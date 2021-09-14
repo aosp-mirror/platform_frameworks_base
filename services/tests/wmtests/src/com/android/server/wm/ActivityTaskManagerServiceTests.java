@@ -43,13 +43,17 @@ import static org.mockito.Mockito.when;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.IApplicationThread;
 import android.app.PictureInPictureParams;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.EnterPipRequestedItem;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.os.Binder;
 import android.os.IBinder;
+import android.os.LocaleList;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
@@ -61,6 +65,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.mockito.MockitoSession;
 
 import java.util.ArrayList;
@@ -79,6 +84,9 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
     private final ArgumentCaptor<ClientTransaction> mClientTransactionCaptor =
             ArgumentCaptor.forClass(ClientTransaction.class);
+
+    private static final String DEFAULT_PACKAGE_NAME = "my.application.package";
+    private static final int DEFAULT_USER_ID = 100;
 
     @Before
     public void setUp() throws Exception {
@@ -489,5 +497,269 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         assertTrue(activity.supportsMultiWindow());
         assertTrue(task.supportsMultiWindow());
     }
+
+    @Test
+    public void testPackageConfigUpdate_locales_successfullyApplied() {
+        Configuration config = mAtm.getGlobalConfiguration();
+        config.setLocales(LocaleList.forLanguageTags("en-XC"));
+        mAtm.updateGlobalConfigurationLocked(config, true, true, DEFAULT_USER_ID);
+        mAtm.mProcessMap.put(Binder.getCallingPid(), createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID));
+
+        ActivityTaskManagerInternal.PackageConfigurationUpdater packageConfigUpdater =
+                mAtm.mInternal.createPackageConfigurationUpdater();
+        packageConfigUpdater.setLocales(LocaleList.forLanguageTags("en-XA,ar-XB")).commit();
+
+        WindowProcessController wpcAfterConfigChange = createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+
+        assertEquals(LocaleList.forLanguageTags("en-XA,ar-XB,en-XC"),
+                wpcAfterConfigChange.getConfiguration().getLocales());
+        assertFalse(wpcAfterConfigChange.getConfiguration().isNightModeActive());
+    }
+
+    @Test
+    public void testPackageConfigUpdate_nightMode_successfullyApplied() {
+        Configuration config = mAtm.getGlobalConfiguration();
+        config.setLocales(LocaleList.forLanguageTags("en-XC"));
+        mAtm.updateGlobalConfigurationLocked(config, true, true, DEFAULT_USER_ID);
+        mAtm.mProcessMap.put(Binder.getCallingPid(), createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID));
+        ActivityTaskManagerInternal.PackageConfigurationUpdater packageConfigUpdater =
+                mAtm.mInternal.createPackageConfigurationUpdater();
+
+        packageConfigUpdater.setNightMode(Configuration.UI_MODE_NIGHT_YES).commit();
+
+        WindowProcessController wpcAfterConfigChange = createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+        assertTrue(wpcAfterConfigChange.getConfiguration().isNightModeActive());
+        assertEquals(LocaleList.forLanguageTags("en-XC"),
+                wpcAfterConfigChange.getConfiguration().getLocales());
+    }
+
+    @Test
+    public void testPackageConfigUpdate_multipleLocaleUpdates_successfullyApplied() {
+        Configuration config = mAtm.getGlobalConfiguration();
+        config.setLocales(LocaleList.forLanguageTags("en-XC"));
+        mAtm.updateGlobalConfigurationLocked(config, true, true, DEFAULT_USER_ID);
+        WindowProcessController wpc = createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+        mAtm.mProcessMap.put(Binder.getCallingPid(), wpc);
+        ActivityTaskManagerInternal.PackageConfigurationUpdater packageConfigUpdater =
+                mAtm.mInternal.createPackageConfigurationUpdater();
+
+        packageConfigUpdater.setLocales(LocaleList.forLanguageTags("en-XA,ar-XB"))
+                .setNightMode(Configuration.UI_MODE_NIGHT_YES).commit();
+
+        WindowProcessController wpcAfterConfigChange1 = createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+        assertEquals(LocaleList.forLanguageTags("en-XA,ar-XB,en-XC"),
+                wpcAfterConfigChange1.getConfiguration().getLocales());
+        assertTrue(wpcAfterConfigChange1.getConfiguration().isNightModeActive());
+        assertEquals(LocaleList.forLanguageTags("en-XA,ar-XB,en-XC"),
+                wpc.getConfiguration().getLocales());
+
+        packageConfigUpdater.setLocales(LocaleList.forLanguageTags("ja-XC,en-XC")).commit();
+
+        WindowProcessController wpcAfterConfigChange2 = createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+
+        assertEquals(LocaleList.forLanguageTags("ja-XC,en-XC"),
+                wpcAfterConfigChange2.getConfiguration().getLocales());
+        assertTrue(wpcAfterConfigChange1.getConfiguration().isNightModeActive());
+        assertEquals(LocaleList.forLanguageTags("ja-XC,en-XC"),
+                wpc.getConfiguration().getLocales());
+    }
+
+    @Test
+    public void testPackageConfigUpdate_multipleNightModeUpdates_successfullyApplied() {
+        Configuration config = mAtm.getGlobalConfiguration();
+        config.setLocales(LocaleList.forLanguageTags("en-XC"));
+        mAtm.updateGlobalConfigurationLocked(config, true, true, DEFAULT_USER_ID);
+        mAtm.mProcessMap.put(Binder.getCallingPid(), createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID));
+        ActivityTaskManagerInternal.PackageConfigurationUpdater packageConfigUpdater =
+                mAtm.mInternal.createPackageConfigurationUpdater();
+
+        packageConfigUpdater.setLocales(LocaleList.forLanguageTags("en-XA,ar-XB"))
+                .setNightMode(Configuration.UI_MODE_NIGHT_YES).commit();
+
+        WindowProcessController wpcAfterConfigChange1 = createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+        assertEquals(LocaleList.forLanguageTags("en-XA,ar-XB,en-XC"),
+                wpcAfterConfigChange1.getConfiguration().getLocales());
+        assertTrue(wpcAfterConfigChange1.getConfiguration().isNightModeActive());
+
+        packageConfigUpdater.setNightMode(Configuration.UI_MODE_NIGHT_NO).commit();
+
+        WindowProcessController wpcAfterConfigChange2 = createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+        assertEquals(LocaleList.forLanguageTags("en-XA,ar-XB,en-XC"),
+                wpcAfterConfigChange2.getConfiguration().getLocales());
+        assertFalse(wpcAfterConfigChange2.getConfiguration().isNightModeActive());
+    }
+
+    @Test
+    public void testPackageConfigUpdate_onPackageUninstall_configShouldNotApply() {
+        Configuration config = mAtm.getGlobalConfiguration();
+        config.setLocales(LocaleList.forLanguageTags("en-XC"));
+        mAtm.updateGlobalConfigurationLocked(config, true, true, DEFAULT_USER_ID);
+        mAtm.mProcessMap.put(Binder.getCallingPid(), createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID));
+        ActivityTaskManagerInternal.PackageConfigurationUpdater packageConfigUpdater =
+                mAtm.mInternal.createPackageConfigurationUpdater();
+
+        packageConfigUpdater.setLocales(LocaleList.forLanguageTags("en-XA,ar-XB"))
+                .setNightMode(Configuration.UI_MODE_NIGHT_YES).commit();
+
+        WindowProcessController wpcAfterConfigChange1 = createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+        assertEquals(LocaleList.forLanguageTags("en-XA,ar-XB,en-XC"),
+                wpcAfterConfigChange1.getConfiguration().getLocales());
+        assertTrue(wpcAfterConfigChange1.getConfiguration().isNightModeActive());
+
+        mAtm.mInternal.onPackageUninstalled(DEFAULT_PACKAGE_NAME);
+
+        WindowProcessController wpcAfterConfigChange2 = createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+        assertEquals(LocaleList.forLanguageTags("en-XC"),
+                wpcAfterConfigChange2.getConfiguration().getLocales());
+        assertFalse(wpcAfterConfigChange2.getConfiguration().isNightModeActive());
+    }
+
+    @Test
+    public void testPackageConfigUpdate_LocalesEmptyAndNightModeUndefined_configShouldNotApply() {
+        Configuration config = mAtm.getGlobalConfiguration();
+        config.setLocales(LocaleList.forLanguageTags("en-XC"));
+        mAtm.updateGlobalConfigurationLocked(config, true, true, DEFAULT_USER_ID);
+        WindowProcessController wpc = createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+        mAtm.mProcessMap.put(Binder.getCallingPid(), wpc);
+        ActivityTaskManagerInternal.PackageConfigurationUpdater packageConfigUpdater =
+                mAtm.mInternal.createPackageConfigurationUpdater();
+
+        packageConfigUpdater.setLocales(LocaleList.forLanguageTags("en-XA,ar-XB"))
+                .setNightMode(Configuration.UI_MODE_NIGHT_YES).commit();
+        WindowProcessController wpcAfterConfigChange1 = createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+
+        assertEquals(LocaleList.forLanguageTags("en-XA,ar-XB,en-XC"),
+                wpcAfterConfigChange1.getConfiguration().getLocales());
+        assertTrue(wpcAfterConfigChange1.getConfiguration().isNightModeActive());
+        assertEquals(LocaleList.forLanguageTags("en-XA,ar-XB,en-XC"),
+                wpc.getConfiguration().getLocales());
+
+        packageConfigUpdater.setLocales(LocaleList.getEmptyLocaleList())
+                .setNightMode(Configuration.UI_MODE_NIGHT_UNDEFINED).commit();
+
+        WindowProcessController wpcAfterConfigChange2 = createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+        assertEquals(LocaleList.forLanguageTags("en-XC"),
+                wpcAfterConfigChange2.getConfiguration().getLocales());
+        assertFalse(wpcAfterConfigChange2.getConfiguration().isNightModeActive());
+        assertEquals(LocaleList.forLanguageTags("en-XC"),
+                wpc.getConfiguration().getLocales());
+    }
+
+    @Test
+    public void testPackageConfigUpdate_WhenUserRemoved_configShouldNotApply() {
+        Configuration config = mAtm.getGlobalConfiguration();
+        config.setLocales(LocaleList.forLanguageTags("en-XC"));
+        mAtm.updateGlobalConfigurationLocked(config, true, true, DEFAULT_USER_ID);
+        mAtm.mProcessMap.put(Binder.getCallingPid(), createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID));
+
+        ActivityTaskManagerInternal.PackageConfigurationUpdater packageConfigUpdater =
+                mAtm.mInternal.createPackageConfigurationUpdater();
+
+        packageConfigUpdater.setLocales(LocaleList.forLanguageTags("en-XA,ar-XB"))
+                .setNightMode(Configuration.UI_MODE_NIGHT_YES).commit();
+
+        WindowProcessController wpcAfterConfigChange1 = createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+        assertEquals(LocaleList.forLanguageTags("en-XA,ar-XB,en-XC"),
+                wpcAfterConfigChange1.getConfiguration().getLocales());
+        assertTrue(wpcAfterConfigChange1.getConfiguration().isNightModeActive());
+
+        mAtm.mInternal.removeUser(DEFAULT_USER_ID);
+
+        WindowProcessController wpcAfterConfigChange2 = createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+        assertEquals(LocaleList.forLanguageTags("en-XC"),
+                wpcAfterConfigChange2.getConfiguration().getLocales());
+        assertFalse(wpcAfterConfigChange2.getConfiguration().isNightModeActive());
+    }
+
+    @Test
+    public void testPackageConfigUpdate_setLocaleListToEmpty_doesNotOverlayLocaleListInWpc() {
+        Configuration config = mAtm.getGlobalConfiguration();
+        config.setLocales(LocaleList.forLanguageTags("en-XC"));
+        mAtm.updateGlobalConfigurationLocked(config, true, true, DEFAULT_USER_ID);
+        mAtm.mProcessMap.put(Binder.getCallingPid(), createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID));
+
+        ActivityTaskManagerInternal.PackageConfigurationUpdater packageConfigUpdater =
+                mAtm.mInternal.createPackageConfigurationUpdater();
+
+        packageConfigUpdater.setLocales(LocaleList.forLanguageTags("en-XA,ar-XB"))
+                .setNightMode(Configuration.UI_MODE_NIGHT_YES).commit();
+
+        WindowProcessController wpcAfterConfigChange1 = createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+        assertEquals(LocaleList.forLanguageTags("en-XA,ar-XB,en-XC"),
+                wpcAfterConfigChange1.getConfiguration().getLocales());
+        assertTrue(wpcAfterConfigChange1.getConfiguration().isNightModeActive());
+
+        packageConfigUpdater.setLocales(LocaleList.getEmptyLocaleList()).commit();
+
+        WindowProcessController wpcAfterConfigChange2 = createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+        assertEquals(LocaleList.forLanguageTags("en-XC"),
+                wpcAfterConfigChange2.getConfiguration().getLocales());
+        assertTrue(wpcAfterConfigChange2.getConfiguration().isNightModeActive());
+    }
+
+    @Test
+    public void testPackageConfigUpdate_resetNightMode_doesNotOverrideNightModeInWpc() {
+        Configuration config = mAtm.getGlobalConfiguration();
+        config.setLocales(LocaleList.forLanguageTags("en-XC"));
+        mAtm.updateGlobalConfigurationLocked(config, true, true, DEFAULT_USER_ID);
+        mAtm.mProcessMap.put(Binder.getCallingPid(), createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID));
+
+        ActivityTaskManagerInternal.PackageConfigurationUpdater packageConfigUpdater =
+                mAtm.mInternal.createPackageConfigurationUpdater();
+
+        packageConfigUpdater.setLocales(LocaleList.forLanguageTags("en-XA,ar-XB"))
+                .setNightMode(Configuration.UI_MODE_NIGHT_YES).commit();
+
+        WindowProcessController wpcAfterConfigChange1 = createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+        assertEquals(LocaleList.forLanguageTags("en-XA,ar-XB,en-XC"),
+                wpcAfterConfigChange1.getConfiguration().getLocales());
+        assertTrue(wpcAfterConfigChange1.getConfiguration().isNightModeActive());
+
+        packageConfigUpdater.setNightMode(Configuration.UI_MODE_NIGHT_UNDEFINED).commit();
+
+        WindowProcessController wpcAfterConfigChange2 = createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+        assertEquals(LocaleList.forLanguageTags("en-XA,ar-XB,en-XC"),
+                wpcAfterConfigChange2.getConfiguration().getLocales());
+        assertFalse(wpcAfterConfigChange2.getConfiguration().isNightModeActive());
+    }
+
+    private WindowProcessController createWindowProcessController(String packageName,
+            int userId) {
+        WindowProcessListener mMockListener = Mockito.mock(WindowProcessListener.class);
+        ApplicationInfo info = mock(ApplicationInfo.class);
+        info.packageName = packageName;
+        WindowProcessController wpc = new WindowProcessController(
+                mAtm, info, packageName, 0, userId, null, mMockListener);
+        wpc.setThread(mock(IApplicationThread.class));
+        return wpc;
+    }
+
 }
+
+
 

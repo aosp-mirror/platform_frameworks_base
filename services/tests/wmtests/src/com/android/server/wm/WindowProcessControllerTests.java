@@ -34,6 +34,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -49,6 +50,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.os.LocaleList;
 import android.platform.test.annotations.Presubmit;
 
 import org.junit.Before;
@@ -371,8 +373,9 @@ public class WindowProcessControllerTests extends WindowTestsBase {
     public void testTopActivityUiModeChangeScheduleConfigChange() {
         final ActivityRecord activity = createActivityRecord(mWpc);
         activity.mVisibleRequested = true;
-        doReturn(true).when(activity).setOverrideNightMode(anyInt());
-        mWpc.updateNightModeForAllActivities(Configuration.UI_MODE_NIGHT_YES);
+        doReturn(true).when(activity).applyAppSpecificConfig(anyInt(), any());
+        mWpc.updateAppSpecificSettingsForAllActivities(Configuration.UI_MODE_NIGHT_YES,
+                LocaleList.forLanguageTags("en-XA"));
         verify(activity).ensureActivityConfiguration(anyInt(), anyBoolean());
     }
 

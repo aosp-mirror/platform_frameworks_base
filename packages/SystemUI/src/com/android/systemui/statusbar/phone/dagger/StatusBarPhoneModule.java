@@ -90,6 +90,7 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
+import com.android.systemui.statusbar.phone.StatusBarMoveFromCenterAnimationController;
 import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarter;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
@@ -213,6 +214,7 @@ public interface StatusBarPhoneModule {
             BrightnessSlider.Factory brightnessSliderFactory,
             UnfoldTransitionConfig unfoldTransitionConfig,
             Lazy<UnfoldLightRevealOverlayAnimation> unfoldLightRevealOverlayAnimation,
+            Lazy<StatusBarMoveFromCenterAnimationController> statusBarMoveFromCenterAnimation,
             OngoingCallController ongoingCallController,
             SystemStatusAnimationScheduler animationScheduler,
             StatusBarLocationPublisher locationPublisher,
@@ -307,6 +309,7 @@ public interface StatusBarPhoneModule {
                 brightnessSliderFactory,
                 unfoldTransitionConfig,
                 unfoldLightRevealOverlayAnimation,
+                statusBarMoveFromCenterAnimation,
                 ongoingCallController,
                 animationScheduler,
                 locationPublisher,

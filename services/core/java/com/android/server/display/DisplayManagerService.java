@@ -2252,6 +2252,9 @@ public final class DisplayManagerService extends SystemService {
                         int displayId = msg.arg1;
                         final LogicalDisplay display =
                                 mLogicalDisplayMapper.getDisplayLocked(displayId);
+                        if (display == null) {
+                            break;
+                        }
                         uids = display.getPendingFrameRateOverrideUids();
                         display.clearPendingFrameRateOverrideUids();
                     }
