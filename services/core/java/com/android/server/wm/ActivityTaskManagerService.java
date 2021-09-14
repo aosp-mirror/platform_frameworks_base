@@ -956,7 +956,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         setRecentTasks(new RecentTasks(this, mTaskSupervisor));
         mVrController = new VrController(mGlobalLock);
         mKeyguardController = mTaskSupervisor.getKeyguardController();
-        mPackageConfigPersister = new PackageConfigPersister(mTaskSupervisor.mPersisterQueue);
+        mPackageConfigPersister = new PackageConfigPersister(mTaskSupervisor.mPersisterQueue, this);
     }
 
     public void onActivityManagerInternalAdded() {
@@ -6575,7 +6575,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     final class PackageConfigurationUpdaterImpl implements
             ActivityTaskManagerInternal.PackageConfigurationUpdater {
         private final int mPid;
-        private int mNightMode;
+        private Integer mNightMode;
+        private LocaleList mLocales;
 
         PackageConfigurationUpdaterImpl(int pid) {
             mPid = pid;
@@ -6584,6 +6585,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public ActivityTaskManagerInternal.PackageConfigurationUpdater setNightMode(int nightMode) {
             mNightMode = nightMode;
+            return this;
+        }
+
+        @Override
+        public ActivityTaskManagerInternal.PackageConfigurationUpdater
+                setLocales(LocaleList locales) {
+            mLocales = locales;
             return this;
         }
 
@@ -6597,8 +6605,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         Slog.w(TAG, "Override application configuration: cannot find pid " + mPid);
                         return;
                     }
-                    wpc.setOverrideNightMode(mNightMode);
-                    wpc.updateNightModeForAllActivities(mNightMode);
+                    LocaleList localesOverride = LocaleOverlayHelper.combineLocalesIfOverlayExists(
+                            mLocales, getGlobalConfiguration().getLocales());
+                    wpc.applyAppSpecificConfig(mNightMode, localesOverride);
+                    wpc.updateAppSpecificSettingsForAllActivities(mNightMode, localesOverride);
                     mPackageConfigPersister.updateFromImpl(wpc.mName, wpc.mUserId, this);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
@@ -6606,8 +6616,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         }
 
-        int getNightMode() {
+        Integer getNightMode() {
             return mNightMode;
+        }
+
+        LocaleList getLocales() {
+            return mLocales;
         }
     }
 }
