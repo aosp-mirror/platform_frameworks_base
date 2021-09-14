@@ -9144,9 +9144,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     /**
-     * Returns the ActiveAdmin associated wit the PO or DO on the given user.
-     * @param userHandle
-     * @return
+     * Returns the ActiveAdmin associated with the PO or DO on the given user.
      */
     private @Nullable ActiveAdmin getDeviceOrProfileOwnerAdminLocked(int userHandle) {
         ActiveAdmin admin = getProfileOwnerAdminLocked(userHandle);
@@ -14306,6 +14304,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             maybePauseDeviceWideLoggingLocked();
             maybeResumeDeviceWideLoggingLocked();
             maybeClearLockTaskPolicyLocked();
+            updateAdminCanGrantSensorsPermissionCache(callingUserId);
         }
     }
 
@@ -17483,7 +17482,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         });
     }
 
-    private void setAdminCanGrantSensorsPermissionForUserUnchecked(int userId, boolean canGrant) {
+    private void setAdminCanGrantSensorsPermissionForUserUnchecked(@UserIdInt int userId,
+            boolean canGrant) {
+        Slogf.d(LOG_TAG, "setAdminCanGrantSensorsPermissionForUserUnchecked(%d, %b)",
+                userId, canGrant);
         synchronized (getLockObject()) {
             ActiveAdmin owner = getDeviceOrProfileOwnerAdminLocked(userId);
 
@@ -17497,10 +17499,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private void updateAdminCanGrantSensorsPermissionCache(int userId) {
+    private void updateAdminCanGrantSensorsPermissionCache(@UserIdInt int userId) {
         synchronized (getLockObject()) {
-            ActiveAdmin owner = getDeviceOrProfileOwnerAdminLocked(userId);
-            final boolean canGrant = owner != null ? owner.mAdminCanGrantSensorsPermissions : false;
+
+            ActiveAdmin owner;
+            // If the user is affiliated the device (either a DO itself, or an affiliated PO),
+            // use mAdminCanGrantSensorsPermissions from the DO
+            if (isUserAffiliatedWithDeviceLocked(userId)) {
+                owner = getDeviceOwnerAdminLocked();
+            } else {
+                owner = getDeviceOrProfileOwnerAdminLocked(userId);
+            }
+            boolean canGrant = owner != null ? owner.mAdminCanGrantSensorsPermissions : false;
             mPolicyCache.setAdminCanGrantSensorsPermissions(userId, canGrant);
         }
     }
