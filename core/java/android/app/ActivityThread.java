@@ -6343,7 +6343,13 @@ public final class ActivityThread extends ClientTransactionHandler
             final File cacheDir = context.getCacheDir();
             if (cacheDir != null) {
                 // Provide a usable directory for temporary files
-                System.setProperty("java.io.tmpdir", cacheDir.getAbsolutePath());
+                String tmpdir = cacheDir.getAbsolutePath();
+                System.setProperty("java.io.tmpdir", tmpdir);
+                try {
+                    android.system.Os.setenv("TMPDIR", tmpdir, true);
+                } catch (ErrnoException ex) {
+                    Log.w(TAG, "Unable to initialize $TMPDIR", ex);
+                }
             } else {
                 Log.v(TAG, "Unable to initialize \"java.io.tmpdir\" property "
                         + "due to missing cache directory");
