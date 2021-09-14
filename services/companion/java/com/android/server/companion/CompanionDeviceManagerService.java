@@ -208,7 +208,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     private ScanCallback mBleScanCallback = new BleScanCallback();
     private AssociationRequest mRequest;
     private String mCallingPackage;
-    private AndroidFuture<Association> mOngoingDeviceDiscovery;
+    private AndroidFuture<?> mOngoingDeviceDiscovery;
     private PermissionControllerManager mPermissionControllerManager;
 
     private BluetoothDeviceConnectedListener mBluetoothDeviceConnectedListener =
@@ -383,7 +383,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         Slog.d(LOG_TAG, "cleanup(); discovery = "
                 + mOngoingDeviceDiscovery + ", request = " + mRequest);
         synchronized (mLock) {
-            AndroidFuture<Association> ongoingDeviceDiscovery = mOngoingDeviceDiscovery;
+            AndroidFuture<?> ongoingDeviceDiscovery = mOngoingDeviceDiscovery;
             if (ongoingDeviceDiscovery != null && !ongoingDeviceDiscovery.isDone()) {
                 ongoingDeviceDiscovery.cancel(true);
             }
@@ -458,13 +458,16 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                 return mServiceConnectors.forUser(userId).postAsync(service -> {
                     Slog.d(LOG_TAG, "Connected to CDM service; starting discovery for " + request);
 
-                    AndroidFuture<Association> future = new AndroidFuture<>();
+                    AndroidFuture<String> future = new AndroidFuture<>();
                     service.startDiscovery(request, callingPackage, callback, future);
                     return future;
                 }).cancelTimeout();
 
-            }, FgThread.getExecutor()).whenComplete(uncheckExceptions((association, err) -> {
+            }, FgThread.getExecutor()).whenComplete(uncheckExceptions((deviceAddress, err) -> {
                 if (err == null) {
+                    Association association = new Association(userId, deviceAddress, callingPackage,
+                            mRequest.getDeviceProfile(), false,
+                            System.currentTimeMillis());
                     addAssociation(association, userId);
                 } else {
                     Slog.e(LOG_TAG, "Failed to discover device(s)", err);

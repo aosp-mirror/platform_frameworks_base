@@ -226,7 +226,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testDetachRemovesSmartspaceView() {
+    public void testDetachDisconnectsSmartspace() {
         when(mSmartspaceController.isEnabled()).thenReturn(true);
         when(mSmartspaceController.buildAndConnectView(any())).thenReturn(mFakeSmartspaceView);
         mController.init();
@@ -237,7 +237,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         verify(mView).addOnAttachStateChangeListener(listenerArgumentCaptor.capture());
 
         listenerArgumentCaptor.getValue().onViewDetachedFromWindow(mView);
-        verify(mView).removeView(mFakeSmartspaceView);
+        verify(mSmartspaceController).disconnect();
     }
 
     @Test

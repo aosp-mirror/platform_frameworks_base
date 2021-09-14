@@ -6131,9 +6131,23 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                 proxyAttributionFlags, proxiedAttributionFlags, attributionChainId);
                     }
                 } else {
-                    startedOpResult = appOpsManager.startProxyOpNoThrow(startedOp,
-                            resolvedAttributionSource, message, skipProxyOperation,
-                            proxyAttributionFlags, proxiedAttributionFlags, attributionChainId);
+                    try {
+                        startedOpResult = appOpsManager.startProxyOpNoThrow(startedOp,
+                                resolvedAttributionSource, message, skipProxyOperation,
+                                proxyAttributionFlags, proxiedAttributionFlags, attributionChainId);
+                    } catch (SecurityException e) {
+                        //TODO 195339480: remove
+                        String msg = "Security exception for op " + startedOp + " with source "
+                                + attributionSource.getUid() + ":"
+                                + attributionSource.getPackageName() + ", "
+                                + attributionSource.getNextUid() + ":"
+                                + attributionSource.getNextPackageName();
+                        if (attributionSource.getNext() != null) {
+                            AttributionSource next = attributionSource.getNext();
+                            msg = msg + ", " + next.getNextPackageName() + ":" + next.getNextUid();
+                        }
+                        throw new SecurityException(msg + ":" + e.getMessage());
+                    }
                 }
                 return Math.max(checkedOpResult, startedOpResult);
             } else {
@@ -6180,8 +6194,22 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                 message, skipProxyOperation);
                     }
                 } else {
-                    notedOpResult = appOpsManager.noteProxyOpNoThrow(notedOp,
-                            resolvedAttributionSource, message, skipProxyOperation);
+                    try {
+                        notedOpResult = appOpsManager.noteProxyOpNoThrow(notedOp,
+                                resolvedAttributionSource, message, skipProxyOperation);
+                    } catch (SecurityException e) {
+                        //TODO 195339480: remove
+                        String msg = "Security exception for op " + notedOp + " with source "
+                                + attributionSource.getUid() + ":"
+                                + attributionSource.getPackageName() + ", "
+                                + attributionSource.getNextUid() + ":"
+                                + attributionSource.getNextPackageName();
+                        if (attributionSource.getNext() != null) {
+                            AttributionSource next = attributionSource.getNext();
+                            msg = msg + ", " + next.getNextPackageName() + ":" + next.getNextUid();
+                        }
+                        throw new SecurityException(msg + ":" + e.getMessage());
+                    }
                 }
                 return Math.max(checkedOpResult, notedOpResult);
             }

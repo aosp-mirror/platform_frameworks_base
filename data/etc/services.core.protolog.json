@@ -1207,6 +1207,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-779535710": {
+      "message": "Transition %d: Set %s as transient-launch",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
     "-775004869": {
       "message": "Not a match: %s",
       "level": "DEBUG",

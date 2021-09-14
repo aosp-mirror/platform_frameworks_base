@@ -20,9 +20,7 @@ import static android.Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND;
 import static android.Manifest.permission.REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND;
 import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND;
-import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
 import static android.app.ActivityManager.PROCESS_STATE_HEAVY_WEIGHT;
-import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManager.PROCESS_STATE_PERSISTENT_UI;
 import static android.app.ActivityManager.PROCESS_STATE_RECEIVER;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
@@ -2898,7 +2896,6 @@ public final class ActiveServices {
             }
             setFgsRestrictionLocked(callingPackage, callingPid, callingUid, service, s, userId,
                     false);
-            logBindServiceFromCachedState(callingPackage, callingUid, service);
 
             if (s.app != null) {
                 ProcessServiceRecord servicePsr = s.app.mServices;
@@ -2961,30 +2958,6 @@ public final class ActiveServices {
         }
 
         return 1;
-    }
-
-    /**
-     * Log a WTF message if the bindService is called by a process from a cached proc state.
-     * This WTF log is to debug background restriction, it will be removed in before final release.
-     * @param callerPackage the caller's package name.
-     * @param callingUid the caller's UID.
-     * @param intent the service's intent.
-     */
-    private void logBindServiceFromCachedState(String callerPackage, int callingUid,
-            Intent intent) {
-        final int callerUidState = mAm.getUidStateLocked(callingUid);
-        if (callerUidState == PROCESS_STATE_NONEXISTENT
-                || callerUidState < PROCESS_STATE_CACHED_ACTIVITY) {
-            return;
-        }
-        final String msg = "bindService from cached state "
-                + "[callerPackage:" + callerPackage
-                + "; callingUid:" + callingUid
-                + "; uidState:" + ProcessList.makeProcStateString(callerUidState)
-                + "; intent:" + intent
-                + ";]";
-        Slog.wtfQuiet(TAG, msg);
-        Slog.i(TAG, msg);
     }
 
     private void maybeLogBindCrossProfileService(

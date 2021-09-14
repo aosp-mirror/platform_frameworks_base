@@ -301,6 +301,15 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         // The top app should not change while sleeping.
         assertEquals(topActivity.app, mAtm.mInternal.getTopApp());
 
+        mAtm.startLaunchPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY
+                | ActivityTaskManagerService.POWER_MODE_REASON_UNKNOWN_VISIBILITY);
+        assertEquals(ActivityManager.PROCESS_STATE_TOP, mAtm.mInternal.getTopProcessState());
+        // Because there is no unknown visibility record, the state will be restored if other
+        // reasons are all done.
+        mAtm.endLaunchPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY);
+        assertEquals(ActivityManager.PROCESS_STATE_TOP_SLEEPING,
+                mAtm.mInternal.getTopProcessState());
+
         // If all activities are stopped, the sleep wake lock must be released.
         final Task topRootTask = topActivity.getRootTask();
         doReturn(true).when(rootHomeTask).goToSleepIfPossible(anyBoolean());
