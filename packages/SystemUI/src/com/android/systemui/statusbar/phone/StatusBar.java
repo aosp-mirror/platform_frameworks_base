@@ -536,6 +536,7 @@ public class StatusBar extends SystemUI implements
     private final FeatureFlags mFeatureFlags;
     private final UnfoldTransitionConfig mUnfoldTransitionConfig;
     private final Lazy<UnfoldLightRevealOverlayAnimation> mUnfoldLightRevealOverlayAnimation;
+    private final Lazy<StatusBarMoveFromCenterAnimationController> mMoveFromCenterAnimation;
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private final MessageRouter mMessageRouter;
     private final WallpaperManager mWallpaperManager;
@@ -768,6 +769,7 @@ public class StatusBar extends SystemUI implements
             BrightnessSlider.Factory brightnessSliderFactory,
             UnfoldTransitionConfig unfoldTransitionConfig,
             Lazy<UnfoldLightRevealOverlayAnimation> unfoldLightRevealOverlayAnimation,
+            Lazy<StatusBarMoveFromCenterAnimationController> statusBarUnfoldAnimationController,
             OngoingCallController ongoingCallController,
             SystemStatusAnimationScheduler animationScheduler,
             StatusBarLocationPublisher locationPublisher,
@@ -860,6 +862,7 @@ public class StatusBar extends SystemUI implements
         mBrightnessSliderFactory = brightnessSliderFactory;
         mUnfoldTransitionConfig = unfoldTransitionConfig;
         mUnfoldLightRevealOverlayAnimation = unfoldLightRevealOverlayAnimation;
+        mMoveFromCenterAnimation = statusBarUnfoldAnimationController;
         mOngoingCallController = ongoingCallController;
         mAnimationScheduler = animationScheduler;
         mStatusBarLocationPublisher = locationPublisher;
@@ -1141,8 +1144,13 @@ public class StatusBar extends SystemUI implements
                         sendInitialExpansionAmount(listener);
                     }
 
+                    StatusBarMoveFromCenterAnimationController moveFromCenterAnimation = null;
+                    if (mUnfoldTransitionConfig.isEnabled()) {
+                        moveFromCenterAnimation = mMoveFromCenterAnimation.get();
+                    }
                     mPhoneStatusBarViewController =
-                            new PhoneStatusBarViewController(mStatusBarView, mCommandQueue);
+                            new PhoneStatusBarViewController(mStatusBarView, mCommandQueue,
+                                    moveFromCenterAnimation);
                     mPhoneStatusBarViewController.init();
 
                     mBatteryMeterViewController = new BatteryMeterViewController(
