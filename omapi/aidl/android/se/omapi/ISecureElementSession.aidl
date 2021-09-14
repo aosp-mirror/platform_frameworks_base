@@ -27,6 +27,7 @@ import android.se.omapi.ISecureElementReader;
 import android.se.omapi.ISecureElementListener;
 
 /** @hide */
+@VintfStability
 interface ISecureElementSession {
 
     /**
@@ -45,7 +46,6 @@ interface ISecureElementSession {
      */
     void closeChannels();
 
-
     /**
      * Tells if this session is closed.
      *
@@ -59,15 +59,19 @@ interface ISecureElementSession {
      * applet if aid != null.
      * Logical channels cannot be opened with this connection.
      * Use interface method openLogicalChannel() to open a logical channel.
+     * Listener is passed to secure element service and used to monitor whether
+     * the client application that uses OMAPI is still alive or not.
      */
     ISecureElementChannel openBasicChannel(in byte[] aid, in byte p2,
-            ISecureElementListener listener);
+            in ISecureElementListener listener);
 
     /**
      * Opens a connection using the next free logical channel of the card in the
      * specified reader. Selects the specified applet.
      * Selection of other applets with this connection is not supported.
+     * Listener is passed to secure element service and used to monitor whether
+     * the client application that uses OMAPI is still alive or not.
      */
     ISecureElementChannel openLogicalChannel(in byte[] aid, in byte p2,
-            ISecureElementListener listener);
+            in ISecureElementListener listener);
 }

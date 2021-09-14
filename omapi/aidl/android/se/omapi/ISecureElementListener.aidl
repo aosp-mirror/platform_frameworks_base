@@ -14,37 +14,15 @@
  * limitations under the License.
  */
 /*
- * Copyright (c) 2015-2017, The Linux Foundation.
- */
-/*
  * Contributed by: Giesecke & Devrient GmbH.
  */
 
 package android.se.omapi;
 
-import android.se.omapi.ISecureElementReader;
-
 /**
- * SecureElement service interface.
+ * Interface to receive call-backs when the service is connected.
  * @hide
  */
-interface ISecureElementService {
-
-    /**
-     * Returns the friendly names of available Secure Element readers.
-     */
-    String[] getReaders();
-
-    /**
-     * Returns SecureElement Service reader object to the given name.
-     */
-    ISecureElementReader getReader(String reader);
-
-    /**
-     * Checks if the application defined by the package name is allowed to
-     * receive NFC transaction events for the defined AID.
-     */
-    boolean[] isNFCEventAllowed(String reader, in byte[] aid,
-            in String[] packageNames);
-
+@VintfStability
+interface ISecureElementListener {
 }
