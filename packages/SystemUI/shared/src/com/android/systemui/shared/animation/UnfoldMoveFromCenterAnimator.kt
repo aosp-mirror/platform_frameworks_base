@@ -36,12 +36,21 @@ class UnfoldMoveFromCenterAnimator @JvmOverloads constructor(
      * [View.setTranslationY]
      */
     private val translationApplier: TranslationApplier = object : TranslationApplier {},
+    /**
+     * Allows to set custom implementation for getting
+     * view location. Could be useful if logical view bounds
+     * are different than actual bounds (e.g. view container may
+     * have larger width than width of the items in the container)
+     */
+    private val viewCenterProvider: ViewCenterProvider = object : ViewCenterProvider {}
 ) : UnfoldTransitionProgressProvider.TransitionProgressListener {
 
     private val screenSize = Point()
     private var isVerticalFold = false
 
     private val animatedViews: MutableList<AnimatedView> = arrayListOf()
+
+    private var lastAnimationProgress: Float = 0f
 
     /**
      * Updates display properties in order to calculate the initial position for the views
@@ -55,6 +64,19 @@ class UnfoldMoveFromCenterAnimator @JvmOverloads constructor(
         // TODO: use JetPack WindowManager library to get the fold orientation
         isVerticalFold = windowManager.defaultDisplay.rotation == Surface.ROTATION_0 ||
             windowManager.defaultDisplay.rotation == Surface.ROTATION_180
+    }
+
+    /**
+     * If target view positions have changed (e.g. because of layout changes) call this method
+     * to re-query view positions and update the translations
+     */
+    fun updateViewPositions() {
+        animatedViews.forEach { animatedView ->
+            animatedView.view.get()?.let {
+                animatedView.updateAnimatedView(it)
+            }
+        }
+        onTransitionProgress(lastAnimationProgress)
     }
 
     /**
@@ -85,45 +107,30 @@ class UnfoldMoveFromCenterAnimator @JvmOverloads constructor(
                 )
             }
         }
+        lastAnimationProgress = progress
     }
 
-    private fun createAnimatedView(view: View): AnimatedView {
-        val viewCenter = getViewCenter(view)
+    private fun createAnimatedView(view: View): AnimatedView =
+        AnimatedView(view = WeakReference(view)).updateAnimatedView(view)
+
+    private fun AnimatedView.updateAnimatedView(view: View): AnimatedView {
+        val viewCenter = Point()
+        viewCenterProvider.getViewCenter(view, viewCenter)
+
         val viewCenterX = viewCenter.x
         val viewCenterY = viewCenter.y
 
-        val translationX: Float
-        val translationY: Float
-
         if (isVerticalFold) {
             val distanceFromScreenCenterToViewCenter = screenSize.x / 2 - viewCenterX
-            translationX = distanceFromScreenCenterToViewCenter * TRANSLATION_PERCENTAGE
-            translationY = 0f
+            startTranslationX = distanceFromScreenCenterToViewCenter * TRANSLATION_PERCENTAGE
+            startTranslationY = 0f
         } else {
             val distanceFromScreenCenterToViewCenter = screenSize.y / 2 - viewCenterY
-            translationX = 0f
-            translationY = distanceFromScreenCenterToViewCenter * TRANSLATION_PERCENTAGE
+            startTranslationX = 0f
+            startTranslationY = distanceFromScreenCenterToViewCenter * TRANSLATION_PERCENTAGE
         }
 
-        return AnimatedView(
-            view = WeakReference(view),
-            startTranslationX = translationX,
-            startTranslationY = translationY
-        )
-    }
-
-    private fun getViewCenter(view: View): Point {
-        val viewLocation = IntArray(2)
-        view.getLocationOnScreen(viewLocation)
-
-        val viewX = viewLocation[0]
-        val viewY = viewLocation[1]
-
-        val outPoint = Point()
-        outPoint.x = viewX + view.width / 2
-        outPoint.y = viewY + view.height / 2
-
-        return outPoint
+        return this
     }
 
     /**
@@ -139,10 +146,29 @@ class UnfoldMoveFromCenterAnimator @JvmOverloads constructor(
         }
     }
 
+    /**
+     * Interface that allows to use custom logic to get the center of the view
+     */
+    interface ViewCenterProvider {
+        /**
+         * Called when we need to get the center of the view
+         */
+        fun getViewCenter(view: View, outPoint: Point) {
+            val viewLocation = IntArray(2)
+            view.getLocationOnScreen(viewLocation)
+
+            val viewX = viewLocation[0]
+            val viewY = viewLocation[1]
+
+            outPoint.x = viewX + view.width / 2
+            outPoint.y = viewY + view.height / 2
+        }
+    }
+
     private class AnimatedView(
         val view: WeakReference<View>,
-        val startTranslationX: Float,
-        val startTranslationY: Float
+        var startTranslationX: Float = 0f,
+        var startTranslationY: Float = 0f
     )
 }
 
