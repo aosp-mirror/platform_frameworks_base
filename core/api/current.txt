@@ -6765,7 +6765,7 @@ package android.app {
   public final class UiAutomation {
     method public void adoptShellPermissionIdentity();
     method public void adoptShellPermissionIdentity(@Nullable java.lang.String...);
-    method public void clearWindowAnimationFrameStats();
+    method @Deprecated public void clearWindowAnimationFrameStats();
     method public boolean clearWindowContentFrameStats(int);
     method public void dropShellPermissionIdentity();
     method public android.view.accessibility.AccessibilityEvent executeAndWaitForEvent(Runnable, android.app.UiAutomation.AccessibilityEventFilter, long) throws java.util.concurrent.TimeoutException;
@@ -6774,7 +6774,7 @@ package android.app {
     method public android.view.accessibility.AccessibilityNodeInfo findFocus(int);
     method public android.view.accessibility.AccessibilityNodeInfo getRootInActiveWindow();
     method public android.accessibilityservice.AccessibilityServiceInfo getServiceInfo();
-    method public android.view.WindowAnimationFrameStats getWindowAnimationFrameStats();
+    method @Deprecated public android.view.WindowAnimationFrameStats getWindowAnimationFrameStats();
     method public android.view.WindowContentFrameStats getWindowContentFrameStats(int);
     method public java.util.List<android.view.accessibility.AccessibilityWindowInfo> getWindows();
     method @NonNull public android.util.SparseArray<java.util.List<android.view.accessibility.AccessibilityWindowInfo>> getWindowsOnAllDisplays();
