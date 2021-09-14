@@ -23,6 +23,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
 import android.app.ITransientNotificationCallback;
@@ -1720,9 +1721,21 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
         // We've checked that the package, component name and uid all match.
         ResolveInfo r = isComponentValidTileService(componentName, userId);
-        if (r == null) {
+        if (r == null || !r.serviceInfo.exported) {
             try {
                 callback.onTileRequest(StatusBarManager.TILE_ADD_REQUEST_ERROR_BAD_COMPONENT);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "requestAddTile", e);
+            }
+            return;
+        }
+
+        final int procState = mActivityManagerInternal.getUidProcessState(callingUid);
+        if (ActivityManager.RunningAppProcessInfo.procStateToImportance(procState)
+                != ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+            try {
+                callback.onTileRequest(
+                        StatusBarManager.TILE_ADD_REQUEST_ERROR_APP_NOT_IN_FOREGROUND);
             } catch (RemoteException e) {
                 Slog.e(TAG, "requestAddTile", e);
             }

@@ -245,7 +245,7 @@ public class StatusBarManager {
     public static final int TILE_ADD_REQUEST_ERROR_REQUEST_IN_PROGRESS =
             TILE_ADD_REQUEST_FIRST_ERROR_CODE + 1;
     /**
-     * Indicates that the component does not match an enabled
+     * Indicates that the component does not match an enabled exported
      * {@link android.service.quicksettings.TileService} for the current user.
      */
     public static final int TILE_ADD_REQUEST_ERROR_BAD_COMPONENT =
@@ -256,11 +256,16 @@ public class StatusBarManager {
     public static final int TILE_ADD_REQUEST_ERROR_NOT_CURRENT_USER =
             TILE_ADD_REQUEST_FIRST_ERROR_CODE + 3;
     /**
+     * Indicates that the requesting application is not in the foreground.
+     */
+    public static final int TILE_ADD_REQUEST_ERROR_APP_NOT_IN_FOREGROUND =
+            TILE_ADD_REQUEST_FIRST_ERROR_CODE + 4;
+    /**
      * The request could not be processed because no fulfilling service was found. This could be
      * a temporary issue (for example, SystemUI has crashed).
      */
     public static final int TILE_ADD_REQUEST_ERROR_NO_STATUS_BAR_SERVICE =
-            TILE_ADD_REQUEST_FIRST_ERROR_CODE + 4;
+            TILE_ADD_REQUEST_FIRST_ERROR_CODE + 5;
 
     /** @hide */
     @IntDef(prefix = {"TILE_ADD_REQUEST"}, value = {
@@ -271,6 +276,7 @@ public class StatusBarManager {
             TILE_ADD_REQUEST_ERROR_REQUEST_IN_PROGRESS,
             TILE_ADD_REQUEST_ERROR_BAD_COMPONENT,
             TILE_ADD_REQUEST_ERROR_NOT_CURRENT_USER,
+            TILE_ADD_REQUEST_ERROR_APP_NOT_IN_FOREGROUND,
             TILE_ADD_REQUEST_ERROR_NO_STATUS_BAR_SERVICE
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -616,7 +622,9 @@ public class StatusBarManager {
      * </ul>
      * <p>
      * The user for which this will be added is determined from the {@link Context} used to retrieve
-     * this service, and must match the current user.
+     * this service, and must match the current user. The requesting application must be in the
+     * foreground ({@link ActivityManager.RunningAppProcessInfo#IMPORTANCE_FOREGROUND}
+     * and the {@link android.service.quicksettings.TileService} must be exported.
      *
      * @param tileServiceComponentName {@link ComponentName} of the
      *        {@link android.service.quicksettings.TileService} for the request.
