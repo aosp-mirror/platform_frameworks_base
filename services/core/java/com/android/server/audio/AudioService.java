@@ -201,7 +201,8 @@ import java.util.stream.Collectors;
  */
 public class AudioService extends IAudioService.Stub
         implements AccessibilityManager.TouchExplorationStateChangeListener,
-            AccessibilityManager.AccessibilityServicesStateChangeListener {
+            AccessibilityManager.AccessibilityServicesStateChangeListener,
+            AudioSystemAdapter.OnRoutingUpdatedListener {
 
     private static final String TAG = "AS.AudioService";
 
@@ -315,12 +316,14 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_SET_A2DP_DEV_CONNECTION_STATE = 38;
     private static final int MSG_A2DP_DEV_CONFIG_CHANGE = 39;
     private static final int MSG_DISPATCH_AUDIO_MODE = 40;
+    private static final int MSG_ROUTING_UPDATED = 41;
 
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
     //   and not with sendMsg(..., ..., SENDMSG_QUEUE, ...)
     private static final int MSG_DISABLE_AUDIO_FOR_UID = 100;
     private static final int MSG_INIT_STREAMS_VOLUMES = 101;
+    private static final int MSG_INIT_SPATIALIZER = 102;
     // end of messages handled under wakelock
 
     // retry delay in case of failure to indicate system ready to AudioFlinger
@@ -871,6 +874,8 @@ public class AudioService extends IAudioService.Stub
 
         mSfxHelper = new SoundEffectsHelper(mContext);
 
+        mSpatializerHelper = new SpatializerHelper(this, mAudioSystem);
+
         mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         mHasVibrator = mVibrator == null ? false : mVibrator.hasVibrator();
 
@@ -1035,6 +1040,9 @@ public class AudioService extends IAudioService.Stub
         // done with service initialization, continue additional work in our Handler thread
         queueMsgUnderWakeLock(mAudioHandler, MSG_INIT_STREAMS_VOLUMES,
                 0 /* arg1 */,  0 /* arg2 */, null /* obj */,  0 /* delay */);
+        queueMsgUnderWakeLock(mAudioHandler, MSG_INIT_SPATIALIZER,
+                0 /* arg1 */,  0 /* arg2 */, null /* obj */,  0 /* delay */);
+
     }
 
     /**
@@ -1224,6 +1232,22 @@ public class AudioService extends IAudioService.Stub
         updateVibratorInfos();
     }
 
+    //-----------------------------------------------------------------
+    // routing monitoring from AudioSystemAdapter
+    @Override
+    public void onRoutingUpdatedFromNative() {
+        sendMsg(mAudioHandler,
+                MSG_ROUTING_UPDATED,
+                SENDMSG_REPLACE, 0, 0, null,
+                /*delay*/ 0);
+    }
+
+    void monitorRoutingChanges(boolean enabled) {
+        mAudioSystem.setRoutingListener(enabled ? this : null);
+    }
+
+
+    //-----------------------------------------------------------------
     RoleObserver mRoleObserver;
 
     class RoleObserver implements OnRoleHoldersChangedListener {
@@ -1407,6 +1431,9 @@ public class AudioService extends IAudioService.Stub
                 }
             }
         }
+
+        // TODO check property if feature enabled
+        mSpatializerHelper.reset(/* featureEnabled */ true);
 
         onIndicateSystemReady();
         // indicate the end of reconfiguration phase to audio HAL
@@ -7549,6 +7576,13 @@ public class AudioService extends IAudioService.Stub
                     mAudioEventWakeLock.release();
                     break;
 
+                case MSG_INIT_SPATIALIZER:
+                    mSpatializerHelper.init();
+                    // TODO read property to see if enabled
+                    mSpatializerHelper.setFeatureEnabled(true);
+                    mAudioEventWakeLock.release();
+                    break;
+
                 case MSG_CHECK_MUSIC_ACTIVE:
                     onCheckMusicActive((String) msg.obj);
                     break;
@@ -7680,6 +7714,10 @@ public class AudioService extends IAudioService.Stub
 
                 case MSG_DISPATCH_AUDIO_MODE:
                     dispatchMode(msg.arg1);
+                    break;
+
+                case MSG_ROUTING_UPDATED:
+                    mSpatializerHelper.onRoutingUpdated();
                     break;
             }
         }
@@ -8249,7 +8287,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     //==========================================================================================
-    private final SpatializerHelper mSpatializerHelper = new SpatializerHelper();
+    private final @NonNull SpatializerHelper mSpatializerHelper;
 
     private void enforceModifyDefaultAudioEffectsPermission() {
         if (mContext.checkCallingOrSelfPermission(
@@ -8259,9 +8297,12 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    /** @see AudioManager#getSpatializerImmersiveAudioLevel() */
+    /**
+     * Returns the immersive audio level that the platform is capable of
+     * @see Spatializer#getImmersiveAudioLevel()
+     */
     public int getSpatializerImmersiveAudioLevel() {
-        return mSpatializerHelper.getImmersiveAudioLevel();
+        return mSpatializerHelper.getCapableImmersiveAudioLevel();
     }
 
     /** @see Spatializer#isEnabled() */
@@ -8277,7 +8318,7 @@ public class AudioService extends IAudioService.Stub
     /** @see Spatializer#setSpatializerEnabled(boolean) */
     public void setSpatializerEnabled(boolean enabled) {
         enforceModifyDefaultAudioEffectsPermission();
-        mSpatializerHelper.setEnabled(enabled);
+        mSpatializerHelper.setFeatureEnabled(enabled);
     }
 
     /** @see Spatializer#canBeSpatialized() */
