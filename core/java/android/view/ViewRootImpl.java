@@ -4273,6 +4273,14 @@ public final class ViewRootImpl implements ViewParent,
         try {
             if (!isContentCaptureEnabled()) return;
 
+            // Initial dispatch of window bounds to content capture
+            if (mAttachInfo.mContentCaptureManager != null) {
+                MainContentCaptureSession session =
+                        mAttachInfo.mContentCaptureManager.getMainContentCaptureSession();
+                session.notifyWindowBoundsChanged(session.getId(),
+                        getConfiguration().windowConfiguration.getBounds());
+            }
+
             // Content capture is a go!
             rootView.dispatchInitialProvideContentCaptureStructure();
         } finally {
@@ -7804,6 +7812,14 @@ public final class ViewRootImpl implements ViewParent,
                 insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0, frameNumber,
                 mTmpFrames, mPendingMergedConfiguration, mSurfaceControl, mTempInsets,
                 mTempControls, mSurfaceSize);
+
+        if (mAttachInfo.mContentCaptureManager != null) {
+            MainContentCaptureSession mainSession = mAttachInfo.mContentCaptureManager
+                    .getMainContentCaptureSession();
+            mainSession.notifyWindowBoundsChanged(mainSession.getId(),
+                    getConfiguration().windowConfiguration.getBounds());
+        }
+
         mPendingBackDropFrame.set(mTmpFrames.backdropFrame);
         if (mSurfaceControl.isValid()) {
             if (!useBLAST()) {
