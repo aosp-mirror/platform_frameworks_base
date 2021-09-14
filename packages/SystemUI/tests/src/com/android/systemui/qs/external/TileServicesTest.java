@@ -43,6 +43,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
@@ -102,6 +103,8 @@ public class TileServicesTest extends SysuiTestCase {
     private TileServiceRequestController.Builder mTileServiceRequestControllerBuilder;
     @Mock
     private TileServiceRequestController mTileServiceRequestController;
+    @Mock
+    private FeatureFlags mFeatureFlags;
 
     @Before
     public void setUp() throws Exception {
@@ -128,7 +131,8 @@ public class TileServicesTest extends SysuiTestCase {
                 mUserTracker,
                 mSecureSettings,
                 mock(CustomTileStatePersister.class),
-                mTileServiceRequestControllerBuilder);
+                mTileServiceRequestControllerBuilder,
+                mFeatureFlags);
         mTileService = new TestTileServices(host, Looper.getMainLooper(), mBroadcastDispatcher,
                 mUserTracker);
     }
