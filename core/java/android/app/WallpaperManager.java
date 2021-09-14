@@ -563,7 +563,7 @@ public class WallpaperManager {
             }
             if (returnDefault) {
                 Bitmap defaultWallpaper = mDefaultWallpaper;
-                if (defaultWallpaper == null) {
+                if (defaultWallpaper == null || defaultWallpaper.isRecycled()) {
                     defaultWallpaper = getDefaultWallpaper(context, which);
                     synchronized (this) {
                         mDefaultWallpaper = defaultWallpaper;
