@@ -299,18 +299,19 @@ public class ChooserListAdapter extends ResolverListAdapter {
                 // Consolidate multiple targets from same app.
                 Map<String, DisplayResolveInfo> consolidated = new HashMap<>();
                 for (DisplayResolveInfo info : allTargets) {
-                    String packageName = info.getResolvedComponentName().getPackageName();
-                    DisplayResolveInfo multiDri = consolidated.get(packageName);
+                    String resolvedTarget = info.getResolvedComponentName().getPackageName()
+                        + '#' + info.getDisplayLabel();
+                    DisplayResolveInfo multiDri = consolidated.get(resolvedTarget);
                     if (multiDri == null) {
-                        consolidated.put(packageName, info);
+                        consolidated.put(resolvedTarget, info);
                     } else if (multiDri instanceof MultiDisplayResolveInfo) {
                         ((MultiDisplayResolveInfo) multiDri).addTarget(info);
                     } else {
                         // create consolidated target from the single DisplayResolveInfo
                         MultiDisplayResolveInfo multiDisplayResolveInfo =
-                            new MultiDisplayResolveInfo(packageName, multiDri);
+                            new MultiDisplayResolveInfo(resolvedTarget, multiDri);
                         multiDisplayResolveInfo.addTarget(info);
-                        consolidated.put(packageName, multiDisplayResolveInfo);
+                        consolidated.put(resolvedTarget, multiDisplayResolveInfo);
                     }
                 }
                 List<DisplayResolveInfo> groupedTargets = new ArrayList<>();
