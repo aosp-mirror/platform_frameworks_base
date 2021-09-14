@@ -2443,8 +2443,7 @@ public class AudioManager {
 
     /**
      * Return a handle to the optional platform's {@link Spatializer}
-     * @return {@code null} if spatialization is not supported, the {@code Spatializer} instance
-     *         otherwise.
+     * @return the {@code Spatializer} instance.
      */
     public @Nullable Spatializer getSpatializer() {
         int level = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
