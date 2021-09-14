@@ -22,7 +22,6 @@ import android.hardware.SensorManager
 import android.hardware.devicestate.DeviceStateManager
 import android.os.Handler
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider
-import com.android.systemui.unfold.config.ANIMATION_MODE_HINGE_ANGLE
 import com.android.systemui.unfold.config.ResourceUnfoldTransitionConfig
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
 import com.android.systemui.unfold.progress.FixedTimingTransitionProgressProvider
@@ -30,7 +29,6 @@ import com.android.systemui.unfold.progress.PhysicsBasedUnfoldTransitionProgress
 import com.android.systemui.unfold.updates.DeviceFoldStateProvider
 import com.android.systemui.unfold.updates.hinge.EmptyHingeAngleProvider
 import com.android.systemui.unfold.updates.hinge.HingeSensorAngleProvider
-import com.android.systemui.unfold.updates.hinge.RotationSensorHingeAngleProvider
 import java.lang.IllegalStateException
 import java.util.concurrent.Executor
 
@@ -50,14 +48,8 @@ fun createUnfoldTransitionProgressProvider(
     }
 
     val hingeAngleProvider =
-        if (config.mode == ANIMATION_MODE_HINGE_ANGLE) {
-            // TODO: after removing temporary "config.mode" we should just
-            //       switch between fixed timing and hinge sensor based on this flag
-            if (config.isHingeAngleEnabled) {
-                HingeSensorAngleProvider(sensorManager)
-            } else {
-                RotationSensorHingeAngleProvider(sensorManager)
-            }
+        if (config.isHingeAngleEnabled) {
+            HingeSensorAngleProvider(sensorManager)
         } else {
             EmptyHingeAngleProvider()
         }
@@ -70,7 +62,7 @@ fun createUnfoldTransitionProgressProvider(
         mainExecutor
     )
 
-    return if (config.mode == ANIMATION_MODE_HINGE_ANGLE) {
+    return if (config.isHingeAngleEnabled) {
         PhysicsBasedUnfoldTransitionProgressProvider(
             mainHandler,
             foldStateProvider

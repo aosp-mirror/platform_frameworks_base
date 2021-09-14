@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
@@ -62,8 +63,29 @@ final class RemoteInputConnection implements InputConnection {
     @NonNull
     private final IInputContextInvoker mInvoker;
 
+    private static final class InputMethodServiceInternalHolder {
+        @NonNull
+        private final WeakReference<InputMethodServiceInternal> mServiceRef;
+
+        private InputMethodServiceInternalHolder(
+                @NonNull WeakReference<InputMethodServiceInternal> ims) {
+            mServiceRef = ims;
+        }
+
+        @AnyThread
+        @Nullable
+        public InputMethodServiceInternal getAndWarnIfNull() {
+            final InputMethodServiceInternal ims = mServiceRef.get();
+            if (ims == null) {
+                Log.e(TAG, "InputMethodService is already destroyed.  InputConnection instances"
+                        + " cannot be used beyond InputMethodService lifetime.", new Throwable());
+            }
+            return ims;
+        }
+    }
+
     @NonNull
-    private final WeakReference<InputMethodServiceInternal> mInputMethodService;
+    private final InputMethodServiceInternalHolder mImsInternal;
 
     @MissingMethodFlags
     private final int mMissingMethods;
@@ -81,7 +103,7 @@ final class RemoteInputConnection implements InputConnection {
             @NonNull WeakReference<InputMethodServiceInternal> inputMethodService,
             IInputContext inputContext, @MissingMethodFlags int missingMethods,
             @NonNull CancellationGroup cancellationGroup) {
-        mInputMethodService = inputMethodService;
+        mImsInternal = new InputMethodServiceInternalHolder(inputMethodService);
         mInvoker = IInputContextInvoker.create(inputContext);
         mMissingMethods = missingMethods;
         mCancellationGroup = cancellationGroup;
@@ -101,11 +123,11 @@ final class RemoteInputConnection implements InputConnection {
         final CharSequence result = CompletableFutureUtil.getResultOrNull(
                 value, TAG, "getTextAfterCursor()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
 
-        final InputMethodServiceInternal inputMethodService = mInputMethodService.get();
-        if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
+        final InputMethodServiceInternal imsInternal = mImsInternal.getAndWarnIfNull();
+        if (imsInternal != null && ImeTracing.getInstance().isEnabled()) {
             final byte[] icProto = InputConnectionProtoDumper.buildGetTextAfterCursorProto(length,
                     flags, result);
-            inputMethodService.triggerServiceDump(TAG + "#getTextAfterCursor", icProto);
+            imsInternal.triggerServiceDump(TAG + "#getTextAfterCursor", icProto);
         }
 
         return result;
@@ -125,11 +147,11 @@ final class RemoteInputConnection implements InputConnection {
         final CharSequence result = CompletableFutureUtil.getResultOrNull(
                 value, TAG, "getTextBeforeCursor()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
 
-        final InputMethodServiceInternal inputMethodService = mInputMethodService.get();
-        if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
+        final InputMethodServiceInternal imsInternal = mImsInternal.getAndWarnIfNull();
+        if (imsInternal != null && ImeTracing.getInstance().isEnabled()) {
             final byte[] icProto = InputConnectionProtoDumper.buildGetTextBeforeCursorProto(length,
                     flags, result);
-            inputMethodService.triggerServiceDump(TAG + "#getTextBeforeCursor", icProto);
+            imsInternal.triggerServiceDump(TAG + "#getTextBeforeCursor", icProto);
         }
 
         return result;
@@ -149,11 +171,11 @@ final class RemoteInputConnection implements InputConnection {
         final CharSequence result = CompletableFutureUtil.getResultOrNull(
                 value, TAG, "getSelectedText()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
 
-        final InputMethodServiceInternal inputMethodService = mInputMethodService.get();
-        if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
+        final InputMethodServiceInternal imsInternal = mImsInternal.getAndWarnIfNull();
+        if (imsInternal != null && ImeTracing.getInstance().isEnabled()) {
             final byte[] icProto = InputConnectionProtoDumper.buildGetSelectedTextProto(flags,
                     result);
-            inputMethodService.triggerServiceDump(TAG + "#getSelectedText", icProto);
+            imsInternal.triggerServiceDump(TAG + "#getSelectedText", icProto);
         }
 
         return result;
@@ -187,11 +209,11 @@ final class RemoteInputConnection implements InputConnection {
         final SurroundingText result = CompletableFutureUtil.getResultOrNull(
                 value, TAG, "getSurroundingText()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
 
-        final InputMethodServiceInternal inputMethodService = mInputMethodService.get();
-        if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
+        final InputMethodServiceInternal imsInternal = mImsInternal.getAndWarnIfNull();
+        if (imsInternal != null && ImeTracing.getInstance().isEnabled()) {
             final byte[] icProto = InputConnectionProtoDumper.buildGetSurroundingTextProto(
                     beforeLength, afterLength, flags, result);
-            inputMethodService.triggerServiceDump(TAG + "#getSurroundingText", icProto);
+            imsInternal.triggerServiceDump(TAG + "#getSurroundingText", icProto);
         }
 
         return result;
@@ -207,11 +229,11 @@ final class RemoteInputConnection implements InputConnection {
         final int result = CompletableFutureUtil.getResultOrZero(
                 value, TAG, "getCursorCapsMode()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
 
-        final InputMethodServiceInternal inputMethodService = mInputMethodService.get();
-        if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
+        final InputMethodServiceInternal imsInternal = mImsInternal.getAndWarnIfNull();
+        if (imsInternal != null && ImeTracing.getInstance().isEnabled()) {
             final byte[] icProto = InputConnectionProtoDumper.buildGetCursorCapsModeProto(
                     reqModes, result);
-            inputMethodService.triggerServiceDump(TAG + "#getCursorCapsMode", icProto);
+            imsInternal.triggerServiceDump(TAG + "#getCursorCapsMode", icProto);
         }
 
         return result;
@@ -227,11 +249,11 @@ final class RemoteInputConnection implements InputConnection {
         final ExtractedText result = CompletableFutureUtil.getResultOrNull(
                 value, TAG, "getExtractedText()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
 
-        final InputMethodServiceInternal inputMethodService = mInputMethodService.get();
-        if (inputMethodService != null && ImeTracing.getInstance().isEnabled()) {
+        final InputMethodServiceInternal imsInternal = mImsInternal.getAndWarnIfNull();
+        if (imsInternal != null && ImeTracing.getInstance().isEnabled()) {
             final byte[] icProto = InputConnectionProtoDumper.buildGetExtractedTextProto(
                     request, flags, result);
-            inputMethodService.triggerServiceDump(TAG + "#getExtractedText", icProto);
+            imsInternal.triggerServiceDump(TAG + "#getExtractedText", icProto);
         }
 
         return result;
@@ -248,12 +270,11 @@ final class RemoteInputConnection implements InputConnection {
 
     @AnyThread
     private void notifyUserActionIfNecessary() {
-        final InputMethodServiceInternal inputMethodService = mInputMethodService.get();
-        if (inputMethodService == null) {
-            // This basically should not happen, because it's the the caller of this method.
+        final InputMethodServiceInternal imsInternal = mImsInternal.getAndWarnIfNull();
+        if (imsInternal == null) {
             return;
         }
-        inputMethodService.notifyUserActionIfNecessary();
+        imsInternal.notifyUserActionIfNecessary();
     }
 
     @AnyThread
@@ -372,7 +393,15 @@ final class RemoteInputConnection implements InputConnection {
             // This method is not implemented.
             return false;
         }
-        final CompletableFuture<Boolean> value = mInvoker.requestCursorUpdates(cursorUpdateMode);
+
+        final InputMethodServiceInternal ims = mImsInternal.getAndWarnIfNull();
+        if (ims == null) {
+            return false;
+        }
+
+        final int displayId = ims.getContext().getDisplayId();
+        final CompletableFuture<Boolean> value =
+                mInvoker.requestCursorUpdates(cursorUpdateMode, displayId);
         return CompletableFutureUtil.getResultOrFalse(value, TAG, "requestCursorUpdates()",
                 mCancellationGroup, MAX_WAIT_TIME_MILLIS);
     }
@@ -400,12 +429,11 @@ final class RemoteInputConnection implements InputConnection {
         }
 
         if ((flags & InputConnection.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0) {
-            final InputMethodServiceInternal inputMethodService = mInputMethodService.get();
-            if (inputMethodService == null) {
-                // This basically should not happen, because it's the caller of this method.
+            final InputMethodServiceInternal imsInternal = mImsInternal.getAndWarnIfNull();
+            if (imsInternal == null) {
                 return false;
             }
-            inputMethodService.exposeContent(inputContentInfo, this);
+            imsInternal.exposeContent(inputContentInfo, this);
         }
 
         final CompletableFuture<Boolean> value =

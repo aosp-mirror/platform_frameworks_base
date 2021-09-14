@@ -2384,12 +2384,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (mCurSeq <= 0) mCurSeq = 1;
         mCurClient = cs;
         mCurInputContext = inputContext;
-        if (cs.selfReportedDisplayId != displayIdToShowIme) {
-            // CursorAnchorInfo API does not work as-is for cross-display scenario.  Pretend that
-            // InputConnection#requestCursorUpdates() is not implemented in the application so that
-            // IMEs will always receive false from this API.
-            missingMethods |= MissingMethodFlags.REQUEST_CURSOR_UPDATES;
-        }
         mCurInputContextMissingMethods = missingMethods;
         mCurAttribute = attribute;
 

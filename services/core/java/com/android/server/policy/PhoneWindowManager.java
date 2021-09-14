@@ -230,6 +230,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * WindowManagerPolicy implementation for the Android phone UI.  This
@@ -3385,13 +3386,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
             }
-        } else if (ExtconUEventObserver.extconExists()
-                && ExtconUEventObserver.namedExtconDirExists(HdmiVideoExtconUEventObserver.NAME)) {
-            HdmiVideoExtconUEventObserver observer = new HdmiVideoExtconUEventObserver();
-            plugged = observer.init();
-            mHDMIObserver = observer;
-        } else if (localLOGV) {
-            Slog.v(TAG, "Not observing HDMI plug state because HDMI was not found.");
+        } else {
+            final List<ExtconUEventObserver.ExtconInfo> extcons =
+                    ExtconUEventObserver.ExtconInfo.getExtconInfoForTypes(
+                            new String[] {ExtconUEventObserver.ExtconInfo.EXTCON_HDMI});
+            if (!extcons.isEmpty()) {
+                // TODO: handle more than one HDMI
+                HdmiVideoExtconUEventObserver observer = new HdmiVideoExtconUEventObserver();
+                plugged = observer.init(extcons.get(0));
+                mHDMIObserver = observer;
+            } else if (localLOGV) {
+                Slog.v(TAG, "Not observing HDMI plug state because HDMI was not found.");
+            }
         }
 
         // This dance forces the code in setHdmiPlugged to run.
@@ -5604,23 +5610,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private class HdmiVideoExtconUEventObserver extends ExtconStateObserver<Boolean> {
         private static final String HDMI_EXIST = "HDMI=1";
         private static final String NAME = "hdmi";
-        private final ExtconInfo mHdmi = new ExtconInfo(NAME);
 
-        private boolean init() {
+        private boolean init(ExtconInfo hdmi) {
             boolean plugged = false;
             try {
-                plugged = parseStateFromFile(mHdmi);
+                plugged = parseStateFromFile(hdmi);
             } catch (FileNotFoundException e) {
-                Slog.w(TAG, mHdmi.getStatePath()
-                        + " not found while attempting to determine initial state", e);
+                Slog.w(TAG,
+                        hdmi.getStatePath()
+                                + " not found while attempting to determine initial state",
+                        e);
             } catch (IOException e) {
-                Slog.e(
-                        TAG,
-                        "Error reading " + mHdmi.getStatePath()
+                Slog.e(TAG,
+                        "Error reading " + hdmi.getStatePath()
                                 + " while attempting to determine initial state",
                         e);
             }
-            startObserving(mHdmi);
+            startObserving(hdmi);
             return plugged;
         }
 

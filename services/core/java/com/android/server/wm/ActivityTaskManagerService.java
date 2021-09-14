@@ -652,16 +652,25 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      */
     volatile int mTopProcessState = ActivityManager.PROCESS_STATE_TOP;
 
+    /** Whether to keep higher priority to launch app while device is sleeping. */
+    private volatile boolean mRetainPowerModeAndTopProcessState;
+
+    /** The timeout to restore power mode if {@link #mRetainPowerModeAndTopProcessState} is set. */
+    private static final long POWER_MODE_UNKNOWN_VISIBILITY_TIMEOUT_MS = 1000;
+
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
             POWER_MODE_REASON_START_ACTIVITY,
             POWER_MODE_REASON_FREEZE_DISPLAY,
+            POWER_MODE_REASON_UNKNOWN_VISIBILITY,
             POWER_MODE_REASON_ALL,
     })
     @interface PowerModeReason {}
 
     static final int POWER_MODE_REASON_START_ACTIVITY = 1 << 0;
     static final int POWER_MODE_REASON_FREEZE_DISPLAY = 1 << 1;
+    /** @see UnknownAppVisibilityController */
+    static final int POWER_MODE_REASON_UNKNOWN_VISIBILITY = 1 << 2;
     /** This can only be used by {@link #endLaunchPowerMode(int)}.*/
     static final int POWER_MODE_REASON_ALL = (1 << 2) - 1;
 
@@ -4247,15 +4256,39 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     void startLaunchPowerMode(@PowerModeReason int reason) {
-        if (mPowerManagerInternal == null) return;
-        mPowerManagerInternal.setPowerMode(Mode.LAUNCH, true);
+        if (mPowerManagerInternal != null) {
+            mPowerManagerInternal.setPowerMode(Mode.LAUNCH, true);
+        }
         mLaunchPowerModeReasons |= reason;
+        if ((reason & POWER_MODE_REASON_UNKNOWN_VISIBILITY) != 0) {
+            if (mRetainPowerModeAndTopProcessState) {
+                mH.removeMessages(H.END_POWER_MODE_UNKNOWN_VISIBILITY_MSG);
+            }
+            mRetainPowerModeAndTopProcessState = true;
+            mH.sendEmptyMessageDelayed(H.END_POWER_MODE_UNKNOWN_VISIBILITY_MSG,
+                    POWER_MODE_UNKNOWN_VISIBILITY_TIMEOUT_MS);
+            Slog.d(TAG, "Temporarily retain top process state for launching app");
+        }
     }
 
     void endLaunchPowerMode(@PowerModeReason int reason) {
-        if (mPowerManagerInternal == null || mLaunchPowerModeReasons == 0) return;
+        if (mLaunchPowerModeReasons == 0) return;
         mLaunchPowerModeReasons &= ~reason;
-        if (mLaunchPowerModeReasons == 0) {
+
+        if ((mLaunchPowerModeReasons & POWER_MODE_REASON_UNKNOWN_VISIBILITY) != 0) {
+            boolean allResolved = true;
+            for (int i = mRootWindowContainer.getChildCount() - 1; i >= 0; i--) {
+                allResolved &= mRootWindowContainer.getChildAt(i).mUnknownAppVisibilityController
+                        .allResolved();
+            }
+            if (allResolved) {
+                mLaunchPowerModeReasons &= ~POWER_MODE_REASON_UNKNOWN_VISIBILITY;
+                mRetainPowerModeAndTopProcessState = false;
+                mH.removeMessages(H.END_POWER_MODE_UNKNOWN_VISIBILITY_MSG);
+            }
+        }
+
+        if (mLaunchPowerModeReasons == 0 && mPowerManagerInternal != null) {
             mPowerManagerInternal.setPowerMode(Mode.LAUNCH, false);
         }
     }
@@ -5117,6 +5150,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     final class H extends Handler {
         static final int REPORT_TIME_TRACKER_MSG = 1;
         static final int UPDATE_PROCESS_ANIMATING_STATE = 2;
+        static final int END_POWER_MODE_UNKNOWN_VISIBILITY_MSG = 3;
 
         static final int FIRST_ACTIVITY_TASK_MSG = 100;
         static final int FIRST_SUPERVISOR_TASK_MSG = 200;
@@ -5137,6 +5171,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     final WindowProcessController proc = (WindowProcessController) msg.obj;
                     synchronized (mGlobalLock) {
                         proc.updateRunningRemoteOrRecentsAnimation();
+                    }
+                }
+                break;
+                case END_POWER_MODE_UNKNOWN_VISIBILITY_MSG: {
+                    synchronized (mGlobalLock) {
+                        mRetainPowerModeAndTopProcessState = false;
+                        endLaunchPowerMode(POWER_MODE_REASON_UNKNOWN_VISIBILITY);
+                        if (mTopApp != null
+                                && mTopProcessState == ActivityManager.PROCESS_STATE_TOP_SLEEPING) {
+                            // Restore the scheduling group for sleeping.
+                            mTopApp.updateProcessInfo(false /* updateServiceConnection */,
+                                    false /* activityChange */, true /* updateOomAdj */,
+                                    false /* addPendingTopUid */);
+                        }
                     }
                 }
                 break;
@@ -5458,6 +5506,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @HotPath(caller = HotPath.OOM_ADJUSTMENT)
         @Override
         public int getTopProcessState() {
+            if (mRetainPowerModeAndTopProcessState) {
+                // There is a launching app while device may be sleeping, force the top state so
+                // the launching process can have top-app scheduling group.
+                return ActivityManager.PROCESS_STATE_TOP;
+            }
             return mTopProcessState;
         }
 
