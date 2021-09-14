@@ -57,6 +57,7 @@ import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.LocaleList;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
@@ -817,10 +818,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return false;
     }
 
-    void updateNightModeForAllActivities(int nightMode) {
+    // TODO(b/199277065): Re-assess how app-specific locales are applied based on UXR
+    // TODO(b/199277729): Consider whether we need to add special casing for edge cases like
+    //  activity-embeddings etc.
+    void updateAppSpecificSettingsForAllActivities(Integer nightMode, LocaleList localesOverride) {
         for (int i = mActivities.size() - 1; i >= 0; --i) {
             final ActivityRecord r = mActivities.get(i);
-            if (r.setOverrideNightMode(nightMode) && r.mVisibleRequested) {
+            if (r.applyAppSpecificConfig(nightMode, localesOverride) && r.mVisibleRequested) {
                 r.ensureActivityConfiguration(0 /* globalChanges */, true /* preserveWindow */);
             }
         }
