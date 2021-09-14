@@ -144,7 +144,6 @@ public class BubbleController {
 
     private BubbleLogger mLogger;
     private BubbleData mBubbleData;
-    private View mBubbleScrim;
     @Nullable private BubbleStackView mStackView;
     private BubbleIconFactory mBubbleIconFactory;
     private BubblePositioner mBubblePositioner;
@@ -1372,8 +1371,9 @@ public class BubbleController {
     private class BubblesImeListener extends PinnedStackListenerForwarder.PinnedTaskListener {
         @Override
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
+            mBubblePositioner.setImeVisible(imeVisible, imeHeight);
             if (mStackView != null) {
-                mStackView.onImeVisibilityChanged(imeVisible, imeHeight);
+                mStackView.animateForIme(imeVisible);
             }
         }
     }

@@ -21,7 +21,6 @@ import static com.android.wm.shell.bubbles.BubblePositioner.NUM_VISIBLE_WHEN_RES
 import android.content.res.Resources;
 import android.graphics.Path;
 import android.graphics.PointF;
-import android.graphics.Rect;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -33,6 +32,7 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.animation.PhysicsAnimator;
 import com.android.wm.shell.bubbles.BubblePositioner;
+import com.android.wm.shell.bubbles.BubbleStackView;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 
 import com.google.android.collect.Sets;
@@ -124,12 +124,15 @@ public class ExpandedAnimationController
 
     private BubblePositioner mPositioner;
 
+    private BubbleStackView mBubbleStackView;
+
     public ExpandedAnimationController(BubblePositioner positioner,
-            Runnable onBubbleAnimatedOutAction) {
+            Runnable onBubbleAnimatedOutAction, BubbleStackView stackView) {
         mPositioner = positioner;
         updateResources();
         mOnBubbleAnimatedOutAction = onBubbleAnimatedOutAction;
         mCollapsePoint = mPositioner.getDefaultStartPosition();
+        mBubbleStackView = stackView;
     }
 
     /**
@@ -239,10 +242,7 @@ public class ExpandedAnimationController
             final Path path = new Path();
             path.moveTo(bubble.getTranslationX(), bubble.getTranslationY());
 
-            boolean onLeft = mPositioner.isStackOnLeft(mCollapsePoint);
-            final PointF p = mPositioner.getExpandedBubbleXY(index,
-                    mLayout.getChildCount(),
-                    onLeft);
+            final PointF p = mPositioner.getExpandedBubbleXY(index, mBubbleStackView.getState());
             if (expanding) {
                 // If we're expanding, first draw a line from the bubble's current position to where
                 // it'll end up
@@ -364,7 +364,7 @@ public class ExpandedAnimationController
             bubbleView.setTranslationY(y);
         }
 
-        final float expandedY = mPositioner.getExpandedBubblesY();
+        final float expandedY = mPositioner.getExpandedViewYTopAligned();
         final boolean draggedOutEnough =
                 y > expandedY + mBubbleSizePx || y < expandedY - mBubbleSizePx;
         if (draggedOutEnough != mBubbleDraggedOutEnough) {
@@ -410,8 +410,7 @@ public class ExpandedAnimationController
             return;
         }
         final int index = mLayout.indexOfChild(bubbleView);
-        final PointF p = mPositioner.getExpandedBubbleXY(index, mLayout.getChildCount(),
-                mPositioner.isStackOnLeft(mCollapsePoint));
+        final PointF p = mPositioner.getExpandedBubbleXY(index, mBubbleStackView.getState());
         animationForChildAtIndex(index)
                 .position(p.x, p.y)
                 .withPositionStartVelocities(velX, velY)
@@ -427,16 +426,6 @@ public class ExpandedAnimationController
         mBubbleDraggedOutEnough = false;
         mMagnetizedBubbleDraggingOut = null;
         updateBubblePositions();
-    }
-
-    /**
-     * Animates the bubbles to the y position. Used in response to IME showing.
-     */
-    public void updateYPosition(Runnable after) {
-        if (mLayout == null) return;
-        animationsForChildrenFromIndex(
-                0, (i, anim) -> anim.translationY(mPositioner.getExpandedBubblesY()))
-                .startAll(after);
     }
 
     /** Description of current animation controller state. */
@@ -496,36 +485,33 @@ public class ExpandedAnimationController
             startOrUpdatePathAnimation(false /* expanding */);
         } else {
             boolean onLeft = mPositioner.isStackOnLeft(mCollapsePoint);
-            final PointF p = mPositioner.getExpandedBubbleXY(index,
-                    mLayout.getChildCount(),
-                    onLeft);
+            final PointF p = mPositioner.getExpandedBubbleXY(index, mBubbleStackView.getState());
             if (mPositioner.showBubblesVertically()) {
                 child.setTranslationY(p.y);
             } else {
                 child.setTranslationX(p.x);
             }
-            if (!mPreparingToCollapse) {
-                // Only animate if we're not collapsing as that animation will handle placing the
+
+            if (mPreparingToCollapse) {
+                // Don't animate if we're collapsing, as that animation will handle placing the
                 // new bubble in the stacked position.
-                if (mPositioner.showBubblesVertically()) {
-                    Rect availableRect = mPositioner.getAvailableRect();
-                    float fromX = onLeft
-                            ? -mBubbleSizePx * ANIMATE_TRANSLATION_FACTOR
-                            : availableRect.right + mBubbleSizePx * ANIMATE_TRANSLATION_FACTOR;
-                    animationForChild(child)
-                            .translationX(fromX, p.y)
-                            .start();
-                } else {
-                    // Only animate if we're not collapsing as that animation will handle placing
-                    // the new bubble in the stacked position.
-                    float fromY = mPositioner.getExpandedBubblesY() - mBubbleSizePx
-                            * ANIMATE_TRANSLATION_FACTOR;
-                    animationForChild(child)
-                            .translationY(fromY, p.y)
-                            .start();
-                }
-                updateBubblePositions();
+                return;
             }
+
+            if (mPositioner.showBubblesVertically()) {
+                float fromX = onLeft
+                        ? p.x - mBubbleSizePx * ANIMATE_TRANSLATION_FACTOR
+                        : p.x + mBubbleSizePx * ANIMATE_TRANSLATION_FACTOR;
+                animationForChild(child)
+                        .translationX(fromX, p.y)
+                        .start();
+            } else {
+                float fromY = p.y - mBubbleSizePx * ANIMATE_TRANSLATION_FACTOR;
+                animationForChild(child)
+                        .translationY(fromY, p.y)
+                        .start();
+            }
+            updateBubblePositions();
         }
     }
 
@@ -572,7 +558,6 @@ public class ExpandedAnimationController
         if (mAnimatingExpand || mAnimatingCollapse) {
             return;
         }
-        boolean onLeft = mPositioner.isStackOnLeft(mCollapsePoint);
         for (int i = 0; i < mLayout.getChildCount(); i++) {
             final View bubble = mLayout.getChildAt(i);
 
@@ -582,7 +567,7 @@ public class ExpandedAnimationController
                 return;
             }
 
-            final PointF p = mPositioner.getExpandedBubbleXY(i, mLayout.getChildCount(), onLeft);
+            final PointF p = mPositioner.getExpandedBubbleXY(i, mBubbleStackView.getState());
             animationForChild(bubble)
                     .translationX(p.x)
                     .translationY(p.y)
