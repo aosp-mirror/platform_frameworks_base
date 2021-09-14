@@ -7256,6 +7256,7 @@ package android.os {
   public class SystemConfigManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_CARRIER_APP_INFO) public java.util.Set<java.lang.String> getDisabledUntilUsedPreinstalledCarrierApps();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_CARRIER_APP_INFO) public java.util.Map<java.lang.String,java.util.List<java.lang.String>> getDisabledUntilUsedPreinstalledCarrierAssociatedApps();
+    method @NonNull public java.util.List<java.lang.String> getEnabledComponentOverrides(@NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.GET_RUNTIME_PERMISSIONS) public int[] getSystemPermissionUids(@NonNull String);
   }
 
