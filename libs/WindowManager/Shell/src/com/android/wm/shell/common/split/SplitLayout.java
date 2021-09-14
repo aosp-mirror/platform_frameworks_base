@@ -125,8 +125,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         mRotation = configuration.windowConfiguration.getRotation();
         mSplitLayoutHandler = splitLayoutHandler;
         mDisplayImeController = displayImeController;
-        mSplitWindowManager = new SplitWindowManager(
-                windowName, mContext, configuration, parentContainerCallbacks);
+        mSplitWindowManager = new SplitWindowManager(windowName, mContext, configuration,
+                parentContainerCallbacks);
         mTaskOrganizer = taskOrganizer;
         mImePositionProcessor = new ImePositionProcessor(mContext.getDisplayId());
         mDismissingParallaxPolicy = new DismissingParallaxPolicy();
@@ -181,22 +181,19 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     public boolean updateConfiguration(Configuration configuration) {
         boolean affectsLayout = false;
 
-        // Make sure to render the divider bar with proper resources that matching the screen
-        // orientation.
-        final int orientation = configuration.orientation;
-        if (orientation != mOrientation) {
-            mOrientation = orientation;
-            mContext = mContext.createConfigurationContext(configuration);
-            mSplitWindowManager.setConfiguration(configuration);
-            affectsLayout = true;
-        }
-
         // Update the split bounds when necessary. Besides root bounds changed, split bounds need to
         // be updated when the rotation changed to cover the case that users rotated the screen 180
         // degrees.
+        // Make sure to render the divider bar with proper resources that matching the screen
+        // orientation.
         final int rotation = configuration.windowConfiguration.getRotation();
         final Rect rootBounds = configuration.windowConfiguration.getBounds();
-        if (rotation != mRotation || !mRootBounds.equals(rootBounds)) {
+        final int orientation = configuration.orientation;
+        if (rotation != mRotation || !mRootBounds.equals(rootBounds)
+                || orientation != mOrientation) {
+            mContext = mContext.createConfigurationContext(configuration);
+            mSplitWindowManager.setConfiguration(configuration);
+            mOrientation = orientation;
             mTempRect.set(mRootBounds);
             mRootBounds.set(rootBounds);
             mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds);
