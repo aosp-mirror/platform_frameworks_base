@@ -26,6 +26,7 @@ import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.helpers.FIND_TIMEOUT
 import com.android.server.wm.flicker.helpers.SYSTEMUI_PACKAGE
+import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.pip.tv.closeTvPipWindow
 import com.android.wm.shell.flicker.pip.tv.isFocusedOrHasFocusedChild
@@ -34,7 +35,7 @@ import com.android.wm.shell.flicker.testapp.Components
 class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
     instrumentation,
     Components.PipActivity.LABEL,
-    Components.PipActivity.COMPONENT
+    Components.PipActivity.COMPONENT.toFlickerComponent()
 ) {
     private val mediaSessionManager: MediaSessionManager
         get() = context.getSystemService(MediaSessionManager::class.java)

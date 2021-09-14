@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.content.ComponentName
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
@@ -29,7 +28,7 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+import com.android.server.wm.traces.common.FlickerComponentName
 import com.google.common.truth.Truth
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -61,7 +60,7 @@ import org.junit.runners.Parameterized
 @Group1
 class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSpec) {
     override val testApp = NonResizeableAppHelper(instrumentation)
-    private val colorFadComponent = ComponentName("", "ColorFade BLAST#")
+    private val colorFadComponent = FlickerComponentName("", "ColorFade BLAST#")
 
     /**
      * Defines the transition used to run the test
@@ -92,15 +91,15 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
      * Checks that the nav bar layer starts visible, becomes invisible during unlocking animation
      * and becomes visible at the end
      */
-    @Presubmit
+    @Postsubmit
     @Test
     fun navBarLayerVisibilityChanges() {
         testSpec.assertLayers {
-            this.isVisible(WindowManagerStateHelper.NAV_BAR_COMPONENT)
+            this.isVisible(FlickerComponentName.NAV_BAR)
                 .then()
-                .isInvisible(WindowManagerStateHelper.NAV_BAR_COMPONENT)
+                .isInvisible(FlickerComponentName.NAV_BAR)
                 .then()
-                .isVisible(WindowManagerStateHelper.NAV_BAR_COMPONENT)
+                .isVisible(FlickerComponentName.NAV_BAR)
         }
     }
 
@@ -159,11 +158,11 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
     @Test
     fun navBarWindowsVisibilityChanges() {
         testSpec.assertWm {
-            this.isAboveAppWindowVisible(WindowManagerStateHelper.NAV_BAR_COMPONENT)
+            this.isAboveAppWindowVisible(FlickerComponentName.NAV_BAR)
                 .then()
-                .isNonAppWindowInvisible(WindowManagerStateHelper.NAV_BAR_COMPONENT)
+                .isNonAppWindowInvisible(FlickerComponentName.NAV_BAR)
                 .then()
-                .isAboveAppWindowVisible(WindowManagerStateHelper.NAV_BAR_COMPONENT)
+                .isAboveAppWindowVisible(FlickerComponentName.NAV_BAR)
         }
     }
 
@@ -172,6 +171,10 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
             super.visibleWindowsShownMoreThanOneConsecutiveEntry()
+
+    @FlakyTest
+    @Test
+    override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
 
     /** {@inheritDoc} */
     @FlakyTest

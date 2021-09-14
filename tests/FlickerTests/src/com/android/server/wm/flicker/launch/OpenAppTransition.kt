@@ -39,8 +39,7 @@ import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.SNAPSHOT_COMPONENT
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.SPLASH_SCREEN_COMPONENT
+import com.android.server.wm.traces.common.FlickerComponentName
 import org.junit.Test
 
 abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
@@ -188,9 +187,9 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
         testSpec.assertWm {
             this.isAppWindowOnTop(LAUNCHER_COMPONENT)
                     .then()
-                    .isAppWindowOnTop(SNAPSHOT_COMPONENT, isOptional = true)
+                    .isAppWindowOnTop(FlickerComponentName.SNAPSHOT, isOptional = true)
                     .then()
-                    .isAppWindowOnTop(SPLASH_SCREEN_COMPONENT, isOptional = true)
+                    .isAppWindowOnTop(FlickerComponentName.SPLASH_SCREEN, isOptional = true)
                     .then()
                     .isAppWindowOnTop(testApp.component)
         }

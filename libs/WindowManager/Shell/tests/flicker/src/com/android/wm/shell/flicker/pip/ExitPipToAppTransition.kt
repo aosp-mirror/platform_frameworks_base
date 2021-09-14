@@ -18,7 +18,6 @@ package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
 import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.traces.parser.toLayerName
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
 import org.junit.Test
 
