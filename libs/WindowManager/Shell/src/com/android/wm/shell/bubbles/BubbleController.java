@@ -69,6 +69,7 @@ import android.util.SparseArray;
 import android.util.SparseSetArray;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.window.WindowContainerTransaction;
 
@@ -187,6 +188,9 @@ public class BubbleController {
 
     /** Saved direction, used to detect layout direction changes @link #onConfigChanged}. */
     private int mLayoutDirection = View.LAYOUT_DIRECTION_UNDEFINED;
+
+    /** Saved insets, used to detect WindowInset changes. */
+    private WindowInsets mWindowInsets;
 
     private boolean mInflateSynchronously;
 
@@ -628,8 +632,11 @@ public class BubbleController {
             mBubbleData.getOverflow().initialize(this);
             mWindowManager.addView(mStackView, mWmLayoutParams);
             mStackView.setOnApplyWindowInsetsListener((view, windowInsets) -> {
-                mBubblePositioner.update();
-                mStackView.onDisplaySizeChanged();
+                if (!windowInsets.equals(mWindowInsets)) {
+                    mWindowInsets = windowInsets;
+                    mBubblePositioner.update();
+                    mStackView.onDisplaySizeChanged();
+                }
                 return windowInsets;
             });
         } catch (IllegalStateException e) {
