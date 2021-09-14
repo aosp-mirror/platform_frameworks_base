@@ -137,6 +137,8 @@ public class ContextHubService extends IContextHubService.Stub {
 
     // True if WiFi is available for the Context Hub
     private boolean mIsWifiAvailable = false;
+    private boolean mIsWifiScanningEnabled = false;
+    private boolean mIsWifiMainEnabled = false;
 
     // Lock object for sendWifiSettingUpdate()
     private final Object mSendWifiSettingUpdateLock = new Object();
@@ -1064,10 +1066,20 @@ public class ContextHubService extends IContextHubService.Stub {
     private void sendWifiSettingUpdate(boolean forceUpdate) {
         synchronized (mSendWifiSettingUpdateLock) {
             WifiManager wifiManager = mContext.getSystemService(WifiManager.class);
-            boolean enabled = wifiManager.isWifiEnabled() || wifiManager.isScanAlwaysAvailable();
-            if (forceUpdate || mIsWifiAvailable != enabled) {
-                mIsWifiAvailable = enabled;
-                mContextHubWrapper.onWifiSettingChanged(enabled);
+            boolean wifiEnabled = wifiManager.isWifiEnabled();
+            boolean wifiScanEnabled = wifiManager.isScanAlwaysAvailable();
+            boolean wifiAvailable = wifiEnabled || wifiScanEnabled;
+            if (forceUpdate || mIsWifiAvailable != wifiAvailable) {
+                mIsWifiAvailable = wifiAvailable;
+                mContextHubWrapper.onWifiSettingChanged(wifiAvailable);
+            }
+            if (forceUpdate || mIsWifiScanningEnabled != wifiScanEnabled) {
+                mIsWifiScanningEnabled = wifiScanEnabled;
+                mContextHubWrapper.onWifiScanningSettingChanged(wifiScanEnabled);
+            }
+            if (forceUpdate || mIsWifiMainEnabled != wifiEnabled) {
+                mIsWifiMainEnabled = wifiEnabled;
+                mContextHubWrapper.onWifiMainSettingChanged(wifiEnabled);
             }
         }
     }
