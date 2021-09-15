@@ -31,6 +31,8 @@ import static android.os.PowerManagerInternal.WAKEFULNESS_DOZING;
 import static android.os.PowerManagerInternal.WAKEFULNESS_DREAMING;
 import static android.os.PowerManagerInternal.wakefulnessToString;
 
+import static com.android.internal.util.LatencyTracker.ACTION_TURN_ON_SCREEN;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -104,6 +106,7 @@ import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.LatencyTracker;
 import com.android.internal.util.Preconditions;
 import com.android.server.EventLogTags;
 import com.android.server.LockGuard;
@@ -1854,6 +1857,9 @@ public final class PowerManagerService extends SystemService
                     + ", details=" + details
                     + ")...");
             Trace.asyncTraceBegin(Trace.TRACE_TAG_POWER, TRACE_SCREEN_ON, groupId);
+            // The instrument will be timed out automatically after 2 seconds.
+            LatencyTracker.getInstance(mContext)
+                    .onActionStart(ACTION_TURN_ON_SCREEN, String.valueOf(groupId));
 
             setWakefulnessLocked(groupId, WAKEFULNESS_AWAKE, eventTime, uid, reason, opUid,
                     opPackageName, details);
@@ -3237,6 +3243,7 @@ public final class PowerManagerService extends SystemService
                         && mDisplayGroupPowerStateMapper.getWakefulnessLocked(
                         groupId) == WAKEFULNESS_AWAKE) {
                     mDisplayGroupPowerStateMapper.setPoweringOnLocked(groupId, false);
+                    LatencyTracker.getInstance(mContext).onActionEnd(ACTION_TURN_ON_SCREEN);
                     Trace.asyncTraceEnd(Trace.TRACE_TAG_POWER, TRACE_SCREEN_ON, groupId);
                     final int latencyMs = (int) (mClock.uptimeMillis()
                             - mDisplayGroupPowerStateMapper.getLastPowerOnTimeLocked(groupId));
