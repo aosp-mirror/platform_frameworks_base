@@ -277,6 +277,25 @@ public class QuickStatusBarHeader extends FrameLayout {
         updateBatteryMode();
         updateHeadersPadding();
         updateAnimators();
+
+        updateClockDatePadding();
+    }
+
+    private void updateClockDatePadding() {
+        int startPadding = mContext.getResources()
+                .getDimensionPixelSize(R.dimen.status_bar_left_clock_starting_padding);
+        int endPadding = mContext.getResources()
+                .getDimensionPixelSize(R.dimen.status_bar_left_clock_end_padding);
+        mClockView.setPaddingRelative(
+                startPadding,
+                mClockView.getPaddingTop(),
+                endPadding,
+                mClockView.getPaddingBottom()
+        );
+
+        MarginLayoutParams lp = (MarginLayoutParams) mClockDateView.getLayoutParams();
+        lp.setMarginStart(endPadding);
+        mClockDateView.setLayoutParams(lp);
     }
 
     private void updateAnimators() {
