@@ -2596,6 +2596,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return parent != null ? parent.getOrganizedTaskFragment() : null;
     }
 
+    boolean isEmbedded() {
+        final TaskFragment parent = getTaskFragment();
+        return parent != null && parent.isEmbedded();
+    }
+
     @Override
     @Nullable
     TaskDisplayArea getDisplayArea() {
@@ -2687,7 +2692,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean isResizeable() {
         return mAtmService.mForceResizableActivities
                 || ActivityInfo.isResizeableMode(info.resizeMode)
-                || info.supportsPictureInPicture();
+                || info.supportsPictureInPicture()
+                // If the activity can be embedded, it should inherit the bounds of task fragment.
+                || isEmbedded();
     }
 
     /** @return whether this activity is non-resizeable but is forced to be resizable. */
