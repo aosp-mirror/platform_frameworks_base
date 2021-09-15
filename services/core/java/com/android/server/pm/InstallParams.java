@@ -28,8 +28,8 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
 import static android.content.pm.PackageManager.INSTALL_FAILED_SESSION_INVALID;
-import static android.content.pm.PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_TEST_ONLY;
+import static android.content.pm.PackageManager.INSTALL_FAILED_UID_CHANGED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_REASON_DEVICE_RESTORE;
 import static android.content.pm.PackageManager.INSTALL_REASON_DEVICE_SETUP;
@@ -1202,19 +1202,17 @@ final class InstallParams extends HandlerParams {
                     }
 
                     // Check for shared user id changes
-                    String invalidPackageName = null;
                     if (!Objects.equals(oldPackage.getSharedUserId(),
                             parsedPackage.getSharedUserId())
                             // Don't mark as invalid if the app is trying to
                             // leave a sharedUserId
                             && parsedPackage.getSharedUserId() != null) {
-                        invalidPackageName = parsedPackage.getPackageName();
-                    }
-
-                    if (invalidPackageName != null) {
-                        throw new PrepareFailure(INSTALL_FAILED_SHARED_USER_INCOMPATIBLE,
-                                "Package " + invalidPackageName + " tried to change user "
-                                        + oldPackage.getSharedUserId());
+                        throw new PrepareFailure(INSTALL_FAILED_UID_CHANGED,
+                                "Package " + parsedPackage.getPackageName()
+                                        + " shared user changed from "
+                                        + (oldPackage.getSharedUserId() != null
+                                        ? oldPackage.getSharedUserId() : "<nothing>")
+                                        + " to " + parsedPackage.getSharedUserId());
                     }
 
                     // In case of rollback, remember per-user/profile install state

@@ -20,7 +20,7 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
-import static android.content.pm.PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
+import static android.content.pm.PackageManager.INSTALL_FAILED_UID_CHANGED;
 import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
 import static android.content.pm.PackageManager.UNINSTALL_REASON_UNKNOWN;
 import static android.content.pm.PackageManager.UNINSTALL_REASON_USER_TYPE;
@@ -1040,14 +1040,15 @@ public final class Settings implements Watchable, Snappable {
             @Nullable Set<String> mimeGroupNames, @NonNull UUID domainSetId)
                     throws PackageManagerException {
         final String pkgName = pkgSetting.name;
-        if (pkgSetting.sharedUser != sharedUser) {
+        if (!Objects.equals(pkgSetting.sharedUser, sharedUser) && sharedUser != null) {
             PackageManagerService.reportSettingsProblem(Log.WARN,
                     "Package " + pkgName + " shared user changed from "
                     + (pkgSetting.sharedUser != null ? pkgSetting.sharedUser.name : "<nothing>")
-                    + " to " + (sharedUser != null ? sharedUser.name : "<nothing>"));
-            throw new PackageManagerException(INSTALL_FAILED_SHARED_USER_INCOMPATIBLE,
+                    + " to " + sharedUser.name);
+            throw new PackageManagerException(INSTALL_FAILED_UID_CHANGED,
                     "Updating application package " + pkgName + " failed");
         }
+        pkgSetting.sharedUser = sharedUser;
 
         if (!pkgSetting.getPath().equals(codePath)) {
             final boolean isSystem = pkgSetting.isSystem();
