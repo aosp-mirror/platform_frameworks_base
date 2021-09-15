@@ -26,6 +26,11 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.Display;
 
+import androidx.annotation.Nullable;
+
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.biometrics.AuthController;
+import com.android.systemui.biometrics.UdfpsController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.dagger.DozeScope;
 import com.android.systemui.doze.dagger.WrappedService;
@@ -34,6 +39,7 @@ import com.android.systemui.util.wakelock.SettableWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 /**
  * Controls the screen when dozing.
@@ -56,23 +62,61 @@ public class DozeScreenState implements DozeMachine.Part {
      */
     public static final int ENTER_DOZE_HIDE_WALLPAPER_DELAY = 2500;
 
+    /**
+     * Add an extra delay to the transition to DOZE when udfps is current activated before
+     * the display state transitions from ON => DOZE.
+     */
+    public static final int UDFPS_DISPLAY_STATE_DELAY = 1200;
+
     private final DozeMachine.Service mDozeService;
     private final Handler mHandler;
     private final Runnable mApplyPendingScreenState = this::applyPendingScreenState;
     private final DozeParameters mParameters;
     private final DozeHost mDozeHost;
+    private final AuthController mAuthController;
+    private final Provider<UdfpsController> mUdfpsControllerProvider;
+    @Nullable private UdfpsController mUdfpsController;
+    private final DozeLog mDozeLog;
 
     private int mPendingScreenState = Display.STATE_UNKNOWN;
     private SettableWakeLock mWakeLock;
 
     @Inject
-    public DozeScreenState(@WrappedService DozeMachine.Service service, @Main Handler handler,
-            DozeHost host, DozeParameters parameters, WakeLock wakeLock) {
+    public DozeScreenState(
+            @WrappedService DozeMachine.Service service,
+            @Main Handler handler,
+            DozeHost host,
+            DozeParameters parameters,
+            WakeLock wakeLock,
+            AuthController authController,
+            Provider<UdfpsController> udfpsControllerProvider,
+            DozeLog dozeLog) {
         mDozeService = service;
         mHandler = handler;
         mParameters = parameters;
         mDozeHost = host;
         mWakeLock = new SettableWakeLock(wakeLock, TAG);
+        mAuthController = authController;
+        mUdfpsControllerProvider = udfpsControllerProvider;
+        mDozeLog = dozeLog;
+
+        updateUdfpsController();
+        if (mUdfpsController == null) {
+            mAuthController.addCallback(new AuthController.Callback() {
+                @Override
+                public void onAllAuthenticatorsRegistered() {
+                    updateUdfpsController();
+                }
+            });
+        }
+    }
+
+    private void updateUdfpsController() {
+        if (mAuthController.isUdfpsEnrolled(KeyguardUpdateMonitor.getCurrentUser())) {
+            mUdfpsController = mUdfpsControllerProvider.get();
+        } else {
+            mUdfpsController = null;
+        }
     }
 
     @Override
@@ -110,21 +154,28 @@ public class DozeScreenState implements DozeMachine.Part {
             mPendingScreenState = screenState;
 
             // Delay screen state transitions even longer while animations are running.
-            boolean shouldDelayTransition = newState == DOZE_AOD
+            boolean shouldDelayTransitionEnteringDoze = newState == DOZE_AOD
                     && mParameters.shouldControlScreenOff() && !turningOn;
 
-            if (shouldDelayTransition) {
+            // Delay screen state transition longer if UDFPS is actively authenticating a fp
+            boolean shouldDelayTransitionForUDFPS = newState == DOZE_AOD
+                    && mUdfpsController != null && mUdfpsController.isFingerDown();
+
+            if (shouldDelayTransitionEnteringDoze || shouldDelayTransitionForUDFPS) {
                 mWakeLock.setAcquired(true);
             }
 
             if (!messagePending) {
                 if (DEBUG) {
                     Log.d(TAG, "Display state changed to " + screenState + " delayed by "
-                            + (shouldDelayTransition ? ENTER_DOZE_DELAY : 1));
+                            + (shouldDelayTransitionEnteringDoze ? ENTER_DOZE_DELAY : 1));
                 }
 
-                if (shouldDelayTransition) {
+                if (shouldDelayTransitionEnteringDoze) {
                     mHandler.postDelayed(mApplyPendingScreenState, ENTER_DOZE_DELAY);
+                } else if (shouldDelayTransitionForUDFPS) {
+                    mDozeLog.traceDisplayStateDelayedByUdfps(mPendingScreenState);
+                    mHandler.postDelayed(mApplyPendingScreenState, UDFPS_DISPLAY_STATE_DELAY);
                 } else {
                     mHandler.post(mApplyPendingScreenState);
                 }
@@ -139,6 +190,12 @@ public class DozeScreenState implements DozeMachine.Part {
     }
 
     private void applyPendingScreenState() {
+        if (mUdfpsController != null && mUdfpsController.isFingerDown()) {
+            mDozeLog.traceDisplayStateDelayedByUdfps(mPendingScreenState);
+            mHandler.postDelayed(mApplyPendingScreenState, UDFPS_DISPLAY_STATE_DELAY);
+            return;
+        }
+
         applyScreenState(mPendingScreenState);
         mPendingScreenState = Display.STATE_UNKNOWN;
     }
