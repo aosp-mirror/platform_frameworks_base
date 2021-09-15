@@ -1224,6 +1224,9 @@ public class ConnectivityServiceTest {
                 Arrays.asList(new UserInfo[] {
                         new UserInfo(VPN_USER, "", 0),
                 }));
+        final int userId = UserHandle.getCallingUserId();
+        final UserInfo primaryUser = new UserInfo(userId, "", UserInfo.FLAG_PRIMARY);
+        doReturn(primaryUser).when(mUserManager).getUserInfo(eq(userId));
         final ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.targetSdkVersion = Build.VERSION_CODES.Q;
         when(mPackageManager.getApplicationInfoAsUser(anyString(), anyInt(), any()))
@@ -1368,6 +1371,9 @@ public class ConnectivityServiceTest {
                         buildPackageInfo(/* SYSTEM */ false, APP2_UID),
                         buildPackageInfo(/* SYSTEM */ false, VPN_UID)
                 }));
+        final int userId = UserHandle.getCallingUserId();
+        when(mPackageManager.getPackageUidAsUser(TEST_PACKAGE_NAME, userId))
+                .thenReturn(Process.myUid());
     }
 
     private void verifyActiveNetwork(int transport) {
@@ -7066,6 +7072,18 @@ public class ConnectivityServiceTest {
         // Back to routing all IPv6 traffic should have filtering rules
         verify(mMockNetd).firewallAddUidInterfaceRules(eq("tun1"), uidCaptor.capture());
         assertContainsExactly(uidCaptor.getValue(), APP1_UID, APP2_UID);
+    }
+
+    @Test
+    public void testStartVpnProfileFromDiffPackage() throws Exception {
+        final String notMyVpnPkg = "com.not.my.vpn";
+        assertThrows(SecurityException.class, () -> mService.startVpnProfile(notMyVpnPkg));
+    }
+
+    @Test
+    public void testStopVpnProfileFromDiffPackage() throws Exception {
+        final String notMyVpnPkg = "com.not.my.vpn";
+        assertThrows(SecurityException.class, () -> mService.stopVpnProfile(notMyVpnPkg));
     }
 
     @Test
