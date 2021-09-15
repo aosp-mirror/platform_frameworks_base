@@ -282,7 +282,11 @@ public class KernelSingleUidTimeReaderTest {
 
     @Test
     public void testAddDeltaFromBpf() {
-        LongArrayMultiStateCounter counter = new LongArrayMultiStateCounter(2, 5, 0, 0);
+        LongArrayMultiStateCounter counter = new LongArrayMultiStateCounter(2, 5);
+        counter.setState(0, 0);
+        mInjector.setCpuTimeInStatePerClusterNs(new long[][]{{0, 0, 0}, {0, 0}});
+        boolean success = mInjector.addDelta(TEST_UID, counter, 0);
+        assertThat(success).isTrue();
 
         // Nanoseconds
         mInjector.setCpuTimeInStatePerClusterNs(
@@ -290,7 +294,7 @@ public class KernelSingleUidTimeReaderTest {
                         {1_000_000, 2_000_000, 3_000_000},
                         {4_000_000, 5_000_000}});
 
-        boolean success = mInjector.addDelta(TEST_UID, counter, 2000);
+        success = mInjector.addDelta(TEST_UID, counter, 2000);
         assertThat(success).isTrue();
 
         LongArrayMultiStateCounter.LongArrayContainer array =
