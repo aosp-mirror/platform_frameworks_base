@@ -1266,12 +1266,14 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     if (inputId != null) {
                         if (connection.updateCableConnectionStatusLocked(cableConnectionStatus)) {
                             if (previousCableConnectionStatus != connection.getInputStateLocked()) {
-                                mListener.onStateChanged(inputId, connection.getInputStateLocked());
+                                mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
+                                    connection.getInputStateLocked(), 0, inputId).sendToTarget();
                             }
                         } else {
                             if ((previousConfigsLength == 0)
                                     != (connection.getConfigsLengthLocked() == 0)) {
-                                mListener.onStateChanged(inputId, connection.getInputStateLocked());
+                                mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
+                                    connection.getInputStateLocked(), 0, inputId).sendToTarget();
                             }
                         }
                     }
