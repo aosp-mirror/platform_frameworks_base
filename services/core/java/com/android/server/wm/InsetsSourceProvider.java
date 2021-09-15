@@ -267,7 +267,7 @@ class InsetsSourceProvider {
                         && mWin.okToDisplay()) {
                     mWin.applyWithNextDraw(mSetLeashPositionConsumer);
                 } else {
-                    mSetLeashPositionConsumer.accept(mWin.getPendingTransaction());
+                    mSetLeashPositionConsumer.accept(mWin.getSyncTransaction());
                 }
             }
             if (mServerVisible && !mLastSourceFrame.equals(mSource.getFrame())) {
@@ -331,7 +331,7 @@ class InsetsSourceProvider {
         if (getSource().getType() == ITYPE_IME) {
             setClientVisible(target.getRequestedVisibility(mSource.getType()));
         }
-        final Transaction t = mDisplayContent.getPendingTransaction();
+        final Transaction t = mDisplayContent.getSyncTransaction();
         mWin.startAnimation(t, mAdapter, !mClientVisible /* hidden */,
                 ANIMATION_TYPE_INSETS_CONTROL);
 
