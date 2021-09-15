@@ -4298,7 +4298,7 @@ class Task extends TaskFragment {
     /**
      * @return true if the task is currently focused.
      */
-    private boolean isFocused() {
+    boolean isFocused() {
         if (mDisplayContent == null || mDisplayContent.mFocusedApp == null) {
             return false;
         }
@@ -4360,6 +4360,10 @@ class Task extends TaskFragment {
      * @param hasFocus
      */
     void onAppFocusChanged(boolean hasFocus) {
+        final ActivityRecord topAct = getTopVisibleActivity();
+        if (topAct != null && (topAct.mStartingData instanceof SnapshotStartingData)) {
+            topAct.removeStartingWindowIfNeeded();
+        }
         updateShadowsRadius(hasFocus, getSyncTransaction());
         dispatchTaskInfoChangedIfNeeded(false /* force */);
     }
