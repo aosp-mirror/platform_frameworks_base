@@ -122,7 +122,6 @@ public class Spatializer {
     public @interface ImmersiveAudioLevel {};
 
     /**
-     * @hide
      * Constant indicating the {@code Spatializer} on this device supports a spatialization
      * mode that differs from the ones available at this SDK level.
      * @see #getImmersiveAudioLevel()
@@ -130,14 +129,12 @@ public class Spatializer {
     public static final int SPATIALIZER_IMMERSIVE_LEVEL_OTHER = -1;
 
     /**
-     * @hide
      * Constant indicating there are no spatialization capabilities supported on this device.
      * @see #getImmersiveAudioLevel()
      */
     public static final int SPATIALIZER_IMMERSIVE_LEVEL_NONE = 0;
 
     /**
-     * @hide
      * Constant indicating the {@code Spatializer} on this device supports multichannel
      * spatialization.
      * @see #getImmersiveAudioLevel()
@@ -145,7 +142,6 @@ public class Spatializer {
     public static final int SPATIALIZER_IMMERSIVE_LEVEL_MULTICHANNEL = 1;
 
     /**
-     * @hide
      * Return the level of support for the spatialization feature on this device.
      * This level of support is independent of whether the {@code Spatializer} is currently
      * enabled or available and will not change over time.
