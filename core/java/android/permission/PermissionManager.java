@@ -37,6 +37,7 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.content.AttributionSource;
 import android.content.Context;
+import android.content.PermissionChecker;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
@@ -79,6 +80,26 @@ import java.util.Set;
 @SystemService(Context.PERMISSION_SERVICE)
 public final class PermissionManager {
     private static final String LOG_TAG = PermissionManager.class.getName();
+
+    /**
+     * The permission is granted.
+     */
+    public static final int PERMISSION_GRANTED = 0;
+
+    /**
+     * The permission is denied. Applicable only to runtime and app op permissions.
+     * <p>
+     * The app isn't expecting the permission to be denied so that a "no-op" action should be taken,
+     * such as returning an empty result.
+     */
+    public static final int PERMISSION_SOFT_DENIED = 1;
+
+    /**
+     * The permission is denied.
+     * <p>
+     * The app should receive a {@code SecurityException}, or an error through a relevant callback.
+     */
+    public static final int PERMISSION_HARD_DENIED = 2;
 
     /** @hide */
     public static final String LOG_TAG_TRACE_GRANTS = "PermissionGrantTrace";
@@ -161,6 +182,69 @@ public final class PermissionManager {
         mLegacyPermissionManager = context.getSystemService(LegacyPermissionManager.class);
         //TODO ntmyren: there should be a way to only enable the watcher when requested
         mUsageHelper = new PermissionUsageHelper(context);
+    }
+
+    /**
+     * Checks whether a given data access chain described by the given {@link AttributionSource}
+     * has a given permission.
+     *
+     * <strong>NOTE:</strong> Use this method only for permission checks at the
+     * point where you will deliver the permission protected data to clients.
+     *
+     * <p>For example, if an app registers a location listener it should have the location
+     * permission but no data is actually sent to the app at the moment of registration
+     * and you should use {@link #checkPermissionForPreflight(String, AttributionSource)}
+     * to determine if the app has or may have location permission (if app has only foreground
+     * location the grant state depends on the app's fg/gb state) and this check will not
+     * leave a trace that permission protected data was delivered. When you are about to
+     * deliver the location data to a registered listener you should use this method which
+     * will evaluate the permission access based on the current fg/bg state of the app and
+     * leave a record that the data was accessed.
+     *
+     * @param permission The permission to check.
+     * @param attributionSource the permission identity
+     * @param message A message describing the reason the permission was checked
+     * @return The permission check result which is either {@link #PERMISSION_GRANTED}
+     *     or {@link #PERMISSION_SOFT_DENIED} or {@link #PERMISSION_HARD_DENIED}.
+     *
+     * @see #checkPermissionForPreflight(String, AttributionSource)
+     */
+    @PermissionCheckerManager.PermissionResult
+    public int checkPermissionForDataDelivery(@NonNull String permission,
+            @NonNull AttributionSource attributionSource, @Nullable String message) {
+        return PermissionChecker.checkPermissionForDataDelivery(mContext, permission,
+                // FIXME(b/199526514): PID should be passed inside AttributionSource.
+                PermissionChecker.PID_UNKNOWN, attributionSource, message);
+    }
+
+    /**
+     * Checks whether a given data access chain described by the given {@link AttributionSource}
+     * has a given permission.
+     *
+     * <strong>NOTE:</strong> Use this method only for permission checks at the
+     * preflight point where you will not deliver the permission protected data
+     * to clients but schedule permission data delivery, apps register listeners,
+     * etc.
+     *
+     * <p>For example, if an app registers a data listener it should have the required
+     * permission but no data is actually sent to the app at the moment of registration
+     * and you should use this method to determine if the app has or may have the
+     * permission and this check will not leave a trace that permission protected data
+     * was delivered. When you are about to deliver the protected data to a registered
+     * listener you should use {@link #checkPermissionForDataDelivery(String,
+     * AttributionSource, String)} which will evaluate the permission access based
+     * on the current fg/bg state of the app and leave a record that the data was accessed.
+     *
+     * @param permission The permission to check.
+     * @param attributionSource The identity for which to check the permission.
+     * @return The permission check result which is either {@link #PERMISSION_GRANTED}
+     *     or {@link #PERMISSION_SOFT_DENIED} or {@link #PERMISSION_HARD_DENIED}.
+     */
+    @PermissionCheckerManager.PermissionResult
+    public int checkPermissionForPreflight(@NonNull String permission,
+            @NonNull AttributionSource attributionSource) {
+        return PermissionChecker.checkPermissionForPreflight(mContext, permission,
+                attributionSource);
     }
 
     /**
