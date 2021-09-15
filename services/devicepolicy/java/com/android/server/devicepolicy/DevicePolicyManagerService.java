@@ -3624,6 +3624,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
+        Preconditions.checkCallAuthorization(
+                isCallingFromPackage(adminReceiver.getPackageName(), caller.getUid())
+                        || isSystemUid(caller));
 
         synchronized (getLockObject()) {
             ActiveAdmin administrator = getActiveAdminUncheckedLocked(adminReceiver, userHandle);
