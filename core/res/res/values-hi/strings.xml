@@ -326,7 +326,7 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"फ़ोन कॉल करने और उन्हें प्रबंधित करने की अनुमति दें"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"बॉडी सेंसर"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"अपने महत्वपूर्ण संकेतों के बारे में सेंसर डेटा को ऐक्सेस करें"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"विंडो की सामग्री वापस पाएं"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"विंडो का कॉन्टेंट वापस पाएं"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"उस विंडो की सामग्री की जाँच करें, जिसका आप इस्तेमाल कर रहे हैं."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"छूकर, किसी चीज़ से जुड़ी जानकारी सुनने की सुविधा चालू करें"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"जिन चीज़ों पर आप टैप करेंगे उन्हें ज़ोर से बोला जाएगा और स्क्रीन को जेस्चर के ज़रिए एक्सप्लोर किया जा सकेगा."</string>
@@ -2008,7 +2008,7 @@
     <string name="app_category_image" msgid="7307840291864213007">"फ़ोटो और तस्वीरें"</string>
     <string name="app_category_social" msgid="2278269325488344054">"सामाजिक और संचार"</string>
     <string name="app_category_news" msgid="1172762719574964544">"समाचार और पत्रिकाएं"</string>
-    <string name="app_category_maps" msgid="6395725487922533156">"Maps और नेविगेशन ऐप्लिकेशन"</string>
+    <string name="app_category_maps" msgid="6395725487922533156">"मैप और नेविगेशन ऐप्लिकेशन"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"उत्पादकता"</string>
     <string name="app_category_accessibility" msgid="6643521607848547683">"सुलभता"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"डिवाइस में जगह"</string>

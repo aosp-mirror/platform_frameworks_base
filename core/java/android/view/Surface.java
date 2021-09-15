@@ -98,6 +98,7 @@ public class Surface implements Parcelable {
 
     private static native int nativeSetFrameRate(
             long nativeObject, float frameRate, int compatibility, int changeFrameRateStrategy);
+    private static native void nativeDestroy(long nativeObject);
 
     public static final @android.annotation.NonNull Parcelable.Creator<Surface> CREATOR =
             new Parcelable.Creator<Surface>() {
@@ -339,6 +340,9 @@ public class Surface implements Parcelable {
      */
     @UnsupportedAppUsage
     public void destroy() {
+        if (mNativeObject != 0) {
+            nativeDestroy(mNativeObject);
+        }
         release();
     }
 

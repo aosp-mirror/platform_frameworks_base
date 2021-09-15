@@ -100,7 +100,7 @@
     <string name="peerTtyModeHco" msgid="5626377160840915617">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് HCO"</string>
     <string name="peerTtyModeVco" msgid="572208600818270944">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് VCO"</string>
     <string name="peerTtyModeOff" msgid="2420380956369226583">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് \'ഓഫ്\'"</string>
-    <string name="serviceClassVoice" msgid="2065556932043454987">"Voice"</string>
+    <string name="serviceClassVoice" msgid="2065556932043454987">"ശബ്‌ദം"</string>
     <string name="serviceClassData" msgid="4148080018967300248">"ഡാറ്റ"</string>
     <string name="serviceClassFAX" msgid="2561653371698904118">"ഫാക്സ്"</string>
     <string name="serviceClassSMS" msgid="1547664561704509004">"SMS"</string>
@@ -306,7 +306,7 @@
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"നിങ്ങളുടെ കോൺടാക്റ്റുകൾ ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"ലൊക്കേഷൻ"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"ഈ ഉപകരണത്തിന്റെ ലൊക്കേഷൻ ആക്സസ് ചെയ്യാൻ"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"കലണ്ടർ"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"നിങ്ങളുടെ കലണ്ടർ ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS സന്ദേശങ്ങൾ അയയ്‌ക്കുകയും കാണുകയും ചെയ്യുക"</string>
@@ -815,7 +815,7 @@
     <string name="phoneTypeTtyTdd" msgid="532038552105328779">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="7522314392003565121">"ഓഫീസ് മൊബൈല്‍"</string>
     <string name="phoneTypeWorkPager" msgid="3748332310638505234">"ഔദ്യോഗിക പേജര്‍‌"</string>
-    <string name="phoneTypeAssistant" msgid="757550783842231039">"അസിസ്റ്റന്‍റ്"</string>
+    <string name="phoneTypeAssistant" msgid="757550783842231039">"അസിസ്റ്റന്റ്"</string>
     <string name="phoneTypeMms" msgid="1799747455131365989">"MMS"</string>
     <string name="eventTypeCustom" msgid="3257367158986466481">"ഇഷ്‌ടാനുസൃതം"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"ജന്മദിനം"</string>
@@ -1038,9 +1038,9 @@
     <string name="menu_space_shortcut_label" msgid="5949311515646872071">"space"</string>
     <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"delete"</string>
-    <string name="search_go" msgid="2141477624421347086">"Search"</string>
+    <string name="search_go" msgid="2141477624421347086">"തിരയുക"</string>
     <string name="search_hint" msgid="455364685740251925">"തിരയുക…"</string>
-    <string name="searchview_description_search" msgid="1045552007537359343">"Search"</string>
+    <string name="searchview_description_search" msgid="1045552007537359343">"തിരയുക"</string>
     <string name="searchview_description_query" msgid="7430242366971716338">"തിരയൽ അന്വേഷണം"</string>
     <string name="searchview_description_clear" msgid="1989371719192982900">"അന്വേഷണം മായ്‌ക്കുക"</string>
     <string name="searchview_description_submit" msgid="6771060386117334686">"ചോദ്യം സമർപ്പിക്കുക"</string>
@@ -1467,7 +1467,7 @@
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"സൂം നിയന്ത്രണം ലഭിക്കാൻ രണ്ടുതവണ ടാപ്പുചെയ്യുക"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"വിജറ്റ് ചേർക്കാനായില്ല."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"പോവുക"</string>
-    <string name="ime_action_search" msgid="4501435960587287668">"Search"</string>
+    <string name="ime_action_search" msgid="4501435960587287668">"തിരയുക"</string>
     <string name="ime_action_send" msgid="8456843745664334138">"അയയ്‌ക്കുക"</string>
     <string name="ime_action_next" msgid="4169702997635728543">"അടുത്തത്"</string>
     <string name="ime_action_done" msgid="6299921014822891569">"പൂർത്തിയായി"</string>
@@ -1972,7 +1972,7 @@
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"നിര്‍‌ദ്ദേശിച്ചത്"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"എല്ലാ ഭാഷകളും"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"എല്ലാ പ്രദേശങ്ങളും"</string>
-    <string name="locale_search_menu" msgid="6258090710176422934">"Search"</string>
+    <string name="locale_search_menu" msgid="6258090710176422934">"തിരയുക"</string>
     <string name="app_suspended_title" msgid="888873445010322650">"ആപ്പ് ലഭ്യമല്ല"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ഇപ്പോൾ ലഭ്യമല്ല. <xliff:g id="APP_NAME_1">%2$s</xliff:g> ആണ് ഇത് മാനേജ് ചെയ്യുന്നത്."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"കൂടുതലറിയുക"</string>
@@ -2008,7 +2008,7 @@
     <string name="app_category_image" msgid="7307840291864213007">"ഫോട്ടോകളും ചിത്രങ്ങളും"</string>
     <string name="app_category_social" msgid="2278269325488344054">"സാമൂഹിക ആപ്സുകളും ആശയവിനിമയവും"</string>
     <string name="app_category_news" msgid="1172762719574964544">"വാർത്തകളും മാസികകളും"</string>
-    <string name="app_category_maps" msgid="6395725487922533156">"മാപ്പുകളും നാവിഗേഷനും"</string>
+    <string name="app_category_maps" msgid="6395725487922533156">"Maps &amp; Navigation"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"ഉല്‍‌പ്പാദനക്ഷമത"</string>
     <string name="app_category_accessibility" msgid="6643521607848547683">"ഉപയോഗസഹായി"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"ഉപകരണ സ്റ്റോറേജ്"</string>

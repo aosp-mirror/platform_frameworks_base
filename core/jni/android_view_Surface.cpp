@@ -449,6 +449,11 @@ static jint nativeSetFrameRate(JNIEnv* env, jclass clazz, jlong nativeObject, jf
                         int(changeFrameRateStrategy));
 }
 
+static void nativeDestroy(JNIEnv* env, jclass clazz, jlong nativeObject) {
+    sp<Surface> surface(reinterpret_cast<Surface*>(nativeObject));
+    surface->destroy();
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gSurfaceMethods[] = {
@@ -477,6 +482,7 @@ static const JNINativeMethod gSurfaceMethods[] = {
         {"nativeSetAutoRefreshEnabled", "(JZ)I", (void*)nativeSetAutoRefreshEnabled},
         {"nativeSetFrameRate", "(JFII)I", (void*)nativeSetFrameRate},
         {"nativeGetFromBlastBufferQueue", "(JJ)J", (void*)nativeGetFromBlastBufferQueue},
+        {"nativeDestroy", "(J)V", (void*)nativeDestroy},
 };
 
 int register_android_view_Surface(JNIEnv* env)
