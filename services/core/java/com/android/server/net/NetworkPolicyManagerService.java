@@ -3806,6 +3806,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 final SparseBooleanArray knownUids = new SparseBooleanArray();
                 collectKeys(mUidState, knownUids);
                 collectKeys(mUidRules, knownUids);
+                collectKeys(mUidBlockedState, knownUids);
 
                 fout.println("Status for all known UIDs:");
                 fout.increaseIndent();
@@ -3826,6 +3827,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     final int uidRules = mUidRules.get(uid, RULE_NONE);
                     fout.print(" rules=");
                     fout.print(uidRulesToString(uidRules));
+
+                    final UidBlockedState uidBlockedState = mUidBlockedState.get(uid);
+                    if (uidBlockedState == null) {
+                        fout.print(" blocked_state={null}");
+                    } else {
+                        fout.print(" blocked_state=");
+                        fout.print(uidBlockedState.toString());
+                    }
                     fout.println();
                 }
                 fout.decreaseIndent();
@@ -4535,6 +4544,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private void onUidDeletedUL(int uid) {
         // First cleanup in-memory state synchronously...
         mUidRules.delete(uid);
+        mUidBlockedState.delete(uid);
         mUidPolicy.delete(uid);
         mUidFirewallStandbyRules.delete(uid);
         mUidFirewallDozableRules.delete(uid);
@@ -5581,7 +5591,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
-    private static void collectKeys(SparseArray<UidState> source, SparseBooleanArray target) {
+    private static <T> void collectKeys(SparseArray<T> source, SparseBooleanArray target) {
         final int size = source.size();
         for (int i = 0; i < size; i++) {
             target.put(source.keyAt(i), true);
@@ -5983,6 +5993,128 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 effectiveBlockedReasons &= ~BLOCKED_METERED_REASON_DATA_SAVER;
             }
             return effectiveBlockedReasons;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder();
+            sb.append("{");
+            sb.append("blocked=").append(blockedReasonsToString(blockedReasons)).append(",");
+            sb.append("allowed=").append(allowedReasonsToString(allowedReasons)).append(",");
+            sb.append("effective=").append(blockedReasonsToString(effectiveBlockedReasons));
+            sb.append("}");
+            return sb.toString();
+        }
+
+        private static final int[] BLOCKED_REASONS = {
+                BLOCKED_REASON_BATTERY_SAVER,
+                BLOCKED_REASON_DOZE,
+                BLOCKED_REASON_APP_STANDBY,
+                BLOCKED_REASON_RESTRICTED_MODE,
+                BLOCKED_METERED_REASON_DATA_SAVER,
+                BLOCKED_METERED_REASON_USER_RESTRICTED,
+                BLOCKED_METERED_REASON_ADMIN_DISABLED,
+        };
+
+        private static final int[] ALLOWED_REASONS = {
+                ALLOWED_REASON_SYSTEM,
+                ALLOWED_REASON_FOREGROUND,
+                ALLOWED_REASON_POWER_SAVE_ALLOWLIST,
+                ALLOWED_REASON_POWER_SAVE_EXCEPT_IDLE_ALLOWLIST,
+                ALLOWED_REASON_RESTRICTED_MODE_PERMISSIONS,
+                ALLOWED_METERED_REASON_USER_EXEMPTED,
+                ALLOWED_METERED_REASON_SYSTEM,
+                ALLOWED_METERED_REASON_FOREGROUND,
+        };
+
+        private static String blockedReasonToString(int blockedReason) {
+            switch (blockedReason) {
+                case BLOCKED_REASON_NONE:
+                    return "NONE";
+                case BLOCKED_REASON_BATTERY_SAVER:
+                    return "BATTERY_SAVER";
+                case BLOCKED_REASON_DOZE:
+                    return "DOZE";
+                case BLOCKED_REASON_APP_STANDBY:
+                    return "APP_STANDBY";
+                case BLOCKED_REASON_RESTRICTED_MODE:
+                    return "RESTRICTED_MODE";
+                case BLOCKED_METERED_REASON_DATA_SAVER:
+                    return "DATA_SAVER";
+                case BLOCKED_METERED_REASON_USER_RESTRICTED:
+                    return "METERED_USER_RESTRICTED";
+                case BLOCKED_METERED_REASON_ADMIN_DISABLED:
+                    return "METERED_ADMIN_DISABLED";
+                default:
+                    Slog.wtfStack(TAG, "Unknown blockedReason: " + blockedReason);
+                    return String.valueOf(blockedReason);
+            }
+        }
+
+        private static String allowedReasonToString(int allowedReason) {
+            switch (allowedReason) {
+                case ALLOWED_REASON_NONE:
+                    return "NONE";
+                case ALLOWED_REASON_SYSTEM:
+                    return "SYSTEM";
+                case ALLOWED_REASON_FOREGROUND:
+                    return "FOREGROUND";
+                case ALLOWED_REASON_POWER_SAVE_ALLOWLIST:
+                    return "POWER_SAVE_ALLOWLIST";
+                case ALLOWED_REASON_POWER_SAVE_EXCEPT_IDLE_ALLOWLIST:
+                    return "POWER_SAVE_EXCEPT_IDLE_ALLOWLIST";
+                case ALLOWED_REASON_RESTRICTED_MODE_PERMISSIONS:
+                    return "RESTRICTED_MODE_PERMISSIONS";
+                case ALLOWED_METERED_REASON_USER_EXEMPTED:
+                    return "METERED_USER_EXEMPTED";
+                case ALLOWED_METERED_REASON_SYSTEM:
+                    return "METERED_SYSTEM";
+                case ALLOWED_METERED_REASON_FOREGROUND:
+                    return "METERED_FOREGROUND";
+                default:
+                    Slog.wtfStack(TAG, "Unknown allowedReason: " + allowedReason);
+                    return String.valueOf(allowedReason);
+            }
+        }
+
+        private static String blockedReasonsToString(int blockedReasons) {
+            if (blockedReasons == BLOCKED_REASON_NONE) {
+                return blockedReasonToString(BLOCKED_REASON_NONE);
+            }
+            final StringBuilder sb = new StringBuilder();
+            for (int reason : BLOCKED_REASONS) {
+                if ((blockedReasons & reason) != 0) {
+                    sb.append(sb.length() == 0 ? "" : "|");
+                    sb.append(blockedReasonToString(reason));
+                    blockedReasons &= ~reason;
+                }
+            }
+            if (blockedReasons != 0) {
+                sb.append(sb.length() == 0 ? "" : "|");
+                sb.append(String.valueOf(blockedReasons));
+                Slog.wtfStack(TAG, "Unknown blockedReasons: " + blockedReasons);
+            }
+            return sb.toString();
+        }
+
+        private static String allowedReasonsToString(int allowedReasons) {
+            if (allowedReasons == ALLOWED_REASON_NONE) {
+                return allowedReasonToString(ALLOWED_REASON_NONE);
+            }
+            final StringBuilder sb = new StringBuilder();
+            for (int reason : ALLOWED_REASONS) {
+                if ((allowedReasons & reason) != 0) {
+                    sb.append(sb.length() == 0 ? "" : "|");
+                    sb.append(allowedReasonToString(reason));
+                    allowedReasons &= ~reason;
+                }
+            }
+            if (allowedReasons != 0) {
+                sb.append(sb.length() == 0 ? "" : "|");
+                sb.append(String.valueOf(allowedReasons));
+                Slog.wtfStack(TAG, "Unknown allowedReasons: " + allowedReasons);
+            }
+            return sb.toString();
         }
     }
 
