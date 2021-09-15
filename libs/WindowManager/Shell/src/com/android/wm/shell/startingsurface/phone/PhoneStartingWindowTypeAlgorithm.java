@@ -107,7 +107,7 @@ public class PhoneStartingWindowTypeAlgorithm implements StartingWindowTypeAlgor
      * rotation must be the same).
      */
     private boolean isSnapshotCompatible(StartingWindowInfo windowInfo) {
-        final TaskSnapshot snapshot = windowInfo.mTaskSnapshot;
+        final TaskSnapshot snapshot = windowInfo.taskSnapshot;
         if (snapshot == null) {
             if (DEBUG_SPLASH_SCREEN || DEBUG_TASK_SNAPSHOT) {
                 Slog.d(TAG, "isSnapshotCompatible no snapshot " + windowInfo.taskInfo.taskId);

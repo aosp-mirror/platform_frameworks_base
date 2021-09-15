@@ -398,6 +398,7 @@ public class BubbleExpandedView extends LinearLayout {
         updatePointerView();
     }
 
+    /** Updates the size and visuals of the pointer. **/
     private void updatePointerView() {
         LayoutParams lp = (LayoutParams) mPointerView.getLayoutParams();
         if (mCurrentPointer == mLeftPointer || mCurrentPointer == mRightPointer) {
@@ -524,9 +525,8 @@ public class BubbleExpandedView extends LinearLayout {
         if (mTaskView != null) {
             mTaskView.setAlpha(alpha);
         }
-        if (mManageButton != null && mManageButton.getVisibility() == View.VISIBLE) {
-            mManageButton.setAlpha(alpha);
-        }
+        mPointerView.setAlpha(alpha);
+        setAlpha(alpha);
     }
 
     /**
@@ -545,6 +545,7 @@ public class BubbleExpandedView extends LinearLayout {
         mIsContentVisible = visibility;
         if (mTaskView != null && !mIsAlphaAnimating) {
             mTaskView.setAlpha(visibility ? 1f : 0f);
+            mPointerView.setAlpha(visibility ? 1f : 0f);
         }
     }
 
@@ -689,7 +690,7 @@ public class BubbleExpandedView extends LinearLayout {
      *                       the bubble if showing vertically.
      * @param onLeft whether the stack was on the left side of the screen when expanded.
      */
-    public void setPointerPosition(float bubblePosition, boolean onLeft) {
+    public void setPointerPosition(float bubblePosition, boolean onLeft, boolean animate) {
         // Pointer gets drawn in the padding
         final boolean showVertically = mPositioner.showBubblesVertically();
         final float paddingLeft = (showVertically && onLeft)
@@ -710,6 +711,8 @@ public class BubbleExpandedView extends LinearLayout {
                 : pointerPosition;
         // Post because we need the width of the view
         post(() -> {
+            mCurrentPointer = showVertically ? onLeft ? mLeftPointer : mRightPointer : mTopPointer;
+            updatePointerView();
             float pointerY;
             float pointerX;
             if (showVertically) {
@@ -721,11 +724,13 @@ public class BubbleExpandedView extends LinearLayout {
                 pointerY = mPointerOverlap;
                 pointerX = bubbleCenter - (mPointerWidth / 2f);
             }
-            mPointerView.setTranslationY(pointerY);
-            mPointerView.setTranslationX(pointerX);
-            mCurrentPointer = showVertically ? onLeft ? mLeftPointer : mRightPointer : mTopPointer;
-            updatePointerView();
-            mPointerView.setVisibility(VISIBLE);
+            if (animate) {
+                mPointerView.animate().translationX(pointerX).translationY(pointerY).start();
+            } else {
+                mPointerView.setTranslationY(pointerY);
+                mPointerView.setTranslationX(pointerX);
+                mPointerView.setVisibility(VISIBLE);
+            }
         });
     }
 

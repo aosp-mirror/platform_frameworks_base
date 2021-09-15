@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.startingsurface;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.graphics.Color.WHITE;
 import static android.graphics.Color.alpha;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
@@ -64,7 +63,6 @@ import android.graphics.RectF;
 import android.hardware.HardwareBuffer;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.os.Trace;
 import android.util.MergedConfiguration;
 import android.util.Slog;
@@ -72,7 +70,6 @@ import android.view.IWindowSession;
 import android.view.InputChannel;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
@@ -120,7 +117,12 @@ public class TaskSnapshotWindow {
     private static final String TITLE_FORMAT = "SnapshotStartingWindow for taskId=%s";
 
     private static final long DELAY_REMOVAL_TIME_GENERAL = 100;
-    private static final long DELAY_REMOVAL_TIME_IME_VISIBLE = 350;
+    /**
+     * The max delay time in milliseconds for removing the task snapshot window with IME visible.
+     * Ideally the delay time will be shorter when receiving
+     * {@link StartingSurfaceDrawer#onImeDrawnOnTask(int)}.
+     */
+    private static final long MAX_DELAY_REMOVAL_TIME_IME_VISIBLE = 450;
 
     //tmp vars for unused relayout params
     private static final Point TMP_SURFACE_SIZE = new Point();
@@ -139,7 +141,6 @@ public class TaskSnapshotWindow {
     private final RectF mTmpDstFrame = new RectF();
     private final CharSequence mTitle;
     private boolean mHasDrawn;
-    private long mShownTime;
     private boolean mSizeMismatch;
     private final Paint mBackgroundPaint = new Paint();
     private final int mActivityType;
@@ -149,6 +150,8 @@ public class TaskSnapshotWindow {
     private final SurfaceControl.Transaction mTransaction;
     private final Matrix mSnapshotMatrix = new Matrix();
     private final float[] mTmpFloat9 = new float[9];
+    private Runnable mScheduledRunnable;
+    private final boolean mHasImeSurface;
 
     static TaskSnapshotWindow create(StartingWindowInfo info, IBinder appToken,
             TaskSnapshot snapshot, ShellExecutor splashScreenExecutor,
@@ -217,7 +220,7 @@ public class TaskSnapshotWindow {
             taskDescription.setBackgroundColor(WHITE);
         }
 
-        final long delayRemovalTime = snapshot.hasImeSurface() ? DELAY_REMOVAL_TIME_IME_VISIBLE
+        final long delayRemovalTime = snapshot.hasImeSurface() ? MAX_DELAY_REMOVAL_TIME_IME_VISIBLE
                 : DELAY_REMOVAL_TIME_GENERAL;
 
         final TaskSnapshotWindow snapshotSurface = new TaskSnapshotWindow(
@@ -227,13 +230,12 @@ public class TaskSnapshotWindow {
         final Window window = snapshotSurface.mWindow;
 
         final InsetsState tmpInsetsState = new InsetsState();
-        final InsetsVisibilities tmpRequestedVisibilities = new InsetsVisibilities();
         final InputChannel tmpInputChannel = new InputChannel();
 
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "TaskSnapshot#addToDisplay");
             final int res = session.addToDisplay(window, layoutParams, View.GONE, displayId,
-                    tmpRequestedVisibilities, tmpInputChannel, tmpInsetsState, tmpControls);
+                    info.requestedVisibilities, tmpInputChannel, tmpInsetsState, tmpControls);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             if (res < 0) {
                 Slog.w(TAG, "Failed to add snapshot starting window res=" + res);
@@ -283,10 +285,15 @@ public class TaskSnapshotWindow {
         mDelayRemovalTime = delayRemovalTime;
         mTransaction = new SurfaceControl.Transaction();
         mClearWindowHandler = clearWindowHandler;
+        mHasImeSurface = snapshot.hasImeSurface();
     }
 
     int getBackgroundColor() {
         return mBackgroundPaint.getColor();
+    }
+
+    boolean hasImeSurface() {
+	return mHasImeSurface;
     }
 
     /**
@@ -306,21 +313,26 @@ public class TaskSnapshotWindow {
         mSystemBarBackgroundPainter.drawNavigationBarBackground(c);
     }
 
-    void remove() {
-        final long now = SystemClock.uptimeMillis();
-        if ((now - mShownTime < mDelayRemovalTime)
-                // Show the latest content as soon as possible for unlocking to home.
-                && mActivityType != ACTIVITY_TYPE_HOME) {
-            final long delayTime = mShownTime + mDelayRemovalTime - now;
-            mSplashScreenExecutor.executeDelayed(() -> remove(), delayTime);
-            if (DEBUG) {
-                Slog.d(TAG, "Defer removing snapshot surface in " + delayTime);
-            }
-            return;
+    void scheduleRemove(Runnable onRemove) {
+        if (mScheduledRunnable != null) {
+            mSplashScreenExecutor.removeCallbacks(mScheduledRunnable);
+            mScheduledRunnable = null;
         }
+        mScheduledRunnable = () -> {
+            TaskSnapshotWindow.this.removeImmediately();
+            onRemove.run();
+        };
+        mSplashScreenExecutor.executeDelayed(mScheduledRunnable, mDelayRemovalTime);
+        if (DEBUG) {
+            Slog.d(TAG, "Defer removing snapshot surface in " + mDelayRemovalTime);
+        }
+    }
+
+    void removeImmediately() {
+        mSplashScreenExecutor.removeCallbacks(mScheduledRunnable);
         try {
             if (DEBUG) {
-                Slog.d(TAG, "Removing snapshot surface, mHasDrawn: " + mHasDrawn);
+                Slog.d(TAG, "Removing taskSnapshot surface, mHasDrawn: " + mHasDrawn);
             }
             mSession.remove(mWindow);
         } catch (RemoteException e) {
@@ -358,7 +370,6 @@ public class TaskSnapshotWindow {
         } else {
             drawSizeMatchSnapshot();
         }
-        mShownTime = SystemClock.uptimeMillis();
         mHasDrawn = true;
         reportDrawn();
 

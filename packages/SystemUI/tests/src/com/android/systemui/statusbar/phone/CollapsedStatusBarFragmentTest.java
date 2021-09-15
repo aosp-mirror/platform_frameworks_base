@@ -39,8 +39,11 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.R;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.log.LogBuffer;
+import com.android.systemui.log.LogcatEchoTracker;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.DisableFlagsLogger;
 import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
@@ -263,6 +266,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 mNetworkController,
                 mStatusBarStateController,
                 mCommandQueue,
+                new CollapsedStatusBarFragmentLogger(
+                        new LogBuffer("TEST", 1, 1, mock(LogcatEchoTracker.class)),
+                        new DisableFlagsLogger()
+                        ),
                 mOperatorNameViewControllerFactory);
     }
 

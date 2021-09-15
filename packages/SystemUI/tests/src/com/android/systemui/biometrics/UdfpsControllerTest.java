@@ -32,6 +32,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.res.TypedArray;
+import android.hardware.biometrics.BiometricOverlayConstants;
 import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.SensorProperties;
 import android.hardware.display.DisplayManager;
@@ -256,7 +257,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Test
     public void dozeTimeTick() throws RemoteException {
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
-                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mFgExecutor.runAllReady();
         mUdfpsController.dozeTimeTick();
         verify(mUdfpsView).dozeTimeTick();
@@ -271,7 +272,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         // GIVEN that the overlay is showing
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
-                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mFgExecutor.runAllReady();
 
         // WHEN ACTION_DOWN is received
@@ -294,7 +295,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         // GIVEN that the overlay is showing
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
-                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mFgExecutor.runAllReady();
 
         // WHEN ACTION_DOWN is received
@@ -317,7 +318,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         // GIVEN that the overlay is showing
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
-                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mFgExecutor.runAllReady();
 
         // WHEN ACTION_DOWN is received
@@ -340,7 +341,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         // GIVEN that the overlay is showing
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
-                IUdfpsOverlayController.REASON_ENROLL_ENROLLING, mUdfpsOverlayControllerCallback);
+                BiometricOverlayConstants.REASON_ENROLL_ENROLLING, mUdfpsOverlayControllerCallback);
         mFgExecutor.runAllReady();
 
         // WHEN ACTION_DOWN is received
@@ -362,7 +363,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         // GIVEN that the overlay is showing
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
-                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mFgExecutor.runAllReady();
 
         // WHEN ACTION_MOVE is received
@@ -384,7 +385,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         // GIVEN that the overlay is showing
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
-                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mFgExecutor.runAllReady();
 
         // WHEN multiple touches are received
@@ -404,7 +405,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Test
     public void showUdfpsOverlay_addsViewToWindow() throws RemoteException {
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
-                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mFgExecutor.runAllReady();
         verify(mWindowManager).addView(eq(mUdfpsView), any());
     }
@@ -412,7 +413,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Test
     public void hideUdfpsOverlay_removesViewFromWindow() throws RemoteException {
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
-                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mOverlayController.hideUdfpsOverlay(TEST_UDFPS_SENSOR_ID);
         mFgExecutor.runAllReady();
         verify(mWindowManager).removeView(eq(mUdfpsView));
@@ -422,7 +423,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
     public void hideUdfpsOverlay_resetsAltAuthBouncerWhenShowing() throws RemoteException {
         // GIVEN overlay was showing and the udfps bouncer is showing
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
-                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         when(mStatusBarKeyguardViewManager.isShowingAlternateAuth()).thenReturn(true);
 
         // WHEN the overlay is hidden
@@ -436,7 +437,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Test
     public void testSubscribesToOrientationChangesWhenShowingOverlay() throws Exception {
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
-                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mFgExecutor.runAllReady();
 
         verify(mDisplayManager).registerDisplayListener(any(), eq(mHandler));
@@ -455,7 +456,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         // GIVEN that the overlay is showing
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
-                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mFgExecutor.runAllReady();
         // WHEN ACTION_DOWN is received
         verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
@@ -479,7 +480,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
     public void aodInterrupt() throws RemoteException {
         // GIVEN that the overlay is showing and screen is on
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
-                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mScreenObserver.onScreenTurnedOn();
         mFgExecutor.runAllReady();
         // WHEN fingerprint is requested because of AOD interrupt
@@ -496,7 +497,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
     public void cancelAodInterrupt() throws RemoteException {
         // GIVEN AOD interrupt
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
-                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mScreenObserver.onScreenTurnedOn();
         mFgExecutor.runAllReady();
         mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
@@ -511,7 +512,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
     public void aodInterruptTimeout() throws RemoteException {
         // GIVEN AOD interrupt
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
-                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mScreenObserver.onScreenTurnedOn();
         mFgExecutor.runAllReady();
         mUdfpsController.onAodInterrupt(0, 0, 0f, 0f);
@@ -527,7 +528,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
     public void aodInterruptScreenOff() throws RemoteException {
         // GIVEN screen off
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
-                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mScreenObserver.onScreenTurnedOff();
         mFgExecutor.runAllReady();
 
@@ -546,7 +547,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         // GIVEN that the overlay is showing
         mOverlayController.showUdfpsOverlay(TEST_UDFPS_SENSOR_ID,
-                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD, mUdfpsOverlayControllerCallback);
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
         mFgExecutor.runAllReady();
 
         // WHEN ACTION_DOWN is received

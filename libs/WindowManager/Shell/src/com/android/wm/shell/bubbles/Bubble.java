@@ -422,14 +422,6 @@ public class Bubble implements BubbleViewProvider {
         }
     }
 
-    @Override
-    public void setExpandedContentAlpha(float alpha) {
-        if (mExpandedView != null) {
-            mExpandedView.setAlpha(alpha);
-            mExpandedView.setTaskViewAlpha(alpha);
-        }
-    }
-
     /**
      * Set visibility of bubble in the expanded state.
      *
