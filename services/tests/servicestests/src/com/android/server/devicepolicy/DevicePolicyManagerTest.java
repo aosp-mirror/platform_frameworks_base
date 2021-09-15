@@ -2960,9 +2960,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertThat(intent.getAction()).isEqualTo(Settings.ACTION_SHOW_ADMIN_SUPPORT_DETAILS);
         assertThat(intent.getIntExtra(Intent.EXTRA_USER_ID, -1))
                 .isEqualTo(UserHandle.getUserId(DpmMockContext.CALLER_SYSTEM_USER_UID));
-        assertThat(
-                (ComponentName) intent.getParcelableExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN))
-                        .isEqualTo(admin1);
         assertThat(intent.getStringExtra(DevicePolicyManager.EXTRA_RESTRICTION))
                 .isEqualTo(UserManager.DISALLOW_ADJUST_VOLUME);
 
@@ -2999,7 +2996,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertThat(intent.getStringExtra(DevicePolicyManager.EXTRA_RESTRICTION))
                 .isEqualTo(DevicePolicyManager.POLICY_DISABLE_CAMERA);
         assertThat(intent.getIntExtra(Intent.EXTRA_USER_ID, -1))
-                .isEqualTo(UserHandle.getUserId(DpmMockContext.CALLER_SYSTEM_USER_UID));
+                .isEqualTo(UserHandle.getUserId(DpmMockContext.CALLER_UID));
         // ScreenCapture should not be disabled by device owner
         intent = dpm.createAdminSupportIntent(DevicePolicyManager.POLICY_DISABLE_SCREEN_CAPTURE);
         assertThat(intent).isNull();
