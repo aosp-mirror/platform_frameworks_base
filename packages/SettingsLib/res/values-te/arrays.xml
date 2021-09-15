@@ -76,7 +76,7 @@
     <item msgid="1963366694959681026">"avrcp16"</item>
   </string-array>
   <string-array name="bluetooth_map_versions">
-    <item msgid="8786402640610987099">"MAP 1.2 (డిఫాల్ట్)"</item>
+    <item msgid="8786402640610987099">"MAP 1.2 (ఆటోమేటిక్)"</item>
     <item msgid="6817922176194686449">"MAP 1.3"</item>
     <item msgid="3423518690032737851">"MAP 1.4"</item>
   </string-array>

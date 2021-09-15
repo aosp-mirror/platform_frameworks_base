@@ -21,7 +21,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="mic_active" msgid="5766614241012047024">"Mikrofon Aktif"</string>
     <string name="app_accessed_mic" msgid="2754428675130470196">"%1$s mengakses mikrofon"</string>
-    <string name="notification_vpn_connected" msgid="3891023882833274730">"VPN tersambung"</string>
+    <string name="notification_vpn_connected" msgid="3891023882833274730">"VPN terhubung"</string>
     <string name="notification_vpn_disconnected" msgid="7150747626448044843">"VPN terputus"</string>
     <string name="notification_disclosure_vpn_text" msgid="3873532735584866236">"Melalui <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="tv_notification_panel_title" msgid="5311050946506276154">"Notifikasi"</string>

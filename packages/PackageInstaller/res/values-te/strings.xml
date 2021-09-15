@@ -52,7 +52,7 @@
     <string name="generic_error_dlg_text" msgid="5287861443265795232">"యాప్‌ను అన్ఇన్‌స్టాల్ చేయడం సాధ్యపడలేదు."</string>
     <string name="uninstall_application_title" msgid="4045420072401428123">"యాప్‌ను అన్‌ఇన్‌స్టాల్ చేయి"</string>
     <string name="uninstall_update_title" msgid="824411791011583031">"అప్‌డేట్ అన్‌ఇన్‌స్టాల్ చేయి"</string>
-    <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> అనేది క్రింది యాప్‌లో ఒక భాగం:"</string>
+    <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> అనేది కింది యాప్‌లో ఒక భాగం:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"మీరు ఈ యాప్‌ను అన్‌ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"మీరు ఈ యాప్‌ను "<b>"అందరు"</b>" వినియోగదారులకు అన్‌ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా? అప్లికేషన్, దాని డేటా పరికరంలోని "<b>"అందరు"</b>" వినియోగదారుల నుండి తీసివేయబడుతుంది."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"మీరు వినియోగదారు <xliff:g id="USERNAME">%1$s</xliff:g> కోసం ఈ యాప్‌ను అన్‌ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా?"</string>

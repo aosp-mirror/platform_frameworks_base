@@ -196,9 +196,8 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     }
 
     private static boolean isHotwordDetectionServiceRequired(PackageManager pm) {
-        // The HotwordDetectionService APIs aren't ready yet for Auto or TV.
-        return !(pm.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)
-                || pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK));
+        // Usage of the HotwordDetectionService won't be enforced until a later release.
+        return false;
     }
 
     @Override

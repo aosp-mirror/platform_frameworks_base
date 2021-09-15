@@ -1038,9 +1038,9 @@
     <string name="menu_space_shortcut_label" msgid="5949311515646872071">"ସ୍ପେସ୍‍"</string>
     <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"ଏଣ୍ଟର୍"</string>
     <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"ଡିଲିଟ୍‌ କରନ୍ତୁ"</string>
-    <string name="search_go" msgid="2141477624421347086">"Search"</string>
-    <string name="search_hint" msgid="455364685740251925">"ସର୍ଚ୍ଚ…"</string>
-    <string name="searchview_description_search" msgid="1045552007537359343">"Search"</string>
+    <string name="search_go" msgid="2141477624421347086">"ସନ୍ଧାନ କରନ୍ତୁ"</string>
+    <string name="search_hint" msgid="455364685740251925">"ସନ୍ଧାନ…"</string>
+    <string name="searchview_description_search" msgid="1045552007537359343">"ସନ୍ଧାନ କରନ୍ତୁ"</string>
     <string name="searchview_description_query" msgid="7430242366971716338">"କ୍ୱେରୀ ସର୍ଚ୍ଚ କରନ୍ତୁ"</string>
     <string name="searchview_description_clear" msgid="1989371719192982900">"କ୍ୱେରୀ ଖାଲି କରନ୍ତୁ"</string>
     <string name="searchview_description_submit" msgid="6771060386117334686">"କ୍ୱେରୀ ଦାଖଲ କରନ୍ତୁ"</string>
@@ -1467,7 +1467,7 @@
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"ଜୁମ୍ ନିୟନ୍ତ୍ରଣ ପାଇଁ ଦୁଇଥର ଟାପ୍‌ କରନ୍ତୁ"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"ୱିଜେଟ୍‍ ଯୋଡ଼ିପାରିବ ନାହିଁ।"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"ଯାଆନ୍ତୁ"</string>
-    <string name="ime_action_search" msgid="4501435960587287668">"Search"</string>
+    <string name="ime_action_search" msgid="4501435960587287668">"ସନ୍ଧାନ କରନ୍ତୁ"</string>
     <string name="ime_action_send" msgid="8456843745664334138">"ପଠାନ୍ତୁ"</string>
     <string name="ime_action_next" msgid="4169702997635728543">"ପରବର୍ତ୍ତୀ"</string>
     <string name="ime_action_done" msgid="6299921014822891569">"ହୋଇଗଲା"</string>
@@ -1972,7 +1972,7 @@
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"ପ୍ରସ୍ତାବିତ"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"ସମସ୍ତ ଭାଷା"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"ସମସ୍ତ ଅଞ୍ଚଳ"</string>
-    <string name="locale_search_menu" msgid="6258090710176422934">"Search"</string>
+    <string name="locale_search_menu" msgid="6258090710176422934">"ସନ୍ଧାନ କରନ୍ତୁ"</string>
     <string name="app_suspended_title" msgid="888873445010322650">"ଆପ୍‌ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"ବର୍ତ୍ତମାନ <xliff:g id="APP_NAME_0">%1$s</xliff:g> ଉପଲବ୍ଧ ନାହିଁ। ଏହା <xliff:g id="APP_NAME_1">%2$s</xliff:g> ଦ୍ଵାରା ପରିଚାଳିତ ହେଉଛି।"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"ଅଧିକ ଜାଣନ୍ତୁ"</string>

@@ -333,7 +333,7 @@
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Czujniki na ciele"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"dostęp do danych czujnika podstawowych funkcji życiowych"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Pobieranie zawartości okna"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Sprawdzanie zawartości okna, z którego korzystasz."</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Sprawdzanie zawartości okna, z którego korzystasz."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Włączenie czytania dotykiem"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Klikane elementy będą wymawiane na głos, a ekran można przeglądać, używając gestów."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Obserwowanie wpisywanego tekstu"</string>
