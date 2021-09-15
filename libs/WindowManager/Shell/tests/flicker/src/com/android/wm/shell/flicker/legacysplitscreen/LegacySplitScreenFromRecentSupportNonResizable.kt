@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
-import android.content.ComponentName
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
@@ -27,7 +26,7 @@ import com.android.server.wm.flicker.annotation.Group2
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+import com.android.server.wm.traces.common.FlickerComponentName
 import com.android.wm.shell.flicker.DOCKED_STACK_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.dockedStackDividerIsVisibleAtEnd
 import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.resetMultiWindowConfig
@@ -70,11 +69,11 @@ class LegacySplitScreenFromRecentSupportNonResizable(
             }
         }
 
-    override val ignoredWindows: List<ComponentName>
+    override val ignoredWindows: List<FlickerComponentName>
         get() = listOf(DOCKED_STACK_DIVIDER_COMPONENT, LAUNCHER_COMPONENT, LETTERBOX_COMPONENT,
-                TOAST_COMPONENT, splitScreenApp.component, nonResizeableApp.component,
-                WindowManagerStateHelper.SPLASH_SCREEN_COMPONENT,
-                WindowManagerStateHelper.SNAPSHOT_COMPONENT)
+            TOAST_COMPONENT, splitScreenApp.component, nonResizeableApp.component,
+            FlickerComponentName.SPLASH_SCREEN,
+            FlickerComponentName.SNAPSHOT)
 
     @Before
     override fun setup() {

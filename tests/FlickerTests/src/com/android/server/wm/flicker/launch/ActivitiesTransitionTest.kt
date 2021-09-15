@@ -31,6 +31,7 @@ import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.TwoActivitiesAppHelper
 import com.android.server.wm.flicker.testapp.ActivityOptions
+import com.android.server.wm.traces.parser.toFlickerComponent
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -78,12 +79,16 @@ class ActivitiesTransitionTest(val testSpec: FlickerTestParameter) {
     @Presubmit
     @Test
     fun finishSubActivity() {
+        val buttonActivityComponent = ActivityOptions
+            .BUTTON_ACTIVITY_COMPONENT_NAME.toFlickerComponent()
+        val imeAutoFocusActivityComponent = ActivityOptions
+            .SIMPLE_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME.toFlickerComponent()
         testSpec.assertWm {
-            this.isAppWindowOnTop(ActivityOptions.BUTTON_ACTIVITY_COMPONENT_NAME)
-                    .then()
-                    .isAppWindowOnTop(ActivityOptions.SIMPLE_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME)
-                    .then()
-                    .isAppWindowOnTop(ActivityOptions.BUTTON_ACTIVITY_COMPONENT_NAME)
+            this.isAppWindowOnTop(buttonActivityComponent)
+                .then()
+                .isAppWindowOnTop(imeAutoFocusActivityComponent)
+                .then()
+                .isAppWindowOnTop(buttonActivityComponent)
         }
     }
 

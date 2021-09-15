@@ -16,7 +16,10 @@
 
 package com.android.systemui.statusbar.phone
 
+import android.view.LayoutInflater
+import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
+import androidx.test.platform.app.InstrumentationRegistry
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.CommandQueue
 import com.google.common.truth.Truth.assertThat
@@ -24,7 +27,10 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import com.android.systemui.R
+import com.android.systemui.util.mockito.any
 
 @SmallTest
 class PhoneStatusBarViewControllerTest : SysuiTestCase() {
@@ -32,14 +38,22 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var commandQueue: CommandQueue
 
+    @Mock
+    private lateinit var moveFromCenterAnimation: StatusBarMoveFromCenterAnimationController
+
     private lateinit var view: PhoneStatusBarView
     private lateinit var controller: PhoneStatusBarViewController
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        view = PhoneStatusBarView(mContext, null)
-        controller = PhoneStatusBarViewController(view, commandQueue)
+        // create the view on main thread as it requires main looper
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            val parent = FrameLayout(mContext) // add parent to keep layout params
+            view = LayoutInflater.from(mContext)
+                .inflate(R.layout.status_bar, parent, false) as PhoneStatusBarView
+        }
+        controller = PhoneStatusBarViewController(view, commandQueue, null)
     }
 
     @Test
@@ -55,5 +69,12 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
         view.panelEnabled()
 
         assertThat(providerUsed).isTrue()
+    }
+
+    @Test
+    fun constructor_moveFromCenterAnimationIsNotNull_moveFromCenterAnimationInitialized() {
+        controller = PhoneStatusBarViewController(view, commandQueue, moveFromCenterAnimation)
+
+        verify(moveFromCenterAnimation).init(any(), any())
     }
 }

@@ -38,7 +38,7 @@ import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+import com.android.server.wm.traces.common.FlickerComponentName
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -122,7 +122,7 @@ class CloseImeAutoOpenWindowToHomeTest(private val testSpec: FlickerTestParamete
     @Test
     fun imeLayerVisibleStart() {
         testSpec.assertLayersStart {
-            this.isVisible(WindowManagerStateHelper.IME_COMPONENT)
+            this.isVisible(FlickerComponentName.IME)
         }
     }
 
@@ -130,7 +130,7 @@ class CloseImeAutoOpenWindowToHomeTest(private val testSpec: FlickerTestParamete
     @Test
     fun imeLayerInvisibleEnd() {
         testSpec.assertLayersEnd {
-            this.isInvisible(WindowManagerStateHelper.IME_COMPONENT)
+            this.isInvisible(FlickerComponentName.IME)
         }
     }
 
@@ -173,8 +173,8 @@ class CloseImeAutoOpenWindowToHomeTest(private val testSpec: FlickerTestParamete
     fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         testSpec.assertLayers {
             this.visibleLayersShownMoreThanOneConsecutiveEntry(listOf(
-                    WindowManagerStateHelper.IME_COMPONENT,
-                    WindowManagerStateHelper.SPLASH_SCREEN_COMPONENT))
+                FlickerComponentName.IME,
+                FlickerComponentName.SPLASH_SCREEN))
         }
     }
 

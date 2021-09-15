@@ -17,7 +17,6 @@
 package com.android.server.wm.flicker.rotation
 
 import android.app.Instrumentation
-import android.content.ComponentName
 import android.platform.test.annotations.Presubmit
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
@@ -31,7 +30,7 @@ import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.startRotation
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+import com.android.server.wm.traces.common.FlickerComponentName
 import org.junit.Test
 
 abstract class RotationTransition(protected val testSpec: FlickerTestParameter) {
@@ -86,9 +85,9 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
     open fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         testSpec.assertLayers {
             this.visibleLayersShownMoreThanOneConsecutiveEntry(
-                ignoreLayers = listOf(WindowManagerStateHelper.SPLASH_SCREEN_COMPONENT,
-                    WindowManagerStateHelper.SNAPSHOT_COMPONENT,
-                    ComponentName("", "SecondaryHomeHandle")
+                ignoreLayers = listOf(FlickerComponentName.SPLASH_SCREEN,
+                    FlickerComponentName.SNAPSHOT,
+                    FlickerComponentName("", "SecondaryHomeHandle")
                 )
             )
         }

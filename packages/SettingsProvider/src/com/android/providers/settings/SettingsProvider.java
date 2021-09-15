@@ -918,9 +918,10 @@ public class SettingsProvider extends ContentProvider {
         }
     }
 
+    @SuppressWarnings("GuardedBy")
     private void dumpSettingsLocked(SettingsState settingsState, PrintWriter pw) {
         List<String> names = settingsState.getSettingNamesLocked();
-
+        pw.println("version: " + settingsState.getVersionLocked());
         final int nameCount = names.size();
 
         for (int i = 0; i < nameCount; i++) {

@@ -53,6 +53,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.InstanceId;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
@@ -108,6 +109,8 @@ public class TileQueryHelperTest extends SysuiTestCase {
     private PackageManager mPackageManager;
     @Mock
     private UserTracker mUserTracker;
+    @Mock
+    private FeatureFlags mFeatureFlags;
     @Captor
     private ArgumentCaptor<List<TileQueryHelper.TileInfo>> mCaptor;
 
@@ -133,12 +136,12 @@ public class TileQueryHelperTest extends SysuiTestCase {
                     }
                 }
         ).when(mQSTileHost).createTile(anyString());
-
+        when(mFeatureFlags.isProviderModelSettingEnabled()).thenReturn(false);
         FakeSystemClock clock = new FakeSystemClock();
         mMainExecutor = new FakeExecutor(clock);
         mBgExecutor = new FakeExecutor(clock);
         mTileQueryHelper = new TileQueryHelper(
-                mContext, mUserTracker, mMainExecutor, mBgExecutor);
+                mContext, mUserTracker, mMainExecutor, mBgExecutor, mFeatureFlags);
         mTileQueryHelper.setListener(mListener);
     }
 

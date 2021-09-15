@@ -29,7 +29,7 @@ import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+import com.android.server.wm.traces.common.FlickerComponentName
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_LANDSCAPE
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_PORTRAIT
@@ -106,7 +106,7 @@ class EnterPipToOtherOrientationTest(
         }
 
     /**
-     * Checks that the [WindowManagerStateHelper.NAV_BAR_COMPONENT] has the correct position at
+     * Checks that the [FlickerComponentName.NAV_BAR] has the correct position at
      * the start and end of the transition
      */
     @FlakyTest
@@ -115,7 +115,7 @@ class EnterPipToOtherOrientationTest(
         testSpec.navBarLayerRotatesAndScales(Surface.ROTATION_90, Surface.ROTATION_0)
 
     /**
-     * Checks that the [WindowManagerStateHelper.STATUS_BAR_COMPONENT] has the correct position at
+     * Checks that the [FlickerComponentName.STATUS_BAR] has the correct position at
      * the start and end of the transition
      */
     @Presubmit

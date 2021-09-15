@@ -2224,6 +2224,7 @@
   <java-symbol type="bool" name="config_enableSecondaryLocationTimeZoneProvider" />
   <java-symbol type="string" name="config_secondaryLocationTimeZoneProviderPackageName" />
   <java-symbol type="bool" name="config_autoResetAirplaneMode" />
+  <java-symbol type="string" name="config_notificationAccessConfirmationActivity" />
 
   <java-symbol type="layout" name="resolver_list" />
   <java-symbol type="id" name="resolver_list" />

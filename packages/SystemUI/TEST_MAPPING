@@ -22,6 +22,9 @@
         },
         {
             "exclude-annotation": "android.platform.test.annotations.Postsubmit"
+        },
+        {
+            "exclude-annotation": "android.platform.test.scenario.annotation.LargeScreenOnly"
         }
       ]
     },
@@ -94,6 +97,9 @@
         },
         {
             "exclude-annotation": "android.platform.helpers.Staging"
+        },
+        {
+            "exclude-annotation": "android.platform.test.scenario.annotation.LargeScreenOnly"
         }
       ]
     }
@@ -110,6 +116,9 @@
         },
         {
             "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+            "exclude-annotation": "android.platform.test.scenario.annotation.LargeScreenOnly"
         }
       ]
     }
@@ -126,5 +135,24 @@
         }
       ]
     }
+  ],
+  "large-screen-postsubmit": [
+      {
+        "name": "PlatformScenarioTests",
+        "options" : [
+          {
+              "include-filter": "android.platform.test.scenario.sysui"
+          },
+          {
+              "include-annotation": "android.platform.test.scenario.annotation.LargeScreenOnly"
+          },
+          {
+              "exclude-annotation": "org.junit.Ignore"
+          },
+          {
+              "exclude-annotation": "androidx.test.filters.FlakyTest"
+          }
+        ]
+      }
   ]
 }

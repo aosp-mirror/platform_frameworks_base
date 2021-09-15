@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
-import android.content.ComponentName
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
@@ -26,7 +25,7 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.launchSplitScreen
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+import com.android.server.wm.traces.common.FlickerComponentName
 import com.android.wm.shell.flicker.dockedStackDividerIsVisibleAtEnd
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.FixMethodOrder
@@ -64,10 +63,10 @@ class EnterSplitScreenFromDetachedRecentTask(
             }
         }
 
-    override val ignoredWindows: List<ComponentName>
+    override val ignoredWindows: List<FlickerComponentName>
         get() = listOf(LAUNCHER_COMPONENT,
-                WindowManagerStateHelper.SPLASH_SCREEN_COMPONENT,
-                WindowManagerStateHelper.SNAPSHOT_COMPONENT,
+                FlickerComponentName.SPLASH_SCREEN,
+                FlickerComponentName.SNAPSHOT,
                 splitScreenApp.component)
 
     @Presubmit

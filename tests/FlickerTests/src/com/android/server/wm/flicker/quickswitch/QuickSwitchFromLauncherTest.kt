@@ -38,7 +38,7 @@ import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.SNAPSHOT_COMPONENT
+import com.android.server.wm.traces.common.FlickerComponentName
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -262,7 +262,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
         testSpec.assertWm {
             this.isAppWindowVisible(LAUNCHER_COMPONENT)
                     .then()
-                    .isAppWindowVisible(SNAPSHOT_COMPONENT)
+                    .isAppWindowVisible(FlickerComponentName.SNAPSHOT)
                     .then()
                     .isAppWindowVisible(testApp.component)
         }
@@ -278,7 +278,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
         testSpec.assertLayers {
             this.isVisible(LAUNCHER_COMPONENT)
                     .then()
-                    .isVisible(SNAPSHOT_COMPONENT)
+                    .isVisible(FlickerComponentName.SNAPSHOT)
                     .then()
                     .isVisible(testApp.component)
         }

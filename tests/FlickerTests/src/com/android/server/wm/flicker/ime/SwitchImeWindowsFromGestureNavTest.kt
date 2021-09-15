@@ -17,7 +17,6 @@
 package com.android.server.wm.flicker.ime
 
 import android.app.Instrumentation
-import android.content.ComponentName
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
@@ -36,7 +35,7 @@ import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+import com.android.server.wm.traces.common.FlickerComponentName
 
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -107,7 +106,7 @@ class SwitchImeWindowsFromGestureNavTest(private val testSpec: FlickerTestParame
 
     @Test
     fun imeAppWindowVisibility() {
-        val component = ComponentName(imeTestApp.`package`, "")
+        val component = FlickerComponentName(imeTestApp.`package`, "")
         testSpec.assertWm {
             this.isAppWindowOnTop(component)
                     .then()
@@ -118,40 +117,40 @@ class SwitchImeWindowsFromGestureNavTest(private val testSpec: FlickerTestParame
     @Test
     fun navBarLayerIsVisibleAroundSwitching() {
         testSpec.assertLayersStart {
-            isVisible(WindowManagerStateHelper.NAV_BAR_COMPONENT)
+            isVisible(FlickerComponentName.NAV_BAR)
         }
         testSpec.assertLayersEnd {
-            isVisible(WindowManagerStateHelper.NAV_BAR_COMPONENT)
+            isVisible(FlickerComponentName.NAV_BAR)
         }
     }
 
     @Test
     fun statusBarLayerIsVisibleAroundSwitching() {
         testSpec.assertLayersStart {
-            isVisible(WindowManagerStateHelper.STATUS_BAR_COMPONENT)
+            isVisible(FlickerComponentName.STATUS_BAR)
         }
         testSpec.assertLayersEnd {
-            isVisible(WindowManagerStateHelper.STATUS_BAR_COMPONENT)
+            isVisible(FlickerComponentName.STATUS_BAR)
         }
     }
 
     @Test
     fun imeLayerIsVisibleWhenSwitchingToImeApp() {
         testSpec.assertLayersStart {
-            isVisible(WindowManagerStateHelper.IME_COMPONENT)
+            isVisible(FlickerComponentName.IME)
         }
         testSpec.assertLayersTag(TAG_IME_VISIBLE) {
-            isVisible(WindowManagerStateHelper.IME_COMPONENT)
+            isVisible(FlickerComponentName.IME)
         }
         testSpec.assertLayersEnd {
-            isVisible(WindowManagerStateHelper.IME_COMPONENT)
+            isVisible(FlickerComponentName.IME)
         }
     }
 
     @Test
     fun imeLayerIsInvisibleWhenSwitchingToTestApp() {
         testSpec.assertLayersTag(TAG_IME_INVISIBLE) {
-            isInvisible(WindowManagerStateHelper.IME_COMPONENT)
+            isInvisible(FlickerComponentName.IME)
         }
     }
 

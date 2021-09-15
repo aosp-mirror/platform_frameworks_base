@@ -82,7 +82,6 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     private ArrayList<MenuItem> mRightMenuItems;
     private final Map<View, MenuItem> mMenuItemsByView = new ArrayMap<>();
     private OnMenuEventListener mMenuListener;
-    private boolean mDismissRtl;
 
     private ValueAnimator mFadeAnimator;
     private boolean mAnimating;
@@ -785,14 +784,6 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     @Override
     public boolean canBeDismissed() {
         return getParent().canViewBeDismissed();
-    }
-
-    @Override
-    public void setDismissRtl(boolean dismissRtl) {
-        mDismissRtl = dismissRtl;
-        if (mMenuContainer != null) {
-            createMenuViews(true);
-        }
     }
 
     public static class NotificationMenuItem implements MenuItem {

@@ -40,4 +40,9 @@ interface ISystemConfig {
      * @see SystemConfigManager#getSystemPermissionUids
      */
     int[] getSystemPermissionUids(String permissionName);
+
+    /**
+     * @see SystemConfigManager#getEnabledComponentOverrides
+     */
+    List<String> getEnabledComponentOverrides(String packageName);
 }

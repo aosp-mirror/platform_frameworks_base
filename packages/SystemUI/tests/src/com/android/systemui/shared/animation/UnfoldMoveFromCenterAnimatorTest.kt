@@ -157,6 +157,21 @@ class UnfoldMoveFromCenterAnimatorTest : SysuiTestCase() {
         assertThat(view.translationY).isWithin(0.01f).of(3.75f)
     }
 
+    @Test
+    fun testUpdateViewPositions_viewOnTheLeftAndMovedToTheRight_viewTranslatedToTheLeft() {
+        givenScreen(width = 100, height = 100, rotation = ROTATION_0)
+        val view = createView(x = 20)
+        animator.registerViewForAnimation(view)
+        animator.onTransitionStarted()
+        animator.onTransitionProgress(0.5f)
+        view.updateMock(x = 80) // view moved from the left side to the right
+
+        animator.updateViewPositions()
+
+        // Negative translationX -> translated to the left
+        assertThat(view.translationX).isWithin(0.1f).of(-5.25f)
+    }
+
     private fun createView(
         x: Int = 0,
         y: Int = 0,
@@ -176,7 +191,30 @@ class UnfoldMoveFromCenterAnimatorTest : SysuiTestCase() {
         whenever(view.width).thenReturn(width)
         whenever(view.height).thenReturn(height)
 
-        return view.apply {
+        view.updateMock(x, y, width, height, translationX, translationY)
+
+        return view
+    }
+
+    private fun View.updateMock(
+        x: Int = 0,
+        y: Int = 0,
+        width: Int = 10,
+        height: Int = 10,
+        translationX: Float = 0f,
+        translationY: Float = 0f
+    ) {
+        doAnswer {
+            val location = (it.arguments[0] as IntArray)
+            location[0] = x
+            location[1] = y
+            Unit
+        }.`when`(this).getLocationOnScreen(any())
+
+        whenever(this.width).thenReturn(width)
+        whenever(this.height).thenReturn(height)
+
+        this.apply {
             setTranslationX(translationX)
             setTranslationY(translationY)
         }

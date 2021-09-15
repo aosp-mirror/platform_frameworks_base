@@ -16,7 +16,7 @@
 
 package com.android.systemui.shared.communal;
 
-import android.view.SurfaceControlViewHost;
+import android.view.SurfaceControlViewHost.SurfacePackage;
 
 /**
 * An interface for receiving the result of a surface request. ICommunalSurfaceCallback is
@@ -26,5 +26,5 @@ interface ICommunalSurfaceCallback {
  /**
   * Invoked when the CommunalSurface has generated the SurfacePackage to be displayed.
   */
- void onSurface(in SurfaceControlViewHost.SurfacePackage surfacePackage) = 1;
+ void onSurface(in SurfacePackage surfacePackage) = 1;
 }
