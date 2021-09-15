@@ -1131,8 +1131,12 @@ public abstract class WebSettings {
      *             become a no-op on all Android versions once support is
      *             removed in Chromium. Consider using Service Workers instead.
      *             See https://web.dev/appcache-removal/ for more information.
+     * @removed The Application Cache API is no longer supported and this method
+     *          is a no-op on WebView 95 and later. Consider using Service Workers
+     *          instead. See https://web.dev/appcache-removal/ for more information.
      */
-    public abstract void setAppCacheEnabled(boolean flag);
+    @Deprecated
+    public void setAppCacheEnabled(boolean flag) {}
 
     /**
      * Sets the path to the Application Caches files. In order for the
@@ -1147,8 +1151,12 @@ public abstract class WebSettings {
      *             become a no-op on all Android versions once support is
      *             removed in Chromium. Consider using Service Workers instead.
      *             See https://web.dev/appcache-removal/ for more information.
+     * @removed The Application Cache API is no longer supported and this method
+     *          is a no-op on WebView 95 and later. Consider using Service Workers
+     *          instead. See https://web.dev/appcache-removal/ for more information.
      */
-    public abstract void setAppCachePath(String appCachePath);
+    @Deprecated
+    public void setAppCachePath(String appCachePath) {}
 
     /**
      * Sets the maximum size for the Application Cache content. The passed size
@@ -1160,9 +1168,10 @@ public abstract class WebSettings {
      *
      * @param appCacheMaxSize the maximum size in bytes
      * @deprecated Quota is managed automatically; this method is a no-op.
+     * @removed Quota is managed automatically; this method is a no-op.
      */
     @Deprecated
-    public abstract void setAppCacheMaxSize(long appCacheMaxSize);
+    public void setAppCacheMaxSize(long appCacheMaxSize) {}
 
     /**
      * Sets whether the database storage API is enabled. The default value is
