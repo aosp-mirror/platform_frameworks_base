@@ -134,7 +134,7 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
                 mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo, appToken,
                         suggestionType);
             } else if (suggestionType == STARTING_WINDOW_TYPE_SNAPSHOT) {
-                final TaskSnapshot snapshot = windowInfo.mTaskSnapshot;
+                final TaskSnapshot snapshot = windowInfo.taskSnapshot;
                 mStartingSurfaceDrawer.makeTaskSnapshotWindow(windowInfo, appToken,
                         snapshot);
             }

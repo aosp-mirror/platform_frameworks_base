@@ -478,7 +478,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         if (launchTheme != 0) {
             info.splashScreenThemeResId = launchTheme;
         }
-        info.mTaskSnapshot = taskSnapshot;
+        info.taskSnapshot = taskSnapshot;
         // make this happen prior than prepare surface
         try {
             lastOrganizer.addStartingWindow(info, activity.token);
