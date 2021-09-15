@@ -1132,7 +1132,7 @@ public class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     void sendCecCommand(HdmiCecMessage command, @Nullable SendMessageCallback callback) {
         assertRunOnServiceThread();
-        if (mMessageValidator.isValid(command) == HdmiCecMessageValidator.OK) {
+        if (mMessageValidator.isValid(command, false) == HdmiCecMessageValidator.OK) {
             mCecController.sendCommand(command, callback);
         } else {
             HdmiLogger.error("Invalid message type:" + command);
@@ -1165,7 +1165,7 @@ public class HdmiControlService extends SystemService {
     @Constants.HandleMessageResult
     protected int handleCecCommand(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        int errorCode = mMessageValidator.isValid(message);
+        int errorCode = mMessageValidator.isValid(message, true);
         if (errorCode != HdmiCecMessageValidator.OK) {
             // We'll not response on the messages with the invalid source or destination
             // or with parameter length shorter than specified in the standard.
@@ -3549,8 +3549,8 @@ public class HdmiControlService extends SystemService {
         invokeInputChangeListener(info);
     }
 
-   void setMhlInputChangeEnabled(boolean enabled) {
-       mMhlController.setOption(OPTION_MHL_INPUT_SWITCHING, toInt(enabled));
+    void setMhlInputChangeEnabled(boolean enabled) {
+        mMhlController.setOption(OPTION_MHL_INPUT_SWITCHING, toInt(enabled));
 
         synchronized (mLock) {
             mMhlInputChangeEnabled = enabled;
