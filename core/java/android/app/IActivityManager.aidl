@@ -250,7 +250,14 @@ interface IActivityManager {
             in String[] resolvedTypes, int flags, in Bundle options, int userId);
     void cancelIntentSender(in IIntentSender sender);
     ActivityManager.PendingIntentInfo getInfoForIntentSender(in IIntentSender sender);
-    void registerIntentSenderCancelListener(in IIntentSender sender, in IResultReceiver receiver);
+    /**
+      This method used to be called registerIntentSenderCancelListener(), was void, and
+      would call `receiver` if the PI has already been canceled.
+      Now it returns false if the PI is cancelled, without calling `receiver`.
+      The method was renamed to catch calls to the original method.
+     */
+    boolean registerIntentSenderCancelListenerEx(in IIntentSender sender,
+        in IResultReceiver receiver);
     void unregisterIntentSenderCancelListener(in IIntentSender sender, in IResultReceiver receiver);
     void enterSafeMode();
     void noteWakeupAlarm(in IIntentSender sender, in WorkSource workSource, int sourceUid,
