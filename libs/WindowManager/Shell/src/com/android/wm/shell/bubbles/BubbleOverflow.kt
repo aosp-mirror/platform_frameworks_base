@@ -154,10 +154,6 @@ class BubbleOverflow(
         return dotPath
     }
 
-    override fun setExpandedContentAlpha(alpha: Float) {
-        expandedView?.alpha = alpha
-    }
-
     override fun setTaskViewVisibility(visible: Boolean) {
         // Overflow does not have a TaskView.
     }

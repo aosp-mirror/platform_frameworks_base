@@ -31,11 +31,11 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutTracker;
+import com.android.server.biometrics.sensors.SensorOverlays;
 import com.android.server.biometrics.sensors.fingerprint.Udfps;
 import com.android.server.biometrics.sensors.fingerprint.UdfpsHelper;
 
@@ -52,7 +52,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
     private static final String TAG = "Biometrics/FingerprintAuthClient";
 
     private final LockoutFrameworkImpl mLockoutFrameworkImpl;
-    @Nullable private final IUdfpsOverlayController mUdfpsOverlayController;
+    @NonNull private final SensorOverlays mSensorOverlays;
     @NonNull private final FingerprintSensorPropertiesInternal mSensorProps;
     @NonNull private final CallbackWithProbe<Probe> mALSProbeCallback;
 
@@ -76,7 +76,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
                 false /* isKeyguardBypassEnabled */);
         setRequestId(requestId);
         mLockoutFrameworkImpl = lockoutTracker;
-        mUdfpsOverlayController = udfpsOverlayController;
+        mSensorOverlays = new SensorOverlays(udfpsOverlayController, null /* sideFpsController */);
         mSensorProps = sensorProps;
         mALSProbeCallback = createALSCallback(false /* startWithClient */);
     }
@@ -112,7 +112,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
         if (authenticated) {
             mState = STATE_STOPPED;
             resetFailedAttempts(getTargetUserId());
-            UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
+            mSensorOverlays.hide(getSensorId());
         } else {
             mState = STATE_STARTED_PAUSED_ATTEMPTED;
             final @LockoutTracker.LockoutMode int lockoutMode =
@@ -125,7 +125,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
                 // Send the error, but do not invoke the FinishCallback yet. Since lockout is not
                 // controlled by the HAL, the framework must stop the sensor before finishing the
                 // client.
-                UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
+                mSensorOverlays.hide(getSensorId());
                 onErrorInternal(errorCode, 0 /* vendorCode */, false /* finish */);
                 cancel();
             }
@@ -140,7 +140,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
             BiometricNotificationUtils.showBadCalibrationNotification(getContext());
         }
 
-        UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
+        mSensorOverlays.hide(getSensorId());
     }
 
     private void resetFailedAttempts(int userId) {
@@ -168,8 +168,8 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
 
     @Override
     protected void startHalOperation() {
-        UdfpsHelper.showUdfpsOverlay(getSensorId(), Utils.getUdfpsAuthReason(this),
-                mUdfpsOverlayController, this);
+        mSensorOverlays.show(getSensorId(), getShowOverlayReason(), this);
+
         try {
             // GroupId was never used. In fact, groupId is always the same as userId.
             getFreshDaemon().authenticate(mOperationId, getTargetUserId());
@@ -177,14 +177,15 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
             Slog.e(TAG, "Remote exception when requesting auth", e);
             onError(BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE,
                     0 /* vendorCode */);
-            UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
+            mSensorOverlays.hide(getSensorId());
             mCallback.onClientFinished(this, false /* success */);
         }
     }
 
     @Override
     protected void stopHalOperation() {
-        UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
+        mSensorOverlays.hide(getSensorId());
+
         try {
             getFreshDaemon().cancel();
         } catch (RemoteException e) {

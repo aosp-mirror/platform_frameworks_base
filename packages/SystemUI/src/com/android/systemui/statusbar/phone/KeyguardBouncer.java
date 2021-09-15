@@ -252,8 +252,6 @@ public class KeyguardBouncer {
                 mKeyguardViewController.resetSecurityContainer();
                 showPromptReason(mBouncerPromptReason);
             }
-            SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED,
-                    SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SHOWN);
         }
     };
 
