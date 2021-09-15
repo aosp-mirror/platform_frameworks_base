@@ -54,7 +54,6 @@ interface IInputMethodManager {
             /* @StartInputFlags */ int startInputFlags,
             /* @android.view.WindowManager.LayoutParams.SoftInputModeFlags */ int softInputMode,
             int windowFlags, in EditorInfo attribute, IInputContext inputContext,
-            /* @InputConnectionInspector.MissingMethodFlags */ int missingMethodFlags,
             int unverifiedTargetSdkVersion);
 
     void showInputMethodPickerFromClient(in IInputMethodClient client,
