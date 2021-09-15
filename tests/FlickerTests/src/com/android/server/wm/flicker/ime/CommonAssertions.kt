@@ -18,52 +18,52 @@
 package com.android.server.wm.flicker.ime
 
 import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+import com.android.server.wm.traces.common.FlickerComponentName
 
 fun FlickerTestParameter.imeLayerBecomesVisible() {
     assertLayers {
-        this.isInvisible(WindowManagerStateHelper.IME_COMPONENT)
+        this.isInvisible(FlickerComponentName.IME)
             .then()
-            .isVisible(WindowManagerStateHelper.IME_COMPONENT)
+            .isVisible(FlickerComponentName.IME)
     }
 }
 
 fun FlickerTestParameter.imeLayerBecomesInvisible() {
     assertLayers {
-        this.isVisible(WindowManagerStateHelper.IME_COMPONENT)
+        this.isVisible(FlickerComponentName.IME)
             .then()
-            .isInvisible(WindowManagerStateHelper.IME_COMPONENT)
+            .isInvisible(FlickerComponentName.IME)
     }
 }
 
 fun FlickerTestParameter.imeWindowIsAlwaysVisible(rotatesScreen: Boolean = false) {
     if (rotatesScreen) {
         assertWm {
-            this.isNonAppWindowVisible(WindowManagerStateHelper.IME_COMPONENT)
+            this.isNonAppWindowVisible(FlickerComponentName.IME)
                 .then()
-                .isNonAppWindowInvisible(WindowManagerStateHelper.IME_COMPONENT)
+                .isNonAppWindowInvisible(FlickerComponentName.IME)
                 .then()
-                .isNonAppWindowVisible(WindowManagerStateHelper.IME_COMPONENT)
+                .isNonAppWindowVisible(FlickerComponentName.IME)
         }
     } else {
         assertWm {
-            this.isNonAppWindowVisible(WindowManagerStateHelper.IME_COMPONENT)
+            this.isNonAppWindowVisible(FlickerComponentName.IME)
         }
     }
 }
 
 fun FlickerTestParameter.imeWindowBecomesVisible() {
     assertWm {
-        this.isNonAppWindowInvisible(WindowManagerStateHelper.IME_COMPONENT)
+        this.isNonAppWindowInvisible(FlickerComponentName.IME)
             .then()
-            .isNonAppWindowVisible(WindowManagerStateHelper.IME_COMPONENT)
+            .isNonAppWindowVisible(FlickerComponentName.IME)
     }
 }
 
 fun FlickerTestParameter.imeWindowBecomesInvisible() {
     assertWm {
-        this.isNonAppWindowVisible(WindowManagerStateHelper.IME_COMPONENT)
+        this.isNonAppWindowVisible(FlickerComponentName.IME)
             .then()
-            .isNonAppWindowInvisible(WindowManagerStateHelper.IME_COMPONENT)
+            .isNonAppWindowInvisible(FlickerComponentName.IME)
     }
 }

@@ -2457,17 +2457,11 @@ public class AudioManager {
 
     /**
      * Return a handle to the optional platform's {@link Spatializer}
-     * @return {@code null} if spatialization is not supported, the {@code Spatializer} instance
-     *         otherwise.
+     * @return the {@code Spatializer} instance.
+     * @see Spatializer#getImmersiveAudioLevel() to check for the level of support of the effect
+     *   on the platform
      */
-    public @Nullable Spatializer getSpatializer() {
-        int level = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
-        try {
-            level = getService().getSpatializerImmersiveAudioLevel();
-        } catch (Exception e) { /* using NONE */ }
-        if (level == Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE) {
-            return null;
-        }
+    public @NonNull Spatializer getSpatializer() {
         return new Spatializer(this);
     }
 

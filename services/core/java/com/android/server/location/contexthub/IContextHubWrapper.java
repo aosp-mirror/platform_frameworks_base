@@ -198,6 +198,20 @@ public abstract class IContextHubWrapper {
     public abstract void onWifiSettingChanged(boolean enabled);
 
     /**
+     * Notifies the Contexthub implementation of a user WiFi main setting change.
+     *
+     * @param enabled true if the WiFi main setting has been enabled.
+     */
+    public abstract void onWifiMainSettingChanged(boolean enabled);
+
+    /**
+     * Notifies the Contexthub implementation of a user WiFi scanning setting change.
+     *
+     * @param enabled true if the WiFi scanning setting has been enabled.
+     */
+    public abstract void onWifiScanningSettingChanged(boolean enabled);
+
+    /**
      * @return True if this version of the Contexthub HAL supports airplane mode setting
      * notifications.
      */
@@ -335,33 +349,43 @@ public abstract class IContextHubWrapper {
             return new Pair(hubInfoList, new ArrayList<String>(supportedPermissions));
         }
 
-        // TODO(b/194285834): Implement settings logic
         public boolean supportsLocationSettingNotifications() {
-            return false;
+            return true;
         }
 
         public boolean supportsWifiSettingNotifications() {
-            return false;
+            return true;
         }
 
         public boolean supportsAirplaneModeSettingNotifications() {
-            return false;
+            return true;
         }
 
         public boolean supportsMicrophoneDisableSettingNotifications() {
-            return false;
+            return true;
         }
 
         public void onLocationSettingChanged(boolean enabled) {
+            onSettingChanged(android.hardware.contexthub.Setting.LOCATION, enabled);
         }
 
         public void onWifiSettingChanged(boolean enabled) {
         }
 
         public void onAirplaneModeSettingChanged(boolean enabled) {
+            onSettingChanged(android.hardware.contexthub.Setting.AIRPLANE_MODE, enabled);
         }
 
         public void onMicrophoneDisableSettingChanged(boolean enabled) {
+            onSettingChanged(android.hardware.contexthub.Setting.MICROPHONE, enabled);
+        }
+
+        public void onWifiMainSettingChanged(boolean enabled) {
+            onSettingChanged(android.hardware.contexthub.Setting.WIFI_MAIN, enabled);
+        }
+
+        public void onWifiScanningSettingChanged(boolean enabled) {
+            onSettingChanged(android.hardware.contexthub.Setting.WIFI_SCANNING, enabled);
         }
 
         @ContextHubTransaction.Result
@@ -413,6 +437,14 @@ public abstract class IContextHubWrapper {
         private int toTransactionResult(boolean success) {
             return success ? ContextHubTransaction.RESULT_SUCCESS
                     : ContextHubTransaction.RESULT_FAILED_UNKNOWN;
+        }
+
+        private void onSettingChanged(byte setting, boolean enabled) {
+            try {
+                mHub.onSettingChanged(setting, enabled);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException while sending setting update");
+            }
         }
     }
 
@@ -531,6 +563,9 @@ public abstract class IContextHubWrapper {
             mCallback = callback;
             mHub.registerCallback(contextHubId, mHidlCallback);
         }
+
+        public void onWifiMainSettingChanged(boolean enabled) {}
+        public void onWifiScanningSettingChanged(boolean enabled) {}
     }
 
     private static class ContextHubWrapperV1_0 extends ContextHubWrapperHidl {

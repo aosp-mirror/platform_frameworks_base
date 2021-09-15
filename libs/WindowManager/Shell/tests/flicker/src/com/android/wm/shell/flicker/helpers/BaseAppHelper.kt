@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.helpers
 
 import android.app.Instrumentation
-import android.content.ComponentName
 import android.content.pm.PackageManager.FEATURE_LEANBACK
 import android.content.pm.PackageManager.FEATURE_LEANBACK_ONLY
 import android.os.SystemProperties
@@ -28,13 +27,13 @@ import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import com.android.compatibility.common.util.SystemUtil
 import com.android.server.wm.flicker.helpers.StandardAppHelper
-import com.android.server.wm.traces.parser.toWindowName
+import com.android.server.wm.traces.common.FlickerComponentName
 import java.io.IOException
 
 abstract class BaseAppHelper(
     instrumentation: Instrumentation,
     launcherName: String,
-    component: ComponentName
+    component: FlickerComponentName
 ) : StandardAppHelper(
     instrumentation,
     launcherName,

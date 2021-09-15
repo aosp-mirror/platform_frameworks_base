@@ -101,7 +101,6 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
         public CharSequence typeContentDescription;
         public CharSequence typeContentDescriptionHtml;
         public CharSequence description;
-        public boolean isWide;
         public int subId;
         public boolean roaming;
         public boolean showTriangle;
@@ -109,7 +108,7 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
         public MobileDataIndicators(IconState statusIcon, IconState qsIcon, int statusType,
                 int qsType, boolean activityIn, boolean activityOut,
                 CharSequence typeContentDescription, CharSequence typeContentDescriptionHtml,
-                CharSequence description, boolean isWide, int subId, boolean roaming,
+                CharSequence description, int subId, boolean roaming,
                 boolean showTriangle) {
             this.statusIcon = statusIcon;
             this.qsIcon = qsIcon;
@@ -120,7 +119,6 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
             this.typeContentDescription = typeContentDescription;
             this.typeContentDescriptionHtml = typeContentDescriptionHtml;
             this.description = description;
-            this.isWide = isWide;
             this.subId = subId;
             this.roaming = roaming;
             this.showTriangle = showTriangle;
@@ -138,7 +136,6 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
                 .append(",typeContentDescription=").append(typeContentDescription)
                 .append(",typeContentDescriptionHtml=").append(typeContentDescriptionHtml)
                 .append(",description=").append(description)
-                .append(",isWide=").append(isWide)
                 .append(",subId=").append(subId)
                 .append(",roaming=").append(roaming)
                 .append(",showTriangle=").append(showTriangle)

@@ -114,6 +114,7 @@ public class Spatializer {
 
     /** @hide */
     @IntDef(flag = false, value = {
+            SPATIALIZER_IMMERSIVE_LEVEL_OTHER,
             SPATIALIZER_IMMERSIVE_LEVEL_NONE,
             SPATIALIZER_IMMERSIVE_LEVEL_MULTICHANNEL,
     })
@@ -121,19 +122,40 @@ public class Spatializer {
     public @interface ImmersiveAudioLevel {};
 
     /**
-     * @hide
+     * Constant indicating the {@code Spatializer} on this device supports a spatialization
+     * mode that differs from the ones available at this SDK level.
+     * @see #getImmersiveAudioLevel()
+     */
+    public static final int SPATIALIZER_IMMERSIVE_LEVEL_OTHER = -1;
+
+    /**
      * Constant indicating there are no spatialization capabilities supported on this device.
-     * @see AudioManager#getImmersiveAudioLevel()
+     * @see #getImmersiveAudioLevel()
      */
     public static final int SPATIALIZER_IMMERSIVE_LEVEL_NONE = 0;
 
     /**
-     * @hide
-     * Constant indicating the {@link Spatializer} on this device supports multichannel
+     * Constant indicating the {@code Spatializer} on this device supports multichannel
      * spatialization.
-     * @see AudioManager#getImmersiveAudioLevel()
+     * @see #getImmersiveAudioLevel()
      */
     public static final int SPATIALIZER_IMMERSIVE_LEVEL_MULTICHANNEL = 1;
+
+    /**
+     * Return the level of support for the spatialization feature on this device.
+     * This level of support is independent of whether the {@code Spatializer} is currently
+     * enabled or available and will not change over time.
+     * @return the level of spatialization support
+     * @see #isEnabled()
+     * @see #isAvailable()
+     */
+    public @ImmersiveAudioLevel int getImmersiveAudioLevel() {
+        int level = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
+        try {
+            level = mAm.getService().getSpatializerImmersiveAudioLevel();
+        } catch (Exception e) { /* using NONE */ }
+        return level;
+    }
 
     /**
      * @hide

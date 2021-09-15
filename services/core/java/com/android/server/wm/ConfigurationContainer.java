@@ -41,6 +41,7 @@ import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.LocaleList;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -514,7 +515,7 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         return mFullConfiguration.windowConfiguration.getWindowingMode() == WINDOWING_MODE_FREEFORM;
     }
 
-    /** Returns the activity type associated with the the configuration container. */
+    /** Returns the activity type associated with the configuration container. */
     /*@WindowConfiguration.ActivityType*/
     public int getActivityType() {
         return mFullConfiguration.windowConfiguration.getActivityType();
@@ -548,20 +549,48 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     }
 
     /**
+     * Applies app-specific nightMode and {@link LocaleList} on requested configuration.
+     * @return true if any of the requested configuration has been updated.
+     */
+    public boolean applyAppSpecificConfig(Integer nightMode, LocaleList locales) {
+        mRequestsTmpConfig.setTo(getRequestedOverrideConfiguration());
+        boolean newNightModeSet = (nightMode != null) && setOverrideNightMode(mRequestsTmpConfig,
+                nightMode);
+        boolean newLocalesSet = (locales != null) && setOverrideLocales(mRequestsTmpConfig,
+                locales);
+        if (newNightModeSet || newLocalesSet) {
+            onRequestedOverrideConfigurationChanged(mRequestsTmpConfig);
+        }
+        return newNightModeSet || newLocalesSet;
+    }
+
+    /**
      * Overrides the night mode applied to this ConfigurationContainer.
      * @return true if the nightMode has been changed.
      */
-    public boolean setOverrideNightMode(int nightMode) {
+    private boolean setOverrideNightMode(Configuration requestsTmpConfig, int nightMode) {
         final int currentUiMode = mRequestedOverrideConfiguration.uiMode;
         final int currentNightMode = currentUiMode & Configuration.UI_MODE_NIGHT_MASK;
         final int validNightMode = nightMode & Configuration.UI_MODE_NIGHT_MASK;
         if (currentNightMode == validNightMode) {
             return false;
         }
-        mRequestsTmpConfig.setTo(getRequestedOverrideConfiguration());
-        mRequestsTmpConfig.uiMode = validNightMode
+        requestsTmpConfig.uiMode = validNightMode
                 | (currentUiMode & ~Configuration.UI_MODE_NIGHT_MASK);
-        onRequestedOverrideConfigurationChanged(mRequestsTmpConfig);
+        return true;
+    }
+
+    /**
+     * Overrides the locales applied to this ConfigurationContainer.
+     * @return true if the LocaleList has been changed.
+     */
+    private boolean setOverrideLocales(Configuration requestsTmpConfig,
+            @NonNull LocaleList overrideLocales) {
+        if (mRequestedOverrideConfiguration.getLocales().equals(overrideLocales)) {
+            return false;
+        }
+        requestsTmpConfig.setLocales(overrideLocales);
+        requestsTmpConfig.userSetLocale = true;
         return true;
     }
 

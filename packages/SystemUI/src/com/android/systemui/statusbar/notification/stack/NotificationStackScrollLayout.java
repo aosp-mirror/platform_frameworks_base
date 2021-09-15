@@ -163,7 +163,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private final Paint mBackgroundPaint = new Paint();
     private final boolean mShouldDrawNotificationBackground;
     private boolean mHighPriorityBeforeSpeedBump;
-    private boolean mDismissRtl;
 
     private float mExpandedHeight;
     private int mOwnScrollY;
@@ -618,16 +617,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
         mFgsSectionView = fgsSectionView;
         addView(mFgsSectionView, -1);
-    }
-
-    void updateDismissRtlSetting(boolean dismissRtl) {
-        mDismissRtl = dismissRtl;
-        for (int i = 0; i < getChildCount(); i++) {
-            View child = getChildAt(i);
-            if (child instanceof ExpandableNotificationRow) {
-                ((ExpandableNotificationRow) child).setDismissRtl(dismissRtl);
-            }
-        }
     }
 
     /**
@@ -2918,7 +2907,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         updateChronometerForChild(child);
         if (child instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-            row.setDismissRtl(mDismissRtl);
             row.setDismissUsingRowTranslationX(mDismissUsingRowTranslationX);
 
         }

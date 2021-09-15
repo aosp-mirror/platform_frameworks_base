@@ -225,17 +225,17 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
             }
         }
 
+        // If no one is light, all icons become white.
+        if (numLightStacks == 0) {
+            mStatusBarIconController.getTransitionsController().setIconsDark(
+                    false, animateChange());
+        }
+
         // If all stacks are light, all icons get dark.
-        if (numLightStacks == numStacks) {
+        else if (numLightStacks == numStacks) {
             mStatusBarIconController.setIconsDarkArea(null);
             mStatusBarIconController.getTransitionsController().setIconsDark(true, animateChange());
 
-        }
-
-        // If no one is light, all icons become white.
-        else if (numLightStacks == 0) {
-            mStatusBarIconController.getTransitionsController().setIconsDark(
-                    false, animateChange());
         }
 
         // Not the same for every stack, magic!

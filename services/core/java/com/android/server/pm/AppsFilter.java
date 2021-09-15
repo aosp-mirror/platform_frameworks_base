@@ -300,6 +300,8 @@ public class AppsFilter implements Watchable, Snappable {
     /**
      * Provides system state to AppsFilter via {@link CurrentStateCallback} after properly guarding
      * the data with the package lock.
+     *
+     * Don't call {@link #runWithState} with {@link #mCacheLock} held.
      */
     @VisibleForTesting(visibility = PRIVATE)
     public interface StateProvider {
@@ -923,15 +925,16 @@ public class AppsFilter implements Watchable, Snappable {
     }
 
     private void updateShouldFilterCacheForPackage(String packageName) {
-        synchronized (mCacheLock) {
-            if (mShouldFilterCache != null) {
-                mStateProvider.runWithState((settings, users) -> {
-                    updateShouldFilterCacheForPackage(mShouldFilterCache, null /* skipPackage */,
-                            settings.get(packageName), settings, users,
-                            settings.size() /*maxIndex*/);
-                });
+        mStateProvider.runWithState((settings, users) -> {
+            synchronized (mCacheLock) {
+                if (mShouldFilterCache == null) {
+                    return;
+                }
+                updateShouldFilterCacheForPackage(mShouldFilterCache, null /* skipPackage */,
+                        settings.get(packageName), settings, users,
+                        settings.size() /*maxIndex*/);
             }
-        }
+        });
     }
 
     private void updateShouldFilterCacheForPackage(WatchedSparseBooleanMatrix cache,

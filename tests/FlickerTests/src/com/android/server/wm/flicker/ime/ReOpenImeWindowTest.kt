@@ -17,7 +17,6 @@
 package com.android.server.wm.flicker.ime
 
 import android.app.Instrumentation
-import android.content.ComponentName
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
@@ -42,7 +41,7 @@ import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+import com.android.server.wm.traces.common.FlickerComponentName
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -100,12 +99,12 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     @Presubmit
     @Test
     fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
-        val component = ComponentName("", "RecentTaskScreenshotSurface")
+        val component = FlickerComponentName("", "RecentTaskScreenshotSurface")
         testSpec.assertWm {
             this.visibleWindowsShownMoreThanOneConsecutiveEntry(
-                    ignoreWindows = listOf(WindowManagerStateHelper.SPLASH_SCREEN_COMPONENT,
-                            WindowManagerStateHelper.SNAPSHOT_COMPONENT,
-                            component)
+                    ignoreWindows = listOf(FlickerComponentName.SPLASH_SCREEN,
+                        FlickerComponentName.SNAPSHOT,
+                        component)
             )
         }
     }
@@ -157,11 +156,11 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun imeLayerIsBecomesVisible() {
         testSpec.assertLayers {
-            this.isVisible(WindowManagerStateHelper.IME_COMPONENT)
+            this.isVisible(FlickerComponentName.IME)
                     .then()
-                    .isInvisible(WindowManagerStateHelper.IME_COMPONENT)
+                    .isInvisible(FlickerComponentName.IME)
                     .then()
-                    .isVisible(WindowManagerStateHelper.IME_COMPONENT)
+                    .isVisible(FlickerComponentName.IME)
         }
     }
 
@@ -171,7 +170,7 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
         testSpec.assertLayers {
             this.isVisible(LAUNCHER_COMPONENT)
                 .then()
-                .isVisible(WindowManagerStateHelper.SNAPSHOT_COMPONENT, isOptional = true)
+                .isVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
                 .then()
                 .isVisible(testApp.component)
         }
@@ -194,11 +193,11 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         // depends on how much of the animation transactions are sent to SF at once
         // sometimes this layer appears for 2-3 frames, sometimes for only 1
-        val recentTaskComponent = ComponentName("", "RecentTaskScreenshotSurface")
+        val recentTaskComponent = FlickerComponentName("", "RecentTaskScreenshotSurface")
         testSpec.assertLayers {
             this.visibleLayersShownMoreThanOneConsecutiveEntry(
-                    listOf(WindowManagerStateHelper.SPLASH_SCREEN_COMPONENT,
-                    WindowManagerStateHelper.SNAPSHOT_COMPONENT, recentTaskComponent)
+                    listOf(FlickerComponentName.SPLASH_SCREEN,
+                        FlickerComponentName.SNAPSHOT, recentTaskComponent)
             )
         }
     }

@@ -189,19 +189,15 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 final IInputContext inputContext = (IInputContext) args.arg2;
                 final EditorInfo info = (EditorInfo) args.arg3;
                 final CancellationGroup cancellationGroup = (CancellationGroup) args.arg4;
-                SomeArgs moreArgs = (SomeArgs) args.arg5;
+                final boolean restarting = args.argi5 == 1;
+                final int missingMethod = args.argi6;
                 final InputConnection ic = inputContext != null
                         ? new RemoteInputConnection(
-                                mTarget, inputContext, moreArgs.argi3, cancellationGroup)
+                                mTarget, inputContext, missingMethod, cancellationGroup)
                         : null;
                 info.makeCompatible(mTargetSdkVersion);
-                inputMethod.dispatchStartInputWithToken(
-                        ic,
-                        info,
-                        moreArgs.argi1 == 1 /* restarting */,
-                        startInputToken);
+                inputMethod.dispatchStartInputWithToken(ic, info, restarting, startInputToken);
                 args.recycle();
-                moreArgs.recycle();
                 return;
             }
             case DO_CREATE_SESSION: {
@@ -330,11 +326,8 @@ class IInputMethodWrapper extends IInputMethod.Stub
             Log.e(TAG, "startInput must be called after bindInput.");
             mCancellationGroup = new CancellationGroup();
         }
-        SomeArgs args = SomeArgs.obtain();
-        args.argi1 = restarting ? 1 : 0;
-        args.argi3 = missingMethods;
-        mCaller.executeOrSendMessage(mCaller.obtainMessageOOOOO(DO_START_INPUT, startInputToken,
-                inputContext, attribute, mCancellationGroup, args));
+        mCaller.executeOrSendMessage(mCaller.obtainMessageOOOOII(DO_START_INPUT, startInputToken,
+                inputContext, attribute, mCancellationGroup, restarting ? 1 : 0, missingMethods));
     }
 
     @BinderThread

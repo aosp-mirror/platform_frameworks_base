@@ -163,7 +163,7 @@ public class WifiSignalController extends
         int qsTypeIcon = 0;
         IconState qsIcon = null;
         if (sbVisible) {
-            qsTypeIcon = icons.qsDataType;
+            qsTypeIcon = icons.dataType;
             qsIcon = new IconState(mCurrentState.connected, getQsCurrentIconIdForCarrierWifi(),
                     contentDescription);
         }
@@ -172,7 +172,7 @@ public class WifiSignalController extends
         MobileDataIndicators mobileDataIndicators = new MobileDataIndicators(
                 statusIcon, qsIcon, typeIcon, qsTypeIcon,
                 mCurrentState.activityIn, mCurrentState.activityOut, dataContentDescription,
-                dataContentDescriptionHtml, description, icons.isWide,
+                dataContentDescriptionHtml, description,
                 mCurrentState.subId, /* roaming= */ false, /* showTriangle= */ true
         );
         callback.setMobileDataIndicators(mobileDataIndicators);

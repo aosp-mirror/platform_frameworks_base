@@ -38,6 +38,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.DisableFlagsLogger;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
@@ -112,6 +113,7 @@ public class StatusBarCommandQueueCallbacksTest extends SysuiTestCase {
                 mVibratorHelper,
                 Optional.of(mVibrator),
                 mLightBarController,
+                new DisableFlagsLogger(),
                 DEFAULT_DISPLAY);
 
         when(mDeviceProvisionedController.isCurrentUserSetup()).thenReturn(true);
