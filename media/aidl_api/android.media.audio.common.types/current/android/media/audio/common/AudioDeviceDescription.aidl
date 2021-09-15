@@ -33,13 +33,22 @@
 
 package android.media.audio.common;
 /* @hide */
-@Backing(type="byte") @VintfStability
-enum PcmType {
-  DEFAULT = 0,
-  UINT_8_BIT = 0,
-  INT_16_BIT = 1,
-  INT_32_BIT = 2,
-  FIXED_Q_8_24 = 3,
-  FLOAT_32_BIT = 4,
-  INT_24_BIT = 5,
+@JavaDerive(equals=true, toString=true) @VintfStability
+parcelable AudioDeviceDescription {
+  android.media.audio.common.AudioDeviceType type = android.media.audio.common.AudioDeviceType.NONE;
+  @utf8InCpp String connection;
+  const @utf8InCpp String CONNECTION_ANALOG = "analog";
+  const @utf8InCpp String CONNECTION_ANALOG_DOCK = "analog-dock";
+  const @utf8InCpp String CONNECTION_BT_A2DP = "bt-a2dp";
+  const @utf8InCpp String CONNECTION_BT_LE = "bt-le";
+  const @utf8InCpp String CONNECTION_BT_SCO = "bt-sco";
+  const @utf8InCpp String CONNECTION_BUS = "bus";
+  const @utf8InCpp String CONNECTION_DIGITAL_DOCK = "digital-dock";
+  const @utf8InCpp String CONNECTION_HDMI = "hdmi";
+  const @utf8InCpp String CONNECTION_HDMI_ARC = "hdmi-arc";
+  const @utf8InCpp String CONNECTION_HDMI_EARC = "hdmi-earc";
+  const @utf8InCpp String CONNECTION_IP_V4 = "ip-v4";
+  const @utf8InCpp String CONNECTION_SPDIF = "spdif";
+  const @utf8InCpp String CONNECTION_WIRELESS = "wireless";
+  const @utf8InCpp String CONNECTION_USB = "usb";
 }
