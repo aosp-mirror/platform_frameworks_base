@@ -144,6 +144,10 @@ public class TaskOrganizer extends WindowOrganizer {
     @BinderThread
     public void onBackPressedOnTaskRoot(@NonNull ActivityManager.RunningTaskInfo taskInfo) {}
 
+    /** @hide */
+    @BinderThread
+    public void onImeDrawnOnTask(int taskId) {}
+
     /**
      * Creates a persistent root task in WM for a particular windowing-mode.
      * @param displayId The display to create the root task on.
@@ -287,6 +291,11 @@ public class TaskOrganizer extends WindowOrganizer {
         @Override
         public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo info) {
             mExecutor.execute(() -> TaskOrganizer.this.onBackPressedOnTaskRoot(info));
+        }
+
+        @Override
+        public void onImeDrawnOnTask(int taskId) {
+            mExecutor.execute(() -> TaskOrganizer.this.onImeDrawnOnTask(taskId));
         }
     };
 
