@@ -454,6 +454,7 @@ public class StatusBar extends SystemUI implements
     @Nullable
     protected LockscreenWallpaper mLockscreenWallpaper;
     private final AutoHideController mAutoHideController;
+    private final CollapsedStatusBarFragmentLogger mCollapsedStatusBarFragmentLogger;
 
     private final Point mCurrentDisplaySize = new Point();
 
@@ -743,6 +744,7 @@ public class StatusBar extends SystemUI implements
             DozeScrimController dozeScrimController,
             VolumeComponent volumeComponent,
             CommandQueue commandQueue,
+            CollapsedStatusBarFragmentLogger collapsedStatusBarFragmentLogger,
             StatusBarComponent.Factory statusBarComponentFactory,
             PluginManager pluginManager,
             Optional<LegacySplitScreen> splitScreenOptional,
@@ -842,6 +844,7 @@ public class StatusBar extends SystemUI implements
         mNotificationShadeDepthControllerLazy = notificationShadeDepthControllerLazy;
         mVolumeComponent = volumeComponent;
         mCommandQueue = commandQueue;
+        mCollapsedStatusBarFragmentLogger = collapsedStatusBarFragmentLogger;
         mStatusBarComponentFactory = statusBarComponentFactory;
         mPluginManager = pluginManager;
         mSplitScreenOptional = splitScreenOptional;
@@ -1215,6 +1218,7 @@ public class StatusBar extends SystemUI implements
                                 mNetworkController,
                                 mStatusBarStateController,
                                 mCommandQueue,
+                                mCollapsedStatusBarFragmentLogger,
                                 mOperatorNameViewControllerFactory
                         ),
                         CollapsedStatusBarFragment.TAG)
