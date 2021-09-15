@@ -197,11 +197,6 @@
      low powered state yet. -->
     <bool name="doze_long_press_uses_prox">true</bool>
 
-    <!-- Doze: whether the brightness sensor uses the proximity sensor.
-     If both this parameter and doze_selectively_register_prox are true, registration for the
-     brightness sensor won't occur when the display state is ON. -->
-    <bool name="doze_brightness_uses_prox">true</bool>
-
     <!-- Doze: should notifications be used as a pulse signal? -->
     <bool name="doze_pulse_on_notifications">true</bool>
 
