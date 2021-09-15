@@ -20,7 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.PointF;
-import android.hardware.fingerprint.IUdfpsOverlayController;
+import android.hardware.biometrics.BiometricOverlayConstants;
 import android.os.Build;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -119,7 +119,7 @@ public class UdfpsEnrollHelper {
     }
 
     boolean shouldShowProgressBar() {
-        return mEnrollReason == IUdfpsOverlayController.REASON_ENROLL_ENROLLING;
+        return mEnrollReason == BiometricOverlayConstants.REASON_ENROLL_ENROLLING;
     }
 
     void onEnrollmentProgress(int remaining) {
