@@ -228,7 +228,8 @@ class WindowStateAnimator {
         }
     }
 
-    boolean finishDrawingLocked(SurfaceControl.Transaction postDrawTransaction) {
+    boolean finishDrawingLocked(SurfaceControl.Transaction postDrawTransaction,
+            boolean forceApplyNow) {
         final boolean startingWindow =
                 mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
         if (startingWindow) {
@@ -253,11 +254,11 @@ class WindowStateAnimator {
             // If there is no surface, the last draw was for the previous surface. We don't want to
             // wait until the new surface is shown and instead just apply the transaction right
             // away.
-            if (mLastHidden && mDrawState != NO_SURFACE) {
+            if (mLastHidden && mDrawState != NO_SURFACE && !forceApplyNow) {
                 mPostDrawTransaction.merge(postDrawTransaction);
                 layoutNeeded = true;
             } else {
-                postDrawTransaction.apply();
+                mWin.getSyncTransaction().merge(postDrawTransaction);
             }
         }
 

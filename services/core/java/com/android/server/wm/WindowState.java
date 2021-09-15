@@ -372,6 +372,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private boolean mRedrawForSyncReported;
 
     /**
+     * {@code true} when the client was still drawing for sync when the sync-set was finished or
+     * cancelled. This can happen if the window goes away during a sync. In this situation we need
+     * to make sure to still apply the postDrawTransaction when it finishes to prevent the client
+     * from getting stuck in a bad state.
+     */
+    boolean mClientWasDrawingForSync = false;
+
+    /**
      * Special mode that is intended only for the rounded corner overlay: during rotation
      * transition, we un-rotate the window token such that the window appears as it did before the
      * rotation.
@@ -6009,6 +6017,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return super.isSyncFinished();
     }
 
+    @Override
+    void finishSync(Transaction outMergedTransaction, boolean cancel) {
+        if (mSyncState == SYNC_STATE_WAITING_FOR_DRAW && mRedrawForSyncReported) {
+            mClientWasDrawingForSync = true;
+        }
+        super.finishSync(outMergedTransaction, cancel);
+    }
+
     boolean finishDrawing(SurfaceControl.Transaction postDrawTransaction) {
         if (mOrientationChangeRedrawRequestTime > 0) {
             final long duration =
@@ -6024,8 +6040,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         executeDrawHandlers(postDrawTransaction);
+
+        final boolean applyPostDrawNow = mClientWasDrawingForSync && postDrawTransaction != null;
+        mClientWasDrawingForSync = false;
         if (!onSyncFinishedDrawing()) {
-            return mWinAnimator.finishDrawingLocked(postDrawTransaction);
+            return mWinAnimator.finishDrawingLocked(postDrawTransaction, applyPostDrawNow);
         }
 
         if (mActivityRecord != null
@@ -6039,7 +6058,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mSyncTransaction.merge(postDrawTransaction);
         }
 
-        mWinAnimator.finishDrawingLocked(null);
+        mWinAnimator.finishDrawingLocked(null, false /* forceApplyNow */);
         // We always want to force a traversal after a finish draw for blast sync.
         return true;
     }
