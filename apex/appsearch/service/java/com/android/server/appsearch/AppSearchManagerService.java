@@ -18,6 +18,7 @@ package com.android.server.appsearch;
 import static android.app.appsearch.AppSearchResult.throwableToFailedResult;
 import static android.os.Process.INVALID_UID;
 
+import android.Manifest;
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.app.appsearch.AppSearchBatchResult;
@@ -331,6 +332,7 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(callback);
 
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
+            int callingPid = Binder.getCallingPid();
             int callingUid = Binder.getCallingUid();
             EXECUTOR.execute(() -> {
                 @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
@@ -343,7 +345,7 @@ public class AppSearchManagerService extends SystemService {
                     // Obtain the user where the client wants to run the operations in. This should
                     // end up being the same as userHandle, assuming it is not a special user and
                     // the client is allowed to run operations in that user.
-                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingPid, callingUid);
                     verifyUserUnlocked(targetUser);
 
                     List<AppSearchSchema> schemas = new ArrayList<>(schemaBundles.size());
@@ -422,6 +424,7 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(userHandle);
             Objects.requireNonNull(callback);
 
+            int callingPid = Binder.getCallingPid();
             int callingUid = Binder.getCallingUid();
             EXECUTOR.execute(() -> {
                 try {
@@ -430,7 +433,7 @@ public class AppSearchManagerService extends SystemService {
                     // Obtain the user where the client wants to run the operations in. This should
                     // end up being the same as userHandle, assuming it is not a special user and
                     // the client is allowed to run operations in that user.
-                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingPid, callingUid);
                     verifyUserUnlocked(targetUser);
 
                     AppSearchUserInstance instance =
@@ -457,6 +460,7 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(userHandle);
             Objects.requireNonNull(callback);
 
+            int callingPid = Binder.getCallingPid();
             int callingUid = Binder.getCallingUid();
             EXECUTOR.execute(() -> {
                 try {
@@ -465,7 +469,7 @@ public class AppSearchManagerService extends SystemService {
                     // Obtain the user where the client wants to run the operations in. This should
                     // end up being the same as userHandle, assuming it is not a special user and
                     // the client is allowed to run operations in that user.
-                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingPid, callingUid);
                     verifyUserUnlocked(targetUser);
 
                     AppSearchUserInstance instance =
@@ -495,6 +499,7 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(callback);
 
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
+            int callingPid = Binder.getCallingPid();
             int callingUid = Binder.getCallingUid();
             EXECUTOR.execute(() -> {
                 @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
@@ -507,7 +512,7 @@ public class AppSearchManagerService extends SystemService {
                     // Obtain the user where the client wants to run the operations in. This should
                     // end up being the same as userHandle, assuming it is not a special user and
                     // the client is allowed to run operations in that user.
-                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingPid, callingUid);
                     verifyUserUnlocked(targetUser);
 
                     AppSearchBatchResult.Builder<String, Void> resultBuilder =
@@ -584,6 +589,7 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(callback);
 
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
+            int callingPid = Binder.getCallingPid();
             int callingUid = Binder.getCallingUid();
             EXECUTOR.execute(() -> {
                 @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
@@ -596,7 +602,7 @@ public class AppSearchManagerService extends SystemService {
                     // Obtain the user where the client wants to run the operations in. This should
                     // end up being the same as userHandle, assuming it is not a special user and
                     // the client is allowed to run operations in that user.
-                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingPid, callingUid);
                     verifyUserUnlocked(targetUser);
 
                     AppSearchBatchResult.Builder<String, Bundle> resultBuilder =
@@ -668,6 +674,7 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(callback);
 
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
+            int callingPid = Binder.getCallingPid();
             int callingUid = Binder.getCallingUid();
             EXECUTOR.execute(() -> {
                 @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
@@ -680,7 +687,7 @@ public class AppSearchManagerService extends SystemService {
                     // Obtain the user where the client wants to run the operations in. This should
                     // end up being the same as userHandle, assuming it is not a special user and
                     // the client is allowed to run operations in that user.
-                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingPid, callingUid);
                     verifyUserUnlocked(targetUser);
 
                     instance = mAppSearchUserInstanceManager.getUserInstance(targetUser);
@@ -737,6 +744,7 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(callback);
 
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
+            int callingPid = Binder.getCallingPid();
             int callingUid = Binder.getCallingUid();
             EXECUTOR.execute(() -> {
                 @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
@@ -749,7 +757,7 @@ public class AppSearchManagerService extends SystemService {
                     // Obtain the user where the client wants to run the operations in. This should
                     // end up being the same as userHandle, assuming it is not a special user and
                     // the client is allowed to run operations in that user.
-                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingPid, callingUid);
                     verifyUserUnlocked(targetUser);
 
                     instance = mAppSearchUserInstanceManager.getUserInstance(targetUser);
@@ -805,6 +813,7 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(userHandle);
             Objects.requireNonNull(callback);
 
+            int callingPid = Binder.getCallingPid();
             int callingUid = Binder.getCallingUid();
             EXECUTOR.execute(() -> {
                 try {
@@ -813,7 +822,7 @@ public class AppSearchManagerService extends SystemService {
                     // Obtain the user where the client wants to run the operations in. This should
                     // end up being the same as userHandle, assuming it is not a special user and
                     // the client is allowed to run operations in that user.
-                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingPid, callingUid);
                     verifyUserUnlocked(targetUser);
 
                     AppSearchUserInstance instance =
@@ -837,6 +846,7 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(packageName);
             Objects.requireNonNull(userHandle);
 
+            int callingPid = Binder.getCallingPid();
             int callingUid = Binder.getCallingUid();
             EXECUTOR.execute(() -> {
                 try {
@@ -845,7 +855,7 @@ public class AppSearchManagerService extends SystemService {
                     // Obtain the user where the client wants to run the operations in. This should
                     // end up being the same as userHandle, assuming it is not a special user and
                     // the client is allowed to run operations in that user.
-                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingPid, callingUid);
                     verifyUserUnlocked(targetUser);
 
                     AppSearchUserInstance instance =
@@ -874,6 +884,7 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(userHandle);
             Objects.requireNonNull(callback);
 
+            int callingPid = Binder.getCallingPid();
             int callingUid = Binder.getCallingUid();
             EXECUTOR.execute(() -> {
                 try {
@@ -882,7 +893,7 @@ public class AppSearchManagerService extends SystemService {
                     // Obtain the user where the client wants to run the operations in. This should
                     // end up being the same as userHandle, assuming it is not a special user and
                     // the client is allowed to run operations in that user.
-                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingPid, callingUid);
                     verifyUserUnlocked(targetUser);
 
                     AppSearchUserInstance instance =
@@ -929,6 +940,7 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(userHandle);
             Objects.requireNonNull(callback);
 
+            int callingPid = Binder.getCallingPid();
             int callingUid = Binder.getCallingUid();
             EXECUTOR.execute(() -> {
                 try {
@@ -937,7 +949,7 @@ public class AppSearchManagerService extends SystemService {
                     // Obtain the user where the client wants to run the operations in. This should
                     // end up being the same as userHandle, assuming it is not a special user and
                     // the client is allowed to run operations in that user.
-                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingPid, callingUid);
                     verifyUserUnlocked(targetUser);
 
                     AppSearchUserInstance instance =
@@ -994,6 +1006,7 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(userHandle);
             Objects.requireNonNull(callback);
 
+            int callingPid = Binder.getCallingPid();
             int callingUid = Binder.getCallingUid();
             EXECUTOR.execute(() -> {
                 try {
@@ -1002,7 +1015,7 @@ public class AppSearchManagerService extends SystemService {
                     // Obtain the user where the client wants to run the operations in. This should
                     // end up being the same as userHandle, assuming it is not a special user and
                     // the client is allowed to run operations in that user.
-                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingPid, callingUid);
                     verifyUserUnlocked(targetUser);
 
                     AppSearchUserInstance instance =
@@ -1044,6 +1057,7 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(callback);
 
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
+            int callingPid = Binder.getCallingPid();
             int callingUid = Binder.getCallingUid();
             EXECUTOR.execute(() -> {
                 @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
@@ -1056,7 +1070,7 @@ public class AppSearchManagerService extends SystemService {
                     // Obtain the user where the client wants to run the operations in. This should
                     // end up being the same as userHandle, assuming it is not a special user and
                     // the client is allowed to run operations in that user.
-                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingPid, callingUid);
                     verifyUserUnlocked(targetUser);
 
                     AppSearchBatchResult.Builder<String, Void> resultBuilder =
@@ -1133,6 +1147,7 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(callback);
 
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
+            int callingPid = Binder.getCallingPid();
             int callingUid = Binder.getCallingUid();
             EXECUTOR.execute(() -> {
                 @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
@@ -1145,7 +1160,7 @@ public class AppSearchManagerService extends SystemService {
                     // Obtain the user where the client wants to run the operations in. This should
                     // end up being the same as userHandle, assuming it is not a special user and
                     // the client is allowed to run operations in that user.
-                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingPid, callingUid);
                     verifyUserUnlocked(targetUser);
 
                     instance = mAppSearchUserInstanceManager.getUserInstance(targetUser);
@@ -1200,6 +1215,7 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(userHandle);
             Objects.requireNonNull(callback);
 
+            int callingPid = Binder.getCallingPid();
             int callingUid = Binder.getCallingUid();
             EXECUTOR.execute(() -> {
                 try {
@@ -1208,7 +1224,7 @@ public class AppSearchManagerService extends SystemService {
                     // Obtain the user where the client wants to run the operations in. This should
                     // end up being the same as userHandle, assuming it is not a special user and
                     // the client is allowed to run operations in that user.
-                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingPid, callingUid);
                     verifyUserUnlocked(targetUser);
 
                     AppSearchUserInstance instance =
@@ -1233,6 +1249,7 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(userHandle);
 
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
+            int callingPid = Binder.getCallingPid();
             int callingUid = Binder.getCallingUid();
             EXECUTOR.execute(() -> {
                 @AppSearchResult.ResultCode int statusCode = AppSearchResult.RESULT_OK;
@@ -1245,7 +1262,7 @@ public class AppSearchManagerService extends SystemService {
                     // Obtain the user where the client wants to run the operations in. This should
                     // end up being the same as userHandle, assuming it is not a special user and
                     // the client is allowed to run operations in that user.
-                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingPid, callingUid);
                     verifyUserUnlocked(targetUser);
 
                     instance = mAppSearchUserInstanceManager.getUserInstance(targetUser);
@@ -1288,6 +1305,7 @@ public class AppSearchManagerService extends SystemService {
             Objects.requireNonNull(callback);
 
             long totalLatencyStartTimeMillis = SystemClock.elapsedRealtime();
+            int callingPid = Binder.getCallingPid();
             int callingUid = Binder.getCallingUid();
 
             EXECUTOR.execute(() -> {
@@ -1301,7 +1319,7 @@ public class AppSearchManagerService extends SystemService {
                     // Obtain the user where the client wants to run the operations in. This should
                     // end up being the same as userHandle, assuming it is not a special user and
                     // the client is allowed to run operations in that user.
-                    UserHandle targetUser = handleIncomingUser(userHandle, callingUid);
+                    UserHandle targetUser = handleIncomingUser(userHandle, callingPid, callingUid);
                     verifyUserUnlocked(targetUser);
 
                     Context targetUserContext = mContext.createContextAsUser(targetUser,
@@ -1389,12 +1407,22 @@ public class AppSearchManagerService extends SystemService {
     /**
      * Helper for dealing with incoming user arguments to system service calls.
      *
+     * <p>Takes care of checking permissions and if the target is special user, this method will
+     * simply throw.
+     *
      * @param targetUserHandle The user which the caller is requesting to execute as.
+     * @param callingPid The actual pid of the caller as determined by Binder.
      * @param callingUid The actual uid of the caller as determined by Binder.
+     *
      * @return the user handle that the call should run as. Will always be a concrete user.
+     *
+     * @throws IllegalArgumentException if the target user is a special user.
+     * @throws SecurityException if caller trying to interact across user without
+     * {@link Manifest.permission#INTERACT_ACROSS_USERS_FULL}
      */
     @NonNull
-    private UserHandle handleIncomingUser(@NonNull UserHandle targetUserHandle, int callingUid) {
+    private UserHandle handleIncomingUser(@NonNull UserHandle targetUserHandle, int callingPid,
+            int callingUid) {
         UserHandle callingUserHandle = UserHandle.getUserHandleForUid(callingUid);
         if (callingUserHandle.equals(targetUserHandle)) {
             return targetUserHandle;
@@ -1406,9 +1434,16 @@ public class AppSearchManagerService extends SystemService {
                     "Call does not support special user " + targetUserHandle);
         }
 
+        if (mContext.checkPermission(
+                Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                callingPid,
+                callingUid) == PackageManager.PERMISSION_GRANTED) {
+            return targetUserHandle;
+        }
         throw new SecurityException(
-                "Requested user, " + targetUserHandle + ", is not the same as the calling user, "
-                        + callingUserHandle + ".");
+                "Permission denied while calling from uid " + callingUid
+                        + " with " + targetUserHandle + "; Requires permission: "
+                        + Manifest.permission.INTERACT_ACROSS_USERS_FULL);
     }
 
     /**
