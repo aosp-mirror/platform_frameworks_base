@@ -29,7 +29,6 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.view.Display;
 
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.doze.dagger.BrightnessSensor;
@@ -111,7 +110,15 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
     public void transitionTo(DozeMachine.State oldState, DozeMachine.State newState) {
         switch (newState) {
             case INITIALIZED:
+                resetBrightnessToDefault();
+                break;
+            case DOZE_AOD:
+            case DOZE_REQUEST_PULSE:
+            case DOZE_AOD_DOCKED:
+                setLightSensorEnabled(true);
+                break;
             case DOZE:
+                setLightSensorEnabled(false);
                 resetBrightnessToDefault();
                 break;
             case FINISH:
@@ -122,22 +129,6 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
             setScreenOff(newState == DozeMachine.State.DOZE);
             setPaused(newState == DozeMachine.State.DOZE_AOD_PAUSED);
         }
-    }
-
-    @Override
-    public void onScreenState(int state) {
-        boolean isDockedScreenOn = state == Display.STATE_ON && mDockManager.isDocked();
-        if (state == Display.STATE_DOZE || state == Display.STATE_DOZE_SUSPEND
-                || (isDockedScreenOn && shouldRegisterLightSensorWhenScreenOnDocked())) {
-            setLightSensorEnabled(true);
-        } else {
-            setLightSensorEnabled(false);
-        }
-    }
-
-    private boolean shouldRegisterLightSensorWhenScreenOnDocked() {
-        return !mDozeParameters.brightnessUsesProx()
-                || !mDozeParameters.getSelectivelyRegisterSensorsUsingProx();
     }
 
     private void onDestroy() {
