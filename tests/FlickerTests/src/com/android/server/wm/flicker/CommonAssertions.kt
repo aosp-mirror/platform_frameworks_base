@@ -17,6 +17,7 @@
 @file:JvmName("CommonAssertions")
 package com.android.server.wm.flicker
 
+import android.view.Surface
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.traces.common.FlickerComponentName
 
@@ -86,35 +87,33 @@ fun FlickerTestParameter.statusBarLayerIsVisible() {
     }
 }
 
-@JvmOverloads
-fun FlickerTestParameter.navBarLayerRotatesAndScales(
-    beginRotation: Int,
-    endRotation: Int = beginRotation
-) {
-    val startingPos = WindowUtils.getNavigationBarPosition(beginRotation)
-    val endingPos = WindowUtils.getNavigationBarPosition(endRotation)
-
+fun FlickerTestParameter.navBarLayerRotatesAndScales() {
     assertLayersStart {
-        this.visibleRegion(FlickerComponentName.NAV_BAR).coversExactly(startingPos)
+        val rotation = this.entry.displays.firstOrNull()?.transform?.getRotation()
+            ?: Surface.ROTATION_0
+        this.visibleRegion(FlickerComponentName.NAV_BAR)
+                .coversExactly(WindowUtils.getNavigationBarPosition(rotation))
     }
     assertLayersEnd {
-        this.visibleRegion(FlickerComponentName.NAV_BAR).coversExactly(endingPos)
+        val rotation = this.entry.displays.firstOrNull()?.transform?.getRotation()
+            ?: Surface.ROTATION_0
+        this.visibleRegion(FlickerComponentName.NAV_BAR)
+                .coversExactly(WindowUtils.getNavigationBarPosition(rotation))
     }
 }
 
-@JvmOverloads
-fun FlickerTestParameter.statusBarLayerRotatesScales(
-    beginRotation: Int,
-    endRotation: Int = beginRotation
-) {
-    val startingPos = WindowUtils.getStatusBarPosition(beginRotation)
-    val endingPos = WindowUtils.getStatusBarPosition(endRotation)
-
+fun FlickerTestParameter.statusBarLayerRotatesScales() {
     assertLayersStart {
-        this.visibleRegion(FlickerComponentName.STATUS_BAR).coversExactly(startingPos)
+        val rotation = this.entry.displays.firstOrNull()?.transform?.getRotation()
+            ?: Surface.ROTATION_0
+        this.visibleRegion(FlickerComponentName.STATUS_BAR)
+            .coversExactly(WindowUtils.getStatusBarPosition(rotation))
     }
     assertLayersEnd {
-        this.visibleRegion(FlickerComponentName.STATUS_BAR).coversExactly(endingPos)
+        val rotation = this.entry.displays.firstOrNull()?.transform?.getRotation()
+            ?: Surface.ROTATION_0
+        this.visibleRegion(FlickerComponentName.STATUS_BAR)
+            .coversExactly(WindowUtils.getStatusBarPosition(rotation))
     }
 }
 
