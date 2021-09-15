@@ -27,7 +27,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -49,6 +48,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Sensor manager implementation that communicates with the built-in
@@ -119,9 +119,10 @@ public class SystemSensorManager extends SensorManager {
     private final Looper mMainLooper;
     private final int mTargetSdkLevel;
     private final boolean mIsPackageDebuggable;
-    private final boolean mHasHighSamplingRateSensorsPermission;
     private final Context mContext;
     private final long mNativeInstance;
+
+    private Optional<Boolean> mHasHighSamplingRateSensorsPermission = Optional.empty();
 
     /** {@hide} */
     public SystemSensorManager(Context context, Looper mainLooper) {
@@ -138,11 +139,6 @@ public class SystemSensorManager extends SensorManager {
         mContext = context;
         mNativeInstance = nativeCreate(context.getOpPackageName());
         mIsPackageDebuggable = (0 != (appInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE));
-        PackageManager packageManager = context.getPackageManager();
-        mHasHighSamplingRateSensorsPermission =
-                (PERMISSION_GRANTED == packageManager.checkPermission(
-                        HIGH_SAMPLING_RATE_SENSORS_PERMISSION,
-                        appInfo.packageName));
 
         // initialize the sensor list
         for (int index = 0;; ++index) {
@@ -152,7 +148,6 @@ public class SystemSensorManager extends SensorManager {
             mHandleToSensor.put(sensor.getHandle(), sensor);
         }
     }
-
 
     /** @hide */
     @Override
@@ -575,7 +570,7 @@ public class SystemSensorManager extends SensorManager {
                 && isSensorInCappedSet(sensor.getType())
                 && rate > CAPPED_SAMPLING_RATE_LEVEL
                 && mIsPackageDebuggable
-                && !mHasHighSamplingRateSensorsPermission
+                && !hasHighSamplingRateSensorsPermission()
                 && Compatibility.isChangeEnabled(CHANGE_ID_SAMPLING_RATE_SENSORS_PERMISSION)) {
             throw new SecurityException("To use the sampling rate level " + rate
                     + ", app needs to declare the normal permission"
@@ -787,7 +782,7 @@ public class SystemSensorManager extends SensorManager {
             if (mManager.isSensorInCappedSet(sensor.getType())
                     && rateUs < CAPPED_SAMPLING_PERIOD_US
                     && mManager.mIsPackageDebuggable
-                    && !mManager.mHasHighSamplingRateSensorsPermission
+                    && !mManager.hasHighSamplingRateSensorsPermission()
                     && Compatibility.isChangeEnabled(CHANGE_ID_SAMPLING_RATE_SENSORS_PERMISSION)) {
                 throw new SecurityException("To use the sampling rate of " + rateUs
                         + " microseconds, app needs to declare the normal permission"
@@ -1033,5 +1028,16 @@ public class SystemSensorManager extends SensorManager {
                 || sensorType == Sensor.TYPE_GYROSCOPE_UNCALIBRATED
                 || sensorType == Sensor.TYPE_MAGNETIC_FIELD
                 || sensorType == Sensor.TYPE_MAGNETIC_FIELD_UNCALIBRATED);
+    }
+
+    private boolean hasHighSamplingRateSensorsPermission() {
+        if (!mHasHighSamplingRateSensorsPermission.isPresent()) {
+            boolean granted = mContext.getPackageManager().checkPermission(
+                    HIGH_SAMPLING_RATE_SENSORS_PERMISSION,
+                    mContext.getApplicationInfo().packageName) == PERMISSION_GRANTED;
+            mHasHighSamplingRateSensorsPermission = Optional.of(granted);
+        }
+
+        return mHasHighSamplingRateSensorsPermission.get();
     }
 }
