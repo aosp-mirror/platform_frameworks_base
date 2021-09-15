@@ -19,6 +19,7 @@ package com.android.systemui.usb;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
 
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.hardware.usb.IUsbManager;
@@ -109,7 +110,9 @@ public class UsbResolverActivity extends ResolverActivity {
                 mOtherProfileIntent.putParcelableArrayListExtra(EXTRA_RESOLVE_INFOS,
                         rListOtherProfile);
             } else {
-                mOtherProfileIntent = new Intent(this, UsbConfirmActivity.class);
+                mOtherProfileIntent.setComponent(ComponentName.unflattenFromString(
+                        this.getResources().getString(
+                                com.android.internal.R.string.config_usbConfirmActivity)));
                 mOtherProfileIntent.putExtra(EXTRA_RESOLVE_INFO, rListOtherProfile.get(0));
 
                 if (mDevice != null) {
