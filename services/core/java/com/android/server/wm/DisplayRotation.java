@@ -444,7 +444,9 @@ public class DisplayRotation {
             }
 
             if (mDisplayContent.mFixedRotationTransitionListener
-                    .isTopFixedOrientationRecentsAnimating()) {
+                    .isTopFixedOrientationRecentsAnimating()
+                    // If screen is off or the device is going to sleep, then still allow to update.
+                    && mService.mPolicy.okToAnimate(false /* ignoreScreenOn */)) {
                 // During the recents animation, the closing app might still be considered on top.
                 // In order to ignore its requested orientation to avoid a sensor led rotation (e.g
                 // user rotating the device while the recents animation is running), we ignore
