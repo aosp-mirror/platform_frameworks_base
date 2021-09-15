@@ -93,9 +93,11 @@ public final class TranslationResponseValue implements Parcelable {
     @NonNull
     private final Bundle mExtras;
 
+    // TODO: Add example of transliteration.
     /**
      * The transliteration result of the translated text.
-     * TODO: Describe the result structure.
+     *
+     * <p>This returns a CharSequence representation of the transliteration of the translated text.
      */
     @Nullable
     private final CharSequence mTransliteration;
@@ -223,7 +225,8 @@ public final class TranslationResponseValue implements Parcelable {
 
     /**
      * The transliteration result of the translated text.
-     * TODO: Describe the result structure.
+     *
+     * <p>This returns a CharSequence representation of the transliteration of the translated text.
      */
     @DataClass.Generated.Member
     public @Nullable CharSequence getTransliteration() {
@@ -407,7 +410,8 @@ public final class TranslationResponseValue implements Parcelable {
 
         /**
          * The transliteration result of the translated text.
-         * TODO: Describe the result structure.
+         *
+         * <p>This returns a CharSequence representation of the transliteration of the translated text.
          */
         @DataClass.Generated.Member
         public @NonNull Builder setTransliteration(@NonNull CharSequence value) {
@@ -448,7 +452,7 @@ public final class TranslationResponseValue implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1622133051937L,
+            time = 1631057245846L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/view/translation/TranslationResponseValue.java",
             inputSignatures = "public static final  int STATUS_SUCCESS\npublic static final  int STATUS_ERROR\npublic static final  java.lang.String EXTRA_DEFINITIONS\nprivate final @android.view.translation.TranslationResponseValue.Status int mStatusCode\nprivate final @android.annotation.Nullable java.lang.CharSequence mText\nprivate final @android.annotation.NonNull android.os.Bundle mExtras\nprivate final @android.annotation.Nullable java.lang.CharSequence mTransliteration\npublic static @android.annotation.NonNull android.view.translation.TranslationResponseValue forError()\nprivate static  java.lang.CharSequence defaultText()\nprivate static  android.os.Bundle defaultExtras()\nprivate  boolean extrasEquals(android.os.Bundle)\nprivate static  java.lang.CharSequence defaultTransliteration()\nclass TranslationResponseValue extends java.lang.Object implements [android.os.Parcelable]\nclass BaseBuilder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genBuilder=true, genToString=true, genEqualsHashCode=true, genHiddenConstDefs=true)\nclass BaseBuilder extends java.lang.Object implements []")

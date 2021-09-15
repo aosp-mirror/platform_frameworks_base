@@ -24,7 +24,7 @@ import com.android.internal.os.IResultReceiver;
 /**
  * System-wide on-device translation service.
  *
- * <p>Services requests to translate text between different languages. The primary use case for this
+ * <p>Services requests to translate data between different languages. The primary use case for this
  * service is automatic translation of text and web views, when the auto Translate feature is
  * enabled.
  *

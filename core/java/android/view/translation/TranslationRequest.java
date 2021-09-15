@@ -39,12 +39,16 @@ public final class TranslationRequest implements Parcelable {
     public static final @RequestFlags int FLAG_TRANSLATION_RESULT = 0x1;
     /**
      * Indicates this request wants to receive the dictionary result.
-     * TODO: describe the structure of the result.
+     *
+     * <p>See {@link TranslationResponseValue#EXTRA_DEFINITIONS} for more detail on the structure
+     * of the returned data.
      */
     public static final @RequestFlags int FLAG_DICTIONARY_RESULT = 0x2;
     /**
      * Indicates this request wants to receive the transliteration result.
-     * TODO: describe the structure of the result.
+     *
+     * <p>This returns a CharSequence representation of the transliteration of the translated text.
+     *  See {@link TranslationResponseValue#getTransliteration()}.
      */
     public static final @RequestFlags int FLAG_TRANSLITERATION_RESULT = 0x4;
     /**
@@ -327,7 +331,8 @@ public final class TranslationRequest implements Parcelable {
             return this;
         }
 
-        /** @see #setTranslationRequestValues
+        /**
+         * @see #setTranslationRequestValues
          * @removed
          */
         @DataClass.Generated.Member
@@ -352,7 +357,8 @@ public final class TranslationRequest implements Parcelable {
             return this;
         }
 
-        /** @see #setViewTranslationRequests
+        /**
+         * @see #setViewTranslationRequests
          * @removed
          */
         @DataClass.Generated.Member
@@ -394,7 +400,7 @@ public final class TranslationRequest implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1620429997487L,
+            time = 1629159107226L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/view/translation/TranslationRequest.java",
             inputSignatures = "public static final @android.view.translation.TranslationRequest.RequestFlags int FLAG_TRANSLATION_RESULT\npublic static final @android.view.translation.TranslationRequest.RequestFlags int FLAG_DICTIONARY_RESULT\npublic static final @android.view.translation.TranslationRequest.RequestFlags int FLAG_TRANSLITERATION_RESULT\npublic static final @android.view.translation.TranslationRequest.RequestFlags int FLAG_PARTIAL_RESPONSES\nprivate final @android.view.translation.TranslationRequest.RequestFlags int mFlags\nprivate final @android.annotation.NonNull @com.android.internal.util.DataClass.PluralOf(\"translationRequestValue\") java.util.List<android.view.translation.TranslationRequestValue> mTranslationRequestValues\nprivate final @android.annotation.NonNull @com.android.internal.util.DataClass.PluralOf(\"viewTranslationRequest\") java.util.List<android.view.translation.ViewTranslationRequest> mViewTranslationRequests\nprivate static  int defaultFlags()\nprivate static  java.util.List<android.view.translation.TranslationRequestValue> defaultTranslationRequestValues()\nprivate static  java.util.List<android.view.translation.ViewTranslationRequest> defaultViewTranslationRequests()\nclass TranslationRequest extends java.lang.Object implements [android.os.Parcelable]\npublic abstract @java.lang.Deprecated android.view.translation.TranslationRequest.Builder addTranslationRequestValue(android.view.translation.TranslationRequestValue)\npublic abstract @java.lang.Deprecated android.view.translation.TranslationRequest.Builder addViewTranslationRequest(android.view.translation.ViewTranslationRequest)\nclass BaseBuilder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genToString=true, genHiddenConstDefs=true, genBuilder=true)\npublic abstract @java.lang.Deprecated android.view.translation.TranslationRequest.Builder addTranslationRequestValue(android.view.translation.TranslationRequestValue)\npublic abstract @java.lang.Deprecated android.view.translation.TranslationRequest.Builder addViewTranslationRequest(android.view.translation.ViewTranslationRequest)\nclass BaseBuilder extends java.lang.Object implements []")

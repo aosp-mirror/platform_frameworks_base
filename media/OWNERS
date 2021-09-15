@@ -1,8 +1,7 @@
-chz@google.com
+# Bug component: 1344
 elaurent@google.com
 essick@google.com
 etalvala@google.com
-gkasten@google.com
 hdmoon@google.com
 hkuang@google.com
 hunga@google.com
@@ -13,16 +12,13 @@ jmtrivi@google.com
 jsharkey@android.com
 klhyun@google.com
 lajos@google.com
-marcone@google.com
 nchalko@google.com
 philburk@google.com
 quxiangfang@google.com
 wonsik@google.com
 
-# LON
-andrewlewis@google.com
-aquilescanta@google.com
-olly@google.com
+# go/android-fwk-media-solutions for info on areas of ownership.
+include platform/frameworks/av:/media/janitors/media_solutions_OWNERS
 
 # SEO
 sungsoo@google.com
