@@ -313,9 +313,15 @@ package android.app {
   }
 
   public final class PendingIntent implements android.os.Parcelable {
+    method public boolean addCancelListener(@NonNull java.util.concurrent.Executor, @NonNull android.app.PendingIntent.CancelListener);
     method @RequiresPermission("android.permission.GET_INTENT_SENDER_INTENT") public boolean intentFilterEquals(@Nullable android.app.PendingIntent);
     method @NonNull @RequiresPermission("android.permission.GET_INTENT_SENDER_INTENT") public java.util.List<android.content.pm.ResolveInfo> queryIntentComponents(int);
+    method public void removeCancelListener(@NonNull android.app.PendingIntent.CancelListener);
     field @Deprecated public static final int FLAG_MUTABLE_UNAUDITED = 33554432; // 0x2000000
+  }
+
+  public static interface PendingIntent.CancelListener {
+    method public void onCancelled(@NonNull android.app.PendingIntent);
   }
 
   public final class PictureInPictureParams implements android.os.Parcelable {

@@ -4990,8 +4990,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void registerIntentSenderCancelListener(IIntentSender sender, IResultReceiver receiver) {
-        mPendingIntentController.registerIntentSenderCancelListener(sender, receiver);
+    public boolean registerIntentSenderCancelListenerEx(
+            IIntentSender sender, IResultReceiver receiver) {
+        return mPendingIntentController.registerIntentSenderCancelListener(sender, receiver);
     }
 
     @Override
