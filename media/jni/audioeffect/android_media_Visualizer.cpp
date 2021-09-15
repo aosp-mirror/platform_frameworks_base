@@ -15,6 +15,7 @@
  */
 
 #include <stdio.h>
+#include <unordered_set>
 
 //#define LOG_NDEBUG 0
 #define LOG_TAG "visualizers-JNI"
@@ -63,6 +64,12 @@ struct visualizer_callback_cookie {
     jclass      visualizer_class;  // Visualizer class
     jobject     visualizer_ref;    // Visualizer object instance
 
+    // 'busy_count' and 'cond' together with 'sLock' are used to serialize
+    // concurrent access to the callback cookie from 'setup'/'release'
+    // and the callback.
+    int         busy_count;
+    Condition   cond;
+
     // Lazily allocated arrays used to hold callback data provided to java
     // applications.  These arrays are allocated during the first callback and
     // reallocated when the size of the callback data changes.  Allocating on
@@ -70,14 +77,12 @@ struct visualizer_callback_cookie {
     // reference to the provided data (they need to make a copy if they want to
     // hold onto outside of the callback scope), but it avoids GC thrash caused
     // by constantly allocating and releasing arrays to hold callback data.
+    // 'callback_data_lock' must never be held at the same time with 'sLock'.
     Mutex       callback_data_lock;
     jbyteArray  waveform_data;
     jbyteArray  fft_data;
 
-    visualizer_callback_cookie() {
-        waveform_data = NULL;
-        fft_data = NULL;
-    }
+    // Assumes use of default initialization by the client.
 
     ~visualizer_callback_cookie() {
         cleanupBuffers();
@@ -102,15 +107,8 @@ struct visualizer_callback_cookie {
  };
 
 // ----------------------------------------------------------------------------
-class VisualizerJniStorage {
-    public:
-        visualizer_callback_cookie mCallbackData;
-
-    VisualizerJniStorage() {
-    }
-
-    ~VisualizerJniStorage() {
-    }
+struct VisualizerJniStorage {
+    visualizer_callback_cookie mCallbackData{};
 };
 
 
@@ -136,6 +134,7 @@ static jint translateError(int code) {
 }
 
 static Mutex sLock;
+static std::unordered_set<visualizer_callback_cookie*> sVisualizerCallBackCookies;
 
 // ----------------------------------------------------------------------------
 static void ensureArraySize(JNIEnv *env, jbyteArray *array, uint32_t size) {
@@ -173,11 +172,19 @@ static void captureCallback(void* user,
         return;
     }
 
+    {
+        Mutex::Autolock l(sLock);
+        if (sVisualizerCallBackCookies.count(callbackInfo) == 0) {
+            return;
+        }
+        callbackInfo->busy_count++;
+    }
     ALOGV("captureCallback: callbackInfo %p, visualizer_ref %p visualizer_class %p",
             callbackInfo,
             callbackInfo->visualizer_ref,
             callbackInfo->visualizer_class);
 
+    {
     AutoMutex lock(&callbackInfo->callback_data_lock);
 
     if (waveformSize != 0 && waveform != NULL) {
@@ -219,10 +226,16 @@ static void captureCallback(void* user,
                 jArray);
         }
     }
+    }  // callback_data_lock scope
 
     if (env->ExceptionCheck()) {
         env->ExceptionDescribe();
         env->ExceptionClear();
+    }
+    {
+        Mutex::Autolock l(sLock);
+        callbackInfo->busy_count--;
+        callbackInfo->cond.broadcast();
     }
 }
 
@@ -332,9 +345,25 @@ static void android_media_visualizer_effect_callback(int32_t event,
                                                      void *info) {
     if ((event == AudioEffect::EVENT_ERROR) &&
         (*((status_t*)info) == DEAD_OBJECT)) {
-        VisualizerJniStorage* lpJniStorage = (VisualizerJniStorage*)user;
-        visualizer_callback_cookie* callbackInfo = &lpJniStorage->mCallbackData;
+        visualizer_callback_cookie* callbackInfo =
+                (visualizer_callback_cookie *)user;
         JNIEnv *env = AndroidRuntime::getJNIEnv();
+
+        if (!user || !env) {
+            ALOGW("effectCallback error user %p, env %p", user, env);
+            return;
+        }
+        {
+            Mutex::Autolock l(sLock);
+            if (sVisualizerCallBackCookies.count(callbackInfo) == 0) {
+                return;
+            }
+            callbackInfo->busy_count++;
+        }
+        ALOGV("effectCallback: callbackInfo %p, visualizer_ref %p visualizer_class %p",
+            callbackInfo,
+            callbackInfo->visualizer_ref,
+            callbackInfo->visualizer_class);
 
         env->CallStaticVoidMethod(
             callbackInfo->visualizer_class,
@@ -342,6 +371,15 @@ static void android_media_visualizer_effect_callback(int32_t event,
             callbackInfo->visualizer_ref,
             NATIVE_EVENT_SERVER_DIED,
             0, NULL);
+        if (env->ExceptionCheck()) {
+            env->ExceptionDescribe();
+            env->ExceptionClear();
+        }
+        {
+            Mutex::Autolock l(sLock);
+            callbackInfo->busy_count--;
+            callbackInfo->cond.broadcast();
+        }
     }
 }
 
@@ -389,7 +427,7 @@ android_media_visualizer_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
     }
     lpVisualizer->set(0,
                       android_media_visualizer_effect_callback,
-                      lpJniStorage,
+                      &lpJniStorage->mCallbackData,
                       (audio_session_t) sessionId);
 
     lStatus = translateError(lpVisualizer->initCheck());
@@ -410,6 +448,10 @@ android_media_visualizer_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
 
     setVisualizer(env, thiz, lpVisualizer);
 
+    {
+        Mutex::Autolock l(sLock);
+        sVisualizerCallBackCookies.insert(&lpJniStorage->mCallbackData);
+    }
     env->SetLongField(thiz, fields.fidJniData, (jlong)lpJniStorage);
 
     return VISUALIZER_SUCCESS;
@@ -432,13 +474,15 @@ setup_failure:
 }
 
 // ----------------------------------------------------------------------------
+#define CALLBACK_COND_WAIT_TIMEOUT_MS 1000
 static void android_media_visualizer_native_release(JNIEnv *env,  jobject thiz) {
-    { //limit scope so that lpVisualizer is deleted before JNI storage data.
+    {
         sp<Visualizer> lpVisualizer = setVisualizer(env, thiz, 0);
         if (lpVisualizer == 0) {
             return;
         }
         lpVisualizer->release();
+        // Visualizer can still can be held by AudioEffect::EffectClient
     }
     // delete the JNI data
     VisualizerJniStorage* lpJniStorage =
@@ -449,9 +493,22 @@ static void android_media_visualizer_native_release(JNIEnv *env,  jobject thiz) 
     env->SetLongField(thiz, fields.fidJniData, 0);
 
     if (lpJniStorage) {
+        {
+        Mutex::Autolock l(sLock);
+        visualizer_callback_cookie *lpCookie = &lpJniStorage->mCallbackData;
         ALOGV("deleting pJniStorage: %p\n", lpJniStorage);
+        sVisualizerCallBackCookies.erase(lpCookie);
+        while (lpCookie->busy_count > 0) {
+            if (lpCookie->cond.waitRelative(sLock,
+                                            milliseconds(CALLBACK_COND_WAIT_TIMEOUT_MS)) !=
+                                                    NO_ERROR) {
+                break;
+            }
+        }
+        ALOG_ASSERT(lpCookie->busy_count == 0, "Unbalanced busy_count inc/dec");
         env->DeleteGlobalRef(lpJniStorage->mCallbackData.visualizer_class);
         env->DeleteGlobalRef(lpJniStorage->mCallbackData.visualizer_ref);
+        }  // sLock scope
         delete lpJniStorage;
     }
 }
@@ -707,4 +764,3 @@ int register_android_media_visualizer(JNIEnv *env)
 {
     return AndroidRuntime::registerNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods));
 }
-
