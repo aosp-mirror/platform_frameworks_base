@@ -14,15 +14,20 @@
 
 package com.android.internal.util;
 
+import static android.os.Trace.TRACE_TAG_APP;
+
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Build;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.provider.DeviceConfig;
+import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
-import android.util.SparseLongArray;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.EventLogTags;
@@ -31,6 +36,7 @@ import com.android.internal.os.BackgroundThread;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Class to track various latencies in SystemUI. It then writes the latency to statsd and also
@@ -44,6 +50,7 @@ public class LatencyTracker {
     private static final String TAG = "LatencyTracker";
     private static final String SETTINGS_ENABLED_KEY = "enabled";
     private static final String SETTINGS_SAMPLING_INTERVAL_KEY = "sampling_interval";
+    private static final boolean DEBUG = false;
     /** Default to being enabled on debug builds. */
     private static final boolean DEFAULT_ENABLED = Build.IS_DEBUGGABLE;
     /** Default to collecting data for 1/5 of all actions (randomly sampled). */
@@ -162,7 +169,8 @@ public class LatencyTracker {
     private static LatencyTracker sLatencyTracker;
 
     private final Object mLock = new Object();
-    private final SparseLongArray mStartRtc = new SparseLongArray();
+    @GuardedBy("mLock")
+    private final SparseArray<Session> mSessions = new SparseArray<>();
     @GuardedBy("mLock")
     private final int[] mTraceThresholdPerAction = new int[ACTIONS_ALL.length];
     @GuardedBy("mLock")
@@ -244,8 +252,12 @@ public class LatencyTracker {
         }
     }
 
-    private static String getTraceNameOfAction(@Action int action) {
-        return "L<" + getNameOfAction(STATSD_ACTION[action]) + ">";
+    private static String getTraceNameOfAction(@Action int action, String tag) {
+        if (TextUtils.isEmpty(tag)) {
+            return "L<" + getNameOfAction(STATSD_ACTION[action]) + ">";
+        } else {
+            return "L<" + getNameOfAction(STATSD_ACTION[action]) + "::" + tag + ">";
+        }
     }
 
     private static String getTraceTriggerNameForAction(@Action int action) {
@@ -263,35 +275,82 @@ public class LatencyTracker {
     }
 
     /**
-     * Notifies that an action is starting. This needs to be called from the main thread.
+     * Notifies that an action is starting. <s>This needs to be called from the main thread.</s>
      *
      * @param action The action to start. One of the ACTION_* values.
      */
     public void onActionStart(@Action int action) {
-        if (!isEnabled()) {
-            return;
-        }
-        Trace.asyncTraceBegin(Trace.TRACE_TAG_APP, getTraceNameOfAction(action), 0);
-        mStartRtc.put(action, SystemClock.elapsedRealtime());
+        onActionStart(action, null);
     }
 
     /**
-     * Notifies that an action has ended. This needs to be called from the main thread.
+     * Notifies that an action is starting. <s>This needs to be called from the main thread.</s>
+     *
+     * @param action The action to start. One of the ACTION_* values.
+     * @param tag The brief description of the action.
+     */
+    public void onActionStart(@Action int action, String tag) {
+        synchronized (mLock) {
+            if (!isEnabled()) {
+                return;
+            }
+            // skip if the action is already instrumenting.
+            if (mSessions.get(action) != null) {
+                return;
+            }
+            Session session = new Session(action, tag);
+            session.begin(() -> onActionCancel(action));
+            mSessions.put(action, session);
+
+            if (DEBUG) {
+                Log.d(TAG, "onActionStart: " + session.name() + ", start=" + session.mStartRtc);
+            }
+        }
+    }
+
+    /**
+     * Notifies that an action has ended. <s>This needs to be called from the main thread.</s>
      *
      * @param action The action to end. One of the ACTION_* values.
      */
     public void onActionEnd(@Action int action) {
-        if (!isEnabled()) {
-            return;
+        synchronized (mLock) {
+            if (!isEnabled()) {
+                return;
+            }
+            Session session = mSessions.get(action);
+            if (session == null) {
+                return;
+            }
+            session.end();
+            mSessions.delete(action);
+            logAction(action, session.duration());
+
+            if (DEBUG) {
+                Log.d(TAG, "onActionEnd:" + session.name() + ", duration=" + session.duration());
+            }
         }
-        long endRtc = SystemClock.elapsedRealtime();
-        long startRtc = mStartRtc.get(action, -1);
-        if (startRtc == -1) {
-            return;
+    }
+
+    /**
+     * Notifies that an action has canceled. <s>This needs to be called from the main thread.</s>
+     *
+     * @param action The action to cancel. One of the ACTION_* values.
+     * @hide
+     */
+    public void onActionCancel(@Action int action) {
+        synchronized (mLock) {
+            Session session = mSessions.get(action);
+            if (session == null) {
+                return;
+            }
+            session.cancel();
+            mSessions.delete(action);
+
+            if (DEBUG) {
+                Log.d(TAG, "onActionCancel: " + session.name());
+            }
         }
-        mStartRtc.delete(action);
-        Trace.asyncTraceEnd(Trace.TRACE_TAG_APP, getTraceNameOfAction(action), 0);
-        logAction(action, (int) (endRtc - startRtc));
     }
 
     /**
@@ -330,6 +389,59 @@ public class LatencyTracker {
         if (writeToStatsLog) {
             FrameworkStatsLog.write(
                     FrameworkStatsLog.UI_ACTION_LATENCY_REPORTED, STATSD_ACTION[action], duration);
+        }
+    }
+
+    static class Session {
+        @Action
+        private final int mAction;
+        private final String mTag;
+        private final String mName;
+        private Runnable mTimeoutRunnable;
+        private long mStartRtc = -1;
+        private long mEndRtc = -1;
+
+        Session(@Action int action, @Nullable String tag) {
+            mAction = action;
+            mTag = tag;
+            mName = TextUtils.isEmpty(mTag)
+                    ? getNameOfAction(STATSD_ACTION[mAction])
+                    : getNameOfAction(STATSD_ACTION[mAction]) + "::" + mTag;
+        }
+
+        String name() {
+            return mName;
+        }
+
+        String traceName() {
+            return getTraceNameOfAction(mAction, mTag);
+        }
+
+        void begin(@NonNull Runnable timeoutAction) {
+            mStartRtc = SystemClock.elapsedRealtime();
+            Trace.asyncTraceBegin(TRACE_TAG_APP, traceName(), 0);
+
+            // start counting timeout.
+            mTimeoutRunnable = timeoutAction;
+            BackgroundThread.getHandler()
+                    .postDelayed(mTimeoutRunnable, TimeUnit.SECONDS.toMillis(2));
+        }
+
+        void end() {
+            mEndRtc = SystemClock.elapsedRealtime();
+            Trace.asyncTraceEnd(TRACE_TAG_APP, traceName(), 0);
+            BackgroundThread.getHandler().removeCallbacks(mTimeoutRunnable);
+            mTimeoutRunnable = null;
+        }
+
+        void cancel() {
+            Trace.asyncTraceEnd(TRACE_TAG_APP, traceName(), 0);
+            BackgroundThread.getHandler().removeCallbacks(mTimeoutRunnable);
+            mTimeoutRunnable = null;
+        }
+
+        int duration() {
+            return (int) (mEndRtc - mStartRtc);
         }
     }
 }
