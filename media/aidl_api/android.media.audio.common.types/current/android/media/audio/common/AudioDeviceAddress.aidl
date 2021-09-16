@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,10 @@
 package android.media.audio.common;
 /* @hide */
 @JavaDerive(equals=true, toString=true) @VintfStability
-parcelable AudioDevice {
-  android.media.audio.common.AudioDeviceDescription type;
-  android.media.audio.common.AudioDeviceAddress address;
+union AudioDeviceAddress {
+  @utf8InCpp String id;
+  byte[] mac;
+  byte[] ipv4;
+  int[] ipv6;
+  int[] alsa;
 }

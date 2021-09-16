@@ -57,6 +57,7 @@ aidl_interface {
         "aidl/android/media/audio/common/AudioConfigBase.aidl",
         "aidl/android/media/audio/common/AudioContentType.aidl",
         "aidl/android/media/audio/common/AudioDevice.aidl",
+        "aidl/android/media/audio/common/AudioDeviceAddress.aidl",
         "aidl/android/media/audio/common/AudioDeviceDescription.aidl",
         "aidl/android/media/audio/common/AudioDeviceType.aidl",
         "aidl/android/media/audio/common/AudioEncapsulationMetadataType.aidl",

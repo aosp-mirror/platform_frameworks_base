@@ -16,6 +16,7 @@
 
 package android.media.audio.common;
 
+import android.media.audio.common.AudioDeviceAddress;
 import android.media.audio.common.AudioDeviceDescription;
 
 /**
@@ -28,5 +29,5 @@ import android.media.audio.common.AudioDeviceDescription;
 @VintfStability
 parcelable AudioDevice {
     AudioDeviceDescription type;
-    @utf8InCpp String address;
+    AudioDeviceAddress address;
 }
