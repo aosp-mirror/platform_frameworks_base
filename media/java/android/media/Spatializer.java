@@ -49,19 +49,7 @@ public class Spatializer {
 
     private final @NonNull AudioManager mAm;
 
-    private final Object mStateListenerLock = new Object();
-
     private static final String TAG = "Spatializer";
-
-    /**
-     * List of listeners for state listener and their associated Executor.
-     * List is lazy-initialized on first registration
-     */
-    @GuardedBy("mStateListenerLock")
-    private @Nullable ArrayList<StateListenerInfo> mStateListeners;
-
-    @GuardedBy("mStateListenerLock")
-    private SpatializerInfoDispatcherStub mInfoDispatcherStub;
 
     /**
      * @hide
@@ -141,6 +129,75 @@ public class Spatializer {
      */
     public static final int SPATIALIZER_IMMERSIVE_LEVEL_MULTICHANNEL = 1;
 
+    /** @hide */
+    @IntDef(flag = false, value = {
+            HEAD_TRACKING_MODE_UNSUPPORTED,
+            HEAD_TRACKING_MODE_DISABLED,
+            HEAD_TRACKING_MODE_RELATIVE_WORLD,
+            HEAD_TRACKING_MODE_RELATIVE_DEVICE,
+    }) public @interface HeadTrackingMode {};
+
+    /** @hide */
+    @IntDef(flag = false, value = {
+            HEAD_TRACKING_MODE_DISABLED,
+            HEAD_TRACKING_MODE_RELATIVE_WORLD,
+            HEAD_TRACKING_MODE_RELATIVE_DEVICE,
+    }) public @interface HeadTrackingModeSet {};
+
+    /** @hide */
+    @IntDef(flag = false, value = {
+            HEAD_TRACKING_MODE_RELATIVE_WORLD,
+            HEAD_TRACKING_MODE_RELATIVE_DEVICE,
+    }) public @interface HeadTrackingModeSupported {};
+
+    /**
+     * @hide
+     * Constant indicating head tracking is not supported by this {@code Spatializer}
+     * @see #getHeadTrackingMode()
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
+    public static final int HEAD_TRACKING_MODE_UNSUPPORTED = -2;
+
+    /**
+     * @hide
+     * Constant indicating head tracking is disabled on this {@code Spatializer}
+     * @see #getHeadTrackingMode()
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
+    public static final int HEAD_TRACKING_MODE_DISABLED = -1;
+
+    /**
+     * @hide
+     * Constant indicating head tracking is in a mode whose behavior is unknown. This is not an
+     * error state but represents a customized behavior not defined by this API.
+     * @see #getHeadTrackingMode()
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
+    public static final int HEAD_TRACKING_MODE_OTHER = 0;
+
+    /**
+     * @hide
+     * Constant indicating head tracking is tracking the user's position / orientation relative to
+     * the world around them
+     * @see #getHeadTrackingMode()
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
+    public static final int HEAD_TRACKING_MODE_RELATIVE_WORLD = 1;
+
+    /**
+     * @hide
+     * Constant indicating head tracking is tracking the user's position / orientation relative to
+     * the device
+     * @see #getHeadTrackingMode()
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
+    public static final int HEAD_TRACKING_MODE_RELATIVE_DEVICE = 2;
+
     /**
      * Return the level of support for the spatialization feature on this device.
      * This level of support is independent of whether the {@code Spatializer} is currently
@@ -176,7 +233,7 @@ public class Spatializer {
     }
 
     /**
-     * An interface to be notified of changes to the state of the spatializer.
+     * An interface to be notified of changes to the state of the spatializer effect.
      */
     public interface OnSpatializerStateChangedListener {
         /**
@@ -197,6 +254,58 @@ public class Spatializer {
          * @see #isAvailable()
          */
         void onSpatializerAvailableChanged(@NonNull Spatializer spat, boolean available);
+    }
+
+    /**
+     * @hide
+     * An interface to be notified of changes to the head tracking mode, used by the spatializer
+     * effect.
+     * Changes to the mode may come from explicitly setting a different mode
+     * (see {@link #setDesiredHeadTrackingMode(int)}) or a change in system conditions (see
+     * {@link #getHeadTrackingMode()}
+     * @see #addOnHeadTrackingModeChangedListener(Executor, OnHeadTrackingModeChangedListener)
+     * @see #removeOnHeadTrackingModeChangedListener(OnHeadTrackingModeChangedListener)
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    public interface OnHeadTrackingModeChangedListener {
+        /**
+         * Called when the actual head tracking mode of the spatializer changed.
+         * @param spatializer the {@code Spatializer} instance whose head tracking mode is changing
+         * @param mode the new head tracking mode
+         */
+        void onHeadTrackingModeChanged(@NonNull Spatializer spatializer,
+                @HeadTrackingMode int mode);
+
+        /**
+         * Called when the desired head tracking mode of the spatializer changed
+         * @param spatializer the {@code Spatializer} instance whose head tracking mode was set
+         * @param mode the newly set head tracking mode
+         */
+        void onDesiredHeadTrackingModeChanged(@NonNull Spatializer spatializer,
+                @HeadTrackingModeSet int mode);
+    }
+
+    /**
+     * @hide
+     * An interface to be notified of updates to the head to soundstage pose, as represented by the
+     * current head tracking mode.
+     * @see #setOnHeadToSoundstagePoseUpdatedListener(Executor, OnHeadToSoundstagePoseUpdatedListener)
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    public interface OnHeadToSoundstagePoseUpdatedListener {
+        /**
+         * Called when the head to soundstage transform is updated
+         * @param spatializer the {@code Spatializer} instance affected by the pose update
+         * @param pose the new pose data representing the transform between the frame
+         *                 of reference for the current head tracking mode (see
+         *                 {@link #getHeadTrackingMode()}) and the device being tracked (for
+         *                 instance a pair of headphones with a head tracker).<br>
+         *                 The head pose data is represented as an array of six float values, where
+         *                 the first three values are the translation vector, and the next three
+         *                 are the rotation vector.
+         */
+        void onHeadToSoundstagePoseUpdated(@NonNull Spatializer spatializer,
+                @NonNull float[] pose);
     }
 
     /**
@@ -342,6 +451,17 @@ public class Spatializer {
         }
     }
 
+    private final Object mStateListenerLock = new Object();
+    /**
+     * List of listeners for state listener and their associated Executor.
+     * List is lazy-initialized on first registration
+     */
+    @GuardedBy("mStateListenerLock")
+    private @Nullable ArrayList<StateListenerInfo> mStateListeners;
+
+    @GuardedBy("mStateListenerLock")
+    private @Nullable SpatializerInfoDispatcherStub mInfoDispatcherStub;
+
     private final class SpatializerInfoDispatcherStub extends ISpatializerCallback.Stub {
         @Override
         public void dispatchSpatializerEnabledChanged(boolean enabled) {
@@ -422,5 +542,379 @@ public class Spatializer {
             return true;
         }
         return false;
+    }
+
+
+    /**
+     * @hide
+     * Return the current head tracking mode as used by the system.
+     * Note this may differ from the desired head tracking mode. Reasons for the two to differ
+     * include: a head tracking device is not available for the current audio output device,
+     * the transmission conditions between the tracker and device have deteriorated and tracking
+     * has been disabled.
+     * @see #getDesiredHeadTrackingMode()
+     * @return the current head tracking mode
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
+    public @HeadTrackingMode int getHeadTrackingMode() {
+        try {
+            return mAm.getService().getActualHeadTrackingMode();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling getActualHeadTrackingMode", e);
+            return HEAD_TRACKING_MODE_UNSUPPORTED;
+        }
+
+    }
+
+    /**
+     * @hide
+     * Return the desired head tracking mode.
+     * Note this may differ from the actual head tracking mode, reflected by
+     * {@link #getHeadTrackingMode()}.
+     * @return the desired head tring mode
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
+    public @HeadTrackingMode int getDesiredHeadTrackingMode() {
+        try {
+            return mAm.getService().getDesiredHeadTrackingMode();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling getDesiredHeadTrackingMode", e);
+            return HEAD_TRACKING_MODE_UNSUPPORTED;
+        }
+    }
+
+    /**
+     * @hide
+     * Returns the list of supported head tracking modes.
+     * @return the list of modes that can be used in {@link #setDesiredHeadTrackingMode(int)} to
+     *         enable head tracking. The list will be empty if {@link #getHeadTrackingMode()}
+     *         is {@link #HEAD_TRACKING_MODE_UNSUPPORTED}. Values can be
+     *         {@link #HEAD_TRACKING_MODE_OTHER},
+     *         {@link #HEAD_TRACKING_MODE_RELATIVE_WORLD} or
+     *         {@link #HEAD_TRACKING_MODE_RELATIVE_DEVICE}
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
+    public @NonNull List<Integer> getSupportedHeadTrackingModes() {
+        try {
+            final int[] modes = mAm.getService().getSupportedHeadTrackingModes();
+            final ArrayList<Integer> list = new ArrayList<>(0);
+            for (int mode : modes) {
+                list.add(mode);
+            }
+            return list;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling getSupportedHeadTrackModes", e);
+            return new ArrayList(0);
+        }
+    }
+
+    /**
+     * @hide
+     * Sets the desired head tracking mode.
+     * Note a set desired mode may differ from the actual head tracking mode.
+     * @see #getHeadTrackingMode()
+     * @param mode the desired head tracking mode, one of the values returned by
+     *             {@link #getSupportedHeadTrackModes()}, or {@link #HEAD_TRACKING_MODE_DISABLED} to
+     *             disable head tracking.
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
+    public void setDesiredHeadTrackingMode(@HeadTrackingModeSet int mode) {
+        try {
+            mAm.getService().setDesiredHeadTrackingMode(mode);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling setDesiredHeadTrackingMode to " + mode, e);
+        }
+    }
+
+    /**
+     * @hide
+     * Recenters the head tracking at the current position / orientation.
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
+    public void recenterHeadTracker() {
+        try {
+            mAm.getService().recenterHeadTracker();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling recenterHeadTracker", e);
+        }
+    }
+
+    /**
+     * @hide
+     * Adds a listener to be notified of changes to the head tracking mode of the
+     * {@code Spatializer}
+     * @param executor the {@code Executor} handling the callbacks
+     * @param listener the listener to register
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
+    public void addOnHeadTrackingModeChangedListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnHeadTrackingModeChangedListener listener) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(listener);
+        synchronized (mHeadTrackingListenerLock) {
+            if (hasListener(listener, mHeadTrackingListeners)) {
+                throw new IllegalArgumentException(
+                        "Called addOnHeadTrackingModeChangedListener() "
+                                + "on a previously registered listener");
+            }
+            // lazy initialization of the list of strategy-preferred device listener
+            if (mHeadTrackingListeners == null) {
+                mHeadTrackingListeners = new ArrayList<>();
+            }
+            mHeadTrackingListeners.add(
+                    new ListenerInfo<OnHeadTrackingModeChangedListener>(listener, executor));
+            if (mHeadTrackingListeners.size() == 1) {
+                // register binder for callbacks
+                if (mHeadTrackingDispatcherStub == null) {
+                    mHeadTrackingDispatcherStub =
+                            new SpatializerHeadTrackingDispatcherStub();
+                }
+                try {
+                    mAm.getService().registerSpatializerHeadTrackingCallback(
+                            mHeadTrackingDispatcherStub);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+        }
+    }
+
+    /**
+     * @hide
+     * Removes a previously added listener for changes to the head tracking mode of the
+     * {@code Spatializer}.
+     * @param listener the listener to unregister
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
+    public void removeOnHeadTrackingModeChangedListener(
+            @NonNull OnHeadTrackingModeChangedListener listener) {
+        Objects.requireNonNull(listener);
+        synchronized (mHeadTrackingListenerLock) {
+            if (!removeListener(listener, mHeadTrackingListeners)) {
+                throw new IllegalArgumentException(
+                        "Called removeOnHeadTrackingModeChangedListener() "
+                                + "on an unregistered listener");
+            }
+            if (mHeadTrackingListeners.size() == 0) {
+                // unregister binder for callbacks
+                try {
+                    mAm.getService().unregisterSpatializerHeadTrackingCallback(
+                            mHeadTrackingDispatcherStub);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                } finally {
+                    mHeadTrackingDispatcherStub = null;
+                    mHeadTrackingListeners = null;
+                }
+            }
+        }
+    }
+
+    /**
+     * @hide
+     * Set the listener to receive head to soundstage pose updates.
+     * @param executor the {@code Executor} handling the callbacks
+     * @param listener the listener to register
+     * @see #clearOnHeadToSoundstagePoseUpdatedListener()
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
+    public void setOnHeadToSoundstagePoseUpdatedListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnHeadToSoundstagePoseUpdatedListener listener) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(listener);
+        synchronized (mPoseListenerLock) {
+            if (mPoseListener != null) {
+                throw new IllegalStateException("Trying to overwrite existing listener");
+            }
+            mPoseListener =
+                    new ListenerInfo<OnHeadToSoundstagePoseUpdatedListener>(listener, executor);
+            mPoseDispatcher = new SpatializerPoseDispatcherStub();
+            try {
+                mAm.getService().registerHeadToSoundstagePoseCallback(mPoseDispatcher);
+            } catch (RemoteException e) {
+                mPoseListener = null;
+                mPoseDispatcher = null;
+            }
+        }
+    }
+
+    /**
+     * @hide
+     * Clears the listener for head to soundstage pose updates
+     * @see #setOnHeadToSoundstagePoseUpdatedListener(Executor, OnHeadToSoundstagePoseUpdatedListener)
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
+    public void clearOnHeadToSoundstagePoseUpdatedListener() {
+        synchronized (mPoseListenerLock) {
+            if (mPoseDispatcher == null) {
+                throw (new IllegalStateException("No listener to clear"));
+            }
+            try {
+                mAm.getService().unregisterHeadToSoundstagePoseCallback(mPoseDispatcher);
+            } catch (RemoteException e) { }
+            mPoseListener = null;
+            mPoseDispatcher = null;
+        }
+    }
+
+    /**
+     * @hide
+     * Sets an additional transform over the soundstage.
+     * The transform represents the pose of the soundstage, relative
+     * to either the device (in {@link #HEAD_TRACKING_MODE_RELATIVE_DEVICE} mode), the world (in
+     * {@link #HEAD_TRACKING_MODE_RELATIVE_WORLD}) or the listener’s head (in
+     * {@link #HEAD_TRACKING_MODE_DISABLED} mode).
+     * @param transform an array of 6 float values, the first 3 are the translation vector, the
+     *                  other 3 are the rotation vector.
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
+    public void setGlobalTransform(@NonNull float[] transform) {
+        if (Objects.requireNonNull(transform).length != 6) {
+            throw new IllegalArgumentException("transform array must be of size 6, was "
+                    + transform.length);
+        }
+        try {
+            mAm.getService().setSpatializerGlobalTransform(transform);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling setGlobalTransform", e);
+        }
+    }
+
+    //-----------------------------------------------------------------------------
+    // callback helper definitions
+
+    private static class ListenerInfo<T> {
+        final @NonNull T mListener;
+        final @NonNull Executor mExecutor;
+
+        ListenerInfo(T listener, Executor exe) {
+            mListener = listener;
+            mExecutor = exe;
+        }
+    }
+
+    private static <T> ListenerInfo<T> getListenerInfo(
+            T listener, ArrayList<ListenerInfo<T>> listeners) {
+        if (listeners == null) {
+            return null;
+        }
+        for (ListenerInfo<T> info : listeners) {
+            if (info.mListener == listener) {
+                return info;
+            }
+        }
+        return null;
+    }
+
+    private static <T> boolean hasListener(T listener, ArrayList<ListenerInfo<T>> listeners) {
+        return getListenerInfo(listener, listeners) != null;
+    }
+
+    private static <T> boolean removeListener(T listener, ArrayList<ListenerInfo<T>> listeners) {
+        final ListenerInfo<T> infoToRemove = getListenerInfo(listener, listeners);
+        if (infoToRemove != null) {
+            listeners.remove(infoToRemove);
+            return true;
+        }
+        return false;
+    }
+
+    //-----------------------------------------------------------------------------
+    // head tracking callback management and stub
+
+    private final Object mHeadTrackingListenerLock = new Object();
+    /**
+     * List of listeners for head tracking mode listener and their associated Executor.
+     * List is lazy-initialized on first registration
+     */
+    @GuardedBy("mHeadTrackingListenerLock")
+    private @Nullable ArrayList<ListenerInfo<OnHeadTrackingModeChangedListener>>
+            mHeadTrackingListeners;
+
+    @GuardedBy("mHeadTrackingListenerLock")
+    private @Nullable SpatializerHeadTrackingDispatcherStub mHeadTrackingDispatcherStub;
+
+    private final class SpatializerHeadTrackingDispatcherStub
+            extends ISpatializerHeadTrackingModeCallback.Stub {
+        @Override
+        public void dispatchSpatializerActualHeadTrackingModeChanged(int mode) {
+            // make a shallow copy of listeners so callback is not executed under lock
+            final ArrayList<ListenerInfo<OnHeadTrackingModeChangedListener>> headTrackingListeners;
+            synchronized (mHeadTrackingListenerLock) {
+                if (mHeadTrackingListeners == null || mHeadTrackingListeners.size() == 0) {
+                    return;
+                }
+                headTrackingListeners = (ArrayList<ListenerInfo<OnHeadTrackingModeChangedListener>>)
+                        mHeadTrackingListeners.clone();
+            }
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                for (ListenerInfo<OnHeadTrackingModeChangedListener> info : headTrackingListeners) {
+                    info.mExecutor.execute(() -> info.mListener
+                            .onHeadTrackingModeChanged(Spatializer.this, mode));
+                }
+            }
+        }
+
+        @Override
+        public void dispatchSpatializerDesiredHeadTrackingModeChanged(int mode) {
+            // make a shallow copy of listeners so callback is not executed under lock
+            final ArrayList<ListenerInfo<OnHeadTrackingModeChangedListener>> headTrackingListeners;
+            synchronized (mHeadTrackingListenerLock) {
+                if (mHeadTrackingListeners == null || mHeadTrackingListeners.size() == 0) {
+                    return;
+                }
+                headTrackingListeners = (ArrayList<ListenerInfo<OnHeadTrackingModeChangedListener>>)
+                        mHeadTrackingListeners.clone();
+            }
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                for (ListenerInfo<OnHeadTrackingModeChangedListener> info : headTrackingListeners) {
+                    info.mExecutor.execute(() -> info.mListener
+                            .onDesiredHeadTrackingModeChanged(Spatializer.this, mode));
+                }
+            }
+        }
+    }
+
+    //-----------------------------------------------------------------------------
+    // head pose callback management and stub
+    private final Object mPoseListenerLock = new Object();
+    /**
+     * Listener for head to soundstage updates
+     */
+    @GuardedBy("mPoseListenerLock")
+    private @Nullable ListenerInfo<OnHeadToSoundstagePoseUpdatedListener> mPoseListener;
+    @GuardedBy("mPoseListenerLock")
+    private @Nullable SpatializerPoseDispatcherStub mPoseDispatcher;
+
+    private final class SpatializerPoseDispatcherStub
+            extends ISpatializerHeadToSoundStagePoseCallback.Stub {
+
+        @Override
+        public void dispatchPoseChanged(float[] pose) {
+            // make a copy of ref to listener so callback is not executed under lock
+            final ListenerInfo<OnHeadToSoundstagePoseUpdatedListener> listener;
+            synchronized (mPoseListenerLock) {
+                listener = mPoseListener;
+            }
+            if (listener == null) {
+                return;
+            }
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                listener.mExecutor.execute(() -> listener.mListener
+                        .onHeadToSoundstagePoseUpdated(Spatializer.this, pose));
+            }
+        }
     }
 }
