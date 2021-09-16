@@ -583,6 +583,13 @@ public class ShellTransitionTests {
                         .setRotate(ROTATION_ANIMATION_SEAMLESS).build())
                 .build();
         assertFalse(DefaultTransitionHandler.isRotationSeamless(seamlessButAlert, displays));
+
+        // Not seamless if there is no changed task.
+        final TransitionInfo noTask = new TransitionInfoBuilder(TRANSIT_CHANGE)
+                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setFlags(FLAG_IS_DISPLAY)
+                        .setRotate().build())
+                .build();
+        assertFalse(DefaultTransitionHandler.isRotationSeamless(noTask, displays));
     }
 
     class TransitionInfoBuilder {

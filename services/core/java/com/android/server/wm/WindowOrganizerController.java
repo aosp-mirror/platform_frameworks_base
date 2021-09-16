@@ -326,7 +326,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             if (transition != null) {
                 // First check if we have a display rotation transition and if so, update it.
                 final DisplayContent dc = DisplayRotation.getDisplayFromTransition(transition);
-                if (dc != null && transition.mChanges.get(dc).mRotation != dc.getRotation()) {
+                if (dc != null && transition.mChanges.get(dc).hasChanged(dc)) {
                     // Go through all tasks and collect them before the rotation
                     // TODO(shell-transitions): move collect() to onConfigurationChange once
                     //       wallpaper handling is synchronized.
