@@ -18,8 +18,6 @@ package com.android.wm.shell.splitscreen;
 
 import static android.app.ActivityOptions.KEY_LAUNCH_ROOT_TASK_TOKEN;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
@@ -90,6 +88,7 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitLayout;
 import com.android.wm.shell.common.split.SplitLayout.SplitPosition;
+import com.android.wm.shell.common.split.SplitWindowManager;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.transition.Transitions;
 
@@ -161,6 +160,19 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mSplitLayout.resetDividerPosition();
         }
         mDismissTop = NO_DISMISS;
+    };
+
+    private final SplitWindowManager.ParentContainerCallbacks mParentContainerCallbacks =
+            new SplitWindowManager.ParentContainerCallbacks() {
+        @Override
+        public void attachToParentSurface(SurfaceControl.Builder b) {
+            mRootTDAOrganizer.attachToDisplayArea(mDisplayId, b);
+        }
+
+        @Override
+        public void onLeashReady(SurfaceControl leash) {
+            mSyncQueue.runInSync(t -> applyDividerVisibility(t));
+        }
     };
 
     StageCoordinator(Context context, int displayId, SyncTransactionQueue syncQueue,
@@ -501,7 +513,8 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mSideStage.removeAllTasks(wct, childrenToTop == mSideStage);
         mMainStage.deactivate(wct, childrenToTop == mMainStage);
         mTaskOrganizer.applyTransaction(wct);
-        // Reset divider position.
+        // Hide divider and reset its position.
+        setDividerVisibility(false);
         mSplitLayout.resetDividerPosition();
         mTopStageAfterFoldDismiss = STAGE_TYPE_UNDEFINED;
         if (childrenToTop != null) {
@@ -635,10 +648,16 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private void onStageVisibilityChanged(StageListenerImpl stageListener) {
         final boolean sideStageVisible = mSideStageListener.mVisible;
         final boolean mainStageVisible = mMainStageListener.mVisible;
-        // Divider is only visible if both the main stage and side stages are visible
-        setDividerVisibility(isSplitScreenVisible());
+        final boolean bothStageVisible = sideStageVisible && mainStageVisible;
+        final boolean bothStageInvisible = !sideStageVisible && !mainStageVisible;
+        final boolean sameVisibility = sideStageVisible == mainStageVisible;
+        // Only add or remove divider when both visible or both invisible to avoid sometimes we only
+        // got one stage visibility changed for a moment and it will cause flicker.
+        if (sameVisibility) {
+            setDividerVisibility(bothStageVisible);
+        }
 
-        if (!mainStageVisible && !sideStageVisible) {
+        if (bothStageInvisible) {
             if (mExitSplitScreenOnHide
             // Don't dismiss staged split when both stages are not visible due to sleeping display,
             // like the cases keyguard showing or screen off.
@@ -655,59 +674,32 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             exitSplitScreen(toTop, SPLITSCREEN_UICHANGED__EXIT_REASON__SCREEN_LOCKED_SHOW_ON_TOP);
         }
 
-        // When both stage's visibility changed to visible, main stage might receives visibility
-        // changed before side stage if it has higher z-order than side stage. Make sure we only
-        // update main stage's windowing mode with the visibility changed of side stage to prevent
-        // stacking multiple windowing mode transactions which result to flicker issue.
-        if (mainStageVisible && stageListener == mSideStageListener) {
-            final WindowContainerTransaction wct = new WindowContainerTransaction();
-            if (sideStageVisible) {
-                // The main stage configuration should to follow split layout when side stage is
-                // visible.
-                mMainStage.updateConfiguration(
-                        WINDOWING_MODE_MULTI_WINDOW, getMainStageBounds(), wct);
-            } else if (!mSideStage.mRootTaskInfo.isSleeping) {
-                // We want the main stage configuration to be fullscreen when the side stage isn't
-                // visible.
-                // We should not do it when side stage are not visible due to sleeping display too.
-                mMainStage.updateConfiguration(WINDOWING_MODE_FULLSCREEN, null, wct);
-            }
-            // TODO: Change to `mSyncQueue.queue(wct)` once BLAST is stable.
-            mTaskOrganizer.applyTransaction(wct);
-        }
-
         mSyncQueue.runInSync(t -> {
             final SurfaceControl sideStageLeash = mSideStage.mRootLeash;
             final SurfaceControl mainStageLeash = mMainStage.mRootLeash;
 
             if (sideStageVisible) {
                 final Rect sideStageBounds = getSideStageBounds();
-                t.show(sideStageLeash)
-                        .setPosition(sideStageLeash,
-                                sideStageBounds.left, sideStageBounds.top)
+                t.setPosition(sideStageLeash,
+                        sideStageBounds.left, sideStageBounds.top)
                         .setWindowCrop(sideStageLeash,
                                 sideStageBounds.width(), sideStageBounds.height());
-            } else {
-                t.hide(sideStageLeash);
             }
 
             if (mainStageVisible) {
                 final Rect mainStageBounds = getMainStageBounds();
-                t.show(mainStageLeash);
-                if (sideStageVisible) {
-                    t.setPosition(mainStageLeash, mainStageBounds.left, mainStageBounds.top)
-                            .setWindowCrop(mainStageLeash,
-                                    mainStageBounds.width(), mainStageBounds.height());
-                } else {
-                    // Clear window crop and position if side stage isn't visible.
-                    t.setPosition(mainStageLeash, 0, 0)
-                            .setWindowCrop(mainStageLeash, null);
-                }
-            } else {
-                t.hide(mainStageLeash);
+                t.setPosition(mainStageLeash, mainStageBounds.left, mainStageBounds.top)
+                        .setWindowCrop(mainStageLeash,
+                                mainStageBounds.width(), mainStageBounds.height());
             }
 
-            applyDividerVisibility(t);
+            // Same above, we only set root tasks and divider leash visibility when both stage
+            // change to visible or invisible to avoid flicker.
+            if (sameVisibility) {
+                t.setVisibility(sideStageLeash, bothStageVisible)
+                        .setVisibility(mainStageLeash, bothStageVisible);
+                applyDividerVisibility(t);
+            }
         });
     }
 
@@ -726,7 +718,6 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         } else {
             t.hide(dividerLeash);
         }
-
     }
 
     private void onStageHasChildrenChanged(StageListenerImpl stageListener) {
@@ -852,8 +843,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mDisplayAreaInfo = displayAreaInfo;
         if (mSplitLayout == null) {
             mSplitLayout = new SplitLayout(TAG + "SplitDivider", mContext,
-                    mDisplayAreaInfo.configuration, this,
-                    b -> mRootTDAOrganizer.attachToDisplayArea(mDisplayId, b),
+                    mDisplayAreaInfo.configuration, this, mParentContainerCallbacks,
                     mDisplayImeController, mTaskOrganizer);
             mDisplayInsetsController.addInsetsChangedListener(mDisplayId, mSplitLayout);
         }
@@ -871,7 +861,6 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 && mSplitLayout.updateConfiguration(mDisplayAreaInfo.configuration)
                 && mMainStage.isActive()) {
             onLayoutChanged(mSplitLayout);
-            mSyncQueue.runInSync(t -> applyDividerVisibility(t));
         }
     }
 

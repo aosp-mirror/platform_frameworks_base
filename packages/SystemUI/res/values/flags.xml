@@ -22,7 +22,7 @@
     <bool name="flag_notification_pipeline2_rendering">false</bool>
     <bool name="flag_notif_updates">true</bool>
 
-    <bool name="flag_monet">false</bool>
+    <bool name="flag_monet">true</bool>
 
     <!-- AOD/Lockscreen alternate layout -->
     <bool name="flag_keyguard_layout">true</bool>

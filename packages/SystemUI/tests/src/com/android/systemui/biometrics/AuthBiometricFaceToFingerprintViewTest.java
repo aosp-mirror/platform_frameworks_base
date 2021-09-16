@@ -29,6 +29,7 @@ import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.hardware.biometrics.ComponentInfoInternal;
+import android.hardware.biometrics.SensorLocationInternal;
 import android.hardware.biometrics.SensorProperties;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
@@ -257,9 +258,10 @@ public class AuthBiometricFaceToFingerprintViewTest extends SysuiTestCase {
                 componentInfo,
                 FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
                 true /* resetLockoutRequiresHardwareAuthToken */,
-                540 /* sensorLocationX */,
-                1600 /* sensorLocationY */,
-                100 /* sensorRadius */);
+                List.of(new SensorLocationInternal("" /* displayId */,
+                        540 /* sensorLocationX */,
+                        1600 /* sensorLocationY */,
+                        100 /* sensorRadius */)));
     }
 
     public class TestableView extends AuthBiometricFaceToFingerprintView {

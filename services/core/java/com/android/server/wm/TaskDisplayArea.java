@@ -1095,29 +1095,27 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                 return rootTask;
             }
         } else if (candidateTask != null) {
-            final Task rootTask = candidateTask;
             final int position = onTop ? POSITION_TOP : POSITION_BOTTOM;
             final Task launchRootTask = getLaunchRootTask(windowingMode, activityType, options,
                     sourceTask, launchFlags);
-
             if (launchRootTask != null) {
-                if (rootTask.getParent() == null) {
-                    launchRootTask.addChild(rootTask, position);
-                } else if (rootTask.getParent() != launchRootTask) {
-                    rootTask.reparent(launchRootTask, position);
+                if (candidateTask.getParent() == null) {
+                    launchRootTask.addChild(candidateTask, position);
+                } else if (candidateTask.getParent() != launchRootTask) {
+                    candidateTask.reparent(launchRootTask, position);
                 }
-            } else if (rootTask.getDisplayArea() != this || !rootTask.isRootTask()) {
-                if (rootTask.getParent() == null) {
-                    addChild(rootTask, position);
+            } else if (candidateTask.getDisplayArea() != this || !candidateTask.isRootTask()) {
+                if (candidateTask.getParent() == null) {
+                    addChild(candidateTask, position);
                 } else {
-                    rootTask.reparent(this, onTop);
+                    candidateTask.reparent(this, onTop);
                 }
             }
             // Update windowing mode if necessary, e.g. moving a pinned task to fullscreen.
             if (candidateTask.getWindowingMode() != windowingMode) {
                 candidateTask.setWindowingMode(windowingMode);
             }
-            return rootTask;
+            return candidateTask.getRootTask();
         }
         return new Task.Builder(mAtmService)
                 .setWindowingMode(windowingMode)

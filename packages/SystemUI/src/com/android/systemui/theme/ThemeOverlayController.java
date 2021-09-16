@@ -37,6 +37,7 @@ import android.content.IntentFilter;
 import android.content.om.FabricatedOverlay;
 import android.content.om.OverlayIdentifier;
 import android.content.pm.UserInfo;
+import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.Color;
 import android.net.Uri;
@@ -47,9 +48,11 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.TypedValue;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.graphics.ColorUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.SystemUI;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -59,6 +62,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.monet.ColorScheme;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
@@ -71,6 +75,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -107,6 +112,7 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
     private DeviceProvisionedController mDeviceProvisionedController;
     private WallpaperColors mCurrentColors;
     private WallpaperManager mWallpaperManager;
+    private ColorScheme mColorScheme;
     // If fabricated overlays were already created for the current theme.
     private boolean mNeedsOverlayCreation;
     // Dominant color extracted from wallpaper, NOT the color used on the overlay
@@ -403,25 +409,47 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
      * Return the main theme color from a given {@link WallpaperColors} instance.
      */
     protected int getNeutralColor(@NonNull WallpaperColors wallpaperColors) {
-        return wallpaperColors.getPrimaryColor().toArgb();
+        return ColorScheme.getSeedColor(wallpaperColors);
     }
 
     protected int getAccentColor(@NonNull WallpaperColors wallpaperColors) {
-        Color accentCandidate = wallpaperColors.getSecondaryColor();
-        if (accentCandidate == null) {
-            accentCandidate = wallpaperColors.getTertiaryColor();
-        }
-        if (accentCandidate == null) {
-            accentCandidate = wallpaperColors.getPrimaryColor();
-        }
-        return accentCandidate.toArgb();
+        return ColorScheme.getSeedColor(wallpaperColors);
     }
 
     /**
      * Given a color candidate, return an overlay definition.
      */
     protected @Nullable FabricatedOverlay getOverlay(int color, int type) {
-        return null;
+        boolean nightMode = (mContext.getResources().getConfiguration().uiMode
+                & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+
+        mColorScheme = new ColorScheme(color, nightMode);
+        List<Integer> colorShades = type == ACCENT
+                ? mColorScheme.getAllAccentColors() : mColorScheme.getAllNeutralColors();
+        String name = type == ACCENT ? "accent" : "neutral";
+        int paletteSize = mColorScheme.getAccent1().size();
+        FabricatedOverlay.Builder overlay =
+                new FabricatedOverlay.Builder("com.android.systemui", name, "android");
+        for (int i = 0; i < colorShades.size(); i++) {
+            int luminosity = i % paletteSize;
+            int paletteIndex = i / paletteSize + 1;
+            String resourceName;
+            switch (luminosity) {
+                case 0:
+                    resourceName = "android:color/system_" + name + paletteIndex + "_10";
+                    break;
+                case 1:
+                    resourceName = "android:color/system_" + name + paletteIndex + "_50";
+                    break;
+                default:
+                    int l = luminosity - 1;
+                    resourceName = "android:color/system_" + name + paletteIndex + "_" + l + "00";
+            }
+            overlay.setResourceValue(resourceName, TypedValue.TYPE_INT_COLOR_ARGB8,
+                    ColorUtils.setAlphaComponent(colorShades.get(i), 0xFF));
+        }
+
+        return overlay.build();
     }
 
     private void updateThemeOverlays() {
@@ -521,7 +549,7 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
                     .map(key -> key + " -> " + categoryToPackage.get(key)).collect(
                             Collectors.joining(", ")));
         }
-        Runnable overlaysAppliedRunnable = () -> onOverlaysApplied();
+        Runnable overlaysAppliedRunnable = this::onOverlaysApplied;
         if (mNeedsOverlayCreation) {
             mNeedsOverlayCreation = false;
             mThemeManager.applyCurrentUserOverlays(categoryToPackage, new FabricatedOverlay[] {
@@ -544,6 +572,7 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
         pw.println("mSecondaryOverlay=" + mSecondaryOverlay);
         pw.println("mNeutralOverlay=" + mNeutralOverlay);
         pw.println("mIsMonetEnabled=" + mIsMonetEnabled);
+        pw.println("mColorScheme=" + mColorScheme);
         pw.println("mNeedsOverlayCreation=" + mNeedsOverlayCreation);
         pw.println("mAcceptColorEvents=" + mAcceptColorEvents);
         pw.println("mDeferredThemeEvaluation=" + mDeferredThemeEvaluation);
