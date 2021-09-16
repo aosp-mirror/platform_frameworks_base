@@ -101,10 +101,7 @@ import java.util.function.Consumer;
 public class NavigationBarView extends FrameLayout implements
         NavigationModeController.ModeChangedListener {
     final static boolean DEBUG = false;
-    final static String TAG = "StatusBar/NavBarView";
-
-    // slippery nav bar when everything is disabled, e.g. during setup
-    final static boolean SLIPPERY_WHEN_DISABLED = true;
+    final static String TAG = "NavBarView";
 
     final static boolean ALTERNATE_CAR_MODE_UI = false;
     private final RegionSamplingHelper mRegionSamplingHelper;
@@ -371,6 +368,12 @@ public class NavigationBarView extends FrameLayout implements
             mNavBarOverlayController.init(mNavbarOverlayVisibilityChangeCallback,
                     mEdgeBackGestureHandler::updateNavigationBarOverlayExcludeRegion);
         }
+    }
+
+    @Override
+    protected boolean onSetAlpha(int alpha) {
+        Log.e(TAG, "onSetAlpha", new Throwable());
+        return super.onSetAlpha(alpha);
     }
 
     public void setAutoHideController(AutoHideController autoHideController) {
@@ -1313,6 +1316,7 @@ public class NavigationBarView extends FrameLayout implements
 
         dumpButton(pw, "back", getBackButton());
         dumpButton(pw, "home", getHomeButton());
+        dumpButton(pw, "handle", getHomeHandle());
         dumpButton(pw, "rcnt", getRecentsButton());
         dumpButton(pw, "rota", getRotateSuggestionButton());
         dumpButton(pw, "a11y", getAccessibilityButton());
