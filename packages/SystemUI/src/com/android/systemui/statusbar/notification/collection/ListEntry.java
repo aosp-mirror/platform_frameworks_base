@@ -36,7 +36,7 @@ public abstract class ListEntry {
     private final ListAttachState mPreviousAttachState = ListAttachState.create();
     private final ListAttachState mAttachState = ListAttachState.create();
 
-    ListEntry(String key, long creationTime) {
+    protected ListEntry(String key, long creationTime) {
         mKey = key;
         mCreationTime = creationTime;
     }
