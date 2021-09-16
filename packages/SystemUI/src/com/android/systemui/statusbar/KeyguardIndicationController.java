@@ -798,7 +798,9 @@ public class KeyguardIndicationController {
      * Show message on the keyguard for how the user can unlock/enter their device.
      */
     public void showActionToUnlock() {
-        if (mDozing) {
+        if (mDozing
+                && !mKeyguardUpdateMonitor.getUserCanSkipBouncer(
+                        KeyguardUpdateMonitor.getCurrentUser())) {
             return;
         }
 
@@ -809,7 +811,7 @@ public class KeyguardIndicationController {
                 String message = mContext.getString(R.string.keyguard_retry);
                 mStatusBarKeyguardViewManager.showBouncerMessage(message, mInitialTextColorState);
             }
-        } else if (mKeyguardUpdateMonitor.isScreenOn()) {
+        } else {
             showTransientIndication(mContext.getString(R.string.keyguard_unlock),
                     false /* isError */, true /* hideOnScreenOff */);
         }
