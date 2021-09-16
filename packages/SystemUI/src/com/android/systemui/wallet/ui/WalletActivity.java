@@ -220,6 +220,12 @@ public class WalletActivity extends LifecycleActivity implements
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        finish();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.wallet_activity_options_menu, menu);
         return super.onCreateOptionsMenu(menu);
