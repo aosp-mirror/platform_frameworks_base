@@ -276,6 +276,10 @@ class InputWindowHandleWrapper {
         mChanged = true;
     }
 
+    boolean isTrustedOverlay() {
+        return mHandle.trustedOverlay;
+    }
+
     @Override
     public String toString() {
         return mHandle + ", changed=" + mChanged;

@@ -134,7 +134,7 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
                 mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo, appToken,
                         suggestionType);
             } else if (suggestionType == STARTING_WINDOW_TYPE_SNAPSHOT) {
-                final TaskSnapshot snapshot = windowInfo.mTaskSnapshot;
+                final TaskSnapshot snapshot = windowInfo.taskSnapshot;
                 mStartingSurfaceDrawer.makeTaskSnapshotWindow(windowInfo, appToken,
                         snapshot);
             }
@@ -174,6 +174,13 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
     public void onAppSplashScreenViewRemoved(int taskId) {
         mSplashScreenExecutor.execute(
                 () -> mStartingSurfaceDrawer.onAppSplashScreenViewRemoved(taskId));
+    }
+
+    /**
+     * Called when the IME has drawn on the organized task.
+     */
+    public void onImeDrawnOnTask(int taskId) {
+        mSplashScreenExecutor.execute(() -> mStartingSurfaceDrawer.onImeDrawnOnTask(taskId));
     }
 
     /**

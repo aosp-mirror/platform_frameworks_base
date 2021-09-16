@@ -1610,12 +1610,14 @@ final class AccessibilityController {
 
                     final Region regionInScreen = new Region();
                     computeWindowRegionInScreen(windowState, regionInScreen);
-
-                    if (windowMattersToAccessibility(windowState, regionInScreen, unaccountedSpace,
+                    if (windowMattersToAccessibility(windowState,
+                            regionInScreen, unaccountedSpace,
                             skipRemainingWindowsForTaskFragments)) {
                         addPopulatedWindowInfo(windowState, regionInScreen, windows, addedWindows);
-                        updateUnaccountedSpace(windowState, regionInScreen, unaccountedSpace,
-                                skipRemainingWindowsForTaskFragments);
+                        if (windowMattersToUnaccountedSpaceComputation(windowState)) {
+                            updateUnaccountedSpace(windowState, regionInScreen, unaccountedSpace,
+                                    skipRemainingWindowsForTaskFragments);
+                        }
                         focusedWindowAdded |= windowState.isFocused();
                     } else if (isUntouchableNavigationBar(windowState, mTempRegion1)) {
                         // If this widow is navigation bar without touchable region, accounting the
@@ -1664,6 +1666,25 @@ final class AccessibilityController {
             mInitialized = true;
         }
 
+        // Some windows should be excluded from unaccounted space computation, though they still
+        // should be reported
+        private boolean windowMattersToUnaccountedSpaceComputation(WindowState windowState) {
+            // Do not account space of trusted non-touchable windows, except the split-screen
+            // divider.
+            // If it's not trusted, touch events are not sent to the windows behind it.
+            if (((windowState.mAttrs.flags & WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0)
+                    && (windowState.mAttrs.type != TYPE_DOCK_DIVIDER)
+                    && windowState.isTrustedOverlay()) {
+                return false;
+            }
+
+            if (windowState.mAttrs.type
+                    == WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY) {
+                return false;
+            }
+            return true;
+        }
+
         private boolean windowMattersToAccessibility(WindowState windowState,
                 Region regionInScreen, Region unaccountedSpace,
                 ArrayList<TaskFragment> skipRemainingWindowsForTaskFragments) {
@@ -1707,53 +1728,49 @@ final class AccessibilityController {
         private void updateUnaccountedSpace(WindowState windowState, Region regionInScreen,
                 Region unaccountedSpace,
                 ArrayList<TaskFragment> skipRemainingWindowsForTaskFragments) {
-            if (windowState.mAttrs.type
-                    != WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY) {
+            // Account for the space this window takes if the window
+            // is not an accessibility overlay which does not change
+            // the reported windows.
+            unaccountedSpace.op(regionInScreen, unaccountedSpace,
+                    Region.Op.REVERSE_DIFFERENCE);
 
-                // Account for the space this window takes if the window
-                // is not an accessibility overlay which does not change
-                // the reported windows.
-                unaccountedSpace.op(regionInScreen, unaccountedSpace,
-                        Region.Op.REVERSE_DIFFERENCE);
-
-                // If a window is modal it prevents other windows from being touched
-                if ((windowState.mAttrs.flags & (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)) == 0) {
-                    if (!windowState.hasTapExcludeRegion()) {
-                        // Account for all space in the task, whether the windows in it are
-                        // touchable or not. The modal window blocks all touches from the task's
-                        // area.
-                        unaccountedSpace.op(windowState.getDisplayFrame(), unaccountedSpace,
-                                Region.Op.REVERSE_DIFFERENCE);
-                    } else {
-                        // If a window has tap exclude region, we need to account it.
-                        final Region displayRegion = new Region(windowState.getDisplayFrame());
-                        final Region tapExcludeRegion = new Region();
-                        windowState.getTapExcludeRegion(tapExcludeRegion);
-                        displayRegion.op(tapExcludeRegion, displayRegion,
-                                Region.Op.REVERSE_DIFFERENCE);
-                        unaccountedSpace.op(displayRegion, unaccountedSpace,
-                                Region.Op.REVERSE_DIFFERENCE);
-                    }
-
-                    final TaskFragment taskFragment = windowState.getTaskFragment();
-                    if (taskFragment != null) {
-                        // If the window is associated with a particular task, we can skip the
-                        // rest of the windows for that task.
-                        skipRemainingWindowsForTaskFragments.add(taskFragment);
-                    } else if (!windowState.hasTapExcludeRegion()) {
-                        // If the window is not associated with a particular task, then it is
-                        // globally modal. In this case we can skip all remaining windows when
-                        // it doesn't has tap exclude region.
-                        unaccountedSpace.setEmpty();
-                    }
-                }
-
-                // Account for the space of letterbox.
-                if (windowState.areAppWindowBoundsLetterboxed()) {
-                    unaccountedSpace.op(getLetterboxBounds(windowState), unaccountedSpace,
+            // If a window is modal it prevents other windows from being touched
+            if ((windowState.mAttrs.flags & (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)) == 0) {
+                if (!windowState.hasTapExcludeRegion()) {
+                    // Account for all space in the task, whether the windows in it are
+                    // touchable or not. The modal window blocks all touches from the task's
+                    // area.
+                    unaccountedSpace.op(windowState.getDisplayFrame(), unaccountedSpace,
+                            Region.Op.REVERSE_DIFFERENCE);
+                } else {
+                    // If a window has tap exclude region, we need to account it.
+                    final Region displayRegion = new Region(windowState.getDisplayFrame());
+                    final Region tapExcludeRegion = new Region();
+                    windowState.getTapExcludeRegion(tapExcludeRegion);
+                    displayRegion.op(tapExcludeRegion, displayRegion,
+                            Region.Op.REVERSE_DIFFERENCE);
+                    unaccountedSpace.op(displayRegion, unaccountedSpace,
                             Region.Op.REVERSE_DIFFERENCE);
                 }
+
+                final TaskFragment taskFragment = windowState.getTaskFragment();
+                if (taskFragment != null) {
+                    // If the window is associated with a particular task, we can skip the
+                    // rest of the windows for that task.
+                    skipRemainingWindowsForTaskFragments.add(taskFragment);
+                } else if (!windowState.hasTapExcludeRegion()) {
+                    // If the window is not associated with a particular task, then it is
+                    // globally modal. In this case we can skip all remaining windows when
+                    // it doesn't has tap exclude region.
+                    unaccountedSpace.setEmpty();
+                }
+            }
+
+            // Account for the space of letterbox.
+            if (windowState.areAppWindowBoundsLetterboxed()) {
+                unaccountedSpace.op(getLetterboxBounds(windowState), unaccountedSpace,
+                        Region.Op.REVERSE_DIFFERENCE);
             }
         }
 

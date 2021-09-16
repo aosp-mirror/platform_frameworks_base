@@ -103,6 +103,20 @@ public class AppTransitionControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testClearTaskSkipAppExecuteTransition() {
+        final ActivityRecord behind = createActivityRecord(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        final Task task = behind.getTask();
+        final ActivityRecord top = createActivityRecord(task);
+        top.setState(ActivityRecord.State.RESUMED, "test");
+        behind.setState(ActivityRecord.State.STARTED, "test");
+        behind.mVisibleRequested = true;
+
+        task.performClearTask("test");
+        assertFalse(mDisplayContent.mAppTransition.isReady());
+    }
+
+    @Test
     public void testTranslucentOpen() {
         final ActivityRecord behind = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);

@@ -18,6 +18,8 @@ package com.android.internal.os;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.os.Parcel;
+
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -30,26 +32,74 @@ public class LongArrayMultiStateCounterTest {
 
     @Test
     public void setStateAndUpdateValue() {
-        LongArrayMultiStateCounter.LongArrayContainer longArrayContainer =
-                new LongArrayMultiStateCounter.LongArrayContainer(4);
-        LongArrayMultiStateCounter counter = new LongArrayMultiStateCounter(2, 4, 0, 1000);
+        LongArrayMultiStateCounter counter = new LongArrayMultiStateCounter(2, 4);
+
+        updateValue(counter, new long[]{0, 0, 0, 0}, 1000);
+        counter.setState(0, 1000);
         counter.setState(1, 2000);
         counter.setState(0, 4000);
-        longArrayContainer.setValues(new long[]{100, 200, 300, 400});
-        counter.updateValues(longArrayContainer, 9000);
-        counter.getCounts(longArrayContainer, 0);
+        updateValue(counter, new long[]{100, 200, 300, 400}, 9000);
 
-        long[] result = new long[4];
-        longArrayContainer.getValues(result);
-        assertThat(result).isEqualTo(new long[]{75, 150, 225, 300});
-
-        counter.getCounts(longArrayContainer, 1);
-        longArrayContainer.getValues(result);
-        assertThat(result).isEqualTo(new long[]{25, 50, 75, 100});
+        assertCounts(counter, 0, new long[]{75, 150, 225, 300});
+        assertCounts(counter, 1, new long[]{25, 50, 75, 100});
 
         assertThat(counter.toString()).isEqualTo(
-                "currentState: 0 lastStateChangeTimestamp: 9000 lastUpdateTimestamp: 9000 states:"
-                        + " [0: time: 0 counter: { 75, 150, 225, 300}"
-                        + ", 1: time: 0 counter: { 25, 50, 75, 100}]");
+                "[0: {75, 150, 225, 300}, 1: {25, 50, 75, 100}] updated: 9000 currentState: 0");
+    }
+
+    @Test
+    public void parceling() {
+        LongArrayMultiStateCounter counter = new LongArrayMultiStateCounter(2, 4);
+        updateValue(counter, new long[]{0, 0, 0, 0}, 1000);
+        counter.setState(0, 1000);
+        updateValue(counter, new long[]{100, 200, 300, 400}, 2000);
+        counter.setState(1, 2000);
+        updateValue(counter, new long[]{101, 202, 304, 408}, 3000);
+
+        assertCounts(counter, 0, new long[]{100, 200, 300, 400});
+        assertCounts(counter, 1, new long[]{1, 2, 4, 8});
+
+        Parcel parcel = Parcel.obtain();
+        counter.writeToParcel(parcel, 0);
+        byte[] bytes = parcel.marshall();
+        parcel.recycle();
+
+        parcel = Parcel.obtain();
+        parcel.unmarshall(bytes, 0, bytes.length);
+        parcel.setDataPosition(0);
+
+        LongArrayMultiStateCounter newCounter =
+                LongArrayMultiStateCounter.CREATOR.createFromParcel(parcel);
+        parcel.recycle();
+
+        assertCounts(newCounter, 0, new long[]{100, 200, 300, 400});
+        assertCounts(newCounter, 1, new long[]{1, 2, 4, 8});
+
+        // ==== Verify that the counter keeps accumulating after unparceling.
+
+        // State, last update timestamp and current counts are undefined at this point.
+        newCounter.setState(0, 100);
+        updateValue(newCounter, new long[]{300, 400, 500, 600}, 100);
+
+        // A new base state and counters are established; we can continue accumulating deltas
+        updateValue(newCounter, new long[]{316, 432, 564, 728}, 200);
+
+        assertCounts(newCounter, 0, new long[]{116, 232, 364, 528});
+    }
+
+    private void updateValue(LongArrayMultiStateCounter counter, long[] values, int timestamp) {
+        LongArrayMultiStateCounter.LongArrayContainer container =
+                new LongArrayMultiStateCounter.LongArrayContainer(values.length);
+        container.setValues(values);
+        counter.updateValues(container, timestamp);
+    }
+
+    private void assertCounts(LongArrayMultiStateCounter counter, int state, long[] expected) {
+        LongArrayMultiStateCounter.LongArrayContainer container =
+                new LongArrayMultiStateCounter.LongArrayContainer(expected.length);
+        long[] counts = new long[expected.length];
+        counter.getCounts(container, state);
+        container.getValues(counts);
+        assertThat(counts).isEqualTo(expected);
     }
 }
