@@ -47,6 +47,7 @@ import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.PromptInfo;
+import android.hardware.biometrics.SensorLocationInternal;
 import android.hardware.biometrics.SensorPropertiesInternal;
 import android.hardware.face.FaceSensorProperties;
 import android.hardware.face.FaceSensorPropertiesInternal;
@@ -766,8 +767,9 @@ public class AuthService extends SystemService {
         if (isUdfps && udfpsProps.length == 3) {
             return new FingerprintSensorPropertiesInternal(sensorId,
                     Utils.authenticatorStrengthToPropertyStrength(strength), maxEnrollmentsPerUser,
-                    componentInfo, sensorType, resetLockoutRequiresHardwareAuthToken, udfpsProps[0],
-                    udfpsProps[1], udfpsProps[2]);
+                    componentInfo, sensorType, resetLockoutRequiresHardwareAuthToken,
+                    List.of(new SensorLocationInternal("" /* display */,
+                            udfpsProps[0], udfpsProps[1], udfpsProps[2])));
         } else {
             return new FingerprintSensorPropertiesInternal(sensorId,
                     Utils.authenticatorStrengthToPropertyStrength(strength), maxEnrollmentsPerUser,

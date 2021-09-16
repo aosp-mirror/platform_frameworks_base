@@ -27,6 +27,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.biometrics.BiometricSourceType;
+import android.hardware.biometrics.SensorLocationInternal;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.media.AudioAttributes;
 import android.os.Process;
@@ -330,8 +331,9 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private void updateLockIconLocation() {
         if (mUdfpsSupported) {
             FingerprintSensorPropertiesInternal props = mAuthController.getUdfpsProps().get(0);
-            mView.setCenterLocation(new PointF(props.sensorLocationX, props.sensorLocationY),
-                    props.sensorRadius);
+            final SensorLocationInternal location = props.getLocation();
+            mView.setCenterLocation(new PointF(location.sensorLocationX, location.sensorLocationY),
+                    location.sensorRadius);
         } else {
             mView.setCenterLocation(
                     new PointF(mWidthPixels / 2,

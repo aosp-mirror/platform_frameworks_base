@@ -223,7 +223,7 @@ class AuthRippleController @Inject constructor(
     private fun updateUdfpsDependentParams() {
         authController.udfpsProps?.let {
             if (it.size > 0) {
-                udfpsRadius = it[0].sensorRadius.toFloat()
+                udfpsRadius = it[0].location.sensorRadius.toFloat()
                 udfpsController = udfpsControllerProvider.get()
 
                 if (mView.isAttachedToWindow) {

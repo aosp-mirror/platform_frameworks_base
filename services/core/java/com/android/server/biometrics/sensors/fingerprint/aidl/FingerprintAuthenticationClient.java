@@ -27,6 +27,7 @@ import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -67,6 +68,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
             int sensorId, boolean isStrongBiometric, int statsClient,
             @Nullable TaskStackListener taskStackListener, @NonNull LockoutCache lockoutCache,
             @Nullable IUdfpsOverlayController udfpsOverlayController,
+            @Nullable ISidefpsController sidefpsController,
             boolean allowBackgroundAuthentication,
             @NonNull FingerprintSensorPropertiesInternal sensorProps) {
         super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted, owner,
@@ -76,7 +78,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
                 false /* isKeyguardBypassEnabled */);
         setRequestId(requestId);
         mLockoutCache = lockoutCache;
-        mSensorOverlays = new SensorOverlays(udfpsOverlayController, null /* sideFpsController */);
+        mSensorOverlays = new SensorOverlays(udfpsOverlayController, sidefpsController);
         mSensorProps = sensorProps;
         mALSProbeCallback = createALSCallback(false /* startWithClient */);
     }
