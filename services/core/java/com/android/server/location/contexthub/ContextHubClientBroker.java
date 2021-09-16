@@ -605,8 +605,14 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         for (String permission : permissions) {
             int opCode = mAppOpsManager.permissionToOpCode(permission);
             if (opCode != AppOpsManager.OP_NONE) {
-                if (mAppOpsManager.noteOp(opCode, mUid, mPackage, mAttributionTag, noteMessage)
-                        != AppOpsManager.MODE_ALLOWED) {
+                try {
+                    if (mAppOpsManager.noteOp(opCode, mUid, mPackage, mAttributionTag, noteMessage)
+                            != AppOpsManager.MODE_ALLOWED) {
+                        return false;
+                    }
+                } catch (SecurityException e) {
+                    Log.e(TAG, "SecurityException: noteOp for pkg " + mPackage + " opcode "
+                            + opCode + ": " + e.getMessage());
                     return false;
                 }
             }
