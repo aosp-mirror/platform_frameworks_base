@@ -1507,6 +1507,21 @@ package android.bluetooth {
     method public void onOobData(int, @NonNull android.bluetooth.OobData);
   }
 
+  public final class BluetoothCsipSetCoordinator implements java.lang.AutoCloseable android.bluetooth.BluetoothProfile {
+    method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public java.util.List<java.lang.Integer> getAllGroupIds(@Nullable android.os.ParcelUuid);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice);
+    method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public java.util.Map getGroupUuidMapByDevice(@Nullable android.bluetooth.BluetoothDevice);
+    method @Nullable @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public java.util.UUID groupLock(int, @Nullable java.util.concurrent.Executor, @Nullable android.bluetooth.BluetoothCsipSetCoordinator.ClientLockCallback);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean groupUnlock(@NonNull java.util.UUID);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice, int);
+    field @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public static final String ACTION_CSIS_DEVICE_AVAILABLE = "android.bluetooth.action.CSIS_DEVICE_AVAILABLE";
+    field @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public static final String ACTION_CSIS_SET_MEMBER_AVAILABLE = "android.bluetooth.action.CSIS_SET_MEMBER_AVAILABLE";
+  }
+
+  public static interface BluetoothCsipSetCoordinator.ClientLockCallback {
+    method public void onGroupLockSet(int, int, boolean);
+  }
+
   public final class BluetoothDevice implements android.os.Parcelable {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean cancelBondProcess();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean createBondOutOfBand(int, @Nullable android.bluetooth.OobData, @Nullable android.bluetooth.OobData);
@@ -1560,7 +1575,10 @@ package android.bluetooth {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean connect(android.bluetooth.BluetoothDevice);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean disconnect(android.bluetooth.BluetoothDevice);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean isInbandRingingEnabled();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean startScoUsingVirtualVoiceCall();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean stopScoUsingVirtualVoiceCall();
   }
 
   public final class BluetoothHearingAid implements android.bluetooth.BluetoothProfile {
@@ -7241,6 +7259,7 @@ package android.os {
   public class SystemConfigManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_CARRIER_APP_INFO) public java.util.Set<java.lang.String> getDisabledUntilUsedPreinstalledCarrierApps();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_CARRIER_APP_INFO) public java.util.Map<java.lang.String,java.util.List<java.lang.String>> getDisabledUntilUsedPreinstalledCarrierAssociatedApps();
+    method @NonNull public java.util.List<java.lang.String> getEnabledComponentOverrides(@NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.GET_RUNTIME_PERMISSIONS) public int[] getSystemPermissionUids(@NonNull String);
   }
 
@@ -10800,32 +10819,6 @@ package android.telephony.data {
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.EpsBearerQosSessionAttributes> CREATOR;
   }
 
-  public final class NetworkSliceInfo implements android.os.Parcelable {
-    method public int describeContents();
-    method @IntRange(from=android.telephony.data.NetworkSliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.NetworkSliceInfo.MAX_SLICE_DIFFERENTIATOR) public int getMappedHplmnSliceDifferentiator();
-    method public int getMappedHplmnSliceServiceType();
-    method @IntRange(from=android.telephony.data.NetworkSliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.NetworkSliceInfo.MAX_SLICE_DIFFERENTIATOR) public int getSliceDifferentiator();
-    method public int getSliceServiceType();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.NetworkSliceInfo> CREATOR;
-    field public static final int MAX_SLICE_DIFFERENTIATOR = 16777214; // 0xfffffe
-    field public static final int MIN_SLICE_DIFFERENTIATOR = -1; // 0xffffffff
-    field public static final int SLICE_DIFFERENTIATOR_NO_SLICE = -1; // 0xffffffff
-    field public static final int SLICE_SERVICE_TYPE_EMBB = 1; // 0x1
-    field public static final int SLICE_SERVICE_TYPE_MIOT = 3; // 0x3
-    field public static final int SLICE_SERVICE_TYPE_NONE = 0; // 0x0
-    field public static final int SLICE_SERVICE_TYPE_URLLC = 2; // 0x2
-  }
-
-  public static final class NetworkSliceInfo.Builder {
-    ctor public NetworkSliceInfo.Builder();
-    method @NonNull public android.telephony.data.NetworkSliceInfo build();
-    method @NonNull public android.telephony.data.NetworkSliceInfo.Builder setMappedHplmnSliceDifferentiator(@IntRange(from=android.telephony.data.NetworkSliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.NetworkSliceInfo.MAX_SLICE_DIFFERENTIATOR) int);
-    method @NonNull public android.telephony.data.NetworkSliceInfo.Builder setMappedHplmnSliceServiceType(int);
-    method @NonNull public android.telephony.data.NetworkSliceInfo.Builder setSliceDifferentiator(@IntRange(from=android.telephony.data.NetworkSliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.NetworkSliceInfo.MAX_SLICE_DIFFERENTIATOR) int);
-    method @NonNull public android.telephony.data.NetworkSliceInfo.Builder setSliceServiceType(int);
-  }
-
   public final class NrQosSessionAttributes implements android.os.Parcelable android.net.QosSessionAttributes {
     method public int describeContents();
     method @NonNull public java.time.Duration getBitRateWindowDuration();
@@ -10880,15 +10873,6 @@ package android.telephony.data {
     method @NonNull public android.telephony.data.ThrottleStatus.Builder setSlotIndex(int);
     method @NonNull public android.telephony.data.ThrottleStatus.Builder setThrottleExpiryTimeMillis(long);
     method @NonNull public android.telephony.data.ThrottleStatus.Builder setTransportType(int);
-  }
-
-  public final class TrafficDescriptor implements android.os.Parcelable {
-    ctor public TrafficDescriptor(@Nullable String, @Nullable String);
-    method public int describeContents();
-    method @Nullable public String getDnn();
-    method @Nullable public String getOsAppId();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.TrafficDescriptor> CREATOR;
   }
 
 }
