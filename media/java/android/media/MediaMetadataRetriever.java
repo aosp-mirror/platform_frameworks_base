@@ -900,7 +900,7 @@ public class MediaMetadataRetriever implements AutoCloseable {
     private @NonNull List<Bitmap> getFramesAtIndexInternal(
             int frameIndex, int numFrames, @Nullable BitmapParams params) {
         if (!"yes".equals(extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO))) {
-            throw new IllegalStateException("Does not contail video or image sequences");
+            throw new IllegalStateException("Does not contain video or image sequences");
         }
         int frameCount = Integer.parseInt(
                 extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_FRAME_COUNT));
@@ -1018,7 +1018,7 @@ public class MediaMetadataRetriever implements AutoCloseable {
 
     private Bitmap getImageAtIndexInternal(int imageIndex, @Nullable BitmapParams params) {
         if (!"yes".equals(extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_IMAGE))) {
-            throw new IllegalStateException("Does not contail still images");
+            throw new IllegalStateException("Does not contain still images");
         }
 
         String imageCount = extractMetadata(MediaMetadataRetriever.METADATA_KEY_IMAGE_COUNT);

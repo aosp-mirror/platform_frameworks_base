@@ -86,6 +86,7 @@ import android.telephony.CallForwardingInfo.CallForwardingReason;
 import android.telephony.VisualVoicemailService.VisualVoicemailTask;
 import android.telephony.data.ApnSetting;
 import android.telephony.data.ApnSetting.MvnoType;
+import android.telephony.data.SlicingConfig;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.emergency.EmergencyNumber.EmergencyServiceCategories;
 import android.telephony.gba.UaSecurityProtocolIdentifier;
@@ -15219,6 +15220,98 @@ public class TelephonyManager {
             return PhoneCapability.DEFAULT_DSDS_CAPABILITY;
         } else {
             return PhoneCapability.DEFAULT_SSSS_CAPABILITY;
+        }
+    }
+
+    /**
+     * Exception that may be supplied to the callback in {@link #getNetworkSlicingConfiguration} if
+     * something goes awry.
+     */
+    public static class SlicingException extends Exception {
+        /**
+         * Getting the current slicing configuration successfully. Used internally only.
+         * @hide
+         */
+        public static final int SUCCESS = 0;
+
+        /**
+         * The system timed out waiting for a response from the Radio.
+         */
+        public static final int ERROR_TIMEOUT = 1;
+
+        /**
+         * The modem returned a failure.
+         */
+        public static final int ERROR_MODEM_ERROR = 2;
+
+        /** @hide */
+        @IntDef(prefix = {"ERROR_"}, value = {
+                ERROR_TIMEOUT,
+                ERROR_MODEM_ERROR,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface SlicingError {}
+
+        private final int mErrorCode;
+
+        public SlicingException(@SlicingError int errorCode) {
+            mErrorCode = errorCode;
+        }
+
+        /**
+         * Fetches the error code associated with this exception.
+         * @return An error code.
+         */
+        public @SlicingError int getErrorCode() {
+            return mErrorCode;
+        }
+    }
+
+    /** @hide */
+    public static final String KEY_SLICING_CONFIG_HANDLE = "slicing_config_handle";
+
+    /**
+     * Request to get the current slicing configuration including URSP rules and
+     * NSSAIs (configured, allowed and rejected).
+     *
+     * This method can be invoked if one of the following requirements is met:
+     * <ul>
+     *     <li>If the calling app has been granted the READ_PRIVILEGED_PHONE_STATE permission; this
+     *     is a privileged permission that can only be granted to apps preloaded on the device.
+     *     <li>If the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * </ul>
+     *
+     * @param executor the executor on which callback will be invoked.
+     * @param callback a callback to receive the current slicing configuration.
+     */
+    @SuppressAutoDoc // No support for carrier privileges (b/72967236).
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public void getNetworkSlicingConfiguration(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OutcomeReceiver<SlicingConfig, SlicingException> callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) {
+                throw new IllegalStateException("telephony service is null.");
+            }
+            telephony.getSlicingConfig(new ResultReceiver(null) {
+                    @Override
+                    protected void onReceiveResult(int resultCode, Bundle result) {
+                        if (resultCode != SlicingException.SUCCESS) {
+                            executor.execute(() -> callback.onError(
+                                    new SlicingException(resultCode)));
+                            return;
+                        }
+                        SlicingConfig slicingConfig =
+                                result.getParcelable(KEY_SLICING_CONFIG_HANDLE);
+                        executor.execute(() -> callback.onResult(slicingConfig));
+                    }
+            });
+        } catch (RemoteException ex) {
+            ex.rethrowAsRuntimeException();
         }
     }
 }
