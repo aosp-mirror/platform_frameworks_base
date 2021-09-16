@@ -223,7 +223,6 @@ import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowState.LEGACY_POLICY_VISIBILITY;
 import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
-import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_BEFORE_ANIM;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
@@ -8041,13 +8040,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @VisibleForTesting
     @Override
     Rect getAnimationBounds(int appRootTaskClipMode) {
-        if (appRootTaskClipMode == ROOT_TASK_CLIP_BEFORE_ANIM && getRootTask() != null) {
-            // Using the root task bounds here effectively applies the clipping before animation.
-            return getRootTask().getBounds();
-        }
-        // Use task-bounds if available so that activity-level letterbox (maxAspectRatio) is
+        // Use TaskFragment-bounds if available so that activity-level letterbox (maxAspectRatio) is
         // included in the animation.
-        return task != null ? task.getBounds() : getBounds();
+        final TaskFragment taskFragment = getTaskFragment();
+        return taskFragment != null ? taskFragment.getBounds() : getBounds();
     }
 
     @Override

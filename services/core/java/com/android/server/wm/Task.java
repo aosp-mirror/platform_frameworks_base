@@ -130,7 +130,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ROOT_TASK;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.dipToPixel;
-import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_BEFORE_ANIM;
 
 import static java.lang.Integer.MAX_VALUE;
 
@@ -2982,16 +2981,6 @@ class Task extends TaskFragment {
     @Override
     void resetSurfacePositionForAnimationLeash(SurfaceControl.Transaction t) {
         super.resetSurfacePositionForAnimationLeash(t);
-    }
-
-    @Override
-    Rect getAnimationBounds(int appRootTaskClipMode) {
-        // TODO(b/131661052): we should remove appRootTaskClipMode with hierarchical animations.
-        if (appRootTaskClipMode == ROOT_TASK_CLIP_BEFORE_ANIM && getRootTask() != null) {
-            // Using the root task bounds here effectively applies the clipping before animation.
-            return getRootTask().getBounds();
-        }
-        return super.getAnimationBounds(appRootTaskClipMode);
     }
 
     boolean shouldAnimate() {
