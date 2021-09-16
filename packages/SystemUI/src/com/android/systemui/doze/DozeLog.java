@@ -275,6 +275,13 @@ public class DozeLog implements Dumpable {
     }
 
     /**
+     * Appends sensor event dropped event to logs
+     */
+    public void traceSensorEventDropped(int sensorEvent, String reason) {
+        mLogger.logSensorEventDropped(sensorEvent, reason);
+    }
+
+    /**
      * Appends pulse dropped event to logs
      * @param reason why the pulse was dropped
      */

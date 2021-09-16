@@ -58,7 +58,6 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -66,6 +65,7 @@ import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.Execution;
@@ -124,8 +124,6 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
-    private KeyguardViewMediator mKeyguardViewMediator;
-    @Mock
     private IUdfpsOverlayControllerCallback mUdfpsOverlayControllerCallback;
     @Mock
     private FalsingManager mFalsingManager;
@@ -153,6 +151,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private ConfigurationController mConfigurationController;
     @Mock
     private SystemClock mSystemClock;
+    @Mock
+    private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
 
     private FakeExecutor mFgExecutor;
 
@@ -222,7 +222,6 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mStatusBarKeyguardViewManager,
                 mDumpManager,
                 mKeyguardUpdateMonitor,
-                mKeyguardViewMediator,
                 mFalsingManager,
                 mPowerManager,
                 mAccessibilityManager,
@@ -236,7 +235,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mDisplayManager,
                 mHandler,
                 mConfigurationController,
-                mSystemClock);
+                mSystemClock,
+                mUnlockedScreenOffAnimationController);
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
         verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());
