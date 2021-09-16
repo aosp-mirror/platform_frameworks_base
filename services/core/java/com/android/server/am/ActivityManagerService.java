@@ -4838,10 +4838,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         showConsoleNotificationIfActive();
 
         t.traceEnd();
-
-        // Load the component aliases.
-        mComponentAliasResolver.update(
-                mConstants.mEnableComponentAlias, mConstants.mComponentAliasOverrides);
     }
 
     private void showConsoleNotificationIfActive() {
@@ -7827,6 +7823,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             t.traceEnd(); // setBinderProxies
 
             t.traceEnd(); // ActivityManagerStartApps
+
+            // Load the component aliases.
+            t.traceBegin("componentAlias");
+            mComponentAliasResolver.onSystemReady(mConstants.mComponentAliasOverrides);
+            t.traceEnd(); // componentAlias
+
             t.traceEnd(); // PhaseActivityManagerReady
         }
     }
