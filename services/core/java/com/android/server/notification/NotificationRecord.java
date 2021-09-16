@@ -200,6 +200,10 @@ public final class NotificationRecord {
     private boolean mIsAppImportanceLocked;
     private ArraySet<Uri> mGrantableUris;
 
+    // Whether this notification record should have an update logged the next time notifications
+    // are sorted.
+    private boolean mPendingLogUpdate = false;
+
     public NotificationRecord(Context context, StatusBarNotification sbn,
             NotificationChannel channel) {
         this.sbn = sbn;
@@ -662,17 +666,23 @@ public final class NotificationRecord {
                     final ArrayList<String> people =
                             adjustment.getSignals().getStringArrayList(Adjustment.KEY_PEOPLE);
                     setPeopleOverride(people);
+                    EventLogTags.writeNotificationAdjusted(
+                            getKey(), Adjustment.KEY_PEOPLE, people.toString());
                 }
                 if (signals.containsKey(Adjustment.KEY_SNOOZE_CRITERIA)) {
                     final ArrayList<SnoozeCriterion> snoozeCriterionList =
                             adjustment.getSignals().getParcelableArrayList(
                                     Adjustment.KEY_SNOOZE_CRITERIA);
                     setSnoozeCriteria(snoozeCriterionList);
+                    EventLogTags.writeNotificationAdjusted(getKey(), Adjustment.KEY_SNOOZE_CRITERIA,
+                            snoozeCriterionList.toString());
                 }
                 if (signals.containsKey(Adjustment.KEY_GROUP_KEY)) {
                     final String groupOverrideKey =
                             adjustment.getSignals().getString(Adjustment.KEY_GROUP_KEY);
                     setOverrideGroupKey(groupOverrideKey);
+                    EventLogTags.writeNotificationAdjusted(getKey(), Adjustment.KEY_GROUP_KEY,
+                            groupOverrideKey);
                 }
                 if (signals.containsKey(Adjustment.KEY_USER_SENTIMENT)) {
                     // Only allow user sentiment update from assistant if user hasn't already
@@ -681,27 +691,42 @@ public final class NotificationRecord {
                             && (getChannel().getUserLockedFields() & USER_LOCKED_IMPORTANCE) == 0) {
                         setUserSentiment(adjustment.getSignals().getInt(
                                 Adjustment.KEY_USER_SENTIMENT, USER_SENTIMENT_NEUTRAL));
+                        EventLogTags.writeNotificationAdjusted(getKey(),
+                                Adjustment.KEY_USER_SENTIMENT,
+                                Integer.toString(getUserSentiment()));
                     }
                 }
                 if (signals.containsKey(Adjustment.KEY_CONTEXTUAL_ACTIONS)) {
                     setSystemGeneratedSmartActions(
                             signals.getParcelableArrayList(Adjustment.KEY_CONTEXTUAL_ACTIONS));
+                    EventLogTags.writeNotificationAdjusted(getKey(),
+                            Adjustment.KEY_CONTEXTUAL_ACTIONS,
+                            getSystemGeneratedSmartActions().toString());
                 }
                 if (signals.containsKey(Adjustment.KEY_TEXT_REPLIES)) {
                     setSmartReplies(signals.getCharSequenceArrayList(Adjustment.KEY_TEXT_REPLIES));
+                    EventLogTags.writeNotificationAdjusted(getKey(), Adjustment.KEY_TEXT_REPLIES,
+                            getSmartReplies().toString());
                 }
                 if (signals.containsKey(Adjustment.KEY_IMPORTANCE)) {
                     int importance = signals.getInt(Adjustment.KEY_IMPORTANCE);
                     importance = Math.max(IMPORTANCE_UNSPECIFIED, importance);
                     importance = Math.min(IMPORTANCE_HIGH, importance);
                     setAssistantImportance(importance);
+                    EventLogTags.writeNotificationAdjusted(getKey(), Adjustment.KEY_IMPORTANCE,
+                            Integer.toString(importance));
                 }
                 if (signals.containsKey(Adjustment.KEY_RANKING_SCORE)) {
                     mRankingScore = signals.getFloat(Adjustment.KEY_RANKING_SCORE);
+                    EventLogTags.writeNotificationAdjusted(getKey(), Adjustment.KEY_RANKING_SCORE,
+                            Float.toString(mRankingScore));
                 }
                 if (signals.containsKey(Adjustment.KEY_NOT_CONVERSATION)) {
                     mIsNotConversationOverride = signals.getBoolean(
                             Adjustment.KEY_NOT_CONVERSATION);
+                    EventLogTags.writeNotificationAdjusted(getKey(),
+                            Adjustment.KEY_NOT_CONVERSATION,
+                            Boolean.toString(mIsNotConversationOverride));
                 }
                 if (!signals.isEmpty() && adjustment.getIssuer() != null) {
                     mAdjustmentIssuer = adjustment.getIssuer();
@@ -1490,6 +1515,24 @@ public final class NotificationRecord {
 
     StatusBarNotification getSbn() {
         return sbn;
+    }
+
+    /**
+     * Returns whether this record's ranking score is approximately equal to otherScore
+     * (the difference must be within 0.0001).
+     */
+    public boolean rankingScoreMatches(float otherScore) {
+        return Math.abs(mRankingScore - otherScore) < 0.0001;
+    }
+
+    protected void setPendingLogUpdate(boolean pendingLogUpdate) {
+        mPendingLogUpdate = pendingLogUpdate;
+    }
+
+    // If a caller of this function subsequently logs the update, they should also call
+    // setPendingLogUpdate to false to make sure other callers don't also do so.
+    protected boolean hasPendingLogUpdate() {
+        return mPendingLogUpdate;
     }
 
     @VisibleForTesting
