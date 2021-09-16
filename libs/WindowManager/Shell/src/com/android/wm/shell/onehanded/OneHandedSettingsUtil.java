@@ -171,9 +171,22 @@ public final class OneHandedSettingsUtil {
      * @return true if user enabled one-handed shortcut in settings, false otherwise.
      */
     public boolean getShortcutEnabled(ContentResolver resolver, int userId) {
-        final String targets = Settings.Secure.getStringForUser(resolver,
+        // Checks SOFTWARE_SHORTCUT_KEY
+        final String targetsSwKey = Settings.Secure.getStringForUser(resolver,
                 Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, userId);
-        return TextUtils.isEmpty(targets) ? false : targets.contains(ONE_HANDED_MODE_TARGET_NAME);
+        if (!TextUtils.isEmpty(targetsSwKey) && targetsSwKey.contains(
+                ONE_HANDED_MODE_TARGET_NAME)) {
+            return true;
+        }
+
+        // Checks HARDWARE_SHORTCUT_KEY
+        final String targetsHwKey = Settings.Secure.getStringForUser(resolver,
+                Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, userId);
+        if (!TextUtils.isEmpty(targetsHwKey) && targetsHwKey.contains(
+                ONE_HANDED_MODE_TARGET_NAME)) {
+            return true;
+        }
+        return false;
     }
 
     /**
