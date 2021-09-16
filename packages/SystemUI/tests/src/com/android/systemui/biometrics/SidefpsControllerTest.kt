@@ -17,6 +17,8 @@
 package com.android.systemui.biometrics
 
 import android.graphics.Rect
+import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD
+import android.hardware.biometrics.BiometricOverlayConstants.REASON_UNKNOWN
 import android.hardware.biometrics.SensorProperties
 import android.hardware.display.DisplayManager
 import android.hardware.display.DisplayManagerGlobal
@@ -128,25 +130,25 @@ class SidefpsControllerTest : SysuiTestCase() {
 
     @Test
     fun testSubscribesToOrientationChangesWhenShowingOverlay() {
-        overlayController.show()
+        overlayController.show(SENSOR_ID, REASON_UNKNOWN)
         executor.runAllReady()
 
         verify(displayManager).registerDisplayListener(any(), eq(handler))
 
-        overlayController.hide()
+        overlayController.hide(SENSOR_ID)
         executor.runAllReady()
         verify(displayManager).unregisterDisplayListener(any())
     }
 
     @Test
     fun testShowsAndHides() {
-        overlayController.show()
+        overlayController.show(SENSOR_ID, REASON_UNKNOWN)
         executor.runAllReady()
 
         verify(windowManager).addView(overlayCaptor.capture(), any())
 
         reset(windowManager)
-        overlayController.hide()
+        overlayController.hide(SENSOR_ID)
         executor.runAllReady()
 
         verify(windowManager, never()).addView(any(), any())
@@ -156,7 +158,7 @@ class SidefpsControllerTest : SysuiTestCase() {
     @Test
     fun testShowsOnce() {
         repeat(5) {
-            overlayController.show()
+            overlayController.show(SENSOR_ID, REASON_UNKNOWN)
             executor.runAllReady()
         }
 
@@ -166,15 +168,23 @@ class SidefpsControllerTest : SysuiTestCase() {
 
     @Test
     fun testHidesOnce() {
-        overlayController.show()
+        overlayController.show(SENSOR_ID, REASON_UNKNOWN)
         executor.runAllReady()
 
         repeat(5) {
-            overlayController.hide()
+            overlayController.hide(SENSOR_ID)
             executor.runAllReady()
         }
 
         verify(windowManager).addView(any(), any())
         verify(windowManager).removeView(any())
+    }
+
+    @Test
+    fun testIgnoredForKeyguard() {
+        overlayController.show(SENSOR_ID, REASON_AUTH_KEYGUARD)
+        executor.runAllReady()
+
+        verify(windowManager, never()).addView(any(), any())
     }
 }
