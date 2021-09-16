@@ -25,7 +25,11 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import android.view.WindowInsets
 import android.view.WindowManager
+import android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
+import android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+import android.view.WindowManagerPolicyConstants
 import android.widget.FrameLayout
 
 private const val TAG = "DialogLaunchAnimator"
@@ -252,6 +256,17 @@ private class DialogLaunchAnimation(
             WindowManager.LayoutParams.MATCH_PARENT
         )
 
+        // If we are using gesture navigation, then we can overlay the navigation/task bars with
+        // the host dialog.
+        val navigationMode = context.resources.getInteger(
+            com.android.internal.R.integer.config_navBarInteractionMode)
+        if (navigationMode == WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL) {
+            window.attributes.fitInsetsTypes = window.attributes.fitInsetsTypes and
+                WindowInsets.Type.navigationBars().inv()
+            window.addFlags(FLAG_LAYOUT_IN_SCREEN or FLAG_LAYOUT_INSET_DECOR)
+            window.setDecorFitsSystemWindows(false)
+        }
+
         // Prevent the host dialog from drawing until the animation starts.
         hostDialogRoot.viewTreeObserver.addOnPreDrawListener(
             object : ViewTreeObserver.OnPreDrawListener {
@@ -356,15 +371,21 @@ private class DialogLaunchAnimation(
                 dialogView.removeOnLayoutChangeListener(this)
                 startAnimation(
                     isLaunching = true,
-                    onLaunchAnimationStart = { drawHostDialog = true },
+                    onLaunchAnimationStart = {
+                        drawHostDialog = true
+
+                        // The ghost of the touch surface was just created, so the touch surface is
+                        // currently invisible. We need to make sure that it stays invisible as long
+                        // as the dialog is shown or animating.
+                        if (touchSurface is LaunchableView) {
+                            touchSurface.setShouldBlockVisibilityChanges(true)
+                        }
+                    },
                     onLaunchAnimationEnd = {
                         touchSurface.setTag(R.id.launch_animation_running, null)
 
                         // We hide the touch surface when the dialog is showing. We will make this
                         // view visible again when dismissing the dialog.
-                        // TODO(b/193634619): Provide an easy way for views to check if they should
-                        // be hidden because of a dialog launch so that they don't override this
-                        // visibility when updating/refreshing itself.
                         touchSurface.visibility = View.INVISIBLE
 
                         isLaunching = false
@@ -417,6 +438,11 @@ private class DialogLaunchAnimation(
         if (!shouldAnimateDialogIntoView()) {
             Log.i(TAG, "Skipping animation of dialog into the touch surface")
 
+            // Make sure we allow the touch surface to change its visibility again.
+            if (touchSurface is LaunchableView) {
+                touchSurface.setShouldBlockVisibilityChanges(false)
+            }
+
             // If the view is invisible it's probably because of us, so we make it visible again.
             if (touchSurface.visibility == View.INVISIBLE) {
                 touchSurface.visibility = View.VISIBLE
@@ -434,6 +460,11 @@ private class DialogLaunchAnimation(
                 hostDialog.window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
             },
             onLaunchAnimationEnd = {
+                // Make sure we allow the touch surface to change its visibility again.
+                if (touchSurface is LaunchableView) {
+                    touchSurface.setShouldBlockVisibilityChanges(false)
+                }
+
                 touchSurface.visibility = View.VISIBLE
                 originalDialogView!!.visibility = View.INVISIBLE
                 dismissDialogs(true /* instantDismiss */)

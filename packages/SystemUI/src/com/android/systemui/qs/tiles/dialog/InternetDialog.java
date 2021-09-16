@@ -15,14 +15,10 @@
  */
 package com.android.systemui.qs.tiles.dialog;
 
-import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
-
 import static com.android.systemui.Prefs.Key.QS_HAS_TURNED_OFF_MOBILE_DATA;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -42,9 +38,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.Window;
-import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -130,7 +124,6 @@ public class InternetDialog extends SystemUIDialog implements
     private Switch mWiFiToggle;
     private FrameLayout mDoneLayout;
     private Drawable mBackgroundOn;
-    private int mListMaxHeight;
     private int mDefaultDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     private boolean mCanConfigMobileData;
 
@@ -149,20 +142,11 @@ public class InternetDialog extends SystemUIDialog implements
         mInternetDialogSubTitle.setText(getSubtitleText());
     };
 
-    private final ViewTreeObserver.OnGlobalLayoutListener mInternetListLayoutListener = () -> {
-        // Set max height for list
-        if (mInternetDialogLayout.getHeight() > mListMaxHeight) {
-            ViewGroup.LayoutParams params = mInternetDialogLayout.getLayoutParams();
-            params.height = mListMaxHeight;
-            mInternetDialogLayout.setLayoutParams(params);
-        }
-    };
-
     public InternetDialog(Context context, InternetDialogFactory internetDialogFactory,
             InternetDialogController internetDialogController, boolean canConfigMobileData,
             boolean canConfigWifi, boolean aboveStatusBar, UiEventLogger uiEventLogger,
             @Main Handler handler, @Background Executor executor) {
-        super(context, R.style.Theme_SystemUI_Dialog_Internet);
+        super(context);
         if (DEBUG) {
             Log.d(TAG, "Init InternetDialog");
         }
@@ -184,8 +168,6 @@ public class InternetDialog extends SystemUIDialog implements
                 return false;
             }
         };
-        mListMaxHeight = context.getResources().getDimensionPixelSize(
-                R.dimen.internet_dialog_list_max_height);
         mUiEventLogger = uiEventLogger;
         mAdapter = new InternetAdapter(mInternetDialogController);
         if (!aboveStatusBar) {
@@ -203,21 +185,12 @@ public class InternetDialog extends SystemUIDialog implements
         mDialogView = LayoutInflater.from(mContext).inflate(R.layout.internet_connectivity_dialog,
                 null);
         final Window window = getWindow();
-        final WindowManager.LayoutParams layoutParams = window.getAttributes();
-        layoutParams.gravity = Gravity.BOTTOM;
-        // Move down the dialog to overlay the navigation bar.
-        layoutParams.setFitInsetsTypes(
-                layoutParams.getFitInsetsTypes() & ~WindowInsets.Type.navigationBars());
-        layoutParams.setFitInsetsSides(WindowInsets.Side.all());
-        layoutParams.setFitInsetsIgnoringVisibility(true);
-        window.setAttributes(layoutParams);
         window.setContentView(mDialogView);
-        //Only fix the width for large screen or tablet.
+
+        // Only fix the width for large screen or tablet.
         window.setLayout(mContext.getResources().getDimensionPixelSize(
                 R.dimen.large_dialog_width), ViewGroup.LayoutParams.WRAP_CONTENT);
         window.setWindowAnimations(R.style.Animation_InternetDialog);
-        window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        window.addFlags(FLAG_LAYOUT_NO_LIMITS);
 
         mInternetDialogLayout = mDialogView.requireViewById(R.id.internet_connectivity_dialog);
         mInternetDialogTitle = mDialogView.requireViewById(R.id.internet_dialog_title);
@@ -244,8 +217,6 @@ public class InternetDialog extends SystemUIDialog implements
         mMobileDataToggle = mDialogView.requireViewById(R.id.mobile_toggle);
         mWiFiToggle = mDialogView.requireViewById(R.id.wifi_toggle);
         mBackgroundOn = mContext.getDrawable(R.drawable.settingslib_switch_bar_bg_on);
-        mInternetDialogLayout.getViewTreeObserver().addOnGlobalLayoutListener(
-                mInternetListLayoutListener);
         mInternetDialogTitle.setText(getDialogTitleText());
         mInternetDialogTitle.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
 
