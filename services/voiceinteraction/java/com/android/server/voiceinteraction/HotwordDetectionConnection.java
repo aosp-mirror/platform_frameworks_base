@@ -272,13 +272,11 @@ final class HotwordDetectionConnection {
         Slog.v(TAG, "cancelLocked");
         clearDebugHotwordLoggingTimeoutLocked();
         mDebugHotwordLogging = false;
-        if (mRemoteHotwordDetectionService.isBound()) {
-            mRemoteHotwordDetectionService.unbind();
-            LocalServices.getService(PermissionManagerServiceInternal.class)
-                    .setHotwordDetectionServiceProvider(null);
-            mIdentity = null;
-            updateServiceUidForAudioPolicy(Process.INVALID_UID);
-        }
+        mRemoteHotwordDetectionService.unbind();
+        LocalServices.getService(PermissionManagerServiceInternal.class)
+                .setHotwordDetectionServiceProvider(null);
+        mIdentity = null;
+        updateServiceUidForAudioPolicy(Process.INVALID_UID);
         mCancellationTaskFuture.cancel(/* may interrupt */ true);
         if (mAudioFlinger != null) {
             mAudioFlinger.unlinkToDeath(mAudioServerDeathRecipient, /* flags= */ 0);

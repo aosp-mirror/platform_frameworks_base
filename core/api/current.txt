@@ -20514,7 +20514,7 @@ package android.media {
     method public String getProperty(String);
     method public int getRingerMode();
     method @Deprecated public int getRouting(int);
-    method @Nullable public android.media.Spatializer getSpatializer();
+    method @NonNull public android.media.Spatializer getSpatializer();
     method public int getStreamMaxVolume(int);
     method public int getStreamMinVolume(int);
     method public int getStreamVolume(int);
@@ -23930,9 +23930,13 @@ package android.media {
   public class Spatializer {
     method public void addOnSpatializerStateChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.Spatializer.OnSpatializerStateChangedListener);
     method public boolean canBeSpatialized(@NonNull android.media.AudioAttributes, @NonNull android.media.AudioFormat);
+    method public int getImmersiveAudioLevel();
     method public boolean isAvailable();
     method public boolean isEnabled();
     method public void removeOnSpatializerStateChangedListener(@NonNull android.media.Spatializer.OnSpatializerStateChangedListener);
+    field public static final int SPATIALIZER_IMMERSIVE_LEVEL_MULTICHANNEL = 1; // 0x1
+    field public static final int SPATIALIZER_IMMERSIVE_LEVEL_NONE = 0; // 0x0
+    field public static final int SPATIALIZER_IMMERSIVE_LEVEL_OTHER = -1; // 0xffffffff
   }
 
   public static interface Spatializer.OnSpatializerStateChangedListener {
@@ -53434,7 +53438,6 @@ package android.webkit {
     method public void onPermissionRequest(android.webkit.PermissionRequest);
     method public void onPermissionRequestCanceled(android.webkit.PermissionRequest);
     method public void onProgressChanged(android.webkit.WebView, int);
-    method @Deprecated public void onReachedMaxAppCacheSize(long, long, android.webkit.WebStorage.QuotaUpdater);
     method public void onReceivedIcon(android.webkit.WebView, android.graphics.Bitmap);
     method public void onReceivedTitle(android.webkit.WebView, String);
     method public void onReceivedTouchIconUrl(android.webkit.WebView, String, boolean);
@@ -53586,9 +53589,6 @@ package android.webkit {
     method public abstract void setAllowFileAccess(boolean);
     method @Deprecated public abstract void setAllowFileAccessFromFileURLs(boolean);
     method @Deprecated public abstract void setAllowUniversalAccessFromFileURLs(boolean);
-    method @Deprecated public abstract void setAppCacheEnabled(boolean);
-    method @Deprecated public abstract void setAppCacheMaxSize(long);
-    method @Deprecated public abstract void setAppCachePath(String);
     method public abstract void setBlockNetworkImage(boolean);
     method public abstract void setBlockNetworkLoads(boolean);
     method public abstract void setBuiltInZoomControls(boolean);

@@ -478,7 +478,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         if (launchTheme != 0) {
             info.splashScreenThemeResId = launchTheme;
         }
-        info.mTaskSnapshot = taskSnapshot;
+        info.taskSnapshot = taskSnapshot;
         // make this happen prior than prepare surface
         try {
             lastOrganizer.addStartingWindow(info, activity.token);
@@ -701,6 +701,17 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             }
         }
         mPendingTaskEvents.clear();
+    }
+
+    void reportImeDrawnOnTask(Task task) {
+        final TaskOrganizerState state = mTaskOrganizerStates.get(task.mTaskOrganizer.asBinder());
+        if (state != null) {
+            try {
+                state.mOrganizer.mTaskOrganizer.onImeDrawnOnTask(task.mTaskId);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Exception sending onImeDrawnOnTask callback", e);
+            }
+        }
     }
 
     void onTaskInfoChanged(Task task, boolean force) {

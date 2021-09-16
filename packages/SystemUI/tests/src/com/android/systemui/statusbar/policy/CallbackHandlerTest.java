@@ -141,7 +141,7 @@ public class CallbackHandlerTest extends SysuiTestCase {
         assertEquals(out, expected.activityOut);
         assertEquals(typeDescription, expected.typeContentDescription);
         assertEquals(typeDescriptionHtml, expected.typeContentDescriptionHtml);
-        assertEquals(description, expected.description);
+        assertEquals(description, expected.qsDescription);
         assertEquals(subId, expected.subId);
         assertTrue(expected.roaming);
         assertTrue(expected.showTriangle);

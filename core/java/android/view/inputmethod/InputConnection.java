@@ -274,10 +274,7 @@ public interface InputConnection {
      *
      * @param flags Supplies additional options controlling how the text is
      * returned. May be either {@code 0} or {@link #GET_TEXT_WITH_STYLES}.
-     * @return the text that is currently selected, if any, or null if
-     * no text is selected. In {@link android.os.Build.VERSION_CODES#N} and
-     * later, returns false when the target application does not implement
-     * this method.
+     * @return the text that is currently selected, if any, or {@code null} if no text is selected.
      */
     CharSequence getSelectedText(int flags);
 
@@ -483,8 +480,9 @@ public interface InputConnection {
      *        If this is greater than the number of existing characters between the cursor and
      *        the end of the text, then this method does not fail but deletes all the characters in
      *        that range.
-     * @return true on success, false if the input connection is no longer valid.  Returns
-     * {@code false} when the target application does not implement this method.
+     * @return {@code true} on success, {@code false} if the input connection is no longer valid.
+     *         Before Android {@link android.os.Build.VERSION_CODES#TIRAMISU}, this API returned
+     *         {@code false} when the target application does not implement this method.
      */
     boolean deleteSurroundingTextInCodePoints(int beforeLength, int afterLength);
 
@@ -573,9 +571,10 @@ public interface InputConnection {
      *
      * @param start the position in the text at which the composing region begins
      * @param end the position in the text at which the composing region ends
-     * @return true on success, false if the input connection is no longer
-     * valid. In {@link android.os.Build.VERSION_CODES#N} and later, false is returned when the
-     * target application does not implement this method.
+     * @return {@code true} on success, {@code false} if the input connection is no longer valid.
+     *         Since Android {@link android.os.Build.VERSION_CODES#N} until
+     *         {@link android.os.Build.VERSION_CODES#TIRAMISU}, this API returned {@code false} when
+     *         the target application does not implement this method.
      */
     boolean setComposingRegion(int start, int end);
 
@@ -686,9 +685,10 @@ public interface InputConnection {
      * in progress.</p>
      *
      * @param correctionInfo Detailed information about the correction.
-     * @return true on success, false if the input connection is no longer valid.
-     * In {@link android.os.Build.VERSION_CODES#N} and later, returns false
-     * when the target application does not implement this method.
+     * @return {@code true} on success, {@code false} if the input connection is no longer valid.
+     *         Since Android {@link android.os.Build.VERSION_CODES#N} until
+     *         {@link android.os.Build.VERSION_CODES#TIRAMISU}, this API returned {@code false} when
+     *         the target application does not implement this method.
      */
     boolean commitCorrection(CorrectionInfo correctionInfo);
 
@@ -924,10 +924,11 @@ public interface InputConnection {
      * {@link #CURSOR_UPDATE_MONITOR}. Pass {@code 0} to disable the effect of
      * {@link #CURSOR_UPDATE_MONITOR}.
      * @return {@code true} if the request is scheduled. {@code false} to indicate that when the
-     * application will not call
-     * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)}.
-     * In {@link android.os.Build.VERSION_CODES#N} and later, returns {@code false} also when the
-     * target application does not implement this method.
+     *         application will not call {@link InputMethodManager#updateCursorAnchorInfo(
+     *         android.view.View, CursorAnchorInfo)}.
+     *         Since Android {@link android.os.Build.VERSION_CODES#N} until
+     *         {@link android.os.Build.VERSION_CODES#TIRAMISU}, this API returned {@code false} when
+     *         the target application does not implement this method.
      */
     boolean requestCursorUpdates(int cursorUpdateMode);
 

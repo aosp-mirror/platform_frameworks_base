@@ -551,6 +551,7 @@ final class InstallParams extends HandlerParams {
                 new ArrayMap<>(requests.size());
         final Map<String, Boolean> createdAppId = new ArrayMap<>(requests.size());
         boolean success = false;
+        final ScanPackageHelper scanPackageHelper = new ScanPackageHelper(mPm);
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "installPackagesLI");
             for (InstallRequest request : requests) {
@@ -579,7 +580,7 @@ final class InstallParams extends HandlerParams {
                 installResults.put(packageName, request.mInstallResult);
                 installArgs.put(packageName, request.mArgs);
                 try {
-                    final ScanResult result = mPm.scanPackageTracedLI(
+                    final ScanResult result = scanPackageHelper.scanPackageTracedLI(
                             prepareResult.mPackageToScan, prepareResult.mParseFlags,
                             prepareResult.mScanFlags, System.currentTimeMillis(),
                             request.mArgs.mUser, request.mArgs.mAbiOverride);
@@ -591,7 +592,8 @@ final class InstallParams extends HandlerParams {
                                         + " in multi-package install request.");
                         return;
                     }
-                    createdAppId.put(packageName, mPm.optimisticallyRegisterAppId(result));
+                    createdAppId.put(packageName,
+                            scanPackageHelper.optimisticallyRegisterAppId(result));
                     versionInfos.put(result.mPkgSetting.pkg.getPackageName(),
                             mPm.getSettingsVersionForPackage(result.mPkgSetting.pkg));
                     if (result.mStaticSharedLibraryInfo != null) {
@@ -668,7 +670,7 @@ final class InstallParams extends HandlerParams {
                 for (ScanResult result : preparedScans.values()) {
                     if (createdAppId.getOrDefault(result.mRequest.mParsedPackage.getPackageName(),
                             false)) {
-                        mPm.cleanUpAppIdCreation(result);
+                        scanPackageHelper.cleanUpAppIdCreation(result);
                     }
                 }
                 // TODO(b/194319951): create a more descriptive reason than unknown

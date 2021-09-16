@@ -17,6 +17,7 @@
 package com.android.server.wm.flicker.ime
 
 import android.app.Instrumentation
+import android.os.SystemProperties
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
@@ -42,6 +43,7 @@ import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.common.FlickerComponentName
+import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -60,6 +62,8 @@ import org.junit.runners.Parameterized
 class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val testApp = ImeAppAutoFocusHelper(instrumentation, testSpec.config.startRotation)
+    private val isShellTransitionsEnabled =
+            SystemProperties.getBoolean("persist.debug.shell_transit", false)
 
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
@@ -121,21 +125,36 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
 
     @Presubmit
     @Test
-    fun imeWindowIsAlwaysVisible() = testSpec.imeWindowIsAlwaysVisible(true)
+    fun imeWindowIsAlwaysVisible() = testSpec.imeWindowIsAlwaysVisible(!isShellTransitionsEnabled)
 
     @Presubmit
     @Test
-    fun imeAppWindowVisibility() {
-        // the app starts visible in live tile, then becomes invisible during animation and
-        // is again launched. Since we log 1x per frame, sometimes the activity visibility and
-        // the app visibility are updated together, sometimes not, thus ignore activity check
-        // at the start
+    fun imeAppWindowVisibilityLegacy() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+        // the app starts visible in live tile, and stays visible for the duration of entering
+        // and exiting overview. However, legacy transitions seem to have a bug which causes
+        // everything to restart during the test, so expect the app to disappear and come back.
+        // Since we log 1x per frame, sometimes the activity visibility and the app visibility
+        // are updated together, sometimes not, thus ignore activity check at the start
         testSpec.assertWm {
             this.isAppWindowVisible(testApp.component, ignoreActivity = true)
                     .then()
                     .isAppWindowInvisible(testApp.component, ignoreActivity = true)
                     .then()
                     .isAppWindowVisible(testApp.component)
+        }
+    }
+
+    @Presubmit
+    @Test
+    fun imeAppWindowVisibility() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
+        // the app starts visible in live tile, and stays visible for the duration of entering
+        // and exiting overview. Since we log 1x per frame, sometimes the activity visibility
+        // and the app visibility are updated together, sometimes not, thus ignore activity
+        // check at the start
+        testSpec.assertWm {
+            this.isAppWindowVisible(testApp.component, ignoreActivity = true)
         }
     }
 
@@ -154,13 +173,23 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
 
     @Presubmit
     @Test
-    fun imeLayerIsBecomesVisible() {
+    fun imeLayerIsBecomesVisibleLegacy() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
         testSpec.assertLayers {
             this.isVisible(FlickerComponentName.IME)
                     .then()
                     .isInvisible(FlickerComponentName.IME)
                     .then()
                     .isVisible(FlickerComponentName.IME)
+        }
+    }
+
+    @Presubmit
+    @Test
+    fun imeLayerIsBecomesVisible() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
+        testSpec.assertLayers {
+            this.isVisible(FlickerComponentName.IME)
         }
     }
 

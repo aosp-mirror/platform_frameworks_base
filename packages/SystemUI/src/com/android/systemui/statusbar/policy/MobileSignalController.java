@@ -91,8 +91,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
     private int mImsType = IMS_TYPE_WWAN;
     // Save entire info for logging, we only use the id.
     final SubscriptionInfo mSubscriptionInfo;
-    // @VisibleForDemoMode
-    Map<String, MobileIconGroup> mNetworkToIconLookup;
+    private Map<String, MobileIconGroup> mNetworkToIconLookup;
 
     // Since some pieces of the phone state are interdependent we store it locally,
     // this could potentially become part of MobileState for simplification/complication
@@ -385,89 +384,83 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         if (mCurrentState.inetCondition == 0) {
             dataContentDescription = mContext.getString(R.string.data_connection_no_internet);
         }
-        final boolean dataDisabled = (mCurrentState.iconGroup == TelephonyIcons.DATA_DISABLED
-                || (mCurrentState.iconGroup == TelephonyIcons.NOT_DEFAULT_DATA))
-                && mCurrentState.userSetup;
+
+        final QsInfo qsInfo = getQsInfo(contentDescription, icons.dataType);
+        final SbInfo sbInfo = getSbInfo(contentDescription, icons.dataType);
+
+        MobileDataIndicators mobileDataIndicators = new MobileDataIndicators(
+                sbInfo.icon,
+                qsInfo.icon,
+                sbInfo.ratTypeIcon,
+                qsInfo.ratTypeIcon,
+                mCurrentState.hasActivityIn(),
+                mCurrentState.hasActivityOut(),
+                dataContentDescription,
+                dataContentDescriptionHtml,
+                qsInfo.description,
+                mSubscriptionInfo.getSubscriptionId(),
+                mCurrentState.roaming,
+                sbInfo.showTriangle);
+        callback.setMobileDataIndicators(mobileDataIndicators);
+    }
+
+    private QsInfo getQsInfo(String contentDescription, int dataTypeIcon) {
+        int qsTypeIcon = 0;
+        IconState qsIcon = null;
+        CharSequence qsDescription = null;
+
+        boolean pm = mProviderModelSetting || mProviderModelBehavior;
+        if (mCurrentState.dataSim) {
+            // If using provider model behavior, only show QS icons if the state is also default
+            if (pm && !mCurrentState.isDefault) {
+                  return new QsInfo(qsTypeIcon, qsIcon, qsDescription);
+            }
+
+            if (mCurrentState.showQuickSettingsRatIcon() || mConfig.alwaysShowDataRatIcon) {
+                qsTypeIcon = dataTypeIcon;
+            }
+
+            boolean qsIconVisible = mCurrentState.enabled && !mCurrentState.isEmergency;
+            qsIcon = new IconState(qsIconVisible, getQsCurrentIconId(), contentDescription);
+
+            if (!mCurrentState.isEmergency) {
+                qsDescription = mCurrentState.networkName;
+            }
+        }
+
+        return new QsInfo(qsTypeIcon, qsIcon, qsDescription);
+    }
+
+    private SbInfo getSbInfo(String contentDescription, int dataTypeIcon) {
+        final boolean dataDisabled = mCurrentState.isDataDisabledOrNotDefault();
+        boolean showTriangle = false;
+        int typeIcon = 0;
+        IconState statusIcon = null;
 
         if (mProviderModelBehavior) {
-            // Show icon in QS when we are connected or data is disabled.
-            boolean showDataIcon = mCurrentState.dataConnected || dataDisabled;
-
-            int qsTypeIcon = 0;
-            IconState qsIcon = null;
-            CharSequence description = null;
-            // Only send data sim callbacks to QS.
-            if (mCurrentState.dataSim && mCurrentState.isDefault) {
-                qsTypeIcon =
-                        (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.dataType : 0;
-                qsIcon = new IconState(mCurrentState.enabled
-                        && !mCurrentState.isEmergency, getQsCurrentIconId(), contentDescription);
-                description = mCurrentState.isEmergency ? null : mCurrentState.networkName;
-            }
-            boolean activityIn = mCurrentState.dataConnected
-                    && !mCurrentState.carrierNetworkChangeMode
-                    && mCurrentState.activityIn;
-            boolean activityOut = mCurrentState.dataConnected
-                    && !mCurrentState.carrierNetworkChangeMode
-                    && mCurrentState.activityOut;
-            showDataIcon &= mCurrentState.dataSim && mCurrentState.isDefault;
-            boolean showTriangle = showDataIcon && !mCurrentState.airplaneMode;
-            int typeIcon = (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.dataType : 0;
-            showDataIcon |= mCurrentState.roaming;
-            IconState statusIcon = new IconState(showDataIcon && !mCurrentState.airplaneMode,
+            boolean showDataIconStatusBar = (mCurrentState.dataConnected || dataDisabled)
+                    && (mCurrentState.dataSim && mCurrentState.isDefault);
+            typeIcon =
+                    (showDataIconStatusBar || mConfig.alwaysShowDataRatIcon) ? dataTypeIcon : 0;
+            showDataIconStatusBar |= mCurrentState.roaming;
+            statusIcon = new IconState(
+                    showDataIconStatusBar && !mCurrentState.airplaneMode,
                     getCurrentIconId(), contentDescription);
-            MobileDataIndicators mobileDataIndicators = new MobileDataIndicators(
-                    statusIcon, qsIcon, typeIcon, qsTypeIcon,
-                    activityIn, activityOut, dataContentDescription, dataContentDescriptionHtml,
-                    description, mSubscriptionInfo.getSubscriptionId(),
-                    mCurrentState.roaming, showTriangle);
-            callback.setMobileDataIndicators(mobileDataIndicators);
+
+            showTriangle = showDataIconStatusBar && !mCurrentState.airplaneMode;
         } else {
-            boolean showDataIcon = mCurrentState.dataConnected || dataDisabled;
-            IconState statusIcon = new IconState(
+            statusIcon = new IconState(
                     mCurrentState.enabled && !mCurrentState.airplaneMode,
                     getCurrentIconId(), contentDescription);
 
-            int qsTypeIcon = 0;
-            IconState qsIcon = null;
-            CharSequence description = null;
-            // Only send data sim callbacks to QS.
-            if (mProviderModelSetting) {
-                if (mCurrentState.dataSim && mCurrentState.isDefault) {
-                    qsTypeIcon =
-                            (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.dataType : 0;
-                    qsIcon = new IconState(
-                            mCurrentState.enabled && !mCurrentState.isEmergency,
-                            getQsCurrentIconId(), contentDescription);
-                    description = mCurrentState.isEmergency ? null : mCurrentState.networkName;
-                }
-            } else {
-                if (mCurrentState.dataSim) {
-                    qsTypeIcon =
-                            (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.dataType : 0;
-                    qsIcon = new IconState(
-                            mCurrentState.enabled && !mCurrentState.isEmergency,
-                            getQsCurrentIconId(), contentDescription);
-                    description = mCurrentState.isEmergency ? null : mCurrentState.networkName;
-                }
-            }
-
-            boolean activityIn = mCurrentState.dataConnected
-                    && !mCurrentState.carrierNetworkChangeMode
-                    && mCurrentState.activityIn;
-            boolean activityOut = mCurrentState.dataConnected
-                    && !mCurrentState.carrierNetworkChangeMode
-                    && mCurrentState.activityOut;
-            showDataIcon &= mCurrentState.isDefault || dataDisabled;
-            int typeIcon = (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.dataType : 0;
-            boolean showTriangle = mCurrentState.enabled && !mCurrentState.airplaneMode;
-            MobileDataIndicators mobileDataIndicators = new MobileDataIndicators(
-                    statusIcon, qsIcon, typeIcon, qsTypeIcon,
-                    activityIn, activityOut, dataContentDescription, dataContentDescriptionHtml,
-                    description, mSubscriptionInfo.getSubscriptionId(),
-                    mCurrentState.roaming, showTriangle);
-            callback.setMobileDataIndicators(mobileDataIndicators);
+            boolean showDataIconInStatusBar =
+                    (mCurrentState.dataConnected && mCurrentState.isDefault) || dataDisabled;
+            typeIcon =
+                    (showDataIconInStatusBar || mConfig.alwaysShowDataRatIcon) ? dataTypeIcon : 0;
+            showTriangle = mCurrentState.enabled && !mCurrentState.airplaneMode;
         }
+
+        return new SbInfo(showTriangle, typeIcon, statusIcon);
     }
 
     @Override
@@ -841,12 +834,15 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
     public void dump(PrintWriter pw) {
         super.dump(pw);
         pw.println("  mSubscription=" + mSubscriptionInfo + ",");
+        pw.println("  mProviderModelSetting=" + mProviderModelSetting + ",");
+        pw.println("  mProviderModelBehavior=" + mProviderModelBehavior + ",");
         pw.println("  mServiceState=" + mServiceState + ",");
         pw.println("  mSignalStrength=" + mSignalStrength + ",");
         pw.println("  mTelephonyDisplayInfo=" + mTelephonyDisplayInfo + ",");
         pw.println("  mDataState=" + mDataState + ",");
         pw.println("  mInflateSignalStrengths=" + mInflateSignalStrengths + ",");
         pw.println("  isDataDisabled=" + isDataDisabled() + ",");
+        pw.println("  mNetworkToIconLookup=" + mNetworkToIconLookup + ",");
         pw.println("  MobileStatusHistory");
         int size = 0;
         for (int i = 0; i < STATUS_HISTORY_SIZE; i++) {
@@ -862,4 +858,31 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
                     + mMobileStatusHistory[i & (STATUS_HISTORY_SIZE - 1)]);
         }
     }
+
+    /** Box for QS icon info */
+    private static final class QsInfo {
+        final int ratTypeIcon;
+        final IconState icon;
+        final CharSequence description;
+
+        QsInfo(int typeIcon, IconState iconState, CharSequence desc) {
+            ratTypeIcon = typeIcon;
+            icon = iconState;
+            description = desc;
+        }
+    }
+
+    /** Box for StatusBar icon info */
+    private static final class SbInfo {
+        final boolean showTriangle;
+        final int ratTypeIcon;
+        final IconState icon;
+
+        SbInfo(boolean show, int typeIcon, IconState iconState) {
+            showTriangle = show;
+            ratTypeIcon = typeIcon;
+            icon = iconState;
+        }
+    }
+
 }

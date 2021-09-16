@@ -116,6 +116,10 @@ public class InsetsVisibilities implements Parcelable {
         dest.writeIntArray(mVisibilities);
     }
 
+    public void readFromParcel(@NonNull Parcel in) {
+        in.readIntArray(mVisibilities);
+    }
+
     public static final @NonNull Creator<InsetsVisibilities> CREATOR =
             new Creator<InsetsVisibilities>() {
 

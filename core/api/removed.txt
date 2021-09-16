@@ -568,6 +568,16 @@ package android.view.translation {
 
 package android.webkit {
 
+  public class WebChromeClient {
+    method @Deprecated public void onReachedMaxAppCacheSize(long, long, android.webkit.WebStorage.QuotaUpdater);
+  }
+
+  public abstract class WebSettings {
+    method @Deprecated public void setAppCacheEnabled(boolean);
+    method @Deprecated public void setAppCacheMaxSize(long);
+    method @Deprecated public void setAppCachePath(String);
+  }
+
   public class WebViewClient {
     method public void onUnhandledInputEvent(android.webkit.WebView, android.view.InputEvent);
   }

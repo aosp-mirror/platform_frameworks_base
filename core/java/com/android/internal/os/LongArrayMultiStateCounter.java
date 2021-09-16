@@ -16,6 +16,11 @@
 
 package com.android.internal.os;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.android.internal.util.Preconditions;
+
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
 
@@ -47,7 +52,7 @@ import libcore.util.NativeAllocationRegistry;
  *
  * @hide
  */
-public class LongArrayMultiStateCounter {
+public final class LongArrayMultiStateCounter implements Parcelable {
 
     /**
      * Container for a native equivalent of a long[].
@@ -112,12 +117,28 @@ public class LongArrayMultiStateCounter {
     // methods.
     final long mNativeObject;
 
-    public LongArrayMultiStateCounter(int stateCount, int arrayLength, int initialState,
-            long timestampMs) {
+    public LongArrayMultiStateCounter(int stateCount, int arrayLength) {
+        Preconditions.checkArgumentPositive(stateCount, "stateCount must be greater than 0");
         mStateCount = stateCount;
         mLength = arrayLength;
-        mNativeObject = native_init(stateCount, arrayLength, initialState, timestampMs);
+        mNativeObject = native_init(stateCount, arrayLength);
         sRegistry.registerNativeAllocation(this, mNativeObject);
+    }
+
+    private LongArrayMultiStateCounter(Parcel in) {
+        mNativeObject = native_initFromParcel(in);
+        sRegistry.registerNativeAllocation(this, mNativeObject);
+
+        mStateCount = native_getStateCount(mNativeObject);
+        mLength = native_getArrayLength(mNativeObject);
+    }
+
+    /**
+     * Enables or disables the counter.  When the counter is disabled, it does not
+     * accumulate counts supplied by the {@link #updateValues} method.
+     */
+    public void setEnabled(boolean enabled, long timestampMs) {
+        native_setEnabled(mNativeObject, enabled, timestampMs);
     }
 
     /**
@@ -146,6 +167,13 @@ public class LongArrayMultiStateCounter {
     }
 
     /**
+     * Resets the accumulated counts to 0.
+     */
+    public void reset() {
+        native_reset(mNativeObject);
+    }
+
+    /**
      * Populates longArrayContainer with the accumulated counts for the specified state.
      */
     public void getCounts(LongArrayContainer longArrayContainer, int state) {
@@ -161,12 +189,39 @@ public class LongArrayMultiStateCounter {
         return native_toString(mNativeObject);
     }
 
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        native_writeToParcel(mNativeObject, dest, flags);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<LongArrayMultiStateCounter> CREATOR =
+            new Creator<LongArrayMultiStateCounter>() {
+                @Override
+                public LongArrayMultiStateCounter createFromParcel(Parcel in) {
+                    return new LongArrayMultiStateCounter(in);
+                }
+
+                @Override
+                public LongArrayMultiStateCounter[] newArray(int size) {
+                    return new LongArrayMultiStateCounter[size];
+                }
+            };
+
+
     @CriticalNative
-    private static native long native_init(int stateCount, int arrayLength, int initialState,
-            long timestampMs);
+    private static native long native_init(int stateCount, int arrayLength);
 
     @CriticalNative
     private static native long native_getReleaseFunc();
+
+    @CriticalNative
+    private static native void native_setEnabled(long nativeObject, boolean enabled,
+            long timestampMs);
 
     @CriticalNative
     private static native void native_setState(long nativeObject, int state, long timestampMs);
@@ -176,9 +231,24 @@ public class LongArrayMultiStateCounter {
             long longArrayContainerNativeObject, long timestampMs);
 
     @CriticalNative
+    private static native void native_reset(long nativeObject);
+
+    @CriticalNative
     private static native void native_getCounts(long nativeObject,
             long longArrayContainerNativeObject, int state);
 
     @FastNative
     private native String native_toString(long nativeObject);
+
+    @FastNative
+    private native void native_writeToParcel(long nativeObject, Parcel dest, int flags);
+
+    @FastNative
+    private static native long native_initFromParcel(Parcel parcel);
+
+    @CriticalNative
+    private static native int native_getStateCount(long nativeObject);
+
+    @CriticalNative
+    private static native int native_getArrayLength(long nativeObject);
 }

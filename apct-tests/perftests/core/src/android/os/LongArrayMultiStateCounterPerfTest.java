@@ -37,15 +37,15 @@ public class LongArrayMultiStateCounterPerfTest {
 
     /**
      * A complete line-for-line reimplementation of
-     * {@link }com.android.internal.os.CpuTimeInFreqMultiStateCounter}, only in Java instead of
+     * {@link com.android.internal.os.LongArrayMultiStateCounter}, only in Java instead of
      * native.
      */
     private static class TestLongArrayMultiStateCounter {
         private final int mStateCount;
         private final int mArrayLength;
         private int mCurrentState;
-        private long mLastStateChangeTimestampMs;
-        private long mLastUpdateTimestampMs;
+        private long mLastStateChangeTimestampMs = -1;
+        private long mLastUpdateTimestampMs = -1;
 
         private static class State {
             private long mTimeInStateSinceUpdate;
@@ -56,13 +56,9 @@ public class LongArrayMultiStateCounterPerfTest {
         private final long[] mLastTimeInFreq;
         private final long[] mDelta;
 
-        TestLongArrayMultiStateCounter(int stateCount, int arrayLength, int initialState,
-                long timestampMs) {
+        TestLongArrayMultiStateCounter(int stateCount, int arrayLength) {
             mStateCount = stateCount;
             mArrayLength = arrayLength;
-            mCurrentState = initialState;
-            mLastStateChangeTimestampMs = timestampMs;
-            mLastUpdateTimestampMs = timestampMs;
             mStates = new State[stateCount];
             for (int i = 0; i < mStateCount; i++) {
                 mStates[i] = new State();
@@ -73,12 +69,14 @@ public class LongArrayMultiStateCounterPerfTest {
         }
 
         public void setState(int state, long timestampMs) {
-            if (timestampMs >= mLastStateChangeTimestampMs) {
-                mStates[mCurrentState].mTimeInStateSinceUpdate +=
-                        timestampMs - mLastStateChangeTimestampMs;
-            } else {
-                for (int i = 0; i < mStateCount; i++) {
-                    mStates[i].mTimeInStateSinceUpdate = 0;
+            if (mLastStateChangeTimestampMs > 0) {
+                if (timestampMs >= mLastStateChangeTimestampMs) {
+                    mStates[mCurrentState].mTimeInStateSinceUpdate +=
+                            timestampMs - mLastStateChangeTimestampMs;
+                } else {
+                    for (int i = 0; i < mStateCount; i++) {
+                        mStates[i].mTimeInStateSinceUpdate = 0;
+                    }
                 }
             }
             mCurrentState = state;
@@ -88,21 +86,23 @@ public class LongArrayMultiStateCounterPerfTest {
         public void updateValue(long[] timeInFreq, long timestampMs) {
             setState(mCurrentState, timestampMs);
 
-            if (timestampMs > mLastUpdateTimestampMs) {
-                if (delta(mLastTimeInFreq, timeInFreq, mDelta)) {
-                    long timeSinceUpdate = timestampMs - mLastUpdateTimestampMs;
-                    for (int i = 0; i < mStateCount; i++) {
-                        long timeInState = mStates[i].mTimeInStateSinceUpdate;
-                        if (timeInState > 0) {
-                            add(mStates[i].mCounter, mDelta, timeInState, timeSinceUpdate);
-                            mStates[i].mTimeInStateSinceUpdate = 0;
+            if (mLastUpdateTimestampMs >= 0) {
+                if (timestampMs > mLastUpdateTimestampMs) {
+                    if (delta(mLastTimeInFreq, timeInFreq, mDelta)) {
+                        long timeSinceUpdate = timestampMs - mLastUpdateTimestampMs;
+                        for (int i = 0; i < mStateCount; i++) {
+                            long timeInState = mStates[i].mTimeInStateSinceUpdate;
+                            if (timeInState > 0) {
+                                add(mStates[i].mCounter, mDelta, timeInState, timeSinceUpdate);
+                                mStates[i].mTimeInStateSinceUpdate = 0;
+                            }
                         }
+                    } else {
+                        throw new RuntimeException();
                     }
-                } else {
+                } else if (timestampMs < mLastUpdateTimestampMs) {
                     throw new RuntimeException();
                 }
-            } else if (timestampMs < mLastUpdateTimestampMs) {
-                throw new RuntimeException();
             }
             System.arraycopy(timeInFreq, 0, mLastTimeInFreq, 0, mArrayLength);
             mLastUpdateTimestampMs = timestampMs;
@@ -142,7 +142,7 @@ public class LongArrayMultiStateCounterPerfTest {
     @Test
     public void javaImplementation() {
         TestLongArrayMultiStateCounter counter =
-                new TestLongArrayMultiStateCounter(2, 4, 0, 1000);
+                new TestLongArrayMultiStateCounter(2, 4);
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         long time = 1000;
         long[] timeInFreq = {100, 200, 300, 400};
@@ -156,7 +156,7 @@ public class LongArrayMultiStateCounterPerfTest {
 
     @Test
     public void nativeImplementation() {
-        LongArrayMultiStateCounter counter = new LongArrayMultiStateCounter(2, 4, 0, 1000);
+        LongArrayMultiStateCounter counter = new LongArrayMultiStateCounter(2, 4);
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         long time = 1000;
         LongArrayMultiStateCounter.LongArrayContainer timeInFreq =

@@ -263,6 +263,7 @@ cc_library_shared {
                 "libdebuggerd_client",
                 "libutils",
                 "libbinder",
+                "libbinder_ndk",
                 "libui",
                 "libgraphicsenv",
                 "libgui",
