@@ -33,6 +33,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import static java.util.Collections.singletonList;
@@ -42,6 +43,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArrayMap;
 
+import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -78,6 +80,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @SmallTest
@@ -605,6 +608,30 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         // THEN each promoter is recorded on each notif it promoted
         assertEquals(promoter1, mEntrySet.get(2).getNotifPromoter());
         assertEquals(promoter2, mEntrySet.get(3).getNotifPromoter());
+    }
+
+    @Test
+    public void testNotifSectionsChildrenUpdated() {
+        AtomicBoolean validChildren = new AtomicBoolean(false);
+        final NotifSectioner pkg1Sectioner = spy(new PackageSectioner(PACKAGE_1) {
+            @Nullable
+            @Override
+            public void onEntriesUpdated(List<ListEntry> entries) {
+                super.onEntriesUpdated(entries);
+                validChildren.set(entries.size() == 2);
+            }
+        });
+        mListBuilder.setSectioners(Arrays.asList(pkg1Sectioner));
+
+        addNotif(0, PACKAGE_4);
+        addNotif(1, PACKAGE_1);
+        addNotif(2, PACKAGE_1);
+        addNotif(3, PACKAGE_3);
+
+        dispatchBuild();
+
+        verify(pkg1Sectioner, times(1)).onEntriesUpdated(any());
+        assertTrue(validChildren.get());
     }
 
     @Test
