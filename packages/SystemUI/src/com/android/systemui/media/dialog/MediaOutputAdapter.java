@@ -135,14 +135,11 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             if (currentlyConnected && mController.isActiveRemoteDevice(device)
                     && mController.getSelectableMediaDevice().size() > 0) {
                 // Init active device layout
-                mDivider.setVisibility(View.VISIBLE);
-                mDivider.setTransitionAlpha(1);
                 mAddIcon.setVisibility(View.VISIBLE);
                 mAddIcon.setTransitionAlpha(1);
                 mAddIcon.setOnClickListener(this::onEndItemClick);
             } else {
                 // Init non-active device layout
-                mDivider.setVisibility(View.GONE);
                 mAddIcon.setVisibility(View.GONE);
             }
             if (mCurrentActivePosition == position) {
@@ -181,7 +178,6 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             super.onBind(customizedItem, topMargin, bottomMargin);
             if (customizedItem == CUSTOMIZED_ITEM_PAIR_NEW) {
                 mCheckBox.setVisibility(View.GONE);
-                mDivider.setVisibility(View.GONE);
                 mAddIcon.setVisibility(View.GONE);
                 mBottomDivider.setVisibility(View.GONE);
                 setSingleLineLayout(mContext.getText(R.string.media_output_dialog_pairing_new),
@@ -196,13 +192,10 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 mBottomDivider.setVisibility(View.GONE);
                 mCheckBox.setVisibility(View.GONE);
                 if (mController.getSelectableMediaDevice().size() > 0) {
-                    mDivider.setVisibility(View.VISIBLE);
-                    mDivider.setTransitionAlpha(1);
                     mAddIcon.setVisibility(View.VISIBLE);
                     mAddIcon.setTransitionAlpha(1);
                     mAddIcon.setOnClickListener(this::onEndItemClick);
                 } else {
-                    mDivider.setVisibility(View.GONE);
                     mAddIcon.setVisibility(View.GONE);
                 }
                 mTitleIcon.setImageDrawable(getSpeakerDrawable());
