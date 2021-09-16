@@ -220,6 +220,8 @@ message CountMetric {
 
   repeated MetricStateLink state_link = 9;
 
+  optional bool split_bucket_for_app_upgrade = 11 [default = true];
+
   optional FieldMatcher dimensions_in_condition = 7 [deprecated = true];
 
   reserved 100;
@@ -249,6 +251,8 @@ message DurationMetric {
   optional FieldMatcher dimensions_in_what = 6;
 
   optional TimeUnit bucket = 7;
+
+  optional bool split_bucket_for_app_upgrade = 12 [default = true];
 
   optional FieldMatcher dimensions_in_condition = 8 [deprecated = true];
 
