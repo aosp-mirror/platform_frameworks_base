@@ -2354,6 +2354,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         if (displayIdToShowIme == INVALID_DISPLAY) {
             mImeHiddenByDisplayPolicy = true;
+            hideCurrentInputLocked(mCurFocusedWindow, 0, null,
+                    SoftInputShowHideReason.HIDE_DISPLAY_IME_POLICY_HIDE);
             return InputBindResult.NO_IME;
         }
         mImeHiddenByDisplayPolicy = false;
