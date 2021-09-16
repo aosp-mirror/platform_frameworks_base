@@ -30,6 +30,7 @@ import static android.app.ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -2698,7 +2699,11 @@ class ActivityStarter {
                             mStartActivity.appTimeTracker, DEFER_RESUME,
                             "bringingFoundTaskToFront");
                     mMovedToFront = !wasTopOfVisibleRootTask;
-                } else {
+                } else if (intentActivity.getWindowingMode() != WINDOWING_MODE_PINNED) {
+                    // Leaves reparenting pinned task operations to task organizer to make sure it
+                    // dismisses pinned task properly.
+                    // TODO(b/199997762): Consider leaving all reparent operation of organized tasks
+                    //  to task organizer.
                     intentTask.reparent(mTargetRootTask, ON_TOP, REPARENT_MOVE_ROOT_TASK_TO_FRONT,
                             ANIMATE, DEFER_RESUME, "reparentToTargetRootTask");
                     mMovedToFront = true;
