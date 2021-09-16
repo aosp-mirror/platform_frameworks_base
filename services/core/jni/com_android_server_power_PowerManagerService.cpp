@@ -178,9 +178,10 @@ sp<system::suspend::internal::ISuspendControlServiceInternal> getSuspendControlI
 void enableAutoSuspend() {
     static bool enabled = false;
     if (!enabled) {
+        static sp<IBinder> autosuspendClientToken = new BBinder();
         sp<system::suspend::internal::ISuspendControlServiceInternal> suspendControl =
                 getSuspendControlInternal();
-        suspendControl->enableAutosuspend(&enabled);
+        suspendControl->enableAutosuspend(autosuspendClientToken, &enabled);
     }
 
     {
