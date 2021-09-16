@@ -464,7 +464,8 @@ class DragState {
         if (mDragInProgress && isValidDropTarget(newWin, containsAppExtras, interceptsGlobalDrag)) {
             // Only allow the extras to be dispatched to a global-intercepting drag target
             ClipData data = interceptsGlobalDrag ? mData.copyForTransferWithActivityInfo() : null;
-            DragEvent event = obtainDragEvent(DragEvent.ACTION_DRAG_STARTED, touchX, touchY,
+            DragEvent event = obtainDragEvent(DragEvent.ACTION_DRAG_STARTED,
+                    newWin.translateToWindowX(touchX), newWin.translateToWindowY(touchY),
                     data, false /* includeDragSurface */,
                     null /* dragAndDropPermission */);
             try {

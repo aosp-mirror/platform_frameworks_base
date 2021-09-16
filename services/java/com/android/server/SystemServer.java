@@ -435,7 +435,6 @@ public final class SystemServer implements Dumpable {
     private static final String SYSPROP_START_UPTIME = "sys.system_server.start_uptime";
 
     private Future<?> mZygotePreload;
-    private Future<?> mBlobStoreServiceStart;
 
     private final SystemServerDumper mDumper = new SystemServerDumper();
 
@@ -2250,12 +2249,9 @@ public final class SystemServer implements Dumpable {
                 t.traceEnd();
             }
 
-            mBlobStoreServiceStart = SystemServerInitThreadPool.submit(() -> {
-                final TimingsTraceAndSlog traceLog = TimingsTraceAndSlog.newAsyncLog();
-                traceLog.traceBegin(START_BLOB_STORE_SERVICE);
-                mSystemServiceManager.startService(BLOB_STORE_MANAGER_SERVICE_CLASS);
-                traceLog.traceEnd();
-            }, START_BLOB_STORE_SERVICE);
+            t.traceBegin(START_BLOB_STORE_SERVICE);
+            mSystemServiceManager.startService(BLOB_STORE_MANAGER_SERVICE_CLASS);
+            t.traceEnd();
 
             // Dreams (interactive idle-time views, a/k/a screen savers, and doze mode)
             t.traceBegin("StartDreamManager");
@@ -2649,9 +2645,6 @@ public final class SystemServer implements Dumpable {
         t.traceBegin("StartMediaCommunicationService");
         mSystemServiceManager.startService(MEDIA_COMMUNICATION_SERVICE_CLASS);
         t.traceEnd();
-
-        ConcurrentUtils.waitForFutureNoInterrupt(mBlobStoreServiceStart,
-                START_BLOB_STORE_SERVICE);
 
         // These are needed to propagate to the runnable below.
         final NetworkManagementService networkManagementF = networkManagement;
