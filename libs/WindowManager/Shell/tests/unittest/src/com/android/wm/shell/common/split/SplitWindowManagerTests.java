@@ -23,7 +23,6 @@ import static org.mockito.Mockito.when;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.view.InsetsState;
-import android.view.SurfaceControl;
 
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -41,8 +40,8 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class SplitWindowManagerTests extends ShellTestCase {
-    @Mock SurfaceControl mSurfaceControl;
     @Mock SplitLayout mSplitLayout;
+    @Mock SplitWindowManager.ParentContainerCallbacks mCallbacks;
     private SplitWindowManager mSplitWindowManager;
 
     @Before
@@ -51,7 +50,7 @@ public class SplitWindowManagerTests extends ShellTestCase {
         final Configuration configuration = new Configuration();
         configuration.setToDefaults();
         mSplitWindowManager = new SplitWindowManager("TestSplitDivider", mContext, configuration,
-                b -> b.setParent(mSurfaceControl));
+                mCallbacks);
         when(mSplitLayout.getDividerBounds()).thenReturn(
                 new Rect(0, 0, configuration.windowConfiguration.getBounds().width(),
                         configuration.windowConfiguration.getBounds().height()));

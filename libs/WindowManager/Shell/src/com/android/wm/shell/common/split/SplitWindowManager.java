@@ -64,6 +64,7 @@ public final class SplitWindowManager extends WindowlessWindowManager {
 
     public interface ParentContainerCallbacks {
         void attachToParentSurface(SurfaceControl.Builder b);
+        void onLeashReady(SurfaceControl leash);
     }
 
     public SplitWindowManager(String windowName, Context context, Configuration config,
@@ -100,6 +101,7 @@ public final class SplitWindowManager extends WindowlessWindowManager {
                 .setCallsite("SplitWindowManager#attachToParentSurface");
         mParentContainerCallbacks.attachToParentSurface(builder);
         mLeash = builder.build();
+        mParentContainerCallbacks.onLeashReady(mLeash);
         b.setParent(mLeash);
     }
 

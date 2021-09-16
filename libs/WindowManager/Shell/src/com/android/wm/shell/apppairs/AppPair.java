@@ -43,6 +43,7 @@ import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.SurfaceUtils;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.split.SplitLayout;
+import com.android.wm.shell.common.split.SplitWindowManager;
 
 import java.io.PrintWriter;
 
@@ -69,6 +70,19 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
     private final DisplayController mDisplayController;
     private final DisplayImeController mDisplayImeController;
     private SplitLayout mSplitLayout;
+
+    private final SplitWindowManager.ParentContainerCallbacks mParentContainerCallbacks =
+            new SplitWindowManager.ParentContainerCallbacks() {
+        @Override
+        public void attachToParentSurface(SurfaceControl.Builder b) {
+            b.setParent(mRootTaskLeash);
+        }
+
+        @Override
+        public void onLeashReady(SurfaceControl leash) {
+            mSyncQueue.runInSync(t -> t.show(leash));
+        }
+    };
 
     AppPair(AppPairsController controller) {
         mController = controller;
@@ -110,8 +124,7 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
         mSplitLayout = new SplitLayout(TAG + "SplitDivider",
                 mDisplayController.getDisplayContext(mRootTaskInfo.displayId),
                 mRootTaskInfo.configuration, this /* layoutChangeListener */,
-                b -> b.setParent(mRootTaskLeash), mDisplayImeController,
-                mController.getTaskOrganizer());
+                mParentContainerCallbacks, mDisplayImeController, mController.getTaskOrganizer());
 
         final WindowContainerToken token1 = task1.token;
         final WindowContainerToken token2 = task2.token;
@@ -218,8 +231,6 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
                 if (mSplitLayout.updateConfiguration(mRootTaskInfo.configuration)) {
                     onLayoutChanged(mSplitLayout);
                 }
-                // updateConfiguration re-inits the dividerbar, so show it now
-                mSyncQueue.runInSync(t -> t.show(mSplitLayout.getDividerLeash()));
             }
         } else if (taskInfo.taskId == getTaskId1()) {
             mTaskInfo1 = taskInfo;
