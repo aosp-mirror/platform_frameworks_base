@@ -649,6 +649,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         final boolean sideStageVisible = mSideStageListener.mVisible;
         final boolean mainStageVisible = mMainStageListener.mVisible;
         final boolean bothStageVisible = sideStageVisible && mainStageVisible;
+        final boolean bothStageInvisible = !sideStageVisible && !mainStageVisible;
         final boolean sameVisibility = sideStageVisible == mainStageVisible;
         // Only add or remove divider when both visible or both invisible to avoid sometimes we only
         // got one stage visibility changed for a moment and it will cause flicker.
@@ -656,7 +657,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             setDividerVisibility(bothStageVisible);
         }
 
-        if (!bothStageVisible) {
+        if (bothStageInvisible) {
             if (mExitSplitScreenOnHide
             // Don't dismiss staged split when both stages are not visible due to sleeping display,
             // like the cases keyguard showing or screen off.
