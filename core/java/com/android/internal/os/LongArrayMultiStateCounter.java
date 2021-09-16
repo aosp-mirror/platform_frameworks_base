@@ -134,6 +134,14 @@ public final class LongArrayMultiStateCounter implements Parcelable {
     }
 
     /**
+     * Enables or disables the counter.  When the counter is disabled, it does not
+     * accumulate counts supplied by the {@link #updateValues} method.
+     */
+    public void setEnabled(boolean enabled, long timestampMs) {
+        native_setEnabled(mNativeObject, enabled, timestampMs);
+    }
+
+    /**
      * Sets the current state to the supplied value.
      */
     public void setState(int state, long timestampMs) {
@@ -156,6 +164,13 @@ public final class LongArrayMultiStateCounter implements Parcelable {
                             + mLength);
         }
         native_updateValues(mNativeObject, longArrayContainer.mNativeObject, timestampMs);
+    }
+
+    /**
+     * Resets the accumulated counts to 0.
+     */
+    public void reset() {
+        native_reset(mNativeObject);
     }
 
     /**
@@ -205,11 +220,18 @@ public final class LongArrayMultiStateCounter implements Parcelable {
     private static native long native_getReleaseFunc();
 
     @CriticalNative
+    private static native void native_setEnabled(long nativeObject, boolean enabled,
+            long timestampMs);
+
+    @CriticalNative
     private static native void native_setState(long nativeObject, int state, long timestampMs);
 
     @CriticalNative
     private static native void native_updateValues(long nativeObject,
             long longArrayContainerNativeObject, long timestampMs);
+
+    @CriticalNative
+    private static native void native_reset(long nativeObject);
 
     @CriticalNative
     private static native void native_getCounts(long nativeObject,
