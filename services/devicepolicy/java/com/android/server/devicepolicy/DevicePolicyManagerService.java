@@ -1150,8 +1150,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         && packageName.equals(service.getCredentialManagementAppPackageName())) {
                     service.removeCredentialManagementApp();
                 }
-            } catch (RemoteException | InterruptedException | IllegalStateException e) {
-                Slogf.e(LOG_TAG, "Unable to remove the credential management app");
+            } catch (RemoteException | InterruptedException | IllegalStateException
+                    | AssertionError e) {
+                Slogf.e(LOG_TAG, "Unable to remove the credential management app", e);
             }
         });
     }
