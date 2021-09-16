@@ -9265,14 +9265,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 task.getBounds(), Type.systemBars(), false /* ignoreVisibility */).toRect();
         InsetUtils.addInsets(insets, getLetterboxInsets());
 
-        return new RemoteAnimationTarget(task.mTaskId, record.getMode(),
-                record.mAdapter.mCapturedLeash, !fillsParent(),
+        final RemoteAnimationTarget target = new RemoteAnimationTarget(task.mTaskId,
+                record.getMode(), record.mAdapter.mCapturedLeash, !fillsParent(),
                 new Rect(), insets,
                 getPrefixOrderIndex(), record.mAdapter.mPosition, record.mAdapter.mLocalBounds,
                 record.mAdapter.mRootTaskBounds, task.getWindowConfiguration(),
                 false /*isNotInRecents*/,
                 record.mThumbnailAdapter != null ? record.mThumbnailAdapter.mCapturedLeash : null,
                 record.mStartBounds, task.getTaskInfo(), checkEnterPictureInPictureAppOpsState());
+        target.hasAnimatingParent = record.hasAnimatingParent();
+        return target;
     }
 
     @Override
