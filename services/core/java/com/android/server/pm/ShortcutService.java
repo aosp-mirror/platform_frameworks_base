@@ -3119,8 +3119,6 @@ public class ShortcutService extends IShortcutService.Stub {
         // step.  Remove them too.
         user.forAllPackages(p -> p.refreshPinnedFlags());
 
-        scheduleSaveUser(owningUserId);
-
         if (doNotify) {
             notifyListeners(packageName, owningUserId);
         }
