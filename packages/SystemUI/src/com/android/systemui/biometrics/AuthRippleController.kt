@@ -40,6 +40,7 @@ import com.android.systemui.util.ViewController
 import java.io.PrintWriter
 import javax.inject.Inject
 import javax.inject.Provider
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 
 /***
  * Controls the ripple effect that shows when authentication is successful.
@@ -57,6 +58,7 @@ class AuthRippleController @Inject constructor(
     private val bypassController: KeyguardBypassController,
     private val biometricUnlockController: BiometricUnlockController,
     private val udfpsControllerProvider: Provider<UdfpsController>,
+    private val statusBarStateController: StatusBarStateController,
     rippleView: AuthRippleView?
 ) : ViewController<AuthRippleView>(rippleView) {
     var fingerprintSensorLocation: PointF? = null
@@ -64,8 +66,11 @@ class AuthRippleController @Inject constructor(
     private var circleReveal: LightRevealEffect? = null
 
     private var udfpsController: UdfpsController? = null
+
     private var dwellScale = 2f
     private var expandedDwellScale = 2.5f
+    private var aodDwellScale = 1.9f
+    private var aodExpandedDwellScale = 2.3f
     private var udfpsRadius: Float = -1f
 
     override fun onInit() {
@@ -163,6 +168,22 @@ class AuthRippleController @Inject constructor(
             Utils.getColorAttr(sysuiContext, android.R.attr.colorAccent).defaultColor)
     }
 
+    private fun showDwellRipple() {
+        if (statusBarStateController.isDozing) {
+            mView.startDwellRipple(
+                    /* startRadius */ udfpsRadius,
+                    /* endRadius */ udfpsRadius * aodDwellScale,
+                    /* expandedRadius */ udfpsRadius * aodExpandedDwellScale,
+                    /* isDozing */ true)
+        } else {
+            mView.startDwellRipple(
+                    /* startRadius */ udfpsRadius,
+                    /* endRadius */ udfpsRadius * dwellScale,
+                    /* expandedRadius */ udfpsRadius * expandedDwellScale,
+                    /* isDozing */ false)
+        }
+    }
+
     private val keyguardUpdateMonitorCallback =
         object : KeyguardUpdateMonitorCallback() {
             override fun onBiometricAuthenticated(
@@ -204,10 +225,7 @@ class AuthRippleController @Inject constructor(
                 }
 
                 mView.setSensorLocation(fingerprintSensorLocation!!)
-                mView.startDwellRipple(
-                        /* startRadius */ udfpsRadius,
-                        /* endRadius */ udfpsRadius * dwellScale,
-                        /* expandedRadius */ udfpsRadius * expandedDwellScale)
+                showDwellRipple()
             }
 
             override fun onFingerUp() {
@@ -234,14 +252,18 @@ class AuthRippleController @Inject constructor(
     }
 
     inner class AuthRippleCommand : Command {
-        fun printDwellInfo(pw: PrintWriter) {
-            pw.println("dwell ripple: " +
+        fun printLockScreenDwellInfo(pw: PrintWriter) {
+            pw.println("lock screen dwell ripple: " +
                     "\n\tsensorLocation=$fingerprintSensorLocation" +
                     "\n\tdwellScale=$dwellScale" +
-                    "\n\tdwellAlpha=${mView.dwellAlpha}, " +
-                    "duration=${mView.dwellAlphaDuration}" +
-                    "\n\tdwellExpand=$expandedDwellScale" +
-                    "\n\t(crash systemui to reset to default)")
+                    "\n\tdwellExpand=$expandedDwellScale")
+        }
+
+        fun printAodDwellInfo(pw: PrintWriter) {
+            pw.println("aod dwell ripple: " +
+                    "\n\tsensorLocation=$fingerprintSensorLocation" +
+                    "\n\tdwellScale=$aodDwellScale" +
+                    "\n\tdwellExpand=$aodExpandedDwellScale")
         }
 
         override fun execute(pw: PrintWriter, args: List<String>) {
@@ -249,40 +271,12 @@ class AuthRippleController @Inject constructor(
                 invalidCommand(pw)
             } else {
                 when (args[0]) {
-                    "dwellScale" -> {
-                        if (args.size > 1 && args[1].toFloatOrNull() != null) {
-                            dwellScale = args[1].toFloat()
-                            printDwellInfo(pw)
+                    "dwell" -> {
+                        showDwellRipple()
+                        if (statusBarStateController.isDozing) {
+                            printAodDwellInfo(pw)
                         } else {
-                            pw.println("expected float argument <dwellScale>")
-                        }
-                    }
-                    "dwellAlpha" -> {
-                        if (args.size > 2 && args[1].toFloatOrNull() != null &&
-                                args[2].toLongOrNull() != null) {
-                            mView.dwellAlpha = args[1].toFloat()
-                            if (args[2].toFloat() > 200L) {
-                                pw.println("alpha animation duration must be less than 200ms.")
-                            }
-                            mView.dwellAlphaDuration = kotlin.math.min(args[2].toLong(), 200L)
-                            printDwellInfo(pw)
-                        } else {
-                            pw.println("expected two float arguments:" +
-                                    " <dwellAlpha> <dwellAlphaDuration>")
-                        }
-                    }
-                    "dwellExpand" -> {
-                        if (args.size > 1 && args[1].toFloatOrNull() != null) {
-                            val expandedScale = args[1].toFloat()
-                            if (expandedScale <= dwellScale) {
-                                pw.println("invalid expandedScale. must be greater than " +
-                                        "dwellScale=$dwellScale, but given $expandedScale")
-                            } else {
-                                expandedDwellScale = expandedScale
-                            }
-                            printDwellInfo(pw)
-                        } else {
-                            pw.println("expected float argument <expandedScale>")
+                            printLockScreenDwellInfo(pw)
                         }
                     }
                     "fingerprint" -> {
@@ -313,9 +307,7 @@ class AuthRippleController @Inject constructor(
         override fun help(pw: PrintWriter) {
             pw.println("Usage: adb shell cmd statusbar auth-ripple <command>")
             pw.println("Available commands:")
-            pw.println("  dwellScale <200ms_scale: float>")
-            pw.println("  dwellAlpha <alpha: float> <duration : long>")
-            pw.println("  dwellExpand <expanded_scale: float>")
+            pw.println("  dwell")
             pw.println("  fingerprint")
             pw.println("  face")
             pw.println("  custom <x-location: int> <y-location: int>")
