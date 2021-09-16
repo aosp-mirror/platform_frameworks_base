@@ -1987,13 +1987,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final DevicePolicyData policy = getUserData(UserHandle.getUserId(callerUid));
             ActiveAdmin admin = policy.mAdminMap.get(adminComponent);
 
-            if (admin == null) {
+            // Throwing combined exception message for both the cases here, because from different
+            // security exceptions it could be deduced if particular package is admin package.
+            if (admin == null || admin.getUid() != callerUid) {
                 throw new SecurityException(String.format(
-                        "No active admin for %s", adminComponent));
-            }
-            if (admin.getUid() != callerUid) {
-                throw new SecurityException(String.format(
-                        "Admin %s is not owned by uid %d", adminComponent, callerUid));
+                        "Admin %s does not exist or is not owned by uid %d", adminComponent,
+                        callerUid));
             }
             if (callerPackage != null) {
                 Preconditions.checkArgument(callerPackage.equals(adminComponent.getPackageName()));
@@ -8153,17 +8152,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      */
     @Override
     public boolean getCameraDisabled(ComponentName who, int userHandle, boolean parent) {
-        return getCameraDisabled(who, userHandle, /* mergeDeviceOwnerRestriction= */ true, parent);
-    }
-
-    private boolean getCameraDisabled(ComponentName who, int userHandle,
-            boolean mergeDeviceOwnerRestriction, boolean parent) {
         if (!mHasFeature) {
             return false;
         }
+
+        final CallerIdentity caller = getCallerIdentity(who);
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
+
         if (parent) {
             Preconditions.checkCallAuthorization(
-                    isProfileOwnerOfOrganizationOwnedDevice(getCallerIdentity().getUserId()));
+                    isProfileOwnerOfOrganizationOwnedDevice(caller.getUserId()));
         }
 
         synchronized (getLockObject()) {
@@ -8172,17 +8170,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 return (admin != null) && admin.disableCamera;
             }
             // First, see if DO has set it.  If so, it's device-wide.
-            if (mergeDeviceOwnerRestriction) {
-                final ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
-                if (deviceOwner != null && deviceOwner.disableCamera) {
-                    return true;
-                }
+            final ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
+            if (deviceOwner != null && deviceOwner.disableCamera) {
+                return true;
             }
             final int affectedUserId = parent ? getProfileParentId(userHandle) : userHandle;
             // Return the strictest policy across all participating admins.
             List<ActiveAdmin> admins = getActiveAdminsForAffectedUserLocked(affectedUserId);
             // Determine whether or not the device camera is disabled for any active admins.
-            for (ActiveAdmin admin: admins) {
+            for (ActiveAdmin admin : admins) {
                 if (admin.disableCamera) {
                     return true;
                 }
