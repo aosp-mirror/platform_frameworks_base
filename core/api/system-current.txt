@@ -3319,6 +3319,7 @@ package android.hardware.display {
 package android.hardware.hdmi {
 
   public abstract class HdmiClient {
+    method public void deviceSelect(int, @NonNull android.hardware.hdmi.HdmiTvClient.SelectCallback);
     method public android.hardware.hdmi.HdmiDeviceInfo getActiveSource();
     method public void sendKeyEvent(int, boolean);
     method public void sendVendorCommand(int, byte[], boolean);
@@ -3662,7 +3663,7 @@ package android.hardware.hdmi {
 
   public final class HdmiTvClient extends android.hardware.hdmi.HdmiClient {
     method public void clearTimerRecording(int, int, android.hardware.hdmi.HdmiTimerRecordSources.TimerRecordSource);
-    method public void deviceSelect(int, @NonNull android.hardware.hdmi.HdmiTvClient.SelectCallback);
+    method @Deprecated public void deviceSelect(int, @NonNull android.hardware.hdmi.HdmiTvClient.SelectCallback);
     method @Deprecated public java.util.List<android.hardware.hdmi.HdmiDeviceInfo> getDeviceList();
     method public int getDeviceType();
     method public void portSelect(int, @NonNull android.hardware.hdmi.HdmiTvClient.SelectCallback);
