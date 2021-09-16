@@ -61,6 +61,10 @@ class PhoneStatusBarViewController(
         }
     }
 
+    fun setImportantForAccessibility(mode: Int) {
+        mView.importantForAccessibility = mode
+    }
+
     private class StatusBarViewsCenterProvider : UnfoldMoveFromCenterAnimator.ViewCenterProvider {
         override fun getViewCenter(view: View, outPoint: Point) =
             when (view.id) {

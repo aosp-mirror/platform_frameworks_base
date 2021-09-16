@@ -26,6 +26,8 @@ import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_SEMI_TRANSPARENT_STATUS_BARS;
 
+import static androidx.core.view.ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_AUTO;
+import static androidx.core.view.ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS;
 import static androidx.lifecycle.Lifecycle.State.RESUMED;
 
 import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
@@ -1180,22 +1182,13 @@ public class StatusBar extends SystemUI implements
                     );
                     mBatteryMeterViewController.init();
 
-                    // CollapsedStatusBarFragment re-inflated PhoneStatusBarView and both of
-                    // mStatusBarView.mExpanded and mStatusBarView.mBouncerShowing are false.
-                    // PhoneStatusBarView's new instance will set to be gone in
-                    // PanelBar.updateVisibility after calling mStatusBarView.setBouncerShowing
-                    // that will trigger PanelBar.updateVisibility. If there is a heads up showing,
-                    // it needs to notify PhoneStatusBarView's new instance to update the correct
-                    // status by calling mNotificationPanel.notifyBarPanelExpansionChanged().
-                    if (mHeadsUpManager.hasPinnedHeadsUp()) {
-                        mNotificationPanelViewController.notifyBarPanelExpansionChanged();
-                    }
-                    mStatusBarView.setBouncerShowing(mBouncerShowing);
-                    if (oldStatusBarView != null) {
-                        float fraction = oldStatusBarView.getExpansionFraction();
-                        boolean expanded = oldStatusBarView.isExpanded();
-                        mStatusBarView.panelExpansionChanged(fraction, expanded);
-                    }
+                    // Ensure we re-propagate panel expansion values to the panel controller and
+                    // any listeners it may have, such as PanelBar. This will also ensure we
+                    // re-display the notification panel if necessary (for example, if
+                    // a heads-up notification was being displayed and should continue being
+                    // displayed).
+                    mNotificationPanelViewController.updatePanelExpansionAndVisibility();
+                    setBouncerShowingForStatusBarComponents(mBouncerShowing);
 
                     HeadsUpAppearanceController oldController = mHeadsUpAppearanceController;
                     if (mHeadsUpAppearanceController != null) {
@@ -3522,13 +3515,30 @@ public class StatusBar extends SystemUI implements
         mBouncerShowing = bouncerShowing;
         mKeyguardBypassController.setBouncerShowing(bouncerShowing);
         mPulseExpansionHandler.setBouncerShowing(bouncerShowing);
-        if (mStatusBarView != null) mStatusBarView.setBouncerShowing(bouncerShowing);
+        setBouncerShowingForStatusBarComponents(bouncerShowing);
         updateHideIconsForBouncer(true /* animate */);
         mCommandQueue.recomputeDisableFlags(mDisplayId, true /* animate */);
         updateScrimController();
         if (!mBouncerShowing) {
             updatePanelExpansionForKeyguard();
         }
+    }
+
+    /**
+     * Propagate the bouncer state to status bar components.
+     *
+     * Separate from {@link #setBouncerShowing} because we sometimes re-create the status bar and
+     * should update only the status bar components.
+     */
+    private void setBouncerShowingForStatusBarComponents(boolean bouncerShowing) {
+        int importance = bouncerShowing
+                ? IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+                : IMPORTANT_FOR_ACCESSIBILITY_AUTO;
+        if (mPhoneStatusBarViewController != null) {
+            mPhoneStatusBarViewController.setImportantForAccessibility(importance);
+        }
+        mNotificationPanelViewController.setImportantForAccessibility(importance);
+        mNotificationPanelViewController.setBouncerShowing(bouncerShowing);
     }
 
     /**
@@ -4200,10 +4210,9 @@ public class StatusBar extends SystemUI implements
     }
 
     private void sendInitialExpansionAmount(ExpansionChangedListener expansionChangedListener) {
-        if (mStatusBarView != null) {
-            expansionChangedListener.onExpansionChanged(mStatusBarView.getExpansionFraction(),
-                    mStatusBarView.isExpanded());
-        }
+        expansionChangedListener.onExpansionChanged(
+                mNotificationPanelViewController.getExpandedFraction(),
+                mNotificationPanelViewController.isExpanded());
     }
 
     public void removeExpansionChangedListener(@NonNull ExpansionChangedListener listener) {

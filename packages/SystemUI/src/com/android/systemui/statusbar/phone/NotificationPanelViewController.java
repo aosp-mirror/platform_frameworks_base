@@ -334,6 +334,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private boolean mKeyguardUserSwitcherEnabled;
     private boolean mDozing;
     private boolean mDozingOnDown;
+    private boolean mBouncerShowing;
     private int mBarState;
     private float mInitialHeightOnTouch;
     private float mInitialTouchX;
@@ -404,7 +405,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private Runnable mHeadsUpExistenceChangedRunnable = () -> {
         setHeadsUpAnimatingAway(false);
-        notifyBarPanelExpansionChanged();
+        updatePanelExpansionAndVisibility();
     };
     // TODO (b/162832756): once migrated to the new pipeline, delete legacy group manager
     private NotificationGroupManagerLegacy mGroupManager;
@@ -3228,11 +3229,19 @@ public class NotificationPanelViewController extends PanelViewController {
     public void setHeadsUpAnimatingAway(boolean headsUpAnimatingAway) {
         mHeadsUpAnimatingAway = headsUpAnimatingAway;
         mNotificationStackScrollLayoutController.setHeadsUpAnimatingAway(headsUpAnimatingAway);
-        updateHeadsUpVisibility();
+        updateVisibility();
     }
 
-    private void updateHeadsUpVisibility() {
-        ((PhoneStatusBarView) mBar).setHeadsUpVisible(mHeadsUpAnimatingAway || mHeadsUpPinnedMode);
+    /** Set whether the bouncer is showing. */
+    public void setBouncerShowing(boolean bouncerShowing) {
+        mBouncerShowing = bouncerShowing;
+        updateVisibility();
+    }
+
+    @Override
+    protected boolean shouldPanelBeVisible() {
+        boolean headsUpVisible = mHeadsUpAnimatingAway || mHeadsUpPinnedMode;
+        return headsUpVisible || isExpanded() || mBouncerShowing;
     }
 
     @Override
@@ -3640,6 +3649,11 @@ public class NotificationPanelViewController extends PanelViewController {
                     false /* goingToFullShade */,
                     mBarState);
         }
+    }
+
+    /** */
+    public void setImportantForAccessibility(int mode) {
+        mView.setImportantForAccessibility(mode);
     }
 
     /**
@@ -4216,7 +4230,7 @@ public class NotificationPanelViewController extends PanelViewController {
             }
             updateGestureExclusionRect();
             mHeadsUpPinnedMode = inPinnedMode;
-            updateHeadsUpVisibility();
+            updateVisibility();
             mKeyguardStatusBarViewController.updateForHeadsUp();
         }
 

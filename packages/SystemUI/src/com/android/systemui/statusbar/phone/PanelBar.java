@@ -33,8 +33,6 @@ public abstract class PanelBar extends FrameLayout {
     private static final boolean SPEW = false;
     private static final String PANEL_BAR_SUPER_PARCELABLE = "panel_bar_super_parcelable";
     private static final String STATE = "state";
-    private boolean mBouncerShowing;
-    private boolean mExpanded;
     protected float mPanelFraction;
 
     public static final void LOG(String fmt, Object... args) {
@@ -99,33 +97,6 @@ public abstract class PanelBar extends FrameLayout {
         pv.setBar(this);
     }
 
-    public void setBouncerShowing(boolean showing) {
-        mBouncerShowing = showing;
-        int important = showing ? IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
-                : IMPORTANT_FOR_ACCESSIBILITY_AUTO;
-
-        setImportantForAccessibility(important);
-        updateVisibility();
-
-        if (mPanel != null) mPanel.getView().setImportantForAccessibility(important);
-    }
-
-    public float getExpansionFraction() {
-        return mPanelFraction;
-    }
-
-    public boolean isExpanded() {
-        return mExpanded;
-    }
-
-    protected void updateVisibility() {
-        mPanel.getView().setVisibility(shouldPanelBeVisible() ? VISIBLE : INVISIBLE);
-    }
-
-    protected boolean shouldPanelBeVisible() {
-        return mExpanded || mBouncerShowing;
-    }
-
     public boolean panelEnabled() {
         return true;
     }
@@ -183,9 +154,7 @@ public abstract class PanelBar extends FrameLayout {
         boolean fullyClosed = true;
         boolean fullyOpened = false;
         if (SPEW) LOG("panelExpansionChanged: start state=%d, f=%.1f", mState, frac);
-        mExpanded = expanded;
         mPanelFraction = frac;
-        updateVisibility();
         // adjust any other panels that may be partially visible
         if (expanded) {
             if (mState == STATE_CLOSED) {
