@@ -41,6 +41,7 @@ import com.android.systemui.dock.DockManager;
 import com.android.systemui.doze.DozeMachine.State;
 import com.android.systemui.doze.dagger.DozeScope;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.sensors.AsyncSensorManager;
@@ -92,6 +93,7 @@ public class DozeTriggers implements DozeMachine.Part {
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final AuthController mAuthController;
     private final DelayableExecutor mMainExecutor;
+    private final KeyguardStateController mKeyguardStateController;
     private final UiEventLogger mUiEventLogger;
 
     private long mNotificationPulseTime;
@@ -179,7 +181,8 @@ public class DozeTriggers implements DozeMachine.Part {
             DozeLog dozeLog, BroadcastDispatcher broadcastDispatcher,
             SecureSettings secureSettings, AuthController authController,
             @Main DelayableExecutor mainExecutor,
-            UiEventLogger uiEventLogger) {
+            UiEventLogger uiEventLogger,
+            KeyguardStateController keyguardStateController) {
         mContext = context;
         mDozeHost = dozeHost;
         mConfig = config;
@@ -198,6 +201,7 @@ public class DozeTriggers implements DozeMachine.Part {
         mAuthController = authController;
         mMainExecutor = mainExecutor;
         mUiEventLogger = uiEventLogger;
+        mKeyguardStateController = keyguardStateController;
     }
 
     @Override
@@ -294,6 +298,7 @@ public class DozeTriggers implements DozeMachine.Part {
             proximityCheckThenCall((result) -> {
                 if (result != null && result) {
                     // In pocket, drop event.
+                    mDozeLog.traceSensorEventDropped(pulseReason, "prox reporting near");
                     return;
                 }
                 if (isDoubleTap || isTap) {
@@ -302,6 +307,10 @@ public class DozeTriggers implements DozeMachine.Part {
                     }
                     gentleWakeUp(pulseReason);
                 } else if (isPickup) {
+                    if (shouldDropPickupEvent())  {
+                        mDozeLog.traceSensorEventDropped(pulseReason, "keyguard occluded");
+                        return;
+                    }
                     gentleWakeUp(pulseReason);
                 } else if (isUdfpsLongPress) {
                     final State state = mMachine.getState();
@@ -320,13 +329,17 @@ public class DozeTriggers implements DozeMachine.Part {
             }, true /* alreadyPerformedProxCheck */, pulseReason);
         }
 
-        if (isPickup) {
+        if (isPickup && !shouldDropPickupEvent()) {
             final long timeSinceNotification =
                     SystemClock.elapsedRealtime() - mNotificationPulseTime;
             final boolean withinVibrationThreshold =
                     timeSinceNotification < mDozeParameters.getPickupVibrationThreshold();
             mDozeLog.tracePickupWakeUp(withinVibrationThreshold);
         }
+    }
+
+    private boolean shouldDropPickupEvent() {
+        return mKeyguardStateController.isOccluded();
     }
 
     private void gentleWakeUp(int reason) {

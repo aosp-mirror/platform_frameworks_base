@@ -77,7 +77,9 @@ public final class HdmiTvClient extends HdmiClient {
      * @param logicalAddress logical address of the device to select
      * @param callback callback to get the result with
      * @throws {@link IllegalArgumentException} if the {@code callback} is null
+     * @deprecated Please use {@link HdmiClient#deviceSelect()} instead.
      */
+    @Deprecated
     public void deviceSelect(int logicalAddress, @NonNull SelectCallback callback) {
         if (callback == null) {
             throw new IllegalArgumentException("callback must not be null.");
@@ -89,6 +91,10 @@ public final class HdmiTvClient extends HdmiClient {
         }
     }
 
+    /**
+     * @deprecated Please use {@link HdmiClient#getCallbackWrapper()} instead.
+     */
+    @Deprecated
     private static IHdmiControlCallback getCallbackWrapper(final SelectCallback callback) {
         return new IHdmiControlCallback.Stub() {
             @Override

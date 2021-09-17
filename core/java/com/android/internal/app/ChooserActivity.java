@@ -1163,7 +1163,9 @@ public class ChooserActivity extends ResolverActivity implements
                             -1);
                     // Action bar is user-independent, always start as primary
                     safelyStartActivityAsUser(ti, getPersonalProfileUserHandle());
-                    finish();
+                    if (!mAwaitingDelegateResponse) {
+                        finish();
+                    }
                 }
         );
         b.setId(R.id.chooser_nearby_button);
@@ -1185,7 +1187,9 @@ public class ChooserActivity extends ResolverActivity implements
                             -1);
                     // Action bar is user-independent, always start as primary
                     safelyStartActivityAsUser(ti, getPersonalProfileUserHandle());
-                    finish();
+                    if (!mAwaitingDelegateResponse) {
+                        finish();
+                    }
                 }
         );
         b.setId(R.id.chooser_edit_button);
@@ -2212,7 +2216,9 @@ public class ChooserActivity extends ResolverActivity implements
             TargetInfo clonedTarget = selectedTarget.cloneFilledIn(matchingIntent, 0);
             if (super.onTargetSelected(clonedTarget, false)) {
                 updateModelAndChooserCounts(clonedTarget);
-                finish();
+                if (!mAwaitingDelegateResponse) {
+                    finish();
+                }
                 return;
             }
         }

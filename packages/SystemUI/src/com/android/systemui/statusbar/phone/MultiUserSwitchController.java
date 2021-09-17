@@ -26,6 +26,7 @@ import com.android.systemui.R;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.DetailAdapter;
+import com.android.systemui.qs.FooterActionsView;
 import com.android.systemui.qs.QSDetailDisplayer;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.user.UserSwitchDialogController;
@@ -35,7 +36,6 @@ import com.android.systemui.util.ViewController;
 import javax.inject.Inject;
 
 /** View Controller for {@link MultiUserSwitch}. */
-@QSScope
 public class MultiUserSwitchController extends ViewController<MultiUserSwitch> {
     private final UserManager mUserManager;
     private final UserSwitcherController mUserSwitcherController;
@@ -68,8 +68,35 @@ public class MultiUserSwitchController extends ViewController<MultiUserSwitch> {
         }
     };
 
-    @Inject
-    public MultiUserSwitchController(MultiUserSwitch view, UserManager userManager,
+    @QSScope
+    public static class Factory {
+        private final UserManager mUserManager;
+        private final UserSwitcherController mUserSwitcherController;
+        private final QSDetailDisplayer mQsDetailDisplayer;
+        private final FalsingManager mFalsingManager;
+        private final UserSwitchDialogController mUserSwitchDialogController;
+        private final FeatureFlags mFeatureFlags;
+
+        @Inject
+        public Factory(UserManager userManager, UserSwitcherController userSwitcherController,
+                QSDetailDisplayer qsDetailDisplayer, FalsingManager falsingManager,
+                UserSwitchDialogController userSwitchDialogController, FeatureFlags featureFlags) {
+            mUserManager = userManager;
+            mUserSwitcherController = userSwitcherController;
+            mQsDetailDisplayer = qsDetailDisplayer;
+            mFalsingManager = falsingManager;
+            mUserSwitchDialogController = userSwitchDialogController;
+            mFeatureFlags = featureFlags;
+        }
+
+        public MultiUserSwitchController create(FooterActionsView view) {
+            return new MultiUserSwitchController(view.findViewById(R.id.multi_user_switch),
+                    mUserManager, mUserSwitcherController, mQsDetailDisplayer,
+                    mFalsingManager, mUserSwitchDialogController, mFeatureFlags);
+        }
+    }
+
+    private MultiUserSwitchController(MultiUserSwitch view, UserManager userManager,
             UserSwitcherController userSwitcherController, QSDetailDisplayer qsDetailDisplayer,
             FalsingManager falsingManager, UserSwitchDialogController userSwitchDialogController,
             FeatureFlags featureFlags) {
