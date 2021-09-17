@@ -152,6 +152,8 @@ public class ResolverActivity extends Activity implements
     /** See {@link #setRetainInOnStop}. */
     private boolean mRetainInOnStop;
 
+    private static final int REQUEST_CODE_RETURN_FROM_DELEGATE_CHOOSER = 20;
+
     private static final String EXTRA_SHOW_FRAGMENT_ARGS = ":settings:show_fragment_args";
     private static final String EXTRA_FRAGMENT_ARG_KEY = ":settings:fragment_args_key";
     private static final String OPEN_LINKS_COMPONENT_KEY = "app_link_state";
@@ -202,6 +204,8 @@ public class ResolverActivity extends Activity implements
     private UserHandle mHeaderCreatorUser;
 
     private UserHandle mWorkProfileUserHandle;
+
+    protected boolean mAwaitingDelegateResponse;
 
     /**
      * Get the string resource to be used as a label for the link to the resolver activity for an
@@ -584,7 +588,9 @@ public class ResolverActivity extends Activity implements
         mProfileSwitchMessageId = -1;
 
         onTargetSelected(dri, false);
-        finish();
+        if (!mAwaitingDelegateResponse) {
+            finish();
+        }
     }
 
     /**
@@ -1026,7 +1032,9 @@ public class ResolverActivity extends Activity implements
                     mMultiProfilePagerAdapter.getActiveListAdapter().hasFilteredItem()
                             ? MetricsProto.MetricsEvent.ACTION_HIDE_APP_DISAMBIG_APP_FEATURED
                             : MetricsProto.MetricsEvent.ACTION_HIDE_APP_DISAMBIG_NONE_FEATURED);
-            finish();
+            if (!mAwaitingDelegateResponse) {
+                finish();
+            }
         }
     }
 
@@ -1354,13 +1362,29 @@ public class ResolverActivity extends Activity implements
             chooserIntent.putExtra(ActivityTaskManager.EXTRA_IGNORE_TARGET_SECURITY,
                     ignoreTargetSecurity);
             chooserIntent.putExtra(Intent.EXTRA_USER_ID, userId);
-            chooserIntent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT
-                    | Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
-            startActivity(chooserIntent);
+            chooserIntent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
+
+            // Don't close until the delegate finishes, or the token will be invalidated.
+            mAwaitingDelegateResponse = true;
+
+            startActivityForResult(chooserIntent, REQUEST_CODE_RETURN_FROM_DELEGATE_CHOOSER);
         } catch (RemoteException e) {
             Log.e(TAG, e.toString());
         }
         return true;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case REQUEST_CODE_RETURN_FROM_DELEGATE_CHOOSER:
+                // Repeat the delegate's result as our own.
+                setResult(resultCode, data);
+                finish();
+                break;
+            default:
+                super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
     public void onActivityStarted(TargetInfo cti) {
@@ -2152,7 +2176,9 @@ public class ResolverActivity extends Activity implements
                         .getItem(selections[0].getIndex());
                 if (ra.onTargetSelected(ti, false)) {
                     ra.mPickOptionRequest = null;
-                    ra.finish();
+                    if (!ra.mAwaitingDelegateResponse) {
+                        ra.finish();
+                    }
                 }
             }
         }

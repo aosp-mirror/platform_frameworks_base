@@ -160,6 +160,14 @@ class DozeLogger @Inject constructor(
         })
     }
 
+    fun logDisplayStateDelayedByUdfps(delayedDisplayState: Int) {
+        buffer.log(TAG, INFO, {
+            str1 = Display.stateToString(delayedDisplayState)
+        }, {
+            "Delaying display state change to: $str1 due to UDFPS activity"
+        })
+    }
+
     fun logDisplayStateChanged(displayState: Int) {
         buffer.log(TAG, INFO, {
             str1 = Display.stateToString(displayState)
@@ -194,6 +202,15 @@ class DozeLogger @Inject constructor(
             bool2 = blocked
         }, {
             "Pulse dropped, pulsePending=$bool1 state=$str1 blocked=$bool2"
+        })
+    }
+
+    fun logSensorEventDropped(sensorEvent: Int, reason: String) {
+        buffer.log(TAG, INFO, {
+            int1 = sensorEvent
+            str1 = reason
+        }, {
+            "SensorEvent [$int1] dropped, reason=$str1"
         })
     }
 

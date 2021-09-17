@@ -81,7 +81,7 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
                 .append(",qsIcon=").append(qsIcon == null ? "" : qsIcon.toString())
                 .append(",activityIn=").append(activityIn)
                 .append(",activityOut=").append(activityOut)
-                .append(",description=").append(description)
+                .append(",qsDescription=").append(description)
                 .append(",isTransient=").append(isTransient)
                 .append(",statusLabel=").append(statusLabel)
                 .append(']').toString();
@@ -100,7 +100,7 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
         public boolean activityOut;
         public CharSequence typeContentDescription;
         public CharSequence typeContentDescriptionHtml;
-        public CharSequence description;
+        public CharSequence qsDescription;
         public int subId;
         public boolean roaming;
         public boolean showTriangle;
@@ -108,7 +108,7 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
         public MobileDataIndicators(IconState statusIcon, IconState qsIcon, int statusType,
                 int qsType, boolean activityIn, boolean activityOut,
                 CharSequence typeContentDescription, CharSequence typeContentDescriptionHtml,
-                CharSequence description, int subId, boolean roaming,
+                CharSequence qsDescription, int subId, boolean roaming,
                 boolean showTriangle) {
             this.statusIcon = statusIcon;
             this.qsIcon = qsIcon;
@@ -118,7 +118,7 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
             this.activityOut = activityOut;
             this.typeContentDescription = typeContentDescription;
             this.typeContentDescriptionHtml = typeContentDescriptionHtml;
-            this.description = description;
+            this.qsDescription = qsDescription;
             this.subId = subId;
             this.roaming = roaming;
             this.showTriangle = showTriangle;
@@ -135,7 +135,7 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
                 .append(",activityOut=").append(activityOut)
                 .append(",typeContentDescription=").append(typeContentDescription)
                 .append(",typeContentDescriptionHtml=").append(typeContentDescriptionHtml)
-                .append(",description=").append(description)
+                .append(",description=").append(qsDescription)
                 .append(",subId=").append(subId)
                 .append(",roaming=").append(roaming)
                 .append(",showTriangle=").append(showTriangle)
@@ -183,11 +183,13 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
         default void setCallIndicator(IconState statusIcon, int subId) {}
     }
 
-    public interface EmergencyListener {
+    /** */
+    interface EmergencyListener {
         void setEmergencyCallsOnly(boolean emergencyOnly);
     }
 
-    public static class IconState {
+    /** */
+    class IconState {
         public final boolean visible;
         public final int icon;
         public final String contentDescription;
@@ -217,7 +219,7 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
      * Tracks changes in access points.  Allows listening for changes, scanning for new APs,
      * and connecting to new ones.
      */
-    public interface AccessPointController {
+    interface AccessPointController {
         void addAccessPointCallback(AccessPointCallback callback);
         void removeAccessPointCallback(AccessPointCallback callback);
         void scanForAccessPoints();
@@ -227,7 +229,7 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
         boolean canConfigWifi();
         boolean canConfigMobileData();
 
-        public interface AccessPointCallback {
+        interface AccessPointCallback {
             void onAccessPointsChanged(List<WifiEntry> accessPoints);
             void onSettingsActivityTriggered(Intent settingsIntent);
         }

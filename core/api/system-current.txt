@@ -1985,6 +1985,7 @@ package android.bluetooth {
   public final class BluetoothDevice implements android.os.Parcelable {
     method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean canBondWithoutDialog();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean cancelBondProcess();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean createBond(int);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public boolean createBondOutOfBand(int, @Nullable android.bluetooth.OobData, @Nullable android.bluetooth.OobData);
     method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean fetchUuidsWithSdp(int);
     method @Nullable @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public byte[] getMetadata(int);
@@ -3319,6 +3320,7 @@ package android.hardware.display {
 package android.hardware.hdmi {
 
   public abstract class HdmiClient {
+    method public void deviceSelect(int, @NonNull android.hardware.hdmi.HdmiTvClient.SelectCallback);
     method public android.hardware.hdmi.HdmiDeviceInfo getActiveSource();
     method public void sendKeyEvent(int, boolean);
     method public void sendVendorCommand(int, byte[], boolean);
@@ -3662,7 +3664,7 @@ package android.hardware.hdmi {
 
   public final class HdmiTvClient extends android.hardware.hdmi.HdmiClient {
     method public void clearTimerRecording(int, int, android.hardware.hdmi.HdmiTimerRecordSources.TimerRecordSource);
-    method public void deviceSelect(int, @NonNull android.hardware.hdmi.HdmiTvClient.SelectCallback);
+    method @Deprecated public void deviceSelect(int, @NonNull android.hardware.hdmi.HdmiTvClient.SelectCallback);
     method @Deprecated public java.util.List<android.hardware.hdmi.HdmiDeviceInfo> getDeviceList();
     method public int getDeviceType();
     method public void portSelect(int, @NonNull android.hardware.hdmi.HdmiTvClient.SelectCallback);

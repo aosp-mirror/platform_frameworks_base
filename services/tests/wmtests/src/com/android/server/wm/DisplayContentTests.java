@@ -2173,6 +2173,21 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
+    public void testKeyguardGoingAwayWhileAodShown() {
+        mDisplayContent.getDisplayPolicy().setAwake(true);
+
+        final WindowState appWin = createWindow(null, TYPE_APPLICATION, mDisplayContent, "appWin");
+        final ActivityRecord activity = appWin.mActivityRecord;
+
+        mAtm.mKeyguardController.setKeyguardShown(true /* keyguardShowing */,
+                true /* aodShowing */);
+        assertFalse(activity.isVisibleRequested());
+
+        mAtm.mKeyguardController.keyguardGoingAway(0 /* flags */);
+        assertTrue(activity.isVisibleRequested());
+    }
+
+    @Test
     public void testRemoveRootTaskInWindowingModes() {
         removeRootTaskTests(() -> mRootWindowContainer.removeRootTasksInWindowingModes(
                 WINDOWING_MODE_FULLSCREEN));

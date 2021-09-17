@@ -270,13 +270,6 @@ public class DozeParameters implements
     }
 
     /**
-     * Whether the brightness sensor uses the proximity sensor.
-     */
-    public boolean brightnessUsesProx() {
-        return mResources.getBoolean(R.bool.doze_brightness_uses_prox);
-    }
-
-    /**
      * Callback to listen for DozeParameter changes.
      */
     public void addCallback(Callback callback) {
@@ -300,6 +293,7 @@ public class DozeParameters implements
 
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+        pw.print("getAlwaysOn(): "); pw.println(getAlwaysOn());
         pw.print("getDisplayStateSupported(): "); pw.println(getDisplayStateSupported());
         pw.print("getPulseDuration(): "); pw.println(getPulseDuration());
         pw.print("getPulseInDuration(): "); pw.println(getPulseInDuration());
@@ -312,7 +306,6 @@ public class DozeParameters implements
         pw.print("getPickupVibrationThreshold(): "); pw.println(getPickupVibrationThreshold());
         pw.print("getSelectivelyRegisterSensorsUsingProx(): ");
         pw.println(getSelectivelyRegisterSensorsUsingProx());
-        pw.print("brightnessUsesProx(): "); pw.println(brightnessUsesProx());
     }
 
     interface Callback {

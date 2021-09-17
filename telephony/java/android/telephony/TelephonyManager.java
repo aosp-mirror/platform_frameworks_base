@@ -14298,7 +14298,8 @@ public class TelephonyManager {
             if (callForwardingInfo.getNumber() == null) {
                 throw new IllegalArgumentException("callForwarding number is null");
             }
-            if (callForwardingInfo.getTimeoutSeconds() <= 0) {
+            if (callForwardingReason == CallForwardingInfo.REASON_NO_REPLY
+                        && callForwardingInfo.getTimeoutSeconds() <= 0) {
                 throw new IllegalArgumentException("callForwarding timeout isn't positive");
             }
         }

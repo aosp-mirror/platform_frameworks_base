@@ -29,8 +29,6 @@ import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
-import android.view.inputmethod.InputConnectionInspector;
-import android.view.inputmethod.InputConnectionInspector.MissingMethodFlags;
 import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.SurroundingText;
 
@@ -87,9 +85,6 @@ final class RemoteInputConnection implements InputConnection {
     @NonNull
     private final InputMethodServiceInternalHolder mImsInternal;
 
-    @MissingMethodFlags
-    private final int mMissingMethods;
-
     /**
      * Signaled when the system decided to take away IME focus from the target app.
      *
@@ -101,11 +96,9 @@ final class RemoteInputConnection implements InputConnection {
 
     RemoteInputConnection(
             @NonNull WeakReference<InputMethodServiceInternal> inputMethodService,
-            IInputContext inputContext, @MissingMethodFlags int missingMethods,
-            @NonNull CancellationGroup cancellationGroup) {
+            IInputContext inputContext, @NonNull CancellationGroup cancellationGroup) {
         mImsInternal = new InputMethodServiceInternalHolder(inputMethodService);
         mInvoker = IInputContextInvoker.create(inputContext);
-        mMissingMethods = missingMethods;
         mCancellationGroup = cancellationGroup;
     }
 
@@ -163,10 +156,6 @@ final class RemoteInputConnection implements InputConnection {
             return null;
         }
 
-        if (isMethodMissing(MissingMethodFlags.GET_SELECTED_TEXT)) {
-            // This method is not implemented.
-            return null;
-        }
         final CompletableFuture<CharSequence> value = mInvoker.getSelectedText(flags);
         final CharSequence result = CompletableFutureUtil.getResultOrNull(
                 value, TAG, "getSelectedText()", mCancellationGroup, MAX_WAIT_TIME_MILLIS);
@@ -200,10 +189,6 @@ final class RemoteInputConnection implements InputConnection {
             return null;
         }
 
-        if (isMethodMissing(MissingMethodFlags.GET_SURROUNDING_TEXT)) {
-            // This method is not implemented.
-            return null;
-        }
         final CompletableFuture<SurroundingText> value = mInvoker.getSurroundingText(beforeLength,
                 afterLength, flags);
         final SurroundingText result = CompletableFutureUtil.getResultOrNull(
@@ -284,10 +269,6 @@ final class RemoteInputConnection implements InputConnection {
 
     @AnyThread
     public boolean commitCorrection(CorrectionInfo correctionInfo) {
-        if (isMethodMissing(MissingMethodFlags.COMMIT_CORRECTION)) {
-            // This method is not implemented.
-            return false;
-        }
         return mInvoker.commitCorrection(correctionInfo);
     }
 
@@ -308,10 +289,6 @@ final class RemoteInputConnection implements InputConnection {
 
     @AnyThread
     public boolean setComposingRegion(int start, int end) {
-        if (isMethodMissing(MissingMethodFlags.SET_COMPOSING_REGION)) {
-            // This method is not implemented.
-            return false;
-        }
         return mInvoker.setComposingRegion(start, end);
     }
 
@@ -360,10 +337,6 @@ final class RemoteInputConnection implements InputConnection {
 
     @AnyThread
     public boolean deleteSurroundingTextInCodePoints(int beforeLength, int afterLength) {
-        if (isMethodMissing(MissingMethodFlags.DELETE_SURROUNDING_TEXT_IN_CODE_POINTS)) {
-            // This method is not implemented.
-            return false;
-        }
         return mInvoker.deleteSurroundingTextInCodePoints(beforeLength, afterLength);
     }
 
@@ -386,11 +359,6 @@ final class RemoteInputConnection implements InputConnection {
     @AnyThread
     public boolean requestCursorUpdates(int cursorUpdateMode) {
         if (mCancellationGroup.isCanceled()) {
-            return false;
-        }
-
-        if (isMethodMissing(MissingMethodFlags.REQUEST_CURSOR_UPDATES)) {
-            // This method is not implemented.
             return false;
         }
 
@@ -423,11 +391,6 @@ final class RemoteInputConnection implements InputConnection {
             return false;
         }
 
-        if (isMethodMissing(MissingMethodFlags.COMMIT_CONTENT)) {
-            // This method is not implemented.
-            return false;
-        }
-
         if ((flags & InputConnection.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0) {
             final InputMethodServiceInternal imsInternal = mImsInternal.getAndWarnIfNull();
             if (imsInternal == null) {
@@ -451,16 +414,9 @@ final class RemoteInputConnection implements InputConnection {
     }
 
     @AnyThread
-    private boolean isMethodMissing(@MissingMethodFlags final int methodFlag) {
-        return (mMissingMethods & methodFlag) == methodFlag;
-    }
-
-    @AnyThread
     @Override
     public String toString() {
         return "RemoteInputConnection{idHash=#"
-                + Integer.toHexString(System.identityHashCode(this))
-                + " mMissingMethods="
-                + InputConnectionInspector.getMissingMethodFlagsAsString(mMissingMethods) + "}";
+                + Integer.toHexString(System.identityHashCode(this)) + "}";
     }
 }

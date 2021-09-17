@@ -43,6 +43,12 @@ static jlong native_getReleaseFunc() {
     return reinterpret_cast<jlong>(native_dispose);
 }
 
+static void native_setEnabled(jlong nativePtr, jboolean enabled, jlong timestamp) {
+    battery::LongArrayMultiStateCounter *counter =
+            reinterpret_cast<battery::LongArrayMultiStateCounter *>(nativePtr);
+    counter->setEnabled(enabled, timestamp);
+}
+
 static void native_setState(jlong nativePtr, jint state, jlong timestamp) {
     battery::LongArrayMultiStateCounter *counter =
             reinterpret_cast<battery::LongArrayMultiStateCounter *>(nativePtr);
@@ -57,6 +63,12 @@ static void native_updateValues(jlong nativePtr, jlong longArrayContainerNativeP
             reinterpret_cast<std::vector<uint64_t> *>(longArrayContainerNativePtr);
 
     counter->updateValue(*vector, timestamp);
+}
+
+static void native_reset(jlong nativePtr) {
+    battery::LongArrayMultiStateCounter *counter =
+            reinterpret_cast<battery::LongArrayMultiStateCounter *>(nativePtr);
+    counter->reset();
 }
 
 static void native_getCounts(jlong nativePtr, jlong longArrayContainerNativePtr, jint state) {
@@ -166,9 +178,13 @@ static const JNINativeMethod g_LongArrayMultiStateCounter_methods[] = {
         // @CriticalNative
         {"native_getReleaseFunc", "()J", (void *)native_getReleaseFunc},
         // @CriticalNative
+        {"native_setEnabled", "(JZJ)V", (void *)native_setEnabled},
+        // @CriticalNative
         {"native_setState", "(JIJ)V", (void *)native_setState},
         // @CriticalNative
         {"native_updateValues", "(JJJ)V", (void *)native_updateValues},
+        // @CriticalNative
+        {"native_reset", "(J)V", (void *)native_reset},
         // @CriticalNative
         {"native_getCounts", "(JJI)V", (void *)native_getCounts},
         // @FastNative

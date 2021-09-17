@@ -38,8 +38,6 @@ import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.DumpableInputConnection;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
-import android.view.inputmethod.InputConnectionInspector;
-import android.view.inputmethod.InputConnectionInspector.MissingMethodFlags;
 import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.InputMethodManager;
 
@@ -145,10 +143,10 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
                 if (ic == null) {
                     return;
                 }
-                @MissingMethodFlags
-                final int missingMethods = InputConnectionInspector.getMissingMethodFlags(ic);
-                if ((missingMethods & MissingMethodFlags.CLOSE_CONNECTION) == 0) {
+                try {
                     ic.closeConnection();
+                } catch (AbstractMethodError ignored) {
+                    // TODO(b/199934664): See if we can remove this by providing a default impl.
                 }
             } finally {
                 synchronized (mLock) {
@@ -260,7 +258,12 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
                 Log.w(TAG, "getSelectedText on inactive InputConnection");
                 return null;
             }
-            return ic.getSelectedText(flags);
+            try {
+                return ic.getSelectedText(flags);
+            } catch (AbstractMethodError ignored) {
+                // TODO(b/199934664): See if we can remove this by providing a default impl.
+                return null;
+            }
         }, useImeTracing() ? result -> buildGetSelectedTextProto(flags, result) : null);
     }
 
@@ -335,7 +338,11 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
                 Log.w(TAG, "commitCorrection on inactive InputConnection");
                 return;
             }
-            ic.commitCorrection(info);
+            try {
+                ic.commitCorrection(info);
+            } catch (AbstractMethodError ignored) {
+                // TODO(b/199934664): See if we can remove this by providing a default impl.
+            }
         });
     }
 
@@ -383,7 +390,11 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
                 Log.w(TAG, "setComposingRegion on inactive InputConnection");
                 return;
             }
-            ic.setComposingRegion(start, end);
+            try {
+                ic.setComposingRegion(start, end);
+            } catch (AbstractMethodError ignored) {
+                // TODO(b/199934664): See if we can remove this by providing a default impl.
+            }
         });
     }
 
@@ -467,7 +478,11 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
                 Log.w(TAG, "deleteSurroundingTextInCodePoints on inactive InputConnection");
                 return;
             }
-            ic.deleteSurroundingTextInCodePoints(beforeLength, afterLength);
+            try {
+                ic.deleteSurroundingTextInCodePoints(beforeLength, afterLength);
+            } catch (AbstractMethodError ignored) {
+                // TODO(b/199934664): See if we can remove this by providing a default impl.
+            }
         });
     }
 
@@ -532,7 +547,12 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
                 // requestCursorUpdates() is not currently supported across displays.
                 return false;
             }
-            return ic.requestCursorUpdates(cursorUpdateMode);
+            try {
+                return ic.requestCursorUpdates(cursorUpdateMode);
+            } catch (AbstractMethodError ignored) {
+                // TODO(b/199934664): See if we can remove this by providing a default impl.
+                return false;
+            }
         });
     }
 
@@ -549,7 +569,12 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
                 Log.w(TAG, "commitContent with invalid inputContentInfo=" + inputContentInfo);
                 return false;
             }
-            return ic.commitContent(inputContentInfo, flags, opts);
+            try {
+                return ic.commitContent(inputContentInfo, flags, opts);
+            } catch (AbstractMethodError ignored) {
+                // TODO(b/199934664): See if we can remove this by providing a default impl.
+                return false;
+            }
         });
     }
 

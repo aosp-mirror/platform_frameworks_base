@@ -17,29 +17,24 @@
 package com.android.effectstest;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
+import android.media.audiofx.AudioEffect;
+import android.media.audiofx.BassBoost;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.View.OnClickListener;
 import android.view.View;
-import android.view.ViewGroup;
+import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.TextView;
-import android.widget.EditText;
-import android.widget.SeekBar;
-import android.widget.ToggleButton;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
-import java.nio.ByteOrder;
-import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
+import android.widget.EditText;
+import android.widget.SeekBar;
+import android.widget.TextView;
+import android.widget.ToggleButton;
 
-import android.media.audiofx.BassBoost;
-import android.media.audiofx.AudioEffect;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.HashMap;
 
 public class BassBoostTest extends Activity implements OnCheckedChangeListener {
 
@@ -78,6 +73,9 @@ public class BassBoostTest extends Activity implements OnCheckedChangeListener {
         mReleaseButton = (ToggleButton)findViewById(R.id.bbReleaseButton);
         mOnOffButton = (ToggleButton)findViewById(R.id.bassboostOnOff);
 
+        final Button hammerReleaseTest = (Button) findViewById(R.id.hammer_on_release_bug);
+        hammerReleaseTest.setEnabled(false);
+
         getEffect(sSession);
 
         if (mBassBoost != null) {
@@ -93,6 +91,14 @@ public class BassBoostTest extends Activity implements OnCheckedChangeListener {
             mStrength = new BassBoostParam(mBassBoost, 0, 1000, seekBar, textView);
             seekBar.setOnSeekBarChangeListener(mStrength);
             mStrength.setEnabled(mBassBoost.getStrengthSupported());
+
+            hammerReleaseTest.setEnabled(true);
+            hammerReleaseTest.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    runHammerReleaseTest(hammerReleaseTest);
+                }
+            });
         }
     }
 
@@ -271,6 +277,54 @@ public class BassBoostTest extends Activity implements OnCheckedChangeListener {
                 sInstances.remove(session);
             }
         }
+    }
+
+    // Stress-tests releasing of AudioEffect by doing repeated creation
+    // and subsequent releasing. Also forces emission of callbacks from
+    // the AudioFlinger by setting a control status listener. Since all
+    // effect instances are bound to the same session, the AF will
+    // notify them about the change in their status. This can reveal racy
+    // behavior w.r.t. releasing.
+    class HammerReleaseTest extends Thread {
+        private static final int NUM_EFFECTS = 10;
+        private static final int NUM_ITERATIONS = 100;
+        private final int mSession;
+        private final Runnable mOnComplete;
+
+        HammerReleaseTest(int session, Runnable onComplete) {
+            mSession = session;
+            mOnComplete = onComplete;
+        }
+
+        @Override
+        public void run() {
+            Log.w(TAG, "HammerReleaseTest started");
+            BassBoost[] effects = new BassBoost[NUM_EFFECTS];
+            for (int i = 0; i < NUM_ITERATIONS; i++) {
+                for (int j = 0; j < NUM_EFFECTS; j++) {
+                    effects[j] = new BassBoost(0, mSession);
+                    effects[j].setControlStatusListener(mEffectListener);
+                    yield();
+                }
+                for (int j = NUM_EFFECTS - 1; j >= 0; j--) {
+                    Log.w(TAG, "HammerReleaseTest releasing effect " + (Object) effects[j]);
+                    effects[j].release();
+                    effects[j] = null;
+                    yield();
+                }
+            }
+            Log.w(TAG, "HammerReleaseTest ended");
+            runOnUiThread(mOnComplete);
+        }
+    }
+
+    private void runHammerReleaseTest(Button controlButton) {
+        controlButton.setEnabled(false);
+        HammerReleaseTest thread = new HammerReleaseTest(sSession,
+                () -> {
+                    controlButton.setEnabled(true);
+                });
+        thread.start();
     }
 
 }

@@ -683,7 +683,6 @@ public final class InputMethodManager {
                             windowFlags,
                             null,
                             null,
-                            0 /* missingMethodFlags */,
                             mCurRootView.mContext.getApplicationInfo().targetSdkVersion);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
@@ -1938,7 +1937,6 @@ public final class InputMethodManager {
                 mServedInputConnection = null;
             }
             RemoteInputConnectionImpl servedInputConnection;
-            final int missingMethodFlags;
             if (ic != null) {
                 mCursorSelStart = tba.initialSelStart;
                 mCursorSelEnd = tba.initialSelEnd;
@@ -1946,19 +1944,17 @@ public final class InputMethodManager {
                 mCursorCandEnd = -1;
                 mCursorRect.setEmpty();
                 mCursorAnchorInfo = null;
-                missingMethodFlags = InputConnectionInspector.getMissingMethodFlags(ic);
-                if ((missingMethodFlags & InputConnectionInspector.MissingMethodFlags.GET_HANDLER)
-                        != 0) {
-                    // InputConnection#getHandler() is not implemented.
-                    icHandler = null;
-                } else {
-                    icHandler = ic.getHandler();
+                Handler handler = null;
+                try {
+                    handler = ic.getHandler();
+                } catch (AbstractMethodError ignored) {
+                    // TODO(b/199934664): See if we can remove this by providing a default impl.
                 }
+                icHandler = handler;
                 servedInputConnection = new RemoteInputConnectionImpl(
                         icHandler != null ? icHandler.getLooper() : vh.getLooper(), ic, this, view);
             } else {
                 servedInputConnection = null;
-                missingMethodFlags = 0;
                 icHandler = null;
             }
             mServedInputConnection = servedInputConnection;
@@ -1971,7 +1967,7 @@ public final class InputMethodManager {
             try {
                 res = mService.startInputOrWindowGainedFocus(
                         startInputReason, mClient, windowGainingFocus, startInputFlags,
-                        softInputMode, windowFlags, tba, servedInputConnection, missingMethodFlags,
+                        softInputMode, windowFlags, tba, servedInputConnection,
                         view.getContext().getApplicationInfo().targetSdkVersion);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
