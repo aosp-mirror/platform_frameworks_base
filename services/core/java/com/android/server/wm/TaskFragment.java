@@ -352,7 +352,29 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return mAdjacentTaskFragment;
     }
 
-    /** @return the currently resumed activity. */
+    /** Returns the currently topmost resumed activity. */
+    @Nullable
+    ActivityRecord getTopResumedActivity() {
+        final ActivityRecord taskFragResumedActivity = getResumedActivity();
+        for (int i = getChildCount() - 1; i >= 0; --i) {
+            WindowContainer<?> child = getChildAt(i);
+            ActivityRecord topResumedActivity = null;
+            if (taskFragResumedActivity != null && child == taskFragResumedActivity) {
+                topResumedActivity = child.asActivityRecord();
+            } else if (child.asTaskFragment() != null) {
+                topResumedActivity = child.asTaskFragment().getTopResumedActivity();
+            }
+            if (topResumedActivity != null) {
+                return topResumedActivity;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the currently resumed activity in this TaskFragment's
+     * {@link #mChildren direct children}
+     */
     ActivityRecord getResumedActivity() {
         return mResumedActivity;
     }
@@ -374,6 +396,25 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     @VisibleForTesting
     void setPausingActivity(ActivityRecord pausing) {
         mPausingActivity = pausing;
+    }
+
+    /** Returns the currently topmost pausing activity. */
+    @Nullable
+    ActivityRecord getTopPausingActivity() {
+        final ActivityRecord taskFragPausingActivity = getPausingActivity();
+        for (int i = getChildCount() - 1; i >= 0; --i) {
+            WindowContainer<?> child = getChildAt(i);
+            ActivityRecord topPausingActivity = null;
+            if (taskFragPausingActivity != null && child == taskFragPausingActivity) {
+                topPausingActivity = child.asActivityRecord();
+            } else if (child.asTaskFragment() != null) {
+                topPausingActivity = child.asTaskFragment().getTopPausingActivity();
+            }
+            if (topPausingActivity != null) {
+                return topPausingActivity;
+            }
+        }
+        return null;
     }
 
     ActivityRecord getPausingActivity() {
@@ -1673,7 +1714,9 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         }
 
         final Task thisTask = asTask();
-        if (thisTask != null) {
+        // Embedded Task's configuration should go with parent TaskFragment, so we don't re-compute
+        // configuration here.
+        if (thisTask != null && !thisTask.isEmbedded()) {
             thisTask.resolveLeafTaskOnlyOverrideConfigs(newParentConfig,
                     mTmpBounds /* previousBounds */);
         }

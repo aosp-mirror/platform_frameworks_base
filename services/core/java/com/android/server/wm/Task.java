@@ -1236,7 +1236,7 @@ class Task extends TaskFragment {
         mRootWindowContainer.updateUIDsPresentOnDisplay();
     }
 
-    /** Returns the currently topmost resumed activity. */
+    @Override
     @Nullable
     ActivityRecord getTopResumedActivity() {
         if (!isLeafTask()) {
@@ -1253,15 +1253,7 @@ class Task extends TaskFragment {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer child = mChildren.get(i);
             if (child.asTaskFragment() != null) {
-                final ActivityRecord[] resumedActivity = new ActivityRecord[1];
-                child.asTaskFragment().forAllLeafTaskFragments(fragment -> {
-                    if (fragment.getResumedActivity() != null) {
-                        resumedActivity[0] = fragment.getResumedActivity();
-                        return true;
-                    }
-                    return false;
-                });
-                topResumedActivity = resumedActivity[0];
+                topResumedActivity = child.asTaskFragment().getTopResumedActivity();
             } else if (taskResumedActivity != null
                     && child.asActivityRecord() == taskResumedActivity) {
                 topResumedActivity = taskResumedActivity;
@@ -1273,9 +1265,7 @@ class Task extends TaskFragment {
         return null;
     }
 
-    /**
-     * Returns the currently topmost pausing activity.
-     */
+    @Override
     @Nullable
     ActivityRecord getTopPausingActivity() {
         if (!isLeafTask()) {
@@ -1292,15 +1282,7 @@ class Task extends TaskFragment {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer child = mChildren.get(i);
             if (child.asTaskFragment() != null) {
-                final ActivityRecord[] pausingActivity = new ActivityRecord[1];
-                child.asTaskFragment().forAllLeafTaskFragments(fragment -> {
-                    if (fragment.getPausingActivity() != null) {
-                        pausingActivity[0] = fragment.getPausingActivity();
-                        return true;
-                    }
-                    return false;
-                });
-                topPausingActivity = pausingActivity[0];
+                topPausingActivity = child.asTaskFragment().getTopPausingActivity();
             } else if (taskPausingActivity != null
                     && child.asActivityRecord() == taskPausingActivity) {
                 topPausingActivity = taskPausingActivity;
