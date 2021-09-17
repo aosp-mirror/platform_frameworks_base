@@ -1857,6 +1857,8 @@ public class SettingsProvider extends ContentProvider {
             if (!Settings.checkAndNoteWriteSettingsOperation(getContext(),
                     Binder.getCallingUid(), callingPackage, getCallingAttributionTag(),
                     true)) {
+                Slog.e(LOG_TAG, "Calling package: " + callingPackage + " is not allowed to "
+                        + "write system settings: " + name);
                 return false;
             }
         }
@@ -1865,6 +1867,8 @@ public class SettingsProvider extends ContentProvider {
         final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(runAsUserId);
 
         if (isSettingRestrictedForUser(name, callingUserId, value, Binder.getCallingUid())) {
+            Slog.e(LOG_TAG, "UserId: " + callingUserId + " is disallowed to change system "
+                    + "setting: " + name);
             return false;
         }
 
@@ -1876,6 +1880,8 @@ public class SettingsProvider extends ContentProvider {
 
         // Only the owning user id can change the setting.
         if (owningUserId != callingUserId) {
+            Slog.e(LOG_TAG, "UserId: " + callingUserId + " is not the owning userId: "
+                    + owningUserId);
             return false;
         }
 
@@ -1916,7 +1922,7 @@ public class SettingsProvider extends ContentProvider {
                             false, null);
                 }
             }
-
+            Slog.e(LOG_TAG, "Unknown operation code: " + operation);
             return false;
         }
     }
