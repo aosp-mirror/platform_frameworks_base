@@ -2613,6 +2613,7 @@
   <java-symbol type="array" name="config_sfps_sensor_props" />
   <java-symbol type="integer" name="config_udfps_illumination_transition_ms" />
   <java-symbol type="bool" name="config_is_powerbutton_fps" />
+  <java-symbol type="array" name="config_udfps_enroll_stage_thresholds" />
 
   <java-symbol type="array" name="config_face_acquire_enroll_ignorelist" />
   <java-symbol type="array" name="config_face_acquire_vendor_enroll_ignorelist" />
@@ -4418,7 +4419,7 @@
   <java-symbol type="string" name="view_and_control_notification_title" />
   <java-symbol type="string" name="view_and_control_notification_content" />
   <java-symbol type="array" name="config_accessibility_allowed_install_source" />
-  
+
   <!-- Translation -->
   <java-symbol type="string" name="ui_translation_accessibility_translated_text" />
   <java-symbol type="string" name="ui_translation_accessibility_translation_finished" />
