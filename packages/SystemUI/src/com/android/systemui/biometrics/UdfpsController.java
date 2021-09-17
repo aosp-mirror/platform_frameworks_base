@@ -41,7 +41,6 @@ import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.hardware.fingerprint.IUdfpsOverlayControllerCallback;
 import android.media.AudioAttributes;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
@@ -65,7 +64,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -73,6 +71,7 @@ import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -119,9 +118,7 @@ public class UdfpsController implements DozeReceiver {
     @NonNull private final StatusBarKeyguardViewManager mKeyguardViewManager;
     @NonNull private final DumpManager mDumpManager;
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    @NonNull private final KeyguardViewMediator mKeyguardViewMediator;
     @Nullable private final Vibrator mVibrator;
-    @NonNull private final Handler mMainHandler;
     @NonNull private final FalsingManager mFalsingManager;
     @NonNull private final PowerManager mPowerManager;
     @NonNull private final AccessibilityManager mAccessibilityManager;
@@ -131,6 +128,8 @@ public class UdfpsController implements DozeReceiver {
     @NonNull private final ConfigurationController mConfigurationController;
     @NonNull private final SystemClock mSystemClock;
     @VisibleForTesting @NonNull final BiometricDisplayListener mOrientationListener;
+    @NonNull private final UnlockedScreenOffAnimationController
+            mUnlockedScreenOffAnimationController;
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
     @VisibleForTesting final FingerprintSensorPropertiesInternal mSensorProps;
@@ -519,7 +518,6 @@ public class UdfpsController implements DozeReceiver {
             @NonNull StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             @NonNull DumpManager dumpManager,
             @NonNull KeyguardUpdateMonitor keyguardUpdateMonitor,
-            @NonNull KeyguardViewMediator keyguardViewMediator,
             @NonNull FalsingManager falsingManager,
             @NonNull PowerManager powerManager,
             @NonNull AccessibilityManager accessibilityManager,
@@ -533,11 +531,11 @@ public class UdfpsController implements DozeReceiver {
             @NonNull DisplayManager displayManager,
             @Main Handler mainHandler,
             @NonNull ConfigurationController configurationController,
-            @NonNull SystemClock systemClock) {
+            @NonNull SystemClock systemClock,
+            @NonNull UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
         mContext = context;
         mExecution = execution;
         // TODO (b/185124905): inject main handler and vibrator once done prototyping
-        mMainHandler = new Handler(Looper.getMainLooper());
         mVibrator = vibrator;
         mInflater = inflater;
         // The fingerprint manager is queried for UDFPS before this class is constructed, so the
@@ -551,7 +549,6 @@ public class UdfpsController implements DozeReceiver {
         mKeyguardViewManager = statusBarKeyguardViewManager;
         mDumpManager = dumpManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
-        mKeyguardViewMediator = keyguardViewMediator;
         mFalsingManager = falsingManager;
         mPowerManager = powerManager;
         mAccessibilityManager = accessibilityManager;
@@ -562,6 +559,7 @@ public class UdfpsController implements DozeReceiver {
         mKeyguardBypassController = keyguardBypassController;
         mConfigurationController = configurationController;
         mSystemClock = systemClock;
+        mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
 
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists
@@ -795,13 +793,12 @@ public class UdfpsController implements DozeReceiver {
                         mStatusBarOptional,
                         mKeyguardViewManager,
                         mKeyguardUpdateMonitor,
-                        mFgExecutor,
                         mDumpManager,
-                        mKeyguardViewMediator,
                         mLockscreenShadeTransitionController,
                         mConfigurationController,
                         mSystemClock,
                         mKeyguardStateController,
+                        mUnlockedScreenOffAnimationController,
                         this
                 );
             case BiometricOverlayConstants.REASON_AUTH_BP:

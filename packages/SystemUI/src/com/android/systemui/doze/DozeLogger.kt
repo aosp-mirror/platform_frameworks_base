@@ -205,6 +205,15 @@ class DozeLogger @Inject constructor(
         })
     }
 
+    fun logSensorEventDropped(sensorEvent: Int, reason: String) {
+        buffer.log(TAG, INFO, {
+            int1 = sensorEvent
+            str1 = reason
+        }, {
+            "SensorEvent [$int1] dropped, reason=$str1"
+        })
+    }
+
     fun logPulseDropped(reason: String) {
         buffer.log(TAG, INFO, {
             str1 = reason
