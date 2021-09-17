@@ -1,0 +1,7 @@
+zap android.accounts.**
+zap android.app.**
+zap android.content.**
+zap android.database.**
+zap android.os.**
+zap android.util.**
+zap android.view.**
