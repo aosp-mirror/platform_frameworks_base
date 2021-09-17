@@ -100,6 +100,17 @@ public class LogModule {
         return factory.create("PrivacyLog", 100);
     }
 
+    /**
+     * Provides a logging buffer for
+     * {@link com.android.systemui.statusbar.phone.CollapsedStatusBarFragment}.
+     */
+    @Provides
+    @SysUISingleton
+    @CollapsedSbFragmentLog
+    public static LogBuffer provideCollapsedSbFragmentLogBuffer(LogBufferFactory factory) {
+        return factory.create("CollapsedSbFragmentLog", 20);
+    }
+
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
     @Provides
     @SysUISingleton
