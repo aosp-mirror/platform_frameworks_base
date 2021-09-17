@@ -18,6 +18,8 @@ package com.android.systemui.biometrics
 import android.content.Context
 import android.graphics.PixelFormat
 import android.graphics.Rect
+import android.hardware.biometrics.BiometricOverlayConstants
+import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD
 import android.hardware.display.DisplayManager
 import android.hardware.fingerprint.FingerprintManager
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
@@ -100,14 +102,20 @@ class SidefpsController @Inject constructor(
 
     init {
         fingerprintManager?.setSidefpsController(object : ISidefpsController.Stub() {
-            override fun show() = mainExecutor.execute {
+            override fun show(
+                sensorId: Int,
+                @BiometricOverlayConstants.ShowReason reason: Int
+            ) = if (reason.isReasonToShow()) doShow() else hide(sensorId)
+
+            private fun doShow() = mainExecutor.execute {
                 if (overlayView == null) {
                     overlayView = createOverlayForDisplay()
                 } else {
                     Log.v(TAG, "overlay already shown")
                 }
             }
-            override fun hide() = mainExecutor.execute { overlayView = null }
+
+            override fun hide(sensorId: Int) = mainExecutor.execute { overlayView = null }
         })
     }
 
@@ -163,6 +171,12 @@ class SidefpsController @Inject constructor(
         overlayViewParams.x = x
         overlayViewParams.y = y
     }
+}
+
+@BiometricOverlayConstants.ShowReason
+private fun Int.isReasonToShow(): Boolean = when (this) {
+    REASON_AUTH_KEYGUARD -> false
+    else -> true
 }
 
 @RawRes

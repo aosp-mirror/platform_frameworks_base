@@ -22,7 +22,7 @@ import android.hardware.fingerprint.IUdfpsOverlayControllerCallback;
  * @hide
  */
 oneway interface IUdfpsOverlayController {
-    // Shows the overlay.
+    // Shows the overlay  for the given sensor with a reason from BiometricOverlayConstants.
     void showUdfpsOverlay(int sensorId, int reason, IUdfpsOverlayControllerCallback callback);
 
     // Hides the overlay.
