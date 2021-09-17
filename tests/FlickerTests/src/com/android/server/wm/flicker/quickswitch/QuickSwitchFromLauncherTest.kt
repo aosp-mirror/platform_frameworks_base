@@ -306,7 +306,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     @Presubmit
     @Test
     fun navbarIsAlwaysInRightPosition() =
-            testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation)
+            testSpec.navBarLayerRotatesAndScales()
 
     /**
      * Checks that the status bar window is visible throughout the entire transition.
