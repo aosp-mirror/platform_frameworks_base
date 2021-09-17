@@ -160,9 +160,7 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
         mBroadcastDispatcher.unregisterReceiver(mLocaleBroadcastReceiver);
         mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
         mBatteryController.removeCallback(mBatteryCallback);
-        if (!mView.isAttachedToWindow()) {
-            mStatusBarStateController.removeCallback(mStatusBarStatePersistentListener);
-        }
+        mStatusBarStateController.removeCallback(mStatusBarStatePersistentListener);
     }
 
     /** Animate the clock appearance */
