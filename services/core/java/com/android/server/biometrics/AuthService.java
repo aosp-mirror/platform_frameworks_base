@@ -60,7 +60,6 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
@@ -82,7 +81,6 @@ public class AuthService extends SystemService {
     private static final String SETTING_HIDL_DISABLED =
             "com.android.server.biometrics.AuthService.hidlDisabled";
     private static final int DEFAULT_HIDL_DISABLED = 0;
-    private static final String SYSPROP_FIRST_API_LEVEL = "ro.board.first_api_level";
 
     private final Injector mInjector;
 
@@ -626,19 +624,9 @@ public class AuthService extends SystemService {
         final SensorConfig[] hidlConfigs;
         if (!mInjector.isHidlDisabled(getContext())) {
             final String[] configStrings = mInjector.getConfiguration(getContext());
-            final boolean isRVendor = SystemProperties.getInt(SYSPROP_FIRST_API_LEVEL, 0)
-                    == Build.VERSION_CODES.R;
-            if (configStrings.length == 0 && isRVendor) {
-                // For backwards compatibility with R where biometrics could work without being
-                // configured in config_biometric_sensors. In the absence of a vendor provided
-                // configuration, we assume the weakest biometric strength (i.e. convenience).
-                Slog.w(TAG, "Found R vendor partition without config_biometric_sensors");
-                hidlConfigs = generateRSdkCompatibleConfiguration();
-            } else {
-                hidlConfigs = new SensorConfig[configStrings.length];
-                for (int i = 0; i < configStrings.length; ++i) {
-                    hidlConfigs[i] = new SensorConfig(configStrings[i]);
-                }
+            hidlConfigs = new SensorConfig[configStrings.length];
+            for (int i = 0; i < configStrings.length; ++i) {
+                hidlConfigs[i] = new SensorConfig(configStrings[i]);
             }
         } else {
             hidlConfigs = null;
@@ -648,38 +636,6 @@ public class AuthService extends SystemService {
         registerAuthenticators(hidlConfigs);
 
         mInjector.publishBinderService(this, mImpl);
-    }
-
-    /**
-     * Generates SensorConfig[] with an entry that corresponds to the biometric feature declared on
-     * the device. Returns an empty SensorConfig[] if no biometric features are declared. If both
-     * fingerprint and face are declared, only the fingerprint config will be generated. Biometrics
-     * are assumed to be of the weakest strength class, i.e. convenience.
-     */
-    private @NonNull SensorConfig[] generateRSdkCompatibleConfiguration() {
-        final boolean hasFp = getContext().getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_FINGERPRINT);
-        final boolean hasFace = getContext().getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_FACE);
-        if (hasFp || hasFace) {
-            final String id = "0";
-            final String strength = String.valueOf(Authenticators.BIOMETRIC_CONVENIENCE);
-            final String modality;
-            final String logStr;
-            if (hasFp) {
-                modality = String.valueOf(BiometricAuthenticator.TYPE_FINGERPRINT);
-                logStr = "fingerprint";
-            } else {
-                modality = String.valueOf(BiometricAuthenticator.TYPE_FACE);
-                logStr = "face";
-            }
-            final String config = String.join(":" /* delimiter */, id, modality, strength);
-            Slog.d(TAG, "Generated config_biometric_sensors for " + logStr + ": " + config);
-            return new SensorConfig[]{new SensorConfig(config)};
-        } else {
-            Slog.d(TAG, "Couldn't generate config_biometric_sensors. No biometrics found.");
-            return new SensorConfig[0];
-        }
     }
 
     /**
