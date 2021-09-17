@@ -89,14 +89,14 @@ fun FlickerTestParameter.statusBarLayerIsVisible() {
 
 fun FlickerTestParameter.navBarLayerRotatesAndScales() {
     assertLayersStart {
-        val rotation = this.entry.displays.firstOrNull()?.transform?.getRotation()
-            ?: Surface.ROTATION_0
+        val rotation = this.entry.displays.sortedBy { it.id }
+            .firstOrNull()?.transform?.getRotation() ?: Surface.ROTATION_0
         this.visibleRegion(FlickerComponentName.NAV_BAR)
                 .coversExactly(WindowUtils.getNavigationBarPosition(rotation))
     }
     assertLayersEnd {
-        val rotation = this.entry.displays.firstOrNull()?.transform?.getRotation()
-            ?: Surface.ROTATION_0
+        val rotation = this.entry.displays.sortedBy { it.id }
+            .firstOrNull()?.transform?.getRotation() ?: Surface.ROTATION_0
         this.visibleRegion(FlickerComponentName.NAV_BAR)
                 .coversExactly(WindowUtils.getNavigationBarPosition(rotation))
     }
@@ -104,14 +104,14 @@ fun FlickerTestParameter.navBarLayerRotatesAndScales() {
 
 fun FlickerTestParameter.statusBarLayerRotatesScales() {
     assertLayersStart {
-        val rotation = this.entry.displays.firstOrNull()?.transform?.getRotation()
-            ?: Surface.ROTATION_0
+        val rotation = this.entry.displays.sortedBy { it.id }
+            .firstOrNull()?.transform?.getRotation() ?: Surface.ROTATION_0
         this.visibleRegion(FlickerComponentName.STATUS_BAR)
             .coversExactly(WindowUtils.getStatusBarPosition(rotation))
     }
     assertLayersEnd {
-        val rotation = this.entry.displays.firstOrNull()?.transform?.getRotation()
-            ?: Surface.ROTATION_0
+        val rotation = this.entry.displays.sortedBy { it.id }
+            .firstOrNull()?.transform?.getRotation() ?: Surface.ROTATION_0
         this.visibleRegion(FlickerComponentName.STATUS_BAR)
             .coversExactly(WindowUtils.getStatusBarPosition(rotation))
     }
