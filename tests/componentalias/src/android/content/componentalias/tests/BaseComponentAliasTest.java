@@ -39,10 +39,8 @@ public class BaseComponentAliasTest {
     @Before
     public void enableComponentAlias() throws Exception {
         sDeviceConfig.set("component_alias_overrides", "");
-        sDeviceConfig.set("enable_experimental_component_alias", "true");
 
-        // Device config propagation happens on a handler, so we need to wait for AM to
-        // actually set it.
+        // Make sure the feature is actually enabled.
         TestUtils.waitUntil("Wait until component alias is actually enabled", () -> {
             return ShellUtils.runShellCommand("dumpsys activity component-alias")
                     .indexOf("Enabled: true") > 0;
