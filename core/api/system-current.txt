@@ -5409,9 +5409,33 @@ package android.media {
 
   public class Spatializer {
     method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void addCompatibleAudioDevice(@NonNull android.media.AudioDeviceAttributes);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void addOnHeadTrackingModeChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.Spatializer.OnHeadTrackingModeChangedListener);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void clearOnHeadToSoundstagePoseUpdatedListener();
     method @NonNull @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public java.util.List<android.media.AudioDeviceAttributes> getCompatibleAudioDevices();
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public int getDesiredHeadTrackingMode();
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public int getHeadTrackingMode();
+    method @NonNull @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public java.util.List<java.lang.Integer> getSupportedHeadTrackingModes();
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void recenterHeadTracker();
     method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void removeCompatibleAudioDevice(@NonNull android.media.AudioDeviceAttributes);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void removeOnHeadTrackingModeChangedListener(@NonNull android.media.Spatializer.OnHeadTrackingModeChangedListener);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void setDesiredHeadTrackingMode(int);
     method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void setEnabled(boolean);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void setGlobalTransform(@NonNull float[]);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void setOnHeadToSoundstagePoseUpdatedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.Spatializer.OnHeadToSoundstagePoseUpdatedListener);
+    field @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public static final int HEAD_TRACKING_MODE_DISABLED = -1; // 0xffffffff
+    field @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public static final int HEAD_TRACKING_MODE_OTHER = 0; // 0x0
+    field @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public static final int HEAD_TRACKING_MODE_RELATIVE_DEVICE = 2; // 0x2
+    field @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public static final int HEAD_TRACKING_MODE_RELATIVE_WORLD = 1; // 0x1
+    field @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public static final int HEAD_TRACKING_MODE_UNSUPPORTED = -2; // 0xfffffffe
+  }
+
+  public static interface Spatializer.OnHeadToSoundstagePoseUpdatedListener {
+    method public void onHeadToSoundstagePoseUpdated(@NonNull android.media.Spatializer, @NonNull float[]);
+  }
+
+  public static interface Spatializer.OnHeadTrackingModeChangedListener {
+    method public void onDesiredHeadTrackingModeChanged(@NonNull android.media.Spatializer, int);
+    method public void onHeadTrackingModeChanged(@NonNull android.media.Spatializer, int);
   }
 
 }
