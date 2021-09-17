@@ -2210,6 +2210,11 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     }
 
     @Override
+    TaskDisplayArea getTaskDisplayArea() {
+        return this;
+    }
+
+    @Override
     boolean isTaskDisplayArea() {
         return true;
     }
