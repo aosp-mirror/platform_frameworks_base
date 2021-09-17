@@ -1171,11 +1171,6 @@ public abstract class PanelViewController {
         return new OnConfigurationChangedListener();
     }
 
-    /**
-     * Set that the panel is currently opening and not fully opened or closed.
-     */
-    public abstract void setIsShadeOpening(boolean opening);
-
     public class TouchHandler implements View.OnTouchListener {
         public boolean onInterceptTouchEvent(MotionEvent event) {
             if (mInstantExpanding || !mNotificationsDragEnabled || mTouchDisabled || (mMotionAborted

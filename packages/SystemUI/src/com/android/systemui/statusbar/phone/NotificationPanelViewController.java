@@ -57,7 +57,6 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.Drawable;
-import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.SensorLocationInternal;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Bundle;
@@ -2225,12 +2224,6 @@ public class NotificationPanelViewController extends PanelViewController {
     };
 
     private void onNotificationScrolled(int newScrollPosition) {
-        updateQSExpansionEnabledAmbient();
-    }
-
-    @Override
-    public void setIsShadeOpening(boolean opening) {
-        mAmbientState.setIsShadeOpening(opening);
         updateQSExpansionEnabledAmbient();
     }
 
@@ -4628,5 +4621,15 @@ public class NotificationPanelViewController extends PanelViewController {
             updateMaxHeadsUpTranslation();
             return insets;
         }
+    }
+
+    private final PanelBar.PanelStateChangeListener mPanelStateChangeListener =
+            state -> {
+                mAmbientState.setIsShadeOpening(state == PanelBar.STATE_OPENING);
+                updateQSExpansionEnabledAmbient();
+            };
+
+    public PanelBar.PanelStateChangeListener getPanelStateChangeListener() {
+        return mPanelStateChangeListener;
     }
 }

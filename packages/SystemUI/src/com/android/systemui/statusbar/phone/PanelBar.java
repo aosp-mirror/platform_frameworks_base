@@ -17,8 +17,10 @@
 package com.android.systemui.statusbar.phone;
 
 import static java.lang.Float.isNaN;
+import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.CallSuper;
+import android.annotation.IntDef;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -26,6 +28,10 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.FrameLayout;
+
+import androidx.annotation.Nullable;
+
+import java.lang.annotation.Retention;
 
 public abstract class PanelBar extends FrameLayout {
     public static final boolean DEBUG = false;
@@ -40,24 +46,25 @@ public abstract class PanelBar extends FrameLayout {
         Log.v(TAG, String.format(fmt, args));
     }
 
+    /** Enum for the current state of the panel. */
+    @Retention(SOURCE)
+    @IntDef({STATE_CLOSED, STATE_OPENING, STATE_OPEN})
+    @interface PanelState {}
     public static final int STATE_CLOSED = 0;
     public static final int STATE_OPENING = 1;
     public static final int STATE_OPEN = 2;
 
     PanelViewController mPanel;
+    @Nullable private PanelStateChangeListener mPanelStateChangeListener;
     private int mState = STATE_CLOSED;
     private boolean mTracking;
 
-    public void go(int state) {
+    private void go(@PanelState int state) {
         if (DEBUG) LOG("go state: %d -> %d", mState, state);
         mState = state;
-        if (mPanel != null) {
-            mPanel.setIsShadeOpening(state == STATE_OPENING);
+        if (mPanelStateChangeListener != null) {
+            mPanelStateChangeListener.onStateChanged(state);
         }
-    }
-
-    protected boolean isShadeOpening() {
-        return mState == STATE_OPENING;
     }
 
     @Override
@@ -95,6 +102,11 @@ public abstract class PanelBar extends FrameLayout {
     public void setPanel(PanelViewController pv) {
         mPanel = pv;
         pv.setBar(this);
+    }
+
+    /** Sets the listener that will be notified of panel state changes. */
+    public void setPanelStateChangeListener(PanelStateChangeListener listener) {
+        mPanelStateChangeListener = listener;
     }
 
     public boolean panelEnabled() {
@@ -225,5 +237,11 @@ public abstract class PanelBar extends FrameLayout {
 
     public void onClosingFinished() {
 
+    }
+
+    /** An interface that will be notified of panel state changes. */
+    public interface PanelStateChangeListener {
+        /** Called when the state changes. */
+        void onStateChanged(@PanelState int state);
     }
 }
