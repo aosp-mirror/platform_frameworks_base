@@ -1152,8 +1152,11 @@ public class StatusBar extends SystemUI implements
                         moveFromCenterAnimation = mMoveFromCenterAnimation.get();
                     }
                     mPhoneStatusBarViewController =
-                            new PhoneStatusBarViewController(mStatusBarView, mCommandQueue,
-                                    moveFromCenterAnimation);
+                            new PhoneStatusBarViewController(
+                                    mStatusBarView,
+                                    mCommandQueue,
+                                    moveFromCenterAnimation,
+                                    this::onPanelExpansionStateChanged);
                     mPhoneStatusBarViewController.init();
 
                     mBatteryMeterViewController = new BatteryMeterViewController(
@@ -1422,6 +1425,15 @@ public class StatusBar extends SystemUI implements
                 || mKeyguardUnlockAnimationController.isUnlockingWithSmartSpaceTransition()) {
             mKeyguardStateController.notifyKeyguardDismissAmountChanged(
                     1f - expansion, trackingTouch);
+        }
+    }
+
+    private void onPanelExpansionStateChanged() {
+        if (getNavigationBarView() != null) {
+            getNavigationBarView().onStatusBarPanelStateChanged();
+        }
+        if (getNotificationPanelViewController() != null) {
+            getNotificationPanelViewController().updateSystemUiStateFlags();
         }
     }
 

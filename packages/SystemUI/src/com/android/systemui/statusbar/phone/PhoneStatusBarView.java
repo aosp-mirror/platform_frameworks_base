@@ -79,6 +79,8 @@ public class PhoneStatusBarView extends PanelBar {
     private int mStatusBarHeight;
     @Nullable
     private List<StatusBar.ExpansionChangedListener> mExpansionChangedListeners;
+    @Nullable
+    private PanelExpansionStateChangedListener mPanelExpansionStateChangedListener;
 
     private PanelEnabledProvider mPanelEnabledProvider;
 
@@ -100,6 +102,10 @@ public class PhoneStatusBarView extends PanelBar {
     public void setExpansionChangedListeners(
             @Nullable List<StatusBar.ExpansionChangedListener> listeners) {
         mExpansionChangedListeners = listeners;
+    }
+
+    void setPanelExpansionStateChangedListener(PanelExpansionStateChangedListener listener) {
+        mPanelExpansionStateChangedListener = listener;
     }
 
     public void setScrimController(ScrimController scrimController) {
@@ -289,11 +295,10 @@ public class PhoneStatusBarView extends PanelBar {
         super.panelExpansionChanged(frac, expanded);
         updateScrimFraction();
         if ((frac == 0 || frac == 1)) {
-            if (mBar.getNavigationBarView() != null) {
-                mBar.getNavigationBarView().onStatusBarPanelStateChanged();
-            }
-            if (mBar.getNotificationPanelViewController() != null) {
-                mBar.getNotificationPanelViewController().updateSystemUiStateFlags();
+            if (mPanelExpansionStateChangedListener != null) {
+                mPanelExpansionStateChangedListener.onPanelExpansionStateChanged();
+            } else {
+                Log.w(TAG, "No PanelExpansionStateChangedListener provided.");
             }
         }
 
@@ -411,5 +416,11 @@ public class PhoneStatusBarView extends PanelBar {
     interface PanelEnabledProvider {
         /** Returns true if the panel is enabled and false otherwise. */
         boolean panelEnabled();
+    }
+
+    /** A listener that will be notified when a panel's expansion state may have changed. */
+    public interface PanelExpansionStateChangedListener {
+        /** Called when a panel's expansion state may have changed. */
+        void onPanelExpansionStateChanged();
     }
 }
