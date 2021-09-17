@@ -26,6 +26,7 @@ import android.media.INativeSpatializerCallback;
 import android.media.ISpatializer;
 import android.media.ISpatializerCallback;
 import android.media.ISpatializerHeadToSoundStagePoseCallback;
+import android.media.ISpatializerHeadTrackingCallback;
 import android.media.ISpatializerHeadTrackingModeCallback;
 import android.media.Spatializer;
 import android.media.SpatializerHeadTrackingMode;
@@ -71,6 +72,8 @@ public class SpatializerHelper {
     private int mDesiredHeadTrackingMode = Spatializer.HEAD_TRACKING_MODE_UNSUPPORTED;
     private @Nullable ISpatializer mSpat;
     private @Nullable SpatializerCallback mSpatCallback;
+    private @Nullable SpatializerHeadTrackingCallback mSpatHeadTrackingCallback;
+
 
     // default attributes and format that determine basic availability of spatialization
     private static final AudioAttributes DEFAULT_ATTRIBUTES = new AudioAttributes.Builder()
@@ -192,9 +195,13 @@ public class SpatializerHelper {
             }
             // TODO use reported spat level to change state
         }
+    };
 
+    // spatializer head tracking callback from native
+    private final class SpatializerHeadTrackingCallback
+            extends ISpatializerHeadTrackingCallback.Stub {
         public void onHeadTrackingModeChanged(byte mode)  {
-            logd("SpatializerCallback.onHeadTrackingModeChanged mode:" + mode);
+            logd("SpatializerHeadTrackingCallback.onHeadTrackingModeChanged mode:" + mode);
             int oldMode, newMode;
             synchronized (this) {
                 oldMode = mActualHeadTrackingMode;
@@ -208,12 +215,13 @@ public class SpatializerHelper {
 
         public void onHeadToSoundStagePoseUpdated(float[] headToStage)  {
             if (headToStage == null) {
-                Log.e(TAG, "SpatializerCallback.onHeadToStagePoseUpdated null transform");
+                Log.e(TAG, "SpatializerHeadTrackingCallback.onHeadToStagePoseUpdated"
+                        + "null transform");
                 return;
             }
             if (headToStage.length != 6) {
-                Log.e(TAG, "SpatializerCallback.onHeadToStagePoseUpdated invalid transform length"
-                        + headToStage.length);
+                Log.e(TAG, "SpatializerHeadTrackingCallback.onHeadToStagePoseUpdated"
+                        + " invalid transform length" + headToStage.length);
                 return;
             }
             if (DEBUG) {
@@ -222,7 +230,7 @@ public class SpatializerHelper {
                 for (float val : headToStage) {
                     t.append("[").append(String.format(Locale.ENGLISH, "%.3f", val)).append("]");
                 }
-                logd("SpatializerCallback.onHeadToStagePoseUpdated headToStage:" + t);
+                logd("SpatializerHeadTrackingCallback.onHeadToStagePoseUpdated headToStage:" + t);
             }
             dispatchPoseUpdate(headToStage);
         }
@@ -433,9 +441,14 @@ public class SpatializerHelper {
     private void createSpat() {
         if (mSpat == null) {
             mSpatCallback = new SpatializerCallback();
+            mSpatHeadTrackingCallback = new SpatializerHeadTrackingCallback();
             mSpat = AudioSystem.getSpatializer(mSpatCallback);
             try {
                 mSpat.setLevel((byte)  Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_MULTICHANNEL);
+                //TODO: register heatracking callback only when sensors are registered
+                if (mSpat.isHeadTrackingSupported()) {
+                    mSpat.registerHeadTrackingCallback(mSpatHeadTrackingCallback);
+                }
             } catch (RemoteException e) {
                 Log.e(TAG, "Can't set spatializer level", e);
                 mState = STATE_NOT_SUPPORTED;
@@ -451,6 +464,7 @@ public class SpatializerHelper {
         if (mSpat != null) {
             mSpatCallback = null;
             try {
+                mSpat.registerHeadTrackingCallback(null);
                 mSpat.release();
                 mSpat = null;
             } catch (RemoteException e) {
