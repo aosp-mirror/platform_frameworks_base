@@ -24,7 +24,6 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Property;
-import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.InsetsSource;
 import android.view.InsetsState;
