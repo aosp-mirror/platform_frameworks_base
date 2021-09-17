@@ -117,6 +117,8 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
@@ -144,6 +146,7 @@ public class NotificationStackScrollLayoutController {
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final NotificationRoundnessManager mNotificationRoundnessManager;
     private final TunerService mTunerService;
+    private final DeviceProvisionedController mDeviceProvisionedController;
     private final DynamicPrivacyController mDynamicPrivacyController;
     private final ConfigurationController mConfigurationController;
     private final ZenModeController mZenModeController;
@@ -215,6 +218,28 @@ public class NotificationStackScrollLayoutController {
                     mConfigurationController.removeCallback(mConfigurationListener);
                     mZenModeController.removeCallback(mZenModeControllerCallback);
                     mStatusBarStateController.removeCallback(mStateListener);
+                }
+            };
+
+    private final DeviceProvisionedListener mDeviceProvisionedListener =
+            new DeviceProvisionedListener() {
+                @Override
+                public void onDeviceProvisionedChanged() {
+                    updateCurrentUserIsSetup();
+                }
+
+                @Override
+                public void onUserSwitched() {
+                    updateCurrentUserIsSetup();
+                }
+
+                @Override
+                public void onUserSetupChanged() {
+                    updateCurrentUserIsSetup();
+                }
+
+                private void updateCurrentUserIsSetup() {
+                    mView.setCurrentUserSetup(mDeviceProvisionedController.isCurrentUserSetup());
                 }
             };
 
@@ -587,6 +612,7 @@ public class NotificationStackScrollLayoutController {
             HeadsUpManagerPhone headsUpManager,
             NotificationRoundnessManager notificationRoundnessManager,
             TunerService tunerService,
+            DeviceProvisionedController deviceProvisionedController,
             DynamicPrivacyController dynamicPrivacyController,
             ConfigurationController configurationController,
             SysuiStatusBarStateController statusBarStateController,
@@ -623,6 +649,7 @@ public class NotificationStackScrollLayoutController {
         mHeadsUpManager = headsUpManager;
         mNotificationRoundnessManager = notificationRoundnessManager;
         mTunerService = tunerService;
+        mDeviceProvisionedController = deviceProvisionedController;
         mDynamicPrivacyController = dynamicPrivacyController;
         mConfigurationController = configurationController;
         mStatusBarStateController = statusBarStateController;
@@ -758,6 +785,9 @@ public class NotificationStackScrollLayoutController {
             mView.requestChildrenUpdate();
             return Unit.INSTANCE;
         });
+
+        // callback is invoked synchronously, updating mView immediately
+        mDeviceProvisionedController.addCallback(mDeviceProvisionedListener);
 
         if (mView.isAttachedToWindow()) {
             mOnAttachStateChangeListener.onViewAttachedToWindow(mView);
