@@ -63,7 +63,7 @@ public class UdfpsEnrollView extends UdfpsAnimationView {
 
     void updateSensorLocation(@NonNull FingerprintSensorPropertiesInternal sensorProps) {
         View fingerprintAccessibilityView = findViewById(R.id.udfps_enroll_accessibility_view);
-        final int sensorHeight = sensorProps.sensorRadius * 2;
+        final int sensorHeight = sensorProps.getLocation().sensorRadius * 2;
         final int sensorWidth = sensorHeight;
         ViewGroup.LayoutParams params = fingerprintAccessibilityView.getLayoutParams();
         params.width = sensorWidth;

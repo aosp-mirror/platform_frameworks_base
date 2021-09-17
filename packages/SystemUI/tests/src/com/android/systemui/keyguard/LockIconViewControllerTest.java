@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.PointF;
+import android.hardware.biometrics.SensorLocationInternal;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Vibrator;
 import android.testing.AndroidTestingRunner;
@@ -132,7 +133,8 @@ public class LockIconViewControllerTest extends SysuiTestCase {
                         /* component info */ new ArrayList<>(),
                         /* sensorType */ 3,
                         /* resetLockoutRequiresHwToken */ false,
-                        (int) udfpsLocation.x, (int) udfpsLocation.y, radius);
+                        List.of(new SensorLocationInternal("" /* displayId */,
+                                (int) udfpsLocation.x, (int) udfpsLocation.y, radius)));
         when(mAuthController.getUdfpsSensorLocation()).thenReturn(udfpsLocation);
         when(mAuthController.getUdfpsProps()).thenReturn(List.of(fpProps));
 
@@ -165,7 +167,8 @@ public class LockIconViewControllerTest extends SysuiTestCase {
                         /* component info */ new ArrayList<>(),
                         /* sensorType */ 3,
                         /* resetLockoutRequiresHwToken */ false,
-                        (int) udfpsLocation.x, (int) udfpsLocation.y, radius);
+                        List.of(new SensorLocationInternal("" /* displayId */,
+                                (int) udfpsLocation.x, (int) udfpsLocation.y, radius)));
         when(mAuthController.getUdfpsSensorLocation()).thenReturn(udfpsLocation);
         when(mAuthController.getUdfpsProps()).thenReturn(List.of(fpProps));
 
