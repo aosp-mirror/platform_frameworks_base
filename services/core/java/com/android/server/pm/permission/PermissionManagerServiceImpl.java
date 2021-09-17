@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,10 @@
 package com.android.server.pm.permission;
 
 import static android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY;
-import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
-import static android.Manifest.permission.RECORD_AUDIO;
-import static android.Manifest.permission.UPDATE_APP_OPS_STATS;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
-import static android.app.AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE;
-import static android.app.AppOpsManager.ATTRIBUTION_FLAGS_NONE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
-import static android.app.AppOpsManager.MODE_ERRORED;
 import static android.app.AppOpsManager.MODE_IGNORED;
-import static android.content.pm.ApplicationInfo.AUTO_REVOKE_DISALLOWED;
-import static android.content.pm.ApplicationInfo.AUTO_REVOKE_DISCOURAGED;
 import static android.content.pm.PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
@@ -71,23 +63,15 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
-import android.app.AppOpsManager.AttributionFlags;
 import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
-import android.content.AttributionSource;
-import android.content.AttributionSourceState;
 import android.content.Context;
-import android.content.PermissionChecker;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.PermissionGroupInfoFlags;
-import android.content.pm.PackageManager.PermissionInfoFlags;
-import android.content.pm.PackageManager.PermissionWhitelistFlags;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.SigningDetails;
@@ -104,7 +88,6 @@ import android.os.Build;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
@@ -116,12 +99,8 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.permission.IOnPermissionsChangeListener;
-import android.permission.IPermissionChecker;
-import android.permission.IPermissionManager;
-import android.permission.PermissionCheckerManager;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
-import android.permission.PermissionManagerInternal;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -136,14 +115,13 @@ import android.util.SparseBooleanArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.os.RoSystemProperties;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IntPair;
 import com.android.internal.util.Preconditions;
-import com.android.internal.util.function.TriFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
@@ -157,8 +135,6 @@ import com.android.server.pm.UserManagerService;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
-import com.android.server.pm.permission.PermissionManagerServiceInternal.HotwordDetectionServiceProvider;
-import com.android.server.pm.permission.PermissionManagerServiceInternal.OnRuntimePermissionStateChangedListener;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.policy.SoftRestrictedPermissionPolicy;
@@ -177,23 +153,18 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
-import java.util.WeakHashMap;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiFunction;
 
 /**
- * Manages all permissions and handles permissions related tasks.
+ * PermissionManagerServiceImpl.
  */
-public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
+public class PermissionManagerServiceImpl implements PermissionManagerServiceInterface {
+
     private static final String TAG = "PackageManager";
     private static final String LOG_TAG = PermissionManagerServiceImpl.class.getSimpleName();
 
@@ -234,10 +205,6 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
     /** If the permission of the value is granted, so is the key */
     private static final Map<String, String> FULLER_PERMISSION_MAP = new HashMap<>();
 
-    /** Map of IBinder -> Running AttributionSource */
-    private static final ConcurrentHashMap<IBinder, RegisteredAttribution>
-            sRunningAttributionSources = new ConcurrentHashMap<>();
-
     static {
         FULLER_PERMISSION_MAP.put(Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION);
@@ -272,12 +239,6 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
     /** Permission controller: User space permission management */
     private PermissionControllerManager mPermissionControllerManager;
 
-    /** Map of OneTimePermissionUserManagers keyed by userId */
-    @GuardedBy("mLock")
-    @NonNull
-    private final SparseArray<OneTimePermissionUserManager> mOneTimePermissionUserManagers =
-            new SparseArray<>();
-
     /** App ops manager */
     private final AppOpsManager mAppOpsManager;
 
@@ -303,9 +264,6 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
     @NonNull
     private final PermissionRegistry mRegistry = new PermissionRegistry();
 
-    @NonNull
-    private final AttributionSourceRegistry mAttributionSourceRegistry;
-
     @GuardedBy("mLock")
     @Nullable
     private ArraySet<String> mPrivappPermissionsViolations;
@@ -328,17 +286,12 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
 
     /** Listeners for permission state (granting and flags) changes */
     @GuardedBy("mLock")
-    final private ArrayList<OnRuntimePermissionStateChangedListener>
+    private final ArrayList<PermissionManagerServiceInternal
+            .OnRuntimePermissionStateChangedListener>
             mRuntimePermissionStateChangedListeners = new ArrayList<>();
-
-    @GuardedBy("mLock")
-    private CheckPermissionDelegate mCheckPermissionDelegate;
 
     @NonNull
     private final OnPermissionChangeListeners mOnPermissionChangeListeners;
-
-    @Nullable
-    private HotwordDetectionServiceProvider mHotwordDetectionServiceProvider;
 
     // TODO: Take a look at the methods defined in the callback.
     // The callback was initially created to support the split between permission
@@ -405,7 +358,7 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
         }
     };
 
-    PermissionManagerServiceImpl(@NonNull Context context,
+    public PermissionManagerServiceImpl(@NonNull Context context,
             @NonNull ArrayMap<String, FeatureInfo> availableFeatures) {
         // The package info cache is the cache for package and permission information.
         // Disable the package info and package permission caches locally but leave the
@@ -435,13 +388,12 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
         mSystemPermissions = systemConfig.getSystemPermissions();
         mGlobalGids = systemConfig.getGlobalGids();
         mOnPermissionChangeListeners = new OnPermissionChangeListeners(FgThread.get().getLooper());
-        mAttributionSourceRegistry = new AttributionSourceRegistry(context);
 
         // propagate permission configuration
         final ArrayMap<String, SystemConfig.PermissionEntry> permConfig =
                 SystemConfig.getInstance().getPermissions();
         synchronized (mLock) {
-            for (int i=0; i<permConfig.size(); i++) {
+            for (int i = 0; i < permConfig.size(); i++) {
                 final SystemConfig.PermissionEntry perm = permConfig.valueAt(i);
                 Permission bp = mRegistry.getPermission(perm.name);
                 if (bp == null) {
@@ -453,11 +405,6 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
                 }
             }
         }
-
-        PermissionManagerServiceInternalImpl localService =
-                new PermissionManagerServiceInternalImpl();
-        LocalServices.addService(PermissionManagerServiceInternal.class, localService);
-        LocalServices.addService(PermissionManagerInternal.class, localService);
     }
 
     @Override
@@ -470,40 +417,13 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
     }
 
     /**
-     * Creates and returns an initialized, internal service for use by other components.
-     * <p>
-     * The object returned is identical to the one returned by the LocalServices class using:
-     * {@code LocalServices.getService(PermissionManagerServiceInternal.class);}
-     * <p>
-     * NOTE: The external lock is temporary and should be removed. This needs to be a
-     * lock created by the permission manager itself.
-     */
-    @NonNull
-    public static PermissionManagerServiceInternal create(@NonNull Context context,
-            ArrayMap<String, FeatureInfo> availableFeatures) {
-        final PermissionManagerServiceInternal permMgrInt =
-                LocalServices.getService(PermissionManagerServiceInternal.class);
-        if (permMgrInt != null) {
-            return permMgrInt;
-        }
-        PermissionManagerServiceImpl permissionService =
-                (PermissionManagerServiceImpl) ServiceManager.getService("permissionmgr");
-        if (permissionService == null) {
-            permissionService = new PermissionManagerServiceImpl(context, availableFeatures);
-            ServiceManager.addService("permissionmgr", permissionService);
-            ServiceManager.addService("permission_checker", new PermissionCheckerService(context));
-        }
-        return LocalServices.getService(PermissionManagerServiceInternal.class);
-    }
-
-    /**
      * This method should typically only be used when granting or revoking
      * permissions, since the app may immediately restart after this call.
      * <p>
      * If you're doing surgery on app code/data, use {@link PackageFreezer} to
      * guard your work against the app being relaunched.
      */
-    public static void killUid(int appId, int userId, String reason) {
+    private static void killUid(int appId, int userId, String reason) {
         final long identity = Binder.clearCallingIdentity();
         try {
             IActivityManager am = ActivityManager.getService();
@@ -533,11 +453,11 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
 
     @Override
     @NonNull
-    public ParceledListSlice<PermissionGroupInfo> getAllPermissionGroups(
-            @PermissionGroupInfoFlags int flags) {
-        final int callingUid = getCallingUid();
+    public List<PermissionGroupInfo> getAllPermissionGroups(
+            @PackageManager.PermissionGroupInfoFlags int flags) {
+        final int callingUid = Binder.getCallingUid();
         if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
-            return ParceledListSlice.emptyList();
+            return Collections.emptyList();
         }
 
         final List<PermissionGroupInfo> out = new ArrayList<>();
@@ -550,15 +470,14 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
         final int callingUserId = UserHandle.getUserId(callingUid);
         out.removeIf(it -> mPackageManagerInt.filterAppAccess(it.packageName, callingUid,
                 callingUserId));
-        return new ParceledListSlice<>(out);
+        return out;
     }
-
 
     @Override
     @Nullable
     public PermissionGroupInfo getPermissionGroupInfo(String groupName,
-            @PermissionGroupInfoFlags int flags) {
-        final int callingUid = getCallingUid();
+            @PackageManager.PermissionGroupInfoFlags int flags) {
+        final int callingUid = Binder.getCallingUid();
         if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
             return null;
         }
@@ -582,12 +501,11 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
         return permissionGroupInfo;
     }
 
-
     @Override
     @Nullable
     public PermissionInfo getPermissionInfo(@NonNull String permName, @NonNull String opPackageName,
-            @PermissionInfoFlags int flags) {
-        final int callingUid = getCallingUid();
+            @PackageManager.PermissionInfoFlags int flags) {
+        final int callingUid = Binder.getCallingUid();
         if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
             return null;
         }
@@ -628,9 +546,9 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
 
     @Override
     @Nullable
-    public ParceledListSlice<PermissionInfo> queryPermissionsByGroup(String groupName,
-            @PermissionInfoFlags int flags) {
-        final int callingUid = getCallingUid();
+    public List<PermissionInfo> queryPermissionsByGroup(String groupName,
+            @PackageManager.PermissionInfoFlags int flags) {
+        final int callingUid = Binder.getCallingUid();
         if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
             return null;
         }
@@ -650,12 +568,12 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
         final int callingUserId = UserHandle.getUserId(callingUid);
         out.removeIf(it -> mPackageManagerInt.filterAppAccess(it.packageName, callingUid,
                 callingUserId));
-        return new ParceledListSlice<>(out);
+        return out;
     }
 
     @Override
     public boolean addPermission(PermissionInfo info, boolean async) {
-        final int callingUid = getCallingUid();
+        final int callingUid = Binder.getCallingUid();
         if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
             throw new SecurityException("Instant apps can't add permissions");
         }
@@ -689,7 +607,7 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
 
     @Override
     public void removePermission(String permName) {
-        final int callingUid = getCallingUid();
+        final int callingUid = Binder.getCallingUid();
         if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
             throw new SecurityException("Instant applications don't have access to this method");
         }
@@ -711,7 +629,7 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
 
     @Override
     public int getPermissionFlags(String packageName, String permName, int userId) {
-        final int callingUid = getCallingUid();
+        final int callingUid = Binder.getCallingUid();
         return getPermissionFlagsInternal(packageName, permName, callingUid, userId);
     }
 
@@ -753,7 +671,7 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
     @Override
     public void updatePermissionFlags(String packageName, String permName, int flagMask,
             int flagValues, boolean checkAdjustPolicyFlagPermission, int userId) {
-        final int callingUid = getCallingUid();
+        final int callingUid = Binder.getCallingUid();
         boolean overridePolicy = false;
 
         if (callingUid != Process.SYSTEM_UID && callingUid != Process.ROOT_UID) {
@@ -906,7 +824,7 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
     @Override
     public void updatePermissionFlagsForAllApps(int flagMask, int flagValues,
             final int userId) {
-        final int callingUid = getCallingUid();
+        final int callingUid = Binder.getCallingUid();
         if (!mUserManagerInt.exists(userId)) {
             return;
         }
@@ -945,27 +863,12 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
         }
     }
 
-    private int checkPermission(String pkgName, String permName, @UserIdInt int userId) {
-        // Not using Objects.requireNonNull() here for compatibility reasons.
-        if (pkgName == null || permName == null) {
-            return PackageManager.PERMISSION_DENIED;
-        }
+    @Override
+    public int checkPermission(String pkgName, String permName, int userId) {
         if (!mUserManagerInt.exists(userId)) {
             return PackageManager.PERMISSION_DENIED;
         }
 
-        final CheckPermissionDelegate checkPermissionDelegate;
-        synchronized (mLock) {
-            checkPermissionDelegate = mCheckPermissionDelegate;
-        }
-        if (checkPermissionDelegate == null) {
-            return checkPermissionImpl(pkgName, permName, userId);
-        }
-        return checkPermissionDelegate.checkPermission(pkgName, permName, userId,
-                this::checkPermissionImpl);
-    }
-
-    private int checkPermissionImpl(String pkgName, String permName, int userId) {
         final AndroidPackage pkg = mPackageManagerInt.getPackage(pkgName);
         if (pkg == null) {
             return PackageManager.PERMISSION_DENIED;
@@ -975,7 +878,7 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
 
     private int checkPermissionInternal(@NonNull AndroidPackage pkg, boolean isPackageExplicit,
             @NonNull String permissionName, @UserIdInt int userId) {
-        final int callingUid = getCallingUid();
+        final int callingUid = Binder.getCallingUid();
         if (isPackageExplicit || pkg.getSharedUserId() == null) {
             if (mPackageManagerInt.filterAppAccess(pkg, callingUid, userId)) {
                 return PackageManager.PERMISSION_DENIED;
@@ -1026,28 +929,13 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
         return true;
     }
 
-    private int checkUidPermission(int uid, String permName) {
-        // Not using Objects.requireNonNull() here for compatibility reasons.
-        if (permName == null) {
-            return PackageManager.PERMISSION_DENIED;
-        }
+    @Override
+    public int checkUidPermission(int uid, String permName) {
         final int userId = UserHandle.getUserId(uid);
         if (!mUserManagerInt.exists(userId)) {
             return PackageManager.PERMISSION_DENIED;
         }
 
-        final CheckPermissionDelegate checkPermissionDelegate;
-        synchronized (mLock) {
-            checkPermissionDelegate = mCheckPermissionDelegate;
-        }
-        if (checkPermissionDelegate == null)  {
-            return checkUidPermissionImpl(uid, permName);
-        }
-        return checkPermissionDelegate.checkUidPermission(uid, permName,
-                this::checkUidPermissionImpl);
-    }
-
-    private int checkUidPermissionImpl(int uid, String permName) {
         final AndroidPackage pkg = mPackageManagerInt.getPackage(uid);
         return checkUidPermissionInternal(pkg, uid, permName);
     }
@@ -1108,7 +996,7 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
     @Nullable
     @Override
     public List<String> getAllowlistedRestrictedPermissions(@NonNull String packageName,
-            @PermissionWhitelistFlags int flags, @UserIdInt int userId) {
+            @PackageManager.PermissionWhitelistFlags int flags, @UserIdInt int userId) {
         Objects.requireNonNull(packageName);
         Preconditions.checkFlagsArgument(flags,
                 PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE
@@ -1162,7 +1050,7 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
 
     @Nullable
     private List<String> getAllowlistedRestrictedPermissionsInternal(@NonNull AndroidPackage pkg,
-            @PermissionWhitelistFlags int flags, @UserIdInt int userId) {
+            @PackageManager.PermissionWhitelistFlags int flags, @UserIdInt int userId) {
         synchronized (mLock) {
             final UidPermissionState uidState = getUidStateLocked(pkg, userId);
             if (uidState == null) {
@@ -1203,7 +1091,7 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
 
     @Override
     public boolean addAllowlistedRestrictedPermission(@NonNull String packageName,
-            @NonNull String permName, @PermissionWhitelistFlags int flags,
+            @NonNull String permName, @PackageManager.PermissionWhitelistFlags int flags,
             @UserIdInt int userId) {
         // Other argument checks are done in get/setAllowlistedRestrictedPermissions
         Objects.requireNonNull(permName);
@@ -1240,7 +1128,7 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
                     && bp.isImmutablyRestricted();
         }
 
-        final int callingUid = getCallingUid();
+        final int callingUid = Binder.getCallingUid();
         final int callingUserId = UserHandle.getUserId(callingUid);
         if (mPackageManagerInt.filterAppAccess(permissionPackageName, callingUid, callingUserId)) {
             EventLog.writeEvent(0x534e4554, "186404356", callingUid, permName);
@@ -1259,7 +1147,7 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
 
     @Override
     public boolean removeAllowlistedRestrictedPermission(@NonNull String packageName,
-            @NonNull String permName, @PermissionWhitelistFlags int flags,
+            @NonNull String permName, @PackageManager.PermissionWhitelistFlags int flags,
             @UserIdInt int userId) {
         // Other argument checks are done in get/setAllowlistedRestrictedPermissions
         Objects.requireNonNull(permName);
@@ -1278,7 +1166,7 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
     }
 
     private boolean setAllowlistedRestrictedPermissions(@NonNull String packageName,
-            @Nullable List<String> permissions, @PermissionWhitelistFlags int flags,
+            @Nullable List<String> permissions, @PackageManager.PermissionWhitelistFlags int flags,
             @UserIdInt int userId) {
         Objects.requireNonNull(packageName);
         Preconditions.checkFlagsArgument(flags,
@@ -1357,85 +1245,6 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
         }
 
         return true;
-    }
-
-    @Override
-    public boolean setAutoRevokeExempted(
-            @NonNull String packageName, boolean exempted, int userId) {
-        Objects.requireNonNull(packageName);
-
-        final AndroidPackage pkg = mPackageManagerInt.getPackage(packageName);
-        final int callingUid = Binder.getCallingUid();
-
-        if (!checkAutoRevokeAccess(pkg, callingUid)) {
-            return false;
-        }
-
-        return setAutoRevokeExemptedInternal(pkg, exempted, userId);
-    }
-
-    private boolean setAutoRevokeExemptedInternal(@NonNull AndroidPackage pkg, boolean exempted,
-            @UserIdInt int userId) {
-        final int packageUid = UserHandle.getUid(userId, pkg.getUid());
-        if (mAppOpsManager.checkOpNoThrow(AppOpsManager.OP_AUTO_REVOKE_MANAGED_BY_INSTALLER,
-                packageUid, pkg.getPackageName()) != MODE_ALLOWED) {
-            // Allowlist user set - don't override
-            return false;
-        }
-
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            mAppOpsManager.setMode(AppOpsManager.OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED, packageUid,
-                    pkg.getPackageName(), exempted ? MODE_IGNORED : MODE_ALLOWED);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-        return true;
-    }
-
-    private boolean checkAutoRevokeAccess(AndroidPackage pkg, int callingUid) {
-        if (pkg == null) {
-            return false;
-        }
-
-        final boolean isCallerPrivileged = mContext.checkCallingOrSelfPermission(
-                Manifest.permission.WHITELIST_AUTO_REVOKE_PERMISSIONS)
-                == PackageManager.PERMISSION_GRANTED;
-        final boolean isCallerInstallerOnRecord =
-                mPackageManagerInt.isCallerInstallerOfRecord(pkg, callingUid);
-
-        if (!isCallerPrivileged && !isCallerInstallerOnRecord) {
-            throw new SecurityException("Caller must either hold "
-                    + Manifest.permission.WHITELIST_AUTO_REVOKE_PERMISSIONS
-                    + " or be the installer on record");
-        }
-        return true;
-    }
-
-    @Override
-    public boolean isAutoRevokeExempted(@NonNull String packageName, int userId) {
-        Objects.requireNonNull(packageName);
-
-        final AndroidPackage pkg = mPackageManagerInt.getPackage(packageName);
-        final int callingUid = Binder.getCallingUid();
-        if (mPackageManagerInt.filterAppAccess(packageName, callingUid, userId)) {
-            return false;
-        }
-
-        if (!checkAutoRevokeAccess(pkg, callingUid)) {
-            return false;
-        }
-
-        final int packageUid = UserHandle.getUid(userId, pkg.getUid());
-
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            return mAppOpsManager.checkOpNoThrow(
-                    AppOpsManager.OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED, packageUid, packageName)
-                    == MODE_IGNORED;
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
     }
 
     @Override
@@ -1593,7 +1402,8 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
         }
 
         if (isRuntimePermission) {
-            logPermission(MetricsEvent.ACTION_PERMISSION_GRANTED, permName, packageName);
+            logPermission(MetricsProto.MetricsEvent.ACTION_PERMISSION_GRANTED,
+                    permName, packageName);
         }
 
         final int uid = UserHandle.getUid(userId, pkg.getUid());
@@ -1732,7 +1542,8 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
         }
 
         if (isRuntimePermission) {
-            logPermission(MetricsEvent.ACTION_PERMISSION_REVOKED, permName, packageName);
+            logPermission(MetricsProto.MetricsEvent.ACTION_PERMISSION_REVOKED,
+                    permName, packageName);
         }
 
         if (callback != null) {
@@ -1997,8 +1808,7 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
             return false;
         }
 
-        if (checkPermission(packageName, permName, userId)
-                == PackageManager.PERMISSION_GRANTED) {
+        if (checkPermission(packageName, permName, userId) == PackageManager.PERMISSION_GRANTED) {
             return false;
         }
 
@@ -2082,14 +1892,16 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
      * @return The state as a xml file
      */
     @Nullable
-    private byte[] backupRuntimePermissions(@UserIdInt int userId) {
+    @Override
+    public byte[] backupRuntimePermissions(@UserIdInt int userId) {
+        Preconditions.checkArgumentNonNegative(userId, "userId");
         CompletableFuture<byte[]> backup = new CompletableFuture<>();
         mPermissionControllerManager.getRuntimePermissionBackup(UserHandle.of(userId),
                 mContext.getMainExecutor(), backup::complete);
 
         try {
             return backup.get(BACKUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | ExecutionException  | TimeoutException e) {
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
             Slog.e(TAG, "Cannot create permission backup for user " + userId, e);
             return null;
         }
@@ -2104,7 +1916,10 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
      * @param backup The state as an xml file
      * @param userId The user ID the data should be restored for
      */
-    private void restoreRuntimePermissions(@NonNull byte[] backup, @UserIdInt int userId) {
+    @Override
+    public void restoreRuntimePermissions(@NonNull byte[] backup, @UserIdInt int userId) {
+        Objects.requireNonNull(backup, "backup");
+        Preconditions.checkArgumentNonNegative(userId, "userId");
         synchronized (mLock) {
             mHasNoDelayedPermBackup.delete(userId);
         }
@@ -2122,8 +1937,11 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
      *
      * @see #restoreRuntimePermissions
      */
-    private void restoreDelayedRuntimePermissions(@NonNull String packageName,
+    @Override
+    public void restoreDelayedRuntimePermissions(@NonNull String packageName,
             @UserIdInt int userId) {
+        Objects.requireNonNull(packageName, "packageName");
+        Preconditions.checkArgumentNonNegative(userId, "userId");
         synchronized (mLock) {
             if (mHasNoDelayedPermBackup.get(userId, false)) {
                 return;
@@ -2140,15 +1958,17 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
                 });
     }
 
-    private void addOnRuntimePermissionStateChangedListener(@NonNull
-            OnRuntimePermissionStateChangedListener listener) {
+    @Override
+    public void addOnRuntimePermissionStateChangedListener(
+            PermissionManagerServiceInternal.OnRuntimePermissionStateChangedListener listener) {
         synchronized (mLock) {
             mRuntimePermissionStateChangedListeners.add(listener);
         }
     }
 
-    private void removeOnRuntimePermissionStateChangedListener(@NonNull
-            OnRuntimePermissionStateChangedListener listener) {
+    @Override
+    public void removeOnRuntimePermissionStateChangedListener(
+            PermissionManagerServiceInternal.OnRuntimePermissionStateChangedListener listener) {
         synchronized (mLock) {
             mRuntimePermissionStateChangedListeners.remove(listener);
         }
@@ -2156,14 +1976,15 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
 
     private void notifyRuntimePermissionStateChanged(@NonNull String packageName,
             @UserIdInt int userId) {
-        FgThread.getHandler().sendMessage(PooledLambda.obtainMessage
-                (PermissionManagerServiceImpl::doNotifyRuntimePermissionStateChanged,
-                        PermissionManagerServiceImpl.this, packageName, userId));
+        FgThread.getHandler().sendMessage(PooledLambda.obtainMessage(
+                PermissionManagerServiceImpl::doNotifyRuntimePermissionStateChanged,
+                PermissionManagerServiceImpl.this, packageName, userId));
     }
 
     private void doNotifyRuntimePermissionStateChanged(@NonNull String packageName,
             @UserIdInt int userId) {
-        final ArrayList<OnRuntimePermissionStateChangedListener> listeners;
+        final ArrayList<PermissionManagerServiceInternal.OnRuntimePermissionStateChangedListener>
+                listeners;
         synchronized (mLock) {
             if (mRuntimePermissionStateChangedListeners.isEmpty()) {
                 return;
@@ -2174,42 +1995,6 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
         for (int i = 0; i < listenerCount; i++) {
             listeners.get(i).onRuntimePermissionStateChanged(packageName, userId);
         }
-    }
-
-    private void startShellPermissionIdentityDelegationInternal(int uid,
-            @NonNull String packageName, @Nullable List<String> permissionNames) {
-        synchronized (mLock) {
-            final CheckPermissionDelegate oldDelegate = mCheckPermissionDelegate;
-            if (oldDelegate != null && oldDelegate.getDelegatedUid() != uid) {
-                throw new SecurityException(
-                        "Shell can delegate permissions only to one UID at a time");
-            }
-            final ShellDelegate delegate = new ShellDelegate(uid, packageName, permissionNames);
-            setCheckPermissionDelegateLocked(delegate);
-        }
-    }
-
-    private void stopShellPermissionIdentityDelegationInternal() {
-        synchronized (mLock) {
-            setCheckPermissionDelegateLocked(null);
-        }
-    }
-
-    @Nullable
-    private List<String> getDelegatedShellPermissionsInternal() {
-        synchronized (mLock) {
-            if (mCheckPermissionDelegate == null) {
-                return Collections.EMPTY_LIST;
-            }
-            return mCheckPermissionDelegate.getDelegatedPermissionNames();
-        }
-    }
-
-    private void setCheckPermissionDelegateLocked(@Nullable CheckPermissionDelegate delegate) {
-        if (delegate != null || mCheckPermissionDelegate != null) {
-            PackageManager.invalidatePackageInfoCache();
-        }
-        mCheckPermissionDelegate = delegate;
     }
 
     /**
@@ -2272,8 +2057,8 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
     private void revokeRuntimePermissionsIfGroupChangedInternal(@NonNull AndroidPackage newPackage,
             @NonNull AndroidPackage oldPackage) {
         final int numOldPackagePermissions = ArrayUtils.size(oldPackage.getPermissions());
-        final ArrayMap<String, String> oldPermissionNameToGroupName
-                = new ArrayMap<>(numOldPackagePermissions);
+        final ArrayMap<String, String> oldPermissionNameToGroupName =
+                new ArrayMap<>(numOldPackagePermissions);
 
         for (int i = 0; i < numOldPackagePermissions; i++) {
             final ParsedPermission permission = oldPackage.getPermissions().get(i);
@@ -2306,8 +2091,8 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
                     mPackageManagerInt.forEachPackage(pkg -> {
                         final String packageName = pkg.getPackageName();
                         for (final int userId : userIds) {
-                            final int permissionState = checkPermission(packageName, permissionName,
-                                    userId);
+                            final int permissionState =
+                                    checkPermission(packageName, permissionName, userId);
                             if (permissionState == PackageManager.PERMISSION_GRANTED) {
                                 EventLog.writeEvent(0x534e4554, "72710897",
                                         newPackage.getUid(),
@@ -2362,7 +2147,7 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
                     return;
                 }
                 for (final int userId : userIds) {
-                    final int permissionState = checkPermissionImpl(packageName, permName,
+                    final int permissionState = checkPermission(packageName, permName,
                             userId);
                     final int flags = getPermissionFlags(packageName, permName, userId);
                     final int flagMask = FLAG_PERMISSION_SYSTEM_FIXED
@@ -2502,9 +2287,9 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
 
     private void removeAllPermissionsInternal(@NonNull AndroidPackage pkg) {
         synchronized (mLock) {
-            int N = ArrayUtils.size(pkg.getPermissions());
+            int n = ArrayUtils.size(pkg.getPermissions());
             StringBuilder r = null;
-            for (int i=0; i<N; i++) {
+            for (int i = 0; i < n; i++) {
                 ParsedPermission p = pkg.getPermissions().get(i);
                 Permission bp = mRegistry.getPermission(p.getName());
                 if (bp == null) {
@@ -2530,9 +2315,9 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
                 if (DEBUG_REMOVE) Log.d(TAG, "  Permissions: " + r);
             }
 
-            N = pkg.getRequestedPermissions().size();
+            n = pkg.getRequestedPermissions().size();
             r = null;
-            for (int i=0; i<N; i++) {
+            for (int i = 0; i < n; i++) {
                 final String permissionName = pkg.getRequestedPermissions().get(i);
                 final Permission permission = mRegistry.getPermission(permissionName);
                 if (permission != null && permission.isAppOp()) {
@@ -2546,7 +2331,9 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
         }
     }
 
-    private void onUserRemoved(@UserIdInt int userId) {
+    @Override
+    public void onUserRemoved(@UserIdInt int userId) {
+        Preconditions.checkArgumentNonNegative(userId, "userId");
         synchronized (mLock) {
             mState.removeUserState(userId);
         }
@@ -3104,8 +2891,9 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
      *
      * @return The updated value of the {@code updatedUserIds} parameter
      */
+    @NonNull
     @GuardedBy("mLock")
-    private @NonNull int[] revokePermissionsNoLongerImplicitLocked(@NonNull UidPermissionState ps,
+    private int[] revokePermissionsNoLongerImplicitLocked(@NonNull UidPermissionState ps,
             @NonNull AndroidPackage pkg, int userId, @NonNull int[] updatedUserIds) {
         String pkgName = pkg.getPackageName();
         boolean supportsRuntimePermissions = pkg.getTargetSdkVersion()
@@ -3243,8 +3031,9 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
      *
      * @return  List of users for which the permission state has been changed
      */
+    @NonNull
     @GuardedBy("mLock")
-    private @NonNull int[] setInitialGrantForNewImplicitPermissionsLocked(
+    private int[] setInitialGrantForNewImplicitPermissionsLocked(
             @NonNull UidPermissionState origPs, @NonNull UidPermissionState ps,
             @NonNull AndroidPackage pkg, @NonNull ArraySet<String> newImplicitPermissions,
             @UserIdInt int userId, @NonNull int[] updatedUserIds) {
@@ -3354,102 +3143,6 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
     @NonNull
     private List<PermissionManager.SplitPermissionInfo> getSplitPermissionInfos() {
         return SystemConfig.getInstance().getSplitPermissions();
-    }
-
-    @NonNull
-    private OneTimePermissionUserManager getOneTimePermissionUserManager(@UserIdInt int userId) {
-        OneTimePermissionUserManager oneTimePermissionUserManager;
-        synchronized (mLock) {
-            oneTimePermissionUserManager = mOneTimePermissionUserManagers.get(userId);
-            if (oneTimePermissionUserManager != null) {
-                return oneTimePermissionUserManager;
-            }
-        }
-        // We cannot create a new instance of OneTimePermissionUserManager while holding our own
-        // lock, which may lead to a deadlock with the package manager lock. So we do it in a
-        // retry-like way, and just discard the newly created instance if someone else managed to be
-        // a little bit faster than us when we dropped our own lock.
-        final OneTimePermissionUserManager newOneTimePermissionUserManager =
-                new OneTimePermissionUserManager(mContext.createContextAsUser(UserHandle.of(userId),
-                        /*flags*/ 0));
-        synchronized (mLock) {
-            oneTimePermissionUserManager = mOneTimePermissionUserManagers.get(userId);
-            if (oneTimePermissionUserManager != null) {
-                return oneTimePermissionUserManager;
-            }
-            oneTimePermissionUserManager = newOneTimePermissionUserManager;
-            mOneTimePermissionUserManagers.put(userId, oneTimePermissionUserManager);
-        }
-        oneTimePermissionUserManager.registerUninstallListener();
-        return oneTimePermissionUserManager;
-    }
-
-    @Override
-    public void startOneTimePermissionSession(String packageName, @UserIdInt int userId,
-            long timeoutMillis, int importanceToResetTimer, int importanceToKeepSessionAlive) {
-        mContext.enforceCallingPermission(Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS,
-                "Must hold " + Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS
-                        + " to register permissions as one time.");
-        Objects.requireNonNull(packageName);
-
-        final long token = Binder.clearCallingIdentity();
-        try {
-            getOneTimePermissionUserManager(userId).startPackageOneTimeSession(packageName,
-                    timeoutMillis, importanceToResetTimer, importanceToKeepSessionAlive);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
-    @Override
-    public void stopOneTimePermissionSession(String packageName, @UserIdInt int userId) {
-        mContext.enforceCallingPermission(Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS,
-                "Must hold " + Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS
-                        + " to remove permissions as one time.");
-        Objects.requireNonNull(packageName);
-
-        final long token = Binder.clearCallingIdentity();
-        try {
-            getOneTimePermissionUserManager(userId).stopPackageOneTimeSession(packageName);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
-    @Override
-    public void registerAttributionSource(@NonNull AttributionSourceState source) {
-        mAttributionSourceRegistry
-                .registerAttributionSource(new AttributionSource(source));
-    }
-
-    @Override
-    public boolean isRegisteredAttributionSource(@NonNull AttributionSourceState source) {
-        return mAttributionSourceRegistry
-                .isRegisteredAttributionSource(new AttributionSource(source));
-    }
-
-    @Override
-    public List<String> getAutoRevokeExemptionRequestedPackages(int userId) {
-        return getPackagesWithAutoRevokePolicy(AUTO_REVOKE_DISCOURAGED, userId);
-    }
-
-    @Override
-    public List<String> getAutoRevokeExemptionGrantedPackages(int userId) {
-        return getPackagesWithAutoRevokePolicy(AUTO_REVOKE_DISALLOWED, userId);
-    }
-
-    @NonNull
-    private List<String> getPackagesWithAutoRevokePolicy(int autoRevokePolicy, int userId) {
-        mContext.enforceCallingPermission(Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
-                "Must hold " + Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY);
-
-        List<String> result = new ArrayList<>();
-        mPackageManagerInt.forEachInstalledPackage(pkg -> {
-            if (pkg.getAutoRevokePermissions() == autoRevokePolicy) {
-                result.add(pkg.getPackageName());
-            }
-        }, userId);
-        return result;
     }
 
     private static boolean isCompatPlatformPermissionForPackage(String perm, AndroidPackage pkg) {
@@ -3869,7 +3562,8 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
     }
 
     private void setAllowlistedRestrictedPermissionsInternal(@NonNull AndroidPackage pkg,
-            @Nullable List<String> permissions, @PermissionWhitelistFlags int allowlistFlags,
+            @Nullable List<String> permissions,
+            @PackageManager.PermissionWhitelistFlags int allowlistFlags,
             @UserIdInt int userId) {
         ArraySet<String> oldGrantedRestrictedPermissions = null;
         boolean updatePermissions = false;
@@ -4391,7 +4085,7 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
             return;
         }
 
-        if (checkPermissionImpl(pName, permissionName, userId)
+        if (checkPermission(pName, permissionName, userId)
                 == PackageManager.PERMISSION_GRANTED) {
             try {
                 revokeRuntimePermissionInternal(
@@ -4410,6 +4104,7 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
             }
         }
     }
+
     /**
      * Update which app owns a permission trees.
      *
@@ -4609,7 +4304,8 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
         }
     }
 
-    private void systemReady() {
+    @Override
+    public void onSystemReady() {
         // Now that we've scanned all packages, and granted any default
         // permissions, ensure permissions are updated. Beware of dragons if you
         // try optimizing this.
@@ -4673,7 +4369,7 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
     private void logPermission(int action, @NonNull String name, @NonNull String packageName) {
         final LogMaker log = new LogMaker(action);
         log.setPackageName(packageName);
-        log.addTaggedData(MetricsEvent.FIELD_PERMISSION, name);
+        log.addTaggedData(MetricsProto.MetricsEvent.FIELD_PERMISSION, name);
 
         mMetricsLogger.write(log);
     }
@@ -4714,7 +4410,8 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
         }
     }
 
-    private void readLegacyPermissionState() {
+    @Override
+    public void readLegacyPermissionStateTEMP() {
         final int[] userIds = getAllUserIds();
         mPackageManagerInt.forEachPackageSetting(ps -> {
             final int appId = ps.getAppId();
@@ -4751,7 +4448,8 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
         }
     }
 
-    private void writeLegacyPermissionState() {
+    @Override
+    public void writeLegacyPermissionStateTEMP() {
         final int[] userIds;
         synchronized (mLock) {
             userIds = mState.getUserIds();
@@ -4798,7 +4496,9 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
         });
     }
 
-    private void readLegacyPermissions(@NonNull LegacyPermissionSettings legacyPermissionSettings) {
+    @Override
+    public void readLegacyPermissionsTEMP(
+            @NonNull LegacyPermissionSettings legacyPermissionSettings) {
         for (int readPermissionOrPermissionTree = 0; readPermissionOrPermissionTree < 2;
                 readPermissionOrPermissionTree++) {
             final List<LegacyPermission> legacyPermissions = readPermissionOrPermissionTree == 0
@@ -4832,7 +4532,8 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
         }
     }
 
-    private void writeLegacyPermissions(
+    @Override
+    public void writeLegacyPermissionsTEMP(
             @NonNull LegacyPermissionSettings legacyPermissionSettings) {
         for (int writePermissionOrPermissionTree = 0; writePermissionOrPermissionTree < 2;
                 writePermissionOrPermissionTree++) {
@@ -4986,6 +4687,9 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
             final int autoRevokePermissionsMode = params.getAutoRevokePermissionsMode();
             if (autoRevokePermissionsMode == AppOpsManager.MODE_ALLOWED
                     || autoRevokePermissionsMode == AppOpsManager.MODE_IGNORED) {
+                // TODO: theianchen Bug: 182523293
+                // We should move this portion of code that's calling
+                // setAutoRevokeExemptedInternal() into the old PMS
                 setAutoRevokeExemptedInternal(pkg,
                         autoRevokePermissionsMode == AppOpsManager.MODE_IGNORED, userId);
             }
@@ -4995,7 +4699,7 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
 
     private void addAllowlistedRestrictedPermissionsInternal(@NonNull AndroidPackage pkg,
             @NonNull List<String> allowlistedRestrictedPermissions,
-            @PermissionWhitelistFlags int flags, @UserIdInt int userId) {
+            @PackageManager.PermissionWhitelistFlags int flags, @UserIdInt int userId) {
         List<String> permissions = getAllowlistedRestrictedPermissionsInternal(pkg, flags, userId);
         if (permissions != null) {
             ArraySet<String> permissionSet = new ArraySet<>(permissions);
@@ -5049,7 +4753,8 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
     }
 
     @NonNull
-    private List<LegacyPermission> getLegacyPermissions() {
+    @Override
+    public List<LegacyPermission> getLegacyPermissions() {
         synchronized (mLock) {
             final List<LegacyPermission> legacyPermissions = new ArrayList<>();
             for (final Permission permission : mRegistry.getPermissions()) {
@@ -5062,8 +4767,8 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
         }
     }
 
-    @NonNull
-    private Map<String, Set<String>> getAllAppOpPermissionPackages() {
+    @Override
+    public Map<String, Set<String>> getAllAppOpPermissionPackages() {
         synchronized (mLock) {
             final ArrayMap<String, ArraySet<String>> appOpPermissionPackages =
                     mRegistry.getAllAppOpPermissionPackages();
@@ -5079,7 +4784,8 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
     }
 
     @NonNull
-    private LegacyPermissionState getLegacyPermissionState(@AppIdInt int appId) {
+    @Override
+    public LegacyPermissionState getLegacyPermissionState(@AppIdInt int appId) {
         final LegacyPermissionState legacyState = new LegacyPermissionState();
         synchronized (mLock) {
             final int[] userIds = mState.getUserIds();
@@ -5108,7 +4814,8 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
     }
 
     @NonNull
-    private int[] getGidsForUid(int uid) {
+    @Override
+    public int[] getGidsForUid(int uid) {
         final int appId = UserHandle.getAppId(uid);
         final int userId = UserHandle.getUserId(uid);
         synchronized (mLock) {
@@ -5122,261 +4829,155 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
         }
     }
 
-    private class PermissionManagerServiceInternalImpl implements PermissionManagerServiceInternal {
-        @Override
-        public int checkPermission(@NonNull String packageName, @NonNull String permissionName,
-                @UserIdInt int userId) {
-            return PermissionManagerServiceImpl.this.checkPermission(packageName, permissionName,
-                    userId);
-        }
+    @Override
+    public boolean isPermissionsReviewRequired(@NonNull String packageName,
+            @UserIdInt int userId) {
+        Objects.requireNonNull(packageName, "packageName");
+        // TODO(b/173235285): Some caller may pass USER_ALL as userId.
+        //Preconditions.checkArgumentNonnegative(userId, "userId");
+        return isPermissionsReviewRequiredInternal(packageName, userId);
+    }
 
-        @Override
-        public int checkUidPermission(int uid, @NonNull String permissionName) {
-            return PermissionManagerServiceImpl.this.checkUidPermission(uid, permissionName);
-        }
+    @NonNull
+    @Override
+    public Set<String> getGrantedPermissions(@NonNull String packageName,
+            @UserIdInt int userId) {
+        Objects.requireNonNull(packageName, "packageName");
+        Preconditions.checkArgumentNonNegative(userId, "userId");
+        return getGrantedPermissionsInternal(packageName, userId);
+    }
 
-        @Override
-        public void onSystemReady() {
-            PermissionManagerServiceImpl.this.systemReady();
-        }
+    @NonNull
+    @Override
+    public int[] getPermissionGids(@NonNull String permissionName, @UserIdInt int userId) {
+        Objects.requireNonNull(permissionName, "permissionName");
+        Preconditions.checkArgumentNonNegative(userId, "userId");
+        return getPermissionGidsInternal(permissionName, userId);
+    }
 
-        @Override
-        public boolean isPermissionsReviewRequired(@NonNull String packageName,
-                @UserIdInt int userId) {
-            Objects.requireNonNull(packageName, "packageName");
-            // TODO(b/173235285): Some caller may pass USER_ALL as userId.
-            //Preconditions.checkArgumentNonnegative(userId, "userId");
-            return isPermissionsReviewRequiredInternal(packageName, userId);
-        }
+    @NonNull
+    @Override
+    public String[] getAppOpPermissionPackages(@NonNull String permissionName) {
+        Objects.requireNonNull(permissionName, "permissionName");
+        return PermissionManagerServiceImpl.this.getAppOpPermissionPackagesInternal(permissionName);
+    }
 
-        @Override
-        public void readLegacyPermissionStateTEMP() {
-            PermissionManagerServiceImpl.this.readLegacyPermissionState();
-        }
-        @Override
-        public void writeLegacyPermissionStateTEMP() {
-            PermissionManagerServiceImpl.this.writeLegacyPermissionState();
-        }
-        @Override
-        public void onUserRemoved(@UserIdInt int userId) {
-            Preconditions.checkArgumentNonNegative(userId, "userId");
-            PermissionManagerServiceImpl.this.onUserRemoved(userId);
-        }
-        @NonNull
-        @Override
-        public Set<String> getGrantedPermissions(@NonNull String packageName,
-                @UserIdInt int userId) {
-            Objects.requireNonNull(packageName, "packageName");
-            Preconditions.checkArgumentNonNegative(userId, "userId");
-            return getGrantedPermissionsInternal(packageName, userId);
-        }
-        @NonNull
-        @Override
-        public int[] getPermissionGids(@NonNull String permissionName, @UserIdInt int userId) {
-            Objects.requireNonNull(permissionName, "permissionName");
-            Preconditions.checkArgumentNonNegative(userId, "userId");
-            return getPermissionGidsInternal(permissionName, userId);
-        }
-        @NonNull
-        @Override
-        public String[] getAppOpPermissionPackages(@NonNull String permissionName) {
-            Objects.requireNonNull(permissionName, "permissionName");
-            return PermissionManagerServiceImpl.this.getAppOpPermissionPackagesInternal(permissionName);
-        }
-        @Override
-        public void onStorageVolumeMounted(@Nullable String volumeUuid, boolean fingerprintChanged) {
-            updateAllPermissions(volumeUuid, fingerprintChanged);
-        }
-        @Override
-        public void resetRuntimePermissions(@NonNull AndroidPackage pkg, @UserIdInt int userId) {
-            Objects.requireNonNull(pkg, "pkg");
-            Preconditions.checkArgumentNonNegative(userId, "userId");
-            resetRuntimePermissionsInternal(pkg, userId);
-        }
+    @Override
+    public void onStorageVolumeMounted(@Nullable String volumeUuid, boolean fingerprintChanged) {
+        updateAllPermissions(volumeUuid, fingerprintChanged);
+    }
 
-        @Override
-        public Permission getPermissionTEMP(String permName) {
-            synchronized (mLock) {
-                return mRegistry.getPermission(permName);
-            }
+    @Override
+    public void resetRuntimePermissions(@NonNull AndroidPackage pkg, @UserIdInt int userId) {
+        Objects.requireNonNull(pkg, "pkg");
+        Preconditions.checkArgumentNonNegative(userId, "userId");
+        resetRuntimePermissionsInternal(pkg, userId);
+    }
+
+    @Override
+    public Permission getPermissionTEMP(String permName) {
+        synchronized (mLock) {
+            return mRegistry.getPermission(permName);
         }
+    }
 
-        @Override
-        public @NonNull ArrayList<PermissionInfo> getAllPermissionsWithProtection(
-                @PermissionInfo.Protection int protection) {
-            ArrayList<PermissionInfo> matchingPermissions = new ArrayList<>();
+    @NonNull
+    @Override
+    public ArrayList<PermissionInfo> getAllPermissionsWithProtection(
+            @PermissionInfo.Protection int protection) {
+        ArrayList<PermissionInfo> matchingPermissions = new ArrayList<>();
 
-            synchronized (mLock) {
-                for (final Permission permission : mRegistry.getPermissions()) {
-                    if (permission.getProtection() == protection) {
-                        matchingPermissions.add(permission.generatePermissionInfo(0));
-                    }
+        synchronized (mLock) {
+            for (final Permission permission : mRegistry.getPermissions()) {
+                if (permission.getProtection() == protection) {
+                    matchingPermissions.add(permission.generatePermissionInfo(0));
                 }
             }
-
-            return matchingPermissions;
         }
 
-        @Override
-        public @NonNull ArrayList<PermissionInfo> getAllPermissionsWithProtectionFlags(
-                @PermissionInfo.ProtectionFlags int protectionFlags) {
-            ArrayList<PermissionInfo> matchingPermissions = new ArrayList<>();
+        return matchingPermissions;
+    }
 
-            synchronized (mLock) {
-                for (final Permission permission : mRegistry.getPermissions()) {
-                    if ((permission.getProtectionFlags() & protectionFlags) == protectionFlags) {
-                        matchingPermissions.add(permission.generatePermissionInfo(0));
-                    }
+    @NonNull
+    @Override
+    public ArrayList<PermissionInfo> getAllPermissionsWithProtectionFlags(
+            @PermissionInfo.ProtectionFlags int protectionFlags) {
+        ArrayList<PermissionInfo> matchingPermissions = new ArrayList<>();
+
+        synchronized (mLock) {
+            for (final Permission permission : mRegistry.getPermissions()) {
+                if ((permission.getProtectionFlags() & protectionFlags) == protectionFlags) {
+                    matchingPermissions.add(permission.generatePermissionInfo(0));
                 }
             }
-
-            return matchingPermissions;
         }
 
-        @Nullable
-        @Override
-        public byte[] backupRuntimePermissions(@UserIdInt int userId) {
-            Preconditions.checkArgumentNonNegative(userId, "userId");
-            return PermissionManagerServiceImpl.this.backupRuntimePermissions(userId);
+        return matchingPermissions;
+    }
+
+    @Override
+    public void onUserCreated(@UserIdInt int userId) {
+        Preconditions.checkArgumentNonNegative(userId, "userId");
+        // NOTE: This adds UPDATE_PERMISSIONS_REPLACE_PKG
+        updateAllPermissions(StorageManager.UUID_PRIVATE_INTERNAL, true);
+    }
+
+    @Override
+    public void onPackageAdded(@NonNull AndroidPackage pkg, boolean isInstantApp,
+            @Nullable AndroidPackage oldPkg) {
+        Objects.requireNonNull(pkg);
+        onPackageAddedInternal(pkg, isInstantApp, oldPkg);
+    }
+
+    @Override
+    public void onPackageInstalled(@NonNull AndroidPackage pkg, int previousAppId,
+            @NonNull PermissionManagerServiceInternal.PackageInstalledParams params,
+            @UserIdInt int userId) {
+        Objects.requireNonNull(pkg, "pkg");
+        Objects.requireNonNull(params, "params");
+        Preconditions.checkArgument(userId >= UserHandle.USER_SYSTEM
+                || userId == UserHandle.USER_ALL, "userId");
+        final int[] userIds = userId == UserHandle.USER_ALL ? getAllUserIds()
+                : new int[] { userId };
+        onPackageInstalledInternal(pkg, previousAppId, params, userIds);
+    }
+
+    @Override
+    public void onPackageRemoved(@NonNull AndroidPackage pkg) {
+        Objects.requireNonNull(pkg);
+        onPackageRemovedInternal(pkg);
+    }
+
+    @Override
+    public void onPackageUninstalled(@NonNull String packageName, int appId,
+            @Nullable AndroidPackage pkg, @NonNull List<AndroidPackage> sharedUserPkgs,
+            @UserIdInt int userId) {
+        Objects.requireNonNull(packageName, "packageName");
+        Objects.requireNonNull(sharedUserPkgs, "sharedUserPkgs");
+        Preconditions.checkArgument(userId >= UserHandle.USER_SYSTEM
+                || userId == UserHandle.USER_ALL, "userId");
+        final int[] userIds = userId == UserHandle.USER_ALL ? getAllUserIds()
+                : new int[] { userId };
+        onPackageUninstalledInternal(packageName, appId, pkg, sharedUserPkgs, userIds);
+    }
+
+    private boolean setAutoRevokeExemptedInternal(@NonNull AndroidPackage pkg, boolean exempted,
+            @UserIdInt int userId) {
+        final int packageUid = UserHandle.getUid(userId, pkg.getUid());
+        if (mAppOpsManager.checkOpNoThrow(AppOpsManager.OP_AUTO_REVOKE_MANAGED_BY_INSTALLER,
+                packageUid, pkg.getPackageName()) != MODE_ALLOWED) {
+            // Allowlist user set - don't override
+            return false;
         }
 
-        @Override
-        public void restoreRuntimePermissions(@NonNull byte[] backup, @UserIdInt int userId) {
-            Objects.requireNonNull(backup, "backup");
-            Preconditions.checkArgumentNonNegative(userId, "userId");
-            PermissionManagerServiceImpl.this.restoreRuntimePermissions(backup, userId);
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mAppOpsManager.setMode(AppOpsManager.OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED, packageUid,
+                    pkg.getPackageName(), exempted ? MODE_IGNORED : MODE_ALLOWED);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
-
-        @Override
-        public void restoreDelayedRuntimePermissions(@NonNull String packageName,
-                @UserIdInt int userId) {
-            Objects.requireNonNull(packageName, "packageName");
-            Preconditions.checkArgumentNonNegative(userId, "userId");
-            PermissionManagerServiceImpl.this.restoreDelayedRuntimePermissions(packageName, userId);
-        }
-
-        @Override
-        public void addOnRuntimePermissionStateChangedListener(
-                OnRuntimePermissionStateChangedListener listener) {
-            PermissionManagerServiceImpl.this.addOnRuntimePermissionStateChangedListener(
-                    listener);
-        }
-
-        @Override
-        public void removeOnRuntimePermissionStateChangedListener(
-                OnRuntimePermissionStateChangedListener listener) {
-            PermissionManagerServiceImpl.this.removeOnRuntimePermissionStateChangedListener(
-                    listener);
-        }
-
-        @Override
-        public void startShellPermissionIdentityDelegation(int uid, @NonNull String packageName,
-                @Nullable List<String> permissionNames) {
-            Objects.requireNonNull(packageName, "packageName");
-            startShellPermissionIdentityDelegationInternal(uid, packageName, permissionNames);
-        }
-
-        @Override
-        public void stopShellPermissionIdentityDelegation() {
-            stopShellPermissionIdentityDelegationInternal();
-        }
-
-        @Override
-        @NonNull
-        public List<String> getDelegatedShellPermissions() {
-            return getDelegatedShellPermissionsInternal();
-        }
-
-        @Override
-        public void onUserCreated(@UserIdInt int userId) {
-            Preconditions.checkArgumentNonNegative(userId, "userId");
-            // NOTE: This adds UPDATE_PERMISSIONS_REPLACE_PKG
-            updateAllPermissions(StorageManager.UUID_PRIVATE_INTERNAL, true);
-        }
-
-        @Override
-        public void readLegacyPermissionsTEMP(
-                @NonNull LegacyPermissionSettings legacyPermissionSettings) {
-            PermissionManagerServiceImpl.this.readLegacyPermissions(legacyPermissionSettings);
-        }
-
-        @Override
-        public void writeLegacyPermissionsTEMP(
-                @NonNull LegacyPermissionSettings legacyPermissionSettings) {
-            PermissionManagerServiceImpl.this.writeLegacyPermissions(legacyPermissionSettings);
-        }
-
-        @Override
-        public void onPackageAdded(@NonNull AndroidPackage pkg, boolean isInstantApp,
-                @Nullable AndroidPackage oldPkg) {
-            Objects.requireNonNull(pkg);
-            onPackageAddedInternal(pkg, isInstantApp, oldPkg);
-        }
-
-        @Override
-        public void onPackageInstalled(@NonNull AndroidPackage pkg, int previousAppId,
-                @NonNull PackageInstalledParams params, @UserIdInt int userId) {
-            Objects.requireNonNull(pkg, "pkg");
-            Objects.requireNonNull(params, "params");
-            Preconditions.checkArgument(userId >= UserHandle.USER_SYSTEM
-                    || userId == UserHandle.USER_ALL, "userId");
-            final int[] userIds = userId == UserHandle.USER_ALL ? getAllUserIds()
-                    : new int[] { userId };
-            onPackageInstalledInternal(pkg, previousAppId, params, userIds);
-        }
-
-        @Override
-        public void onPackageRemoved(@NonNull AndroidPackage pkg) {
-            Objects.requireNonNull(pkg);
-            onPackageRemovedInternal(pkg);
-        }
-
-        @Override
-        public void onPackageUninstalled(@NonNull String packageName, int appId,
-                @Nullable AndroidPackage pkg, @NonNull List<AndroidPackage> sharedUserPkgs,
-                @UserIdInt int userId) {
-            Objects.requireNonNull(packageName, "packageName");
-            Objects.requireNonNull(sharedUserPkgs, "sharedUserPkgs");
-            Preconditions.checkArgument(userId >= UserHandle.USER_SYSTEM
-                    || userId == UserHandle.USER_ALL, "userId");
-            final int[] userIds = userId == UserHandle.USER_ALL ? getAllUserIds()
-                    : new int[] { userId };
-            onPackageUninstalledInternal(packageName, appId, pkg, sharedUserPkgs, userIds);
-        }
-
-        @NonNull
-        @Override
-        public List<LegacyPermission> getLegacyPermissions() {
-            return PermissionManagerServiceImpl.this.getLegacyPermissions();
-        }
-
-        @NonNull
-        @Override
-        public Map<String, Set<String>> getAllAppOpPermissionPackages() {
-            return PermissionManagerServiceImpl.this.getAllAppOpPermissionPackages();
-        }
-
-        @NonNull
-        @Override
-        public LegacyPermissionState getLegacyPermissionState(@AppIdInt int appId) {
-            return PermissionManagerServiceImpl.this.getLegacyPermissionState(appId);
-        }
-
-        @NonNull
-        @Override
-        public int[] getGidsForUid(int uid) {
-            return PermissionManagerServiceImpl.this.getGidsForUid(uid);
-        }
-
-        @Override
-        public void setHotwordDetectionServiceProvider(HotwordDetectionServiceProvider provider) {
-            mHotwordDetectionServiceProvider = provider;
-        }
-
-        @Override
-        public HotwordDetectionServiceProvider getHotwordDetectionServiceProvider() {
-            return mHotwordDetectionServiceProvider;
-        }
+        return true;
     }
 
     /**
@@ -5454,923 +5055,6 @@ public class PermissionManagerServiceImpl extends IPermissionManager.Stub {
             } finally {
                 mPermissionListeners.finishBroadcast();
             }
-        }
-    }
-
-    /**
-     * Interface to intercept permission checks and optionally pass through to the original
-     * implementation.
-     */
-    private interface CheckPermissionDelegate {
-        /**
-         * Get the UID whose permission checks is being delegated.
-         *
-         * @return the UID
-         */
-        int getDelegatedUid();
-
-        /**
-         * Check whether the given package has been granted the specified permission.
-         *
-         * @param packageName the name of the package to be checked
-         * @param permissionName the name of the permission to be checked
-         * @param userId the user ID
-         * @param superImpl the original implementation that can be delegated to
-         * @return {@link android.content.pm.PackageManager#PERMISSION_GRANTED} if the package has
-         * the permission, or {@link android.content.pm.PackageManager#PERMISSION_DENIED} otherwise
-         *
-         * @see android.content.pm.PackageManager#checkPermission(String, String)
-         */
-        int checkPermission(@NonNull String packageName, @NonNull String permissionName,
-                @UserIdInt int userId,
-                @NonNull TriFunction<String, String, Integer, Integer> superImpl);
-
-        /**
-         * Check whether the given UID has been granted the specified permission.
-         *
-         * @param uid the UID to be checked
-         * @param permissionName the name of the permission to be checked
-         * @param superImpl the original implementation that can be delegated to
-         * @return {@link android.content.pm.PackageManager#PERMISSION_GRANTED} if the package has
-         * the permission, or {@link android.content.pm.PackageManager#PERMISSION_DENIED} otherwise
-         */
-        int checkUidPermission(int uid, @NonNull String permissionName,
-                BiFunction<Integer, String, Integer> superImpl);
-
-        /**
-         * @return list of delegated permissions
-         */
-        List<String> getDelegatedPermissionNames();
-    }
-
-    private class ShellDelegate implements CheckPermissionDelegate {
-        private final int mDelegatedUid;
-        @NonNull
-        private final String mDelegatedPackageName;
-        @Nullable
-        private final List<String> mDelegatedPermissionNames;
-
-        public ShellDelegate(int delegatedUid, @NonNull String delegatedPackageName,
-                @Nullable List<String> delegatedPermissionNames) {
-            mDelegatedUid = delegatedUid;
-            mDelegatedPackageName = delegatedPackageName;
-            mDelegatedPermissionNames = delegatedPermissionNames;
-        }
-
-        @Override
-        public int getDelegatedUid() {
-            return mDelegatedUid;
-        }
-
-        @Override
-        public int checkPermission(@NonNull String packageName, @NonNull String permissionName,
-                int userId, @NonNull TriFunction<String, String, Integer, Integer> superImpl) {
-            if (mDelegatedPackageName.equals(packageName)
-                    && isDelegatedPermission(permissionName)) {
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    return superImpl.apply("com.android.shell", permissionName, userId);
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            }
-            return superImpl.apply(packageName, permissionName, userId);
-        }
-
-        @Override
-        public int checkUidPermission(int uid, @NonNull String permissionName,
-                @NonNull BiFunction<Integer, String, Integer> superImpl) {
-            if (uid == mDelegatedUid && isDelegatedPermission(permissionName)) {
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    return superImpl.apply(Process.SHELL_UID, permissionName);
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            }
-            return superImpl.apply(uid, permissionName);
-        }
-
-        @Override
-        public List<String> getDelegatedPermissionNames() {
-            return mDelegatedPermissionNames == null
-                    ? null
-                    : new ArrayList<>(mDelegatedPermissionNames);
-        }
-
-        private boolean isDelegatedPermission(@NonNull String permissionName) {
-            // null permissions means all permissions are targeted
-            return mDelegatedPermissionNames == null
-                    || mDelegatedPermissionNames.contains(permissionName);
-        }
-    }
-
-    private static final class AttributionSourceRegistry {
-        private final Object mLock = new Object();
-
-        private final Context mContext;
-
-        AttributionSourceRegistry(@NonNull Context context) {
-            mContext = context;
-        }
-
-        private final WeakHashMap<IBinder, AttributionSource> mAttributions = new WeakHashMap<>();
-
-        public void registerAttributionSource(@NonNull AttributionSource source) {
-            //   Here we keep track of attribution sources that were created by an app
-            // from an attribution chain that called into the app and the apps's
-            // own attribution source. An app can register an attribution chain up
-            // to itself inclusive if and only if it is adding a node for itself which
-            // optionally points to an attribution chain that was created by each
-            // preceding app recursively up to the beginning of the chain.
-            //   The only special case is when the first app in the attribution chain
-            // creates a source that points to another app (not a chain of apps). We
-            // allow this even if the source the app points to is not registered since
-            // in app ops we allow every app to blame every other app (untrusted if not
-            // holding a special permission).
-            //  This technique ensures that a bad actor in the middle of the attribution
-            // chain can neither prepend nor append an invalid attribution sequence, i.e.
-            // a sequence that is not constructed by trusted sources up to the that bad
-            // actor's app.
-            //   Note that passing your attribution source to another app means you allow
-            // it to blame private data access on your app. This can be mediated by the OS
-            // in, which case security is already enforced; by other app's code running in
-            // your process calling into the other app, in which case it can already access
-            // the private data in your process; or by you explicitly calling to another
-            // app passing the source, in which case you must trust the other side;
-
-            final int callingUid = Binder.getCallingUid();
-            if (source.getUid() != callingUid && mContext.checkPermission(
-                    Manifest.permission.UPDATE_APP_OPS_STATS, /*pid*/ -1, callingUid)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Cannot register attribution source for uid:"
-                        + source.getUid() + " from uid:" + callingUid);
-            }
-
-            final PackageManagerInternal packageManagerInternal = LocalServices.getService(
-                    PackageManagerInternal.class);
-            if (packageManagerInternal.getPackageUid(source.getPackageName(), 0,
-                    UserHandle.getUserId(callingUid)) != source.getUid()) {
-                throw new SecurityException("Cannot register attribution source for package:"
-                        + source.getPackageName() + " from uid:" + callingUid);
-            }
-
-            final AttributionSource next = source.getNext();
-            if (next != null && next.getNext() != null
-                    && !isRegisteredAttributionSource(next)) {
-                throw new SecurityException("Cannot register forged attribution source:"
-                        + source);
-            }
-
-            synchronized (mLock) {
-                mAttributions.put(source.getToken(), source);
-            }
-        }
-
-        public boolean isRegisteredAttributionSource(@NonNull AttributionSource source) {
-            synchronized (mLock) {
-                final AttributionSource cachedSource = mAttributions.get(source.getToken());
-                if (cachedSource != null) {
-                    return cachedSource.equals(source);
-                }
-                return false;
-            }
-        }
-    }
-
-    /**
-     * TODO: We need to consolidate these APIs either on PermissionManager or an extension
-     * object or a separate PermissionChecker service in context. The impartant part is to
-     * keep a single impl that is exposed to Java and native. We are not sure about the
-     * API shape so let is soak a bit.
-     */
-    private static final class PermissionCheckerService extends IPermissionChecker.Stub {
-        // Cache for platform defined runtime permissions to avoid multi lookup (name -> info)
-        private static final ConcurrentHashMap<String, PermissionInfo> sPlatformPermissions
-                = new ConcurrentHashMap<>();
-
-        private static final AtomicInteger sAttributionChainIds = new AtomicInteger(0);
-
-        private final @NonNull Context mContext;
-        private final @NonNull AppOpsManager mAppOpsManager;
-        private final @NonNull PermissionManagerServiceInternal mPermissionManagerServiceInternal;
-
-        PermissionCheckerService(@NonNull Context context) {
-            mContext = context;
-            mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
-            mPermissionManagerServiceInternal =
-                    LocalServices.getService(PermissionManagerServiceInternal.class);
-        }
-
-        @Override
-        @PermissionCheckerManager.PermissionResult
-        public int checkPermission(@NonNull String permission,
-                @NonNull AttributionSourceState attributionSourceState, @Nullable String message,
-                boolean forDataDelivery, boolean startDataDelivery, boolean fromDatasource,
-                int attributedOp) {
-            Objects.requireNonNull(permission);
-            Objects.requireNonNull(attributionSourceState);
-            final AttributionSource attributionSource = new AttributionSource(
-                    attributionSourceState);
-            final int result = checkPermission(mContext, mPermissionManagerServiceInternal,
-                    permission, attributionSource, message, forDataDelivery, startDataDelivery,
-                    fromDatasource, attributedOp);
-            // Finish any started op if some step in the attribution chain failed.
-            if (startDataDelivery && result != PermissionChecker.PERMISSION_GRANTED
-                    && result != PermissionChecker.PERMISSION_SOFT_DENIED) {
-                if (attributedOp == AppOpsManager.OP_NONE) {
-                    finishDataDelivery(AppOpsManager.permissionToOpCode(permission),
-                            attributionSource.asState(), fromDatasource);
-                } else {
-                    finishDataDelivery(attributedOp, attributionSource.asState(), fromDatasource);
-                }
-            }
-            return result;
-        }
-
-        @Override
-        public void finishDataDelivery(int op,
-                @NonNull AttributionSourceState attributionSourceState, boolean fromDataSource) {
-            finishDataDelivery(mContext, op, attributionSourceState,
-                    fromDataSource);
-        }
-
-        private static void finishDataDelivery(Context context, int op,
-                @NonNull AttributionSourceState attributionSourceState, boolean fromDatasource) {
-            Objects.requireNonNull(attributionSourceState);
-            AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
-
-            if (op == AppOpsManager.OP_NONE) {
-                return;
-            }
-
-            AttributionSource current = new AttributionSource(attributionSourceState);
-            AttributionSource next = null;
-
-            while (true) {
-                final boolean skipCurrentFinish = (fromDatasource || next != null);
-
-                next = current.getNext();
-
-                // If the call is from a datasource we need to vet only the chain before it. This
-                // way we can avoid the datasource creating an attribution context for every call.
-                if (!(fromDatasource && current.asState() == attributionSourceState)
-                        && next != null && !current.isTrusted(context)) {
-                    return;
-                }
-
-                // The access is for oneself if this is the single receiver of data
-                // after the data source or if this is the single attribution source
-                // in the chain if not from a datasource.
-                final boolean singleReceiverFromDatasource = (fromDatasource
-                        && current.asState() == attributionSourceState && next != null
-                        && next.getNext() == null);
-                final boolean selfAccess = singleReceiverFromDatasource || next == null;
-
-                final AttributionSource accessorSource = (!singleReceiverFromDatasource)
-                        ? current : next;
-
-                if (selfAccess) {
-                    final String resolvedPackageName = resolvePackageName(context, accessorSource);
-                    if (resolvedPackageName == null) {
-                        return;
-                    }
-                    appOpsManager.finishOp(accessorSource.getToken(), op,
-                            accessorSource.getUid(), resolvedPackageName,
-                            accessorSource.getAttributionTag());
-                } else {
-                    final AttributionSource resolvedAttributionSource =
-                            resolveAttributionSource(context, accessorSource);
-                    if (resolvedAttributionSource.getPackageName() == null) {
-                        return;
-                    }
-                    appOpsManager.finishProxyOp(AppOpsManager.opToPublicName(op),
-                            resolvedAttributionSource, skipCurrentFinish);
-                }
-
-                if (next == null || next.getNext() == null) {
-                    return;
-                }
-
-                RegisteredAttribution registered =
-                        sRunningAttributionSources.remove(current.getToken());
-                if (registered != null) {
-                    registered.unregister();
-                }
-                current = next;
-            }
-        }
-
-        @Override
-        @PermissionCheckerManager.PermissionResult
-        public int checkOp(int op, AttributionSourceState attributionSource,
-                String message, boolean forDataDelivery, boolean startDataDelivery) {
-            int result = checkOp(mContext, op, mPermissionManagerServiceInternal,
-                    new AttributionSource(attributionSource), message, forDataDelivery,
-                    startDataDelivery);
-            if (result != PermissionChecker.PERMISSION_GRANTED && startDataDelivery) {
-                // Finish any started op if some step in the attribution chain failed.
-                finishDataDelivery(op, attributionSource, /*fromDatasource*/ false);
-            }
-            return result;
-        }
-
-        @PermissionCheckerManager.PermissionResult
-        private static int checkPermission(@NonNull Context context,
-                @NonNull PermissionManagerServiceInternal permissionManagerServiceInt,
-                @NonNull String permission, @NonNull AttributionSource attributionSource,
-                @Nullable String message, boolean forDataDelivery, boolean startDataDelivery,
-                boolean fromDatasource, int attributedOp) {
-            PermissionInfo permissionInfo = sPlatformPermissions.get(permission);
-
-            if (permissionInfo == null) {
-                try {
-                    permissionInfo = context.getPackageManager().getPermissionInfo(permission, 0);
-                    if (PLATFORM_PACKAGE_NAME.equals(permissionInfo.packageName)) {
-                        // Double addition due to concurrency is fine - the backing
-                        // store is concurrent.
-                        sPlatformPermissions.put(permission, permissionInfo);
-                    }
-                } catch (PackageManager.NameNotFoundException ignored) {
-                    return PermissionChecker.PERMISSION_HARD_DENIED;
-                }
-            }
-
-            if (permissionInfo.isAppOp()) {
-                return checkAppOpPermission(context, permissionManagerServiceInt, permission,
-                        attributionSource, message, forDataDelivery, fromDatasource);
-            }
-            if (permissionInfo.isRuntime()) {
-                return checkRuntimePermission(context, permissionManagerServiceInt, permission,
-                        attributionSource, message, forDataDelivery, startDataDelivery,
-                        fromDatasource, attributedOp);
-            }
-
-            if (!fromDatasource && !checkPermission(context, permissionManagerServiceInt,
-                    permission, attributionSource.getUid(),
-                    attributionSource.getRenouncedPermissions())) {
-                return PermissionChecker.PERMISSION_HARD_DENIED;
-            }
-
-            if (attributionSource.getNext() != null) {
-                return checkPermission(context, permissionManagerServiceInt, permission,
-                        attributionSource.getNext(), message, forDataDelivery, startDataDelivery,
-                        /*fromDatasource*/ false, attributedOp);
-            }
-
-            return PermissionChecker.PERMISSION_GRANTED;
-        }
-
-        @PermissionCheckerManager.PermissionResult
-        private static int checkAppOpPermission(@NonNull Context context,
-                @NonNull PermissionManagerServiceInternal permissionManagerServiceInt,
-                @NonNull String permission, @NonNull AttributionSource attributionSource,
-                @Nullable String message, boolean forDataDelivery, boolean fromDatasource) {
-            final int op = AppOpsManager.permissionToOpCode(permission);
-            if (op < 0) {
-                Slog.wtf(LOG_TAG, "Appop permission " + permission + " with no app op defined!");
-                return PermissionChecker.PERMISSION_HARD_DENIED;
-            }
-
-            AttributionSource current = attributionSource;
-            AttributionSource next = null;
-
-            while (true) {
-                final boolean skipCurrentChecks = (fromDatasource || next != null);
-
-                next = current.getNext();
-
-                // If the call is from a datasource we need to vet only the chain before it. This
-                // way we can avoid the datasource creating an attribution context for every call.
-                if (!(fromDatasource && current.equals(attributionSource))
-                        && next != null && !current.isTrusted(context)) {
-                    return PermissionChecker.PERMISSION_HARD_DENIED;
-                }
-
-                // The access is for oneself if this is the single receiver of data
-                // after the data source or if this is the single attribution source
-                // in the chain if not from a datasource.
-                final boolean singleReceiverFromDatasource = (fromDatasource
-                        && current.equals(attributionSource) && next != null
-                        && next.getNext() == null);
-                final boolean selfAccess = singleReceiverFromDatasource || next == null;
-
-                final int opMode = performOpTransaction(context, op, current, message,
-                        forDataDelivery, /*startDataDelivery*/ false, skipCurrentChecks,
-                        selfAccess, singleReceiverFromDatasource, AppOpsManager.OP_NONE,
-                        AppOpsManager.ATTRIBUTION_FLAGS_NONE, AppOpsManager.ATTRIBUTION_FLAGS_NONE,
-                        AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE);
-
-                switch (opMode) {
-                    case AppOpsManager.MODE_IGNORED:
-                    case AppOpsManager.MODE_ERRORED: {
-                        return PermissionChecker.PERMISSION_HARD_DENIED;
-                    }
-                    case AppOpsManager.MODE_DEFAULT: {
-                        if (!skipCurrentChecks && !checkPermission(context,
-                                permissionManagerServiceInt, permission, attributionSource.getUid(),
-                                attributionSource.getRenouncedPermissions())) {
-                            return PermissionChecker.PERMISSION_HARD_DENIED;
-                        }
-                        if (next != null && !checkPermission(context, permissionManagerServiceInt,
-                                permission, next.getUid(), next.getRenouncedPermissions())) {
-                            return PermissionChecker.PERMISSION_HARD_DENIED;
-                        }
-                    }
-                }
-
-                if (next == null || next.getNext() == null) {
-                    return PermissionChecker.PERMISSION_GRANTED;
-                }
-
-                current = next;
-            }
-        }
-
-        private static int checkRuntimePermission(@NonNull Context context,
-                @NonNull PermissionManagerServiceInternal permissionManagerServiceInt,
-                @NonNull String permission, @NonNull AttributionSource attributionSource,
-                @Nullable String message, boolean forDataDelivery, boolean startDataDelivery,
-                boolean fromDatasource, int attributedOp) {
-            // Now let's check the identity chain...
-            final int op = AppOpsManager.permissionToOpCode(permission);
-            final int attributionChainId =
-                    getAttributionChainId(startDataDelivery, attributionSource);
-            final boolean hasChain = attributionChainId != ATTRIBUTION_CHAIN_ID_NONE;
-            AttributionSource current = attributionSource;
-            AttributionSource next = null;
-            // We consider the chain trusted if the start node has UPDATE_APP_OPS_STATS, and
-            // every attributionSource in the chain is registered with the system.
-            final boolean isChainStartTrusted = !hasChain || checkPermission(context,
-                    permissionManagerServiceInt, UPDATE_APP_OPS_STATS, current.getUid(),
-                    current.getRenouncedPermissions());
-
-            while (true) {
-                final boolean skipCurrentChecks = (fromDatasource || next != null);
-                next = current.getNext();
-
-                // If the call is from a datasource we need to vet only the chain before it. This
-                // way we can avoid the datasource creating an attribution context for every call.
-                if (!(fromDatasource && current.equals(attributionSource))
-                        && next != null && !current.isTrusted(context)) {
-                    return PermissionChecker.PERMISSION_HARD_DENIED;
-                }
-
-                // If we already checked the permission for this one, skip the work
-                if (!skipCurrentChecks && !checkPermission(context, permissionManagerServiceInt,
-                        permission, current.getUid(), current.getRenouncedPermissions())) {
-                    return PermissionChecker.PERMISSION_HARD_DENIED;
-                }
-
-                if (next != null && !checkPermission(context, permissionManagerServiceInt,
-                        permission, next.getUid(), next.getRenouncedPermissions())) {
-                    return PermissionChecker.PERMISSION_HARD_DENIED;
-                }
-
-                if (op < 0) {
-                    // Bg location is one-off runtime modifier permission and has no app op
-                    if (sPlatformPermissions.contains(permission)
-                            && !Manifest.permission.ACCESS_BACKGROUND_LOCATION.equals(permission)) {
-                        Slog.wtf(LOG_TAG, "Platform runtime permission " + permission
-                                + " with no app op defined!");
-                    }
-                    if (next == null) {
-                        return PermissionChecker.PERMISSION_GRANTED;
-                    }
-                    current = next;
-                    continue;
-                }
-
-                // The access is for oneself if this is the single receiver of data
-                // after the data source or if this is the single attribution source
-                // in the chain if not from a datasource.
-                final boolean singleReceiverFromDatasource = (fromDatasource
-                        && current.equals(attributionSource)
-                        && next != null && next.getNext() == null);
-                final boolean selfAccess = singleReceiverFromDatasource || next == null;
-                final boolean isLinkTrusted = isChainStartTrusted
-                        && (current.isTrusted(context) || current.equals(attributionSource))
-                        && (next == null || next.isTrusted(context));
-
-                final int proxyAttributionFlags = (!skipCurrentChecks && hasChain)
-                        ? resolveProxyAttributionFlags(attributionSource, current, fromDatasource,
-                                startDataDelivery, selfAccess, isLinkTrusted)
-                        : ATTRIBUTION_FLAGS_NONE;
-                final int proxiedAttributionFlags = hasChain ? resolveProxiedAttributionFlags(
-                        attributionSource, next, fromDatasource, startDataDelivery, selfAccess,
-                        isLinkTrusted) : ATTRIBUTION_FLAGS_NONE;
-
-                final int opMode = performOpTransaction(context, op, current, message,
-                        forDataDelivery, startDataDelivery, skipCurrentChecks, selfAccess,
-                        singleReceiverFromDatasource, attributedOp, proxyAttributionFlags,
-                        proxiedAttributionFlags, attributionChainId);
-
-                switch (opMode) {
-                    case AppOpsManager.MODE_ERRORED: {
-                        return PermissionChecker.PERMISSION_HARD_DENIED;
-                    }
-                    case AppOpsManager.MODE_IGNORED: {
-                        return PermissionChecker.PERMISSION_SOFT_DENIED;
-                    }
-                }
-
-                if (startDataDelivery) {
-                    RegisteredAttribution registered = new RegisteredAttribution(context, op,
-                            current, fromDatasource);
-                    sRunningAttributionSources.put(current.getToken(), registered);
-                }
-
-                if (next == null || next.getNext() == null) {
-                    return PermissionChecker.PERMISSION_GRANTED;
-                }
-
-                current = next;
-            }
-        }
-
-        private static boolean checkPermission(@NonNull Context context,
-                @NonNull PermissionManagerServiceInternal permissionManagerServiceInt,
-                @NonNull String permission, int uid, @NonNull Set<String> renouncedPermissions) {
-            boolean permissionGranted = context.checkPermission(permission, /*pid*/ -1,
-                    uid) == PackageManager.PERMISSION_GRANTED;
-
-            // Override certain permissions checks for the HotwordDetectionService. This service is
-            // an isolated service, which ordinarily cannot hold permissions.
-            // There's probably a cleaner, more generalizable way to do this. For now, this is
-            // the only use case for this, so simply override here.
-            if (!permissionGranted
-                    && Process.isIsolated(uid) // simple check which fails-fast for the common case
-                    && (permission.equals(RECORD_AUDIO)
-                    || permission.equals(CAPTURE_AUDIO_HOTWORD))) {
-                HotwordDetectionServiceProvider hotwordServiceProvider =
-                        permissionManagerServiceInt.getHotwordDetectionServiceProvider();
-                permissionGranted = hotwordServiceProvider != null
-                        && uid == hotwordServiceProvider.getUid();
-            }
-
-            if (permissionGranted && renouncedPermissions.contains(permission)
-                    && context.checkPermission(Manifest.permission.RENOUNCE_PERMISSIONS,
-                    /*pid*/ -1, uid) == PackageManager.PERMISSION_GRANTED) {
-                return false;
-            }
-            return permissionGranted;
-        }
-
-        private static @AttributionFlags int resolveProxyAttributionFlags(
-                @NonNull AttributionSource attributionChain,
-                @NonNull AttributionSource current, boolean fromDatasource,
-                boolean startDataDelivery, boolean selfAccess, boolean isTrusted) {
-            return resolveAttributionFlags(attributionChain, current, fromDatasource,
-                    startDataDelivery, selfAccess, isTrusted, /*flagsForProxy*/ true);
-        }
-
-        private static @AttributionFlags int resolveProxiedAttributionFlags(
-                @NonNull AttributionSource attributionChain,
-                @NonNull AttributionSource current, boolean fromDatasource,
-                boolean startDataDelivery, boolean selfAccess, boolean isTrusted) {
-            return resolveAttributionFlags(attributionChain, current, fromDatasource,
-                    startDataDelivery, selfAccess, isTrusted, /*flagsForProxy*/ false);
-        }
-
-        private static @AttributionFlags int resolveAttributionFlags(
-                @NonNull AttributionSource attributionChain,
-                @NonNull AttributionSource current, boolean fromDatasource,
-                boolean startDataDelivery, boolean selfAccess, boolean isTrusted,
-                boolean flagsForProxy) {
-            if (current == null || !startDataDelivery) {
-                return AppOpsManager.ATTRIBUTION_FLAGS_NONE;
-            }
-            int trustedFlag = isTrusted
-                    ? AppOpsManager.ATTRIBUTION_FLAG_TRUSTED : AppOpsManager.ATTRIBUTION_FLAGS_NONE;
-            if (flagsForProxy) {
-                if (selfAccess) {
-                    return trustedFlag | AppOpsManager.ATTRIBUTION_FLAG_ACCESSOR;
-                } else if (!fromDatasource && current.equals(attributionChain)) {
-                    return trustedFlag | AppOpsManager.ATTRIBUTION_FLAG_ACCESSOR;
-                }
-            } else {
-                if (selfAccess) {
-                    return trustedFlag | AppOpsManager.ATTRIBUTION_FLAG_RECEIVER;
-                } else if (fromDatasource && current.equals(attributionChain.getNext())) {
-                    return trustedFlag | AppOpsManager.ATTRIBUTION_FLAG_ACCESSOR;
-                } else if (current.getNext() == null) {
-                    return trustedFlag | AppOpsManager.ATTRIBUTION_FLAG_RECEIVER;
-                }
-            }
-            if (fromDatasource && current.equals(attributionChain)) {
-                return AppOpsManager.ATTRIBUTION_FLAGS_NONE;
-            }
-            return trustedFlag | AppOpsManager.ATTRIBUTION_FLAG_INTERMEDIARY;
-        }
-
-        private static int checkOp(@NonNull Context context, @NonNull int op,
-                @NonNull PermissionManagerServiceInternal permissionManagerServiceInt,
-                @NonNull AttributionSource attributionSource, @Nullable String message,
-                boolean forDataDelivery, boolean startDataDelivery) {
-            if (op < 0 || attributionSource.getPackageName() == null) {
-                return PermissionChecker.PERMISSION_HARD_DENIED;
-            }
-
-            final int attributionChainId =
-                    getAttributionChainId(startDataDelivery, attributionSource);
-            final boolean hasChain = attributionChainId != ATTRIBUTION_CHAIN_ID_NONE;
-
-            AttributionSource current = attributionSource;
-            AttributionSource next = null;
-
-            // We consider the chain trusted if the start node has UPDATE_APP_OPS_STATS, and
-            // every attributionSource in the chain is registered with the system.
-            final boolean isChainStartTrusted = !hasChain || checkPermission(context,
-                    permissionManagerServiceInt, UPDATE_APP_OPS_STATS, current.getUid(),
-                    current.getRenouncedPermissions());
-
-            while (true) {
-                final boolean skipCurrentChecks = (next != null);
-                next = current.getNext();
-
-                // If the call is from a datasource we need to vet only the chain before it. This
-                // way we can avoid the datasource creating an attribution context for every call.
-                if (next != null && !current.isTrusted(context)) {
-                    return PermissionChecker.PERMISSION_HARD_DENIED;
-                }
-
-                // The access is for oneself if this is the single attribution source in the chain.
-                final boolean selfAccess = (next == null);
-                final boolean isLinkTrusted = isChainStartTrusted
-                        && (current.isTrusted(context) || current.equals(attributionSource))
-                        && (next == null || next.isTrusted(context));
-
-                final int proxyAttributionFlags = (!skipCurrentChecks && hasChain)
-                        ? resolveProxyAttributionFlags(attributionSource, current,
-                                /*fromDatasource*/ false, startDataDelivery, selfAccess,
-                        isLinkTrusted) : ATTRIBUTION_FLAGS_NONE;
-                final int proxiedAttributionFlags = hasChain ? resolveProxiedAttributionFlags(
-                        attributionSource, next, /*fromDatasource*/ false, startDataDelivery,
-                        selfAccess, isLinkTrusted) : ATTRIBUTION_FLAGS_NONE;
-
-                final int opMode = performOpTransaction(context, op, current, message,
-                        forDataDelivery, startDataDelivery, skipCurrentChecks, selfAccess,
-                        /*fromDatasource*/ false, AppOpsManager.OP_NONE, proxyAttributionFlags,
-                        proxiedAttributionFlags, attributionChainId);
-
-                switch (opMode) {
-                    case AppOpsManager.MODE_ERRORED: {
-                        return PermissionChecker.PERMISSION_HARD_DENIED;
-                    }
-                    case AppOpsManager.MODE_IGNORED: {
-                        return PermissionChecker.PERMISSION_SOFT_DENIED;
-                    }
-                }
-
-                if (next == null || next.getNext() == null) {
-                    return PermissionChecker.PERMISSION_GRANTED;
-                }
-
-                current = next;
-            }
-        }
-
-        @SuppressWarnings("ConstantConditions")
-        private static int performOpTransaction(@NonNull Context context, int op,
-                @NonNull AttributionSource attributionSource, @Nullable String message,
-                boolean forDataDelivery, boolean startDataDelivery, boolean skipProxyOperation,
-                boolean selfAccess, boolean singleReceiverFromDatasource, int attributedOp,
-                @AttributionFlags int proxyAttributionFlags,
-                @AttributionFlags int proxiedAttributionFlags, int attributionChainId) {
-            // We cannot perform app ops transactions without a package name. In all relevant
-            // places we pass the package name but just in case there is a bug somewhere we
-            // do a best effort to resolve the package from the UID (pick first without a loss
-            // of generality - they are in the same security sandbox).
-            final AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
-            final AttributionSource accessorSource = (!singleReceiverFromDatasource)
-                    ? attributionSource : attributionSource.getNext();
-            if (!forDataDelivery) {
-                final String resolvedAccessorPackageName = resolvePackageName(context,
-                        accessorSource);
-                if (resolvedAccessorPackageName == null) {
-                    return AppOpsManager.MODE_ERRORED;
-                }
-                final int opMode = appOpsManager.unsafeCheckOpRawNoThrow(op,
-                        accessorSource.getUid(), resolvedAccessorPackageName);
-                final AttributionSource next = accessorSource.getNext();
-                if (!selfAccess && opMode == AppOpsManager.MODE_ALLOWED && next != null) {
-                    final String resolvedNextPackageName = resolvePackageName(context, next);
-                    if (resolvedNextPackageName == null) {
-                        return AppOpsManager.MODE_ERRORED;
-                    }
-                    return appOpsManager.unsafeCheckOpRawNoThrow(op, next.getUid(),
-                            resolvedNextPackageName);
-                }
-                return opMode;
-            } else if (startDataDelivery) {
-                final AttributionSource resolvedAttributionSource = resolveAttributionSource(
-                        context, accessorSource);
-                if (resolvedAttributionSource.getPackageName() == null) {
-                    return AppOpsManager.MODE_ERRORED;
-                }
-                // If the datasource is not in a trusted platform component then in would not
-                // have UPDATE_APP_OPS_STATS and the call below would fail. The problem is that
-                // an app is exposing runtime permission protected data but cannot blame others
-                // in a trusted way which would not properly show in permission usage UIs.
-                // As a fallback we note a proxy op that blames the app and the datasource.
-                int startedOp = op;
-                int checkedOpResult = MODE_ALLOWED;
-                int startedOpResult;
-
-                // If the datasource wants to attribute to another app op we need to
-                // make sure the op for the permission and the attributed ops allow
-                // the operation. We return the less permissive of the two and check
-                // the permission op while start the attributed op.
-                if (attributedOp != AppOpsManager.OP_NONE && attributedOp != op) {
-                    checkedOpResult = appOpsManager.checkOpNoThrow(op,
-                            resolvedAttributionSource.getUid(), resolvedAttributionSource
-                                    .getPackageName());
-                    if (checkedOpResult == MODE_ERRORED) {
-                        return checkedOpResult;
-                    }
-                    startedOp = attributedOp;
-                }
-                if (selfAccess) {
-                    try {
-                        startedOpResult = appOpsManager.startOpNoThrow(
-                                resolvedAttributionSource.getToken(), startedOp,
-                                resolvedAttributionSource.getUid(),
-                                resolvedAttributionSource.getPackageName(),
-                                /*startIfModeDefault*/ false,
-                                resolvedAttributionSource.getAttributionTag(),
-                                message, proxyAttributionFlags, attributionChainId);
-                    } catch (SecurityException e) {
-                        Slog.w(LOG_TAG, "Datasource " + attributionSource + " protecting data with"
-                                + " platform defined runtime permission "
-                                + AppOpsManager.opToPermission(op) + " while not having "
-                                + Manifest.permission.UPDATE_APP_OPS_STATS);
-                        startedOpResult = appOpsManager.startProxyOpNoThrow(attributedOp,
-                                attributionSource, message, skipProxyOperation,
-                                proxyAttributionFlags, proxiedAttributionFlags, attributionChainId);
-                    }
-                } else {
-                    try {
-                        startedOpResult = appOpsManager.startProxyOpNoThrow(startedOp,
-                                resolvedAttributionSource, message, skipProxyOperation,
-                                proxyAttributionFlags, proxiedAttributionFlags, attributionChainId);
-                    } catch (SecurityException e) {
-                        //TODO 195339480: remove
-                        String msg = "Security exception for op " + startedOp + " with source "
-                                + attributionSource.getUid() + ":"
-                                + attributionSource.getPackageName() + ", "
-                                + attributionSource.getNextUid() + ":"
-                                + attributionSource.getNextPackageName();
-                        if (attributionSource.getNext() != null) {
-                            AttributionSource next = attributionSource.getNext();
-                            msg = msg + ", " + next.getNextPackageName() + ":" + next.getNextUid();
-                        }
-                        throw new SecurityException(msg + ":" + e.getMessage());
-                    }
-                }
-                return Math.max(checkedOpResult, startedOpResult);
-            } else {
-                final AttributionSource resolvedAttributionSource = resolveAttributionSource(
-                        context, accessorSource);
-                if (resolvedAttributionSource.getPackageName() == null) {
-                    return AppOpsManager.MODE_ERRORED;
-                }
-                int notedOp = op;
-                int checkedOpResult = MODE_ALLOWED;
-                int notedOpResult;
-
-                // If the datasource wants to attribute to another app op we need to
-                // make sure the op for the permission and the attributed ops allow
-                // the operation. We return the less permissive of the two and check
-                // the permission op while start the attributed op.
-                if (attributedOp != AppOpsManager.OP_NONE && attributedOp != op) {
-                    checkedOpResult = appOpsManager.checkOpNoThrow(op,
-                            resolvedAttributionSource.getUid(), resolvedAttributionSource
-                                    .getPackageName());
-                    if (checkedOpResult == MODE_ERRORED) {
-                        return checkedOpResult;
-                    }
-                    notedOp = attributedOp;
-                }
-                if (selfAccess) {
-                    // If the datasource is not in a trusted platform component then in would not
-                    // have UPDATE_APP_OPS_STATS and the call below would fail. The problem is that
-                    // an app is exposing runtime permission protected data but cannot blame others
-                    // in a trusted way which would not properly show in permission usage UIs.
-                    // As a fallback we note a proxy op that blames the app and the datasource.
-                    try {
-                        notedOpResult = appOpsManager.noteOpNoThrow(notedOp,
-                                resolvedAttributionSource.getUid(),
-                                resolvedAttributionSource.getPackageName(),
-                                resolvedAttributionSource.getAttributionTag(),
-                                message);
-                    } catch (SecurityException e) {
-                        Slog.w(LOG_TAG, "Datasource " + attributionSource + " protecting data with"
-                                + " platform defined runtime permission "
-                                + AppOpsManager.opToPermission(op) + " while not having "
-                                + Manifest.permission.UPDATE_APP_OPS_STATS);
-                        notedOpResult = appOpsManager.noteProxyOpNoThrow(notedOp, attributionSource,
-                                message, skipProxyOperation);
-                    }
-                } else {
-                    try {
-                        notedOpResult = appOpsManager.noteProxyOpNoThrow(notedOp,
-                                resolvedAttributionSource, message, skipProxyOperation);
-                    } catch (SecurityException e) {
-                        //TODO 195339480: remove
-                        String msg = "Security exception for op " + notedOp + " with source "
-                                + attributionSource.getUid() + ":"
-                                + attributionSource.getPackageName() + ", "
-                                + attributionSource.getNextUid() + ":"
-                                + attributionSource.getNextPackageName();
-                        if (attributionSource.getNext() != null) {
-                            AttributionSource next = attributionSource.getNext();
-                            msg = msg + ", " + next.getNextPackageName() + ":" + next.getNextUid();
-                        }
-                        throw new SecurityException(msg + ":" + e.getMessage());
-                    }
-                }
-                return Math.max(checkedOpResult, notedOpResult);
-            }
-        }
-
-        private static int getAttributionChainId(boolean startDataDelivery,
-                AttributionSource source) {
-            if (source == null || source.getNext() == null || !startDataDelivery) {
-                return AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE;
-            }
-            int attributionChainId = sAttributionChainIds.incrementAndGet();
-
-            // handle overflow
-            if (attributionChainId < 0) {
-                attributionChainId = 0;
-                sAttributionChainIds.set(0);
-            }
-            return attributionChainId;
-        }
-
-        private static @Nullable String resolvePackageName(@NonNull Context context,
-                @NonNull AttributionSource attributionSource) {
-            if (attributionSource.getPackageName() != null) {
-                return attributionSource.getPackageName();
-            }
-            final String[] packageNames = context.getPackageManager().getPackagesForUid(
-                    attributionSource.getUid());
-            if (packageNames != null) {
-                // This is best effort if the caller doesn't pass a package. The security
-                // sandbox is UID, therefore we pick an arbitrary package.
-                return packageNames[0];
-            }
-            // Last resort to handle special UIDs like root, etc.
-            return AppOpsManager.resolvePackageName(attributionSource.getUid(),
-                    attributionSource.getPackageName());
-        }
-
-        private static @NonNull AttributionSource resolveAttributionSource(
-                @NonNull Context context, @NonNull AttributionSource attributionSource) {
-            if (attributionSource.getPackageName() != null) {
-                return attributionSource;
-            }
-            return attributionSource.withPackageName(resolvePackageName(context,
-                    attributionSource));
-        }
-    }
-
-    private static final class RegisteredAttribution {
-        private final DeathRecipient mDeathRecipient;
-        private final IBinder mToken;
-        private final AtomicBoolean mFinished;
-
-        RegisteredAttribution(Context context, int op, AttributionSource source,
-                boolean fromDatasource) {
-            mFinished = new AtomicBoolean(false);
-            mDeathRecipient = () -> {
-                if (unregister()) {
-                    PermissionCheckerService
-                            .finishDataDelivery(context, op, source.asState(), fromDatasource);
-                }
-            };
-            mToken = source.getToken();
-            if (mToken != null) {
-                try {
-                    mToken.linkToDeath(mDeathRecipient, 0);
-                } catch (RemoteException e) {
-                    mDeathRecipient.binderDied();
-                }
-            }
-        }
-
-        public boolean unregister() {
-            if (mFinished.compareAndSet(false, true)) {
-                try {
-                    if (mToken != null) {
-                        mToken.unlinkToDeath(mDeathRecipient, 0);
-                    }
-                } catch (NoSuchElementException e) {
-                    // do nothing
-                }
-                return true;
-            }
-            return false;
         }
     }
 }
