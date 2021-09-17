@@ -74,6 +74,7 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.FakeSettingsProviderRule;
@@ -751,19 +752,27 @@ public class DisplayModeDirectorTest {
 
         director.start(sensorManager);
 
-        ArgumentCaptor<SensorEventListener> listenerCaptor =
+        ArgumentCaptor<DisplayListener> displayListenerCaptor =
+                  ArgumentCaptor.forClass(DisplayListener.class);
+        verify(mInjector).registerDisplayListener(displayListenerCaptor.capture(),
+                any(Handler.class),
+                eq(DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
+                    | DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS));
+        DisplayListener displayListener = displayListenerCaptor.getValue();
+
+        ArgumentCaptor<SensorEventListener> sensorListenerCaptor =
                 ArgumentCaptor.forClass(SensorEventListener.class);
         Mockito.verify(sensorManager, Mockito.timeout(TimeUnit.SECONDS.toMillis(1)))
                 .registerListener(
-                        listenerCaptor.capture(),
+                        sensorListenerCaptor.capture(),
                         eq(lightSensor),
                         anyInt(),
                         any(Handler.class));
-        SensorEventListener listener = listenerCaptor.getValue();
+        SensorEventListener sensorListener = sensorListenerCaptor.getValue();
 
-        setBrightness(10);
+        setBrightness(10, 10, displayListener);
         // Sensor reads 20 lux,
-        listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 20 /*lux*/));
+        sensorListener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 20 /*lux*/));
 
         Vote vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE);
         assertVoteForRefreshRate(vote, 90 /*fps*/);
@@ -771,9 +780,11 @@ public class DisplayModeDirectorTest {
         assertThat(vote).isNotNull();
         assertThat(vote.disableRefreshRateSwitching).isTrue();
 
-        setBrightness(125);
+        // We expect DisplayModeDirector to act on BrightnessInfo.adjustedBrightness; set only this
+        // parameter to the necessary threshold
+        setBrightness(10, 125, displayListener);
         // Sensor reads 1000 lux,
-        listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 1000 /*lux*/));
+        sensorListener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 1000 /*lux*/));
 
         vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE);
         assertThat(vote).isNull();
@@ -799,6 +810,14 @@ public class DisplayModeDirectorTest {
 
         director.start(sensorManager);
 
+        ArgumentCaptor<DisplayListener> displayListenerCaptor =
+                  ArgumentCaptor.forClass(DisplayListener.class);
+        verify(mInjector).registerDisplayListener(displayListenerCaptor.capture(),
+                any(Handler.class),
+                eq(DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
+                    | DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS));
+        DisplayListener displayListener = displayListenerCaptor.getValue();
+
         ArgumentCaptor<SensorEventListener> listenerCaptor =
                 ArgumentCaptor.forClass(SensorEventListener.class);
         verify(sensorManager, Mockito.timeout(TimeUnit.SECONDS.toMillis(1)))
@@ -807,20 +826,22 @@ public class DisplayModeDirectorTest {
                         eq(lightSensor),
                         anyInt(),
                         any(Handler.class));
-        SensorEventListener listener = listenerCaptor.getValue();
+        SensorEventListener sensorListener = listenerCaptor.getValue();
 
-        setBrightness(100);
+        setBrightness(100, 100, displayListener);
         // Sensor reads 2000 lux,
-        listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 2000));
+        sensorListener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 2000));
 
         Vote vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE);
         assertThat(vote).isNull();
         vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH);
         assertThat(vote).isNull();
 
-        setBrightness(255);
+        // We expect DisplayModeDirector to act on BrightnessInfo.adjustedBrightness; set only this
+        // parameter to the necessary threshold
+        setBrightness(100, 255, displayListener);
         // Sensor reads 9000 lux,
-        listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 9000));
+        sensorListener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 9000));
 
         vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE);
         assertVoteForRefreshRate(vote, 60 /*fps*/);
@@ -1834,11 +1855,14 @@ public class DisplayModeDirectorTest {
         }
     }
 
-    private void setBrightness(int brightness) {
-        Settings.System.putInt(mContext.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS,
-                brightness);
-        mInjector.notifyBrightnessChanged();
-        waitForIdleSync();
+    private void setBrightness(int brightness, int adjustedBrightness, DisplayListener listener) {
+        float floatBri = BrightnessSynchronizer.brightnessIntToFloat(brightness);
+        float floatAdjBri = BrightnessSynchronizer.brightnessIntToFloat(adjustedBrightness);
+
+        when(mInjector.getBrightnessInfo(DISPLAY_ID)).thenReturn(
+                new BrightnessInfo(floatBri, floatAdjBri, 0.0f, 1.0f,
+                    BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF));
+        listener.onDisplayChanged(DISPLAY_ID);
     }
 
     private void setPeakRefreshRate(float fps) {
@@ -1899,27 +1923,6 @@ public class DisplayModeDirectorTest {
         @NonNull
         public FakeDeviceConfig getDeviceConfig() {
             return mDeviceConfig;
-        }
-
-        @Override
-        public void registerBrightnessObserver(@NonNull ContentResolver cr,
-                @NonNull ContentObserver observer) {
-            if (mBrightnessObserver != null) {
-                throw new IllegalStateException("Tried to register a second brightness observer");
-            }
-            mBrightnessObserver = observer;
-        }
-
-        @Override
-        public void unregisterBrightnessObserver(@NonNull ContentResolver cr,
-                @NonNull ContentObserver observer) {
-            mBrightnessObserver = null;
-        }
-
-        void notifyBrightnessChanged() {
-            if (mBrightnessObserver != null) {
-                mBrightnessObserver.dispatchChange(false /*selfChange*/, DISPLAY_BRIGHTNESS_URI);
-            }
         }
 
         @Override

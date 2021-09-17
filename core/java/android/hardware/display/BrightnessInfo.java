@@ -60,6 +60,9 @@ public final class BrightnessInfo implements Parcelable {
     /** Brightness */
     public final float brightness;
 
+    /** Brightness after {@link DisplayPowerController} adjustments */
+    public final float adjustedBrightness;
+
     /** Current minimum supported brightness. */
     public final float brightnessMinimum;
 
@@ -74,7 +77,13 @@ public final class BrightnessInfo implements Parcelable {
 
     public BrightnessInfo(float brightness, float brightnessMinimum, float brightnessMaximum,
             @HighBrightnessMode int highBrightnessMode) {
+        this(brightness, brightness, brightnessMinimum, brightnessMaximum, highBrightnessMode);
+    }
+
+    public BrightnessInfo(float brightness, float adjustedBrightness, float brightnessMinimum,
+            float brightnessMaximum, @HighBrightnessMode int highBrightnessMode) {
         this.brightness = brightness;
+        this.adjustedBrightness = adjustedBrightness;
         this.brightnessMinimum = brightnessMinimum;
         this.brightnessMaximum = brightnessMaximum;
         this.highBrightnessMode = highBrightnessMode;
@@ -103,6 +112,7 @@ public final class BrightnessInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeFloat(brightness);
+        dest.writeFloat(adjustedBrightness);
         dest.writeFloat(brightnessMinimum);
         dest.writeFloat(brightnessMaximum);
         dest.writeInt(highBrightnessMode);
@@ -123,6 +133,7 @@ public final class BrightnessInfo implements Parcelable {
 
     private BrightnessInfo(Parcel source) {
         brightness = source.readFloat();
+        adjustedBrightness = source.readFloat();
         brightnessMinimum = source.readFloat();
         brightnessMaximum = source.readFloat();
         highBrightnessMode = source.readInt();

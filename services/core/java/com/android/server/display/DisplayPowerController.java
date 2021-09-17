@@ -1259,10 +1259,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             putScreenBrightnessSetting(brightnessState, /* updateCurrent */ true);
         }
 
-        // We save the brightness info *after* the brightness setting has been changed so that
-        // the brightness info reflects the latest value.
-        saveBrightnessInfo(getScreenBrightnessSetting());
-
         // Apply dimming by at least some minimum amount when user activity
         // timeout is about to expire.
         if (mPowerRequest.policy == DisplayPowerRequest.POLICY_DIM) {
@@ -1393,6 +1389,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                         hadUserBrightnessPoint);
             }
 
+            // We save the brightness info *after* the brightness setting has been changed and
+            // adjustments made so that the brightness info reflects the latest value.
+            saveBrightnessInfo(getScreenBrightnessSetting(), animateValue);
+        } else {
+            saveBrightnessInfo(getScreenBrightnessSetting());
         }
 
         // Log any changes to what is currently driving the brightness setting.
@@ -1509,6 +1510,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         synchronized (mCachedBrightnessInfo) {
             return new BrightnessInfo(
                     mCachedBrightnessInfo.brightness,
+                    mCachedBrightnessInfo.adjustedBrightness,
                     mCachedBrightnessInfo.brightnessMin,
                     mCachedBrightnessInfo.brightnessMax,
                     mCachedBrightnessInfo.hbmMode);
@@ -1516,8 +1518,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     private void saveBrightnessInfo(float brightness) {
+        saveBrightnessInfo(brightness, brightness);
+    }
+
+    private void saveBrightnessInfo(float brightness, float adjustedBrightness) {
         synchronized (mCachedBrightnessInfo) {
             mCachedBrightnessInfo.brightness = brightness;
+            mCachedBrightnessInfo.adjustedBrightness = adjustedBrightness;
             mCachedBrightnessInfo.brightnessMin = mHbmController.getCurrentBrightnessMin();
             mCachedBrightnessInfo.brightnessMax = mHbmController.getCurrentBrightnessMax();
             mCachedBrightnessInfo.hbmMode = mHbmController.getHighBrightnessMode();
@@ -2195,6 +2202,16 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         pw.println("  mSkipScreenOnBrightnessRamp=" + mSkipScreenOnBrightnessRamp);
         pw.println("  mColorFadeFadesConfig=" + mColorFadeFadesConfig);
         pw.println("  mColorFadeEnabled=" + mColorFadeEnabled);
+        synchronized (mCachedBrightnessInfo) {
+            pw.println("  mCachedBrightnessInfo.brightness=" + mCachedBrightnessInfo.brightness);
+            pw.println("  mCachedBrightnessInfo.adjustedBrightness=" +
+                    mCachedBrightnessInfo.adjustedBrightness);
+            pw.println("  mCachedBrightnessInfo.brightnessMin=" +
+                    mCachedBrightnessInfo.brightnessMin);
+            pw.println("  mCachedBrightnessInfo.brightnessMax=" +
+                    mCachedBrightnessInfo.brightnessMax);
+            pw.println("  mCachedBrightnessInfo.hbmMode=" + mCachedBrightnessInfo.hbmMode);
+        }
         pw.println("  mDisplayBlanksAfterDozeConfig=" + mDisplayBlanksAfterDozeConfig);
         pw.println("  mBrightnessBucketsInDozeConfig=" + mBrightnessBucketsInDozeConfig);
 
@@ -2606,6 +2623,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     static class CachedBrightnessInfo {
         public float brightness;
+        public float adjustedBrightness;
         public float brightnessMin;
         public float brightnessMax;
         public int hbmMode;
