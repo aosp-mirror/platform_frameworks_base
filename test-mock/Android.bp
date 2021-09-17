@@ -32,7 +32,9 @@ java_sdk_library {
         ":android-test-mock-sources",
         // Note: Below are NOT APIs of this library. We only take APIs under
         // the android.test.mock package. They however provide private APIs that
-        // android.test.mock APIs references to.
+        // android.test.mock APIs references to. We need to have the classes in
+        // source code form to have access to the @hide comment which disappears
+        // when the classes are compiled into a Jar library.
         ":framework-core-sources-for-test-mock",
         ":framework_native_aidl",
     ],
@@ -44,6 +46,14 @@ java_sdk_library {
     ],
 
     api_packages: [
+        "android.test.mock",
+    ],
+    // Only include android.test.mock.* classes. Jarjar rules below removes
+    // classes in other packages like android.content. In order to keep the
+    // list up-to-date, permitted_packages ensures that the library contains
+    // clases under android.test.mock after the jarjar rules are applied.
+    jarjar_rules: "jarjar-rules.txt",
+    permitted_packages: [
         "android.test.mock",
     ],
     compile_dex: true,
