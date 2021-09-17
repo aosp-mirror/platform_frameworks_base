@@ -50,7 +50,6 @@ import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.biometrics.SensorProperties;
 import android.hardware.biometrics.SensorPropertiesInternal;
-import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Binder;
 import android.os.Build;
 import android.os.RemoteException;
@@ -62,7 +61,6 @@ import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 
 import java.util.List;
@@ -539,16 +537,6 @@ public class Utils {
                 return Authenticators.BIOMETRIC_STRONG;
             default:
                 throw new IllegalArgumentException("Unknown strength: " + strength);
-        }
-    }
-
-    public static int getUdfpsAuthReason(@NonNull AuthenticationClient<?> client) {
-        if (client.isKeyguard()) {
-            return IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD;
-        } else if (client.isBiometricPrompt()) {
-            return IUdfpsOverlayController.REASON_AUTH_BP;
-        } else {
-            return IUdfpsOverlayController.REASON_AUTH_FPM_OTHER;
         }
     }
 }
