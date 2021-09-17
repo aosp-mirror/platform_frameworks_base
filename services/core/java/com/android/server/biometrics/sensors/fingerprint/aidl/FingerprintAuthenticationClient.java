@@ -165,14 +165,17 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
     @Override
     protected void stopHalOperation() {
         mSensorOverlays.hide(getSensorId());
-
-        try {
-            mCancellationSignal.cancel();
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Remote exception", e);
-            onError(BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE,
-                    0 /* vendorCode */);
-            mCallback.onClientFinished(this, false /* success */);
+        if (mCancellationSignal != null) {
+            try {
+                mCancellationSignal.cancel();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception", e);
+                onError(BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE,
+                        0 /* vendorCode */);
+                mCallback.onClientFinished(this, false /* success */);
+            }
+        } else {
+            Slog.e(TAG, "cancellation signal was null");
         }
     }
 
