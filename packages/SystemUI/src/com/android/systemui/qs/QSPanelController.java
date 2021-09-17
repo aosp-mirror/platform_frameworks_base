@@ -254,10 +254,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         return mView.isLayoutRtl();
     }
 
-    public View getBrightnessView() {
-        return mView.getBrightnessView();
-    }
-
     /** */
     public void setPageListener(PagedTileLayout.PageListener listener) {
         mView.setPageListener(listener);
