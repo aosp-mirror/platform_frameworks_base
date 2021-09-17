@@ -36,7 +36,7 @@ class FooterActionsControllerBuilder @Inject constructor(
     private val activityStarter: ActivityStarter,
     private val userManager: UserManager,
     private val userInfoController: UserInfoController,
-    private val multiUserSwitchController: MultiUserSwitchController,
+    private val multiUserSwitchControllerFactory: MultiUserSwitchController.Factory,
     private val deviceProvisionedController: DeviceProvisionedController,
     private val falsingManager: FalsingManager,
     private val metricsLogger: MetricsLogger,
@@ -60,8 +60,8 @@ class FooterActionsControllerBuilder @Inject constructor(
 
     fun build(): FooterActionsController {
         return FooterActionsController(view, qsPanelController, activityStarter, userManager,
-                userInfoController, multiUserSwitchController, deviceProvisionedController,
-                falsingManager, metricsLogger, tunerService, globalActionsDialog, uiEventLogger,
-                showPMLiteButton, buttonsVisibleState)
+                userInfoController, multiUserSwitchControllerFactory.create(view),
+                deviceProvisionedController, falsingManager, metricsLogger, tunerService,
+                globalActionsDialog, uiEventLogger, showPMLiteButton, buttonsVisibleState)
     }
 }
