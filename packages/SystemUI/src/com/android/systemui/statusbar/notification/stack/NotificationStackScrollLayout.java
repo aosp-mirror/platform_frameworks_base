@@ -610,6 +610,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mClearAllEnabled = res.getBoolean(R.bool.config_enableNotificationsClearAll);
         mGroupMembershipManager = groupMembershipManager;
         mGroupExpansionManager = groupExpansionManager;
+        setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
     }
 
     void initializeForegroundServiceSection(ForegroundServiceDungeonView fgsSectionView) {
