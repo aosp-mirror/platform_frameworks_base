@@ -74,6 +74,7 @@ import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
 
@@ -98,6 +99,7 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
     @Mock private HeadsUpManagerPhone mHeadsUpManager;
     @Mock private NotificationRoundnessManager mNotificationRoundnessManager;
     @Mock private TunerService mTunerService;
+    @Mock private DeviceProvisionedController mDeviceProvisionedController;
     @Mock private DynamicPrivacyController mDynamicPrivacyController;
     @Mock private ConfigurationController mConfigurationController;
     @Mock private NotificationStackScrollLayout mNotificationStackScrollLayout;
@@ -153,6 +155,7 @@ public class NotificationStackScrollerControllerTest extends SysuiTestCase {
                 mHeadsUpManager,
                 mNotificationRoundnessManager,
                 mTunerService,
+                mDeviceProvisionedController,
                 mDynamicPrivacyController,
                 mConfigurationController,
                 mSysuiStatusBarStateController,
