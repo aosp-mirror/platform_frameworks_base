@@ -645,21 +645,25 @@ public final class CachedAppOptimizer {
             char state = (char) fr.read();
 
             if (state == '1' || state == '0') {
+                // Also check freezer binder ioctl
+                getBinderFreezeInfo(Process.myPid());
                 supported = true;
             } else {
                 Slog.e(TAG_AM, "unexpected value in cgroup.freeze");
             }
         } catch (java.io.FileNotFoundException e) {
-            Slog.d(TAG_AM, "cgroup.freeze not present");
+            Slog.w(TAG_AM, "cgroup.freeze not present");
+        } catch (RuntimeException e) {
+            Slog.w(TAG_AM, "unable to read freezer info");
         } catch (Exception e) {
-            Slog.d(TAG_AM, "unable to read cgroup.freeze: " + e.toString());
+            Slog.w(TAG_AM, "unable to read cgroup.freeze: " + e.toString());
         }
 
         if (fr != null) {
             try {
                 fr.close();
             } catch (java.io.IOException e) {
-                Slog.e(TAG_AM, "Exception closing freezer.killable: " + e.toString());
+                Slog.e(TAG_AM, "Exception closing cgroup.freeze: " + e.toString());
             }
         }
 
