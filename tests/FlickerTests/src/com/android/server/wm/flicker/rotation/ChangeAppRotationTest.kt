@@ -24,7 +24,9 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
+import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
@@ -90,11 +92,16 @@ class ChangeAppRotationTest(
 
     @Presubmit
     @Test
-    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
+    fun statusBarLayerRotatesScales() {
+        testSpec.statusBarLayerRotatesScales(
+            testSpec.config.startRotation, testSpec.config.endRotation)
+    }
 
     @FlakyTest
     @Test
-    override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
+    override fun navBarLayerRotatesAndScales() {
+        super.navBarLayerRotatesAndScales()
+    }
 
     @FlakyTest
     @Test
