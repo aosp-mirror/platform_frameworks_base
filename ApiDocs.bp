@@ -77,21 +77,15 @@ stubs_defaults {
         // Module sources
         ":art.module.public.api{.public.stubs.source}",
         ":conscrypt.module.public.api{.public.stubs.source}",
-        ":framework-connectivity-sources",
-        ":framework-mediaprovider-sources",
-        ":framework-permission-sources",
-        ":framework-sdkextensions-sources",
-        ":framework-statsd-sources",
-        ":framework-tethering-srcs",
-        ":framework-wifi-updatable-sources",
         ":i18n.module.public.api{.public.stubs.source}",
-        ":ike-srcs",
-        ":updatable-media-srcs",
 
         // No longer part of the stubs, but are included in the docs.
         ":android-test-base-sources",
         ":android-test-mock-sources",
         ":android-test-runner-sources",
+    ],
+    arg_files: [
+        "core/res/AndroidManifest.xml",
     ],
     libs: framework_docs_only_libs,
     create_doc_stubs: true,
@@ -106,12 +100,31 @@ stubs_defaults {
     merge_annotations_dirs: [
         "metalava-manual",
     ],
+    write_sdk_values: true,
 }
 
 droidstubs {
     name: "android-non-updatable-doc-stubs",
     defaults: ["android-non-updatable-doc-stubs-defaults"],
     args: metalava_framework_docs_args,
+}
+
+// Defaults module for doc-stubs targets that use module source code as input.
+// This is the default/normal.
+stubs_defaults {
+    name: "framework-doc-stubs-sources-default",
+    defaults: ["framework-doc-stubs-default"],
+    srcs: [
+        ":framework-connectivity-sources",
+        ":framework-mediaprovider-sources",
+        ":framework-permission-sources",
+        ":framework-sdkextensions-sources",
+        ":framework-statsd-sources",
+        ":framework-tethering-srcs",
+        ":framework-wifi-updatable-sources",
+        ":ike-srcs",
+        ":updatable-media-srcs",
+    ],
 }
 
 droidstubs {
@@ -123,24 +136,44 @@ droidstubs {
 
 droidstubs {
     name: "framework-doc-stubs",
-    defaults: ["framework-doc-stubs-default"],
-    arg_files: [
-        "core/res/AndroidManifest.xml",
-    ],
+    defaults: ["framework-doc-stubs-sources-default"],
     args: metalava_framework_docs_args,
-    write_sdk_values: true,
 }
 
 droidstubs {
     name: "framework-doc-system-stubs",
-    defaults: ["framework-doc-stubs-default"],
-    arg_files: [
-        "core/res/AndroidManifest.xml",
-    ],
+    defaults: ["framework-doc-stubs-sources-default"],
     args: metalava_framework_docs_args +
         " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS\\) ",
-    write_sdk_values: true,
     api_levels_sdk_type: "system",
+}
+
+// Experimental target building doc stubs with module stub source code as input.
+// This is intended to eventually replace framework-doc-stubs, once all diffs
+// have been eliminated.
+droidstubs {
+    name: "framework-doc-stubs-module-stubs",
+    defaults: ["framework-doc-stubs-default"],
+    args: metalava_framework_docs_args,
+    srcs: [
+        ":android.net.ipsec.ike{.public.stubs.source}",
+        ":framework-connectivity{.public.stubs.source}",
+        ":framework-media{.public.stubs.source}",
+        ":framework-mediaprovider{.public.stubs.source}",
+        ":framework-permission{.public.stubs.source}",
+        ":framework-sdkextensions{.public.stubs.source}",
+        ":framework-statsd{.public.stubs.source}",
+        ":framework-tethering{.public.stubs.source}",
+        ":framework-wifi{.public.stubs.source}",
+    ],
+    aidl: {
+        local_include_dirs: [
+            "apex/media/aidl/stable",
+        ],
+        include_dirs: [
+            "packages/modules/Connectivity/framework/aidl-export",
+        ],
+    },
 }
 
 /////////////////////////////////////////////////////////////////////
