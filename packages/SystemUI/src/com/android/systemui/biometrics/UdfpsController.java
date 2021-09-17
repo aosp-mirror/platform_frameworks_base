@@ -94,7 +94,7 @@ import kotlin.Unit;
  * controls/manages all UDFPS sensors. In other words, a single controller is registered with
  * {@link com.android.server.biometrics.sensors.fingerprint.FingerprintService}, and interfaces such
  * as {@link FingerprintManager#onPointerDown(int, int, int, float, float)} or
- * {@link IUdfpsOverlayController#showUdfpsOverlay(int)}should all have
+ * {@link IUdfpsOverlayController#showUdfpsOverlay(int)} should all have
  * {@code sensorId} parameters.
  */
 @SuppressWarnings("deprecation")
@@ -659,6 +659,20 @@ public class UdfpsController implements DozeReceiver {
         }
     }
 
+    private boolean shouldRotate(@Nullable UdfpsAnimationViewController animation) {
+        if (!(animation instanceof UdfpsKeyguardViewController)) {
+            // always rotate view if we're not on the keyguard
+            return true;
+        }
+
+        // on the keyguard, make sure we don't rotate if we're going to sleep or not occluded
+        if (mKeyguardUpdateMonitor.isGoingToSleep() || !mKeyguardStateController.isOccluded()) {
+            return false;
+        }
+
+        return true;
+    }
+
     private WindowManager.LayoutParams computeLayoutParams(
             @Nullable UdfpsAnimationViewController animation) {
         final int paddingX = animation != null ? animation.getPaddingX() : 0;
@@ -683,9 +697,11 @@ public class UdfpsController implements DozeReceiver {
         // Transform dimensions if the device is in landscape mode
         switch (mContext.getDisplay().getRotation()) {
             case Surface.ROTATION_90:
-                if (animation instanceof UdfpsKeyguardViewController
-                        && mKeyguardUpdateMonitor.isGoingToSleep()) {
+                if (!shouldRotate(animation)) {
+                    Log.v(TAG, "skip rotating udfps location ROTATION_90");
                     break;
+                } else {
+                    Log.v(TAG, "rotate udfps location ROTATION_90");
                 }
                 mCoreLayoutParams.x = location.sensorLocationY - location.sensorRadius
                         - paddingX;
@@ -694,9 +710,11 @@ public class UdfpsController implements DozeReceiver {
                 break;
 
             case Surface.ROTATION_270:
-                if (animation instanceof UdfpsKeyguardViewController
-                        && mKeyguardUpdateMonitor.isGoingToSleep()) {
+                if (!shouldRotate(animation)) {
+                    Log.v(TAG, "skip rotating udfps location ROTATION_270");
                     break;
+                } else {
+                    Log.v(TAG, "rotate udfps location ROTATION_270");
                 }
                 mCoreLayoutParams.x = p.x - location.sensorLocationY - location.sensorRadius
                         - paddingX;

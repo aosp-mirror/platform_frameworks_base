@@ -192,6 +192,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         when(mLayoutInflater.inflate(R.layout.udfps_keyguard_view, null))
                 .thenReturn(mKeyguardView); // for showOverlay REASON_AUTH_FPM_KEYGUARD
         when(mEnrollView.getContext()).thenReturn(mContext);
+        when(mKeyguardStateController.isOccluded()).thenReturn(false);
         final List<FingerprintSensorPropertiesInternal> props = new ArrayList<>();
 
         final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
