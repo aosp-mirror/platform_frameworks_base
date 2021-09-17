@@ -2334,11 +2334,10 @@ public class DisplayContentTests extends WindowTestsBase {
         // mirror.
         setUpDefaultTaskDisplayAreaWindowToken();
 
-        // GIVEN SurfaceControl can successfully mirror the provided surface.
+        // GIVEN SurfaceControl does not mirror a null surface.
         Point surfaceSize = new Point(
                 mDefaultDisplay.getDefaultTaskDisplayArea().getBounds().width(),
                 mDefaultDisplay.getDefaultTaskDisplayArea().getBounds().height());
-        surfaceControlMirrors(surfaceSize);
 
         // GIVEN a new VirtualDisplay with an associated surface.
         final VirtualDisplay display = createVirtualDisplay(surfaceSize, null /* surface */);
