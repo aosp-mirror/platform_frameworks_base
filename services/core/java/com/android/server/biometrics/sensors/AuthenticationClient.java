@@ -28,6 +28,7 @@ import android.content.pm.ApplicationInfo;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.BiometricOverlayConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -456,5 +457,15 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
 
     public boolean wasAuthAttempted() {
         return mAuthAttempted;
+    }
+
+    protected int getShowOverlayReason() {
+        if (isKeyguard()) {
+            return BiometricOverlayConstants.REASON_AUTH_KEYGUARD;
+        } else if (isBiometricPrompt()) {
+            return BiometricOverlayConstants.REASON_AUTH_BP;
+        } else {
+            return BiometricOverlayConstants.REASON_AUTH_OTHER;
+        }
     }
 }
