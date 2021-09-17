@@ -183,14 +183,15 @@ public final class CompatChange extends CompatibilityChangeInfo {
      */
     synchronized boolean recheckOverride(String packageName, OverrideAllowedState allowedState,
             @Nullable Long versionCode) {
+        if (packageName == null) {
+            return false;
+        }
         boolean allowed = (allowedState.state == OverrideAllowedState.ALLOWED);
-
         // If the app is not installed or no longer has raw overrides, evaluate to false
         if (versionCode == null || !mRawOverrides.containsKey(packageName) || !allowed) {
             removePackageOverrideInternal(packageName);
             return false;
         }
-
         // Evaluate the override based on its version
         int overrideValue = mRawOverrides.get(packageName).evaluate(versionCode);
         switch (overrideValue) {
@@ -266,6 +267,9 @@ public final class CompatChange extends CompatibilityChangeInfo {
      * @return {@code true} if the change should be enabled for the package.
      */
     boolean willBeEnabled(String packageName) {
+        if (packageName == null) {
+            return defaultValue();
+        }
         final PackageOverride override = mRawOverrides.get(packageName);
         if (override != null) {
             switch (override.evaluateForAllVersions()) {
