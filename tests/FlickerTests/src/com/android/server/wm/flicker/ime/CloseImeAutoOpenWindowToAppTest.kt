@@ -152,13 +152,13 @@ class CloseImeAutoOpenWindowToAppTest(private val testSpec: FlickerTestParameter
     @Presubmit
     @Test
     fun navBarLayerRotatesAndScales() {
-        testSpec.navBarLayerRotatesAndScales()
+        testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation)
     }
 
     @Presubmit
     @Test
     fun statusBarLayerRotatesScales() {
-        testSpec.statusBarLayerRotatesScales()
+        testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation)
     }
 
     @Presubmit

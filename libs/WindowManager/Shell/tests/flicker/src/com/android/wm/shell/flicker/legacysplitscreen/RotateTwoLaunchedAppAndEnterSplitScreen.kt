@@ -24,6 +24,7 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group2
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
@@ -82,11 +83,14 @@ class RotateTwoLaunchedAppAndEnterSplitScreen(
 
     @Presubmit
     @Test
-    fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
+    fun navBarLayerRotatesAndScales() =
+        testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation,
+            testSpec.config.endRotation)
 
     @Presubmit
     @Test
-    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
+    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales(
+        testSpec.config.startRotation, testSpec.config.endRotation)
 
     @Presubmit
     @Test

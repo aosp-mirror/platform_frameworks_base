@@ -32,6 +32,7 @@ import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.entireScreenCovered
+import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.common.FlickerComponentName
@@ -120,20 +121,20 @@ class CloseImeWindowToAppTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun navBarLayerRotatesAndScales() {
         Assume.assumeFalse(testSpec.isRotated)
-        testSpec.navBarLayerRotatesAndScales()
+        testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation)
     }
 
     @FlakyTest
     @Test
     fun navBarLayerRotatesAndScales_Flaky() {
         Assume.assumeTrue(testSpec.isRotated)
-        testSpec.navBarLayerRotatesAndScales()
+        testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation)
     }
 
     @Presubmit
     @Test
     fun statusBarLayerRotatesScales() {
-        testSpec.statusBarLayerRotatesScales()
+        testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation)
     }
 
     @Presubmit

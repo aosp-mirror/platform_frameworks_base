@@ -314,7 +314,8 @@ class QuickSwitchBetweenTwoAppsForwardTest(private val testSpec: FlickerTestPara
      */
     @Postsubmit
     @Test
-    fun navbarIsAlwaysInRightPosition() = testSpec.navBarLayerRotatesAndScales()
+    fun navbarIsAlwaysInRightPosition() =
+            testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation)
 
     /**
      * Checks that the status bar window is visible throughout the entire transition.

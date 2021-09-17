@@ -107,11 +107,13 @@ class LegacySplitScreenToLauncher(
 
     @Presubmit
     @Test
-    fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
+    fun navBarLayerRotatesAndScales() =
+        testSpec.navBarLayerRotatesAndScales(testSpec.config.endRotation)
 
     @Presubmit
     @Test
-    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
+    fun statusBarLayerRotatesScales() =
+        testSpec.statusBarLayerRotatesScales(testSpec.config.endRotation)
 
     @Presubmit
     @Test

@@ -75,7 +75,10 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
 
     @Presubmit
     @Test
-    open fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
+    open fun navBarLayerRotatesAndScales() {
+        testSpec.navBarLayerRotatesAndScales(
+            testSpec.config.startRotation, testSpec.config.endRotation)
+    }
 
     @Presubmit
     @Test
