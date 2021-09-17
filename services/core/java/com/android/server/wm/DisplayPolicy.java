@@ -111,9 +111,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Px;
 import android.app.ActivityManager;
-import android.app.ActivityThread;
-import android.app.LoadedApk;
-import android.app.ResourcesManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -450,7 +447,7 @@ public class DisplayPolicy {
                 : service.mContext.createDisplayContext(displayContent.getDisplay());
         mUiContext = displayContent.isDefaultDisplay ? service.mAtmService.mUiContext
                 : service.mAtmService.mSystemThread
-                        .createSystemUiContext(displayContent.getDisplayId());
+                        .getSystemUiContext(displayContent.getDisplayId());
         mDisplayContent = displayContent;
         mLock = service.getWindowManagerLock();
 
@@ -2240,19 +2237,8 @@ public class DisplayPolicy {
 
         // For non-system users, ensure that the resources are loaded from the current
         // user's package info (see ContextImpl.createDisplayContext)
-        final LoadedApk pi = ActivityThread.currentActivityThread().getPackageInfo(
-                uiContext.getPackageName(), null, 0, userId);
-        mCurrentUserResources = ResourcesManager.getInstance().getResources(null,
-                pi.getResDir(),
-                null /* splitResDirs */,
-                pi.getOverlayDirs(),
-                pi.getOverlayPaths(),
-                pi.getApplicationInfo().sharedLibraryFiles,
-                mDisplayContent.getDisplayId(),
-                null /* overrideConfig */,
-                uiContext.getResources().getCompatibilityInfo(),
-                null /* classLoader */,
-                null /* loaders */);
+        mCurrentUserResources = uiContext.createContextAsUser(UserHandle.of(userId), 0 /* flags*/)
+                .getResources();
     }
 
     @VisibleForTesting
