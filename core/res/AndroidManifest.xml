@@ -2949,13 +2949,11 @@
                 android:protectionLevel="signature" />
 
     <!-- Allows an app to set and release automotive projection.
-         <p>Once permissions can be granted via role-only, this needs to be changed to
-          protectionLevel="role" and added to the SYSTEM_AUTOMOTIVE_PROJECTION role.
          @hide
          @SystemApi
     -->
     <permission android:name="android.permission.TOGGLE_AUTOMOTIVE_PROJECTION"
-                android:protectionLevel="signature|privileged" />
+                android:protectionLevel="internal|role" />
 
     <!-- Allows an app to prevent non-system-overlay windows from being drawn on top of it -->
     <permission android:name="android.permission.HIDE_OVERLAY_WINDOWS"
