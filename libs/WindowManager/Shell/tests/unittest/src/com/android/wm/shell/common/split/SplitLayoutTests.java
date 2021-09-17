@@ -29,7 +29,6 @@ import static org.mockito.Mockito.verify;
 
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.view.SurfaceControl;
 
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -53,7 +52,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidJUnit4.class)
 public class SplitLayoutTests extends ShellTestCase {
     @Mock SplitLayout.SplitLayoutHandler mSplitLayoutHandler;
-    @Mock SurfaceControl mRootLeash;
+    @Mock SplitWindowManager.ParentContainerCallbacks mCallbacks;
     @Mock DisplayImeController mDisplayImeController;
     @Mock ShellTaskOrganizer mTaskOrganizer;
     @Captor ArgumentCaptor<Runnable> mRunnableCaptor;
@@ -67,7 +66,7 @@ public class SplitLayoutTests extends ShellTestCase {
                 mContext,
                 getConfiguration(),
                 mSplitLayoutHandler,
-                b -> b.setParent(mRootLeash),
+                mCallbacks,
                 mDisplayImeController,
                 mTaskOrganizer));
     }

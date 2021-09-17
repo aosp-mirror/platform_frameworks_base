@@ -90,6 +90,7 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitLayout;
 import com.android.wm.shell.common.split.SplitLayout.SplitPosition;
+import com.android.wm.shell.common.split.SplitWindowManager;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.transition.Transitions;
 
@@ -161,6 +162,19 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mSplitLayout.resetDividerPosition();
         }
         mDismissTop = NO_DISMISS;
+    };
+
+    private final SplitWindowManager.ParentContainerCallbacks mParentContainerCallbacks =
+            new SplitWindowManager.ParentContainerCallbacks() {
+        @Override
+        public void attachToParentSurface(SurfaceControl.Builder b) {
+            mRootTDAOrganizer.attachToDisplayArea(mDisplayId, b);
+        }
+
+        @Override
+        public void onLeashReady(SurfaceControl leash) {
+            mSyncQueue.runInSync(t -> applyDividerVisibility(t));
+        }
     };
 
     StageCoordinator(Context context, int displayId, SyncTransactionQueue syncQueue,
@@ -726,7 +740,6 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         } else {
             t.hide(dividerLeash);
         }
-
     }
 
     private void onStageHasChildrenChanged(StageListenerImpl stageListener) {
@@ -852,8 +865,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mDisplayAreaInfo = displayAreaInfo;
         if (mSplitLayout == null) {
             mSplitLayout = new SplitLayout(TAG + "SplitDivider", mContext,
-                    mDisplayAreaInfo.configuration, this,
-                    b -> mRootTDAOrganizer.attachToDisplayArea(mDisplayId, b),
+                    mDisplayAreaInfo.configuration, this, mParentContainerCallbacks,
                     mDisplayImeController, mTaskOrganizer);
             mDisplayInsetsController.addInsetsChangedListener(mDisplayId, mSplitLayout);
         }
@@ -871,7 +883,6 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 && mSplitLayout.updateConfiguration(mDisplayAreaInfo.configuration)
                 && mMainStage.isActive()) {
             onLayoutChanged(mSplitLayout);
-            mSyncQueue.runInSync(t -> applyDividerVisibility(t));
         }
     }
 
