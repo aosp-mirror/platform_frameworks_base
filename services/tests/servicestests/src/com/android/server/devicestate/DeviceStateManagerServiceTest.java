@@ -18,6 +18,9 @@ package com.android.server.devicestate;
 
 import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
 
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -35,8 +38,6 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
-
-import static org.mockito.Mockito.mock;
 
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowProcessController;
@@ -181,8 +182,10 @@ public final class DeviceStateManagerServiceTest {
         assertEquals(mService.getCommittedState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertEquals(mService.getPendingState(), Optional.empty());
         assertEquals(mService.getBaseState(), Optional.of(DEFAULT_DEVICE_STATE));
+        assertThat(mService.getSupportedStates()).asList().containsExactly(DEFAULT_DEVICE_STATE,
+                OTHER_DEVICE_STATE);
 
-        mProvider.notifySupportedDeviceStates(new DeviceState[]{ DEFAULT_DEVICE_STATE });
+        mProvider.notifySupportedDeviceStates(new DeviceState[]{DEFAULT_DEVICE_STATE});
         flushHandler();
 
         // The current committed and requests states do not change because the current state remains
@@ -190,9 +193,10 @@ public final class DeviceStateManagerServiceTest {
         assertEquals(mService.getCommittedState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertEquals(mService.getPendingState(), Optional.empty());
         assertEquals(mService.getBaseState(), Optional.of(DEFAULT_DEVICE_STATE));
+        assertThat(mService.getSupportedStates()).asList().containsExactly(DEFAULT_DEVICE_STATE);
 
         assertArrayEquals(callback.getLastNotifiedInfo().supportedStates,
-                new int[] { DEFAULT_DEVICE_STATE.getIdentifier() });
+                new int[]{DEFAULT_DEVICE_STATE.getIdentifier()});
     }
 
     @Test
@@ -207,9 +211,11 @@ public final class DeviceStateManagerServiceTest {
         assertEquals(mService.getCommittedState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertEquals(mService.getPendingState(), Optional.empty());
         assertEquals(mService.getBaseState(), Optional.of(DEFAULT_DEVICE_STATE));
+        assertThat(mService.getSupportedStates()).asList().containsExactly(DEFAULT_DEVICE_STATE,
+                OTHER_DEVICE_STATE);
 
-        mProvider.notifySupportedDeviceStates(new DeviceState[]{ DEFAULT_DEVICE_STATE,
-                OTHER_DEVICE_STATE });
+        mProvider.notifySupportedDeviceStates(new DeviceState[]{DEFAULT_DEVICE_STATE,
+                OTHER_DEVICE_STATE});
         flushHandler();
 
         // The current committed and requests states do not change because the current state remains
@@ -217,6 +223,8 @@ public final class DeviceStateManagerServiceTest {
         assertEquals(mService.getCommittedState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertEquals(mService.getPendingState(), Optional.empty());
         assertEquals(mService.getBaseState(), Optional.of(DEFAULT_DEVICE_STATE));
+        assertThat(mService.getSupportedStates()).asList().containsExactly(DEFAULT_DEVICE_STATE,
+                OTHER_DEVICE_STATE);
 
         // The callback wasn't notified about a change in supported states as the states have not
         // changed.
