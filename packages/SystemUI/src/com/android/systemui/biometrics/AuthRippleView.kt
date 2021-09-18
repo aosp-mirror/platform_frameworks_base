@@ -26,13 +26,10 @@ import android.graphics.PointF
 import android.util.AttributeSet
 import android.view.View
 import android.view.animation.PathInterpolator
-import com.android.internal.R.attr.interpolator
 import com.android.internal.graphics.ColorUtils
 import com.android.systemui.animation.Interpolators
-import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.charging.RippleShader
 
-private const val RIPPLE_ANIMATION_DURATION: Long = 1533
 private const val RIPPLE_SPARKLE_STRENGTH: Float = 0.4f
 
 /**
@@ -45,12 +42,18 @@ private const val RIPPLE_SPARKLE_STRENGTH: Float = 0.4f
  */
 class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
     private val retractInterpolator = PathInterpolator(.05f, .93f, .1f, 1f)
-    private val dwellPulseDuration = 200L
-    var dwellAlphaDuration = dwellPulseDuration
-    private val dwellExpandDuration = 1200L - dwellPulseDuration
-    private val retractDuration = 400L
 
-    var dwellAlpha: Float = .5f
+    private val dwellPulseDuration = 50L
+    private val dwellAlphaDuration = dwellPulseDuration
+    private val dwellAlpha: Float = 1f
+    private val dwellExpandDuration = 1200L - dwellPulseDuration
+
+    private val aodDwellPulseDuration = 50L
+    private var aodDwellAlphaDuration = aodDwellPulseDuration
+    private var aodDwellAlpha: Float = .8f
+    private var aodDwellExpandDuration = 1200L - aodDwellPulseDuration
+
+    private val retractDuration = 400L
     private var alphaInDuration: Long = 0
     private var unlockedRippleInProgress: Boolean = false
     private val rippleShader = RippleShader()
@@ -142,7 +145,12 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
      * Ripple that moves animates from an outer ripple ring of
      *      startRadius => endRadius => expandedRadius
      */
-    fun startDwellRipple(startRadius: Float, endRadius: Float, expandedRadius: Float) {
+    fun startDwellRipple(
+        startRadius: Float,
+        endRadius: Float,
+        expandedRadius: Float,
+        isDozing: Boolean
+    ) {
         if (unlockedRippleInProgress || dwellPulseOutAnimator?.isRunning == true) {
             return
         }
@@ -153,12 +161,13 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
         val endInitialDwellProgress = endRadius / radius / 4f
         val endExpandDwellProgress = expandedRadius / radius / 4f
 
-        val pulseOutEndAlpha = (255 * dwellAlpha).toInt()
-        val expandDwellEndAlpha = kotlin.math.min((255 * (dwellAlpha + .25f)).toInt(), 255)
+        val alpha = if (isDozing) aodDwellAlpha else dwellAlpha
+        val pulseOutEndAlpha = (255 * alpha).toInt()
+        val expandDwellEndAlpha = kotlin.math.min((255 * (alpha + .25f)).toInt(), 255)
         val dwellPulseOutRippleAnimator = ValueAnimator.ofFloat(startDwellProgress,
                 endInitialDwellProgress).apply {
             interpolator = Interpolators.LINEAR_OUT_SLOW_IN
-            duration = dwellPulseDuration
+            duration = if (isDozing) aodDwellPulseDuration else dwellPulseDuration
             addUpdateListener { animator ->
                 val now = animator.currentPlayTime
                 rippleShader.progress = animator.animatedValue as Float
@@ -170,7 +179,7 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
 
         val dwellPulseOutAlphaAnimator = ValueAnimator.ofInt(0, pulseOutEndAlpha).apply {
             interpolator = Interpolators.LINEAR
-            duration = dwellAlphaDuration
+            duration = if (isDozing) aodDwellAlphaDuration else dwellAlphaDuration
             addUpdateListener { animator ->
                 rippleShader.color = ColorUtils.setAlphaComponent(
                         rippleShader.color,
@@ -184,7 +193,7 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
         val expandDwellRippleAnimator = ValueAnimator.ofFloat(endInitialDwellProgress,
                 endExpandDwellProgress).apply {
             interpolator = Interpolators.LINEAR_OUT_SLOW_IN
-            duration = dwellExpandDuration
+            duration = if (isDozing) aodDwellExpandDuration else dwellExpandDuration
             addUpdateListener { animator ->
                 val now = animator.currentPlayTime
                 rippleShader.progress = animator.animatedValue as Float
@@ -197,7 +206,7 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
         val expandDwellAlphaAnimator = ValueAnimator.ofInt(pulseOutEndAlpha, expandDwellEndAlpha)
                 .apply {
             interpolator = Interpolators.LINEAR
-            duration = dwellExpandDuration
+            duration = if (isDozing) aodDwellExpandDuration else dwellExpandDuration
             addUpdateListener { animator ->
                 rippleShader.color = ColorUtils.setAlphaComponent(
                         rippleShader.color,
@@ -238,7 +247,7 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
     /**
      * Ripple that bursts outwards from the position of the sensor to the edges of the screen
      */
-    fun startUnlockedRipple(onAnimationEnd: Runnable?, lightReveal: LightRevealScrim?) {
+    fun startUnlockedRipple(onAnimationEnd: Runnable?) {
         if (unlockedRippleInProgress) {
             return // Ignore if ripple effect is already playing
         }
@@ -254,21 +263,13 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
 
         val rippleAnimator = ValueAnimator.ofFloat(rippleStart, 1f).apply {
             interpolator = Interpolators.LINEAR_OUT_SLOW_IN
-            duration = RIPPLE_ANIMATION_DURATION
+            duration = AuthRippleController.RIPPLE_ANIMATION_DURATION
             addUpdateListener { animator ->
                 val now = animator.currentPlayTime
                 rippleShader.progress = animator.animatedValue as Float
                 rippleShader.time = now.toFloat()
 
                 invalidate()
-            }
-        }
-
-        val revealAnimator = ValueAnimator.ofFloat(.1f, 1f).apply {
-            interpolator = rippleAnimator.interpolator
-            duration = rippleAnimator.duration
-            addUpdateListener { animator ->
-                lightReveal?.revealAmount = animator.animatedValue as Float
             }
         }
 
@@ -286,7 +287,6 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
         val animatorSet = AnimatorSet().apply {
             playTogether(
                 rippleAnimator,
-                revealAnimator,
                 alphaInAnimator
             )
             addListener(object : AnimatorListenerAdapter() {
