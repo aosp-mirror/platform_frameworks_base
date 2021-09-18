@@ -2724,9 +2724,11 @@ public class ActivityRecordTests extends WindowTestsBase {
                 mAtm, null /* fragmentToken */, false /* createdByOrganizer */);
         fragmentSetup.accept(taskFragment2, new Rect(width / 2, 0, width, height));
         task.addChild(taskFragment2, POSITION_TOP);
-        final ActivityRecord activity2 = new ActivityBuilder(mAtm).build();
+        final ActivityRecord activity2 = new ActivityBuilder(mAtm)
+                .setResizeMode(ActivityInfo.RESIZE_MODE_UNRESIZEABLE).build();
         activity2.mVisibleRequested = true;
         taskFragment2.addChild(activity2);
+        assertTrue(activity2.isResizeable());
         activity1.reparent(taskFragment1, POSITION_TOP);
 
         assertEquals(task, activity1.mStartingData.mAssociatedTask);

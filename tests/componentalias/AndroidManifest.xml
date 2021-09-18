@@ -20,10 +20,6 @@
 
     <application>
         <uses-library android:name="android.test.runner" />
+        <property android:name="com.android.EXPERIMENTAL_COMPONENT_ALIAS_OPT_IN" android:value="true" />
     </application>
-
-    <instrumentation
-        android:name="androidx.test.runner.AndroidJUnitRunner"
-        android:targetPackage="android.content.componentalias.tests" >
-    </instrumentation>
 </manifest>

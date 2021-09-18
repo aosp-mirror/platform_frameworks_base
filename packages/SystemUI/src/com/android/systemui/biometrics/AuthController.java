@@ -114,7 +114,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     @VisibleForTesting
     IBiometricSysuiReceiver mReceiver;
     @VisibleForTesting
-    @NonNull final BiometricOrientationEventListener mOrientationListener;
+    @NonNull final BiometricDisplayListener mOrientationListener;
     @Nullable private final List<FaceSensorPropertiesInternal> mFaceProps;
     @Nullable private List<FingerprintSensorPropertiesInternal> mFpProps;
     @Nullable private List<FingerprintSensorPropertiesInternal> mUdfpsProps;
@@ -459,13 +459,15 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         mSidefpsControllerFactory = sidefpsControllerFactory;
         mWindowManager = windowManager;
         mUdfpsEnrolledForUser = new SparseBooleanArray();
-        mOrientationListener = new BiometricOrientationEventListener(context,
+        mOrientationListener = new BiometricDisplayListener(
+                context,
+                displayManager,
+                handler,
+                BiometricDisplayListener.SensorType.Generic.INSTANCE,
                 () -> {
                     onOrientationChanged();
                     return Unit.INSTANCE;
-                },
-                displayManager,
-                handler);
+                });
 
         mFaceProps = mFaceManager != null ? mFaceManager.getSensorPropertiesInternal() : null;
 

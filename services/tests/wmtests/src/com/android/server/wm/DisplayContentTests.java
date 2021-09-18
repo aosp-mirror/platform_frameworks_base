@@ -1572,6 +1572,12 @@ public class DisplayContentTests extends WindowTestsBase {
         mDisplayContent.mFixedRotationTransitionListener.onFinishRecentsAnimation();
         assertTrue(displayRotation.updateRotationUnchecked(false));
 
+        // Rotation can be updated if the policy is not ok to animate (e.g. going to sleep).
+        mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(recentsActivity);
+        displayRotation.setRotation((displayRotation.getRotation() + 1) % 4);
+        ((TestWindowManagerPolicy) mWm.mPolicy).mOkToAnimate = false;
+        assertTrue(displayRotation.updateRotationUnchecked(false));
+
         // Rotation can be updated if the recents animation is animating but it is not on top, e.g.
         // switching activities in different orientations by quickstep gesture.
         mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(recentsActivity);
@@ -2334,11 +2340,10 @@ public class DisplayContentTests extends WindowTestsBase {
         // mirror.
         setUpDefaultTaskDisplayAreaWindowToken();
 
-        // GIVEN SurfaceControl can successfully mirror the provided surface.
+        // GIVEN SurfaceControl does not mirror a null surface.
         Point surfaceSize = new Point(
                 mDefaultDisplay.getDefaultTaskDisplayArea().getBounds().width(),
                 mDefaultDisplay.getDefaultTaskDisplayArea().getBounds().height());
-        surfaceControlMirrors(surfaceSize);
 
         // GIVEN a new VirtualDisplay with an associated surface.
         final VirtualDisplay display = createVirtualDisplay(surfaceSize, null /* surface */);

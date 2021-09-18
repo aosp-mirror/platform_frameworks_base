@@ -1150,8 +1150,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         && packageName.equals(service.getCredentialManagementAppPackageName())) {
                     service.removeCredentialManagementApp();
                 }
-            } catch (RemoteException | InterruptedException | IllegalStateException e) {
-                Slogf.e(LOG_TAG, "Unable to remove the credential management app");
+            } catch (RemoteException | InterruptedException | IllegalStateException
+                    | AssertionError e) {
+                Slogf.e(LOG_TAG, "Unable to remove the credential management app", e);
             }
         });
     }
@@ -3788,7 +3789,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
 
-        final CallerIdentity caller = getCallerIdentity();
+        final CallerIdentity caller = hasCallingOrSelfPermission(permission.MANAGE_DEVICE_ADMINS)
+                ? getCallerIdentity() : getCallerIdentity(adminReceiver);
         Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_REMOVE_ACTIVE_ADMIN);
         enforceUserUnlocked(userHandle);
@@ -3805,8 +3807,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         + adminReceiver);
                 return;
             }
-            Preconditions.checkCallAuthorization(admin.getUid() == caller.getUid()
-                    || hasCallingOrSelfPermission(permission.MANAGE_DEVICE_ADMINS));
+
             mInjector.binderWithCleanCallingIdentity(() ->
                     removeActiveAdminLocked(adminReceiver, userHandle));
         }

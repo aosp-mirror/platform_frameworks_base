@@ -355,6 +355,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             throw new IllegalArgumentException("reparent: can't reparent to null " + this);
         }
 
+        if (newParent == this) {
+            throw new IllegalArgumentException("Can not reparent to itself " + this);
+        }
+
         final WindowContainer oldParent = mParent;
         if (mParent == newParent) {
             throw new IllegalArgumentException("WC=" + this + " already child of " + mParent);

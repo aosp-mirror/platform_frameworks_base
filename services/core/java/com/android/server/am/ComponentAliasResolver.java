@@ -17,15 +17,20 @@ package com.android.server.am;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ComponentInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManager.Property;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Binder;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -36,6 +41,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
+import com.android.server.compat.CompatChange;
+import com.android.server.compat.PlatformCompat;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -59,6 +66,13 @@ public class ComponentAliasResolver {
     private static final String TAG = "ComponentAliasResolver";
     private static final boolean DEBUG = true;
 
+    /**
+     * This flag has to be enabled for the "android" package to use component aliases.
+     */
+    @ChangeId
+    @Disabled
+    public static final long USE_EXPERIMENTAL_COMPONENT_ALIAS = 196254758L;
+
     private final Object mLock = new Object();
     private final ActivityManagerService mAm;
     private final Context mContext;
@@ -71,6 +85,11 @@ public class ComponentAliasResolver {
 
     @GuardedBy("mLock")
     private final ArrayMap<ComponentName, ComponentName> mFromTo = new ArrayMap<>();
+
+    @GuardedBy("mLock")
+    private PlatformCompat mPlatformCompat;
+
+    private static final String OPT_IN_PROPERTY = "com.android.EXPERIMENTAL_COMPONENT_ALIAS_OPT_IN";
 
     private static final String ALIAS_FILTER_ACTION = "android.intent.action.EXPERIMENTAL_IS_ALIAS";
     private static final String META_DATA_ALIAS_TARGET = "alias_target";
@@ -114,14 +133,32 @@ public class ComponentAliasResolver {
         }
     };
 
+    private final CompatChange.ChangeListener mCompatChangeListener = (packageName) -> {
+        if (DEBUG) Slog.d(TAG, "USE_EXPERIMENTAL_COMPONENT_ALIAS changed.");
+        BackgroundThread.getHandler().post(this::refresh);
+    };
+
+    /**
+     * Call this on systemRead().
+     */
+    public void onSystemReady(String overrides) {
+        synchronized (mLock) {
+            mPlatformCompat = (PlatformCompat) ServiceManager.getService(
+                    Context.PLATFORM_COMPAT_SERVICE);
+            mPlatformCompat.registerListener(USE_EXPERIMENTAL_COMPONENT_ALIAS,
+                    mCompatChangeListener);
+        }
+        if (DEBUG) Slog.d(TAG, "Compat listener set.");
+        update(overrides);
+    }
+
     /**
      * (Re-)loads aliases from <meta-data> and the device config override.
      */
-    public void update(boolean enabled, String overrides) {
+    public void update(String overrides) {
         synchronized (mLock) {
-            if (enabled == mEnabled && Objects.equals(overrides, mOverrideString)) {
-                return;
-            }
+            final boolean enabled = mPlatformCompat.isChangeEnabledByPackageName(
+                    USE_EXPERIMENTAL_COMPONENT_ALIAS, "android", UserHandle.USER_SYSTEM);
             if (enabled != mEnabled) {
                 Slog.i(TAG, (enabled ? "Enabling" : "Disabling") + " component aliases...");
                 if (enabled) {
@@ -144,7 +181,7 @@ public class ComponentAliasResolver {
 
     private void refresh() {
         synchronized (mLock) {
-            refreshLocked();
+            update(mOverrideString);
         }
     }
 
@@ -167,18 +204,80 @@ public class ComponentAliasResolver {
         final List<ResolveInfo> services = mContext.getPackageManager().queryIntentServicesAsUser(
                 i, PACKAGE_QUERY_FLAGS, UserHandle.USER_SYSTEM);
 
-        extractAliases(services);
+        extractAliasesLocked(services);
 
         if (DEBUG) Slog.d(TAG, "Scanning receiver aliases...");
         final List<ResolveInfo> receivers = mContext.getPackageManager()
                 .queryBroadcastReceiversAsUser(i, PACKAGE_QUERY_FLAGS, UserHandle.USER_SYSTEM);
 
-        extractAliases(receivers);
+        extractAliasesLocked(receivers);
 
         // TODO: Scan for other component types as well.
     }
 
-    private void extractAliases(List<ResolveInfo> components) {
+    /**
+     * Make sure a given package is opted into component alias, by having a
+     * "com.android.EXPERIMENTAL_COMPONENT_ALIAS_OPT_IN" property set to true in the manifest.
+     *
+     * The implementation isn't optimized -- in every call we scan the package's properties,
+     * even thought we're likely going to call it with the same packages multiple times.
+     * But that's okay since this feature is experimental, and this code path won't be called
+     * until explicitly enabled.
+     */
+    @GuardedBy("mLock")
+    private boolean isEnabledForPackageLocked(String packageName) {
+        boolean enabled = false;
+        try {
+            final Property p = mContext.getPackageManager().getProperty(
+                    OPT_IN_PROPERTY, packageName);
+            enabled = p.getBoolean();
+        } catch (NameNotFoundException e) {
+        }
+        if (!enabled) {
+            Slog.w(TAG, "USE_EXPERIMENTAL_COMPONENT_ALIAS not enabled for " + packageName);
+        }
+        return enabled;
+    }
+
+    /**
+     * Make sure an alias and its target are the same package, or, the target is in a "sub" package.
+     */
+    private static boolean validateAlias(ComponentName from, ComponentName to) {
+        final String fromPackage = from.getPackageName();
+        final String toPackage = to.getPackageName();
+
+        if (Objects.equals(fromPackage, toPackage)) { // Same package?
+            return true;
+        }
+        if (toPackage.startsWith(fromPackage + ".")) { // Prefix?
+            return true;
+        }
+        Slog.w(TAG, "Invalid alias: "
+                + from.flattenToShortString() + " -> " + to.flattenToShortString());
+        return false;
+    }
+
+    @GuardedBy("mLock")
+    private void validateAndAddAliasLocked(ComponentName from, ComponentName to) {
+        if (DEBUG) {
+            Slog.d(TAG,
+                    "" + from.flattenToShortString() + " -> " + to.flattenToShortString());
+        }
+        if (!validateAlias(from, to)) {
+            return;
+        }
+
+        // Make sure both packages have
+        if (!isEnabledForPackageLocked(from.getPackageName())
+                || !isEnabledForPackageLocked(to.getPackageName())) {
+            return;
+        }
+
+        mFromTo.put(from, to);
+    }
+
+    @GuardedBy("mLock")
+    private void extractAliasesLocked(List<ResolveInfo> components) {
         for (ResolveInfo ri : components) {
             final ComponentInfo ci = ri.getComponentInfo();
             final ComponentName from = ci.getComponentName();
@@ -186,10 +285,7 @@ public class ComponentAliasResolver {
             if (to == null) {
                 continue;
             }
-            if (DEBUG) {
-                Slog.d(TAG, "" + from.flattenToShortString() + " -> " + to.flattenToShortString());
-            }
-            mFromTo.put(from, to);
+            validateAndAddAliasLocked(from, to);
         }
     }
 
@@ -221,16 +317,12 @@ public class ComponentAliasResolver {
                     continue;
                 }
 
-                if (DEBUG) {
-                    Slog.d(TAG,
-                            "" + from.flattenToShortString() + " -> " + to.flattenToShortString());
-                }
-                mFromTo.put(from, to);
+                validateAndAddAliasLocked(from, to);
             }
         }
     }
 
-    private ComponentName unflatten(String name) {
+    private static ComponentName unflatten(String name) {
         final ComponentName cn = ComponentName.unflattenFromString(name);
         if (cn != null) {
             return cn;

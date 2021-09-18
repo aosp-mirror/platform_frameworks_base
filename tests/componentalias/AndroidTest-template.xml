@@ -21,6 +21,8 @@
         <option name="test-file-name" value="ComponentAliasTests2.apk" />
     </target_preparer>
     <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
+        <option name="run-command" value="am compat enable --no-kill USE_EXPERIMENTAL_COMPONENT_ALIAS android" />
+
         <!-- Exempt the helper APKs from the BG restriction, so they can start BG services. -->
         <option name="run-command" value="cmd deviceidle whitelist +android.content.componentalias.tests" />
         <option name="run-command" value="cmd deviceidle whitelist +android.content.componentalias.tests.sub1" />

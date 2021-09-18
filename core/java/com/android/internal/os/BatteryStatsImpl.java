@@ -8578,7 +8578,7 @@ public class BatteryStatsImpl extends BatteryStats {
          * inactive so can be dropped.
          */
         @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-        public boolean reset(long uptimeUs, long realtimeUs) {
+        public boolean reset(long uptimeUs, long realtimeUs, int resetReason) {
             boolean active = false;
 
             mOnBatteryBackgroundTimeBase.init(uptimeUs, realtimeUs);
@@ -8648,7 +8648,11 @@ public class BatteryStatsImpl extends BatteryStats {
             resetIfNotNull(mBluetoothControllerActivity, false, realtimeUs);
             resetIfNotNull(mModemControllerActivity, false, realtimeUs);
 
-            MeasuredEnergyStats.resetIfNotNull(mUidMeasuredEnergyStats);
+            if (resetReason == RESET_REASON_MEASURED_ENERGY_BUCKETS_CHANGE) {
+                mUidMeasuredEnergyStats = null;
+            } else {
+                MeasuredEnergyStats.resetIfNotNull(mUidMeasuredEnergyStats);
+            }
 
             resetIfNotNull(mUserCpuTime, false, realtimeUs);
             resetIfNotNull(mSystemCpuTime, false, realtimeUs);
@@ -11332,7 +11336,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mNumConnectivityChange = 0;
 
         for (int i=0; i<mUidStats.size(); i++) {
-            if (mUidStats.valueAt(i).reset(uptimeUs, elapsedRealtimeUs)) {
+            if (mUidStats.valueAt(i).reset(uptimeUs, elapsedRealtimeUs, resetReason)) {
                 mUidStats.valueAt(i).detachFromTimeBase();
                 mUidStats.remove(mUidStats.keyAt(i));
                 i--;

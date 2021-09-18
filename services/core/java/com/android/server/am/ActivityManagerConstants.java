@@ -123,7 +123,6 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_KILL_BG_RESTRICTED_CACHED_IDLE = "kill_bg_restricted_cached_idle";
     static final String KEY_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME =
             "kill_bg_restricted_cached_idle_settle_time";
-    static final String KEY_ENABLE_COMPONENT_ALIAS = "enable_experimental_component_alias";
     static final String KEY_COMPONENT_ALIAS_OVERRIDES = "component_alias_overrides";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
@@ -200,7 +199,6 @@ final class ActivityManagerConstants extends ContentObserver {
      * Whether or not to enable the extra delays to service restarts on memory pressure.
      */
     private static final boolean DEFAULT_ENABLE_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE = true;
-    private static final boolean DEFAULT_ENABLE_COMPONENT_ALIAS = false;
     private static final String DEFAULT_COMPONENT_ALIAS_OVERRIDES = "";
 
     // Flag stored in the DeviceConfig API.
@@ -595,8 +593,6 @@ final class ActivityManagerConstants extends ContentObserver {
     @GuardedBy("mService")
     boolean mEnableExtraServiceRestartDelayOnMemPressure =
             DEFAULT_ENABLE_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE;
-    /** Whether to enable "component alias" experimental feature. */
-    volatile boolean mEnableComponentAlias = DEFAULT_ENABLE_COMPONENT_ALIAS;
 
     /**
      * Defines component aliases. Format
@@ -835,7 +831,6 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_ENABLE_EXTRA_SERVICE_RESTART_DELAY_ON_MEM_PRESSURE:
                                 updateEnableExtraServiceRestartDelayOnMemPressure();
                                 break;
-                            case KEY_ENABLE_COMPONENT_ALIAS:
                             case KEY_COMPONENT_ALIAS_OVERRIDES:
                                 updateComponentAliases();
                                 break;
@@ -1274,15 +1269,11 @@ final class ActivityManagerConstants extends ContentObserver {
     }
 
     private void updateComponentAliases() {
-        mEnableComponentAlias = DeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                KEY_ENABLE_COMPONENT_ALIAS,
-                DEFAULT_ENABLE_COMPONENT_ALIAS);
         mComponentAliasOverrides = DeviceConfig.getString(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_COMPONENT_ALIAS_OVERRIDES,
                 DEFAULT_COMPONENT_ALIAS_OVERRIDES);
-        mService.mComponentAliasResolver.update(mEnableComponentAlias, mComponentAliasOverrides);
+        mService.mComponentAliasResolver.update(mComponentAliasOverrides);
     }
 
     private void updateProcessKillTimeout() {
@@ -1521,8 +1512,6 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("="); pw.println(mPushMessagingOverQuotaBehavior);
         pw.print("  "); pw.print(KEY_FGS_ALLOW_OPT_OUT);
         pw.print("="); pw.println(mFgsAllowOptOut);
-        pw.print("  "); pw.print(KEY_ENABLE_COMPONENT_ALIAS);
-        pw.print("="); pw.println(mEnableComponentAlias);
         pw.print("  "); pw.print(KEY_COMPONENT_ALIAS_OVERRIDES);
         pw.print("="); pw.println(mComponentAliasOverrides);
 

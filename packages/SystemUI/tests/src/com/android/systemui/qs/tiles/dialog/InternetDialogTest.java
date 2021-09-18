@@ -67,6 +67,7 @@ public class InternetDialogTest extends SysuiTestCase {
     private InternetDialog mInternetDialog;
     private View mDialogView;
     private View mSubTitle;
+    private LinearLayout mEthernet;
     private LinearLayout mMobileDataToggle;
     private LinearLayout mWifiToggle;
     private LinearLayout mConnectedWifi;
@@ -97,6 +98,7 @@ public class InternetDialogTest extends SysuiTestCase {
 
         mDialogView = mInternetDialog.mDialogView;
         mSubTitle = mDialogView.requireViewById(R.id.internet_dialog_subtitle);
+        mEthernet = mDialogView.requireViewById(R.id.ethernet_layout);
         mMobileDataToggle = mDialogView.requireViewById(R.id.mobile_network_layout);
         mWifiToggle = mDialogView.requireViewById(R.id.turn_on_wifi_layout);
         mConnectedWifi = mDialogView.requireViewById(R.id.wifi_connected_layout);
@@ -136,6 +138,46 @@ public class InternetDialogTest extends SysuiTestCase {
         mInternetDialog.updateDialog();
 
         assertThat(mSubTitle.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void updateDialog_apmOffAndHasEthernet_showEthernet() {
+        when(mInternetDialogController.isAirplaneModeEnabled()).thenReturn(false);
+        when(mInternetDialogController.hasEthernet()).thenReturn(true);
+
+        mInternetDialog.updateDialog();
+
+        assertThat(mEthernet.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void updateDialog_apmOffAndNoEthernet_hideEthernet() {
+        when(mInternetDialogController.isAirplaneModeEnabled()).thenReturn(false);
+        when(mInternetDialogController.hasEthernet()).thenReturn(false);
+
+        mInternetDialog.updateDialog();
+
+        assertThat(mEthernet.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void updateDialog_apmOnAndHasEthernet_showEthernet() {
+        when(mInternetDialogController.isAirplaneModeEnabled()).thenReturn(true);
+        when(mInternetDialogController.hasEthernet()).thenReturn(true);
+
+        mInternetDialog.updateDialog();
+
+        assertThat(mEthernet.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void updateDialog_apmOnAndNoEthernet_hideEthernet() {
+        when(mInternetDialogController.isAirplaneModeEnabled()).thenReturn(true);
+        when(mInternetDialogController.hasEthernet()).thenReturn(false);
+
+        mInternetDialog.updateDialog();
+
+        assertThat(mEthernet.getVisibility()).isEqualTo(View.GONE);
     }
 
     @Test

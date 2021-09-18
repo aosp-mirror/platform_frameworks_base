@@ -151,9 +151,17 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         }
 
         public void reportUnlockAttempt(int userId, boolean success, int timeoutMs) {
+            int bouncerSide = SysUiStatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__SIDE__DEFAULT;
+            if (canUseOneHandedBouncer()) {
+                bouncerSide = isOneHandedKeyguardLeftAligned()
+                        ? SysUiStatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__SIDE__LEFT
+                        : SysUiStatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__SIDE__RIGHT;
+            }
+
             if (success) {
                 SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED,
-                        SysUiStatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__RESULT__SUCCESS);
+                        SysUiStatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__RESULT__SUCCESS,
+                        bouncerSide);
                 mLockPatternUtils.reportSuccessfulPasswordAttempt(userId);
                 // Force a garbage collection in an attempt to erase any lockscreen password left in
                 // memory. Do it asynchronously with a 5-sec delay to avoid making the keyguard
@@ -168,7 +176,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 });
             } else {
                 SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED,
-                        SysUiStatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__RESULT__FAILURE);
+                        SysUiStatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__RESULT__FAILURE,
+                        bouncerSide);
                 reportFailedUnlockAttempt(userId, timeoutMs);
             }
             mMetricsLogger.write(new LogMaker(MetricsEvent.BOUNCER)
@@ -314,6 +323,14 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     @Override
     public void onResume(int reason) {
         if (mCurrentSecurityMode != SecurityMode.None) {
+            int state = SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SHOWN;
+            if (canUseOneHandedBouncer()) {
+                state = mView.isOneHandedModeLeftAligned()
+                        ? SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SHOWN_LEFT
+                        : SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SHOWN_RIGHT;
+            }
+            SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED, state);
+
             getCurrentSecurityController().onResume(reason);
         }
         mView.onResume(
