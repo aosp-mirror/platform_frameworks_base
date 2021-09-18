@@ -8,13 +8,13 @@ import android.content.res.Configuration
 import android.database.ContentObserver
 import android.os.Handler
 import android.provider.Settings
-import com.android.systemui.statusbar.StatusBarState
 import android.view.View
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.statusbar.LightRevealScrim
+import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.StatusBarStateControllerImpl
 import com.android.systemui.statusbar.notification.AnimatableProperty
 import com.android.systemui.statusbar.notification.PropertyAnimator
@@ -61,6 +61,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
     private var shouldAnimateInKeyguard = false
     private var lightRevealAnimationPlaying = false
     private var aodUiAnimationPlaying = false
+    private var callbacks = HashSet<Callback>()
 
     /**
      * The result of our decision whether to play the screen off animation in
@@ -72,11 +73,17 @@ class UnlockedScreenOffAnimationController @Inject constructor(
     private val lightRevealAnimator = ValueAnimator.ofFloat(1f, 0f).apply {
         duration = LIGHT_REVEAL_ANIMATION_DURATION
         interpolator = Interpolators.LINEAR
-        addUpdateListener { lightRevealScrim.revealAmount = it.animatedValue as Float }
+        addUpdateListener {
+            lightRevealScrim.revealAmount = it.animatedValue as Float
+            sendUnlockedScreenOffProgressUpdate(
+                    1f - (it.animatedFraction as Float),
+                    1f - (it.animatedValue as Float))
+        }
         addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationCancel(animation: Animator?) {
                 lightRevealScrim.revealAmount = 1f
                 lightRevealAnimationPlaying = false
+                sendUnlockedScreenOffProgressUpdate(0f, 0f)
             }
 
             override fun onAnimationEnd(animation: Animator?) {
@@ -243,7 +250,21 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         return true
     }
 
-    /**
+    fun addCallback(callback: Callback) {
+        callbacks.add(callback)
+    }
+
+    fun removeCallback(callback: Callback) {
+        callbacks.remove(callback)
+    }
+
+    fun sendUnlockedScreenOffProgressUpdate(linear: Float, eased: Float) {
+        callbacks.forEach {
+            it.onUnlockedScreenOffProgressUpdate(linear, eased)
+        }
+    }
+
+/**
      * Whether we're doing the light reveal animation or we're done with that and animating in the
      * AOD UI.
      */
@@ -261,5 +282,9 @@ class UnlockedScreenOffAnimationController @Inject constructor(
      */
     fun isScreenOffLightRevealAnimationPlaying(): Boolean {
         return lightRevealAnimationPlaying
+    }
+
+    interface Callback {
+        fun onUnlockedScreenOffProgressUpdate(linear: Float, eased: Float)
     }
 }

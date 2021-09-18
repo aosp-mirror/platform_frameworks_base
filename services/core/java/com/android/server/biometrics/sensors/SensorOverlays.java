@@ -68,7 +68,7 @@ public final class SensorOverlays {
             @NonNull AcquisitionClient<?> client) {
         if (mSidefpsController.isPresent()) {
             try {
-                mSidefpsController.get().show();
+                mSidefpsController.get().show(sensorId, reason);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception when showing the side-fps overlay", e);
             }
@@ -99,7 +99,7 @@ public final class SensorOverlays {
     public void hide(int sensorId) {
         if (mSidefpsController.isPresent()) {
             try {
-                mSidefpsController.get().hide();
+                mSidefpsController.get().hide(sensorId);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception when hiding the side-fps overlay", e);
             }

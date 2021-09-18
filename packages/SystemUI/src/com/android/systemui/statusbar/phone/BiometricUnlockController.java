@@ -116,7 +116,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
 
     /**
      * Mode in which fingerprint unlocks the device or passive auth (ie face auth) unlocks the
-     * device while being requested when keyguard is occluded.
+     * device while being requested when keyguard is occluded or showing.
      */
     public static final int MODE_UNLOCK_COLLAPSING = 5;
 
@@ -425,6 +425,11 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                 if (!wasDeviceInteractive) {
                     mPendingShowBouncer = true;
                 } else {
+                    mShadeController.animateCollapsePanels(
+                            CommandQueue.FLAG_EXCLUDE_NONE,
+                            true /* force */,
+                            false /* delayed */,
+                            BIOMETRIC_COLLAPSE_SPEEDUP_FACTOR);
                     mPendingShowBouncer = false;
                     mKeyguardViewController.notifyKeyguardAuthenticated(
                             false /* strongAuth */);

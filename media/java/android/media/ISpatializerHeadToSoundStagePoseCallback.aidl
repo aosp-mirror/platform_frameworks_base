@@ -13,17 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.hardware.fingerprint;
+
+package android.media;
 
 /**
- * Interface for interacting with the side fingerprint sensor (side-fps) overlay.
- * @hide
+ * AIDL for the AudioService to signal Spatializer state changes.
+ *
+ * {@hide}
  */
-oneway interface ISidefpsController {
+oneway interface ISpatializerHeadToSoundStagePoseCallback {
 
-    // Shows the overlay for the given sensor with a reason from BiometricOverlayConstants.
-    void show(int sensorId, int reason);
-
-    // Hides the overlay.
-    void hide(int sensorId);
+    /**
+     * The pose is sent as an array of 6 float values, the first 3 are the translation vector, the
+     * other 3 are the rotation vector.
+     */
+    void dispatchPoseChanged(in float[] pose);
 }

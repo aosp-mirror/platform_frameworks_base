@@ -24,7 +24,6 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Property;
-import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.InsetsSource;
 import android.view.InsetsState;
@@ -178,10 +177,12 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
             return true;
         }
 
+        // Convert to use screen-based coordinates to prevent lost track of motion events while
+        // moving divider bar and calculating dragging velocity.
+        event.setLocation(event.getRawX(), event.getRawY());
         final int action = event.getAction() & MotionEvent.ACTION_MASK;
         final boolean isLandscape = isLandscape();
-        // Using raw xy to prevent lost track of motion events while moving divider bar.
-        final int touchPos = isLandscape ? (int) event.getRawX() : (int) event.getRawY();
+        final int touchPos = (int) (isLandscape ? event.getX() : event.getY());
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 mVelocityTracker = VelocityTracker.obtain();
