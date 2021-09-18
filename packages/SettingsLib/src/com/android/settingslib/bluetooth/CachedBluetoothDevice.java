@@ -88,6 +88,8 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     boolean mJustDiscovered;
 
+    boolean mIsCoordinatedSetMember = false;
+
     private final Collection<Callback> mCallbacks = new CopyOnWriteArrayList<>();
 
     /**
@@ -318,6 +320,24 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     public boolean isHearingAidDevice() {
         return mHiSyncId != BluetoothHearingAid.HI_SYNC_ID_INVALID;
+    }
+
+    /**
+     * Mark the discovered device as member of coordinated set.
+     *
+     * @param isCoordinatedSetMember {@code true}, if the device is a member of a coordinated set.
+     */
+    public void setIsCoordinatedSetMember(boolean isCoordinatedSetMember) {
+        mIsCoordinatedSetMember = isCoordinatedSetMember;
+    }
+
+    /**
+     * Check if the device is a CSIP member device.
+     *
+     * @return {@code true}, if this device supports CSIP, otherwise returns {@code false}.
+     */
+    public boolean isCoordinatedSetMemberDevice() {
+        return mIsCoordinatedSetMember;
     }
 
     void onBondingDockConnect() {
