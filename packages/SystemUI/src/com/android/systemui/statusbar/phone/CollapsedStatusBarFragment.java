@@ -42,6 +42,7 @@ import com.android.systemui.animation.Interpolators;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.DisableFlagsLogger.DisableState;
 import com.android.systemui.statusbar.OperatorNameView;
 import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.StatusBarState;
@@ -93,6 +94,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
     private DarkIconManager mDarkIconManager;
     private final CommandQueue mCommandQueue;
+    private final CollapsedStatusBarFragmentLogger mCollapsedStatusBarFragmentLogger;
     private final OperatorNameViewController.Factory mOperatorNameViewControllerFactory;
     private final OngoingCallController mOngoingCallController;
     private final SystemStatusAnimationScheduler mAnimationScheduler;
@@ -131,6 +133,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             StatusBarStateController statusBarStateController,
             Lazy<Optional<StatusBar>> statusBarOptionalLazy,
             CommandQueue commandQueue,
+            CollapsedStatusBarFragmentLogger collapsedStatusBarFragmentLogger,
             OperatorNameViewController.Factory operatorNameViewControllerFactory
     ) {
         mOngoingCallController = ongoingCallController;
@@ -144,6 +147,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mStatusBarStateController = statusBarStateController;
         mStatusBarOptionalLazy = statusBarOptionalLazy;
         mCommandQueue = commandQueue;
+        mCollapsedStatusBarFragmentLogger = collapsedStatusBarFragmentLogger;
         mOperatorNameViewControllerFactory = operatorNameViewControllerFactory;
     }
 
@@ -244,7 +248,14 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         if (displayId != getContext().getDisplayId()) {
             return;
         }
+
+        int state1BeforeAdjustment = state1;
         state1 = adjustDisableFlags(state1);
+
+        mCollapsedStatusBarFragmentLogger.logDisableFlagChange(
+                new DisableState(state1BeforeAdjustment, state2),
+                new DisableState(state1, state2));
+
         final int old1 = mDisabled1;
         final int diff1 = state1 ^ old1;
         final int old2 = mDisabled2;

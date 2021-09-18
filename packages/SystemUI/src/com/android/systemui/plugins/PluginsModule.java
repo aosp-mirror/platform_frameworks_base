@@ -102,6 +102,7 @@ public abstract class PluginsModule {
     }
 
     @Provides
+    @Singleton
     static PluginManager providesPluginManager(
             Context context,
             PluginActionManager.Factory instanceManagerFactory,

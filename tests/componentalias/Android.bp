@@ -51,6 +51,7 @@ android_test {
     package_name: "android.content.componentalias.tests",
     manifest: "AndroidManifest.xml",
     additional_manifests: [
+        "AndroidManifest_main.xml",
         "AndroidManifest_service_aliases.xml",
         "AndroidManifest_service_targets.xml",
     ],
@@ -65,7 +66,7 @@ android_test {
     package_name: "android.content.componentalias.tests.sub1",
     manifest: "AndroidManifest.xml",
     additional_manifests: [
-        "AndroidManifest_service_aliases.xml",
+        "AndroidManifest_sub1.xml",
         "AndroidManifest_service_targets.xml",
     ],
     test_config_template: "AndroidTest-template.xml",
@@ -79,7 +80,7 @@ android_test {
     package_name: "android.content.componentalias.tests.sub2",
     manifest: "AndroidManifest.xml",
     additional_manifests: [
-        "AndroidManifest_service_aliases.xml",
+        "AndroidManifest_sub2.xml",
         "AndroidManifest_service_targets.xml",
     ],
     test_config_template: "AndroidTest-template.xml",

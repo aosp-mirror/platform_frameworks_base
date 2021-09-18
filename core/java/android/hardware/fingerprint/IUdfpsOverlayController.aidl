@@ -22,13 +22,6 @@ import android.hardware.fingerprint.IUdfpsOverlayControllerCallback;
  * @hide
  */
 oneway interface IUdfpsOverlayController {
-    const int REASON_UNKNOWN = 0;
-    const int REASON_ENROLL_FIND_SENSOR = 1;
-    const int REASON_ENROLL_ENROLLING = 2;
-    const int REASON_AUTH_BP = 3; // BiometricPrompt
-    const int REASON_AUTH_FPM_KEYGUARD = 4; // FingerprintManager usage from Keyguard
-    const int REASON_AUTH_FPM_OTHER = 5; // Other FingerprintManager usage
-
     // Shows the overlay.
     void showUdfpsOverlay(int sensorId, int reason, IUdfpsOverlayControllerCallback callback);
 

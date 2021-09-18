@@ -16,7 +16,7 @@
 
 package com.android.systemui.biometrics;
 
-import static android.hardware.fingerprint.IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD;
+import static android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD;
 
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
@@ -32,6 +32,8 @@ import android.content.IntentFilter;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.RectF;
+import android.hardware.biometrics.BiometricOverlayConstants;
+import android.hardware.biometrics.SensorLocationInternal;
 import android.hardware.display.DisplayManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
@@ -127,7 +129,7 @@ public class UdfpsController implements DozeReceiver {
     @NonNull private final SystemClock mSystemClock;
     @NonNull private final UnlockedScreenOffAnimationController
             mUnlockedScreenOffAnimationController;
-    @VisibleForTesting @NonNull final BiometricOrientationEventListener mOrientationListener;
+    @VisibleForTesting @NonNull final BiometricDisplayListener mOrientationListener;
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
     @VisibleForTesting final FingerprintSensorPropertiesInternal mSensorProps;
@@ -240,8 +242,8 @@ public class UdfpsController implements DozeReceiver {
                 @NonNull IUdfpsOverlayControllerCallback callback) {
             mFgExecutor.execute(() -> {
                 final UdfpsEnrollHelper enrollHelper;
-                if (reason == IUdfpsOverlayController.REASON_ENROLL_FIND_SENSOR
-                        || reason == IUdfpsOverlayController.REASON_ENROLL_ENROLLING) {
+                if (reason == BiometricOverlayConstants.REASON_ENROLL_FIND_SENSOR
+                        || reason == BiometricOverlayConstants.REASON_ENROLL_ENROLLING) {
                     enrollHelper = new UdfpsEnrollHelper(mContext, reason);
                 } else {
                     enrollHelper = null;
@@ -319,7 +321,7 @@ public class UdfpsController implements DozeReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (mServerRequest != null
-                    && mServerRequest.mRequestReason != REASON_AUTH_FPM_KEYGUARD
+                    && mServerRequest.mRequestReason != REASON_AUTH_KEYGUARD
                     && Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
                 Log.d(TAG, "ACTION_CLOSE_SYSTEM_DIALOGS received, mRequestReason: "
                         + mServerRequest.mRequestReason);
@@ -554,14 +556,6 @@ public class UdfpsController implements DozeReceiver {
         mHbmProvider = hbmProvider.orElse(null);
         screenLifecycle.addObserver(mScreenObserver);
         mScreenOn = screenLifecycle.getScreenState() == ScreenLifecycle.SCREEN_ON;
-        mOrientationListener = new BiometricOrientationEventListener(
-                context,
-                () -> {
-                    onOrientationChanged();
-                    return Unit.INSTANCE;
-                },
-                displayManager,
-                mainHandler);
         mKeyguardBypassController = keyguardBypassController;
         mConfigurationController = configurationController;
         mSystemClock = systemClock;
@@ -570,6 +564,15 @@ public class UdfpsController implements DozeReceiver {
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists
         checkArgument(mSensorProps != null);
+        mOrientationListener = new BiometricDisplayListener(
+                context,
+                displayManager,
+                mainHandler,
+                new BiometricDisplayListener.SensorType.UnderDisplayFingerprint(mSensorProps),
+                () -> {
+                    onOrientationChanged();
+                    return Unit.INSTANCE;
+                });
 
         mCoreLayoutParams = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG,
@@ -639,10 +642,11 @@ public class UdfpsController implements DozeReceiver {
         // on lockscreen and for the udfps light reveal animation on keyguard.
         // Keyguard is only shown in portrait mode for now, so this will need to
         // be updated if that ever changes.
-        return new RectF(mSensorProps.sensorLocationX - mSensorProps.sensorRadius,
-                mSensorProps.sensorLocationY - mSensorProps.sensorRadius,
-                mSensorProps.sensorLocationX + mSensorProps.sensorRadius,
-                mSensorProps.sensorLocationY + mSensorProps.sensorRadius);
+        final SensorLocationInternal location = mSensorProps.getLocation();
+        return new RectF(location.sensorLocationX - location.sensorRadius,
+                location.sensorLocationY - location.sensorRadius,
+                location.sensorLocationX + location.sensorRadius,
+                location.sensorLocationY + location.sensorRadius);
     }
 
     private void updateOverlay() {
@@ -680,10 +684,11 @@ public class UdfpsController implements DozeReceiver {
         }
 
         // Default dimensions assume portrait mode.
-        mCoreLayoutParams.x = mSensorProps.sensorLocationX - mSensorProps.sensorRadius - paddingX;
-        mCoreLayoutParams.y = mSensorProps.sensorLocationY - mSensorProps.sensorRadius - paddingY;
-        mCoreLayoutParams.height = 2 * mSensorProps.sensorRadius + 2 * paddingX;
-        mCoreLayoutParams.width = 2 * mSensorProps.sensorRadius + 2 * paddingY;
+        final SensorLocationInternal location = mSensorProps.getLocation();
+        mCoreLayoutParams.x = location.sensorLocationX - location.sensorRadius - paddingX;
+        mCoreLayoutParams.y = location.sensorLocationY - location.sensorRadius - paddingY;
+        mCoreLayoutParams.height = 2 * location.sensorRadius + 2 * paddingX;
+        mCoreLayoutParams.width = 2 * location.sensorRadius + 2 * paddingY;
 
         Point p = new Point();
         // Gets the size based on the current rotation of the display.
@@ -698,9 +703,9 @@ public class UdfpsController implements DozeReceiver {
                 } else {
                     Log.v(TAG, "rotate udfps location ROTATION_90");
                 }
-                mCoreLayoutParams.x = mSensorProps.sensorLocationY - mSensorProps.sensorRadius
+                mCoreLayoutParams.x = location.sensorLocationY - location.sensorRadius
                         - paddingX;
-                mCoreLayoutParams.y = p.y - mSensorProps.sensorLocationX - mSensorProps.sensorRadius
+                mCoreLayoutParams.y = p.y - location.sensorLocationX - location.sensorRadius
                         - paddingY;
                 break;
 
@@ -711,9 +716,9 @@ public class UdfpsController implements DozeReceiver {
                 } else {
                     Log.v(TAG, "rotate udfps location ROTATION_270");
                 }
-                mCoreLayoutParams.x = p.x - mSensorProps.sensorLocationY - mSensorProps.sensorRadius
+                mCoreLayoutParams.x = p.x - location.sensorLocationY - location.sensorRadius
                         - paddingX;
-                mCoreLayoutParams.y = mSensorProps.sensorLocationX - mSensorProps.sensorRadius
+                mCoreLayoutParams.y = location.sensorLocationX - location.sensorRadius
                         - paddingY;
                 break;
 
@@ -763,9 +768,9 @@ public class UdfpsController implements DozeReceiver {
 
                 // This view overlaps the sensor area, so prevent it from being selectable
                 // during a11y.
-                if (reason == IUdfpsOverlayController.REASON_ENROLL_FIND_SENSOR
-                        || reason == IUdfpsOverlayController.REASON_ENROLL_ENROLLING
-                        || reason == IUdfpsOverlayController.REASON_AUTH_BP) {
+                if (reason == BiometricOverlayConstants.REASON_ENROLL_FIND_SENSOR
+                        || reason == BiometricOverlayConstants.REASON_ENROLL_ENROLLING
+                        || reason == BiometricOverlayConstants.REASON_AUTH_BP) {
                     mView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
                 }
 
@@ -783,8 +788,8 @@ public class UdfpsController implements DozeReceiver {
 
     private UdfpsAnimationViewController inflateUdfpsAnimation(int reason) {
         switch (reason) {
-            case IUdfpsOverlayController.REASON_ENROLL_FIND_SENSOR:
-            case IUdfpsOverlayController.REASON_ENROLL_ENROLLING:
+            case BiometricOverlayConstants.REASON_ENROLL_FIND_SENSOR:
+            case BiometricOverlayConstants.REASON_ENROLL_ENROLLING:
                 UdfpsEnrollView enrollView = (UdfpsEnrollView) mInflater.inflate(
                         R.layout.udfps_enroll_view, null);
                 mView.addView(enrollView);
@@ -796,7 +801,7 @@ public class UdfpsController implements DozeReceiver {
                         mStatusBarOptional,
                         mDumpManager
                 );
-            case IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD:
+            case BiometricOverlayConstants.REASON_AUTH_KEYGUARD:
                 UdfpsKeyguardView keyguardView = (UdfpsKeyguardView)
                         mInflater.inflate(R.layout.udfps_keyguard_view, null);
                 mView.addView(keyguardView);
@@ -814,7 +819,7 @@ public class UdfpsController implements DozeReceiver {
                         mUnlockedScreenOffAnimationController,
                         this
                 );
-            case IUdfpsOverlayController.REASON_AUTH_BP:
+            case BiometricOverlayConstants.REASON_AUTH_BP:
                 // note: empty controller, currently shows no visual affordance
                 UdfpsBpView bpView = (UdfpsBpView) mInflater.inflate(R.layout.udfps_bp_view, null);
                 mView.addView(bpView);
@@ -824,7 +829,7 @@ public class UdfpsController implements DozeReceiver {
                         mStatusBarOptional,
                         mDumpManager
                 );
-            case IUdfpsOverlayController.REASON_AUTH_FPM_OTHER:
+            case BiometricOverlayConstants.REASON_AUTH_OTHER:
                 UdfpsFpmOtherView authOtherView = (UdfpsFpmOtherView)
                         mInflater.inflate(R.layout.udfps_fpm_other_view, null);
                 mView.addView(authOtherView);

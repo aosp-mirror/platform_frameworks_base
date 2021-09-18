@@ -271,9 +271,11 @@ public class PendingIntentController {
         }
     }
 
-    void registerIntentSenderCancelListener(IIntentSender sender, IResultReceiver receiver) {
+    boolean registerIntentSenderCancelListener(IIntentSender sender, IResultReceiver receiver) {
         if (!(sender instanceof PendingIntentRecord)) {
-            return;
+            Slog.w(TAG, "registerIntentSenderCancelListener called on non-PendingIntentRecord");
+            // In this case, it's not "success", but we don't know if it's canceld either.
+            return true;
         }
         boolean isCancelled;
         synchronized (mLock) {
@@ -281,12 +283,9 @@ public class PendingIntentController {
             isCancelled = pendingIntent.canceled;
             if (!isCancelled) {
                 pendingIntent.registerCancelListenerLocked(receiver);
-            }
-        }
-        if (isCancelled) {
-            try {
-                receiver.send(Activity.RESULT_CANCELED, null);
-            } catch (RemoteException e) {
+                return true;
+            } else {
+                return false;
             }
         }
     }

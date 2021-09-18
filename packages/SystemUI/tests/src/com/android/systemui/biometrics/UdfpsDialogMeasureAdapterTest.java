@@ -19,6 +19,7 @@ package com.android.systemui.biometrics;
 import static org.junit.Assert.assertEquals;
 
 import android.hardware.biometrics.ComponentInfoInternal;
+import android.hardware.biometrics.SensorLocationInternal;
 import android.hardware.biometrics.SensorProperties;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
@@ -61,8 +62,9 @@ public class UdfpsDialogMeasureAdapterTest extends SysuiTestCase {
                 0 /* sensorId */, SensorProperties.STRENGTH_STRONG, 5 /* maxEnrollmentsPerUser */,
                 componentInfo,
                 FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
-                true /* resetLockoutRequiresHardwareAuthToken */, sensorLocationX, sensorLocationY,
-                sensorRadius);
+                true /* resetLockoutRequiresHardwareAuthToken */,
+                List.of(new SensorLocationInternal("" /* displayId */,
+                        sensorLocationX, sensorLocationY, sensorRadius)));
 
         assertEquals(970,
                 UdfpsDialogMeasureAdapter.calculateBottomSpacerHeightForPortrait(
@@ -125,8 +127,9 @@ public class UdfpsDialogMeasureAdapterTest extends SysuiTestCase {
                 0 /* sensorId */, SensorProperties.STRENGTH_STRONG, 5 /* maxEnrollmentsPerUser */,
                 componentInfo,
                 FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
-                true /* resetLockoutRequiresHardwareAuthToken */, sensorLocationX, sensorLocationY,
-                sensorRadius);
+                true /* resetLockoutRequiresHardwareAuthToken */,
+                List.of(new SensorLocationInternal("" /* displayId */,
+                        sensorLocationX, sensorLocationY, sensorRadius)));
 
         assertEquals(1205,
                 UdfpsDialogMeasureAdapter.calculateHorizontalSpacerWidthForLandscape(

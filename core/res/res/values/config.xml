@@ -4570,6 +4570,20 @@
       -->
     </integer-array>
 
+    <!-- An array of arrays of side fingerprint sensor properties relative to each display.
+         Note: this value is temporary and is expected to be queried directly
+         from the HAL in the future. -->
+    <array name="config_sfps_sensor_props" translatable="false">
+        <!--
+            <array>
+                <item>displayId</item>
+                <item>sensorLocationX</item>
+                <item>sensorLocationY</item>
+                <item>sensorRadius</item>
+            <array>
+        -->
+    </array>
+
     <!-- How long it takes for the HW to start illuminating after the illumination is requested. -->
     <integer name="config_udfps_illumination_transition_ms">50</integer>
 

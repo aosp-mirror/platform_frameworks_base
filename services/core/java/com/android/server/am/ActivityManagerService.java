@@ -4838,10 +4838,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         showConsoleNotificationIfActive();
 
         t.traceEnd();
-
-        // Load the component aliases.
-        mComponentAliasResolver.update(
-                mConstants.mEnableComponentAlias, mConstants.mComponentAliasOverrides);
     }
 
     private void showConsoleNotificationIfActive() {
@@ -5054,8 +5050,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void registerIntentSenderCancelListener(IIntentSender sender, IResultReceiver receiver) {
-        mPendingIntentController.registerIntentSenderCancelListener(sender, receiver);
+    public boolean registerIntentSenderCancelListenerEx(
+            IIntentSender sender, IResultReceiver receiver) {
+        return mPendingIntentController.registerIntentSenderCancelListener(sender, receiver);
     }
 
     @Override
@@ -7827,6 +7824,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             t.traceEnd(); // setBinderProxies
 
             t.traceEnd(); // ActivityManagerStartApps
+
+            // Load the component aliases.
+            t.traceBegin("componentAlias");
+            mComponentAliasResolver.onSystemReady(mConstants.mComponentAliasOverrides);
+            t.traceEnd(); // componentAlias
+
             t.traceEnd(); // PhaseActivityManagerReady
         }
     }
