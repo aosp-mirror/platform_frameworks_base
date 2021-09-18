@@ -157,6 +157,7 @@ public final class SurfaceControl implements Parcelable {
     private static native boolean nativeGetAnimationFrameStats(WindowAnimationFrameStats outStats);
 
     private static native long[] nativeGetPhysicalDisplayIds();
+    private static native long nativeGetPrimaryPhysicalDisplayId();
     private static native IBinder nativeGetPhysicalDisplayToken(long physicalDisplayId);
     private static native IBinder nativeCreateDisplay(String name, boolean secure);
     private static native void nativeDestroyDisplay(IBinder displayToken);
@@ -2274,6 +2275,15 @@ public final class SurfaceControl implements Parcelable {
      */
     public static long[] getPhysicalDisplayIds() {
         return nativeGetPhysicalDisplayIds();
+    }
+
+    /**
+     * Exposed to identify the correct display to apply the primary display orientation. Avoid using
+     * for any other purpose.
+     * @hide
+     */
+    public static long getPrimaryPhysicalDisplayId() {
+        return nativeGetPrimaryPhysicalDisplayId();
     }
 
     /**

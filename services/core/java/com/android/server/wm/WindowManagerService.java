@@ -172,8 +172,10 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
-import android.hardware.configstore.V1_0.ISurfaceFlingerConfigs;
 import android.hardware.configstore.V1_0.OptionalBool;
+import android.hardware.configstore.V1_1.DisplayOrientation;
+import android.hardware.configstore.V1_1.ISurfaceFlingerConfigs;
+import android.hardware.configstore.V1_1.OptionalDisplayOrientation;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.InputManager;
@@ -225,6 +227,7 @@ import android.util.TypedValue;
 import android.util.proto.ProtoOutputStream;
 import android.view.Choreographer;
 import android.view.Display;
+import android.view.DisplayAddress;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IAppTransitionAnimationSpecsFuture;
@@ -450,6 +453,8 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     static final boolean ENABLE_FIXED_ROTATION_TRANSFORM =
             SystemProperties.getBoolean("persist.wm.fixed_rotation_transform", true);
+    private @Surface.Rotation int mPrimaryDisplayOrientation = Surface.ROTATION_0;
+    private DisplayAddress mPrimaryDisplayPhysicalAddress;
 
     // Enums for animation scale update types.
     @Retention(RetentionPolicy.SOURCE)
@@ -2459,16 +2464,21 @@ public class WindowManagerService extends IWindowManager.Stub
             configChanged = displayContent.updateOrientation();
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
 
-            final DisplayInfo rotatedDisplayInfo =
-                    win.mToken.getFixedRotationTransformDisplayInfo();
-            if (rotatedDisplayInfo != null) {
-                outSurfaceControl.setTransformHint(rotatedDisplayInfo.rotation);
-            } else {
-                // We have to update the transform hint of display here, but we need to get if from
-                // SurfaceFlinger, so set it as rotation of display for most cases, then
-                // SurfaceFlinger would still update the transform hint of display in next frame.
-                outSurfaceControl.setTransformHint(displayContent.getDisplayInfo().rotation);
+            final DisplayInfo displayInfo = win.getDisplayInfo();
+            int transformHint = displayInfo.rotation;
+            // If the window is on the primary display, use the panel orientation to adjust the
+            // transform hint
+            final boolean isPrimaryDisplay = displayInfo.address != null &&
+                    displayInfo.address.equals(mPrimaryDisplayPhysicalAddress);
+            if (isPrimaryDisplay) {
+                transformHint = (transformHint + mPrimaryDisplayOrientation) % 4;
             }
+            outSurfaceControl.setTransformHint(transformHint);
+            ProtoLog.v(WM_DEBUG_ORIENTATION,
+                    "Passing transform hint %d for window %s%s",
+                    transformHint, win,
+                    isPrimaryDisplay ? " on primary display with orientation "
+                            + mPrimaryDisplayOrientation : "");
 
             if (toBeDisplayed && win.mIsWallpaper) {
                 displayContent.mWallpaperController.updateWallpaperOffset(win, false /* sync */);
@@ -4874,6 +4884,9 @@ public class WindowManagerService extends IWindowManager.Stub
         mTaskSnapshotController.systemReady();
         mHasWideColorGamutSupport = queryWideColorGamutSupport();
         mHasHdrSupport = queryHdrSupport();
+        mPrimaryDisplayOrientation = queryPrimaryDisplayOrientation();
+        mPrimaryDisplayPhysicalAddress =
+            DisplayAddress.fromPhysicalDisplayId(SurfaceControl.getPrimaryPhysicalDisplayId());
         UiThread.getHandler().post(mSettingsObserver::loadSettings);
         IVrManager vrManager = IVrManager.Stub.asInterface(
                 ServiceManager.getService(Context.VR_SERVICE));
@@ -4893,6 +4906,9 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+
+    // Keep logic in sync with SurfaceFlingerProperties.cpp
+    // Consider exposing properties via ISurfaceComposer instead.
     private static boolean queryWideColorGamutSupport() {
         boolean defaultValue = false;
         Optional<Boolean> hasWideColorProp = SurfaceFlingerProperties.has_wide_color_display();
@@ -4931,6 +4947,39 @@ public class WindowManagerService extends IWindowManager.Stub
             return defaultValue;
         }
         return false;
+    }
+
+    private static @Surface.Rotation int queryPrimaryDisplayOrientation() {
+        Optional<SurfaceFlingerProperties.primary_display_orientation_values> prop =
+                SurfaceFlingerProperties.primary_display_orientation();
+        if (prop.isPresent()) {
+            switch (prop.get()) {
+                case ORIENTATION_90: return Surface.ROTATION_90;
+                case ORIENTATION_180: return Surface.ROTATION_180;
+                case ORIENTATION_270: return Surface.ROTATION_270;
+                case ORIENTATION_0:
+                default:
+                    return Surface.ROTATION_0;
+            }
+        }
+        try {
+            ISurfaceFlingerConfigs surfaceFlinger = ISurfaceFlingerConfigs.getService();
+            OptionalDisplayOrientation primaryDisplayOrientation =
+                    surfaceFlinger.primaryDisplayOrientation();
+            if (primaryDisplayOrientation != null && primaryDisplayOrientation.specified) {
+                switch (primaryDisplayOrientation.value) {
+                    case DisplayOrientation.ORIENTATION_90: return Surface.ROTATION_90;
+                    case DisplayOrientation.ORIENTATION_180: return Surface.ROTATION_180;
+                    case DisplayOrientation.ORIENTATION_270: return Surface.ROTATION_270;
+                    case DisplayOrientation.ORIENTATION_0:
+                    default:
+                        return Surface.ROTATION_0;
+                }
+            }
+        } catch (Exception e) {
+            // Use default value if we can't talk to config store.
+        }
+        return Surface.ROTATION_0;
     }
 
     void reportFocusChanged(IBinder oldToken, IBinder newToken) {
