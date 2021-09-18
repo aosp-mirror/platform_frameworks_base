@@ -19,6 +19,8 @@ package android.media.audio.common;
 /**
  * The type of the audio format. Only used as part of 'AudioFormatDescription'
  * structure.
+ *
+ * {@hide}
  */
 @VintfStability
 @Backing(type="byte")

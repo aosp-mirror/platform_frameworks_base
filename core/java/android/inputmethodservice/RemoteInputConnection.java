@@ -108,7 +108,11 @@ final class RemoteInputConnection implements InputConnection {
     @Nullable
     @AnyThread
     public CharSequence getTextAfterCursor(@IntRange(from = 0) int length, int flags) {
-        if (length < 0 || mCancellationGroup.isCanceled()) {
+        if (length < 0) {
+            // TODO: Should we throw an InvalidParameterException() based on targetSdkVersion?
+            Log.e(TAG, "length=" + length + " is invalid and always results in null result.");
+        }
+        if (mCancellationGroup.isCanceled()) {
             return null;
         }
 
@@ -132,7 +136,11 @@ final class RemoteInputConnection implements InputConnection {
     @Nullable
     @AnyThread
     public CharSequence getTextBeforeCursor(@IntRange(from = 0) int length, int flags) {
-        if (length < 0 || mCancellationGroup.isCanceled()) {
+        if (length < 0) {
+            // TODO: Should we throw an InvalidParameterException() based on targetSdkVersion?
+            Log.e(TAG, "length=" + length + " is invalid and always results in null result.");
+        }
+        if (mCancellationGroup.isCanceled()) {
             return null;
         }
 
@@ -185,7 +193,17 @@ final class RemoteInputConnection implements InputConnection {
     @AnyThread
     public SurroundingText getSurroundingText(
             @IntRange(from = 0) int beforeLength, @IntRange(from = 0) int afterLength, int flags) {
-        if (beforeLength < 0 || afterLength < 0 || mCancellationGroup.isCanceled()) {
+        if (beforeLength < 0) {
+            // TODO: Should we throw an InvalidParameterException() based on targetSdkVersion?
+            Log.e(TAG, "beforeLength=" + beforeLength
+                    + " is invalid and always results in null result.");
+        }
+        if (afterLength < 0) {
+            // TODO: Should we throw an InvalidParameterException() based on targetSdkVersion?
+            Log.e(TAG, "afterLength=" + afterLength
+                    + " is invalid and always results in null result.");
+        }
+        if (mCancellationGroup.isCanceled()) {
             return null;
         }
 

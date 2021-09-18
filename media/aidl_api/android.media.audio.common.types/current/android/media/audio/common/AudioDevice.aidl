@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,13 +33,8 @@
 
 package android.media.audio.common;
 /* @hide */
-@Backing(type="byte") @VintfStability
-enum PcmType {
-  DEFAULT = 0,
-  UINT_8_BIT = 0,
-  INT_16_BIT = 1,
-  INT_32_BIT = 2,
-  FIXED_Q_8_24 = 3,
-  FLOAT_32_BIT = 4,
-  INT_24_BIT = 5,
+@JavaDerive(equals=true, toString=true) @VintfStability
+parcelable AudioDevice {
+  android.media.audio.common.AudioDeviceDescription type;
+  android.media.audio.common.AudioDeviceAddress address;
 }

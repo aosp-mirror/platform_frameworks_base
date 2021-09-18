@@ -180,6 +180,9 @@ public class HearingAidDeviceManager {
                 break;
             case BluetoothProfile.STATE_DISCONNECTED:
                 mainDevice = findMainDevice(cachedDevice);
+                if (cachedDevice.getUnpairing()) {
+                    return true;
+                }
                 if (mainDevice != null) {
                     // When main device exists, receiving sub device disconnection
                     // To update main device UI
