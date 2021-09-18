@@ -66,8 +66,8 @@ class WallpaperWindowToken extends WindowToken {
     }
 
     @Override
-    void setExiting() {
-        super.setExiting();
+    void setExiting(boolean animateExit) {
+        super.setExiting(animateExit);
         mDisplayContent.mWallpaperController.removeWallpaperToken(this);
     }
 

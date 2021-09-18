@@ -1165,10 +1165,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
     }
 
-    WindowToken removeWindowToken(IBinder binder) {
+    WindowToken removeWindowToken(IBinder binder, boolean animateExit) {
         final WindowToken token = mTokenMap.remove(binder);
         if (token != null && token.asActivityRecord() == null) {
-            token.setExiting();
+            token.setExiting(animateExit);
         }
         return token;
     }
@@ -1252,7 +1252,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     void removeAppToken(IBinder binder) {
-        final WindowToken token = removeWindowToken(binder);
+        final WindowToken token = removeWindowToken(binder, true /* animateExit */);
         if (token == null) {
             Slog.w(TAG_WM, "removeAppToken: Attempted to remove non-existing token: " + binder);
             return;

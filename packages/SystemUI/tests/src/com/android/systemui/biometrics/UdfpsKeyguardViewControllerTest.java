@@ -313,6 +313,25 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
         verify(mView).setUnpausedAlpha(0);
     }
 
+    @Test
+    public void testShowUdfpsBouncer() {
+        // GIVEN view is attached and status bar expansion is 0
+        mController.onViewAttached();
+        captureExpansionListeners();
+        captureKeyguardStateControllerCallback();
+        captureAltAuthInterceptor();
+        updateStatusBarExpansion(0, true);
+        reset(mView);
+        when(mView.getContext()).thenReturn(mResourceContext);
+        when(mResourceContext.getString(anyInt())).thenReturn("test string");
+
+        // WHEN status bar expansion is 0 but udfps bouncer is requested
+        mAltAuthInterceptor.showAlternateAuthBouncer();
+
+        // THEN alpha is 0
+        verify(mView).setUnpausedAlpha(255);
+    }
+
     private void sendStatusBarStateChanged(int statusBarState) {
         mStatusBarStateListener.onStateChanged(statusBarState);
     }

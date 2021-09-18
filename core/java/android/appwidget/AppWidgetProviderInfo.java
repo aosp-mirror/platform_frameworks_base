@@ -143,7 +143,7 @@ public class AppWidgetProviderInfo implements Parcelable {
     public ComponentName provider;
 
     /**
-     * The default height of the widget when added to a host, in dp. The widget will get
+     * The default height of the widget when added to a host, in px. The widget will get
      * at least this width, and will often be given more, depending on the host.
      *
      * <p>This field corresponds to the <code>android:minWidth</code> attribute in
@@ -152,7 +152,7 @@ public class AppWidgetProviderInfo implements Parcelable {
     public int minWidth;
 
     /**
-     * The default height of the widget when added to a host, in dp. The widget will get
+     * The default height of the widget when added to a host, in px. The widget will get
      * at least this height, and will often be given more, depending on the host.
      *
      * <p>This field corresponds to the <code>android:minHeight</code> attribute in
@@ -161,7 +161,7 @@ public class AppWidgetProviderInfo implements Parcelable {
     public int minHeight;
 
     /**
-     * Minimum width (in dp) which the widget can be resized to. This field has no effect if it
+     * Minimum width (in px) which the widget can be resized to. This field has no effect if it
      * is greater than minWidth or if horizontal resizing isn't enabled (see {@link #resizeMode}).
      *
      * <p>This field corresponds to the <code>android:minResizeWidth</code> attribute in
@@ -170,7 +170,7 @@ public class AppWidgetProviderInfo implements Parcelable {
     public int minResizeWidth;
 
     /**
-     * Minimum height (in dp) which the widget can be resized to. This field has no effect if it
+     * Minimum height (in px) which the widget can be resized to. This field has no effect if it
      * is greater than minHeight or if vertical resizing isn't enabled (see {@link #resizeMode}).
      *
      * <p>This field corresponds to the <code>android:minResizeHeight</code> attribute in
@@ -179,7 +179,7 @@ public class AppWidgetProviderInfo implements Parcelable {
     public int minResizeHeight;
 
     /**
-     * Maximum width (in dp) which the widget can be resized to. This field has no effect if it is
+     * Maximum width (in px) which the widget can be resized to. This field has no effect if it is
      * smaller than minWidth or if horizontal resizing isn't enabled (see {@link #resizeMode}).
      *
      * <p>This field corresponds to the <code>android:maxResizeWidth</code> attribute in the
@@ -189,7 +189,7 @@ public class AppWidgetProviderInfo implements Parcelable {
     public int maxResizeWidth;
 
     /**
-     * Maximum height (in dp) which the widget can be resized to. This field has no effect if it is
+     * Maximum height (in px) which the widget can be resized to. This field has no effect if it is
      * smaller than minHeight or if vertical resizing isn't enabled (see {@link #resizeMode}).
      *
      * <p>This field corresponds to the <code>android:maxResizeHeight</code> attribute in the

@@ -445,8 +445,21 @@ public abstract class WindowManagerInternal {
      * @param removeWindows Whether to also remove the windows associated with the token.
      * @param displayId The display to remove the token from.
      */
+    public final void removeWindowToken(android.os.IBinder token, boolean removeWindows,
+            int displayId) {
+        removeWindowToken(token, removeWindows, true /* animateExit */, displayId);
+    }
+
+    /**
+     * Removes a window token.
+     *
+     * @param token The toke to remove.
+     * @param removeWindows Whether to also remove the windows associated with the token.
+     * @param animateExit Whether to play the windows exit animation after the token removal.
+     * @param displayId The display to remove the token from.
+     */
     public abstract void removeWindowToken(android.os.IBinder token, boolean removeWindows,
-            int displayId);
+            boolean animateExit, int displayId);
 
     /**
      * Registers a listener to be notified about app transition events.
