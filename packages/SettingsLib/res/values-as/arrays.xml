@@ -228,7 +228,7 @@
     <item msgid="8612549335720461635">"৪কে. (সুৰক্ষিত)"</item>
     <item msgid="7322156123728520872">"৪কে. (বৰ্ধিত)"</item>
     <item msgid="7735692090314849188">"৪কে. (বৰ্ধিত, সুৰক্ষিত)"</item>
-    <item msgid="7346816300608639624">"৭২০পি., ১০৮০পি. (দ্বৈত স্ক্ৰীণ)"</item>
+    <item msgid="7346816300608639624">"৭২০পি., ১০৮০পি. (দ্বৈত স্ক্ৰীন)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
     <item msgid="4433736508877934305">"নাই"</item>
@@ -243,7 +243,7 @@
   </string-array>
   <string-array name="track_frame_time_entries">
     <item msgid="634406443901014984">"অফ হৈ আছে"</item>
-    <item msgid="1288760936356000927">"স্ক্ৰীণত দণ্ড হিচাপে"</item>
+    <item msgid="1288760936356000927">"স্ক্ৰীনত দণ্ড হিচাপে"</item>
     <item msgid="5023908510820531131">"<xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>ত"</item>
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
