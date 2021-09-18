@@ -102,7 +102,8 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mDisplayId = displayId;
         mCommandQueue.addCallback(this);
         mOverviewProxyService.addCallback(this);
-        mNavigationModeController.addListener(this);
+        mEdgeBackGestureHandler.onNavigationModeChanged(
+                mNavigationModeController.addListener(this));
         mNavigationBarA11yHelper.registerA11yEventListener(mNavA11yEventListener);
         // Set initial state for any listeners
         updateSysuiFlags();

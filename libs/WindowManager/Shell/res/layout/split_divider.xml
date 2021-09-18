@@ -24,19 +24,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <View style="@style/DockedDividerTopLeftRoundCorner"/>
-
         <View
             style="@style/DockedDividerBackground"
             android:id="@+id/docked_divider_background"/>
-
-        <View style="@style/DockedDividerBottomRightRoundCorner"/>
 
         <com.android.wm.shell.common.split.DividerHandleView
             style="@style/DockedDividerHandle"
             android:id="@+id/docked_divider_handle"
             android:contentDescription="@string/accessibility_divider"
             android:background="@null"/>
+
+        <com.android.wm.shell.common.split.DividerRoundedCorner
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
 
     </FrameLayout>
 
