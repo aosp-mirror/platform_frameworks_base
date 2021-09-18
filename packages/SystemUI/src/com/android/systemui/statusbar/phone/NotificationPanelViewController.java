@@ -853,13 +853,13 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardStatusBar = mView.findViewById(R.id.keyguard_header);
         mBigClockContainer = mView.findViewById(R.id.big_clock_container);
 
-        UserAvatarView userAvatarView = null;
+        FrameLayout userAvatarContainer = null;
         KeyguardUserSwitcherView keyguardUserSwitcherView = null;
 
         if (mKeyguardUserSwitcherEnabled && mUserManager.isUserSwitcherEnabled()) {
             if (mKeyguardQsUserSwitchEnabled) {
                 ViewStub stub = mView.findViewById(R.id.keyguard_qs_user_switch_stub);
-                userAvatarView = (UserAvatarView) stub.inflate();
+                userAvatarContainer = (FrameLayout) stub.inflate();
             } else {
                 ViewStub stub = mView.findViewById(R.id.keyguard_user_switcher_stub);
                 keyguardUserSwitcherView = (KeyguardUserSwitcherView) stub.inflate();
@@ -868,7 +868,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
         updateViewControllers(
                 mView.findViewById(R.id.keyguard_status_view),
-                userAvatarView,
+                userAvatarContainer,
                 mKeyguardStatusBar,
                 keyguardUserSwitcherView);
         mNotificationContainerParent = mView.findViewById(R.id.notification_container_parent);
@@ -960,7 +960,7 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     private void updateViewControllers(KeyguardStatusView keyguardStatusView,
-            UserAvatarView userAvatarView,
+            FrameLayout userAvatarView,
             KeyguardStatusBarView keyguardStatusBarView,
             KeyguardUserSwitcherView keyguardUserSwitcherView) {
         // Re-associate the KeyguardStatusViewController
@@ -1112,7 +1112,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 !mKeyguardQsUserSwitchEnabled
                         && mKeyguardUserSwitcherEnabled
                         && isUserSwitcherEnabled;
-        UserAvatarView userAvatarView = (UserAvatarView) reInflateStub(
+        FrameLayout userAvatarView = (FrameLayout) reInflateStub(
                 R.id.keyguard_qs_user_switch_view /* viewId */,
                 R.id.keyguard_qs_user_switch_stub /* stubId */,
                 R.layout.keyguard_qs_user_switch /* layoutId */,
