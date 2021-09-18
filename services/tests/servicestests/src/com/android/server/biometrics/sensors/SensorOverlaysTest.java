@@ -95,7 +95,7 @@ public class SensorOverlaysTest {
             verify(mUdfpsOverlayController).showUdfpsOverlay(eq(SENSOR_ID), eq(reason), any());
         }
         if (sidefps != null) {
-            verify(mSidefpsController).show();
+            verify(mSidefpsController).show(eq(SENSOR_ID), eq(reason));
         }
     }
 
@@ -123,7 +123,7 @@ public class SensorOverlaysTest {
             verify(mUdfpsOverlayController).hideUdfpsOverlay(eq(SENSOR_ID));
         }
         if (sidefps != null) {
-            verify(mSidefpsController).hide();
+            verify(mSidefpsController).hide(eq(SENSOR_ID));
         }
     }
 }

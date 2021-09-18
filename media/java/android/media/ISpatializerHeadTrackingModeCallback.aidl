@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.hardware.fingerprint;
+
+package android.media;
 
 /**
- * Interface for interacting with the side fingerprint sensor (side-fps) overlay.
- * @hide
+ * AIDL for the AudioService to signal Spatializer head tracking mode changes.
+ *
+ * {@hide}
  */
-oneway interface ISidefpsController {
+oneway interface ISpatializerHeadTrackingModeCallback {
 
-    // Shows the overlay for the given sensor with a reason from BiometricOverlayConstants.
-    void show(int sensorId, int reason);
+    void dispatchSpatializerActualHeadTrackingModeChanged(int mode);
 
-    // Hides the overlay.
-    void hide(int sensorId);
+    void dispatchSpatializerDesiredHeadTrackingModeChanged(int mode);
 }

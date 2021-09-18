@@ -3412,8 +3412,6 @@ public class StatusBar extends SystemUI implements
         mNotificationPanelViewController.collapseWithDuration(duration);
     }
 
-
-
     /**
      * Updates the light reveal effect to reflect the reason we're waking or sleeping (for example,
      * from the power button).
@@ -4304,6 +4302,7 @@ public class StatusBar extends SystemUI implements
 
             mNotificationShadeWindowController.setWallpaperSupportsAmbientMode(supportsAmbientMode);
             mScrimController.setWallpaperSupportsAmbientMode(supportsAmbientMode);
+            mKeyguardViewMediator.setWallpaperSupportsAmbientMode(supportsAmbientMode);
         }
     };
 
@@ -4411,7 +4410,8 @@ public class StatusBar extends SystemUI implements
                 @Override
                 public void onDozeAmountChanged(float linear, float eased) {
                     if (mFeatureFlags.useNewLockscreenAnimations()
-                            && !(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)) {
+                            && !(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)
+                            && !mBiometricUnlockController.isWakeAndUnlock()) {
                         mLightRevealScrim.setRevealAmount(1f - linear);
                     }
                 }

@@ -94,6 +94,8 @@ import android.media.IPlaybackConfigDispatcher;
 import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
 import android.media.ISpatializerCallback;
+import android.media.ISpatializerHeadToSoundStagePoseCallback;
+import android.media.ISpatializerHeadTrackingModeCallback;
 import android.media.IStrategyPreferredDevicesDispatcher;
 import android.media.IVolumeController;
 import android.media.MediaMetrics;
@@ -8322,16 +8324,48 @@ public class AudioService extends IAudioService.Stub
 
     /** @see Spatializer.SpatializerInfoDispatcherStub */
     public void registerSpatializerCallback(
-            @NonNull ISpatializerCallback dispatcher) {
-        Objects.requireNonNull(dispatcher);
-        mSpatializerHelper.registerStateCallback(dispatcher);
+            @NonNull ISpatializerCallback cb) {
+        Objects.requireNonNull(cb);
+        mSpatializerHelper.registerStateCallback(cb);
     }
 
     /** @see Spatializer.SpatializerInfoDispatcherStub */
     public void unregisterSpatializerCallback(
-            @NonNull ISpatializerCallback dispatcher) {
-        Objects.requireNonNull(dispatcher);
-        mSpatializerHelper.unregisterStateCallback(dispatcher);
+            @NonNull ISpatializerCallback cb) {
+        Objects.requireNonNull(cb);
+        mSpatializerHelper.unregisterStateCallback(cb);
+    }
+
+    /** @see Spatializer#SpatializerHeadTrackingDispatcherStub */
+    public void registerSpatializerHeadTrackingCallback(
+            @NonNull ISpatializerHeadTrackingModeCallback cb) {
+        enforceModifyDefaultAudioEffectsPermission();
+        Objects.requireNonNull(cb);
+        mSpatializerHelper.registerHeadTrackingModeCallback(cb);
+    }
+
+    /** @see Spatializer#SpatializerHeadTrackingDispatcherStub */
+    public void unregisterSpatializerHeadTrackingCallback(
+            @NonNull ISpatializerHeadTrackingModeCallback cb) {
+        enforceModifyDefaultAudioEffectsPermission();
+        Objects.requireNonNull(cb);
+        mSpatializerHelper.unregisterHeadTrackingModeCallback(cb);
+    }
+
+    /** @see Spatializer#setOnHeadToSoundstagePoseUpdatedListener */
+    public void registerHeadToSoundstagePoseCallback(
+            @NonNull ISpatializerHeadToSoundStagePoseCallback cb) {
+        enforceModifyDefaultAudioEffectsPermission();
+        Objects.requireNonNull(cb);
+        mSpatializerHelper.registerHeadToSoundstagePoseCallback(cb);
+    }
+
+    /** @see Spatializer#clearOnHeadToSoundstagePoseUpdatedListener */
+    public void unregisterHeadToSoundstagePoseCallback(
+            @NonNull ISpatializerHeadToSoundStagePoseCallback cb) {
+        enforceModifyDefaultAudioEffectsPermission();
+        Objects.requireNonNull(cb);
+        mSpatializerHelper.unregisterHeadToSoundstagePoseCallback(cb);
     }
 
     /** @see Spatializer#getSpatializerCompatibleAudioDevices() */
@@ -8352,6 +8386,51 @@ public class AudioService extends IAudioService.Stub
         enforceModifyDefaultAudioEffectsPermission();
         Objects.requireNonNull(ada);
         mSpatializerHelper.removeCompatibleAudioDevice(ada);
+    }
+
+    /** @see Spatializer#getSupportedHeadTrackingModes() */
+    public int[] getSupportedHeadTrackingModes() {
+        enforceModifyDefaultAudioEffectsPermission();
+        return mSpatializerHelper.getSupportedHeadTrackingModes();
+    }
+
+    /** @see Spatializer#getHeadTrackingMode() */
+    public int getActualHeadTrackingMode() {
+        enforceModifyDefaultAudioEffectsPermission();
+        return mSpatializerHelper.getActualHeadTrackingMode();
+    }
+
+    /** @see Spatializer#getDesiredHeadTrackingMode() */
+    public int getDesiredHeadTrackingMode() {
+        enforceModifyDefaultAudioEffectsPermission();
+        return mSpatializerHelper.getDesiredHeadTrackingMode();
+    }
+
+    /** @see Spatializer#setGlobalTransform */
+    public void setSpatializerGlobalTransform(@NonNull float[] transform) {
+        enforceModifyDefaultAudioEffectsPermission();
+        Objects.requireNonNull(transform);
+        mSpatializerHelper.setGlobalTransform(transform);
+    }
+
+    /** @see Spatializer#recenterHeadTracker() */
+    public void recenterHeadTracker() {
+        enforceModifyDefaultAudioEffectsPermission();
+        mSpatializerHelper.recenterHeadTracker();
+    }
+
+    /** @see Spatializer#setDesiredHeadTrackingMode */
+    public void setDesiredHeadTrackingMode(@Spatializer.HeadTrackingModeSet int mode) {
+        enforceModifyDefaultAudioEffectsPermission();
+        switch(mode) {
+            case Spatializer.HEAD_TRACKING_MODE_DISABLED:
+            case Spatializer.HEAD_TRACKING_MODE_RELATIVE_WORLD:
+            case Spatializer.HEAD_TRACKING_MODE_RELATIVE_DEVICE:
+                break;
+            default:
+                return;
+        }
+        mSpatializerHelper.setDesiredHeadTrackingMode(mode);
     }
 
     //==========================================================================================
