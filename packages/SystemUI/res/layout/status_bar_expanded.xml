@@ -70,6 +70,19 @@
             android:padding="@dimen/lock_icon_padding"
             android:layout_gravity="center"
             android:scaleType="centerCrop"/>
+
+        <!-- Fingerprint -->
+        <!-- AOD dashed fingerprint icon with moving dashes -->
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/lock_udfps_aod_fp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="@dimen/lock_icon_padding"
+            android:layout_gravity="center"
+            android:scaleType="centerCrop"
+            systemui:lottie_autoPlay="false"
+            systemui:lottie_loop="true"
+            systemui:lottie_rawRes="@raw/udfps_aod_fp"/>
     </com.android.keyguard.LockIconView>
 
     <com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer

@@ -35,6 +35,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.keyguard.LockIconViewController;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dock.DockManager;
@@ -87,6 +88,7 @@ public class NotificationShadeWindowViewController {
     private final NotificationShadeDepthController mDepthController;
     private final NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
+    private final LockIconViewController mLockIconViewController;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     private GestureDetector mGestureDetector;
@@ -137,7 +139,8 @@ public class NotificationShadeWindowViewController {
             NotificationPanelViewController notificationPanelViewController,
             StatusBarWindowView statusBarWindowView,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
-            StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager,
+            LockIconViewController lockIconViewController) {
         mInjectionInflationController = injectionInflationController;
         mCoordinator = coordinator;
         mPulseExpansionHandler = pulseExpansionHandler;
@@ -162,6 +165,7 @@ public class NotificationShadeWindowViewController {
         mStatusBarWindowView = statusBarWindowView;
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
+        mLockIconViewController = lockIconViewController;
 
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
@@ -234,6 +238,7 @@ public class NotificationShadeWindowViewController {
                 if (!isCancel && mService.shouldIgnoreTouch()) {
                     return false;
                 }
+
                 if (isDown) {
                     setTouchActive(true);
                     mTouchCancelled = false;
@@ -244,6 +249,7 @@ public class NotificationShadeWindowViewController {
                 if (mTouchCancelled || mExpandAnimationRunning) {
                     return false;
                 }
+
                 mFalsingCollector.onTouchEvent(ev);
                 mGestureDetector.onTouchEvent(ev);
                 mStatusBarKeyguardViewManager.onTouch(ev);
@@ -259,9 +265,17 @@ public class NotificationShadeWindowViewController {
                 if (isDown) {
                     mNotificationStackScrollLayoutController.closeControlsIfOutsideTouch(ev);
                 }
+
                 if (mStatusBarStateController.isDozing()) {
                     mService.mDozeScrimController.extendPulse();
                 }
+                mLockIconViewController.onTouchEvent(
+                        ev,
+                        () -> mService.wakeUpIfDozing(
+                                SystemClock.uptimeMillis(),
+                                mView,
+                                "LOCK_ICON_TOUCH"));
+
                 // In case we start outside of the view bounds (below the status bar), we need to
                 // dispatch
                 // the touch manually as the view system can't accommodate for touches outside of
