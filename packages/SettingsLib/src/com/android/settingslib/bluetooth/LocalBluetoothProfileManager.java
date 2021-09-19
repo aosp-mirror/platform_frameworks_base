@@ -19,6 +19,7 @@ package com.android.settingslib.bluetooth;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothA2dpSink;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothCsipSetCoordinator;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothHeadsetClient;
@@ -100,6 +101,7 @@ public class LocalBluetoothProfileManager {
     private PbapClientProfile mPbapClientProfile;
     private PbapServerProfile mPbapProfile;
     private HearingAidProfile mHearingAidProfile;
+    private CsipSetCoordinatorProfile mCsipSetCoordinatorProfile;
     private SapProfile mSapProfile;
     private VolumeControlProfile mVolumeControlProfile;
 
@@ -230,7 +232,16 @@ public class LocalBluetoothProfileManager {
             // Note: no event handler for VCP, only for being connectable.
             mProfileNameMap.put(VolumeControlProfile.NAME, mVolumeControlProfile);
         }
-
+        if (mCsipSetCoordinatorProfile == null
+                && supportedList.contains(BluetoothProfile.CSIP_SET_COORDINATOR)) {
+            if (DEBUG) {
+                Log.d(TAG, "Adding local CSIP set coordinator profile");
+            }
+            mCsipSetCoordinatorProfile =
+                    new CsipSetCoordinatorProfile(mContext, mDeviceManager, this);
+            addProfile(mCsipSetCoordinatorProfile, mCsipSetCoordinatorProfile.NAME,
+                    BluetoothCsipSetCoordinator.ACTION_CSIS_CONNECTION_STATE_CHANGED);
+        }
         mEventManager.registerProfileIntentReceiver();
     }
 
@@ -462,6 +473,10 @@ public class LocalBluetoothProfileManager {
         return mHidDeviceProfile;
     }
 
+    public CsipSetCoordinatorProfile getCsipSetCoordinatorProfile() {
+        return mCsipSetCoordinatorProfile;
+    }
+
     /**
      * Fill in a list of LocalBluetoothProfile objects that are supported by
      * the local device and the remote device.
@@ -580,6 +595,12 @@ public class LocalBluetoothProfileManager {
                 && ArrayUtils.contains(uuids, BluetoothUuid.VOLUME_CONTROL)) {
             profiles.add(mVolumeControlProfile);
             removedProfiles.remove(mVolumeControlProfile);
+        }
+
+        if (mCsipSetCoordinatorProfile != null
+                && ArrayUtils.contains(uuids, BluetoothUuid.COORDINATED_SET)) {
+            profiles.add(mCsipSetCoordinatorProfile);
+            removedProfiles.remove(mCsipSetCoordinatorProfile);
         }
 
         if (DEBUG) {
