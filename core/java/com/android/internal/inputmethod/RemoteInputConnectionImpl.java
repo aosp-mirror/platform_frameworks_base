@@ -233,6 +233,11 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
                 Log.w(TAG, "getTextAfterCursor on inactive InputConnection");
                 return null;
             }
+            if (length < 0) {
+                Log.i(TAG, "Returning null to getTextAfterCursor due to an invalid length="
+                        + length);
+                return null;
+            }
             return ic.getTextAfterCursor(length, flags);
         }, useImeTracing() ? result -> buildGetTextAfterCursorProto(length, flags, result) : null);
     }
@@ -244,6 +249,11 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
             final InputConnection ic = getInputConnection();
             if (ic == null || !isActive()) {
                 Log.w(TAG, "getTextBeforeCursor on inactive InputConnection");
+                return null;
+            }
+            if (length < 0) {
+                Log.i(TAG, "Returning null to getTextBeforeCursor due to an invalid length="
+                        + length);
                 return null;
             }
             return ic.getTextBeforeCursor(length, flags);
@@ -274,6 +284,16 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
             final InputConnection ic = getInputConnection();
             if (ic == null || !isActive()) {
                 Log.w(TAG, "getSurroundingText on inactive InputConnection");
+                return null;
+            }
+            if (beforeLength < 0) {
+                Log.i(TAG, "Returning null to getSurroundingText due to an invalid"
+                        + " beforeLength=" + beforeLength);
+                return null;
+            }
+            if (afterLength < 0) {
+                Log.i(TAG, "Returning null to getSurroundingText due to an invalid"
+                        + " afterLength=" + afterLength);
                 return null;
             }
             return ic.getSurroundingText(beforeLength, afterLength, flags);

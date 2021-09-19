@@ -241,18 +241,20 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
         if (mGhbmView != null && surface == null) {
             Log.e(TAG, "doIlluminate | surface must be non-null for GHBM");
         }
-        mHbmProvider.enableHbm(mHbmType, surface, () -> {
-            if (mGhbmView != null) {
-                mGhbmView.drawIlluminationDot(mSensorRect);
-            }
-            if (onIlluminatedRunnable != null) {
-                // No framework API can reliably tell when a frame reaches the panel. A timeout
-                // is the safest solution.
-                postDelayed(onIlluminatedRunnable, mOnIlluminatedDelayMs);
-            } else {
-                Log.w(TAG, "doIlluminate | onIlluminatedRunnable is null");
-            }
-        });
+        if (mHbmProvider != null) {
+            mHbmProvider.enableHbm(mHbmType, surface, () -> {
+                if (mGhbmView != null) {
+                    mGhbmView.drawIlluminationDot(mSensorRect);
+                }
+                if (onIlluminatedRunnable != null) {
+                    // No framework API can reliably tell when a frame reaches the panel. A timeout
+                    // is the safest solution.
+                    postDelayed(onIlluminatedRunnable, mOnIlluminatedDelayMs);
+                } else {
+                    Log.w(TAG, "doIlluminate | onIlluminatedRunnable is null");
+                }
+            });
+        }
     }
 
     @Override
@@ -265,6 +267,8 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
             mGhbmView.setGhbmIlluminationListener(null);
             mGhbmView.setVisibility(View.INVISIBLE);
         }
-        mHbmProvider.disableHbm(null /* onHbmDisabled */);
+        if (mHbmProvider != null) {
+            mHbmProvider.disableHbm(null /* onHbmDisabled */);
+        }
     }
 }
