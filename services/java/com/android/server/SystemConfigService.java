@@ -21,6 +21,7 @@ import static java.util.stream.Collectors.toMap;
 import android.Manifest;
 import android.content.Context;
 import android.os.ISystemConfig;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
@@ -83,6 +84,21 @@ public class SystemConfigService extends SystemService {
                 }
             }
             return ArrayUtils.convertToIntArray(uids);
+        }
+
+        @Override
+        public List<String> getEnabledComponentOverrides(String packageName) {
+            ArrayMap<String, Boolean> systemComponents = SystemConfig.getInstance()
+                    .getComponentsEnabledStates(packageName);
+            List<String> enabledComponent = new ArrayList<>();
+            if (systemComponents != null) {
+                for (Map.Entry<String, Boolean> entry : systemComponents.entrySet()) {
+                    if (Boolean.TRUE.equals(entry.getValue())) {
+                        enabledComponent.add(entry.getKey());
+                    }
+                }
+            }
+            return enabledComponent;
         }
     };
 

@@ -2178,12 +2178,6 @@ public final class MediaCodecInfo {
                 if (size == null || size.getWidth() * size.getHeight() <= 0) {
                     continue;
                 }
-                if (size.getWidth() > SIZE_RANGE.getUpper()
-                        || size.getHeight() > SIZE_RANGE.getUpper()) {
-                    size = new Size(
-                            Math.min(size.getWidth(), SIZE_RANGE.getUpper()),
-                            Math.min(size.getHeight(), SIZE_RANGE.getUpper()));
-                }
                 Range<Long> range = Utils.parseLongRange(map.get(key), null);
                 if (range == null || range.getLower() < 0 || range.getUpper() < 0) {
                     continue;
