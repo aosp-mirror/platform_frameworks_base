@@ -102,7 +102,7 @@ final class DeviceSelectActionFromPlayback extends HdmiCecFeatureAction {
         mIsCec20 = isCec20;
     }
 
-    private int getTargetAddress() {
+    int getTargetAddress() {
         return mTarget.getLogicalAddress();
     }
 

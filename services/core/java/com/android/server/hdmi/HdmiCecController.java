@@ -324,7 +324,8 @@ final class HdmiCecController {
     /**
      * Return the physical address of the device.
      *
-     * <p>Declared as package-private. accessed by {@link HdmiControlService} only.
+     * <p>Declared as package-private. accessed by {@link HdmiControlService} and
+     * {@link HdmiCecNetwork} only.
      *
      * @return CEC physical address of the device. The range of success address
      *         is between 0x0000 and 0xFFFF. If failed it returns -1

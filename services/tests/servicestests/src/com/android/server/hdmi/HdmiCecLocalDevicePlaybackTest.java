@@ -29,6 +29,7 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
+import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
@@ -54,6 +55,8 @@ import java.util.concurrent.TimeUnit;
 /** Tests for {@link HdmiCecLocalDevicePlayback} class. */
 public class HdmiCecLocalDevicePlaybackTest {
     private static final int TIMEOUT_MS = HdmiConfig.TIMEOUT_MS + 1;
+    private static final int HOTPLUG_INTERVAL =
+            HotplugDetectionAction.POLLING_INTERVAL_MS_FOR_PLAYBACK;
 
     private static final int PORT_1 = 1;
     private static final HdmiDeviceInfo INFO_TV = new HdmiDeviceInfo(
@@ -1643,6 +1646,60 @@ public class HdmiCecLocalDevicePlaybackTest {
         assertThat(mNativeWrapper.getResultMessages()).contains(textViewOn);
         assertThat(mNativeWrapper.getResultMessages()).contains(activeSource);
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(systemAudioModeRequest);
+    }
+
+    @Test
+    public void onAddressAllocated_invokesDeviceDiscovery() {
+        mNativeWrapper.setPollAddressResponse(Constants.ADDR_PLAYBACK_2, SendMessageResult.SUCCESS);
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+
+        mTestLooper.dispatchAll();
+
+        // Check for <Give Physical Address> being sent to available device (ADDR_PLAYBACK_2).
+        // This message is sent as part of the DeviceDiscoveryAction to available devices.
+        HdmiCecMessage givePhysicalAddress = HdmiCecMessageBuilder.buildGivePhysicalAddress(
+                Constants.ADDR_PLAYBACK_1,
+                Constants.ADDR_PLAYBACK_2);
+        assertThat(mNativeWrapper.getResultMessages()).contains(givePhysicalAddress);
+    }
+
+    @Test
+    public void hotplugDetectionAction_addDevice() {
+        int otherPlaybackLogicalAddress = mPlaybackLogicalAddress == Constants.ADDR_PLAYBACK_2
+                ? Constants.ADDR_PLAYBACK_1 : Constants.ADDR_PLAYBACK_2;
+        mNativeWrapper.setPollAddressResponse(otherPlaybackLogicalAddress,
+                SendMessageResult.NACK);
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+
+        mNativeWrapper.setPollAddressResponse(otherPlaybackLogicalAddress,
+                SendMessageResult.SUCCESS);
+        mTestLooper.moveTimeForward(HOTPLUG_INTERVAL);
+        mTestLooper.dispatchAll();
+
+        // Check for <Give Physical Address> being sent to the newly discovered device.
+        // This message is sent as part of the HotplugDetectionAction to available devices.
+        HdmiCecMessage givePhysicalAddress = HdmiCecMessageBuilder.buildGivePhysicalAddress(
+                mPlaybackLogicalAddress, otherPlaybackLogicalAddress);
+        assertThat(mNativeWrapper.getResultMessages()).contains(givePhysicalAddress);
+    }
+
+    @Test
+    public void hotplugDetectionAction_removeDevice() {
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mHdmiControlService.getHdmiCecNetwork().clearDeviceList();
+        HdmiDeviceInfo infoPlayback = new HdmiDeviceInfo(
+                Constants.ADDR_PLAYBACK_2, 0x1234, PORT_1,
+                HdmiDeviceInfo.DEVICE_PLAYBACK, 0x1234, "Playback 2",
+                HdmiControlManager.POWER_STATUS_ON, HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
+        mHdmiControlService.getHdmiCecNetwork().addCecDevice(infoPlayback);
+        // This logical address (ADDR_PLAYBACK_2) won't acknowledge the poll message sent by the
+        // HotplugDetectionAction so it shall be removed.
+        mNativeWrapper.setPollAddressResponse(Constants.ADDR_PLAYBACK_2, SendMessageResult.NACK);
+        mTestLooper.moveTimeForward(HOTPLUG_INTERVAL);
+        mTestLooper.dispatchAll();
+
+        assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false)).isEmpty();
     }
 
     @Test

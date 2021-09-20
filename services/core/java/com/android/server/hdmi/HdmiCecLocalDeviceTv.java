@@ -685,7 +685,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                             mService.getHdmiCecNetwork().addCecDevice(info);
                         }
 
-                        // Since we removed all devices when it's start and
+                        // Since we removed all devices when it starts and
                         // device discovery action does not poll local devices,
                         // we should put device info of local device manually here
                         for (HdmiCecLocalDevice device : mService.getAllLocalDevices()) {
@@ -732,13 +732,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 startArcAction(true);
             }
         }
-    }
-
-    // Clear all device info.
-    @ServiceThreadOnly
-    private void clearDeviceInfoList() {
-        assertRunOnServiceThread();
-        mService.getHdmiCecNetwork().clearDeviceList();
     }
 
     @ServiceThreadOnly
