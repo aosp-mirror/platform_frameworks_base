@@ -19,6 +19,8 @@ package com.android.keyguard;
 import static android.hardware.biometrics.BiometricSourceType.FINGERPRINT;
 
 import static com.android.systemui.classifier.Classifier.LOCK_ICON;
+import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
+import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInProgressOffset;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -32,6 +34,7 @@ import android.media.AudioAttributes;
 import android.os.Process;
 import android.os.Vibrator;
 import android.util.DisplayMetrics;
+import android.util.MathUtils;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
@@ -58,6 +61,8 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
+
+import com.airbnb.lottie.LottieAnimationView;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -94,6 +99,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     @NonNull private final DelayableExecutor mExecutor;
     private boolean mUdfpsEnrolled;
 
+    @NonNull private LottieAnimationView mAodFp;
+
     @NonNull private final AnimatedVectorDrawable mFpToUnlockIcon;
     @NonNull private final AnimatedVectorDrawable mLockToUnlockIcon;
     @NonNull private final Drawable mLockIcon;
@@ -112,6 +119,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private boolean mIsKeyguardShowing;
     private boolean mUserUnlockedWithBiometric;
     private Runnable mCancelDelayedUpdateVisibilityRunnable;
+    private Runnable mOnGestureDetectedRunnable;
 
     private boolean mUdfpsSupported;
     private float mHeightPixels;
@@ -120,6 +128,12 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
     private boolean mShowUnlockIcon;
     private boolean mShowLockIcon;
+
+    // for udfps when strong auth is required or unlocked on AOD
+    private boolean mShowAODFpIcon;
+    private final int mMaxBurnInOffsetX;
+    private final int mMaxBurnInOffsetY;
+    private float mInterpolatedDarkAmount;
 
     private boolean mDownDetected;
     private boolean mDetectedLongPress;
@@ -155,6 +169,12 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mAuthRippleController = authRippleController;
 
         final Context context = view.getContext();
+        mAodFp = mView.findViewById(R.id.lock_udfps_aod_fp);
+        mMaxBurnInOffsetX = context.getResources()
+                .getDimensionPixelSize(R.dimen.udfps_burn_in_offset_x);
+        mMaxBurnInOffsetY = context.getResources()
+                .getDimensionPixelSize(R.dimen.udfps_burn_in_offset_y);
+
         mUnlockIcon = mView.getContext().getResources().getDrawable(
             R.drawable.ic_unlock,
             mView.getContext().getTheme());
@@ -173,19 +193,19 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
     @Override
     protected void onInit() {
-        mAuthController.addCallback(mAuthControllerCallback);
-        mUdfpsSupported = mAuthController.getUdfpsSensorLocation() != null;
-
         mView.setAccessibilityDelegate(mAccessibilityDelegate);
     }
 
     @Override
     protected void onViewAttached() {
+        updateIsUdfpsEnrolled();
         updateConfiguration();
         updateKeyguardShowing();
         mUserUnlockedWithBiometric = false;
+
         mIsBouncerShowing = mKeyguardViewController.isBouncerShowing();
         mIsDozing = mStatusBarStateController.isDozing();
+        mInterpolatedDarkAmount = mStatusBarStateController.getDozeAmount();
         mRunningFPS = mKeyguardUpdateMonitor.isFingerprintDetectionRunning();
         mCanDismissLockScreen = mKeyguardStateController.canDismissLockScreen();
         mStatusBarState = mStatusBarStateController.getState();
@@ -193,15 +213,18 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         updateColors();
         mConfigurationController.addCallback(mConfigurationListener);
 
+        mAuthController.addCallback(mAuthControllerCallback);
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
         mStatusBarStateController.addCallback(mStatusBarStateListener);
         mKeyguardStateController.addCallback(mKeyguardStateCallback);
         mDownDetected = false;
+        updateBurnInOffsets();
         updateVisibility();
     }
 
     @Override
     protected void onViewDetached() {
+        mAuthController.removeCallback(mAuthControllerCallback);
         mConfigurationController.removeCallback(mConfigurationListener);
         mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
@@ -231,7 +254,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             mCancelDelayedUpdateVisibilityRunnable = null;
         }
 
-        if (!mIsKeyguardShowing) {
+        if (!mIsKeyguardShowing && !mIsDozing) {
             mView.setVisibility(View.INVISIBLE);
             return;
         }
@@ -242,6 +265,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mShowLockIcon = !mCanDismissLockScreen && !mUserUnlockedWithBiometric && isLockScreen()
             && (!mUdfpsEnrolled || !mRunningFPS);
         mShowUnlockIcon = mCanDismissLockScreen && isLockScreen();
+        mShowAODFpIcon = mIsDozing && mUdfpsEnrolled && !mRunningFPS;
 
         final CharSequence prevContentDescription = mView.getContentDescription();
         if (mShowLockIcon) {
@@ -264,10 +288,22 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             }
             mView.setVisibility(View.VISIBLE);
             mView.setContentDescription(mUnlockedLabel);
+        } else if (mShowAODFpIcon) {
+            mView.setImageDrawable(null);
+            mView.setContentDescription(null);
+            mAodFp.setVisibility(View.VISIBLE);
+            mAodFp.setContentDescription(mCanDismissLockScreen ? mUnlockedLabel : mLockedLabel);
+            mView.setVisibility(View.VISIBLE);
         } else {
             mView.setVisibility(View.INVISIBLE);
             mView.setContentDescription(null);
         }
+
+        if (!mShowAODFpIcon) {
+            mAodFp.setVisibility(View.INVISIBLE);
+            mAodFp.setContentDescription(null);
+        }
+
         if (!Objects.equals(prevContentDescription, mView.getContentDescription())
                 && mView.getContentDescription() != null) {
             mView.announceForAccessibility(mView.getContentDescription());
@@ -344,10 +380,12 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+        pw.println("mUdfpsSupported: " + mUdfpsSupported);
         pw.println("mUdfpsEnrolled: " + mUdfpsEnrolled);
         pw.println("mIsKeyguardShowing: " + mIsKeyguardShowing);
         pw.println(" mShowUnlockIcon: " + mShowUnlockIcon);
         pw.println(" mShowLockIcon: " + mShowLockIcon);
+        pw.println(" mShowAODFpIcon: " + mShowAODFpIcon);
         pw.println("  mIsDozing: " + mIsDozing);
         pw.println("  mIsBouncerShowing: " + mIsBouncerShowing);
         pw.println("  mUserUnlockedWithBiometric: " + mUserUnlockedWithBiometric);
@@ -355,17 +393,57 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         pw.println("  mCanDismissLockScreen: " + mCanDismissLockScreen);
         pw.println("  mStatusBarState: " + StatusBarState.toShortString(mStatusBarState));
         pw.println("  mQsExpanded: " + mQsExpanded);
+        pw.println("  mInterpolatedDarkAmount: " + mInterpolatedDarkAmount);
 
         if (mView != null) {
             mView.dump(fd, pw, args);
         }
     }
 
+    /** Every minute, update the aod icon's burn in offset */
+    public void dozeTimeTick() {
+        updateBurnInOffsets();
+    }
+
+    private void updateBurnInOffsets() {
+        float offsetX = MathUtils.lerp(0f,
+                getBurnInOffset(mMaxBurnInOffsetX * 2, true /* xAxis */)
+                        - mMaxBurnInOffsetX, mInterpolatedDarkAmount);
+        float offsetY = MathUtils.lerp(0f,
+                getBurnInOffset(mMaxBurnInOffsetY * 2, false /* xAxis */)
+                        - mMaxBurnInOffsetY, mInterpolatedDarkAmount);
+        float progress = MathUtils.lerp(0f, getBurnInProgressOffset(), mInterpolatedDarkAmount);
+
+        mAodFp.setTranslationX(offsetX);
+        mAodFp.setTranslationY(offsetY);
+        mAodFp.setProgress(progress);
+        mAodFp.setAlpha(255 * mInterpolatedDarkAmount);
+    }
+
+    private void updateIsUdfpsEnrolled() {
+        boolean wasUdfpsSupported = mUdfpsSupported;
+        boolean wasUdfpsEnrolled = mUdfpsEnrolled;
+
+        mUdfpsSupported = mAuthController.getUdfpsSensorLocation() != null;
+        mUdfpsEnrolled = mKeyguardUpdateMonitor.isUdfpsEnrolled();
+        if (wasUdfpsSupported != mUdfpsSupported || wasUdfpsEnrolled != mUdfpsEnrolled) {
+            updateVisibility();
+        }
+    }
+
     private StatusBarStateController.StateListener mStatusBarStateListener =
             new StatusBarStateController.StateListener() {
                 @Override
+                public void onDozeAmountChanged(float linear, float eased) {
+                    mInterpolatedDarkAmount = eased;
+                    updateBurnInOffsets();
+                }
+
+                @Override
                 public void onDozingChanged(boolean isDozing) {
                     mIsDozing = isDozing;
+                    updateBurnInOffsets();
+                    updateIsUdfpsEnrolled();
                     updateVisibility();
                 }
 
@@ -439,7 +517,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                     mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(
                         KeyguardUpdateMonitor.getCurrentUser());
             }
-            mUdfpsEnrolled = mKeyguardUpdateMonitor.isUdfpsEnrolled();
+            updateIsUdfpsEnrolled();
             updateVisibility();
         }
 
@@ -485,8 +563,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
                     // intercept all following touches until we see MotionEvent.ACTION_CANCEL UP or
                     // MotionEvent.ACTION_UP (see #onTouchEvent)
-                    mDownDetected = true;
-                    if (mVibrator != null) {
+                    if (mVibrator != null && !mDownDetected) {
                         mVibrator.vibrate(
                                 Process.myUid(),
                                 getContext().getOpPackageName(),
@@ -494,6 +571,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                                 "lockIcon-onDown",
                                 VIBRATION_SONIFICATION_ATTRIBUTES);
                     }
+
+                    mDownDetected = true;
                     return true;
                 }
 
@@ -551,6 +630,9 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                         mAuthRippleController.showRipple(FINGERPRINT);
                     }
                     updateVisibility();
+                    if (mOnGestureDetectedRunnable != null) {
+                        mOnGestureDetectedRunnable.run();
+                    }
                     mKeyguardViewController.showBouncer(/* scrim */ true);
                     return true;
                 }
@@ -561,16 +643,18 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
      * in a 'clickable' state
      * @return whether to intercept the touch event
      */
-    public boolean onTouchEvent(MotionEvent event) {
+    public boolean onTouchEvent(MotionEvent event, Runnable onGestureDetectedRunnable) {
         if (mSensorTouchLocation.contains((int) event.getX(), (int) event.getY())
-                && mView.getVisibility() == View.VISIBLE) {
+                && (mView.getVisibility() == View.VISIBLE
+                || mAodFp.getVisibility() == View.VISIBLE)) {
+            mOnGestureDetectedRunnable = onGestureDetectedRunnable;
             mGestureDetector.onTouchEvent(event);
         }
 
         // we continue to intercept all following touches until we see MotionEvent.ACTION_CANCEL UP
         // or MotionEvent.ACTION_UP. this is to avoid passing the touch to NPV
         // after the lock icon disappears on device entry
-        if (mDownDetected && mDetectedLongPress) {
+        if (mDownDetected) {
             if (event.getAction() == MotionEvent.ACTION_CANCEL
                     || event.getAction() == MotionEvent.ACTION_UP) {
                 mDownDetected = false;
@@ -594,7 +678,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private final AuthController.Callback mAuthControllerCallback = new AuthController.Callback() {
         @Override
         public void onAllAuthenticatorsRegistered() {
-            mUdfpsSupported = mAuthController.getUdfpsSensorLocation() != null;
+            updateIsUdfpsEnrolled();
             updateConfiguration();
         }
     };
