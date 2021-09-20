@@ -119,12 +119,12 @@ class LegacySplitScreenFromIntentNotSupportNonResizable(
             // when the activity gets PAUSED the window may still be marked as visible
             // it will be updated in the next log entry. This occurs because we record 1x
             // per frame, thus ignore activity check here
-            this.isAppWindowVisible(splitScreenApp.component, ignoreActivity = true)
+            this.isAppWindowVisible(splitScreenApp.component)
                     .then()
                     // immediately after the window (after onResume and before perform relayout)
                     // the activity is invisible. This may or not be logged, since we record 1x
                     // per frame, thus ignore activity check here
-                    .isAppWindowInvisible(splitScreenApp.component, ignoreActivity = true)
+                    .isAppWindowInvisible(splitScreenApp.component)
         }
     }
 
@@ -141,13 +141,12 @@ class LegacySplitScreenFromIntentNotSupportNonResizable(
                     .then()
                     // we log once per frame, upon logging, window may be visible or not depending
                     // on what was processed until that moment. Both behaviors are correct
-                    .isAppWindowInvisible(nonResizeableApp.component,
-                            ignoreActivity = true, isOptional = true)
+                    .isAppWindowInvisible(nonResizeableApp.component, isOptional = true)
                     .then()
                     // immediately after the window (after onResume and before perform relayout)
                     // the activity is invisible. This may or not be logged, since we record 1x
                     // per frame, thus ignore activity check here
-                    .isAppWindowVisible(nonResizeableApp.component, ignoreActivity = true)
+                    .isAppWindowVisible(nonResizeableApp.component)
         }
     }
 
@@ -158,7 +157,7 @@ class LegacySplitScreenFromIntentNotSupportNonResizable(
     @Test
     fun nonResizableAppWindowBecomesVisibleAtEnd() {
         testSpec.assertWmEnd {
-            this.isVisible(nonResizeableApp.component)
+            isAppWindowVisible(nonResizeableApp.component)
         }
     }
 
@@ -170,8 +169,8 @@ class LegacySplitScreenFromIntentNotSupportNonResizable(
     @Test
     fun onlyNonResizableAppWindowIsVisibleAtEnd() {
         testSpec.assertWmEnd {
-            isInvisible(splitScreenApp.component)
-            isVisible(nonResizeableApp.component)
+            isAppWindowInvisible(splitScreenApp.component)
+            isAppWindowVisible(nonResizeableApp.component)
         }
     }
 

@@ -191,7 +191,7 @@ class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestParamet
                     .then()
                     .isAppWindowVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
                     .then()
-                    .isAppWindowVisible(testApp1.component, ignoreActivity = true)
+                    .isAppWindowVisible(testApp1.component)
         }
     }
 
@@ -217,7 +217,7 @@ class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestParamet
     @Test
     fun app2WindowBecomesAndStaysInvisible() {
         testSpec.assertWm {
-            this.isAppWindowVisible(testApp2.component, ignoreActivity = true)
+            this.isAppWindowVisible(testApp2.component)
                     .then()
                     .isAppWindowInvisible(testApp2.component)
         }

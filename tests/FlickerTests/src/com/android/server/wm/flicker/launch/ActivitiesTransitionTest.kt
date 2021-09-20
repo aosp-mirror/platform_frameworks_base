@@ -96,11 +96,16 @@ class ActivitiesTransitionTest(val testSpec: FlickerTestParameter) {
     @Test
     fun entireScreenCovered() = testSpec.entireScreenCovered()
 
+    /**
+     * Checks that the [LAUNCHER_COMPONENT] window is not on top. The launcher cannot be
+     * asserted with `isAppWindowVisible` because it contains 2 windows with the exact same name,
+     * and both are never simultaneously visible
+     */
     @Presubmit
     @Test
-    fun launcherWindowNotVisible() {
+    fun launcherWindowNotOnTop() {
         testSpec.assertWm {
-            this.isAppWindowInvisible(LAUNCHER_COMPONENT, ignoreActivity = true)
+            this.isAppWindowNotOnTop(LAUNCHER_COMPONENT)
         }
     }
 

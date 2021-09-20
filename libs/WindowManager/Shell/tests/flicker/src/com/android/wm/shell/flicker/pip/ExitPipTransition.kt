@@ -54,9 +54,9 @@ abstract class ExitPipTransition(testSpec: FlickerTestParameter) : PipTransition
     open fun pipWindowBecomesInvisible() {
         testSpec.assertWm {
             this.invoke("hasPipWindow") {
-                it.isPinned(pipApp.component).isVisible(pipApp.component)
+                it.isPinned(pipApp.component).isAppWindowVisible(pipApp.component)
             }.then().invoke("!hasPipWindow") {
-                it.isNotPinned(pipApp.component).isInvisible(pipApp.component)
+                it.isNotPinned(pipApp.component).isAppWindowInvisible(pipApp.component)
             }
         }
     }

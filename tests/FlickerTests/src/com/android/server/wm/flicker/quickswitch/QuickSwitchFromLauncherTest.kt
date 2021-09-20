@@ -145,7 +145,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun startsWithHomeActivityFlaggedVisible() {
         testSpec.assertWmStart {
-            this.isHomeActivityVisible(true)
+            this.isHomeActivityVisible()
         }
     }
 
@@ -192,7 +192,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun endsWithHomeActivityFlaggedInvisible() {
         testSpec.assertWmEnd {
-            this.isHomeActivityVisible(false)
+            this.isHomeActivityInvisible()
         }
     }
 
@@ -204,9 +204,9 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun appWindowBecomesAndStaysVisible() {
         testSpec.assertWm {
-            this.isAppWindowInvisible(testApp.component, ignoreActivity = true)
+            this.isAppWindowInvisible(testApp.component)
                     .then()
-                    .isAppWindowVisible(testApp.component, ignoreActivity = true)
+                    .isAppWindowVisible(testApp.component)
         }
     }
 
@@ -232,9 +232,9 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun launcherWindowBecomesAndStaysInvisible() {
         testSpec.assertWm {
-            this.isAppWindowVisible(LAUNCHER_COMPONENT)
+            this.isAppWindowOnTop(LAUNCHER_COMPONENT)
                     .then()
-                    .isAppWindowInvisible(LAUNCHER_COMPONENT)
+                    .isAppWindowNotOnTop(LAUNCHER_COMPONENT)
         }
     }
 
@@ -260,7 +260,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun appWindowIsVisibleOnceLauncherWindowIsInvisible() {
         testSpec.assertWm {
-            this.isAppWindowVisible(LAUNCHER_COMPONENT)
+            this.isAppWindowOnTop(LAUNCHER_COMPONENT)
                     .then()
                     .isAppWindowVisible(FlickerComponentName.SNAPSHOT)
                     .then()

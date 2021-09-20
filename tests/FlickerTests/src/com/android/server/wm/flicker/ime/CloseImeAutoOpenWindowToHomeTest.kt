@@ -110,7 +110,7 @@ class CloseImeAutoOpenWindowToHomeTest(private val testSpec: FlickerTestParamete
         testSpec.assertWm {
             this.isAppWindowOnTop(testApp.component)
                 .then()
-                .appWindowNotOnTop(testApp.component)
+                .isAppWindowNotOnTop(testApp.component)
         }
     }
 
