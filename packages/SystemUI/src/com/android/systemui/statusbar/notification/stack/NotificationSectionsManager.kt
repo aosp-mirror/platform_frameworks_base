@@ -350,7 +350,7 @@ class NotificationSectionsManager @Inject internal constructor(
         silentHeaderView?.run {
             val hasActiveClearableNotifications = this@NotificationSectionsManager.parent
                     .hasActiveClearableNotifications(NotificationStackScrollLayout.ROWS_GENTLE)
-            setAreThereDismissableGentleNotifs(hasActiveClearableNotifications)
+            setClearSectionButtonEnabled(hasActiveClearableNotifications)
         }
     }
 

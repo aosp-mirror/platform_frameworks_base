@@ -789,7 +789,7 @@ public class NotificationStackScrollLayoutController {
             mOnAttachStateChangeListener.onViewAttachedToWindow(mView);
         }
         mView.addOnAttachStateChangeListener(mOnAttachStateChangeListener);
-        mSilentHeaderController.setOnClearAllClickListener(v -> clearSilentNotifications());
+        mSilentHeaderController.setOnClearSectionClickListener(v -> clearSilentNotifications());
     }
 
     private boolean isInVisibleLocation(NotificationEntry entry) {
