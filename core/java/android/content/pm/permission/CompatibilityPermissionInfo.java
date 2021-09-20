@@ -39,10 +39,15 @@ public class CompatibilityPermissionInfo extends ParsedUsesPermission {
     /**
      * List of new permissions that have been added since 1.0.
      *
+     * NOTE: These must be declared in SDK version order, with permissions
+     * added to newer SDKs appearing before those added to older SDKs.
+     *
      * @hide
      */
     public static final CompatibilityPermissionInfo[] COMPAT_PERMS =
             new CompatibilityPermissionInfo[]{
+                    new CompatibilityPermissionInfo(Manifest.permission.POST_NOTIFICATIONS,
+                            android.os.Build.VERSION_CODES.TIRAMISU, 0 /*usesPermissionFlags*/),
                     new CompatibilityPermissionInfo(Manifest.permission.WRITE_EXTERNAL_STORAGE,
                             android.os.Build.VERSION_CODES.DONUT, 0 /*usesPermissionFlags*/),
                     new CompatibilityPermissionInfo(Manifest.permission.READ_PHONE_STATE,

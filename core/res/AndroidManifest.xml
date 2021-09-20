@@ -1488,6 +1488,28 @@
         android:description="@string/permdesc_useBiometric"
         android:protectionLevel="normal" />
 
+   <!-- ======================================================================= -->
+    <!-- Permissions for posting notifications                                  -->
+    <!-- ====================================================================== -->
+    <eat-comment />
+
+    <!-- Used for permissions that are associated with posting notifications
+    -->
+    <permission-group android:name="android.permission-group.NOTIFICATIONS"
+          android:icon="@drawable/ic_notifications_alerted"
+          android:label="@string/permgrouplab_notifications"
+          android:description="@string/permgroupdesc_notifications"
+          android:priority="850" />
+
+    <!-- Allows an app to post notifications
+         <p>Protection level: dangerous
+    -->
+    <permission android:name="android.permission.POST_NOTIFICATIONS"
+                android:permissionGroup="android.permission-group.UNDEFINED"
+                android:label="@string/permlab_postNotification"
+                android:description="@string/permdesc_postNotification"
+                android:protectionLevel="dangerous" />
+
     <!-- ====================================================================== -->
     <!-- REMOVED PERMISSIONS                                                    -->
     <!-- ====================================================================== -->
