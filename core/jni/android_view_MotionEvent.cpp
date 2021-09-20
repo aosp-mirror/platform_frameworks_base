@@ -393,13 +393,13 @@ static jlong android_view_MotionEvent_nativeInitialize(
 
     ui::Transform transform;
     transform.set(xOffset, yOffset);
+    ui::Transform identityTransform;
     event->initialize(InputEvent::nextId(), deviceId, source, displayId, INVALID_HMAC, action, 0,
                       flags, edgeFlags, metaState, buttonState,
                       static_cast<MotionClassification>(classification), transform, xPrecision,
                       yPrecision, AMOTION_EVENT_INVALID_CURSOR_POSITION,
-                      AMOTION_EVENT_INVALID_CURSOR_POSITION, ui::Transform::ROT_0,
-                      INVALID_DISPLAY_SIZE, INVALID_DISPLAY_SIZE, downTimeNanos, eventTimeNanos,
-                      pointerCount, pointerProperties, rawPointerCoords);
+                      AMOTION_EVENT_INVALID_CURSOR_POSITION, identityTransform, downTimeNanos,
+                      eventTimeNanos, pointerCount, pointerProperties, rawPointerCoords);
 
     return reinterpret_cast<jlong>(event.release());
 }
