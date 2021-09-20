@@ -100,8 +100,7 @@ public class KeyguardIndicationRotateTextViewController extends
      */
     public void updateIndication(@IndicationType int type, KeyguardIndication newIndication,
             boolean updateImmediately) {
-        if (type == INDICATION_TYPE_NOW_PLAYING
-                || type == INDICATION_TYPE_REVERSE_CHARGING) {
+        if (type == INDICATION_TYPE_REVERSE_CHARGING) {
             // temporarily don't show here, instead use AmbientContainer b/181049781
             return;
         }
@@ -303,7 +302,6 @@ public class KeyguardIndicationRotateTextViewController extends
     public static final int INDICATION_TYPE_TRUST = 6;
     public static final int INDICATION_TYPE_RESTING = 7;
     public static final int INDICATION_TYPE_USER_LOCKED = 8;
-    public static final int INDICATION_TYPE_NOW_PLAYING = 9;
     public static final int INDICATION_TYPE_REVERSE_CHARGING = 10;
 
     @IntDef({
@@ -317,7 +315,6 @@ public class KeyguardIndicationRotateTextViewController extends
             INDICATION_TYPE_TRUST,
             INDICATION_TYPE_RESTING,
             INDICATION_TYPE_USER_LOCKED,
-            INDICATION_TYPE_NOW_PLAYING,
             INDICATION_TYPE_REVERSE_CHARGING,
     })
     @Retention(RetentionPolicy.SOURCE)
