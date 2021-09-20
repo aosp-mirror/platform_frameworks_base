@@ -247,7 +247,8 @@ public class Letterbox {
         TapEventReceiver(InputChannel inputChannel, Context context) {
             super(inputChannel, UiThread.getHandler().getLooper());
             mDoubleTapListener = new DoubleTapListener();
-            mDoubleTapDetector = new GestureDetector(context, mDoubleTapListener);
+            mDoubleTapDetector = new GestureDetector(
+                    context, mDoubleTapListener, UiThread.getHandler());
         }
 
         @Override
