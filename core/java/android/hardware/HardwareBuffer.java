@@ -25,6 +25,7 @@ import android.graphics.GraphicBuffer;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.SurfaceControl;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
@@ -129,6 +130,15 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     public static final long USAGE_GPU_SAMPLED_IMAGE      = 1 << 8;
     /** Usage: The buffer will be written to by the GPU */
     public static final long USAGE_GPU_COLOR_OUTPUT       = 1 << 9;
+    /**
+     * The buffer will be used as a composer HAL overlay layer.
+     *
+     * This flag is currently only needed when using
+     * {@link android.view.SurfaceControl.Transaction#setBuffer(SurfaceControl, HardwareBuffer)}
+     * to set a buffer. In all other cases, the framework adds this flag
+     * internally to buffers that could be presented in a composer overlay.
+     */
+    public static final long USAGE_COMPOSER_OVERLAY = 1 << 11;
     /** Usage: The buffer must not be used outside of a protected hardware path */
     public static final long USAGE_PROTECTED_CONTENT      = 1 << 14;
     /** Usage: The buffer will be read by a hardware video encoder */
