@@ -25,7 +25,10 @@ import android.media.AudioSystem;
 import android.media.INativeSpatializerCallback;
 import android.media.ISpatializer;
 import android.media.ISpatializerCallback;
+import android.media.ISpatializerHeadToSoundStagePoseCallback;
+import android.media.ISpatializerHeadTrackingModeCallback;
 import android.media.Spatializer;
+import android.media.SpatializerHeadTrackingMode;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.Log;
@@ -64,6 +67,8 @@ public class SpatializerHelper {
     /** current level as reported by native Spatializer in callback */
     private int mSpatLevel = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
     private int mCapableSpatLevel = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
+    private int mActualHeadTrackingMode = Spatializer.HEAD_TRACKING_MODE_UNSUPPORTED;
+    private int mDesiredHeadTrackingMode = Spatializer.HEAD_TRACKING_MODE_UNSUPPORTED;
     private @Nullable ISpatializer mSpat;
     private @Nullable SpatializerCallback mSpatCallback;
 
@@ -150,6 +155,7 @@ public class SpatializerHelper {
         mState = STATE_UNINITIALIZED;
         mSpatLevel = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
         mCapableSpatLevel = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
+        mActualHeadTrackingMode = Spatializer.HEAD_TRACKING_MODE_UNSUPPORTED;
         init();
         setFeatureEnabled(featureEnabled);
     }
@@ -189,11 +195,25 @@ public class SpatializerHelper {
 
         public void onHeadTrackingModeChanged(byte mode)  {
             logd("SpatializerCallback.onHeadTrackingModeChanged mode:" + mode);
+            int oldMode, newMode;
+            synchronized (this) {
+                oldMode = mActualHeadTrackingMode;
+                mActualHeadTrackingMode = headTrackingModeTypeToSpatializerInt(mode);
+                newMode = mActualHeadTrackingMode;
+            }
+            if (oldMode != newMode) {
+                dispatchActualHeadTrackingMode(newMode);
+            }
         }
 
         public void onHeadToSoundStagePoseUpdated(float[] headToStage)  {
             if (headToStage == null) {
                 Log.e(TAG, "SpatializerCallback.onHeadToStagePoseUpdated null transform");
+                return;
+            }
+            if (headToStage.length != 6) {
+                Log.e(TAG, "SpatializerCallback.onHeadToStagePoseUpdated invalid transform length"
+                        + headToStage.length);
                 return;
             }
             if (DEBUG) {
@@ -204,6 +224,7 @@ public class SpatializerHelper {
                 }
                 logd("SpatializerCallback.onHeadToStagePoseUpdated headToStage:" + t);
             }
+            dispatchPoseUpdate(headToStage);
         }
     };
 
@@ -471,5 +492,240 @@ public class SpatializerHelper {
         final boolean able = AudioSystem.canBeSpatialized(attributes, format, devices);
         logd("canBeSpatialized returning " + able);
         return able;
+    }
+
+    //------------------------------------------------------
+    // head tracking
+    final RemoteCallbackList<ISpatializerHeadTrackingModeCallback> mHeadTrackingModeCallbacks =
+            new RemoteCallbackList<ISpatializerHeadTrackingModeCallback>();
+
+    synchronized void registerHeadTrackingModeCallback(
+            @NonNull ISpatializerHeadTrackingModeCallback callback) {
+        mHeadTrackingModeCallbacks.register(callback);
+    }
+
+    synchronized void unregisterHeadTrackingModeCallback(
+            @NonNull ISpatializerHeadTrackingModeCallback callback) {
+        mHeadTrackingModeCallbacks.unregister(callback);
+    }
+
+    synchronized int[] getSupportedHeadTrackingModes() {
+        switch (mState) {
+            case STATE_UNINITIALIZED:
+                return new int[0];
+            case STATE_NOT_SUPPORTED:
+                // return an empty list when Spatializer functionality is not supported
+                // because the list of head tracking modes you can set is actually empty
+                // as defined in {@link Spatializer#getSupportedHeadTrackingModes()}
+                return new int[0];
+            case STATE_ENABLED_UNAVAILABLE:
+            case STATE_DISABLED_UNAVAILABLE:
+            case STATE_DISABLED_AVAILABLE:
+            case STATE_ENABLED_AVAILABLE:
+                if (mSpat == null) {
+                    return new int[0];
+                }
+                break;
+        }
+        // mSpat != null
+        try {
+            final byte[] values = mSpat.getSupportedHeadTrackingModes();
+            ArrayList<Integer> list = new ArrayList<>(0);
+            for (byte value : values) {
+                switch (value) {
+                    case SpatializerHeadTrackingMode.OTHER:
+                    case SpatializerHeadTrackingMode.DISABLED:
+                        // not expected here, skip
+                        break;
+                    case SpatializerHeadTrackingMode.RELATIVE_WORLD:
+                    case SpatializerHeadTrackingMode.RELATIVE_SCREEN:
+                        list.add(headTrackingModeTypeToSpatializerInt(value));
+                        break;
+                    default:
+                        Log.e(TAG, "Unexpected head tracking mode:" + value,
+                                new IllegalArgumentException("invalid mode"));
+                        break;
+                }
+            }
+            int[] modes = new int[list.size()];
+            for (int i = 0; i < list.size(); i++) {
+                modes[i] = list.get(i);
+            }
+            return modes;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling getSupportedHeadTrackingModes", e);
+            return new int[] { Spatializer.HEAD_TRACKING_MODE_UNSUPPORTED };
+        }
+    }
+
+    synchronized int getActualHeadTrackingMode() {
+        switch (mState) {
+            case STATE_UNINITIALIZED:
+                return Spatializer.HEAD_TRACKING_MODE_DISABLED;
+            case STATE_NOT_SUPPORTED:
+                return Spatializer.HEAD_TRACKING_MODE_UNSUPPORTED;
+            case STATE_ENABLED_UNAVAILABLE:
+            case STATE_DISABLED_UNAVAILABLE:
+            case STATE_DISABLED_AVAILABLE:
+            case STATE_ENABLED_AVAILABLE:
+                if (mSpat == null) {
+                    return Spatializer.HEAD_TRACKING_MODE_DISABLED;
+                }
+                break;
+        }
+        // mSpat != null
+        try {
+            return headTrackingModeTypeToSpatializerInt(mSpat.getActualHeadTrackingMode());
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling getActualHeadTrackingMode", e);
+            return Spatializer.HEAD_TRACKING_MODE_UNSUPPORTED;
+        }
+    }
+
+    synchronized int getDesiredHeadTrackingMode() {
+        return mDesiredHeadTrackingMode;
+    }
+
+    synchronized void setGlobalTransform(@NonNull float[] transform) {
+        if (transform.length != 6) {
+            throw new IllegalArgumentException("invalid array size" + transform.length);
+        }
+        if (!checkSpatForHeadTracking("setGlobalTransform")) {
+            return;
+        }
+        try {
+            mSpat.setGlobalTransform(transform);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling setGlobalTransform", e);
+        }
+    }
+
+    synchronized void recenterHeadTracker() {
+        if (!checkSpatForHeadTracking("recenterHeadTracker")) {
+            return;
+        }
+        try {
+            mSpat.recenterHeadTracker();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling recenterHeadTracker", e);
+        }
+    }
+
+    synchronized void setDesiredHeadTrackingMode(@Spatializer.HeadTrackingModeSet int mode) {
+        if (!checkSpatForHeadTracking("setDesiredHeadTrackingMode")) {
+            return;
+        }
+        try {
+            if (mode != mDesiredHeadTrackingMode) {
+                mSpat.setDesiredHeadTrackingMode(spatializerIntToHeadTrackingModeType(mode));
+                mDesiredHeadTrackingMode = mode;
+                dispatchDesiredHeadTrackingMode(mode);
+            }
+
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling setDesiredHeadTrackingMode", e);
+        }
+    }
+
+    private int headTrackingModeTypeToSpatializerInt(byte mode) {
+        switch (mode) {
+            case SpatializerHeadTrackingMode.OTHER:
+                return Spatializer.HEAD_TRACKING_MODE_OTHER;
+            case SpatializerHeadTrackingMode.DISABLED:
+                return Spatializer.HEAD_TRACKING_MODE_DISABLED;
+            case SpatializerHeadTrackingMode.RELATIVE_WORLD:
+                return Spatializer.HEAD_TRACKING_MODE_RELATIVE_WORLD;
+            case SpatializerHeadTrackingMode.RELATIVE_SCREEN:
+                return Spatializer.HEAD_TRACKING_MODE_RELATIVE_DEVICE;
+            default:
+                throw(new IllegalArgumentException("Unexpected head tracking mode:" + mode));
+        }
+    }
+
+    private byte spatializerIntToHeadTrackingModeType(int sdkMode) {
+        switch (sdkMode) {
+            case Spatializer.HEAD_TRACKING_MODE_OTHER:
+                return SpatializerHeadTrackingMode.OTHER;
+            case Spatializer.HEAD_TRACKING_MODE_DISABLED:
+                return SpatializerHeadTrackingMode.DISABLED;
+            case Spatializer.HEAD_TRACKING_MODE_RELATIVE_WORLD:
+                return SpatializerHeadTrackingMode.RELATIVE_WORLD;
+            case Spatializer.HEAD_TRACKING_MODE_RELATIVE_DEVICE:
+                return SpatializerHeadTrackingMode.RELATIVE_SCREEN;
+            default:
+                throw(new IllegalArgumentException("Unexpected head tracking mode:" + sdkMode));
+        }
+    }
+
+    private boolean checkSpatForHeadTracking(String funcName) {
+        switch (mState) {
+            case STATE_UNINITIALIZED:
+            case STATE_NOT_SUPPORTED:
+                return false;
+            case STATE_ENABLED_UNAVAILABLE:
+            case STATE_DISABLED_UNAVAILABLE:
+            case STATE_DISABLED_AVAILABLE:
+            case STATE_ENABLED_AVAILABLE:
+                if (mSpat == null) {
+                    throw (new IllegalStateException(
+                            "null Spatializer when calling " + funcName));
+                }
+                break;
+        }
+        return true;
+    }
+
+    private void dispatchActualHeadTrackingMode(int newMode) {
+        final int nbCallbacks = mHeadTrackingModeCallbacks.beginBroadcast();
+        for (int i = 0; i < nbCallbacks; i++) {
+            try {
+                mHeadTrackingModeCallbacks.getBroadcastItem(i)
+                        .dispatchSpatializerActualHeadTrackingModeChanged(newMode);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error in dispatchSpatializerActualHeadTrackingModeChanged", e);
+            }
+        }
+        mHeadTrackingModeCallbacks.finishBroadcast();
+    }
+
+    private void dispatchDesiredHeadTrackingMode(int newMode) {
+        final int nbCallbacks = mHeadTrackingModeCallbacks.beginBroadcast();
+        for (int i = 0; i < nbCallbacks; i++) {
+            try {
+                mHeadTrackingModeCallbacks.getBroadcastItem(i)
+                        .dispatchSpatializerDesiredHeadTrackingModeChanged(newMode);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error in dispatchSpatializerDesiredHeadTrackingModeChanged", e);
+            }
+        }
+        mHeadTrackingModeCallbacks.finishBroadcast();
+    }
+
+    //------------------------------------------------------
+    // head pose
+    final RemoteCallbackList<ISpatializerHeadToSoundStagePoseCallback> mHeadPoseCallbacks =
+            new RemoteCallbackList<ISpatializerHeadToSoundStagePoseCallback>();
+
+    synchronized void registerHeadToSoundstagePoseCallback(
+            @NonNull ISpatializerHeadToSoundStagePoseCallback callback) {
+        mHeadPoseCallbacks.register(callback);
+    }
+
+    synchronized void unregisterHeadToSoundstagePoseCallback(
+            @NonNull ISpatializerHeadToSoundStagePoseCallback callback) {
+        mHeadPoseCallbacks.unregister(callback);
+    }
+
+    private void dispatchPoseUpdate(float[] pose) {
+        final int nbCallbacks = mHeadPoseCallbacks.beginBroadcast();
+        for (int i = 0; i < nbCallbacks; i++) {
+            try {
+                mHeadPoseCallbacks.getBroadcastItem(i)
+                        .dispatchPoseChanged(pose);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error in dispatchPoseChanged", e);
+            }
+        }
+        mHeadPoseCallbacks.finishBroadcast();
     }
 }
