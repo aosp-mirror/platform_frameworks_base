@@ -265,7 +265,7 @@
     <string name="bugreport_in_power" msgid="8664089072534638709">"বাগ ৰিপৰ্টৰ শ্ৱৰ্টকাট"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"পাৱাৰ মেনুত বাগ প্ৰতিবেদন গ্ৰহণ কৰিবলৈ এটা বুটাম দেখুৱাওক"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"জাগ্ৰত কৰি ৰাখক"</string>
-    <string name="keep_screen_on_summary" msgid="1510731514101925829">"চ্চাৰ্জ হৈ থকাৰ সময়ত স্ক্ৰীণ কেতিয়াও সুপ্ত অৱস্থালৈ নাযায়"</string>
+    <string name="keep_screen_on_summary" msgid="1510731514101925829">"চ্চাৰ্জ হৈ থকাৰ সময়ত স্ক্ৰীন কেতিয়াও সুপ্ত অৱস্থালৈ নাযায়"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"ব্লুটুথ HCI স্নুপ ল’গ সক্ষম কৰক"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"ব্লুটুথ পেকেট সংগ্ৰহ কৰক। (এই ছেটিংটো সলনি কৰাৰ পিছত ব্লুটুথ ট’গল কৰক)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"ঔইএম আনলক"</string>
@@ -358,9 +358,9 @@
     <string name="media_category" msgid="8122076702526144053">"মিডিয়া"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"নিৰীক্ষণ কৰি থকা হৈছে"</string>
     <string name="strict_mode" msgid="889864762140862437">"কঠোৰ ম’ড সক্ষম কৰা হৈছে"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"যেতিয়া এপসমূহে মুখ্য থ্ৰেডত দীঘলীয়া কাৰ্যকলাপ চলাই, তেতিয়া স্ক্ৰীণ ফ্লাশ্ব কৰক"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"যেতিয়া এপ্সমূহে মুখ্য থ্ৰেডত দীঘলীয়া কাৰ্যকলাপ চলাই, তেতিয়া স্ক্ৰীন ফ্লাশ্ব কৰক"</string>
     <string name="pointer_location" msgid="7516929526199520173">"পইণ্টাৰৰ অৱস্থান"</string>
-    <string name="pointer_location_summary" msgid="957120116989798464">"চলিত স্পৰ্শ-বিষয়ক তথ্যসহ স্ক্ৰীণ অভাৰলে\'"</string>
+    <string name="pointer_location_summary" msgid="957120116989798464">"চলিত স্পৰ্শ-বিষয়ক তথ্যসহ স্ক্ৰীন অভাৰলে’"</string>
     <string name="show_touches" msgid="8437666942161289025">"টেপসমূহ দেখুৱাওক"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"টিপিলে দৃশ্যায়িত ফীডবেক দিয়ক"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"পৃষ্ঠভাগৰ আপডেইট দেখুৱাওক"</string>
@@ -371,7 +371,7 @@
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"হাৰ্ডৱেৰ লেয়াৰ আপডেইট হওতে সিঁহতক সেউজীয়া ৰঙেৰে ফ্লাশ্ব কৰক"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"GPU অভাৰড্ৰ ডিবাগ কৰক"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"HW অ’ভাৰলে অক্ষম কৰক"</string>
-    <string name="disable_overlays_summary" msgid="1954852414363338166">"স্ক্ৰীণ কম্প’জিট কৰাৰ বাবে সদায় জিপিইউ ব্যৱহাৰ কৰক"</string>
+    <string name="disable_overlays_summary" msgid="1954852414363338166">"স্ক্ৰীন কম্প’জিট কৰাৰ বাবে সদায় জিপিইউ ব্যৱহাৰ কৰক"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"ৰঙৰ ঠাই ছিমিউলেইট কৰক"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL ট্ৰেছ সক্ষম কৰক"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"ইউএছবি অডিঅ\' ৰাউটিং অক্ষম কৰক"</string>
@@ -379,7 +379,7 @@
     <string name="debug_layout" msgid="1659216803043339741">"লেআউটৰ সময় দেখুৱাওক"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"ক্লিপ বাউণ্ড, মাৰ্জিন আদিসমূহ দেখুৱাওক"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"আৰটিএল চানেকিৰ দিশ বলেৰে সলনি কৰক"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"সকলো ভাষাৰ বাবে স্ক্ৰীণৰ চানেকিৰ দিশ RTLলৈ বলেৰে সলনি কৰক"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"সকলো ভাষাৰ বাবে স্ক্ৰীনৰ চানেকিৰ দিশ RTLলৈ বলেৰে সলনি কৰক"</string>
     <string name="window_blurs" msgid="6831008984828425106">"ৱিণ্ড’ স্তৰত অস্পষ্ট কৰাৰ অনুমতি দিয়ক"</string>
     <string name="force_msaa" msgid="4081288296137775550">"বল ৪গুণ MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 এপত ৪গুণ MSAA সক্ষম কৰক"</string>
@@ -400,7 +400,7 @@
     <string name="show_all_anrs" msgid="9160563836616468726">"নেপথ্য এএনআৰবোৰ দেখুৱাওক"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"নেপথ্য এপসমূহৰ বাবে এপে সঁহাৰি দিয়া নাই ডায়ল\'গ প্ৰদৰ্শন কৰক"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"জাননী চ্চেনেলৰ সকীয়নিসমূহ দেখুৱাওক"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"কোনো এপে বৈধ চ্চেনেল নোহোৱাকৈ কোনো জাননী প\'ষ্ট কৰিলে স্ক্ৰীণত সকীয়নি প্ৰদৰ্শন হয়"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"কোনো এপে বৈধ চ্চেনেল নোহোৱাকৈ কোনো জাননী প\'ষ্ট কৰিলে স্ক্ৰীনত সকীয়নি প্ৰদৰ্শন হয়"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"বাহ্যিক সঞ্চয়াগাৰত এপক বলেৰে অনুমতি দিয়ক"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"মেনিফেষ্টৰ মান যিয়েই নহওক, বাহ্যিক সঞ্চয়াগাৰত লিখিবলৈ যিকোনো এপক উপযুক্ত কৰি তোলে"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"বলেৰে কাৰ্যকলাপসমূহৰ আকাৰ সলনি কৰিব পৰা কৰক"</string>
