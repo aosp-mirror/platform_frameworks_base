@@ -6822,9 +6822,8 @@
                  content for the duration of the animation. -->
             <enum name="bottom" value="-1" />
         </attr>
-        <!-- Special background behind animation.  Only for use with window
-             animations.  Can only be a color, and only black.  If 0, the
-             default, there is no background. -->
+        <!-- Special background behind animation. Only for use with task animations.
+             If 0, the default, there is no background. -->
         <attr name="background" />
         <!-- Special option for window animations: if this window is on top
              of a wallpaper, don't animate the wallpaper with it. -->
@@ -7737,7 +7736,7 @@
 
         <!-- Name of a method on the Context used to inflate the menu that will be
              called when the item is clicked.
-             {@deprecated Menu actually traverses the Context hierarchy looking for the 
+             {@deprecated Menu actually traverses the Context hierarchy looking for the
              relevant method, which is fragile (an intermediate ContextWrapper adding a
              same-named method would change behavior) and restricts bytecode optimizers
              such as R8. Instead, use MenuItem.setOnMenuItemClickListener.} -->
