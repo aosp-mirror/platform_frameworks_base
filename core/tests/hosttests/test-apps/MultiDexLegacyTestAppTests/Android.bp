@@ -13,19 +13,22 @@
 // limitations under the License.
 
 package {
-    // See: http://go/android-license-faq
-    // A large-scale-change added 'default_applicable_licenses' to import
-    // all of the 'license_kinds' from "frameworks_base_license"
-    // to get the below license kinds:
-    //   SPDX-license-identifier-Apache-2.0
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+// The application with a minimal main dex
 android_test {
-    name: "MultiDexLegacyTestServicesTests",
+    name: "MultiDexLegacyTestAppTests",
+
+    static_libs: ["android-support-multidex-instrumentation"],
+
     srcs: ["src/**/*.java"],
+
     sdk_version: "16",
-    dex_preopt: {
-        enabled: false,
-    },
+
+    javacflags: ["-nowarn"],
+
+    min_sdk_version: "16",
+
+    instrumentation_for: "MultiDexLegacyTestApp",
 }
