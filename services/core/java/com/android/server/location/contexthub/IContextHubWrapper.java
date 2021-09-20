@@ -29,6 +29,9 @@ import android.hardware.location.ContextHubTransaction;
 import android.hardware.location.NanoAppBinary;
 import android.hardware.location.NanoAppMessage;
 import android.hardware.location.NanoAppState;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
@@ -306,35 +309,51 @@ public abstract class IContextHubWrapper {
 
         private ContextHubAidlCallback mAidlCallback = new ContextHubAidlCallback();
 
+        // Use this thread in case where the execution requires to be on a service thread.
+        // For instance, AppOpsManager.noteOp requires the UPDATE_APP_OPS_STATS permission.
+        private HandlerThread mHandlerThread =
+                new HandlerThread("Context Hub AIDL callback", Process.THREAD_PRIORITY_BACKGROUND);
+        private Handler mHandler;
+
         private class ContextHubAidlCallback extends
                 android.hardware.contexthub.IContextHubCallback.Stub {
             public void handleNanoappInfo(android.hardware.contexthub.NanoappInfo[] appInfo) {
                 List<NanoAppState> nanoAppStateList =
                         ContextHubServiceUtil.createNanoAppStateList(appInfo);
-                mCallback.handleNanoappInfo(nanoAppStateList);
+                mHandler.post(() -> {
+                    mCallback.handleNanoappInfo(nanoAppStateList);
+                });
             }
 
             public void handleContextHubMessage(android.hardware.contexthub.ContextHubMessage msg,
                     String[] msgContentPerms) {
-                mCallback.handleNanoappMessage(
-                        (short) msg.hostEndPoint,
-                        ContextHubServiceUtil.createNanoAppMessage(msg),
-                        new ArrayList<>(Arrays.asList(msg.permissions)),
-                        new ArrayList<>(Arrays.asList(msgContentPerms)));
+                mHandler.post(() -> {
+                    mCallback.handleNanoappMessage(
+                            (short) msg.hostEndPoint,
+                            ContextHubServiceUtil.createNanoAppMessage(msg),
+                            new ArrayList<>(Arrays.asList(msg.permissions)),
+                            new ArrayList<>(Arrays.asList(msgContentPerms)));
+                });
             }
 
             public void handleContextHubAsyncEvent(int evt) {
-                mCallback.handleContextHubEvent(
-                        ContextHubServiceUtil.toContextHubEventFromAidl(evt));
+                mHandler.post(() -> {
+                    mCallback.handleContextHubEvent(
+                            ContextHubServiceUtil.toContextHubEventFromAidl(evt));
+                });
             }
 
             public void handleTransactionResult(int transactionId, boolean success) {
-                mCallback.handleTransactionResult(transactionId, success);
+                mHandler.post(() -> {
+                    mCallback.handleTransactionResult(transactionId, success);
+                });
             }
         }
 
         ContextHubWrapperAidl(android.hardware.contexthub.IContextHub hub) {
             mHub = hub;
+            mHandlerThread.start();
+            mHandler = new Handler(mHandlerThread.getLooper());
         }
 
         public Pair<List<ContextHubInfo>, List<String>> getHubs() throws RemoteException {
