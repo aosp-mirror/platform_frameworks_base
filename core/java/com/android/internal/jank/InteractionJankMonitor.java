@@ -103,7 +103,7 @@ public class InteractionJankMonitor {
     private static final String ACTION_PREFIX = InteractionJankMonitor.class.getCanonicalName();
 
     private static final String DEFAULT_WORKER_NAME = TAG + "-Worker";
-    private static final long DEFAULT_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(5L);
+    private static final long DEFAULT_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(2L);
     private static final String SETTINGS_ENABLED_KEY = "enabled";
     private static final String SETTINGS_SAMPLING_INTERVAL_KEY = "sampling_interval";
     private static final String SETTINGS_THRESHOLD_MISSED_FRAMES_KEY =
