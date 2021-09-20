@@ -3933,7 +3933,7 @@ public class NotificationPanelViewController extends PanelViewController {
         return new TouchHandler() {
             @Override
             public boolean onInterceptTouchEvent(MotionEvent event) {
-                if (mBlockTouches || mQsFullyExpanded && mQs.disallowPanelTouches()) {
+                if (mBlockTouches || mQs.disallowPanelTouches()) {
                     return false;
                 }
                 initDownStates(event);
