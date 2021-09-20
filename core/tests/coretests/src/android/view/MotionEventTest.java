@@ -26,6 +26,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
+import android.platform.test.annotations.Presubmit;
 import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
 
@@ -40,6 +41,7 @@ import java.util.Set;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@Presubmit
 public class MotionEventTest {
     private static final int ID_SOURCE_MASK = 0x3 << 30;
 
