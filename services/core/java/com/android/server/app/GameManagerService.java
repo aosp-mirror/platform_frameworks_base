@@ -852,7 +852,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
      * @hide
      */
     @VisibleForTesting
-    public void updateConfigsForUser(int userId, String ...packageNames) {
+    void updateConfigsForUser(int userId, String ...packageNames) {
         try {
             synchronized (mDeviceConfigLock) {
                 for (final String packageName : packageNames) {
