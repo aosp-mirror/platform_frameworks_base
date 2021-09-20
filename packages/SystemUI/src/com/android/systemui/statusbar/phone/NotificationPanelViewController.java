@@ -57,6 +57,9 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.Drawable;
+import android.hardware.biometrics.BiometricSourceType;
+import android.hardware.biometrics.SensorLocationInternal;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -616,6 +619,8 @@ public class NotificationPanelViewController extends PanelViewController {
      */
     private float mKeyguardOnlyContentAlpha = 1.0f;
 
+    private float mUdfpsMaxYBurnInOffset;
+
     /**
      * Are we currently in gesture navigation
      */
@@ -1008,6 +1013,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 mView.getContext());
         mLockscreenNotificationQSPadding = mResources.getDimensionPixelSize(
                 R.dimen.notification_side_paddings);
+        mUdfpsMaxYBurnInOffset = mResources.getDimensionPixelSize(R.dimen.udfps_burn_in_offset_y);
     }
 
     private void updateViewControllers(KeyguardStatusView keyguardStatusView,
@@ -1394,7 +1400,17 @@ public class NotificationPanelViewController extends PanelViewController {
         float darkamount =
                 mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()
                         ? 1.0f : mInterpolatedDarkAmount;
-        mClockPositionAlgorithm.setup(mStatusBarHeaderHeightKeyguard,
+
+        float udfpsAodTopLocation = -1f;
+        if (mUpdateMonitor.isUdfpsEnrolled() && mAuthController.getUdfpsProps().size() > 0) {
+            FingerprintSensorPropertiesInternal props = mAuthController.getUdfpsProps().get(0);
+            final SensorLocationInternal location = props.getLocation();
+            udfpsAodTopLocation = location.sensorLocationY - location.sensorRadius
+                    - mUdfpsMaxYBurnInOffset;
+        }
+
+        mClockPositionAlgorithm.setup(
+                mStatusBarHeaderHeightKeyguard,
                 expandedFraction,
                 mKeyguardStatusViewController.getLockscreenHeight(),
                 userIconHeight,
@@ -1403,7 +1419,10 @@ public class NotificationPanelViewController extends PanelViewController {
                 bypassEnabled, getUnlockedStackScrollerPadding(),
                 computeQsExpansionFraction(),
                 mDisplayTopInset,
-                mShouldUseSplitNotificationShade);
+                mShouldUseSplitNotificationShade,
+                udfpsAodTopLocation,
+                mKeyguardStatusViewController.getClockBottom(mStatusBarHeaderHeightKeyguard),
+                mKeyguardStatusViewController.isClockTopAligned());
         mClockPositionAlgorithm.run(mClockPositionResult);
         boolean animate = mNotificationStackScrollLayoutController.isAddOrRemoveAnimationPending();
         boolean animateClock = animate || mAnimateNextPositionUpdate;
