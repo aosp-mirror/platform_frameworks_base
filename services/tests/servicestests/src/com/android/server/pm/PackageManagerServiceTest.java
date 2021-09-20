@@ -71,7 +71,7 @@ public class PackageManagerServiceTest {
     }
 
     @Test
-    public void testPackageRemoval() throws Exception {
+    public void testPackageRemoval() {
         class PackageSenderImpl implements PackageSender {
             public void sendPackageBroadcast(final String action, final String pkg,
                     final Bundle extras, final int flags, final String targetPkg,
@@ -147,7 +147,7 @@ public class PackageManagerServiceTest {
     }
 
     @Test
-    public void testPartitions() throws Exception {
+    public void testPartitions() {
         String[] partitions = { "system", "vendor", "odm", "oem", "product", "system_ext" };
         String[] appdir = { "app", "priv-app" };
         for (int i = 0; i < partitions.length; i++) {
@@ -440,15 +440,15 @@ public class PackageManagerServiceTest {
     // known constants.
     private Boolean getOverride(Method m) {
         final String name = "Computer." + displayName(m);
-        final PackageManagerService.Computer.LiveImplementation annotation =
-                m.getAnnotation(PackageManagerService.Computer.LiveImplementation.class);
+        final Computer.LiveImplementation annotation =
+                m.getAnnotation(Computer.LiveImplementation.class);
         if (annotation == null) {
             return null;
         }
         final int override = annotation.override();
-        if (override == PackageManagerService.Computer.LiveImplementation.MANDATORY) {
+        if (override == Computer.LiveImplementation.MANDATORY) {
             return true;
-        } else if (override == PackageManagerService.Computer.LiveImplementation.NOT_ALLOWED) {
+        } else if (override == Computer.LiveImplementation.NOT_ALLOWED) {
             return false;
         } else {
             flag(name, "invalid Live value: " + override);
@@ -461,7 +461,7 @@ public class PackageManagerServiceTest {
         // Verify that Copmuter methods are properly annotated and that ComputerLocked is
         // properly populated per annotations.
         // Call PackageManagerService.validateComputer();
-        Class base = PackageManagerService.Computer.class;
+        Class base = Computer.class;
 
         HashMap<Method, Boolean> methodType = new HashMap<>();
 
@@ -476,7 +476,7 @@ public class PackageManagerServiceTest {
             methodType.put(m, override);
         }
 
-        Class coreClass = PackageManagerService.ComputerEngine.class;
+        Class coreClass = ComputerEngine.class;
         final Method[] coreMethods = coreClass.getDeclaredMethods();
 
         // Examine every method in the core.  If it inherits from a base method it must be
@@ -520,7 +520,7 @@ public class PackageManagerServiceTest {
             }
         }
 
-        Class liveClass = PackageManagerService.ComputerLocked.class;
+        Class liveClass = ComputerLocked.class;
         final Method[] liveMethods = liveClass.getDeclaredMethods();
 
         // Examine every method in the live list.  Every method must be final and must

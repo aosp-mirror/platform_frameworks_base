@@ -404,7 +404,7 @@ final class VerificationParams extends HandlerParams {
 
             DeviceIdleInternal idleController =
                     mPm.mInjector.getLocalService(DeviceIdleInternal.class);
-            final long idleDuration = mPm.getVerificationTimeout();
+            final long idleDuration = mVerificationHelper.getVerificationTimeout();
             final BroadcastOptions options = BroadcastOptions.makeBasic();
             options.setTemporaryAppAllowlist(idleDuration,
                     TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
@@ -460,7 +460,8 @@ final class VerificationParams extends HandlerParams {
                                 final Message msg = mPm.mHandler
                                         .obtainMessage(CHECK_PENDING_VERIFICATION);
                                 msg.arg1 = verificationId;
-                                mPm.mHandler.sendMessageDelayed(msg, mPm.getVerificationTimeout());
+                                mPm.mHandler.sendMessageDelayed(msg,
+                                        mVerificationHelper.getVerificationTimeout());
                             }
                         }, null, 0, null, null);
 

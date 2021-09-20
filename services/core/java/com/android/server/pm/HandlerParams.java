@@ -40,11 +40,13 @@ abstract class HandlerParams {
     int mTraceCookie;
     @NonNull
     final PackageManagerService mPm;
+    final VerificationHelper mVerificationHelper;
 
     // TODO(b/198166813): remove PMS dependency
     HandlerParams(UserHandle user, PackageManagerService pm) {
         mUser = user;
         mPm = pm;
+        mVerificationHelper = new VerificationHelper(mPm.mContext);
     }
 
     UserHandle getUser() {

@@ -5075,7 +5075,7 @@ public final class Settings implements Watchable, Snappable {
         if (!ArrayUtils.isEmpty(gids)) {
             pw.print(prefix);
             pw.print("gids="); pw.println(
-                    PackageManagerService.arrayToString(gids));
+                    PackageManagerServiceUtils.arrayToString(gids));
         }
     }
 
