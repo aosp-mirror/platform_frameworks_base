@@ -44,6 +44,8 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
+import com.android.systemui.statusbar.policy.DeviceProvisionedController
+import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener
 import com.android.systemui.util.concurrency.FakeExecution
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
@@ -89,6 +91,8 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var statusBarStateController: StatusBarStateController
     @Mock
+    private lateinit var deviceProvisionedController: DeviceProvisionedController
+    @Mock
     private lateinit var handler: Handler
 
     @Mock
@@ -106,12 +110,15 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     private lateinit var configChangeListenerCaptor: ArgumentCaptor<ConfigurationListener>
     @Captor
     private lateinit var statusBarStateListenerCaptor: ArgumentCaptor<StateListener>
+    @Captor
+    private lateinit var deviceProvisionedCaptor: ArgumentCaptor<DeviceProvisionedListener>
 
     private lateinit var sessionListener: OnTargetsAvailableListener
     private lateinit var userListener: UserTracker.Callback
     private lateinit var settingsObserver: ContentObserver
     private lateinit var configChangeListener: ConfigurationListener
     private lateinit var statusBarStateListener: StateListener
+    private lateinit var deviceProvisionedListener: DeviceProvisionedListener
 
     private lateinit var smartspaceView: SmartspaceView
 
@@ -145,6 +152,8 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         `when`(plugin.getView(any())).thenReturn(createSmartspaceView(), createSmartspaceView())
         `when`(userTracker.userProfiles).thenReturn(userList)
         `when`(statusBarStateController.dozeAmount).thenReturn(0.5f)
+        `when`(deviceProvisionedController.isDeviceProvisioned()).thenReturn(true)
+        `when`(deviceProvisionedController.isCurrentUserSetup()).thenReturn(true)
 
         setActiveUser(userHandlePrimary)
         setAllowPrivateNotifications(userHandlePrimary, true)
@@ -162,11 +171,15 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
                 contentResolver,
                 configurationController,
                 statusBarStateController,
+                deviceProvisionedController,
                 execution,
                 executor,
                 handler,
                 Optional.of(plugin)
                 )
+
+        verify(deviceProvisionedController).addCallback(capture(deviceProvisionedCaptor))
+        deviceProvisionedListener = deviceProvisionedCaptor.value
     }
 
     @Test(expected = RuntimeException::class)
@@ -178,6 +191,27 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         controller.buildAndConnectView(fakeParent)
 
         // THEN an exception is thrown
+    }
+
+    @Test
+    fun connectOnlyAfterDeviceIsProvisioned() {
+        // GIVEN an unprovisioned device and an attempt to connect
+        `when`(deviceProvisionedController.isDeviceProvisioned()).thenReturn(false)
+        `when`(deviceProvisionedController.isCurrentUserSetup()).thenReturn(false)
+
+        // WHEN a connection attempt is made
+        controller.buildAndConnectView(fakeParent)
+
+        // THEN no session is created
+        verify(smartspaceManager, never()).createSmartspaceSession(any())
+
+        // WHEN it does become provisioned
+        `when`(deviceProvisionedController.isDeviceProvisioned()).thenReturn(true)
+        `when`(deviceProvisionedController.isCurrentUserSetup()).thenReturn(true)
+        deviceProvisionedListener.onUserSetupChanged()
+
+        // THEN the session is created
+        verify(smartspaceManager).createSmartspaceSession(any())
     }
 
     @Test
