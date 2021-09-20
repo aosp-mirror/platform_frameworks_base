@@ -30,6 +30,7 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.os.UserHandle.USER_NULL;
 import static android.view.SurfaceControl.Transaction;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS_ANIM;
@@ -2578,13 +2579,34 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         mSurfaceFreezer.unfreeze(getPendingTransaction());
     }
 
+    /**
+     * Initializes a change transition. See {@link SurfaceFreezer} for more information.
+     *
+     * For now, this will only be called for the following cases:
+     * 1. {@link Task} is changing windowing mode between fullscreen and freeform.
+     * 2. {@link TaskFragment} is organized and is changing window bounds.
+     * 3. {@link ActivityRecord} is reparented into an organized {@link TaskFragment}.
+     *
+     * This shouldn't be called on other {@link WindowContainer} unless there is a valid use case.
+     */
+    void initializeChangeTransition(Rect startBounds) {
+        mDisplayContent.prepareAppTransition(TRANSIT_CHANGE);
+        mDisplayContent.mChangingContainers.add(this);
+        mSurfaceFreezer.freeze(getSyncTransaction(), startBounds);
+    }
+
     ArraySet<WindowContainer> getAnimationSources() {
         return mSurfaceAnimationSources;
     }
 
     @Override
     public SurfaceControl getFreezeSnapshotTarget() {
-        return null;
+        // Only allow freezing if this window is in a TRANSIT_CHANGE
+        if (!mDisplayContent.mAppTransition.containsTransitRequest(TRANSIT_CHANGE)
+                || !mDisplayContent.mChangingContainers.contains(this)) {
+            return null;
+        }
+        return getSurfaceControl();
     }
 
     @Override
@@ -3186,6 +3208,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *          {@link android.window.WindowOrganizer}
      */
     boolean isOrganized() {
+        return false;
+    }
+
+    /** @return {@code true} if this is a container for embedded activities or tasks. */
+    boolean isEmbedded() {
         return false;
     }
 
