@@ -22804,7 +22804,7 @@ package android.media {
 
   public class MediaMetadataRetriever implements java.lang.AutoCloseable {
     ctor public MediaMetadataRetriever();
-    method public void close();
+    method public void close() throws java.io.IOException;
     method @Nullable public String extractMetadata(int);
     method @Nullable public byte[] getEmbeddedPicture();
     method @Nullable public android.graphics.Bitmap getFrameAtIndex(int, @NonNull android.media.MediaMetadataRetriever.BitmapParams);
@@ -22821,7 +22821,7 @@ package android.media {
     method @Nullable public android.graphics.Bitmap getPrimaryImage();
     method @Nullable public android.graphics.Bitmap getScaledFrameAtTime(long, int, @IntRange(from=1) int, @IntRange(from=1) int);
     method @Nullable public android.graphics.Bitmap getScaledFrameAtTime(long, int, @IntRange(from=1) int, @IntRange(from=1) int, @NonNull android.media.MediaMetadataRetriever.BitmapParams);
-    method public void release();
+    method public void release() throws java.io.IOException;
     method public void setDataSource(String) throws java.lang.IllegalArgumentException;
     method public void setDataSource(String, java.util.Map<java.lang.String,java.lang.String>) throws java.lang.IllegalArgumentException;
     method public void setDataSource(java.io.FileDescriptor, long, long) throws java.lang.IllegalArgumentException;
