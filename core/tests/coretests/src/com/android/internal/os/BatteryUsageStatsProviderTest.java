@@ -18,6 +18,9 @@ package com.android.internal.os;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.BatteryConsumer;
@@ -261,6 +264,39 @@ public class BatteryUsageStatsProviderTest {
                 .getConsumedPower(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT))
                 .isWithin(0.1)
                 .of(180.0);
+    }
+
+    @Test
+    public void testAggregateBatteryStats_incompatibleSnapshot() {
+        Context context = InstrumentationRegistry.getContext();
+        MockBatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
+        batteryStats.initMeasuredEnergyStats(new String[]{"FOO", "BAR"});
+
+        BatteryUsageStatsStore batteryUsageStatsStore = mock(BatteryUsageStatsStore.class);
+
+        when(batteryUsageStatsStore.listBatteryUsageStatsTimestamps())
+                .thenReturn(new long[]{1000, 2000});
+
+        when(batteryUsageStatsStore.loadBatteryUsageStats(1000)).thenReturn(
+                new BatteryUsageStats.Builder(batteryStats.getCustomEnergyConsumerNames())
+                        .setStatsDuration(1234).build());
+
+        // Add a snapshot, with a different set of custom power components.  It should
+        // be skipped by the aggregation.
+        when(batteryUsageStatsStore.loadBatteryUsageStats(2000)).thenReturn(
+                new BatteryUsageStats.Builder(new String[]{"different"})
+                        .setStatsDuration(4321).build());
+
+        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context,
+                batteryStats, batteryUsageStatsStore);
+
+        BatteryUsageStatsQuery query = new BatteryUsageStatsQuery.Builder()
+                .aggregateSnapshots(0, 3000)
+                .build();
+        final BatteryUsageStats stats = provider.getBatteryUsageStats(query);
+        assertThat(stats.getCustomPowerComponentNames())
+                .isEqualTo(batteryStats.getCustomEnergyConsumerNames());
+        assertThat(stats.getStatsDuration()).isEqualTo(1234);
     }
 
     private static class TestHandler extends Handler {
