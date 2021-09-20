@@ -43,6 +43,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 
+import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -54,6 +55,8 @@ import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.WindowManager;
+import android.window.ITaskFragmentOrganizer;
+import android.window.TaskFragmentOrganizer;
 
 import androidx.test.filters.SmallTest;
 
@@ -389,6 +392,35 @@ public class AppTransitionTests extends WindowTestsBase {
         attrs.type = TYPE_APPLICATION_STARTING;
         assertEquals(mDc.mAppTransition.getDefaultWindowAnimationStyleResId(),
                 mDc.mAppTransition.getAnimationStyleResId(attrs));
+    }
+
+    @Test
+    public void testActivityRecordReparentToTaskFragment() {
+        final ActivityRecord activity = createActivityRecord(mDc);
+        activity.setVisibility(true);
+        final Task task = activity.getTask();
+
+        // Add a TaskFragment of half of the Task size.
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final ITaskFragmentOrganizer iOrganizer =
+                ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder());
+        mAtm.mTaskFragmentOrganizerController.registerOrganizer(iOrganizer);
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setOrganizer(organizer)
+                .build();
+        final Rect taskBounds = new Rect();
+        task.getBounds(taskBounds);
+        taskFragment.setBounds(0, 0, taskBounds.right / 2, taskBounds.bottom);
+
+        assertTrue(mDc.mChangingContainers.isEmpty());
+        assertFalse(mDc.mAppTransition.isTransitionSet());
+
+        // Schedule app transition when reparent activity to a TaskFragment of different size.
+        activity.reparent(taskFragment, POSITION_TOP);
+
+        assertTrue(mDc.mChangingContainers.contains(activity));
+        assertTrue(mDc.mAppTransition.containsTransitRequest(TRANSIT_CHANGE));
     }
 
     private class TestRemoteAnimationRunner implements IRemoteAnimationRunner {
