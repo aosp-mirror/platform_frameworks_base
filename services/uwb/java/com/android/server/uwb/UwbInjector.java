@@ -91,8 +91,9 @@ public class UwbInjector {
             return Settings.Global.getInt(cr, Settings.Global.UWB_ENABLED)
                     == AdapterState.STATE_ENABLED_ACTIVE;
         } catch (Settings.SettingNotFoundException e) {
-            Settings.Global.putInt(cr, Settings.Global.UWB_ENABLED, AdapterState.STATE_DISABLED);
-            return false;
+            Settings.Global.putInt(cr, Settings.Global.UWB_ENABLED,
+                AdapterState.STATE_ENABLED_ACTIVE);
+            return true;
         }
     }
 }
