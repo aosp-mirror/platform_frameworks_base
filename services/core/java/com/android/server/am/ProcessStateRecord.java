@@ -343,6 +343,20 @@ final class ProcessStateRecord {
     private int mCacheOomRankerUseCount;
 
     /**
+     * Process memory usage (RSS).
+     *
+     * Periodically populated by {@code CacheOomRanker}, stored in this object to cache the values.
+     */
+    @GuardedBy("mService")
+    private long mCacheOomRankerRss;
+
+    /**
+     * The last time, in milliseconds since boot, since {@link #mCacheOomRankerRss} was updated.
+     */
+    @GuardedBy("mService")
+    private long mCacheOomRankerRssTimeMs;
+
+    /**
      * Whether or not this process is reachable from given process.
      */
     @GuardedBy("mService")
@@ -1148,6 +1162,21 @@ final class ProcessStateRecord {
     @ElapsedRealtimeLong
     long getLastInvisibleTime() {
         return mLastInvisibleTime;
+    }
+
+    public void setCacheOomRankerRss(long rss, long rssTimeMs) {
+        mCacheOomRankerRss = rss;
+        mCacheOomRankerRssTimeMs = rssTimeMs;
+    }
+
+    @GuardedBy("mService")
+    public long getCacheOomRankerRss() {
+        return mCacheOomRankerRss;
+    }
+
+    @GuardedBy("mService")
+    public long getCacheOomRankerRssTimeMs() {
+        return mCacheOomRankerRssTimeMs;
     }
 
     @GuardedBy({"mService", "mProcLock"})
