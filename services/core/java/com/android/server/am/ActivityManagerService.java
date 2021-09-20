@@ -15412,12 +15412,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void updateDeviceIdleTempAllowlist(int[] appids, int changingUid, boolean adding,
-                long durationMs, @TempAllowListType int type, @ReasonCode int reasonCode,
-                @Nullable String reason, int callingUid) {
+        public void updateDeviceIdleTempAllowlist(@Nullable int[] appids, int changingUid,
+                boolean adding, long durationMs, @TempAllowListType int type,
+                @ReasonCode int reasonCode, @Nullable String reason, int callingUid) {
             synchronized (ActivityManagerService.this) {
                 synchronized (mProcLock) {
-                    mDeviceIdleTempAllowlist = appids;
+                    if (appids != null) {
+                        mDeviceIdleTempAllowlist = appids;
+                    }
                     if (adding) {
                         if (type == TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED) {
                             // Note, the device idle temp-allowlist are by app-ids, but here
@@ -15427,12 +15429,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     callingUid));
                         }
                     } else {
-                        // Note in the removing case, we need to remove all the UIDs matching
-                        // the appId, because DeviceIdle's temp-allowlist are based on AppIds,
-                        // not UIDs.
-                        // For eacmple, "cmd deviceidle tempallowlist -r PACKAGE" will
-                        // not only remove this app for user 0, but for all users.
-                        mFgsStartTempAllowList.removeAppId(UserHandle.getAppId(changingUid));
+                        mFgsStartTempAllowList.removeUid(changingUid);
                     }
                     setAppIdTempAllowlistStateLSP(changingUid, adding);
                 }
