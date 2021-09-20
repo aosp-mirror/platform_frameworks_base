@@ -33,7 +33,6 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.os.UserHandle.USER_NULL;
 import static android.view.Display.INVALID_DISPLAY;
-import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_NONE;
@@ -465,7 +464,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return this;
     }
 
-    /** Returns {@code true} if this is a container for embedded activities or tasks. */
+    @Override
     boolean isEmbedded() {
         if (mIsEmbedded) {
             return true;
@@ -2073,15 +2072,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return !startBounds.equals(getBounds());
     }
 
-    /**
-     * Initializes a change transition. See {@link SurfaceFreezer} for more information.
-     */
-    void initializeChangeTransition(Rect startBounds) {
-        mDisplayContent.prepareAppTransition(TRANSIT_CHANGE);
-        mDisplayContent.mChangingContainers.add(this);
-        mSurfaceFreezer.freeze(getSyncTransaction(), startBounds);
-    }
-
     @Override
     void setSurfaceControl(SurfaceControl sc) {
         super.setSurfaceControl(sc);
@@ -2160,6 +2150,11 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     @Override
     boolean isOrganized() {
+        return mTaskFragmentOrganizer != null;
+    }
+
+    /** Whether this is an organized {@link TaskFragment} and not a {@link Task}. */
+    final boolean isOrganizedTaskFragment() {
         return mTaskFragmentOrganizer != null;
     }
 
