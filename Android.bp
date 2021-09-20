@@ -411,7 +411,6 @@ java_library {
         "core/java/com/android/internal/util/AsyncChannel.java",
         "core/java/com/android/internal/util/AsyncService.java",
         "core/java/com/android/internal/util/Protocol.java",
-        "core/java/com/android/internal/util/Preconditions.java",
         "telephony/java/android/telephony/Annotation.java",
         ":net-utils-framework-wifi-common-srcs",
     ],
