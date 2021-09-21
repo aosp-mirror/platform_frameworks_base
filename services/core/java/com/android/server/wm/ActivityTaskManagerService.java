@@ -6554,7 +6554,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public PackageConfigurationUpdater createPackageConfigurationUpdater() {
-            return new PackageConfigurationUpdaterImpl(Binder.getCallingPid());
+            return new PackageConfigurationUpdaterImpl(Binder.getCallingPid(),
+                    ActivityTaskManagerService.this);
         }
 
         @Override
@@ -6569,59 +6570,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             // Start a transition for waking. This is needed for showWhenLocked activities.
             getTransitionController().requestTransitionIfNeeded(TRANSIT_WAKE, 0 /* flags */,
                     null /* trigger */, mRootWindowContainer.getDefaultDisplay());
-        }
-    }
-
-    final class PackageConfigurationUpdaterImpl implements
-            ActivityTaskManagerInternal.PackageConfigurationUpdater {
-        private final int mPid;
-        private Integer mNightMode;
-        private LocaleList mLocales;
-
-        PackageConfigurationUpdaterImpl(int pid) {
-            mPid = pid;
-        }
-
-        @Override
-        public ActivityTaskManagerInternal.PackageConfigurationUpdater setNightMode(int nightMode) {
-            mNightMode = nightMode;
-            return this;
-        }
-
-        @Override
-        public ActivityTaskManagerInternal.PackageConfigurationUpdater
-                setLocales(LocaleList locales) {
-            mLocales = locales;
-            return this;
-        }
-
-        @Override
-        public void commit() {
-            synchronized (mGlobalLock) {
-                final long ident = Binder.clearCallingIdentity();
-                try {
-                    final WindowProcessController wpc = mProcessMap.getProcess(mPid);
-                    if (wpc == null) {
-                        Slog.w(TAG, "Override application configuration: cannot find pid " + mPid);
-                        return;
-                    }
-                    LocaleList localesOverride = LocaleOverlayHelper.combineLocalesIfOverlayExists(
-                            mLocales, getGlobalConfiguration().getLocales());
-                    wpc.applyAppSpecificConfig(mNightMode, localesOverride);
-                    wpc.updateAppSpecificSettingsForAllActivities(mNightMode, localesOverride);
-                    mPackageConfigPersister.updateFromImpl(wpc.mName, wpc.mUserId, this);
-                } finally {
-                    Binder.restoreCallingIdentity(ident);
-                }
-            }
-        }
-
-        Integer getNightMode() {
-            return mNightMode;
-        }
-
-        LocaleList getLocales() {
-            return mLocales;
         }
     }
 }
