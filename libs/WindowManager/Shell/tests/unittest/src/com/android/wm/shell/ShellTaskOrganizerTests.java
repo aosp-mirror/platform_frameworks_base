@@ -197,6 +197,43 @@ public class ShellTaskOrganizerTests {
     }
 
     @Test
+    public void testAddListenerForMultipleTypes() {
+        RunningTaskInfo taskInfo1 = createTaskInfo(1, WINDOWING_MODE_FULLSCREEN);
+        mOrganizer.onTaskAppeared(taskInfo1, null);
+        RunningTaskInfo taskInfo2 = createTaskInfo(2, WINDOWING_MODE_MULTI_WINDOW);
+        mOrganizer.onTaskAppeared(taskInfo2, null);
+
+        TrackingTaskListener listener = new TrackingTaskListener();
+        mOrganizer.addListenerForType(listener,
+                TASK_LISTENER_TYPE_MULTI_WINDOW, TASK_LISTENER_TYPE_FULLSCREEN);
+
+        // onTaskAppeared event should be delivered once for each taskInfo.
+        assertTrue(listener.appeared.contains(taskInfo1));
+        assertTrue(listener.appeared.contains(taskInfo2));
+        assertEquals(2, listener.appeared.size());
+    }
+
+    @Test
+    public void testRemoveListenerForMultipleTypes() {
+        RunningTaskInfo taskInfo1 = createTaskInfo(1, WINDOWING_MODE_FULLSCREEN);
+        mOrganizer.onTaskAppeared(taskInfo1, null);
+        RunningTaskInfo taskInfo2 = createTaskInfo(2, WINDOWING_MODE_MULTI_WINDOW);
+        mOrganizer.onTaskAppeared(taskInfo2, null);
+
+        TrackingTaskListener listener = new TrackingTaskListener();
+        mOrganizer.addListenerForType(listener,
+                TASK_LISTENER_TYPE_MULTI_WINDOW, TASK_LISTENER_TYPE_FULLSCREEN);
+
+        mOrganizer.removeListener(listener);
+
+        // If listener is removed properly, onTaskInfoChanged event shouldn't be delivered.
+        mOrganizer.onTaskInfoChanged(taskInfo1);
+        assertTrue(listener.infoChanged.isEmpty());
+        mOrganizer.onTaskInfoChanged(taskInfo2);
+        assertTrue(listener.infoChanged.isEmpty());
+    }
+
+    @Test
     public void testWindowingModeChange() {
         RunningTaskInfo taskInfo = createTaskInfo(1, WINDOWING_MODE_MULTI_WINDOW);
         TrackingTaskListener mwListener = new TrackingTaskListener();
