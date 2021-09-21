@@ -28,6 +28,7 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.common.FlickerComponentName
 import com.google.common.truth.Truth
 import org.junit.FixMethodOrder
@@ -107,7 +108,7 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
      * Checks that the app layer doesn't exist at the start of the transition, that it is
      * created (invisible) and becomes visible during the transition
      */
-    @Presubmit
+    @FlakyTest
     @Test
     fun appLayerBecomesVisible() {
         testSpec.assertLayers {
@@ -165,6 +166,11 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
                 .isAboveAppWindowVisible(FlickerComponentName.NAV_BAR)
         }
     }
+
+    /** {@inheritDoc} */
+    @FlakyTest
+    @Test
+    override fun statusBarWindowIsVisible() = super.statusBarWindowIsVisible()
 
     /** {@inheritDoc} */
     @FlakyTest
