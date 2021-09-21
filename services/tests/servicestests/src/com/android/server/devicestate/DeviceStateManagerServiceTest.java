@@ -34,6 +34,7 @@ import android.hardware.devicestate.IDeviceStateManagerCallback;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.platform.test.annotations.FlakyTest;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
@@ -343,6 +344,7 @@ public final class DeviceStateManagerServiceTest {
                 DEFAULT_DEVICE_STATE.getIdentifier());
     }
 
+    @FlakyTest(bugId = 200332057)
     @Test
     public void requestState_pendingStateAtRequest() throws RemoteException {
         TestDeviceStateManagerCallback callback = new TestDeviceStateManagerCallback();
@@ -474,6 +476,7 @@ public final class DeviceStateManagerServiceTest {
                 OTHER_DEVICE_STATE.getIdentifier());
     }
 
+    @FlakyTest(bugId = 200332057)
     @Test
     public void requestState_becomesUnsupported() throws RemoteException {
         TestDeviceStateManagerCallback callback = new TestDeviceStateManagerCallback();
