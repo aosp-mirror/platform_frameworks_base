@@ -70,6 +70,7 @@ aidl_interface {
         "aidl/android/media/audio/common/AudioMMapPolicyType.aidl",
         "aidl/android/media/audio/common/AudioMode.aidl",
         "aidl/android/media/audio/common/AudioOffloadInfo.aidl",
+        "aidl/android/media/audio/common/AudioProfile.aidl",
         "aidl/android/media/audio/common/AudioSource.aidl",
         "aidl/android/media/audio/common/AudioStreamType.aidl",
         "aidl/android/media/audio/common/AudioUsage.aidl",
