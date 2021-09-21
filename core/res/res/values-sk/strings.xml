@@ -1453,6 +1453,7 @@
     <string name="deny" msgid="6632259981847676572">"Zamietnuť"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Vyžaduje sa povolenie"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Vyžaduje sa oprávnenie\npre účet <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Povolenia, ktoré aplikácia <xliff:g id="APP">%1$s</xliff:g> požaduje\npre účet <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Túto aplikáciu používate mimo svojho pracovného profilu"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Túto aplikáciu používate vo svojom pracovnom profile"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Metóda vstupu"</string>
