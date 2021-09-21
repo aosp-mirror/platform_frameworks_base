@@ -1413,6 +1413,7 @@
     <string name="deny" msgid="6632259981847676572">"অস্বীকার করুন"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"অনুমতির অনুরোধ করা হয়েছে"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"<xliff:g id="ACCOUNT">%s</xliff:g>অ্যাকাউন্টের জন্য\nঅনুমতির অনুরোধ করা হয়েছে৷"</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="ACCOUNT">%2$s</xliff:g> অ্যাকাউন্টের জন্য <xliff:g id="APP">%1$s</xliff:g>\n থেকে অনুমতি চাওয়া হয়েছে।"</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"আপনি এই অ্যাপ্লিকেশানটি আপনার কর্মস্থলের প্রোফাইলের বাইরে ব্যবহার করছেন"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"আপনি এই অ্যাপ্লিকেশানটি আপনার কর্মস্থলের প্রোফাইলে ব্যবহার করছেন"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"ইনপুট পদ্ধতি"</string>
