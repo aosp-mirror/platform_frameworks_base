@@ -2366,6 +2366,25 @@ public class HdmiControlService extends SystemService {
         }
 
         @Override
+        public boolean setMessageHistorySize(int newSize) {
+            enforceAccessPermission();
+            if (mCecController == null) {
+                return false;
+            }
+            return mCecController.setMessageHistorySize(newSize);
+        }
+
+        @Override
+        public int getMessageHistorySize() {
+            enforceAccessPermission();
+            if (mCecController != null) {
+                return mCecController.getMessageHistorySize();
+            } else {
+                return 0;
+            }
+        }
+
+        @Override
         public void addCecSettingChangeListener(String name,
                 final IHdmiCecSettingChangeListener listener) {
             enforceAccessPermission();
