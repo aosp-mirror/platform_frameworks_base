@@ -1817,7 +1817,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             @Override
             public int onAppTransitionStartingLocked(boolean keyguardGoingAway, long duration,
                     long statusBarAnimationStartTime, long statusBarAnimationDuration) {
-                return handleStartTransitionForKeyguardLw(keyguardGoingAway, duration);
+                // When remote animation is enabled for KEYGUARD_GOING_AWAY transition, SysUI
+                // receives IRemoteAnimationRunner#onAnimationStart to start animation, so we don't
+                // need to call IKeyguardService#keyguardGoingAway here.
+                return handleStartTransitionForKeyguardLw(keyguardGoingAway
+                        && !WindowManagerService.sEnableRemoteKeyguardGoingAwayAnimation, duration);
             }
 
             @Override
@@ -3065,7 +3069,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private int handleStartTransitionForKeyguardLw(boolean keyguardGoingAway, long duration) {
         final int res = applyKeyguardOcclusionChange();
         if (res != 0) return res;
-        if (!WindowManagerService.sEnableRemoteKeyguardGoingAwayAnimation && keyguardGoingAway) {
+        if (keyguardGoingAway) {
             if (DEBUG_KEYGUARD) Slog.d(TAG, "Starting keyguard exit animation");
             startKeyguardExitAnimation(SystemClock.uptimeMillis(), duration);
         }

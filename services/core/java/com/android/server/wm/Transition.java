@@ -745,8 +745,13 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                     (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0,
                     (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE) != 0,
                     (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION) != 0);
-            mController.mAtm.mWindowManager.mPolicy.startKeyguardExitAnimation(
-                    SystemClock.uptimeMillis(), 0 /* duration */);
+            if (!WindowManagerService.sEnableRemoteKeyguardGoingAwayAnimation) {
+                // When remote animation is enabled for KEYGUARD_GOING_AWAY transition, SysUI
+                // receives IRemoteAnimationRunner#onAnimationStart to start animation, so we don't
+                // need to call IKeyguardService#keyguardGoingAway here.
+                mController.mAtm.mWindowManager.mPolicy.startKeyguardExitAnimation(
+                        SystemClock.uptimeMillis(), 0 /* duration */);
+            }
         }
         if ((flags & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0) {
             mController.mAtm.mWindowManager.mPolicy.applyKeyguardOcclusionChange();
