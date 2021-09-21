@@ -211,7 +211,7 @@ class InsetsPolicy {
     InsetsState getInsetsForWindow(WindowState target) {
         final InsetsState originalState = mStateController.getInsetsForWindow(target);
         final InsetsState state = adjustVisibilityForTransientTypes(originalState);
-        return target.mIsImWindow ? adjustVisibilityForIme(state, state == originalState) : state;
+        return adjustVisibilityForIme(target, state, state == originalState);
     }
 
     /**
@@ -241,16 +241,37 @@ class InsetsPolicy {
         return state;
     }
 
-    // Navigation bar insets is always visible to IME.
-    private static InsetsState adjustVisibilityForIme(InsetsState originalState,
+    private InsetsState adjustVisibilityForIme(WindowState w, InsetsState originalState,
             boolean copyState) {
-        final InsetsSource originalNavSource = originalState.peekSource(ITYPE_NAVIGATION_BAR);
-        if (originalNavSource != null && !originalNavSource.isVisible()) {
-            final InsetsState state = copyState ? new InsetsState(originalState) : originalState;
-            final InsetsSource navSource = new InsetsSource(originalNavSource);
-            navSource.setVisible(true);
-            state.addSource(navSource);
-            return state;
+        if (w.mIsImWindow) {
+            // Navigation bar insets is always visible to IME.
+            final InsetsSource originalNavSource = originalState.peekSource(ITYPE_NAVIGATION_BAR);
+            if (originalNavSource != null && !originalNavSource.isVisible()) {
+                final InsetsState state = copyState ? new InsetsState(originalState)
+                        : originalState;
+                final InsetsSource navSource = new InsetsSource(originalNavSource);
+                navSource.setVisible(true);
+                state.addSource(navSource);
+                return state;
+            }
+        } else if (w.mActivityRecord != null && w.mActivityRecord.mImeInsetsFrozenUntilStartInput) {
+            // During switching tasks with gestural navigation, if the IME is attached to
+            // one app window on that time, even the next app window is behind the IME window,
+            // conceptually the window should not receive the IME insets if the next window is
+            // not eligible IME requester and ready to show IME on top of it.
+            final boolean shouldImeAttachedToApp = mDisplayContent.shouldImeAttachedToApp();
+            final InsetsSource originalImeSource = originalState.peekSource(ITYPE_IME);
+
+            if (shouldImeAttachedToApp && originalImeSource != null) {
+                final boolean imeVisibility =
+                        w.mActivityRecord.mLastImeShown || w.getRequestedVisibility(ITYPE_IME);
+                final InsetsState state = copyState ? new InsetsState(originalState)
+                        : originalState;
+                final InsetsSource imeSource = new InsetsSource(originalImeSource);
+                imeSource.setVisible(imeVisibility);
+                state.addSource(imeSource);
+                return state;
+            }
         }
         return originalState;
     }
