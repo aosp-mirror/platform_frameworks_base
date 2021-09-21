@@ -208,6 +208,15 @@ public class RemoteAnimationTarget implements Parcelable {
      */
     public final @WindowManager.LayoutParams.WindowType int windowType;
 
+    /**
+     * {@code true} if its parent is also a {@link RemoteAnimationTarget} in the same transition.
+     *
+     * For example, when a TaskFragment is resizing while one of its children is open/close, both
+     * windows will be animation targets. This value will be {@code true} for the child, so that
+     * the handler can choose to handle it differently.
+     */
+    public boolean hasAnimatingParent;
+
     public RemoteAnimationTarget(int taskId, int mode, SurfaceControl leash, boolean isTranslucent,
             Rect clipRect, Rect contentInsets, int prefixOrderIndex, Point position,
             Rect localBounds, Rect screenSpaceBounds,
@@ -265,6 +274,7 @@ public class RemoteAnimationTarget implements Parcelable {
         taskInfo = in.readTypedObject(ActivityManager.RunningTaskInfo.CREATOR);
         allowEnterPip = in.readBoolean();
         windowType = in.readInt();
+        hasAnimatingParent = in.readBoolean();
     }
 
     @Override
@@ -292,6 +302,7 @@ public class RemoteAnimationTarget implements Parcelable {
         dest.writeTypedObject(taskInfo, 0 /* flags */);
         dest.writeBoolean(allowEnterPip);
         dest.writeInt(windowType);
+        dest.writeBoolean(hasAnimatingParent);
     }
 
     public void dump(PrintWriter pw, String prefix) {
@@ -311,6 +322,7 @@ public class RemoteAnimationTarget implements Parcelable {
         pw.print(prefix); pw.print("taskInfo="); pw.println(taskInfo);
         pw.print(prefix); pw.print("allowEnterPip="); pw.println(allowEnterPip);
         pw.print(prefix); pw.print("windowType="); pw.print(windowType);
+        pw.print(prefix); pw.print("hasAnimatingParent="); pw.print(hasAnimatingParent);
     }
 
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
