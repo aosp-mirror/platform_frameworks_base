@@ -1450,6 +1450,7 @@
     <string name="deny" msgid="2081879885755434506">"ငြင်းပယ်သည်"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"ခွင့်ပြုချက် တောင်းခံထားခြင်း"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"အကောင့် <xliff:g id="ACCOUNT">%s</xliff:g> အတွက် \n ခွင့်ပြုချက် တောင်းခံထားပြီး"</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="ACCOUNT">%2$s</xliff:g> အကောင့်အတွက်\n<xliff:g id="APP">%1$s</xliff:g> က ခွင့်ပြုချက် တောင်းခံထားသည်။"</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"သင်သည် ဒီအက်ပ်ကို သင့်အလုပ်ပရိုဖိုင် ပြင်ပတွင် အသုံးပြုနေ၏"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"သင်သည် ဒီအက်ပ်ကို သင်၏ အလုပ် ပရိုဖိုင် ထဲမှာ အသုံးပြုနေသည်"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"ထည့်သွင်းရန်နည်းလမ်း"</string>
