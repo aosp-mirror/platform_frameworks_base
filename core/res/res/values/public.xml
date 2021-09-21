@@ -3221,6 +3221,7 @@
   <eat-comment />
 
   <staging-public-group type="attr" first-id="0x01ff0000">
+    <public name="shouldUseDefaultUnfoldTransition" />
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01fe0000">
