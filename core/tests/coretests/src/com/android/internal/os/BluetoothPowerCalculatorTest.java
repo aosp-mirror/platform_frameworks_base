@@ -33,6 +33,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
+
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class BluetoothPowerCalculatorTest {
@@ -105,10 +107,10 @@ public class BluetoothPowerCalculatorTest {
         final BluetoothActivityEnergyInfo info = new BluetoothActivityEnergyInfo(1000,
                 BluetoothActivityEnergyInfo.BT_STACK_STATE_STATE_ACTIVE, 7000, 5000, 0,
                 reportedEnergyUc);
-        info.setUidTraffic(new UidTraffic[]{
-                new UidTraffic(Process.BLUETOOTH_UID, 1000, 2000),
-                new UidTraffic(APP_UID, 3000, 4000)
-        });
+        info.setUidTraffic(new ArrayList<UidTraffic>(){{
+                add(new UidTraffic(Process.BLUETOOTH_UID, 1000, 2000));
+                add(new UidTraffic(APP_UID, 3000, 4000));
+            }});
         mStatsRule.getBatteryStats().updateBluetoothStateLocked(info,
                 consumedEnergyUc, 1000, 1000);
     }
