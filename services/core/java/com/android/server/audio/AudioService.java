@@ -8443,6 +8443,20 @@ public class AudioService extends IAudioService.Stub
         mSpatializerHelper.setDesiredHeadTrackingMode(mode);
     }
 
+    /** @see Spatializer#setEffectParameter */
+    public void setSpatializerParameter(int key, @NonNull byte[] value) {
+        enforceModifyDefaultAudioEffectsPermission();
+        Objects.requireNonNull(value);
+        mSpatializerHelper.setEffectParameter(key, value);
+    }
+
+    /** @see Spatializer#getEffectParameter */
+    public void getSpatializerParameter(int key, @NonNull byte[] value) {
+        enforceModifyDefaultAudioEffectsPermission();
+        Objects.requireNonNull(value);
+        mSpatializerHelper.getEffectParameter(key, value);
+    }
+
     //==========================================================================================
     private boolean readCameraSoundForced() {
         return SystemProperties.getBoolean("audio.camerasound.force", false) ||
