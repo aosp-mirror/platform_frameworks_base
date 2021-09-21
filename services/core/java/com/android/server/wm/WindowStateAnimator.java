@@ -80,16 +80,10 @@ class WindowStateAnimator {
     static final int ROOT_TASK_CLIP_AFTER_ANIM = 0;
 
     /**
-     * Mode how the window gets clipped by the root task bounds: The clipping should be applied
-     * before applying the animation transformation, i.e. the root task bounds move with the window.
-     */
-    static final int ROOT_TASK_CLIP_BEFORE_ANIM = 1;
-
-    /**
      * Mode how window gets clipped by the root task bounds during an animation: Don't clip the
      * window by the root task bounds.
      */
-    static final int ROOT_TASK_CLIP_NONE = 2;
+    static final int ROOT_TASK_CLIP_NONE = 1;
 
     // Unchanging local convenience fields.
     final WindowManagerService mService;

@@ -436,6 +436,19 @@ class RemoteAnimationController implements DeathRecipient {
         int getMode() {
             return mMode;
         }
+
+        /** Whether its parent is also an animation target in the same transition. */
+        boolean hasAnimatingParent() {
+            // mOpeningApps and mClosingApps are only activities, so only need to check
+            // mChangingContainers.
+            for (int i = mDisplayContent.mChangingContainers.size() - 1; i >= 0; i--) {
+                if (mWindowContainer.isDescendantOf(
+                        mDisplayContent.mChangingContainers.valueAt(i))) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     class RemoteAnimationAdapterWrapper implements AnimationAdapter {
