@@ -728,4 +728,54 @@ public class SpatializerHelper {
         }
         mHeadPoseCallbacks.finishBroadcast();
     }
+
+    //------------------------------------------------------
+    // vendor parameters
+    synchronized void setEffectParameter(int key, @NonNull byte[] value) {
+        switch (mState) {
+            case STATE_UNINITIALIZED:
+            case STATE_NOT_SUPPORTED:
+                throw (new IllegalStateException(
+                        "Can't set parameter key:" + key + " without a spatializer"));
+            case STATE_ENABLED_UNAVAILABLE:
+            case STATE_DISABLED_UNAVAILABLE:
+            case STATE_DISABLED_AVAILABLE:
+            case STATE_ENABLED_AVAILABLE:
+                if (mSpat == null) {
+                    throw (new IllegalStateException(
+                            "null Spatializer for setParameter for key:" + key));
+                }
+                break;
+        }
+        // mSpat != null
+        try {
+            mSpat.setParameter(key, value);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error in setParameter for key:" + key, e);
+        }
+    }
+
+    synchronized void getEffectParameter(int key, @NonNull byte[] value) {
+        switch (mState) {
+            case STATE_UNINITIALIZED:
+            case STATE_NOT_SUPPORTED:
+                throw (new IllegalStateException(
+                        "Can't get parameter key:" + key + " without a spatializer"));
+            case STATE_ENABLED_UNAVAILABLE:
+            case STATE_DISABLED_UNAVAILABLE:
+            case STATE_DISABLED_AVAILABLE:
+            case STATE_ENABLED_AVAILABLE:
+                if (mSpat == null) {
+                    throw (new IllegalStateException(
+                            "null Spatializer for getParameter for key:" + key));
+                }
+                break;
+        }
+        // mSpat != null
+        try {
+            mSpat.getParameter(key, value);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error in getParameter for key:" + key, e);
+        }
+    }
 }
