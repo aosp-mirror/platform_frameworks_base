@@ -29,6 +29,17 @@ using namespace android;
 static const char* PROG_NAME = "validatekeymaps";
 static bool gQuiet = false;
 
+/**
+ * Return true if 'str' contains 'substr', ignoring case.
+ */
+static bool containsSubstringCaseInsensitive(std::string_view str, std::string_view substr) {
+    auto it = std::search(str.begin(), str.end(), substr.begin(), substr.end(),
+                          [](char left, char right) {
+                              return std::tolower(left) == std::tolower(right);
+                          });
+    return it != str.end();
+}
+
 enum class FileType {
     UNKNOWN,
     KEY_LAYOUT,
@@ -85,6 +96,36 @@ static FileType getFileType(const char* filename) {
     return FileType::UNKNOWN;
 }
 
+/**
+ * Return true if the filename is allowed, false otherwise.
+ */
+static bool validateKeyLayoutFileName(const std::string& filename) {
+    static const std::string kMicrosoftReason =
+            "Microsoft's controllers are designed to work with Generic.kl. Please check with "
+            "Microsoft prior to adding these layouts. See b/194334400";
+    static const std::vector<std::pair<std::string, std::string>> kBannedDevices{
+            std::make_pair("Vendor_0a5c_Product_8502",
+                           "This vendorId/productId combination conflicts with 'SnakeByte "
+                           "iDroid:con', 'BT23BK keyboard', and other keyboards. Instead, consider "
+                           "matching these specific devices by name. See b/36976285, b/191720859"),
+            std::make_pair("Vendor_045e_Product_0b05", kMicrosoftReason),
+            std::make_pair("Vendor_045e_Product_0b20", kMicrosoftReason),
+            std::make_pair("Vendor_045e_Product_0b21", kMicrosoftReason),
+            std::make_pair("Vendor_045e_Product_0b22", kMicrosoftReason),
+    };
+
+    for (const auto& [filenameSubstr, reason] : kBannedDevices) {
+        if (containsSubstringCaseInsensitive(filename, filenameSubstr)) {
+            error("You are trying to add a key layout %s, which matches %s. ", filename.c_str(),
+                  filenameSubstr.c_str());
+            error("This would cause some devices to function incorrectly. ");
+            error("%s. ", reason.c_str());
+            return false;
+        }
+    }
+    return true;
+}
+
 static bool validateFile(const char* filename) {
     log("Validating file '%s'...\n", filename);
 
@@ -95,6 +136,9 @@ static bool validateFile(const char* filename) {
             return false;
 
         case FileType::KEY_LAYOUT: {
+            if (!validateKeyLayoutFileName(filename)) {
+                return false;
+            }
             base::Result<std::shared_ptr<KeyLayoutMap>> ret = KeyLayoutMap::load(filename);
             if (!ret.ok()) {
                 error("Error %s parsing key layout file.\n\n", ret.error().message().c_str());
