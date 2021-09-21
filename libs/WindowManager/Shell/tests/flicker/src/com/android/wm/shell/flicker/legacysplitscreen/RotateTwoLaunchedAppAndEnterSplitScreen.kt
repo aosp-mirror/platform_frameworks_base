@@ -101,7 +101,7 @@ class RotateTwoLaunchedAppAndEnterSplitScreen(
             // Because we log WM once per frame, sometimes the activity and the window
             // become visible in the same entry, sometimes not, thus it is not possible to
             // assert the visibility of the activity here
-            this.isAppWindowInvisible(secondaryApp.component, ignoreActivity = true)
+            this.isAppWindowInvisible(secondaryApp.component)
                     .then()
                     // during re-parenting, the window may disappear and reappear from the
                     // trace, this occurs because we log only 1x per frame

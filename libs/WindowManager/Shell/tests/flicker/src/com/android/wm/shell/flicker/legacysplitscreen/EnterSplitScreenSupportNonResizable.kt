@@ -94,7 +94,7 @@ class EnterSplitScreenSupportNonResizable(
     @Test
     fun appWindowIsVisible() {
         testSpec.assertWmEnd {
-            isVisible(nonResizeableApp.component)
+            isAppWindowVisible(nonResizeableApp.component)
         }
     }
 

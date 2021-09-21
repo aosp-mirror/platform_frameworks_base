@@ -201,9 +201,9 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
      */
     open fun launcherWindowBecomesInvisible() {
         testSpec.assertWm {
-            this.isAppWindowVisible(LAUNCHER_COMPONENT)
+            this.isAppWindowOnTop(LAUNCHER_COMPONENT)
                     .then()
-                    .isAppWindowInvisible(LAUNCHER_COMPONENT)
+                    .isAppWindowNotOnTop(LAUNCHER_COMPONENT)
         }
     }
 }

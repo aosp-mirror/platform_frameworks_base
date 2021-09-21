@@ -137,9 +137,9 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
         // Since we log 1x per frame, sometimes the activity visibility and the app visibility
         // are updated together, sometimes not, thus ignore activity check at the start
         testSpec.assertWm {
-            this.isAppWindowVisible(testApp.component, ignoreActivity = true)
+            this.isAppWindowVisible(testApp.component)
                     .then()
-                    .isAppWindowInvisible(testApp.component, ignoreActivity = true)
+                    .isAppWindowInvisible(testApp.component)
                     .then()
                     .isAppWindowVisible(testApp.component)
         }
@@ -154,7 +154,7 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
         // and the app visibility are updated together, sometimes not, thus ignore activity
         // check at the start
         testSpec.assertWm {
-            this.isAppWindowVisible(testApp.component, ignoreActivity = true)
+            this.isAppWindowVisible(testApp.component)
         }
     }
 

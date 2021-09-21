@@ -150,7 +150,7 @@ class EnterPipToOtherOrientationTest(
     @Test
     fun testAppWindowInvisibleOnStart() {
         testSpec.assertWmStart {
-            isInvisible(testApp.component)
+            isAppWindowInvisible(testApp.component)
         }
     }
 
@@ -161,7 +161,7 @@ class EnterPipToOtherOrientationTest(
     @Test
     fun testAppWindowVisibleOnEnd() {
         testSpec.assertWmEnd {
-            isVisible(testApp.component)
+            isAppWindowVisible(testApp.component)
         }
     }
 

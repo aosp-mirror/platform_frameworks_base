@@ -104,9 +104,9 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
     @Test
     fun bothAppWindowsVisible() {
         testSpec.assertWmEnd {
-            isVisible(testApp.component)
-            isVisible(imeApp.component)
-            noWindowsOverlap(testApp.component, imeApp.component)
+            isAppWindowVisible(testApp.component)
+            isAppWindowVisible(imeApp.component)
+            doNotOverlap(testApp.component, imeApp.component)
         }
     }
 
