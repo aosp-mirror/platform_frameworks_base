@@ -27,7 +27,6 @@ import android.graphics.Rect;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.window.common.DeviceStateManagerPostureProducer;
 import androidx.window.common.DisplayFeature;
 import androidx.window.common.ResourceConfigDisplayFeatureProducer;
@@ -52,7 +51,7 @@ import java.util.function.Consumer;
  * production builds since the interface can still change before reaching stable version.
  * Please refer to {@link androidx.window.sidecar.SampleSidecarImpl} instead.
  */
-public class WindowLayoutComponent {
+public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     private static final String TAG = "SampleExtension";
     private static WindowLayoutComponent sInstance;
 
@@ -65,7 +64,7 @@ public class WindowLayoutComponent {
     private final SettingsDisplayFeatureProducer mSettingsDisplayFeatureProducer;
     private final DataProducer<List<DisplayFeature>> mDisplayFeatureProducer;
 
-    private WindowLayoutComponent(Context context) {
+    public WindowLayoutComponentImpl(Context context) {
         mSettingsDevicePostureProducer = new SettingsDevicePostureProducer(context);
         mDevicePostureProducer = new PriorityDataProducer<>(List.of(
                 mSettingsDevicePostureProducer,
@@ -80,21 +79,6 @@ public class WindowLayoutComponent {
 
         mDevicePostureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
         mDisplayFeatureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
-    }
-
-    /**
-     * Returns a shared instance.
-     */
-    @Nullable
-    public static WindowLayoutComponent getInstance(@NonNull Context context) {
-        if (sInstance == null) {
-            synchronized (WindowLayoutComponent.class) {
-                if (sInstance == null) {
-                    sInstance = new WindowLayoutComponent(context);
-                }
-            }
-        }
-        return sInstance;
     }
 
     /**
