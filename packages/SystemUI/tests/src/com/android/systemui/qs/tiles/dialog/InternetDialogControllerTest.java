@@ -444,6 +444,47 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         verify(mInternetDialogCallback).onAccessPointsChanged(mWifiEntries, mConnectedEntry);
     }
 
+    @Test
+    public void onAccessPointsChanged_fourWifiEntries_callbackCutMore() {
+        reset(mInternetDialogCallback);
+        mInternetDialogController.setAirplaneModeEnabled(true);
+        mAccessPoints.clear();
+        mAccessPoints.add(mWifiEntry1);
+        mAccessPoints.add(mWifiEntry2);
+        mAccessPoints.add(mWifiEntry3);
+        mAccessPoints.add(mWifiEntry4);
+
+        mInternetDialogController.onAccessPointsChanged(mAccessPoints);
+
+        mWifiEntries.clear();
+        mWifiEntries.add(mWifiEntry1);
+        mWifiEntries.add(mWifiEntry2);
+        mWifiEntries.add(mWifiEntry3);
+        mWifiEntries.add(mWifiEntry4);
+        verify(mInternetDialogCallback)
+                .onAccessPointsChanged(mWifiEntries, null /* connectedEntry */);
+
+        // If the Ethernet exists, then Wi-Fi entries will cut last one.
+        reset(mInternetDialogCallback);
+        mInternetDialogController.mHasEthernet = true;
+
+        mInternetDialogController.onAccessPointsChanged(mAccessPoints);
+
+        mWifiEntries.remove(mWifiEntry4);
+        verify(mInternetDialogCallback)
+                .onAccessPointsChanged(mWifiEntries, null /* connectedEntry */);
+
+        // Turn off airplane mode to has carrier network, then Wi-Fi entries will cut last one.
+        reset(mInternetDialogCallback);
+        mInternetDialogController.setAirplaneModeEnabled(false);
+
+        mInternetDialogController.onAccessPointsChanged(mAccessPoints);
+
+        mWifiEntries.remove(mWifiEntry3);
+        verify(mInternetDialogCallback)
+                .onAccessPointsChanged(mWifiEntries, null /* connectedEntry */);
+    }
+
     private String getResourcesString(String name) {
         return mContext.getResources().getString(getResourcesId(name));
     }
