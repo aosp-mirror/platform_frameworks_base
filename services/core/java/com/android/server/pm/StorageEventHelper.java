@@ -38,6 +38,7 @@ import android.os.FileUtils;
 import android.os.UserHandle;
 import android.os.storage.StorageEventListener;
 import android.os.storage.StorageManager;
+import android.os.storage.StorageManagerInternal;
 import android.os.storage.VolumeInfo;
 import android.text.TextUtils;
 import android.util.Log;
@@ -157,9 +158,12 @@ public class StorageEventHelper extends StorageEventListener {
         // Reconcile app data for all started/unlocked users
         final StorageManager sm = mPm.mInjector.getSystemService(StorageManager.class);
         UserManagerInternal umInternal = mPm.mInjector.getUserManagerInternal();
+        StorageManagerInternal smInternal = mPm.mInjector.getLocalService(
+                StorageManagerInternal.class);
         for (UserInfo user : mPm.mUserManager.getUsers(false /* includeDying */)) {
             final int flags;
-            if (umInternal.isUserUnlockingOrUnlocked(user.id)) {
+            if (StorageManager.isUserKeyUnlocked(user.id)
+                    && smInternal.isCeStoragePrepared(user.id)) {
                 flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
             } else if (umInternal.isUserRunning(user.id)) {
                 flags = StorageManager.FLAG_STORAGE_DE;
@@ -170,8 +174,7 @@ public class StorageEventHelper extends StorageEventListener {
             try {
                 sm.prepareUserStorage(volumeUuid, user.id, user.serialNumber, flags);
                 synchronized (mPm.mInstallLock) {
-                    mPm.reconcileAppsDataLI(volumeUuid, user.id, flags, true /* migrateAppData */,
-                            null);
+                    mPm.reconcileAppsDataLI(volumeUuid, user.id, flags, true /* migrateAppData */);
                 }
             } catch (IllegalStateException e) {
                 // Device was probably ejected, and we'll process that event momentarily
