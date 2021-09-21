@@ -45,7 +45,7 @@ class TaskFragmentAnimationController {
         }
         final RemoteAnimationDefinition definition = new RemoteAnimationDefinition();
         final RemoteAnimationAdapter animationAdapter =
-                new RemoteAnimationAdapter(mRemoteRunner, 0, 0);
+                new RemoteAnimationAdapter(mRemoteRunner, 0, 0, true /* changeNeedsSnapshot */);
         definition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_OPEN, animationAdapter);
         definition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_CLOSE, animationAdapter);
         definition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_CHANGE, animationAdapter);
