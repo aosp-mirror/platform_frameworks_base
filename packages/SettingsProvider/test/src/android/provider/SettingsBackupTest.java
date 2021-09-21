@@ -272,7 +272,6 @@ public class SettingsBackupTest {
                     Settings.Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD,
                     Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS,
                     Settings.Global.SMART_SUGGESTIONS_IN_NOTIFICATIONS_FLAGS,
-                    Settings.Global.ENABLE_ACCESSIBILITY_AUDIO_DESCRIPTION_BY_DEFAULT,
                     Settings.Global.ENABLE_ADB_INCREMENTAL_INSTALL_DEFAULT,
                     Settings.Global.ENABLE_MULTI_SLOT_TIMEOUT_MILLIS,
                     Settings.Global.ENHANCED_4G_MODE_ENABLED,
@@ -722,6 +721,7 @@ public class SettingsBackupTest {
                  Settings.Secure.DOCKED_CLOCK_FACE,
                  Settings.Secure.DOZE_PULSE_ON_LONG_PRESS,
                  Settings.Secure.EMERGENCY_ASSISTANCE_APPLICATION,
+                 Settings.Secure.ENABLE_ACCESSIBILITY_AUDIO_DESCRIPTION_BY_DEFAULT,
                  Settings.Secure.ENABLED_INPUT_METHODS,  // Intentionally removed in P
                  Settings.Secure.ENABLED_NOTIFICATION_ASSISTANT,
                  Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,

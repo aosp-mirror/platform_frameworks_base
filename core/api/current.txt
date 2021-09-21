@@ -50835,6 +50835,7 @@ package android.view.accessibility {
     method public int getRecommendedTimeoutMillis(int, int);
     method public void interrupt();
     method public static boolean isAccessibilityButtonSupported();
+    method public boolean isAudioDescriptionEnabled();
     method public boolean isEnabled();
     method public boolean isTouchExplorationEnabled();
     method public void removeAccessibilityRequestPreparer(android.view.accessibility.AccessibilityRequestPreparer);
