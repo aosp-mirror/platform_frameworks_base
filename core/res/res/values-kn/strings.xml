@@ -1346,6 +1346,7 @@
     <string name="deny" msgid="2081879885755434506">"ನಿರಾಕರಿಸಿ"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"ಅನುಮತಿ ವಿನಂತಿಸಲಾಗಿದೆ"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"<xliff:g id="ACCOUNT">%s</xliff:g> ಖಾತೆಗಾಗಿ\n ಅನುಮತಿಯನ್ನು ವಿನಂತಿಸಲಾಗಿದೆ."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="ACCOUNT">%2$s</xliff:g> ಖಾತೆಗಾಗಿ \n <xliff:g id="APP">%1$s</xliff:g> ನಿಂದ ಅನುಮತಿಯನ್ನು ವಿನಂತಿಸಲಾಗಿದೆ."</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"ನಿಮ್ಮ ಕೆಲಸದ ಪ್ರೊಫೈಲ್‌ನ ಹೊರಗೆ ನೀವು ಈ ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಬಳಸುತ್ತಿರುವಿರಿ"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"ನಿಮ್ಮ ಕೆಲಸದ ಪ್ರೊಫೈಲ್‌ನಲ್ಲಿ ನೀವು ಈ ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಬಳಸುತ್ತಿರುವಿರಿ"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"ಇನ್‌ಪುಟ್ ವಿಧಾನ"</string>

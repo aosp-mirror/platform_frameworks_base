@@ -1345,6 +1345,7 @@
     <string name="deny" msgid="2081879885755434506">"अस्वीकारें"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"अनुमति अनुरोधित"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"<xliff:g id="ACCOUNT">%s</xliff:g> खाते के लिए अनुमति\nका अनुरोध किया गया."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="APP">%1$s</xliff:g> ने <xliff:g id="ACCOUNT">%2$s</xliff:g> खाते को ऐक्सेस\nकरने की अनुमति का अनुरोध किया है."</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"आप इस ऐप्स का उपयोग अपनी वर्क प्रोफ़ाइल से बाहर कर रहे हैं"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"आप इस ऐप्स का उपयोग अपनी वर्क प्रोफ़ाइल में कर रहे हैं"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"इनपुट विधि"</string>

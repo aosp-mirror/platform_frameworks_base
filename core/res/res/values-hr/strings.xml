@@ -1367,6 +1367,7 @@
     <string name="deny" msgid="2081879885755434506">"Odbij"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Zatražena je dozvola"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Zatražena je dozvola\nza račun <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Aplikacija <xliff:g id="APP">%1$s</xliff:g> zatražila je dopuštenje\nza račun <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"Ovu aplikaciju upotrebljavate izvan svog radnog profila"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"Upotrebljavate tu aplikaciju u radnom profilu"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Način unosa"</string>

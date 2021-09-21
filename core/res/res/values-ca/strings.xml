@@ -1345,6 +1345,7 @@
     <string name="deny" msgid="2081879885755434506">"Denega"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Permís sol·licitat"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"S\'ha sol·licitat permís\nper al compte <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="APP">%1$s</xliff:g> ha sol·licitat permís\nper accedir al compte <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"Estàs utilitzant aquesta aplicació fora del perfil professional."</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"Estàs utilitzant l\'aplicació al perfil professional."</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Mètode d\'introducció de text"</string>

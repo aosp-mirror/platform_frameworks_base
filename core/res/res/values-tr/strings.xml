@@ -1345,6 +1345,7 @@
     <string name="deny" msgid="2081879885755434506">"Reddet"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"İzin istendi"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"<xliff:g id="ACCOUNT">%s</xliff:g> hesabı için\nizin isteğinde bulunuldu."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="APP">%1$s</xliff:g> uygulaması, <xliff:g id="ACCOUNT">%2$s</xliff:g> hesabı\niçin izin istedi"</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"Bu uygulamayı iş profilinizin dışında kullanıyorsunuz"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"Bu uygulamayı iş profilinizde kullanıyorsunuz"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Giriş yöntemi"</string>

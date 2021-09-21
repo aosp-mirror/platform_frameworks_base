@@ -1345,6 +1345,7 @@
     <string name="deny" msgid="2081879885755434506">"Ablehnen"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Berechtigung angefordert"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Berechtigung angefordert\nfür Konto <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Berechtigung wurde angefordert von <xliff:g id="APP">%1$s</xliff:g>\nfür das Konto <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"Du verwendest diese App außerhalb deines Arbeitsprofils"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"Du verwendest diese App in deinem Arbeitsprofil."</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Eingabemethode"</string>

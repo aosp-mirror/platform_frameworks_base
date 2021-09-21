@@ -1345,6 +1345,7 @@
     <string name="deny" msgid="2081879885755434506">"拒絕"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"已要求權限"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"帳戶 <xliff:g id="ACCOUNT">%s</xliff:g> 已提出\n權限要求。"</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"「<xliff:g id="APP">%1$s</xliff:g>」要求授予\n<xliff:g id="ACCOUNT">%2$s</xliff:g> 帳戶的權限。"</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"你目前並非透過工作資料夾使用這個應用程式"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"你目前透過工作設定檔使用這個應用程式"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"輸入法"</string>
