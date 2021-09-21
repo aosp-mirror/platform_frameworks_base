@@ -26,6 +26,7 @@ import android.bluetooth.BluetoothCsipSetCoordinator;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.os.ParcelUuid;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
@@ -34,6 +35,7 @@ import com.android.settingslib.R;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * CSIP Set Coordinator handles Bluetooth CSIP Set Coordinator role profile.
@@ -80,6 +82,7 @@ public class CsipSetCoordinatorProfile implements LocalBluetoothProfile {
                 device.refresh();
             }
 
+            mDeviceManager.updateCsipDevices();
             mProfileManager.callServiceConnectedListeners();
             mIsProfileReady = true;
         }
@@ -209,6 +212,18 @@ public class CsipSetCoordinatorProfile implements LocalBluetoothProfile {
     @Override
     public int getDrawableResource(BluetoothClass btClass) {
         return 0;
+    }
+
+    /**
+     * Get the device's groups and correspondsing uuids map.
+     * @param device the bluetooth device
+     * @return Map of groups ids and related UUIDs
+     */
+    public Map<Integer, ParcelUuid> getGroupUuidMapByDevice(BluetoothDevice device) {
+        if (mService == null || device == null) {
+            return null;
+        }
+        return mService.getGroupUuidMapByDevice(device);
     }
 
     /**
