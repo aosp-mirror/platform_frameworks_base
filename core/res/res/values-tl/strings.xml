@@ -1449,6 +1449,7 @@
     <string name="deny" msgid="2081879885755434506">"Tanggihan"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Hiniling ang pahintulot"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Hiniling ang pahintulot\npara sa account na <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Humiling ang <xliff:g id="APP">%1$s</xliff:g> ng pahintulot\npara sa account na <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"Ginagamit mo ang app na ito sa labas ng iyong profile sa trabaho"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"Ginagamit mo ang app na ito sa iyong profile sa trabaho"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Pamamaraan ng pag-input"</string>

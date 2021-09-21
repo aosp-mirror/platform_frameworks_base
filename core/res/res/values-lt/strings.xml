@@ -1493,6 +1493,7 @@
     <string name="deny" msgid="2081879885755434506">"Atmesti"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Pateikta užklausa dėl leidimo"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Pateikta leidimo užklausa\ndėl <xliff:g id="ACCOUNT">%s</xliff:g> paskyros"</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Programai „<xliff:g id="APP">%1$s</xliff:g>“ reikalingas leidimas\n, susijęs su paskyra <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"Šią programą naudojate ne darbo profilyje"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"Šią programą naudojate darbo profilyje"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Įvesties būdas"</string>

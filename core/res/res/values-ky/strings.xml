@@ -1451,6 +1451,7 @@
     <string name="deny" msgid="2081879885755434506">"Жок"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Уруксат талап кылуу"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Кийинки эсепке\nуруксат талап кылынууда: <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="APP">%1$s</xliff:g> колдонмосу\n<xliff:g id="ACCOUNT">%2$s</xliff:g> аккаунтуна кирүүгө уруксат сурады."</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"Бул колдонмо жумуш профилиңиздин сыртында колдонулуп жатат"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"Бул колдонмону жумуш профилиңизде пайдаланып жатасыз"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Киргизүү ыкмасы"</string>

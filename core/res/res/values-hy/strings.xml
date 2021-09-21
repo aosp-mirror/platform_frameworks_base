@@ -1449,6 +1449,7 @@
     <string name="deny" msgid="2081879885755434506">"Մերժել"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Թույլտվության հարցում է արված"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Թույլտվության հարցում է արված\n<xliff:g id="ACCOUNT">%s</xliff:g> հաշվի համար:"</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Հայցվում է թույլտվություն <xliff:g id="APP">%1$s</xliff:g> հավելվածի կողմից\n<xliff:g id="ACCOUNT">%2$s</xliff:g> հաշվի համար"</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"Դուք օգտագործում եք այս հավելվածը ձեր աշխատանքային պրոֆիլից դուրս"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"Դուք օգտագործում եք այս հավելվածը ձեր աշխատանքային պրոֆիլում"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Ներածման եղանակը"</string>
