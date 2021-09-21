@@ -37,7 +37,6 @@ import android.widget.ImageView;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.dump.DumpManager;
@@ -238,6 +237,11 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                     mQSPanelController.getMediaHost().getHostView().setAlpha(1.0f);
                     mQSAnimator.requestAnimatorUpdate();
                 });
+
+        mQsDragHandler.setOnClickListener(v -> {
+            Log.d(TAG, "drag handler clicked");
+            mCommandQueue.animateExpandSettingsPanel(null);
+        });
     }
 
     @Override
