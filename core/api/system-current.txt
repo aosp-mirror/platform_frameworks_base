@@ -5413,12 +5413,14 @@ package android.media {
     method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void clearOnHeadToSoundstagePoseUpdatedListener();
     method @NonNull @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public java.util.List<android.media.AudioDeviceAttributes> getCompatibleAudioDevices();
     method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public int getDesiredHeadTrackingMode();
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void getEffectParameter(int, @NonNull byte[]);
     method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public int getHeadTrackingMode();
     method @NonNull @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public java.util.List<java.lang.Integer> getSupportedHeadTrackingModes();
     method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void recenterHeadTracker();
     method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void removeCompatibleAudioDevice(@NonNull android.media.AudioDeviceAttributes);
     method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void removeOnHeadTrackingModeChangedListener(@NonNull android.media.Spatializer.OnHeadTrackingModeChangedListener);
     method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void setDesiredHeadTrackingMode(int);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void setEffectParameter(int, @NonNull byte[]);
     method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void setEnabled(boolean);
     method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void setGlobalTransform(@NonNull float[]);
     method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public void setOnHeadToSoundstagePoseUpdatedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.Spatializer.OnHeadToSoundstagePoseUpdatedListener);
