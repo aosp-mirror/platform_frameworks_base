@@ -26,20 +26,25 @@ import android.util.ArrayMap;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 
+import com.android.apex.ApexInfo;
+import com.android.apex.XmlParser;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.om.OverlayConfigParser.OverlayPartition;
 import com.android.internal.content.om.OverlayConfigParser.ParsedConfiguration;
 import com.android.internal.content.om.OverlayScanner.ParsedOverlayInfo;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.TriConsumer;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 /**
@@ -77,7 +82,7 @@ public class OverlayConfig {
     public interface PackageProvider {
 
         /** Performs the given action for each package. */
-        void forEachPackage(BiConsumer<ParsingPackageRead, Boolean> p);
+        void forEachPackage(TriConsumer<ParsingPackageRead, Boolean, File> p);
     }
 
     private static final Comparator<ParsedConfiguration> sStaticOverlayComparator = (c1, c2) -> {
@@ -119,6 +124,8 @@ public class OverlayConfig {
                             p)));
         }
 
+        ArrayMap<Integer, List<String>> activeApexesPerPartition = getActiveApexes(partitions);
+
         boolean foundConfigFile = false;
         final Map<String, ParsedOverlayInfo> packageManagerOverlayInfos =
                 packageProvider == null ? null : getOverlayPackageInfos(packageProvider);
@@ -129,7 +136,9 @@ public class OverlayConfig {
             final OverlayScanner scanner = (scannerFactory == null) ? null : scannerFactory.get();
             final ArrayList<ParsedConfiguration> partitionOverlays =
                     OverlayConfigParser.getConfigurations(partition, scanner,
-                            packageManagerOverlayInfos);
+                            packageManagerOverlayInfos,
+                            activeApexesPerPartition.getOrDefault(partition.type,
+                                    Collections.emptyList()));
             if (partitionOverlays != null) {
                 foundConfigFile = true;
                 overlays.addAll(partitionOverlays);
@@ -147,7 +156,8 @@ public class OverlayConfig {
                 // Filter out overlays not present in the partition.
                 partitionOverlayInfos = new ArrayList<>(packageManagerOverlayInfos.values());
                 for (int j = partitionOverlayInfos.size() - 1; j >= 0; j--) {
-                    if (!partition.containsFile(partitionOverlayInfos.get(j).path)) {
+                    if (!partition.containsFile(partitionOverlayInfos.get(j)
+                            .getOriginalPartitionPath())) {
                         partitionOverlayInfos.remove(j);
                     }
                 }
@@ -294,14 +304,48 @@ public class OverlayConfig {
     private static Map<String, ParsedOverlayInfo> getOverlayPackageInfos(
             @NonNull PackageProvider packageManager) {
         final HashMap<String, ParsedOverlayInfo> overlays = new HashMap<>();
-        packageManager.forEachPackage((ParsingPackageRead p, Boolean isSystem) -> {
+        packageManager.forEachPackage((ParsingPackageRead p, Boolean isSystem,
+                @Nullable File preInstalledApexPath) -> {
             if (p.getOverlayTarget() != null && isSystem) {
                 overlays.put(p.getPackageName(), new ParsedOverlayInfo(p.getPackageName(),
                         p.getOverlayTarget(), p.getTargetSdkVersion(), p.isOverlayIsStatic(),
-                        p.getOverlayPriority(), new File(p.getBaseApkPath())));
+                        p.getOverlayPriority(), new File(p.getBaseApkPath()),
+                        preInstalledApexPath));
             }
         });
         return overlays;
+    }
+
+    /** Returns a map of PartitionType to List of active APEX module names. */
+    @NonNull
+    private static ArrayMap<Integer, List<String>> getActiveApexes(
+            @NonNull List<OverlayPartition> partitions) {
+        // An Overlay in an APEX, which is an update of an APEX in a given partition,
+        // is considered as belonging to that partition.
+        ArrayMap<Integer, List<String>> result = new ArrayMap<>();
+        for (OverlayPartition partition : partitions) {
+            result.put(partition.type, new ArrayList<String>());
+        }
+        // Read from apex-info-list because ApexManager is not accessible to zygote.
+        File apexInfoList = new File("/apex/apex-info-list.xml");
+        if (apexInfoList.exists() && apexInfoList.canRead()) {
+            try (FileInputStream stream = new FileInputStream(apexInfoList)) {
+                List<ApexInfo> apexInfos = XmlParser.readApexInfoList(stream).getApexInfo();
+                for (ApexInfo info : apexInfos) {
+                    if (info.getIsActive()) {
+                        for (OverlayPartition partition : partitions) {
+                            if (partition.containsPath(info.getPreinstalledModulePath())) {
+                                result.get(partition.type).add(info.getModuleName());
+                                break;
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                Log.w(TAG, "Error reading apex-info-list: " + e);
+            }
+        }
+        return result;
     }
 
     /** Represents a single call to idmap create-multiple. */
