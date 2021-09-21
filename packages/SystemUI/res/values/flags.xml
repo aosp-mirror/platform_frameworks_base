@@ -57,5 +57,5 @@
 
     <bool name="flag_combined_status_bar_signal_icons">false</bool>
 
-    <bool name="flag_new_user_switcher">false</bool>
+    <bool name="flag_new_user_switcher">true</bool>
 </resources>
