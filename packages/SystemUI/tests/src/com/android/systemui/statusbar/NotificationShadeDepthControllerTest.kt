@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar
 
-import android.app.WallpaperManager
 import android.os.IBinder
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
@@ -32,6 +31,7 @@ import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.WallpaperController
 import com.android.systemui.util.mockito.eq
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -47,10 +47,8 @@ import org.mockito.Mockito.any
 import org.mockito.Mockito.anyFloat
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.clearInvocations
-import org.mockito.Mockito.doThrow
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
-import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 import java.util.function.Consumer
@@ -65,7 +63,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     @Mock private lateinit var biometricUnlockController: BiometricUnlockController
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var choreographer: Choreographer
-    @Mock private lateinit var wallpaperManager: WallpaperManager
+    @Mock private lateinit var wallpaperController: WallpaperController
     @Mock private lateinit var notificationShadeWindowController: NotificationShadeWindowController
     @Mock private lateinit var dumpManager: DumpManager
     @Mock private lateinit var root: View
@@ -101,7 +99,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
 
         notificationShadeDepthController = NotificationShadeDepthController(
                 statusBarStateController, blurUtils, biometricUnlockController,
-                keyguardStateController, choreographer, wallpaperManager,
+                keyguardStateController, choreographer, wallpaperController,
                 notificationShadeWindowController, dozeParameters, dumpManager)
         notificationShadeDepthController.shadeAnimation = shadeAnimation
         notificationShadeDepthController.brightnessMirrorSpring = brightnessSpring
@@ -209,7 +207,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
         notificationShadeDepthController.qsPanelExpansion = 0.25f
         notificationShadeDepthController.onPanelExpansionChanged(1f, tracking = false)
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
-        verify(wallpaperManager).setWallpaperZoomOut(any(),
+        verify(wallpaperController).setNotificationShadeZoom(
                 eq(Interpolators.getNotificationScrimAlpha(0.25f, false /* notifications */)))
     }
 
@@ -242,14 +240,14 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
         notificationShadeDepthController.transitionToFullShadeProgress = 1f
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
         verify(blurUtils).applyBlur(any(), eq(0), eq(false))
-        verify(wallpaperManager).setWallpaperZoomOut(any(), eq(1f))
+        verify(wallpaperController).setNotificationShadeZoom(eq(1f))
     }
 
     @Test
     fun updateBlurCallback_setsBlurAndZoom() {
         notificationShadeDepthController.addListener(listener)
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
-        verify(wallpaperManager).setWallpaperZoomOut(any(), anyFloat())
+        verify(wallpaperController).setNotificationShadeZoom(anyFloat())
         verify(listener).onWallpaperZoomOutChanged(anyFloat())
         verify(blurUtils).applyBlur(any(), anyInt(), eq(false))
     }
@@ -276,21 +274,6 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
         notificationShadeDepthController.blursDisabledForAppLaunch = true
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
         verify(blurUtils).applyBlur(any(), eq(0), eq(false))
-    }
-
-    @Test
-    fun updateBlurCallback_invalidWindow() {
-        `when`(root.isAttachedToWindow).thenReturn(false)
-        notificationShadeDepthController.updateBlurCallback.doFrame(0)
-        verify(wallpaperManager, times(0)).setWallpaperZoomOut(any(), anyFloat())
-    }
-
-    @Test
-    fun updateBlurCallback_exception() {
-        doThrow(IllegalArgumentException("test exception")).`when`(wallpaperManager)
-                .setWallpaperZoomOut(any(), anyFloat())
-        notificationShadeDepthController.updateBlurCallback.doFrame(0)
-        verify(wallpaperManager).setWallpaperZoomOut(any(), anyFloat())
     }
 
     @Test
@@ -322,7 +305,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
 
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
         verify(notificationShadeWindowController).setBackgroundBlurRadius(eq(0))
-        verify(wallpaperManager).setWallpaperZoomOut(any(), eq(1f))
+        verify(wallpaperController).setNotificationShadeZoom(eq(1f))
         verify(blurUtils).applyBlur(eq(viewRootImpl), eq(0), eq(false))
     }
 
