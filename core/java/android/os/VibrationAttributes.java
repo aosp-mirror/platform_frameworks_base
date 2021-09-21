@@ -282,7 +282,7 @@ public final class VibrationAttributes implements Parcelable {
             case USAGE_ALARM:
                 return "ALARM";
             case USAGE_RINGTONE:
-                return "RIGNTONE";
+                return "RINGTONE";
             case USAGE_NOTIFICATION:
                 return "NOTIFICATION";
             case USAGE_COMMUNICATION_REQUEST:
