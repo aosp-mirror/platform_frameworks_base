@@ -6504,25 +6504,34 @@ public class Notification implements Parcelable
 
             if (mContext.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.N
                     && !styleDisplaysCustomViewInline()) {
-                if (mN.contentView == null) {
-                    mN.contentView = createContentView();
+                RemoteViews newContentView = mN.contentView;
+                RemoteViews newBigContentView = mN.bigContentView;
+                RemoteViews newHeadsUpContentView = mN.headsUpContentView;
+                if (newContentView == null) {
+                    newContentView = createContentView();
                     mN.extras.putInt(EXTRA_REBUILD_CONTENT_VIEW_ACTION_COUNT,
-                            mN.contentView.getSequenceNumber());
+                            newContentView.getSequenceNumber());
                 }
-                if (mN.bigContentView == null) {
-                    mN.bigContentView = createBigContentView();
-                    if (mN.bigContentView != null) {
+                if (newBigContentView == null) {
+                    newBigContentView = createBigContentView();
+                    if (newBigContentView != null) {
                         mN.extras.putInt(EXTRA_REBUILD_BIG_CONTENT_VIEW_ACTION_COUNT,
-                                mN.bigContentView.getSequenceNumber());
+                                newBigContentView.getSequenceNumber());
                     }
                 }
-                if (mN.headsUpContentView == null) {
-                    mN.headsUpContentView = createHeadsUpContentView();
-                    if (mN.headsUpContentView != null) {
+                if (newHeadsUpContentView == null) {
+                    newHeadsUpContentView = createHeadsUpContentView();
+                    if (newHeadsUpContentView != null) {
                         mN.extras.putInt(EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW_ACTION_COUNT,
-                                mN.headsUpContentView.getSequenceNumber());
+                                newHeadsUpContentView.getSequenceNumber());
                     }
                 }
+                // Don't set any of the content views until after they have all been generated,
+                //  to avoid the generated .contentView triggering the logic which skips generating
+                //  the .bigContentView.
+                mN.contentView = newContentView;
+                mN.bigContentView = newBigContentView;
+                mN.headsUpContentView = newHeadsUpContentView;
             }
 
             if ((mN.defaults & DEFAULT_LIGHTS) != 0) {

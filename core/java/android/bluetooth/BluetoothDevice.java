@@ -110,7 +110,7 @@ public final class BluetoothDevice implements Parcelable, Attributable {
      * <p>Sent when a remote device is found during discovery.
      * <p>Always contains the extra fields {@link #EXTRA_DEVICE} and {@link
      * #EXTRA_CLASS}. Can contain the extra fields {@link #EXTRA_NAME} and/or
-     * {@link #EXTRA_RSSI} if they are available.
+     * {@link #EXTRA_RSSI} and/or {@link #EXTRA_IS_COORDINATED_SET_MEMBER} if they are available.
      */
     // TODO: Change API to not broadcast RSSI if not available (incoming connection)
     @RequiresLegacyBluetoothPermission
@@ -277,6 +277,15 @@ public final class BluetoothDevice implements Parcelable, Attributable {
      * Bluetooth hardware.
      */
     public static final String EXTRA_RSSI = "android.bluetooth.device.extra.RSSI";
+
+    /**
+    * Used as an bool extra field in {@link #ACTION_FOUND} intents.
+    * It contains the information if device is discovered as member of a coordinated set or not.
+    * Pairing with device that belongs to a set would trigger pairing with the rest of set members.
+    * See Bluetooth CSIP specification for more details.
+    */
+    public static final String EXTRA_IS_COORDINATED_SET_MEMBER =
+            "android.bluetooth.extra.IS_COORDINATED_SET_MEMBER";
 
     /**
      * Used as a Parcelable {@link BluetoothClass} extra field in {@link

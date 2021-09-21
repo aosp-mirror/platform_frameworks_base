@@ -28,20 +28,6 @@
         <item name="android:layout_height">96dp</item>
     </style>
 
-    <style name="DockedDividerTopLeftRoundCorner">
-        <item name="android:layout_gravity">center_horizontal|top</item>
-        <item name="android:background">@drawable/split_rounded_top</item>
-        <item name="android:layout_width">@dimen/split_divider_corner_size</item>
-        <item name="android:layout_height">@dimen/split_divider_corner_size</item>
-    </style>
-
-    <style name="DockedDividerBottomRightRoundCorner">
-        <item name="android:layout_gravity">center_horizontal|bottom</item>
-        <item name="android:background">@drawable/split_rounded_bottom</item>
-        <item name="android:layout_width">@dimen/split_divider_corner_size</item>
-        <item name="android:layout_height">@dimen/split_divider_corner_size</item>
-    </style>
-
     <style name="DockedDividerMinimizedShadow">
         <item name="android:layout_width">8dp</item>
         <item name="android:layout_height">match_parent</item>

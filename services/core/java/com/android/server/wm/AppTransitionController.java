@@ -237,6 +237,8 @@ public class AppTransitionController {
 
         // Check if there is any override
         if (!overrideWithTaskFragmentRemoteAnimation(transit, activityTypes)) {
+            // Unfreeze the windows that were previously frozen for TaskFragment animation.
+            unfreezeEmbeddedChangingWindows();
             overrideWithRemoteAnimationIfSet(animLpActivity, transit, activityTypes);
         }
 
@@ -341,6 +343,9 @@ public class AppTransitionController {
             switch (changingType) {
                 case TYPE_TASK:
                     return TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
+                case TYPE_ACTIVITY:
+                    // ActivityRecord is put in a change transition only when it is reparented
+                    // to an organized TaskFragment. See ActivityRecord#shouldStartChangeTransition.
                 case TYPE_TASK_FRAGMENT:
                     return TRANSIT_OLD_TASK_FRAGMENT_CHANGE;
                 default:
@@ -509,6 +514,16 @@ public class AppTransitionController {
         return mRemoteAnimationDefinition != null
                 ? mRemoteAnimationDefinition.getAdapter(transit, activityTypes)
                 : null;
+    }
+
+    private void unfreezeEmbeddedChangingWindows() {
+        final ArraySet<WindowContainer> changingContainers = mDisplayContent.mChangingContainers;
+        for (int i = changingContainers.size() - 1; i >= 0; i--) {
+            final WindowContainer wc = changingContainers.valueAt(i);
+            if (wc.isEmbedded()) {
+                wc.mSurfaceFreezer.unfreeze(wc.getSyncTransaction());
+            }
+        }
     }
 
     /**

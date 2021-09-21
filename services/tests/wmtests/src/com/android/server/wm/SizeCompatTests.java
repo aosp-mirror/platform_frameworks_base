@@ -1171,7 +1171,6 @@ public class SizeCompatTests extends WindowTestsBase {
         final WindowState w = addWindowToActivity(mActivity);
         // Compute the frames of the window and invoke {@link ActivityRecord#layoutLetterbox}.
         mActivity.mRootWindowContainer.performSurfacePlacement();
-        mActivity.layoutLetterbox(null);
         // The letterbox insets should be [450, 0 - 250, 0].
         assertEquals(new Rect(mActivity.getBounds().left, 0, dh - mActivity.getBounds().right, 0),
                 mActivity.getLetterboxInsets());
@@ -1833,9 +1832,6 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     private void assertLetterboxSurfacesDrawnBetweenActivityAndParentBounds(Rect parentBounds) {
-        // Ensure Letterbox is updated.
-        mActivity.layoutLetterbox(null);
-
         // Letterbox should fill the gap between the parent bounds and the letterboxed activity.
         final Rect letterboxedBounds = new Rect(mActivity.getBounds());
         assertTrue(parentBounds.contains(letterboxedBounds));

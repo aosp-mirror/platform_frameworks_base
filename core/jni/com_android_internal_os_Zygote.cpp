@@ -1142,14 +1142,14 @@ static void isolateAppDataPerPackage(int userId, std::string_view package_name,
 }
 
 // Relabel directory
-static void relabelDir(const char* path, security_context_t context, fail_fn_t fail_fn) {
+static void relabelDir(const char* path, const char* context, fail_fn_t fail_fn) {
   if (setfilecon(path, context) != 0) {
     fail_fn(CREATE_ERROR("Failed to setfilecon %s %s", path, strerror(errno)));
   }
 }
 
 // Relabel all directories under a path non-recursively.
-static void relabelAllDirs(const char* path, security_context_t context, fail_fn_t fail_fn) {
+static void relabelAllDirs(const char* path, const char* context, fail_fn_t fail_fn) {
   DIR* dir = opendir(path);
   if (dir == nullptr) {
     fail_fn(CREATE_ERROR("Failed to opendir %s", path));
@@ -1224,7 +1224,7 @@ static void isolateAppData(JNIEnv* env, const std::vector<std::string>& merged_d
   snprintf(internalDePath, PATH_MAX, "/data/user_de");
   snprintf(externalPrivateMountPath, PATH_MAX, "/mnt/expand");
 
-  security_context_t dataDataContext = nullptr;
+  char* dataDataContext = nullptr;
   if (getfilecon(internalDePath, &dataDataContext) < 0) {
     fail_fn(CREATE_ERROR("Unable to getfilecon on %s %s", internalDePath,
         strerror(errno)));

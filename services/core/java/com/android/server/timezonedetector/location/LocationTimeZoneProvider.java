@@ -403,9 +403,7 @@ abstract class LocationTimeZoneProvider implements Dumpable {
             }
             mProviderListener = Objects.requireNonNull(providerListener);
             ProviderState currentState = ProviderState.createStartingState(this);
-            currentState = currentState.newState(
-                    PROVIDER_STATE_STOPPED, null, null,
-                    "initialize() called");
+            currentState = currentState.newState(PROVIDER_STATE_STOPPED, null, null, "initialize");
             setCurrentState(currentState, false);
 
             // Guard against uncaught exceptions due to initialization problems.
@@ -413,9 +411,8 @@ abstract class LocationTimeZoneProvider implements Dumpable {
                 onInitialize();
             } catch (RuntimeException e) {
                 warnLog("Unable to initialize the provider", e);
-                currentState = currentState
-                        .newState(PROVIDER_STATE_PERM_FAILED, null, null,
-                                "Provider failed to initialize");
+                currentState = currentState.newState(PROVIDER_STATE_PERM_FAILED, null, null,
+                        "Failed to initialize: " + e.getMessage());
                 setCurrentState(currentState, true);
             }
         }
@@ -437,8 +434,8 @@ abstract class LocationTimeZoneProvider implements Dumpable {
         synchronized (mSharedLock) {
             ProviderState currentState = mCurrentState.get();
             if (!currentState.isTerminated()) {
-                ProviderState destroyedState = currentState
-                        .newState(PROVIDER_STATE_DESTROYED, null, null, "destroy() called");
+                ProviderState destroyedState =
+                        currentState.newState(PROVIDER_STATE_DESTROYED, null, null, "destroy");
                 setCurrentState(destroyedState, false);
                 onDestroy();
             }
@@ -537,9 +534,8 @@ abstract class LocationTimeZoneProvider implements Dumpable {
             assertCurrentState(PROVIDER_STATE_STOPPED);
 
             ProviderState currentState = mCurrentState.get();
-            ProviderState newState = currentState.newState(
-                    PROVIDER_STATE_STARTED_INITIALIZING, null /* event */,
-                    currentUserConfiguration, "startUpdates() called");
+            ProviderState newState = currentState.newState(PROVIDER_STATE_STARTED_INITIALIZING,
+                    null /* event */, currentUserConfiguration, "startUpdates");
             setCurrentState(newState, false);
 
             Duration delay = initializationTimeout.plus(initializationTimeoutFuzz);
@@ -557,9 +553,9 @@ abstract class LocationTimeZoneProvider implements Dumpable {
             ProviderState currentState = mCurrentState.get();
             if (currentState.stateEnum == PROVIDER_STATE_STARTED_INITIALIZING) {
                 // On initialization timeout the provider becomes uncertain.
-                ProviderState newState = currentState.newState(
-                        PROVIDER_STATE_STARTED_UNCERTAIN, null /* event */,
-                        currentState.currentUserConfiguration, "initialization timeout");
+                ProviderState newState = currentState.newState(PROVIDER_STATE_STARTED_UNCERTAIN,
+                        null /* event */, currentState.currentUserConfiguration,
+                        "handleInitializationTimeout");
                 setCurrentState(newState, true);
             } else {
                 warnLog("handleInitializationTimeout: Initialization timeout triggered when in"
@@ -588,8 +584,8 @@ abstract class LocationTimeZoneProvider implements Dumpable {
             assertIsStarted();
 
             ProviderState currentState = mCurrentState.get();
-            ProviderState newState = currentState.newState(
-                    PROVIDER_STATE_STOPPED, null, null, "stopUpdates() called");
+            ProviderState newState =
+                    currentState.newState(PROVIDER_STATE_STOPPED, null, null, "stopUpdates");
             setCurrentState(newState, false);
 
             cancelInitializationTimeoutIfSet();
@@ -631,7 +627,7 @@ abstract class LocationTimeZoneProvider implements Dumpable {
                         case EVENT_TYPE_PERMANENT_FAILURE: {
                             String msg = "handleTimeZoneProviderEvent:"
                                     + " Failure event=" + timeZoneProviderEvent
-                                    + " received for stopped provider=" + this
+                                    + " received for stopped provider=" + mProviderName
                                     + ", entering permanently failed state";
                             warnLog(msg);
                             ProviderState newState = currentState.newState(
@@ -664,7 +660,9 @@ abstract class LocationTimeZoneProvider implements Dumpable {
                         case EVENT_TYPE_PERMANENT_FAILURE: {
                             String msg = "handleTimeZoneProviderEvent:"
                                     + " Failure event=" + timeZoneProviderEvent
-                                    + " received for provider=" + this
+                                    + " received for provider=" + mProviderName
+                                    + " in state=" + ProviderState.prettyPrintStateEnum(
+                                            currentState.stateEnum)
                                     + ", entering permanently failed state";
                             warnLog(msg);
                             ProviderState newState = currentState.newState(
@@ -684,7 +682,7 @@ abstract class LocationTimeZoneProvider implements Dumpable {
                             }
                             ProviderState newState = currentState.newState(providerStateEnum,
                                     timeZoneProviderEvent, currentState.currentUserConfiguration,
-                                    "handleTimeZoneProviderEvent() when started");
+                                    "handleTimeZoneProviderEvent");
                             setCurrentState(newState, true);
                             cancelInitializationTimeoutIfSet();
                             return;
@@ -713,15 +711,14 @@ abstract class LocationTimeZoneProvider implements Dumpable {
                 case PROVIDER_STATE_STARTED_UNCERTAIN:
                 case PROVIDER_STATE_STARTED_CERTAIN: {
                     // A temporary failure is treated as becoming uncertain.
-                    String msg = "handleProviderLost reason=" + reason
-                            + ", mProviderName=" + mProviderName
-                            + ", currentState=" + currentState;
-                    debugLog(msg);
+
                     // This is an unusual PROVIDER_STATE_STARTED_UNCERTAIN state because
                     // event == null
-                    ProviderState newState = currentState.newState(
-                            PROVIDER_STATE_STARTED_UNCERTAIN, null,
-                            currentState.currentUserConfiguration, msg);
+                    String debugInfo = "handleTemporaryFailure: reason=" + reason
+                            + ", currentState=" + ProviderState.prettyPrintStateEnum(
+                                    currentState.stateEnum);
+                    ProviderState newState = currentState.newState(PROVIDER_STATE_STARTED_UNCERTAIN,
+                            null, currentState.currentUserConfiguration, debugInfo);
                     setCurrentState(newState, true);
                     cancelInitializationTimeoutIfSet();
                     break;

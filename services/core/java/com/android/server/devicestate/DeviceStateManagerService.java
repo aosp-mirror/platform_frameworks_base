@@ -31,6 +31,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.devicestate.DeviceStateInfo;
 import android.hardware.devicestate.DeviceStateManager;
+import android.hardware.devicestate.DeviceStateManagerInternal;
 import android.hardware.devicestate.IDeviceStateManager;
 import android.hardware.devicestate.IDeviceStateManagerCallback;
 import android.os.Binder;
@@ -161,6 +162,7 @@ public final class DeviceStateManagerService extends SystemService {
     @Override
     public void onStart() {
         publishBinderService(Context.DEVICE_STATE_SERVICE, mBinderService);
+        publishLocalService(DeviceStateManagerInternal.class, new LocalService());
     }
 
     @VisibleForTesting
@@ -236,13 +238,6 @@ public final class DeviceStateManagerService extends SystemService {
                 supportedStates[i] = mDeviceStates.valueAt(i);
             }
             return supportedStates;
-        }
-    }
-
-    /** Returns the list of currently supported device state identifiers. */
-    private int[] getSupportedStateIdentifiers() {
-        synchronized (mLock) {
-            return getSupportedStateIdentifiersLocked();
         }
     }
 
@@ -845,6 +840,16 @@ public final class DeviceStateManagerService extends SystemService {
                 dumpInternal(pw);
             } finally {
                 Binder.restoreCallingIdentity(token);
+            }
+        }
+    }
+
+    /** Implementation of {@link DeviceStateManagerInternal} published as a local service. */
+    private final class LocalService extends DeviceStateManagerInternal {
+        @Override
+        public int[] getSupportedStateIdentifiers() {
+            synchronized (mLock) {
+                return getSupportedStateIdentifiersLocked();
             }
         }
     }
