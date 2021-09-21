@@ -16,14 +16,17 @@
 
 package android.location;
 
+import java.util.concurrent.Executor;
+
 /**
-* Used for receiving NMEA sentences from the GNSS.
-* NMEA 0183 is a standard for communicating with marine electronic devices
-* and is a common method for receiving data from a GNSS, typically over a serial port.
-* See <a href="http://en.wikipedia.org/wiki/NMEA_0183">NMEA 0183</a> for more details.
-* You can implement this interface and call {@link LocationManager#addNmeaListener}
-* to receive NMEA data from the GNSS engine.
-*/
+ * Used for receiving NMEA sentences from the GNSS.
+ * NMEA 0183 is a standard for communicating with marine electronic devices
+ * and is a common method for receiving data from a GNSS, typically over a serial port.
+ * See <a href="http://en.wikipedia.org/wiki/NMEA_0183">NMEA 0183</a> for more details.
+ * You can implement this interface and call
+ * {@link LocationManager#addNmeaListener(Executor, OnNmeaMessageListener)} to receive NMEA data
+ * from the GNSS engine.
+ */
 public interface OnNmeaMessageListener {
     /**
      * Called when an NMEA message is received.
