@@ -17,6 +17,7 @@
 package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -62,7 +63,7 @@ class ExitPipWithDismissButtonTest(testSpec: FlickerTestParameter) : ExitPipTran
             }
         }
 
-    @Postsubmit
+    @Presubmit
     @Test
     override fun pipLayerBecomesInvisible() = super.pipLayerBecomesInvisible()
 
