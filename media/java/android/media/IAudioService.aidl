@@ -36,6 +36,8 @@ import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
 import android.media.IStrategyPreferredDevicesDispatcher;
 import android.media.ISpatializerCallback;
+import android.media.ISpatializerHeadTrackingModeCallback;
+import android.media.ISpatializerHeadToSoundStagePoseCallback;
 import android.media.IVolumeController;
 import android.media.IVolumeController;
 import android.media.PlayerBase;
@@ -414,13 +416,33 @@ interface IAudioService {
 
     boolean canBeSpatialized(in AudioAttributes aa, in AudioFormat af);
 
-    void registerSpatializerCallback(in ISpatializerCallback callback);
+    void registerSpatializerCallback(in ISpatializerCallback cb);
 
-    void unregisterSpatializerCallback(in ISpatializerCallback callback);
+    void unregisterSpatializerCallback(in ISpatializerCallback cb);
+
+    void registerSpatializerHeadTrackingCallback(in ISpatializerHeadTrackingModeCallback cb);
+
+    void unregisterSpatializerHeadTrackingCallback(in ISpatializerHeadTrackingModeCallback cb);
+
+    void registerHeadToSoundstagePoseCallback(in ISpatializerHeadToSoundStagePoseCallback cb);
+
+    void unregisterHeadToSoundstagePoseCallback(in ISpatializerHeadToSoundStagePoseCallback cb);
 
     List<AudioDeviceAttributes> getSpatializerCompatibleAudioDevices();
 
     void addSpatializerCompatibleAudioDevice(in AudioDeviceAttributes ada);
 
     void removeSpatializerCompatibleAudioDevice(in AudioDeviceAttributes ada);
+
+    void setDesiredHeadTrackingMode(int mode);
+
+    int getDesiredHeadTrackingMode();
+
+    int[] getSupportedHeadTrackingModes();
+
+    int getActualHeadTrackingMode();
+
+    oneway void setSpatializerGlobalTransform(in float[] transform);
+
+    oneway void recenterHeadTracker();
 }

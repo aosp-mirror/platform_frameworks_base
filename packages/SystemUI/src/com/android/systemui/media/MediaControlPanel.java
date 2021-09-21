@@ -75,6 +75,8 @@ public class MediaControlPanel {
     private static final String TAG = "MediaControlPanel";
 
     private static final float DISABLED_ALPHA = 0.38f;
+    private static final String EXPORTED_SMARTSPACE_TRAMPOLINE_ACTIVITY_NAME = "com.google"
+            + ".android.apps.gsa.staticplugins.opa.smartspace.ExportedSmartspaceTrampolineActivity";
     private static final String EXTRAS_SMARTSPACE_INTENT =
             "com.google.android.apps.gsa.smartspace.extra.SMARTSPACE_INTENT";
     private static final int MEDIA_RECOMMENDATION_ITEMS_PER_ROW = 3;
@@ -627,6 +629,22 @@ public class MediaControlPanel {
             closeGuts();
             mMediaDataManagerLazy.get().dismissSmartspaceRecommendation(
                     data.getTargetId(), MediaViewController.GUTS_ANIMATION_DURATION + 100L);
+
+            Intent dismissIntent = data.getDismissIntent();
+            if (dismissIntent == null) {
+                Log.w(TAG, "Cannot create dismiss action click action: "
+                        + "extras missing dismiss_intent.");
+                return;
+            }
+
+            if (dismissIntent.getComponent() != null
+                    && dismissIntent.getComponent().getClassName()
+                    .equals(EXPORTED_SMARTSPACE_TRAMPOLINE_ACTIVITY_NAME)) {
+                // Dismiss the card Smartspace data through Smartspace trampoline activity.
+                mContext.startActivity(dismissIntent);
+            } else {
+                mContext.sendBroadcast(dismissIntent);
+            }
         });
 
         mController = null;

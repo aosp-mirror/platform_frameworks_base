@@ -127,33 +127,36 @@ import java.util.concurrent.Executor;
  */
 public final class PendingIntent implements Parcelable {
     private static final String TAG = "PendingIntent";
+    @NonNull
     private final IIntentSender mTarget;
-    private IResultReceiver mCancelReceiver;
     private IBinder mWhitelistToken;
-
-    /**
-     * To protect {@link #mCancelListeners}. We could stop lazy-initialization and synchronize
-     * on {@link #mCancelListeners} directly, and that wouldn't increase allocations
-     * (an empty ArraySet won't causew extra allocations), but
-     * because an empty ArraySet is slightly larger than an Object, and because
-     * {@link #addCancelListener} is rarely used, having a separate lock object would probably
-     * be a net win.
-     */
-    private final Object mLock = new Object();
-
-    @GuardedBy("mLock")
-    private ArraySet<Pair<Executor, CancelListener>> mCancelListeners;
-
-    /**
-     * Whether the PI is canceld or not. Note this is essentially a "cache" that's updated
-     * only when the client uses {@link #addCancelListener}. Even if this is fase, that
-     * still doesn't know the PI is *not* cancled, but if it's true, this PI is definitely canceled.
-     */
-    @GuardedBy("mLock")
-    private boolean mCanceled;
 
     // cached pending intent information
     private @Nullable PendingIntentInfo mCachedInfo;
+
+    /**
+     * Structure to store information related to {@link #addCancelListener}, which is rarely used,
+     * so we lazily allocate it to keep the PendingIntent class size small.
+     */
+    private final class CancelListerInfo extends IResultReceiver.Stub {
+        private final ArraySet<Pair<Executor, CancelListener>> mCancelListeners = new ArraySet<>();
+
+        /**
+         * Whether the PI is canceled or not. Note this is essentially a "cache" that's updated
+         * only when the client uses {@link #addCancelListener}. Even if this is false, that
+         * still doesn't know the PI is *not* canceled, but if it's true, this PI is definitely
+         * canceled.
+         */
+        private boolean mCanceled;
+
+        @Override
+        public void send(int resultCode, Bundle resultData) throws RemoteException {
+            notifyCancelListeners();
+        }
+    }
+
+    @GuardedBy("mTarget")
+    private @Nullable CancelListerInfo mCancelListerInfo;
 
     /**
      * It is now required to specify either {@link #FLAG_IMMUTABLE}
@@ -1094,51 +1097,43 @@ public final class PendingIntent implements Parcelable {
     @TestApi
     public boolean addCancelListener(@NonNull Executor executor,
             @NonNull CancelListener cancelListener) {
-        synchronized (mLock) {
-            if (mCanceled) {
+        synchronized (mTarget) {
+            if (mCancelListerInfo != null && mCancelListerInfo.mCanceled) {
                 return false;
             }
+            if (mCancelListerInfo == null) {
+                mCancelListerInfo = new CancelListerInfo();
+            }
+            final CancelListerInfo cli = mCancelListerInfo;
 
-            if (mCancelReceiver == null) {
-                mCancelReceiver = new IResultReceiver.Stub() {
-                    @Override
-                    public void send(int resultCode, Bundle resultData) {
-                        notifyCancelListeners();
-                    }
-                };
-            }
-            if (mCancelListeners == null) {
-                mCancelListeners = new ArraySet<>();
-            }
-            boolean wasEmpty = mCancelListeners.isEmpty();
-            mCancelListeners.add(Pair.create(executor, cancelListener));
+            boolean wasEmpty = cli.mCancelListeners.isEmpty();
+            cli.mCancelListeners.add(Pair.create(executor, cancelListener));
             if (wasEmpty) {
                 boolean success;
                 try {
                     success = ActivityManager.getService().registerIntentSenderCancelListenerEx(
-                            mTarget, mCancelReceiver);
+                            mTarget, cli);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 }
                 if (!success) {
-                    mCanceled = true;
+                    cli.mCanceled = true;
                 }
                 return success;
             } else {
-                return !mCanceled;
+                return !cli.mCanceled;
             }
         }
     }
 
     private void notifyCancelListeners() {
         ArraySet<Pair<Executor, CancelListener>> cancelListeners;
-        synchronized (mLock) {
-            if (mCancelListeners == null || mCancelListeners.size() == 0) {
-                return;
-            }
-            mCanceled = true;
-            cancelListeners = new ArraySet<>(mCancelListeners);
-            mCancelListeners.clear();
+        synchronized (mTarget) {
+            // When notifyCancelListeners() is called, mCancelListerInfo must always be non-null.
+            final CancelListerInfo cli = mCancelListerInfo;
+            cli.mCanceled = true;
+            cancelListeners = new ArraySet<>(cli.mCancelListeners);
+            cli.mCancelListeners.clear();
         }
         int size = cancelListeners.size();
         for (int i = 0; i < size; i++) {
@@ -1164,19 +1159,20 @@ public final class PendingIntent implements Parcelable {
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @TestApi
     public void removeCancelListener(@NonNull CancelListener cancelListener) {
-        synchronized (mLock) {
-            if (mCancelListeners.size() == 0) {
+        synchronized (mTarget) {
+            final CancelListerInfo cli = mCancelListerInfo;
+            if (cli == null || cli.mCancelListeners.size() == 0) {
                 return;
             }
-            for (int i = mCancelListeners.size() - 1; i >= 0; i--) {
-                if (mCancelListeners.valueAt(i).second == cancelListener) {
-                    mCancelListeners.removeAt(i);
+            for (int i = cli.mCancelListeners.size() - 1; i >= 0; i--) {
+                if (cli.mCancelListeners.valueAt(i).second == cancelListener) {
+                    cli.mCancelListeners.removeAt(i);
                 }
             }
-            if (mCancelListeners.isEmpty()) {
+            if (cli.mCancelListeners.isEmpty()) {
                 try {
                     ActivityManager.getService().unregisterIntentSenderCancelListener(mTarget,
-                            mCancelReceiver);
+                            cli);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 }

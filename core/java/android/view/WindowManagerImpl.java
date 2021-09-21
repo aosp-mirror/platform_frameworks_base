@@ -373,8 +373,8 @@ public final class WindowManagerImpl implements WindowManager {
             currentDisplayInfo = possibleDisplayInfos.get(i);
 
             // Calculate max bounds for this rotation and state.
-            Rect maxBounds = new Rect(0, 0, currentDisplayInfo.getNaturalWidth(),
-                    currentDisplayInfo.getNaturalHeight());
+            Rect maxBounds = new Rect(0, 0, currentDisplayInfo.logicalWidth,
+                    currentDisplayInfo.logicalHeight);
 
             // Calculate insets for the rotated max bounds.
             // TODO(181127261) calculate insets for each display rotation and state.

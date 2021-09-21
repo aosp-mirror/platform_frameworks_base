@@ -102,7 +102,7 @@ public class KeyguardPatternView extends KeyguardInputView
 
         ConstraintSet cs = new ConstraintSet();
         cs.clone(mContainer);
-        cs.setGuidelinePercent(R.id.pin_pad_top_guideline, posture == DEVICE_POSTURE_HALF_OPENED
+        cs.setGuidelinePercent(R.id.pattern_top_guideline, posture == DEVICE_POSTURE_HALF_OPENED
                 ? halfOpenPercentage : 0.0f);
         cs.applyTo(mContainer);
     }

@@ -18,6 +18,7 @@ package com.android.systemui.keyguard;
 
 import static junit.framework.Assert.assertEquals;
 
+import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -50,6 +51,8 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
+import com.airbnb.lottie.LottieAnimationView;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -81,6 +84,7 @@ public class LockIconViewControllerTest extends SysuiTestCase {
     private @Mock DelayableExecutor mDelayableExecutor;
     private @Mock Vibrator mVibrator;
     private @Mock AuthRippleController mAuthRippleController;
+    private @Mock LottieAnimationView mAodFp;
 
     private LockIconViewController mLockIconViewController;
 
@@ -102,6 +106,7 @@ public class LockIconViewControllerTest extends SysuiTestCase {
         when(mLockIconView.getContext()).thenReturn(mContext);
         when(mContext.getResources()).thenReturn(mResources);
         when(mResources.getDisplayMetrics()).thenReturn(mDisplayMetrics);
+        when(mLockIconView.findViewById(anyInt())).thenReturn(mAodFp);
 
         mLockIconViewController = new LockIconViewController(
                 mLockIconView,
@@ -122,7 +127,7 @@ public class LockIconViewControllerTest extends SysuiTestCase {
 
     @Test
     public void testUpdateFingerprintLocationOnInit() {
-        // GIVEN fp sensor location is available pre-init
+        // GIVEN fp sensor location is available pre-attached
         final PointF udfpsLocation = new PointF(50, 75);
         final int radius = 33;
         final FingerprintSensorPropertiesInternal fpProps =
@@ -141,7 +146,7 @@ public class LockIconViewControllerTest extends SysuiTestCase {
         // WHEN lock icon view controller is initialized and attached
         mLockIconViewController.init();
         captureAttachListener();
-        mAttachListener.onViewAttachedToWindow(null);
+        mAttachListener.onViewAttachedToWindow(mLockIconView);
 
         // THEN lock icon view location is updated with the same coordinates as fpProps
         verify(mLockIconView).setCenterLocation(mPointCaptor.capture(), eq(radius));
@@ -154,8 +159,10 @@ public class LockIconViewControllerTest extends SysuiTestCase {
         when(mAuthController.getFingerprintSensorLocation()).thenReturn(null);
         when(mAuthController.getUdfpsProps()).thenReturn(null);
         mLockIconViewController.init();
+        captureAttachListener();
+        mAttachListener.onViewAttachedToWindow(mLockIconView);
 
-        // GIVEN fp sensor location is available post-init
+        // GIVEN fp sensor location is available post-atttached
         captureAuthControllerCallback();
         final PointF udfpsLocation = new PointF(50, 75);
         final int radius = 33;

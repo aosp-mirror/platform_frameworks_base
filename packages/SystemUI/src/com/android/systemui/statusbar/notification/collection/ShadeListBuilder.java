@@ -78,6 +78,8 @@ public class ShadeListBuilder implements Dumpable {
     private final SystemClock mSystemClock;
     private final ShadeListBuilderLogger mLogger;
     private final NotificationInteractionTracker mInteractionTracker;
+    // used exclusivly by ShadeListBuilder#notifySectionEntriesUpdated
+    private final ArrayList<ListEntry> mTempSectionMembers = new ArrayList<>();
 
     private List<ListEntry> mNotifList = new ArrayList<>();
     private List<ListEntry> mNewNotifList = new ArrayList<>();
@@ -356,7 +358,7 @@ public class ShadeListBuilder implements Dumpable {
         // section by our list of custom comparators
         dispatchOnBeforeSort(mReadOnlyNotifList);
         mPipelineState.incrementTo(STATE_SORTING);
-        sortList();
+        sortListAndNotifySections();
 
         // Step 7: Lock in our group structure and log anything that's changed since the last run
         mPipelineState.incrementTo(STATE_FINALIZING);
@@ -380,6 +382,22 @@ public class ShadeListBuilder implements Dumpable {
         }
         mPipelineState.setState(STATE_IDLE);
         mIterationCount++;
+    }
+
+    private void notifySectionEntriesUpdated() {
+        NotifSection currentSection = null;
+        mTempSectionMembers.clear();
+        for (int i = 0; i < mNotifList.size(); i++) {
+            ListEntry currentEntry = mNotifList.get(i);
+            if (currentSection != currentEntry.getSection()) {
+                if (currentSection != null) {
+                    currentSection.getSectioner().onEntriesUpdated(mTempSectionMembers);
+                    mTempSectionMembers.clear();
+                }
+                currentSection = currentEntry.getSection();
+            }
+            mTempSectionMembers.add(currentEntry);
+        }
     }
 
     /**
@@ -713,7 +731,7 @@ public class ShadeListBuilder implements Dumpable {
         }
     }
 
-    private void sortList() {
+    private void sortListAndNotifySections() {
         // Assign sections to top-level elements and sort their children
         for (ListEntry entry : mNotifList) {
             NotifSection section = applySections(entry);
@@ -728,6 +746,9 @@ public class ShadeListBuilder implements Dumpable {
 
         // Finally, sort all top-level elements
         mNotifList.sort(mTopLevelComparator);
+
+        // notify sections since the list is sorted now
+        notifySectionEntriesUpdated();
     }
 
     private void freeEmptyGroups() {
@@ -937,7 +958,6 @@ public class ShadeListBuilder implements Dumpable {
         }
 
         entry.getAttachState().setSection(finalSection);
-
         return finalSection;
     }
 

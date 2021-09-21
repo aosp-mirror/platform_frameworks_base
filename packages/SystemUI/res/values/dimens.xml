@@ -87,7 +87,7 @@
     <dimen name="status_bar_left_clock_starting_padding">0dp</dimen>
 
     <!-- End padding for left-aligned status bar clock -->
-    <dimen name="status_bar_left_clock_end_padding">7dp</dimen>
+    <dimen name="status_bar_left_clock_end_padding">2dp</dimen>
 
     <!-- Spacing after the wifi signals that is present if there are any icons following it. -->
     <dimen name="status_bar_wifi_signal_spacer_width">2.5dp</dimen>
@@ -750,9 +750,7 @@
     <!-- The margin between the status view and the notifications on Keyguard.-->
     <dimen name="keyguard_status_view_bottom_margin">20dp</dimen>
     <!-- Minimum margin between clock and status bar -->
-    <dimen name="keyguard_clock_top_margin">36dp</dimen>
-    <!-- The margin between top of clock and bottom of lock icon. -->
-    <dimen name="keyguard_clock_lock_margin">16dp</dimen>
+    <dimen name="keyguard_clock_top_margin">18dp</dimen>
     <!-- The amount to shift the clocks during a small/large transition -->
     <dimen name="keyguard_clock_switch_y_shift">10dp</dimen>
     <!-- When large clock is showing, offset the smartspace by this amount -->
@@ -1157,9 +1155,9 @@
     <dimen name="default_burn_in_prevention_offset">15dp</dimen>
 
     <!-- The maximum offset for the under-display fingerprint sensor (UDFPS) icon in either
-         direction that elements aer moved to prevent burn-in on AOD-->
-    <dimen name="udfps_burn_in_offset_x">2dp</dimen>
-    <dimen name="udfps_burn_in_offset_y">8dp</dimen>
+         direction that elements are moved to prevent burn-in on AOD-->
+    <dimen name="udfps_burn_in_offset_x">7px</dimen>
+    <dimen name="udfps_burn_in_offset_y">28px</dimen>
 
     <dimen name="corner_size">8dp</dimen>
     <dimen name="top_padding">0dp</dimen>

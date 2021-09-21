@@ -190,6 +190,20 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     }
 
     /**
+     * Get y-bottom position of the currently visible clock.
+     */
+    public int getClockBottom(int statusBarHeaderHeight) {
+        return mKeyguardClockSwitchController.getClockBottom(statusBarHeaderHeight);
+    }
+
+    /**
+     * @return true if the currently displayed clock is top aligned (as opposed to center aligned)
+     */
+    public boolean isClockTopAligned() {
+        return mKeyguardClockSwitchController.isClockTopAligned();
+    }
+
+    /**
      * Set whether the view accessibility importance mode.
      */
     public void setStatusAccessibilityImportance(int mode) {
