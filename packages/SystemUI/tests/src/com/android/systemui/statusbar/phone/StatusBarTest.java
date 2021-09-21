@@ -140,7 +140,9 @@ import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
+import com.android.systemui.unfold.UnfoldTransitionWallpaperController;
 import com.android.systemui.unfold.config.UnfoldTransitionConfig;
+import com.android.systemui.util.WallpaperController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.concurrency.MessageRouterImpl;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -256,6 +258,8 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private UnfoldTransitionConfig mUnfoldTransitionConfig;
     @Mock private Lazy<UnfoldLightRevealOverlayAnimation> mUnfoldLightRevealOverlayAnimationLazy;
     @Mock private Lazy<StatusBarMoveFromCenterAnimationController> mMoveFromCenterAnimationLazy;
+    @Mock private Lazy<UnfoldTransitionWallpaperController> mUnfoldWallpaperController;
+    @Mock private WallpaperController mWallpaperController;
     @Mock private OngoingCallController mOngoingCallController;
     @Mock private SystemStatusAnimationScheduler mAnimationScheduler;
     @Mock private StatusBarLocationPublisher mLocationPublisher;
@@ -431,7 +435,9 @@ public class StatusBarTest extends SysuiTestCase {
                 mBrightnessSliderFactory,
                 mUnfoldTransitionConfig,
                 mUnfoldLightRevealOverlayAnimationLazy,
+                mUnfoldWallpaperController,
                 mMoveFromCenterAnimationLazy,
+                mWallpaperController,
                 mOngoingCallController,
                 mAnimationScheduler,
                 mLocationPublisher,

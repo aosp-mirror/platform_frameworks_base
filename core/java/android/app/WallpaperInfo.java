@@ -81,6 +81,7 @@ public final class WallpaperInfo implements Parcelable {
     final int mContextDescriptionResource;
     final boolean mShowMetadataInPreview;
     final boolean mSupportsAmbientMode;
+    final boolean mShouldUseDefaultUnfoldTransition;
     final String mSettingsSliceUri;
     final boolean mSupportMultipleDisplays;
 
@@ -145,6 +146,9 @@ public final class WallpaperInfo implements Parcelable {
             mSupportsAmbientMode = sa.getBoolean(
                     com.android.internal.R.styleable.Wallpaper_supportsAmbientMode,
                     false);
+            mShouldUseDefaultUnfoldTransition = sa.getBoolean(
+                    com.android.internal.R.styleable.Wallpaper_shouldUseDefaultUnfoldTransition,
+                    true);
             mSettingsSliceUri = sa.getString(
                     com.android.internal.R.styleable.Wallpaper_settingsSliceUri);
             mSupportMultipleDisplays = sa.getBoolean(
@@ -171,6 +175,7 @@ public final class WallpaperInfo implements Parcelable {
         mSupportsAmbientMode = source.readInt() != 0;
         mSettingsSliceUri = source.readString();
         mSupportMultipleDisplays = source.readInt() != 0;
+        mShouldUseDefaultUnfoldTransition = source.readInt() != 0;
         mService = ResolveInfo.CREATOR.createFromParcel(source);
     }
     
@@ -393,6 +398,26 @@ public final class WallpaperInfo implements Parcelable {
         return mSupportMultipleDisplays;
     }
 
+    /**
+     * Returns whether this wallpaper should receive default zooming updates when unfolding.
+     * If set to false the wallpaper will not receive zoom events when folding or unfolding
+     * a foldable device, so it can implement its own unfold transition.
+     * <p>
+     * This corresponds to the value {@link
+     * android.R.styleable#Wallpaper_shouldUseDefaultUnfoldTransition} in the XML description
+     * of the wallpaper.
+     * <p>
+     * The default value is {@code true}.
+     *
+     * @see android.R.styleable#Wallpaper_shouldUseDefaultUnfoldTransition
+     * @return {@code true} if wallpaper should receive default fold/unfold transition updates
+     *
+     * @attr ref android.R.styleable#Wallpaper_shouldUseDefaultUnfoldTransition
+     */
+    public boolean shouldUseDefaultUnfoldTransition() {
+        return mShouldUseDefaultUnfoldTransition;
+    }
+
     public void dump(Printer pw, String prefix) {
         pw.println(prefix + "Service:");
         mService.dump(pw, prefix + "  ");
@@ -423,6 +448,7 @@ public final class WallpaperInfo implements Parcelable {
         dest.writeInt(mSupportsAmbientMode ? 1 : 0);
         dest.writeString(mSettingsSliceUri);
         dest.writeInt(mSupportMultipleDisplays ? 1 : 0);
+        dest.writeInt(mShouldUseDefaultUnfoldTransition ? 1 : 0);
         mService.writeToParcel(dest, flags);
     }
 
