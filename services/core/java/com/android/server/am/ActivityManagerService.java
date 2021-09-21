@@ -11830,8 +11830,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             restart = app.onCleanupApplicationRecordLSP(mProcessStats, allowRestart,
                     fromBinderDied || app.isolated /* unlinkDeath */);
 
-            // Cancel pending frozen task if there is any.
-            mOomAdjuster.mCachedAppOptimizer.unscheduleFreezeAppLSP(app);
+            // Cancel pending frozen task and clean up frozen record if there is any.
+            mOomAdjuster.mCachedAppOptimizer.onCleanupApplicationRecordLocked(app);
         }
         mAppProfiler.onCleanupApplicationRecordLocked(app);
         skipCurrentReceiverLocked(app);
