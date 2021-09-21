@@ -1273,7 +1273,7 @@
 
     <dimen name="ongoing_appops_dialog_circle_size">32dp</dimen>
 
-    <dimen name="ongoing_appops_dialog_icon_size">20dp</dimen>
+    <dimen name="ongoing_appops_dialog_icon_size">16dp</dimen>
 
     <dimen name="ongoing_appops_dialog_side_padding">16dp</dimen>
 
