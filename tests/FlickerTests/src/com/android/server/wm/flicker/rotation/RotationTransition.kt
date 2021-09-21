@@ -92,10 +92,7 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
      */
     @Presubmit
     @Test
-    open fun navBarLayerRotatesAndScales() {
-        testSpec.navBarLayerRotatesAndScales(
-            testSpec.config.startRotation, testSpec.config.endRotation)
-    }
+    open fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
 
     /**
      * Checks that all layers that are visible on the trace, are visible for at least 2

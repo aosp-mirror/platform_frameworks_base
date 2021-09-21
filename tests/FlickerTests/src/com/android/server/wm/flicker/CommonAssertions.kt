@@ -102,35 +102,33 @@ fun FlickerTestParameter.statusBarLayerIsVisible() {
     }
 }
 
-@JvmOverloads
-fun FlickerTestParameter.navBarLayerRotatesAndScales(
-    beginRotation: Int,
-    endRotation: Int = beginRotation
-) {
-    val startingPos = WindowUtils.getNavigationBarPosition(beginRotation)
-    val endingPos = WindowUtils.getNavigationBarPosition(endRotation)
-
+fun FlickerTestParameter.navBarLayerRotatesAndScales() {
     assertLayersStart {
-        this.visibleRegion(FlickerComponentName.NAV_BAR).coversExactly(startingPos)
+        val display = this.entry.displays.minByOrNull { it.id }
+            ?: throw RuntimeException("There is no display!")
+        this.visibleRegion(FlickerComponentName.NAV_BAR)
+                .coversExactly(WindowUtils.getNavigationBarPosition(display))
     }
     assertLayersEnd {
-        this.visibleRegion(FlickerComponentName.NAV_BAR).coversExactly(endingPos)
+        val display = this.entry.displays.minByOrNull { it.id }
+            ?: throw RuntimeException("There is no display!")
+        this.visibleRegion(FlickerComponentName.NAV_BAR)
+                .coversExactly(WindowUtils.getNavigationBarPosition(display))
     }
 }
 
-@JvmOverloads
-fun FlickerTestParameter.statusBarLayerRotatesScales(
-    beginRotation: Int,
-    endRotation: Int = beginRotation
-) {
-    val startingPos = WindowUtils.getStatusBarPosition(beginRotation)
-    val endingPos = WindowUtils.getStatusBarPosition(endRotation)
-
+fun FlickerTestParameter.statusBarLayerRotatesScales() {
     assertLayersStart {
-        this.visibleRegion(FlickerComponentName.STATUS_BAR).coversExactly(startingPos)
+        val display = this.entry.displays.minByOrNull { it.id }
+            ?: throw RuntimeException("There is no display!")
+        this.visibleRegion(FlickerComponentName.STATUS_BAR)
+            .coversExactly(WindowUtils.getStatusBarPosition(display))
     }
     assertLayersEnd {
-        this.visibleRegion(FlickerComponentName.STATUS_BAR).coversExactly(endingPos)
+        val display = this.entry.displays.minByOrNull { it.id }
+            ?: throw RuntimeException("There is no display!")
+        this.visibleRegion(FlickerComponentName.STATUS_BAR)
+            .coversExactly(WindowUtils.getStatusBarPosition(display))
     }
 }
 

@@ -95,18 +95,14 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
      */
     @FlakyTest
     @Test
-    override fun navBarLayerRotatesAndScales() =
-        testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation,
-            testSpec.config.endRotation)
+    override fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
 
     /**
      * Checks the position of the status bar at the start and end of the transition
      */
     @Presubmit
     @Test
-    override fun statusBarLayerRotatesScales() =
-        testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation,
-            testSpec.config.endRotation)
+    override fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
     /**
      * Checks that [fixedApp] layer is within [screenBoundsStart] at the start of the transition
