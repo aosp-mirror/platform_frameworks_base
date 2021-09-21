@@ -24,6 +24,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
+import android.app.ActivityManager;
 import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.Context;
@@ -581,7 +582,7 @@ public class CacheOomRankerTest {
     }
 
     private ProcessRecord nextProcessRecord(int setAdj, long lastActivityTime, long lastRss,
-            int returnedToCacheCount) {
+            int wentToForegroundCount) {
         ApplicationInfo ai = new ApplicationInfo();
         ai.packageName = "a.package.name" + mNextPackageName++;
         ProcessRecord app = new ProcessRecord(mAms, ai, ai.packageName + ":process", mNextUid++);
@@ -593,9 +594,9 @@ public class CacheOomRankerTest {
         app.setLastActivityTime(lastActivityTime);
         app.mProfile.setLastRss(lastRss);
         app.mState.setCached(false);
-        for (int i = 0; i < returnedToCacheCount; ++i) {
-            app.mState.setCached(false);
-            app.mState.setCached(true);
+        for (int i = 0; i < wentToForegroundCount; ++i) {
+            app.mState.setSetProcState(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+            app.mState.setSetProcState(ActivityManager.PROCESS_STATE_CACHED_RECENT);
         }
         // Sets the thread returned by ProcessRecord#getThread, which we use to check whether the
         // app is currently launching.
