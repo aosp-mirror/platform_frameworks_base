@@ -19,7 +19,6 @@ package com.android.systemui.statusbar
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
-import android.app.WallpaperManager
 import android.os.SystemClock
 import android.os.Trace
 import android.util.IndentingPrintWriter
@@ -42,6 +41,7 @@ import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.PanelExpansionListener
 import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.WallpaperController
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -58,7 +58,7 @@ class NotificationShadeDepthController @Inject constructor(
     private val biometricUnlockController: BiometricUnlockController,
     private val keyguardStateController: KeyguardStateController,
     private val choreographer: Choreographer,
-    private val wallpaperManager: WallpaperManager,
+    private val wallpaperController: WallpaperController,
     private val notificationShadeWindowController: NotificationShadeWindowController,
     private val dozeParameters: DozeParameters,
     dumpManager: DumpManager
@@ -215,15 +215,7 @@ class NotificationShadeDepthController @Inject constructor(
         Trace.traceCounter(Trace.TRACE_TAG_APP, "shade_blur_radius", blur)
         blurUtils.applyBlur(blurRoot?.viewRootImpl ?: root.viewRootImpl, blur, opaque)
         lastAppliedBlur = blur
-        try {
-            if (root.isAttachedToWindow && root.windowToken != null) {
-                wallpaperManager.setWallpaperZoomOut(root.windowToken, zoomOut)
-            } else {
-                Log.i(TAG, "Won't set zoom. Window not attached $root")
-            }
-        } catch (e: IllegalArgumentException) {
-            Log.w(TAG, "Can't set zoom. Window is gone: ${root.windowToken}", e)
-        }
+        wallpaperController.setNotificationShadeZoom(zoomOut)
         listeners.forEach {
             it.onWallpaperZoomOutChanged(zoomOut)
             it.onBlurRadiusChanged(blur)

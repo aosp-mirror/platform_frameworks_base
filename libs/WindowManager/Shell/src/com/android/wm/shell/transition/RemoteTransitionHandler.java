@@ -71,7 +71,7 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
     void removeFiltered(RemoteTransition remote) {
         boolean removed = false;
         for (int i = mFilters.size() - 1; i >= 0; --i) {
-            if (mFilters.get(i).second == remote) {
+            if (mFilters.get(i).second.asBinder().equals(remote.asBinder())) {
                 mFilters.remove(i);
                 removed = true;
             }

@@ -173,7 +173,7 @@ public class PackageConfigPersister {
 
     @GuardedBy("mLock")
     void updateFromImpl(String packageName, int userId,
-            ActivityTaskManagerService.PackageConfigurationUpdaterImpl impl) {
+            PackageConfigurationUpdaterImpl impl) {
         synchronized (mLock) {
             PackageConfigRecord record = findRecordOrCreate(mModified, packageName, userId);
             if (impl.getNightMode() != null) {

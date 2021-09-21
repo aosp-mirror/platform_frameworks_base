@@ -178,8 +178,7 @@ public class ThemeOverlayApplier implements Dumpable {
             Map<String, OverlayIdentifier> categoryToPackage,
             FabricatedOverlay[] pendingCreation,
             int currentUser,
-            Set<UserHandle> managedProfiles,
-            Runnable onOverlaysApplied) {
+            Set<UserHandle> managedProfiles) {
         mBgExecutor.execute(() -> {
 
             // Disable all overlays that have not been specified in the user setting.
@@ -226,7 +225,6 @@ public class ThemeOverlayApplier implements Dumpable {
 
             try {
                 mOverlayManager.commit(transaction.build());
-                mMainExecutor.execute(onOverlaysApplied);
             } catch (SecurityException | IllegalStateException e) {
                 Log.e(TAG, "setEnabled failed", e);
             }
