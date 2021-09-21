@@ -23,12 +23,20 @@ import com.android.server.wm.traces.common.FlickerComponentName
 val LAUNCHER_COMPONENT = FlickerComponentName("com.google.android.apps.nexuslauncher",
         "com.google.android.apps.nexuslauncher.NexusLauncherActivity")
 
+/**
+ * Checks that [FlickerComponentName.STATUS_BAR] window is visible and above the app windows in
+ * all WM trace entries
+ */
 fun FlickerTestParameter.statusBarWindowIsVisible() {
     assertWm {
         this.isAboveAppWindowVisible(FlickerComponentName.STATUS_BAR)
     }
 }
 
+/**
+ * Checks that [FlickerComponentName.NAV_BAR] window is visible and above the app windows in
+ * all WM trace entries
+ */
 fun FlickerTestParameter.navBarWindowIsVisible() {
     assertWm {
         this.isAboveAppWindowVisible(FlickerComponentName.NAV_BAR)
@@ -68,6 +76,10 @@ fun FlickerTestParameter.entireScreenCovered(allStates: Boolean = true) {
     }
 }
 
+/**
+ * Checks that [FlickerComponentName.NAV_BAR] layer is visible at the start and end of the SF
+ * trace
+ */
 fun FlickerTestParameter.navBarLayerIsVisible() {
     assertLayersStart {
         this.isVisible(FlickerComponentName.NAV_BAR)
@@ -77,6 +89,10 @@ fun FlickerTestParameter.navBarLayerIsVisible() {
     }
 }
 
+/**
+ * Checks that [FlickerComponentName.STATUS_BAR] layer is visible at the start and end of the SF
+ * trace
+ */
 fun FlickerTestParameter.statusBarLayerIsVisible() {
     assertLayersStart {
         this.isVisible(FlickerComponentName.STATUS_BAR)

@@ -84,7 +84,7 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
     }
 
     /**
-     * Checks that the navigation bar layer is visible during the whole transition
+     * Checks that the navigation bar layer is visible at the start and end of the trace
      */
     open fun navBarLayerIsVisible() {
         testSpec.navBarLayerIsVisible()
@@ -109,7 +109,7 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
     }
 
     /**
-     * Checks that the status bar layer is visible during the whole transition
+     * Checks that the status bar layer is visible at the start and end of the trace
      */
     @Presubmit
     @Test
