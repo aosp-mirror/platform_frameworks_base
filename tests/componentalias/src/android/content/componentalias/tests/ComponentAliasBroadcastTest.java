@@ -16,18 +16,17 @@
 package android.content.componentalias.tests;
 
 import static android.content.componentalias.tests.ComponentAliasTestCommon.MAIN_PACKAGE;
+import static android.content.componentalias.tests.ComponentAliasTestCommon.SUB1_PACKAGE;
+import static android.content.componentalias.tests.ComponentAliasTestCommon.SUB2_PACKAGE;
 import static android.content.componentalias.tests.ComponentAliasTestCommon.TAG;
 
 import static com.google.common.truth.Truth.assertThat;
-
-import static org.hamcrest.core.Is.is;
 
 import android.content.ComponentName;
 import android.content.Intent;
 
 import com.android.compatibility.common.util.BroadcastMessenger.Receiver;
 
-import org.junit.Assume;
 import org.junit.Test;
 
 import java.util.function.Consumer;
@@ -37,18 +36,16 @@ public class ComponentAliasBroadcastTest extends BaseComponentAliasTest {
         new Combo(
                 new ComponentName(MAIN_PACKAGE, MAIN_PACKAGE + ".b.Alias00"),
                 new ComponentName(MAIN_PACKAGE, MAIN_PACKAGE + ".b.Target00"),
-                MAIN_PACKAGE + ".IS_ALIAS_00").apply(callback);
+                MAIN_PACKAGE + ".IS_RECEIVER_00").apply(callback);
 
-        // TODO: This still don't pass -- fix it. But there seems to be an issue with
-        // `am instrument`, so need to fix that first...
-//        new Combo(
-//                new ComponentName(MAIN_PACKAGE, MAIN_PACKAGE + ".b.Alias01"),
-//                new ComponentName(SUB1_PACKAGE, MAIN_PACKAGE + ".b.Target01"),
-//                MAIN_PACKAGE + ".IS_ALIAS_01").apply(callback);
-//        new Combo(
-//                new ComponentName(MAIN_PACKAGE, MAIN_PACKAGE + ".b.Alias02"),
-//                new ComponentName(SUB2_PACKAGE, MAIN_PACKAGE + ".b.Target02"),
-//                MAIN_PACKAGE + ".IS_ALIAS_02").apply(callback);
+        new Combo(
+                new ComponentName(MAIN_PACKAGE, MAIN_PACKAGE + ".b.Alias01"),
+                new ComponentName(SUB1_PACKAGE, MAIN_PACKAGE + ".b.Target01"),
+                MAIN_PACKAGE + ".IS_RECEIVER_01").apply(callback);
+        new Combo(
+                new ComponentName(MAIN_PACKAGE, MAIN_PACKAGE + ".b.Alias02"),
+                new ComponentName(SUB2_PACKAGE, MAIN_PACKAGE + ".b.Target02"),
+                MAIN_PACKAGE + ".IS_RECEIVER_02").apply(callback);
     }
 
     @Test
@@ -77,9 +74,13 @@ public class ComponentAliasBroadcastTest extends BaseComponentAliasTest {
 
     @Test
     public void testBroadcast_explicitPackageName() {
-        // TODO Fix it -- it should work even when called from sub-packages.
-        Assume.assumeThat(sContext.getPackageName(), is(MAIN_PACKAGE));
         forEachCombo((c) -> {
+            // In this test, we only set the package name to the intent.
+            // If the alias and target are the same package, the intent will be sent to both of them
+            // *and* the one to the alias is redirected to the target, so the target will receive
+            // the intent twice. This case is haled at *1 below.
+
+
             Intent i = new Intent().setPackage(c.alias.getPackageName());
             i.setAction(c.action);
             ComponentAliasMessage m;
@@ -92,10 +93,16 @@ public class ComponentAliasBroadcastTest extends BaseComponentAliasTest {
 
                 assertThat(m.getMethodName()).isEqualTo("onReceive");
                 assertThat(m.getSenderIdentity()).isEqualTo(c.target.flattenToShortString());
-
-                // The broadcast intent will always have the receiving component name set.
                 assertThat(m.getIntent().getComponent()).isEqualTo(c.target);
 
+                // *1 -- if the alias and target are in the same package, we expect one more
+                // message.
+                if (c.alias.getPackageName().equals(c.target.getPackageName())) {
+                    m = receiver.waitForNextMessage();
+                    assertThat(m.getMethodName()).isEqualTo("onReceive");
+                    assertThat(m.getSenderIdentity()).isEqualTo(c.target.flattenToShortString());
+                    assertThat(m.getIntent().getComponent()).isEqualTo(c.target);
+                }
                 receiver.ensureNoMoreMessages();
             }
         });
