@@ -33,6 +33,9 @@ import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.traces.common.FlickerComponentName
 import org.junit.Test
 
+/**
+ * Base class for app rotation tests
+ */
 abstract class RotationTransition(protected val testSpec: FlickerTestParameter) {
     protected abstract val testApp: StandardAppHelper
 
@@ -54,6 +57,10 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
         }
     }
 
+    /**
+     * Entry point for the test runner. It will use this method to initialize and cache
+     * flicker executions
+     */
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
@@ -61,18 +68,28 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
         }
     }
 
+    /**
+     * Checks that the navigation bar window is visible and above the app windows in all WM
+     * trace entries
+     */
     @Presubmit
     @Test
     open fun navBarWindowIsVisible() {
         testSpec.navBarWindowIsVisible()
     }
 
+    /**
+     * Checks that the navigation bar layer is visible at the start and end of the transition
+     */
     @Presubmit
     @Test
     open fun navBarLayerIsVisible() {
         testSpec.navBarLayerIsVisible()
     }
 
+    /**
+     * Checks the position of the navigation bar at the start and end of the transition
+     */
     @Presubmit
     @Test
     open fun navBarLayerRotatesAndScales() {
@@ -80,6 +97,10 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
             testSpec.config.startRotation, testSpec.config.endRotation)
     }
 
+    /**
+     * Checks that all layers that are visible on the trace, are visible for at least 2
+     * consecutive entries.
+     */
     @Presubmit
     @Test
     open fun visibleLayersShownMoreThanOneConsecutiveEntry() {
@@ -93,6 +114,10 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
         }
     }
 
+    /**
+     * Checks that all windows that are visible on the trace, are visible for at least 2
+     * consecutive entries.
+     */
     @Presubmit
     @Test
     open fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
@@ -101,10 +126,16 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
         }
     }
 
+    /**
+     * Checks that all parts of the screen are covered during the transition
+     */
     @Presubmit
     @Test
     open fun entireScreenCovered() = testSpec.entireScreenCovered()
 
+    /**
+     * Checks that the focus doesn't change during animation
+     */
     @Presubmit
     @Test
     open fun focusDoesNotChange() {
@@ -113,6 +144,9 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
         }
     }
 
+    /**
+     * Checks that [testApp] layer covers the entire screen at the start of the transition
+     */
     @Presubmit
     @Test
     open fun appLayerRotates_StartingPos() {
@@ -123,6 +157,9 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
         }
     }
 
+    /**
+     * Checks that [testApp] layer covers the entire screen at the end of the transition
+     */
     @Presubmit
     @Test
     open fun appLayerRotates_EndingPos() {
