@@ -40,7 +40,19 @@ import org.junit.runners.Parameterized
 
 /**
  * Test the back and forward transition between 2 activities.
+ *
  * To run this test: `atest FlickerTests:ActivitiesTransitionTest`
+ *
+ * Actions:
+ *     Launch an app
+ *     Launch a secondary activity within the app
+ *     Close the secondary activity back to the initial one
+ *
+ * Notes:
+ *     1. Part of the test setup occurs automatically via
+ *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
+ *        including configuring navigation mode, initial orientation and ensuring no
+ *        apps are running before setup
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
@@ -51,6 +63,10 @@ class ActivitiesTransitionTest(val testSpec: FlickerTestParameter) {
     val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val testApp: TwoActivitiesAppHelper = TwoActivitiesAppHelper(instrumentation)
 
+    /**
+     * Entry point for the test runner. It will use this method to initialize and cache
+     * flicker executions
+     */
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
@@ -76,6 +92,13 @@ class ActivitiesTransitionTest(val testSpec: FlickerTestParameter) {
         }
     }
 
+    /**
+     * Checks that the [ActivityOptions.BUTTON_ACTIVITY_COMPONENT_NAME] activity is visible at
+     * the start of the transition, that
+     * [ActivityOptions.SIMPLE_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME] becomes visible during the
+     * transition, and that [ActivityOptions.BUTTON_ACTIVITY_COMPONENT_NAME] is again visible
+     * at the end
+     */
     @Presubmit
     @Test
     fun finishSubActivity() {
@@ -92,6 +115,9 @@ class ActivitiesTransitionTest(val testSpec: FlickerTestParameter) {
         }
     }
 
+    /**
+     * Checks that all parts of the screen are covered during the transition
+     */
     @Presubmit
     @Test
     fun entireScreenCovered() = testSpec.entireScreenCovered()
@@ -109,6 +135,9 @@ class ActivitiesTransitionTest(val testSpec: FlickerTestParameter) {
         }
     }
 
+    /**
+     * Checks that the [LAUNCHER_COMPONENT] layer is never visible during the transition
+     */
     @Presubmit
     @Test
     fun launcherLayerNotVisible() {
@@ -116,6 +145,12 @@ class ActivitiesTransitionTest(val testSpec: FlickerTestParameter) {
     }
 
     companion object {
+        /**
+         * Creates the test configurations.
+         *
+         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
+         * repetitions, screen orientation and navigation modes.
+         */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
