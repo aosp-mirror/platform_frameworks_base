@@ -920,13 +920,6 @@ public class DreamService extends Service implements Window.Callback {
 
         if (!mWaking && !mFinished) {
             mWaking = true;
-            // During wake up the activity should be translucent to allow the application underneath
-            // to start drawing. Normally, the WM animation system takes care of this, but here we
-            // give the dream application some time to perform a custom exit animation.
-            // If it uses a view animation, the WM doesn't know about it and can't make the activity
-            // translucent in the normal way. Therefore, here we ensure that the activity is
-            // translucent during wake up regardless of what animation is used in onWakeUp().
-            mActivity.convertToTranslucent(null, null);
 
             // As a minor optimization, invoke the callback first in case it simply
             // calls finish() immediately so there wouldn't be much point in telling
