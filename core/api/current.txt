@@ -4380,6 +4380,7 @@ package android.app {
     method @Nullable public android.graphics.Rect getLaunchBounds();
     method public int getLaunchDisplayId();
     method public boolean getLockTaskMode();
+    method public boolean isPendingIntentBackgroundActivityLaunchAllowed();
     method public static android.app.ActivityOptions makeBasic();
     method public static android.app.ActivityOptions makeClipRevealAnimation(android.view.View, int, int, int, int);
     method public static android.app.ActivityOptions makeCustomAnimation(android.content.Context, int, int);
@@ -4393,6 +4394,7 @@ package android.app {
     method public android.app.ActivityOptions setLaunchBounds(@Nullable android.graphics.Rect);
     method public android.app.ActivityOptions setLaunchDisplayId(int);
     method public android.app.ActivityOptions setLockTaskEnabled(boolean);
+    method public void setPendingIntentBackgroundActivityLaunchAllowed(boolean);
     method public android.os.Bundle toBundle();
     method public void update(android.app.ActivityOptions);
     field public static final String EXTRA_USAGE_TIME_REPORT = "android.activity.usage_time";
