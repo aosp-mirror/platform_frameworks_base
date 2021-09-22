@@ -293,7 +293,7 @@ public class ContextHubService extends IContextHubService.Stub {
                     }, UserHandle.USER_ALL);
         }
 
-        if (mContextHubWrapper.supportsMicrophoneDisableSettingNotifications()) {
+        if (mContextHubWrapper.supportsMicrophoneSettingNotifications()) {
             sendMicrophoneDisableSettingUpdateForCurrentUser();
 
             mSensorPrivacyManagerInternal.addSensorPrivacyListenerForAllUsers(
@@ -1100,7 +1100,10 @@ public class ContextHubService extends IContextHubService.Stub {
      */
     private void sendMicrophoneDisableSettingUpdate(boolean enabled) {
         Log.d(TAG, "Mic Disabled Setting: " + enabled);
-        mContextHubWrapper.onMicrophoneDisableSettingChanged(enabled);
+        // The SensorPrivacyManager reports if microphone privacy was enabled,
+        // which translates to microphone access being disabled (and vice-versa).
+        // With this in mind, we flip the argument before piping it to CHRE.
+        mContextHubWrapper.onMicrophoneSettingChanged(!enabled);
     }
 
     /**
