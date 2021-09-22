@@ -4565,6 +4565,13 @@
     <!-- Indicates whether device has a power button fingerprint sensor. -->
     <bool name="config_is_powerbutton_fps" translatable="false" >false</bool>
 
+    <!-- When each intermediate UDFPS enroll stage ends, as a fraction of total progress. -->
+    <string-array name="config_udfps_enroll_stage_thresholds" translatable="false">
+        <item>0.25</item>
+        <item>0.5</item>
+        <item>0.75</item>
+    </string-array>
+
     <!-- Messages that should not be shown to the user during face auth enrollment. This should be
          used to hide messages that may be too chatty or messages that the user can't do much about.
          Entries are defined in android.hardware.biometrics.face@1.0 types.hal -->

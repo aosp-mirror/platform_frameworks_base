@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.PointF;
+import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Build;
 import android.os.UserHandle;
@@ -44,16 +45,14 @@ public class UdfpsEnrollHelper {
     private static final String NEW_COORDS_OVERRIDE =
             "com.android.systemui.biometrics.UdfpsNewCoords";
 
-    // Enroll with two center touches before going to guided enrollment
-    private static final int NUM_CENTER_TOUCHES = 2;
-
     interface Listener {
         void onEnrollmentProgress(int remaining, int totalSteps);
+        void onEnrollmentHelp(int remaining, int totalSteps);
         void onLastStepAcquired();
-        void onEnrollmentHelp();
     }
 
     @NonNull private final Context mContext;
+    @NonNull private final FingerprintManager mFingerprintManager;
     // IUdfpsOverlayController reason
     private final int mEnrollReason;
     private final boolean mAccessibilityEnabled;
@@ -66,10 +65,15 @@ public class UdfpsEnrollHelper {
     // interface makes no promises about monotonically increasing by one each time.
     private int mLocationsEnrolled = 0;
 
+    private int mCenterTouchCount = 0;
+
     @Nullable Listener mListener;
 
-    public UdfpsEnrollHelper(@NonNull Context context, int reason) {
+    public UdfpsEnrollHelper(@NonNull Context context,
+            @NonNull FingerprintManager fingerprintManager, int reason) {
+
         mContext = context;
+        mFingerprintManager = fingerprintManager;
         mEnrollReason = reason;
 
         final AccessibilityManager am = context.getSystemService(AccessibilityManager.class);
@@ -118,6 +122,14 @@ public class UdfpsEnrollHelper {
         }
     }
 
+    int getStageCount() {
+        return mFingerprintManager.getEnrollStageCount();
+    }
+
+    int getStageThresholdSteps(int totalSteps, int stageIndex) {
+        return Math.round(totalSteps * mFingerprintManager.getEnrollStageThreshold(stageIndex));
+    }
+
     boolean shouldShowProgressBar() {
         return mEnrollReason == IUdfpsOverlayController.REASON_ENROLL_ENROLLING;
     }
@@ -129,6 +141,9 @@ public class UdfpsEnrollHelper {
 
         if (remaining != mRemainingSteps) {
             mLocationsEnrolled++;
+            if (isCenterEnrollmentStage()) {
+                mCenterTouchCount++;
+            }
         }
 
         mRemainingSteps = remaining;
@@ -140,7 +155,7 @@ public class UdfpsEnrollHelper {
 
     void onEnrollmentHelp() {
         if (mListener != null) {
-            mListener.onEnrollmentHelp();
+            mListener.onEnrollmentHelp(mRemainingSteps, mTotalSteps);
         }
     }
 
@@ -155,19 +170,41 @@ public class UdfpsEnrollHelper {
         }
     }
 
-    boolean isCenterEnrollmentComplete() {
+    boolean isCenterEnrollmentStage() {
         if (mTotalSteps == -1 || mRemainingSteps == -1) {
-            return false;
-        } else if (mAccessibilityEnabled) {
+            return true;
+        }
+        return mTotalSteps - mRemainingSteps < getStageThresholdSteps(mTotalSteps, 0);
+    }
+
+    boolean isGuidedEnrollmentStage() {
+        if (mAccessibilityEnabled || mTotalSteps == -1 || mRemainingSteps == -1) {
             return false;
         }
-        final int stepsEnrolled = mTotalSteps - mRemainingSteps;
-        return stepsEnrolled >= NUM_CENTER_TOUCHES;
+        final int progressSteps = mTotalSteps - mRemainingSteps;
+        return progressSteps >= getStageThresholdSteps(mTotalSteps, 0)
+                && progressSteps < getStageThresholdSteps(mTotalSteps, 1);
+    }
+
+    boolean isTipEnrollmentStage() {
+        if (mTotalSteps == -1 || mRemainingSteps == -1) {
+            return false;
+        }
+        final int progressSteps = mTotalSteps - mRemainingSteps;
+        return progressSteps >= getStageThresholdSteps(mTotalSteps, 1)
+                && progressSteps < getStageThresholdSteps(mTotalSteps, 2);
+    }
+
+    boolean isEdgeEnrollmentStage() {
+        if (mTotalSteps == -1 || mRemainingSteps == -1) {
+            return false;
+        }
+        return mTotalSteps - mRemainingSteps >= getStageThresholdSteps(mTotalSteps, 2);
     }
 
     @NonNull
     PointF getNextGuidedEnrollmentPoint() {
-        if (mAccessibilityEnabled) {
+        if (mAccessibilityEnabled || !isGuidedEnrollmentStage()) {
             return new PointF(0f, 0f);
         }
 
@@ -177,7 +214,7 @@ public class UdfpsEnrollHelper {
                     SCALE_OVERRIDE, SCALE,
                     UserHandle.USER_CURRENT);
         }
-        final int index = mLocationsEnrolled - NUM_CENTER_TOUCHES;
+        final int index = mLocationsEnrolled - mCenterTouchCount;
         final PointF originalPoint = mGuidedEnrollmentPoints
                 .get(index % mGuidedEnrollmentPoints.size());
         return new PointF(originalPoint.x * scale, originalPoint.y * scale);
