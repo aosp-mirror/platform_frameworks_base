@@ -14952,8 +14952,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * @return true if this view and all ancestors are visible as of the last
      * {@link #onVisibilityAggregated(boolean)} call.
+     *
+     * @hide
      */
-    boolean isAggregatedVisible() {
+    public boolean isAggregatedVisible() {
         return (mPrivateFlags3 & PFLAG3_AGGREGATED_VISIBLE) != 0;
     }
 
