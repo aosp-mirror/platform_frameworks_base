@@ -14399,6 +14399,7 @@ package android.view.contentcapture {
     method public int getFlags();
     method @Nullable public android.view.contentcapture.ContentCaptureSessionId getParentSessionId();
     method public int getTaskId();
+    method @Nullable public android.os.IBinder getWindowToken();
     field public static final int FLAG_DISABLED_BY_APP = 1; // 0x1
     field public static final int FLAG_DISABLED_BY_FLAG_SECURE = 2; // 0x2
     field public static final int FLAG_RECONNECTED = 4; // 0x4
