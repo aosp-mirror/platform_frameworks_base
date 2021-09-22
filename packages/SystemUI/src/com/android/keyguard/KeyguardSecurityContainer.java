@@ -21,8 +21,7 @@ import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
 
 import static java.lang.Integer.max;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -40,6 +39,8 @@ import android.view.ViewPropertyAnimator;
 import android.view.WindowInsets;
 import android.view.WindowInsetsAnimation;
 import android.view.WindowManager;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 
 import androidx.annotation.VisibleForTesting;
@@ -55,7 +56,6 @@ import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.shared.system.SysUiStatsLog;
-import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,6 +84,13 @@ public class KeyguardSecurityContainer extends FrameLayout {
     private static final float SLOP_SCALE = 4f;
 
     private static final long IME_DISAPPEAR_DURATION_MS = 125;
+
+    // The duration of the animation to switch bouncer sides.
+    private static final long BOUNCER_HANDEDNESS_ANIMATION_DURATION_MS = 500;
+
+    // How much of the switch sides animation should be dedicated to fading the bouncer out. The
+    // remainder will fade it back in again.
+    private static final float BOUNCER_HANDEDNESS_ANIMATION_FADE_OUT_PROPORTION = 0.2f;
 
     @VisibleForTesting
     KeyguardSecurityViewFlipper mSecurityViewFlipper;
@@ -322,18 +329,87 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 ? 0 : (int) (getMeasuredWidth() - mSecurityViewFlipper.getWidth());
 
         if (animate) {
-            mRunningOneHandedAnimator =
-                    mSecurityViewFlipper.animate().translationX(targetTranslation);
-            mRunningOneHandedAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
-            mRunningOneHandedAnimator.setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mRunningOneHandedAnimator = null;
+            // This animation is a bit fun to implement. The bouncer needs to move, and fade in/out
+            // at the same time. The issue is, the bouncer should only move a short amount (120dp or
+            // so), but obviously needs to go from one side of the screen to the other. This needs a
+            // pretty custom animation.
+            //
+            // This works as follows. It uses a ValueAnimation to simply drive the animation
+            // progress. This animator is responsible for both the translation of the bouncer, and
+            // the current fade. It will fade the bouncer out while also moving it along the 120dp
+            // path. Once the bouncer is fully faded out though, it will "snap" the bouncer closer
+            // to its destination, then fade it back in again. The effect is that the bouncer will
+            // move from 0 -> X while fading out, then (destination - X) -> destination while fading
+            // back in again.
+            // TODO(b/195012405): Make this animation properly abortable.
+            Interpolator positionInterpolator = AnimationUtils.loadInterpolator(
+                    mContext, android.R.interpolator.fast_out_extra_slow_in);
+            Interpolator fadeOutInterpolator = Interpolators.FAST_OUT_LINEAR_IN;
+            Interpolator fadeInInterpolator = Interpolators.LINEAR_OUT_SLOW_IN;
+
+            ValueAnimator anim = ValueAnimator.ofFloat(0.0f, 1.0f);
+            anim.setDuration(BOUNCER_HANDEDNESS_ANIMATION_DURATION_MS);
+            anim.setInterpolator(Interpolators.LINEAR);
+
+            int initialTranslation = (int) mSecurityViewFlipper.getTranslationX();
+            int totalTranslation = (int) getResources().getDimension(
+                    R.dimen.one_handed_bouncer_move_animation_translation);
+
+            final boolean shouldRestoreLayerType = mSecurityViewFlipper.hasOverlappingRendering()
+                    && mSecurityViewFlipper.getLayerType() != View.LAYER_TYPE_HARDWARE;
+            if (shouldRestoreLayerType) {
+                mSecurityViewFlipper.setLayerType(View.LAYER_TYPE_HARDWARE, /* paint= */null);
+            }
+
+            anim.addUpdateListener(animation -> {
+                float switchPoint = BOUNCER_HANDEDNESS_ANIMATION_FADE_OUT_PROPORTION;
+                boolean isFadingOut = animation.getAnimatedFraction() < switchPoint;
+
+                int currentTranslation = (int) (positionInterpolator.getInterpolation(
+                        animation.getAnimatedFraction()) * totalTranslation);
+                int translationRemaining = totalTranslation - currentTranslation;
+
+                // Flip the sign if we're going from right to left.
+                if (mIsSecurityViewLeftAligned) {
+                    currentTranslation = -currentTranslation;
+                    translationRemaining = -translationRemaining;
+                }
+
+                if (isFadingOut) {
+                    // The bouncer fades out over the first X%.
+                    float fadeOutFraction = MathUtils.constrainedMap(
+                            /* rangeMin= */0.0f,
+                            /* rangeMax= */1.0f,
+                            /* valueMin= */0.0f,
+                            /* valueMax= */switchPoint,
+                            animation.getAnimatedFraction());
+                    float opacity = fadeOutInterpolator.getInterpolation(fadeOutFraction);
+                    mSecurityViewFlipper.setAlpha(1f - opacity);
+
+                    // Animate away from the source.
+                    mSecurityViewFlipper.setTranslationX(initialTranslation + currentTranslation);
+                } else {
+                    // And in again over the remaining (100-X)%.
+                    float fadeInFraction = MathUtils.constrainedMap(
+                            /* rangeMin= */0.0f,
+                            /* rangeMax= */1.0f,
+                            /* valueMin= */switchPoint,
+                            /* valueMax= */1.0f,
+                            animation.getAnimatedFraction());
+
+                    float opacity = fadeInInterpolator.getInterpolation(fadeInFraction);
+                    mSecurityViewFlipper.setAlpha(opacity);
+
+                    // Fading back in, animate towards the destination.
+                    mSecurityViewFlipper.setTranslationX(targetTranslation - translationRemaining);
+                }
+
+                if (animation.getAnimatedFraction() == 1.0f && shouldRestoreLayerType) {
+                    mSecurityViewFlipper.setLayerType(View.LAYER_TYPE_NONE, /* paint= */null);
                 }
             });
 
-            mRunningOneHandedAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
-            mRunningOneHandedAnimator.start();
+            anim.start();
         } else {
             mSecurityViewFlipper.setTranslationX(targetTranslation);
         }
