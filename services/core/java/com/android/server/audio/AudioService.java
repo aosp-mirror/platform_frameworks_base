@@ -243,7 +243,7 @@ public class AudioService extends IAudioService.Stub
      */
     private static final int FLAG_ADJUST_VOLUME = 1;
 
-    private final Context mContext;
+    final Context mContext;
     private final ContentResolver mContentResolver;
     private final AppOpsManager mAppOps;
 
@@ -318,6 +318,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_A2DP_DEV_CONFIG_CHANGE = 39;
     private static final int MSG_DISPATCH_AUDIO_MODE = 40;
     private static final int MSG_ROUTING_UPDATED = 41;
+    private static final int MSG_INIT_HEADTRACKING_SENSORS = 42;
 
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
@@ -7607,6 +7608,10 @@ public class AudioService extends IAudioService.Stub
                     mAudioEventWakeLock.release();
                     break;
 
+                case MSG_INIT_HEADTRACKING_SENSORS:
+                    mSpatializerHelper.onInitSensors(/*init*/ msg.arg1 == 1);
+                    break;
+
                 case MSG_CHECK_MUSIC_ACTIVE:
                     onCheckMusicActive((String) msg.obj);
                     break;
@@ -8477,6 +8482,18 @@ public class AudioService extends IAudioService.Stub
         enforceModifyDefaultAudioEffectsPermission();
         Objects.requireNonNull(value);
         mSpatializerHelper.getEffectParameter(key, value);
+    }
+
+    /**
+     * post a message to schedule init/release of head tracking sensors
+     * @param init initialization if true, release if false
+     */
+    void postInitSpatializerHeadTrackingSensors(boolean init) {
+        sendMsg(mAudioHandler,
+                MSG_INIT_HEADTRACKING_SENSORS,
+                SENDMSG_REPLACE,
+                /*arg1*/ init ? 1 : 0,
+                0, TAG, /*delay*/ 0);
     }
 
     //==========================================================================================
