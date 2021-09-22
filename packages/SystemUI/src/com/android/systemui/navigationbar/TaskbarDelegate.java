@@ -71,7 +71,6 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     private int mDisabledFlags;
     private @WindowVisibleState int mTaskBarWindowState = WINDOW_STATE_SHOWING;
     private @Behavior int mBehavior;
-    private boolean mTaskbarVisible = false;
 
     @Inject
     public TaskbarDelegate(Context context) {
@@ -98,7 +97,6 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mNavigationModeController.removeListener(this);
         mNavigationBarA11yHelper.removeA11yEventListener(mNavA11yEventListener);
         mEdgeBackGestureHandler.onNavBarDetached();
-        mTaskbarVisible = false;
     }
 
     public void init(int displayId) {
@@ -109,7 +107,6 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
                 mNavigationModeController.addListener(this));
         mNavigationBarA11yHelper.registerA11yEventListener(mNavA11yEventListener);
         mEdgeBackGestureHandler.onNavBarAttached();
-        mTaskbarVisible = true;
         // Set initial state for any listeners
         updateSysuiFlags();
     }
@@ -181,19 +178,6 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         if (mBehavior != behavior) {
             mBehavior = behavior;
             updateSysuiFlags();
-        }
-    }
-
-    @Override
-    public void onTaskbarStatusUpdated(boolean visible, boolean stashed) {
-        if (mTaskbarVisible == visible) {
-            return;
-        }
-        mTaskbarVisible = visible;
-        if (visible) {
-            mEdgeBackGestureHandler.onNavBarAttached();
-        } else {
-            mEdgeBackGestureHandler.onNavBarDetached();
         }
     }
 
