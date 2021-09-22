@@ -2347,11 +2347,6 @@ class Task extends TaskFragment {
         return getRootTask().mTaskId;
     }
 
-    @Nullable
-    Task getRootTask() {
-        return getRootTaskFragment().asTask();
-    }
-
     /** @return the first organized task. */
     @Nullable
     Task getOrganizedTask() {
