@@ -168,6 +168,9 @@ class TaskSnapshotController {
      */
     @VisibleForTesting
     void addSkipClosingAppSnapshotTasks(ArraySet<Task> tasks) {
+        if (shouldDisableSnapshots()) {
+            return;
+        }
         mSkipClosingAppSnapshotTasks.addAll(tasks);
     }
 

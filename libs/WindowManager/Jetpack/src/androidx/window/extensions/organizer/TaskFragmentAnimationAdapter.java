@@ -16,6 +16,7 @@
 
 package androidx.window.extensions.organizer;
 
+import android.graphics.Rect;
 import android.view.Choreographer;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
@@ -31,15 +32,28 @@ class TaskFragmentAnimationAdapter {
     private final Animation mAnimation;
     private final RemoteAnimationTarget mTarget;
     private final SurfaceControl mLeash;
+    private final boolean mSizeChanged;
     private final Transformation mTransformation = new Transformation();
     private final float[] mMatrix = new float[9];
+    private final float[] mVecs = new float[4];
+    private final Rect mRect = new Rect();
     private boolean mIsFirstFrame = true;
 
     TaskFragmentAnimationAdapter(@NonNull Animation animation,
             @NonNull RemoteAnimationTarget target) {
+        this(animation, target, target.leash, false /* sizeChanged */);
+    }
+
+    /**
+     * @param sizeChanged whether the surface size needs to be changed.
+     */
+    TaskFragmentAnimationAdapter(@NonNull Animation animation,
+            @NonNull RemoteAnimationTarget target, @NonNull SurfaceControl leash,
+            boolean sizeChanged) {
         mAnimation = animation;
         mTarget = target;
-        mLeash = target.leash;
+        mLeash = leash;
+        mSizeChanged = sizeChanged;
     }
 
     /** Called on frame update. */
@@ -56,6 +70,22 @@ class TaskFragmentAnimationAdapter {
         t.setMatrix(mLeash, mTransformation.getMatrix(), mMatrix);
         t.setAlpha(mLeash, mTransformation.getAlpha());
         t.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
+
+        if (mSizeChanged) {
+            // The following applies an inverse scale to the clip-rect so that it crops "after" the
+            // scale instead of before.
+            mVecs[1] = mVecs[2] = 0;
+            mVecs[0] = mVecs[3] = 1;
+            mTransformation.getMatrix().mapVectors(mVecs);
+            mVecs[0] = 1.f / mVecs[0];
+            mVecs[3] = 1.f / mVecs[3];
+            final Rect clipRect = mTransformation.getClipRect();
+            mRect.left = (int) (clipRect.left * mVecs[0] + 0.5f);
+            mRect.right = (int) (clipRect.right * mVecs[0] + 0.5f);
+            mRect.top = (int) (clipRect.top * mVecs[3] + 0.5f);
+            mRect.bottom = (int) (clipRect.bottom * mVecs[3] + 0.5f);
+            t.setWindowCrop(mLeash, mRect);
+        }
     }
 
     /** Called after animation finished. */
