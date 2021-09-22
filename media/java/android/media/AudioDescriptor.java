@@ -18,16 +18,21 @@ package android.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * The AudioDescriptor contains the information to describe the audio playback/capture
  * capabilities. The capabilities are described by a byte array, which is defined by a
  * particular standard. This is used when the format is unrecognized to the platform.
  */
-public class AudioDescriptor {
+public class AudioDescriptor implements Parcelable {
     /**
      * The audio standard is not specified.
      */
@@ -49,7 +54,15 @@ public class AudioDescriptor {
     private final byte[] mDescriptor;
     private final int mEncapsulationType;
 
-    AudioDescriptor(int standard, int encapsulationType, @NonNull byte[] descriptor) {
+    /**
+     * @hide
+     * Constructor from standard, encapsulation type and descriptor
+     * @param standard the standard of the audio descriptor
+     * @param encapsulationType the encapsulation type of the audio descriptor
+     * @param descriptor the audio descriptor
+     */
+    @SystemApi
+    public AudioDescriptor(int standard, int encapsulationType, @NonNull byte[] descriptor) {
         mStandard = standard;
         mEncapsulationType = encapsulationType;
         mDescriptor = descriptor;
@@ -87,4 +100,66 @@ public class AudioDescriptor {
     public @AudioProfile.EncapsulationType int getEncapsulationType() {
         return mEncapsulationType;
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mStandard, mEncapsulationType, Arrays.hashCode(mDescriptor));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        AudioDescriptor that = (AudioDescriptor) o;
+        return ((mStandard == that.mStandard)
+                && (mEncapsulationType == that.mEncapsulationType)
+                && (Arrays.equals(mDescriptor, that.mDescriptor)));
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("{");
+        sb.append("standard=" + mStandard);
+        sb.append(", encapsulation type=" + mEncapsulationType);
+        if (mDescriptor != null && mDescriptor.length > 0) {
+            sb.append(", descriptor=").append(Arrays.toString(mDescriptor));
+        }
+        sb.append("}");
+        return sb.toString();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeInt(mStandard);
+        dest.writeInt(mEncapsulationType);
+        dest.writeByteArray(mDescriptor);
+    }
+
+    private AudioDescriptor(@NonNull Parcel in) {
+        mStandard = in.readInt();
+        mEncapsulationType = in.readInt();
+        mDescriptor = in.createByteArray();
+    }
+
+    public static final @NonNull Parcelable.Creator<AudioDescriptor> CREATOR =
+            new Parcelable.Creator<AudioDescriptor>() {
+                /**
+                 * Rebuilds an AudioDescriptor previously stored with writeToParcel().
+                 * @param p Parcel object to read the AudioDescriptor from
+                 * @return a new AudioDescriptor created from the data in the parcel
+                 */
+                public AudioDescriptor createFromParcel(Parcel p) {
+                    return new AudioDescriptor(p);
+                }
+
+                public AudioDescriptor[] newArray(int size) {
+                    return new AudioDescriptor[size];
+                }
+            };
 }
