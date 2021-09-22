@@ -288,7 +288,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
              *       frameworks/native/cmds/installd/otapreopt.cpp.
              */
             @Override
-            public void dexopt(String apkPath, int uid, @Nullable String pkgName,
+            public boolean dexopt(String apkPath, int uid, @Nullable String pkgName,
                     String instructionSet, int dexoptNeeded, @Nullable String outputPath,
                     int dexFlags, String compilerFilter, @Nullable String volumeUuid,
                     @Nullable String sharedLibraries, @Nullable String seInfo, boolean downgrade,
@@ -320,6 +320,9 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                 encodeParameter(builder, dexoptCompilationReason);
 
                 commands.add(builder.toString());
+
+                // Cancellation cannot happen for OtaDexOpt. Returns true always.
+                return true;
             }
 
             /**
