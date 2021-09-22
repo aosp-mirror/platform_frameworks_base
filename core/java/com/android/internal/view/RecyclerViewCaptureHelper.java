@@ -44,6 +44,12 @@ public class RecyclerViewCaptureHelper implements ScrollCaptureViewHelper<ViewGr
     private int mOverScrollMode;
 
     @Override
+    public boolean onAcceptSession(@NonNull ViewGroup view) {
+        return view.isVisibleToUser()
+                && (view.canScrollVertically(UP) || view.canScrollVertically(DOWN));
+    }
+
+    @Override
     public void onPrepareForStart(@NonNull ViewGroup view, Rect scrollBounds) {
         mScrollDelta = 0;
 

@@ -67,10 +67,7 @@ public interface ScrollCaptureViewHelper<V extends View> {
      * @param view the view being captured
      * @return true if the callback should respond to a request with scroll bounds
      */
-    default boolean onAcceptSession(@NonNull V view) {
-        return view.isVisibleToUser()
-                && (view.canScrollVertically(UP) || view.canScrollVertically(DOWN));
-    }
+    boolean onAcceptSession(@NonNull V view);
 
     /**
      * Given a scroll capture request for a view, adjust the provided rect to cover the scrollable
