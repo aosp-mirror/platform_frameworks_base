@@ -857,7 +857,8 @@ internal object MediaPlayerData {
     ) {
         shouldPrioritizeSs = shouldPrioritize
         removeMediaPlayer(key)
-        val sortKey = MediaSortKey(isSsMediaRec = true, EMPTY, clock.currentTimeMillis())
+        val sortKey = MediaSortKey(/* isSsMediaRec= */ true,
+            EMPTY.copy(isPlaying = false), clock.currentTimeMillis())
         mediaData.put(key, sortKey)
         mediaPlayers.put(sortKey, player)
         smartspaceMediaData = data
