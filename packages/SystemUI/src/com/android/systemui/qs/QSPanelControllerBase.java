@@ -24,6 +24,7 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.res.Configuration;
 import android.metrics.LogMaker;
+import android.view.View;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
@@ -403,6 +404,10 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
      */
     public void setUsingHorizontalLayoutChangeListener(Runnable listener) {
         mUsingHorizontalLayoutChangedListener = listener;
+    }
+
+    public View getBrightnessView() {
+        return mView.getBrightnessView();
     }
 
     /** */
