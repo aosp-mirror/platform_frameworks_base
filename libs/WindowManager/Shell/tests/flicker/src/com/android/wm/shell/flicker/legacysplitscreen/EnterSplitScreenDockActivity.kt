@@ -88,7 +88,7 @@ class EnterSplitScreenDockActivity(
     @Test
     fun appWindowIsVisible() {
         testSpec.assertWmEnd {
-            isVisible(splitScreenApp.component)
+            isAppWindowVisible(splitScreenApp.component)
         }
     }
 

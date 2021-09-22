@@ -132,10 +132,9 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
         testSpec.assertWm {
             this.notContains(testApp.component)
                     .then()
-                    .isAppWindowInvisible(testApp.component,
-                            ignoreActivity = true, isOptional = true)
+                    .isAppWindowInvisible(testApp.component, isOptional = true)
                     .then()
-                    .isAppWindowVisible(testApp.component, ignoreActivity = true)
+                    .isAppWindowVisible(testApp.component)
         }
     }
 
@@ -146,7 +145,7 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
     @Test
     fun appWindowBecomesVisibleAtEnd() {
         testSpec.assertWmEnd {
-            this.isVisible(testApp.component)
+            this.isAppWindowVisible(testApp.component)
         }
     }
 

@@ -163,6 +163,7 @@ class InsetsSourceProvider {
             // animate-out as new one animates-in.
             mWin.cancelAnimation();
             mWin.mProvidedInsetsSources.remove(mSource.getType());
+            mSeamlessRotating = false;
         }
         ProtoLog.d(WM_DEBUG_WINDOW_INSETS, "InsetsSource setWin %s for type %s", win,
                 InsetsState.typeToString(mSource.getType()));

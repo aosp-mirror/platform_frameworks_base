@@ -26,6 +26,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
+import android.platform.test.annotations.Presubmit;
 import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
 
@@ -40,6 +41,7 @@ import java.util.Set;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@Presubmit
 public class MotionEventTest {
     private static final int ID_SOURCE_MASK = 0x3 << 30;
 
@@ -174,6 +176,7 @@ public class MotionEventTest {
     public void testEventRotation() {
         final MotionEvent event = MotionEvent.obtain(0 /* downTime */, 0 /* eventTime */,
                     ACTION_DOWN, 30 /* x */, 50 /* y */, 0 /* metaState */);
+        event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
         MotionEvent rot90 = MotionEvent.obtain(event);
         rot90.transform(MotionEvent.createRotateMatrix(/* 90 deg */1, 1000, 600));
         assertEquals(50, (int) rot90.getX());

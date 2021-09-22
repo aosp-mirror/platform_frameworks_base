@@ -77,7 +77,7 @@ class EnterSplitScreenFromDetachedRecentTask(
     @Test
     fun appWindowIsVisible() {
         testSpec.assertWmEnd {
-            isVisible(splitScreenApp.component)
+            isAppWindowVisible(splitScreenApp.component)
         }
     }
 

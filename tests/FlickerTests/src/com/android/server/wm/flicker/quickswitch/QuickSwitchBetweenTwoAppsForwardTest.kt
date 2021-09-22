@@ -209,7 +209,7 @@ class QuickSwitchBetweenTwoAppsForwardTest(private val testSpec: FlickerTestPara
                     .then()
                     .isAppWindowVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
                     .then()
-                    .isAppWindowVisible(testApp2.component, ignoreActivity = true)
+                    .isAppWindowVisible(testApp2.component)
         }
     }
 
@@ -235,7 +235,7 @@ class QuickSwitchBetweenTwoAppsForwardTest(private val testSpec: FlickerTestPara
     @Test
     fun app1WindowBecomesAndStaysInvisible() {
         testSpec.assertWm {
-            this.isAppWindowVisible(testApp1.component, ignoreActivity = true)
+            this.isAppWindowVisible(testApp1.component)
                     .then()
                     .isAppWindowInvisible(testApp1.component)
         }
@@ -314,8 +314,7 @@ class QuickSwitchBetweenTwoAppsForwardTest(private val testSpec: FlickerTestPara
      */
     @Postsubmit
     @Test
-    fun navbarIsAlwaysInRightPosition() =
-            testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation)
+    fun navbarIsAlwaysInRightPosition() = testSpec.navBarLayerRotatesAndScales()
 
     /**
      * Checks that the status bar window is visible throughout the entire transition.

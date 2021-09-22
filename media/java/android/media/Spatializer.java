@@ -792,6 +792,45 @@ public class Spatializer {
         }
     }
 
+    /**
+     * @hide
+     * Sets a parameter on the platform spatializer effect implementation.
+     * This is to be used for vendor-specific configurations of their effect, keys and values are
+     * not reuseable across implementations.
+     * @param key the parameter to change
+     * @param value an array for the value of the parameter to change
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
+    public void setEffectParameter(int key, @NonNull byte[] value) {
+        Objects.requireNonNull(value);
+        try {
+            mAm.getService().setSpatializerParameter(key, value);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling setEffectParameter", e);
+        }
+    }
+
+    /**
+     * @hide
+     * Retrieves a parameter value from the platform spatializer effect implementation.
+     * This is to be used for vendor-specific configurations of their effect, keys and values are
+     * not reuseable across implementations.
+     * @param key the parameter for which the value is queried
+     * @param value a non-empty array to contain the return value. The caller is responsible for
+     *              passing an array of size matching the parameter.
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
+    public void getEffectParameter(int key, @NonNull byte[] value) {
+        Objects.requireNonNull(value);
+        try {
+            mAm.getService().getSpatializerParameter(key, value);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling getEffectParameter", e);
+        }
+    }
+
     //-----------------------------------------------------------------------------
     // callback helper definitions
 

@@ -107,7 +107,9 @@ import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
+import com.android.systemui.unfold.UnfoldTransitionWallpaperController;
 import com.android.systemui.unfold.config.UnfoldTransitionConfig;
+import com.android.systemui.util.WallpaperController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.MessageRouter;
 import com.android.systemui.volume.VolumeComponent;
@@ -216,7 +218,9 @@ public interface StatusBarPhoneModule {
             BrightnessSlider.Factory brightnessSliderFactory,
             UnfoldTransitionConfig unfoldTransitionConfig,
             Lazy<UnfoldLightRevealOverlayAnimation> unfoldLightRevealOverlayAnimation,
+            Lazy<UnfoldTransitionWallpaperController> unfoldTransitionWallpaperController,
             Lazy<StatusBarMoveFromCenterAnimationController> statusBarMoveFromCenterAnimation,
+            WallpaperController wallpaperController,
             OngoingCallController ongoingCallController,
             SystemStatusAnimationScheduler animationScheduler,
             StatusBarLocationPublisher locationPublisher,
@@ -312,7 +316,9 @@ public interface StatusBarPhoneModule {
                 brightnessSliderFactory,
                 unfoldTransitionConfig,
                 unfoldLightRevealOverlayAnimation,
+                unfoldTransitionWallpaperController,
                 statusBarMoveFromCenterAnimation,
+                wallpaperController,
                 ongoingCallController,
                 animationScheduler,
                 locationPublisher,

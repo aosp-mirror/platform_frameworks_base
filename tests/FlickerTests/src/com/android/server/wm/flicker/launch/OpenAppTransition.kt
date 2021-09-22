@@ -18,13 +18,11 @@ package com.android.server.wm.flicker.launch
 
 import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
-import android.view.Surface
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.StandardAppHelper
@@ -42,6 +40,9 @@ import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.common.FlickerComponentName
 import org.junit.Test
 
+/**
+ * Base class for app launch tests
+ */
 abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     protected open val testApp: StandardAppHelper = SimpleAppHelper(instrumentation)
@@ -84,7 +85,7 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
     }
 
     /**
-     * Checks that the navigation bar layer is visible during the whole transition
+     * Checks that the navigation bar layer is visible at the start and end of the trace
      */
     open fun navBarLayerIsVisible() {
         testSpec.navBarLayerIsVisible()
@@ -95,9 +96,7 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
      */
     @Presubmit
     @Test
-    open fun navBarLayerRotatesAndScales() {
-        testSpec.navBarLayerRotatesAndScales(Surface.ROTATION_0, testSpec.config.endRotation)
-    }
+    open fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
 
     /**
      * Checks that the status bar window is visible during the whole transition
@@ -109,7 +108,7 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
     }
 
     /**
-     * Checks that the status bar layer is visible during the whole transition
+     * Checks that the status bar layer is visible at the start and end of the trace
      */
     @Presubmit
     @Test
@@ -122,9 +121,7 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
      */
     @Presubmit
     @Test
-    open fun statusBarLayerRotatesScales() {
-        testSpec.statusBarLayerRotatesScales(Surface.ROTATION_0, testSpec.config.endRotation)
-    }
+    open fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
     /**
      * Checks that all windows that are visible on the trace, are visible for at least 2
@@ -201,9 +198,9 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
      */
     open fun launcherWindowBecomesInvisible() {
         testSpec.assertWm {
-            this.isAppWindowVisible(LAUNCHER_COMPONENT)
+            this.isAppWindowOnTop(LAUNCHER_COMPONENT)
                     .then()
-                    .isAppWindowInvisible(LAUNCHER_COMPONENT)
+                    .isAppWindowNotOnTop(LAUNCHER_COMPONENT)
         }
     }
 }

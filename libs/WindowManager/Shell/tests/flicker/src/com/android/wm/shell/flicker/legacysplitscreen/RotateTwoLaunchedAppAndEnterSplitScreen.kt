@@ -24,7 +24,6 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group2
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
@@ -83,14 +82,11 @@ class RotateTwoLaunchedAppAndEnterSplitScreen(
 
     @Presubmit
     @Test
-    fun navBarLayerRotatesAndScales() =
-        testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation,
-            testSpec.config.endRotation)
+    fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
 
     @Presubmit
     @Test
-    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales(
-        testSpec.config.startRotation, testSpec.config.endRotation)
+    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
     @Presubmit
     @Test
@@ -101,7 +97,7 @@ class RotateTwoLaunchedAppAndEnterSplitScreen(
             // Because we log WM once per frame, sometimes the activity and the window
             // become visible in the same entry, sometimes not, thus it is not possible to
             // assert the visibility of the activity here
-            this.isAppWindowInvisible(secondaryApp.component, ignoreActivity = true)
+            this.isAppWindowInvisible(secondaryApp.component)
                     .then()
                     // during re-parenting, the window may disappear and reappear from the
                     // trace, this occurs because we log only 1x per frame

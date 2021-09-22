@@ -209,9 +209,17 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
 
     protected int calculateContainerHeight() {
         int heightOverride = mHeightOverride != -1 ? mHeightOverride : getMeasuredHeight();
+        // Need to add the dragHandle height so touches will be intercepted by it.
+        int dragHandleHeight;
+        if (mDragHandle.getVisibility() == VISIBLE) {
+            dragHandleHeight = Math.round((1 - mQsExpansion) * mDragHandle.getHeight());
+        } else {
+            dragHandleHeight = 0;
+        }
         return mQSCustomizer.isCustomizing() ? mQSCustomizer.getHeight()
                 : Math.round(mQsExpansion * (heightOverride - mHeader.getHeight()))
-                + mHeader.getHeight();
+                + mHeader.getHeight()
+                + dragHandleHeight;
     }
 
     int calculateContainerBottom() {
@@ -227,6 +235,7 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
         mQsExpansion = expansion;
         mQSPanelContainer.setScrollingEnabled(expansion > 0f);
         mDragHandle.setAlpha(1.0f - expansion);
+        mDragHandle.setClickable(expansion == 0f); // Only clickable when fully collapsed
         updateExpansion();
     }
 

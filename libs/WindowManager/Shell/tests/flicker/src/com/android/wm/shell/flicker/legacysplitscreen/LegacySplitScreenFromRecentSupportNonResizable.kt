@@ -106,7 +106,7 @@ class LegacySplitScreenFromRecentSupportNonResizable(
             // Because we log WM once per frame, sometimes the activity and the window
             // become visible in the same entry, sometimes not, thus it is not possible to
             // assert the visibility of the activity here
-            this.isAppWindowInvisible(nonResizeableApp.component, ignoreActivity = true)
+            this.isAppWindowInvisible(nonResizeableApp.component)
                     .then()
                     // during re-parenting, the window may disappear and reappear from the
                     // trace, this occurs because we log only 1x per frame
@@ -128,8 +128,8 @@ class LegacySplitScreenFromRecentSupportNonResizable(
     @Test
     fun bothAppsWindowsAreVisibleAtEnd() {
         testSpec.assertWmEnd {
-            isVisible(splitScreenApp.component)
-            isVisible(nonResizeableApp.component)
+            isAppWindowVisible(splitScreenApp.component)
+            isAppWindowVisible(nonResizeableApp.component)
         }
     }
 

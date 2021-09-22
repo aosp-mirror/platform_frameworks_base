@@ -38,7 +38,6 @@ import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.startRotation
-import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
@@ -137,9 +136,9 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
         // Since we log 1x per frame, sometimes the activity visibility and the app visibility
         // are updated together, sometimes not, thus ignore activity check at the start
         testSpec.assertWm {
-            this.isAppWindowVisible(testApp.component, ignoreActivity = true)
+            this.isAppWindowVisible(testApp.component)
                     .then()
-                    .isAppWindowInvisible(testApp.component, ignoreActivity = true)
+                    .isAppWindowInvisible(testApp.component)
                     .then()
                     .isAppWindowVisible(testApp.component)
         }
@@ -154,7 +153,7 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
         // and the app visibility are updated together, sometimes not, thus ignore activity
         // check at the start
         testSpec.assertWm {
-            this.isAppWindowVisible(testApp.component, ignoreActivity = true)
+            this.isAppWindowVisible(testApp.component)
         }
     }
 
@@ -207,15 +206,11 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
 
     @Presubmit
     @Test
-    fun navBarLayerRotatesAndScales() {
-        testSpec.navBarLayerRotatesAndScales(Surface.ROTATION_0, testSpec.config.endRotation)
-    }
+    fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
 
     @Presubmit
     @Test
-    fun statusBarLayerRotatesScales() {
-        testSpec.statusBarLayerRotatesScales(Surface.ROTATION_0, testSpec.config.endRotation)
-    }
+    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
     @Presubmit
     @Test

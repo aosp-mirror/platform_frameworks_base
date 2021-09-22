@@ -110,7 +110,7 @@ class CloseImeAutoOpenWindowToHomeTest(private val testSpec: FlickerTestParamete
         testSpec.assertWm {
             this.isAppWindowOnTop(testApp.component)
                 .then()
-                .appWindowNotOnTop(testApp.component)
+                .isAppWindowNotOnTop(testApp.component)
         }
     }
 
@@ -150,15 +150,11 @@ class CloseImeAutoOpenWindowToHomeTest(private val testSpec: FlickerTestParamete
 
     @Presubmit
     @Test
-    fun navBarLayerRotatesAndScales() {
-        testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation, Surface.ROTATION_0)
-    }
+    fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
 
     @Presubmit
     @Test
-    fun statusBarLayerRotatesScales() {
-        testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation, Surface.ROTATION_0)
-    }
+    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
     @Presubmit
     @Test

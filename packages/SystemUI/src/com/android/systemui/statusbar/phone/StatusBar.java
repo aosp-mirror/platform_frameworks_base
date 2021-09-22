@@ -228,7 +228,9 @@ import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
+import com.android.systemui.unfold.UnfoldTransitionWallpaperController;
 import com.android.systemui.unfold.config.UnfoldTransitionConfig;
+import com.android.systemui.util.WallpaperController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.MessageRouter;
 import com.android.systemui.volume.VolumeComponent;
@@ -537,7 +539,9 @@ public class StatusBar extends SystemUI implements
     private final FeatureFlags mFeatureFlags;
     private final UnfoldTransitionConfig mUnfoldTransitionConfig;
     private final Lazy<UnfoldLightRevealOverlayAnimation> mUnfoldLightRevealOverlayAnimation;
+    private final Lazy<UnfoldTransitionWallpaperController> mUnfoldWallpaperController;
     private final Lazy<StatusBarMoveFromCenterAnimationController> mMoveFromCenterAnimation;
+    private final WallpaperController mWallpaperController;
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private final MessageRouter mMessageRouter;
     private final WallpaperManager mWallpaperManager;
@@ -771,7 +775,9 @@ public class StatusBar extends SystemUI implements
             BrightnessSlider.Factory brightnessSliderFactory,
             UnfoldTransitionConfig unfoldTransitionConfig,
             Lazy<UnfoldLightRevealOverlayAnimation> unfoldLightRevealOverlayAnimation,
+            Lazy<UnfoldTransitionWallpaperController> unfoldTransitionWallpaperController,
             Lazy<StatusBarMoveFromCenterAnimationController> statusBarUnfoldAnimationController,
+            WallpaperController wallpaperController,
             OngoingCallController ongoingCallController,
             SystemStatusAnimationScheduler animationScheduler,
             StatusBarLocationPublisher locationPublisher,
@@ -865,6 +871,8 @@ public class StatusBar extends SystemUI implements
         mBrightnessSliderFactory = brightnessSliderFactory;
         mUnfoldTransitionConfig = unfoldTransitionConfig;
         mUnfoldLightRevealOverlayAnimation = unfoldLightRevealOverlayAnimation;
+        mUnfoldWallpaperController = unfoldTransitionWallpaperController;
+        mWallpaperController = wallpaperController;
         mMoveFromCenterAnimation = statusBarUnfoldAnimationController;
         mOngoingCallController = ongoingCallController;
         mAnimationScheduler = animationScheduler;
@@ -1052,6 +1060,7 @@ public class StatusBar extends SystemUI implements
 
         if (mUnfoldTransitionConfig.isEnabled()) {
             mUnfoldLightRevealOverlayAnimation.get().init();
+            mUnfoldWallpaperController.get().init();
         }
 
         mPluginManager.addPluginListener(
@@ -1117,6 +1126,7 @@ public class StatusBar extends SystemUI implements
         inflateStatusBarWindow();
         mNotificationShadeWindowViewController.setService(this, mNotificationShadeWindowController);
         mNotificationShadeWindowView.setOnTouchListener(getStatusBarWindowTouchListener());
+        mWallpaperController.setRootView(mNotificationShadeWindowView);
 
         // TODO: Deal with the ugliness that comes from having some of the statusbar broken out
         // into fragments, but the rest here, it leaves some awkward lifecycle and whatnot.
@@ -4294,6 +4304,8 @@ public class StatusBar extends SystemUI implements
                 return;
             }
             WallpaperInfo info = mWallpaperManager.getWallpaperInfo(UserHandle.USER_CURRENT);
+            mWallpaperController.onWallpaperInfoUpdated(info);
+
             final boolean deviceSupportsAodWallpaper = mContext.getResources().getBoolean(
                     com.android.internal.R.bool.config_dozeSupportsAodWallpaper);
             // If WallpaperInfo is null, it must be ImageWallpaper.

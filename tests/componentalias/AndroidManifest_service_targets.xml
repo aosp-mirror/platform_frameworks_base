@@ -28,19 +28,29 @@
         <service android:name=".s.Target04" android:exported="true" android:enabled="true" >
         </service>
 
+        <!--
+            Due to http://go/intents-match-intent-filters-guide, the target intent has to have
+            an intent filter that matches the original intent. (modulo the package name)
+            This restriction shouldn't exist in the final version.
+        -->
         <receiver android:name=".b.Target00" android:exported="true" android:enabled="true" >
+            <intent-filter><action android:name="android.content.componentalias.tests.IS_RECEIVER_00" /></intent-filter>
             <intent-filter><action android:name="ACTION_BROADCAST" /></intent-filter>
         </receiver>
         <receiver android:name=".b.Target01" android:exported="true" android:enabled="true" >
+            <intent-filter><action android:name="android.content.componentalias.tests.IS_RECEIVER_01" /></intent-filter>
             <intent-filter><action android:name="ACTION_BROADCAST" /></intent-filter>
         </receiver>
         <receiver android:name=".b.Target02" android:exported="true" android:enabled="true" >
+            <intent-filter><action android:name="android.content.componentalias.tests.IS_RECEIVER_02" /></intent-filter>
             <intent-filter><action android:name="ACTION_BROADCAST" /></intent-filter>
         </receiver>
         <receiver android:name=".b.Target03" android:exported="true" android:enabled="true" >
+            <intent-filter><action android:name="android.content.componentalias.tests.IS_RECEIVER_03" /></intent-filter>
             <intent-filter><action android:name="ACTION_BROADCAST" /></intent-filter>
         </receiver>
         <receiver android:name=".b.Target04" android:exported="true" android:enabled="true" >
+            <intent-filter><action android:name="android.content.componentalias.tests.IS_RECEIVER_04" /></intent-filter>
             <intent-filter><action android:name="ACTION_BROADCAST" /></intent-filter>
         </receiver>
     </application>

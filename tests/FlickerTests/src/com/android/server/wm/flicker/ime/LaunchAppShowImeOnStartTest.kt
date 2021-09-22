@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,23 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker.close
+package com.android.server.wm.flicker.ime
 
+import android.app.Instrumentation
 import android.platform.test.annotations.Postsubmit
-import androidx.test.filters.FlakyTest
+import android.view.Surface
+import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
+import androidx.test.platform.app.InstrumentationRegistry
+import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
+import com.android.server.wm.flicker.helpers.setRotation
+import com.android.server.wm.flicker.startRotation
+import com.android.server.wm.traces.common.FlickerComponentName
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -31,14 +38,13 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test app closes by pressing home button
+ * Launch an app that automatically displays the IME
  *
- * To run this test: `atest FlickerTests:CloseAppHomeButtonTest`
+ * To run this test: `atest FlickerTests:LaunchAppShowImeOnStartTest`
  *
  * Actions:
  *     Make sure no apps are running on the device
- *     Launch an app [testApp] and wait animation to complete
- *     Press home button
+ *     Launch an app [testApp] that automatically displays IME and wait animation to complete
  *
  * To run only the presubmit assertions add: `--
  *      --module-arg FlickerTests:exclude-annotation:androidx.test.filters.FlakyTest
@@ -63,26 +69,65 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group4
-class CloseAppHomeButtonTest(testSpec: FlickerTestParameter) : CloseAppTransition(testSpec) {
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = {
-            super.transition(this, it)
+class LaunchAppShowImeOnStartTest(private val testSpec: FlickerTestParameter) {
+    private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
+    private val testApp = ImeAppAutoFocusHelper(instrumentation, testSpec.config.startRotation)
+
+    @FlickerBuilderProvider
+    fun buildFlicker(): FlickerBuilder {
+        return FlickerBuilder(instrumentation).apply {
+            setup {
+                eachRun {
+                    this.setRotation(testSpec.config.startRotation)
+                }
+            }
+            teardown {
+                eachRun {
+                    testApp.exit()
+                }
+            }
             transitions {
-                device.pressHome()
-                wmHelper.waitForHomeActivityVisible()
+                testApp.launchViaIntent(wmHelper)
+                wmHelper.waitImeShown()
             }
         }
+    }
 
-    /** {@inheritDoc} */
-    @FlakyTest
-    @Test
-    override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
-
-    /** {@inheritDoc} */
+    /**
+     * Checks that [FlickerComponentName.IME] window becomes visible during the transition
+     */
     @Postsubmit
     @Test
-    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
+    fun imeWindowBecomesVisible() = testSpec.imeWindowBecomesVisible()
+
+    /**
+     * Checks that [FlickerComponentName.IME] layer becomes visible during the transition
+     */
+    @Postsubmit
+    @Test
+    fun imeLayerBecomesVisible() = testSpec.imeLayerBecomesVisible()
+
+    /**
+     * Checks that [FlickerComponentName.IME] layer is invisible at the start of the transition
+     */
+    @Postsubmit
+    @Test
+    fun imeLayerNotExistsStart() {
+        testSpec.assertLayersStart {
+            this.isInvisible(FlickerComponentName.IME)
+        }
+    }
+
+    /**
+     * Checks that [FlickerComponentName.IME] layer is visible at the end of the transition
+     */
+    @Postsubmit
+    @Test
+    fun imeLayerExistsEnd() {
+        testSpec.assertLayersEnd {
+            this.isVisible(FlickerComponentName.IME)
+        }
+    }
 
     companion object {
         /**
@@ -95,7 +140,14 @@ class CloseAppHomeButtonTest(testSpec: FlickerTestParameter) : CloseAppTransitio
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(repetitions = 5)
+                .getConfigNonRotationTests(
+                    repetitions = 5,
+                    supportedRotations = listOf(Surface.ROTATION_0),
+                    supportedNavigationModes = listOf(
+                        WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
+                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
+                    )
+                )
         }
     }
 }

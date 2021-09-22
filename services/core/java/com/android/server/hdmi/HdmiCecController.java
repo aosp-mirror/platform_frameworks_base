@@ -90,7 +90,7 @@ final class HdmiCecController {
 
     private static final int MAX_DEDICATED_ADDRESS = 11;
 
-    private static final int MAX_HDMI_MESSAGE_HISTORY = 250;
+    private static final int INITIAL_HDMI_MESSAGE_HISTORY_SIZE = 250;
 
     private static final int INVALID_PHYSICAL_ADDRESS = 0xFFFF;
 
@@ -138,8 +138,10 @@ final class HdmiCecController {
     private final HdmiControlService mService;
 
     // Stores recent CEC messages and HDMI Hotplug event history for debugging purpose.
-    private final ArrayBlockingQueue<Dumpable> mMessageHistory =
-            new ArrayBlockingQueue<>(MAX_HDMI_MESSAGE_HISTORY);
+    private ArrayBlockingQueue<Dumpable> mMessageHistory =
+            new ArrayBlockingQueue<>(INITIAL_HDMI_MESSAGE_HISTORY_SIZE);
+
+    private final Object mMessageHistoryLock = new Object();
 
     private final NativeWrapper mNativeWrapperImpl;
 
@@ -750,10 +752,37 @@ final class HdmiCecController {
     }
 
     private void addEventToHistory(Dumpable event) {
-        if (!mMessageHistory.offer(event)) {
-            mMessageHistory.poll();
-            mMessageHistory.offer(event);
+        synchronized (mMessageHistoryLock) {
+            if (!mMessageHistory.offer(event)) {
+                mMessageHistory.poll();
+                mMessageHistory.offer(event);
+            }
         }
+    }
+
+    int getMessageHistorySize() {
+        synchronized (mMessageHistoryLock) {
+            return mMessageHistory.size() + mMessageHistory.remainingCapacity();
+        }
+    }
+
+    boolean setMessageHistorySize(int newSize) {
+        if (newSize < INITIAL_HDMI_MESSAGE_HISTORY_SIZE) {
+            return false;
+        }
+        ArrayBlockingQueue<Dumpable> newMessageHistory = new ArrayBlockingQueue<>(newSize);
+
+        synchronized (mMessageHistoryLock) {
+            if (newSize < mMessageHistory.size()) {
+                for (int i = 0; i < mMessageHistory.size() - newSize; i++) {
+                    mMessageHistory.poll();
+                }
+            }
+
+            newMessageHistory.addAll(mMessageHistory);
+            mMessageHistory = newMessageHistory;
+        }
+        return true;
     }
 
     void dump(final IndentingPrintWriter pw) {
