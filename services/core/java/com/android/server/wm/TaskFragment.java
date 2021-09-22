@@ -2046,9 +2046,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
         if (shouldStartChangeTransition(mTmpPrevBounds)) {
             initializeChangeTransition(mTmpPrevBounds);
-        }
-
-        if (mTaskFragmentOrganizer != null) {
+        } else if (mTaskFragmentOrganizer != null) {
             // Update the surface position here instead of in the organizer so that we can make sure
             // it can be synced with the surface freezer.
             updateSurfacePosition(getSyncTransaction());
