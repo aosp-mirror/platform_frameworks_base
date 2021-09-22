@@ -73,23 +73,22 @@ public class UdfpsEnrollView extends UdfpsAnimationView {
     }
 
     void setEnrollHelper(UdfpsEnrollHelper enrollHelper) {
+        mFingerprintProgressDrawable.setEnrollHelper(enrollHelper);
         mFingerprintDrawable.setEnrollHelper(enrollHelper);
     }
 
     void onEnrollmentProgress(int remaining, int totalSteps) {
         mHandler.post(() -> {
-            mFingerprintProgressDrawable.setEnrollmentProgress(remaining, totalSteps);
+            mFingerprintProgressDrawable.onEnrollmentProgress(remaining, totalSteps);
             mFingerprintDrawable.onEnrollmentProgress(remaining, totalSteps);
         });
     }
 
-    void onLastStepAcquired() {
-        mHandler.post(() -> {
-            mFingerprintProgressDrawable.onLastStepAcquired();
-        });
+    void onEnrollmentHelp(int remaining, int totalSteps) {
+        mHandler.post(() -> mFingerprintProgressDrawable.onEnrollmentHelp(remaining, totalSteps));
     }
 
-    void onEnrollmentHelp() {
-        mHandler.post(mFingerprintProgressDrawable::onEnrollmentHelp);
+    void onLastStepAcquired() {
+        mHandler.post(mFingerprintProgressDrawable::onLastStepAcquired);
     }
 }
