@@ -16,6 +16,7 @@
 
 package com.android.server.accessibility.magnification;
 
+import static android.accessibilityservice.MagnificationConfig.MAGNIFICATION_MODE_WINDOW;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
@@ -377,6 +378,16 @@ public class MagnificationController implements WindowMagnificationManager.Callb
     @Override
     public void onChangeMagnificationMode(int displayId, int magnificationMode) {
         mAms.changeMagnificationMode(displayId, magnificationMode);
+    }
+
+    @Override
+    public void onSourceBoundsChanged(int displayId, Rect bounds) {
+        final MagnificationConfig config = new MagnificationConfig.Builder()
+                .setMode(MAGNIFICATION_MODE_WINDOW)
+                .setScale(mScaleProvider.getScale(displayId))
+                .setCenterX(bounds.exactCenterX())
+                .setCenterY(bounds.exactCenterY()).build();
+        mAms.notifyMagnificationChanged(displayId, new Region(bounds), config);
     }
 
     private void disableFullScreenMagnificationIfNeeded(int displayId) {
