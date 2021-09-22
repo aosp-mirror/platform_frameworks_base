@@ -168,26 +168,34 @@ public class ColorScheme(@ColorInt seed: Int, val darkTheme: Boolean) {
                         (totalPopulationMeaningless || proportion > 0.01)
             }
             // Sort the colors by score, from high to low.
-            val seeds = mutableListOf<Int>()
             val intToScoreIntermediate = filteredIntToCam.mapValues {
                 score(it.value, intToHueProportion[it.key]!!)
             }
             val intToScore = intToScoreIntermediate.entries.toMutableList()
             intToScore.sortByDescending { it.value }
 
-            // Go through the colors, from high score to low score. If there isn't already a seed
-            // color with a hue close to color being examined, add the color being examined to the
-            // seed colors.
-            for (entry in intToScore) {
-                val int = entry.key
-                val existingSeedNearby = seeds.find {
-                    val hueA = intToCam[int]!!.hue
-                    val hueB = intToCam[it]!!.hue
-                    hueDiff(hueA, hueB) < 15 } != null
-                if (existingSeedNearby) {
-                    continue
+            // Go through the colors, from high score to low score.
+            // If the color is distinct in hue from colors picked so far, pick the color.
+            // Iteratively decrease the amount of hue distinctness required, thus ensuring we
+            // maximize difference between colors.
+            val minimumHueDistance = 15
+            val seeds = mutableListOf<Int>()
+            maximizeHueDistance@ for (i in 90 downTo minimumHueDistance step 1) {
+                seeds.clear()
+                for (entry in intToScore) {
+                    val int = entry.key
+                    val existingSeedNearby = seeds.find {
+                        val hueA = intToCam[int]!!.hue
+                        val hueB = intToCam[it]!!.hue
+                        hueDiff(hueA, hueB) < i } != null
+                    if (existingSeedNearby) {
+                        continue
+                    }
+                    seeds.add(int)
+                    if (seeds.size >= 4) {
+                        break@maximizeHueDistance
+                    }
                 }
-                seeds.add(int)
             }
 
             if (seeds.isEmpty()) {
