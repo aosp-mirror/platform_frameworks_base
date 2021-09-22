@@ -45,9 +45,11 @@ final class Vibration {
     enum Status {
         RUNNING,
         FINISHED,
+        FINISHED_UNEXPECTED,  // Didn't terminate in the usual way.
         FORWARDED_TO_INPUT_DEVICES,
         CANCELLED,
         IGNORED_ERROR_APP_OPS,
+        IGNORED_ERROR_TOKEN,
         IGNORED,
         IGNORED_APP_OPS,
         IGNORED_BACKGROUND,
