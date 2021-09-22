@@ -1018,7 +1018,7 @@ public final class StreamConfigurationMap {
      * <p>The following formats will never have a stall duration:
      * <ul>
      * <li>{@link ImageFormat#YUV_420_888 YUV_420_888}
-     * <li>{@link #isOutputSupportedFor(Class) Implementation-Defined}
+     * <li>{@link ImageFormat#PRIVATE PRIVATE}
      * </ul></p>
      *
      * <p>
