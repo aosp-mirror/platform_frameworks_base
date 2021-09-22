@@ -347,7 +347,7 @@ public final class SensorPrivacyService extends SystemService {
                             intent.getIntExtra(EXTRA_SENSOR, UNKNOWN), false);
                 }
             }, new IntentFilter(ACTION_DISABLE_INDIVIDUAL_SENSOR_PRIVACY),
-                    MANAGE_SENSOR_PRIVACY, null);
+                    MANAGE_SENSOR_PRIVACY, null, Context.RECEIVER_EXPORTED);
             mUserManagerInternal.addUserRestrictionsListener(this);
         }
 

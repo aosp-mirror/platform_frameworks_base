@@ -190,7 +190,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
                 ServiceManager.getService(Context.WINDOW_SERVICE));
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-        mContext.registerReceiver(mBroadcastReceiver, filter, null, handler);
+        mContext.registerReceiver(mBroadcastReceiver, filter, null, handler,
+                Context.RECEIVER_NOT_EXPORTED);
     }
 
     public boolean showSessionLocked(Bundle args, int flags,

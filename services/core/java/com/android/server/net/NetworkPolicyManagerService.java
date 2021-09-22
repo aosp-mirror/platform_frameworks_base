@@ -976,7 +976,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             // listen for restrict background changes from notifications
             final IntentFilter allowFilter = new IntentFilter(ACTION_ALLOW_BACKGROUND);
-            mContext.registerReceiver(mAllowReceiver, allowFilter, MANAGE_NETWORK_POLICY, mHandler);
+            mContext.registerReceiver(mAllowReceiver, allowFilter, MANAGE_NETWORK_POLICY, mHandler,
+                    Context.RECEIVER_EXPORTED);
 
             // Listen for snooze from notifications
             mContext.registerReceiver(mSnoozeReceiver,

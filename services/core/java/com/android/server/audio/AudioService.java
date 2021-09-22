@@ -1117,7 +1117,8 @@ public class AudioService extends IAudioService.Stub
         intentFilter.addAction(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION);
         intentFilter.addAction(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION);
 
-        mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, intentFilter, null, null);
+        mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, intentFilter, null, null,
+                Context.RECEIVER_EXPORTED);
 
     }
 
