@@ -38,12 +38,10 @@ parcelable AudioDeviceDescription {
   android.media.audio.common.AudioDeviceType type = android.media.audio.common.AudioDeviceType.NONE;
   @utf8InCpp String connection;
   const @utf8InCpp String CONNECTION_ANALOG = "analog";
-  const @utf8InCpp String CONNECTION_ANALOG_DOCK = "analog-dock";
   const @utf8InCpp String CONNECTION_BT_A2DP = "bt-a2dp";
   const @utf8InCpp String CONNECTION_BT_LE = "bt-le";
   const @utf8InCpp String CONNECTION_BT_SCO = "bt-sco";
   const @utf8InCpp String CONNECTION_BUS = "bus";
-  const @utf8InCpp String CONNECTION_DIGITAL_DOCK = "digital-dock";
   const @utf8InCpp String CONNECTION_HDMI = "hdmi";
   const @utf8InCpp String CONNECTION_HDMI_ARC = "hdmi-arc";
   const @utf8InCpp String CONNECTION_HDMI_EARC = "hdmi-earc";

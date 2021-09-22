@@ -39,7 +39,8 @@ parcelable AudioDeviceDescription {
      * Usually it's some kind of a communication protocol, e.g. Bluetooth SCO or
      * USB. There is a list of connection types recognized by the framework,
      * defined using 'CONNECTION_' constants. Vendors can add their own
-     * connection types with "vx.<vendor>." prefix.
+     * connection types with "VX_<vendor>_" prefix, where the "vendor" part
+     * must consist of at least 3 letters or numbers.
      *
      * When the 'connection' field is left empty and 'type != NONE | DEFAULT',
      * it is assumed that the device is permanently attached to the audio
@@ -50,13 +51,10 @@ parcelable AudioDeviceDescription {
      */
     @utf8InCpp String connection;
     /**
-     * Analog connection, for example, via 3.5 mm analog jack.
+     * Analog connection, for example, via 3.5 mm analog jack,
+     * or a low-end (analog) desk dock.
      */
     const @utf8InCpp String CONNECTION_ANALOG = "analog";
-    /**
-     * Low-End (Analog) Desk Dock.
-     */
-    const @utf8InCpp String CONNECTION_ANALOG_DOCK = "analog-dock";
     /**
      * Bluetooth A2DP connection.
      */
@@ -73,10 +71,6 @@ parcelable AudioDeviceDescription {
      * Bus connection. Mostly used in automotive scenarios.
      */
     const @utf8InCpp String CONNECTION_BUS = "bus";
-    /**
-     * High-End (Digital) Desk Dock.
-     */
-    const @utf8InCpp String CONNECTION_DIGITAL_DOCK = "digital-dock";
     /**
      * HDMI connection.
      */
@@ -102,7 +96,7 @@ parcelable AudioDeviceDescription {
      */
     const @utf8InCpp String CONNECTION_WIRELESS = "wireless";
     /**
-     * USB connection.
+     * USB connection. The Android device is the USB Host.
      */
     const @utf8InCpp String CONNECTION_USB = "usb";
 }
