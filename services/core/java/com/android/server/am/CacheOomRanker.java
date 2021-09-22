@@ -364,6 +364,7 @@ public class CacheOomRanker {
                 // First element is total RSS:
                 // frameworks/base/core/jni/android_util_Process.cpp:1192
                 scoredProcessRecord.proc.mState.setCacheOomRankerRss(rss[0], nowMs);
+                scoredProcessRecord.proc.mProfile.setLastRss(rss[0]);
             }
         }
 
