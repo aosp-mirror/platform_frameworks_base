@@ -374,8 +374,6 @@ applications that come with the platform
         <permission name="android.permission.STOP_APP_SWITCHES"/>
         <permission name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME"/>
         <permission name="android.permission.SUSPEND_APPS" />
-        <!-- Permission required for UiModeManager and Telecom car mode CTS tests -->
-        <permission name="android.permission.TOGGLE_AUTOMOTIVE_PROJECTION" />
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
         <permission name="android.permission.USE_RESERVED_DISK"/>
         <permission name="android.permission.UWB_PRIVILEGED"/>
