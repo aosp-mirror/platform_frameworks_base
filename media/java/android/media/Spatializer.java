@@ -129,6 +129,14 @@ public class Spatializer {
      */
     public static final int SPATIALIZER_IMMERSIVE_LEVEL_MULTICHANNEL = 1;
 
+    /**
+     * @hide
+     * Constant indicating the {@code Spatializer} on this device supports the spatialization of
+     * multichannel bed plus objects.
+     * @see #getImmersiveAudioLevel()
+     */
+    public static final int SPATIALIZER_IMMERSIVE_LEVEL_MCHAN_BED_PLUS_OBJECTS = 2;
+
     /** @hide */
     @IntDef(flag = false, value = {
             HEAD_TRACKING_MODE_UNSUPPORTED,

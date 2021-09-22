@@ -18,6 +18,9 @@ package com.android.server.audio;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.media.AudioAttributes;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioFormat;
@@ -28,6 +31,7 @@ import android.media.ISpatializerCallback;
 import android.media.ISpatializerHeadToSoundStagePoseCallback;
 import android.media.ISpatializerHeadTrackingCallback;
 import android.media.ISpatializerHeadTrackingModeCallback;
+import android.media.SpatializationLevel;
 import android.media.Spatializer;
 import android.media.SpatializerHeadTrackingMode;
 import android.os.RemoteCallbackList;
@@ -45,6 +49,7 @@ public class SpatializerHelper {
 
     private static final String TAG = "AS.SpatializerHelper";
     private static final boolean DEBUG = true;
+    private static final boolean DEBUG_MORE = false;
 
     private static void logd(String s) {
         if (DEBUG) {
@@ -54,6 +59,7 @@ public class SpatializerHelper {
 
     private final @NonNull AudioSystemAdapter mASA;
     private final @NonNull AudioService mAudioService;
+    private @Nullable SensorManager mSensorManager;
 
     //------------------------------------------------------------
     // Spatializer state machine
@@ -127,7 +133,7 @@ public class SpatializerHelper {
             for (byte level : levels) {
                 logd("found support for level: " + level);
                 if (level == Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_MULTICHANNEL) {
-                    logd("Setting Spatializer to LEVEL_MULTICHANNEL");
+                    logd("Setting capable level to LEVEL_MULTICHANNEL");
                     mCapableSpatLevel = level;
                     break;
                 }
@@ -191,9 +197,16 @@ public class SpatializerHelper {
         public void onLevelChanged(byte level) {
             logd("SpatializerCallback.onLevelChanged level:" + level);
             synchronized (SpatializerHelper.this) {
-                mSpatLevel = level;
+                mSpatLevel = spatializationLevelToSpatializerInt(level);
             }
             // TODO use reported spat level to change state
+
+            // init sensors
+            if (level == SpatializationLevel.NONE) {
+                initSensors(/*init*/false);
+            } else {
+                postInitSensors(true);
+            }
         }
     };
 
@@ -224,7 +237,7 @@ public class SpatializerHelper {
                         + " invalid transform length" + headToStage.length);
                 return;
             }
-            if (DEBUG) {
+            if (DEBUG_MORE) {
                 // 6 values * (4 digits + 1 dot + 2 brackets) = 42 characters
                 StringBuilder t = new StringBuilder(42);
                 for (float val : headToStage) {
@@ -641,36 +654,6 @@ public class SpatializerHelper {
         }
     }
 
-    private int headTrackingModeTypeToSpatializerInt(byte mode) {
-        switch (mode) {
-            case SpatializerHeadTrackingMode.OTHER:
-                return Spatializer.HEAD_TRACKING_MODE_OTHER;
-            case SpatializerHeadTrackingMode.DISABLED:
-                return Spatializer.HEAD_TRACKING_MODE_DISABLED;
-            case SpatializerHeadTrackingMode.RELATIVE_WORLD:
-                return Spatializer.HEAD_TRACKING_MODE_RELATIVE_WORLD;
-            case SpatializerHeadTrackingMode.RELATIVE_SCREEN:
-                return Spatializer.HEAD_TRACKING_MODE_RELATIVE_DEVICE;
-            default:
-                throw(new IllegalArgumentException("Unexpected head tracking mode:" + mode));
-        }
-    }
-
-    private byte spatializerIntToHeadTrackingModeType(int sdkMode) {
-        switch (sdkMode) {
-            case Spatializer.HEAD_TRACKING_MODE_OTHER:
-                return SpatializerHeadTrackingMode.OTHER;
-            case Spatializer.HEAD_TRACKING_MODE_DISABLED:
-                return SpatializerHeadTrackingMode.DISABLED;
-            case Spatializer.HEAD_TRACKING_MODE_RELATIVE_WORLD:
-                return SpatializerHeadTrackingMode.RELATIVE_WORLD;
-            case Spatializer.HEAD_TRACKING_MODE_RELATIVE_DEVICE:
-                return SpatializerHeadTrackingMode.RELATIVE_SCREEN;
-            default:
-                throw(new IllegalArgumentException("Unexpected head tracking mode:" + sdkMode));
-        }
-    }
-
     private boolean checkSpatForHeadTracking(String funcName) {
         switch (mState) {
             case STATE_UNINITIALIZED:
@@ -790,6 +773,103 @@ public class SpatializerHelper {
             mSpat.getParameter(key, value);
         } catch (RemoteException e) {
             Log.e(TAG, "Error in getParameter for key:" + key, e);
+        }
+    }
+
+    //------------------------------------------------------
+    // sensors
+    private void initSensors(boolean init) {
+        if (mSensorManager == null) {
+            mSensorManager = (SensorManager)
+                    mAudioService.mContext.getSystemService(Context.SENSOR_SERVICE);
+        }
+        final int headHandle;
+        final int screenHandle;
+        if (init) {
+            if (mSensorManager == null) {
+                Log.e(TAG, "Null SensorManager, can't init sensors");
+                return;
+            }
+            // TODO replace with dynamic association of sensor for headtracker
+            Sensor headSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
+            headHandle = headSensor.getHandle();
+            //Sensor screenSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+            //screenHandle = deviceSensor.getHandle();
+            screenHandle = -1;
+        } else {
+            // -1 is disable value
+            screenHandle = -1;
+            headHandle = -1;
+        }
+        try {
+            Log.i(TAG, "setScreenSensor:" + screenHandle);
+            mSpat.setScreenSensor(screenHandle);
+        } catch (Exception e) {
+            Log.e(TAG, "Error calling setScreenSensor:" + screenHandle, e);
+        }
+        try {
+            Log.i(TAG, "setHeadSensor:" + headHandle);
+            mSpat.setHeadSensor(headHandle);
+        } catch (Exception e) {
+            Log.e(TAG, "Error calling setHeadSensor:" + headHandle, e);
+        }
+    }
+
+    private void postInitSensors(boolean init) {
+        mAudioService.postInitSpatializerHeadTrackingSensors(init);
+    }
+
+    synchronized void onInitSensors(boolean init) {
+        final int[] modes = getSupportedHeadTrackingModes();
+        if (modes.length == 0) {
+            Log.i(TAG, "not initializing sensors, no headtracking supported");
+            return;
+        }
+        initSensors(init);
+    }
+
+    //------------------------------------------------------
+    // SDK <-> AIDL converters
+    private static int headTrackingModeTypeToSpatializerInt(byte mode) {
+        switch (mode) {
+            case SpatializerHeadTrackingMode.OTHER:
+                return Spatializer.HEAD_TRACKING_MODE_OTHER;
+            case SpatializerHeadTrackingMode.DISABLED:
+                return Spatializer.HEAD_TRACKING_MODE_DISABLED;
+            case SpatializerHeadTrackingMode.RELATIVE_WORLD:
+                return Spatializer.HEAD_TRACKING_MODE_RELATIVE_WORLD;
+            case SpatializerHeadTrackingMode.RELATIVE_SCREEN:
+                return Spatializer.HEAD_TRACKING_MODE_RELATIVE_DEVICE;
+            default:
+                throw(new IllegalArgumentException("Unexpected head tracking mode:" + mode));
+        }
+    }
+
+    private static byte spatializerIntToHeadTrackingModeType(int sdkMode) {
+        switch (sdkMode) {
+            case Spatializer.HEAD_TRACKING_MODE_OTHER:
+                return SpatializerHeadTrackingMode.OTHER;
+            case Spatializer.HEAD_TRACKING_MODE_DISABLED:
+                return SpatializerHeadTrackingMode.DISABLED;
+            case Spatializer.HEAD_TRACKING_MODE_RELATIVE_WORLD:
+                return SpatializerHeadTrackingMode.RELATIVE_WORLD;
+            case Spatializer.HEAD_TRACKING_MODE_RELATIVE_DEVICE:
+                return SpatializerHeadTrackingMode.RELATIVE_SCREEN;
+            default:
+                throw(new IllegalArgumentException("Unexpected head tracking mode:" + sdkMode));
+        }
+    }
+
+    private static int spatializationLevelToSpatializerInt(byte level) {
+        switch (level) {
+            case SpatializationLevel.NONE:
+                return Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
+            case SpatializationLevel.SPATIALIZER_MULTICHANNEL:
+                return Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_MULTICHANNEL;
+            case SpatializationLevel.SPATIALIZER_MCHAN_BED_PLUS_OBJECTS:
+                return Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_MCHAN_BED_PLUS_OBJECTS;
+            default:
+                throw(new IllegalArgumentException("Unexpected spatializer level:" + level));
         }
     }
 }
