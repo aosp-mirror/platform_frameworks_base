@@ -250,10 +250,10 @@ class WindowStateAnimator {
             // away.
             if (mLastHidden && mDrawState != NO_SURFACE && !forceApplyNow) {
                 mPostDrawTransaction.merge(postDrawTransaction);
-                layoutNeeded = true;
             } else {
                 mWin.getSyncTransaction().merge(postDrawTransaction);
             }
+            layoutNeeded = true;
         }
 
         return layoutNeeded;
