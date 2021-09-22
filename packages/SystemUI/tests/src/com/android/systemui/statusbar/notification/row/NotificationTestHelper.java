@@ -72,6 +72,7 @@ import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyViewHolder;
 import com.android.systemui.statusbar.policy.SmartReplyStateInflater;
+import com.android.systemui.statusbar.policy.dagger.RemoteInputViewSubcomponent;
 import com.android.systemui.tests.R;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.systemui.wmshell.BubblesTestActivity;
@@ -479,6 +480,7 @@ public class NotificationTestHelper {
 
         row.initialize(
                 entry,
+                mock(RemoteInputViewSubcomponent.Factory.class),
                 APP_NAME,
                 entry.getKey(),
                 mock(ExpansionLogger.class),

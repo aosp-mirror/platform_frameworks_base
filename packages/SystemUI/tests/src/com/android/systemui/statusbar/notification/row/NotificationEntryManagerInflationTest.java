@@ -87,6 +87,7 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyViewHolder;
 import com.android.systemui.statusbar.policy.SmartReplyStateInflater;
+import com.android.systemui.statusbar.policy.dagger.RemoteInputViewSubcomponent;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -251,6 +252,7 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                         new ExpandableNotificationRowController(
                                 viewCaptor.getValue(),
                                 mListContainer,
+                                mock(RemoteInputViewSubcomponent.Factory.class),
                                 mock(ActivatableNotificationViewController.class),
                                 mNotificationMediaManager,
                                 mock(PluginManager.class),
