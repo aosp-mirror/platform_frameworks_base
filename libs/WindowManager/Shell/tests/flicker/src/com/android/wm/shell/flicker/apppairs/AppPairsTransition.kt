@@ -38,6 +38,7 @@ import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
+import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.wm.shell.flicker.helpers.AppPairsHelper
 import com.android.wm.shell.flicker.helpers.BaseAppHelper
 import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.getDevEnableNonResizableMultiWindow
@@ -55,7 +56,7 @@ abstract class AppPairsTransition(protected val testSpec: FlickerTestParameter) 
     protected val activityHelper = ActivityHelper.getInstance()
     protected val appPairsHelper = AppPairsHelper(instrumentation,
         Components.SplitScreenActivity.LABEL,
-        Components.SplitScreenActivity.COMPONENT)
+        Components.SplitScreenActivity.COMPONENT.toFlickerComponent())
 
     protected val primaryApp = SplitScreenHelper.getPrimary(instrumentation)
     protected val secondaryApp = SplitScreenHelper.getSecondary(instrumentation)

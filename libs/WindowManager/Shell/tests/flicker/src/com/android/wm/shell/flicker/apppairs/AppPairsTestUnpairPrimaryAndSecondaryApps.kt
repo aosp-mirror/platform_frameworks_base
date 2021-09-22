@@ -81,8 +81,8 @@ class AppPairsTestUnpairPrimaryAndSecondaryApps(
     @Test
     fun bothAppWindowsInvisible() {
         testSpec.assertWmEnd {
-            isInvisible(primaryApp.component)
-            isInvisible(secondaryApp.component)
+            isAppWindowInvisible(primaryApp.component)
+            isAppWindowInvisible(secondaryApp.component)
         }
     }
 

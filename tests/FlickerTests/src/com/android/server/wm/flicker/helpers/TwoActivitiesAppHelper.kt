@@ -17,19 +17,21 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
-import android.content.ComponentName
 import android.support.test.launcherhelper.ILauncherStrategy
 import android.support.test.launcherhelper.LauncherStrategyFactory
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.testapp.ActivityOptions
+import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 
 class TwoActivitiesAppHelper @JvmOverloads constructor(
     instr: Instrumentation,
     launcherName: String = ActivityOptions.BUTTON_ACTIVITY_LAUNCHER_NAME,
-    component: ComponentName = ActivityOptions.BUTTON_ACTIVITY_COMPONENT_NAME,
+    component: FlickerComponentName =
+        ActivityOptions.BUTTON_ACTIVITY_COMPONENT_NAME.toFlickerComponent(),
     launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
         .getInstance(instr)
         .launcherStrategy

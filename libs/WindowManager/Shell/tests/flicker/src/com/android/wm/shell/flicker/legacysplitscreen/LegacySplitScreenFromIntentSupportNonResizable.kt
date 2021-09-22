@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
-import android.content.ComponentName
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
@@ -26,7 +25,7 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group2
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.launchSplitScreen
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+import com.android.server.wm.traces.common.FlickerComponentName
 import com.android.wm.shell.flicker.DOCKED_STACK_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.dockedStackDividerIsVisibleAtEnd
 import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.resetMultiWindowConfig
@@ -69,11 +68,11 @@ class LegacySplitScreenFromIntentSupportNonResizable(
             }
         }
 
-    override val ignoredWindows: List<ComponentName>
+    override val ignoredWindows: List<FlickerComponentName>
         get() = listOf(DOCKED_STACK_DIVIDER_COMPONENT, LAUNCHER_COMPONENT, LETTERBOX_COMPONENT,
             nonResizeableApp.component, splitScreenApp.component,
-            WindowManagerStateHelper.SPLASH_SCREEN_COMPONENT,
-            WindowManagerStateHelper.SNAPSHOT_COMPONENT)
+            FlickerComponentName.SPLASH_SCREEN,
+            FlickerComponentName.SNAPSHOT)
 
     @Before
     override fun setup() {
@@ -110,13 +109,12 @@ class LegacySplitScreenFromIntentSupportNonResizable(
                     .then()
                     // we log once per frame, upon logging, window may be visible or not depending
                     // on what was processed until that moment. Both behaviors are correct
-                    .isAppWindowInvisible(nonResizeableApp.component,
-                            ignoreActivity = true, isOptional = true)
+                    .isAppWindowInvisible(nonResizeableApp.component, isOptional = true)
                     .then()
                     // immediately after the window (after onResume and before perform relayout)
                     // the activity is invisible. This may or not be logged, since we record 1x
                     // per frame, thus ignore activity check here
-                    .isAppWindowVisible(nonResizeableApp.component, ignoreActivity = true)
+                    .isAppWindowVisible(nonResizeableApp.component)
         }
     }
 
@@ -128,8 +126,8 @@ class LegacySplitScreenFromIntentSupportNonResizable(
     @Test
     fun bothAppsWindowsAreVisibleAtEnd() {
         testSpec.assertWmEnd {
-            isVisible(splitScreenApp.component)
-            isVisible(nonResizeableApp.component)
+            isAppWindowVisible(splitScreenApp.component)
+            isAppWindowVisible(nonResizeableApp.component)
         }
     }
 
