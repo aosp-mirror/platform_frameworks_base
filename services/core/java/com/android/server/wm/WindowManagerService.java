@@ -3459,8 +3459,6 @@ public class WindowManagerService extends IWindowManager.Stub
             // Notify whether the root docked task exists for the current user
             final DisplayContent displayContent = getDefaultDisplayContentLocked();
 
-            mRoot.forAllDisplays(dc -> dc.mAppTransition.setCurrentUser(newUserId));
-
             // If the display is already prepared, update the density.
             // Otherwise, we'll update it when it's prepared.
             if (mDisplayReady) {
