@@ -27,7 +27,6 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group2
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
@@ -133,12 +132,10 @@ class ResizeLegacySplitScreen(
     fun entireScreenCovered() = testSpec.entireScreenCovered()
 
     @Test
-    fun navBarLayerRotatesAndScales() =
-        testSpec.navBarLayerRotatesAndScales(testSpec.config.endRotation)
+    fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
 
     @Test
-    fun statusBarLayerRotatesScales() =
-        testSpec.statusBarLayerRotatesScales(testSpec.config.endRotation)
+    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
     @Test
     fun topAppLayerIsAlwaysVisible() {

@@ -111,8 +111,7 @@ class EnterPipToOtherOrientationTest(
      */
     @FlakyTest
     @Test
-    override fun navBarLayerRotatesAndScales() =
-        testSpec.navBarLayerRotatesAndScales(Surface.ROTATION_90, Surface.ROTATION_0)
+    override fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
 
     /**
      * Checks that the [FlickerComponentName.STATUS_BAR] has the correct position at
@@ -120,8 +119,7 @@ class EnterPipToOtherOrientationTest(
      */
     @Presubmit
     @Test
-    override fun statusBarLayerRotatesScales() =
-        testSpec.statusBarLayerRotatesScales(Surface.ROTATION_90, Surface.ROTATION_0)
+    override fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
     /**
      * Checks that all parts of the screen are covered at the start and end of the transition
@@ -150,7 +148,7 @@ class EnterPipToOtherOrientationTest(
     @Test
     fun testAppWindowInvisibleOnStart() {
         testSpec.assertWmStart {
-            isInvisible(testApp.component)
+            isAppWindowInvisible(testApp.component)
         }
     }
 
@@ -161,7 +159,7 @@ class EnterPipToOtherOrientationTest(
     @Test
     fun testAppWindowVisibleOnEnd() {
         testSpec.assertWmEnd {
-            isVisible(testApp.component)
+            isAppWindowVisible(testApp.component)
         }
     }
 

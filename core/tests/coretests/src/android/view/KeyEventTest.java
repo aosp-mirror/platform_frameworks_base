@@ -22,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 import android.os.Parcel;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -34,6 +35,7 @@ import java.util.Set;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@Presubmit
 public class KeyEventTest {
 
     private static final int DOWN_TIME = 50;

@@ -313,11 +313,7 @@ public class InputShellCommand extends ShellCommand {
 
         injectKeyEvent(event);
         if (longpress) {
-            try {
-                Thread.sleep(ViewConfiguration.getLongPressTimeout());
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            sleep(ViewConfiguration.getLongPressTimeout());
             // Some long press behavior would check the event time, we set a new event time here.
             final long nextEventTime = now + ViewConfiguration.getLongPressTimeout();
             injectKeyEvent(KeyEvent.changeTimeRepeat(event, nextEventTime, 1 /* repeatCount */,
@@ -328,11 +324,7 @@ public class InputShellCommand extends ShellCommand {
 
     private void sendKeyDoubleTap(int inputSource, int keyCode, int displayId) {
         sendKeyEvent(inputSource, keyCode, false, displayId);
-        try {
-            Thread.sleep(ViewConfiguration.getDoubleTapMinTime());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        sleep(ViewConfiguration.getDoubleTapMinTime());
         sendKeyEvent(inputSource, keyCode, false, displayId);
     }
 
@@ -376,11 +368,7 @@ public class InputShellCommand extends ShellCommand {
                 displayId);
         if (isDragDrop) {
             // long press until drag start.
-            try {
-                Thread.sleep(ViewConfiguration.getLongPressTimeout());
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            sleep(ViewConfiguration.getLongPressTimeout());
         }
         long now = SystemClock.uptimeMillis();
         final long endTime = down + duration;
@@ -513,14 +501,23 @@ public class InputShellCommand extends ShellCommand {
             injectKeyEventAsync(event);
         }
 
-        try {
-            Thread.sleep(ViewConfiguration.getTapTimeout());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        sleep(ViewConfiguration.getTapTimeout());
 
         for (KeyEvent event: events) {
             injectKeyEventAsync(KeyEvent.changeAction(event, KeyEvent.ACTION_UP));
+        }
+    }
+
+    /**
+     * Puts the thread to sleep for the provided time.
+     *
+     * @param milliseconds The time to sleep in milliseconds.
+     */
+    private void sleep(int milliseconds) {
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 }

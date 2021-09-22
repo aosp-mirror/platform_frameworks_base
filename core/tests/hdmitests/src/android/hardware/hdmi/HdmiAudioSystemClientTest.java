@@ -376,6 +376,17 @@ public class HdmiAudioSystemClientTest {
         }
 
         @Override
+        public int getMessageHistorySize() {
+            return 0;
+        }
+
+        @Override
+        public boolean setMessageHistorySize(int newSize) {
+            return true;
+        }
+
+
+        @Override
         public List<String> getUserCecSettings() {
             return new ArrayList<>();
         }

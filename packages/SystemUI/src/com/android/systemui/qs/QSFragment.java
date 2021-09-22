@@ -238,6 +238,11 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                     mQSPanelController.getMediaHost().getHostView().setAlpha(1.0f);
                     mQSAnimator.requestAnimatorUpdate();
                 });
+
+        mQsDragHandler.setOnClickListener(v -> {
+            Log.d(TAG, "drag handler clicked");
+            mCommandQueue.animateExpandSettingsPanel(null);
+        });
     }
 
     @Override

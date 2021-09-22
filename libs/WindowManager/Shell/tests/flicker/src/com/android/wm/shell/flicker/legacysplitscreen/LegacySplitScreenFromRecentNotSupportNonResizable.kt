@@ -115,12 +115,12 @@ class LegacySplitScreenFromRecentNotSupportNonResizable(
             // when the activity gets PAUSED the window may still be marked as visible
             // it will be updated in the next log entry. This occurs because we record 1x
             // per frame, thus ignore activity check here
-            this.isAppWindowVisible(splitScreenApp.component, ignoreActivity = true)
+            this.isAppWindowVisible(splitScreenApp.component)
                     .then()
                     // immediately after the window (after onResume and before perform relayout)
                     // the activity is invisible. This may or not be logged, since we record 1x
                     // per frame, thus ignore activity check here
-                    .isAppWindowInvisible(splitScreenApp.component, ignoreActivity = true)
+                    .isAppWindowInvisible(splitScreenApp.component)
         }
     }
 
@@ -142,8 +142,8 @@ class LegacySplitScreenFromRecentNotSupportNonResizable(
     @Test
     fun onlyNonResizableAppWindowIsVisibleAtEnd() {
         testSpec.assertWmEnd {
-            isInvisible(splitScreenApp.component)
-            isVisible(nonResizeableApp.component)
+            isAppWindowInvisible(splitScreenApp.component)
+            isAppWindowVisible(nonResizeableApp.component)
         }
     }
 

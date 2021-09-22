@@ -445,4 +445,8 @@ interface IAudioService {
     oneway void setSpatializerGlobalTransform(in float[] transform);
 
     oneway void recenterHeadTracker();
+
+    void setSpatializerParameter(int key, in byte[] value);
+
+    void getSpatializerParameter(int key, inout byte[] value);
 }

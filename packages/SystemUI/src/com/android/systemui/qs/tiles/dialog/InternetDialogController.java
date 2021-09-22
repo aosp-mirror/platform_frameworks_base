@@ -370,9 +370,12 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
                 drawable = shared.get();
             }
 
-            drawable.setTint(activeNetworkIsCellular() ? mContext.getColor(
-                    R.color.connected_network_primary_color) : Utils.getColorAttrDefaultColor(
-                    mContext, android.R.attr.textColorTertiary));
+            int tintColor = Utils.getColorAttrDefaultColor(mContext,
+                    android.R.attr.textColorTertiary);
+            if (activeNetworkIsCellular() || isCarrierNetworkActive()) {
+                tintColor = mContext.getColor(R.color.connected_network_primary_color);
+            }
+            drawable.setTint(tintColor);
         } catch (Throwable e) {
             e.printStackTrace();
         }
@@ -533,9 +536,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         }
 
         int resId = mapIconSets(config).get(iconKey).dataContentDescription;
-        final MergedCarrierEntry mergedCarrierEntry =
-                mAccessPointController.getMergedCarrierEntry();
-        if (mergedCarrierEntry != null && mergedCarrierEntry.isDefaultNetwork()) {
+        if (isCarrierNetworkActive()) {
             SignalIcon.MobileIconGroup carrierMergedWifiIconGroup =
                     TelephonyIcons.CARRIER_MERGED_WIFI;
             resId = carrierMergedWifiIconGroup.dataContentDescription;
@@ -554,7 +555,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
             return context.getString(R.string.mobile_data_no_connection);
         }
         String summary = networkTypeDescription;
-        if (activeNetworkIsCellular()) {
+        if (activeNetworkIsCellular() || isCarrierNetworkActive()) {
             summary = context.getString(R.string.preference_summary_default_combination,
                     context.getString(R.string.mobile_data_connection_active),
                     networkTypeDescription);
@@ -581,6 +582,12 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         if (mergedCarrierEntry != null && mergedCarrierEntry.canConnect()) {
             mergedCarrierEntry.connect(null /* ConnectCallback */);
         }
+    }
+
+    boolean isCarrierNetworkActive() {
+        final MergedCarrierEntry mergedCarrierEntry =
+                mAccessPointController.getMergedCarrierEntry();
+        return mergedCarrierEntry != null && mergedCarrierEntry.isDefaultNetwork();
     }
 
     WifiManager getWifiManager() {
