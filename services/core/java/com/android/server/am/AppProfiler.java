@@ -1033,6 +1033,7 @@ public class AppProfiler {
                     mService.setProcessTrackerStateLOSP(app, trackerMemFactor, now);
                     state.setProcStateChanged(false);
                 }
+                trimMemoryUiHiddenIfNecessaryLSP(app);
                 if (curProcState >= ActivityManager.PROCESS_STATE_HOME && !app.isKilledByAm()) {
                     if (trimMemoryLevel < curLevel[0] && (thread = app.getThread()) != null) {
                         try {
@@ -1075,24 +1076,6 @@ public class AppProfiler {
                     }
                     profile.setTrimMemoryLevel(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND);
                 } else {
-                    if ((curProcState >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
-                                || state.isSystemNoUi()) && profile.hasPendingUiClean()) {
-                        // If this application is now in the background and it
-                        // had done UI, then give it the special trim level to
-                        // have it free UI resources.
-                        final int level = ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN;
-                        if (trimMemoryLevel < level && (thread = app.getThread()) != null) {
-                            try {
-                                if (DEBUG_SWITCH || DEBUG_OOM_ADJ) {
-                                    Slog.v(TAG_OOM_ADJ, "Trimming memory of bg-ui "
-                                            + app.processName + " to " + level);
-                                }
-                                thread.scheduleTrimMemory(level);
-                            } catch (RemoteException e) {
-                            }
-                        }
-                        profile.setPendingUiClean(false);
-                    }
                     if (trimMemoryLevel < fgTrimLevel && (thread = app.getThread()) != null) {
                         try {
                             if (DEBUG_SWITCH || DEBUG_OOM_ADJ) {
@@ -1119,26 +1102,34 @@ public class AppProfiler {
                     mService.setProcessTrackerStateLOSP(app, trackerMemFactor, now);
                     state.setProcStateChanged(false);
                 }
-                if ((state.getCurProcState() >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
-                            || state.isSystemNoUi()) && profile.hasPendingUiClean()) {
-                    if (profile.getTrimMemoryLevel() < ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN
-                            && (thread = app.getThread()) != null) {
-                        try {
-                            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) {
-                                Slog.v(TAG_OOM_ADJ,
-                                        "Trimming memory of ui hidden " + app.processName
-                                        + " to " + ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
-                            }
-                            thread.scheduleTrimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
-                        } catch (RemoteException e) {
-                        }
-                    }
-                    profile.setPendingUiClean(false);
-                }
+                trimMemoryUiHiddenIfNecessaryLSP(app);
                 profile.setTrimMemoryLevel(0);
             });
         }
         return allChanged;
+    }
+
+    @GuardedBy({"mService", "mProcLock"})
+    private void trimMemoryUiHiddenIfNecessaryLSP(ProcessRecord app) {
+        if ((app.mState.getCurProcState() >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
+                || app.mState.isSystemNoUi()) && app.mProfile.hasPendingUiClean()) {
+            // If this application is now in the background and it
+            // had done UI, then give it the special trim level to
+            // have it free UI resources.
+            final int level = ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN;
+            IApplicationThread thread;
+            if (app.mProfile.getTrimMemoryLevel() < level && (thread = app.getThread()) != null) {
+                try {
+                    if (DEBUG_SWITCH || DEBUG_OOM_ADJ) {
+                        Slog.v(TAG_OOM_ADJ, "Trimming memory of bg-ui "
+                                + app.processName + " to " + level);
+                    }
+                    thread.scheduleTrimMemory(level);
+                } catch (RemoteException e) {
+                }
+            }
+            app.mProfile.setPendingUiClean(false);
+        }
     }
 
     @GuardedBy("mProcLock")
