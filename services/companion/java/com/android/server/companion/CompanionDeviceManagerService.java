@@ -177,6 +177,7 @@ public class CompanionDeviceManagerService extends SystemService {
             new BluetoothDeviceConnectedListener();
     private BleStateBroadcastReceiver mBleStateBroadcastReceiver = new BleStateBroadcastReceiver();
     private List<String> mCurrentlyConnectedDevices = new ArrayList<>();
+    Set<Integer> mPresentSelfManagedDevices = new HashSet<>();
     private ArrayMap<String, Date> mDevicesLastNearby = new ArrayMap<>();
     private UnbindDeviceListenersRunnable
             mUnbindDeviceListenersRunnable = new UnbindDeviceListenersRunnable();
@@ -217,7 +218,7 @@ public class CompanionDeviceManagerService extends SystemService {
         mPermissionControllerManager = requireNonNull(
                 context.getSystemService(PermissionControllerManager.class));
         mUserManager = context.getSystemService(UserManager.class);
-        mCompanionDevicePresenceController = new CompanionDevicePresenceController();
+        mCompanionDevicePresenceController = new CompanionDevicePresenceController(this);
         mAssociationRequestsProcessor = new AssociationRequestsProcessor(this);
 
         registerPackageMonitor();
@@ -555,6 +556,57 @@ public class CompanionDeviceManagerService extends SystemService {
             //TODO: b/199427116
         }
 
+        @Override
+        public void notifyDeviceAppeared(int associationId) {
+            final AssociationInfo association = getAssociationWithCallerChecks(associationId);
+            if (association == null) {
+                throw new IllegalArgumentException("Association with ID " + associationId + " "
+                        + "does not exist "
+                        + "or belongs to a different package "
+                        + "or belongs to a different user");
+            }
+
+            if (!association.isSelfManaged()) {
+                throw new IllegalArgumentException("Association with ID " + associationId
+                        + " is not self-managed. notifyDeviceAppeared(int) can only be called for"
+                        + " self-managed associations.");
+            }
+
+            if (!mPresentSelfManagedDevices.add(associationId)) {
+                Slog.w(LOG_TAG, "Association with ID " + associationId + " is already present");
+                return;
+            }
+
+            mCompanionDevicePresenceController.onDeviceNotifyAppeared(
+                    association, getContext(), mMainHandler);
+        }
+
+        @Override
+        public void notifyDeviceDisappeared(int associationId) {
+            final AssociationInfo association = getAssociationWithCallerChecks(associationId);
+            if (association == null) {
+                throw new IllegalArgumentException("Association with ID " + associationId + " "
+                        + "does not exist "
+                        + "or belongs to a different package "
+                        + "or belongs to a different user");
+            }
+
+            if (!association.isSelfManaged()) {
+                throw new IllegalArgumentException("Association with ID " + associationId
+                        + " is not self-managed. notifyDeviceAppeared(int) can only be called for"
+                        + " self-managed associations.");
+            }
+
+            if (!mPresentSelfManagedDevices.contains(associationId)) {
+                Slog.w(LOG_TAG, "Association with ID " + associationId + " is not connected");
+                return;
+            }
+
+            mPresentSelfManagedDevices.remove(associationId);
+            mCompanionDevicePresenceController.onDeviceNotifyDisappearedAndUnbind(
+                    association, getContext(), mMainHandler);
+        }
+
         private void registerDevicePresenceListenerActive(String packageName, String deviceAddress,
                 boolean active) throws RemoteException {
             getContext().enforceCallingOrSelfPermission(
@@ -645,9 +697,16 @@ public class CompanionDeviceManagerService extends SystemService {
                 }
 
             }
+
             fout.append("Currently Connected Devices:").append('\n');
             for (int i = 0, size = mCurrentlyConnectedDevices.size(); i < size; i++) {
                 fout.append("  ").append(mCurrentlyConnectedDevices.get(i)).append('\n');
+            }
+
+            fout.append("Currently SelfManaged Connected Devices associationId:").append('\n');
+            for (Integer associationId : mPresentSelfManagedDevices) {
+                fout.append("  ").append("AssociationId:  ").append(
+                        String.valueOf(associationId)).append('\n');
             }
 
             fout.append("Devices Last Nearby:").append('\n');
@@ -774,7 +833,9 @@ public class CompanionDeviceManagerService extends SystemService {
     }
 
     void onAssociationPreRemove(AssociationInfo association) {
-        if (association.isNotifyOnDeviceNearby()) {
+        if (association.isNotifyOnDeviceNearby()
+                || (association.isSelfManaged()
+                && mPresentSelfManagedDevices.contains(association.getId()))) {
             mCompanionDevicePresenceController.unbindDevicePresenceListener(
                     association.getPackageName(), association.getUserId());
         }
