@@ -157,6 +157,9 @@ public class ComponentAliasResolver {
      */
     public void update(String overrides) {
         synchronized (mLock) {
+            if (mPlatformCompat == null) {
+                return; // System not ready.
+            }
             final boolean enabled = mPlatformCompat.isChangeEnabledByPackageName(
                     USE_EXPERIMENTAL_COMPONENT_ALIAS, "android", UserHandle.USER_SYSTEM);
             if (enabled != mEnabled) {
