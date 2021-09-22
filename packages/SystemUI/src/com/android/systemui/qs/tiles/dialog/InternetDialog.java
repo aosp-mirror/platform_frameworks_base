@@ -303,7 +303,8 @@ public class InternetDialog extends SystemUIDialog implements
             mInternetDialogSubTitle.setText(getSubtitleText());
         }
         updateEthernet();
-        setMobileDataLayout(mInternetDialogController.activeNetworkIsCellular());
+        setMobileDataLayout(mInternetDialogController.activeNetworkIsCellular()
+                || mInternetDialogController.isCarrierNetworkActive());
 
         if (!mCanConfigWifi) {
             return;
@@ -355,7 +356,7 @@ public class InternetDialog extends SystemUIDialog implements
                 mInternetDialogController.hasEthernet() ? View.VISIBLE : View.GONE);
     }
 
-    private void setMobileDataLayout(boolean isCellularNetwork) {
+    private void setMobileDataLayout(boolean isCarrierNetworkConnected) {
         if (mInternetDialogController.isAirplaneModeEnabled()
                 || !mInternetDialogController.hasCarrier()) {
             mMobileNetworkLayout.setVisibility(View.GONE);
@@ -371,13 +372,13 @@ public class InternetDialog extends SystemUIDialog implements
                 mMobileSummaryText.setVisibility(View.GONE);
             }
             mSignalIcon.setImageDrawable(getSignalStrengthDrawable());
-            mMobileTitleText.setTextAppearance(isCellularNetwork
+            mMobileTitleText.setTextAppearance(isCarrierNetworkConnected
                     ? R.style.TextAppearance_InternetDialog_Active
                     : R.style.TextAppearance_InternetDialog);
-            mMobileSummaryText.setTextAppearance(isCellularNetwork
+            mMobileSummaryText.setTextAppearance(isCarrierNetworkConnected
                     ? R.style.TextAppearance_InternetDialog_Secondary_Active
                     : R.style.TextAppearance_InternetDialog_Secondary);
-            mMobileNetworkLayout.setBackground(isCellularNetwork ? mBackgroundOn : null);
+            mMobileNetworkLayout.setBackground(isCarrierNetworkConnected ? mBackgroundOn : null);
 
             mMobileDataToggle.setVisibility(mCanConfigMobileData ? View.VISIBLE : View.INVISIBLE);
         }
