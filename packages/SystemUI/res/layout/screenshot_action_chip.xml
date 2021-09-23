@@ -16,7 +16,7 @@
   -->
 <com.android.systemui.screenshot.ScreenshotActionChip
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/global_screenshot_action_chip"
+    android:id="@+id/screenshot_action_chip"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginStart="@dimen/screenshot_action_chip_margin_start"

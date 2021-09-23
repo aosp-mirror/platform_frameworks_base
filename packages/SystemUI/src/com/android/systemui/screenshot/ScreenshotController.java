@@ -452,7 +452,7 @@ public class ScreenshotController {
 
         // Inflate the screenshot layout
         mScreenshotView = (ScreenshotView)
-                LayoutInflater.from(mContext).inflate(R.layout.global_screenshot, null);
+                LayoutInflater.from(mContext).inflate(R.layout.screenshot, null);
         mScreenshotView.init(mUiEventLogger, new ScreenshotView.ScreenshotViewCallback() {
             @Override
             public void onUserInteraction() {
