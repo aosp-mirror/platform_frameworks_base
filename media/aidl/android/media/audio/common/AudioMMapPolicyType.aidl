@@ -26,10 +26,10 @@ enum AudioMMapPolicyType {
      * Default aaudio mmap policy. It is used to query whether the
      * aaudio MMAP could be used or not.
      */
-    DEFAULT    = 1,
+    DEFAULT = 1,
     /**
      * Exclusive aaudio mmap policy. It is used to query whether the
      * aaudio MMAP could be used in exclusive mode or not.
      */
-    EXCLUSIVE  = 2,
+    EXCLUSIVE = 2,
 }

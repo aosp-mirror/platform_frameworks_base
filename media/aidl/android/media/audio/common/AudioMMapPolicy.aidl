@@ -29,13 +29,13 @@ enum AudioMMapPolicy {
     /**
      * The MMAP feature is disabled and never used.
      */
-    NEVER       = 1,
+    NEVER = 1,
     /**
      * If MMAP feature works then uses it. Otherwise, fall back to something else.
      */
-    AUTO        = 2,
+    AUTO = 2,
     /**
      * The MMAP feature must be used. If not available then fail.
      */
-    ALWAYS      = 3,
+    ALWAYS = 3,
 }
