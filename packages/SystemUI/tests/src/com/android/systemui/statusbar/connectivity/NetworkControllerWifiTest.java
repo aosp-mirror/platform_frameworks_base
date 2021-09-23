@@ -1,10 +1,25 @@
-package com.android.systemui.statusbar.policy;
+/*
+ * Copyright (C) 2021 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.systemui.statusbar.connectivity;
 
 import static junit.framework.Assert.assertEquals;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -21,7 +36,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.settingslib.mobile.TelephonyIcons;
-import com.android.systemui.statusbar.policy.NetworkController.WifiIndicators;
+import com.android.systemui.statusbar.connectivity.NetworkController.WifiIndicators;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -165,7 +180,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    public void testWifiIconDisconnectedViaCallback(){
+    public void testWifiIconDisconnectedViaCallback() {
         // Setup normal connection
         String testSsid = "Test SSID";
         int testLevel = 2;
@@ -183,7 +198,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    public void testVpnWithUnderlyingWifi(){
+    public void testVpnWithUnderlyingWifi() {
         String testSsid = "Test SSID";
         int testLevel = 2;
         setWifiEnabled(true);
@@ -299,7 +314,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
 
     protected void setWifiLevel(int level) {
         float amountPerLevel = (MAX_RSSI - MIN_RSSI) / (WifiIcons.WIFI_LEVEL_COUNT - 1);
-        int rssi = (int)(MIN_RSSI + level * amountPerLevel);
+        int rssi = (int) (MIN_RSSI + level * amountPerLevel);
         // Put RSSI in the middle of the range.
         rssi += amountPerLevel / 2;
         when(mWifiInfo.getRssi()).thenReturn(rssi);
