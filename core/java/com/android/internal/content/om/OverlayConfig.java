@@ -23,6 +23,7 @@ import android.content.pm.parsing.ParsingPackageRead;
 import android.os.Build;
 import android.os.Trace;
 import android.util.ArrayMap;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -32,6 +33,7 @@ import com.android.internal.content.om.OverlayScanner.ParsedOverlayInfo;
 import com.android.internal.util.Preconditions;
 
 import java.io.File;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -395,6 +397,25 @@ public class OverlayConfig {
         }
 
         return idmapPaths.toArray(new String[0]);
+    }
+
+    /** Dump all overlay configurations to the Printer. */
+    public void dump(@NonNull PrintWriter writer) {
+        final IndentingPrintWriter ipw = new IndentingPrintWriter(writer);
+        ipw.println("Overlay configurations:");
+        ipw.increaseIndent();
+
+        final ArrayList<Configuration> configurations = new ArrayList<>(mConfigurations.values());
+        configurations.sort(Comparator.comparingInt(o -> o.configIndex));
+        for (int i = 0; i < configurations.size(); i++) {
+            final Configuration configuration = configurations.get(i);
+            ipw.print(configuration.configIndex);
+            ipw.print(", ");
+            ipw.print(configuration.parsedConfig);
+            ipw.println();
+        }
+        ipw.decreaseIndent();
+        ipw.println();
     }
 
     /**
