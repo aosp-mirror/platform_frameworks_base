@@ -98,8 +98,6 @@ import android.os.ShellCommand;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.permission.PermissionControllerManager;
-import android.provider.Settings;
-import android.provider.SettingsStringUtil.ComponentNameSet;
 import android.text.BidiFormatter;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -630,6 +628,12 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                 String packageName, String deviceAddress)
                 throws RemoteException {
             registerDevicePresenceListenerActive(packageName, deviceAddress, false);
+        }
+
+        @Override
+        public void receiveMessage(int messageId, int associationId, byte[] message)
+                throws RemoteException {
+            //TODO: b/199427116
         }
 
         private void registerDevicePresenceListenerActive(String packageName, String deviceAddress,

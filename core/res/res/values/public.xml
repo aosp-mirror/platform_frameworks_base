@@ -2905,6 +2905,7 @@
     <public type="attr" name="usesNonSdkApi" id="0x0101058e" />
     <public type="attr" name="nonInteractiveUiTimeout" id="0x0101058f" />
     <public type="attr" name="isLightTheme" id="0x01010590" />
+    <!-- {@deprecated Use requiredSplitTypes instead.} -->
     <public type="attr" name="isSplitRequired" id="0x01010591" />
     <public type="attr" name="textLocale" id="0x01010592" />
     <public type="attr" name="settingsSliceUri" id="0x01010593" />

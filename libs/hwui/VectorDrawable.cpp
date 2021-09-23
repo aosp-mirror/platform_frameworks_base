@@ -269,7 +269,7 @@ void FullPath::FullPathProperties::setPropertyValue(int propertyId, float value)
 
 void ClipPath::draw(SkCanvas* outCanvas, bool useStagingData) {
     SkPath tempStagingPath;
-    outCanvas->clipPath(getUpdatedPath(useStagingData, &tempStagingPath));
+    outCanvas->clipPath(getUpdatedPath(useStagingData, &tempStagingPath), true);
 }
 
 Group::Group(const Group& group) : Node(group) {

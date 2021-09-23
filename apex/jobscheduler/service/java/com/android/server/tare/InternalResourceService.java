@@ -83,6 +83,8 @@ public class InternalResourceService extends SystemService {
     static final long UNUSED_RECLAMATION_PERIOD_MS = 24 * HOUR_IN_MILLIS;
     /** How much of an app's unused wealth should be reclaimed periodically. */
     private static final float DEFAULT_UNUSED_RECLAMATION_PERCENTAGE = .1f;
+    /** The amount of time to delay reclamation by after boot. */
+    private static final long RECLAMATION_STARTUP_DELAY_MS = 30_000L;
     private static final int PACKAGE_QUERY_FLAGS =
             PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                     | PackageManager.MATCH_APEX;
@@ -99,6 +101,7 @@ public class InternalResourceService extends SystemService {
     private final CompleteEconomicPolicy mCompleteEconomicPolicy;
     private final ConfigObserver mConfigObserver;
     private final EconomyManagerStub mEconomyManagerStub;
+    private final Scribe mScribe;
 
     @NonNull
     @GuardedBy("mLock")
@@ -117,9 +120,6 @@ public class InternalResourceService extends SystemService {
     // In the range [0,100] to represent 0% to 100% battery.
     @GuardedBy("mLock")
     private int mCurrentBatteryLevel;
-    // TODO: load from disk
-    @GuardedBy("mLock")
-    private long mLastUnusedReclamationTime;
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Nullable
@@ -187,7 +187,7 @@ public class InternalResourceService extends SystemService {
                 public void onAlarm() {
                     synchronized (mLock) {
                         mAgent.reclaimUnusedAssetsLocked(DEFAULT_UNUSED_RECLAMATION_PERCENTAGE);
-                        mLastUnusedReclamationTime = getCurrentTimeMillis();
+                        mScribe.setLastReclamationTimeLocked(getCurrentTimeMillis());
                         scheduleUnusedWealthReclamationLocked();
                     }
                 }
@@ -216,6 +216,7 @@ public class InternalResourceService extends SystemService {
         mPackageManager = context.getPackageManager();
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mEconomyManagerStub = new EconomyManagerStub();
+        mScribe = new Scribe(this);
         mCompleteEconomicPolicy = new CompleteEconomicPolicy(this);
         mAgent = new Agent(this, mCompleteEconomicPolicy);
 
@@ -451,8 +452,8 @@ public class InternalResourceService extends SystemService {
     @GuardedBy("mLock")
     private void scheduleUnusedWealthReclamationLocked() {
         final long now = getCurrentTimeMillis();
-        final long nextReclamationTime =
-                Math.max(mLastUnusedReclamationTime + UNUSED_RECLAMATION_PERIOD_MS, now + 30_000);
+        final long nextReclamationTime = Math.max(now + RECLAMATION_STARTUP_DELAY_MS,
+                mScribe.getLastReclamationTimeLocked() + UNUSED_RECLAMATION_PERIOD_MS);
         mHandler.post(() -> {
             // Never call out to AlarmManager with the lock held. This sits below AM.
             AlarmManager alarmManager = getContext().getSystemService(AlarmManager.class);
@@ -463,7 +464,7 @@ public class InternalResourceService extends SystemService {
                         ALARM_TAG_WEALTH_RECLAMATION, mUnusedWealthReclamationListener, mHandler);
             } else {
                 mHandler.sendEmptyMessageDelayed(
-                        MSG_SCHEDULE_UNUSED_WEALTH_RECLAMATION_EVENT, 30_000);
+                        MSG_SCHEDULE_UNUSED_WEALTH_RECLAMATION_EVENT, RECLAMATION_STARTUP_DELAY_MS);
             }
         });
     }
@@ -531,6 +532,7 @@ public class InternalResourceService extends SystemService {
             if (isFirstSetup) {
                 mAgent.grantBirthrightsLocked();
             }
+            scheduleUnusedWealthReclamationLocked();
         }
     }
 
@@ -542,7 +544,6 @@ public class InternalResourceService extends SystemService {
             registerListeners();
             mCurrentBatteryLevel = getCurrentBatteryLevel();
             mHandler.post(this::setupHeavyWork);
-            scheduleUnusedWealthReclamationLocked();
             mCompleteEconomicPolicy.setup();
         }
     }
@@ -562,6 +563,7 @@ public class InternalResourceService extends SystemService {
                 }
             });
             mPkgCache.clear();
+            mScribe.tearDownLocked();
             mUidToPackageCache.clear();
             getContext().unregisterReceiver(mBroadcastReceiver);
             UsageStatsManagerInternal usmi =

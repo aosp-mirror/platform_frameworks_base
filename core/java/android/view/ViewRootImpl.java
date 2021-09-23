@@ -312,6 +312,9 @@ public final class ViewRootImpl implements ViewParent,
     static final ArrayList<Runnable> sFirstDrawHandlers = new ArrayList<>();
     static boolean sFirstDrawComplete = false;
 
+    private ArrayList<OnSurfaceTransformHintChangedListener> mTransformHintListeners =
+            new ArrayList<>();
+    private @Surface.Rotation int mPreviousTransformHint = Surface.ROTATION_0;
     /**
      * Callback for notifying about global configuration changes.
      */
@@ -4269,6 +4272,14 @@ public final class ViewRootImpl implements ViewParent,
         try {
             if (!isContentCaptureEnabled()) return;
 
+            // Initial dispatch of window bounds to content capture
+            if (mAttachInfo.mContentCaptureManager != null) {
+                MainContentCaptureSession session =
+                        mAttachInfo.mContentCaptureManager.getMainContentCaptureSession();
+                session.notifyWindowBoundsChanged(session.getId(),
+                        getConfiguration().windowConfiguration.getBounds());
+            }
+
             // Content capture is a go!
             rootView.dispatchInitialProvideContentCaptureStructure();
         } finally {
@@ -7803,6 +7814,14 @@ public final class ViewRootImpl implements ViewParent,
                 insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0, frameNumber,
                 mTmpFrames, mPendingMergedConfiguration, mSurfaceControl, mTempInsets,
                 mTempControls, mSurfaceSize);
+
+        if (mAttachInfo.mContentCaptureManager != null) {
+            MainContentCaptureSession mainSession = mAttachInfo.mContentCaptureManager
+                    .getMainContentCaptureSession();
+            mainSession.notifyWindowBoundsChanged(mainSession.getId(),
+                    getConfiguration().windowConfiguration.getBounds());
+        }
+
         mPendingBackDropFrame.set(mTmpFrames.backdropFrame);
         if (mSurfaceControl.isValid()) {
             if (!useBLAST()) {
@@ -7819,6 +7838,11 @@ public final class ViewRootImpl implements ViewParent,
             if (mAttachInfo.mThreadedRenderer != null) {
                 mAttachInfo.mThreadedRenderer.setSurfaceControl(mSurfaceControl);
                 mAttachInfo.mThreadedRenderer.setBlastBufferQueue(mBlastBufferQueue);
+            }
+            int transformHint = mSurfaceControl.getTransformHint();
+            if (mPreviousTransformHint != transformHint) {
+                mPreviousTransformHint = transformHint;
+                dispatchTransformHintChanged(transformHint);
             }
         } else {
             destroySurface();
@@ -10442,7 +10466,39 @@ public final class ViewRootImpl implements ViewParent,
         return true;
     }
 
-    int getSurfaceTransformHint() {
+    @Override
+    public @Surface.Rotation int getSurfaceTransformHint() {
         return mSurfaceControl.getTransformHint();
+    }
+
+    @Override
+    public void addOnSurfaceTransformHintChangedListener(
+            OnSurfaceTransformHintChangedListener listener) {
+        Objects.requireNonNull(listener);
+        if (mTransformHintListeners.contains(listener)) {
+            throw new IllegalArgumentException(
+                    "attempt to call addOnSurfaceTransformHintChangedListener() "
+                            + "with a previously registered listener");
+        }
+        mTransformHintListeners.add(listener);
+    }
+
+    @Override
+    public void removeOnSurfaceTransformHintChangedListener(
+            OnSurfaceTransformHintChangedListener listener) {
+        Objects.requireNonNull(listener);
+        mTransformHintListeners.remove(listener);
+    }
+
+    private void dispatchTransformHintChanged(@Surface.Rotation int hint) {
+        if (mTransformHintListeners.isEmpty()) {
+            return;
+        }
+        ArrayList<OnSurfaceTransformHintChangedListener> listeners =
+                (ArrayList<OnSurfaceTransformHintChangedListener>) mTransformHintListeners.clone();
+        for (int i = 0; i < listeners.size(); i++) {
+            OnSurfaceTransformHintChangedListener listener = listeners.get(i);
+            listener.onSurfaceTransformHintChanged(hint);
+        }
     }
 }

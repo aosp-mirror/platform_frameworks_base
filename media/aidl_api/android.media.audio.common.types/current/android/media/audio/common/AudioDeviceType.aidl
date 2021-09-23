@@ -49,6 +49,7 @@ enum AudioDeviceType {
   IN_SUBMIX = 11,
   IN_TELEPHONY_RX = 12,
   IN_TV_TUNER = 13,
+  IN_DOCK = 14,
   OUT_DEFAULT = 129,
   OUT_ACCESSORY = 130,
   OUT_AFE_PROXY = 131,
@@ -65,4 +66,5 @@ enum AudioDeviceType {
   OUT_SPEAKER_SAFE = 142,
   OUT_SUBMIX = 143,
   OUT_TELEPHONY_TX = 144,
+  OUT_DOCK = 145,
 }

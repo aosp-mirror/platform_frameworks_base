@@ -104,4 +104,11 @@
          allow it to use the whole screen space, 0.6 will allow it to use just under half of the
          screen. -->
     <item name="half_opened_bouncer_height_ratio" type="dimen" format="float">0.0</item>
+
+    <!-- The actual amount of translation that is applied to the bouncer when it animates from one
+         side of the screen to the other in one-handed mode. Note that it will always translate from
+         the side of the screen to the other (it will "jump" closer to the destination while the
+         opacity is zero), but this controls how much motion will actually be applied to it while
+         animating. Larger values will cause it to move "faster" while fading out/in. -->
+    <dimen name="one_handed_bouncer_move_animation_translation">120dp</dimen>
 </resources>

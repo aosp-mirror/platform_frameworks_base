@@ -43,6 +43,11 @@ public class ScrollViewCaptureHelper implements ScrollCaptureViewHelper<ViewGrou
     private boolean mScrollBarEnabled;
     private int mOverScrollMode;
 
+    public boolean onAcceptSession(@NonNull ViewGroup view) {
+        return view.isVisibleToUser()
+                && (view.canScrollVertically(UP) || view.canScrollVertically(DOWN));
+    }
+
     public void onPrepareForStart(@NonNull ViewGroup view, Rect scrollBounds) {
         mStartScrollY = view.getScrollY();
         mOverScrollMode = view.getOverScrollMode();

@@ -39,6 +39,12 @@ public class ListViewCaptureHelper implements ScrollCaptureViewHelper<ListView> 
     private int mOverScrollMode;
 
     @Override
+    public boolean onAcceptSession(@NonNull ListView view) {
+        return view.isVisibleToUser()
+                && (view.canScrollVertically(UP) || view.canScrollVertically(DOWN));
+    }
+
+    @Override
     public void onPrepareForStart(@NonNull ListView view, Rect scrollBounds) {
         mScrollDelta = 0;
 
@@ -113,7 +119,6 @@ public class ListViewCaptureHelper implements ScrollCaptureViewHelper<ListView> 
         Log.d(TAG, "-----------------------------------------------------------");
         return result;
     }
-
 
     @Override
     public void onPrepareForEnd(@NonNull ListView listView) {

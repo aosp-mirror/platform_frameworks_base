@@ -79,6 +79,7 @@ package android {
     field public static final String CONTROL_LOCATION_UPDATES = "android.permission.CONTROL_LOCATION_UPDATES";
     field public static final String DELETE_CACHE_FILES = "android.permission.DELETE_CACHE_FILES";
     field public static final String DELETE_PACKAGES = "android.permission.DELETE_PACKAGES";
+    field public static final String DELIVER_COMPANION_MESSAGES = "android.permission.DELIVER_COMPANION_MESSAGES";
     field public static final String DIAGNOSTIC = "android.permission.DIAGNOSTIC";
     field public static final String DISABLE_KEYGUARD = "android.permission.DISABLE_KEYGUARD";
     field public static final String DUMP = "android.permission.DUMP";
@@ -842,7 +843,7 @@ package android {
     field @Deprecated public static final int isModifier = 16843334; // 0x1010246
     field @Deprecated public static final int isRepeatable = 16843336; // 0x1010248
     field public static final int isScrollContainer = 16843342; // 0x101024e
-    field public static final int isSplitRequired = 16844177; // 0x1010591
+    field @Deprecated public static final int isSplitRequired = 16844177; // 0x1010591
     field public static final int isStatic = 16844122; // 0x101055a
     field @Deprecated public static final int isSticky = 16843335; // 0x1010247
     field public static final int isolatedProcess = 16843689; // 0x10103a9
@@ -9897,6 +9898,8 @@ package android.companion {
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method @MainThread public abstract void onDeviceAppeared(@NonNull String);
     method @MainThread public abstract void onDeviceDisappeared(@NonNull String);
+    method @MainThread public void onSendMessage(int, int, @NonNull byte[]);
+    method @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES) public final void receiveMessage(int, int, @NonNull byte[]);
     field public static final String SERVICE_INTERFACE = "android.companion.CompanionDeviceService";
   }
 
@@ -46984,8 +46987,15 @@ package android.view {
   }
 
   @UiThread public interface AttachedSurfaceControl {
+    method public default void addOnSurfaceTransformHintChangedListener(@NonNull android.view.AttachedSurfaceControl.OnSurfaceTransformHintChangedListener);
     method public boolean applyTransactionOnDraw(@NonNull android.view.SurfaceControl.Transaction);
     method @Nullable public android.view.SurfaceControl.Transaction buildReparentTransaction(@NonNull android.view.SurfaceControl);
+    method public default int getSurfaceTransformHint();
+    method public default void removeOnSurfaceTransformHintChangedListener(@NonNull android.view.AttachedSurfaceControl.OnSurfaceTransformHintChangedListener);
+  }
+
+  @UiThread public static interface AttachedSurfaceControl.OnSurfaceTransformHintChangedListener {
+    method public void onSurfaceTransformHintChanged(int);
   }
 
   public final class Choreographer {
@@ -50835,6 +50845,7 @@ package android.view.accessibility {
     method public int getRecommendedTimeoutMillis(int, int);
     method public void interrupt();
     method public static boolean isAccessibilityButtonSupported();
+    method public boolean isAudioDescriptionEnabled();
     method public boolean isEnabled();
     method public boolean isTouchExplorationEnabled();
     method public void removeAccessibilityRequestPreparer(android.view.accessibility.AccessibilityRequestPreparer);

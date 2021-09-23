@@ -445,6 +445,35 @@ public final class CompanionDeviceManager {
     }
 
     /**
+     * Dispatch received message to system for processing.
+     *
+     * <p>Messages received from {@link CompanionDeviceService#onSendMessage}, which is implemented
+     * on another device, need to be dispatched to system for processing.</p>
+     *
+     * <p>Calling app must declare uses-permission
+     * {@link android.Manifest.permission#DELIVER_COMPANION_MESSAGES}</p>
+     *
+     * @param messageId id of the message
+     * @param associationId association id of the associated device where data is coming from
+     * @param message message received from the associated device
+     *
+     * @throws DeviceNotAssociatedException if the given device was not previously associated with
+     * this app
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES)
+    public void receiveMessage(int messageId, int associationId, @NonNull byte[] message)
+            throws DeviceNotAssociatedException {
+        try {
+            mService.receiveMessage(messageId, associationId, message);
+        } catch (RemoteException e) {
+            ExceptionUtils.propagateIfInstanceOf(e.getCause(), DeviceNotAssociatedException.class);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Associates given device with given app for the given user directly, without UI prompt.
      *
      * @param packageName package name of the companion app
