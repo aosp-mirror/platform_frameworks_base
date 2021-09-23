@@ -239,6 +239,29 @@ public class CsipDeviceManager {
         return null;
     }
 
+    /**
+     * Called when we found a set member of a group. The function will check bond state, and
+     * the {@code groupId} if it exists, and then create the bond.
+     *
+     * @param device The found device
+     * @param groupId The group id of the found device
+     *
+     * @return {@code true}, if the we create bond with the device. Otherwise, return
+     * {@code false}.
+     */
+    public boolean onSetMemberAppear(BluetoothDevice device, int groupId) {
+        if (device.getBondState() != BluetoothDevice.BOND_NONE) {
+            return false;
+        }
+
+        if (getCachedDevice(groupId) != null) {
+            device.createBond(BluetoothDevice.TRANSPORT_LE);
+            return true;
+        }
+
+        return false;
+    }
+
     private void log(String msg) {
         if (DEBUG) {
             Log.d(TAG, msg);
