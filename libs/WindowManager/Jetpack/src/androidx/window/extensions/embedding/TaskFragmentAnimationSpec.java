@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package androidx.window.extensions.organizer;
+package androidx.window.extensions.embedding;
 
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 
