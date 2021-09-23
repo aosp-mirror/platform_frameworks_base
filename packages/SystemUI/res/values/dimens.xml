@@ -1310,6 +1310,7 @@
     <!-- Size of Smartspace media recommendations cards in the QSPanel carousel -->
     <dimen name="qs_aa_media_rec_album_size_collapsed">72dp</dimen>
     <dimen name="qs_aa_media_rec_album_size_expanded">76dp</dimen>
+    <dimen name="qs_aa_media_gradient_bg_width">32dp</dimen>
     <dimen name="qs_aa_media_rec_album_margin">8dp</dimen>
     <dimen name="qs_aa_media_rec_album_margin_vert">4dp</dimen>
     <dimen name="qq_aa_media_rec_header_text_size">16sp</dimen>
