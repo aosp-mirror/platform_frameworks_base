@@ -312,6 +312,9 @@ public final class ViewRootImpl implements ViewParent,
     static final ArrayList<Runnable> sFirstDrawHandlers = new ArrayList<>();
     static boolean sFirstDrawComplete = false;
 
+    private ArrayList<OnSurfaceTransformHintChangedListener> mTransformHintListeners =
+            new ArrayList<>();
+    private @Surface.Rotation int mPreviousTransformHint = Surface.ROTATION_0;
     /**
      * Callback for notifying about global configuration changes.
      */
@@ -7840,6 +7843,11 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 mAttachInfo.mThreadedRenderer.setSurfaceControl(mSurfaceControl);
             }
+            int transformHint = mSurfaceControl.getTransformHint();
+            if (mPreviousTransformHint != transformHint) {
+                mPreviousTransformHint = transformHint;
+                dispatchTransformHintChanged(transformHint);
+            }
         } else {
             destroySurface();
         }
@@ -10463,7 +10471,39 @@ public final class ViewRootImpl implements ViewParent,
         return true;
     }
 
-    int getSurfaceTransformHint() {
+    @Override
+    public @Surface.Rotation int getSurfaceTransformHint() {
         return mSurfaceControl.getTransformHint();
+    }
+
+    @Override
+    public void addOnSurfaceTransformHintChangedListener(
+            OnSurfaceTransformHintChangedListener listener) {
+        Objects.requireNonNull(listener);
+        if (mTransformHintListeners.contains(listener)) {
+            throw new IllegalArgumentException(
+                    "attempt to call addOnSurfaceTransformHintChangedListener() "
+                            + "with a previously registered listener");
+        }
+        mTransformHintListeners.add(listener);
+    }
+
+    @Override
+    public void removeOnSurfaceTransformHintChangedListener(
+            OnSurfaceTransformHintChangedListener listener) {
+        Objects.requireNonNull(listener);
+        mTransformHintListeners.remove(listener);
+    }
+
+    private void dispatchTransformHintChanged(@Surface.Rotation int hint) {
+        if (mTransformHintListeners.isEmpty()) {
+            return;
+        }
+        ArrayList<OnSurfaceTransformHintChangedListener> listeners =
+                (ArrayList<OnSurfaceTransformHintChangedListener>) mTransformHintListeners.clone();
+        for (int i = 0; i < listeners.size(); i++) {
+            OnSurfaceTransformHintChangedListener listener = listeners.get(i);
+            listener.onSurfaceTransformHintChanged(hint);
+        }
     }
 }

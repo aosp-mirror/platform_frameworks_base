@@ -53,4 +53,72 @@ public interface AttachedSurfaceControl {
      * to the View hierarchy you may need to call {@link android.view.View#invalidate}
      */
     boolean applyTransactionOnDraw(@NonNull SurfaceControl.Transaction t);
+
+    /**
+     * The transform hint can be used by a buffer producer to pre-rotate the rendering such that the
+     * final transformation in the system composer is identity. This can be very useful when used in
+     * conjunction with the h/w composer HAL in situations where it cannot handle rotations or
+     * handle them with an additional power cost.
+     *
+     * The transform hint should be used with ASurfaceControl APIs when submitting buffers.
+     * Example usage:
+     *
+     * 1. After a configuration change, before dequeuing a buffer, the buffer producer queries the
+     *    function for the transform hint.
+     *
+     * 2. The desired buffer width and height is rotated by the transform hint.
+     *
+     * 3. The producer dequeues a buffer of the new pre-rotated size.
+     *
+     * 4. The producer renders to the buffer such that the image is already transformed, that is
+     *    applying the transform hint to the rendering.
+     *
+     * 5. The producer applies the inverse transform hint to the buffer it just rendered.
+     *
+     * 6. The producer queues the pre-transformed buffer with the buffer transform.
+     *
+     * 7. The composer combines the buffer transform with the display transform.  If the buffer
+     *    transform happens to cancel out the display transform then no rotation is needed and there
+     *    will be no performance penalties.
+     *
+     * Note, when using ANativeWindow APIs in conjunction with a NativeActivity Surface or
+     * SurfaceView Surface, the buffer producer will already have access to the transform hint and
+     * no additional work is needed.
+     */
+    default @Surface.Rotation int getSurfaceTransformHint() {
+        return Surface.ROTATION_0;
+    }
+
+    /**
+     * Surface transform hint change listener.
+     * @see #getSurfaceTransformHint
+     */
+    @UiThread
+    interface OnSurfaceTransformHintChangedListener {
+        /**
+         * @param hint new surface transform hint
+         * @see #getSurfaceTransformHint
+         */
+        void onSurfaceTransformHintChanged(@Surface.Rotation int hint);
+    }
+
+    /**
+     * Registers a surface transform hint changed listener to receive notifications about when
+     * the transform hint changes.
+     *
+     * @see #getSurfaceTransformHint
+     * @see #removeOnSurfaceTransformHintChangedListener
+     */
+    default void addOnSurfaceTransformHintChangedListener(
+            @NonNull OnSurfaceTransformHintChangedListener listener) {
+    }
+
+    /**
+     * Unregisters a surface transform hint changed listener.
+     *
+     * @see #addOnSurfaceTransformHintChangedListener
+     */
+    default void removeOnSurfaceTransformHintChangedListener(
+            @NonNull OnSurfaceTransformHintChangedListener listener) {
+    }
 }
