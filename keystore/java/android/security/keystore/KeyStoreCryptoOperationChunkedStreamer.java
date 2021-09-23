@@ -126,8 +126,8 @@ class KeyStoreCryptoOperationChunkedStreamer implements KeyStoreCryptoOperationS
 
             if (mChunkLength > mChunkSizeMax) {
                 throw new KeyStoreException(KeymasterDefs.KM_ERROR_INVALID_INPUT_LENGTH,
-                    "Chunk size exceeded max chunk size. Max: " + mChunkSizeMax
-                    + " Actual: " + mChunkLength);
+                        "Chunk size exceeded max chunk size. Max: " + mChunkSizeMax
+                                + " Actual: " + mChunkLength);
             }
 
             if (mChunkLength >= mChunkSizeThreshold) {
@@ -139,18 +139,28 @@ class KeyStoreCryptoOperationChunkedStreamer implements KeyStoreCryptoOperationS
                 } else if (opResult.resultCode != KeyStore.NO_ERROR) {
                     throw KeyStore.getKeyStoreException(opResult.resultCode);
                 }
-                if (opResult.inputConsumed <= 0) {
-                    throw new KeyStoreException(KeymasterDefs.KM_ERROR_INVALID_INPUT_LENGTH,
-                        "Keystore consumed 0 of " + mChunkLength + " bytes provided.");
-                } else if (opResult.inputConsumed > mChunkLength) {
+                if (opResult.inputConsumed == 0) {
+                    // Some KM implementations do not consume data in certain block modes unless a
+                    // full block of data was presented.
+                    if (inputLength > 0) {
+                        // More input is available, but it wasn't included into the previous chunk
+                        // because the chunk reached its maximum permitted size.
+                        // Shouldn't have happened.
+                        throw new KeyStoreException(KeymasterDefs.KM_ERROR_INVALID_INPUT_LENGTH,
+                                "Keystore consumed nothing from max-sized chunk: " + mChunkLength
+                                        + " bytes");
+                    }
+                } else if (opResult.inputConsumed > mChunkLength || opResult.inputConsumed < 0) {
                     throw new KeyStoreException(KeymasterDefs.KM_ERROR_UNKNOWN_ERROR,
-                        "Keystore consumed more input than provided. Provided: "
-                            + mChunkLength + ", consumed: " + opResult.inputConsumed);
+                            "Keystore consumed more input than provided (or inputConsumed was "
+                                    + "negative."
+                                    + " Provided: " + mChunkLength
+                                    + ", consumed: " + opResult.inputConsumed);
                 }
                 mChunkLength -= opResult.inputConsumed;
 
                 if (mChunkLength > 0) {
-                    // Partialy consumed, shift chunk contents
+                    // Partially consumed, shift chunk contents
                     ArrayUtils.copy(mChunk, opResult.inputConsumed, mChunk, 0, mChunkLength);
                 }
 
