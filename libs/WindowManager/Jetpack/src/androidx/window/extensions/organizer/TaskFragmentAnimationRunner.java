@@ -23,8 +23,6 @@ import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_OPEN;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
-import android.app.ActivityThread;
-import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -39,10 +37,6 @@ import android.view.animation.Animation;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.internal.R;
-import com.android.internal.policy.AttributeCache;
-import com.android.internal.policy.TransitionAnimation;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,13 +45,10 @@ class TaskFragmentAnimationRunner extends IRemoteAnimationRunner.Stub {
 
     private static final String TAG = "TaskFragAnimationRunner";
     private final Handler mHandler = new Handler(Looper.myLooper());
-    private final TransitionAnimation mTransitionAnimation;
+    private final TaskFragmentAnimationSpec mAnimationSpec;
 
     TaskFragmentAnimationRunner() {
-        final Context context = ActivityThread.currentActivityThread().getApplication();
-        mTransitionAnimation = new TransitionAnimation(context, false /* debug */, TAG);
-        // Initialize the AttributeCache for the TransitionAnimation.
-        AttributeCache.init(context);
+        mAnimationSpec = new TaskFragmentAnimationSpec(mHandler);
     }
 
     @Nullable
@@ -175,11 +166,10 @@ class TaskFragmentAnimationRunner extends IRemoteAnimationRunner.Stub {
 
     private List<TaskFragmentAnimationAdapter> createOpenAnimationAdapters(
             @NonNull RemoteAnimationTarget[] targets) {
-        // TODO(b/196173550) We need to customize the animation to handle two open window as one.
         final List<TaskFragmentAnimationAdapter> adapters = new ArrayList<>();
         for (RemoteAnimationTarget target : targets) {
             final Animation animation =
-                    loadOpenAnimation(target.mode != MODE_CLOSING /* isEnter */);
+                    mAnimationSpec.loadOpenAnimation(target.mode != MODE_CLOSING /* isEnter */);
             adapters.add(new TaskFragmentAnimationAdapter(animation, target));
         }
         return adapters;
@@ -187,11 +177,10 @@ class TaskFragmentAnimationRunner extends IRemoteAnimationRunner.Stub {
 
     private List<TaskFragmentAnimationAdapter> createCloseAnimationAdapters(
             @NonNull RemoteAnimationTarget[] targets) {
-        // TODO(b/196173550) We need to customize the animation to handle two open window as one.
         final List<TaskFragmentAnimationAdapter> adapters = new ArrayList<>();
         for (RemoteAnimationTarget target : targets) {
             final Animation animation =
-                    loadCloseAnimation(target.mode != MODE_CLOSING /* isEnter */);
+                    mAnimationSpec.loadCloseAnimation(target.mode != MODE_CLOSING /* isEnter */);
             adapters.add(new TaskFragmentAnimationAdapter(animation, target));
         }
         return adapters;
@@ -199,29 +188,29 @@ class TaskFragmentAnimationRunner extends IRemoteAnimationRunner.Stub {
 
     private List<TaskFragmentAnimationAdapter> createChangeAnimationAdapters(
             @NonNull RemoteAnimationTarget[] targets) {
-        // TODO(b/196173550) We need to hard code the change animation instead of using the default
-        //  open. See WindowChangeAnimationSpec.java as an example.
-        final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+        final List<TaskFragmentAnimationAdapter> adapters = new ArrayList<>();
         for (RemoteAnimationTarget target : targets) {
-            // The start leash is snapshot of the previous window. Hide it for now, will need to use
-            // it for the fade in.
-            if (target.startLeash != null) {
-                t.hide(target.startLeash);
+            if (target.startBounds != null) {
+                final Animation[] animations =
+                        mAnimationSpec.createChangeBoundsChangeAnimations(target);
+                adapters.add(new TaskFragmentAnimationAdapter(animations[0], target,
+                        target.startLeash, false /* sizeChanged */));
+                adapters.add(new TaskFragmentAnimationAdapter(animations[1], target,
+                        target.leash, true /* sizeChanged */));
+                continue;
             }
+
+            final Animation animation;
+            if (target.hasAnimatingParent) {
+                // No-op if it will be covered by the changing parent window.
+                animation = TaskFragmentAnimationSpec.createNoopAnimation(target);
+            } else if (target.mode == MODE_CLOSING) {
+                animation = mAnimationSpec.createChangeBoundsCloseAnimation(target);
+            } else {
+                animation = mAnimationSpec.createChangeBoundsOpenAnimation(target);
+            }
+            adapters.add(new TaskFragmentAnimationAdapter(animation, target));
         }
-        t.apply();
-        return createOpenAnimationAdapters(targets);
-    }
-
-    private Animation loadOpenAnimation(boolean isEnter) {
-        return mTransitionAnimation.loadDefaultAnimationAttr(isEnter
-                ? R.styleable.WindowAnimation_activityOpenEnterAnimation
-                : R.styleable.WindowAnimation_activityOpenExitAnimation);
-    }
-
-    private Animation loadCloseAnimation(boolean isEnter) {
-        return mTransitionAnimation.loadDefaultAnimationAttr(isEnter
-                ? R.styleable.WindowAnimation_activityCloseEnterAnimation
-                : R.styleable.WindowAnimation_activityCloseExitAnimation);
+        return adapters;
     }
 }

@@ -28,6 +28,7 @@ import org.junit.Assert.fail
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
@@ -58,12 +59,26 @@ class CompletableFutureUtilTest {
         }
     }
 
-    private inline fun runOnMainDelayed(delay: Long, crossinline block: () -> Unit) {
+    private fun <T> assertCompletionTiming(
+        completable: CompletableFuture<T>,
+        cancellationGroup: CancellationGroup?,
+        timeout: Long,
+        completionOperationDelay: Long,
+        completionOperation: () -> Unit
+    ): T? {
         val handler = Handler.createAsync(
                 InstrumentationRegistry.getInstrumentation().getTargetContext().getMainLooper())
-        handler.postDelayed({
-            block()
-        }, delay)
+        val beginNanos = SystemClock.elapsedRealtimeNanos()
+        handler.postDelayed(completionOperation, completionOperationDelay)
+        val result = CompletableFutureUtil.getResultOrNull(
+                completable, null, null, cancellationGroup, timeout)
+        val elapsedNanos = SystemClock.elapsedRealtimeNanos() - beginNanos
+        assertThat(elapsedNanos).isIn(Range.openClosed(
+                // It seems that Handler#postDelayed() may trigger the task a bit earlier within
+                // msec resolution. Let's give 1 msec "epsilon". See b/198735181 for details.
+                TimeUnit.MILLISECONDS.toNanos((completionOperationDelay - 1).coerceAtLeast(0)),
+                TimeUnit.MILLISECONDS.toNanos(timeout)))
+        return result
     }
 
     @Test
@@ -211,17 +226,12 @@ class CompletableFutureUtilTest {
         val expectedValue = "Expected Value"
         val completable = CompletableFuture<CharSequence>()
 
-        val beginNanos = SystemClock.elapsedRealtimeNanos()
-        runOnMainDelayed(SHORT_PERIOD_MILLI) {
+        val result = assertCompletionTiming(completable, null, TIMEOUT_MILLI, SHORT_PERIOD_MILLI) {
             completable.complete(expectedValue)
         }
-        val result = CompletableFutureUtil.getResultOrNull(
-                completable, null, null, null, TIMEOUT_MILLI)
-        val elapsed = SystemClock.elapsedRealtimeNanos() - beginNanos
 
         assertThat(completable.isDone).isTrue()
         assertThat(result).isEqualTo(expectedValue)
-        assertThat(elapsed).isIn(Range.closedOpen(SHORT_PERIOD_NANO, TIMEOUT_NANO))
     }
 
     @Test
@@ -232,35 +242,26 @@ class CompletableFutureUtilTest {
 
         assertThat(cancellationGroup.isCanceled).isFalse()
 
-        val beginNanos = SystemClock.elapsedRealtimeNanos()
-        runOnMainDelayed(SHORT_PERIOD_MILLI) {
+        val result = assertCompletionTiming(completable, cancellationGroup, TIMEOUT_MILLI,
+                SHORT_PERIOD_MILLI) {
             completable.complete(expectedValue)
         }
-        val result = CompletableFutureUtil.getResultOrNull(
-                completable, null, null, cancellationGroup, TIMEOUT_MILLI)
-        val elapsed = SystemClock.elapsedRealtimeNanos() - beginNanos
 
         assertThat(cancellationGroup.isCanceled).isFalse()
         assertThat(completable.isDone).isTrue()
         assertThat(result).isEqualTo(expectedValue)
-        assertThat(elapsed).isIn(Range.closedOpen(SHORT_PERIOD_NANO, TIMEOUT_NANO))
     }
 
     @Test
     fun testCharSequenceUnblockByError() {
         val completable = CompletableFuture<CharSequence>()
 
-        val beginNanos = SystemClock.elapsedRealtimeNanos()
-        runOnMainDelayed(SHORT_PERIOD_MILLI) {
+        val result = assertCompletionTiming(completable, null, TIMEOUT_MILLI, SHORT_PERIOD_MILLI) {
             completable.completeExceptionally(UnsupportedOperationException(ERROR_MESSAGE))
         }
-        val result = CompletableFutureUtil.getResultOrNull(
-                completable, null, null, null, TIMEOUT_MILLI)
-        val elapsed = SystemClock.elapsedRealtimeNanos() - beginNanos
 
         assertThat(completable.isDone).isTrue()
         assertThat(result).isNull()
-        assertThat(elapsed).isIn(Range.closedOpen(SHORT_PERIOD_NANO, TIMEOUT_NANO))
     }
 
     @Test
@@ -268,17 +269,13 @@ class CompletableFutureUtilTest {
         val completable = CompletableFuture<CharSequence>()
         val cancellationGroup = CancellationGroup()
 
-        val beginNanos = SystemClock.elapsedRealtimeNanos()
-        runOnMainDelayed(SHORT_PERIOD_MILLI) {
+        val result = assertCompletionTiming(completable, cancellationGroup, TIMEOUT_MILLI,
+                SHORT_PERIOD_MILLI) {
             cancellationGroup.cancelAll()
         }
-        val result = CompletableFutureUtil.getResultOrNull(
-                completable, null, null, cancellationGroup, TIMEOUT_MILLI)
-        val elapsed = SystemClock.elapsedRealtimeNanos() - beginNanos
 
         // due to the side-effect of cancellationGroup.
         assertThat(completable.isDone).isTrue()
         assertThat(result).isNull()
-        assertThat(elapsed).isIn(Range.closedOpen(SHORT_PERIOD_NANO, TIMEOUT_NANO))
     }
 }

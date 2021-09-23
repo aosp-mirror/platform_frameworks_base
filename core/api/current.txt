@@ -79,6 +79,7 @@ package android {
     field public static final String CONTROL_LOCATION_UPDATES = "android.permission.CONTROL_LOCATION_UPDATES";
     field public static final String DELETE_CACHE_FILES = "android.permission.DELETE_CACHE_FILES";
     field public static final String DELETE_PACKAGES = "android.permission.DELETE_PACKAGES";
+    field public static final String DELIVER_COMPANION_MESSAGES = "android.permission.DELIVER_COMPANION_MESSAGES";
     field public static final String DIAGNOSTIC = "android.permission.DIAGNOSTIC";
     field public static final String DISABLE_KEYGUARD = "android.permission.DISABLE_KEYGUARD";
     field public static final String DUMP = "android.permission.DUMP";
@@ -9897,6 +9898,8 @@ package android.companion {
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method @MainThread public abstract void onDeviceAppeared(@NonNull String);
     method @MainThread public abstract void onDeviceDisappeared(@NonNull String);
+    method @MainThread public void onSendMessage(int, int, @NonNull byte[]);
+    method @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES) public final void receiveMessage(int, int, @NonNull byte[]);
     field public static final String SERVICE_INTERFACE = "android.companion.CompanionDeviceService";
   }
 

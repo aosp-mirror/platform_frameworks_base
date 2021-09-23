@@ -16,8 +16,6 @@
 
 package com.android.server.input;
 
-import static android.view.Surface.ROTATION_0;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
@@ -40,7 +38,6 @@ import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayViewport;
@@ -100,7 +97,6 @@ import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputMonitor;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
 import android.view.VerifiedInputEvent;
@@ -595,20 +591,9 @@ public class InputManagerService extends IInputManager.Stub
 
     private void setDisplayViewportsInternal(List<DisplayViewport> viewports) {
         final DisplayViewport[] vArray = new DisplayViewport[viewports.size()];
-        if (ENABLE_PER_WINDOW_INPUT_ROTATION) {
-            // Remove display projection information from DisplayViewport, leaving only the
-            // orientation. The display projection will be built-into the window transforms.
-            for (int i = viewports.size() - 1; i >= 0; --i) {
-                final DisplayViewport v = vArray[i] = viewports.get(i).makeCopy();
-                // Note: the deviceWidth/Height are in rotated with the orientation.
-                v.logicalFrame.set(0, 0, v.deviceWidth, v.deviceHeight);
-                v.physicalFrame.set(0, 0, v.deviceWidth, v.deviceHeight);
-            }
-        } else {
             for (int i = viewports.size() - 1; i >= 0; --i) {
                 vArray[i] = viewports.get(i);
             }
-        }
         nativeSetDisplayViewports(mPtr, vArray);
     }
 
@@ -827,38 +812,6 @@ public class InputManagerService extends IInputManager.Stub
                 && mode != InputEventInjectionSync.WAIT_FOR_FINISHED
                 && mode != InputEventInjectionSync.WAIT_FOR_RESULT) {
             throw new IllegalArgumentException("mode is invalid");
-        }
-        if (ENABLE_PER_WINDOW_INPUT_ROTATION) {
-            // Motion events that are pointer events or relative mouse events will need to have the
-            // inverse display rotation applied to them.
-            if (event instanceof MotionEvent
-                    && (event.isFromSource(InputDevice.SOURCE_CLASS_POINTER)
-                    || event.isFromSource(InputDevice.SOURCE_MOUSE_RELATIVE))) {
-                Context displayContext = getContextForDisplay(event.getDisplayId());
-                if (displayContext == null) {
-                    displayContext = Objects.requireNonNull(
-                            getContextForDisplay(Display.DEFAULT_DISPLAY));
-                }
-                final Display display = displayContext.getDisplay();
-                final int rotation = display.getRotation();
-                if (rotation != ROTATION_0) {
-                    final MotionEvent motion = (MotionEvent) event;
-                    // Injections are currently expected to be in the space of the injector (ie.
-                    // usually assumed to be post-rotated). Thus we need to un-rotate into raw
-                    // input coordinates for dispatch.
-                    final Point sz = new Point();
-                    if (event.isFromSource(InputDevice.SOURCE_CLASS_POINTER)) {
-                        display.getRealSize(sz);
-                        if ((rotation % 2) != 0) {
-                            final int tmpX = sz.x;
-                            sz.x = sz.y;
-                            sz.y = tmpX;
-                        }
-                    }
-                    motion.applyTransform(MotionEvent.createRotateMatrix(
-                            (4 - rotation), sz.x, sz.y));
-                }
-            }
         }
 
         final int pid = Binder.getCallingPid();

@@ -487,9 +487,42 @@ public class Installer extends SystemService {
         }
     }
 
-    public void dexopt(String apkPath, int uid, @Nullable String pkgName, String instructionSet,
+    /**
+     * Runs dex optimization.
+     *
+     * @param apkPath Path of target APK
+     * @param uid UID of the package
+     * @param pkgName Name of the package
+     * @param instructionSet Target instruction set to run dex optimization.
+     * @param dexoptNeeded Necessary dex optimization for this request. Check
+     *        {@link dalvik.system.DexFile#NO_DEXOPT_NEEDED},
+     *        {@link dalvik.system.DexFile#DEX2OAT_FROM_SCRATCH},
+     *        {@link dalvik.system.DexFile#DEX2OAT_FOR_BOOT_IMAGE}, and
+     *        {@link dalvik.system.DexFile#DEX2OAT_FOR_FILTER}.
+     * @param outputPath Output path of generated dex optimization.
+     * @param dexFlags Check {@code DEXOPT_*} for allowed flags.
+     * @param compilerFilter Compiler filter like "verify", "speed-profile". Check
+     *                       {@code art/libartbase/base/compiler_filter.cc} for full list.
+     * @param volumeUuid UUID of the volume where the package data is stored. {@code null}
+     *                   represents internal storage.
+     * @param classLoaderContext This encodes the class loader chain (class loader type + class
+     *                           path) in a format compatible to dex2oat. Check
+     *                           {@code DexoptUtils.processContextForDexLoad} for further details.
+     * @param seInfo Selinux context to set for generated outputs.
+     * @param downgrade If set, allows downgrading {@code compilerFilter}. If downgrading is not
+     *                  allowed and requested {@code compilerFilter} is considered as downgrade,
+     *                  the request will be ignored.
+     * @param targetSdkVersion Target SDK version of the package.
+     * @param profileName Name of reference profile file.
+     * @param dexMetadataPath Specifies the location of dex metadata file.
+     * @param compilationReason Specifies the reason for the compilation like "install".
+     * @return {@code true} if {@code dexopt} is completed. {@code false} if it was cancelled.
+     *
+     * @throws InstallerException if {@code dexopt} fails.
+     */
+    public boolean dexopt(String apkPath, int uid, @Nullable String pkgName, String instructionSet,
             int dexoptNeeded, @Nullable String outputPath, int dexFlags,
-            String compilerFilter, @Nullable String volumeUuid, @Nullable String sharedLibraries,
+            String compilerFilter, @Nullable String volumeUuid, @Nullable String classLoaderContext,
             @Nullable String seInfo, boolean downgrade, int targetSdkVersion,
             @Nullable String profileName, @Nullable String dexMetadataPath,
             @Nullable String compilationReason) throws InstallerException {
@@ -497,13 +530,30 @@ public class Installer extends SystemService {
         BlockGuard.getVmPolicy().onPathAccess(apkPath);
         BlockGuard.getVmPolicy().onPathAccess(outputPath);
         BlockGuard.getVmPolicy().onPathAccess(dexMetadataPath);
-        if (!checkBeforeRemote()) return;
+        if (!checkBeforeRemote()) return false;
         try {
-            mInstalld.dexopt(apkPath, uid, pkgName, instructionSet, dexoptNeeded, outputPath,
-                    dexFlags, compilerFilter, volumeUuid, sharedLibraries, seInfo, downgrade,
+            return mInstalld.dexopt(apkPath, uid, pkgName, instructionSet, dexoptNeeded, outputPath,
+                    dexFlags, compilerFilter, volumeUuid, classLoaderContext, seInfo, downgrade,
                     targetSdkVersion, profileName, dexMetadataPath, compilationReason);
         } catch (Exception e) {
             throw InstallerException.from(e);
+        }
+    }
+
+    /**
+     * Enables or disables dex optimization blocking.
+     *
+     * <p> Enabling blocking will also involve cancelling pending dexopt call and killing child
+     * processes forked from installd to run dexopt. The pending dexopt call will return false
+     * when it is cancelled.
+     *
+     * @param block set to true to enable blocking / false to disable blocking.
+     */
+    public void controlDexOptBlocking(boolean block) {
+        try {
+            mInstalld.controlDexOptBlocking(block);
+        } catch (Exception e) {
+            Slog.w(TAG, "blockDexOpt failed", e);
         }
     }
 

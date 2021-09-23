@@ -47,6 +47,7 @@ enum AudioDeviceType {
     IN_DEFAULT = 1,
     /**
      * A device implementing Android Open Accessory protocol.
+     * Note: AOAv2 audio support has been deprecated in Android 8.0.
      */
     IN_ACCESSORY = 2,
     /**
@@ -94,12 +95,17 @@ enum AudioDeviceType {
      */
     IN_TV_TUNER = 13,
     /**
+     * Input from a phone / table dock.
+     */
+    IN_DOCK = 14,
+    /**
      * The "default" device is used when the client does not have any
      * preference for a particular device.
      */
     OUT_DEFAULT = 129,
     /**
      * A device implementing Android Open Accessory protocol.
+     * Note: AOAv2 audio support has been deprecated in Android 8.0.
      */
     OUT_ACCESSORY = 130,
     /**
@@ -158,4 +164,8 @@ enum AudioDeviceType {
      * Output into a telephone line.
      */
     OUT_TELEPHONY_TX = 144,
+    /**
+     * Output into a speaker of a phone / table dock.
+     */
+    OUT_DOCK = 145,
 }

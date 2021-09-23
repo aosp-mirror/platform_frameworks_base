@@ -54,4 +54,6 @@ interface ICompanionDeviceManager {
 
     void createAssociation(in String packageName, in String macAddress, int userId,
         in byte[] certificate);
+
+    void receiveMessage(in int messageId, in int associationId, in byte[] message);
 }

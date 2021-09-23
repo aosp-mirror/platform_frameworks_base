@@ -16,14 +16,9 @@
 
 package android.companion;
 
-import android.app.PendingIntent;
-import android.companion.IFindDeviceCallback;
-import android.companion.Association;
-import android.companion.AssociationRequest;
-import android.content.ComponentName;
-
 /** @hide */
 oneway interface ICompanionDeviceService {
     void onDeviceAppeared(in String address);
     void onDeviceDisappeared(in String address);
+    void onSendMessage(in int messageId, in int associationId, in byte[] message);
 }

@@ -14399,6 +14399,7 @@ package android.view.contentcapture {
     method public int getFlags();
     method @Nullable public android.view.contentcapture.ContentCaptureSessionId getParentSessionId();
     method public int getTaskId();
+    method @Nullable public android.os.IBinder getWindowToken();
     field public static final int FLAG_DISABLED_BY_APP = 1; // 0x1
     field public static final int FLAG_DISABLED_BY_FLAG_SECURE = 2; // 0x2
     field public static final int FLAG_RECONNECTED = 4; // 0x4
@@ -14406,6 +14407,7 @@ package android.view.contentcapture {
 
   public final class ContentCaptureEvent implements android.os.Parcelable {
     method public int describeContents();
+    method @Nullable public android.graphics.Rect getBounds();
     method @Nullable public android.view.contentcapture.ContentCaptureContext getContentCaptureContext();
     method public long getEventTime();
     method @Nullable public android.view.autofill.AutofillId getId();
@@ -14425,6 +14427,7 @@ package android.view.contentcapture {
     field public static final int TYPE_VIEW_TEXT_CHANGED = 3; // 0x3
     field public static final int TYPE_VIEW_TREE_APPEARED = 5; // 0x5
     field public static final int TYPE_VIEW_TREE_APPEARING = 4; // 0x4
+    field public static final int TYPE_WINDOW_BOUNDS_CHANGED = 10; // 0xa
   }
 
   public final class ContentCaptureManager {
