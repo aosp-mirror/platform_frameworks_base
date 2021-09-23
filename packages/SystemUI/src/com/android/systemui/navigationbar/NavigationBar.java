@@ -712,6 +712,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mHandler.removeCallbacks(mAutoDim);
         mHandler.removeCallbacks(mOnVariableDurationHomeLongClick);
         mHandler.removeCallbacks(mEnableLayoutTransitions);
+        mNavigationBarA11yHelper.removeA11yEventListener(mAccessibilityListener);
         mFrame = null;
         mNavigationBarView = null;
         mOrientationHandle = null;
@@ -1391,10 +1392,11 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     void updateAccessibilityServicesState() {
         int a11yFlags = mNavigationBarA11yHelper.getA11yButtonState();
 
-        boolean clickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0;
-        boolean longClickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0;
-        mNavigationBarView.setAccessibilityButtonState(clickable, longClickable);
-
+        if (mNavigationBarView != null) {
+            boolean clickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0;
+            boolean longClickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0;
+            mNavigationBarView.setAccessibilityButtonState(clickable, longClickable);
+        }
         updateSystemUiStateFlags(a11yFlags);
     }
 
