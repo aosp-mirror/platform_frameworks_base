@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.Manifest.permission.ACTIVITY_EMBEDDING;
 import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.app.Activity.RESULT_CANCELED;
 import static android.app.ActivityManager.START_ABORTED;
@@ -1953,38 +1952,43 @@ class ActivityStarter {
             }
         }
 
-        if (mInTaskFragment != null && mInTaskFragment.getTask() != null) {
-            final int hostUid = mInTaskFragment.getTask().effectiveUid;
-            final int embeddingUid = targetTask != null ? targetTask.effectiveUid : r.getUid();
-            if (!canTaskBeEmbedded(hostUid, embeddingUid)) {
-                Slog.e(TAG, "Cannot embed activity to a task owned by " + hostUid + " targetTask= "
-                        + targetTask);
-                return START_PERMISSION_DENIED;
-            }
+        if (mInTaskFragment != null && !canEmbedActivity(mInTaskFragment, r, newTask, targetTask)) {
+            Slog.e(TAG, "Permission denied: Cannot embed " + r + " to " + mInTaskFragment.getTask()
+                    + " targetTask= " + targetTask);
+            return START_PERMISSION_DENIED;
         }
 
         return START_SUCCESS;
     }
 
     /**
-     * Return {@code true} if the {@param task} can embed another task.
-     * @param hostUid the uid of the host task
-     * @param embeddedUid the uid of the task the are going to be embedded
+     * Return {@code true} if an activity can be embedded to the TaskFragment.
+     * @param taskFragment the TaskFragment for embedding.
+     * @param starting the starting activity.
+     * @param newTask whether the starting activity is going to be launched on a new task.
+     * @param targetTask the target task for launching activity, which could be different from
+     *                   the one who hosting the embedding.
      */
-    private boolean canTaskBeEmbedded(int hostUid, int embeddedUid) {
+    private boolean canEmbedActivity(@NonNull TaskFragment taskFragment, ActivityRecord starting,
+            boolean newTask, Task targetTask) {
+        final Task hostTask = taskFragment.getTask();
+        if (hostTask == null) {
+            return false;
+        }
+
         // Allowing the embedding if the task is owned by system.
+        final int hostUid = hostTask.effectiveUid;
         if (hostUid == Process.SYSTEM_UID) {
             return true;
         }
 
-        // Allowing embedding if the host task is owned by an app that has the ACTIVITY_EMBEDDING
-        // permission
-        if (mService.checkPermission(ACTIVITY_EMBEDDING, -1, hostUid) == PERMISSION_GRANTED) {
-            return true;
+        // Not allowed embedding an activity of another app.
+        if (hostUid != starting.getUid()) {
+            return false;
         }
 
-        // Allowing embedding if it is from the same app that owned the task
-        return hostUid == embeddedUid;
+        // Not allowed embedding task.
+        return !newTask && (targetTask == null || targetTask == hostTask);
     }
 
     /**
@@ -2801,10 +2805,15 @@ class ActivityStarter {
                 newParent = mInTaskFragment;
             }
         } else {
-            // Use the child TaskFragment (if any) as the new parent if the activity can be embedded
             final ActivityRecord top = task.topRunningActivity(false /* focusableOnly */,
                     false /* includingEmbeddedTask */);
-            newParent = top != null ? top.getTaskFragment() : task;
+            final TaskFragment taskFragment = top != null ? top.getTaskFragment() : null;
+            if (taskFragment != null && taskFragment.isEmbedded()
+                    && task.effectiveUid == mStartActivity.getUid()) {
+                // Use the embedded TaskFragment of the top activity as the new parent if the
+                // activity can be embedded.
+                newParent = top.getTaskFragment();
+            }
         }
 
         if (mStartActivity.getTaskFragment() == null
