@@ -106,8 +106,13 @@ public class SpatializerHelper {
         mASA = asa;
     }
 
-    synchronized void init() {
+    synchronized void init(boolean effectExpected) {
         Log.i(TAG, "Initializing");
+        if (!effectExpected) {
+            Log.i(TAG, "Setting state to STATE_NOT_SUPPORTED due to effect not expected");
+            mState = STATE_NOT_SUPPORTED;
+            return;
+        }
         if (mState != STATE_UNINITIALIZED) {
             throw new IllegalStateException(("init() called in state:" + mState));
         }
@@ -165,7 +170,7 @@ public class SpatializerHelper {
         mSpatLevel = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
         mCapableSpatLevel = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
         mActualHeadTrackingMode = Spatializer.HEAD_TRACKING_MODE_UNSUPPORTED;
-        init();
+        init(true);
         setFeatureEnabled(featureEnabled);
     }
 
@@ -391,7 +396,7 @@ public class SpatializerHelper {
             }
         }
         mStateCallbacks.finishBroadcast();
-        // TODO persist enabled state
+        mAudioService.persistSpatialAudioEnabled(featureEnabled);
     }
 
     private synchronized void setDispatchAvailableState(boolean available) {
