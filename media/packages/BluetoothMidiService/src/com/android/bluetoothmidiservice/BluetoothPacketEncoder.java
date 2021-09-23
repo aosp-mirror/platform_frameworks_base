@@ -45,6 +45,8 @@ public class BluetoothPacketEncoder extends PacketEncoder {
     private int mPacketTimestamp;
     // current running status, or zero if none
     private byte mRunningStatus;
+    // max size of a packet
+    private int mMaxPacketSize;
 
     private boolean mWritePending;
 
@@ -86,7 +88,7 @@ public class BluetoothPacketEncoder extends PacketEncoder {
                 if (needsTimestamp) bytesNeeded++;  // add one for timestamp byte
                 if (status == mRunningStatus) bytesNeeded--;    // subtract one for status byte
 
-                if (mAccumulatedBytes + bytesNeeded > mAccumulationBuffer.length) {
+                if (mAccumulatedBytes + bytesNeeded > mMaxPacketSize) {
                     // write out our data if there is no more room
                     // if necessary, block until previous packet is sent
                     flushLocked(true);
@@ -112,14 +114,14 @@ public class BluetoothPacketEncoder extends PacketEncoder {
                     int remaining = (hasSysExEnd ? count - 1 : count);
 
                     while (remaining > 0) {
-                        if (mAccumulatedBytes == mAccumulationBuffer.length) {
+                        if (mAccumulatedBytes == mMaxPacketSize) {
                             // write out our data if there is no more room
                             // if necessary, block until previous packet is sent
                             flushLocked(true);
                             appendHeader(milliTimestamp);
                         }
 
-                        int copy = mAccumulationBuffer.length - mAccumulatedBytes;
+                        int copy = mMaxPacketSize - mAccumulatedBytes;
                         if (copy > remaining) copy = remaining;
                         System.arraycopy(msg, offset, mAccumulationBuffer, mAccumulatedBytes, copy);
                         mAccumulatedBytes += copy;
@@ -129,7 +131,7 @@ public class BluetoothPacketEncoder extends PacketEncoder {
 
                     if (hasSysExEnd) {
                         // SysEx End command must be preceeded by a timestamp byte
-                        if (mAccumulatedBytes + 2 > mAccumulationBuffer.length) {
+                        if (mAccumulatedBytes + 2 > mMaxPacketSize) {
                             // write out our data if there is no more room
                             // if necessary, block until previous packet is sent
                             flushLocked(true);
@@ -182,6 +184,16 @@ public class BluetoothPacketEncoder extends PacketEncoder {
     public BluetoothPacketEncoder(PacketReceiver packetReceiver, int maxPacketSize) {
         mPacketReceiver = packetReceiver;
         mAccumulationBuffer = new byte[maxPacketSize];
+        setMaxPacketSize(maxPacketSize);
+    }
+
+    /**
+     * Dynamically sets the maximum packet size
+     */
+    public void setMaxPacketSize(int maxPacketSize) {
+        synchronized (mLock) {
+            mMaxPacketSize = Math.min(maxPacketSize, mAccumulationBuffer.length);
+        }
     }
 
     @Override
