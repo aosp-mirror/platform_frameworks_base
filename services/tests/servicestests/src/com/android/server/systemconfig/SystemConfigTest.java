@@ -25,6 +25,7 @@ import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Xml;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -36,6 +37,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.xmlpull.v1.XmlPullParser;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -74,6 +76,11 @@ public class SystemConfigTest {
         SystemConfigTestClass() {
             super(false);
         }
+    }
+
+    private void readPermissions(File libraryDir, int permissionFlag) {
+        final XmlPullParser parser = Xml.newPullParser();
+        mSysConfig.readPermissions(parser, libraryDir, permissionFlag);
     }
 
     /**
@@ -134,8 +141,8 @@ public class SystemConfigTest {
         // Also, make a third file, but with the name folder1/permFile2.xml, to prove no conflicts.
         createTempFile(folder1, "permFile2.xml", contents3);
 
-        mSysConfig.readPermissions(folder1, /* No permission needed anyway */ 0);
-        mSysConfig.readPermissions(folder2, /* No permission needed anyway */ 0);
+        readPermissions(folder1, /* No permission needed anyway */ 0);
+        readPermissions(folder2, /* No permission needed anyway */ 0);
 
         Map<String, Set<String>> actualWhite = mSysConfig.getAndClearPackageToUserTypeWhitelist();
         Map<String, Set<String>> actualBlack = mSysConfig.getAndClearPackageToUserTypeBlacklist();
@@ -165,7 +172,7 @@ public class SystemConfigTest {
         final File folder = createTempSubfolder("folder");
         createTempFile(folder, "component-override.xml", contents);
 
-        mSysConfig.readPermissions(folder, /* No permission needed anyway */ 0);
+        readPermissions(folder, /* No permission needed anyway */ 0);
 
         final ArrayMap<String, Boolean> packageOneExpected = new ArrayMap<>();
         packageOneExpected.put("com.android.package1.Full", true);
@@ -197,7 +204,7 @@ public class SystemConfigTest {
         final File folder = createTempSubfolder("folder");
         createTempFile(folder, "staged-installer-whitelist.xml", contents);
 
-        mSysConfig.readPermissions(folder, /* Grant all permission flags */ ~0);
+        readPermissions(folder, /* Grant all permission flags */ ~0);
 
         assertThat(mSysConfig.getWhitelistedStagedInstallers())
                 .containsExactly("com.android.package1");
@@ -215,7 +222,7 @@ public class SystemConfigTest {
         final File folder = createTempSubfolder("folder");
         createTempFile(folder, "staged-installer-whitelist.xml", contents);
 
-        mSysConfig.readPermissions(folder, /* Grant all permission flags */ ~0);
+        readPermissions(folder, /* Grant all permission flags */ ~0);
 
         assertThat(mSysConfig.getWhitelistedStagedInstallers())
                 .containsExactly("com.android.package1");
@@ -238,7 +245,7 @@ public class SystemConfigTest {
 
         IllegalStateException e = expectThrows(
                 IllegalStateException.class,
-                () -> mSysConfig.readPermissions(folder, /* Grant all permission flags */ ~0));
+                () -> readPermissions(folder, /* Grant all permission flags */ ~0));
 
         assertThat(e).hasMessageThat().contains("Multiple modules installers");
     }
@@ -257,7 +264,7 @@ public class SystemConfigTest {
         final File folder = createTempSubfolder("folder");
         createTempFile(folder, "staged-installer-whitelist.xml", contents);
 
-        mSysConfig.readPermissions(folder, /* Grant all but ALLOW_APP_CONFIGS flag */ ~0x08);
+        readPermissions(folder, /* Grant all but ALLOW_APP_CONFIGS flag */ ~0x08);
 
         assertThat(mSysConfig.getWhitelistedStagedInstallers()).isEmpty();
     }
@@ -277,7 +284,7 @@ public class SystemConfigTest {
         final File folder = createTempSubfolder("folder");
         createTempFile(folder, "vendor-apex-allowlist.xml", contents);
 
-        mSysConfig.readPermissions(folder, /* Grant all permission flags */ ~0);
+        readPermissions(folder, /* Grant all permission flags */ ~0);
 
         assertThat(mSysConfig.getAllowedVendorApexes())
                 .containsExactly("com.android.apex1", "com.installer");
@@ -297,7 +304,7 @@ public class SystemConfigTest {
         final File folder = createTempSubfolder("folder");
         createTempFile(folder, "vendor-apex-allowlist.xml", contents);
 
-        mSysConfig.readPermissions(folder, /* Grant all permission flags */ ~0);
+        readPermissions(folder, /* Grant all permission flags */ ~0);
 
         assertThat(mSysConfig.getAllowedVendorApexes()).isEmpty();
     }
@@ -317,7 +324,7 @@ public class SystemConfigTest {
         final File folder = createTempSubfolder("folder");
         createTempFile(folder, "vendor-apex-allowlist.xml", contents);
 
-        mSysConfig.readPermissions(folder, /* Grant all but ALLOW_VENDOR_APEX flag */ ~0x400);
+        readPermissions(folder, /* Grant all but ALLOW_VENDOR_APEX flag */ ~0x400);
 
         assertThat(mSysConfig.getAllowedVendorApexes()).isEmpty();
     }
