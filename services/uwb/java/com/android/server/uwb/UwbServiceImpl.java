@@ -236,7 +236,12 @@ public class UwbServiceImpl extends IUwbAdapter.Stub implements IBinder.DeathRec
             throw new IllegalStateException("No vendor service found!");
         }
         Log.i(TAG, "Retrieved vendor service");
+        long token = Binder.clearCallingIdentity();
+        try {
         mVendorUwbAdapter.setEnabled(mUwbInjector.isPersistedUwbStateEnabled());
+        } finally {
+          Binder.restoreCallingIdentity(token);
+        }
         linkToVendorServiceDeath();
         return mVendorUwbAdapter;
     }
