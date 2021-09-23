@@ -420,9 +420,12 @@ public final class SensorPrivacyService extends SystemService {
             }
 
             synchronized (mLock) {
-                if (mSuppressReminders.containsKey(new Pair<>(sensor, user))) {
+                UserHandle parentUser = UserHandle.of(mUserManagerInternal
+                        .getProfileParentId(user.getIdentifier()));
+                if (mSuppressReminders.containsKey(new Pair<>(sensor, parentUser))) {
                     Log.d(TAG,
-                            "Suppressed sensor privacy reminder for " + packageName + "/" + user);
+                            "Suppressed sensor privacy reminder for " + packageName + "/"
+                                    + parentUser);
                     return;
                 }
             }
