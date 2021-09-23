@@ -4011,6 +4011,80 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testApplyAdjustmentsLogged() throws Exception {
+        NotificationManagerService.WorkerHandler handler = mock(
+                NotificationManagerService.WorkerHandler.class);
+        mService.setHandler(handler);
+        when(mAssistants.isSameUser(eq(null), anyInt())).thenReturn(true);
+
+        // Set up notifications that will be adjusted
+        final NotificationRecord r1 = generateNotificationRecord(
+                mTestNotificationChannel, 1, null, true);
+        r1.getSbn().setInstanceId(mNotificationInstanceIdSequence.newInstanceId());
+        mService.addNotification(r1);
+        final NotificationRecord r2 = generateNotificationRecord(
+                mTestNotificationChannel, 2, null, true);
+        r2.getSbn().setInstanceId(mNotificationInstanceIdSequence.newInstanceId());
+        mService.addNotification(r2);
+
+        // Third notification that's NOT adjusted, just to make sure that doesn't get spuriously
+        // logged.
+        final NotificationRecord r3 = generateNotificationRecord(
+                mTestNotificationChannel, 3, null, true);
+        r3.getSbn().setInstanceId(mNotificationInstanceIdSequence.newInstanceId());
+        mService.addNotification(r3);
+
+        List<Adjustment> adjustments = new ArrayList<>();
+
+        // Test an adjustment that's associated with a ranking change and one that's not
+        Bundle signals1 = new Bundle();
+        signals1.putInt(Adjustment.KEY_IMPORTANCE, IMPORTANCE_HIGH);
+        Adjustment adjustment1 = new Adjustment(
+                r1.getSbn().getPackageName(), r1.getKey(), signals1, "",
+                r1.getUser().getIdentifier());
+        adjustments.add(adjustment1);
+
+        // This one wouldn't trigger a ranking change, but should still trigger a log.
+        Bundle signals2 = new Bundle();
+        signals2.putFloat(Adjustment.KEY_RANKING_SCORE, -0.5f);
+        Adjustment adjustment2 = new Adjustment(
+                r2.getSbn().getPackageName(), r2.getKey(), signals2, "",
+                r2.getUser().getIdentifier());
+        adjustments.add(adjustment2);
+
+        mBinderService.applyAdjustmentsFromAssistant(null, adjustments);
+        verify(mRankingHandler, times(1)).requestSort();
+
+        // Actually apply the adjustments & recalculate importance when run
+        doAnswer(invocationOnMock -> {
+            ((NotificationRecord) invocationOnMock.getArguments()[0])
+                    .applyAdjustments();
+            ((NotificationRecord) invocationOnMock.getArguments()[0])
+                    .calculateImportance();
+            return null;
+        }).when(mRankingHelper).extractSignals(any(NotificationRecord.class));
+
+        // Now make sure that when the sort happens, we actually log the changes.
+        mService.handleRankingSort();
+
+        // Even though the ranking score change is not meant to trigger a ranking update,
+        // during this process the package visibility & canShowBadge values are changing
+        // in all notifications, so all 3 seem to trigger a ranking change. Here we check instead
+        // that scheduleSendRankingUpdate is sent and that the relevant fields have been changed
+        // accordingly to confirm the adjustments happened to the 2 relevant notifications.
+        verify(handler, times(3)).scheduleSendRankingUpdate();
+        assertEquals(IMPORTANCE_HIGH, r1.getImportance());
+        assertTrue(r2.rankingScoreMatches(-0.5f));
+        assertEquals(2, mNotificationRecordLogger.numCalls());
+        assertEquals(NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_ADJUSTED,
+                mNotificationRecordLogger.event(0));
+        assertEquals(NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_ADJUSTED,
+                mNotificationRecordLogger.event(1));
+        assertEquals(1, mNotificationRecordLogger.get(0).getInstanceId());
+        assertEquals(2, mNotificationRecordLogger.get(1).getInstanceId());
+    }
+
+    @Test
     public void testEnqueuedAdjustmentAppliesAdjustments() throws Exception {
         final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         mService.addEnqueuedNotification(r);
