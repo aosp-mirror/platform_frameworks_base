@@ -1960,11 +1960,6 @@ public class LocationProviderManager extends
             Preconditions.checkState(Thread.holdsLock(mLock));
         }
 
-        if (mDelayedRegister != null) {
-            mAlarmHelper.cancel(mDelayedRegister);
-            mDelayedRegister = null;
-        }
-
         // calculate how long the new request should be delayed before sending it off to the
         // provider, under the assumption that once we send the request off, the provider will
         // immediately attempt to deliver a new location satisfying that request.
@@ -1997,8 +1992,8 @@ public class LocationProviderManager extends
                 public void onAlarm() {
                     synchronized (mLock) {
                         if (mDelayedRegister == this) {
-                            setProviderRequest(newRequest);
                             mDelayedRegister = null;
+                            setProviderRequest(newRequest);
                         }
                     }
                 }
@@ -2025,6 +2020,11 @@ public class LocationProviderManager extends
 
     @GuardedBy("mLock")
     void setProviderRequest(ProviderRequest request) {
+        if (mDelayedRegister != null) {
+            mAlarmHelper.cancel(mDelayedRegister);
+            mDelayedRegister = null;
+        }
+
         EVENT_LOG.logProviderUpdateRequest(mName, request);
         mProvider.getController().setRequest(request);
 
