@@ -167,6 +167,14 @@ public class ActivityOptions {
     public static final String KEY_SPLASH_SCREEN_THEME = "android.activity.splashScreenTheme";
 
     /**
+     * PendingIntent caller allows activity start even if PendingIntent creator is in background.
+     * This only works if the PendingIntent caller is allowed to start background activities,
+     * for example if it's in the foreground, or has BAL permission.
+     * @hide
+     */
+    public static final String KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED =
+            "android.pendingIntent.backgroundActivityAllowed";
+    /**
      * Callback for when the last frame of the animation is played.
      * @hide
      */
@@ -380,6 +388,12 @@ public class ActivityOptions {
     /** @hide */
     public static final int ANIM_REMOTE_ANIMATION = 13;
 
+    /**
+     * Default value for KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED.
+     * @hide
+     **/
+    public static final boolean PENDING_INTENT_BAL_ALLOWED_DEFAULT = true;
+
     private String mPackageName;
     private Rect mLaunchBounds;
     private int mAnimationType = ANIM_UNDEFINED;
@@ -431,6 +445,7 @@ public class ActivityOptions {
     private String mSplashScreenThemeResName;
     @SplashScreen.SplashScreenStyle
     private int mSplashScreenStyle;
+    private boolean mPendingIntentBalAllowed = PENDING_INTENT_BAL_ALLOWED_DEFAULT;
     private boolean mRemoveWithTaskOrganizer;
     private boolean mLaunchedFromBubble;
     private boolean mTransientLaunch;
@@ -1184,6 +1199,8 @@ public class ActivityOptions {
         mRemoteTransition = opts.getParcelable(KEY_REMOTE_TRANSITION);
         mOverrideTaskTransition = opts.getBoolean(KEY_OVERRIDE_TASK_TRANSITION);
         mSplashScreenThemeResName = opts.getString(KEY_SPLASH_SCREEN_THEME);
+        mPendingIntentBalAllowed = opts.getBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED,
+                PENDING_INTENT_BAL_ALLOWED_DEFAULT);
         mRemoveWithTaskOrganizer = opts.getBoolean(KEY_REMOVE_WITH_TASK_ORGANIZER);
         mLaunchedFromBubble = opts.getBoolean(KEY_LAUNCHED_FROM_BUBBLE);
         mTransientLaunch = opts.getBoolean(KEY_TRANSIENT_LAUNCH);
@@ -1397,6 +1414,24 @@ public class ActivityOptions {
     @SplashScreen.SplashScreenStyle
     public int getSplashScreenStyle() {
         return mSplashScreenStyle;
+    }
+
+    /**
+     * Set PendingIntent activity is allowed to be started in the background if the caller
+     * can start background activities.
+     * @hide
+     */
+    public void setPendingIntentBackgroundActivityLaunchAllowed(boolean allowed) {
+        mPendingIntentBalAllowed = allowed;
+    }
+
+    /**
+     * Get PendingIntent activity is allowed to be started in the background if the caller
+     * can start background activities.
+     * @hide
+     */
+    public boolean isPendingIntentBackgroundActivityLaunchAllowed() {
+        return mPendingIntentBalAllowed;
     }
 
     /**
@@ -1972,6 +2007,7 @@ public class ActivityOptions {
         if (mSplashScreenThemeResName != null && !mSplashScreenThemeResName.isEmpty()) {
             b.putString(KEY_SPLASH_SCREEN_THEME, mSplashScreenThemeResName);
         }
+        b.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED, mPendingIntentBalAllowed);
         if (mRemoveWithTaskOrganizer) {
             b.putBoolean(KEY_REMOVE_WITH_TASK_ORGANIZER, mRemoveWithTaskOrganizer);
         }
