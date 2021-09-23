@@ -13102,6 +13102,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                 pkgSetting.pkg.getRequestedPermissions());
                     }
                     mPermissionManager.onPackageInstalled(pkgSetting.pkg,
+                            Process.INVALID_UID /* previousAppId */,
                             permissionParamsBuilder.build(), userId);
                 }
 
@@ -20020,6 +20021,23 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public AndroidPackage getPackage(int uid) {
             return PackageManagerService.this.getPackage(uid);
+        }
+
+        @Override
+        public List<AndroidPackage> getPackagesForAppId(int appId) {
+            final Object obj;
+            synchronized (mLock) {
+                obj = mSettings.getSettingLPr(appId);
+            }
+            if (obj instanceof SharedUserSetting) {
+                final SharedUserSetting sus = (SharedUserSetting) obj;
+                return sus.getPackages();
+            } else if (obj instanceof PackageSetting) {
+                final PackageSetting ps = (PackageSetting) obj;
+                return List.of(ps.getPkg());
+            } else {
+                return Collections.emptyList();
+            }
         }
 
         @Nullable

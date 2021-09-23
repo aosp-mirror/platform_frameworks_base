@@ -1622,7 +1622,7 @@ final class InstallParams extends HandlerParams {
 
             AndroidPackage pkg = mPm.commitReconciledScanResultLocked(reconciledPkg,
                     request.mAllUsers);
-            updateSettingsLI(pkg, reconciledPkg.mInstallArgs, request.mAllUsers, res);
+            updateSettingsLI(pkg, reconciledPkg, request.mAllUsers, res);
 
             final PackageSetting ps = mPm.mSettings.getPackageLPr(packageName);
             if (ps != null) {
@@ -1642,17 +1642,18 @@ final class InstallParams extends HandlerParams {
         return mPm.mSettings.disableSystemPackageLPw(oldPkg.getPackageName(), true);
     }
 
-    private void updateSettingsLI(AndroidPackage newPackage, InstallArgs installArgs,
+    private void updateSettingsLI(AndroidPackage newPackage, ReconciledPackage reconciledPkg,
             int[] allUsers, PackageInstalledInfo res) {
-        updateSettingsInternalLI(newPackage, installArgs, allUsers, res);
+        updateSettingsInternalLI(newPackage, reconciledPkg, allUsers, res);
     }
 
-    private void updateSettingsInternalLI(AndroidPackage pkg, InstallArgs installArgs,
+    private void updateSettingsInternalLI(AndroidPackage pkg, ReconciledPackage reconciledPkg,
             int[] allUsers, PackageInstalledInfo res) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "updateSettings");
 
         final String pkgName = pkg.getPackageName();
         final int[] installedForUsers = res.mOrigUsers;
+        final InstallArgs installArgs = reconciledPkg.mInstallArgs;
         final int installReason = installArgs.mInstallReason;
         InstallSource installSource = installArgs.mInstallSource;
         final String installerPackageName = installSource.installerPackageName;
@@ -1808,8 +1809,9 @@ final class InstallParams extends HandlerParams {
                 }
                 final int autoRevokePermissionsMode = installArgs.mAutoRevokePermissionsMode;
                 permissionParamsBuilder.setAutoRevokePermissionsMode(autoRevokePermissionsMode);
-                mPm.mPermissionManager.onPackageInstalled(pkg, permissionParamsBuilder.build(),
-                        userId);
+                final ScanResult scanResult = reconciledPkg.mScanResult;
+                mPm.mPermissionManager.onPackageInstalled(pkg, scanResult.mPreviousAppId,
+                        permissionParamsBuilder.build(), userId);
             }
             res.mName = pkgName;
             res.mUid = pkg.getUid();

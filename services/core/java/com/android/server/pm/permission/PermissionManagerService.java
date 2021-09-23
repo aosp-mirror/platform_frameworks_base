@@ -2620,8 +2620,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         // being upgraded to target a newer SDK, in which case dangerous permissions
         // are transformed from install time to runtime ones.
 
-        final PackageSetting ps = (PackageSetting) mPackageManagerInt.getPackageSetting(
-                pkg.getPackageName());
+        final PackageSetting ps = mPackageManagerInt.getPackageSetting(pkg.getPackageName());
         if (ps == null) {
             return;
         }
@@ -3954,21 +3953,24 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
     }
 
-    @UserIdInt
-    private int revokeSharedUserPermissionsForDeletedPackageInternal(
-            @Nullable AndroidPackage pkg, @NonNull List<AndroidPackage> sharedUserPkgs,
+    private void revokeSharedUserPermissionsForLeavingPackageInternal(
+            @Nullable AndroidPackage pkg, int appId, @NonNull List<AndroidPackage> sharedUserPkgs,
             @UserIdInt int userId) {
         if (pkg == null) {
             Slog.i(TAG, "Trying to update info for null package. Just ignoring");
-            return UserHandle.USER_NULL;
+            return;
         }
 
         // No shared user packages
         if (sharedUserPkgs.isEmpty()) {
-            return UserHandle.USER_NULL;
+            return;
         }
 
-        int affectedUserId = UserHandle.USER_NULL;
+        PackageSetting disabledPs = mPackageManagerInt.getDisabledSystemPackage(
+                pkg.getPackageName());
+        boolean isShadowingSystemPkg = disabledPs != null && disabledPs.appId == pkg.getUid();
+
+        boolean shouldKillUid = false;
         // Update permissions
         for (String eachPerm : pkg.getRequestedPermissions()) {
             // Check if another package in the shared user needs the permission.
@@ -3985,26 +3987,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 continue;
             }
 
-            PackageSetting disabledPs = mPackageManagerInt.getDisabledSystemPackage(
-                    pkg.getPackageName());
-
-            // If the package is shadowing is a disabled system package,
+            // If the package is shadowing a disabled system package,
             // do not drop permissions that the shadowed package requests.
-            if (disabledPs != null) {
-                boolean reqByDisabledSysPkg = false;
-                for (String permission : disabledPs.pkg.getRequestedPermissions()) {
-                    if (permission.equals(eachPerm)) {
-                        reqByDisabledSysPkg = true;
-                        break;
-                    }
-                }
-                if (reqByDisabledSysPkg) {
-                    continue;
-                }
+            if (isShadowingSystemPkg
+                    && disabledPs.getPkg().getRequestedPermissions().contains(eachPerm)) {
+                continue;
             }
 
             synchronized (mLock) {
-                UidPermissionState uidState = getUidStateLocked(pkg, userId);
+                UidPermissionState uidState = getUidStateLocked(appId, userId);
                 if (uidState == null) {
                     Slog.e(TAG, "Missing permissions state for " + pkg.getPackageName()
                             + " and user " + userId);
@@ -4019,12 +4010,18 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 // TODO(zhanghai): Why are we only killing the UID when GIDs changed, instead of any
                 //  permission change?
                 if (uidState.removePermissionState(bp.getName()) && bp.hasGids()) {
-                    affectedUserId = userId;
+                    shouldKillUid = true;
                 }
             }
         }
 
-        return affectedUserId;
+        // If gids changed, kill all affected packages.
+        if (shouldKillUid) {
+            mHandler.post(() -> {
+                // This has to happen with no lock held.
+                killUid(appId, UserHandle.USER_ALL, KILL_APP_REASON_GIDS_CHANGED);
+            });
+        }
     }
 
     @GuardedBy("mLock")
@@ -4892,9 +4889,48 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         return true;
     }
 
-    private void onPackageInstalledInternal(@NonNull AndroidPackage pkg,
+    private void onPackageInstalledInternal(@NonNull AndroidPackage pkg, int previousAppId,
             @NonNull PermissionManagerServiceInternal.PackageInstalledParams params,
             @UserIdInt int[] userIds) {
+        // If previousAppId is not Process.INVALID_UID, the package is performing a migration out
+        // of a shared user group. Operations we need to do before calling updatePermissions():
+        // - Retrieve the original uid permission state and create a copy of it as the new app's
+        //   uid state. The new permission state will be properly updated in updatePermissions().
+        // - Remove the app from the original shared user group. Other apps in the shared
+        //   user group will perceive as if the original app is uninstalled.
+        if (previousAppId != Process.INVALID_UID) {
+            final PackageSetting ps = mPackageManagerInt.getPackageSetting(pkg.getPackageName());
+            final List<AndroidPackage> origSharedUserPackages =
+                    mPackageManagerInt.getPackagesForAppId(previousAppId);
+
+            synchronized (mLock) {
+                // All users are affected
+                for (final int userId : getAllUserIds()) {
+                    // Retrieve the original uid state
+                    final UserPermissionState userState = mState.getUserState(userId);
+                    if (userState == null) {
+                        continue;
+                    }
+                    final UidPermissionState prevUidState = userState.getUidState(previousAppId);
+                    if (prevUidState == null) {
+                        continue;
+                    }
+
+                    // Insert new uid state by cloning the original one
+                    userState.createUidStateWithExisting(ps.getAppId(), prevUidState);
+
+                    // Remove original app ID from original shared user group
+                    // Should match the implementation of onPackageUninstalledInternal(...)
+                    if (origSharedUserPackages.isEmpty()) {
+                        removeUidStateAndResetPackageInstallPermissionsFixed(
+                                previousAppId, pkg.getPackageName(), userId);
+                    } else {
+                        revokeSharedUserPermissionsForLeavingPackageInternal(pkg, previousAppId,
+                                origSharedUserPackages, userId);
+                    }
+                }
+            }
+        }
         updatePermissions(pkg.getPackageName(), pkg);
         for (final int userId : userIds) {
             addAllowlistedRestrictedPermissionsInternal(pkg,
@@ -4931,6 +4967,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private void onPackageUninstalledInternal(@NonNull String packageName, int appId,
             @Nullable AndroidPackage pkg, @NonNull List<AndroidPackage> sharedUserPkgs,
             @UserIdInt int[] userIds) {
+        // TODO: Handle the case when a system app upgrade is uninstalled and need to rejoin
+        //  a shared UID permission state.
+
         // TODO: Move these checks to check PackageState to be more reliable.
         // System packages should always have an available APK.
         if (pkg != null && pkg.isSystem()
@@ -4956,16 +4995,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 // or packages running under the shared user of the removed
                 // package if revoking the permissions requested only by the removed
                 // package is successful and this causes a change in gids.
-                final int userIdToKill = revokeSharedUserPermissionsForDeletedPackageInternal(pkg,
+                revokeSharedUserPermissionsForLeavingPackageInternal(pkg, appId,
                         sharedUserPkgs, userId);
-                final boolean shouldKill = userIdToKill != UserHandle.USER_NULL;
-                // If gids changed, kill all affected packages.
-                if (shouldKill) {
-                    mHandler.post(() -> {
-                        // This has to happen with no lock held.
-                        killUid(appId, UserHandle.USER_ALL, KILL_APP_REASON_GIDS_CHANGED);
-                    });
-                }
             }
         }
     }
@@ -5236,7 +5267,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         @Override
-        public void onPackageInstalled(@NonNull AndroidPackage pkg,
+        public void onPackageInstalled(@NonNull AndroidPackage pkg, int previousAppId,
                 @NonNull PackageInstalledParams params, @UserIdInt int userId) {
             Objects.requireNonNull(pkg, "pkg");
             Objects.requireNonNull(params, "params");
@@ -5244,7 +5275,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     || userId == UserHandle.USER_ALL, "userId");
             final int[] userIds = userId == UserHandle.USER_ALL ? getAllUserIds()
                     : new int[] { userId };
-            onPackageInstalledInternal(pkg, params, userIds);
+            onPackageInstalledInternal(pkg, previousAppId, params, userIds);
         }
 
         @Override

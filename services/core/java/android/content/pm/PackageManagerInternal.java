@@ -667,6 +667,12 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
      */
     public abstract @Nullable AndroidPackage getPackage(int uid);
 
+
+    /**
+     * Returns all packages for the given app ID.
+     */
+    public abstract @NonNull List<AndroidPackage> getPackagesForAppId(int appId);
+
     /**
      * Returns a list without a change observer.
      *
