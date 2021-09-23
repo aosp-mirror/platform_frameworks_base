@@ -158,7 +158,7 @@ cc_defaults {
         "android.hardware.input.classifier@1.0",
         "android.hardware.ir@1.0",
         "android.hardware.light@2.0",
-        "android.hardware.memtrack-V1-ndk_platform",
+        "android.hardware.memtrack-V1-ndk",
         "android.hardware.power@1.0",
         "android.hardware.power@1.1",
         "android.hardware.power-V1-cpp",
@@ -176,7 +176,7 @@ cc_defaults {
         "android.frameworks.stats@1.0",
         "android.system.suspend.control-V1-cpp",
         "android.system.suspend.control.internal-cpp",
-        "android.system.suspend@1.0",
+        "android.system.suspend-V1-ndk",
         "service.incremental",
     ],
 

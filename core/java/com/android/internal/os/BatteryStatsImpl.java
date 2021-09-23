@@ -66,7 +66,6 @@ import android.provider.Settings;
 import android.telephony.CellSignalStrength;
 import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.ModemActivityInfo;
-import android.telephony.ModemActivityInfo.TransmitPower;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
@@ -7205,7 +7204,7 @@ public class BatteryStatsImpl extends BatteryStats {
         public ControllerActivityCounterImpl getOrCreateModemControllerActivityLocked() {
             if (mModemControllerActivity == null) {
                 mModemControllerActivity = new ControllerActivityCounterImpl(mBsi.mOnBatteryTimeBase,
-                        ModemActivityInfo.TX_POWER_LEVELS);
+                        ModemActivityInfo.getNumTxPowerLevels());
             }
             return mModemControllerActivity;
         }
@@ -8687,7 +8686,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
             if (in.readInt() != 0) {
                 mModemControllerActivity = new ControllerActivityCounterImpl(mBsi.mOnBatteryTimeBase,
-                        ModemActivityInfo.TX_POWER_LEVELS, in);
+                        ModemActivityInfo.getNumTxPowerLevels(), in);
             } else {
                 mModemControllerActivity = null;
             }
@@ -9953,7 +9952,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mBluetoothActivity = new ControllerActivityCounterImpl(mOnBatteryTimeBase,
                 NUM_BT_TX_LEVELS);
         mModemActivity = new ControllerActivityCounterImpl(mOnBatteryTimeBase,
-                ModemActivityInfo.TX_POWER_LEVELS);
+                ModemActivityInfo.getNumTxPowerLevels());
         mMobileRadioActiveTimer = new StopwatchTimer(mClocks, null, -400, null, mOnBatteryTimeBase);
         mMobileRadioActivePerAppTimer = new StopwatchTimer(mClocks, null, -401, null,
                 mOnBatteryTimeBase);
@@ -11131,26 +11130,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    private ModemActivityInfo mLastModemActivityInfo =
-            new ModemActivityInfo(0, 0, 0, new int[0], 0);
-
-    private ModemActivityInfo getDeltaModemActivityInfo(ModemActivityInfo activityInfo) {
-        if (activityInfo == null) {
-            return null;
-        }
-        int[] txTimeMs = new int[ModemActivityInfo.TX_POWER_LEVELS];
-        for (int i = 0; i < ModemActivityInfo.TX_POWER_LEVELS; i++) {
-            txTimeMs[i] = activityInfo.getTransmitPowerInfo().get(i).getTimeInMillis()
-                    - mLastModemActivityInfo.getTransmitPowerInfo().get(i).getTimeInMillis();
-        }
-        ModemActivityInfo deltaInfo = new ModemActivityInfo(activityInfo.getTimestamp(),
-                activityInfo.getSleepTimeMillis() - mLastModemActivityInfo.getSleepTimeMillis(),
-                activityInfo.getIdleTimeMillis() - mLastModemActivityInfo.getIdleTimeMillis(),
-                txTimeMs,
-                activityInfo.getReceiveTimeMillis() - mLastModemActivityInfo.getReceiveTimeMillis());
-        mLastModemActivityInfo = activityInfo;
-        return deltaInfo;
-    }
+    private ModemActivityInfo mLastModemActivityInfo = null;
 
     /**
      * Distribute Cell radio energy info and network traffic to apps.
@@ -11159,7 +11139,9 @@ public class BatteryStatsImpl extends BatteryStats {
         if (DEBUG_ENERGY) {
             Slog.d(TAG, "Updating mobile radio stats with " + activityInfo);
         }
-        ModemActivityInfo deltaInfo = getDeltaModemActivityInfo(activityInfo);
+        ModemActivityInfo deltaInfo = mLastModemActivityInfo == null ? activityInfo
+                : mLastModemActivityInfo.getDelta(activityInfo);
+        mLastModemActivityInfo = activityInfo;
 
         // Add modem tx power to history.
         addModemTxPowerToHistory(deltaInfo);
@@ -11191,10 +11173,9 @@ public class BatteryStatsImpl extends BatteryStats {
                 mModemActivity.getSleepTimeCounter().addCountLocked(
                         deltaInfo.getSleepTimeMillis());
                 mModemActivity.getRxTimeCounter().addCountLocked(deltaInfo.getReceiveTimeMillis());
-                for (int lvl = 0; lvl < ModemActivityInfo.TX_POWER_LEVELS; lvl++) {
+                for (int lvl = 0; lvl < ModemActivityInfo.getNumTxPowerLevels(); lvl++) {
                     mModemActivity.getTxTimeCounters()[lvl]
-                        .addCountLocked(deltaInfo.getTransmitPowerInfo()
-                            .get(lvl).getTimeInMillis());
+                        .addCountLocked(deltaInfo.getTransmitDurationMillisAtPowerLevel(lvl));
                 }
 
                 // POWER_MODEM_CONTROLLER_OPERATING_VOLTAGE is measured in mV, so convert to V.
@@ -11208,11 +11189,11 @@ public class BatteryStatsImpl extends BatteryStats {
                             mPowerProfile.getAveragePower(PowerProfile.POWER_MODEM_CONTROLLER_IDLE)
                             + deltaInfo.getReceiveTimeMillis() *
                             mPowerProfile.getAveragePower(PowerProfile.POWER_MODEM_CONTROLLER_RX);
-                    List<TransmitPower> txPowerInfo = deltaInfo.getTransmitPowerInfo();
-                    for (int i = 0; i < Math.min(txPowerInfo.size(),
+                    for (int i = 0; i < Math.min(ModemActivityInfo.getNumTxPowerLevels(),
                             CellSignalStrength.getNumSignalStrengthLevels()); i++) {
-                        energyUsed += txPowerInfo.get(i).getTimeInMillis() * mPowerProfile
-                            .getAveragePower(PowerProfile.POWER_MODEM_CONTROLLER_TX, i);
+                        energyUsed += deltaInfo.getTransmitDurationMillisAtPowerLevel(i)
+                                * mPowerProfile.getAveragePower(
+                                        PowerProfile.POWER_MODEM_CONTROLLER_TX, i);
                     }
 
                     // We store the power drain as mAms.
@@ -11307,10 +11288,10 @@ public class BatteryStatsImpl extends BatteryStats {
                             }
 
                             if (totalTxPackets > 0 && entry.txPackets > 0) {
-                                for (int lvl = 0; lvl < ModemActivityInfo.TX_POWER_LEVELS; lvl++) {
-                                    long txMs =
-                                            entry.txPackets * deltaInfo.getTransmitPowerInfo()
-                                                .get(lvl).getTimeInMillis();
+                                for (int lvl = 0; lvl < ModemActivityInfo.getNumTxPowerLevels();
+                                        lvl++) {
+                                    long txMs = entry.txPackets
+                                            * deltaInfo.getTransmitDurationMillisAtPowerLevel(lvl);
                                     txMs /= totalTxPackets;
                                     activityCounter.getTxTimeCounters()[lvl].addCountLocked(txMs);
                                 }
@@ -11341,20 +11322,16 @@ public class BatteryStatsImpl extends BatteryStats {
         if (activityInfo == null) {
             return;
         }
-        List<TransmitPower> txPowerInfo = activityInfo.getTransmitPowerInfo();
-        if (txPowerInfo == null || txPowerInfo.size() != ModemActivityInfo.TX_POWER_LEVELS) {
-            return;
-        }
         final long elapsedRealtime = mClocks.elapsedRealtime();
         final long uptime = mClocks.uptimeMillis();
         int levelMaxTimeSpent = 0;
-        for (int i = 1; i < txPowerInfo.size(); i++) {
-            if (txPowerInfo.get(i).getTimeInMillis() > txPowerInfo.get(levelMaxTimeSpent)
-                .getTimeInMillis()) {
+        for (int i = 1; i < ModemActivityInfo.getNumTxPowerLevels(); i++) {
+            if (activityInfo.getTransmitDurationMillisAtPowerLevel(i)
+                    > activityInfo.getTransmitDurationMillisAtPowerLevel(levelMaxTimeSpent)) {
                 levelMaxTimeSpent = i;
             }
         }
-        if (levelMaxTimeSpent == ModemActivityInfo.TX_POWER_LEVELS - 1) {
+        if (levelMaxTimeSpent == ModemActivityInfo.getNumTxPowerLevels() - 1) {
             mHistoryCur.states2 |= HistoryItem.STATE2_CELLULAR_HIGH_TX_POWER_FLAG;
             addHistoryRecordLocked(elapsedRealtime, uptime);
         }
@@ -12771,7 +12748,7 @@ public class BatteryStatsImpl extends BatteryStats {
            timeInRxSignalStrengthLevelMs[i]
                = getPhoneSignalStrengthTime(i, rawRealTime, which) / 1000;
         }
-        long[] txTimeMs = new long[Math.min(ModemActivityInfo.TX_POWER_LEVELS,
+        long[] txTimeMs = new long[Math.min(ModemActivityInfo.getNumTxPowerLevels(),
             counter.getTxTimeCounters().length)];
         long totalTxTimeMs = 0;
         for (int i = 0; i < txTimeMs.length; i++) {
@@ -14817,7 +14794,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mBluetoothActivity = new ControllerActivityCounterImpl(mOnBatteryTimeBase,
                 NUM_BT_TX_LEVELS, in);
         mModemActivity = new ControllerActivityCounterImpl(mOnBatteryTimeBase,
-                ModemActivityInfo.TX_POWER_LEVELS, in);
+                ModemActivityInfo.getNumTxPowerLevels(), in);
         mHasWifiReporting = in.readInt() != 0;
         mHasBluetoothReporting = in.readInt() != 0;
         mHasModemReporting = in.readInt() != 0;

@@ -10,4 +10,6 @@ per-file BatteryUsageStats* = file:/BATTERY_STATS_OWNERS
 per-file *ChargeCalculator* = file:/BATTERY_STATS_OWNERS
 per-file *PowerCalculator* = file:/BATTERY_STATS_OWNERS
 per-file *PowerEstimator* = file:/BATTERY_STATS_OWNERS
+per-file *Kernel* = file:/BATTERY_STATS_OWNERS
+per-file *MultiState* = file:/BATTERY_STATS_OWNERS
 

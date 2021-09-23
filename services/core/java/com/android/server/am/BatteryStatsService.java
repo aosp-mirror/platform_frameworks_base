@@ -1208,7 +1208,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     public void noteModemControllerActivity(ModemActivityInfo info) {
         enforceCallingPermission();
 
-        if (info == null || !info.isValid()) {
+        if (info == null) {
             Slog.e(TAG, "invalid modem data given: " + info);
             return;
         }

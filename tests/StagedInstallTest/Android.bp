@@ -25,14 +25,24 @@ android_test_helper_app {
     name: "StagedInstallInternalTestApp",
     manifest: "app/AndroidManifest.xml",
     srcs: ["app/src/**/*.java"],
-    static_libs: ["androidx.test.rules", "cts-install-lib"],
+    static_libs: [
+        "androidx.test.rules",
+        "cts-install-lib",
+    ],
     test_suites: ["general-tests"],
+    java_resources: [
+        ":StagedInstallTestApexV2",
+    ],
+    platform_apis: true,
 }
 
 java_test_host {
     name: "StagedInstallInternalTest",
     srcs: ["src/**/*.java"],
-    libs: ["tradefed", "cts-shim-host-lib"],
+    libs: [
+        "tradefed",
+        "cts-shim-host-lib",
+    ],
     static_libs: [
         "testng",
         "compatibility-tradefed",

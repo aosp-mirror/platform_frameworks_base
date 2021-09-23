@@ -546,13 +546,14 @@ public class SystemConfig {
         if (!isSystemProcess()) {
             return;
         }
-        // Read configuration of libs from apex module.
+        // Read configuration of features and libs from apex module.
+        int apexPermissionFlag = ALLOW_LIBS | ALLOW_FEATURES;
         // TODO: Use a solid way to filter apex module folders?
         for (File f: FileUtils.listFilesOrEmpty(Environment.getApexDirectory())) {
             if (f.isFile() || f.getPath().contains("@")) {
                 continue;
             }
-            readPermissions(Environment.buildPath(f, "etc", "permissions"), ALLOW_LIBS);
+            readPermissions(Environment.buildPath(f, "etc", "permissions"), apexPermissionFlag);
         }
     }
 

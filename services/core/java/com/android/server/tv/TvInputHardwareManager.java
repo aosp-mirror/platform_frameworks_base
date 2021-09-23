@@ -114,6 +114,8 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     private final SparseBooleanArray mHdmiStateMap = new SparseBooleanArray();
     private final List<Message> mPendingHdmiDeviceEvents = new LinkedList<>();
 
+    private final List<Message> mPendingTvinputInfoEvents = new LinkedList<>();
+
     // Calls to mListener should happen here.
     private final Handler mHandler = new ListenerHandler();
 
@@ -229,7 +231,16 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                             connection.getInputStateLocked(), 0, inputId).sendToTarget();
                     }
                 }
-            }
+            } else {
+                Message msg = mHandler.obtainMessage(ListenerHandler.TVINPUT_INFO_ADDED,
+                    deviceId, cableConnectionStatus, connection);
+                for (Iterator<Message> it = mPendingTvinputInfoEvents.iterator(); it.hasNext();) {
+                    if (it.next().arg1 == deviceId) {
+                    it.remove();
+                    }
+                }
+                mPendingTvinputInfoEvents.add(msg);
+           }
             ITvInputHardwareCallback callback = connection.getCallbackLocked();
             if (callback != null) {
                 try {
@@ -288,6 +299,8 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             }
             mHardwareInputIdMap.put(deviceId, info.getId());
             mInputMap.put(info.getId(), info);
+            processPendingTvInputInfoEventsLocked();
+            Slog.d(TAG,"deviceId ="+ deviceId+", tvinputinfo = "+info);
 
             // Process pending state changes
 
@@ -528,6 +541,20 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             }
         }
     }
+
+
+    private void processPendingTvInputInfoEventsLocked() {
+        for (Iterator<Message> it = mPendingTvinputInfoEvents.iterator(); it.hasNext(); ) {
+            Message msg = it.next();
+            int deviceId =  msg.arg1;
+            String inputId = mHardwareInputIdMap.get(deviceId);
+            if (inputId != null) {
+                msg.sendToTarget();
+                it.remove();
+            }
+        }
+    }
+
 
     private void updateVolume() {
         mCurrentMaxIndex = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
@@ -1181,6 +1208,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         private static final int HDMI_DEVICE_ADDED = 4;
         private static final int HDMI_DEVICE_REMOVED = 5;
         private static final int HDMI_DEVICE_UPDATED = 6;
+        private static final int TVINPUT_INFO_ADDED = 7;
 
         @Override
         public final void handleMessage(Message msg) {
@@ -1222,6 +1250,31 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     } else {
                         Slog.w(TAG, "Could not resolve input ID matching the device info; "
                                 + "ignoring.");
+                    }
+                    break;
+                }
+                case TVINPUT_INFO_ADDED: {
+                    int deviceId = msg.arg1;
+                    int cableConnectionStatus = msg.arg2;
+                    Connection connection =(Connection)msg.obj;
+
+                    int previousConfigsLength = connection.getConfigsLengthLocked();
+                    int previousCableConnectionStatus = connection.getInputStateLocked();
+                    String inputId = mHardwareInputIdMap.get(deviceId);
+
+                    if (inputId != null) {
+                        if (connection.updateCableConnectionStatusLocked(cableConnectionStatus)) {
+                            if (previousCableConnectionStatus != connection.getInputStateLocked()) {
+                                mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
+                                    connection.getInputStateLocked(), 0, inputId).sendToTarget();
+                            }
+                        } else {
+                            if ((previousConfigsLength == 0)
+                                    != (connection.getConfigsLengthLocked() == 0)) {
+                                mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
+                                    connection.getInputStateLocked(), 0, inputId).sendToTarget();
+                            }
+                        }
                     }
                     break;
                 }

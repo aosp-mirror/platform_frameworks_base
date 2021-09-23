@@ -18,11 +18,12 @@
 
 //#define LOG_NDEBUG 0
 
+#include <aidl/android/system/suspend/ISystemSuspend.h>
+#include <aidl/android/system/suspend/IWakeLock.h>
 #include <android/hardware/power/1.1/IPower.h>
 #include <android/hardware/power/Boost.h>
 #include <android/hardware/power/IPower.h>
 #include <android/hardware/power/Mode.h>
-#include <android/system/suspend/1.0/ISystemSuspend.h>
 #include <android/system/suspend/ISuspendControlService.h>
 #include <android/system/suspend/internal/ISuspendControlServiceInternal.h>
 #include <nativehelper/JNIHelp.h>
@@ -33,6 +34,7 @@
 #include <limits.h>
 
 #include <android-base/chrono_utils.h>
+#include <android/binder_manager.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
 #include <binder/IServiceManager.h>
@@ -40,23 +42,23 @@
 #include <hardware/power.h>
 #include <hardware_legacy/power.h>
 #include <hidl/ServiceManagement.h>
+#include <utils/Log.h>
+#include <utils/String8.h>
 #include <utils/Timers.h>
 #include <utils/misc.h>
-#include <utils/String8.h>
-#include <utils/Log.h>
 
 #include "com_android_server_power_PowerManagerService.h"
 
+using aidl::android::system::suspend::ISystemSuspend;
+using aidl::android::system::suspend::IWakeLock;
+using aidl::android::system::suspend::WakeLockType;
+using android::String8;
 using android::hardware::Return;
 using android::hardware::Void;
 using android::hardware::power::Boost;
 using android::hardware::power::Mode;
-using android::hardware::power::V1_0::PowerHint;
 using android::hardware::power::V1_0::Feature;
-using android::String8;
-using android::system::suspend::V1_0::ISystemSuspend;
-using android::system::suspend::V1_0::IWakeLock;
-using android::system::suspend::V1_0::WakeLockType;
+using android::hardware::power::V1_0::PowerHint;
 using android::system::suspend::ISuspendControlService;
 using IPowerV1_1 = android::hardware::power::V1_1::IPower;
 using IPowerV1_0 = android::hardware::power::V1_0::IPower;
@@ -352,20 +354,21 @@ void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t 
     }
 }
 
-static sp<ISystemSuspend> gSuspendHal = nullptr;
+static std::shared_ptr<ISystemSuspend> gSuspendHal = nullptr;
 static sp<ISuspendControlService> gSuspendControl = nullptr;
 static sp<system::suspend::internal::ISuspendControlServiceInternal> gSuspendControlInternal =
         nullptr;
-static sp<IWakeLock> gSuspendBlocker = nullptr;
+static std::shared_ptr<IWakeLock> gSuspendBlocker = nullptr;
 static std::mutex gSuspendMutex;
 
 // Assume SystemSuspend HAL is always alive.
 // TODO: Force device to restart if SystemSuspend HAL dies.
-sp<ISystemSuspend> getSuspendHal() {
+std::shared_ptr<ISystemSuspend> getSuspendHal() {
     static std::once_flag suspendHalFlag;
-    std::call_once(suspendHalFlag, [](){
-        ::android::hardware::details::waitForHwService(ISystemSuspend::descriptor, "default");
-        gSuspendHal = ISystemSuspend::getService();
+    std::call_once(suspendHalFlag, []() {
+        const std::string suspendInstance = std::string() + ISystemSuspend::descriptor + "/default";
+        gSuspendHal = ISystemSuspend::fromBinder(
+                ndk::SpAIBinder(AServiceManager_waitForService(suspendInstance.c_str())));
         assert(gSuspendHal != nullptr);
     });
     return gSuspendHal;
@@ -403,7 +406,7 @@ void enableAutoSuspend() {
         std::lock_guard<std::mutex> lock(gSuspendMutex);
         if (gSuspendBlocker) {
             gSuspendBlocker->release();
-            gSuspendBlocker.clear();
+            gSuspendBlocker = nullptr;
         }
     }
 }
@@ -411,9 +414,10 @@ void enableAutoSuspend() {
 void disableAutoSuspend() {
     std::lock_guard<std::mutex> lock(gSuspendMutex);
     if (!gSuspendBlocker) {
-        sp<ISystemSuspend> suspendHal = getSuspendHal();
-        gSuspendBlocker = suspendHal->acquireWakeLock(WakeLockType::PARTIAL,
-                "PowerManager.SuspendLockout");
+        std::shared_ptr<ISystemSuspend> suspendHal = getSuspendHal();
+        suspendHal->acquireWakeLock(WakeLockType::PARTIAL, "PowerManager.SuspendLockout",
+                                    &gSuspendBlocker);
+        assert(gSuspendBlocker != nullptr);
     }
 }
 

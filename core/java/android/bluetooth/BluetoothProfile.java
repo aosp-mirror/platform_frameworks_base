@@ -229,12 +229,18 @@ public interface BluetoothProfile {
     int MCP_SERVER = 24;
 
     /**
+     * Coordinated Set Identification Profile set coordinator
+     *
+     */
+    int CSIP_SET_COORDINATOR = 25;
+
+    /**
      * Max profile ID. This value should be updated whenever a new profile is added to match
      * the largest value assigned to a profile.
      *
      * @hide
      */
-    int MAX_PROFILE_ID = 24;
+    int MAX_PROFILE_ID = 25;
 
     /**
      * Default priority for devices that we try to auto-connect to and
