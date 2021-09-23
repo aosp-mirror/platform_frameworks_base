@@ -968,7 +968,7 @@ public class BubbleStackView extends FrameLayout
             }
         });
         mExpandedViewAlphaAnimator.addUpdateListener(valueAnimator -> {
-            if (mExpandedBubble != null) {
+            if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
                 mExpandedBubble.getExpandedView().setTaskViewAlpha(
                         (float) valueAnimator.getAnimatedValue());
             }
