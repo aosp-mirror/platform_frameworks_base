@@ -3320,11 +3320,15 @@ package android.hardware.display {
 package android.hardware.hdmi {
 
   public abstract class HdmiClient {
-    method public void deviceSelect(int, @NonNull android.hardware.hdmi.HdmiTvClient.SelectCallback);
     method public android.hardware.hdmi.HdmiDeviceInfo getActiveSource();
+    method public void selectDevice(int, @NonNull android.hardware.hdmi.HdmiClient.SelectedDeviceCallback);
     method public void sendKeyEvent(int, boolean);
     method public void sendVendorCommand(int, byte[], boolean);
     method public void setVendorCommandListener(@NonNull android.hardware.hdmi.HdmiControlManager.VendorCommandListener);
+  }
+
+  public static interface HdmiClient.SelectedDeviceCallback {
+    method public void onComplete(int);
   }
 
   public final class HdmiControlManager {
