@@ -898,6 +898,12 @@ static jlongArray nativeGetPhysicalDisplayIds(JNIEnv* env, jclass clazz) {
     return array;
 }
 
+static jlong nativeGetPrimaryPhysicalDisplayId(JNIEnv* env, jclass clazz) {
+    PhysicalDisplayId displayId;
+    SurfaceComposerClient::getPrimaryPhysicalDisplayId(&displayId);
+    return static_cast<jlong>(displayId.value);
+}
+
 static jobject nativeGetPhysicalDisplayToken(JNIEnv* env, jclass clazz, jlong physicalDisplayId) {
     const auto id = DisplayId::fromValue<PhysicalDisplayId>(physicalDisplayId);
     if (!id) return nullptr;
@@ -1906,6 +1912,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeReleaseFrameRateFlexibilityToken },
     {"nativeGetPhysicalDisplayIds", "()[J",
             (void*)nativeGetPhysicalDisplayIds },
+    {"nativeGetPrimaryPhysicalDisplayId", "()J",
+            (void*)nativeGetPrimaryPhysicalDisplayId },
     {"nativeGetPhysicalDisplayToken", "(J)Landroid/os/IBinder;",
             (void*)nativeGetPhysicalDisplayToken },
     {"nativeCreateDisplay", "(Ljava/lang/String;Z)Landroid/os/IBinder;",
