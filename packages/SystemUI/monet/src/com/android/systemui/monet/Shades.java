@@ -53,10 +53,15 @@ public class Shades {
      */
     public static @ColorInt int[] of(float hue, float chroma) {
         int[] shades = new int[12];
-        shades[0] = ColorUtils.CAMToColor(hue, chroma, 99);
-        shades[1] = ColorUtils.CAMToColor(hue, chroma, 95);
+        // At tone 90 and above, blue and yellow hues can reach a much higher chroma.
+        // To preserve a consistent appearance across all hues, use a maximum chroma of 40.
+        shades[0] = ColorUtils.CAMToColor(hue, Math.min(40f, chroma), 99);
+        shades[1] = ColorUtils.CAMToColor(hue, Math.min(40f, chroma), 95);
         for (int i = 2; i < 12; i++) {
             float lStar = (i == 6) ? MIDDLE_LSTAR : 100 - 10 * (i - 1);
+            if (lStar >= 90) {
+                chroma = Math.min(40f, chroma);
+            }
             shades[i] = ColorUtils.CAMToColor(hue, chroma, lStar);
         }
         return shades;
