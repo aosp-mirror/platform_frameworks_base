@@ -96,4 +96,10 @@ public class UwbInjector {
             return true;
         }
     }
+
+    /** Returns true if airplane mode is turned on. */
+    public boolean isAirplaneModeOn() {
+        return Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.AIRPLANE_MODE_ON, 0) == 1;
+    }
 }
