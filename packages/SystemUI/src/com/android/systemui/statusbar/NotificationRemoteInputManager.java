@@ -507,15 +507,19 @@ public class NotificationRemoteInputManager implements Dumpable {
 
         riv.setRevealParameters(cx, cy, r);
         riv.setPendingIntent(pendingIntent);
+        riv.getController().setPendingIntent(pendingIntent);
         riv.setRemoteInput(inputs, input, editedSuggestionInfo);
+        riv.getController().setRemoteInput(input);
+        riv.getController().setRemoteInputs(inputs);
         riv.focusAnimated();
         if (userMessageContent != null) {
             riv.setEditTextContent(userMessageContent);
         }
         if (deferBouncer) {
             final ExpandableNotificationRow finalRow = row;
-            riv.setBouncerChecker(() -> !authBypassCheck.canSendRemoteInputWithoutBouncer()
-                    && showBouncerForRemoteInput(view, pendingIntent, finalRow));
+            riv.getController().setBouncerChecker(() ->
+                    !authBypassCheck.canSendRemoteInputWithoutBouncer()
+                            && showBouncerForRemoteInput(view, pendingIntent, finalRow));
         }
 
         return true;
