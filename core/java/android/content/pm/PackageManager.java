@@ -3934,6 +3934,15 @@ public abstract class PackageManager {
     public static final String FEATURE_APP_COMPAT_OVERRIDES =
             "android.software.app_compat_overrides";
 
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
+     * supports communal mode,
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_COMMUNAL_MODE = "android.software.communal_mode";
+
     /** @hide */
     public static final boolean APP_ENUMERATION_ENABLED_BY_DEFAULT = true;
 
