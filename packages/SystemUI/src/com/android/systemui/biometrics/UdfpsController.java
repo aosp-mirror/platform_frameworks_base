@@ -242,7 +242,7 @@ public class UdfpsController implements DozeReceiver {
                 final UdfpsEnrollHelper enrollHelper;
                 if (reason == IUdfpsOverlayController.REASON_ENROLL_FIND_SENSOR
                         || reason == IUdfpsOverlayController.REASON_ENROLL_ENROLLING) {
-                    enrollHelper = new UdfpsEnrollHelper(mContext, reason);
+                    enrollHelper = new UdfpsEnrollHelper(mContext, mFingerprintManager, reason);
                 } else {
                     enrollHelper = null;
                 }
