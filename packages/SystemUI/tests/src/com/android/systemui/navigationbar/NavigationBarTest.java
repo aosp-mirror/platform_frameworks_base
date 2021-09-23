@@ -165,9 +165,12 @@ public class NavigationBarTest extends SysuiTestCase {
         Display defaultDisplay = mContext.getSystemService(WindowManager.class).getDefaultDisplay();
         when(windowManager.getDefaultDisplay()).thenReturn(
                 defaultDisplay);
-        WindowMetrics metrics = mContext.getSystemService(WindowManager.class)
+        WindowMetrics maximumWindowMetrics = mContext.getSystemService(WindowManager.class)
                 .getMaximumWindowMetrics();
-        when(windowManager.getMaximumWindowMetrics()).thenReturn(metrics);
+        when(windowManager.getMaximumWindowMetrics()).thenReturn(maximumWindowMetrics);
+        WindowMetrics currentWindowMetrics = mContext.getSystemService(WindowManager.class)
+                .getCurrentWindowMetrics();
+        when(windowManager.getCurrentWindowMetrics()).thenReturn(currentWindowMetrics);
         doNothing().when(windowManager).addView(any(), any());
         mContext.addMockSystemService(Context.WINDOW_SERVICE, windowManager);
         mSysuiTestableContextExternal.addMockSystemService(Context.WINDOW_SERVICE, windowManager);
