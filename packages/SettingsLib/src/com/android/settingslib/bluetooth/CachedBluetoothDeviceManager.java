@@ -45,6 +45,7 @@ public class CachedBluetoothDeviceManager {
     HearingAidDeviceManager mHearingAidDeviceManager;
     @VisibleForTesting
     CsipDeviceManager mCsipDeviceManager;
+    BluetoothDevice mOngoingSetMemberPair;
 
     CachedBluetoothDeviceManager(Context context, LocalBluetoothManager localBtManager) {
         mContext = context;
@@ -335,6 +336,74 @@ public class CachedBluetoothDeviceManager {
             mainDevice.unpair();
             mainDevice.setSubDevice(null);
         }
+    }
+
+    /**
+     * Called when we found a set member of a group. The function will check the {@code groupId} if
+     * it exists and if there is a ongoing pair, the device would be ignored.
+     *
+     * @param device The found device
+     * @param groupId The group id of the found device
+     */
+    public synchronized void onSetMemberAppear(BluetoothDevice device, int groupId) {
+        Log.d(TAG, "onSetMemberAppear, groupId: " + groupId + " device: " + device.toString());
+
+        if (mOngoingSetMemberPair != null) {
+            Log.d(TAG, "Ongoing set memberPairing in process, drop it!");
+            return;
+        }
+
+        if (mCsipDeviceManager.onSetMemberAppear(device, groupId)) {
+            mOngoingSetMemberPair = device;
+        }
+    }
+
+    /**
+     * Called when the bond state change. If the bond state change is related with the
+     * ongoing set member pair, the cachedBluetoothDevice will be created but the UI
+     * would not be updated. For the other case, return {@code false} to go through the normal
+     * flow.
+     *
+     * @param device The device
+     * @param bondState The new bond state
+     *
+     * @return {@code true}, if the bond state change for the device is handled inside this
+     * function, and would not like to update the UI. If not, return {@code false}.
+     */
+    public synchronized boolean onBondStateChangedIfProcess(BluetoothDevice device, int bondState) {
+        if (mOngoingSetMemberPair == null || !mOngoingSetMemberPair.equals(device)) {
+            return false;
+        }
+
+        if (bondState == BluetoothDevice.BOND_BONDING) {
+            return true;
+        }
+
+        mOngoingSetMemberPair = null;
+        if (bondState != BluetoothDevice.BOND_NONE) {
+            if (findDevice(device) == null) {
+                final LocalBluetoothProfileManager profileManager = mBtManager.getProfileManager();
+                CachedBluetoothDevice newDevice =
+                        new CachedBluetoothDevice(mContext, profileManager, device);
+                mCachedDevices.add(newDevice);
+                findDevice(device).connect();
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if the device is the one which is initial paired locally by CSIP. The setting
+     * would depned on it to accept the pairing request automatically
+     *
+     * @param device The device
+     *
+     * @return {@code true}, if the device is ongoing pair by CSIP. Otherwise, return
+     * {@code false}.
+     */
+    public boolean isOngoingPairByCsip(BluetoothDevice device) {
+        return !(mOngoingSetMemberPair == null) && mOngoingSetMemberPair.equals(device);
     }
 
     private void log(String msg) {
