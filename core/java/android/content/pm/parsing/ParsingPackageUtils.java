@@ -217,6 +217,11 @@ public class ParsingPackageUtils {
     public static final int PARSE_IS_SYSTEM_DIR = 1 << 4;
     public static final int PARSE_COLLECT_CERTIFICATES = 1 << 5;
     public static final int PARSE_ENFORCE_CODE = 1 << 6;
+    /**
+     * This flag is applied in the ApkLiteParser. Used by OverlayConfigParser to ignore the
+     * checks of required system property within the overlay tag.
+     */
+    public static final int PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY = 1 << 7;
     public static final int PARSE_CHATTY = 1 << 31;
 
     @IntDef(flag = true, prefix = { "PARSE_" }, value = {
@@ -227,6 +232,7 @@ public class ParsingPackageUtils {
             PARSE_IGNORE_PROCESSES,
             PARSE_IS_SYSTEM_DIR,
             PARSE_MUST_BE_APK,
+            PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ParseFlags {}
