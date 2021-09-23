@@ -315,13 +315,13 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mOneHandedController = oneHandedController;
         mPipTransitionController = pipTransitionController;
         mTaskStackListener = taskStackListener;
-        mPipInputConsumer = new PipInputConsumer(WindowManagerGlobal.getWindowManagerService(),
-                INPUT_CONSUMER_PIP, mainExecutor);
         //TODO: move this to ShellInit when PipController can be injected
         mMainExecutor.execute(this::init);
     }
 
     public void init() {
+        mPipInputConsumer = new PipInputConsumer(WindowManagerGlobal.getWindowManagerService(),
+                INPUT_CONSUMER_PIP, mMainExecutor);
         mPipTransitionController.registerPipTransitionCallback(this);
         mPipTaskOrganizer.registerOnDisplayIdChangeCallback((int displayId) -> {
             mPipBoundsState.setDisplayId(displayId);
