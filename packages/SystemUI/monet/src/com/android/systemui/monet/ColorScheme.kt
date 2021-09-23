@@ -37,8 +37,7 @@ const val NEUTRAL2_CHROMA = 8.0f
 
 const val GOOGLE_BLUE = 0xFF1b6ef3.toInt()
 
-const val MIN_CHROMA = 15
-const val MIN_LSTAR = 10
+const val MIN_CHROMA = 5
 
 public class ColorScheme(@ColorInt seed: Int, val darkTheme: Boolean) {
 
@@ -75,7 +74,14 @@ public class ColorScheme(@ColorInt seed: Int, val darkTheme: Boolean) {
         get() = ColorUtils.setAlphaComponent(if (darkTheme) accent1[2] else accent1[6], 0xFF)
 
     init {
-        val seedArgb = if (seed == Color.TRANSPARENT) GOOGLE_BLUE else seed
+        val proposedSeedCam = Cam.fromInt(seed)
+        val seedArgb = if (seed == Color.TRANSPARENT) {
+            GOOGLE_BLUE
+        } else if (proposedSeedCam.chroma < 5) {
+            GOOGLE_BLUE
+        } else {
+            seed
+        }
         val camSeed = Cam.fromInt(seedArgb)
         val hue = camSeed.hue
         val chroma = camSeed.chroma.coerceAtLeast(ACCENT1_CHROMA)
@@ -129,9 +135,7 @@ public class ColorScheme(@ColorInt seed: Int, val darkTheme: Boolean) {
                 val distinctColors = wallpaperColors.mainColors.map {
                     it.toArgb()
                 }.distinct().filter {
-                    val cam = Cam.fromInt(it)
-                    val lstar = lstarFromInt(it)
-                    cam.chroma >= MIN_CHROMA && lstar >= MIN_LSTAR
+                    Cam.fromInt(it).chroma >= MIN_CHROMA
                 }.toList()
 
                 if (distinctColors.isEmpty()) {
@@ -164,7 +168,7 @@ public class ColorScheme(@ColorInt seed: Int, val darkTheme: Boolean) {
                 val cam = it.value
                 val lstar = lstarFromInt(it.key)
                 val proportion = intToHueProportion[it.key]!!
-                cam.chroma >= MIN_CHROMA && lstar >= MIN_LSTAR &&
+                cam.chroma >= MIN_CHROMA &&
                         (totalPopulationMeaningless || proportion > 0.01)
             }
             // Sort the colors by score, from high to low.
