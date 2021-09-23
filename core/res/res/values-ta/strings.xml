@@ -2006,7 +2006,7 @@
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"மொபைலில் போதுமான சார்ஜ் உள்ளது. அம்சங்கள் இனி தடையின்றி இயங்கும்."</string>
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"டேப்லெட்டில் போதுமான சார்ஜ் உள்ளது. அம்சங்கள் இனி தடையின்றி இயங்கும்."</string>
     <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"சாதனத்தில் போதுமான சார்ஜ் உள்ளது. அம்சங்கள் இனி தடையின்றி இயங்கும்."</string>
-    <string name="mime_type_folder" msgid="2203536499348787650">"கோப்புறை"</string>
+    <string name="mime_type_folder" msgid="2203536499348787650">"ஃபோல்டர்"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android ஆப்ஸ்"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"ஃபைல்"</string>
     <string name="mime_type_generic_ext" msgid="9220220924380909486">"<xliff:g id="EXTENSION">%1$s</xliff:g> ஃபைல்"</string>

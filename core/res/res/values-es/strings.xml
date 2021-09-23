@@ -998,7 +998,7 @@
     </plurals>
     <string name="last_month" msgid="1528906781083518683">"El mes pasado"</string>
     <string name="older" msgid="1645159827884647400">"Anterior"</string>
-    <string name="preposition_for_date" msgid="2780767868832729599">"el <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_date" msgid="2780767868832729599">"<xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="4336835286453822053">"a las <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="3149809685340130039">"en <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8394717255950176156">"día"</string>

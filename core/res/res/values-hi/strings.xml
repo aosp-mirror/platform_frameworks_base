@@ -692,10 +692,10 @@
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"इस फ़ोन पर मौजूद इस उपयोगकर्ता का डेटा बिना चेतावनी के मिटा दें."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"डिवाइस वैश्विक प्रॉक्‍सी सेट करें"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"नीति चालू होने के दौरान इस्तेमाल करने के लिए डिवाइस ग्लोबल प्रॉक्‍सी सेट करें. केवल डिवाइस का मालिक ही ग्लोबल प्रॉक्‍सी सेट कर सकता है."</string>
-    <string name="policylab_expirePassword" msgid="6015404400532459169">"स्‍क्रीन लॉक पासवर्ड समाप्‍ति सेट करें"</string>
+    <string name="policylab_expirePassword" msgid="6015404400532459169">"स्‍क्रीन लॉक पासवर्ड के खत्म होने की अवधि सेट करें"</string>
     <string name="policydesc_expirePassword" msgid="9136524319325960675">"यह बदलें कि स्‍क्रीन लॉक पासवर्ड, पिन या पैटर्न को कितने समय में बदला जाना चाहिए."</string>
     <string name="policylab_encryptedStorage" msgid="9012936958126670110">"मेमोरी को सुरक्षित करने का तरीका सेट करें"</string>
-    <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"संग्रहित ऐप्स डेटा को एन्क्रिप्ट किया जाना आवश्‍यक है."</string>
+    <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"स्टोर किए गए ऐप डेटा को एन्क्रिप्ट किया जाना ज़रूरी है."</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"कैमरों को अक्षम करें"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"सभी डिवाइस कैमरों का उपयोग रोकें."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"स्‍क्रीन लॉक की कुछ सुविधाएं बंद करना"</string>
