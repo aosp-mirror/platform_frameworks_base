@@ -4458,6 +4458,8 @@
 
   <java-symbol type="integer" name="config_customizedMaxCachedProcesses" />
 
+  <java-symbol type="color" name="overview_background"/>
+
   <java-symbol type="bool" name="config_disableTaskSnapshots" />
 
   <java-symbol type="string" name="config_secondaryBuiltInDisplayCutout" />
