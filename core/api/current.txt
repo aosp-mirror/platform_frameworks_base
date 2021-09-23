@@ -46987,8 +46987,15 @@ package android.view {
   }
 
   @UiThread public interface AttachedSurfaceControl {
+    method public default void addOnSurfaceTransformHintChangedListener(@NonNull android.view.AttachedSurfaceControl.OnSurfaceTransformHintChangedListener);
     method public boolean applyTransactionOnDraw(@NonNull android.view.SurfaceControl.Transaction);
     method @Nullable public android.view.SurfaceControl.Transaction buildReparentTransaction(@NonNull android.view.SurfaceControl);
+    method public default int getSurfaceTransformHint();
+    method public default void removeOnSurfaceTransformHintChangedListener(@NonNull android.view.AttachedSurfaceControl.OnSurfaceTransformHintChangedListener);
+  }
+
+  @UiThread public static interface AttachedSurfaceControl.OnSurfaceTransformHintChangedListener {
+    method public void onSurfaceTransformHintChanged(int);
   }
 
   public final class Choreographer {
