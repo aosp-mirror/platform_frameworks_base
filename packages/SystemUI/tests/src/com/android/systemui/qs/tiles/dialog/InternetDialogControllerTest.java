@@ -15,7 +15,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,10 +33,6 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableResources;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.WindowManager;
-import android.widget.TextView;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
@@ -58,6 +53,7 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.AccessPointController;
 import com.android.systemui.toast.SystemUIToast;
 import com.android.systemui.toast.ToastFactory;
+import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -68,7 +64,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -98,6 +93,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     private SubscriptionManager mSubscriptionManager;
     @Mock
     private Handler mHandler;
+    @Mock
+    private Handler mWorkerHandler;
     @Mock
     private ActivityStarter mActivityStarter;
     @Mock
@@ -136,6 +133,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     private View mToastView;
     @Mock
     private Animator mAnimator;
+    @Mock
+    private CarrierConfigTracker mCarrierConfigTracker;
 
     private TestableResources mTestableResources;
     private MockInternetDialogController mInternetDialogController;
@@ -157,6 +156,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         when(mWifiEntry4.getConnectedState()).thenReturn(WifiEntry.CONNECTED_STATE_DISCONNECTED);
         mAccessPoints.add(mConnectedEntry);
         mAccessPoints.add(mWifiEntry1);
+        when(mAccessPointController.getMergedCarrierEntry()).thenReturn(mMergedCarrierEntry);
         when(mSubscriptionManager.getActiveSubscriptionIdList()).thenReturn(new int[]{SUB_ID});
         when(mAccessPointController.getMergedCarrierEntry()).thenReturn(mMergedCarrierEntry);
         when(mToastFactory.createToast(any(), anyString(), anyString(), anyInt(), anyInt()))
@@ -170,7 +170,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
                 mSubscriptionManager, mTelephonyManager, mWifiManager,
                 mock(ConnectivityManager.class), mHandler, mExecutor, mBroadcastDispatcher,
                 mock(KeyguardUpdateMonitor.class), mGlobalSettings, mKeyguardStateController,
-                mWindowManager, mToastFactory);
+                mWindowManager, mToastFactory, mWorkerHandler, mCarrierConfigTracker);
         mSubscriptionManager.addOnSubscriptionsChangedListener(mExecutor,
                 mInternetDialogController.mOnSubscriptionsChangedListener);
         mInternetDialogController.onStart(mInternetDialogCallback, true);
@@ -569,6 +569,39 @@ public class InternetDialogControllerTest extends SysuiTestCase {
                 .onAccessPointsChanged(mWifiEntries, null /* connectedEntry */);
     }
 
+    @Test
+    public void setMergedCarrierWifiEnabledIfNeed_carrierProvisionsEnabled_doNothing() {
+        when(mCarrierConfigTracker.getCarrierProvisionsWifiMergedNetworksBool(SUB_ID))
+                .thenReturn(true);
+
+        mInternetDialogController.setMergedCarrierWifiEnabledIfNeed(SUB_ID, true);
+
+        verify(mMergedCarrierEntry, never()).setEnabled(anyBoolean());
+    }
+
+    @Test
+    public void setMergedCarrierWifiEnabledIfNeed_mergedCarrierEntryEmpty_doesntCrash() {
+        when(mCarrierConfigTracker.getCarrierProvisionsWifiMergedNetworksBool(SUB_ID))
+                .thenReturn(false);
+        when(mAccessPointController.getMergedCarrierEntry()).thenReturn(null);
+
+        mInternetDialogController.setMergedCarrierWifiEnabledIfNeed(SUB_ID, true);
+    }
+
+    @Test
+    public void setMergedCarrierWifiEnabledIfNeed_neededSetMergedCarrierEntry_setTogether() {
+        when(mCarrierConfigTracker.getCarrierProvisionsWifiMergedNetworksBool(SUB_ID))
+                .thenReturn(false);
+
+        mInternetDialogController.setMergedCarrierWifiEnabledIfNeed(SUB_ID, true);
+
+        verify(mMergedCarrierEntry).setEnabled(true);
+
+        mInternetDialogController.setMergedCarrierWifiEnabledIfNeed(SUB_ID, false);
+
+        verify(mMergedCarrierEntry).setEnabled(false);
+    }
+
     private String getResourcesString(String name) {
         return mContext.getResources().getString(getResourcesId(name));
     }
@@ -591,11 +624,13 @@ public class InternetDialogControllerTest extends SysuiTestCase {
                 BroadcastDispatcher broadcastDispatcher,
                 KeyguardUpdateMonitor keyguardUpdateMonitor, GlobalSettings globalSettings,
                 KeyguardStateController keyguardStateController, WindowManager windowManager,
-                ToastFactory toastFactory) {
+                ToastFactory toastFactory, Handler workerHandler,
+                CarrierConfigTracker carrierConfigTracker) {
             super(context, uiEventLogger, starter, accessPointController, subscriptionManager,
                     telephonyManager, wifiManager, connectivityManager, handler, mainExecutor,
                     broadcastDispatcher, keyguardUpdateMonitor, globalSettings,
-                    keyguardStateController, windowManager, toastFactory);
+                    keyguardStateController, windowManager, toastFactory, workerHandler,
+                    carrierConfigTracker);
             mGlobalSettings = globalSettings;
         }
 

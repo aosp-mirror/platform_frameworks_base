@@ -25,7 +25,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
@@ -73,6 +72,7 @@ import com.android.settingslib.net.SignalStrengthUtil;
 import com.android.settingslib.wifi.WifiUtils;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -80,6 +80,7 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.AccessPointController;
 import com.android.systemui.toast.SystemUIToast;
 import com.android.systemui.toast.ToastFactory;
+import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.wifitrackerlib.MergedCarrierEntry;
 import com.android.wifitrackerlib.WifiEntry;
@@ -125,10 +126,12 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
     private SubscriptionManager mSubscriptionManager;
     private TelephonyManager mTelephonyManager;
     private ConnectivityManager mConnectivityManager;
+    private CarrierConfigTracker mCarrierConfigTracker;
     private TelephonyDisplayInfo mTelephonyDisplayInfo =
             new TelephonyDisplayInfo(TelephonyManager.NETWORK_TYPE_UNKNOWN,
                     TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE);
     private Handler mHandler;
+    private Handler mWorkerHandler;
     private MobileMappings.Config mConfig = null;
     private Executor mExecutor;
     private AccessPointController mAccessPointController;
@@ -191,11 +194,14 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
             @Main Handler handler, @Main Executor mainExecutor,
             BroadcastDispatcher broadcastDispatcher, KeyguardUpdateMonitor keyguardUpdateMonitor,
             GlobalSettings globalSettings, KeyguardStateController keyguardStateController,
-            WindowManager windowManager, ToastFactory toastFactory) {
+            WindowManager windowManager, ToastFactory toastFactory,
+            @Background Handler workerHandler,
+            CarrierConfigTracker carrierConfigTracker) {
         if (DEBUG) {
             Log.d(TAG, "Init InternetDialogController");
         }
         mHandler = handler;
+        mWorkerHandler = workerHandler;
         mExecutor = mainExecutor;
         mContext = context;
         mGlobalSettings = globalSettings;
@@ -203,6 +209,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         mTelephonyManager = telephonyManager;
         mConnectivityManager = connectivityManager;
         mSubscriptionManager = subscriptionManager;
+        mCarrierConfigTracker = carrierConfigTracker;
         mBroadcastDispatcher = broadcastDispatcher;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mKeyguardStateController = keyguardStateController;
@@ -611,6 +618,24 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         return mergedCarrierEntry != null && mergedCarrierEntry.isDefaultNetwork();
     }
 
+    @WorkerThread
+    void setMergedCarrierWifiEnabledIfNeed(int subId, boolean enabled) {
+        // If the Carrier Provisions Wi-Fi Merged Networks enabled, do not set the merged carrier
+        // Wi-Fi state together.
+        if (mCarrierConfigTracker.getCarrierProvisionsWifiMergedNetworksBool(subId)) {
+            return;
+        }
+
+        final MergedCarrierEntry entry = mAccessPointController.getMergedCarrierEntry();
+        if (entry == null) {
+            if (DEBUG) {
+                Log.d(TAG, "MergedCarrierEntry is null, can not set the status.");
+            }
+            return;
+        }
+        entry.setEnabled(enabled);
+    }
+
     WifiManager getWifiManager() {
         return mWifiManager;
     }
@@ -685,6 +710,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
                 }
             }
         }
+        mWorkerHandler.post(() -> setMergedCarrierWifiEnabledIfNeed(subId, enabled));
     }
 
     boolean isDataStateInService() {
