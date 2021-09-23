@@ -1253,7 +1253,7 @@ public class NotificationContentView extends FrameLayout {
             }
             if (hasRemoteInput) {
                 existing.setWrapper(wrapper);
-                existing.setOnVisibilityChangedListener(this::setRemoteInputVisible);
+                existing.addOnVisibilityChangedListener(this::setRemoteInputVisible);
 
                 if (existingPendingIntent != null || existing.isActive()) {
                     // The current action could be gone, or the pending intent no longer valid.
