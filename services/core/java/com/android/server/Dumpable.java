@@ -21,6 +21,8 @@ import android.util.IndentingPrintWriter;
 
 /**
  * Interface used to dump {@link SystemServer} state that is not associated with any service.
+ *
+ * <p>See {@link SystemServer.SystemServerDumper} for usage example.
  */
 public interface Dumpable {
 
