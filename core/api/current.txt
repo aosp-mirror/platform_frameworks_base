@@ -843,7 +843,7 @@ package android {
     field @Deprecated public static final int isModifier = 16843334; // 0x1010246
     field @Deprecated public static final int isRepeatable = 16843336; // 0x1010248
     field public static final int isScrollContainer = 16843342; // 0x101024e
-    field public static final int isSplitRequired = 16844177; // 0x1010591
+    field @Deprecated public static final int isSplitRequired = 16844177; // 0x1010591
     field public static final int isStatic = 16844122; // 0x101055a
     field @Deprecated public static final int isSticky = 16843335; // 0x1010247
     field public static final int isolatedProcess = 16843689; // 0x10103a9
