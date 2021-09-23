@@ -149,7 +149,7 @@ java_library_static {
         "android.hardware.biometrics.fingerprint-V2.3-java",
         "android.hardware.biometrics.fingerprint-V1-java",
         "android.hardware.oemlock-V1.0-java",
-        "android.hardware.configstore-V1.0-java",
+        "android.hardware.configstore-V1.1-java",
         "android.hardware.contexthub-V1.0-java",
         "android.hardware.rebootescrow-V1-java",
         "android.hardware.soundtrigger-V2.3-java",

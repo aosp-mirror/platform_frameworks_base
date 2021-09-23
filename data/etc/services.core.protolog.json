@@ -103,12 +103,6 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/TaskFragment.java"
     },
-    "-2006946193": {
-      "message": "setClientVisible: %s clientVisible=%b Callers=%s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_APP_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
     "-2002500255": {
       "message": "Defer removing snapshot surface in %dms",
       "level": "VERBOSE",
@@ -510,6 +504,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "-1556507536": {
+      "message": "Passing transform hint %d for window %s%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "-1554521902": {
       "message": "showInsets(ime) was requested by different window: %s ",
