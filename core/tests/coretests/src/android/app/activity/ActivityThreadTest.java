@@ -88,6 +88,11 @@ public class ActivityThreadTest {
                     false /* launchActivity */);
 
     @Test
+    public void testTemporaryDirectory() throws Exception {
+        assertEquals(System.getProperty("java.io.tmpdir"), System.getenv("TMPDIR"));
+    }
+
+    @Test
     public void testDoubleRelaunch() throws Exception {
         final Activity activity = mActivityTestRule.launchActivity(new Intent());
         final IApplicationThread appThread = activity.getActivityThread().getApplicationThread();

@@ -33,13 +33,11 @@ import android.os.IInstalld;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.ServiceSpecificException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.ZygoteProcess;
-import android.os.storage.StorageManager;
 import android.provider.DeviceConfig;
 import android.security.keystore2.AndroidKeyStoreProvider;
 import android.system.ErrnoException;
@@ -58,7 +56,6 @@ import android.widget.TextView;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Preconditions;
 
-import dalvik.system.DexFile;
 import dalvik.system.VMRuntime;
 import dalvik.system.ZygoteHooks;
 
@@ -517,7 +514,6 @@ public class ZygoteInit {
 
         final String systemServerClasspath = Os.getenv("SYSTEMSERVERCLASSPATH");
         if (systemServerClasspath != null) {
-            performSystemServerDexOpt(systemServerClasspath);
             // Capturing profiles is only supported for debug or eng builds since selinux normally
             // prevents it.
             if (shouldProfileSystemServer() && (Build.IS_USERDEBUG || Build.IS_ENG)) {
@@ -656,95 +652,6 @@ public class ZygoteInit {
 
         return ClassLoaderFactory.createClassLoader(classPath, libraryPath, libraryPath,
                 parent, targetSdkVersion, true /* isNamespaceShared */, null /* classLoaderName */);
-    }
-
-    /**
-     * Performs dex-opt on the elements of {@code classPath}, if needed. We choose the instruction
-     * set of the current runtime.
-     */
-    private static void performSystemServerDexOpt(String classPath) {
-        final String[] classPathElements = classPath.split(":");
-        final String instructionSet = VMRuntime.getRuntime().vmInstructionSet();
-
-        String classPathForElement = "";
-        for (String classPathElement : classPathElements) {
-            // We default to the verify filter because the compilation will happen on /data and
-            // system server cannot load executable code outside /system.
-            String systemServerFilter = SystemProperties.get(
-                    "dalvik.vm.systemservercompilerfilter", "verify");
-
-            String classLoaderContext =
-                        getSystemServerClassLoaderContext(classPathForElement);
-            int dexoptNeeded;
-            try {
-                dexoptNeeded = DexFile.getDexOptNeeded(
-                        classPathElement, instructionSet, systemServerFilter,
-                        classLoaderContext, false /* newProfile */, false /* downgrade */);
-            } catch (FileNotFoundException ignored) {
-                // Do not add to the classpath.
-                Log.w(TAG, "Missing classpath element for system server: " + classPathElement);
-                continue;
-            } catch (IOException e) {
-                // Not fully clear what to do here as we don't know the cause of the
-                // IO exception. Add to the classpath to be conservative, but don't
-                // attempt to compile it.
-                Log.w(TAG, "Error checking classpath element for system server: "
-                        + classPathElement, e);
-                dexoptNeeded = DexFile.NO_DEXOPT_NEEDED;
-            }
-
-            if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
-                final String packageName = "*";
-                final String outputPath = null;
-                final int dexFlags = 0;
-                final String uuid = StorageManager.UUID_PRIVATE_INTERNAL;
-                final String seInfo = null;
-                final int targetSdkVersion = 0;  // SystemServer targets the system's SDK version
-                // Wait for installd to be made available
-                IInstalld installd = IInstalld.Stub.asInterface(
-                        ServiceManager.waitForService("installd"));
-
-                try {
-                    installd.dexopt(classPathElement, Process.SYSTEM_UID, packageName,
-                            instructionSet, dexoptNeeded, outputPath, dexFlags, systemServerFilter,
-                            uuid, classLoaderContext, seInfo, false /* downgrade */,
-                            targetSdkVersion, /*profileName*/ null, /*dexMetadataPath*/ null,
-                            "server-dexopt");
-                } catch (RemoteException | ServiceSpecificException e) {
-                    // Ignore (but log), we need this on the classpath for fallback mode.
-                    Log.w(TAG, "Failed compiling classpath element for system server: "
-                            + classPathElement, e);
-                }
-            }
-
-            classPathForElement = encodeSystemServerClassPath(
-                    classPathForElement, classPathElement);
-        }
-    }
-
-    /**
-     * Encodes the system server class loader context in a format that is accepted by dexopt. This
-     * assumes the system server is always loaded with a {@link dalvik.system.PathClassLoader}.
-     *
-     * Note that ideally we would use the {@code DexoptUtils} to compute this. However we have no
-     * dependency here on the server so we hard code the logic again.
-     */
-    private static String getSystemServerClassLoaderContext(String classPath) {
-        return classPath == null ? "PCL[]" : "PCL[" + classPath + "]";
-    }
-
-    /**
-     * Encodes the class path in a format accepted by dexopt.
-     *
-     * @param classPath  The old class path (may be empty).
-     * @param newElement  The new class path elements
-     * @return The class path encoding resulted from appending {@code newElement} to {@code
-     * classPath}.
-     */
-    private static String encodeSystemServerClassPath(String classPath, String newElement) {
-        return (classPath == null || classPath.isEmpty())
-                ? newElement
-                : classPath + ":" + newElement;
     }
 
     /**

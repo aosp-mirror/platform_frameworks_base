@@ -22,6 +22,7 @@ import android.content.Context;
 import android.net.wifi.WifiManager;
 import android.os.BatteryStats;
 import android.os.Bundle;
+import android.os.OutcomeReceiver;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.ServiceManager;
@@ -40,6 +41,7 @@ import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.function.pooled.PooledLambda;
 
+import java.util.concurrent.ExecutionException;
 import libcore.util.EmptyArray;
 
 import java.util.concurrent.CompletableFuture;
@@ -405,7 +407,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         // We will request data from external processes asynchronously, and wait on a timeout.
         SynchronousResultReceiver wifiReceiver = null;
         SynchronousResultReceiver bluetoothReceiver = null;
-        SynchronousResultReceiver modemReceiver = null;
+        CompletableFuture<ModemActivityInfo> modemFuture = CompletableFuture.completedFuture(null);
         boolean railUpdated = false;
 
         if ((updateFlags & BatteryStatsImpl.ExternalStatsSync.UPDATE_WIFI) != 0) {
@@ -460,8 +462,22 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
             }
 
             if (mTelephony != null) {
-                modemReceiver = new SynchronousResultReceiver("telephony");
-                mTelephony.requestModemActivityInfo(modemReceiver);
+                CompletableFuture<ModemActivityInfo> temp = new CompletableFuture<>();
+                mTelephony.requestModemActivityInfo(Runnable::run,
+                        new OutcomeReceiver<ModemActivityInfo,
+                                TelephonyManager.ModemActivityInfoException>() {
+                            @Override
+                            public void onResult(ModemActivityInfo result) {
+                                temp.complete(result);
+                            }
+
+                            @Override
+                            public void onError(TelephonyManager.ModemActivityInfoException e) {
+                                Slog.w(TAG, "error reading modem stats:" + e);
+                                temp.complete(null);
+                            }
+                        });
+                modemFuture = temp;
             }
             if (!railUpdated) {
                 synchronized (mStats) {
@@ -472,7 +488,17 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
 
         final WifiActivityEnergyInfo wifiInfo = awaitControllerInfo(wifiReceiver);
         final BluetoothActivityEnergyInfo bluetoothInfo = awaitControllerInfo(bluetoothReceiver);
-        final ModemActivityInfo modemInfo = awaitControllerInfo(modemReceiver);
+        ModemActivityInfo modemInfo = null;
+        try {
+            modemInfo = modemFuture.get(EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS,
+                    TimeUnit.MILLISECONDS);
+        } catch (TimeoutException | InterruptedException e) {
+            Slog.w(TAG, "timeout or interrupt reading modem stats: " + e);
+        } catch (ExecutionException e) {
+            Slog.w(TAG, "exception reading modem stats: " + e.getCause());
+        }
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
 
         synchronized (mStats) {
             mStats.addHistoryEventLocked(
@@ -519,11 +545,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         }
 
         if (modemInfo != null) {
-            if (modemInfo.isValid()) {
-                mStats.updateMobileRadioState(modemInfo);
-            } else {
-                Slog.w(TAG, "modem info is invalid: " + modemInfo);
-            }
+            mStats.updateMobileRadioState(modemInfo);
         }
     }
 

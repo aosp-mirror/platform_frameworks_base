@@ -224,6 +224,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         mStagingManager = new StagingManager(this, context, apexParserSupplier);
     }
 
+    StagingManager getStagingManager() {
+        return mStagingManager;
+    }
+
     boolean okToSendBroadcasts()  {
         return mOkToSendBroadcasts;
     }

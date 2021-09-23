@@ -62,6 +62,7 @@ oneway interface IPhoneStateListener {
     void onActiveDataSubIdChanged(in int subId);
     void onRadioPowerStateChanged(in int state);
     void onCallAttributesChanged(in CallAttributes callAttributes);
+    @SuppressWarnings(value={"untyped-collection"})
     void onEmergencyNumberListChanged(in Map emergencyNumberList);
     void onOutgoingEmergencyCall(in EmergencyNumber placedEmergencyNumber, int subscriptionId);
     void onOutgoingEmergencySms(in EmergencyNumber sentEmergencyNumber, int subscriptionId);

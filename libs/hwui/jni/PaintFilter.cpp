@@ -74,7 +74,7 @@ int register_android_graphics_DrawFilter(JNIEnv* env) {
     result |= RegisterMethodsOrDie(env, "android/graphics/PaintFlagsDrawFilter", paintflags_methods,
                                    NELEM(paintflags_methods));
 
-    return 0;
+    return result;
 }
 
 }

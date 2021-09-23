@@ -21,14 +21,12 @@ import static android.Manifest.permission.INSTALL_PACKAGES;
 import static android.Manifest.permission.MANAGE_DEVICE_ADMINS;
 import static android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS;
 import static android.Manifest.permission.QUERY_ALL_PACKAGES;
-import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.REQUEST_DELETE_PACKAGES;
 import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.content.Intent.ACTION_MAIN;
-import static android.content.Intent.CATEGORY_BROWSABLE;
 import static android.content.Intent.CATEGORY_DEFAULT;
 import static android.content.Intent.CATEGORY_HOME;
 import static android.content.Intent.EXTRA_LONG_VERSION_CODE;
@@ -36,8 +34,6 @@ import static android.content.Intent.EXTRA_PACKAGE_NAME;
 import static android.content.Intent.EXTRA_VERSION_CODE;
 import static android.content.pm.PackageManager.CERT_INPUT_RAW_X509;
 import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
-import static android.content.Intent.CATEGORY_BROWSABLE;
-import static android.content.Intent.CATEGORY_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
@@ -181,6 +177,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.IPackageManagerNative;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
+import android.content.pm.IStagedApexObserver;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.InstantAppInfo;
 import android.content.pm.InstantAppRequest;
@@ -220,6 +217,7 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
+import android.content.pm.StagedApexInfo;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.VerifierDeviceIdentity;
@@ -14291,9 +14289,15 @@ public class PackageManagerService extends IPackageManager.Stub
             return new ParceledListSlice<IntentFilter>(result) {
                 @Override
                 protected void writeElement(IntentFilter parcelable, Parcel dest, int callFlags) {
-                    // IntentFilter has final Parcelable methods, so redirect to the subclass
-                    ((ParsedIntentInfo) parcelable).writeIntentInfoToParcel(dest,
-                            callFlags);
+                    parcelable.writeToParcel(dest, callFlags);
+                }
+
+                @Override
+                protected void writeParcelableCreator(IntentFilter parcelable, Parcel dest) {
+                    // All Parcel#writeParcelableCreator does is serialize the class name to
+                    // access via reflection to grab its CREATOR. This does that manually, pointing
+                    // to the parent IntentFilter so that all of the subclass fields are ignored.
+                    dest.writeString(IntentFilter.class.getName());
                 }
             };
         }
@@ -24118,6 +24122,28 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public String getModuleMetadataPackageName() throws RemoteException {
             return PackageManagerService.this.mModuleInfoProvider.getPackageName();
+        }
+
+        @Override
+        public void registerStagedApexObserver(IStagedApexObserver observer) {
+            mInstallerService.getStagingManager().registerStagedApexObserver(observer);
+        }
+
+        @Override
+        public void unregisterStagedApexObserver(IStagedApexObserver observer) {
+            mInstallerService.getStagingManager().unregisterStagedApexObserver(observer);
+        }
+
+        @Override
+        public String[] getStagedApexModuleNames() {
+            return mInstallerService.getStagingManager()
+                    .getStagedApexModuleNames().toArray(new String[0]);
+        }
+
+        @Override
+        @Nullable
+        public StagedApexInfo getStagedApexInfo(String moduleName) {
+            return mInstallerService.getStagingManager().getStagedApexInfo(moduleName);
         }
     }
 

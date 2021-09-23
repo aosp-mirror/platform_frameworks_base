@@ -65,9 +65,6 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      * <p>{@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} can be any of
      * {@link #STATE_DISCONNECTED}, {@link #STATE_CONNECTING},
      * {@link #STATE_CONNECTED}, {@link #STATE_DISCONNECTING}.
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission to
-     * receive.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_LE_AUDIO_CONNECTION_STATE_CHANGED =
@@ -82,9 +79,6 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      * be null if no device is active. </li>
      * </ul>
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission to
-     * receive.
-     *
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
@@ -92,11 +86,147 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
             "android.bluetooth.action.LE_AUDIO_ACTIVE_DEVICE_CHANGED";
 
     /**
+     * Intent used to broadcast group node status information.
+     *
+     * <p>This intent will have 3 extra:
+     * <ul>
+     * <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device. It can
+     * be null if no device is active. </li>
+     * <li> {@link #EXTRA_LE_AUDIO_GROUP_ID} - Group id. </li>
+     * <li> {@link #EXTRA_LE_AUDIO_GROUP_NODE_STATUS} - Group node status. </li>
+     * </ul>
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_LE_AUDIO_GROUP_NODE_STATUS_CHANGED =
+            "android.bluetooth.action.LE_AUDIO_GROUP_NODE_STATUS_CHANGED";
+
+
+    /**
+     * Intent used to broadcast group status information.
+     *
+     * <p>This intent will have 4 extra:
+     * <ul>
+     * <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device. It can
+     * be null if no device is active. </li>
+     * <li> {@link #EXTRA_LE_AUDIO_GROUP_ID} - Group id. </li>
+     * <li> {@link #EXTRA_LE_AUDIO_GROUP_STATUS} - Group status. </li>
+     * </ul>
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_LE_AUDIO_GROUP_STATUS_CHANGED =
+            "android.bluetooth.action.LE_AUDIO_GROUP_STATUS_CHANGED";
+
+    /**
+     * Intent used to broadcast group audio configuration changed information.
+     *
+     * <p>This intent will have 5 extra:
+     * <ul>
+     * <li> {@link #EXTRA_LE_AUDIO_GROUP_ID} - Group id. </li>
+     * <li> {@link #EXTRA_LE_AUDIO_DIRECTION} - Direction as bit mask. </li>
+     * <li> {@link #EXTRA_LE_AUDIO_SINK_LOCATION} - Sink location as per Bluetooth Assigned
+     * Numbers </li>
+     * <li> {@link #EXTRA_LE_AUDIO_SOURCE_LOCATION} - Source location as per Bluetooth Assigned
+     * Numbers </li>
+     * <li> {@link #EXTRA_LE_AUDIO_AVAILABLE_CONTEXTS} - Available contexts for group as per
+     * Bluetooth Assigned Numbers </li>
+     * </ul>
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_LE_AUDIO_CONF_CHANGED =
+            "android.bluetooth.action.LE_AUDIO_CONF_CHANGED";
+
+    /**
+     * Indicates conversation between humans as, for example, in telephony or video calls.
+     * @hide
+     */
+    public static final int CONTEXT_TYPE_COMMUNICATION = 0x0002;
+
+    /**
+     * Indicates media as, for example, in music, public radio, podcast or video soundtrack.
+     * @hide
+     */
+    public static final int CONTEXT_TYPE_MEDIA = 0x0004;
+
+    /**
      * This represents an invalid group ID.
      *
      * @hide
      */
     public static final int GROUP_ID_INVALID = IBluetoothLeAudio.LE_AUDIO_GROUP_ID_INVALID;
+
+    /**
+     * Contains group id.
+     * @hide
+     */
+    public static final String EXTRA_LE_AUDIO_GROUP_ID =
+            "android.bluetooth.extra.LE_AUDIO_GROUP_ID";
+
+    /**
+     * Contains group node status, can be any of
+     * <p>
+     * <ul>
+     * <li> {@link #GROUP_NODE_ADDED} </li>
+     * <li> {@link #GROUP_NODE_REMOVED} </li>
+     * </ul>
+     * <p>
+     * @hide
+     */
+    public static final String EXTRA_LE_AUDIO_GROUP_NODE_STATUS =
+            "android.bluetooth.extra.LE_AUDIO_GROUP_NODE_STATUS";
+
+    /**
+     * Contains group status, can be any of
+     *
+     * <p>
+     * <ul>
+     * <li> {@link #GROUP_STATUS_IDLE} </li>
+     * <li> {@link #GROUP_STATUS_STREAMING} </li>
+     * <li> {@link #GROUP_STATUS_SUSPENDED} </li>
+     * <li> {@link #GROUP_STATUS_RECONFIGURED} </li>
+     * <li> {@link #GROUP_STATUS_DESTROYED} </li>
+     * </ul>
+     * <p>
+     * @hide
+     */
+    public static final String EXTRA_LE_AUDIO_GROUP_STATUS =
+            "android.bluetooth.extra.LE_AUDIO_GROUP_STATUS";
+
+    /**
+     * Contains bit mask for direction, bit 0 set when Sink, bit 1 set when Source.
+     * @hide
+     */
+    public static final String EXTRA_LE_AUDIO_DIRECTION =
+            "android.bluetooth.extra.LE_AUDIO_DIRECTION";
+
+    /**
+     * Contains source location as per Bluetooth Assigned Numbers
+     * @hide
+     */
+    public static final String EXTRA_LE_AUDIO_SOURCE_LOCATION =
+            "android.bluetooth.extra.LE_AUDIO_SOURCE_LOCATION";
+
+    /**
+     * Contains sink location as per Bluetooth Assigned Numbers
+     * @hide
+     */
+    public static final String EXTRA_LE_AUDIO_SINK_LOCATION =
+            "android.bluetooth.extra.LE_AUDIO_SINK_LOCATION";
+
+    /**
+     * Contains available context types for group as per Bluetooth Assigned Numbers
+     * @hide
+     */
+    public static final String EXTRA_LE_AUDIO_AVAILABLE_CONTEXTS =
+            "android.bluetooth.extra.LE_AUDIO_AVAILABLE_CONTEXTS";
 
     private BluetoothAdapter mAdapter;
     private final BluetoothProfileConnector<IBluetoothLeAudio> mProfileConnector =

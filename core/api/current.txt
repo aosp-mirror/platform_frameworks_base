@@ -954,7 +954,7 @@ package android {
     field public static final int measureWithLargestChild = 16843476; // 0x10102d4
     field public static final int mediaRouteButtonStyle = 16843693; // 0x10103ad
     field public static final int mediaRouteTypes = 16843694; // 0x10103ae
-    field public static final int memtagMode = 16844313; // 0x1010619
+    field public static final int memtagMode = 16844324; // 0x1010624
     field public static final int menuCategory = 16843230; // 0x10101de
     field public static final int mimeGroup = 16844309; // 0x1010615
     field public static final int mimeType = 16842790; // 0x1010026
@@ -978,7 +978,7 @@ package android {
     field public static final int multiArch = 16843918; // 0x101048e
     field public static final int multiprocess = 16842771; // 0x1010013
     field public static final int name = 16842755; // 0x1010003
-    field public static final int nativeHeapZeroInitialized = 16844314; // 0x101061a
+    field public static final int nativeHeapZeroInitialized = 16844325; // 0x1010625
     field public static final int navigationBarColor = 16843858; // 0x1010452
     field public static final int navigationBarDividerColor = 16844141; // 0x101056d
     field public static final int navigationContentDescription = 16843969; // 0x10104c1
@@ -8657,6 +8657,15 @@ package android.bluetooth {
     field public static final int TELEPHONY = 4194304; // 0x400000
   }
 
+  public final class BluetoothCsipSetCoordinator implements java.lang.AutoCloseable android.bluetooth.BluetoothProfile {
+    method public void close();
+    method protected void finalize();
+    method @NonNull public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
+    method public int getConnectionState(@Nullable android.bluetooth.BluetoothDevice);
+    method @NonNull public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(@NonNull int[]);
+    field @RequiresPermission(android.Manifest.permission.BLUETOOTH) public static final String ACTION_CSIS_CONNECTION_STATE_CHANGED = "android.bluetooth.action.CSIS_CONNECTION_STATE_CHANGED";
+  }
+
   public final class BluetoothDevice implements android.os.Parcelable {
     method public android.bluetooth.BluetoothGatt connectGatt(android.content.Context, boolean, android.bluetooth.BluetoothGattCallback);
     method public android.bluetooth.BluetoothGatt connectGatt(android.content.Context, boolean, android.bluetooth.BluetoothGattCallback, int);
@@ -8703,6 +8712,7 @@ package android.bluetooth {
     field public static final String EXTRA_BOND_STATE = "android.bluetooth.device.extra.BOND_STATE";
     field public static final String EXTRA_CLASS = "android.bluetooth.device.extra.CLASS";
     field public static final String EXTRA_DEVICE = "android.bluetooth.device.extra.DEVICE";
+    field public static final String EXTRA_IS_COORDINATED_SET_MEMBER = "android.bluetooth.extra.IS_COORDINATED_SET_MEMBER";
     field public static final String EXTRA_NAME = "android.bluetooth.device.extra.NAME";
     field public static final String EXTRA_PAIRING_KEY = "android.bluetooth.device.extra.PAIRING_KEY";
     field public static final String EXTRA_PAIRING_VARIANT = "android.bluetooth.device.extra.PAIRING_VARIANT";
@@ -9083,6 +9093,7 @@ package android.bluetooth {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getConnectionState(android.bluetooth.BluetoothDevice);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(int[]);
     field public static final int A2DP = 2; // 0x2
+    field public static final int CSIP_SET_COORDINATOR = 25; // 0x19
     field public static final String EXTRA_PREVIOUS_STATE = "android.bluetooth.profile.extra.PREVIOUS_STATE";
     field public static final String EXTRA_STATE = "android.bluetooth.profile.extra.STATE";
     field public static final int GATT = 7; // 0x7
@@ -29935,6 +29946,11 @@ package android.os {
     ctor public OperationCanceledException(String);
   }
 
+  public interface OutcomeReceiver<R, E extends java.lang.Throwable> {
+    method public default void onError(@NonNull E);
+    method public void onResult(@NonNull R);
+  }
+
   public final class Parcel {
     method public void appendFrom(android.os.Parcel, int, int);
     method @Nullable public android.os.IBinder[] createBinderArray();
@@ -41030,6 +41046,7 @@ package android.telephony {
     method public String getNetworkOperator();
     method public String getNetworkOperatorName();
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PRECISE_PHONE_STATE}) public int getNetworkSelectionMode();
+    method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public void getNetworkSlicingConfiguration(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.telephony.data.SlicingConfig,android.telephony.TelephonyManager.SlicingException>);
     method public String getNetworkSpecifier();
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public int getNetworkType();
     method @Deprecated public int getPhoneCount();
@@ -41263,6 +41280,13 @@ package android.telephony {
     field public static final int ERROR_TIMEOUT = 1; // 0x1
   }
 
+  public static class TelephonyManager.SlicingException extends java.lang.Exception {
+    ctor public TelephonyManager.SlicingException(int);
+    method public int getErrorCode();
+    field public static final int ERROR_MODEM_ERROR = 2; // 0x2
+    field public static final int ERROR_TIMEOUT = 1; // 0x1
+  }
+
   public abstract static class TelephonyManager.UssdResponseCallback {
     ctor public TelephonyManager.UssdResponseCallback();
     method public void onReceiveUssdResponse(android.telephony.TelephonyManager, String, CharSequence);
@@ -41436,6 +41460,88 @@ package android.telephony.data {
     method @NonNull public android.telephony.data.ApnSetting.Builder setProxyPort(int);
     method @NonNull public android.telephony.data.ApnSetting.Builder setRoamingProtocol(int);
     method @NonNull public android.telephony.data.ApnSetting.Builder setUser(@Nullable String);
+  }
+
+  public final class NetworkSliceInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @IntRange(from=0xffffffff, to=0xfffffe) public int getMappedHplmnSliceDifferentiator();
+    method public int getMappedHplmnSliceServiceType();
+    method @IntRange(from=0xffffffff, to=0xfffffe) public int getSliceDifferentiator();
+    method public int getSliceServiceType();
+    method public int getStatus();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.NetworkSliceInfo> CREATOR;
+    field public static final int SLICE_DIFFERENTIATOR_NO_SLICE = -1; // 0xffffffff
+    field public static final int SLICE_SERVICE_TYPE_EMBB = 1; // 0x1
+    field public static final int SLICE_SERVICE_TYPE_MIOT = 3; // 0x3
+    field public static final int SLICE_SERVICE_TYPE_NONE = 0; // 0x0
+    field public static final int SLICE_SERVICE_TYPE_URLLC = 2; // 0x2
+    field public static final int SLICE_STATUS_ALLOWED = 2; // 0x2
+    field public static final int SLICE_STATUS_CONFIGURED = 1; // 0x1
+    field public static final int SLICE_STATUS_DEFAULT_CONFIGURED = 5; // 0x5
+    field public static final int SLICE_STATUS_REJECTED_NOT_AVAILABLE_IN_PLMN = 3; // 0x3
+    field public static final int SLICE_STATUS_REJECTED_NOT_AVAILABLE_IN_REGISTERED_AREA = 4; // 0x4
+    field public static final int SLICE_STATUS_UNKNOWN = 0; // 0x0
+  }
+
+  public static final class NetworkSliceInfo.Builder {
+    ctor public NetworkSliceInfo.Builder();
+    method @NonNull public android.telephony.data.NetworkSliceInfo build();
+    method @NonNull public android.telephony.data.NetworkSliceInfo.Builder setMappedHplmnSliceDifferentiator(@IntRange(from=0xffffffff, to=0xfffffe) int);
+    method @NonNull public android.telephony.data.NetworkSliceInfo.Builder setMappedHplmnSliceServiceType(int);
+    method @NonNull public android.telephony.data.NetworkSliceInfo.Builder setSliceDifferentiator(@IntRange(from=0xffffffff, to=0xfffffe) int);
+    method @NonNull public android.telephony.data.NetworkSliceInfo.Builder setSliceServiceType(int);
+    method @NonNull public android.telephony.data.NetworkSliceInfo.Builder setStatus(int);
+  }
+
+  public final class RouteSelectionDescriptor implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<java.lang.String> getDataNetworkName();
+    method @IntRange(from=0x0, to=0xff) public int getPrecedence();
+    method public int getSessionType();
+    method @NonNull public java.util.List<android.telephony.data.NetworkSliceInfo> getSliceInfo();
+    method public int getSscMode();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.RouteSelectionDescriptor> CREATOR;
+    field public static final int ROUTE_SSC_MODE_1 = 1; // 0x1
+    field public static final int ROUTE_SSC_MODE_2 = 2; // 0x2
+    field public static final int ROUTE_SSC_MODE_3 = 3; // 0x3
+    field public static final int SESSION_TYPE_IPV4 = 0; // 0x0
+    field public static final int SESSION_TYPE_IPV4V6 = 2; // 0x2
+    field public static final int SESSION_TYPE_IPV6 = 1; // 0x1
+  }
+
+  public final class SlicingConfig implements android.os.Parcelable {
+    ctor public SlicingConfig();
+    method public int describeContents();
+    method @NonNull public java.util.List<android.telephony.data.NetworkSliceInfo> getSliceInfo();
+    method @NonNull public java.util.List<android.telephony.data.UrspRule> getUrspRules();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.SlicingConfig> CREATOR;
+  }
+
+  public final class TrafficDescriptor implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public String getDataNetworkName();
+    method @Nullable public String getOsAppId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.TrafficDescriptor> CREATOR;
+  }
+
+  public static final class TrafficDescriptor.Builder {
+    ctor public TrafficDescriptor.Builder();
+    method @NonNull public android.telephony.data.TrafficDescriptor build();
+    method @NonNull public android.telephony.data.TrafficDescriptor.Builder setDataNetworkName(@NonNull String);
+    method @NonNull public android.telephony.data.TrafficDescriptor.Builder setOsAppId(@NonNull String);
+  }
+
+  public final class UrspRule implements android.os.Parcelable {
+    method public int describeContents();
+    method @IntRange(from=0x0, to=0xff) public int getPrecedence();
+    method @NonNull public java.util.List<android.telephony.data.RouteSelectionDescriptor> getRouteSelectionDescriptor();
+    method @NonNull public java.util.List<android.telephony.data.TrafficDescriptor> getTrafficDescriptors();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.UrspRule> CREATOR;
   }
 
 }

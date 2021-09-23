@@ -29,9 +29,11 @@ interface IMbmsGroupCallService
 
     void stopGroupCall(int subId, long tmgi);
 
+    @SuppressWarnings(value={"untyped-collection"})
     void updateGroupCall(int subscriptionId, long tmgi, in List saiList,
         in List frequencyList);
 
+    @SuppressWarnings(value={"untyped-collection"})
     int startGroupCall(int subscriptionId, long tmgi, in List saiList,
         in List frequencyList, IGroupCallCallback callback);
 

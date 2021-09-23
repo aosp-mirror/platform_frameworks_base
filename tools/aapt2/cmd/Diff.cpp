@@ -148,7 +148,7 @@ static bool EmitResourceEntryDiff(IAaptContext* context, LoadedApk* apk_a,
       diff = true;
     }
   }
-  return false;
+  return diff;
 }
 
 static bool EmitResourceTypeDiff(IAaptContext* context, LoadedApk* apk_a,

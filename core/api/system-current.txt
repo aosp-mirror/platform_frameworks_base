@@ -1507,8 +1507,24 @@ package android.bluetooth {
     method public void onOobData(int, @NonNull android.bluetooth.OobData);
   }
 
+  public final class BluetoothCsipSetCoordinator implements java.lang.AutoCloseable android.bluetooth.BluetoothProfile {
+    method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public java.util.List<java.lang.Integer> getAllGroupIds(@Nullable android.os.ParcelUuid);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice);
+    method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public java.util.Map getGroupUuidMapByDevice(@Nullable android.bluetooth.BluetoothDevice);
+    method @Nullable @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public java.util.UUID groupLock(int, @Nullable java.util.concurrent.Executor, @Nullable android.bluetooth.BluetoothCsipSetCoordinator.ClientLockCallback);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean groupUnlock(@NonNull java.util.UUID);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice, int);
+    field @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public static final String ACTION_CSIS_DEVICE_AVAILABLE = "android.bluetooth.action.CSIS_DEVICE_AVAILABLE";
+    field @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public static final String ACTION_CSIS_SET_MEMBER_AVAILABLE = "android.bluetooth.action.CSIS_SET_MEMBER_AVAILABLE";
+  }
+
+  public static interface BluetoothCsipSetCoordinator.ClientLockCallback {
+    method public void onGroupLockSet(int, int, boolean);
+  }
+
   public final class BluetoothDevice implements android.os.Parcelable {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean cancelBondProcess();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean createBond(int);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean createBondOutOfBand(int, @Nullable android.bluetooth.OobData, @Nullable android.bluetooth.OobData);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean fetchUuidsWithSdp(int);
     method @Nullable @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public byte[] getMetadata(int);
@@ -1560,7 +1576,10 @@ package android.bluetooth {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean connect(android.bluetooth.BluetoothDevice);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean disconnect(android.bluetooth.BluetoothDevice);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean isInbandRingingEnabled();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean startScoUsingVirtualVoiceCall();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean stopScoUsingVirtualVoiceCall();
   }
 
   public final class BluetoothHearingAid implements android.bluetooth.BluetoothProfile {
@@ -1644,6 +1663,7 @@ package android.bluetooth {
     field @NonNull public static final android.os.ParcelUuid AVRCP_TARGET;
     field @NonNull public static final android.os.ParcelUuid BASE_UUID;
     field @NonNull public static final android.os.ParcelUuid BNEP;
+    field @NonNull public static final android.os.ParcelUuid COORDINATED_SET;
     field @NonNull public static final android.os.ParcelUuid DIP;
     field @NonNull public static final android.os.ParcelUuid GENERIC_MEDIA_CONTROL;
     field @NonNull public static final android.os.ParcelUuid HEARING_AID;
@@ -7240,6 +7260,7 @@ package android.os {
   public class SystemConfigManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_CARRIER_APP_INFO) public java.util.Set<java.lang.String> getDisabledUntilUsedPreinstalledCarrierApps();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_CARRIER_APP_INFO) public java.util.Map<java.lang.String,java.util.List<java.lang.String>> getDisabledUntilUsedPreinstalledCarrierAssociatedApps();
+    method @NonNull public java.util.List<java.lang.String> getEnabledComponentOverrides(@NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.GET_RUNTIME_PERMISSIONS) public int[] getSystemPermissionUids(@NonNull String);
   }
 
@@ -9670,6 +9691,25 @@ package android.telephony {
     field public static final String MBMS_STREAMING_SERVICE_ACTION = "android.telephony.action.EmbmsStreaming";
   }
 
+  public final class ModemActivityInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.telephony.ModemActivityInfo getDelta(@NonNull android.telephony.ModemActivityInfo);
+    method public long getIdleTimeMillis();
+    method public static int getNumTxPowerLevels();
+    method public long getReceiveTimeMillis();
+    method public long getSleepTimeMillis();
+    method public long getTimestampMillis();
+    method public long getTransmitDurationMillisAtPowerLevel(int);
+    method @NonNull public android.util.Range<java.lang.Integer> getTransmitPowerRange(int);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ModemActivityInfo> CREATOR;
+    field public static final int TX_POWER_LEVEL_0 = 0; // 0x0
+    field public static final int TX_POWER_LEVEL_1 = 1; // 0x1
+    field public static final int TX_POWER_LEVEL_2 = 2; // 0x2
+    field public static final int TX_POWER_LEVEL_3 = 3; // 0x3
+    field public static final int TX_POWER_LEVEL_4 = 4; // 0x4
+  }
+
   public final class NetworkRegistrationInfo implements android.os.Parcelable {
     method @Nullable public android.telephony.DataSpecificRegistrationInfo getDataSpecificInfo();
     method public int getRegistrationState();
@@ -10336,6 +10376,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean rebootRadio();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void reportDefaultNetworkStatus(boolean);
     method @RequiresPermission(allOf={android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.MODIFY_PHONE_STATE}) public void requestCellInfoUpdate(@NonNull android.os.WorkSource, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.CellInfoCallback);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void requestModemActivityInfo(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.telephony.ModemActivityInfo,android.telephony.TelephonyManager.ModemActivityInfoException>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void requestNumberVerification(@NonNull android.telephony.PhoneNumberRange, long, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.NumberVerificationCallback);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void resetAllCarrierActions();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void resetCarrierKeysForImsiEncryption();
@@ -10508,6 +10549,14 @@ package android.telephony {
     field public static final int RESULT_SUCCESS = 0; // 0x0
   }
 
+  public static class TelephonyManager.ModemActivityInfoException extends java.lang.Exception {
+    method public int getErrorCode();
+    field public static final int ERROR_INVALID_INFO_RECEIVED = 2; // 0x2
+    field public static final int ERROR_MODEM_RESPONSE_ERROR = 3; // 0x3
+    field public static final int ERROR_PHONE_NOT_AVAILABLE = 1; // 0x1
+    field public static final int ERROR_UNKNOWN = 0; // 0x0
+  }
+
   public final class ThermalMitigationRequest implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public android.telephony.DataThrottlingRequest getDataThrottlingRequest();
@@ -10632,7 +10681,7 @@ package android.telephony.data {
     method public int getPduSessionId();
     method public int getProtocolType();
     method public long getRetryDurationMillis();
-    method @Nullable public android.telephony.data.SliceInfo getSliceInfo();
+    method @Nullable public android.telephony.data.NetworkSliceInfo getSliceInfo();
     method @Deprecated public int getSuggestedRetryTime();
     method @NonNull public java.util.List<android.telephony.data.TrafficDescriptor> getTrafficDescriptors();
     method public void writeToParcel(android.os.Parcel, int);
@@ -10668,7 +10717,7 @@ package android.telephony.data {
     method @NonNull public android.telephony.data.DataCallResponse.Builder setPduSessionId(int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setProtocolType(int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setRetryDurationMillis(long);
-    method @NonNull public android.telephony.data.DataCallResponse.Builder setSliceInfo(@Nullable android.telephony.data.SliceInfo);
+    method @NonNull public android.telephony.data.DataCallResponse.Builder setSliceInfo(@Nullable android.telephony.data.NetworkSliceInfo);
     method @Deprecated @NonNull public android.telephony.data.DataCallResponse.Builder setSuggestedRetryTime(int);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setTrafficDescriptors(@NonNull java.util.List<android.telephony.data.TrafficDescriptor>);
   }
@@ -10741,7 +10790,7 @@ package android.telephony.data {
     method public void setDataProfile(@NonNull java.util.List<android.telephony.data.DataProfile>, boolean, @NonNull android.telephony.data.DataServiceCallback);
     method public void setInitialAttachApn(@NonNull android.telephony.data.DataProfile, boolean, @NonNull android.telephony.data.DataServiceCallback);
     method public void setupDataCall(int, @NonNull android.telephony.data.DataProfile, boolean, boolean, int, @Nullable android.net.LinkProperties, @NonNull android.telephony.data.DataServiceCallback);
-    method public void setupDataCall(int, @NonNull android.telephony.data.DataProfile, boolean, boolean, int, @Nullable android.net.LinkProperties, @IntRange(from=0, to=15) int, @Nullable android.telephony.data.SliceInfo, @Nullable android.telephony.data.TrafficDescriptor, boolean, @NonNull android.telephony.data.DataServiceCallback);
+    method public void setupDataCall(int, @NonNull android.telephony.data.DataProfile, boolean, boolean, int, @Nullable android.net.LinkProperties, @IntRange(from=0, to=15) int, @Nullable android.telephony.data.NetworkSliceInfo, @Nullable android.telephony.data.TrafficDescriptor, boolean, @NonNull android.telephony.data.DataServiceCallback);
   }
 
   public class DataServiceCallback {
@@ -10799,32 +10848,6 @@ package android.telephony.data {
     method public final void updateQualifiedNetworkTypes(int, @NonNull java.util.List<java.lang.Integer>);
   }
 
-  public final class SliceInfo implements android.os.Parcelable {
-    method public int describeContents();
-    method @IntRange(from=android.telephony.data.SliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.SliceInfo.MAX_SLICE_DIFFERENTIATOR) public int getMappedHplmnSliceDifferentiator();
-    method public int getMappedHplmnSliceServiceType();
-    method @IntRange(from=android.telephony.data.SliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.SliceInfo.MAX_SLICE_DIFFERENTIATOR) public int getSliceDifferentiator();
-    method public int getSliceServiceType();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.SliceInfo> CREATOR;
-    field public static final int MAX_SLICE_DIFFERENTIATOR = 16777214; // 0xfffffe
-    field public static final int MIN_SLICE_DIFFERENTIATOR = -1; // 0xffffffff
-    field public static final int SLICE_DIFFERENTIATOR_NO_SLICE = -1; // 0xffffffff
-    field public static final int SLICE_SERVICE_TYPE_EMBB = 1; // 0x1
-    field public static final int SLICE_SERVICE_TYPE_MIOT = 3; // 0x3
-    field public static final int SLICE_SERVICE_TYPE_NONE = 0; // 0x0
-    field public static final int SLICE_SERVICE_TYPE_URLLC = 2; // 0x2
-  }
-
-  public static final class SliceInfo.Builder {
-    ctor public SliceInfo.Builder();
-    method @NonNull public android.telephony.data.SliceInfo build();
-    method @NonNull public android.telephony.data.SliceInfo.Builder setMappedHplmnSliceDifferentiator(@IntRange(from=android.telephony.data.SliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.SliceInfo.MAX_SLICE_DIFFERENTIATOR) int);
-    method @NonNull public android.telephony.data.SliceInfo.Builder setMappedHplmnSliceServiceType(int);
-    method @NonNull public android.telephony.data.SliceInfo.Builder setSliceDifferentiator(@IntRange(from=android.telephony.data.SliceInfo.MIN_SLICE_DIFFERENTIATOR, to=android.telephony.data.SliceInfo.MAX_SLICE_DIFFERENTIATOR) int);
-    method @NonNull public android.telephony.data.SliceInfo.Builder setSliceServiceType(int);
-  }
-
   public final class ThrottleStatus implements android.os.Parcelable {
     method public int describeContents();
     method public int getApnType();
@@ -10851,15 +10874,6 @@ package android.telephony.data {
     method @NonNull public android.telephony.data.ThrottleStatus.Builder setSlotIndex(int);
     method @NonNull public android.telephony.data.ThrottleStatus.Builder setThrottleExpiryTimeMillis(long);
     method @NonNull public android.telephony.data.ThrottleStatus.Builder setTransportType(int);
-  }
-
-  public final class TrafficDescriptor implements android.os.Parcelable {
-    ctor public TrafficDescriptor(@Nullable String, @Nullable String);
-    method public int describeContents();
-    method @Nullable public String getDnn();
-    method @Nullable public String getOsAppId();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.TrafficDescriptor> CREATOR;
   }
 
 }

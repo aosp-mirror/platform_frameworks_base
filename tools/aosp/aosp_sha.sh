@@ -35,6 +35,7 @@ else
         echo
         echo "If your change contains no confidential details (such as security fixes), please"
         echo "upload and merge this change at https://android-review.googlesource.com/."
+        echo "Else add a tag 'Ignore-AOSP-First:' with the reason to bypass AOSP."
         echo
         exit 1
     fi

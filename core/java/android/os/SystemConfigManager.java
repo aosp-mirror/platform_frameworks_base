@@ -17,6 +17,7 @@ package android.os;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -125,6 +126,23 @@ public class SystemConfigManager {
     public int[] getSystemPermissionUids(@NonNull String permissionName) {
         try {
             return mInterface.getSystemPermissionUids(permissionName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get enabled component for a specific package
+     *
+     * @param packageName The target package.
+     * @return The enabled component
+     * {@hide}
+     */
+    @SystemApi
+    @NonNull
+    public List<String> getEnabledComponentOverrides(@NonNull String packageName) {
+        try {
+            return mInterface.getEnabledComponentOverrides(packageName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
