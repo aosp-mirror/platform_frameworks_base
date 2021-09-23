@@ -18,6 +18,7 @@ package com.android.settingslib.bluetooth;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
+import android.bluetooth.BluetoothCsipSetCoordinator;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothProfile;
@@ -41,7 +42,9 @@ import com.android.settingslib.Utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -66,6 +69,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     private final Object mProfileLock = new Object();
     BluetoothDevice mDevice;
     private long mHiSyncId;
+    private int mGroupId;
     // Need this since there is no method for getting RSSI
     short mRssi;
     // mProfiles and mRemovedProfiles does not do swap() between main and sub device. It is
@@ -100,6 +104,8 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     private boolean mIsA2dpProfileConnectedFail = false;
     private boolean mIsHeadsetProfileConnectedFail = false;
     private boolean mIsHearingAidProfileConnectedFail = false;
+    // Group member devices for the coordinated set
+    private Set<CachedBluetoothDevice> mMemberDevices = new HashSet<CachedBluetoothDevice>();
     // Group second device for Hearing Aid
     private CachedBluetoothDevice mSubDevice;
 
@@ -133,6 +139,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         mDevice = device;
         fillData();
         mHiSyncId = BluetoothHearingAid.HI_SYNC_ID_INVALID;
+        mGroupId = BluetoothCsipSetCoordinator.GROUP_ID_INVALID;
     }
 
     /**
@@ -315,6 +322,24 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      */
     public boolean isCoordinatedSetMemberDevice() {
         return mIsCoordinatedSetMember;
+    }
+
+    /**
+    * Get the coordinated set group id.
+    *
+    * @return the group id.
+    */
+    public int getGroupId() {
+        return mGroupId;
+    }
+
+    /**
+    * Set the coordinated set group id.
+    *
+    * @param id the group id from the CSIP.
+    */
+    public void setGroupId(int id) {
+        mGroupId = id;
     }
 
     void onBondingDockConnect() {
@@ -1189,6 +1214,54 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         mSubDevice.mDevice = tmpDevice;
         mSubDevice.mRssi = tmpRssi;
         mSubDevice.mJustDiscovered = tmpJustDiscovered;
+        fetchActiveDevices();
+    }
+
+    /**
+     * @return a set of member devices that are in the same coordinated set with this device.
+     */
+    public Set<CachedBluetoothDevice> getMemberDevice() {
+        return mMemberDevices;
+    }
+
+    /**
+     * Store the member devices that are in the same coordinated set.
+     */
+    public void setMemberDevice(CachedBluetoothDevice memberDevice) {
+        mMemberDevices.add(memberDevice);
+    }
+
+    /**
+     * Remove a device from the member device sets.
+     */
+    public void removeMemberDevice(CachedBluetoothDevice memberDevice) {
+        mMemberDevices.remove(memberDevice);
+    }
+
+    /**
+     * In order to show the preference for the whole group, we always set the main device as the
+     * first connected device in the coordinated set, and then switch the content of the main
+     * device and member devices.
+     *
+     * @param prevMainDevice the previous Main device, it will be added into the member device set.
+     * @param newMainDevie the new Main device, it will be removed from the member device set.
+     */
+    public void switchMemberDeviceContent(CachedBluetoothDevice prevMainDevice,
+            CachedBluetoothDevice newMainDevie) {
+        // Backup from main device
+        final BluetoothDevice tmpDevice = mDevice;
+        final short tmpRssi = mRssi;
+        final boolean tmpJustDiscovered = mJustDiscovered;
+        // Set main device from sub device
+        mDevice = newMainDevie.mDevice;
+        mRssi = newMainDevie.mRssi;
+        mJustDiscovered = newMainDevie.mJustDiscovered;
+        setMemberDevice(prevMainDevice);
+        mMemberDevices.remove(newMainDevie);
+        // Set sub device from backup
+        newMainDevie.mDevice = tmpDevice;
+        newMainDevie.mRssi = tmpRssi;
+        newMainDevie.mJustDiscovered = tmpJustDiscovered;
         fetchActiveDevices();
     }
 }
