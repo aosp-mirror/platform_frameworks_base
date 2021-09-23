@@ -483,8 +483,8 @@ public abstract class Context {
                     | Context.BIND_NOT_PERCEPTIBLE | Context.BIND_NOT_VISIBLE;
 
     /** @hide */
-    @IntDef(flag = true, prefix = { "RECEIVER_VISIBLE_" }, value = {
-            RECEIVER_VISIBLE_TO_INSTANT_APPS
+    @IntDef(flag = true, prefix = { "RECEIVER_VISIBLE" }, value = {
+            RECEIVER_VISIBLE_TO_INSTANT_APPS, RECEIVER_EXPORTED, RECEIVER_NOT_EXPORTED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface RegisterReceiverFlags {}
@@ -493,6 +493,18 @@ public abstract class Context {
      * Flag for {@link #registerReceiver}: The receiver can receive broadcasts from Instant Apps.
      */
     public static final int RECEIVER_VISIBLE_TO_INSTANT_APPS = 0x1;
+
+    /**
+     * Flag for {@link #registerReceiver}: The receiver can receive broadcasts from other Apps.
+     * Has the same behavior as marking a statically registered receiver with "exported=true"
+     */
+    public static final int RECEIVER_EXPORTED = 0x2;
+
+    /**
+     * Flag for {@link #registerReceiver}: The receiver cannot receive broadcasts from other Apps.
+     * Has the same behavior as marking a statically registered receiver with "exported=false"
+     */
+    public static final int RECEIVER_NOT_EXPORTED = 0x4;
 
     /**
      * Returns an AssetManager instance for the application's package.
@@ -2881,8 +2893,12 @@ public abstract class Context {
      *
      * @param receiver The BroadcastReceiver to handle the broadcast.
      * @param filter Selects the Intent broadcasts to be received.
-     * @param flags Additional options for the receiver. May be 0 or
-     *      {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS}.
+     * @param flags Additional options for the receiver. As of
+     * {@link android.os.Build.VERSION_CODES#TIRAMISU}, either {@link #RECEIVER_EXPORTED} or
+     * {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being registered
+     *            for protected broadcasts, and may additionally specify
+     *            {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS} if {@link #RECEIVER_EXPORTED} is
+     *            specified.
      *
      * @return The first sticky intent found that matches <var>filter</var>,
      *         or null if there are none.
@@ -2954,8 +2970,12 @@ public abstract class Context {
      *      no permission is required.
      * @param scheduler Handler identifying the thread that will receive
      *      the Intent.  If null, the main thread of the process will be used.
-     * @param flags Additional options for the receiver. May be 0 or
-     *      {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS}.
+     * @param flags Additional options for the receiver. As of
+     * {@link android.os.Build.VERSION_CODES#TIRAMISU}, either {@link #RECEIVER_EXPORTED} or
+     * {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being registered
+     *            for protected broadcasts, and may additionally specify
+     *            {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS} if {@link #RECEIVER_EXPORTED} is
+     *            specified.
      *
      * @return The first sticky intent found that matches <var>filter</var>,
      *         or null if there are none.
@@ -3002,6 +3022,42 @@ public abstract class Context {
     }
 
     /**
+     * Same as {@link #registerReceiver(BroadcastReceiver, IntentFilter, String, Handler, int)}
+     * but this receiver will receive broadcasts that are sent to all users. The receiver can
+     * use {@link BroadcastReceiver#getSendingUser} to determine on which user the broadcast
+     * was sent.
+     *
+     * @param receiver The BroadcastReceiver to handle the broadcast.
+     * @param filter Selects the Intent broadcasts to be received.
+     * @param broadcastPermission String naming a permissions that a
+     *      broadcaster must hold in order to send an Intent to you. If {@code null},
+     *      no permission is required.
+     * @param scheduler Handler identifying the thread that will receive
+     *      the Intent. If {@code null}, the main thread of the process will be used.
+     * @param flags Additional options for the receiver. As of
+     *      {@link android.os.Build.VERSION_CODES#TIRAMISU}, either {@link #RECEIVER_EXPORTED} or
+     *      {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being
+     *      registered for protected broadcasts
+     *
+     * @return The first sticky intent found that matches <var>filter</var>,
+     *         or {@code null} if there are none.
+     *
+     * @see #registerReceiver(BroadcastReceiver, IntentFilter, String, Handler, int)
+     * @see #sendBroadcast
+     * @see #unregisterReceiver
+     * @hide
+     */
+    @SuppressLint("IntentBuilderName")
+    @Nullable
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+    @SystemApi
+    public Intent registerReceiverForAllUsers(@Nullable BroadcastReceiver receiver,
+            @NonNull IntentFilter filter, @Nullable String broadcastPermission,
+            @Nullable Handler scheduler, @RegisterReceiverFlags int flags) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * @hide
      * Same as {@link #registerReceiver(BroadcastReceiver, IntentFilter, String, Handler)
      * but for a specific user.  This receiver will receiver broadcasts that
@@ -3030,6 +3086,41 @@ public abstract class Context {
     public abstract Intent registerReceiverAsUser(BroadcastReceiver receiver,
             UserHandle user, IntentFilter filter, @Nullable String broadcastPermission,
             @Nullable Handler scheduler);
+
+    /**
+     * @hide
+     * Same as {@link #registerReceiver(BroadcastReceiver, IntentFilter, String, Handler, int)
+     * but for a specific user.  This receiver will receiver broadcasts that
+     * are sent to the requested user.
+     *
+     * @param receiver The BroadcastReceiver to handle the broadcast.
+     * @param user UserHandle to send the intent to.
+     * @param filter Selects the Intent broadcasts to be received.
+     * @param broadcastPermission String naming a permissions that a
+     *      broadcaster must hold in order to send an Intent to you.  If null,
+     *      no permission is required.
+     * @param scheduler Handler identifying the thread that will receive
+     *      the Intent.  If null, the main thread of the process will be used.
+     * @param flags Additional options for the receiver. As of
+     *      {@link android.os.Build.VERSION_CODES#TIRAMISU}, either {@link #RECEIVER_EXPORTED} or
+     *      {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being
+     *      registered for protected broadcasts
+     *
+     * @return The first sticky intent found that matches <var>filter</var>,
+     *         or null if there are none.
+     *
+     * @see #registerReceiver(BroadcastReceiver, IntentFilter, String, Handler, int)
+     * @see #sendBroadcast
+     * @see #unregisterReceiver
+     */
+    @SuppressWarnings("HiddenAbstractMethod")
+    @SuppressLint("IntentBuilderName")
+    @Nullable
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+    @UnsupportedAppUsage
+    public abstract Intent registerReceiverAsUser(BroadcastReceiver receiver,
+            UserHandle user, IntentFilter filter, @Nullable String broadcastPermission,
+            @Nullable Handler scheduler, @RegisterReceiverFlags int flags);
 
     /**
      * Unregister a previously registered BroadcastReceiver.  <em>All</em>
