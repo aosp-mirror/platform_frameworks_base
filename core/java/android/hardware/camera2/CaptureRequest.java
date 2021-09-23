@@ -85,7 +85,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
 
     /**
      * A {@code Key} is used to do capture request field lookups with
-     * {@link CaptureResult#get} or to set fields with
+     * {@link CaptureRequest#get} or to set fields with
      * {@link CaptureRequest.Builder#set(Key, Object)}.
      *
      * <p>For example, to set the crop rectangle for the next capture:
@@ -95,11 +95,11 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * </pre></code>
      * </p>
      *
-     * <p>To enumerate over all possible keys for {@link CaptureResult}, see
-     * {@link CameraCharacteristics#getAvailableCaptureResultKeys}.</p>
+     * <p>To enumerate over all possible keys for {@link CaptureRequest}, see
+     * {@link CameraCharacteristics#getAvailableCaptureRequestKeys}.</p>
      *
-     * @see CaptureResult#get
-     * @see CameraCharacteristics#getAvailableCaptureResultKeys
+     * @see CaptureRequest#get
+     * @see CameraCharacteristics#getAvailableCaptureRequestKeys
      */
     public final static class Key<T> {
         private final CameraMetadataNative.Key<T> mKey;
