@@ -18,20 +18,10 @@
 -->
 <!-- This should in sync with task_open_enter.xml -->
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shareInterpolator="false"
-    android:zAdjustment="top"
-    android:hasRoundedCorners="true"
-    android:showWallpaper="true">
-
-    <alpha
-        android:fromAlpha="1"
-        android:toAlpha="1.0"
-        android:fillEnabled="true"
-        android:fillBefore="true"
-        android:fillAfter="true"
-        android:interpolator="@interpolator/linear"
-        android:startOffset="67"
-        android:duration="217"/>
+     android:shareInterpolator="false"
+     android:zAdjustment="top"
+     android:hasRoundedCorners="true"
+     android:background="@color/overview_background">
 
     <translate
         android:fromXDelta="105%"
@@ -39,36 +29,9 @@
         android:fillEnabled="true"
         android:fillBefore="true"
         android:fillAfter="true"
-        android:interpolator="@interpolator/aggressive_ease"
-        android:startOffset="50"
-        android:duration="383"/>
-
-    <scale
-        android:fromXScale="1.0526"
-        android:toXScale="1"
-        android:fromYScale="1.0526"
-        android:toYScale="1"
-        android:pivotX="50%"
-        android:pivotY="50%"
-        android:fillEnabled="true"
-        android:fillBefore="true"
-        android:fillAfter="true"
-        android:interpolator="@interpolator/fast_out_slow_in"
-        android:duration="283"/>
-
-    <scale
-        android:fromXScale="0.95"
-        android:toXScale="1"
-        android:fromYScale="0.95"
-        android:toYScale="1"
-        android:pivotX="50%"
-        android:pivotY="50%"
-        android:fillEnabled="true"
-        android:fillBefore="true"
-        android:fillAfter="true"
-        android:interpolator="@interpolator/fast_out_slow_in"
-        android:startOffset="283"
-        android:duration="317"/>
+        android:interpolator="@interpolator/fast_out_extra_slow_in"
+        android:startOffset="0"
+        android:duration="500"/>
 
     <!-- To keep the transition around longer for the thumbnail, should be kept in sync with
          cross_profile_apps_thumbmail.xml -->
