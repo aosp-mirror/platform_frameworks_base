@@ -9035,6 +9035,15 @@ public final class Settings {
         public static final String UNSAFE_VOLUME_MUSIC_ACTIVE_MS = "unsafe_volume_music_active_ms";
 
         /**
+         * Indicates whether the spatial audio feature was enabled for this user.
+         *
+         * Type : int (0 disabled, 1 enabled)
+         *
+         * @hide
+         */
+        public static final String SPATIAL_AUDIO_ENABLED = "spatial_audio_enabled";
+
+        /**
          * Indicates whether notification display on the lock screen is enabled.
          * <p>
          * Type: int (0 for false, 1 for true)

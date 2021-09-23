@@ -320,6 +320,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_DISPATCH_AUDIO_MODE = 40;
     private static final int MSG_ROUTING_UPDATED = 41;
     private static final int MSG_INIT_HEADTRACKING_SENSORS = 42;
+    private static final int MSG_PERSIST_SPATIAL_AUDIO_ENABLED = 43;
 
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
@@ -1040,12 +1041,13 @@ public class AudioService extends IAudioService.Stub
 
         mMonitorRotation = SystemProperties.getBoolean("ro.audio.monitorRotation", false);
 
+        mHasSpatializerEffect = SystemProperties.getBoolean("ro.audio.spatializer_enabled", false);
+
         // done with service initialization, continue additional work in our Handler thread
         queueMsgUnderWakeLock(mAudioHandler, MSG_INIT_STREAMS_VOLUMES,
                 0 /* arg1 */,  0 /* arg2 */, null /* obj */,  0 /* delay */);
         queueMsgUnderWakeLock(mAudioHandler, MSG_INIT_SPATIALIZER,
-                0 /* arg1 */,  0 /* arg2 */, null /* obj */,  0 /* delay */);
-
+                0 /* arg1 */, 0 /* arg2 */, null /* obj */, 0 /* delay */);
     }
 
     /**
@@ -1239,6 +1241,9 @@ public class AudioService extends IAudioService.Stub
     // routing monitoring from AudioSystemAdapter
     @Override
     public void onRoutingUpdatedFromNative() {
+        if (!mHasSpatializerEffect) {
+            return;
+        }
         sendMsg(mAudioHandler,
                 MSG_ROUTING_UPDATED,
                 SENDMSG_REPLACE, 0, 0, null,
@@ -1435,8 +1440,10 @@ public class AudioService extends IAudioService.Stub
             }
         }
 
-        // TODO check property if feature enabled
-        mSpatializerHelper.reset(/* featureEnabled */ SPATIALIZER_FEATURE_ENABLED_DEFAULT);
+        if (mHasSpatializerEffect) {
+            mSpatializerHelper.reset(/* featureEnabled */ isSpatialAudioEnabled());
+            monitorRoutingChanges(true);
+        }
 
         onIndicateSystemReady();
         // indicate the end of reconfiguration phase to audio HAL
@@ -7580,9 +7587,11 @@ public class AudioService extends IAudioService.Stub
                     break;
 
                 case MSG_INIT_SPATIALIZER:
-                    mSpatializerHelper.init();
-                    // TODO read property to see if enabled
-                    mSpatializerHelper.setFeatureEnabled(SPATIALIZER_FEATURE_ENABLED_DEFAULT);
+                    mSpatializerHelper.init(/*effectExpected*/ mHasSpatializerEffect);
+                    if (mHasSpatializerEffect) {
+                        mSpatializerHelper.setFeatureEnabled(isSpatialAudioEnabled());
+                        monitorRoutingChanges(true);
+                    }
                     mAudioEventWakeLock.release();
                     break;
 
@@ -7725,6 +7734,10 @@ public class AudioService extends IAudioService.Stub
 
                 case MSG_ROUTING_UPDATED:
                     mSpatializerHelper.onRoutingUpdated();
+                    break;
+
+                case MSG_PERSIST_SPATIAL_AUDIO_ENABLED:
+                    onPersistSpatialAudioEnabled(msg.arg1 == 1);
                     break;
             }
         }
@@ -8295,7 +8308,40 @@ public class AudioService extends IAudioService.Stub
 
     //==========================================================================================
     private final @NonNull SpatializerHelper mSpatializerHelper;
-    private static final boolean SPATIALIZER_FEATURE_ENABLED_DEFAULT = false;
+    /**
+     * Initialized from property ro.audio.spatializer_enabled
+     * Should only be 1 when the device ships with a Spatializer effect
+     */
+    private final boolean mHasSpatializerEffect;
+    /**
+     * Default value for the spatial audio feature
+     */
+    private static final boolean SPATIAL_AUDIO_ENABLED_DEFAULT = true;
+
+    /**
+     * persist in user settings whether the feature is enabled.
+     * Can change when {@link Spatializer#setEnabled(boolean)} is called and successfully
+     * changes the state of the feature
+     * @param featureEnabled
+     */
+    void persistSpatialAudioEnabled(boolean featureEnabled) {
+        sendMsg(mAudioHandler,
+                MSG_PERSIST_SPATIAL_AUDIO_ENABLED,
+                SENDMSG_REPLACE, featureEnabled ? 1 : 0, 0, null,
+                /*delay ms*/ 100);
+    }
+
+    void onPersistSpatialAudioEnabled(boolean enabled) {
+        Settings.Secure.putIntForUser(mContentResolver,
+                Settings.Secure.SPATIAL_AUDIO_ENABLED, enabled ? 1 : 0,
+                UserHandle.USER_CURRENT);
+    }
+
+    boolean isSpatialAudioEnabled() {
+        return Settings.Secure.getIntForUser(mContentResolver,
+                Settings.Secure.SPATIAL_AUDIO_ENABLED, SPATIAL_AUDIO_ENABLED_DEFAULT ? 1 : 0,
+                UserHandle.USER_CURRENT) == 1;
+    }
 
     private void enforceModifyDefaultAudioEffectsPermission() {
         if (mContext.checkCallingOrSelfPermission(
@@ -9054,6 +9100,12 @@ public class AudioService extends IAudioService.Stub
         sVolumeLogger.dump(pw);
         pw.println("\n");
         dumpSupportedSystemUsage(pw);
+
+        pw.println("\n");
+        pw.println("\nSpatial audio:");
+        pw.println("mHasSpatializerEffect:" + mHasSpatializerEffect);
+        pw.println("isSpatializerEnabled:" + isSpatializerEnabled());
+        pw.println("isSpatialAudioEnabled:" + isSpatialAudioEnabled());
     }
 
     private void dumpSupportedSystemUsage(PrintWriter pw) {
