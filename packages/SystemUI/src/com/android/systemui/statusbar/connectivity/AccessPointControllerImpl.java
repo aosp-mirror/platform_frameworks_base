@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.policy;
+package com.android.systemui.statusbar.connectivity;
 
 import android.content.Context;
 import android.content.Intent;
@@ -54,6 +54,7 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
+/** */
 public class AccessPointControllerImpl
         implements NetworkController.AccessPointController,
         WifiPickerTracker.WifiPickerTrackerCallback, LifecycleOwner {
@@ -115,17 +116,19 @@ public class AccessPointControllerImpl
         super.finalize();
     }
 
+    /** */
     public boolean canConfigWifi() {
         return !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_WIFI,
                 new UserHandle(mCurrentUser));
     }
 
+    /** */
     public boolean canConfigMobileData() {
         return !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS,
                 UserHandle.of(mCurrentUser)) && mUserTracker.getUserInfo().isAdmin();
     }
 
-    public void onUserSwitched(int newUserId) {
+    void onUserSwitched(int newUserId) {
         mCurrentUser = newUserId;
     }
 
@@ -224,7 +227,7 @@ public class AccessPointControllerImpl
         }
     }
 
-    public void dump(PrintWriter pw) {
+    void dump(PrintWriter pw) {
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw);
         ipw.println("AccessPointControllerImpl:");
         ipw.increaseIndent();

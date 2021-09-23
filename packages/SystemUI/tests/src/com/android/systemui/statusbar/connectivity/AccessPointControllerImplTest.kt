@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.policy
+package com.android.systemui.statusbar.connectivity
 
 import android.os.UserManager
 import android.test.suitebuilder.annotation.SmallTest

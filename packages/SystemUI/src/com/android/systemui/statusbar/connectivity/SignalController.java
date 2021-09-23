@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.statusbar.policy;
+package com.android.systemui.statusbar.connectivity;
 
-import static com.android.systemui.statusbar.policy.NetworkControllerImpl.TAG;
+import static com.android.systemui.statusbar.connectivity.NetworkControllerImpl.TAG;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -23,8 +23,8 @@ import android.util.Log;
 
 import com.android.settingslib.SignalIcon.IconGroup;
 import com.android.settingslib.SignalIcon.State;
-import com.android.systemui.statusbar.policy.NetworkController.IconState;
-import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
+import com.android.systemui.statusbar.connectivity.NetworkController.IconState;
+import com.android.systemui.statusbar.connectivity.NetworkController.SignalCallback;
 
 import java.io.PrintWriter;
 import java.util.BitSet;
@@ -83,7 +83,7 @@ public abstract class SignalController<T extends State, I extends IconGroup> {
         return mCurrentState;
     }
 
-    public void updateConnectivity(BitSet connectedTransports, BitSet validatedTransports) {
+    void updateConnectivity(BitSet connectedTransports, BitSet validatedTransports) {
         mCurrentState.inetCondition = validatedTransports.get(mTransportType) ? 1 : 0;
         notifyListenersIfNecessary();
     }
@@ -114,7 +114,7 @@ public abstract class SignalController<T extends State, I extends IconGroup> {
         return false;
     }
 
-    public void saveLastState() {
+    void saveLastState() {
         if (RECORD_HISTORY) {
             recordLastState();
         }
@@ -161,7 +161,7 @@ public abstract class SignalController<T extends State, I extends IconGroup> {
         }
     }
 
-    public void notifyListenersIfNecessary() {
+    void notifyListenersIfNecessary() {
         if (isDirty()) {
             saveLastState();
             notifyListeners();
@@ -192,7 +192,7 @@ public abstract class SignalController<T extends State, I extends IconGroup> {
         mHistoryIndex = (mHistoryIndex + 1) % HISTORY_SIZE;
     }
 
-    public void dump(PrintWriter pw) {
+    void dump(PrintWriter pw) {
         pw.println("  - " + mTag + " -----");
         pw.println("  Current State: " + mCurrentState);
         if (RECORD_HISTORY) {
@@ -210,7 +210,7 @@ public abstract class SignalController<T extends State, I extends IconGroup> {
         }
     }
 
-    public final void notifyListeners() {
+    final void notifyListeners() {
         notifyListeners(mCallbackHandler);
     }
 
@@ -219,7 +219,7 @@ public abstract class SignalController<T extends State, I extends IconGroup> {
      * based on current state, and only need to be called in the scenario where
      * mCurrentState != mLastState.
      */
-    public abstract void notifyListeners(SignalCallback callback);
+    abstract void notifyListeners(SignalCallback callback);
 
     /**
      * Generate a blank T.

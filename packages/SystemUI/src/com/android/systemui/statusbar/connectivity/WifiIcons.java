@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.policy;
+package com.android.systemui.statusbar.connectivity;
 
 import com.android.settingslib.AccessibilityContentDescriptions;
 import com.android.settingslib.R;
 import com.android.settingslib.SignalIcon.IconGroup;
 
+/** */
 public class WifiIcons {
 
     static final int[] WIFI_FULL_ICONS = {

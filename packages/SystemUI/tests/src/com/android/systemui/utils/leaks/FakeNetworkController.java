@@ -18,9 +18,9 @@ import android.os.Bundle;
 import android.testing.LeakCheck;
 
 import com.android.settingslib.net.DataUsageController;
+import com.android.systemui.statusbar.connectivity.NetworkController;
+import com.android.systemui.statusbar.connectivity.NetworkController.SignalCallback;
 import com.android.systemui.statusbar.policy.DataSaverController;
-import com.android.systemui.statusbar.policy.NetworkController;
-import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
 public class FakeNetworkController extends BaseLeakChecker<SignalCallback>
         implements NetworkController {
