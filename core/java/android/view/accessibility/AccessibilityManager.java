@@ -36,7 +36,6 @@ import android.annotation.UserIdInt;
 import android.app.RemoteAction;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -55,7 +54,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
@@ -273,8 +271,6 @@ public final class AccessibilityManager {
      */
     private SparseArray<List<AccessibilityRequestPreparer>> mRequestPreparerLists;
 
-    private ContentResolver mContentResolver;
-
     /**
      * Listener for the system accessibility state. To listen for changes to the
      * accessibility state on the device, implement this interface and register
@@ -487,7 +483,6 @@ public final class AccessibilityManager {
         mCallback = new MyCallback();
         mHandler = new Handler(context.getMainLooper(), mCallback);
         mUserId = userId;
-        mContentResolver = context.getContentResolver();
         synchronized (mLock) {
             initialFocusAppearanceLocked(context.getResources());
             tryConnectToServiceLocked(service);
@@ -512,7 +507,6 @@ public final class AccessibilityManager {
         mCallback = new MyCallback();
         mHandler = handler;
         mUserId = userId;
-        mContentResolver = context.getContentResolver();
         synchronized (mLock) {
             initialFocusAppearanceLocked(context.getResources());
             if (serviceConnect) {
@@ -1824,25 +1818,6 @@ public final class AccessibilityManager {
     public static boolean isAccessibilityButtonSupported() {
         final Resources res = Resources.getSystem();
         return res.getBoolean(com.android.internal.R.bool.config_showNavigationBar);
-    }
-
-    /**
-     * Determines if users want to select sound track with audio description by default.
-     *
-     * Audio description, also referred to as a video description, described video, or
-     * more precisely called a visual description, is a form of narration used to provide
-     * information surrounding key visual elements in a media work for the benefit of
-     * blind and visually impaired consumers.
-     *
-     * The method provides the preference value to content provider apps to select the
-     * default sound track during playing a video or movie.
-     *
-     * @return {@code true} if the audio description is enabled, {@code false} otherwise.
-     */
-    public boolean isAudioDescriptionEnabled() {
-        return Settings.Secure.getInt(
-                mContentResolver,
-                Settings.Secure.ENABLE_ACCESSIBILITY_AUDIO_DESCRIPTION_BY_DEFAULT, 0) == 1;
     }
 
     private final class MyCallback implements Handler.Callback {
