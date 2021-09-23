@@ -88,20 +88,21 @@ public abstract class CompanionDeviceService extends Service {
     public abstract void onDeviceDisappeared(@NonNull String address);
 
     /**
-     * Called by system whenever the system tries to send a message to an associated device.
+     * Called by system whenever the system dispatches a message to the app to send it to
+     * an associated device.
      *
      * @param messageId system assigned id of the message to be sent
      * @param associationId association id of the associated device
      * @param message message to be sent
      */
     @MainThread
-    public void onSendMessage(int messageId, int associationId, @NonNull byte[] message) {
+    public void onDispatchMessage(int messageId, int associationId, @NonNull byte[] message) {
         // do nothing. Companion apps can override this function for system to send messages.
     }
 
     /**
-     * Called when there's message received from an associated device, which needs to be dispatched
-     * to system for processing.
+     * App calls this method when there's a message received from an associated device,
+     * which needs to be dispatched to system for processing.
      *
      * <p>Calling app must declare uses-permission
      * {@link android.Manifest.permission#DELIVER_COMPANION_MESSAGES}</p>
@@ -111,10 +112,10 @@ public abstract class CompanionDeviceService extends Service {
      * @param message messaged received from the associated device
      */
     @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES)
-    public final void receiveMessage(int messageId, int associationId, @NonNull byte[] message) {
+    public final void dispatchMessage(int messageId, int associationId, @NonNull byte[] message) {
         CompanionDeviceManager companionDeviceManager =
                 getSystemService(CompanionDeviceManager.class);
-        companionDeviceManager.receiveMessage(messageId, associationId, message);
+        companionDeviceManager.dispatchMessage(messageId, associationId, message);
     }
 
     @Nullable
@@ -144,16 +145,16 @@ public abstract class CompanionDeviceService extends Service {
                     CompanionDeviceService.this, address));
         }
 
-        public void onSendMessage(int messageId, int associationId, @NonNull byte[] message) {
+        public void onDispatchMessage(int messageId, int associationId, @NonNull byte[] message) {
             Handler.getMain().sendMessage(PooledLambda.obtainMessage(
-                    CompanionDeviceService::onSendMessage,
+                    CompanionDeviceService::onDispatchMessage,
                     CompanionDeviceService.this, messageId, associationId, message));
         }
 
-        public final void receiveMessage(int messageId, int associationId,
+        public final void dispatchMessage(int messageId, int associationId,
                 @NonNull byte[] message) {
             Handler.getMain().sendMessage(PooledLambda.obtainMessage(
-                    CompanionDeviceService::receiveMessage,
+                    CompanionDeviceService::dispatchMessage,
                     CompanionDeviceService.this, messageId, associationId, message));
         }
     }
