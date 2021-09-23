@@ -21,7 +21,6 @@ import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_OOM_ADJ;
-import static com.android.server.am.OomAdjuster.CachedCompatChangeId;
 import static com.android.server.am.ProcessRecord.TAG;
 
 import android.annotation.ElapsedRealtimeLong;
@@ -35,6 +34,7 @@ import android.util.TimeUtils;
 import com.android.internal.annotations.CompositeRWLock;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.am.PlatformCompatCache.CachedCompatChangeId;
 
 import java.io.PrintWriter;
 
