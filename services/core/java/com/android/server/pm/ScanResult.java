@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import android.annotation.Nullable;
 import android.content.pm.SharedLibraryInfo;
+import android.os.Process;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -36,10 +37,11 @@ final class ScanResult {
      */
     public final boolean mExistingSettingCopied;
     /**
-     * Whether or not the original PackageSetting needs to be updated with
-     * a new uid. Useful when leaving a sharedUserID.
+     * The previous app ID if the app decided to leave a shared user ID.
+     * The value is set *only* if the app is leaving a shared user ID.
+     * Default value is Process.INVALID_UID.
      */
-    public final boolean mNeedsNewAppId;
+    public final int mPreviousAppId;
     /**
      * The final package settings. This may be the same object passed in
      * the {@link ScanRequest}, but, with modified values.
@@ -57,7 +59,7 @@ final class ScanResult {
             ScanRequest request, boolean success,
             @Nullable PackageSetting pkgSetting,
             @Nullable List<String> changedAbiCodePath, boolean existingSettingCopied,
-            boolean needsNewAppId,
+            int previousAppId,
             SharedLibraryInfo staticSharedLibraryInfo,
             List<SharedLibraryInfo> dynamicSharedLibraryInfos) {
         mRequest = request;
@@ -65,8 +67,16 @@ final class ScanResult {
         mPkgSetting = pkgSetting;
         mChangedAbiCodePath = changedAbiCodePath;
         mExistingSettingCopied = existingSettingCopied;
-        mNeedsNewAppId = needsNewAppId;
+        mPreviousAppId = previousAppId;
         mStaticSharedLibraryInfo = staticSharedLibraryInfo;
         mDynamicSharedLibraryInfos = dynamicSharedLibraryInfos;
+    }
+
+    /**
+     * Whether the original PackageSetting needs to be updated with
+     * a new app ID. Useful when leaving a sharedUserId.
+     */
+    public boolean needsNewAppId() {
+        return mPreviousAppId != Process.INVALID_UID;
     }
 }
