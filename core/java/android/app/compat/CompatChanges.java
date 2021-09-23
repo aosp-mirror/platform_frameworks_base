@@ -20,14 +20,11 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.compat.Compatibility;
-import android.content.Context;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 
 import com.android.internal.compat.CompatibilityOverrideConfig;
 import com.android.internal.compat.CompatibilityOverridesToRemoveConfig;
-import com.android.internal.compat.IPlatformCompat;
 
 import java.util.Map;
 import java.util.Set;
@@ -41,6 +38,7 @@ import java.util.Set;
 @SystemApi
 public final class CompatChanges {
     private static final ChangeIdStateCache QUERY_CACHE = new ChangeIdStateCache();
+
     private CompatChanges() {}
 
     /**
@@ -115,11 +113,10 @@ public final class CompatChanges {
     @RequiresPermission(android.Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD)
     public static void putPackageOverrides(@NonNull String packageName,
             @NonNull Map<Long, PackageOverride> overrides) {
-        IPlatformCompat platformCompat = IPlatformCompat.Stub.asInterface(
-                ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
         CompatibilityOverrideConfig config = new CompatibilityOverrideConfig(overrides);
         try {
-            platformCompat.putOverridesOnReleaseBuilds(config, packageName);
+            QUERY_CACHE.getPlatformCompatService()
+                .putOverridesOnReleaseBuilds(config, packageName);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -139,12 +136,11 @@ public final class CompatChanges {
     @RequiresPermission(android.Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD)
     public static void removePackageOverrides(@NonNull String packageName,
             @NonNull Set<Long> overridesToRemove) {
-        IPlatformCompat platformCompat = IPlatformCompat.Stub.asInterface(
-                ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
         CompatibilityOverridesToRemoveConfig config = new CompatibilityOverridesToRemoveConfig(
                 overridesToRemove);
         try {
-            platformCompat.removeOverridesOnReleaseBuilds(config, packageName);
+            QUERY_CACHE.getPlatformCompatService()
+                .removeOverridesOnReleaseBuilds(config, packageName);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
