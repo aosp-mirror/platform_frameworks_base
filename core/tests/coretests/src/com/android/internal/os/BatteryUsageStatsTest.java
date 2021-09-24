@@ -16,9 +16,12 @@
 
 package com.android.internal.os;
 
+import static android.os.BatteryConsumer.POWER_COMPONENT_ANY;
 import static android.os.BatteryConsumer.POWER_MODEL_MEASURED_ENERGY;
-import static android.os.BatteryConsumer.POWER_MODEL_POWER_PROFILE;
 import static android.os.BatteryConsumer.POWER_MODEL_UNDEFINED;
+import static android.os.BatteryConsumer.PROCESS_STATE_BACKGROUND;
+import static android.os.BatteryConsumer.PROCESS_STATE_FOREGROUND;
+import static android.os.BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -27,6 +30,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.os.AggregateBatteryConsumer;
 import android.os.BatteryConsumer;
 import android.os.BatteryUsageStats;
 import android.os.Parcel;
@@ -65,6 +69,12 @@ public class BatteryUsageStatsTest {
     public void testBuilder() {
         BatteryUsageStats batteryUsageStats = buildBatteryUsageStats1(true).build();
         assertBatteryUsageStats1(batteryUsageStats, true);
+    }
+
+    @Test
+    public void testBuilder_noProcessStateData() {
+        BatteryUsageStats batteryUsageStats = buildBatteryUsageStats1(false).build();
+        assertBatteryUsageStats1(batteryUsageStats, false);
     }
 
     @Test
@@ -142,9 +152,14 @@ public class BatteryUsageStatsTest {
         assertThat(dump).contains("Computed drain: 30000");
         assertThat(dump).contains("actual drain: 1000-2000");
         assertThat(dump).contains("cpu: 20100 apps: 10100 duration: 20s 300ms");
+        assertThat(dump).contains("cpu(fg): 2333 apps: 1333 duration: 3s 332ms");
+        assertThat(dump).contains("cpu(bg): 2444 apps: 1444 duration: 4s 442ms");
+        assertThat(dump).contains("cpu(fgs): 2555 apps: 1555 duration: 5s 552ms");
         assertThat(dump).contains("FOO: 20200 apps: 10200 duration: 20s 400ms");
-        assertThat(dump).contains("UID 271: 1200 ( screen=300 cpu=400 FOO=500 )");
-        assertThat(dump).contains("User 42: 30.0 ( cpu=10.0 FOO=20.0 )");
+        assertThat(dump).contains("UID 271: 1200 fg: 1777 bg: 1888 fgs: 1999 ( screen=300 "
+                + "cpu=400 (600ms) cpu:fg=1777 (7s 771ms) cpu:bg=1888 (8s 881ms) "
+                + "cpu:fgs=1999 (9s 991ms) FOO=500 )");
+        assertThat(dump).contains("User 42: 30.0 ( cpu=10.0 (30ms) FOO=20.0 )");
     }
 
     @Test
@@ -160,10 +175,10 @@ public class BatteryUsageStatsTest {
     @Test
     public void testAdd() {
         final BatteryUsageStats stats1 = buildBatteryUsageStats1(false).build();
-        final BatteryUsageStats stats2 = buildBatteryUsageStats2(new String[] {"FOO"}).build();
+        final BatteryUsageStats stats2 = buildBatteryUsageStats2(new String[]{"FOO"}, true).build();
 
         final BatteryUsageStats sum =
-                new BatteryUsageStats.Builder(new String[] {"FOO"}, true)
+                new BatteryUsageStats.Builder(new String[]{"FOO"}, true, true)
                         .add(stats1)
                         .add(stats2)
                         .build();
@@ -175,12 +190,16 @@ public class BatteryUsageStatsTest {
         for (UidBatteryConsumer uidBatteryConsumer : uidBatteryConsumers) {
             if (uidBatteryConsumer.getUid() == APP_UID1) {
                 assertUidBatteryConsumer(uidBatteryConsumer, 2124, null,
-                        5321, 7432, 423, POWER_MODEL_POWER_PROFILE, 745, POWER_MODEL_UNDEFINED,
-                        956, 1167, 1478);
+                        5321, 7432, 423, BatteryConsumer.POWER_MODEL_POWER_PROFILE, 745,
+                        POWER_MODEL_UNDEFINED,
+                        956, 1167, 1478,
+                        true, 3554, 3776, 3998, 3554, 15542, 3776, 17762, 3998, 19982);
             } else if (uidBatteryConsumer.getUid() == APP_UID2) {
                 assertUidBatteryConsumer(uidBatteryConsumer, 1332, "bar",
-                        1111, 2222, 333, POWER_MODEL_POWER_PROFILE, 444, POWER_MODEL_POWER_PROFILE,
-                        555, 666, 777);
+                        1111, 2222, 333, BatteryConsumer.POWER_MODEL_POWER_PROFILE, 444,
+                        BatteryConsumer.POWER_MODEL_POWER_PROFILE,
+                        555, 666, 777,
+                        true, 1777, 1888, 1999, 1777, 7771, 1888, 8881, 1999, 9991);
             } else {
                 fail("Unexpected UID " + uidBatteryConsumer.getUid());
             }
@@ -198,8 +217,17 @@ public class BatteryUsageStatsTest {
     @Test
     public void testAdd_customComponentMismatch() {
         final BatteryUsageStats.Builder builder =
-                new BatteryUsageStats.Builder(new String[] {"FOO"}, true);
-        final BatteryUsageStats stats = buildBatteryUsageStats2(new String[] {"BAR"}).build();
+                new BatteryUsageStats.Builder(new String[]{"FOO"}, true, true);
+        final BatteryUsageStats stats = buildBatteryUsageStats2(new String[]{"BAR"}, false).build();
+
+        assertThrows(IllegalArgumentException.class, () -> builder.add(stats));
+    }
+
+    @Test
+    public void testAdd_processStateDataMismatch() {
+        final BatteryUsageStats.Builder builder =
+                new BatteryUsageStats.Builder(new String[]{"FOO"}, true, true);
+        final BatteryUsageStats stats = buildBatteryUsageStats2(new String[]{"FOO"}, false).build();
 
         assertThrows(IllegalArgumentException.class, () -> builder.add(stats));
     }
@@ -227,7 +255,7 @@ public class BatteryUsageStatsTest {
         final MockBatteryStatsImpl batteryStats = new MockBatteryStatsImpl(clocks);
 
         final BatteryUsageStats.Builder builder =
-                new BatteryUsageStats.Builder(new String[] {"FOO"}, true)
+                new BatteryUsageStats.Builder(new String[]{"FOO"}, true, true)
                         .setBatteryCapacity(4000)
                         .setDischargePercentage(20)
                         .setDischargedPowerRange(1000, 2000)
@@ -236,16 +264,19 @@ public class BatteryUsageStatsTest {
 
         addUidBatteryConsumer(builder, batteryStats, APP_UID1, "foo",
                 1000, 2000,
-                300, POWER_MODEL_POWER_PROFILE, 400, POWER_MODEL_POWER_PROFILE, 500, 600, 800);
+                300, BatteryConsumer.POWER_MODEL_POWER_PROFILE, 400,
+                BatteryConsumer.POWER_MODEL_POWER_PROFILE, 500, 600, 800,
+                1777, 7771, 1888, 8881, 1999, 9991);
 
         addAggregateBatteryConsumer(builder,
                 BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS, 0,
-                10100, 10200, 10300, 10400);
+                10100, 10200, 10300, 10400,
+                1333, 3331, 1444, 4441, 1555, 5551);
 
         addAggregateBatteryConsumer(builder,
                 BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE, 30000,
-                20100, 20200, 20300, 20400);
-
+                20100, 20200, 20300, 20400,
+                2333, 3332, 2444, 4442, 2555, 5552);
 
         if (includeUserBatteryConsumer) {
             builder.getOrCreateUserBatteryConsumerBuilder(USER_ID)
@@ -261,43 +292,55 @@ public class BatteryUsageStatsTest {
         return builder;
     }
 
-    private BatteryUsageStats.Builder buildBatteryUsageStats2(String[] customPowerComponentNames) {
+    private BatteryUsageStats.Builder buildBatteryUsageStats2(String[] customPowerComponentNames,
+            boolean includeProcessStateData) {
         final MockClock clocks = new MockClock();
         final MockBatteryStatsImpl batteryStats = new MockBatteryStatsImpl(clocks);
 
         final BatteryUsageStats.Builder builder =
-                new BatteryUsageStats.Builder(customPowerComponentNames, true)
-                        .setDischargePercentage(30)
-                        .setDischargedPowerRange(1234, 2345)
-                        .setStatsStartTimestamp(2000)
-                        .setStatsEndTimestamp(5000);
+                new BatteryUsageStats.Builder(customPowerComponentNames, true,
+                        includeProcessStateData);
+        builder.setDischargePercentage(30)
+                .setDischargedPowerRange(1234, 2345)
+                .setStatsStartTimestamp(2000)
+                .setStatsEndTimestamp(5000);
 
         addUidBatteryConsumer(builder, batteryStats, APP_UID1, null,
                 4321, 5432,
-                123, POWER_MODEL_POWER_PROFILE, 345, POWER_MODEL_MEASURED_ENERGY, 456, 567, 678);
+                123, BatteryConsumer.POWER_MODEL_POWER_PROFILE, 345, POWER_MODEL_MEASURED_ENERGY,
+                456, 567, 678,
+                1777, 7771, 1888, 8881, 1999, 9991);
 
         addUidBatteryConsumer(builder, batteryStats, APP_UID2, "bar",
                 1111, 2222,
-                333, POWER_MODEL_POWER_PROFILE, 444, POWER_MODEL_POWER_PROFILE, 555, 666, 777);
+                333, BatteryConsumer.POWER_MODEL_POWER_PROFILE, 444,
+                BatteryConsumer.POWER_MODEL_POWER_PROFILE, 555, 666, 777,
+                1777, 7771, 1888, 8881, 1999, 9991);
 
         addAggregateBatteryConsumer(builder,
                 BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS, 0,
-                10123, 10234, 10345, 10456);
+                10123, 10234, 10345, 10456,
+                4333, 3334, 5444, 4445, 6555, 5556);
 
         addAggregateBatteryConsumer(builder,
                 BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE, 12345,
-                20111, 20222, 20333, 20444);
+                20111, 20222, 20333, 20444,
+                7333, 3337, 8444, 4448, 9555, 5559);
 
         return builder;
     }
 
     private void addUidBatteryConsumer(BatteryUsageStats.Builder builder,
             MockBatteryStatsImpl batteryStats, int uid, String packageWithHighestDrain,
-            int timeInStateForeground, int timeInStateBackground, int screenPower,
-            int screenPowerModel, int cpuPower, int cpuPowerModel, int customComponentPower,
-            int cpuDuration, int customComponentDuration) {
+            int timeInStateForeground, int timeInStateBackground, double screenPower,
+            int screenPowerModel, double cpuPower, int cpuPowerModel, double customComponentPower,
+            int cpuDuration, int customComponentDuration, double cpuPowerForeground,
+            int cpuDurationForeground, double cpuPowerBackground, int cpuDurationBackground,
+            double cpuPowerFgs, int cpuDurationFgs) {
         final BatteryStatsImpl.Uid batteryStatsUid = batteryStats.getUidStatsLocked(uid);
-        builder.getOrCreateUidBatteryConsumerBuilder(batteryStatsUid)
+        final UidBatteryConsumer.Builder uidBuilder =
+                builder.getOrCreateUidBatteryConsumerBuilder(batteryStatsUid);
+        uidBuilder
                 .setPackageWithHighestDrain(packageWithHighestDrain)
                 .setTimeInStateMs(UidBatteryConsumer.STATE_FOREGROUND, timeInStateForeground)
                 .setTimeInStateMs(UidBatteryConsumer.STATE_BACKGROUND, timeInStateBackground)
@@ -311,21 +354,68 @@ public class BatteryUsageStatsTest {
                         BatteryConsumer.POWER_COMPONENT_CPU, cpuDuration)
                 .setUsageDurationForCustomComponentMillis(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, customComponentDuration);
+        if (builder.isProcessStateDataNeeded()) {
+            final BatteryConsumer.Key cpuFgKey = uidBuilder.getKey(
+                    BatteryConsumer.POWER_COMPONENT_CPU,
+                    BatteryConsumer.PROCESS_STATE_FOREGROUND);
+            final BatteryConsumer.Key cpuBgKey = uidBuilder.getKey(
+                    BatteryConsumer.POWER_COMPONENT_CPU,
+                    BatteryConsumer.PROCESS_STATE_BACKGROUND);
+            final BatteryConsumer.Key cpuFgsKey = uidBuilder.getKey(
+                    BatteryConsumer.POWER_COMPONENT_CPU,
+                    BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE);
+            uidBuilder
+                    .setConsumedPower(cpuFgKey, cpuPowerForeground,
+                            BatteryConsumer.POWER_MODEL_POWER_PROFILE)
+                    .setUsageDurationMillis(cpuFgKey, cpuDurationForeground)
+                    .setConsumedPower(cpuBgKey, cpuPowerBackground,
+                            BatteryConsumer.POWER_MODEL_POWER_PROFILE)
+                    .setUsageDurationMillis(cpuBgKey, cpuDurationBackground)
+                    .setConsumedPower(cpuFgsKey, cpuPowerFgs,
+                            BatteryConsumer.POWER_MODEL_POWER_PROFILE)
+                    .setUsageDurationMillis(cpuFgsKey, cpuDurationFgs);
+        }
     }
 
     private void addAggregateBatteryConsumer(BatteryUsageStats.Builder builder, int scope,
             double consumedPower, int cpuPower, int customComponentPower, int cpuDuration,
-            int customComponentDuration) {
-        builder.getAggregateBatteryConsumerBuilder(scope)
-                .setConsumedPower(consumedPower)
-                .setConsumedPower(
-                        BatteryConsumer.POWER_COMPONENT_CPU, cpuPower)
-                .setConsumedPowerForCustomComponent(
-                        BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, customComponentPower)
-                .setUsageDurationMillis(
-                        BatteryConsumer.POWER_COMPONENT_CPU, cpuDuration)
-                .setUsageDurationForCustomComponentMillis(
-                        BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, customComponentDuration);
+            int customComponentDuration, double cpuPowerForeground, long cpuDurationForeground,
+            double cpuPowerBackground, long cpuDurationBackground, double cpuPowerFgs,
+            long cpuDurationFgs) {
+        final AggregateBatteryConsumer.Builder aggBuilder =
+                builder.getAggregateBatteryConsumerBuilder(scope)
+                        .setConsumedPower(consumedPower)
+                        .setConsumedPower(
+                                BatteryConsumer.POWER_COMPONENT_CPU, cpuPower)
+                        .setConsumedPowerForCustomComponent(
+                                BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID,
+                                customComponentPower)
+                        .setUsageDurationMillis(
+                                BatteryConsumer.POWER_COMPONENT_CPU, cpuDuration)
+                        .setUsageDurationForCustomComponentMillis(
+                                BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID,
+                                customComponentDuration);
+        if (builder.isProcessStateDataNeeded()) {
+            final BatteryConsumer.Key cpuFgKey = aggBuilder.getKey(
+                    BatteryConsumer.POWER_COMPONENT_CPU,
+                    BatteryConsumer.PROCESS_STATE_FOREGROUND);
+            final BatteryConsumer.Key cpuBgKey = aggBuilder.getKey(
+                    BatteryConsumer.POWER_COMPONENT_CPU,
+                    BatteryConsumer.PROCESS_STATE_BACKGROUND);
+            final BatteryConsumer.Key cpuFgsKey = aggBuilder.getKey(
+                    BatteryConsumer.POWER_COMPONENT_CPU,
+                    BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE);
+            aggBuilder
+                    .setConsumedPower(cpuFgKey, cpuPowerForeground,
+                            BatteryConsumer.POWER_MODEL_POWER_PROFILE)
+                    .setUsageDurationMillis(cpuFgKey, cpuDurationForeground)
+                    .setConsumedPower(cpuBgKey, cpuPowerBackground,
+                            BatteryConsumer.POWER_MODEL_POWER_PROFILE)
+                    .setUsageDurationMillis(cpuBgKey, cpuDurationBackground)
+                    .setConsumedPower(cpuFgsKey, cpuPowerFgs,
+                            BatteryConsumer.POWER_MODEL_POWER_PROFILE)
+                    .setUsageDurationMillis(cpuFgsKey, cpuDurationFgs);
+        }
     }
 
     public void assertBatteryUsageStats1(BatteryUsageStats batteryUsageStats,
@@ -338,8 +428,10 @@ public class BatteryUsageStatsTest {
         for (UidBatteryConsumer uidBatteryConsumer : uidBatteryConsumers) {
             if (uidBatteryConsumer.getUid() == APP_UID1) {
                 assertUidBatteryConsumer(uidBatteryConsumer, 1200, "foo",
-                        1000, 2000, 300, POWER_MODEL_POWER_PROFILE, 400, POWER_MODEL_POWER_PROFILE,
-                        500, 600, 800);
+                        1000, 2000, 300, BatteryConsumer.POWER_MODEL_POWER_PROFILE, 400,
+                        BatteryConsumer.POWER_MODEL_POWER_PROFILE,
+                        500, 600, 800,
+                        true, 1777, 1888, 1999, 1777, 7771, 1888, 8881, 1999, 9991);
             } else {
                 fail("Unexpected UID " + uidBatteryConsumer.getUid());
             }
@@ -384,10 +476,13 @@ public class BatteryUsageStatsTest {
     }
 
     private void assertUidBatteryConsumer(UidBatteryConsumer uidBatteryConsumer,
-            int consumedPower, String packageWithHighestDrain, int timeInStateForeground,
-            int timeInStateBackground, int screenPower, int screenPowerModel, int cpuPower,
-            int cpuPowerModel, int customComponentPower, int cpuDuration,
-            int customComponentDuration) {
+            double consumedPower, String packageWithHighestDrain, int timeInStateForeground,
+            int timeInStateBackground, int screenPower, int screenPowerModel, double cpuPower,
+            int cpuPowerModel, double customComponentPower, int cpuDuration,
+            int customComponentDuration, boolean processStateDataIncluded,
+            double totalPowerForeground, double totalPowerBackground, double totalPowerFgs,
+            double cpuPowerForeground, int cpuDurationForeground, double cpuPowerBackground,
+            int cpuDurationBackground, double cpuPowerFgs, int cpuDurationFgs) {
         assertThat(uidBatteryConsumer.getConsumedPower()).isEqualTo(consumedPower);
         assertThat(uidBatteryConsumer.getPackageWithHighestDrain()).isEqualTo(
                 packageWithHighestDrain);
@@ -413,6 +508,58 @@ public class BatteryUsageStatsTest {
         assertThat(uidBatteryConsumer.getCustomPowerComponentCount()).isEqualTo(1);
         assertThat(uidBatteryConsumer.getCustomPowerComponentName(
                 BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID)).isEqualTo("FOO");
+
+        if (processStateDataIncluded) {
+            assertThat(uidBatteryConsumer.getConsumedPower(
+                    new BatteryConsumer.Dimensions(POWER_COMPONENT_ANY,
+                            PROCESS_STATE_FOREGROUND)))
+                    .isEqualTo(totalPowerForeground);
+            assertThat(uidBatteryConsumer.getConsumedPower(
+                    new BatteryConsumer.Dimensions(POWER_COMPONENT_ANY,
+                            PROCESS_STATE_BACKGROUND)))
+                    .isEqualTo(totalPowerBackground);
+            assertThat(uidBatteryConsumer.getConsumedPower(
+                    new BatteryConsumer.Dimensions(POWER_COMPONENT_ANY,
+                            PROCESS_STATE_FOREGROUND_SERVICE)))
+                    .isEqualTo(totalPowerFgs);
+        }
+
+        final BatteryConsumer.Key cpuFgKey = uidBatteryConsumer.getKey(
+                BatteryConsumer.POWER_COMPONENT_CPU, BatteryConsumer.PROCESS_STATE_FOREGROUND);
+        if (processStateDataIncluded) {
+            assertThat(cpuFgKey).isNotNull();
+            assertThat(uidBatteryConsumer.getConsumedPower(cpuFgKey))
+                    .isEqualTo(cpuPowerForeground);
+            assertThat(uidBatteryConsumer.getUsageDurationMillis(cpuFgKey))
+                    .isEqualTo(cpuDurationForeground);
+        } else {
+            assertThat(cpuFgKey).isNull();
+        }
+
+        final BatteryConsumer.Key cpuBgKey = uidBatteryConsumer.getKey(
+                BatteryConsumer.POWER_COMPONENT_CPU, BatteryConsumer.PROCESS_STATE_BACKGROUND);
+        if (processStateDataIncluded) {
+            assertThat(cpuBgKey).isNotNull();
+            assertThat(uidBatteryConsumer.getConsumedPower(cpuBgKey))
+                    .isEqualTo(cpuPowerBackground);
+            assertThat(uidBatteryConsumer.getUsageDurationMillis(cpuBgKey))
+                    .isEqualTo(cpuDurationBackground);
+        } else {
+            assertThat(cpuBgKey).isNull();
+        }
+
+        final BatteryConsumer.Key cpuFgsKey = uidBatteryConsumer.getKey(
+                BatteryConsumer.POWER_COMPONENT_CPU,
+                BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE);
+        if (processStateDataIncluded) {
+            assertThat(cpuFgsKey).isNotNull();
+            assertThat(uidBatteryConsumer.getConsumedPower(cpuFgsKey))
+                    .isEqualTo(cpuPowerFgs);
+            assertThat(uidBatteryConsumer.getUsageDurationMillis(cpuFgsKey))
+                    .isEqualTo(cpuDurationFgs);
+        } else {
+            assertThat(cpuFgsKey).isNotNull();
+        }
     }
 
     private void assertUserBatteryConsumer(UserBatteryConsumer userBatteryConsumer,

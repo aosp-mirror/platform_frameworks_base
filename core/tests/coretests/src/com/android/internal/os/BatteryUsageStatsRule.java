@@ -183,8 +183,10 @@ public class BatteryUsageStatsRule implements TestRule {
         final String[] customPowerComponentNames = mBatteryStats.getCustomEnergyConsumerNames();
         final boolean includePowerModels = (query.getFlags()
                 & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_MODELS) != 0;
+        final boolean includeProcessStateData = (query.getFlags()
+                & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_PROCESS_STATE_DATA) != 0;
         BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(
-                customPowerComponentNames, includePowerModels);
+                customPowerComponentNames, includePowerModels, includeProcessStateData);
         SparseArray<? extends BatteryStats.Uid> uidStats = mBatteryStats.getUidStats();
         for (int i = 0; i < uidStats.size(); i++) {
             builder.getOrCreateUidBatteryConsumerBuilder(uidStats.valueAt(i));

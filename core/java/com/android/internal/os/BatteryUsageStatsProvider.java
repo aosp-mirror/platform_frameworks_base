@@ -152,9 +152,13 @@ public class BatteryUsageStatsProvider {
 
         final boolean includePowerModels = (query.getFlags()
                 & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_MODELS) != 0;
+        final boolean includeProcessStateData = ((query.getFlags()
+                & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_PROCESS_STATE_DATA) != 0)
+                && mStats.isProcessStateDataAvailable();
 
         final BatteryUsageStats.Builder batteryUsageStatsBuilder = new BatteryUsageStats.Builder(
-                mStats.getCustomEnergyConsumerNames(), includePowerModels);
+                mStats.getCustomEnergyConsumerNames(), includePowerModels,
+                includeProcessStateData);
         // TODO(b/188068523): use a monotonic clock to ensure resilience of order and duration
         // of stats sessions to wall-clock adjustments
         batteryUsageStatsBuilder.setStatsStartTimestamp(mStats.getStartClockTime());
@@ -224,10 +228,13 @@ public class BatteryUsageStatsProvider {
     private BatteryUsageStats getAggregatedBatteryUsageStats(BatteryUsageStatsQuery query) {
         final boolean includePowerModels = (query.getFlags()
                 & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_MODELS) != 0;
+        final boolean includeProcessStateData = ((query.getFlags()
+                & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_PROCESS_STATE_DATA) != 0)
+                && mStats.isProcessStateDataAvailable();
 
         final String[] customEnergyConsumerNames = mStats.getCustomEnergyConsumerNames();
         final BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(
-                customEnergyConsumerNames, includePowerModels);
+                customEnergyConsumerNames, includePowerModels, includeProcessStateData);
         if (mBatteryUsageStatsStore == null) {
             Log.e(TAG, "BatteryUsageStatsStore is unavailable");
             return builder.build();
@@ -238,16 +245,25 @@ public class BatteryUsageStatsProvider {
             if (timestamp > query.getFromTimestamp() && timestamp <= query.getToTimestamp()) {
                 final BatteryUsageStats snapshot =
                         mBatteryUsageStatsStore.loadBatteryUsageStats(timestamp);
-                if (snapshot != null) {
-                    if (Arrays.equals(snapshot.getCustomPowerComponentNames(),
-                            customEnergyConsumerNames)) {
-                        builder.add(snapshot);
-                    } else {
-                        Log.w(TAG, "Ignoring older BatteryUsageStats snapshot, which has different "
-                                + "custom power components: "
-                                + Arrays.toString(snapshot.getCustomPowerComponentNames()));
-                    }
+                if (snapshot == null) {
+                    continue;
                 }
+
+                if (!Arrays.equals(snapshot.getCustomPowerComponentNames(),
+                        customEnergyConsumerNames)) {
+                    Log.w(TAG, "Ignoring older BatteryUsageStats snapshot, which has different "
+                            + "custom power components: "
+                            + Arrays.toString(snapshot.getCustomPowerComponentNames()));
+                    continue;
+                }
+
+                if (includeProcessStateData && !snapshot.isProcessStateDataIncluded()) {
+                    Log.w(TAG, "Ignoring older BatteryUsageStats snapshot, which "
+                            + " does not include process state data");
+                    continue;
+                }
+
+                builder.add(snapshot);
             }
         }
         return builder.build();

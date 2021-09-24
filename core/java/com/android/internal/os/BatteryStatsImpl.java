@@ -14769,6 +14769,11 @@ public class BatteryStatsImpl extends BatteryStats {
         mShuttingDown = true;
     }
 
+    @Override
+    public boolean isProcessStateDataAvailable() {
+        return trackPerProcStateCpuTimes();
+    }
+
     public boolean trackPerProcStateCpuTimes() {
         return mConstants.TRACK_CPU_TIMES_BY_PROC_STATE && mPerProcStateCpuTimesAvailable;
     }
