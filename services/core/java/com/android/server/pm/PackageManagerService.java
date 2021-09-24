@@ -16165,8 +16165,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
-    void sendPackagesSuspendedForUser(String[] pkgList, int[] uidList, int userId,
-            boolean suspended) {
+    void sendPackagesSuspendedForUser(String intent, String[] pkgList, int[] uidList, int userId) {
         final List<List<String>> pkgsToSend = new ArrayList(pkgList.length);
         final List<IntArray> uidsToSend = new ArrayList(pkgList.length);
         final List<SparseArray<int[]>> allowListsToSend = new ArrayList(pkgList.length);
@@ -16207,11 +16206,8 @@ public class PackageManagerService extends IPackageManager.Stub
             extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidsToSend.get(i).toArray());
             final SparseArray<int[]> allowList = allowListsToSend.get(i).size() == 0
                     ? null : allowListsToSend.get(i);
-            sendPackageBroadcast(
-                    suspended ? Intent.ACTION_PACKAGES_SUSPENDED
-                            : Intent.ACTION_PACKAGES_UNSUSPENDED,
-                    null, extras, Intent.FLAG_RECEIVER_REGISTERED_ONLY, null, null,
-                    userIds, null, allowList, null);
+            sendPackageBroadcast(intent, null, extras, Intent.FLAG_RECEIVER_REGISTERED_ONLY, null,
+                    null, userIds, null, allowList, null);
         }
     }
 
@@ -16525,6 +16521,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final List<String> changedPackagesList = new ArrayList<>(packageNames.length);
         final IntArray changedUids = new IntArray(packageNames.length);
+        final List<String> modifiedPackagesList = new ArrayList<>(packageNames.length);
+        final IntArray modifiedUids = new IntArray(packageNames.length);
         final List<String> unactionedPackages = new ArrayList<>(packageNames.length);
         final boolean[] canSuspend = suspended ? canSuspendPackageForUserInternal(packageNames,
                 userId) : null;
@@ -16552,13 +16550,14 @@ public class PackageManagerService extends IPackageManager.Stub
                 unactionedPackages.add(packageName);
                 continue;
             }
-            boolean packageUnsuspended;
+            final boolean packageUnsuspended;
+            final boolean packageModified;
             synchronized (mLock) {
                 if (suspended) {
-                    pkgSetting.addOrUpdateSuspension(callingPackage, dialogInfo, appExtras,
-                            launcherExtras, userId);
+                    packageModified = pkgSetting.addOrUpdateSuspension(callingPackage,
+                            dialogInfo, appExtras, launcherExtras, userId);
                 } else {
-                    pkgSetting.removeSuspension(callingPackage, userId);
+                    packageModified = pkgSetting.removeSuspension(callingPackage, userId);
                 }
                 packageUnsuspended = !suspended && !pkgSetting.getSuspended(userId);
             }
@@ -16566,18 +16565,29 @@ public class PackageManagerService extends IPackageManager.Stub
                 changedPackagesList.add(packageName);
                 changedUids.add(UserHandle.getUid(userId, pkgSetting.appId));
             }
+            if (packageModified) {
+                modifiedPackagesList.add(packageName);
+                modifiedUids.add(UserHandle.getUid(userId, pkgSetting.appId));
+            }
         }
 
         if (!changedPackagesList.isEmpty()) {
-            final String[] changedPackages = changedPackagesList.toArray(
-                    new String[changedPackagesList.size()]);
-            sendPackagesSuspendedForUser(changedPackages, changedUids.toArray(), userId, suspended);
+            final String[] changedPackages = changedPackagesList.toArray(new String[0]);
+            sendPackagesSuspendedForUser(
+                    suspended ? Intent.ACTION_PACKAGES_SUSPENDED
+                              : Intent.ACTION_PACKAGES_UNSUSPENDED,
+                    changedPackages, changedUids.toArray(), userId);
             sendMyPackageSuspendedOrUnsuspended(changedPackages, suspended, userId);
             synchronized (mLock) {
                 scheduleWritePackageRestrictionsLocked(userId);
             }
         }
-        return unactionedPackages.toArray(new String[unactionedPackages.size()]);
+        // Send the suspension changed broadcast to ensure suspension state is not stale.
+        if (!modifiedPackagesList.isEmpty()) {
+            sendPackagesSuspendedForUser(Intent.ACTION_PACKAGES_SUSPENSION_CHANGED,
+                    modifiedPackagesList.toArray(new String[0]), modifiedUids.toArray(), userId);
+        }
+        return unactionedPackages.toArray(new String[0]);
     }
 
     @Override
@@ -16706,7 +16716,8 @@ public class PackageManagerService extends IPackageManager.Stub
             final String[] packageArray = unsuspendedPackages.toArray(
                     new String[unsuspendedPackages.size()]);
             sendMyPackageSuspendedOrUnsuspended(packageArray, false, userId);
-            sendPackagesSuspendedForUser(packageArray, unsuspendedUids.toArray(), userId, false);
+            sendPackagesSuspendedForUser(Intent.ACTION_PACKAGES_UNSUSPENDED,
+                    packageArray, unsuspendedUids.toArray(), userId);
         }
     }
 
