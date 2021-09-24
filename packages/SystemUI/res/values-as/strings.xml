@@ -37,7 +37,7 @@
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"বেটাৰী সঞ্চয়কাৰীৰ বিষয়ে"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"অন কৰক"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"বেটাৰি সঞ্চয়কাৰী অন কৰক"</string>
-    <string name="status_bar_settings_settings_button" msgid="534331565185171556">"ছেটিংসমূহ"</string>
+    <string name="status_bar_settings_settings_button" msgid="534331565185171556">"ছেটিং"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"ৱাই-ফাই"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"স্বয়ং-ঘূৰ্ণন স্ক্ৰীন"</string>
     <string name="status_bar_settings_mute_label" msgid="914392730086057522">"মিউট"</string>
@@ -233,7 +233,7 @@
     <string name="accessibility_battery_level" msgid="5143715405241138822">"<xliff:g id="NUMBER">%d</xliff:g> শতাংশ বেটাৰি।"</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"আপোনাৰ ব্যৱহাৰৰ ওপৰত ভিত্তি কৰি বেটাৰী <xliff:g id="PERCENTAGE">%1$s</xliff:g> শতাংশ, প্ৰায় <xliff:g id="TIME">%2$s</xliff:g> বাকী আছে"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"বেটাৰি চাৰ্জ হৈ আছে, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> শতাংশ।"</string>
-    <string name="accessibility_settings_button" msgid="2197034218538913880">"ছিষ্টেমৰ ছেটিংসমূহ৷"</string>
+    <string name="accessibility_settings_button" msgid="2197034218538913880">"ছিষ্টেমৰ ছেটিং৷"</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"জাননীসমূহ।"</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"সকলো জাননীবোৰ চাওক"</string>
     <string name="accessibility_remove_notification" msgid="1641455251495815527">"জাননী মচক৷"</string>
@@ -248,9 +248,9 @@
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"জাননী অগ্ৰাহ্য কৰা হৈছে।"</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"জাননী পেনেল।"</string>
-    <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"ক্ষিপ্ৰ ছেটিংসমূহ।"</string>
+    <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"ক্ষিপ্ৰ ছেটিং।"</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"বন্ধ স্ক্ৰীন।"</string>
-    <string name="accessibility_desc_settings" msgid="6728577365389151969">"ছেটিংসমূহ"</string>
+    <string name="accessibility_desc_settings" msgid="6728577365389151969">"ছেটিং"</string>
     <string name="accessibility_desc_recent_apps" msgid="1748675199348914194">"অৱলোকন।"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"কৰ্মস্থানৰ প্ৰ\'ফাইলৰ লক স্ক্ৰীন"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"বন্ধ কৰক"</string>
@@ -318,8 +318,8 @@
       <item quantity="other"> ভিতৰত আৰু <xliff:g id="NUMBER_1">%s</xliff:g>টা জাননী আছে।</item>
     </plurals>
     <string name="notification_summary_message_format" msgid="5158219088501909966">"<xliff:g id="CONTACT_NAME">%1$s</xliff:g>: <xliff:g id="MESSAGE_CONTENT">%2$s</xliff:g>"</string>
-    <string name="status_bar_notification_inspect_item_title" msgid="6818779631806163080">"জাননীৰ ছেটিংসমূহ"</string>
-    <string name="status_bar_notification_app_settings_title" msgid="5050006438806013903">"<xliff:g id="APP_NAME">%s</xliff:g> ছেটিংসমূহ"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="6818779631806163080">"জাননীৰ ছেটিং"</string>
+    <string name="status_bar_notification_app_settings_title" msgid="5050006438806013903">"<xliff:g id="APP_NAME">%s</xliff:g> ছেটিং"</string>
     <string name="accessibility_rotation_lock_off" msgid="3880436123632448930">"আপোনাৰ ফ\'নৰ স্ক্ৰীন স্বয়ংক্ৰিয়ভাৱে ঘূৰিব।"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"স্ক্ৰীন লেণ্ডস্কে\'প দিশত লক কৰা হ’ল।"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"স্ক্ৰীন প\'ৰ্ট্ৰেইট দিশত লক কৰা হ’ল।"</string>
@@ -361,7 +361,7 @@
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"মিডিয়া ডিভাইচ"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"জৰুৰীকালীন কল মাত্ৰ"</string>
-    <string name="quick_settings_settings_label" msgid="2214639529565474534">"ছেটিংসমূহ"</string>
+    <string name="quick_settings_settings_label" msgid="2214639529565474534">"ছেটিং"</string>
     <string name="quick_settings_time_label" msgid="3352680970557509303">"সময়"</string>
     <string name="quick_settings_user_label" msgid="1253515509432672496">"মোক"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"ব্যৱহাৰকাৰী"</string>
@@ -555,9 +555,9 @@
     <string name="disconnect_vpn" msgid="26286850045344557">"ভিপিএন সংযোগ বিচ্ছিন্ন কৰক"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"নীতিসমূহ চাওক"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"নিয়ন্ত্ৰণসমূহ চাওক"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"এই ডিভাইচটো <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ৰ।\n\nআপোনাৰ আইটি প্ৰশাসকে আপোনাৰ ডিভাইচটোৰ লগত জড়িত ছেটিংসমূহ, কৰ্পৰে’টৰ এক্সেছ, এপ্‌সমূহ, ডেটা আৰু আপোনাৰ ডিভাইচটোৰ অৱস্থান সম্পৰ্কীয় তথ্য নিৰীক্ষণ কৰাৰ লগতে সেয়া পৰিচালনা কৰিব পাৰে।\n\nঅধিক তথ্যৰ বাবে আপোনাৰ আইটি প্ৰশাসকৰ সৈতে যোগাযোগ কৰক।"</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"এই ডিভাইচটো <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ৰ।\n\nআপোনাৰ আইটি প্ৰশাসকে আপোনাৰ ডিভাইচটোৰ লগত জড়িত ছেটিং, কৰ্পৰে’টৰ এক্সেছ, এপ্‌, ডেটা আৰু আপোনাৰ ডিভাইচটোৰ অৱস্থান সম্পৰ্কীয় তথ্য নিৰীক্ষণ কৰাৰ লগতে সেয়া পৰিচালনা কৰিব পাৰে।\n\nঅধিক তথ্যৰ বাবে আপোনাৰ আইটি প্ৰশাসকৰ সৈতে যোগাযোগ কৰক।"</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g>এ হয়তো এই ডিভাইচটোৰ সৈতে জড়িত হৈ থকা ডেটা এক্সেছ কৰিব, এপ্‌ পৰিচালনা কৰিব আৰু এই ডিভাইচটোৰ ছেটিং সলনি কৰিব পাৰিব।\n\nআপোনাৰ যদি কিবা প্ৰশ্ন আছে, তেন্তে <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>ৰ সৈতে যোগাযোগ কৰক।"</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"এই ডিভাইচটো আপোনাৰ প্ৰতিষ্ঠানৰ।\n\nআপোনাৰ আইটি প্ৰশাসকে আপোনাৰ ডিভাইচটোৰ লগত জড়িত ছেটিংসমূহ, কৰ্পৰে’টৰ এক্সেছ, এপ্‌সমূহ, ডেটা আৰু আপোনাৰ ডিভাইচটোৰ অৱস্থান সম্পৰ্কীয় তথ্য নিৰীক্ষণ কৰাৰ লগতে সেয়া পৰিচালনা কৰিব পাৰে।\n\nঅধিক তথ্যৰ বাবে আপোনাৰ আইটি প্ৰশাসকৰ সৈতে যোগাযোগ কৰক।"</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"এই ডিভাইচটো আপোনাৰ প্ৰতিষ্ঠানৰ।\n\nআপোনাৰ আইটি প্ৰশাসকে আপোনাৰ ডিভাইচটোৰ লগত জড়িত ছেটিং, কৰ্পৰে’টৰ এক্সেছ, এপ্‌, ডেটা আৰু আপোনাৰ ডিভাইচটোৰ অৱস্থান সম্পৰ্কীয় তথ্য নিৰীক্ষণ কৰাৰ লগতে সেয়া পৰিচালনা কৰিব পাৰে।\n\nঅধিক তথ্যৰ বাবে আপোনাৰ আইটি প্ৰশাসকৰ সৈতে যোগাযোগ কৰক।"</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"আপোনাৰ প্ৰতিষ্ঠানে এই ডিভাইচটোত এটা প্ৰমাণপত্ৰ সম্পৰ্কীয় কৰ্তৃপক্ষ ইনষ্টল কৰিছে। আপোনাৰ সুৰক্ষিত নেটৱৰ্ক ট্ৰেফিক পৰ্যবেক্ষণ বা সংশোধন কৰা হ\'ব পাৰে।"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"আপোনাৰ প্ৰতিষ্ঠানে আপোনাৰ কৰ্মস্থানৰ প্ৰ\'ফাইলটোত এটা প্ৰমাণপত্ৰ সম্পৰ্কীয় কৰ্তৃপক্ষ ইনষ্টল কৰিছে। আপোনাৰ সুৰক্ষিত নেটৱৰ্কৰ ট্ৰেফিক পৰ্যবেক্ষণ বা সংশোধন কৰা হ\'ব পাৰে।"</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"এই ডিভাইচটোত এটা প্ৰমাণপত্ৰ সম্পৰ্কীয় কৰ্তৃপক্ষ ইনষ্টল কৰা হৈছে। আপোনাৰ সুৰক্ষিত নেটৱৰ্কৰ ট্ৰেফিক পৰ্যবেক্ষণ বা সংশোধন কৰা হ\'ব পাৰে।"</string>
@@ -569,12 +569,12 @@
     <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"আপোনাৰ ব্যক্তিগত প্ৰ\'ফাইলটো <xliff:g id="VPN_APP">%1$s</xliff:g>ৰে সংযুক্ত হৈ আছে, যিয়ে আপোনাৰ ইমেইল, এপ্ আৰু ৱেবছাইটকে ধৰি নেটৱর্কৰ কাৰ্যকলাপ পৰ্যবেক্ষণ কৰিব পাৰে।"</string>
     <string name="monitoring_description_do_header_generic" msgid="6130190408164834986">"আপোনাৰ ডিভাইচটো <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>ৰ দ্বাৰা পৰিচালিত।"</string>
     <string name="monitoring_description_do_header_with_name" msgid="2696255132542779511">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>এ আপোনাৰ ডিভাইচটো পৰিচালনা কৰিবলৈ <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> ব্যৱহাৰ কৰে।"</string>
-    <string name="monitoring_description_do_body" msgid="7700878065625769970">"আপোনাৰ প্ৰশাসকে আপোনাৰ ডিভাইচৰ লগত জড়িত ছেটিংসমূহ, কৰ্প\'ৰেইট অনুমতি, এপসমূহ, ডেটা আৰু ডিভাইচৰ অৱস্থান সম্পৰ্কীয় তথ্য পৰ্যবেক্ষণ কৰাৰ লগতে পৰিচালনা কৰিব পাৰিব।"</string>
+    <string name="monitoring_description_do_body" msgid="7700878065625769970">"আপোনাৰ প্ৰশাসকে আপোনাৰ ডিভাইচৰ লগত জড়িত ছেটিং, কৰ্প\'ৰেইট এক্সেছ, এপ্‌, ডেটা আৰু ডিভাইচৰ অৱস্থান সম্পৰ্কীয় তথ্য পৰ্যবেক্ষণ তথা পৰিচালনা কৰিব পাৰে।"</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="1467280496376492558">" "</string>
     <string name="monitoring_description_do_learn_more" msgid="645149183455573790">"অধিক জানক"</string>
     <string name="monitoring_description_do_body_vpn" msgid="7699280130070502303">"আপুনি <xliff:g id="VPN_APP">%1$s</xliff:g> ৰে সংযুক্ত হৈ আছে, ই ইমেইল, এপ্ আৰু ৱেবছাইটকে ধৰি আপোনাৰ নেটৱর্কৰ কাৰ্যকলাপ পৰ্যবেক্ষণ কৰিব পাৰে।"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"ভিপিএন ছেটিংসমূহ খোলক"</string>
+    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN ছেটিং খোলক"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"বিশ্বাসী পৰিচয়-পত্ৰসমূহ খোলক"</string>
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"আপোনাৰ প্ৰশাসকে নেটৱৰ্ক লগিং অন কৰিছে, যিয়ে আপোনাৰ ডিভাইচটোত নেটৱৰ্ক ট্ৰেফিক পৰ্যবেক্ষণ কৰে।\n\nএই সম্পৰ্কে অধিক জানিবলৈ আপোনাৰ প্ৰশাসকৰ সৈতে যোগাযোগ কৰক।"</string>
@@ -596,7 +596,7 @@
     <string name="hidden_notifications_setup" msgid="2064795578526982467">"ছেট আপ কৰক"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="5901885672973736563">"এতিয়া অফ কৰক"</string>
-    <string name="accessibility_volume_settings" msgid="1458961116951564784">"ধ্বনিৰ ছেটিংসমূহ"</string>
+    <string name="accessibility_volume_settings" msgid="1458961116951564784">"ধ্বনিৰ ছেটিং"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"সম্প্ৰসাৰণ কৰক"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"সংকুচিত কৰক"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"স্বয়ংক্ৰিয় কেপশ্বন মিডিয়া"</string>
@@ -621,7 +621,7 @@
     <string name="screen_pinning_start" msgid="7483998671383371313">"এপ্‌টো পিন কৰা হ’ল"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"এপ্‌টো আনপিন কৰা হ’ল"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> লুকুৱাবনে?"</string>
-    <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"আপুনি ইয়াক পৰৱৰ্তী সময়ত ছেটিংসমূহত অন কৰিলে ই পুনৰ প্ৰকট হ\'ব।"</string>
+    <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"আপুনি পৰৱৰ্তী সময়ত ছেটিঙত ইয়াক অন কৰিলে ই পুনৰ প্ৰকট হ\'ব।"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"লুকুৱাওক"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"কল"</string>
     <string name="stream_system" msgid="7663148785370565134">"ছিষ্টেম"</string>
@@ -659,7 +659,7 @@
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="6235377891802910455">"সংযুক্ত বেটাৰিৰ কিমান শতাংশ বাকী আছে দেখুওৱাক"</string>
     <string name="show_battery_percentage_summary" msgid="9053024758304102915">"চাৰ্জ হৈ নথকা অৱস্থাত বেটাৰি কিমান শতাংশ বাকী স্থিতি দণ্ডৰ ভিতৰত দেখুৱাওক"</string>
-    <string name="quick_settings" msgid="6211774484997470203">"ক্ষিপ্ৰ ছেটিংসমূহ"</string>
+    <string name="quick_settings" msgid="6211774484997470203">"ক্ষিপ্ৰ ছেটিং"</string>
     <string name="status_bar" msgid="4357390266055077437">"স্থিতি দণ্ড"</string>
     <string name="overview" msgid="3522318590458536816">"অৱলোকন"</string>
     <string name="demo_mode" msgid="263484519766901593">"ছিষ্টেমৰ UI প্ৰদৰ্শন ম\'ড"</string>
@@ -684,21 +684,21 @@
     <string name="zen_alarm_warning" msgid="7844303238486849503">"আপুনি আপোনাৰ পিছৰটো এলাৰ্ম <xliff:g id="WHEN">%1$s</xliff:g> বজাত শুনা নাপাব"</string>
     <string name="alarm_template" msgid="2234991538018805736">"<xliff:g id="WHEN">%1$s</xliff:g> বজাত"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g> বজাত"</string>
-    <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"ক্ষিপ্ৰ ছেটিংসমূহ, <xliff:g id="TITLE">%s</xliff:g>।"</string>
+    <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"ক্ষিপ্ৰ ছেটিং, <xliff:g id="TITLE">%s</xliff:g>।"</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"হটস্পট"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"কৰ্মস্থানৰ প্ৰ\'ফাইল"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"কিছুমানৰ বাবে আমোদজনক হয় কিন্তু সকলোৰে বাবে নহয়"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tunerএ আপোনাক Android ব্যৱহাৰকাৰী ইণ্টাৰফেইচ সলনি কৰিবলৈ আৰু নিজৰ উপযোগিতা অনুসৰি ব্যৱহাৰ কৰিবলৈ অতিৰিক্ত সুবিধা প্ৰদান কৰে। এই পৰীক্ষামূলক সুবিধাসমূহ সলনি হ\'ব পাৰে, সেইবোৰে কাম নকৰিব পাৰে বা আগন্তুক সংস্কৰণসমূহত সেইবোৰ অন্তৰ্ভুক্ত কৰা নহ’ব পাৰে। সাৱধানেৰে আগবাঢ়ক।"</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"এই পৰীক্ষামূলক সুবিধাসমূহ সলনি হ\'ব পাৰে, সেইবোৰে কাম নকৰিব পাৰে বা আগন্তুক সংস্কৰণসমূহত সেইবোৰ অন্তৰ্ভুক্ত কৰা নহ’ব পাৰে। সাৱধানেৰে আগবাঢ়ক।"</string>
     <string name="got_it" msgid="477119182261892069">"বুজি পালোঁ"</string>
-    <string name="tuner_toast" msgid="3812684836514766951">"অভিনন্দন! ছেটিংসমূহত System UI Tuner যোগ কৰা হৈছে"</string>
-    <string name="remove_from_settings" msgid="633775561782209994">"ছেটিংসমূহৰ পৰা আঁতৰাওক"</string>
-    <string name="remove_from_settings_prompt" msgid="551565437265615426">"ছেটিংসমূহৰ পৰা System UI Tuner আঁতৰাই ইয়াৰ সুবিধাসমূহ ব্যৱহাৰ কৰাটো বন্ধ কৰিবনে?"</string>
+    <string name="tuner_toast" msgid="3812684836514766951">"অভিনন্দন! ছেটিঙত System UI Tuner যোগ কৰা হৈছে"</string>
+    <string name="remove_from_settings" msgid="633775561782209994">"ছেটিঙৰ পৰা আঁতৰাওক"</string>
+    <string name="remove_from_settings_prompt" msgid="551565437265615426">"ছেটিঙৰ পৰা System UI Tuner আঁতৰাই ইয়াৰ সুবিধাসমূহ ব্যৱহাৰ কৰাটো বন্ধ কৰিবনে?"</string>
     <string name="activity_not_found" msgid="8711661533828200293">"আপোনাৰ ডিভাইচত এপ্লিকেশ্বনটো ইনষ্টল কৰা হোৱা নাই"</string>
     <string name="clock_seconds" msgid="8709189470828542071">"ঘড়ীৰ ছেকেণ্ড দেখুৱাওক"</string>
     <string name="clock_seconds_desc" msgid="2415312788902144817">"স্থিতি দণ্ডত ঘড়ীৰ ছেকেণ্ড দেখুৱাওক। এই কার্যই বেটাৰিৰ অৱস্থাত প্ৰভাৱ পেলাব পাৰে।"</string>
-    <string name="qs_rearrange" msgid="484816665478662911">"ক্ষিপ্ৰ ছেটিংসমূহ পুনৰ সজাওক"</string>
-    <string name="show_brightness" msgid="6700267491672470007">"দ্ৰুত ছেটিংসমূহত উজ্জ্বলতা দেখুৱাওক"</string>
+    <string name="qs_rearrange" msgid="484816665478662911">"ক্ষিপ্ৰ ছেটিং পুনৰ সজাওক"</string>
+    <string name="show_brightness" msgid="6700267491672470007">"দ্ৰুত ছেটিঙত উজ্জ্বলতা দেখুৱাওক"</string>
     <string name="experimental" msgid="3549865454812314826">"পৰীক্ষামূলক"</string>
     <string name="enable_bluetooth_title" msgid="866883307336662596">"ব্লুটুথ অন কৰিবনে?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"আপোনাৰ টেবলেটত আপোনাৰ কীব\'ৰ্ড সংযোগ কৰিবলৈ আপুনি প্ৰথমে ব্লুটুথ অন কৰিব লাগিব।"</string>
@@ -748,7 +748,7 @@
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"বাৰ্তালাপৰ জাননীৰ শীৰ্ষত আৰু প্ৰ’ফাইল চিত্ৰ হিচাপে লক স্ক্ৰীনত দেখুৱায়, এটা বাবল হিচাপে দেখা পোৱা যায়"</string>
     <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"বাৰ্তালাপৰ জাননীৰ শীৰ্ষত আৰু প্ৰ’ফাইল চিত্ৰ হিচাপে লক স্ক্ৰীনত দেখুৱায়, অসুবিধা নিদিব ম’ডত ব্যাঘাত জন্মায়"</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"বাৰ্তালাপৰ জাননীৰ শীৰ্ষত আৰু প্ৰ’ফাইল চিত্ৰ হিচাপে লক স্ক্ৰীনত দেখুৱায়, এটা বাবল হিচাপে দেখা পোৱা যায়, অসুবিধা নিদিব ম’ডত ব্যাঘাত জন্মায়"</string>
-    <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ছেটিংসমূহ"</string>
+    <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ছেটিং"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"অগ্ৰাধিকাৰ"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g>এ বাৰ্তালাপৰ সুবিধাসমূহ সমৰ্থন নকৰে"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"এই জাননীসমূহ সংশোধন কৰিব নোৱাৰি।"</string>
@@ -763,7 +763,7 @@
     <string name="appops_camera_overlay" msgid="6466845606058816484">"এই এপে আপোনাৰ স্ক্ৰীনত থকা অন্য় এপৰ ওপৰত প্ৰদৰ্শিত হৈ কেমেৰা ব্য়ৱহাৰ কৰি আছে।"</string>
     <string name="appops_mic_overlay" msgid="4609326508944233061">"এই এপে আপোনাৰ স্ক্ৰীনত থকা অন্য় এপৰ ওপৰত প্ৰদৰ্শিত হৈ মাইক্ৰ\'ফ\'ন ব্য়ৱহাৰ কৰি আছে।"</string>
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"এই এপে আপোনাৰ স্ক্ৰীনত থকা অন্য় এপৰ ওপৰত প্ৰদৰ্শিত হৈ মাইক্ৰ\'ফ\'ন আৰু কেমেৰা ব্য়ৱহাৰ কৰি আছে।"</string>
-    <string name="notification_appops_settings" msgid="5208974858340445174">"ছেটিংসমূহ"</string>
+    <string name="notification_appops_settings" msgid="5208974858340445174">"ছেটিং"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"ঠিক আছে"</string>
     <string name="feedback_alerted" msgid="5192459808484271208">"ছিষ্টেমটোৱে স্বয়ংক্ৰিয়ভাৱে এই জাননীটোৰ ক্ষেত্ৰত দিয়া &lt;b&gt;গুৰুত্ব ডিফ’ল্ট&lt;/b&gt;লৈ বৃদ্ধি কৰিছে।"</string>
     <string name="feedback_silenced" msgid="9116540317466126457">"ছিষ্টেমটোৱে স্বয়ংক্ৰিয়ভাৱে এই জাননীটোৰ ক্ষেত্ৰত দিয়া &lt;b&gt;গুৰুত্ব নীৰৱ&lt;/b&gt;লৈ হ্ৰাস কৰিছে।"</string>
@@ -791,7 +791,7 @@
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"জাননীৰ নিয়ন্ত্ৰণসমূহ"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"জাননীক স্নুজ কৰাৰ বিকল্পসমূহ"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"মোক মনত পেলাই দিব"</string>
-    <string name="notification_menu_settings_action" msgid="7085494017202764285">"ছেটিংসমূহ"</string>
+    <string name="notification_menu_settings_action" msgid="7085494017202764285">"ছেটিং"</string>
     <string name="snooze_undo" msgid="2738844148845992103">"আনডু কৰক"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g>ৰ বাবে স্নুজ কৰক"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
@@ -856,7 +856,7 @@
     <string name="battery" msgid="769686279459897127">"বেটাৰি"</string>
     <string name="clock" msgid="8978017607326790204">"ঘড়ী"</string>
     <string name="headset" msgid="4485892374984466437">"হেডছেট"</string>
-    <string name="accessibility_long_click_tile" msgid="210472753156768705">"ছেটিংসমূহ খোলক"</string>
+    <string name="accessibility_long_click_tile" msgid="210472753156768705">"ছেটিং খোলক"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"হেডফ\'ন সংযোগ হৈ আছে"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"হেডছেট সংযোগ হৈ আছে"</string>
     <string name="data_saver" msgid="3484013368530820763">"ডেটা সঞ্চয়কাৰী"</string>
@@ -920,19 +920,19 @@
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"<xliff:g id="POSITION">%1$d</xliff:g> নম্বৰ স্থান"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"টাইল যোগ দিয়া হৈছে"</string>
     <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"টাইল আঁতৰোৱা হৈছে"</string>
-    <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"ক্ষিপ্ৰ ছেটিংসমূহৰ সম্পাদক।"</string>
+    <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"ক্ষিপ্ৰ ছেটিঙৰ সম্পাদক।"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> জাননী: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"ছেটিংসমূহ খোলক।"</string>
-    <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"ক্ষিপ্ৰ ছেটিংসমূহ খোলক।"</string>
-    <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"ক্ষিপ্ৰ ছেটিংসমূহ বন্ধ কৰক।"</string>
+    <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"ছেটিং খোলক।"</string>
+    <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"ক্ষিপ্ৰ ছেটিং খোলক।"</string>
+    <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"ক্ষিপ্ৰ ছেটিং বন্ধ কৰক।"</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="7237918261045099853">"এলার্ম ছেট কৰা হ’ল।"</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g> হিচাপে ছাইন ইন হ’ল"</string>
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"ব্যৱহাৰকাৰী বাছনি কৰক"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"ইণ্টাৰনেট সংযোগ নাই"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"বিৱৰণসমূহ খোলক।"</string>
     <string name="accessibility_quick_settings_not_available" msgid="6860875849497473854">"<xliff:g id="REASON">%s</xliff:g>ৰ বাবে উপলব্ধ নহয়"</string>
-    <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g>ৰ ছেটিংসমূহ খোলক।"</string>
-    <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"ছেটিংসমূহৰ ক্ৰম সম্পাদনা কৰক।"</string>
+    <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g>ৰ ছেটিং খোলক।"</string>
+    <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"ছেটিঙৰ ক্ৰম সম্পাদনা কৰক।"</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"পাৱাৰ মেনু"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g>ৰ পৃষ্ঠা <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"লক স্ক্ৰীন"</string>
@@ -990,7 +990,7 @@
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"ম’বাইল ডেটা অফ কৰিবনে?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"আপুনি <xliff:g id="CARRIER">%s</xliff:g>ৰ জৰিয়তে ডেটা সংযোগ বা ইণ্টাৰনেট সংযোগ নাপাব। কেৱল ৱাই-ফাইৰ যোগেৰে ইণ্টাৰনেট উপলব্ধ হ\'ব।"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"আপোনাৰ বাহক"</string>
-    <string name="touch_filtered_warning" msgid="8119511393338714836">"এটা এপে অনুমতি বিচাৰি কৰা অনুৰোধ এটা ঢাকি ধৰা বাবে ছেটিংসমূহে আপোনাৰ উত্তৰ সত্যাপন কৰিব পৰা নাই।"</string>
+    <string name="touch_filtered_warning" msgid="8119511393338714836">"এটা এপে অনুমতি বিচাৰি কৰা অনুৰোধ এটা ঢাকি ধৰা বাবে ছেটিঙৰ পৰা আপোনাৰ উত্তৰ সত্যাপন কৰিব পৰা নাই।"</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_0">%1$s</xliff:g>ক <xliff:g id="APP_2">%2$s</xliff:g>ৰ অংশ দেখুওৱাবলৈ অনুমতি দিবনে?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- ই <xliff:g id="APP">%1$s</xliff:g>ৰ তথ্য পঢ়িব পাৰে"</string>
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- ই <xliff:g id="APP">%1$s</xliff:g>ৰ ভিতৰত কাৰ্য কৰিব পাৰে"</string>
@@ -1002,7 +1002,7 @@
     <string name="no_auto_saver_action" msgid="7467924389609773835">"নালাগে, ধন্যবাদ"</string>
     <string name="auto_saver_enabled_title" msgid="4294726198280286333">"বেটাৰি সঞ্চয়কাৰীৰ সময়সূচী অন কৰা অৱস্থাত আছে"</string>
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"বেটাৰি চ্চাৰ্জৰ স্তৰ <xliff:g id="PERCENTAGE">%d</xliff:g>%%তকৈ কম হোৱাৰ লগে লগে বেটাৰি সঞ্চয়কাৰী স্বয়ংক্ৰিয়ভাৱে অন হ’ব।"</string>
-    <string name="open_saver_setting_action" msgid="2111461909782935190">"ছেটিংবোৰ"</string>
+    <string name="open_saver_setting_action" msgid="2111461909782935190">"ছেটিং"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"বুজি পালোঁ"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"SysUI হীপ ডাম্প কৰক"</string>
     <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g>এ আপোনাৰ <xliff:g id="TYPES_LIST">%2$s</xliff:g> ব্যৱহাৰ কৰি আছে।"</string>
@@ -1021,8 +1021,8 @@
     <string name="device_services" msgid="1549944177856658705">"ডিভাইচ সেৱা"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"কোনো শিৰোনাম নাই"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"আঁতৰাওক"</string>
-    <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ছিষ্টেম নেভিগেশ্বন আপডে’ট কৰা হ’ল। সলনি কৰিবলৈ ছেটিংসমূহ-লৈ যাওক।"</string>
-    <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ছিষ্টেম নেভিগেশ্বন আপডে’ট কৰিবলৈ ছেটিংসমূহ-লৈ যাওক"</string>
+    <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ছিষ্টেম নেভিগেশ্বন আপডে’ট কৰা হ’ল। সলনি কৰিবলৈ ছেটিঙলৈ যাওক।"</string>
+    <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ছিষ্টেম নেভিগেশ্বন আপডে’ট কৰিবলৈ ছেটিঙলৈ যাওক"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ষ্টেণ্ডবাই"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"বিবৰ্ধন ৱিণ্ড’"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"বিবৰ্ধন ৱিণ্ড’ৰ নিয়ন্ত্ৰণসমূহ"</string>
@@ -1065,7 +1065,7 @@
     <string name="controls_favorite_removed" msgid="5276978408529217272">"সকলো নিয়ন্ত্ৰণ আঁতৰোৱা হৈছে"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"সালসলনিসমূহ ছেভ নহ’ল"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"অন্য এপ্‌সমূহ চাওক"</string>
-    <string name="controls_favorite_load_error" msgid="5126216176144877419">"নিয়ন্ত্ৰণসমূহ ল’ড কৰিবপৰা নগ’ল। এপ্‌টোৰ ছেটিংসমূহ সলনি কৰা হোৱা নাই বুলি নিশ্চিত কৰিবলৈ <xliff:g id="APP">%s</xliff:g> এপ্‌টো পৰীক্ষা কৰক।"</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"নিয়ন্ত্ৰণসমূহ ল’ড কৰিবপৰা নগ’ল। এপ্‌টোৰ ছেটিং সলনি কৰা হোৱা নাই বুলি নিশ্চিত কৰিবলৈ <xliff:g id="APP">%s</xliff:g> এপ্‌টো পৰীক্ষা কৰক।"</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"সমিল নিয়ন্ত্ৰণসমূহ উপলব্ধ নহয়"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"অন্য"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"ডিভাইচৰ নিয়ন্ত্ৰণসমূহত যোগ দিয়ক"</string>
@@ -1088,7 +1088,7 @@
     <string name="controls_media_active_session" msgid="3146882316024153337">"বৰ্তমানৰ মিডিয়াৰ ছেশ্বনটো লুকুৱাব নোৱাৰি।"</string>
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"অগ্ৰাহ্য কৰক"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"পুনৰ আৰম্ভ কৰক"</string>
-    <string name="controls_media_settings_button" msgid="5815790345117172504">"ছেটিংসমূহ"</string>
+    <string name="controls_media_settings_button" msgid="5815790345117172504">"ছেটিং"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="APP_LABEL">%3$s</xliff:g>ত <xliff:g id="ARTIST_NAME">%2$s</xliff:g>ৰ <xliff:g id="SONG_NAME">%1$s</xliff:g> গীতটো প্লে’ হৈ আছে"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"প্লে’ কৰক"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> খোলক"</string>
@@ -1098,7 +1098,7 @@
     <string name="controls_error_retryable" msgid="864025882878378470">"আসোঁৱাহ, পুনৰ চেষ্টা কৰি আছে…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"বিচাৰি পোৱা নগ’ল"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"নিয়ন্ত্ৰণটো উপলব্ধ নহয়"</string>
-    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> এক্সেছ কৰিব পৰা নগ’ল। নিয়ন্ত্ৰণটো এতিয়াও উপলব্ধ আৰু এপ্‌টোৰ ছেটিংসমূহ সলনি কৰা হোৱা নাই বুলি নিশ্চিত কৰিবলৈ <xliff:g id="APPLICATION">%2$s</xliff:g> এপ্‌টো পৰীক্ষা কৰক।"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> এক্সেছ কৰিব পৰা নগ’ল। নিয়ন্ত্ৰণটো এতিয়াও উপলব্ধ আৰু এপ্‌টোৰ ছেটিং সলনি কৰা হোৱা নাই বুলি নিশ্চিত কৰিবলৈ <xliff:g id="APPLICATION">%2$s</xliff:g> এপ্‌টো পৰীক্ষা কৰক।"</string>
     <string name="controls_open_app" msgid="483650971094300141">"এপ্‌টো খোলক"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"স্থিতি ল’ড কৰিব নোৱাৰি"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"আসোঁৱাহ হৈছে, আকৌ চেষ্টা কৰক"</string>
