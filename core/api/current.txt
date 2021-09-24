@@ -843,7 +843,7 @@ package android {
     field @Deprecated public static final int isModifier = 16843334; // 0x1010246
     field @Deprecated public static final int isRepeatable = 16843336; // 0x1010248
     field public static final int isScrollContainer = 16843342; // 0x101024e
-    field public static final int isSplitRequired = 16844177; // 0x1010591
+    field @Deprecated public static final int isSplitRequired = 16844177; // 0x1010591
     field public static final int isStatic = 16844122; // 0x101055a
     field @Deprecated public static final int isSticky = 16843335; // 0x1010247
     field public static final int isolatedProcess = 16843689; // 0x10103a9
@@ -19637,12 +19637,20 @@ package android.location {
   }
 
   public final class Geocoder {
-    ctor public Geocoder(android.content.Context, java.util.Locale);
-    ctor public Geocoder(android.content.Context);
-    method public java.util.List<android.location.Address> getFromLocation(double, double, int) throws java.io.IOException;
-    method public java.util.List<android.location.Address> getFromLocationName(String, int) throws java.io.IOException;
-    method public java.util.List<android.location.Address> getFromLocationName(String, int, double, double, double, double) throws java.io.IOException;
+    ctor public Geocoder(@NonNull android.content.Context);
+    ctor public Geocoder(@NonNull android.content.Context, @NonNull java.util.Locale);
+    method @Deprecated @Nullable public java.util.List<android.location.Address> getFromLocation(@FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double, @IntRange int) throws java.io.IOException;
+    method public void getFromLocation(@FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double, @IntRange int, @NonNull android.location.Geocoder.GeocodeListener);
+    method @Deprecated @Nullable public java.util.List<android.location.Address> getFromLocationName(@NonNull String, @IntRange int) throws java.io.IOException;
+    method public void getFromLocationName(@NonNull String, @IntRange int, @NonNull android.location.Geocoder.GeocodeListener);
+    method @Deprecated @Nullable public java.util.List<android.location.Address> getFromLocationName(@NonNull String, @IntRange int, @FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double, @FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double) throws java.io.IOException;
+    method public void getFromLocationName(@NonNull String, @IntRange int, @FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double, @FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double, @NonNull android.location.Geocoder.GeocodeListener);
     method public static boolean isPresent();
+  }
+
+  public static interface Geocoder.GeocodeListener {
+    method public default void onError(@Nullable String);
+    method public void onGeocode(@NonNull java.util.List<android.location.Address>);
   }
 
   public final class GnssAntennaInfo implements android.os.Parcelable {
@@ -46987,8 +46995,15 @@ package android.view {
   }
 
   @UiThread public interface AttachedSurfaceControl {
+    method public default void addOnSurfaceTransformHintChangedListener(@NonNull android.view.AttachedSurfaceControl.OnSurfaceTransformHintChangedListener);
     method public boolean applyTransactionOnDraw(@NonNull android.view.SurfaceControl.Transaction);
     method @Nullable public android.view.SurfaceControl.Transaction buildReparentTransaction(@NonNull android.view.SurfaceControl);
+    method public default int getSurfaceTransformHint();
+    method public default void removeOnSurfaceTransformHintChangedListener(@NonNull android.view.AttachedSurfaceControl.OnSurfaceTransformHintChangedListener);
+  }
+
+  @UiThread public static interface AttachedSurfaceControl.OnSurfaceTransformHintChangedListener {
+    method public void onSurfaceTransformHintChanged(int);
   }
 
   public final class Choreographer {
@@ -50838,7 +50853,6 @@ package android.view.accessibility {
     method public int getRecommendedTimeoutMillis(int, int);
     method public void interrupt();
     method public static boolean isAccessibilityButtonSupported();
-    method public boolean isAudioDescriptionEnabled();
     method public boolean isEnabled();
     method public boolean isTouchExplorationEnabled();
     method public void removeAccessibilityRequestPreparer(android.view.accessibility.AccessibilityRequestPreparer);

@@ -7235,14 +7235,6 @@ public final class Settings {
             "enabled_accessibility_services";
 
         /**
-         * Whether select sound track with audio description by default.
-         * @hide
-         */
-        @Readable
-        public static final String ENABLE_ACCESSIBILITY_AUDIO_DESCRIPTION_BY_DEFAULT =
-                "enable_accessibility_audio_description_by_default";
-
-        /**
          * List of the notified non-accessibility category accessibility services.
          *
          * @hide
@@ -9035,6 +9027,15 @@ public final class Settings {
         public static final String UNSAFE_VOLUME_MUSIC_ACTIVE_MS = "unsafe_volume_music_active_ms";
 
         /**
+         * Indicates whether the spatial audio feature was enabled for this user.
+         *
+         * Type : int (0 disabled, 1 enabled)
+         *
+         * @hide
+         */
+        public static final String SPATIAL_AUDIO_ENABLED = "spatial_audio_enabled";
+
+        /**
          * Indicates whether notification display on the lock screen is enabled.
          * <p>
          * Type: int (0 for false, 1 for true)
@@ -10253,6 +10254,13 @@ public final class Settings {
         public static final String COMMUNAL_MODE_ENABLED = "communal_mode_enabled";
 
         /**
+         * An array of all the packages which have been enabled for hub mode by the user.
+         *
+         * @hide
+         */
+        public static final String COMMUNAL_MODE_PACKAGES = "communal_mode_packages";
+
+        /**
          * These entries are considered common between the personal and the managed profile,
          * since the managed profile doesn't get to change them.
          */
@@ -10397,6 +10405,14 @@ public final class Settings {
         @Readable
         public static final String ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED =
                 "enable_accessibility_global_gesture_enabled";
+
+        /**
+         * Whether select sound track with audio description by default.
+         * @hide
+         */
+        @Readable
+        public static final String ENABLE_ACCESSIBILITY_AUDIO_DESCRIPTION_BY_DEFAULT =
+                "enable_accessibility_audio_description_by_default";
 
         /**
          * Whether Airplane Mode is on.

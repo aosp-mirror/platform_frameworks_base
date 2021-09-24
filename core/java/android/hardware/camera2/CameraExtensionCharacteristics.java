@@ -263,12 +263,12 @@ public final class CameraExtensionCharacteristics {
                     @Override
                     public void onServiceConnected(ComponentName component, IBinder binder) {
                         mProxy = ICameraExtensionsProxyService.Stub.asInterface(binder);
-                        mInitFuture.setStatus(true);
                         try {
                             mSupportsAdvancedExtensions = mProxy.advancedExtensionsSupported();
                         } catch (RemoteException e) {
                             Log.e(TAG, "Remote IPC failed!");
                         }
+                        mInitFuture.setStatus(true);
                     }
                 };
                 ctx.bindService(intent, Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT |

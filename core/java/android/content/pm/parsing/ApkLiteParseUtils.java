@@ -18,6 +18,7 @@ package android.content.pm.parsing;
 
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+import static android.content.pm.parsing.ParsingPackageUtils.PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY;
 import static android.content.pm.parsing.ParsingPackageUtils.checkRequiredSystemProperties;
 import static android.content.pm.parsing.ParsingPackageUtils.parsePublicKey;
 import static android.content.pm.parsing.ParsingPackageUtils.validateName;
@@ -332,7 +333,7 @@ public class ApkLiteParseUtils {
                 signingDetails = SigningDetails.UNKNOWN;
             }
 
-            return parseApkLite(input, apkPath, parser, signingDetails);
+            return parseApkLite(input, apkPath, parser, signingDetails, flags);
         } catch (XmlPullParserException | IOException | RuntimeException e) {
             Slog.w(TAG, "Failed to parse " + apkPath, e);
             return input.error(PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
@@ -350,7 +351,7 @@ public class ApkLiteParseUtils {
     }
 
     private static ParseResult<ApkLite> parseApkLite(ParseInput input, String codePath,
-            XmlResourceParser parser, SigningDetails signingDetails)
+            XmlResourceParser parser, SigningDetails signingDetails, int flags)
             throws IOException, XmlPullParserException {
         ParseResult<Pair<String, String>> result = parsePackageSplitNames(input, parser);
         if (result.isError()) {
@@ -522,14 +523,14 @@ public class ApkLiteParseUtils {
         }
 
         // Check to see if overlay should be excluded based on system property condition
-        if (!checkRequiredSystemProperties(requiredSystemPropertyName,
-                requiredSystemPropertyValue)) {
-            Slog.i(TAG, "Skipping target and overlay pair " + targetPackage + " and "
+        if ((flags & PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY) == 0
+                && !checkRequiredSystemProperties(
+                        requiredSystemPropertyName, requiredSystemPropertyValue)) {
+            String message = "Skipping target and overlay pair " + targetPackage + " and "
                     + codePath + ": overlay ignored due to required system property: "
-                    + requiredSystemPropertyName + " with value: " + requiredSystemPropertyValue);
-            targetPackage = null;
-            overlayIsStatic = false;
-            overlayPriority = 0;
+                    + requiredSystemPropertyName + " with value: " + requiredSystemPropertyValue;
+            Slog.i(TAG, message);
+            return input.skip(message);
         }
 
         return input.success(
@@ -538,7 +539,8 @@ public class ApkLiteParseUtils {
                         versionCodeMajor, revisionCode, installLocation, verifiers, signingDetails,
                         coreApp, debuggable, profilableByShell, multiArch, use32bitAbi,
                         useEmbeddedDex, extractNativeLibs, isolatedSplits, targetPackage,
-                        overlayIsStatic, overlayPriority, minSdkVersion, targetSdkVersion,
+                        overlayIsStatic, overlayPriority, requiredSystemPropertyName,
+                        requiredSystemPropertyValue, minSdkVersion, targetSdkVersion,
                         rollbackDataPolicy, requiredSplitTypes.first, requiredSplitTypes.second));
     }
 

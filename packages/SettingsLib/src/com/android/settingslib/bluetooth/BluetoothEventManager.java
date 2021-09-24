@@ -18,6 +18,7 @@ package com.android.settingslib.bluetooth;
 
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothCsipSetCoordinator;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothHearingAid;
@@ -125,6 +126,9 @@ public class BluetoothEventManager {
         // ACL connection changed broadcasts
         addHandler(BluetoothDevice.ACTION_ACL_CONNECTED, new AclStateChangedHandler());
         addHandler(BluetoothDevice.ACTION_ACL_DISCONNECTED, new AclStateChangedHandler());
+
+        addHandler(BluetoothCsipSetCoordinator.ACTION_CSIS_SET_MEMBER_AVAILABLE,
+                new SetMemberAvailableHandler());
 
         registerAdapterIntentReceiver();
     }
@@ -339,6 +343,12 @@ public class BluetoothEventManager {
             }
             int bondState = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE,
                     BluetoothDevice.ERROR);
+
+            if (mDeviceManager.onBondStateChangedIfProcess(device, bondState)) {
+                Log.d(TAG, "Should not update UI for the set member");
+                return;
+            }
+
             CachedBluetoothDevice cachedDevice = mDeviceManager.findDevice(device);
             if (cachedDevice == null) {
                 Log.w(TAG, "Got bonding state changed for " + device +
@@ -352,8 +362,10 @@ public class BluetoothEventManager {
             cachedDevice.onBondingStateChanged(bondState);
 
             if (bondState == BluetoothDevice.BOND_NONE) {
-                /* Check if we need to remove other Hearing Aid devices */
-                if (cachedDevice.getHiSyncId() != BluetoothHearingAid.HI_SYNC_ID_INVALID) {
+                // Check if we need to remove other Coordinated set member devices / Hearing Aid
+                // devices
+                if (cachedDevice.getGroupId() != BluetoothCsipSetCoordinator.GROUP_ID_INVALID
+                        || cachedDevice.getHiSyncId() != BluetoothHearingAid.HI_SYNC_ID_INVALID) {
                     mDeviceManager.onDeviceUnpaired(cachedDevice);
                 }
                 int reason = intent.getIntExtra(BluetoothDevice.EXTRA_REASON,
@@ -501,6 +513,31 @@ public class BluetoothEventManager {
                 return;
             }
             dispatchAudioModeChanged();
+        }
+    }
+
+    private class SetMemberAvailableHandler implements Handler {
+        @Override
+        public void onReceive(Context context, Intent intent, BluetoothDevice device) {
+            final String action = intent.getAction();
+            if (device == null) {
+                Log.e(TAG, "SetMemberAvailableHandler: device is null");
+                return;
+            }
+
+            if (action == null) {
+                Log.e(TAG, "SetMemberAvailableHandler: action is null");
+                return;
+            }
+
+            final int groupId = intent.getIntExtra(BluetoothCsipSetCoordinator.EXTRA_CSIS_GROUP_ID,
+                    BluetoothCsipSetCoordinator.GROUP_ID_INVALID);
+            if (groupId == BluetoothCsipSetCoordinator.GROUP_ID_INVALID) {
+                Log.e(TAG, "SetMemberAvailableHandler: Invalid group id");
+                return;
+            }
+
+            mDeviceManager.onSetMemberAppear(device, groupId);
         }
     }
 }

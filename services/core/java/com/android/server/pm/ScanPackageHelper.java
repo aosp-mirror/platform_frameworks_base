@@ -73,6 +73,7 @@ import android.content.pm.parsing.component.ParsedService;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.Build;
+import android.os.Process;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -130,10 +131,12 @@ public final class ScanPackageHelper {
      */
     public boolean optimisticallyRegisterAppId(@NonNull ScanResult result)
             throws PackageManagerException {
-        if (!result.mExistingSettingCopied || result.mNeedsNewAppId) {
-            // THROWS: when we can't allocate a user id. add call to check if there's
-            // enough space to ensure we won't throw; otherwise, don't modify state
-            return mPm.mSettings.registerAppIdLPw(result.mPkgSetting, result.mNeedsNewAppId);
+        if (!result.mExistingSettingCopied || result.needsNewAppId()) {
+            synchronized (mPm.mLock) {
+                // THROWS: when we can't allocate a user id. add call to check if there's
+                // enough space to ensure we won't throw; otherwise, don't modify state
+                return mPm.mSettings.registerAppIdLPw(result.mPkgSetting, result.needsNewAppId());
+            }
         }
         return false;
     }
@@ -337,11 +340,11 @@ public final class ScanPackageHelper {
             }
         }
 
-        boolean leavingSharedUser = false;
+        int previousAppId = Process.INVALID_UID;
 
         if (pkgSetting != null && pkgSetting.sharedUser != sharedUserSetting) {
             if (pkgSetting.sharedUser != null && sharedUserSetting == null) {
-                leavingSharedUser = true;
+                previousAppId = pkgSetting.appId;
                 // Log that something is leaving shareduid and keep going
                 Slog.i(TAG,
                         "Package " + parsedPackage.getPackageName() + " shared user changed from "
@@ -630,7 +633,7 @@ public final class ScanPackageHelper {
 
         return new ScanResult(request, true, pkgSetting, changedAbiCodePath,
                 !createNewPackage /* existingSettingCopied */,
-                leavingSharedUser /* needsNewAppId */, staticSharedLibraryInfo,
+                previousAppId, staticSharedLibraryInfo,
                 dynamicSharedLibraryInfos);
     }
 

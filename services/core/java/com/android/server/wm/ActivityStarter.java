@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.Manifest.permission.ACTIVITY_EMBEDDING;
 import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.app.Activity.RESULT_CANCELED;
 import static android.app.ActivityManager.START_ABORTED;
@@ -89,6 +88,9 @@ import android.app.IApplicationThread;
 import android.app.PendingIntent;
 import android.app.ProfilerInfo;
 import android.app.WaitResult;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
 import android.content.IIntentSender;
 import android.content.Intent;
@@ -102,6 +104,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
@@ -146,6 +149,13 @@ class ActivityStarter {
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
     private static final String TAG_USER_LEAVING = TAG + POSTFIX_USER_LEAVING;
     private static final int INVALID_LAUNCH_MODE = -1;
+
+    /**
+     * Feature flag to protect PendingIntent being abused to start background activity.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    static final long ENABLE_PENDING_INTENT_BAL_OPTION = 192341120L;
 
     private final ActivityTaskManagerService mService;
     private final RootWindowContainer mRootWindowContainer;
@@ -988,6 +998,10 @@ class ActivityStarter {
         abort |= !mService.getPermissionPolicyInternal().checkStartActivity(intent, callingUid,
                 callingPackage);
 
+        // Merge the two options bundles, while realCallerOptions takes precedence.
+        ActivityOptions checkedOptions = options != null
+                ? options.getOptions(intent, aInfo, callerApp, mSupervisor) : null;
+
         boolean restrictedBgActivity = false;
         if (!abort) {
             try {
@@ -996,15 +1010,12 @@ class ActivityStarter {
                 restrictedBgActivity = shouldAbortBackgroundActivityStart(callingUid,
                         callingPid, callingPackage, realCallingUid, realCallingPid, callerApp,
                         request.originatingPendingIntent, request.allowBackgroundActivityStart,
-                        intent);
+                        intent, checkedOptions);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
             }
         }
 
-        // Merge the two options bundles, while realCallerOptions takes precedence.
-        ActivityOptions checkedOptions = options != null
-                ? options.getOptions(intent, aInfo, callerApp, mSupervisor) : null;
         if (request.allowPendingRemoteAnimationRegistryLookup) {
             checkedOptions = mService.getActivityStartController()
                     .getPendingRemoteAnimationRegistry()
@@ -1243,10 +1254,22 @@ class ActivityStarter {
         return activity != null && packageName.equals(activity.getPackageName());
     }
 
+    private static boolean isPendingIntentBalAllowedByCaller(ActivityOptions activityOptions) {
+        if (activityOptions == null) {
+            return ActivityOptions.PENDING_INTENT_BAL_ALLOWED_DEFAULT;
+        }
+        final Bundle options = activityOptions.toBundle();
+        if (options == null) {
+            return ActivityOptions.PENDING_INTENT_BAL_ALLOWED_DEFAULT;
+        }
+        return options.getBoolean(ActivityOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED,
+                ActivityOptions.PENDING_INTENT_BAL_ALLOWED_DEFAULT);
+    }
+
     boolean shouldAbortBackgroundActivityStart(int callingUid, int callingPid,
             final String callingPackage, int realCallingUid, int realCallingPid,
             WindowProcessController callerApp, PendingIntentRecord originatingPendingIntent,
-            boolean allowBackgroundActivityStart, Intent intent) {
+            boolean allowBackgroundActivityStart, Intent intent, ActivityOptions checkedOptions) {
         // don't abort for the most important UIDs
         final int callingAppId = UserHandle.getAppId(callingUid);
         if (callingUid == Process.ROOT_UID || callingAppId == Process.SYSTEM_UID
@@ -1315,7 +1338,29 @@ class ActivityStarter {
                 ? isCallingUidPersistentSystemProcess
                 : (realCallingAppId == Process.SYSTEM_UID)
                         || realCallingUidProcState <= ActivityManager.PROCESS_STATE_PERSISTENT_UI;
-        if (realCallingUid != callingUid) {
+
+        // If caller a legacy app, we won't check if caller has BAL permission.
+        final boolean isPiBalOptionEnabled = CompatChanges.isChangeEnabled(
+                ENABLE_PENDING_INTENT_BAL_OPTION, callingUid);
+
+        // Legacy behavior allows to use caller foreground state to bypass BAL restriction.
+        final boolean balAllowedByPiSender =
+                isPendingIntentBalAllowedByCaller(checkedOptions);
+
+        if (balAllowedByPiSender && realCallingUid != callingUid) {
+            if (isPiBalOptionEnabled) {
+                if (ActivityManager.checkComponentPermission(
+                        android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND,
+                        realCallingUid, -1, true)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    if (DEBUG_ACTIVITY_STARTS) {
+                        Slog.d(TAG, "Activity start allowed: realCallingUid (" + realCallingUid
+                                + ") has BAL permission.");
+                    }
+                    return false;
+                }
+            }
+
             // don't abort if the realCallingUid has a visible window
             // TODO(b/171459802): We should check appSwitchAllowed also
             if (realCallingUidHasAnyVisibleWindow) {
@@ -1390,9 +1435,9 @@ class ActivityStarter {
         // If we don't have callerApp at this point, no caller was provided to startActivity().
         // That's the case for PendingIntent-based starts, since the creator's process might not be
         // up and alive. If that's the case, we retrieve the WindowProcessController for the send()
-        // caller, so that we can make the decision based on its state.
+        // caller if caller allows, so that we can make the decision based on its state.
         int callerAppUid = callingUid;
-        if (callerApp == null) {
+        if (callerApp == null && balAllowedByPiSender) {
             callerApp = mService.getProcessController(realCallingPid, realCallingUid);
             callerAppUid = realCallingUid;
         }
@@ -1953,38 +1998,43 @@ class ActivityStarter {
             }
         }
 
-        if (mInTaskFragment != null && mInTaskFragment.getTask() != null) {
-            final int hostUid = mInTaskFragment.getTask().effectiveUid;
-            final int embeddingUid = targetTask != null ? targetTask.effectiveUid : r.getUid();
-            if (!canTaskBeEmbedded(hostUid, embeddingUid)) {
-                Slog.e(TAG, "Cannot embed activity to a task owned by " + hostUid + " targetTask= "
-                        + targetTask);
-                return START_PERMISSION_DENIED;
-            }
+        if (mInTaskFragment != null && !canEmbedActivity(mInTaskFragment, r, newTask, targetTask)) {
+            Slog.e(TAG, "Permission denied: Cannot embed " + r + " to " + mInTaskFragment.getTask()
+                    + " targetTask= " + targetTask);
+            return START_PERMISSION_DENIED;
         }
 
         return START_SUCCESS;
     }
 
     /**
-     * Return {@code true} if the {@param task} can embed another task.
-     * @param hostUid the uid of the host task
-     * @param embeddedUid the uid of the task the are going to be embedded
+     * Return {@code true} if an activity can be embedded to the TaskFragment.
+     * @param taskFragment the TaskFragment for embedding.
+     * @param starting the starting activity.
+     * @param newTask whether the starting activity is going to be launched on a new task.
+     * @param targetTask the target task for launching activity, which could be different from
+     *                   the one who hosting the embedding.
      */
-    private boolean canTaskBeEmbedded(int hostUid, int embeddedUid) {
+    private boolean canEmbedActivity(@NonNull TaskFragment taskFragment, ActivityRecord starting,
+            boolean newTask, Task targetTask) {
+        final Task hostTask = taskFragment.getTask();
+        if (hostTask == null) {
+            return false;
+        }
+
         // Allowing the embedding if the task is owned by system.
+        final int hostUid = hostTask.effectiveUid;
         if (hostUid == Process.SYSTEM_UID) {
             return true;
         }
 
-        // Allowing embedding if the host task is owned by an app that has the ACTIVITY_EMBEDDING
-        // permission
-        if (mService.checkPermission(ACTIVITY_EMBEDDING, -1, hostUid) == PERMISSION_GRANTED) {
-            return true;
+        // Not allowed embedding an activity of another app.
+        if (hostUid != starting.getUid()) {
+            return false;
         }
 
-        // Allowing embedding if it is from the same app that owned the task
-        return hostUid == embeddedUid;
+        // Not allowed embedding task.
+        return !newTask && (targetTask == null || targetTask == hostTask);
     }
 
     /**
@@ -2801,10 +2851,15 @@ class ActivityStarter {
                 newParent = mInTaskFragment;
             }
         } else {
-            // Use the child TaskFragment (if any) as the new parent if the activity can be embedded
             final ActivityRecord top = task.topRunningActivity(false /* focusableOnly */,
                     false /* includingEmbeddedTask */);
-            newParent = top != null ? top.getTaskFragment() : task;
+            final TaskFragment taskFragment = top != null ? top.getTaskFragment() : null;
+            if (taskFragment != null && taskFragment.isEmbedded()
+                    && task.effectiveUid == mStartActivity.getUid()) {
+                // Use the embedded TaskFragment of the top activity as the new parent if the
+                // activity can be embedded.
+                newParent = top.getTaskFragment();
+            }
         }
 
         if (mStartActivity.getTaskFragment() == null

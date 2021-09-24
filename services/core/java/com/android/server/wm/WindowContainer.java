@@ -857,6 +857,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return parent != null ? parent.getRootDisplayArea() : null;
     }
 
+    @Nullable
+    TaskDisplayArea getTaskDisplayArea() {
+        WindowContainer parent = getParent();
+        return parent != null ? parent.getTaskDisplayArea() : null;
+    }
+
     boolean isAttached() {
         WindowContainer parent = getParent();
         return parent != null && parent.isAttached();
@@ -2555,10 +2561,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *               some point but the meaning is too weird to work for all containers.
      * @param type The type of animation defined as {@link AnimationType}.
      * @param animationFinishedCallback The callback being triggered when the animation finishes.
+     * @param animationCancelledCallback The callback is triggered after the SurfaceAnimator sends a
+     *                                   cancel call to the underlying AnimationAdapter.
      */
     void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
             @AnimationType int type,
-            @Nullable OnAnimationFinishedCallback animationFinishedCallback) {
+            @Nullable OnAnimationFinishedCallback animationFinishedCallback,
+            @Nullable Runnable animationCancelledCallback) {
         if (DEBUG_ANIM) {
             Slog.v(TAG, "Starting animation on " + this + ": type=" + type + ", anim=" + anim);
         }
@@ -2566,7 +2575,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // TODO: This should use isVisible() but because isVisible has a really weird meaning at
         // the moment this doesn't work for all animatable window containers.
         mSurfaceAnimator.startAnimation(t, anim, hidden, type, animationFinishedCallback,
-                mSurfaceFreezer);
+                animationCancelledCallback, mSurfaceFreezer);
+    }
+
+    void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
+            @AnimationType int type,
+            @Nullable OnAnimationFinishedCallback animationFinishedCallback) {
+        startAnimation(t, anim, hidden, type, animationFinishedCallback,
+                null /* adapterAnimationCancelledCallback */);
     }
 
     void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
@@ -2800,8 +2816,27 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             if (sources != null) {
                 mSurfaceAnimationSources.addAll(sources);
             }
+
+            TaskDisplayArea taskDisplayArea = getTaskDisplayArea();
+            int backgroundColor = adapter.getBackgroundColor();
+
+            boolean shouldSetBackgroundColor = taskDisplayArea != null && backgroundColor != 0;
+
+            if (shouldSetBackgroundColor) {
+                taskDisplayArea.setBackgroundColor(backgroundColor);
+            }
+
+            Runnable clearColorBackground = () -> {
+                if (shouldSetBackgroundColor) {
+                    taskDisplayArea.clearBackgroundColor();
+                }
+            };
+
             startAnimation(getPendingTransaction(), adapter, !isVisible(),
-                    ANIMATION_TYPE_APP_TRANSITION);
+                    ANIMATION_TYPE_APP_TRANSITION,
+                    (type, anim) -> clearColorBackground.run(),
+                    clearColorBackground);
+
             if (adapter.getShowWallpaper()) {
                 getDisplayContent().pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
             }

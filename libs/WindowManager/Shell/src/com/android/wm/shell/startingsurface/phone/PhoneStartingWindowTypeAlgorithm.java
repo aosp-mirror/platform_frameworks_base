@@ -71,23 +71,13 @@ public class PhoneStartingWindowTypeAlgorithm implements StartingWindowTypeAlgor
                     + " topIsHome:" + topIsHome);
         }
 
-        final int visibleSplashScreenType = legacySplashScreen
-                ? STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN
-                : STARTING_WINDOW_TYPE_SPLASH_SCREEN;
-
         if (!topIsHome) {
-            if (!processRunning) {
+            if (!processRunning || newTask || (taskSwitch && !activityCreated)) {
                 return useEmptySplashScreen
                         ? STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN
-                        : visibleSplashScreenType;
-            }
-            if (newTask) {
-                return useEmptySplashScreen
-                        ? STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN
-                        : visibleSplashScreenType;
-            }
-            if (taskSwitch && !activityCreated) {
-                return visibleSplashScreenType;
+                        : legacySplashScreen
+                                ? STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN
+                                : STARTING_WINDOW_TYPE_SPLASH_SCREEN;
             }
         }
         if (taskSwitch && allowTaskSnapshot) {
