@@ -154,7 +154,7 @@
     <string name="running_process_item_user_label" msgid="3988506293099805796">"ব্যৱহাৰকাৰী: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"কিছুমান ডিফ\'ল্ট ছেট কৰা হৈছে"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"কোনো ডিফ\'ল্ট ছেট কৰা হোৱা নাই"</string>
-    <string name="tts_settings" msgid="8130616705989351312">"পাঠৰ পৰা কথনৰ ছেটিংসমূহ"</string>
+    <string name="tts_settings" msgid="8130616705989351312">"পাঠৰ পৰা কথনৰ ছেটিং"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"পাঠৰ পৰা কথনৰ আউটপুট"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"কথা কোৱাৰ হাৰ"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"পাঠ কথনৰ বেগ"</string>
@@ -176,8 +176,8 @@
     <string name="tts_status_requires_network" msgid="8327617638884678896">"<xliff:g id="LOCALE">%1$s</xliff:g>ক নেটৱৰ্ক সংযোগৰ দৰকাৰ"</string>
     <string name="tts_status_not_supported" msgid="2702997696245523743">"<xliff:g id="LOCALE">%1$s</xliff:g> সমৰ্থিত নহয়"</string>
     <string name="tts_status_checking" msgid="8026559918948285013">"পৰীক্ষা কৰি থকা হৈছে…"</string>
-    <string name="tts_engine_settings_title" msgid="7849477533103566291">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>ৰ বাবে ছেটিংসমূহ"</string>
-    <string name="tts_engine_settings_button" msgid="477155276199968948">"ইঞ্জিনৰ ছেটিংসমূহ লঞ্চ কৰক"</string>
+    <string name="tts_engine_settings_title" msgid="7849477533103566291">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>ৰ ছেটিং"</string>
+    <string name="tts_engine_settings_button" msgid="477155276199968948">"ইঞ্জিনৰ ছেটিং লঞ্চ কৰক"</string>
     <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"অগ্ৰাধিকাৰপ্ৰাপ্ত ইঞ্জিন"</string>
     <string name="tts_general_section_title" msgid="8919671529502364567">"সাধাৰণ"</string>
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"কথনভংগী তীব্ৰতা ৰিছেট কৰক"</string>
@@ -200,9 +200,9 @@
     <string name="development_settings_enable" msgid="4285094651288242183">"বিকাশকৰ্তা বিষয়ক বিকল্পসমূহ সক্ষম কৰক"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"এপৰ বিকাশৰ বাবে বিকল্পসমূহ ছেট কৰক"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"এইজন ব্যৱহাৰকাৰীৰ বাবে বিকাশকৰ্তাৰ বিকল্পসমূহ উপলব্ধ নহয়"</string>
-    <string name="vpn_settings_not_available" msgid="2894137119965668920">"ভিপিএন ছেটিংসমূহ এই ব্যৱহাৰকাৰীজনৰ বাবে উপলব্ধ নহয়"</string>
-    <string name="tethering_settings_not_available" msgid="266821736434699780">"এই ব্যৱহাৰকাৰীৰ বাবে টেডাৰিং ছেটিংসমূহ উপলব্ধ নহয়"</string>
-    <string name="apn_settings_not_available" msgid="1147111671403342300">"এই ব্যৱহাৰকাৰীৰ বাবে একচেছ পইণ্টৰ নাম ছেটিংসমূহ উপলব্ধ নহয়"</string>
+    <string name="vpn_settings_not_available" msgid="2894137119965668920">"ভিপিএন ছেটিং এই ব্যৱহাৰকাৰীজনৰ বাবে উপলব্ধ নহয়"</string>
+    <string name="tethering_settings_not_available" msgid="266821736434699780">"এই ব্যৱহাৰকাৰীৰ বাবে টেডাৰিং ছেটিং উপলব্ধ নহয়"</string>
+    <string name="apn_settings_not_available" msgid="1147111671403342300">"এই ব্যৱহাৰকাৰীৰ বাবে এক্সেছ পইণ্টৰ নামৰ ছেটিং উপলব্ধ নহয়"</string>
     <string name="enable_adb" msgid="8072776357237289039">"ইউএছবি ডিবাগিং"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"ইউএছবি সংযোগ হৈ থকাৰ অৱস্থাত ডিবাগ ম\'ড"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"ইউএছবি ডিবাগিং অনুমতিসমূহ প্ৰত্যাহাৰ কৰক"</string>
@@ -304,7 +304,7 @@
     <string name="adbwifi_warning_title" msgid="727104571653031865">"ৱায়াৰলেচ ডি\'বাগিংৰ অনুমতি দিবনে?"</string>
     <string name="adbwifi_warning_message" msgid="8005936574322702388">"ৱায়াৰলেচ ডি\'বাগিং কেৱল বিকাশৰ উদ্দেশ্যেৰে কৰা হয়। আপোনাৰ কম্পিউটাৰ আৰু আপোনাৰ ডিভাইচৰ মাজত ডেটা প্ৰতিলিপি কৰিবলৈ, কোনো জাননী নিদিয়াকৈয়ে আপোনাৰ ডিভাইচত এপ্‌সমূহ ইনষ্টল কৰিবলৈ আৰু লগ ডেটা পঢ়িবলৈ এইটো ব্যৱহাৰ কৰক।"</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"আপুনি আগতে ইউএছবি ডিবাগিঙৰ বাবে প্ৰৱেশৰ অনুমতি দিয়া সকলো কম্পিউটাৰৰ পৰা সেই অনুমতি প্ৰত্যাহাৰ কৰেনে?"</string>
-    <string name="dev_settings_warning_title" msgid="8251234890169074553">"বিকাশৰ কামৰ বাবে থকা ছেটিংবিলাকক অনুমতি দিবনে?"</string>
+    <string name="dev_settings_warning_title" msgid="8251234890169074553">"বিকাশৰ কামৰ বাবে থকা ছেটিঙৰ অনুমতি দিবনে?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"এই ছেটিংসমূহ বিকাশৰ কামত ব্যৱহাৰ কৰিবলৈ তৈয়াৰ কৰা হৈছে। সেইবিলাকে আপোনাৰ ডিভাইচ আৰু তাত থকা এপ্লিকেশ্বনসমূহক অকামিলা কৰি পেলাব পাৰে আৰু সেইবিলাকৰ কাৰণে এপ্লিকেশ্বনসমূহে অদ্ভুত আচৰণ কৰিব পাৰে।"</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"ইউএছবিৰ যোগেৰে এপৰ সত্যাপন কৰক"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ADB/ADTৰ যোগেৰে ইনষ্টল কৰা এপসমূহে কিবা ক্ষতিকাৰক আচৰণ কৰিছে নেকি পৰীক্ষা কৰক।"</string>
@@ -459,7 +459,7 @@
     <string name="external_source_trusted" msgid="1146522036773132905">"অনুমতি দিয়া হৈছে"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"অনুমতি দিয়া হোৱা নাই"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"অজ্ঞাত এপ্ ইনষ্টল কৰক"</string>
-    <string name="home" msgid="973834627243661438">"ছেটিংসমূহৰ গৃহপৃষ্ঠা"</string>
+    <string name="home" msgid="973834627243661438">"Settingsৰ গৃহপৃষ্ঠা"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"০%"</item>
     <item msgid="8894873528875953317">"৫০%"</item>
@@ -479,7 +479,7 @@
     <string name="retail_demo_reset_title" msgid="1866911701095959800">"পাছৱৰ্ড দৰকাৰী"</string>
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"সক্ৰিয়হৈ থকা ইনপুট পদ্ধতিসমূহ"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"ছিষ্টেমৰ ভাষা ব্যৱহাৰ কৰক"</string>
-    <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>ৰ ছেটিংবিলাক খুলিব পৰা নগ\'ল"</string>
+    <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>ৰ ছেটিং খুলিব পৰা নগ\'ল"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"এই ইনপুট পদ্ধতিটোৱে আপুনি টাইপ কৰা আপোনাৰ ব্যক্তিগত ডেটা যেনে পাছৱৰ্ডসমূহ আৰু ক্ৰেডিট কাৰ্ডৰ নম্বৰসমূহকে ধৰি সকলো পাঠ সংগ্ৰহ কৰিবলৈ সক্ষম হ\'ব পাৰে। <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> এপটোৰ লগত ই সংলগ্ন। এই ইনপুট পদ্ধতিটো ব্যৱহাৰ কৰেনে?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"টোকা: ৰিবুট কৰাৰ পিছত আপুনি ফ\'নটো আনলক নকৰালৈকে এই এপটো ষ্টাৰ্ট নহ’ব"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"আইএমএছ পঞ্জীয়ন স্থিতি"</string>
@@ -531,7 +531,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"ব্যৱহাৰকাৰী"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"সীমিত প্ৰ\'ফাইল"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"নতুন ব্যৱহাৰকাৰী যোগ কৰিবনে?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"আপুনি অতিৰিক্ত ব্য়ৱহাৰকাৰীক যোগ কৰি এই ডিভাইচটো অন্য় ব্য়ক্তিৰ সৈতে শ্বেয়াৰ কৰিব পাৰে। প্ৰতিজন ব্য়ৱহাৰকাৰীৰ বাবে নিজাকৈ ঠাই আছে যাক তেওঁলোকে এপ্, ৱালপেপাৰ আৰু অন্য়ান্য় বস্তুৰ বাবে নিজৰ উপযোগিতা অনুযায়ী ব্য়ৱহাৰ কৰিব পাৰে। ব্য়ৱহাৰকাৰীসকলে সকলোকে প্ৰভাৱান্বিত কৰা ৱাই-ফাইৰ নিচিনা ডিভাইচৰ ছেটিংসমূহ সাল-সলনি কৰিবও পাৰে।\n\nআপুনি যেতিয়া কোনো নতুন ব্য়ৱহাৰকাৰীক যোগ কৰে সেই ব্য়ক্তিজনে নিজেই নিজৰ বাবে ঠাই ছেট আপ কৰিব লাগিব।\n\nসকলো ব্য়ৱহাৰকাৰীএ অন্য় ব্য়ৱহাৰকাৰীৰ বাবে এপসমূহ আপডে’ট কৰিব পাৰে। সাধ্য় সুবিধাসমূহৰ ছেটিং আৰু সেৱাসমূহ নতুন ব্য়ৱহাৰকাৰীলৈ স্থানান্তৰ নহ\'বও পাৰে।"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"আপুনি অতিৰিক্ত ব্য়ৱহাৰকাৰীক যোগ কৰি এই ডিভাইচটো অন্য় ব্য়ক্তিৰ সৈতে শ্বেয়াৰ কৰিব পাৰে। প্ৰতিজন ব্য়ৱহাৰকাৰীৰ বাবে নিজাকৈ ঠাই আছে যাক তেওঁলোকে এপ্, ৱালপেপাৰ আৰু অন্য়ান্য় বস্তুৰ বাবে নিজৰ উপযোগিতা অনুযায়ী ব্য়ৱহাৰ কৰিব পাৰে। ব্য়ৱহাৰকাৰীসকলে সকলোকে প্ৰভাৱান্বিত কৰা ৱাই-ফাইৰ নিচিনা ডিভাইচৰ ছেটিং সাল-সলনি কৰিবও পাৰে।\n\nআপুনি যেতিয়া কোনো নতুন ব্য়ৱহাৰকাৰীক যোগ কৰে সেই ব্য়ক্তিজনে নিজেই নিজৰ বাবে ঠাই ছেট আপ কৰিব লাগিব।\n\nসকলো ব্য়ৱহাৰকাৰীয়ে অন্য় ব্য়ৱহাৰকাৰীৰ বাবে এপ্‌সমূহ আপডে’ট কৰিব পাৰে। সাধ্য় সুবিধাসমূহৰ ছেটিং আৰু সেৱাসমূহ নতুন ব্য়ৱহাৰকাৰীলৈ স্থানান্তৰ নহ\'বও পাৰে।"</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"আপুনি যেতিয়া এজন নতুন ব্যৱহাৰকাৰী যোগ কৰে, তেওঁ নিজৰ ঠাই ছেট আপ কৰা প্ৰয়োজন।\n\nযিকোনো ব্যৱহাৰকাৰীয়ে সকলো ব্যৱহাৰকাৰীৰ বাবে এপ্ আপডেইট কৰিব পাৰে।"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"ব্যৱহাৰকাৰী এতিয়া ছেট আপ কৰিবনে?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ডিভাইচটো লৈ নিজৰ ঠাই ছেটআপ কৰিবলৈ নতুন ব্যৱহাৰকাৰী উপলব্ধ থকাটো নিশ্চিত কৰক"</string>
