@@ -758,6 +758,51 @@ public class LocationManager {
     }
 
     /**
+     * Set whether GNSS requests are suspended on the device.
+     *
+     * This method was added to help support power management use cases on automotive devices. More
+     * specifically, it is being added to fix a suspend to RAM issue where the SoC can't go into
+     * a lower power state when applications are actively requesting GNSS updates.
+     *
+     * Ideally, the issue should be fixed at a lower layer in the stack, but this API introduces a
+     * workaround in the platform layer. This API allows car specific services to halt GNSS requests
+     * based on changes to the car power policy, which will in turn enable the device to go into
+     * suspend.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.AUTOMOTIVE_GNSS_CONTROLS)
+    public void setAutoGnssSuspended(boolean suspended) {
+        try {
+            mService.setAutoGnssSuspended(suspended);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Return whether GNSS requests are suspended or not.
+     *
+     * This method was added to help support power management use cases on automotive devices. More
+     * specifically, it is being added as part of the fix for a suspend to RAM issue where the SoC
+     * can't go into a lower power state when applications are actively requesting GNSS updates.
+     *
+     * @return true if GNSS requests are suspended and false if they aren't.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.AUTOMOTIVE_GNSS_CONTROLS)
+    public boolean isAutoGnssSuspended() {
+        try {
+            return mService.isAutoGnssSuspended();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Gets the last known location from the fused provider, or null if there is no last known
      * location. The returned location may be quite old in some circumstances, so the age of the
      * location should always be checked.

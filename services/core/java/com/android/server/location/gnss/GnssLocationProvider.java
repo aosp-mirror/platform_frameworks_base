@@ -243,6 +243,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     @GuardedBy("mLock")
     private boolean mBatchingEnabled;
 
+    @GuardedBy("mLock")
+    private boolean mAutomotiveSuspend;
+
     private boolean mShutdown;
     private boolean mStarted;
     private boolean mBatchingStarted;
@@ -721,6 +724,27 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
     }
 
+    /**
+     * Set whether the GnssLocationProvider is suspended. This method was added to help support
+     * power management use cases on automotive devices.
+     */
+    public void setAutoGnssSuspended(boolean suspended) {
+        synchronized (mLock) {
+            mAutomotiveSuspend = suspended;
+        }
+        mHandler.post(this::updateEnabled);
+    }
+
+    /**
+     * Return whether the GnssLocationProvider is suspended or not. This method was added to help
+     * support power management use cases on automotive devices.
+     */
+    public boolean isAutoGnssSuspended() {
+        synchronized (mLock) {
+            return mAutomotiveSuspend && !mGpsEnabled;
+        }
+    }
+
     private void handleEnable() {
         if (DEBUG) Log.d(TAG, "handleEnable");
 
@@ -775,6 +799,11 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         enabled |= (mProviderRequest != null
                 && mProviderRequest.isActive()
                 && mProviderRequest.isBypass());
+
+        // .. disable if automotive device needs to go into suspend
+        synchronized (mLock) {
+            enabled &= !mAutomotiveSuspend;
+        }
 
         // ... and, finally, disable anyway, if device is being shut down
         enabled &= !mShutdown;

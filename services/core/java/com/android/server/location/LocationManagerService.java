@@ -39,6 +39,7 @@ import android.Manifest;
 import android.Manifest.permission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
@@ -1236,6 +1237,32 @@ public class LocationManagerService extends ILocationManager.Stub implements
     @Override
     public boolean isProviderEnabledForUser(String provider, int userId) {
         return mLocalService.isProviderEnabledForUser(provider, userId);
+    }
+
+    @Override
+    @RequiresPermission(android.Manifest.permission.AUTOMOTIVE_GNSS_CONTROLS)
+    public void setAutoGnssSuspended(boolean suspended) {
+        mContext.enforceCallingPermission(permission.AUTOMOTIVE_GNSS_CONTROLS, null);
+
+        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
+            throw new IllegalStateException(
+                    "setAutoGnssSuspended only allowed on automotive devices");
+        }
+
+        mGnssManagerService.setAutoGnssSuspended(suspended);
+    }
+
+    @Override
+    @RequiresPermission(android.Manifest.permission.AUTOMOTIVE_GNSS_CONTROLS)
+    public boolean isAutoGnssSuspended() {
+        mContext.enforceCallingPermission(permission.AUTOMOTIVE_GNSS_CONTROLS, null);
+
+        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
+            throw new IllegalStateException(
+                    "isAutoGnssSuspended only allowed on automotive devices");
+        }
+
+        return mGnssManagerService.isAutoGnssSuspended();
     }
 
     @Override

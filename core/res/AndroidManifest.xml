@@ -1751,6 +1751,13 @@
     <permission android:name="android.permission.ACCESS_MOCK_LOCATION"
         android:protectionLevel="signature" />
 
+    <!-- @SystemApi @hide Allows automotive applications to control location
+         suspend state for power management use cases.
+         <p>Not for use by third-party applications.
+    -->
+    <permission android:name="android.permission.AUTOMOTIVE_GNSS_CONTROLS"
+        android:protectionLevel="signature|privileged" />
+
     <!-- ======================================= -->
     <!-- Permissions for accessing networks -->
     <!-- ======================================= -->
