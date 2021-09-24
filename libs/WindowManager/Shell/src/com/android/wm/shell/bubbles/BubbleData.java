@@ -323,7 +323,7 @@ public class BubbleData {
         }
         mPendingBubbles.remove(bubble.getKey()); // No longer pending once we're here
         Bubble prevBubble = getBubbleInStackWithKey(bubble.getKey());
-        suppressFlyout |= !bubble.isVisuallyInterruptive();
+        suppressFlyout |= !bubble.isTextChanged();
 
         if (prevBubble == null) {
             // Create a new bubble

@@ -1132,6 +1132,10 @@ public final class NotificationRecord {
         return mIsInterruptive;
     }
 
+    public boolean isTextChanged() {
+        return mTextChanged;
+    }
+
     /** Returns the time the notification audibly alerted the user. */
     public long getLastAudiblyAlertedMs() {
         return mLastAudiblyAlertedMs;
