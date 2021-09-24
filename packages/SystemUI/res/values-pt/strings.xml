@@ -578,7 +578,7 @@
     <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"Receba notificações mais rápido"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"Veja-as antes de desbloquear"</string>
-    <string name="hidden_notifications_cancel" msgid="4805370226181001278">"Não, obrigado"</string>
+    <string name="hidden_notifications_cancel" msgid="4805370226181001278">"Agora não"</string>
     <string name="hidden_notifications_setup" msgid="2064795578526982467">"Configurar"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="5901885672973736563">"Desativar agora"</string>
@@ -603,7 +603,7 @@
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Para liberar o app, toque nos botões \"Voltar\" e home e os mantenha pressionados"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Para liberar o app, deslize para cima e mantenha a tela pressionada"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Entendi"</string>
-    <string name="screen_pinning_negative" msgid="6882816864569211666">"Não, obrigado"</string>
+    <string name="screen_pinning_negative" msgid="6882816864569211666">"Agora não"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"App fixado"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"App liberado"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"Esconder <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
