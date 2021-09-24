@@ -8053,6 +8053,7 @@ package android.app.job {
     field public static final int STOP_REASON_CONSTRAINT_DEVICE_IDLE = 8; // 0x8
     field public static final int STOP_REASON_CONSTRAINT_STORAGE_NOT_LOW = 9; // 0x9
     field public static final int STOP_REASON_DEVICE_STATE = 4; // 0x4
+    field public static final int STOP_REASON_ESTIMATED_APP_LAUNCH_TIME_CHANGED = 15; // 0xf
     field public static final int STOP_REASON_PREEMPT = 2; // 0x2
     field public static final int STOP_REASON_QUOTA = 10; // 0xa
     field public static final int STOP_REASON_SYSTEM_PROCESSING = 14; // 0xe

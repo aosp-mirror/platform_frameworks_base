@@ -18,6 +18,7 @@ package com.android.server.job;
 
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
+import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
 import android.annotation.NonNull;
@@ -105,6 +106,7 @@ import com.android.server.job.controllers.ContentObserverController;
 import com.android.server.job.controllers.DeviceIdleJobsController;
 import com.android.server.job.controllers.IdleController;
 import com.android.server.job.controllers.JobStatus;
+import com.android.server.job.controllers.PrefetchController;
 import com.android.server.job.controllers.QuotaController;
 import com.android.server.job.controllers.RestrictingController;
 import com.android.server.job.controllers.StateController;
@@ -252,6 +254,8 @@ public class JobSchedulerService extends com.android.server.SystemService
     private final StorageController mStorageController;
     /** Need directly for sending uid state changes */
     private final DeviceIdleJobsController mDeviceIdleJobsController;
+    /** Needed to get next estimated launch time. */
+    private final PrefetchController mPrefetchController;
     /** Needed to get remaining quota time. */
     private final QuotaController mQuotaController;
     /** Needed to get max execution time and expedited-job allowance. */
@@ -427,6 +431,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                         case Constants.KEY_CONN_PREFETCH_RELAX_FRAC:
                             mConstants.updateConnectivityConstantsLocked();
                             break;
+                        case Constants.KEY_PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS:
+                            mConstants.updatePrefetchConstantsLocked();
+                            break;
                         case Constants.KEY_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS:
                         case Constants.KEY_RUNTIME_MIN_GUARANTEE_MS:
                         case Constants.KEY_RUNTIME_MIN_EJ_GUARANTEE_MS:
@@ -482,6 +489,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final String KEY_MIN_EXP_BACKOFF_TIME_MS = "min_exp_backoff_time_ms";
         private static final String KEY_CONN_CONGESTION_DELAY_FRAC = "conn_congestion_delay_frac";
         private static final String KEY_CONN_PREFETCH_RELAX_FRAC = "conn_prefetch_relax_frac";
+        private static final String KEY_PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS =
+                "prefetch_force_batch_relax_threshold_ms";
         private static final String KEY_ENABLE_API_QUOTAS = "enable_api_quotas";
         private static final String KEY_API_QUOTA_SCHEDULE_COUNT = "aq_schedule_count";
         private static final String KEY_API_QUOTA_SCHEDULE_WINDOW_MS = "aq_schedule_window_ms";
@@ -503,6 +512,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final long DEFAULT_MIN_EXP_BACKOFF_TIME_MS = JobInfo.MIN_BACKOFF_MILLIS;
         private static final float DEFAULT_CONN_CONGESTION_DELAY_FRAC = 0.5f;
         private static final float DEFAULT_CONN_PREFETCH_RELAX_FRAC = 0.5f;
+        private static final long DEFAULT_PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS = HOUR_IN_MILLIS;
         private static final boolean DEFAULT_ENABLE_API_QUOTAS = true;
         private static final int DEFAULT_API_QUOTA_SCHEDULE_COUNT = 250;
         private static final long DEFAULT_API_QUOTA_SCHEDULE_WINDOW_MS = MINUTE_IN_MILLIS;
@@ -555,6 +565,14 @@ public class JobSchedulerService extends com.android.server.SystemService
          * we consider matching it against a metered network.
          */
         public float CONN_PREFETCH_RELAX_FRAC = DEFAULT_CONN_PREFETCH_RELAX_FRAC;
+
+        /**
+         * The amount of time within which we would consider the app to be launching relatively soon
+         * and will relax the force batching policy on prefetch jobs. If the app is not going to be
+         * launched within this amount of time from now, then we will force batch the prefetch job.
+         */
+        public long PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS =
+                DEFAULT_PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS;
 
         /**
          * Whether to enable quota limits on APIs.
@@ -635,6 +653,13 @@ public class JobSchedulerService extends com.android.server.SystemService
                     DEFAULT_CONN_PREFETCH_RELAX_FRAC);
         }
 
+        private void updatePrefetchConstantsLocked() {
+            PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS = DeviceConfig.getLong(
+                    DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS,
+                    DEFAULT_PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS);
+        }
+
         private void updateApiQuotaConstantsLocked() {
             ENABLE_API_QUOTAS = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                     KEY_ENABLE_API_QUOTAS, DEFAULT_ENABLE_API_QUOTAS);
@@ -700,6 +725,8 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.print(KEY_MIN_EXP_BACKOFF_TIME_MS, MIN_EXP_BACKOFF_TIME_MS).println();
             pw.print(KEY_CONN_CONGESTION_DELAY_FRAC, CONN_CONGESTION_DELAY_FRAC).println();
             pw.print(KEY_CONN_PREFETCH_RELAX_FRAC, CONN_PREFETCH_RELAX_FRAC).println();
+            pw.print(KEY_PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS,
+                    PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS).println();
 
             pw.print(KEY_ENABLE_API_QUOTAS, ENABLE_API_QUOTAS).println();
             pw.print(KEY_API_QUOTA_SCHEDULE_COUNT, API_QUOTA_SCHEDULE_COUNT).println();
@@ -1569,6 +1596,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         mControllers.add(new ContentObserverController(this));
         mDeviceIdleJobsController = new DeviceIdleJobsController(this);
         mControllers.add(mDeviceIdleJobsController);
+        mPrefetchController = new PrefetchController(this);
+        mControllers.add(mPrefetchController);
         mQuotaController =
                 new QuotaController(this, backgroundJobsController, connectivityController);
         mControllers.add(mQuotaController);
@@ -2325,6 +2354,15 @@ public class JobSchedulerService extends com.android.server.SystemService
                 } else if (job.getEffectiveStandbyBucket() == RESTRICTED_INDEX) {
                     // Restricted jobs must always be batched
                     shouldForceBatchJob = true;
+                } else if (job.getJob().isPrefetch()) {
+                    // Only relax batching on prefetch jobs if we expect the app to be launched
+                    // relatively soon. PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS defines what
+                    // "relatively soon" means.
+                    final long relativelySoonCutoffTime = sSystemClock.millis()
+                            + mConstants.PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS;
+                    shouldForceBatchJob =
+                            mPrefetchController.getNextEstimatedLaunchTimeLocked(job)
+                                    > relativelySoonCutoffTime;
                 } else if (job.getNumFailures() > 0) {
                     shouldForceBatchJob = false;
                 } else {
