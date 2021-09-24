@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2020 The Android Open Source Project
+  ~ Copyright (C) 2021 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -12,10 +12,16 @@
   ~ distributed under the License is distributed on an "AS IS" BASIS,
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
-  ~ limitations under the License.
+  ~ limitations under the License
   -->
 <resources>
-    <!-- Size of the panel of large phones on portrait. This shouldn't fill, but have some padding on the side -->
-    <dimen name="notification_panel_width">504dp</dimen>
 
+    <!-- The maximum number of tiles in the QuickQSPanel -->
+    <integer name="quick_qs_panel_max_tiles">6</integer>
+
+    <!-- The maximum number of rows in the QuickSettings -->
+    <integer name="quick_settings_max_rows">3</integer>
+
+    <!-- The number of columns in the QuickSettings -->
+    <integer name="quick_settings_num_columns">3</integer>
 </resources>
