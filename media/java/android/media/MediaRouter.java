@@ -654,9 +654,12 @@ public class MediaRouter {
         final class Client extends IMediaRouterClient.Stub {
             @Override
             public void onStateChanged() {
-                mHandler.post(() -> {
-                    if (Client.this == mClient) {
-                        updateClientState();
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (Client.this == mClient) {
+                            updateClientState();
+                        }
                     }
                 });
             }
@@ -687,22 +690,6 @@ public class MediaRouter {
                 mHandler.post(() -> {
                     if (Client.this == mClient) {
                         handleGroupRouteSelected(groupRouteId);
-                    }
-                });
-            }
-
-            // Called when the selection of a connected device (phone speaker or BT devices)
-            // is changed.
-            @Override
-            public void onGlobalA2dpChanged(boolean a2dpOn) {
-                mHandler.post(() -> {
-                    if (mSelectedRoute == null) {
-                        return;
-                    }
-                    if (mSelectedRoute.isDefault() && a2dpOn) {
-                        setSelectedRoute(mBluetoothA2dpRoute, /*explicit=*/false);
-                    } else if (mSelectedRoute.isBluetooth() && !a2dpOn) {
-                        setSelectedRoute(mDefaultAudioVideo, /*explicit=*/false);
                     }
                 });
             }
