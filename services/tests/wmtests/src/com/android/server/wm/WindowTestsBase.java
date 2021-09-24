@@ -1140,6 +1140,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         private int mCreateActivityCount = 0;
         @Nullable
         private TaskFragmentOrganizer mOrganizer;
+        private IBinder mFragmentToken;
 
         TaskFragmentBuilder(ActivityTaskManagerService service) {
             mAtm = service;
@@ -1171,10 +1172,15 @@ class WindowTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
+        TaskFragmentBuilder setFragmentToken(@Nullable IBinder fragmentToken) {
+            mFragmentToken = fragmentToken;
+            return this;
+        }
+
         TaskFragment build() {
             SystemServicesTestRule.checkHoldsLock(mAtm.mGlobalLock);
 
-            final TaskFragment taskFragment = new TaskFragment(mAtm, null /* fragmentToken */,
+            final TaskFragment taskFragment = new TaskFragment(mAtm, mFragmentToken,
                     mOrganizer != null);
             if (mParentTask == null && mCreateParentTask) {
                 mParentTask = new TaskBuilder(mAtm.mTaskSupervisor).build();
