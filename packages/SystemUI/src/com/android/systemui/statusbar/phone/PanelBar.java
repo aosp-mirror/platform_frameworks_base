@@ -182,8 +182,7 @@ public abstract class PanelBar extends FrameLayout {
         }
         boolean fullyClosed = true;
         boolean fullyOpened = false;
-        if (SPEW) LOG("panelExpansionChanged: start state=%d", mState);
-        PanelViewController pv = mPanel;
+        if (SPEW) LOG("panelExpansionChanged: start state=%d, f=%.1f", mState, frac);
         mExpanded = expanded;
         mPanelFraction = frac;
         updateVisibility();
@@ -194,9 +193,7 @@ public abstract class PanelBar extends FrameLayout {
                 onPanelPeeked();
             }
             fullyClosed = false;
-            final float thisFrac = pv.getExpandedFraction();
-            if (SPEW) LOG("panelExpansionChanged:  -> %s: f=%.1f", pv.getName(), thisFrac);
-            fullyOpened = thisFrac >= 1f;
+            fullyOpened = frac >= 1f;
         }
         if (fullyOpened && !mTracking) {
             go(STATE_OPEN);
