@@ -191,7 +191,7 @@ public class HdmiCecLocalDeviceTest {
         mMessageValidator =
                 new HdmiCecMessageValidator(mHdmiControlService) {
                     @Override
-                    int isValid(HdmiCecMessage message) {
+                    int isValid(HdmiCecMessage message, boolean isMessageReceived) {
                         return HdmiCecMessageValidator.OK;
                     }
                 };
