@@ -54,7 +54,7 @@ java_test_host {
     ],
     data: [
         ":com.android.apex.apkrollback.test_v1",
-        ":com.android.apex.cts.shim.v2_prebuilt",
+        ":StagedInstallTestApexV2",
         ":StagedInstallTestApexV2_WrongSha",
         ":TestAppAv1",
         ":test.rebootless_apex_v1",
