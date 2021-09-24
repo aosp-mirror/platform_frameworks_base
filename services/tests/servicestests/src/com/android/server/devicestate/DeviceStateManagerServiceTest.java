@@ -34,10 +34,10 @@ import android.hardware.devicestate.IDeviceStateManagerCallback;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.platform.test.annotations.FlakyTest;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.FlakyTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.wm.ActivityTaskManagerInternal;
