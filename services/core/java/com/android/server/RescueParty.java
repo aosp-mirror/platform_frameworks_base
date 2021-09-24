@@ -327,18 +327,23 @@ public class RescueParty {
         }
     }
 
-    private static int getMaxRescueLevel() {
-        return SystemProperties.getBoolean(PROP_DISABLE_FACTORY_RESET_FLAG, false)
-                ? LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS : LEVEL_FACTORY_RESET;
+    private static int getMaxRescueLevel(boolean mayPerformFactoryReset) {
+        if (!mayPerformFactoryReset
+                || SystemProperties.getBoolean(PROP_DISABLE_FACTORY_RESET_FLAG, false)) {
+            return LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS;
+        }
+        return LEVEL_FACTORY_RESET;
     }
 
     /**
      * Get the rescue level to perform if this is the n-th attempt at mitigating failure.
      *
      * @param mitigationCount: the mitigation attempt number (1 = first attempt etc.)
+     * @param mayPerformFactoryReset: whether or not a factory reset may be performed for the given
+     *                              failure.
      * @return the rescue level for the n-th mitigation attempt.
      */
-    private static int getRescueLevel(int mitigationCount) {
+    private static int getRescueLevel(int mitigationCount, boolean mayPerformFactoryReset) {
         if (mitigationCount == 1) {
             return LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS;
         } else if (mitigationCount == 2) {
@@ -346,9 +351,9 @@ public class RescueParty {
         } else if (mitigationCount == 3) {
             return LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS;
         } else if (mitigationCount == 4) {
-            return Math.min(getMaxRescueLevel(), LEVEL_WARM_REBOOT);
+            return Math.min(getMaxRescueLevel(mayPerformFactoryReset), LEVEL_WARM_REBOOT);
         } else if (mitigationCount >= 5) {
-            return Math.min(getMaxRescueLevel(), LEVEL_FACTORY_RESET);
+            return Math.min(getMaxRescueLevel(mayPerformFactoryReset), LEVEL_FACTORY_RESET);
         } else {
             Slog.w(TAG, "Expected positive mitigation count, was " + mitigationCount);
             return LEVEL_NONE;
@@ -614,7 +619,8 @@ public class RescueParty {
                 @FailureReasons int failureReason, int mitigationCount) {
             if (!isDisabled() && (failureReason == PackageWatchdog.FAILURE_REASON_APP_CRASH
                     || failureReason == PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING)) {
-                return mapRescueLevelToUserImpact(getRescueLevel(mitigationCount));
+                return mapRescueLevelToUserImpact(getRescueLevel(mitigationCount,
+                        mayPerformFactoryReset(failedPackage)));
             } else {
                 return PackageHealthObserverImpact.USER_IMPACT_NONE;
             }
@@ -628,7 +634,8 @@ public class RescueParty {
             }
             if (failureReason == PackageWatchdog.FAILURE_REASON_APP_CRASH
                     || failureReason == PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING) {
-                final int level = getRescueLevel(mitigationCount);
+                final int level = getRescueLevel(mitigationCount,
+                        mayPerformFactoryReset(failedPackage));
                 executeRescueLevel(mContext,
                         failedPackage == null ? null : failedPackage.getPackageName(), level);
                 return true;
@@ -653,12 +660,7 @@ public class RescueParty {
             } catch (PackageManager.NameNotFoundException ignore) {
             }
 
-            try {
-                ApplicationInfo info = pm.getApplicationInfo(packageName, 0);
-                return (info.flags & PERSISTENT_MASK) == PERSISTENT_MASK;
-            } catch (PackageManager.NameNotFoundException e) {
-                return false;
-            }
+            return isPersistentSystemApp(packageName);
         }
 
         @Override
@@ -666,7 +668,7 @@ public class RescueParty {
             if (isDisabled()) {
                 return PackageHealthObserverImpact.USER_IMPACT_NONE;
             }
-            return mapRescueLevelToUserImpact(getRescueLevel(mitigationCount));
+            return mapRescueLevelToUserImpact(getRescueLevel(mitigationCount, true));
         }
 
         @Override
@@ -674,13 +676,37 @@ public class RescueParty {
             if (isDisabled()) {
                 return false;
             }
-            executeRescueLevel(mContext, /*failedPackage=*/ null, getRescueLevel(mitigationCount));
+            executeRescueLevel(mContext, /*failedPackage=*/ null,
+                    getRescueLevel(mitigationCount, true));
             return true;
         }
 
         @Override
         public String getName() {
             return NAME;
+        }
+
+        /**
+         * Returns {@code true} if the failing package is non-null and performing a reboot or
+         * prompting a factory reset is an acceptable mitigation strategy for the package's
+         * failure, {@code false} otherwise.
+         */
+        private boolean mayPerformFactoryReset(@Nullable VersionedPackage failingPackage) {
+            if (failingPackage == null) {
+                return false;
+            }
+
+            return isPersistentSystemApp(failingPackage.getPackageName());
+        }
+
+        private boolean isPersistentSystemApp(@NonNull String packageName) {
+            PackageManager pm = mContext.getPackageManager();
+            try {
+                ApplicationInfo info = pm.getApplicationInfo(packageName, 0);
+                return (info.flags & PERSISTENT_MASK) == PERSISTENT_MASK;
+            } catch (PackageManager.NameNotFoundException e) {
+                return false;
+            }
         }
 
         private synchronized void recordDeviceConfigAccess(@NonNull String callingPackage,
