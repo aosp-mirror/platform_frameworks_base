@@ -2620,10 +2620,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * {@link #updateFrom(Configuration)} will treat it as a no-op and not update that member.
      *
      * This is fine for device configurations as no member is ever undefined.
-     * {@hide}
      */
-    @UnsupportedAppUsage
-    public static Configuration generateDelta(Configuration base, Configuration change) {
+    @NonNull
+    public static Configuration generateDelta(
+            @NonNull Configuration base, @NonNull Configuration change) {
         final Configuration delta = new Configuration();
         if (base.fontScale != change.fontScale) {
             delta.fontScale = change.fontScale;
