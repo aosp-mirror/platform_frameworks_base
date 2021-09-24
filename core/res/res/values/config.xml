@@ -4849,8 +4849,8 @@
     <item name="config_fixedOrientationLetterboxAspectRatio" format="float" type="dimen">0.0</item>
 
     <!-- Corners radius for activity presented the letterbox mode. Values < 0 will be ignored and
-         corners of the activity won't be rounded. -->
-    <integer name="config_letterboxActivityCornersRadius">0</integer>
+         min between device bottom corner radii will be used instead. -->
+    <integer name="config_letterboxActivityCornersRadius">-1</integer>
 
     <!-- Blur radius for the Option 3 in R.integer.config_letterboxBackgroundType. Values < 0 are
         ignored and 0 is used. -->
