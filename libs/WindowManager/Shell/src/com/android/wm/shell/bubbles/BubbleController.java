@@ -939,7 +939,7 @@ public class BubbleController {
     public void updateBubble(BubbleEntry notif, boolean suppressFlyout, boolean showInShade) {
         // If this is an interruptive notif, mark that it's interrupted
         mSysuiProxy.setNotificationInterruption(notif.getKey());
-        if (!notif.getRanking().visuallyInterruptive()
+        if (!notif.getRanking().isTextChanged()
                 && (notif.getBubbleMetadata() != null
                     && !notif.getBubbleMetadata().getAutoExpandBubble())
                 && mBubbleData.hasOverflowBubbleWithKey(notif.getKey())) {
