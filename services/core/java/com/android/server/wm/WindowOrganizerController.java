@@ -122,7 +122,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
      * A Map which manages the relationship between
      * {@link TaskFragmentCreationParams#getFragmentToken()} and {@link TaskFragment}
      */
-    private final ArrayMap<IBinder, TaskFragment> mLaunchTaskFragments = new ArrayMap<>();
+    @VisibleForTesting
+    final ArrayMap<IBinder, TaskFragment> mLaunchTaskFragments = new ArrayMap<>();
 
     WindowOrganizerController(ActivityTaskManagerService atm) {
         mService = atm;
@@ -672,7 +673,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     throw new IllegalArgumentException(
                             "Can only delete organized TaskFragment, but not Task.");
                 }
-                deleteTaskFragment(taskFragment, errorCallbackToken);
+                effects |= deleteTaskFragment(taskFragment, errorCallbackToken);
                 break;
             case HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT:
                 fragmentToken = hop.getContainer();
@@ -704,6 +705,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     break;
                 }
                 activity.reparent(mLaunchTaskFragments.get(fragmentToken), POSITION_TOP);
+                effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 break;
             case HIERARCHY_OP_TYPE_REPARENT_CHILDREN:
                 final WindowContainer oldParent = WindowContainer.fromBinder(hop.getContainer());
@@ -716,6 +718,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     break;
                 }
                 reparentTaskFragment(oldParent, newParent, errorCallbackToken);
+                effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 break;
             case HIERARCHY_OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS:
                 fragmentToken = hop.getContainer();
@@ -731,6 +734,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     break;
                 }
                 tf1.setAdjacentTaskFragment(tf2);
+                effects |= TRANSACT_EFFECTS_LIFECYCLE;
 
                 final Bundle bundle = hop.getLaunchOptions();
                 final WindowContainerTransaction.TaskFragmentAdjacentParams adjacentParams =
@@ -1175,7 +1179,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
     }
 
-    void deleteTaskFragment(@NonNull TaskFragment taskFragment,
+    private int deleteTaskFragment(@NonNull TaskFragment taskFragment,
             @Nullable IBinder errorCallbackToken) {
         final int index = mLaunchTaskFragments.indexOfValue(taskFragment);
         if (index < 0) {
@@ -1184,10 +1188,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                             + "taskFragment");
             sendTaskFragmentOperationFailure(taskFragment.getTaskFragmentOrganizer(),
                     errorCallbackToken, exception);
-            return;
+            return 0;
         }
         mLaunchTaskFragments.removeAt(index);
         taskFragment.remove(true /* withTransition */, "deleteTaskFragment");
+        return TRANSACT_EFFECTS_LIFECYCLE;
     }
 
     @Nullable
