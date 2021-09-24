@@ -60,6 +60,7 @@ cc_defaults {
         ":libincident_aidl",
         "src/IncidentReportArgs.cpp",
     ],
+    min_sdk_version: "29",
 }
 
 cc_library_shared {
