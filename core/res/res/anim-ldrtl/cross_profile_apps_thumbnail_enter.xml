@@ -20,8 +20,7 @@
 <set xmlns:android="http://schemas.android.com/apk/res/android"
      android:shareInterpolator="false"
      android:zAdjustment="top"
-     android:hasRoundedCorners="true"
-     android:background="@color/overview_background">
+     android:hasRoundedCorners="true">
 
     <translate
         android:fromXDelta="-105%"
