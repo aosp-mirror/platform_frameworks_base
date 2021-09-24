@@ -914,7 +914,7 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Құпия сөзді <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате тердіңіз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундтан кейін қайталаңыз."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"PIN кодын <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате тердіңіз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундтан кейін қайталаңыз."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"Бекітпесін ашу өрнегін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате салдыңыз. Тағы <xliff:g id="NUMBER_1">%2$d</xliff:g> сәтсіз әрекеттен кейін сізден Google жүйесіне кіріп планшет бекітпесін ашу сұралады.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундтан кейін әрекетті қайталаңыз."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"Құлыпты ашу өрнегін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет дұрыс сызбадыңыз. Енді тағы <xliff:g id="NUMBER_1">%2$d</xliff:g> рет қателессеңіз, Android TV құрылғыңыздың құлпын ашу үшін Google есептік жазбаңызға кіру керек болады.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундтан кейін қайталап көріңіз."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"Құлыпты ашу өрнегін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет дұрыс сызбадыңыз. Енді тағы <xliff:g id="NUMBER_1">%2$d</xliff:g> рет қателессеңіз, Android TV құрылғыңыздың құлпын ашу үшін Google аккаунтыңызға кіру керек болады.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундтан кейін қайталап көріңіз."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"Бекітпесін ашу өрнегін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате салдыңыз. Тағы <xliff:g id="NUMBER_1">%2$d</xliff:g> сәтсіз әрекеттен кейін сізден Google жүйесіне кіріп телефон бекітпесін ашу сұралады.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундтан кейін әрекетті қайталаңыз."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="7914445759242151426">"Планшеттің бекітпесін ашуға <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате әрекеттендіңіз. <xliff:g id="NUMBER_1">%2$d</xliff:g> сәтсіз әрекеттен кейін, телефон зауыттың бастапқы параметрлеріне қайта реттеледі және пайдаланушы деректері жоғалады."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="4275591249631864248">"Android TV құрылғыңыздың құлпын <xliff:g id="NUMBER_0">%1$d</xliff:g> рет дұрыс ашпадыңыз. Енді тағы <xliff:g id="NUMBER_1">%2$d</xliff:g> рет қателессеңіз, Android TV құрылғыңыздың зауыттық әдепкі параметрлері қайтарылады және одан барлық пайдаланушы деректері өшіп қалады."</string>
@@ -926,7 +926,7 @@
     <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"Кескінді ұмытып қалдыңыз ба?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"Аккаунттың бекітпесін ашу"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"Тым көп кескін әрекеттері"</string>
-    <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"Ашу үшін Google есептік жазбаңызбен кіріңіз."</string>
+    <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"Ашу үшін Google аккаунтыңызбен кіріңіз."</string>
     <string name="lockscreen_glogin_username_hint" msgid="6916101478673157045">"Пайдаланушы атауы (эл. пошта)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="3031027901286812848">"Құпия сөз"</string>
     <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"Кіру"</string>
@@ -1330,8 +1330,8 @@
     <string name="sms_control_yes" msgid="4858845109269524622">"Рұқсат беру"</string>
     <string name="sms_control_no" msgid="4845717880040355570">"Өшіру"</string>
     <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасы &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; мекенжайына хабар жіберуді қалайды."</string>
-    <string name="sms_short_code_details" msgid="2723725738333388351">"Бұл мобильді есептік жазбаңызда "<b>"өзгерістер"</b>" тудыруы мүмкін."</string>
-    <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"Бұл мобильді есептік жазбаңызда өзгерістерді тудырады."</b></string>
+    <string name="sms_short_code_details" msgid="2723725738333388351">"Бұл мобильді аккаунтыңызда "<b>"өзгерістер"</b>" тудыруы мүмкін."</string>
+    <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"Бұл мобильді аккаунтыңызда өзгерістерді тудырады."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"Жіберу"</string>
     <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"Бас тарту"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"Менің таңдауым есте сақталсын"</string>
@@ -1475,7 +1475,7 @@
     <string name="ime_action_default" msgid="8265027027659800121">"Орындау"</string>
     <string name="dial_number_using" msgid="6060769078933953531">"Нөмірді\n <xliff:g id="NUMBER">%s</xliff:g> қолданып теріңіз"</string>
     <string name="create_contact_using" msgid="6200708808003692594">"Байланысты\n <xliff:g id="NUMBER">%s</xliff:g> нөмірі арқылы орнату"</string>
-    <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"Келесі бір немесе бірнеше қолданба қазір және болашақта есептік жазбаңызға қатынасуға рұқсатты сұрап жатыр."</string>
+    <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"Келесі бір немесе бірнеше қолданба қазір және болашақта аккаунтыңызға қатынасуға рұқсатты сұрап жатыр."</string>
     <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"Бұл өтініштің орындалуын қалайсыз ба?"</string>
     <string name="grant_permissions_header_text" msgid="3420736827804657201">"Кіру өтініші"</string>
     <string name="allow" msgid="6195617008611933762">"Рұқсат беру"</string>
@@ -1682,7 +1682,7 @@
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="5045460916106267585">"Android TV құрылғыңыздың құлпын <xliff:g id="NUMBER">%d</xliff:g> рет дұрыс ашпадыңыз. Енді Android TV құрылғыңыздың зауыттық әдепкі параметрлері қайтарылады."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="5043730590446071189">"Телефонды ашуға <xliff:g id="NUMBER">%d</xliff:g> рет қате әрекеттендіңіз. Телефон бастапқы зауыттық параметрлеріне қайта реттеледі."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="7086799295109717623">"Бекітпені ашу кескінін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате сыздыңыз. After <xliff:g id="NUMBER_1">%2$d</xliff:g> сәтсіз әрекеттен кейін планшетіңізді аккаунт арқылы ашу өтінішін аласыз.\n\n  <xliff:g id="NUMBER_2">%3$d</xliff:g> секундтан кейін қайта әрекеттеніңіз."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"Құлыпты ашу өрнегін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет дұрыс сызбадыңыз. Енді тағы <xliff:g id="NUMBER_1">%2$d</xliff:g> рет қателессеңіз, Android TV құрылғыңыздың құлпын ашу үшін есептік жазбаңызға кіру керек болады.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундтан кейін қайталап көріңіз."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"Құлыпты ашу өрнегін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет дұрыс сызбадыңыз. Енді тағы <xliff:g id="NUMBER_1">%2$d</xliff:g> рет қателессеңіз, Android TV құрылғыңыздың құлпын ашу үшін аккаунтыңызға кіру керек болады.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундтан кейін қайталап көріңіз."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Бекітпені ашу кескінін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате сыздыңыз. <xliff:g id="NUMBER_1">%2$d</xliff:g> сәтсіз әрекеттен кейін телефоныңызды аккаунт арқылы ашу өтінішін аласыз. \n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундтан кейін қайта әрекеттеніңіз."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Жою"</string>
