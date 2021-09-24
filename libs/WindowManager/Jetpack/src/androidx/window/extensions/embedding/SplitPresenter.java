@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-package androidx.window.extensions.organizer;
+package androidx.window.extensions.embedding;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.LayoutDirection;
+import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowMetrics;
 import android.window.TaskFragmentCreationParams;
@@ -32,8 +35,6 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.window.extensions.embedding.SplitPairRule;
-import androidx.window.extensions.embedding.SplitRule;
 
 import java.util.concurrent.Executor;
 
@@ -42,13 +43,13 @@ import java.util.concurrent.Executor;
  * {@link SplitController}.
  */
 class SplitPresenter extends JetpackTaskFragmentOrganizer {
-    private static final int POSITION_LEFT = 0;
-    private static final int POSITION_RIGHT = 1;
+    private static final int POSITION_START = 0;
+    private static final int POSITION_END = 1;
     private static final int POSITION_FILL = 2;
 
     @IntDef(value = {
-            POSITION_LEFT,
-            POSITION_RIGHT,
+            POSITION_START,
+            POSITION_END,
             POSITION_FILL,
     })
     private @interface Position {}
@@ -96,13 +97,15 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
         final Rect parentBounds = getParentContainerBounds(primaryActivity);
-        final Rect primaryRectBounds = getBoundsForPosition(POSITION_LEFT, parentBounds, rule);
+        final Rect primaryRectBounds = getBoundsForPosition(POSITION_START, parentBounds, rule,
+                isLtr(primaryActivity, rule));
         final TaskFragmentContainer primaryContainer = prepareContainerForActivity(wct,
                 primaryActivity, primaryRectBounds, null);
 
         // Create new empty task fragment
-        TaskFragmentContainer secondaryContainer = mController.newContainer(null);
-        final Rect secondaryRectBounds = getBoundsForPosition(POSITION_RIGHT, parentBounds, rule);
+        final TaskFragmentContainer secondaryContainer = mController.newContainer(null);
+        final Rect secondaryRectBounds = getBoundsForPosition(POSITION_END, parentBounds,
+                rule, isLtr(primaryActivity, rule));
         createTaskFragment(wct, secondaryContainer.getTaskFragmentToken(),
                 primaryActivity.getActivityToken(), secondaryRectBounds,
                 WINDOWING_MODE_MULTI_WINDOW);
@@ -135,11 +138,13 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
         final Rect parentBounds = getParentContainerBounds(primaryActivity);
-        final Rect primaryRectBounds = getBoundsForPosition(POSITION_LEFT, parentBounds, rule);
+        final Rect primaryRectBounds = getBoundsForPosition(POSITION_START, parentBounds, rule,
+                isLtr(primaryActivity, rule));
         final TaskFragmentContainer primaryContainer = prepareContainerForActivity(wct,
                 primaryActivity, primaryRectBounds, null);
 
-        final Rect secondaryRectBounds = getBoundsForPosition(POSITION_RIGHT, parentBounds, rule);
+        final Rect secondaryRectBounds = getBoundsForPosition(POSITION_END, parentBounds, rule,
+                isLtr(primaryActivity, rule));
         final TaskFragmentContainer secondaryContainer = prepareContainerForActivity(wct,
                 secondaryActivity, secondaryRectBounds, primaryContainer);
 
@@ -150,6 +155,20 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         mController.registerSplit(wct, primaryContainer, primaryActivity, secondaryContainer, rule);
 
         applyTransaction(wct);
+    }
+
+    /**
+     * Creates a new expanded container.
+     */
+    TaskFragmentContainer createNewExpandedContainer(@NonNull Activity launchingActivity) {
+        final TaskFragmentContainer newContainer = mController.newContainer(null);
+
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        createTaskFragment(wct, newContainer.getTaskFragmentToken(),
+                launchingActivity.getActivityToken(), new Rect(), WINDOWING_MODE_MULTI_WINDOW);
+
+        applyTransaction(wct);
+        return newContainer;
     }
 
     /**
@@ -197,8 +216,10 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     void startActivityToSide(@NonNull Activity launchingActivity, @NonNull Intent activityIntent,
             @Nullable Bundle activityOptions, @NonNull SplitRule rule) {
         final Rect parentBounds = getParentContainerBounds(launchingActivity);
-        final Rect primaryRectBounds = getBoundsForPosition(POSITION_LEFT, parentBounds, rule);
-        final Rect secondaryRectBounds = getBoundsForPosition(POSITION_RIGHT, parentBounds, rule);
+        final Rect primaryRectBounds = getBoundsForPosition(POSITION_START, parentBounds, rule,
+                isLtr(launchingActivity, rule));
+        final Rect secondaryRectBounds = getBoundsForPosition(POSITION_END, parentBounds, rule,
+                isLtr(launchingActivity, rule));
 
         TaskFragmentContainer primaryContainer = mController.getContainerWithActivity(
                 launchingActivity.getActivityToken());
@@ -231,8 +252,15 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         // Getting the parent bounds using the updated container - it will have the recent value.
         final Rect parentBounds = getParentContainerBounds(updatedContainer);
         final SplitRule rule = splitContainer.getSplitRule();
-        final Rect primaryRectBounds = getBoundsForPosition(POSITION_LEFT, parentBounds, rule);
-        final Rect secondaryRectBounds = getBoundsForPosition(POSITION_RIGHT, parentBounds, rule);
+        final Activity activity = splitContainer.getPrimaryContainer().getTopNonFinishingActivity();
+        if (activity == null) {
+            return;
+        }
+        final boolean isLtr = isLtr(activity, rule);
+        final Rect primaryRectBounds = getBoundsForPosition(POSITION_START, parentBounds, rule,
+                isLtr);
+        final Rect secondaryRectBounds = getBoundsForPosition(POSITION_END, parentBounds, rule,
+                isLtr);
 
         // If the task fragments are not registered yet, the positions will be updated after they
         // are created again.
@@ -283,34 +311,62 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         // TODO(b/190433398): Supply correct insets.
         final WindowMetrics parentMetrics = new WindowMetrics(parentBounds,
                 new WindowInsets(new Rect()));
-        return rule.getParentWindowMetricsPredicate().test(parentMetrics);
+        return rule.checkParentMetrics(parentMetrics);
     }
 
     @NonNull
     private Rect getBoundsForPosition(@Position int position, @NonNull Rect parentBounds,
-            @NonNull SplitRule rule) {
+            @NonNull SplitRule rule, boolean isLtr) {
         if (!shouldShowSideBySide(parentBounds, rule)) {
             return new Rect();
         }
 
-        float splitRatio = rule.getSplitRatio();
+        final float splitRatio = rule.getSplitRatio();
+        final float rtlSplitRatio = 1 - splitRatio;
         switch (position) {
-            case POSITION_LEFT:
-                return new Rect(
-                        parentBounds.left,
-                        parentBounds.top,
-                        (int) (parentBounds.left + parentBounds.width() * splitRatio),
-                        parentBounds.bottom);
-            case POSITION_RIGHT:
-                return new Rect(
-                        (int) (parentBounds.left + parentBounds.width() * splitRatio),
-                        parentBounds.top,
-                        parentBounds.right,
-                        parentBounds.bottom);
+            case POSITION_START:
+                return isLtr ? getLeftContainerBounds(parentBounds, splitRatio)
+                        : getRightContainerBounds(parentBounds, rtlSplitRatio);
+            case POSITION_END:
+                return isLtr ? getRightContainerBounds(parentBounds, splitRatio)
+                        : getLeftContainerBounds(parentBounds, rtlSplitRatio);
             case POSITION_FILL:
                 return parentBounds;
         }
         return parentBounds;
+    }
+
+    private Rect getLeftContainerBounds(@NonNull Rect parentBounds, float splitRatio) {
+        return new Rect(
+                parentBounds.left,
+                parentBounds.top,
+                (int) (parentBounds.left + parentBounds.width() * splitRatio),
+                parentBounds.bottom);
+    }
+
+    private Rect getRightContainerBounds(@NonNull Rect parentBounds, float splitRatio) {
+        return new Rect(
+                (int) (parentBounds.left + parentBounds.width() * splitRatio),
+                parentBounds.top,
+                parentBounds.right,
+                parentBounds.bottom);
+    }
+
+    /**
+     * Checks if a split with the provided rule should be displays in left-to-right layout
+     * direction, either always or with the current configuration.
+     */
+    private boolean isLtr(@NonNull Context context, @NonNull SplitRule rule) {
+        switch (rule.getLayoutDirection()) {
+            case LayoutDirection.LOCALE:
+                return context.getResources().getConfiguration().getLayoutDirection()
+                        == View.LAYOUT_DIRECTION_LTR;
+            case LayoutDirection.RTL:
+                return false;
+            case LayoutDirection.LTR:
+            default:
+                return true;
+        }
     }
 
     @NonNull
