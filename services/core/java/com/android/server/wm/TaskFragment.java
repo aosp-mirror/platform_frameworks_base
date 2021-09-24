@@ -459,6 +459,11 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return parentTaskFragment == null ? this : parentTaskFragment.getRootTaskFragment();
     }
 
+    @Nullable
+    Task getRootTask() {
+        return getRootTaskFragment().asTask();
+    }
+
     @Override
     TaskFragment asTaskFragment() {
         return this;
@@ -2151,6 +2156,13 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     /** Whether this is an organized {@link TaskFragment} and not a {@link Task}. */
     final boolean isOrganizedTaskFragment() {
         return mTaskFragmentOrganizer != null;
+    }
+
+    boolean isReadyToTransit() {
+        // We don't want to start the transition if the organized TaskFragment is empty, unless
+        // it is requested to be removed.
+        return !isOrganizedTaskFragment() || getTopNonFinishingActivity() != null
+                || mIsRemovalRequested;
     }
 
     /** Clear {@link #mLastPausedActivity} for all {@link TaskFragment} children */

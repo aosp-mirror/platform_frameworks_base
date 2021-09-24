@@ -165,8 +165,8 @@ public class AppTransitionController {
     void handleAppTransitionReady() {
         mTempTransitionReasons.clear();
         if (!transitionGoodToGo(mDisplayContent.mOpeningApps, mTempTransitionReasons)
-                || !transitionGoodToGo(mDisplayContent.mChangingContainers,
-                        mTempTransitionReasons)) {
+                || !transitionGoodToGo(mDisplayContent.mChangingContainers, mTempTransitionReasons)
+                || !transitionGoodToGoForTaskFragments()) {
             return;
         }
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "AppTransitionReady");
@@ -599,6 +599,13 @@ public class AppTransitionController {
         }
     }
 
+    @Nullable
+    static Task findRootTaskFromContainer(WindowContainer wc) {
+        return wc.asTaskFragment() != null ? wc.asTaskFragment().getRootTask()
+                : wc.asActivityRecord().getRootTask();
+    }
+
+    @Nullable
     static ActivityRecord getAppFromContainer(WindowContainer wc) {
         return wc.asTaskFragment() != null ? wc.asTaskFragment().getTopNonFinishingActivity()
                 : wc.asActivityRecord();
@@ -972,71 +979,108 @@ public class AppTransitionController {
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                 "Checking %d opening apps (frozen=%b timeout=%b)...", apps.size(),
                 mService.mDisplayFrozen, mDisplayContent.mAppTransition.isTimeout());
-
+        if (mDisplayContent.mAppTransition.isTimeout()) {
+            return true;
+        }
         final ScreenRotationAnimation screenRotationAnimation = mService.mRoot.getDisplayContent(
                 Display.DEFAULT_DISPLAY).getRotationAnimation();
 
-        if (!mDisplayContent.mAppTransition.isTimeout()) {
-            // Imagine the case where we are changing orientation due to an app transition, but a
-            // previous orientation change is still in progress. We won't process the orientation
-            // change for our transition because we need to wait for the rotation animation to
-            // finish.
-            // If we start the app transition at this point, we will interrupt it halfway with a
-            // new rotation animation after the old one finally finishes. It's better to defer the
-            // app transition.
-            if (screenRotationAnimation != null && screenRotationAnimation.isAnimating()
-                    && mDisplayContent.getDisplayRotation().needsUpdate()) {
-                ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
-                        "Delaying app transition for screen rotation animation to finish");
-                return false;
-            }
-            for (int i = 0; i < apps.size(); i++) {
-                WindowContainer wc = apps.valueAt(i);
-                final ActivityRecord activity = getAppFromContainer(wc);
-                if (activity == null) {
-                    continue;
-                }
-                ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
-                        "Check opening app=%s: allDrawn=%b startingDisplayed=%b "
-                                + "startingMoved=%b isRelaunching()=%b startingWindow=%s",
-                        activity, activity.allDrawn, activity.startingDisplayed,
-                        activity.startingMoved, activity.isRelaunching(),
-                        activity.mStartingWindow);
-
-
-                final boolean allDrawn = activity.allDrawn && !activity.isRelaunching();
-                if (!allDrawn && !activity.startingDisplayed && !activity.startingMoved) {
-                    return false;
-                }
-                if (allDrawn) {
-                    outReasons.put(activity, APP_TRANSITION_WINDOWS_DRAWN);
-                } else {
-                    outReasons.put(activity,
-                            activity.mStartingData instanceof SplashScreenStartingData
-                                    ? APP_TRANSITION_SPLASH_SCREEN
-                                    : APP_TRANSITION_SNAPSHOT);
-                }
-            }
-
-            // We also need to wait for the specs to be fetched, if needed.
-            if (mDisplayContent.mAppTransition.isFetchingAppTransitionsSpecs()) {
-                ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "isFetchingAppTransitionSpecs=true");
-                return false;
-            }
-
-            if (!mDisplayContent.mUnknownAppVisibilityController.allResolved()) {
-                ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "unknownApps is not empty: %s",
-                            mDisplayContent.mUnknownAppVisibilityController.getDebugMessage());
-                return false;
-            }
-
-            // If the wallpaper is visible, we need to check it's ready too.
-            boolean wallpaperReady = !mWallpaperControllerLocked.isWallpaperVisible() ||
-                    mWallpaperControllerLocked.wallpaperTransitionReady();
-            if (wallpaperReady) {
-                return true;
-            }
+        // Imagine the case where we are changing orientation due to an app transition, but a
+        // previous orientation change is still in progress. We won't process the orientation
+        // change for our transition because we need to wait for the rotation animation to
+        // finish.
+        // If we start the app transition at this point, we will interrupt it halfway with a
+        // new rotation animation after the old one finally finishes. It's better to defer the
+        // app transition.
+        if (screenRotationAnimation != null && screenRotationAnimation.isAnimating()
+                && mDisplayContent.getDisplayRotation().needsUpdate()) {
+            ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
+                    "Delaying app transition for screen rotation animation to finish");
             return false;
+        }
+        for (int i = 0; i < apps.size(); i++) {
+            WindowContainer wc = apps.valueAt(i);
+            final ActivityRecord activity = getAppFromContainer(wc);
+            if (activity == null) {
+                continue;
+            }
+            ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
+                    "Check opening app=%s: allDrawn=%b startingDisplayed=%b "
+                            + "startingMoved=%b isRelaunching()=%b startingWindow=%s",
+                    activity, activity.allDrawn, activity.startingDisplayed,
+                    activity.startingMoved, activity.isRelaunching(),
+                    activity.mStartingWindow);
+
+            final boolean allDrawn = activity.allDrawn && !activity.isRelaunching();
+            if (!allDrawn && !activity.startingDisplayed && !activity.startingMoved) {
+                return false;
+            }
+            if (allDrawn) {
+                outReasons.put(activity, APP_TRANSITION_WINDOWS_DRAWN);
+            } else {
+                outReasons.put(activity,
+                        activity.mStartingData instanceof SplashScreenStartingData
+                                ? APP_TRANSITION_SPLASH_SCREEN
+                                : APP_TRANSITION_SNAPSHOT);
+            }
+        }
+
+        // We also need to wait for the specs to be fetched, if needed.
+        if (mDisplayContent.mAppTransition.isFetchingAppTransitionsSpecs()) {
+            ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "isFetchingAppTransitionSpecs=true");
+            return false;
+        }
+
+        if (!mDisplayContent.mUnknownAppVisibilityController.allResolved()) {
+            ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "unknownApps is not empty: %s",
+                    mDisplayContent.mUnknownAppVisibilityController.getDebugMessage());
+            return false;
+        }
+
+        // If the wallpaper is visible, we need to check it's ready too.
+        return !mWallpaperControllerLocked.isWallpaperVisible()
+                || mWallpaperControllerLocked.wallpaperTransitionReady();
+    }
+
+    private boolean transitionGoodToGoForTaskFragments() {
+        if (mDisplayContent.mAppTransition.isTimeout()) {
+            return true;
+        }
+
+        // Check all Tasks in this transition. This is needed because new TaskFragment created for
+        // launching activity may not be in the tracking lists, but we still want to wait for the
+        // activity launch to start the transition.
+        final ArraySet<Task> rootTasks = new ArraySet<>();
+        for (int i = mDisplayContent.mOpeningApps.size() - 1; i >= 0; i--) {
+            rootTasks.add(mDisplayContent.mOpeningApps.valueAt(i).getRootTask());
+        }
+        for (int i = mDisplayContent.mClosingApps.size() - 1; i >= 0; i--) {
+            rootTasks.add(mDisplayContent.mClosingApps.valueAt(i).getRootTask());
+        }
+        for (int i = mDisplayContent.mChangingContainers.size() - 1; i >= 0; i--) {
+            rootTasks.add(
+                    findRootTaskFromContainer(mDisplayContent.mChangingContainers.valueAt(i)));
+        }
+
+        // Organized TaskFragment can be empty for two situations:
+        // 1. New created and is waiting for Activity launch. In this case, we want to wait for
+        //    the Activity launch to trigger the transition.
+        // 2. Last Activity is just removed. In this case, we want to wait for organizer to
+        //    remove the TaskFragment because it may also want to change other TaskFragments in
+        //    the same transition.
+        for (int i = rootTasks.size() - 1; i >= 0; i--) {
+            final Task rootTask = rootTasks.valueAt(i);
+            final boolean notReady = rootTask.forAllLeafTaskFragments(taskFragment -> {
+                if (!taskFragment.isReadyToTransit()) {
+                    ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "Organized TaskFragment is not ready= %s",
+                            taskFragment);
+                    return true;
+                }
+                return false;
+            });
+            if (notReady) {
+                return false;
+            }
         }
         return true;
     }
