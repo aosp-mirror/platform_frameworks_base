@@ -172,7 +172,7 @@ public class WifiSignalController extends
         MobileDataIndicators mobileDataIndicators = new MobileDataIndicators(
                 statusIcon, qsIcon, typeIcon, qsTypeIcon,
                 mCurrentState.activityIn, mCurrentState.activityOut, dataContentDescription,
-                dataContentDescriptionHtml, description, icons.isWide,
+                dataContentDescriptionHtml, description,
                 mCurrentState.subId, /* roaming= */ false, /* showTriangle= */ true
         );
         callback.setMobileDataIndicators(mobileDataIndicators);
