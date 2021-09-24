@@ -192,6 +192,42 @@ droidstubs {
     },
 }
 
+// This produces the same annotations.zip as framework-doc-stubs, but by using
+// outputs from individual modules instead of all the source code.
+genrule {
+    name: "sdk-annotations.zip",
+    srcs: [
+        ":android-non-updatable-doc-stubs{.annotations.zip}",
+
+        // Conscrypt and i18n currently do not enable annotations
+        // ":conscrypt.module.public.api{.public.annotations.zip}",
+        // ":i18n.module.public.api{.public.annotations.zip}",
+
+        // Modules that enable annotations below
+        ":android.net.ipsec.ike{.public.annotations.zip}",
+        ":art.module.public.api{.public.annotations.zip}",
+        ":framework-appsearch{.public.annotations.zip}",
+        ":framework-connectivity{.public.annotations.zip}",
+        ":framework-graphics{.public.annotations.zip}",
+        ":framework-media{.public.annotations.zip}",
+        ":framework-mediaprovider{.public.annotations.zip}",
+        ":framework-permission{.public.annotations.zip}",
+        ":framework-permission-s{.public.annotations.zip}",
+        ":framework-scheduling{.public.annotations.zip}",
+        ":framework-sdkextensions{.public.annotations.zip}",
+        ":framework-statsd{.public.annotations.zip}",
+        ":framework-tethering{.public.annotations.zip}",
+        ":framework-wifi{.public.annotations.zip}",
+    ],
+    out: ["annotations.zip"],
+    tools: [
+        "merge_annotation_zips",
+        "soong_zip",
+    ],
+    cmd: "$(location merge_annotation_zips) $(genDir)/out $(in) && " +
+        "$(location soong_zip) -o $(out) -C $(genDir)/out -D $(genDir)/out",
+}
+
 /////////////////////////////////////////////////////////////////////
 // API docs are created from the generated stub source files
 // using droiddoc
