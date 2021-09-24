@@ -39,7 +39,6 @@ import com.android.internal.midi.MidiEventScheduler.MidiEvent;
 import libcore.io.IoUtils;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -50,7 +49,8 @@ public final class BluetoothMidiDevice {
     private static final String TAG = "BluetoothMidiDevice";
     private static final boolean DEBUG = false;
 
-    private static final int MAX_PACKET_SIZE = 20;
+    private static final int DEFAULT_PACKET_SIZE = 20;
+    private static final int MAX_PACKET_SIZE = 512;
 
     //  Bluetooth MIDI Gatt service UUID
     private static final UUID MIDI_SERVICE = UUID.fromString(
@@ -103,6 +103,11 @@ public final class BluetoothMidiDevice {
                 Log.d(TAG, "Connected to GATT server.");
                 Log.d(TAG, "Attempting to start service discovery:" +
                         mBluetoothGatt.discoverServices());
+                if (!mBluetoothGatt.requestMtu(MAX_PACKET_SIZE)) {
+                    Log.e(TAG, "request mtu failed");
+                    mPacketEncoder.setMaxPacketSize(DEFAULT_PACKET_SIZE);
+                    mPacketDecoder.setMaxPacketSize(DEFAULT_PACKET_SIZE);
+                }
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.i(TAG, "Disconnected from GATT server.");
                 close();
@@ -182,21 +187,27 @@ public final class BluetoothMidiDevice {
             }
             mPacketDecoder.decodePacket(characteristic.getValue(), mOutputReceiver);
         }
+
+        @Override
+        public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
+            Log.d(TAG, "onMtuChanged callback received. mtu: " + mtu + ", status: " + status);
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                mPacketEncoder.setMaxPacketSize(Math.min(mtu, MAX_PACKET_SIZE));
+                mPacketDecoder.setMaxPacketSize(Math.min(mtu, MAX_PACKET_SIZE));
+            } else {
+                mPacketEncoder.setMaxPacketSize(DEFAULT_PACKET_SIZE);
+                mPacketDecoder.setMaxPacketSize(DEFAULT_PACKET_SIZE);
+            }
+        }
     };
 
     // This receives MIDI data that has already been passed through our MidiEventScheduler
     // and has been normalized by our MidiFramer.
 
     private class PacketReceiver implements PacketEncoder.PacketReceiver {
-        // buffers of every possible packet size
-        private final byte[][] mWriteBuffers;
+        private byte[] mCachedBuffer;
 
         public PacketReceiver() {
-            // Create buffers of every possible packet size
-            mWriteBuffers = new byte[MAX_PACKET_SIZE + 1][];
-            for (int i = 0; i <= MAX_PACKET_SIZE; i++) {
-                mWriteBuffers[i] = new byte[i];
-            }
         }
 
         @Override
@@ -205,9 +216,14 @@ public final class BluetoothMidiDevice {
                 Log.w(TAG, "not ready to send packet yet");
                 return;
             }
-            byte[] writeBuffer = mWriteBuffers[count];
-            System.arraycopy(buffer, 0, writeBuffer, 0, count);
-            mCharacteristic.setValue(writeBuffer);
+
+            // Cache the previous buffer for writePacket so buffers aren't
+            // consistently created if the buffer sizes are consistent.
+            if ((mCachedBuffer == null) || (mCachedBuffer.length != count)) {
+                mCachedBuffer = new byte[count];
+            }
+            System.arraycopy(buffer, 0, mCachedBuffer, 0, count);
+            mCharacteristic.setValue(mCachedBuffer);
             if (DEBUG) {
                 logByteArray("Sent ", mCharacteristic.getValue(), 0,
                        mCharacteristic.getValue().length);

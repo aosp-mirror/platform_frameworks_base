@@ -60,7 +60,8 @@ public final class HdmiTvClient extends HdmiClient {
     }
 
     /**
-     * Callback interface used to get the result of {@link #deviceSelect}.
+     * Callback interface used to get the result of {@link #portSelect} and
+     * {@link #setSystemAudioMode}.
      */
     public interface SelectCallback {
         /**
@@ -77,7 +78,7 @@ public final class HdmiTvClient extends HdmiClient {
      * @param logicalAddress logical address of the device to select
      * @param callback callback to get the result with
      * @throws {@link IllegalArgumentException} if the {@code callback} is null
-     * @deprecated Please use {@link HdmiClient#deviceSelect()} instead.
+     * @deprecated Please use {@link HdmiClient#selectDevice} instead.
      */
     @Deprecated
     public void deviceSelect(int logicalAddress, @NonNull SelectCallback callback) {
@@ -91,10 +92,6 @@ public final class HdmiTvClient extends HdmiClient {
         }
     }
 
-    /**
-     * @deprecated Please use {@link HdmiClient#getCallbackWrapper()} instead.
-     */
-    @Deprecated
     private static IHdmiControlCallback getCallbackWrapper(final SelectCallback callback) {
         return new IHdmiControlCallback.Stub() {
             @Override

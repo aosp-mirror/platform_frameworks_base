@@ -108,6 +108,16 @@ public class ApkLite {
     private final boolean mOverlayIsStatic;
     /** Indicate the priority of this overlay package */
     private final int mOverlayPriority;
+    /**
+     * A comma separated list of system property names to control whether the overlay should be
+     * excluded based on the system property condition.
+     */
+    private final @Nullable String mRequiredSystemPropertyName;
+    /**
+     * A comma separated list of system property values to control whether the overlay should be
+     * excluded based on the system property condition.
+     */
+    private final @Nullable String mRequiredSystemPropertyValue;
 
     /**
      * Indicate the policy to deal with user data when rollback is committed
@@ -125,6 +135,7 @@ public class ApkLite {
             boolean debuggable, boolean profileableByShell, boolean multiArch, boolean use32bitAbi,
             boolean useEmbeddedDex, boolean extractNativeLibs, boolean isolatedSplits,
             String targetPackageName, boolean overlayIsStatic, int overlayPriority,
+            String requiredSystemPropertyName, String requiredSystemPropertyValue,
             int minSdkVersion, int targetSdkVersion, int rollbackDataPolicy,
             Set<String> requiredSplitTypes, Set<String> splitTypes) {
         mPath = path;
@@ -153,6 +164,8 @@ public class ApkLite {
         mTargetPackageName = targetPackageName;
         mOverlayIsStatic = overlayIsStatic;
         mOverlayPriority = overlayPriority;
+        mRequiredSystemPropertyName = requiredSystemPropertyName;
+        mRequiredSystemPropertyValue = requiredSystemPropertyValue;
         mMinSdkVersion = minSdkVersion;
         mTargetSdkVersion = targetSdkVersion;
         mRollbackDataPolicy = rollbackDataPolicy;
@@ -419,6 +432,24 @@ public class ApkLite {
     }
 
     /**
+     * A comma separated list of system property names to control whether the overlay should be
+     * excluded based on the system property condition.
+     */
+    @DataClass.Generated.Member
+    public @Nullable String getRequiredSystemPropertyName() {
+        return mRequiredSystemPropertyName;
+    }
+
+    /**
+     * A comma separated list of system property values to control whether the overlay should be
+     * excluded based on the system property condition.
+     */
+    @DataClass.Generated.Member
+    public @Nullable String getRequiredSystemPropertyValue() {
+        return mRequiredSystemPropertyValue;
+    }
+
+    /**
      * Indicate the policy to deal with user data when rollback is committed
      *
      * @see {@link PackageManager#ROLLBACK_DATA_POLICY_RESTORE}
@@ -431,10 +462,10 @@ public class ApkLite {
     }
 
     @DataClass.Generated(
-            time = 1628562554893L,
+            time = 1631763761543L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/content/pm/parsing/ApkLite.java",
-            inputSignatures = "private final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.NonNull java.lang.String mPath\nprivate final @android.annotation.Nullable java.lang.String mSplitName\nprivate final @android.annotation.Nullable java.lang.String mUsesSplitName\nprivate final @android.annotation.Nullable java.lang.String mConfigForSplit\nprivate final @android.annotation.Nullable java.util.Set<java.lang.String> mRequiredSplitTypes\nprivate final @android.annotation.Nullable java.util.Set<java.lang.String> mSplitTypes\nprivate final  int mVersionCodeMajor\nprivate final  int mVersionCode\nprivate final  int mRevisionCode\nprivate final  int mInstallLocation\nprivate final  int mMinSdkVersion\nprivate final  int mTargetSdkVersion\nprivate final @android.annotation.NonNull android.content.pm.VerifierInfo[] mVerifiers\nprivate final @android.annotation.NonNull android.content.pm.SigningDetails mSigningDetails\nprivate final  boolean mFeatureSplit\nprivate final  boolean mIsolatedSplits\nprivate final  boolean mSplitRequired\nprivate final  boolean mCoreApp\nprivate final  boolean mDebuggable\nprivate final  boolean mProfileableByShell\nprivate final  boolean mMultiArch\nprivate final  boolean mUse32bitAbi\nprivate final  boolean mExtractNativeLibs\nprivate final  boolean mUseEmbeddedDex\nprivate final @android.annotation.Nullable java.lang.String mTargetPackageName\nprivate final  boolean mOverlayIsStatic\nprivate final  int mOverlayPriority\nprivate final  int mRollbackDataPolicy\npublic  long getLongVersionCode()\nprivate  boolean hasAnyRequiredSplitTypes()\nclass ApkLite extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false, genConstDefs=false)")
+            inputSignatures = "private final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.NonNull java.lang.String mPath\nprivate final @android.annotation.Nullable java.lang.String mSplitName\nprivate final @android.annotation.Nullable java.lang.String mUsesSplitName\nprivate final @android.annotation.Nullable java.lang.String mConfigForSplit\nprivate final @android.annotation.Nullable java.util.Set<java.lang.String> mRequiredSplitTypes\nprivate final @android.annotation.Nullable java.util.Set<java.lang.String> mSplitTypes\nprivate final  int mVersionCodeMajor\nprivate final  int mVersionCode\nprivate final  int mRevisionCode\nprivate final  int mInstallLocation\nprivate final  int mMinSdkVersion\nprivate final  int mTargetSdkVersion\nprivate final @android.annotation.NonNull android.content.pm.VerifierInfo[] mVerifiers\nprivate final @android.annotation.NonNull android.content.pm.SigningDetails mSigningDetails\nprivate final  boolean mFeatureSplit\nprivate final  boolean mIsolatedSplits\nprivate final  boolean mSplitRequired\nprivate final  boolean mCoreApp\nprivate final  boolean mDebuggable\nprivate final  boolean mProfileableByShell\nprivate final  boolean mMultiArch\nprivate final  boolean mUse32bitAbi\nprivate final  boolean mExtractNativeLibs\nprivate final  boolean mUseEmbeddedDex\nprivate final @android.annotation.Nullable java.lang.String mTargetPackageName\nprivate final  boolean mOverlayIsStatic\nprivate final  int mOverlayPriority\nprivate final @android.annotation.Nullable java.lang.String mRequiredSystemPropertyName\nprivate final @android.annotation.Nullable java.lang.String mRequiredSystemPropertyValue\nprivate final  int mRollbackDataPolicy\npublic  long getLongVersionCode()\nprivate  boolean hasAnyRequiredSplitTypes()\nclass ApkLite extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false, genConstDefs=false)")
     @Deprecated
     private void __metadata() {}
 

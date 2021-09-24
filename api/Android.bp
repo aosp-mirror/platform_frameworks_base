@@ -62,7 +62,7 @@ python_test_host {
 metalava_cmd = "$(location metalava)"
 // Silence reflection warnings. See b/168689341
 metalava_cmd += " -J--add-opens=java.base/java.util=ALL-UNNAMED "
-metalava_cmd += " --no-banner --format=v2 "
+metalava_cmd += " --quiet --no-banner --format=v2 "
 
 genrule {
     name: "current-api-xml",
@@ -123,13 +123,13 @@ genrule {
         ":android-incompatibilities.api.public.latest",
         ":frameworks-base-api-current.txt",
     ],
-    out: ["stdout.txt"],
+    out: ["updated-baseline.txt"],
     tools: ["metalava"],
     cmd: metalava_cmd +
         "--check-compatibility:api:released $(location :android.api.public.latest) " +
         "--baseline:compatibility:released $(location :android-incompatibilities.api.public.latest) " +
-        "$(location :frameworks-base-api-current.txt) " +
-        "> $(genDir)/stdout.txt",
+        "--update-baseline:compatibility:released $(genDir)/updated-baseline.txt " +
+        "$(location :frameworks-base-api-current.txt)",
 }
 
 genrule {
@@ -251,14 +251,14 @@ genrule {
         ":frameworks-base-api-current.txt",
         ":frameworks-base-api-system-current.txt",
     ],
-    out: ["stdout.txt"],
+    out: ["updated-baseline.txt"],
     tools: ["metalava"],
     cmd: metalava_cmd +
         "--check-compatibility:api:released $(location :android.api.system.latest) " +
         "--check-compatibility:base $(location :frameworks-base-api-current.txt) " +
         "--baseline:compatibility:released $(location :android-incompatibilities.api.system.latest) " +
-        "$(location :frameworks-base-api-system-current.txt) " +
-        "> $(genDir)/stdout.txt",
+        "--update-baseline:compatibility:released $(genDir)/updated-baseline.txt " +
+        "$(location :frameworks-base-api-system-current.txt)",
 }
 
 genrule {
@@ -350,7 +350,7 @@ genrule {
         ":frameworks-base-api-current.txt",
         ":frameworks-base-api-module-lib-current.txt",
     ],
-    out: ["stdout.txt"],
+    out: ["updated-baseline.txt"],
     tools: ["metalava"],
     cmd: metalava_cmd +
         "--check-compatibility:api:released $(location :android.api.module-lib.latest) " +
@@ -359,8 +359,8 @@ genrule {
         // MODULE_LIBS -> public.
         "--check-compatibility:base $(location :frameworks-base-api-current.txt) " +
         "--baseline:compatibility:released $(location :android-incompatibilities.api.module-lib.latest) " +
-        "$(location :frameworks-base-api-module-lib-current.txt) " +
-        "> $(genDir)/stdout.txt",
+        "--update-baseline:compatibility:released $(genDir)/updated-baseline.txt " +
+        "$(location :frameworks-base-api-module-lib-current.txt)",
 }
 
 genrule {

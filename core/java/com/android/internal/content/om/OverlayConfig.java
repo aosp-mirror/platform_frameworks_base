@@ -35,6 +35,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
@@ -116,14 +118,16 @@ public class OverlayConfig {
         }
 
         boolean foundConfigFile = false;
-        ArrayList<ParsedOverlayInfo> packageManagerOverlayInfos = null;
+        final Map<String, ParsedOverlayInfo> packageManagerOverlayInfos =
+                packageProvider == null ? null : getOverlayPackageInfos(packageProvider);
 
         final ArrayList<ParsedConfiguration> overlays = new ArrayList<>();
         for (int i = 0, n = partitions.size(); i < n; i++) {
             final OverlayPartition partition = partitions.get(i);
             final OverlayScanner scanner = (scannerFactory == null) ? null : scannerFactory.get();
             final ArrayList<ParsedConfiguration> partitionOverlays =
-                    OverlayConfigParser.getConfigurations(partition, scanner);
+                    OverlayConfigParser.getConfigurations(partition, scanner,
+                            packageManagerOverlayInfos);
             if (partitionOverlays != null) {
                 foundConfigFile = true;
                 overlays.addAll(partitionOverlays);
@@ -138,12 +142,8 @@ public class OverlayConfig {
             if (scannerFactory != null) {
                 partitionOverlayInfos = new ArrayList<>(scanner.getAllParsedInfos());
             } else {
-                if (packageManagerOverlayInfos == null) {
-                    packageManagerOverlayInfos = getOverlayPackageInfos(packageProvider);
-                }
-
                 // Filter out overlays not present in the partition.
-                partitionOverlayInfos = new ArrayList<>(packageManagerOverlayInfos);
+                partitionOverlayInfos = new ArrayList<>(packageManagerOverlayInfos.values());
                 for (int j = partitionOverlayInfos.size() - 1; j >= 0; j--) {
                     if (!partition.containsFile(partitionOverlayInfos.get(j).path)) {
                         partitionOverlayInfos.remove(j);
@@ -289,14 +289,14 @@ public class OverlayConfig {
     }
 
     @NonNull
-    private static ArrayList<ParsedOverlayInfo> getOverlayPackageInfos(
+    private static Map<String, ParsedOverlayInfo> getOverlayPackageInfos(
             @NonNull PackageProvider packageManager) {
-        final ArrayList<ParsedOverlayInfo> overlays = new ArrayList<>();
+        final HashMap<String, ParsedOverlayInfo> overlays = new HashMap<>();
         packageManager.forEachPackage((ParsingPackageRead p, Boolean isSystem) -> {
             if (p.getOverlayTarget() != null && isSystem) {
-                overlays.add(new ParsedOverlayInfo(p.getPackageName(), p.getOverlayTarget(),
-                        p.getTargetSdkVersion(), p.isOverlayIsStatic(), p.getOverlayPriority(),
-                        new File(p.getBaseApkPath())));
+                overlays.put(p.getPackageName(), new ParsedOverlayInfo(p.getPackageName(),
+                        p.getOverlayTarget(), p.getTargetSdkVersion(), p.isOverlayIsStatic(),
+                        p.getOverlayPriority(), new File(p.getBaseApkPath())));
             }
         });
         return overlays;

@@ -89,7 +89,6 @@ class Agent {
     private static final String ALARM_TAG_LEDGER_CLEANUP = "*tare.ledger_cleanup*";
 
     private final Object mLock;
-    private final CompleteEconomicPolicy mCompleteEconomicPolicy;
     private final Handler mHandler;
     private final InternalResourceService mIrs;
 
@@ -184,11 +183,9 @@ class Agent {
     private static final int MSG_CLEAN_LEDGER = 1;
     private static final int MSG_SET_ALARMS = 2;
 
-    Agent(@NonNull InternalResourceService irs,
-            @NonNull CompleteEconomicPolicy completeEconomicPolicy) {
+    Agent(@NonNull InternalResourceService irs) {
         mLock = irs.getLock();
         mIrs = irs;
-        mCompleteEconomicPolicy = completeEconomicPolicy;
         mHandler = new AgentHandler(TareHandlerThread.get().getLooper());
         mAppStandbyInternal = LocalServices.getService(AppStandbyInternal.class);
     }
@@ -260,19 +257,19 @@ class Agent {
 
         final long now = getCurrentTimeMillis();
         final Ledger ledger = getLedgerLocked(userId, pkgName);
+        final CompleteEconomicPolicy economicPolicy = mIrs.getCompleteEconomicPolicyLocked();
 
         final int eventType = getEventType(eventId);
         switch (eventType) {
             case TYPE_ACTION:
-                final long actionCost =
-                        mCompleteEconomicPolicy.getCostOfAction(eventId, userId, pkgName);
+                final long actionCost = economicPolicy.getCostOfAction(eventId, userId, pkgName);
 
                 recordTransactionLocked(userId, pkgName, ledger,
                         new Ledger.Transaction(now, now, eventId, tag, -actionCost), true);
                 break;
 
             case TYPE_REWARD:
-                final EconomicPolicy.Reward reward = mCompleteEconomicPolicy.getReward(eventId);
+                final EconomicPolicy.Reward reward = economicPolicy.getReward(eventId);
                 if (reward != null) {
                     final long rewardSum = ledger.get24HourSum(eventId, now);
                     final long rewardVal = Math.max(0,
@@ -311,11 +308,11 @@ class Agent {
         }
         OngoingEvent ongoingEvent = ongoingEvents.get(eventId, tag);
 
+        final CompleteEconomicPolicy economicPolicy = mIrs.getCompleteEconomicPolicyLocked();
         final int eventType = getEventType(eventId);
         switch (eventType) {
             case TYPE_ACTION:
-                final long actionCost =
-                        mCompleteEconomicPolicy.getCostOfAction(eventId, userId, pkgName);
+                final long actionCost = economicPolicy.getCostOfAction(eventId, userId, pkgName);
 
                 if (ongoingEvent == null) {
                     ongoingEvents.add(eventId, tag,
@@ -326,7 +323,7 @@ class Agent {
                 break;
 
             case TYPE_REWARD:
-                final EconomicPolicy.Reward reward = mCompleteEconomicPolicy.getReward(eventId);
+                final EconomicPolicy.Reward reward = economicPolicy.getReward(eventId);
                 if (reward != null) {
                     if (ongoingEvent == null) {
                         ongoingEvents.add(eventId, tag, new OngoingEvent(
@@ -348,8 +345,14 @@ class Agent {
 
     @GuardedBy("mLock")
     void onDeviceStateChangedLocked() {
+        onPricingChangedLocked();
+    }
+
+    @GuardedBy("mLock")
+    void onPricingChangedLocked() {
         final long now = getCurrentTimeMillis();
         final long nowElapsed = SystemClock.elapsedRealtime();
+        final CompleteEconomicPolicy economicPolicy = mIrs.getCompleteEconomicPolicyLocked();
 
         mCurrentOngoingEvents.forEach((userId, pkgName, ongoingEvents) -> {
             final ArraySet<ActionAffordabilityNote> actionAffordabilityNotes =
@@ -381,7 +384,7 @@ class Agent {
                 final int size = actionAffordabilityNotes.size();
                 for (int i = 0; i < size; ++i) {
                     final ActionAffordabilityNote note = actionAffordabilityNotes.valueAt(i);
-                    note.recalculateModifiedPrice(mCompleteEconomicPolicy, userId, pkgName);
+                    note.recalculateModifiedPrice(economicPolicy, userId, pkgName);
                     final long newBalance = getLedgerLocked(userId, pkgName).getCurrentBalance();
                     final boolean isAffordable = newBalance >= note.getCachedModifiedPrice();
                     if (wasAffordable[i] != isAffordable) {
@@ -398,6 +401,7 @@ class Agent {
     void onAppStatesChangedLocked(final int userId, @NonNull ArraySet<String> pkgNames) {
         final long now = getCurrentTimeMillis();
         final long nowElapsed = SystemClock.elapsedRealtime();
+        final CompleteEconomicPolicy economicPolicy = mIrs.getCompleteEconomicPolicyLocked();
 
         for (int i = 0; i < pkgNames.size(); ++i) {
             final String pkgName = pkgNames.valueAt(i);
@@ -433,7 +437,7 @@ class Agent {
                     final int size = actionAffordabilityNotes.size();
                     for (int n = 0; n < size; ++n) {
                         final ActionAffordabilityNote note = actionAffordabilityNotes.valueAt(n);
-                        note.recalculateModifiedPrice(mCompleteEconomicPolicy, userId, pkgName);
+                        note.recalculateModifiedPrice(economicPolicy, userId, pkgName);
                         final long newBalance =
                                 getLedgerLocked(userId, pkgName).getCurrentBalance();
                         final boolean isAffordable = newBalance >= note.getCachedModifiedPrice();
@@ -532,6 +536,7 @@ class Agent {
                     "Tried to adjust system balance for " + appToString(userId, pkgName));
             return;
         }
+        final CompleteEconomicPolicy economicPolicy = mIrs.getCompleteEconomicPolicyLocked();
         final long maxCirculationAllowed = mIrs.getMaxCirculationLocked();
         final long newArcsInCirculation = mCurrentNarcsInCirculation + transaction.delta;
         if (transaction.delta > 0 && newArcsInCirculation > maxCirculationAllowed) {
@@ -549,12 +554,11 @@ class Agent {
         }
         final long originalBalance = ledger.getCurrentBalance();
         if (transaction.delta > 0
-                && originalBalance + transaction.delta
-                > mCompleteEconomicPolicy.getMaxSatiatedBalance()) {
+                && originalBalance + transaction.delta > economicPolicy.getMaxSatiatedBalance()) {
             // Set lower bound at 0 so we don't accidentally take away credits when we were trying
             // to _give_ the app credits.
             final long newDelta =
-                    Math.max(0, mCompleteEconomicPolicy.getMaxSatiatedBalance() - originalBalance);
+                    Math.max(0, economicPolicy.getMaxSatiatedBalance() - originalBalance);
             Slog.i(TAG, "Would result in becoming too rich. Decreasing transaction "
                     + eventToString(transaction.eventId)
                     + (transaction.tag == null ? "" : ":" + transaction.tag)
@@ -601,6 +605,7 @@ class Agent {
      */
     @GuardedBy("mLock")
     void reclaimUnusedAssetsLocked(double percentage) {
+        final CompleteEconomicPolicy economicPolicy = mIrs.getCompleteEconomicPolicyLocked();
         final List<PackageInfo> pkgs = mIrs.getInstalledPackages();
         final long now = getCurrentTimeMillis();
         for (int i = 0; i < pkgs.size(); ++i) {
@@ -613,8 +618,7 @@ class Agent {
                     mAppStandbyInternal.getTimeSinceLastUsedByUser(pkgName, userId);
             if (timeSinceLastUsedMs >= MIN_UNUSED_TIME_MS) {
                 // Use a constant floor instead of the scaled floor from the IRS.
-                final long minBalance =
-                        mCompleteEconomicPolicy.getMinSatiatedBalance(userId, pkgName);
+                final long minBalance = economicPolicy.getMinSatiatedBalance(userId, pkgName);
                 final long curBalance = ledger.getCurrentBalance();
                 long toReclaim = (long) (curBalance * percentage);
                 if (curBalance - toReclaim < minBalance) {
@@ -1198,8 +1202,9 @@ class Agent {
             actionAffordabilityNotes = new ArraySet<>();
             mActionAffordabilityNotes.add(userId, pkgName, actionAffordabilityNotes);
         }
+        final CompleteEconomicPolicy economicPolicy = mIrs.getCompleteEconomicPolicyLocked();
         final ActionAffordabilityNote note =
-                new ActionAffordabilityNote(bill, listener, mCompleteEconomicPolicy);
+                new ActionAffordabilityNote(bill, listener, economicPolicy);
         if (actionAffordabilityNotes.add(note)) {
             if (!mIrs.isEnabled()) {
                 // When TARE isn't enabled, we always say something is affordable. We also don't
@@ -1208,7 +1213,7 @@ class Agent {
                 note.setNewAffordability(true);
                 return;
             }
-            note.recalculateModifiedPrice(mCompleteEconomicPolicy, userId, pkgName);
+            note.recalculateModifiedPrice(economicPolicy, userId, pkgName);
             note.setNewAffordability(
                     getBalanceLocked(userId, pkgName) >= note.getCachedModifiedPrice());
             mIrs.postAffordabilityChanged(userId, pkgName, note);
@@ -1224,8 +1229,9 @@ class Agent {
         final ArraySet<ActionAffordabilityNote> actionAffordabilityNotes =
                 mActionAffordabilityNotes.get(userId, pkgName);
         if (actionAffordabilityNotes != null) {
+            final CompleteEconomicPolicy economicPolicy = mIrs.getCompleteEconomicPolicyLocked();
             final ActionAffordabilityNote note =
-                    new ActionAffordabilityNote(bill, listener, mCompleteEconomicPolicy);
+                    new ActionAffordabilityNote(bill, listener, economicPolicy);
             if (actionAffordabilityNotes.remove(note)) {
                 // Update ongoing alarm
                 scheduleBalanceCheckLocked(userId, pkgName);

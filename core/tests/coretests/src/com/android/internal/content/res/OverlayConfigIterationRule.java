@@ -18,12 +18,14 @@ package com.android.internal.content.res;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import android.content.pm.parsing.ParsingPackageRead;
+import android.content.pm.parsing.ParsingPackageUtils;
 import android.os.Build;
+import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.Pair;
 
 import com.android.internal.content.om.OverlayConfig.PackageProvider;
 import com.android.internal.content.om.OverlayScanner;
@@ -38,6 +40,7 @@ import org.mockito.invocation.InvocationOnMock;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
@@ -58,22 +61,42 @@ public class OverlayConfigIterationRule implements TestRule {
         SYSTEM_SERVER,
     }
 
-    private final ArrayMap<File, ParsedOverlayInfo> mOverlayStubResults = new ArrayMap<>();
+    private final ArrayMap<File, TestOverlayInfo> mTestOverlayInfos = new ArrayMap<>();
     private Supplier<OverlayScanner> mOverlayScanner;
     private PackageProvider mPkgProvider;
     private Iteration mIteration;
+
+    /** Represents information parsed from the manifest of an overlay for test. */
+    private static class TestOverlayInfo extends ParsedOverlayInfo {
+        public final String requiredSystemPropertyName;
+        public final String requiredSystemPropertyValue;
+
+        TestOverlayInfo(String packageName, String targetPackageName,
+                int targetSdkVersion, boolean isStatic, int priority, File path,
+                String requiredSystemPropertyName, String requiredSystemPropertyValue) {
+            super(packageName, targetPackageName, targetSdkVersion, isStatic, priority, path);
+            this.requiredSystemPropertyName = requiredSystemPropertyName;
+            this.requiredSystemPropertyValue = requiredSystemPropertyValue;
+        }
+
+        public boolean isMatchRequiredSystemProperty() {
+            return ParsingPackageUtils.checkRequiredSystemProperties(
+                    requiredSystemPropertyName, requiredSystemPropertyValue);
+        }
+    }
 
     /**
      * Mocks the parsing of the file to make it appear to the scanner that the file is a valid
      * overlay APK.
      **/
     void addOverlay(File path, String packageName, String targetPackage, int targetSdkVersion,
-            boolean isStatic, int priority) {
+            boolean isStatic, int priority, String requiredSystemPropertyName,
+            String requiredSystemPropertyValue) {
         try {
             final File canonicalPath = new File(path.getCanonicalPath());
-            mOverlayStubResults.put(canonicalPath, new ParsedOverlayInfo(
+            mTestOverlayInfos.put(canonicalPath, new TestOverlayInfo(
                     packageName, targetPackage, targetSdkVersion, isStatic, priority,
-                    canonicalPath));
+                    canonicalPath, requiredSystemPropertyName, requiredSystemPropertyValue));
         } catch (IOException e) {
             Assert.fail("Failed to add overlay " + e);
         }
@@ -89,6 +112,12 @@ public class OverlayConfigIterationRule implements TestRule {
 
     void addOverlay(File path, String packageName, String targetPackage, int targetSdkVersion) {
         addOverlay(path, packageName, targetPackage, targetSdkVersion, false, 0);
+    }
+
+    void addOverlay(File path, String packageName, String targetPackage, int targetSdkVersion,
+            boolean isStatic, int priority) {
+        addOverlay(path, packageName, targetPackage, targetSdkVersion, isStatic, priority,
+                null /* requiredSystemPropertyName */, null /* requiredSystemPropertyValue */);
     }
 
     /** Retrieves the {@link OverlayScanner} for the current run of the test. */
@@ -116,11 +145,21 @@ public class OverlayConfigIterationRule implements TestRule {
                 // and parsing configuration files.
                 mOverlayScanner = () -> {
                     OverlayScanner scanner = Mockito.spy(new OverlayScanner());
-                    for (Map.Entry<File, ParsedOverlayInfo> overlay :
-                            mOverlayStubResults.entrySet()) {
-                        doReturn(overlay.getValue()).when(scanner)
-                                .parseOverlayManifest(overlay.getKey());
-                    }
+                    doAnswer((InvocationOnMock invocation) -> {
+                        final Object[] args = invocation.getArguments();
+                        final File overlayApk = (File) args[0];
+                        final List<Pair<String, File>> outExcludedOverlayPackages =
+                                (List<Pair<String, File>>) args[1];
+                        final TestOverlayInfo overlayInfo = mTestOverlayInfos.get(overlayApk);
+                        if ((!TextUtils.isEmpty(overlayInfo.requiredSystemPropertyName)
+                                || !TextUtils.isEmpty(overlayInfo.requiredSystemPropertyValue))
+                                && !overlayInfo.isMatchRequiredSystemProperty()) {
+                            outExcludedOverlayPackages.add(
+                                    Pair.create(overlayInfo.packageName, overlayApk));
+                            return null;
+                        }
+                        return overlayInfo;
+                    }).when(scanner).parseOverlayManifest(any(), any());
                     return scanner;
                 };
                 mPkgProvider = null;
@@ -137,10 +176,15 @@ public class OverlayConfigIterationRule implements TestRule {
                     final Object[] args = invocation.getArguments();
                     final BiConsumer<ParsingPackageRead, Boolean> f =
                             (BiConsumer<ParsingPackageRead, Boolean>) args[0];
-                    for (Map.Entry<File, ParsedOverlayInfo> overlay :
-                            mOverlayStubResults.entrySet()) {
+                    for (Map.Entry<File, TestOverlayInfo> overlay :
+                            mTestOverlayInfos.entrySet()) {
                         final ParsingPackageRead a = Mockito.mock(ParsingPackageRead.class);
-                        final ParsedOverlayInfo info = overlay.getValue();
+                        final TestOverlayInfo info = overlay.getValue();
+                        if ((!TextUtils.isEmpty(info.requiredSystemPropertyName)
+                                || !TextUtils.isEmpty(info.requiredSystemPropertyValue))
+                                && !info.isMatchRequiredSystemProperty()) {
+                            continue;
+                        }
                         when(a.getPackageName()).thenReturn(info.packageName);
                         when(a.getOverlayTarget()).thenReturn(info.targetPackageName);
                         when(a.getTargetSdkVersion()).thenReturn(info.targetSdkVersion);

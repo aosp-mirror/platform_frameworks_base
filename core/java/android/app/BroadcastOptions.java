@@ -43,6 +43,7 @@ public class BroadcastOptions {
     private int mMaxManifestReceiverApiLevel = Build.VERSION_CODES.CUR_DEVELOPMENT;
     private boolean mDontSendToRestrictedApps = false;
     private boolean mAllowBackgroundActivityStarts;
+    private boolean mPendingIntentBalAllowed = ActivityOptions.PENDING_INTENT_BAL_ALLOWED_DEFAULT;
 
     /**
      * How long to temporarily put an app on the power allowlist when executing this broadcast
@@ -77,6 +78,16 @@ public class BroadcastOptions {
      */
     private static final String KEY_DONT_SEND_TO_RESTRICTED_APPS =
             "android:broadcast.dontSendToRestrictedApps";
+
+    /**
+     * PendingIntent caller allows activity start even if PendingIntent creator is in background.
+     * This only works if the PendingIntent caller is allowed to start background activities,
+     * for example if it's in the foreground, or has BAL permission.
+     * TODO: Merge it with ActivityOptions.
+     * @hide
+     */
+    public static final String KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED =
+            "android.pendingIntent.backgroundActivityAllowed";
 
     /**
      * Corresponds to {@link #setBackgroundActivityStartsAllowed}.
@@ -130,6 +141,8 @@ public class BroadcastOptions {
         mDontSendToRestrictedApps = opts.getBoolean(KEY_DONT_SEND_TO_RESTRICTED_APPS, false);
         mAllowBackgroundActivityStarts = opts.getBoolean(KEY_ALLOW_BACKGROUND_ACTIVITY_STARTS,
                 false);
+        mPendingIntentBalAllowed = opts.getBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED,
+                ActivityOptions.PENDING_INTENT_BAL_ALLOWED_DEFAULT);
     }
 
     /**
@@ -301,6 +314,26 @@ public class BroadcastOptions {
     }
 
     /**
+     * Set PendingIntent activity is allowed to be started in the background if the caller
+     * can start background activities.
+     * TODO: Merge it with ActivityOptions.
+     * @hide
+     */
+    public void setPendingIntentBackgroundActivityLaunchAllowed(boolean allowed) {
+        mPendingIntentBalAllowed = allowed;
+    }
+
+    /**
+     * Get PendingIntent activity is allowed to be started in the background if the caller
+     * can start background activities.
+     * TODO: Merge it with ActivityOptions.
+     * @hide
+     */
+    public boolean isPendingIntentBackgroundActivityLaunchAllowed() {
+        return mPendingIntentBalAllowed;
+    }
+
+    /**
      * Returns the created options as a Bundle, which can be passed to
      * {@link android.content.Context#sendBroadcast(android.content.Intent)
      * Context.sendBroadcast(Intent)} and related methods.
@@ -328,6 +361,8 @@ public class BroadcastOptions {
         if (mAllowBackgroundActivityStarts) {
             b.putBoolean(KEY_ALLOW_BACKGROUND_ACTIVITY_STARTS, true);
         }
+        // TODO: Add API for BroadcastOptions and have a shared base class with ActivityOptions.
+        b.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED, mPendingIntentBalAllowed);
         return b.isEmpty() ? null : b;
     }
 }

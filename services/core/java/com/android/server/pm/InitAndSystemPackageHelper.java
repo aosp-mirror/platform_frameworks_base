@@ -50,6 +50,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.os.Environment;
+import android.os.Process;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -575,6 +576,7 @@ public class InitAndSystemPackageHelper {
                         Slog.w(TAG, "updateAllSharedLibrariesLPw failed: ", e);
                     }
                     mPm.mPermissionManager.onPackageInstalled(pkg,
+                            Process.INVALID_UID /* previousAppId */,
                             PermissionManagerServiceInternal.PackageInstalledParams.DEFAULT,
                             UserHandle.USER_ALL);
                     mPm.writeSettingsLPrTEMP();
@@ -907,6 +909,7 @@ public class InitAndSystemPackageHelper {
             // The method below will take care of removing obsolete permissions and granting
             // install permissions.
             mPm.mPermissionManager.onPackageInstalled(pkg,
+                    Process.INVALID_UID /* previousAppId */,
                     PermissionManagerServiceInternal.PackageInstalledParams.DEFAULT,
                     UserHandle.USER_ALL);
             for (final int userId : allUserHandles) {

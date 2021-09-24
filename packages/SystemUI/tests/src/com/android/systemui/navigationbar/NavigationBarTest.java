@@ -56,6 +56,7 @@ import android.testing.TestableLooper.RunWithLooper;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
 import android.view.accessibility.AccessibilityManager;
@@ -122,6 +123,8 @@ public class NavigationBarTest extends SysuiTestCase {
     EdgeBackGestureHandler.Factory mEdgeBackGestureHandlerFactory;
     @Mock
     EdgeBackGestureHandler mEdgeBackGestureHandler;
+    @Mock
+    NavigationBarA11yHelper mNavigationBarA11yHelper;
 
     @Rule
     public final LeakCheckedTest.SysuiLeakCheck mLeakCheck = new LeakCheckedTest.SysuiLeakCheck();
@@ -256,6 +259,20 @@ public class NavigationBarTest extends SysuiTestCase {
         assertFalse((defaultNavBar.getNavigationIconHints() & NAVIGATION_HINT_IME_SHOWN) != 0);
     }
 
+    @Test
+    public void testA11yEventAfterDetach() {
+        View v = mNavigationBar.createView(null);
+        mNavigationBar.onViewAttachedToWindow(v);
+        verify(mNavigationBarA11yHelper).registerA11yEventListener(any(
+                NavigationBarA11yHelper.NavA11yEventListener.class));
+        mNavigationBar.onViewDetachedFromWindow(v);
+        verify(mNavigationBarA11yHelper).removeA11yEventListener(any(
+                NavigationBarA11yHelper.NavA11yEventListener.class));
+
+        // Should be safe even though the internal view is now null.
+        mNavigationBar.updateAccessibilityServicesState();
+    }
+
     private NavigationBar createNavBar(Context context) {
         DeviceProvisionedController deviceProvisionedController =
                 mock(DeviceProvisionedController.class);
@@ -287,7 +304,7 @@ public class NavigationBarTest extends SysuiTestCase {
                 mHandler,
                 mock(NavigationBarOverlayController.class),
                 mUiEventLogger,
-                mock(NavigationBarA11yHelper.class),
+                mNavigationBarA11yHelper,
                 mock(UserTracker.class)));
     }
 
