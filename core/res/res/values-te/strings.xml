@@ -79,8 +79,8 @@
     <string name="CLIRPermanent" msgid="166443681876381118">"మీరు కాలర్ ID సెట్టింగ్‌ను మార్చలేరు."</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"మొబైల్ డేటా సేవ లేదు"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"అత్యవసర కాలింగ్ అందుబాటులో లేదు"</string>
-    <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"వాయిస్ సేవ లేదు"</string>
-    <string name="RestrictedOnAllVoiceTitle" msgid="3982069078579103087">"వాయిస్ సేవ లేదా అత్యవసర కాలింగ్ లేదు"</string>
+    <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"వాయిస్ సర్వీస్ లేదు"</string>
+    <string name="RestrictedOnAllVoiceTitle" msgid="3982069078579103087">"వాయిస్ సర్వీస్ లేదా ఎమర్జెన్సీ కాలింగ్ లేదు"</string>
     <string name="RestrictedStateContent" msgid="7693575344608618926">"మీ క్యారియర్ తాత్కాలికంగా ఆఫ్ చేయబడింది"</string>
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> కోసం మీ క్యారియర్ తాత్కాలికంగా ఆఫ్ చేశారు"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"మొబైల్ నెట్‌వర్క్ అందుబాటులో లేదు"</string>
@@ -306,7 +306,7 @@
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"మీ కాంటాక్ట్‌లను యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"లొకేషన్"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"ఈ పరికర లొకేషన్‌ను యాక్సెస్ చేయడానికి"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"క్యాలెండర్"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"మీ క్యాలెండర్‌ను యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS మెసేజ్‌లను పంపడం మరియు వీక్షించడం"</string>
@@ -453,9 +453,9 @@
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"భౌతిక కార్యాకలాపాన్ని గుర్తించండి"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"ఈ యాప్ మీ భౌతిక కార్యాకలాపాన్ని గుర్తించగలదు."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"చిత్రాలు మరియు వీడియోలు తీయడం"</string>
-    <string name="permdesc_camera" msgid="5240801376168647151">"యాప్ ఉపయోగంలో ఉన్నపుడు కెమెరాను ఉపయోగించి ఈ యాప్ ఎప్పుడైనా ఫోటోలను తీయగలదు, వీడియోలను రికార్డ్ చేయగలదు."</string>
+    <string name="permdesc_camera" msgid="5240801376168647151">"యాప్ ఉపయోగంలో ఉన్నపుడు కెమెరాను ఉపయోగించి ఎప్పుడు కావాలంటే అప్పుడు ఈ యాప్ ఫోటోలు తీయగలదు, వీడియోలు రికార్డ్ చేయగలదు."</string>
     <string name="permlab_backgroundCamera" msgid="7549917926079731681">"బ్యాక్‌గ్రౌండ్‌లో ఫోటోలు, వీడియోలను తీయగలదు"</string>
-    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"కెమెరాను ఉపయోగించి ఈ యాప్ ఎప్పుడైనా ఫోటోలను తీయగలదు, వీడియోలను రికార్డ్ చేయగలదు."</string>
+    <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"ఈ యాప్, కెమెరాను ఉపయోగించి ఎప్పుడు కావాలంటే అప్పుడు ఫోటోలు తీయగలదు, వీడియోలు రికార్డ్ చేయగలదు."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"ఫోటోలు, వీడియోలు తీయడానికి సిస్టమ్ కెమెరాలకు యాప్, లేదా సేవా యాక్సెస్‌ను అనుమతించండి"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"ఈ విశేష లేదా సిస్టమ్ యాప్ ఎప్పుడైనా సిస్టమ్ కెమెరాను ఉపయోగించి ఫోటోలు తీయగలదు, వీడియోలను రికార్డ్ చేయగలదు. యాప్‌కు android.permission.CAMERA అనుమతి ఇవ్వడం కూడా అవసరం"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"కెమెరా పరికరాలు తెరుచుకుంటున్నప్పుడు లేదా మూసుకుంటున్నప్పుడు కాల్‌బ్యాక్‌లను స్వీకరించడానికి యాప్‌ను లేదా సర్వీస్‌ను అనుమతించండి."</string>
@@ -815,7 +815,7 @@
     <string name="phoneTypeTtyTdd" msgid="532038552105328779">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="7522314392003565121">"కార్యాలయ మొబైల్"</string>
     <string name="phoneTypeWorkPager" msgid="3748332310638505234">"కార్యాలయ పేజర్"</string>
-    <string name="phoneTypeAssistant" msgid="757550783842231039">"అసిస్టెంట్"</string>
+    <string name="phoneTypeAssistant" msgid="757550783842231039">"Assistant"</string>
     <string name="phoneTypeMms" msgid="1799747455131365989">"MMS"</string>
     <string name="eventTypeCustom" msgid="3257367158986466481">"అనుకూలం"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"పుట్టినరోజు"</string>
@@ -848,7 +848,7 @@
     <string name="orgTypeOther" msgid="5450675258408005553">"ఇతరం"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"అనుకూలం"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"అనుకూలం"</string>
-    <string name="relationTypeAssistant" msgid="4057605157116589315">"అసిస్టెంట్"</string>
+    <string name="relationTypeAssistant" msgid="4057605157116589315">"Assistant"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"సోదరుడు"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"బిడ్డ"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"జీవిత భాగస్వామి"</string>
@@ -1044,7 +1044,7 @@
     <string name="searchview_description_query" msgid="7430242366971716338">"ప్రశ్నను వెతకండి"</string>
     <string name="searchview_description_clear" msgid="1989371719192982900">"ప్రశ్నను క్లియర్ చేయి"</string>
     <string name="searchview_description_submit" msgid="6771060386117334686">"ప్రశ్నని సమర్పించండి"</string>
-    <string name="searchview_description_voice" msgid="42360159504884679">"వాయిస్ శోధన"</string>
+    <string name="searchview_description_voice" msgid="42360159504884679">"వాయిస్ సెర్చ్"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"తాకడం ద్వారా విశ్లేషణను ప్రారంభించాలా?"</string>
     <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> తాకడం ద్వారా విశ్లేషణను ప్రారంభించాలనుకుంటోంది. తాకడం ద్వారా విశ్లేషణను ఆన్ చేసినప్పుడు, మీరు మీ వేలి కింద ఉన్నవాటి యొక్క వివరణలను వినవచ్చు లేదా చూడవచ్చు లేదా టాబ్లెట్‌తో పరస్పర చర్య చేయడానికి సంజ్ఞలు చేయవచ్చు."</string>
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> తాకడం ద్వారా విశ్లేషణను ప్రారంభించాలనుకుంటోంది. తాకడం ద్వారా విశ్లేషణ ఆన్ చేయబడినప్పుడు, మీరు మీ వేలి కింద ఉన్నవాటి యొక్క వివరణలను వినవచ్చు లేదా చూడవచ్చు లేదా ఫోన్‌తో పరస్పర చర్య చేయడానికి సంజ్ఞలు చేయవచ్చు."</string>
@@ -2288,7 +2288,7 @@
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"సెట్టింగ్‌లలో ఆన్ చేయండి"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"విస్మరించు"</string>
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"పరికరం మైక్రోఫోన్‌ను అన్‌బ్లాక్ చేయండి"</string>
-    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"పరికరం కెమెరాను అన్‌బ్లాక్ చేయండి"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"పరికరంలోని కెమెరాను అన్‌బ్లాక్ చేయండి"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; యాప్, ఇతర యాప్‌లు, సర్వీస్‌ల కోసం"</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"అన్‌బ్లాక్ చేయండి"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"సెన్సార్ గోప్యత"</string>
