@@ -38,8 +38,7 @@
             android:gravity="center_vertical|center_horizontal"
             android:layout_width="wrap_content"
             android:layout_height="32dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:fontFamily="@*android:string/config_headlineFontFamily"
+            android:textAppearance="@style/TextAppearance.InternetDialog"
             android:textSize="24sp"/>
 
         <TextView
@@ -50,8 +49,7 @@
             android:layout_marginTop="4dp"
             android:ellipsize="end"
             android:maxLines="1"
-            android:fontFamily="@*android:string/config_headlineFontFamily"
-            android:textSize="14sp"/>
+            android:textAppearance="@style/TextAppearance.InternetDialog.Secondary"/>
     </LinearLayout>
 
     <LinearLayout
@@ -165,10 +163,11 @@
                         android:layout_gravity="end|center_vertical">
                         <Switch
                             android:id="@+id/mobile_toggle"
+                            android:contentDescription="@string/mobile_data_settings_title"
                             android:switchMinWidth="@dimen/settingslib_switch_track_width"
                             android:layout_gravity="center"
                             android:layout_width="@dimen/settingslib_switch_track_width"
-                            android:layout_height="@dimen/settingslib_switch_track_height"
+                            android:layout_height="match_parent"
                             android:track="@drawable/settingslib_track_selector"
                             android:thumb="@drawable/settingslib_thumb_selector"
                             android:theme="@style/MainSwitch.Settingslib"/>
@@ -180,7 +179,9 @@
                     android:id="@+id/turn_on_wifi_layout"
                     style="@style/InternetDialog.Network"
                     android:layout_height="72dp"
-                    android:gravity="center">
+                    android:gravity="center"
+                    android:clickable="false"
+                    android:focusable="false">
 
                     <FrameLayout
                         android:layout_weight="1"
@@ -204,10 +205,11 @@
                         android:layout_marginBottom="10dp">
                         <Switch
                             android:id="@+id/wifi_toggle"
+                            android:contentDescription="@string/turn_on_wifi"
                             android:switchMinWidth="@dimen/settingslib_switch_track_width"
                             android:layout_gravity="center"
                             android:layout_width="@dimen/settingslib_switch_track_width"
-                            android:layout_height="@dimen/settingslib_switch_track_height"
+                            android:layout_height="match_parent"
                             android:track="@drawable/settingslib_track_selector"
                             android:thumb="@drawable/settingslib_thumb_selector"
                             android:theme="@style/MainSwitch.Settingslib"/>
@@ -319,25 +321,27 @@
                         android:textAppearance="@style/TextAppearance.InternetDialog"
                         android:textSize="14sp"/>
                 </FrameLayout>
-
             </LinearLayout>
 
             <FrameLayout
-                android:layout_width="match_parent"
+                android:id="@+id/done_layout"
+                android:layout_width="67dp"
                 android:layout_height="48dp"
-                android:layout_marginBottom="40dp">
+                android:layout_marginEnd="24dp"
+                android:layout_marginBottom="40dp"
+                android:layout_gravity="end|center_vertical"
+                android:clickable="true"
+                android:focusable="true">
                 <Button
-                    style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
-                    android:id="@+id/done"
-                    android:layout_width="67dp"
-                    android:layout_height="36dp"
-                    android:layout_marginEnd="24dp"
-                    android:layout_gravity="end|center_vertical"
-                    android:background="@drawable/internet_dialog_footer_background"
-                    android:textColor="?android:attr/textColorPrimary"
                     android:text="@string/inline_done_button"
+                    style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
+                    android:layout_width="match_parent"
+                    android:layout_height="36dp"
+                    android:layout_gravity="center"
+                    android:textAppearance="@style/TextAppearance.InternetDialog"
                     android:textSize="14sp"
-                    android:fontFamily="@*android:string/config_headlineFontFamily"/>
+                    android:background="@drawable/internet_dialog_footer_background"
+                    android:clickable="false"/>
             </FrameLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
