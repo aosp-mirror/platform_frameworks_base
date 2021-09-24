@@ -710,6 +710,8 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Mga kontrol sa notification ng power"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Naka-on"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Naka-off"</string>
+    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
+    <skip />
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Sa pamamagitan ng mga kontrol sa notification ng power, magagawa mong itakda ang antas ng kahalagahan ng mga notification ng isang app mula 0 hanggang 5. \n\n"<b>"Antas 5"</b>" \n- Ipakita sa itaas ng listahan ng notification \n- Payagan ang pag-istorbo kapag full screen \n- Palaging sumilip \n\n"<b>"Antas 4"</b>" \n- Pigilan ang pag-istorbo kapag full screen \n- Palaging sumilip \n\n"<b>"Antas 3"</b>" \n- Pigilan ang pag-istorbo kapag full screen \n- Huwag kailanman sumilip \n\n"<b>"Antas 2"</b>" \n- Pigilan ang pag-istorbo kapag full screen \n- Huwag kailanman sumilip \n- Huwag kailanman tumunog o mag-vibrate \n\n"<b>"Antas 1"</b>" \n- Pigilan ang pag-istorbo kapag full screen \n- Huwag kailanman sumilip \n- Huwag kailanman tumunog o mag-vibrate \n- Itago sa lock screen at status bar \n- Ipakita sa ibaba ng listahan ng notification \n\n"<b>"Antas 0"</b>" \n- I-block ang lahat ng notification mula sa app"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Mga Notification"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Hindi mo na makikita ang mga notification na ito"</string>
@@ -1175,5 +1177,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"I-unlock para tingnan ang mga network"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Naghahanap ng mga network…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Hind nakakonekta sa network"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"Tingnan lahat"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Para lumipat ng network, idiskonekta ang ethernet"</string>
 </resources>

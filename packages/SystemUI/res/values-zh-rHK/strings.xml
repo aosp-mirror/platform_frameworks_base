@@ -710,6 +710,8 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"通知控制項"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"開啟"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"關閉"</string>
+    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
+    <skip />
     <string name="power_notification_controls_description" msgid="1334963837572708952">"通知控制項讓您設定應用程式通知的重要性 (0 至 5 級)。\n\n"<b>"第 5 級"</b>" \n- 在通知清單頂部顯示 \n- 允許全螢幕騷擾 \n- 一律顯示通知 \n\n"<b>"第 4 級"</b>" \n- 阻止全螢幕騷擾 \n- 一律顯示通知 \n\n"<b>"第 3 級"</b>" \n- 阻止全螢幕騷擾 \n- 永不顯示通知 \n\n"<b>"第 2 級"</b>" \n- 阻止全螢幕騷擾 \n- 永不顯示通知 \n- 永不發出聲響和震動 \n\n"<b>"第 1 級"</b>" \n- 阻止全螢幕騷擾 \n- 永不顯示通知 \n- 永不發出聲響和震動 \n- 從上鎖畫面和狀態列中隱藏 \n- 在通知清單底部顯示 \n\n"<b>"第 0 級"</b>" \n- 封鎖所有應用程式通知"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"通知"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"您不會再看到這些通知"</string>
@@ -1175,5 +1177,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"解鎖即可查看網絡"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"正在搜尋網絡…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"無法連接網絡"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"顯示全部"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"如要切換網絡，請中斷以太網連線"</string>
 </resources>

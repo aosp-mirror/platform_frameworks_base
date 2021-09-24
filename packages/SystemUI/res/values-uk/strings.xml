@@ -716,6 +716,8 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Елементи керування сповіщеннями"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Увімк."</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Вимк."</string>
+    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
+    <skip />
     <string name="power_notification_controls_description" msgid="1334963837572708952">"За допомогою елементів керування сповіщеннями ви можете налаштувати пріоритет сповіщень додатка – від 0 до 5 рівня. \n\n"<b>"Рівень 5"</b>\n"- Показувати сповіщення вгорі списку \n- Виводити на весь екран \n- Завжди показувати короткі сповіщення \n\n"<b>"Рівень 4"</b>\n"- Не виводити на весь екран \n- Завжди показувати короткі сповіщення \n\n"<b>"Рівень 3"</b>\n"- Не виводити на весь екран \n- Не показувати короткі сповіщення \n\n"<b>"Рівень 2"</b>\n"- Не виводити на весь екран \n- Не показувати короткі сповіщення \n- Вимкнути звук і вібросигнал \n\n"<b>"Рівень 1"</b>\n"- Не виводити на весь екран \n- Не показувати короткі сповіщення \n- Вимкнути звук і вібросигнал \n- Не показувати на заблокованому екрані та в рядку стану \n- Показувати сповіщення внизу списку \n\n"<b>"Рівень 0"</b>\n"- Блокувати всі сповіщення з додатка"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Сповіщення"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Ви більше не бачитимете цих сповіщень"</string>
@@ -1187,5 +1189,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Розблокувати, щоб переглянути мережі"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Пошук мереж…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Не вдалося підключитися до мережі"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"Показати все"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Щоб вибрати іншу мережу, від’єднайте кабель Ethernet"</string>
 </resources>

@@ -710,6 +710,8 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Қуат хабарландыруының басқару элементтері"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Қосулы"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Өшірулі"</string>
+    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
+    <skip />
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Қуат хабарландыруының басқару элементтерімен қолданбаның хабарландырулары үшін 0-ден бастап 5-ке дейін маңыздылық деңгейін орнатуға болады. \n\n"<b>"5-деңгей"</b>" \n- Хабарландыру тізімінің ең басында көрсету \n- Толық экранға ашылуын рұқсат ету \n- Әрдайым қалқымалы хабарландыру түрінде көрсету \n\n"<b>"4-деңгей"</b>" \n- Толық экранға шығармау \n- Әрдайым қалқымалы хабарландыру түрінде көрсету \n\n"<b>"3-деңгей"</b>" \n- Толық экранға шығармау \n- Ешқашан қалқымалы хабарландыру түрінде көрсетпеу \n\n"<b>"2-деңгей"</b>" \n- Толық экранға шығармау \n- Ешқашан қалқымалы хабарландыру түрінде көрсетпеу \n- Ешқашан дыбыс және діріл шығармау \n\n"<b>"1-деңгей"</b>" \n- Толық экранға шығармау \n- Ешқашан қалқымалы хабарландыру түрінде көрсетпеу \n- Ешқашан дыбыс немесе діріл шығармау \n- Құлыпталған экраннан және күйін көрсету жолағынан жасыру \n- Хабарландыру тізімінің ең астында көрсету \n\n"<b>"0-деңгей"</b>" \n- Қолданбадағы барлық хабарландыруларға тыйым салу"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Хабарландырулар"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Хабарландырулар бұдан былай көрсетілмейді"</string>
@@ -1175,5 +1177,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Желілерді көру үшін құлыпты ашыңыз."</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Маңайдағы желілер ізделуде…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Желіге қосылмады."</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"Барлығын көру"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Желілерді ауыстыру үшін ethernet кабелін ажыратыңыз."</string>
 </resources>

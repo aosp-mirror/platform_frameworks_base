@@ -710,6 +710,8 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Izilawuli zesaziso zamandla"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Vuliwe"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Valiwe"</string>
+    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
+    <skip />
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Ngezilawuli zesaziso zamandla, ungasetha ileveli ebalulekile kusuka ku-0 kuya ku-5 kusuka kuzaziso zohlelo lokusebenza. \n\n"<b>"Ileveli 5"</b>" \n- Ibonisa phezulu kuhlu lwesaziso \n- Vumela ukuphazamiseka kwesikrini esigcwele \n- Ukuhlola njalo \n\n"<b>"Ileveli 4"</b>" \n- Gwema ukuphazamiseka kwesikrini esigcwele \n- Ukuhlola njalo \n\n"<b>"Ileveli 3"</b>" \n- Gwema ukuphazamiseka kwesikrini esigcwele \n- Ukungahloli \n\n"<b>"Ileveli 2"</b>" \n- Gwema ukuphazamiseka kwesikrini esigcwele \n- Ukungahloli \n- Ungenzi umsindo nokudlidliza \n\n"<b>"Ileveli 1"</b>" \n- Gwema ukuphazamiseka kwesikrini esigcwele \n- Ukungahloli \n- Ungenzi umsindo noma ukudlidliza \n- Fihla kusuka kusikrini sokukhiya nebha yesimo \n- Bonisa phansi kohlu lwesaziso \n\n"<b>"Ileveli 0"</b>" \n- Vimbela zonke izaziso kusuka kuhlelo lokusebenza"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Izaziso"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Ngeke usabona lezi zaziso"</string>
@@ -1175,5 +1177,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Vula ukuze ubuke amanethiwekhi"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Iseshela amanethiwekhi…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Yehlulekile ukuxhuma kunethiwekhi"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"Bona konke"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Ukuze ushintshe amanethiwekhi, nqamula i-ethernet"</string>
 </resources>

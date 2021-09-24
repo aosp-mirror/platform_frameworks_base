@@ -703,8 +703,8 @@
     <string name="activity_not_found" msgid="8711661533828200293">"Праграма не ўсталявана на вашым тэлефоне"</string>
     <string name="clock_seconds" msgid="8709189470828542071">"Паказваць секунды гадзінніка"</string>
     <string name="clock_seconds_desc" msgid="2415312788902144817">"Паказваць секунды гадзінніка на панэлі стану. Можа паўплываць на рэсурс акумулятара."</string>
-    <string name="qs_rearrange" msgid="484816665478662911">"Змяніць парадак Хуткіх налад"</string>
-    <string name="show_brightness" msgid="6700267491672470007">"Паказваць яркасць у Хуткіх наладах"</string>
+    <string name="qs_rearrange" msgid="484816665478662911">"Змяніць парадак хуткіх налад"</string>
+    <string name="show_brightness" msgid="6700267491672470007">"Паказваць яркасць у хуткіх наладах"</string>
     <string name="experimental" msgid="3549865454812314826">"Эксперыментальныя"</string>
     <string name="enable_bluetooth_title" msgid="866883307336662596">"Уключыць Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Для падлучэння клавіятуры да планшэта трэба спачатку ўключыць Bluetooth."</string>
@@ -716,6 +716,8 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Пашыранае кіраванне апавяшчэннямі"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Уключана"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Выключана"</string>
+    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
+    <skip />
     <string name="power_notification_controls_description" msgid="1334963837572708952">"З дапамогай пашыранага кіравання апавяшчэннямі вы можаце задаваць узровень важнасці апавяшчэнняў праграмы ад 0 да 5. \n\n"<b>"Узровень 5"</b>" \n- Паказваць уверсе спіса апавяшчэнняў \n- Дазваляць перапыняць рэжым поўнага экрана \n- Заўсёды дазваляць кароткі паказ \n\n"<b>"Узровень 4"</b>" \n- Забараняць перапыняць рэжым поўнага экрана \n- Заўсёды дазваляць кароткі паказ \n\n"<b>"Узровень 3"</b>" \n- Забараняць перапыняць рэжым поўнага экрана \n- Ніколі не дазваляць кароткі паказ \n\n"<b>"Узровень 2"</b>" \n- Забараняць перапыняць рэжым поўнага экрана \n- Ніколі не дазваляць кароткі паказ \n- Ніколі не прайграваць гук і не вібрыраваць \n\n"<b>"Узровень 1"</b>" \n- Забараняць перапыняць рэжым поўнага экрана \n- Ніколі не дазваляць кароткі паказ \n- Ніколі не прайграваць гук і не вібрыраваць \n- Хаваць з экрана блакіроўкі і панэлі стану \n- Паказваць унізе спіса апавяшчэнняў \n\n"<b>"Узровень 0"</b>" \n- Блакіраваць усе апавяшчэнні ад праграмы"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Апавяшчэнні"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Вы больш не будзеце бачыць гэтыя апавяшчэнні"</string>
@@ -1072,7 +1074,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"выдаліць з абранага"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Перамясціць у пазіцыю <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Сродкі кіравання"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Выберыце элементы кіравання, да якіх вы хочаце мець доступ з Хуткіх налад"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Выберыце элементы кіравання, да якіх вы хочаце мець доступ з хуткіх налад"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Каб змяніць парадак элементаў кіравання, утрымлівайце і перацягвайце іх"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Усе элементы кіравання выдалены"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Змяненні не захаваны"</string>
@@ -1187,5 +1189,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Разблакіраваць для прагляду сетак"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Выконваецца пошук сетак…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Не ўдалося падключыцца да сеткі"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"Паказаць усе"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Каб падключыцца да сетак, выключыце Ethernet"</string>
 </resources>

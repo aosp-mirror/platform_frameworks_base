@@ -710,6 +710,8 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"전원 알림 컨트롤"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"사용"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"사용 안함"</string>
+    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
+    <skip />
     <string name="power_notification_controls_description" msgid="1334963837572708952">"전원 알림 컨트롤을 사용하면 앱 알림 관련 중요도를 0부터 5까지로 설정할 수 있습니다. \n\n"<b>"레벨 5"</b>" \n- 알림 목록 상단에 표시 \n- 전체 화면일 경우 알림 표시 허용 \n- 항상 엿보기 표시 \n\n"<b>"레벨 4"</b>" \n- 전체 화면에 알림 표시 금지 \n- 항상 엿보기 표시 \n\n"<b>"레벨 3"</b>" \n- 전체 화면에 알림 표시 금지 \n- 엿보기 표시 안함 \n\n"<b>"레벨 2"</b>" \n- 전체 화면에 알림 표시 금지 \n- 엿보기 표시 안함 \n- 소리나 진동으로 알리지 않음 \n\n"<b>"레벨 1"</b>" \n- 전체 화면에 알림 표시 금지 \n- 엿보기 표시 안함 \n- 소리나 진동으로 알리지 않음 \n- 잠금 화면 및 상태 표시줄에서 숨김 \n- 알림 목록 하단에 표시 \n\n"<b>"레벨 0"</b>" \n- 앱의 모든 알림 차단"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"알림"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"더 이상 다음의 알림을 받지 않습니다"</string>
@@ -1175,5 +1177,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"네트워크를 보려면 잠금 해제하세요"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"네트워크 검색 중…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"네트워크에 연결하지 못했습니다."</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"모두 보기"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"네트워크를 전환하려면 이더넷을 연결 해제하세요."</string>
 </resources>
