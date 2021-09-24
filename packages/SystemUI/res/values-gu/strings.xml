@@ -1176,9 +1176,9 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"નેટવર્ક શોધી રહ્યાં છીએ…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"નેટવર્ક સાથે કનેક્ટ કરવામાં નિષ્ફળ થયાં"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"બધા જુઓ"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"બીજા નેટવર્ક પર જવા માટે, ઇથરનેટ ડિસ્કનેક્ટ કરો"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"ઝડપી સેટિંગમાં <xliff:g id="APPNAME">%1$s</xliff:g> નીચે જણાવેલા ટાઇલ ઉમેરવા માગે છે"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"ટાઇલ ઉમેરો"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"ટાઇલ ઉમેરશો નહીં"</string>
-    <!-- no translation found for qs_user_switch_dialog_title (3045189293587781366) -->
-    <skip />
+    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"વપરાશકર્તા પસંદ કરો"</string>
 </resources>

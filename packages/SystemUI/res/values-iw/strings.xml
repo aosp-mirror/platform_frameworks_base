@@ -1188,9 +1188,9 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"בתהליך חיפוש רשתות…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"נכשל הניסיון להתחבר לרשת"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"הצגת הכול"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"כדי לעבור בין רשתות, צריך לנתק את האתרנט"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"האפליקציה <xliff:g id="APPNAME">%1$s</xliff:g> מבקשת להוסיף להגדרות המהירות את האריח הבא"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"הוספת אריח"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"אין להוסיף אריח"</string>
-    <!-- no translation found for qs_user_switch_dialog_title (3045189293587781366) -->
-    <skip />
+    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"בחירת משתמש"</string>
 </resources>

@@ -1176,6 +1176,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Netzwerke werden gesucht…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Netzwerkverbindung konnte nicht hergestellt werden"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Alle ansehen"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Trenne das Ethernetkabel, um das Netzwerk zu wechseln"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> möchte die folgende Kachel den Schnelleinstellungen hinzufügen"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Kachel hinzufügen"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Kachel nicht hinzu"</string>
