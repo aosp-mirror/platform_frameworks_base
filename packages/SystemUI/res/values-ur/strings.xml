@@ -710,6 +710,8 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"پاور اطلاع کے کنٹرولز"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"آن"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"آف"</string>
+    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
+    <skip />
     <string name="power_notification_controls_description" msgid="1334963837572708952">"پاور اطلاع کنٹرولز کے ساتھ آپ کسی ایپ کی اطلاعات کیلئے 0 سے 5 تک اہمیت کی سطح سیٹ کر سکتے ہیں۔ \n\n"<b>"سطح 5"</b>\n"- اطلاعات کی فہرست کے اوپر دکھائیں \n- پوری اسکرین کی مداخلت کی اجازت دیں \n- ہمیشہ جھانکنا\n\n"<b>"سطح 4"</b>\n"- پوری اسکرین کی مداخلت کو روکیں \n- ہمیشہ جھانکنا\n\n"<b>"سطح 3"</b>\n"- پوری اسکرین کی مداخلت کو روکیں \n- کبھی نہ جھانکنا \n\n"<b>"سطح 2"</b>\n"- پوری اسکرین کی مداخلت کو روکیں \n- کبھی نہ جھانکنا \n- کبھی آواز اور ارتعاش پیدا نہ کرنا \n\n"<b>" سطح 1"</b>\n"- پوری اسکرین کی مداخلت کو روکنا \n- کبھی نہ جھانکنا \n- کبھی بھی آواز یا ارتعاش پیدا نہ کرنا\n- مقفل اسکرین اور اسٹیٹس بار سے چھپانا \n - اطلاع کی فہرست کی نیچے دکھانا \n\n"<b>"سطح 0"</b>\n"- ایپ سے تمام اطلاعات مسدود کریں"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"اطلاعات"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"آپ کو یہ اطلاعات مزید دکھائی نہیں دیں گی"</string>
@@ -1175,5 +1177,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"نیٹ ورکس کو دیکھنے کے لیے غیر مقفل کریں"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"نیٹ ورکس تلاش کیے جا رہے ہیں…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"نیٹ ورک سے منسلک ہونے میں ناکام ہو گیا"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"سبھی دیکھیں"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"نیٹ ورکس پر سوئچ کرنے کیلئے، ایتھرنیٹ غیر منسلک کریں"</string>
 </resources>

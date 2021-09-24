@@ -710,6 +710,8 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Ilmoitusten tehohallinta"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Päällä"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Pois päältä"</string>
+    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
+    <skip />
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Ilmoitusten tehohallinnan avulla voit määrittää sovelluksen ilmoituksille tärkeystason väliltä 0–5. \n\n"<b>"Taso 5"</b>" \n– Ilmoitukset näytetään ilmoitusluettelon yläosassa \n– Näkyminen koko näytön tilassa sallitaan \n– Ilmoitukset kurkistavat aina näytölle\n\n"<b>"Taso 4"</b>" \n– Näkyminen koko näytön tilassa estetään \n– Ilmoitukset kurkistavat aina näytölle \n\n"<b>"Taso 3"</b>" \n– Näkyminen koko näytön tilassa estetään \n– Ei kurkistamista \n\n"<b>"Taso 2"</b>" \n– Näkyminen koko näytön tilassa estetään \n– Ei kurkistamista \n– Ei ääniä eikä värinää \n\n"<b>"Taso 1"</b>" \n– Näkyminen koko näytön tilassa estetään \n– Ei kurkistamista \n– Ei ääniä eikä värinää \n– Ilmoitukset piilotetaan lukitusnäytöltä ja tilapalkista \n– Ilmoitukset näytetään ilmoitusluettelon alaosassa \n\n"<b>"Taso 0"</b>" \n– Kaikki sovelluksen ilmoitukset estetään"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Ilmoitukset"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Et näe näitä ilmoituksia enää"</string>
@@ -1175,5 +1177,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Avaa lukitus nähdäksesi verkot"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Etsitään verkkoja…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Yhteyden muodostaminen verkkoon epäonnistui"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"Näytä kaikki"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Irrota Ethernet-johto, jos haluat vaihtaa verkkoa"</string>
 </resources>

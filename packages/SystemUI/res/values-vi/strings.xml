@@ -710,6 +710,8 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Điều khiển thông báo nguồn"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Bật"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Đang tắt"</string>
+    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
+    <skip />
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Với các kiểm soát thông báo nguồn, bạn có thể đặt cấp độ quan trọng từ 0 đến 5 cho các thông báo của ứng dụng. \n\n"<b>"Cấp 5"</b>" \n- Hiển thị ở đầu danh sách thông báo \n- Cho phép gián đoạn ở chế độ toàn màn hình \n- Luôn xem nhanh \n\n"<b>"Cấp 4"</b>" \n- Ngăn gián đoạn ở chế độ toàn màn hình \n- Luôn xem nhanh \n\n"<b>"Cấp 3"</b>" \n- Ngăn gián đoạn ở chế độ toàn màn hình \n- Không bao giờ xem nhanh \n\n"<b>"Cấp 2"</b>" \n- Ngăn gián đoạn ở chế độ toàn màn hình \n- Không bao giờ xem nhanh \n- Không bao giờ có âm báo và rung \n\n"<b>"Cấp 1"</b>" \n- Ngăn gián đoạn ở chế độ toàn màn hình \n- Không bao giờ xem nhanh \n- Không bao giờ có âm báo và rung \n- Ẩn khỏi màn hình khóa và thanh trạng thái \n- Hiển thị ở cuối danh sách thông báo \n\n"<b>"Cấp 0"</b>" \n- Chặn tất cả các thông báo từ ứng dụng"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Thông báo"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Bạn sẽ không thấy các thông báo này nữa"</string>
@@ -1175,5 +1177,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Mở khóa để xem mạng"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Đang tìm mạng…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Không kết nối được với mạng"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"Xem tất cả"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Để chuyển mạng, hãy rút cáp Ethernet"</string>
 </resources>

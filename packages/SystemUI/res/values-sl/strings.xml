@@ -716,6 +716,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Kontrolniki za pomembnost obvestil"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Vklopljeno"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Izklopljeno"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Vklopljeno – na podlagi obraza"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"S kontrolniki za pomebnost obvestila je mogoče za obvestila aplikacije nastaviti stopnjo pomembnosti od 0 do 5. \n\n"<b>"Stopnja 5"</b>" \n– Prikaz na vrhu seznama obvestil \n– Omogočanje prekinitev v celozaslonskem načinu \n– Vedno prikaži hitre predoglede \n\n"<b>"Stopnja 4"</b>" \n– Preprečevanje prekinitev v celozaslonskem načinu \n– Vedno prikaži hitre predoglede \n\n"<b>"Stopnja 3"</b>" \n– Preprečevanje prekinitev v celozaslonskem načinu \n– Nikoli ne prikaži hitrih predogledov \n\n"<b>"Stopnja 2"</b>" \n– Preprečevanje prekinitev v celozaslonskem načinu \n– Nikoli ne prikaži hitrih predogledov \n– Nikoli ne uporabi zvoka in vibriranja \n\n"<b>"Stopnja 1"</b>" \n– Preprečevanje prekinitev v celozaslonskem načinu \n– Nikoli ne prikaži hitrih predogledov \n– Nikoli ne uporabi zvoka in vibriranja \n– Skrivanje na zaklenjenem zaslonu in v vrstici stanja \n– Prikaz na dnu seznama obvestil \n\n"<b>"Stopnja 0"</b>" \n– Blokiranje vseh obvestil aplikacije"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Obvestila"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Ta obvestila ne bodo več prikazana"</string>
@@ -1187,5 +1188,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Odklenite za ogled omrežij"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Iskanje omrežij …"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Vzpostavljanje povezave z omrežjem ni uspelo."</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"Prikaz vseh omrežij"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Če želite preklopiti omrežje, prekinite ethernetno povezavo."</string>
 </resources>

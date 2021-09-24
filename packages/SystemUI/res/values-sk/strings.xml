@@ -716,6 +716,8 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Ovládacie prvky zobrazovania upozornení"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Zapnuté"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Vypnuté"</string>
+    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
+    <skip />
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Pomocou ovládacích prvkov zobrazovania upozornení môžete nastaviť pre upozornenia aplikácie úroveň dôležitosti od 0 do 5. \n\n"<b>"Úroveň 5"</b>" \n– Zobrazovať v hornej časti zoznamu upozornení. \n– Povoliť prerušenia na celú obrazovku. \n– Vždy zobrazovať čiastočne. \n\n"<b>"Úroveň 4"</b>" \n– Zabrániť prerušeniam na celú obrazovku. \n– Vždy zobrazovať čiastočne. \n\n"<b>"Úroveň 3"</b>" \n– Zabrániť prerušeniam na celú obrazovku. \n– Nikdy nezobrazovať čiastočne. \n\n"<b>"Úroveň 2"</b>" \n– Zabrániť prerušeniam na celú obrazovku. \n– Nikdy nezobrazovať čiastočne. \n– Nikdy nespúšťať zvuk ani vibrácie. \n\n"<b>"Úroveň 1"</b>" \n– Zabrániť prerušeniam na celú obrazovku. \n– Nikdy nezobrazovať čiastočne. \n– Nikdy nespúšťať zvuk ani vibrácie. \n– Skryť na uzamknutej obrazovke a v stavovom riadku. \n– Zobraziť v dolnej časti zoznamu upozornení. \n\n"<b>"Úroveň 0"</b>" \n– Blokovať všetky upozornenia z aplikácie."</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Upozornenia"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Tieto upozornenia sa už nebudú zobrazovať"</string>
@@ -1187,5 +1189,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Odomknutím si zobrazte siete"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Vyhľadávajú sa siete…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Nepodarilo sa pripojiť k sieti"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"Zobraziť všetko"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Ak chcete prepnúť siete, odpojte ethernet"</string>
 </resources>

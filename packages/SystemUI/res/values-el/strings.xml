@@ -710,6 +710,8 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Στοιχεία ελέγχου ειδοποίησης ισχύος"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Ενεργό"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Ανενεργή"</string>
+    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
+    <skip />
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Με τα στοιχεία ελέγχου ειδοποίησης ισχύος, μπορείτε να ορίσετε ένα επίπεδο βαρύτητας από 0 έως 5 για τις ειδοποιήσεις μιας εφαρμογής. \n\n"<b>"Επίπεδο 5"</b>" \n- Εμφάνιση στην κορυφή της λίστας ειδοποιήσεων \n- Να επιτρέπεται η διακοπή πλήρους οθόνης \n- Να γίνεται πάντα σύντομη προβολή \n\n"<b>"Επίπεδο 4"</b>" \n- Αποτροπή διακοπής πλήρους οθόνης \n- Να γίνεται πάντα σύντομη προβολή \n\n"<b>"Επίπεδο 3"</b>" \n- Αποτροπή διακοπής πλήρους οθόνης \n- Να μην γίνεται ποτέ σύντομη προβολή \n\n"<b>"Επίπεδο 2"</b>" \n- Αποτροπή διακοπής πλήρους οθόνης \n- Να μην γίνεται ποτέ σύντομη προβολή \n- Να μην χρησιμοποιείται ποτέ ήχος και δόνηση \n\n"<b>"Επίπεδο 1"</b>" \n- Αποτροπή διακοπής πλήρους οθόνης \n- Να μην γίνεται ποτέ σύντομη προβολή \n- Να μην χρησιμοποιείται ποτέ ήχος και δόνηση \n- Απόκρυψη από την οθόνη κλειδώματος και τη γραμμή κατάστασης \n- Εμφάνιση στο κάτω μέρος της λίστας ειδοποιήσεων \n\n"<b>"Επίπεδο 0"</b>" \n- Αποκλεισμός όλων των ειδοποιήσεων από την εφαρμογή"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Ειδοποιήσεις"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Δεν θα βλέπετε πλέον αυτές τις ειδοποιήσεις"</string>
@@ -1175,5 +1177,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Ξεκλειδώστε για προβολή δικτύων"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Αναζήτηση δικτύων…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Αποτυχία σύνδεσης στο δίκτυο"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"Εμφάνιση όλων"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Για εναλλαγή δικτύων, αποσυνδέστε το ethernet"</string>
 </resources>

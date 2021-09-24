@@ -710,6 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Controlos de notificações do consumo de energia"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Ativado"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Desativado"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Ativada – Com base no rosto"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Com os controlos de notificações do consumo de energia, pode definir um nível de importância de 0 a 5 para as notificações de aplicações. \n\n"<b>"Nível 5"</b>" \n- Mostrar no início da lista de notificações \n- Permitir a interrupção do ecrã inteiro \n- Aparecer rapidamente sempre \n\n"<b>"Nível 4"</b>" \n- Impedir a interrupção do ecrã inteiro \n- Aparecer rapidamente sempre\n\n"<b>"Nível 3"</b>" \n- Impedir a interrupção do ecrã inteiro \n- Nunca aparecer rapidamente \n\n"<b>"Nível 2"</b>" \n- Impedir a interrupção do ecrã inteiro \n- Nunca aparecer rapidamente \n- Nunca tocar nem vibrar \n\n"<b>"Nível 1"</b>" \n- Impedir a interrupção do ecrã inteiro \n- Nunca aparecer rapidamente \n- Nunca tocar nem vibrar \n- Ocultar do ecrã de bloqueio e da barra de estado \n- Mostrar no fim da lista de notificações \n\n"<b>"Nível 0"</b>" \n- Bloquear todas as notificações da app"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Notificações"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Nunca mais verá estas notificações."</string>
@@ -1175,5 +1176,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Desbloqueie para ver as redes"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"A procurar redes…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Não foi possível estabelecer ligação à rede"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"Veja tudo"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Para mudar de rede, desligue a Ethernet"</string>
 </resources>

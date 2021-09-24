@@ -710,6 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Bildirishnomalar uchun kengaytirilgan boshqaruv"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Yoniq"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Yoqilmagan"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Yoqish - Yuz asosida"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Bildirishnomalar uchun kengaytirilgan boshqaruv yordamida ilova bildirishnomalarining muhimlik darajasini (0-5) sozlash mumkin. \n\n"<b>"5-daraja"</b>" \n- Bildirishnomani ro‘yxatning boshida ko‘rsatish \n- To‘liq ekranli bildirishnomalarni ko‘rsatish \n- Qalqib chiquvchi bildirishnomalarni ko‘rsatish \n\n"<b>"4-daraja"</b>" \n- To‘liq ekranli bildirishnomalarni ko‘rsatmaslik \n- Qalqib chiquvchi bildirishnomalarni ko‘rsatish \n\n"<b>"3-daraja"</b>" \n- To‘liq ekranli bildirishnomalarni ko‘rsatmaslik \n- Qalqib chiquvchi bildirishnomalarni ko‘rsatmaslik \n\n"<b>"2-daraja"</b>" \n- To‘liq ekranli bildirishnomalarni ko‘rsatmaslik \n- Qalqib chiquvchi bildirishnomalarni ko‘rsatmaslik \n- Ovoz va tebranishdan foydalanmaslik \n\n"<b>"1-daraja"</b>" \n- To‘liq ekranli bildirishnomalarni ko‘rsatmaslik \n- Qalqib chiquvchi bildirishnomalarni ko‘rsatmaslik \n- Ovoz va tebranishdan foydalanmaslik \n- Ekran qulfi va holat qatorida ko‘rsatmaslik \n- Bildirishnomani ro‘yxatning oxirida ko‘rsatish \n\n"<b>"0-daraja"</b>" \n- Ilovadan keladigan barcha bildirishnomalarni bloklash"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Bildirishnomalar"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Bu bildirishnomalar endi chiqmaydi"</string>
@@ -1175,5 +1176,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Tarmoqlarni koʻrish uchun qulfdan chiqaring"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Tarmoqlar qidirilmoqda…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Tarmoqqa ulanmadi"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"Hammasi"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Boshqa tarmoqqa almashish uchun Ethernet tarmogʻini uzing"</string>
 </resources>

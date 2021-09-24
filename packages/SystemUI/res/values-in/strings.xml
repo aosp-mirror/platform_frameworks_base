@@ -710,6 +710,8 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Kontrol notifikasi daya"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Aktif"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Nonaktif"</string>
+    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
+    <skip />
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Dengan kontrol notifikasi daya, Anda dapt menyetel level kepentingan notifikasi aplikasi dari 0 sampai 5. \n\n"<b>"Level 5"</b>" \n- Muncul di atas daftar notifikasi \n- Izinkan interupsi layar penuh \n- Selalu intip pesan \n\n"<b>"Level 4"</b>" \n- Jangan interupsi layar penuh \n- Selalu intip pesan \n\n"<b>"Level 3"</b>" \n- Jangan interupsi layar penuh \n- Tak pernah intip pesan \n\n"<b>"Level 2"</b>" \n- Jangan interupsi layar penuh \n- Tak pernah intip pesan \n- Tanpa suara dan getaran \n\n"<b>"Level 1"</b>" \n- Jangan interupsi layar penuh \n- Tak pernah intip pesan \n- Tanpa suara atau getaran \n- Sembunyikan dari layar kunci dan bilah status \n- Muncul di bawah daftar notifikasi \n\n"<b>"Level 0"</b>" \n- Blokir semua notifikasi dari aplikasi"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Notifikasi"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Anda tidak akan melihat notifikasi ini lagi"</string>
@@ -1175,5 +1177,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Buka kunci untuk melihat jaringan"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Mencari jaringan …"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Gagal menghubungkan ke jaringan"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"Lihat semua"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Untuk beralih jaringan, lepaskan kabel ethernet"</string>
 </resources>
