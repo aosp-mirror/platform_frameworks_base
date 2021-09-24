@@ -62,6 +62,7 @@ public final class StageTaskListenerTests {
     @Mock private SyncTransactionQueue mSyncQueue;
     @Captor private ArgumentCaptor<SyncTransactionQueue.TransactionRunnable> mRunnableCaptor;
     private SurfaceSession mSurfaceSession = new SurfaceSession();
+    private SurfaceControl mSurfaceControl;
     private ActivityManager.RunningTaskInfo mRootTask;
     private StageTaskListener mStageTaskListener;
 
@@ -76,7 +77,8 @@ public final class StageTaskListenerTests {
                 mSurfaceSession);
         mRootTask = new TestRunningTaskInfoBuilder().build();
         mRootTask.parentTaskId = INVALID_TASK_ID;
-        mStageTaskListener.onTaskAppeared(mRootTask, new SurfaceControl());
+        mSurfaceControl = new SurfaceControl.Builder(mSurfaceSession).setName("test").build();
+        mStageTaskListener.onTaskAppeared(mRootTask, mSurfaceControl);
     }
 
     @Test
@@ -103,7 +105,7 @@ public final class StageTaskListenerTests {
         final ActivityManager.RunningTaskInfo childTask =
                 new TestRunningTaskInfoBuilder().setParentTaskId(mRootTask.taskId).build();
 
-        mStageTaskListener.onTaskAppeared(childTask, new SurfaceControl());
+        mStageTaskListener.onTaskAppeared(childTask, mSurfaceControl);
 
         assertThat(mStageTaskListener.mChildrenTaskInfo.contains(childTask.taskId)).isTrue();
         verify(mCallbacks).onStatusChanged(eq(mRootTask.isVisible), eq(true));
