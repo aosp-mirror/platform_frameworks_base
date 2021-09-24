@@ -31,6 +31,7 @@ import android.os.Vibrator;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.DisplayMetrics;
+import android.util.Pair;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 
@@ -127,19 +128,7 @@ public class LockIconViewControllerTest extends SysuiTestCase {
     @Test
     public void testUpdateFingerprintLocationOnInit() {
         // GIVEN fp sensor location is available pre-attached
-        final PointF udfpsLocation = new PointF(50, 75);
-        final int radius = 33;
-        final FingerprintSensorPropertiesInternal fpProps =
-                new FingerprintSensorPropertiesInternal(
-                        /* sensorId */ 0,
-                        /* strength */ 0,
-                        /* max enrollments per user */ 5,
-                        /* component info */ new ArrayList<>(),
-                        /* sensorType */ 3,
-                        /* resetLockoutRequiresHwToken */ false,
-                        (int) udfpsLocation.x, (int) udfpsLocation.y, radius);
-        when(mAuthController.getUdfpsSensorLocation()).thenReturn(udfpsLocation);
-        when(mAuthController.getUdfpsProps()).thenReturn(List.of(fpProps));
+        Pair<Integer, PointF> udfps = setupUdfps();
 
         // WHEN lock icon view controller is initialized and attached
         mLockIconViewController.init();
@@ -147,8 +136,8 @@ public class LockIconViewControllerTest extends SysuiTestCase {
         mAttachListener.onViewAttachedToWindow(mLockIconView);
 
         // THEN lock icon view location is updated with the same coordinates as fpProps
-        verify(mLockIconView).setCenterLocation(mPointCaptor.capture(), eq(radius));
-        assertEquals(udfpsLocation, mPointCaptor.getValue());
+        verify(mLockIconView).setCenterLocation(mPointCaptor.capture(), eq(udfps.first));
+        assertEquals(udfps.second, mPointCaptor.getValue());
     }
 
     @Test
@@ -162,6 +151,47 @@ public class LockIconViewControllerTest extends SysuiTestCase {
 
         // GIVEN fp sensor location is available post-atttached
         captureAuthControllerCallback();
+        Pair<Integer, PointF> udfps = setupUdfps();
+
+        // WHEN all authenticators are registered
+        mAuthControllerCallback.onAllAuthenticatorsRegistered();
+
+        // THEN lock icon view location is updated with the same coordinates as fpProps
+        verify(mLockIconView).setCenterLocation(mPointCaptor.capture(), eq(udfps.first));
+        assertEquals(udfps.second, mPointCaptor.getValue());
+    }
+
+    @Test
+    public void testLockIconViewBackgroundEnabledWhenUdfpsIsAvailable() {
+        // GIVEN Udpfs sensor location is available
+        setupUdfps();
+
+        mLockIconViewController.init();
+        captureAttachListener();
+
+        // WHEN the view is attached
+        mAttachListener.onViewAttachedToWindow(mLockIconView);
+
+        // THEN the lock icon view background should be enabled
+        verify(mLockIconView).setUseBackground(true);
+    }
+
+    @Test
+    public void testLockIconViewBackgroundDisabledWhenUdfpsIsUnavailable() {
+        // GIVEN Udfps sensor location is not available
+        when(mAuthController.getUdfpsSensorLocation()).thenReturn(null);
+
+        mLockIconViewController.init();
+        captureAttachListener();
+
+        // WHEN the view is attached
+        mAttachListener.onViewAttachedToWindow(mLockIconView);
+
+        // THEN the lock icon view background should be disabled
+        verify(mLockIconView).setUseBackground(false);
+    }
+
+    private Pair<Integer, PointF> setupUdfps() {
         final PointF udfpsLocation = new PointF(50, 75);
         final int radius = 33;
         final FingerprintSensorPropertiesInternal fpProps =
@@ -176,12 +206,7 @@ public class LockIconViewControllerTest extends SysuiTestCase {
         when(mAuthController.getUdfpsSensorLocation()).thenReturn(udfpsLocation);
         when(mAuthController.getUdfpsProps()).thenReturn(List.of(fpProps));
 
-        // WHEN all authenticators are registered
-        mAuthControllerCallback.onAllAuthenticatorsRegistered();
-
-        // THEN lock icon view location is updated with the same coordinates as fpProps
-        verify(mLockIconView).setCenterLocation(mPointCaptor.capture(), eq(radius));
-        assertEquals(udfpsLocation, mPointCaptor.getValue());
+        return new Pair(radius, udfpsLocation);
     }
 
     private void captureAuthControllerCallback() {

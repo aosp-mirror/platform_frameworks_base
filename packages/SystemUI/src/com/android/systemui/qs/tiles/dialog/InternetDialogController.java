@@ -19,11 +19,15 @@ package com.android.systemui.qs.tiles.dialog;
 import static com.android.settingslib.mobile.MobileMappings.getIconKey;
 import static com.android.settingslib.mobile.MobileMappings.mapIconSets;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
@@ -32,6 +36,7 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.NetworkRegistrationInfo;
@@ -45,7 +50,8 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
-import android.widget.Toast;
+import android.view.View;
+import android.view.WindowManager;
 
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
@@ -66,11 +72,15 @@ import com.android.settingslib.net.SignalStrengthUtil;
 import com.android.settingslib.wifi.WifiUtils;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.AccessPointController;
+import com.android.systemui.toast.SystemUIToast;
+import com.android.systemui.toast.ToastFactory;
+import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.wifitrackerlib.MergedCarrierEntry;
 import com.android.wifitrackerlib.WifiEntry;
@@ -116,10 +126,12 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
     private SubscriptionManager mSubscriptionManager;
     private TelephonyManager mTelephonyManager;
     private ConnectivityManager mConnectivityManager;
+    private CarrierConfigTracker mCarrierConfigTracker;
     private TelephonyDisplayInfo mTelephonyDisplayInfo =
             new TelephonyDisplayInfo(TelephonyManager.NETWORK_TYPE_UNKNOWN,
                     TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE);
     private Handler mHandler;
+    private Handler mWorkerHandler;
     private MobileMappings.Config mConfig = null;
     private Executor mExecutor;
     private AccessPointController mAccessPointController;
@@ -133,7 +145,15 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
     private GlobalSettings mGlobalSettings;
     private int mDefaultDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     private ConnectivityManager.NetworkCallback mConnectivityManagerNetworkCallback;
+    private WindowManager mWindowManager;
+    private ToastFactory mToastFactory;
 
+    @VisibleForTesting
+    static final float TOAST_PARAMS_HORIZONTAL_WEIGHT = 1.0f;
+    @VisibleForTesting
+    static final float TOAST_PARAMS_VERTICAL_WEIGHT = 1.0f;
+    @VisibleForTesting
+    static final long SHORT_DURATION_TIMEOUT = 4000;
     @VisibleForTesting
     protected ActivityStarter mActivityStarter;
     @VisibleForTesting
@@ -173,11 +193,15 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
             @Nullable WifiManager wifiManager, ConnectivityManager connectivityManager,
             @Main Handler handler, @Main Executor mainExecutor,
             BroadcastDispatcher broadcastDispatcher, KeyguardUpdateMonitor keyguardUpdateMonitor,
-            GlobalSettings globalSettings, KeyguardStateController keyguardStateController) {
+            GlobalSettings globalSettings, KeyguardStateController keyguardStateController,
+            WindowManager windowManager, ToastFactory toastFactory,
+            @Background Handler workerHandler,
+            CarrierConfigTracker carrierConfigTracker) {
         if (DEBUG) {
             Log.d(TAG, "Init InternetDialogController");
         }
         mHandler = handler;
+        mWorkerHandler = workerHandler;
         mExecutor = mainExecutor;
         mContext = context;
         mGlobalSettings = globalSettings;
@@ -185,6 +209,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         mTelephonyManager = telephonyManager;
         mConnectivityManager = connectivityManager;
         mSubscriptionManager = subscriptionManager;
+        mCarrierConfigTracker = carrierConfigTracker;
         mBroadcastDispatcher = broadcastDispatcher;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mKeyguardStateController = keyguardStateController;
@@ -196,6 +221,8 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         mConfig = MobileMappings.Config.readConfig(mContext);
         mWifiIconInjector = new WifiUtils.InternetIconInjector(mContext);
         mConnectivityManagerNetworkCallback = new DataConnectivityListener();
+        mWindowManager = windowManager;
+        mToastFactory = toastFactory;
     }
 
     void onStart(@NonNull InternetDialogCallback callback, boolean canConfigWifi) {
@@ -580,7 +607,8 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         final MergedCarrierEntry mergedCarrierEntry =
                 mAccessPointController.getMergedCarrierEntry();
         if (mergedCarrierEntry != null && mergedCarrierEntry.canConnect()) {
-            mergedCarrierEntry.connect(null /* ConnectCallback */);
+            mergedCarrierEntry.connect(null /* ConnectCallback */, false);
+            makeOverlayToast(R.string.wifi_wont_autoconnect_for_now);
         }
     }
 
@@ -588,6 +616,24 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         final MergedCarrierEntry mergedCarrierEntry =
                 mAccessPointController.getMergedCarrierEntry();
         return mergedCarrierEntry != null && mergedCarrierEntry.isDefaultNetwork();
+    }
+
+    @WorkerThread
+    void setMergedCarrierWifiEnabledIfNeed(int subId, boolean enabled) {
+        // If the Carrier Provisions Wi-Fi Merged Networks enabled, do not set the merged carrier
+        // Wi-Fi state together.
+        if (mCarrierConfigTracker.getCarrierProvisionsWifiMergedNetworksBool(subId)) {
+            return;
+        }
+
+        final MergedCarrierEntry entry = mAccessPointController.getMergedCarrierEntry();
+        if (entry == null) {
+            if (DEBUG) {
+                Log.d(TAG, "MergedCarrierEntry is null, can not set the status.");
+            }
+            return;
+        }
+        entry.setEnabled(enabled);
     }
 
     WifiManager getWifiManager() {
@@ -664,6 +710,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
                 }
             }
         }
+        mWorkerHandler.post(() -> setMergedCarrierWifiEnabledIfNeed(subId, enabled));
     }
 
     boolean isDataStateInService() {
@@ -729,20 +776,20 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
                 Log.d(TAG, "connect to unsaved network " + ap.getTitle());
             }
         }
-        ap.connect(new WifiEntryConnectCallback(mActivityStarter, mContext, ap));
+        ap.connect(new WifiEntryConnectCallback(mActivityStarter, ap, this));
         return false;
     }
 
     static class WifiEntryConnectCallback implements WifiEntry.ConnectCallback {
         final ActivityStarter mActivityStarter;
-        final Context mContext;
         final WifiEntry mWifiEntry;
+        final InternetDialogController mInternetDialogController;
 
-        WifiEntryConnectCallback(ActivityStarter activityStarter, Context context,
-                WifiEntry connectWifiEntry) {
+        WifiEntryConnectCallback(ActivityStarter activityStarter, WifiEntry connectWifiEntry,
+                InternetDialogController internetDialogController) {
             mActivityStarter = activityStarter;
-            mContext = context;
             mWifiEntry = connectWifiEntry;
+            mInternetDialogController = internetDialogController;
         }
 
         @Override
@@ -757,8 +804,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 mActivityStarter.startActivity(intent, false /* dismissShade */);
             } else if (status == CONNECT_STATUS_FAILURE_UNKNOWN) {
-                Toast.makeText(mContext, R.string.wifi_failed_connect_message,
-                        Toast.LENGTH_SHORT).show();
+                mInternetDialogController.makeOverlayToast(R.string.wifi_failed_connect_message);
             } else {
                 if (DEBUG) {
                     Log.d(TAG, "connect failure reason=" + status);
@@ -966,5 +1012,58 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
 
         void onAccessPointsChanged(@Nullable List<WifiEntry> wifiEntries,
                 @Nullable WifiEntry connectedEntry);
+    }
+
+    void makeOverlayToast(int stringId) {
+        final Resources res = mContext.getResources();
+
+        final SystemUIToast systemUIToast = mToastFactory.createToast(mContext,
+                res.getString(stringId), mContext.getPackageName(), UserHandle.myUserId(),
+                res.getConfiguration().orientation);
+        if (systemUIToast == null) {
+            return;
+        }
+
+        View toastView = systemUIToast.getView();
+
+        final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+        params.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        params.width = WindowManager.LayoutParams.WRAP_CONTENT;
+        params.format = PixelFormat.TRANSLUCENT;
+        params.type = WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
+        params.y = systemUIToast.getYOffset();
+
+        int absGravity = Gravity.getAbsoluteGravity(systemUIToast.getGravity(),
+                res.getConfiguration().getLayoutDirection());
+        params.gravity = absGravity;
+        if ((absGravity & Gravity.HORIZONTAL_GRAVITY_MASK) == Gravity.FILL_HORIZONTAL) {
+            params.horizontalWeight = TOAST_PARAMS_HORIZONTAL_WEIGHT;
+        }
+        if ((absGravity & Gravity.VERTICAL_GRAVITY_MASK) == Gravity.FILL_VERTICAL) {
+            params.verticalWeight = TOAST_PARAMS_VERTICAL_WEIGHT;
+        }
+
+        mWindowManager.addView(toastView, params);
+
+        Animator inAnimator = systemUIToast.getInAnimation();
+        if (inAnimator != null) {
+            inAnimator.start();
+        }
+
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Animator outAnimator = systemUIToast.getOutAnimation();
+                if (outAnimator != null) {
+                    outAnimator.start();
+                    outAnimator.addListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animator) {
+                            mWindowManager.removeViewImmediate(toastView);
+                        }
+                    });
+                }
+            }
+        }, SHORT_DURATION_TIMEOUT);
     }
 }
