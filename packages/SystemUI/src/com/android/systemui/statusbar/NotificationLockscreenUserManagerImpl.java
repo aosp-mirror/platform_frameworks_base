@@ -19,8 +19,8 @@ import static android.app.Notification.VISIBILITY_SECRET;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
-import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_MEDIA_CONTROLS;
-import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_SILENT;
+import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_MEDIA_CONTROLS;
+import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_SILENT;
 
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
