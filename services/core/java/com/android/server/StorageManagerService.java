@@ -221,6 +221,9 @@ class StorageManagerService extends IStorageManager.Stub
     @GuardedBy("mLock")
     private final Set<Integer> mFuseMountedUser = new ArraySet<>();
 
+    @GuardedBy("mLock")
+    private final Set<Integer> mCeStoragePreparedUsers = new ArraySet<>();
+
     public static class Lifecycle extends SystemService {
         private StorageManagerService mStorageManagerService;
 
@@ -4863,6 +4866,20 @@ class StorageManagerService extends IStorageManager.Stub
                 }
             }
             return primaryVolumeIds;
+        }
+
+        @Override
+        public void markCeStoragePrepared(int userId) {
+            synchronized (mLock) {
+                mCeStoragePreparedUsers.add(userId);
+            }
+        }
+
+        @Override
+        public boolean isCeStoragePrepared(int userId) {
+            synchronized (mLock) {
+                return mCeStoragePreparedUsers.contains(userId);
+            }
         }
     }
 }
