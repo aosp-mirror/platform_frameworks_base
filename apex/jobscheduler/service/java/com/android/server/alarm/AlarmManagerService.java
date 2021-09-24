@@ -909,6 +909,11 @@ public class AlarmManagerService extends SystemService {
                         }
                         return standbyChanged || tareChanged;
                     });
+                    if (!USE_TARE_POLICY) {
+                        // Remove the cached values so we don't accidentally use them when TARE is
+                        // re-enabled.
+                        mAffordabilityCache.clear();
+                    }
                     if (changed) {
                         rescheduleKernelAlarmsLocked();
                         updateNextAlarmClockLocked();
@@ -1382,6 +1387,7 @@ public class AlarmManagerService extends SystemService {
      * @param uid         uid to filter on
      * @param packageName package to filter on, or null for all packages in uid
      */
+    @GuardedBy("mLock")
     void sendPendingBackgroundAlarmsLocked(int uid, String packageName) {
         final ArrayList<Alarm> alarmsForUid = mPendingBackgroundAlarms.get(uid);
         if (alarmsForUid == null || alarmsForUid.size() == 0) {
@@ -1418,6 +1424,7 @@ public class AlarmManagerService extends SystemService {
      *
      * This is only called when the power save whitelist changes, so it's okay to be slow.
      */
+    @GuardedBy("mLock")
     void sendAllUnrestrictedPendingBackgroundAlarmsLocked() {
         final ArrayList<Alarm> alarmsToDeliver = new ArrayList<>();
 
@@ -1454,6 +1461,7 @@ public class AlarmManagerService extends SystemService {
         }
     }
 
+    @GuardedBy("mLock")
     private void deliverPendingBackgroundAlarmsLocked(ArrayList<Alarm> alarms, long nowELAPSED) {
         final int N = alarms.size();
         boolean hasWakeup = false;
@@ -2129,6 +2137,7 @@ public class AlarmManagerService extends SystemService {
         }
     }
 
+    @GuardedBy("mLock")
     private void setImplLocked(int type, long when, long whenElapsed, long windowLength,
             long interval, PendingIntent operation, IAlarmListener directReceiver,
             String listenerTag, int flags, WorkSource workSource,
@@ -2406,12 +2415,13 @@ public class AlarmManagerService extends SystemService {
             return;
         }
         mEconomyManagerInternal.registerAffordabilityChangeListener(
-                UserHandle.getUserId(alarm.uid), alarm.sourcePackage,
+                UserHandle.getUserId(alarm.creatorUid), alarm.sourcePackage,
                 mAffordabilityChangeListener, TareBill.getAppropriateBill(alarm));
     }
 
     /** Unregister the TARE listener associated with the alarm if it's no longer needed. */
-    private void maybeUnregisterTareListener(Alarm alarm) {
+    @GuardedBy("mLock")
+    private void maybeUnregisterTareListenerLocked(Alarm alarm) {
         if (!mConstants.USE_TARE_POLICY) {
             return;
         }
@@ -2421,12 +2431,21 @@ public class AlarmManagerService extends SystemService {
                         && alarm.sourcePackage.equals(a.sourcePackage)
                         && bill.equals(TareBill.getAppropriateBill(a));
         if (mAlarmStore.getCount(isSameAlarmTypeForSameApp) == 0) {
+            final int userId = UserHandle.getUserId(alarm.creatorUid);
             mEconomyManagerInternal.unregisterAffordabilityChangeListener(
-                    UserHandle.getUserId(alarm.uid), alarm.sourcePackage,
+                    userId, alarm.sourcePackage,
                     mAffordabilityChangeListener, bill);
+            // Remove the cached value so we don't accidentally use it when the app
+            // schedules a new alarm.
+            ArrayMap<EconomyManagerInternal.ActionBill, Boolean> actionAffordability =
+                    mAffordabilityCache.get(userId, alarm.sourcePackage);
+            if (actionAffordability != null) {
+                actionAffordability.remove(bill);
+            }
         }
     }
 
+    @GuardedBy("mLock")
     private void setImplLocked(Alarm a) {
         if ((a.flags & AlarmManager.FLAG_IDLE_UNTIL) != 0) {
             adjustIdleUntilTime(a);
@@ -3775,6 +3794,7 @@ public class AlarmManagerService extends SystemService {
      *
      * This is not expected to get called frequently.
      */
+    @GuardedBy("mLock")
     void removeExactAlarmsOnPermissionRevokedLocked(int uid, String packageName) {
         if (isExemptFromExactAlarmPermission(uid)
                 || !isExactAlarmChangeEnabled(packageName, UserHandle.getUserId(uid))) {
@@ -3792,6 +3812,7 @@ public class AlarmManagerService extends SystemService {
         }
     }
 
+    @GuardedBy("mLock")
     private void removeAlarmsInternalLocked(Predicate<Alarm> whichAlarms, int reason) {
         final long nowRtc = mInjector.getCurrentTimeMillis();
         final long nowElapsed = mInjector.getElapsedRealtime();
@@ -3832,7 +3853,7 @@ public class AlarmManagerService extends SystemService {
                 mRemovalHistory.put(removed.uid, bufferForUid);
             }
             bufferForUid.append(new RemovedAlarm(removed, reason, nowRtc, nowElapsed));
-            maybeUnregisterTareListener(removed);
+            maybeUnregisterTareListenerLocked(removed);
         }
 
         if (removedFromStore) {
@@ -3857,6 +3878,7 @@ public class AlarmManagerService extends SystemService {
         }
     }
 
+    @GuardedBy("mLock")
     void removeLocked(PendingIntent operation, IAlarmListener directReceiver, int reason) {
         if (operation == null && directReceiver == null) {
             if (localLOGV) {
@@ -3868,6 +3890,7 @@ public class AlarmManagerService extends SystemService {
         removeAlarmsInternalLocked(a -> a.matches(operation, directReceiver), reason);
     }
 
+    @GuardedBy("mLock")
     void removeLocked(final int uid, int reason) {
         if (uid == Process.SYSTEM_UID) {
             // If a force-stop occurs for a system-uid package, ignore it.
@@ -3876,6 +3899,7 @@ public class AlarmManagerService extends SystemService {
         removeAlarmsInternalLocked(a -> a.uid == uid, reason);
     }
 
+    @GuardedBy("mLock")
     void removeLocked(final String packageName) {
         if (packageName == null) {
             if (localLOGV) {
@@ -3888,6 +3912,7 @@ public class AlarmManagerService extends SystemService {
     }
 
     // Only called for ephemeral apps
+    @GuardedBy("mLock")
     void removeForStoppedLocked(final int uid) {
         if (uid == Process.SYSTEM_UID) {
             // If a force-stop occurs for a system-uid package, ignore it.
@@ -3898,6 +3923,7 @@ public class AlarmManagerService extends SystemService {
         removeAlarmsInternalLocked(whichAlarms, REMOVE_REASON_UNDEFINED);
     }
 
+    @GuardedBy("mLock")
     void removeUserLocked(int userHandle) {
         if (userHandle == USER_SYSTEM) {
             Slog.w(TAG, "Ignoring attempt to remove system-user state!");
@@ -3924,6 +3950,7 @@ public class AlarmManagerService extends SystemService {
         }
     }
 
+    @GuardedBy("mLock")
     void interactiveStateChangedLocked(boolean interactive) {
         if (mInteractive != interactive) {
             mInteractive = interactive;
@@ -4033,6 +4060,7 @@ public class AlarmManagerService extends SystemService {
     private static native int setKernelTimezone(long nativeData, int minuteswest);
     private static native long getNextAlarm(long nativeData, int type);
 
+    @GuardedBy("mLock")
     int triggerAlarmsLocked(ArrayList<Alarm> triggerList, final long nowELAPSED) {
         int wakeUps = 0;
         final ArrayList<Alarm> pendingAlarms = mAlarmStore.removePendingAlarms(nowELAPSED);
@@ -4150,6 +4178,7 @@ public class AlarmManagerService extends SystemService {
         return timeSinceLast <= currentNonWakeupFuzzLocked(nowELAPSED);
     }
 
+    @GuardedBy("mLock")
     void deliverAlarmsLocked(ArrayList<Alarm> triggerList, long nowELAPSED) {
         mLastAlarmDeliveryTime = nowELAPSED;
         for (int i = 0; i < triggerList.size(); i++) {
@@ -4173,7 +4202,7 @@ public class AlarmManagerService extends SystemService {
                 reportAlarmEventToTare(alarm);
                 if (alarm.repeatInterval <= 0) {
                     // Don't bother trying to unregister for a repeating alarm.
-                    maybeUnregisterTareListener(alarm);
+                    maybeUnregisterTareListenerLocked(alarm);
                 }
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Failure sending alarm.", e);
@@ -4184,6 +4213,9 @@ public class AlarmManagerService extends SystemService {
     }
 
     private void reportAlarmEventToTare(Alarm alarm) {
+        if (!mConstants.USE_TARE_POLICY) {
+            return;
+        }
         final boolean allowWhileIdle =
                 (alarm.flags & (FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED | FLAG_ALLOW_WHILE_IDLE)) != 0;
         final int action;
@@ -4222,7 +4254,7 @@ public class AlarmManagerService extends SystemService {
             }
         }
         mEconomyManagerInternal.noteInstantaneousEvent(
-                UserHandle.getUserId(alarm.uid), alarm.sourcePackage, action, null);
+                UserHandle.getUserId(alarm.creatorUid), alarm.sourcePackage, action, null);
     }
 
     @VisibleForTesting
@@ -4537,7 +4569,7 @@ public class AlarmManagerService extends SystemService {
     @GuardedBy("mLock")
     private boolean canAffordBillLocked(@NonNull Alarm alarm,
             @NonNull EconomyManagerInternal.ActionBill bill) {
-        final int userId = UserHandle.getUserId(alarm.uid);
+        final int userId = UserHandle.getUserId(alarm.creatorUid);
         final String pkgName = alarm.sourcePackage;
         ArrayMap<EconomyManagerInternal.ActionBill, Boolean> actionAffordability =
                 mAffordabilityCache.get(userId, pkgName);
@@ -5049,6 +5081,7 @@ public class AlarmManagerService extends SystemService {
 
     class DeliveryTracker extends IAlarmCompleteListener.Stub implements PendingIntent.OnFinished {
 
+        @GuardedBy("mLock")
         private InFlight removeLocked(PendingIntent pi, Intent intent) {
             for (int i = 0; i < mInFlight.size(); i++) {
                 final InFlight inflight = mInFlight.get(i);
@@ -5063,6 +5096,7 @@ public class AlarmManagerService extends SystemService {
             return null;
         }
 
+        @GuardedBy("mLock")
         private InFlight removeLocked(IBinder listener) {
             for (int i = 0; i < mInFlight.size(); i++) {
                 if (mInFlight.get(i).mListener == listener) {
