@@ -46,6 +46,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
+import android.testing.DexmakerShareClassLoaderRule;
 import android.view.Display;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 import android.view.accessibility.MagnificationAnimationCallback;
@@ -58,6 +59,7 @@ import com.android.server.accessibility.AccessibilityTraceManager;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -79,7 +81,8 @@ public class MagnificationControllerTest {
     private static final float MAGNIFIED_CENTER_X = 100;
     private static final float MAGNIFIED_CENTER_Y = 200;
     private static final float DEFAULT_SCALE = 3f;
-    private static final int CURRENT_USER_ID = UserHandle.USER_CURRENT;
+    private static final int CURRENT_USER_ID = UserHandle.USER_SYSTEM;
+    private static final int SECOND_USER_ID = CURRENT_USER_ID + 1;
     private static final int MODE_WINDOW = Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
     private static final int MODE_FULLSCREEN =
             Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
@@ -94,6 +97,7 @@ public class MagnificationControllerTest {
     private Context mContext;
     @Mock
     private FullScreenMagnificationController mScreenMagnificationController;
+    private MagnificationScaleProvider mScaleProvider;
     @Captor
     private ArgumentCaptor<MagnificationAnimationCallback> mCallbackArgumentCaptor;
 
@@ -102,6 +106,11 @@ public class MagnificationControllerTest {
     private MockContentResolver mMockResolver;
     private MagnificationController mMagnificationController;
     private FullScreenMagnificationControllerStubber mScreenMagnificationControllerStubber;
+
+    // To mock package-private class
+    @Rule
+    public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
+            new DexmakerShareClassLoaderRule();
 
     @Before
     public void setUp() throws Exception {
@@ -113,15 +122,17 @@ public class MagnificationControllerTest {
         Settings.Secure.putFloatForUser(mMockResolver,
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, DEFAULT_SCALE,
                 CURRENT_USER_ID);
+        mScaleProvider = spy(new MagnificationScaleProvider(mContext));
         mWindowMagnificationManager = Mockito.spy(
                 new WindowMagnificationManager(mContext, CURRENT_USER_ID,
-                        mock(WindowMagnificationManager.Callback.class), mTraceManager));
+                        mock(WindowMagnificationManager.Callback.class), mTraceManager,
+                        mScaleProvider));
         mMockConnection = new MockWindowMagnificationConnection(true);
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
         mScreenMagnificationControllerStubber = new FullScreenMagnificationControllerStubber(
                 mScreenMagnificationController);
         mMagnificationController = spy(new MagnificationController(mService, new Object(), mContext,
-                mScreenMagnificationController, mWindowMagnificationManager));
+                mScreenMagnificationController, mWindowMagnificationManager, mScaleProvider));
 
         mMagnificationController.setMagnificationCapabilities(
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL);
@@ -283,14 +294,16 @@ public class MagnificationControllerTest {
 
         verify(mScreenMagnificationController).onDisplayRemoved(TEST_DISPLAY);
         verify(mWindowMagnificationManager).onDisplayRemoved(TEST_DISPLAY);
+        verify(mScaleProvider).onDisplayRemoved(TEST_DISPLAY);
     }
 
     @Test
-    public void updateUserIdIfNeeded_AllModulesAvailable_setUserId() {
-        mMagnificationController.updateUserIdIfNeeded(CURRENT_USER_ID);
+    public void updateUserIdIfNeeded_AllModulesAvailable_disableMagnificationAndChangeUserId() {
+        mMagnificationController.updateUserIdIfNeeded(SECOND_USER_ID);
 
-        verify(mScreenMagnificationController).setUserId(CURRENT_USER_ID);
-        verify(mWindowMagnificationManager).setUserId(CURRENT_USER_ID);
+        verify(mScreenMagnificationController).resetAllIfNeeded(false);
+        verify(mWindowMagnificationManager).disableAllWindowMagnifiers();
+        verify(mScaleProvider).onUserChanged(SECOND_USER_ID);
     }
 
     @Test
@@ -575,6 +588,13 @@ public class MagnificationControllerTest {
         verify(mMagnificationController, never()).logMagnificationModeWithIme(anyInt());
     }
 
+    @Test
+    public void onUserRemoved_notifyScaleProvider() {
+        mMagnificationController.onUserRemoved(SECOND_USER_ID);
+
+        verify(mScaleProvider).onUserRemoved(SECOND_USER_ID);
+    }
+
     private void setMagnificationEnabled(int mode) throws RemoteException {
         setMagnificationEnabled(mode, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y);
     }
@@ -627,7 +647,8 @@ public class MagnificationControllerTest {
                     TEST_DISPLAY);
             doAnswer(invocation -> mIsMagnifying).when(
                     mScreenMagnificationController).isForceShowMagnifiableBounds(TEST_DISPLAY);
-            doAnswer(invocation -> mScale).when(mScreenMagnificationController).getPersistedScale();
+            doAnswer(invocation -> mScale).when(mScreenMagnificationController).getPersistedScale(
+                    TEST_DISPLAY);
             doAnswer(invocation -> mScale).when(mScreenMagnificationController).getScale(
                     TEST_DISPLAY);
             doAnswer(invocation -> mCenterX).when(mScreenMagnificationController).getCenterX(

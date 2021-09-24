@@ -128,6 +128,7 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.accessibility.magnification.MagnificationController;
 import com.android.server.accessibility.magnification.MagnificationProcessor;
+import com.android.server.accessibility.magnification.MagnificationScaleProvider;
 import com.android.server.accessibility.magnification.WindowMagnificationManager;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -338,7 +339,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mA11yWindowManager = new AccessibilityWindowManager(mLock, mMainHandler,
                 mWindowManagerService, this, mSecurityPolicy, this, mTraceManager);
         mA11yDisplayListener = new AccessibilityDisplayListener(mContext, mMainHandler);
-        mMagnificationController = new MagnificationController(this, mLock, mContext);
+        mMagnificationController = new MagnificationController(this, mLock, mContext,
+                new MagnificationScaleProvider(mContext));
         mMagnificationProcessor = new MagnificationProcessor(mMagnificationController);
         init();
     }
@@ -1364,6 +1366,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     private void switchUser(int userId) {
+        mMagnificationController.updateUserIdIfNeeded(userId);
         synchronized (mLock) {
             if (mCurrentUserId == userId && mInitialized) {
                 return;
@@ -1386,8 +1389,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
             // The user changed.
             mCurrentUserId = userId;
-
-            mMagnificationController.updateUserIdIfNeeded(mCurrentUserId);
             AccessibilityUserState userState = getCurrentUserStateLocked();
 
             readConfigurationForUserStateLocked(userState);
@@ -1444,6 +1445,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         synchronized (mLock) {
             mUserStates.remove(userId);
         }
+        getMagnificationController().onUserRemoved(userId);
     }
 
     // Called only during settings restore; currently supports only the owner user

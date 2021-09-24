@@ -67,7 +67,7 @@ import org.mockito.invocation.InvocationOnMock;
 public class WindowMagnificationManagerTest {
 
     private static final int TEST_DISPLAY = Display.DEFAULT_DISPLAY;
-    private static final int CURRENT_USER_ID = UserHandle.USER_CURRENT;
+    private static final int CURRENT_USER_ID = UserHandle.USER_SYSTEM;
 
     private MockWindowMagnificationConnection mMockConnection;
     @Mock
@@ -91,7 +91,7 @@ public class WindowMagnificationManagerTest {
         mResolver = new MockContentResolver();
         mMockConnection = new MockWindowMagnificationConnection();
         mWindowMagnificationManager = new WindowMagnificationManager(mContext, CURRENT_USER_ID,
-                mMockCallback, mMockTrace);
+                mMockCallback, mMockTrace, new MagnificationScaleProvider(mContext));
 
         when(mContext.getContentResolver()).thenReturn(mResolver);
         doAnswer((InvocationOnMock invocation) -> {
@@ -230,7 +230,7 @@ public class WindowMagnificationManagerTest {
     public void getPersistedScale() {
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
 
-        assertEquals(mWindowMagnificationManager.getPersistedScale(), 2.5f);
+        assertEquals(mWindowMagnificationManager.getPersistedScale(TEST_DISPLAY), 2.5f);
     }
 
     @Test
@@ -264,7 +264,7 @@ public class WindowMagnificationManagerTest {
         mWindowMagnificationManager.setScale(TEST_DISPLAY, 10.0f);
 
         assertEquals(mWindowMagnificationManager.getScale(TEST_DISPLAY),
-                WindowMagnificationManager.MAX_SCALE);
+                MagnificationScaleProvider.MAX_SCALE);
     }
 
     @Test
