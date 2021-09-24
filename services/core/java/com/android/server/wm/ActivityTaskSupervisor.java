@@ -1940,6 +1940,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     void removeHistoryRecords(WindowProcessController app) {
         removeHistoryRecords(mStoppingActivities, app, "mStoppingActivities");
         removeHistoryRecords(mFinishingActivities, app, "mFinishingActivities");
+        removeHistoryRecords(mNoHistoryActivities, app, "mNoHistoryActivities");
     }
 
     private void removeHistoryRecords(ArrayList<ActivityRecord> list, WindowProcessController app,
@@ -1977,6 +1978,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 mWaitingActivityLaunched.get(i).dump(pw, prefix + "  ");
             }
         }
+        pw.println(prefix + "mNoHistoryActivities=" + mNoHistoryActivities);
         pw.println();
     }
 
