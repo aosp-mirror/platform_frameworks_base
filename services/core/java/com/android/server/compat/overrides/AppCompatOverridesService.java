@@ -49,7 +49,6 @@ import com.android.internal.compat.CompatibilityOverrideConfig;
 import com.android.internal.compat.CompatibilityOverridesToRemoveConfig;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.server.SystemService;
-import com.android.server.compat.overrides.AppCompatOverridesParser.PackageOverrides;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -128,20 +127,25 @@ public final class AppCompatOverridesService {
     }
 
     /**
-     * Same as {@link #applyOverrides(Properties, Map)} except all properties of the given {@code
-     * namespace} are fetched via {@link DeviceConfig#getProperties}.
+     * Same as {@link #applyOverrides(Properties, Set, Map)} except all properties of the given
+     * {@code namespace} are fetched via {@link DeviceConfig#getProperties}.
      */
-    private void applyAllOverrides(String namespace,
+    private void applyAllOverrides(String namespace, Set<Long> ownedChangeIds,
             Map<String, Set<Long>> packageToChangeIdsToSkip) {
-        applyOverrides(DeviceConfig.getProperties(namespace), packageToChangeIdsToSkip);
+        applyOverrides(DeviceConfig.getProperties(namespace), ownedChangeIds,
+                packageToChangeIdsToSkip);
     }
 
     /**
      * Iterates all package override flags in the given {@code properties}, and for each flag whose
-     * package is installed on the device, parses its value and applies the overrides in it with
+     * package is installed on the device, parses its value and adds the overrides in it with
      * respect to the package's current installed version.
+     *
+     * <p>In addition, for each package, removes any override that wasn't just added, whose change
+     * ID is in {@code ownedChangeIds} but not in the respective set in {@code
+     * packageToChangeIdsToSkip}.
      */
-    private void applyOverrides(Properties properties,
+    private void applyOverrides(Properties properties, Set<Long> ownedChangeIds,
             Map<String, Set<Long>> packageToChangeIdsToSkip) {
         Set<String> packageNames = new ArraySet<>(properties.getKeyset());
         packageNames.remove(FLAG_OWNED_CHANGE_IDS);
@@ -154,15 +158,16 @@ public final class AppCompatOverridesService {
             }
 
             applyPackageOverrides(properties.getString(packageName, /* defaultValue= */ ""),
-                    packageName, versionCode,
-                    packageToChangeIdsToSkip.getOrDefault(packageName, emptySet()));
+                    packageName, versionCode, ownedChangeIds,
+                    packageToChangeIdsToSkip.getOrDefault(packageName, emptySet()),
+                    /* removeOtherOwnedOverrides= */ true);
         }
     }
 
     /**
-     * Applies all overrides in all supported namespaces for the given {@code packageName}.
+     * Adds all overrides in all supported namespaces for the given {@code packageName}.
      */
-    private void applyAllPackageOverrides(String packageName) {
+    private void addAllPackageOverrides(String packageName) {
         Long versionCode = getVersionCodeOrNull(packageName);
         if (versionCode == null) {
             return;
@@ -171,26 +176,40 @@ public final class AppCompatOverridesService {
         for (String namespace : mSupportedNamespaces) {
             // We apply overrides for each namespace separately so that if there is a failure for
             // one namespace, the other namespaces won't be affected.
+            Set<Long> ownedChangeIds = getOwnedChangeIds(namespace);
             applyPackageOverrides(
                     DeviceConfig.getString(namespace, packageName, /* defaultValue= */ ""),
-                    packageName, versionCode,
-                    getOverridesToRemove(namespace).getOrDefault(packageName, emptySet()));
+                    packageName, versionCode, ownedChangeIds,
+                    getOverridesToRemove(namespace, ownedChangeIds).getOrDefault(packageName,
+                            emptySet()), /* removeOtherOwnedOverrides */ false);
         }
     }
 
     /**
-     * Calls {@link AppCompatOverridesParser#parsePackageOverrides} on the given arguments, adds the
-     * resulting {@link PackageOverrides#overridesToAdd} via {@link
-     * IPlatformCompat#putOverridesOnReleaseBuilds}, and removes the resulting {@link
-     * PackageOverrides#overridesToRemove} via {@link
-     * IPlatformCompat#removeOverridesOnReleaseBuilds}.
+     * Calls {@link AppCompatOverridesParser#parsePackageOverrides} on the given arguments and adds
+     * the resulting overrides via {@link IPlatformCompat#putOverridesOnReleaseBuilds}.
+     *
+     * <p>In addition, if {@code removeOtherOwnedOverrides} is true, removes any override that
+     * wasn't just added, whose change ID is in {@code ownedChangeIds} but not in {@code
+     * changeIdsToSkip}, via {@link IPlatformCompat#removeOverridesOnReleaseBuilds}.
      */
-    private void applyPackageOverrides(String configStr, String packageName,
-            long versionCode, Set<Long> changeIdsToSkip) {
-        PackageOverrides packageOverrides = AppCompatOverridesParser.parsePackageOverrides(
+    private void applyPackageOverrides(String configStr, String packageName, long versionCode,
+            Set<Long> ownedChangeIds, Set<Long> changeIdsToSkip,
+            boolean removeOtherOwnedOverrides) {
+        Map<Long, PackageOverride> overridesToAdd = AppCompatOverridesParser.parsePackageOverrides(
                 configStr, versionCode, changeIdsToSkip);
-        putPackageOverrides(packageName, packageOverrides.overridesToAdd);
-        removePackageOverrides(packageName, packageOverrides.overridesToRemove);
+        putPackageOverrides(packageName, overridesToAdd);
+
+        if (!removeOtherOwnedOverrides) {
+            return;
+        }
+        Set<Long> overridesToRemove = new ArraySet<>();
+        for (Long changeId : ownedChangeIds) {
+            if (!overridesToAdd.containsKey(changeId) && !changeIdsToSkip.contains(changeId)) {
+                overridesToRemove.add(changeId);
+            }
+        }
+        removePackageOverrides(packageName, overridesToRemove);
     }
 
     /**
@@ -227,10 +246,11 @@ public final class AppCompatOverridesService {
      * {@code namespace} and parses it into a map from package name to a set of change IDs to
      * remove for that package.
      */
-    private Map<String, Set<Long>> getOverridesToRemove(String namespace) {
+    private Map<String, Set<Long>> getOverridesToRemove(String namespace,
+            Set<Long> ownedChangeIds) {
         return mOverridesParser.parseRemoveOverrides(
                 DeviceConfig.getString(namespace, FLAG_REMOVE_OVERRIDES, /* defaultValue= */ ""),
-                getOwnedChangeIds(namespace));
+                ownedChangeIds);
     }
 
     /**
@@ -333,7 +353,9 @@ public final class AppCompatOverridesService {
             boolean ownedChangedIdsFlagChanged = properties.getKeyset().contains(
                     FLAG_OWNED_CHANGE_IDS);
 
-            Map<String, Set<Long>> overridesToRemove = getOverridesToRemove(mNamespace);
+            Set<Long> ownedChangeIds = getOwnedChangeIds(mNamespace);
+            Map<String, Set<Long>> overridesToRemove = getOverridesToRemove(mNamespace,
+                    ownedChangeIds);
             if (removeOverridesFlagChanged || ownedChangedIdsFlagChanged) {
                 // In both cases it's possible that overrides that weren't removed before should
                 // now be removed.
@@ -343,9 +365,9 @@ public final class AppCompatOverridesService {
             if (removeOverridesFlagChanged) {
                 // We need to re-apply all overrides in the namespace since the remove overrides
                 // flag might have blocked some of them from being applied before.
-                applyAllOverrides(mNamespace, overridesToRemove);
+                applyAllOverrides(mNamespace, ownedChangeIds, overridesToRemove);
             } else {
-                applyOverrides(properties, overridesToRemove);
+                applyOverrides(properties, ownedChangeIds, overridesToRemove);
             }
         }
     }
@@ -392,7 +414,7 @@ public final class AppCompatOverridesService {
             switch (action) {
                 case ACTION_PACKAGE_ADDED:
                 case ACTION_PACKAGE_CHANGED:
-                    applyAllPackageOverrides(packageName);
+                    addAllPackageOverrides(packageName);
                     break;
                 case ACTION_PACKAGE_REMOVED:
                     if (!isInstalledForAnyUser(packageName)) {
