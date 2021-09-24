@@ -4948,12 +4948,6 @@
          button. -->
     <integer name="config_mashPressVibrateTimeOnPowerButton">0</integer>
 
-    <!-- Control the behavior when the user presses the power button 5 times.
-           0 - Nothing
-           1 - Launch panic button gesture
-    -->
-    <integer name="config_mashPressOnPowerBehavior">0</integer>
-
     <!-- Whether or not to enable the binder heavy hitter watcher by default -->
     <bool name="config_defaultBinderHeavyHitterWatcherEnabled">false</bool>
 
