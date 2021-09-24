@@ -51,6 +51,14 @@ public class AgentTest {
     @Mock
     private InternalResourceService mIrs;
 
+    private Scribe mScribe;
+
+    private static class MockScribe extends Scribe {
+        MockScribe(InternalResourceService irs) {
+            super(irs);
+        }
+    }
+
     @Before
     public void setUp() {
         mMockingSession = mockitoSession()
@@ -61,6 +69,7 @@ public class AgentTest {
         when(mIrs.getContext()).thenReturn(mContext);
         when(mIrs.getCompleteEconomicPolicyLocked()).thenReturn(mEconomicPolicy);
         when(mContext.getSystemService(Context.ALARM_SERVICE)).thenReturn(mock(AlarmManager.class));
+        mScribe = new MockScribe(mIrs);
     }
 
     @After
@@ -72,7 +81,7 @@ public class AgentTest {
 
     @Test
     public void testRecordTransaction_UnderMax() {
-        Agent agent = new Agent(mIrs);
+        Agent agent = new Agent(mIrs, mScribe);
         Ledger ledger = new Ledger();
 
         doReturn(1_000_000L).when(mIrs).getMaxCirculationLocked();
@@ -101,7 +110,7 @@ public class AgentTest {
 
     @Test
     public void testRecordTransaction_MaxCirculation() {
-        Agent agent = new Agent(mIrs);
+        Agent agent = new Agent(mIrs, mScribe);
         Ledger ledger = new Ledger();
 
         doReturn(1000L).when(mIrs).getMaxCirculationLocked();
@@ -148,7 +157,7 @@ public class AgentTest {
 
     @Test
     public void testRecordTransaction_MaxSatiatedBalance() {
-        Agent agent = new Agent(mIrs);
+        Agent agent = new Agent(mIrs, mScribe);
         Ledger ledger = new Ledger();
 
         doReturn(1_000_000L).when(mIrs).getMaxCirculationLocked();
