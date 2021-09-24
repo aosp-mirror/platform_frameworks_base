@@ -254,7 +254,7 @@ public class HdmiCecMessageValidator {
         mValidationInfo.append(opcode, new ValidationInfo(validator, addrType));
     }
 
-    int isValid(HdmiCecMessage message) {
+    int isValid(HdmiCecMessage message, boolean isMessageReceived) {
         int opcode = message.getOpcode();
         ValidationInfo info = mValidationInfo.get(opcode);
         if (info == null) {
@@ -268,6 +268,22 @@ public class HdmiCecMessageValidator {
             HdmiLogger.warning("Unexpected source: " + message);
             return ERROR_SOURCE;
         }
+
+        if (isMessageReceived) {
+            // Check if the source's logical address and local device's logical
+            // address are the same.
+            for (HdmiCecLocalDevice device : mService.getAllLocalDevices()) {
+                synchronized (device.mLock) {
+                    if (message.getSource() == device.getDeviceInfo().getLogicalAddress()
+                            && message.getSource() != Constants.ADDR_UNREGISTERED) {
+                        HdmiLogger.warning(
+                                "Unexpected source: message sent from device itself, " + message);
+                        return ERROR_SOURCE;
+                    }
+                }
+            }
+        }
+
         // Check the destination field.
         if (message.getDestination() == Constants.ADDR_BROADCAST) {
             if ((info.addressType & DEST_BROADCAST) == 0) {
