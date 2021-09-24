@@ -165,13 +165,13 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     private boolean mNavBarAttachedToApp = false;
     private int mRecentsDisplayId = INVALID_DISPLAY;
 
-    Transition(@TransitionType int type, @TransitionFlags int flags,
+    Transition(@TransitionType int type, @TransitionFlags int flags, long timeoutMs,
             TransitionController controller, BLASTSyncEngine syncEngine) {
         mType = type;
         mFlags = flags;
         mController = controller;
         mSyncEngine = syncEngine;
-        mSyncId = mSyncEngine.startSyncSet(this);
+        mSyncId = mSyncEngine.startSyncSet(this, timeoutMs);
     }
 
     void addFlag(int flag) {
