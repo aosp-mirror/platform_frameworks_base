@@ -31,6 +31,7 @@ import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.SYSTEMUI_PACKAGE
 import com.android.server.wm.flicker.repetitions
 import com.android.wm.shell.flicker.helpers.LaunchBubbleHelper
 import org.junit.Test
@@ -53,6 +54,7 @@ abstract class BaseBubbleScreen(protected val testSpec: FlickerTestParameter) {
             testApp.component.packageName, 0).uid
 
     protected lateinit var addBubbleBtn: UiObject2
+    protected lateinit var cancelAllBtn: UiObject2
 
     protected abstract val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
 
@@ -69,6 +71,8 @@ abstract class BaseBubbleScreen(protected val testSpec: FlickerTestParameter) {
                     testApp.launchViaIntent(wmHelper)
                     addBubbleBtn = device.wait(Until.findObject(
                             By.text("Add Bubble")), FIND_OBJECT_TIMEOUT)
+                    cancelAllBtn = device.wait(Until.findObject(
+                            By.text("Cancel All Bubble")), FIND_OBJECT_TIMEOUT)
                 }
             }
 
@@ -108,5 +112,7 @@ abstract class BaseBubbleScreen(protected val testSpec: FlickerTestParameter) {
         }
 
         const val FIND_OBJECT_TIMEOUT = 2000L
+        const val SYSTEM_UI_PACKAGE = SYSTEMUI_PACKAGE
+        const val BUBBLE_RES_NAME = "bubble_view"
     }
 }
