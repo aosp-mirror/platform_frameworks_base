@@ -300,6 +300,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private LockscreenGestureLogger mLockscreenGestureLogger;
     @Mock
     private DumpManager mDumpManager;
+    @Mock
+    private NotificationsQSContainerController mNotificationsQSContainerController;
 
     private SysuiStatusBarStateController mStatusBarStateController;
     private NotificationPanelViewController mNotificationPanelViewController;
@@ -414,6 +416,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 () -> flingAnimationUtilsBuilder, mStatusBarTouchableRegionManager,
                 mConversationNotificationManager, mMediaHiearchyManager,
                 mStatusBarKeyguardViewManager,
+                mNotificationsQSContainerController,
                 mNotificationStackScrollLayoutController,
                 mKeyguardStatusViewComponentFactory,
                 mKeyguardQsUserSwitchComponentFactory,

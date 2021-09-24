@@ -26,7 +26,6 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.WindowInsets;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -58,7 +57,6 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
     private int mSideMargins;
     private boolean mQsDisabled;
     private int mContentPadding = -1;
-    private int mNavBarInset = 0;
     private boolean mClippingEnabled;
 
     public QSContainerImpl(Context context, AttributeSet attrs) {
@@ -95,24 +93,13 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
     }
 
     @Override
-    public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-        mNavBarInset = insets.getInsets(WindowInsets.Type.navigationBars()).bottom;
-        mQSPanelContainer.setPaddingRelative(
-                mQSPanelContainer.getPaddingStart(),
-                mQSPanelContainer.getPaddingTop(),
-                mQSPanelContainer.getPaddingEnd(),
-                mNavBarInset
-        );
-        return super.onApplyWindowInsets(insets);
-    }
-
-    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         // QSPanel will show as many rows as it can (up to TileLayout.MAX_ROWS) such that the
         // bottom and footer are inside the screen.
         MarginLayoutParams layoutParams = (MarginLayoutParams) mQSPanelContainer.getLayoutParams();
 
-        int maxQs = getDisplayHeight() - layoutParams.topMargin - layoutParams.bottomMargin
+        int availableHeight = View.MeasureSpec.getSize(heightMeasureSpec);
+        int maxQs = availableHeight - layoutParams.topMargin - layoutParams.bottomMargin
                 - getPaddingBottom();
         int padding = mPaddingLeft + mPaddingRight + layoutParams.leftMargin
                 + layoutParams.rightMargin;
@@ -122,11 +109,11 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
                 MeasureSpec.makeMeasureSpec(maxQs, MeasureSpec.AT_MOST));
         int width = mQSPanelContainer.getMeasuredWidth() + padding;
         super.onMeasure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(getDisplayHeight(), MeasureSpec.EXACTLY));
+                MeasureSpec.makeMeasureSpec(availableHeight, MeasureSpec.EXACTLY));
         // QSCustomizer will always be the height of the screen, but do this after
         // other measuring to avoid changing the height of the QS.
         mQSCustomizer.measure(widthMeasureSpec,
-                MeasureSpec.makeMeasureSpec(getDisplayHeight(), MeasureSpec.EXACTLY));
+                MeasureSpec.makeMeasureSpec(availableHeight, MeasureSpec.EXACTLY));
     }
 
     @Override
