@@ -548,12 +548,16 @@ public abstract class WallpaperService extends Service {
          */
         public void reportEngineShown(boolean waitForEngineShown) {
             if (mIWallpaperEngine.mShownReported) return;
-            Message message = mCaller.obtainMessage(MSG_REPORT_SHOWN);
             if (!waitForEngineShown) {
+                Message message = mCaller.obtainMessage(MSG_REPORT_SHOWN);
                 mCaller.removeMessages(MSG_REPORT_SHOWN);
                 mCaller.sendMessage(message);
             } else {
-                mCaller.sendMessageDelayed(message, TimeUnit.SECONDS.toMillis(1));
+                // if we are already waiting, no need to reset the timeout.
+                if (!mCaller.hasMessages(MSG_REPORT_SHOWN)) {
+                    Message message = mCaller.obtainMessage(MSG_REPORT_SHOWN);
+                    mCaller.sendMessageDelayed(message, TimeUnit.SECONDS.toMillis(5));
+                }
             }
         }
 
@@ -2078,6 +2082,8 @@ public abstract class WallpaperService extends Service {
                 mShownReported = true;
                 try {
                     mConnection.engineShown(this);
+                    Log.d(TAG, "Wallpaper has updated the surface:"
+                            + mWallpaperManager.getWallpaperInfo());
                 } catch (RemoteException e) {
                     Log.w(TAG, "Wallpaper host disappeared", e);
                     return;
