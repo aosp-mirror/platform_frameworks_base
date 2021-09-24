@@ -16,7 +16,7 @@
   -->
 <com.android.systemui.screenshot.ScreenshotView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/global_screenshot_frame"
+    android:id="@+id/screenshot_frame"
     android:theme="@style/Screenshot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -29,25 +29,25 @@
         android:clickable="true"
         android:importantForAccessibility="no"/>
     <ImageView
-        android:id="@+id/global_screenshot_actions_background"
+        android:id="@+id/screenshot_actions_background"
         android:layout_height="@dimen/screenshot_bg_protection_height"
         android:layout_width="match_parent"
         android:layout_gravity="bottom"
         android:alpha="0.0"
         android:src="@drawable/screenshot_actions_background_protection"/>
     <ImageView
-        android:id="@+id/global_screenshot_flash"
+        android:id="@+id/screenshot_flash"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"
         android:elevation="@dimen/screenshot_preview_elevation"
         android:src="@android:color/white"/>
     <com.android.systemui.screenshot.ScreenshotSelectorView
-        android:id="@+id/global_screenshot_selector"
+        android:id="@+id/screenshot_selector"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"
         android:pointerIcon="crosshair"/>
-    <include layout="@layout/global_screenshot_static"
-             android:id="@+id/global_screenshot_static"/>
+    <include layout="@layout/screenshot_static"
+             android:id="@+id/screenshot_static"/>
 </com.android.systemui.screenshot.ScreenshotView>

@@ -193,7 +193,7 @@ public class ScreenshotView extends FrameLayout implements
         super(context, attrs, defStyleAttr, defStyleRes);
         mResources = mContext.getResources();
 
-        mCornerSizeX = mResources.getDimensionPixelSize(R.dimen.global_screenshot_x_scale);
+        mCornerSizeX = mResources.getDimensionPixelSize(R.dimen.screenshot_x_scale);
         mDismissDeltaY = mResources.getDimensionPixelSize(
                 R.dimen.screenshot_dismissal_height_delta);
 
@@ -339,23 +339,23 @@ public class ScreenshotView extends FrameLayout implements
     @Override // View
     protected void onFinishInflate() {
         mScrollingScrim = requireNonNull(findViewById(R.id.screenshot_scrolling_scrim));
-        mScreenshotStatic = requireNonNull(findViewById(R.id.global_screenshot_static));
-        mScreenshotPreview = requireNonNull(findViewById(R.id.global_screenshot_preview));
+        mScreenshotStatic = requireNonNull(findViewById(R.id.screenshot_static));
+        mScreenshotPreview = requireNonNull(findViewById(R.id.screenshot_preview));
         mTransitionView = requireNonNull(findViewById(R.id.screenshot_transition_view));
         mScreenshotPreviewBorder = requireNonNull(
-                findViewById(R.id.global_screenshot_preview_border));
+                findViewById(R.id.screenshot_preview_border));
         mScreenshotPreview.setClipToOutline(true);
 
         mActionsContainerBackground = requireNonNull(findViewById(
-                R.id.global_screenshot_actions_container_background));
-        mActionsContainer = requireNonNull(findViewById(R.id.global_screenshot_actions_container));
-        mActionsView = requireNonNull(findViewById(R.id.global_screenshot_actions));
+                R.id.screenshot_actions_container_background));
+        mActionsContainer = requireNonNull(findViewById(R.id.screenshot_actions_container));
+        mActionsView = requireNonNull(findViewById(R.id.screenshot_actions));
         mBackgroundProtection = requireNonNull(
-                findViewById(R.id.global_screenshot_actions_background));
-        mDismissButton = requireNonNull(findViewById(R.id.global_screenshot_dismiss_button));
+                findViewById(R.id.screenshot_actions_background));
+        mDismissButton = requireNonNull(findViewById(R.id.screenshot_dismiss_button));
         mScrollablePreview = requireNonNull(findViewById(R.id.screenshot_scrollable_preview));
-        mScreenshotFlash = requireNonNull(findViewById(R.id.global_screenshot_flash));
-        mScreenshotSelectorView = requireNonNull(findViewById(R.id.global_screenshot_selector));
+        mScreenshotFlash = requireNonNull(findViewById(R.id.screenshot_flash));
+        mScreenshotSelectorView = requireNonNull(findViewById(R.id.screenshot_selector));
         mShareChip = requireNonNull(mActionsContainer.findViewById(R.id.screenshot_share_chip));
         mEditChip = requireNonNull(mActionsContainer.findViewById(R.id.screenshot_edit_chip));
         mScrollChip = requireNonNull(mActionsContainer.findViewById(R.id.screenshot_scroll_chip));
@@ -452,7 +452,7 @@ public class ScreenshotView extends FrameLayout implements
         mOrientationPortrait = (orientation == ORIENTATION_PORTRAIT);
         updateInsets(insets);
         int screenshotFixedSize =
-                mContext.getResources().getDimensionPixelSize(R.dimen.global_screenshot_x_scale);
+                mContext.getResources().getDimensionPixelSize(R.dimen.screenshot_x_scale);
         ViewGroup.LayoutParams params = mScreenshotPreview.getLayoutParams();
         if (mOrientationPortrait) {
             params.width = screenshotFixedSize;
@@ -748,7 +748,7 @@ public class ScreenshotView extends FrameLayout implements
 
             for (Notification.Action smartAction : imageData.smartActions) {
                 ScreenshotActionChip actionChip = (ScreenshotActionChip) inflater.inflate(
-                        R.layout.global_screenshot_action_chip, mActionsView, false);
+                        R.layout.screenshot_action_chip, mActionsView, false);
                 actionChip.setText(smartAction.title);
                 actionChip.setIcon(smartAction.getIcon(), false);
                 actionChip.setPendingIntent(smartAction.actionIntent,
@@ -767,7 +767,7 @@ public class ScreenshotView extends FrameLayout implements
         if (mPendingInteraction == null) {
             LayoutInflater inflater = LayoutInflater.from(mContext);
             mQuickShareChip = (ScreenshotActionChip) inflater.inflate(
-                    R.layout.global_screenshot_action_chip, mActionsView, false);
+                    R.layout.screenshot_action_chip, mActionsView, false);
             mQuickShareChip.setText(quickShareAction.title);
             mQuickShareChip.setIcon(quickShareAction.getIcon(), false);
             mQuickShareChip.setOnClickListener(v -> {
