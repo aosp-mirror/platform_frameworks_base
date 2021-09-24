@@ -1188,6 +1188,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Ieškoma tinklų…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Jungiantis prie tinklo įvyko klaida"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Žiūrėti viską"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Norėdami perjungti tinklus, atjunkite eternetą"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"„<xliff:g id="APPNAME">%1$s</xliff:g>“ nori prie sparčiųjų nustatymų pridėti toliau pateiktą išklotinės elementą"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Pridėti išklotinės elementą"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Nepridėti išklotinės elemento"</string>

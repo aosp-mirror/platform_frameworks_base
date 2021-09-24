@@ -1176,6 +1176,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Сүлжээ хайж байна…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Сүлжээнд холбогдож чадсангүй"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Бүгдийг харах"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Сүлжээг сэлгэхийн тулд этернэтийг салгана уу"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> нь дараах хавтанг Шуурхай тохиргоонд нэмэх хүсэлтэй байна"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Хавтан нэмэх"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Хавтанг бүү нэм"</string>
