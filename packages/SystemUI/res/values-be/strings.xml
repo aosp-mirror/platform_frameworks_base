@@ -679,8 +679,8 @@
     <string name="activity_not_found" msgid="8711661533828200293">"Праграма не ўсталявана на вашым тэлефоне"</string>
     <string name="clock_seconds" msgid="8709189470828542071">"Паказваць секунды гадзінніка"</string>
     <string name="clock_seconds_desc" msgid="2415312788902144817">"Паказваць секунды гадзінніка на панэлі стану. Можа паўплываць на рэсурс акумулятара."</string>
-    <string name="qs_rearrange" msgid="484816665478662911">"Змяніць парадак Хуткіх налад"</string>
-    <string name="show_brightness" msgid="6700267491672470007">"Паказваць яркасць у Хуткіх наладах"</string>
+    <string name="qs_rearrange" msgid="484816665478662911">"Змяніць парадак хуткіх налад"</string>
+    <string name="show_brightness" msgid="6700267491672470007">"Паказваць яркасць у хуткіх наладах"</string>
     <string name="experimental" msgid="3549865454812314826">"Эксперыментальныя"</string>
     <string name="enable_bluetooth_title" msgid="866883307336662596">"Уключыць Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Для падлучэння клавіятуры да планшэта трэба спачатку ўключыць Bluetooth."</string>
