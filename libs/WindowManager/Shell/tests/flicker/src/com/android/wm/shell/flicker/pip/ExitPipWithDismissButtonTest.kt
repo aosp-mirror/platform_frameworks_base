@@ -16,8 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Postsubmit
-import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -26,7 +24,6 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import org.junit.FixMethodOrder
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -62,14 +59,6 @@ class ExitPipWithDismissButtonTest(testSpec: FlickerTestParameter) : ExitPipTran
                 pipApp.closePipWindow(wmHelper)
             }
         }
-
-    @Presubmit
-    @Test
-    override fun pipLayerBecomesInvisible() = super.pipLayerBecomesInvisible()
-
-    @Postsubmit
-    @Test
-    override fun pipWindowBecomesInvisible() = super.pipWindowBecomesInvisible()
 
     companion object {
         /**

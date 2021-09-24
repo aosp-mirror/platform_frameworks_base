@@ -17,7 +17,7 @@
 package com.android.server.wm.flicker.ime
 
 import android.app.Instrumentation
-import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
@@ -96,21 +96,21 @@ class LaunchAppShowImeOnStartTest(private val testSpec: FlickerTestParameter) {
     /**
      * Checks that [FlickerComponentName.IME] window becomes visible during the transition
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun imeWindowBecomesVisible() = testSpec.imeWindowBecomesVisible()
 
     /**
      * Checks that [FlickerComponentName.IME] layer becomes visible during the transition
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun imeLayerBecomesVisible() = testSpec.imeLayerBecomesVisible()
 
     /**
      * Checks that [FlickerComponentName.IME] layer is invisible at the start of the transition
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun imeLayerNotExistsStart() {
         testSpec.assertLayersStart {
@@ -121,7 +121,7 @@ class LaunchAppShowImeOnStartTest(private val testSpec: FlickerTestParameter) {
     /**
      * Checks that [FlickerComponentName.IME] layer is visible at the end of the transition
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun imeLayerExistsEnd() {
         testSpec.assertLayersEnd {
