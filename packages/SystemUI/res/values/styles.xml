@@ -1000,7 +1000,7 @@
 
     <style name="TextAppearance.InternetDialog.Secondary">
         <item name="android:textSize">14sp</item>
-        <item name="android:textColor">?android:attr/textColorTertiary</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
     <style name="TextAppearance.InternetDialog.Active"/>
