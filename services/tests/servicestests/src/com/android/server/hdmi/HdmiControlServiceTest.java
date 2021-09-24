@@ -671,7 +671,7 @@ public class HdmiControlServiceTest {
     @Test
     public void handleCecCommand_errorParameter_returnsAbortInvalidOperand() {
         // Validity ERROR_PARAMETER. Taken from HdmiCecMessageValidatorTest#isValid_menuStatus
-        HdmiCecMessage message = HdmiUtils.buildMessage("40:8D:03");
+        HdmiCecMessage message = HdmiUtils.buildMessage("80:8D:03");
 
         assertThat(mHdmiControlServiceSpy.handleCecCommand(message))
                 .isEqualTo(Constants.ABORT_INVALID_OPERAND);
