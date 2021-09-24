@@ -2040,7 +2040,7 @@
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"Atualizar <xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g> em "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"Atualizar estes itens em "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> e <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Salvar"</string>
-    <string name="autofill_save_no" msgid="9212826374207023544">"Não, obrigado"</string>
+    <string name="autofill_save_no" msgid="9212826374207023544">"Agora não"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"Agora não"</string>
     <string name="autofill_save_never" msgid="6821841919831402526">"Nunca"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"Atualizar"</string>
