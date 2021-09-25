@@ -5144,7 +5144,7 @@ class Task extends WindowContainer<WindowContainer> {
     /**
      * @return true if the task is currently focused.
      */
-    private boolean isFocused() {
+    boolean isFocused() {
         if (mDisplayContent == null || mDisplayContent.mCurrentFocus == null) {
             return false;
         }
@@ -5206,6 +5206,10 @@ class Task extends WindowContainer<WindowContainer> {
      * @param hasFocus
      */
     void onWindowFocusChanged(boolean hasFocus) {
+        final ActivityRecord topAct = getTopVisibleActivity();
+        if (topAct != null && (topAct.mStartingData instanceof SnapshotStartingData)) {
+            topAct.removeStartingWindowIfNeeded();
+        }
         updateShadowsRadius(hasFocus, getSyncTransaction());
         // TODO(b/180525887): Un-comment once there is resolution on the bug.
         // dispatchTaskInfoChangedIfNeeded(false /* force */);
