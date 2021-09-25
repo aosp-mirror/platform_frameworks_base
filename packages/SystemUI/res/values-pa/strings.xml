@@ -710,6 +710,8 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"ਪਾਵਰ ਸੂਚਨਾ ਕੰਟਰੋਲ"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"ਚਾਲੂ"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"ਬੰਦ"</string>
+    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
+    <skip />
     <string name="power_notification_controls_description" msgid="1334963837572708952">"ਪਾਵਰ ਸੂਚਨਾ ਕੰਟਰੋਲਾਂ ਨਾਲ, ਤੁਸੀਂ ਕਿਸੇ ਐਪ ਦੀਆਂ ਸੂਚਨਾਵਾਂ ਲਈ ਮਹੱਤਤਾ ਪੱਧਰ ਨੂੰ 0 ਤੋਂ 5 ਤੱਕ ਸੈੱਟ ਕਰ ਸਕਦੇ ਹੋ। \n\n"<b>"ਪੱਧਰ 5"</b>" \n- ਸੂਚਨਾ ਸੂਚੀ ਦੇ ਸਿਖਰ \'ਤੇ ਦਿਖਾਓ \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਦੀ ਆਗਿਆ ਦਿਓ \n- ਹਮੇਸ਼ਾਂ ਝਲਕ ਦਿਖਾਓ \n\n"<b>"ਪੱਧਰ 4"</b>" \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਨੂੰ ਰੋਕੋ \n- ਹਮੇਸ਼ਾਂ ਝਲਕ ਦਿਖਾਓ \n\n"<b>"ਪੱਧਰ 3"</b>" \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਨੂੰ ਰੋਕੋ \n- ਕਦੇ ਝਲਕ ਨਾ ਦਿਖਾਓ \n\n"<b>"ਪੱਧਰ 2"</b>" \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਨੂੰ ਰੋਕੋ \n- ਕਦੇ ਝਲਕ ਨਾ ਦਿਖਾਓ \n- ਕਦੇ ਵੀ ਧੁਨੀ ਜਾਂ ਥਰਥਰਾਹਟ ਨਾ ਕਰੋ \n\n"<b>"ਪੱਧਰ 1"</b>" \n- ਪੂਰੀ ਸਕ੍ਰੀਨ ਰੁਕਾਵਟ ਨੂੰ ਰੋਕੋ \n- ਕਦੇ ਝਲਕ ਨਾ ਦਿਖਾਓ \n- ਕਦੇ ਧੁਨੀ ਜਾਂ ਥਰਥਰਾਹਟ ਨਾ ਕਰੋ \n- ਲਾਕ ਸਕ੍ਰੀਨ ਅਤੇ ਸਥਿਤੀ ਪੱਟੀ ਤੋਂ ਲੁਕਾਓ \n- ਸੂਚਨਾ ਸੂਚੀ ਦੇ ਹੇਠਾਂ ਦਿਖਾਓ \n\n"<b>"ਪੱਧਰ 0"</b>" \n- ਐਪ ਤੋਂ ਸਾਰੀਆਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਬਲਾਕ ਕਰੋ"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"ਸੂਚਨਾਵਾਂ"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"ਤੁਹਾਨੂੰ ਹੁਣ ਇਹ ਸੂਚਨਾਵਾਂ ਦਿਖਾਈ ਨਹੀਂ ਦੇਣਗੀਆਂ"</string>
@@ -1175,5 +1177,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"ਨੈੱਟਵਰਕਾਂ ਨੂੰ ਦੇਖਣ ਲਈ ਅਣਲਾਕ ਕਰੋ"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"ਨੈੱਟਵਰਕ ਖੋਜੇ ਜਾ ਰਹੇ ਹਨ…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਕਰਨਾ ਅਸਫਲ ਰਿਹਾ"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"ਸਭ ਦੇਖੋ"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ਨੈੱਟਵਰਕਾਂ ਨੂੰ ਬਦਲਣ ਲਈ, ਈਥਰਨੈੱਟ ਨੂੰ ਡਿਸਕਨੈਕਟ ਕਰੋ"</string>
 </resources>

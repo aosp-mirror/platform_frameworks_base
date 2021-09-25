@@ -710,6 +710,8 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"പവർ അറിയിപ്പ് നിയന്ത്രണങ്ങൾ"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"ഓൺ"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"ഓഫ്"</string>
+    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
+    <skip />
     <string name="power_notification_controls_description" msgid="1334963837572708952">"പവർ അറിയിപ്പ് നിയന്ത്രണം ഉപയോഗിച്ച്, ഒരു ആപ്പിനായുള്ള അറിയിപ്പുകൾക്ക് 0 മുതൽ 5 വരെയുള്ള പ്രാധാന്യ ലെവലുകളിലൊന്ന് നിങ്ങൾക്ക് സജ്ജമാക്കാവുന്നതാണ്. \n\n"<b>"ലെവൽ 5"</b>" \n- അറിയിപ്പ് ലിസ്റ്റിന്റെ മുകളിൽ കാണിക്കുക \n- മുഴുവൻ സ്ക്രീൻ തടസ്സം അനുവദിക്കുക \n- എല്ലായ്പ്പോഴും ദൃശ്യമാക്കുക \n\n"<b>"ലെവൽ 4"</b>" \n- മുഴുവൻ സ്ക്രീൻ തടസ്സം തടയുക \n- എല്ലായ്പ്പോഴും ദൃശ്യമാക്കുക \n\n"<b>"ലെവൽ 3"</b>" \n- മുഴുവൻ സ്ക്രീൻ തടസ്സം തടയുക \n- ഒരിക്കലും സൃശ്യമാക്കരുത് \n\n"<b>"ലെവൽ 2"</b>" \n- മുഴുവൻ സ്ക്രീൻ തടസ്സം തടയുക \n- ഒരിക്കലും ദൃശ്യമാക്കരുത് \n- ഒരിക്കലും ശബ്ദവും വൈബ്രേഷനും ഉണ്ടാക്കരുത് \n\n"<b>"ലെവൽ 1"</b>" \n- മുഴുവൻ സ്ക്രീൻ തടസ്സം തടയുക \n- ഒരിക്കലും ദൃശ്യമാക്കരുത് \n- ഒരിക്കലും ശബ്ദവും വൈബ്രേഷനും ഉണ്ടാക്കരുത് \n- ലോക്ക് സ്ക്രീനിൽ നിന്നും സ്റ്റാറ്റസ് ബാറിൽ നിന്നും മറയ്ക്കുക \n- അറിയിപ്പ് ലിസ്റ്റിന്റെ അടിയിൽ കാണിക്കുക \n\n"<b>"ലെവൽ 0"</b>" \n- ആപ്പിൽ നിന്നുള്ള എല്ലാ അറിയിപ്പുകളും ബ്ലോക്കുചെയ്യുക"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"അറിയിപ്പുകൾ"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"നിങ്ങൾ ഇനി ഈ അറിയിപ്പുകൾ കാണില്ല"</string>
@@ -1175,5 +1177,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"നെറ്റ്‌വർക്കുകൾ കാണാൻ അൺ‌ലോക്ക് ചെയ്യുക"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"നെറ്റ്‌വർക്കുകൾ തിരയുന്നു…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"നെറ്റ്‌വർക്കിൽ കണക്റ്റ് ചെയ്യാനായില്ല"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"എല്ലാം കാണുക"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"മറ്റ് നെറ്റ്‌വർക്കുകളിലേക്ക് മാറാൻ, ഇതർനെറ്റ് വിച്ഛേദിക്കുക"</string>
 </resources>

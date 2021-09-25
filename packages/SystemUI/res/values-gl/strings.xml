@@ -710,6 +710,8 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Controis de notificacións mellorados"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Activado"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Desactivado"</string>
+    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
+    <skip />
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Cos controis de notificacións mellorados, podes asignarlles un nivel de importancia comprendido entre 0 e 5 ás notificacións dunha aplicación determinada. \n\n"<b>"Nivel 5"</b>" \n- Mostrar na parte superior da lista de notificacións. \n- Permitir interrupcións no modo de pantalla completa. \n- Mostrar sempre. \n\n"<b>"Nivel 4"</b>" \n- Impedir interrupcións no modo de pantalla completa. \n- Mostrar sempre. \n\n"<b>"Nivel 3"</b>" \n- Impedir interrupcións no modo de pantalla completa. \n- Non mostrar nunca. \n\n"<b>"Nivel 2"</b>" \n- Impedir interrupcións no modo de pantalla completa. \n- Non mostrar nunca. \n- Non soar nin vibrar nunca. \n\n"<b>"Nivel 1"</b>" \n- Impedir interrupcións no modo de pantalla completa. \n- Non mostrar nunca. \n- Non soar nin vibrar nunca. \n- Ocultar na pantalla de bloqueo e na barra de estado. \n- Mostrar na parte inferior da lista de notificacións. \n\n"<b>"Nivel 0"</b>" \n- Bloquear todas as notificacións da aplicación."</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Notificacións"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Deixarás de ver estas notificacións"</string>
@@ -1175,5 +1177,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Desbloquea a pantalla para ver as redes"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Buscando redes…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Produciuse un erro ao conectarse á rede"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"Ver todo"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Para cambiar de rede, desconecta a Ethernet"</string>
 </resources>

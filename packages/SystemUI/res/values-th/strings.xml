@@ -710,6 +710,8 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"ส่วนควบคุมการแจ้งเตือนแบบเปิด/ปิด"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"เปิด"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"ปิด"</string>
+    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
+    <skip />
     <string name="power_notification_controls_description" msgid="1334963837572708952">"ส่วนควบคุมการแจ้งเตือนแบบเปิด/ปิดช่วยให้คุณตั้งค่าระดับความสำคัญสำหรับการแจ้งเตือนของแอปได้ตั้งแต่ระดับ 0-5 \n\n"<b>"ระดับ 5"</b>" \n- แสดงที่ด้านบนของรายการแจ้งเตือน \n- อนุญาตให้รบกวนแบบเต็มหน้าจอ \n- อนุญาตให้แสดงชั่วครู่ \n\n"<b>"ระดับ 4"</b>" \n- ป้องกันการรบกวนแบบเต็มหน้าจอ \n- แสดงชั่วครู่เสมอ \n\n"<b>"ระดับ 3"</b>" \n- ป้องกันการรบกวนแบบเต็มหน้าจอ \n- ไม่แสดงชั่วครู่เลย \n\n"<b>"ระดับ 2"</b>" \n- ป้องกันการรบกวนแบบเต็มหน้าจอ \n- ไม่แสดงชั่วครู่เลย \n- ไม่ส่งเสียงหรือสั่นเลย \n\n"<b>"ระดับ 1"</b>" \n- ป้องกันการรบกวนแบบเต็มหน้าจอ \n- ไม่แสดงชั่วครู่เลย \n- ไม่ส่งเสียงหรือสั่นเลย \n- ซ่อนจากหน้าจอล็อกและแถบสถานะ \n- แสดงที่ด้านล่างของรายการแจ้งเตือน \n\n"<b>"ระดับ 0"</b>" \n- บล็อกการแจ้งเตือนทั้งหมดจากแอป"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"การแจ้งเตือน"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"คุณจะไม่เห็นการแจ้งเตือนเหล่านี้อีก"</string>
@@ -1175,5 +1177,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"ปลดล็อกเพื่อดูเครือข่าย"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"กำลังค้นหาเครือข่าย…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"เชื่อมต่อเครือข่ายไม่สำเร็จ"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"ดูทั้งหมด"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ตัดการเชื่อมต่ออีเทอร์เน็ตเพื่อสลับเครือข่าย"</string>
 </resources>

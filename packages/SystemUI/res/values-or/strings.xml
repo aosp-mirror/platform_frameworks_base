@@ -710,6 +710,8 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"ପାୱାର୍‍ ବିଜ୍ଞପ୍ତି କଣ୍ଟ୍ରୋଲ୍‌"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"ଚାଲୁ ଅଛି"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"ବନ୍ଦ"</string>
+    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
+    <skip />
     <string name="power_notification_controls_description" msgid="1334963837572708952">"ପାୱାର୍‍ ବିଜ୍ଞପ୍ତି କଣ୍ଟ୍ରୋଲ୍‌ରେ, ଆପଣ ଏକ ଆପ୍‍ ବିଜ୍ଞପ୍ତି ପାଇଁ 0 ରୁ 5 ଗୁରୁତ୍ୱ ସ୍ତର ସେଟ୍‍ କରିହେବେ। \n\n"<b>"ସ୍ତର 5"</b>" \n- ବିଜ୍ଞପ୍ତି ତାଲିକାର ଶୀର୍ଷରେ ଦେଖାନ୍ତୁ \n- ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନରେ ବାଧା ଦେବାକୁ ଅନୁମତି ଦିଅନ୍ତୁ \n- ସର୍ବଦା ପିକ୍‍ କରନ୍ତୁ \n\n"<b>"ସ୍ତର 4"</b>" \n- ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନରେ ବାଧା ଦେବା ବ୍ଲକ୍‌ କରନ୍ତୁ \n- ସର୍ବଦା ପିକ୍‍ କରନ୍ତୁ \n\n"<b>"ସ୍ତର 3"</b>" \n- ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନରେ ବାଧା ଦେବା ବ୍ଲକ୍‌ କରନ୍ତୁ \n- କଦାପି ପିକ୍‍ କରନ୍ତୁ ନାହିଁ \n\n"<b>"ସ୍ତର 2"</b>" \n- ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନରେ ବାଧା ଦେବା ବ୍ଲକ୍‌ କରନ୍ତୁ \n- କଦାପି ପିକ୍‍ କରନ୍ତୁ ନାହିଁ \n- କଦାପି ସାଉଣ୍ଡ ଓ ଭାଇବ୍ରେଟ୍‍ କରନ୍ତୁ ନାହିଁ \n\n"<b>"ସ୍ତର 1"</b>" \n- ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନରେ ବାଧା ଦେବା ବ୍ଲକ୍‌ କରନ୍ତୁ \n- କଦାପି ପିକ୍‍ କରନ୍ତୁ ନାହିଁ \n- କଦାପି ସାଉଣ୍ଡ ଓ ଭାଇବ୍ରେଟ୍‍ କରନ୍ତୁ ନାହିଁ \n- ଲକ୍‍ ସ୍କ୍ରୀନ୍‍ ଓ ଷ୍ଟାଟସ୍‍ ବାର୍‌ରୁ ଲୁଚାନ୍ତୁ \n- ବିଜ୍ଞପ୍ତି ତାଲିକାର ନିମ୍ନରେ ଦେଖାନ୍ତୁ \n\n"<b>"ସ୍ତର 0"</b>" \n- ଆପରୁ ସମସ୍ତ ବିଜ୍ଞପ୍ତି ବ୍ଲକ୍‌ କରନ୍ତୁ"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"ବିଜ୍ଞପ୍ତି"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"ଏହି ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ଆପଣ ଆଉ ଦେଖିବାକୁ ପାଇବେନାହିଁ।"</string>
@@ -1175,5 +1177,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"ନେଟୱାର୍କଗୁଡ଼ିକୁ ଦେଖିବା ପାଇଁ ଅନଲକ୍ କରନ୍ତୁ"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"ନେଟୱାର୍କଗୁଡ଼ିକ ସନ୍ଧାନ କରାଯାଉଛି…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"ନେଟୱାର୍କକୁ ସଂଯୋଗ କରିବାରେ ବିଫଳ ହୋଇଛି"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"ସବୁ ଦେଖନ୍ତୁ"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ନେଟୱାର୍କ ସ୍ୱିଚ୍ କରିବାକୁ, ଇଥରନେଟ୍ ବିଚ୍ଛିନ୍ନ କରନ୍ତୁ"</string>
 </resources>

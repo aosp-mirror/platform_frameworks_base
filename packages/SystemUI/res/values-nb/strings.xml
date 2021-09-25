@@ -710,6 +710,8 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Effektive varselinnstillinger"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"På"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Av"</string>
+    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
+    <skip />
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Med effektive varselinnstillinger kan du angi viktighetsnivåer fra 0 til 5 for appvarsler. \n\n"<b>"Nivå 5"</b>" \n– Vis øverst på varsellisten \n– Tillat forstyrrelser ved fullskjermmodus \n– Vis alltid raskt \n\n"<b>"Nivå 4"</b>" \n– Forhindre forstyrrelser ved fullskjermmodus \n– Vis alltid raskt \n\n"<b>"Nivå 3"</b>" \n– Forhindre forstyrrelser ved fullskjermmodus \n– Vis aldri raskt \n\n"<b>"Nivå 2"</b>" \n– Forhindre forstyrrelser ved fullskjermmodus \n– Vis aldri fort \n– Tillat aldri lyder eller vibrering \n\n"<b>"Nivå 1"</b>" \n– Forhindre forstyrrelser ved fullskjermmodus \n– Vis aldri raskt \n– Tillat aldri lyder eller vibrering \n– Skjul fra låseskjermen og statusfeltet \n– Vis nederst på varsellisten \n\n"<b>"Nivå 0"</b>" \n– Blokkér alle varsler fra appen"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Varsler"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Du ser ikke disse varslene lenger"</string>
@@ -1175,5 +1177,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Lås opp for å se nettverk"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Søker etter nettverk …"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Kunne ikke koble til nettverket"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"Se alle"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"For å bytte nettverk, koble fra Ethernet"</string>
 </resources>

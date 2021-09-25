@@ -710,6 +710,8 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Kragkennisgewingkontroles"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Aan"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Af"</string>
+    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
+    <skip />
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Met kragkennisgewingkontroles kan jy \'n belangrikheidvlak van 0 tot 5 vir \'n program se kennisgewings stel. \n\n"<b>"Vlak 5"</b>" \n- Wys aan die bokant van die kennisgewinglys \n- Laat volskermonderbreking toe \n- Wys altyd opspringkennisgewings \n\n"<b>"Vlak 4"</b>" \n- Verhoed volskermonderbreking \n- Wys altyd opspringkennisgewings \n\n"<b>"Vlak 3"</b>" \n- Verhoed volskermonderbreking \n- Verhoed opspringkennisgewings \n\n"<b>"Vlak 2"</b>" \n- Verhoed volskermonderbreking \n- Verhoed opspringkennisgewings \n- Moet nooit \'n klank maak of vibreer nie \n\n"<b>"Vlak 1"</b>" \n- Verhoed volskermonderbreking \n- Verhoed opspringkennisgewings \n- Moet nooit \'n klank maak of vibreer nie \n- Versteek van sluitskerm en statusbalk \n- Wys aan die onderkant van die kennisgewinglys \n\n"<b>"Vlak 0"</b>" \n- Blokkeer alle kennisgewings van die program af"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Kennisgewings"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Jy sal nie meer hierdie kennisgewings sien nie"</string>
@@ -1175,5 +1177,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Ontsluit om netwerke te bekyk"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Soek tans na netwerke …"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Kon nie aan netwerk koppel nie"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"Sien alles"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Ontkoppel Ethernet om netwerke te wissel"</string>
 </resources>

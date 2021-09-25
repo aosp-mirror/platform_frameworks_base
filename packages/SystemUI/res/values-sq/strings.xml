@@ -710,6 +710,8 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Kontrollet e njoftimit të energjisë"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Aktiv"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Joaktiv"</string>
+    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
+    <skip />
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Me kontrollet e njoftimit të energjisë, mund të caktosh një nivel rëndësie nga 0 në 5 për njoftimet e një aplikacioni. \n\n"<b>"Niveli 5"</b>" \n- Shfaq në krye të listës së njoftimeve \n- Lejo ndërprerjen e ekranit të plotë \n- Gjithmonë shfaq shpejt \n\n"<b>"Niveli 4"</b>" \n- Parandalo ndërprerjen e ekranit të plotë \n- Gijthmonë shfaq shpejt \n\n"<b>"Niveli 3"</b>" \n- Parandalo ndërprerjen e ekranit të plotë \n- Asnjëherë mos shfaq shpejt \n\n"<b>"Niveli 2"</b>" \n- Parandalo ndërprerjen e ekranit të plotë \n- Asnjëherë mos shfaq shpejt \n- Asnjëherë mos lësho tingull dhe dridhje \n\n"<b>"Niveli 1"</b>" \n- Parandalo ndërprerjen e ekranit të plotë \n- Asnjëherë mos shfaq shpejt \n- Asnjëherë mos lësho tingull ose dridhje \n- Fshih nga ekrani i kyçjes dhe shiriti i statusit \n- Shfaq në fund të listës së njoftimeve \n\n"<b>"Niveli 0"</b>" \n- Blloko të gjitha njoftimet nga aplikacioni"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Njoftime"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Nuk do t\'i shikosh më këto njoftime"</string>
@@ -1175,5 +1177,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Shkyçe për të parë rrjetet"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Po kërkon për rrjete…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Lidhja me rrjetin dështoi"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"Shiko të gjitha"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Për të ndërruar rrjetet, shkëput Ethernet-in"</string>
 </resources>

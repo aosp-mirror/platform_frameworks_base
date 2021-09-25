@@ -716,6 +716,8 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Rozšířené ovládací prvky oznámení"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Zapnuto"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Vypnuto"</string>
+    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
+    <skip />
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Rozšířené ovládací prvky oznámení umožňují nastavit úroveň důležitosti oznámení aplikace od 0 do 5. \n\n"<b>"Úroveň 5"</b>" \n– Zobrazit na začátku seznamu oznámení \n– Povolit vyrušení na celou obrazovku \n– Vždy zobrazit náhled \n\n"<b>"Úroveň 4"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Vždy zobrazit náhled \n\n"<b>"Úroveň 3"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n\n"<b>"Úroveň 2"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n– Nikdy nevydávat žádný zvukový signál ani nevibrovat \n\n"<b>"Úroveň 1"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n– Nikdy nevydávat zvukový signál ani nevibrovat \n– Skrýt z obrazovky uzamčení a stavového řádku \n– Zobrazovat na konci seznamu oznámení \n\n"<b>";Úroveň 0"</b>" \n– Blokovat všechna oznámení z aplikace"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Oznámení"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Tato oznámení již nebudete dostávat"</string>
@@ -1187,5 +1189,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Sítě uvidíte po odemknutí"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Vyhledávání sítí…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Připojení k síti se nezdařilo"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"Zobrazit vše"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Pokud chcete přepnout sítě, odpojte ethernet"</string>
 </resources>

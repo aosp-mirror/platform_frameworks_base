@@ -713,6 +713,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Напредне контроле за обавештења"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Укључено"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Искључено"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Укључено – на основу лица"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Помоћу напредних контрола за обавештења можете да подесите ниво важности од 0. до 5. за обавештења апликације. \n\n"<b>"5. ниво"</b>" \n– Приказују се у врху листе обавештења \n- Дозволи прекид режима целог екрана \n– Увек завируј \n\n"<b>"4. ниво"</b>" \n– Спречи прекид режима целог екрана \n– Увек завируј \n\n"<b>"3. ниво"</b>" \n– Спречи прекид режима целог екрана \n– Никада не завируј \n\n"<b>"2. ниво"</b>" \n– Спречи прекид режима целог екрана \n– Никада не завируј \n– Никада не производи звук или вибрацију \n\n"<b>"1. ниво"</b>" \n– Спречи прекид режима целог екрана \n– Никада не завируј \n– Никада не производи звук или вибрацију \n– Сакриј на закључаном екрану и статусној траци \n– Приказују се у дну листе обавештења \n\n"<b>"0. ниво"</b>" \n– Блокирај сва обавештења из апликације"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Обавештења"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Више нећете видети ова обавештења"</string>
@@ -1181,5 +1182,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Откључајте да бисте видели мреже"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Траже се мреже…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Повезивање са мрежом није успело"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"Погледајте све"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Да бисте променили мрежу, прекините етернет везу"</string>
 </resources>

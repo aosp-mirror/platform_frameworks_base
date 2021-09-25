@@ -710,6 +710,8 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"የኃይል ማሳወቂያ መቆጣጠሪያዎች"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"በርቷል"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"ጠፍቷል"</string>
+    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
+    <skip />
     <string name="power_notification_controls_description" msgid="1334963837572708952">"በኃይል ማሳወቂያ መቆጣጠሪያዎች አማካኝነት የአንድ መተግበሪያ ማሳወቂያዎች የአስፈላጊነት ደረጃ ከ0 እስከ 5 ድረስ ማዘጋጀት ይችላሉ። \n\n"<b>"ደረጃ 5"</b>" \n- በማሳወቂያ ዝርዝሩ አናት ላይ አሳይ \n- የሙሉ ማያ ገጽ ማቋረጥን ፍቀድ \n- ሁልጊዜ አጮልቀው ይመልከቱ \n\n"<b>"ደረጃ 4"</b>" \n- የሙሉ ማያ ገጽ ማቋረጥን ከልክል \n- ሁልጊዜ አጮልቀው ይመልከቱ \n\n"<b>"ደረጃ 3"</b>" \n- የሙሉ ማያ ገጽ ማቋረጥን ከልክል \n- በፍጹም አጮልቀው አይምልከቱ \n\n"<b>"ደረጃ 2"</b>" \n- የሙሉ ማያ ገጽ ማቋረጥን ይከልክሉ \n- በፍጹም አጮልቀው አይመልከቱ \n- ድምፅ እና ንዝረትን በፍጹም አይኑር \n\n"<b>"ደረጃ 1"</b>" \n- የሙሉ ማያ ገጽ ማቋረጥን ይከልክሉ \n- በፍጹም አጮልቀው አይመልከቱ \n- ድምፅ ወይም ንዝረትን በፍጹም አያደርጉ \n- ከመቆለፊያ ገጽ እና የሁኔታ አሞሌ ይደብቁ \n- በማሳወቂያ ዝርዝር ግርጌ ላይ አሳይ \n\n"<b>"ደረጃ 0"</b>" \n- ሁሉንም የመተግበሪያው ማሳወቂያዎች ያግዱ"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"ማሳወቂያዎች"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"እነዚህን ማሳወቂያዎችን ከእንግዲህ አይመለከቷቸውም"</string>
@@ -1175,5 +1177,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"አውታረ መረቦችን ለመመልከት ይክፈቱ"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"አውታረ መረቦችን በመፈለግ ላይ…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"ከአውታረ መረቡ ጋር መገናኘት አልተሳካም"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"ሁሉንም ይመልከቱ"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"አውታረ መረቦችን ለመቀየር፣ የኢተርኔት ግንኙነት ያቋርጡ"</string>
 </resources>

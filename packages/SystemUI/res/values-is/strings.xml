@@ -710,6 +710,8 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Orkustillingar tilkynninga"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Kveikt"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Slökkt"</string>
+    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
+    <skip />
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Með orkutilkynningastýringum geturðu stillt mikilvægi frá 0 upp í 5 fyrir tilkynningar forrita. \n\n"<b>"Stig 5"</b>" \n- Sýna efst á tilkynningalista \n- Leyfa truflun þegar birt er á öllum skjánum \n- Kíkja alltaf \n\n"<b>"Stig 4"</b>" \n- Hindra truflun við birtingu á öllum skjánum \n- Kíkja alltaf \n\n"<b>"Stig 3"</b>" \n- Hindra truflun við birtingu á öllum skjánum \n- Kíkja aldrei \n\n"<b>"Stig 2"</b>" \n- Hindra truflun við birtingu á öllum skjánum \n- Kíkja aldrei \n- Slökkva á hljóði og titringi \n\n"<b>"Stig 1"</b>" \n- Hindra truflun við birtingu á öllum skjánum \n- Kíkja aldrei \n- Slökkva á hljóði og titringi \n- Fela á lásskjá og stöðustiku \n- Sýna neðst á tilkynningalista \n\n"<b>"Stig 0"</b>" \n- Setja allar tilkynningar frá forriti á bannlista"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Tilkynningar"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Þú munt ekki sjá þessar tilkynningar aftur"</string>
@@ -1175,5 +1177,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Taktu úr lás til að skoða netkerfi"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Leitar að netum…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Ekki tókst að tengjast neti"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"Sjá allt"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Aftengdu ethernet til að skipta um net"</string>
 </resources>
