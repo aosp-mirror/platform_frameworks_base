@@ -8854,7 +8854,8 @@ public class TelephonyManager {
     }
 
     /**
-     * Set the preferred network type to global mode which includes LTE, CDMA, EvDo and GSM/WCDMA.
+     * Set the preferred network type to global mode which includes NR, LTE, CDMA, EvDo
+     * and GSM/WCDMA.
      *
      * <p>Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
@@ -8865,7 +8866,8 @@ public class TelephonyManager {
     }
 
     /**
-     * Set the preferred network type to global mode which includes LTE, CDMA, EvDo and GSM/WCDMA.
+     * Set the preferred network type to global mode which includes NR, LTE, CDMA, EvDo
+     * and GSM/WCDMA.
      *
      * <p>Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
@@ -8873,7 +8875,7 @@ public class TelephonyManager {
      * @hide
      */
     public boolean setPreferredNetworkTypeToGlobal(int subId) {
-        return setPreferredNetworkType(subId, RILConstants.NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA);
+        return setPreferredNetworkType(subId, RILConstants.NETWORK_MODE_NR_LTE_CDMA_EVDO_GSM_WCDMA);
     }
 
     /**
