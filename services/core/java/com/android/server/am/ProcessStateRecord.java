@@ -577,6 +577,10 @@ final class ProcessStateRecord {
 
     @GuardedBy({"mService", "mProcLock"})
     void setSetProcState(int setProcState) {
+        if (ActivityManager.isProcStateCached(mSetProcState)
+                && !ActivityManager.isProcStateCached(setProcState)) {
+            mCacheOomRankerUseCount++;
+        }
         mSetProcState = setProcState;
     }
 
@@ -840,12 +844,7 @@ final class ProcessStateRecord {
 
     @GuardedBy("mService")
     void setCached(boolean cached) {
-        if (mCached != cached) {
-            mCached = cached;
-            if (cached) {
-                ++mCacheOomRankerUseCount;
-            }
-        }
+        mCached = cached;
     }
 
     @GuardedBy("mService")
