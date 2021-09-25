@@ -621,6 +621,8 @@ int register_android_view_InputEventReceiver(JNIEnv* env) {
                              "(Z)V");
     gInputEventReceiverClassInfo.onDragEvent =
             GetMethodIDOrDie(env, gInputEventReceiverClassInfo.clazz, "onDragEvent", "(ZFF)V");
+    gInputEventReceiverClassInfo.onTouchModeChanged =
+            GetMethodIDOrDie(env, gInputEventReceiverClassInfo.clazz, "onTouchModeChanged", "(Z)V");
     gInputEventReceiverClassInfo.onBatchedInputEventPending =
             GetMethodIDOrDie(env, gInputEventReceiverClassInfo.clazz, "onBatchedInputEventPending",
                              "(I)V");

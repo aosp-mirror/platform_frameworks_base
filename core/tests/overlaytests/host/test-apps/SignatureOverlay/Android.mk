@@ -23,7 +23,7 @@ LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
 LOCAL_LICENSE_CONDITIONS := notice
 LOCAL_NOTICE_FILE  := $(LOCAL_PATH)/../../../../../../NOTICE
 LOCAL_SDK_VERSION := current
-LOCAL_COMPATIBILITY_SUITE := device-tests
+LOCAL_COMPATIBILITY_SUITE := device-tests general-tests
 LOCAL_AAPT_FLAGS := --custom-package $(my_package_prefix)_bad
 include $(BUILD_PACKAGE)
 
@@ -34,7 +34,7 @@ LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
 LOCAL_LICENSE_CONDITIONS := notice
 LOCAL_NOTICE_FILE  := $(LOCAL_PATH)/../../../../../../NOTICE
 LOCAL_SDK_VERSION := current
-LOCAL_COMPATIBILITY_SUITE := device-tests
+LOCAL_COMPATIBILITY_SUITE := device-tests general-tests
 LOCAL_CERTIFICATE := platform
 LOCAL_MANIFEST_FILE := static/AndroidManifest.xml
 LOCAL_AAPT_FLAGS := --custom-package $(my_package_prefix)_static
@@ -47,7 +47,7 @@ LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
 LOCAL_LICENSE_CONDITIONS := notice
 LOCAL_NOTICE_FILE  := $(LOCAL_PATH)/../../../../../../NOTICE
 LOCAL_SDK_VERSION := current
-LOCAL_COMPATIBILITY_SUITE := device-tests
+LOCAL_COMPATIBILITY_SUITE := device-tests general-tests
 LOCAL_CERTIFICATE := platform
 LOCAL_AAPT_FLAGS := --custom-package $(my_package_prefix)_v1
 LOCAL_AAPT_FLAGS += --version-code 1 --version-name v1
