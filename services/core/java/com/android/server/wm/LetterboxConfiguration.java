@@ -174,7 +174,7 @@ final class LetterboxConfiguration {
      * Whether corners of letterboxed activities are rounded.
      */
     boolean isLetterboxActivityCornersRounded() {
-        return getLetterboxActivityCornersRadius() > 0;
+        return getLetterboxActivityCornersRadius() != 0;
     }
 
     /**

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package androidx.window.extensions;
+package androidx.window.extensions.layout;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
@@ -36,19 +36,27 @@ import androidx.window.util.DataProducer;
 import androidx.window.util.PriorityDataProducer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
 
 /**
- * Reference implementation of androidx.window.extensions OEM interface for use with
+ * Reference implementation of androidx.window.extensions.layout OEM interface for use with
  * WindowManager Jetpack.
  *
  * NOTE: This version is a work in progress and under active development. It MUST NOT be used in
  * production builds since the interface can still change before reaching stable version.
  * Please refer to {@link androidx.window.sidecar.SampleSidecarImpl} instead.
  */
-class SampleExtensionImpl extends StubExtension {
+public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     private static final String TAG = "SampleExtension";
+    private static WindowLayoutComponent sInstance;
+
+    private final Map<Activity, Consumer<WindowLayoutInfo>> mWindowLayoutChangeListeners =
+            new HashMap<>();
 
     private final SettingsDevicePostureProducer mSettingsDevicePostureProducer;
     private final DataProducer<Integer> mDevicePostureProducer;
@@ -56,7 +64,7 @@ class SampleExtensionImpl extends StubExtension {
     private final SettingsDisplayFeatureProducer mSettingsDisplayFeatureProducer;
     private final DataProducer<List<DisplayFeature>> mDisplayFeatureProducer;
 
-    SampleExtensionImpl(Context context) {
+    public WindowLayoutComponentImpl(Context context) {
         mSettingsDevicePostureProducer = new SettingsDevicePostureProducer(context);
         mDevicePostureProducer = new PriorityDataProducer<>(List.of(
                 mSettingsDevicePostureProducer,
@@ -73,28 +81,68 @@ class SampleExtensionImpl extends StubExtension {
         mDisplayFeatureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
     }
 
+    /**
+     * Adds a listener interested in receiving updates to {@link WindowLayoutInfo}
+     * @param activity hosting a {@link android.view.Window}
+     * @param consumer interested in receiving updates to {@link WindowLayoutInfo}
+     */
+    public void addWindowLayoutInfoListener(@NonNull Activity activity,
+            @NonNull Consumer<WindowLayoutInfo> consumer) {
+        mWindowLayoutChangeListeners.put(activity, consumer);
+        updateRegistrations();
+    }
+
+    /**
+     * Removes a listener no longer interested in receiving updates.
+     * @param consumer no longer interested in receiving updates to {@link WindowLayoutInfo}
+     */
+    public void removeWindowLayoutInfoListener(
+            @NonNull Consumer<WindowLayoutInfo> consumer) {
+        mWindowLayoutChangeListeners.values().remove(consumer);
+        updateRegistrations();
+    }
+
+    void updateWindowLayout(@NonNull Activity activity,
+            @NonNull WindowLayoutInfo newLayout) {
+        Consumer<WindowLayoutInfo> consumer = mWindowLayoutChangeListeners.get(activity);
+        if (consumer != null) {
+            consumer.accept(newLayout);
+        }
+    }
+
+    @NonNull
+    Set<Activity> getActivitiesListeningForLayoutChanges() {
+        return mWindowLayoutChangeListeners.keySet();
+    }
+
+    protected boolean hasListeners() {
+        return !mWindowLayoutChangeListeners.isEmpty();
+    }
+
     private int getFeatureState(DisplayFeature feature) {
         Integer featureState = feature.getState();
         Optional<Integer> posture = mDevicePostureProducer.getData();
-        int fallbackPosture = posture.orElse(ExtensionFoldingFeature.STATE_FLAT);
+        int fallbackPosture = posture.orElse(FoldingFeature.STATE_FLAT);
         return featureState == null ? fallbackPosture : featureState;
     }
 
     private void onDisplayFeaturesChanged() {
         for (Activity activity : getActivitiesListeningForLayoutChanges()) {
-            ExtensionWindowLayoutInfo newLayout = getWindowLayoutInfo(activity);
+            WindowLayoutInfo newLayout = getWindowLayoutInfo(activity);
             updateWindowLayout(activity, newLayout);
         }
     }
 
     @NonNull
-    private ExtensionWindowLayoutInfo getWindowLayoutInfo(@NonNull Activity activity) {
-        List<ExtensionDisplayFeature> displayFeatures = getDisplayFeatures(activity);
-        return new ExtensionWindowLayoutInfo(displayFeatures);
+    private WindowLayoutInfo getWindowLayoutInfo(@NonNull Activity activity) {
+        List<androidx.window.extensions.layout.DisplayFeature> displayFeatures =
+                getDisplayFeatures(activity);
+        return new WindowLayoutInfo(displayFeatures);
     }
 
-    private List<ExtensionDisplayFeature> getDisplayFeatures(@NonNull Activity activity) {
-        List<ExtensionDisplayFeature> features = new ArrayList<>();
+    private List<androidx.window.extensions.layout.DisplayFeature> getDisplayFeatures(
+            @NonNull Activity activity) {
+        List<androidx.window.extensions.layout.DisplayFeature> features = new ArrayList<>();
         int displayId = activity.getDisplay().getDisplayId();
         if (displayId != DEFAULT_DISPLAY) {
             Log.w(TAG, "This sample doesn't support display features on secondary displays");
@@ -115,15 +163,14 @@ class SampleExtensionImpl extends StubExtension {
                 rotateRectToDisplayRotation(displayId, featureRect);
                 transformToWindowSpaceRect(activity, featureRect);
 
-                features.add(new ExtensionFoldingFeature(featureRect, baseFeature.getType(),
+                features.add(new FoldingFeature(featureRect, baseFeature.getType(),
                         getFeatureState(baseFeature)));
             }
         }
         return features;
     }
 
-    @Override
-    protected void onListenersChanged() {
+    private void updateRegistrations() {
         if (hasListeners()) {
             mSettingsDevicePostureProducer.registerObserversIfNeeded();
             mSettingsDisplayFeatureProducer.registerObserversIfNeeded();

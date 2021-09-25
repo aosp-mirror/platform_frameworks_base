@@ -553,6 +553,12 @@
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
     },
+    "-1501564055": {
+      "message": "Organized TaskFragment is not ready= %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_APP_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/AppTransitionController.java"
+    },
     "-1499134947": {
       "message": "Removing starting %s from %s",
       "level": "VERBOSE",

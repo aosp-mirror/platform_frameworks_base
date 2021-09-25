@@ -16,6 +16,6 @@
   -->
 <resources>
     <!-- Size of the panel of large phones on portrait. This shouldn't fill, but have some padding on the side -->
-    <dimen name="notification_panel_width">416dp</dimen>
+    <dimen name="notification_panel_width">504dp</dimen>
 
 </resources>

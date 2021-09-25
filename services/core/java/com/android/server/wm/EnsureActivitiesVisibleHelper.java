@@ -107,8 +107,9 @@ class EnsureActivitiesVisibleHelper {
                 final TaskFragment childTaskFragment = child.asTaskFragment();
                 childTaskFragment.updateActivityVisibilities(starting, configChanges,
                         preserveWindows, notifyClients);
-                mBehindFullyOccludedContainer |= childTaskFragment.getBounds().equals(
-                        mTaskFragment.getBounds());
+                mBehindFullyOccludedContainer |=
+                        childTaskFragment.topRunningActivity() != null
+                                && childTaskFragment.getBounds().equals(mTaskFragment.getBounds());
                 if (mAboveTop && mTop.getTaskFragment() == childTaskFragment) {
                     mAboveTop = false;
                 }

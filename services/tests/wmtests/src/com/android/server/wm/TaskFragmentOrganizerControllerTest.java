@@ -76,7 +76,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
     @Before
     public void setup() {
-        mController = mWm.mAtmService.mWindowOrganizerController.mTaskFragmentOrganizerController;
+        mController = mAtm.mWindowOrganizerController.mTaskFragmentOrganizerController;
         mOrganizer = new TaskFragmentOrganizer(Runnable::run);
         mOrganizerToken = mOrganizer.getOrganizerToken();
         mIOrganizer = ITaskFragmentOrganizer.Stub.asInterface(mOrganizerToken.asBinder());
@@ -284,7 +284,9 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     @Test
     public void testApplyTransaction_enforceHierarchyChange_deleteTaskFragment()
             throws RemoteException {
+        mController.registerOrganizer(mIOrganizer);
         mOrganizer.applyTransaction(mTransaction);
+        doReturn(true).when(mTaskFragment).isAttached();
 
         // Throw exception if the transaction is trying to change a window that is not organized by
         // the organizer.
@@ -300,8 +302,18 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         // Allow transaction to change a TaskFragment created by the organizer.
         mTaskFragment.setTaskFragmentOrganizer(mOrganizerToken, 10 /* pid */);
+        clearInvocations(mAtm.mRootWindowContainer);
 
         mAtm.getWindowOrganizerController().applyTransaction(mTransaction);
+
+        // No lifecycle update when the TaskFragment is not recorded.
+        verify(mAtm.mRootWindowContainer, never()).resumeFocusedTasksTopActivities();
+
+        mAtm.mWindowOrganizerController.mLaunchTaskFragments
+                .put(mFragmentToken, mTaskFragment);
+        mAtm.getWindowOrganizerController().applyTransaction(mTransaction);
+
+        verify(mAtm.mRootWindowContainer).resumeFocusedTasksTopActivities();
     }
 
     @Test
@@ -327,8 +339,11 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         // Allow transaction to change a TaskFragment created by the organizer.
         mTaskFragment.setTaskFragmentOrganizer(mOrganizerToken, 10 /* pid */);
         taskFragment2.setTaskFragmentOrganizer(mOrganizerToken, 10 /* pid */);
+        clearInvocations(mAtm.mRootWindowContainer);
 
         mAtm.getWindowOrganizerController().applyTransaction(mTransaction);
+
+        verify(mAtm.mRootWindowContainer).resumeFocusedTasksTopActivities();
     }
 
     @Test
@@ -360,6 +375,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     public void testApplyTransaction_enforceHierarchyChange_reparentChildren()
             throws RemoteException {
         mOrganizer.applyTransaction(mTransaction);
+        mController.registerOrganizer(mIOrganizer);
+        doReturn(true).when(mTaskFragment).isAttached();
 
         // Throw exception if the transaction is trying to change a window that is not organized by
         // the organizer.
@@ -375,7 +392,30 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         // Allow transaction to change a TaskFragment created by the organizer.
         mTaskFragment.setTaskFragmentOrganizer(mOrganizerToken, 10 /* pid */);
+        clearInvocations(mAtm.mRootWindowContainer);
 
         mAtm.getWindowOrganizerController().applyTransaction(mTransaction);
+
+        verify(mAtm.mRootWindowContainer).resumeFocusedTasksTopActivities();
+    }
+
+    @Test
+    public void testApplyTransaction_reparentActivityToTaskFragment_triggerLifecycleUpdate()
+            throws RemoteException {
+        final ActivityRecord activity = createActivityRecord(mDefaultDisplay);
+        mOrganizer.applyTransaction(mTransaction);
+        mController.registerOrganizer(mIOrganizer);
+        mTaskFragment = new TaskFragmentBuilder(mAtm)
+                .setCreateParentTask()
+                .setFragmentToken(mFragmentToken)
+                .build();
+        mAtm.mWindowOrganizerController.mLaunchTaskFragments
+                .put(mFragmentToken, mTaskFragment);
+        mTransaction.reparentActivityToTaskFragment(mFragmentToken, activity.appToken);
+        clearInvocations(mAtm.mRootWindowContainer);
+
+        mAtm.getWindowOrganizerController().applyTransaction(mTransaction);
+
+        verify(mAtm.mRootWindowContainer).resumeFocusedTasksTopActivities();
     }
 }

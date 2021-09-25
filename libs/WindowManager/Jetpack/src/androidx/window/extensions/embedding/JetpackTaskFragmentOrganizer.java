@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package androidx.window.extensions.organizer;
+package androidx.window.extensions.embedding;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -36,7 +36,6 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.window.extensions.embedding.SplitRule;
 
 import java.util.Map;
 import java.util.concurrent.Executor;
