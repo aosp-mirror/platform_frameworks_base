@@ -23,7 +23,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -31,7 +30,6 @@ import android.graphics.drawable.LayerDrawable;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.NetworkRequest;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.provider.Settings;
@@ -49,6 +47,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.widget.Toast;
 
+import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -133,6 +132,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private GlobalSettings mGlobalSettings;
     private int mDefaultDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+    private ConnectivityManager.NetworkCallback mConnectivityManagerNetworkCallback;
 
     @VisibleForTesting
     protected ActivityStarter mActivityStarter;
@@ -146,6 +146,8 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
     protected boolean mCanConfigWifi;
     @VisibleForTesting
     protected KeyguardStateController mKeyguardStateController;
+    @VisibleForTesting
+    protected boolean mHasEthernet = false;
 
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -193,6 +195,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         mAccessPointController = accessPointController;
         mConfig = MobileMappings.Config.readConfig(mContext);
         mWifiIconInjector = new WifiUtils.InternetIconInjector(mContext);
+        mConnectivityManagerNetworkCallback = new DataConnectivityListener();
     }
 
     void onStart(@NonNull InternetDialogCallback callback, boolean canConfigWifi) {
@@ -216,9 +219,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         mInternetTelephonyCallback = new InternetTelephonyCallback();
         mTelephonyManager.registerTelephonyCallback(mExecutor, mInternetTelephonyCallback);
         // Listen the connectivity changes
-        mConnectivityManager.registerNetworkCallback(new NetworkRequest.Builder()
-                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                .build(), new DataConnectivityListener(), mHandler);
+        mConnectivityManager.registerDefaultNetworkCallback(mConnectivityManagerNetworkCallback);
         mCanConfigWifi = canConfigWifi;
         scanWifiAccessPoints();
     }
@@ -233,6 +234,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
                 mOnSubscriptionsChangedListener);
         mAccessPointController.removeAccessPointCallback(this);
         mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateCallback);
+        mConnectivityManager.unregisterNetworkCallback(mConnectivityManagerNetworkCallback);
     }
 
     @VisibleForTesting
@@ -351,11 +353,6 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         return drawable;
     }
 
-    boolean isNightMode() {
-        return (mContext.getResources().getConfiguration().uiMode
-                & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
-    }
-
     Drawable getSignalStrengthDrawable() {
         Drawable drawable = mContext.getDrawable(
                 R.drawable.ic_signal_strength_zero_bar_no_internet);
@@ -373,9 +370,12 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
                 drawable = shared.get();
             }
 
-            drawable.setTint(activeNetworkIsCellular() ? mContext.getColor(
-                    R.color.connected_network_primary_color) : Utils.getColorAttrDefaultColor(
-                    mContext, android.R.attr.textColorTertiary));
+            int tintColor = Utils.getColorAttrDefaultColor(mContext,
+                    android.R.attr.textColorTertiary);
+            if (activeNetworkIsCellular() || isCarrierNetworkActive()) {
+                tintColor = mContext.getColor(R.color.connected_network_primary_color);
+            }
+            drawable.setTint(tintColor);
         } catch (Throwable e) {
             e.printStackTrace();
         }
@@ -536,9 +536,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         }
 
         int resId = mapIconSets(config).get(iconKey).dataContentDescription;
-        final MergedCarrierEntry mergedCarrierEntry =
-                mAccessPointController.getMergedCarrierEntry();
-        if (mergedCarrierEntry != null && mergedCarrierEntry.isDefaultNetwork()) {
+        if (isCarrierNetworkActive()) {
             SignalIcon.MobileIconGroup carrierMergedWifiIconGroup =
                     TelephonyIcons.CARRIER_MERGED_WIFI;
             resId = carrierMergedWifiIconGroup.dataContentDescription;
@@ -557,7 +555,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
             return context.getString(R.string.mobile_data_no_connection);
         }
         String summary = networkTypeDescription;
-        if (activeNetworkIsCellular()) {
+        if (activeNetworkIsCellular() || isCarrierNetworkActive()) {
             summary = context.getString(R.string.preference_summary_default_combination,
                     context.getString(R.string.mobile_data_connection_active),
                     networkTypeDescription);
@@ -584,6 +582,12 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         if (mergedCarrierEntry != null && mergedCarrierEntry.canConnect()) {
             mergedCarrierEntry.connect(null /* ConnectCallback */);
         }
+    }
+
+    boolean isCarrierNetworkActive() {
+        final MergedCarrierEntry mergedCarrierEntry =
+                mAccessPointController.getMergedCarrierEntry();
+        return mergedCarrierEntry != null && mergedCarrierEntry.isDefaultNetwork();
     }
 
     WifiManager getWifiManager() {
@@ -800,6 +804,9 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         }
 
         int count = MAX_WIFI_ENTRY_COUNT;
+        if (mHasEthernet) {
+            count -= 1;
+        }
         if (hasCarrier()) {
             count -= 1;
         }
@@ -870,21 +877,30 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         @Override
         @WorkerThread
         public void onCapabilitiesChanged(@NonNull Network network,
-                @NonNull NetworkCapabilities networkCapabilities) {
-            if (mCanConfigWifi) {
-                for (int transport : networkCapabilities.getTransportTypes()) {
-                    if (transport == NetworkCapabilities.TRANSPORT_WIFI) {
-                        scanWifiAccessPoints();
-                        break;
-                    }
-                }
+                @NonNull NetworkCapabilities capabilities) {
+            mHasEthernet = capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET);
+            if (mCanConfigWifi && (mHasEthernet || capabilities.hasTransport(
+                    NetworkCapabilities.TRANSPORT_WIFI))) {
+                scanWifiAccessPoints();
             }
-            final Network activeNetwork = mConnectivityManager.getActiveNetwork();
-            if (activeNetwork != null && activeNetwork.equals(network)) {
-                // update UI
-                mCallback.onCapabilitiesChanged(network, networkCapabilities);
-            }
+            // update UI
+            mCallback.onCapabilitiesChanged(network, capabilities);
         }
+
+        @Override
+        @WorkerThread
+        public void onLost(@NonNull Network network) {
+            mHasEthernet = false;
+            mCallback.onLost(network);
+        }
+    }
+
+    /**
+     * Return {@code true} If the Ethernet exists
+     */
+    @MainThread
+    public boolean hasEthernet() {
+        return mHasEthernet;
     }
 
     private final BroadcastReceiver mConnectionStateReceiver = new BroadcastReceiver() {
@@ -933,6 +949,8 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         void onSimStateChanged();
 
         void onCapabilitiesChanged(Network network, NetworkCapabilities networkCapabilities);
+
+        void onLost(@NonNull Network network);
 
         void onSubscriptionsChanged(int defaultDataSubId);
 

@@ -2918,6 +2918,13 @@ public class DeviceIdleController extends SystemService
                             reasonCode, reason).sendToTarget();
                 }
                 reportTempWhitelistChangedLocked(uid, true);
+            } else {
+                // The uid is already temp allowlisted, only need to update AMS for temp allowlist
+                // duration.
+                if (mLocalActivityManager != null) {
+                    mLocalActivityManager.updateDeviceIdleTempAllowlist(null, uid, true,
+                            duration, tempAllowListType, reasonCode, reason, callingUid);
+                }
             }
         }
         if (informWhitelistChanged) {

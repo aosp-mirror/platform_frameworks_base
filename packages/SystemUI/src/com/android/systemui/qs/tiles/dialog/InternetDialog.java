@@ -52,6 +52,7 @@ import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import androidx.annotation.MainThread;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.annotation.WorkerThread;
@@ -60,7 +61,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
-import com.android.settingslib.Utils;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
@@ -105,12 +105,10 @@ public class InternetDialog extends SystemUIDialog implements
     private View mDivider;
     private ProgressBar mProgressBar;
     private LinearLayout mInternetDialogLayout;
-    private LinearLayout mInternetListLayout;
     private LinearLayout mConnectedWifListLayout;
-    private LinearLayout mConnectedWifList;
     private LinearLayout mMobileNetworkLayout;
-    private LinearLayout mMobileNetworkList;
     private LinearLayout mTurnWifiOnLayout;
+    private LinearLayout mEthernetLayout;
     private TextView mWifiToggleTitleText;
     private LinearLayout mSeeAllLayout;
     private RecyclerView mWifiRecyclerView;
@@ -126,7 +124,6 @@ public class InternetDialog extends SystemUIDialog implements
     private Button mDoneButton;
     private Drawable mBackgroundOn;
     private int mListMaxHeight;
-    private int mLayoutWidth;
     private int mDefaultDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     private boolean mCanConfigMobileData;
 
@@ -181,8 +178,6 @@ public class InternetDialog extends SystemUIDialog implements
         };
         mListMaxHeight = context.getResources().getDimensionPixelSize(
                 R.dimen.internet_dialog_list_max_height);
-        mLayoutWidth = context.getResources().getDimensionPixelSize(
-                R.dimen.internet_dialog_list_max_width);
         mUiEventLogger = uiEventLogger;
         mAdapter = new InternetAdapter(mInternetDialogController);
         if (!aboveStatusBar) {
@@ -221,13 +216,11 @@ public class InternetDialog extends SystemUIDialog implements
         mInternetDialogSubTitle = mDialogView.requireViewById(R.id.internet_dialog_subtitle);
         mDivider = mDialogView.requireViewById(R.id.divider);
         mProgressBar = mDialogView.requireViewById(R.id.wifi_searching_progress);
-        mInternetListLayout = mDialogView.requireViewById(R.id.internet_list);
+        mEthernetLayout = mDialogView.requireViewById(R.id.ethernet_layout);
         mMobileNetworkLayout = mDialogView.requireViewById(R.id.mobile_network_layout);
-        mMobileNetworkList = mDialogView.requireViewById(R.id.mobile_network_list);
         mTurnWifiOnLayout = mDialogView.requireViewById(R.id.turn_on_wifi_layout);
         mWifiToggleTitleText = mDialogView.requireViewById(R.id.wifi_toggle_title);
         mConnectedWifListLayout = mDialogView.requireViewById(R.id.wifi_connected_layout);
-        mConnectedWifList = mDialogView.requireViewById(R.id.wifi_connected_list);
         mConnectedWifiIcon = mDialogView.requireViewById(R.id.wifi_connected_icon);
         mConnectedWifiTitleText = mDialogView.requireViewById(R.id.wifi_connected_title);
         mConnectedWifiSummaryText = mDialogView.requireViewById(R.id.wifi_connected_summary);
@@ -309,7 +302,9 @@ public class InternetDialog extends SystemUIDialog implements
         } else {
             mInternetDialogSubTitle.setText(getSubtitleText());
         }
-        setMobileDataLayout(mInternetDialogController.activeNetworkIsCellular());
+        updateEthernet();
+        setMobileDataLayout(mInternetDialogController.activeNetworkIsCellular()
+                || mInternetDialogController.isCarrierNetworkActive());
 
         if (!mCanConfigWifi) {
             return;
@@ -355,7 +350,13 @@ public class InternetDialog extends SystemUIDialog implements
         mDoneButton.setOnClickListener(v -> dismiss());
     }
 
-    private void setMobileDataLayout(boolean isCellularNetwork) {
+    @MainThread
+    private void updateEthernet() {
+        mEthernetLayout.setVisibility(
+                mInternetDialogController.hasEthernet() ? View.VISIBLE : View.GONE);
+    }
+
+    private void setMobileDataLayout(boolean isCarrierNetworkConnected) {
         if (mInternetDialogController.isAirplaneModeEnabled()
                 || !mInternetDialogController.hasCarrier()) {
             mMobileNetworkLayout.setVisibility(View.GONE);
@@ -371,38 +372,33 @@ public class InternetDialog extends SystemUIDialog implements
                 mMobileSummaryText.setVisibility(View.GONE);
             }
             mSignalIcon.setImageDrawable(getSignalStrengthDrawable());
-            if (mInternetDialogController.isNightMode()) {
-                int titleColor = isCellularNetwork ? mContext.getColor(
-                        R.color.connected_network_primary_color) : Utils.getColorAttrDefaultColor(
-                        mContext, android.R.attr.textColorPrimary);
-                int summaryColor = isCellularNetwork ? mContext.getColor(
-                        R.color.connected_network_secondary_color) : Utils.getColorAttrDefaultColor(
-                        mContext, android.R.attr.textColorSecondary);
-
-                mMobileTitleText.setTextColor(titleColor);
-                mMobileSummaryText.setTextColor(summaryColor);
-            }
-            mMobileNetworkLayout.setBackground(isCellularNetwork ? mBackgroundOn : null);
+            mMobileTitleText.setTextAppearance(isCarrierNetworkConnected
+                    ? R.style.TextAppearance_InternetDialog_Active
+                    : R.style.TextAppearance_InternetDialog);
+            mMobileSummaryText.setTextAppearance(isCarrierNetworkConnected
+                    ? R.style.TextAppearance_InternetDialog_Secondary_Active
+                    : R.style.TextAppearance_InternetDialog_Secondary);
+            mMobileNetworkLayout.setBackground(isCarrierNetworkConnected ? mBackgroundOn : null);
 
             mMobileDataToggle.setVisibility(mCanConfigMobileData ? View.VISIBLE : View.INVISIBLE);
         }
     }
 
+    @MainThread
     private void updateWifiToggle(boolean isWifiEnabled, boolean isDeviceLocked) {
         mWiFiToggle.setChecked(isWifiEnabled);
-        if (isDeviceLocked && mInternetDialogController.isNightMode()) {
-            int titleColor = mConnectedWifiEntry != null ? mContext.getColor(
-                    R.color.connected_network_primary_color) : Utils.getColorAttrDefaultColor(
-                    mContext, android.R.attr.textColorPrimary);
-            mWifiToggleTitleText.setTextColor(titleColor);
+        if (isDeviceLocked) {
+            mWifiToggleTitleText.setTextAppearance((mConnectedWifiEntry != null)
+                    ? R.style.TextAppearance_InternetDialog_Active
+                    : R.style.TextAppearance_InternetDialog);
         }
         mTurnWifiOnLayout.setBackground(
                 (isDeviceLocked && mConnectedWifiEntry != null) ? mBackgroundOn : null);
     }
 
+    @MainThread
     private void updateConnectedWifi(boolean isWifiEnabled, boolean isDeviceLocked) {
         if (!isWifiEnabled || mConnectedWifiEntry == null || isDeviceLocked) {
-            mConnectedWifListLayout.setBackground(null);
             mConnectedWifListLayout.setVisibility(View.GONE);
             return;
         }
@@ -411,15 +407,8 @@ public class InternetDialog extends SystemUIDialog implements
         mConnectedWifiSummaryText.setText(mConnectedWifiEntry.getSummary(false));
         mConnectedWifiIcon.setImageDrawable(
                 mInternetDialogController.getInternetWifiDrawable(mConnectedWifiEntry));
-        if (mInternetDialogController.isNightMode()) {
-            mConnectedWifiTitleText.setTextColor(
-                    mContext.getColor(R.color.connected_network_primary_color));
-            mConnectedWifiSummaryText.setTextColor(
-                    mContext.getColor(R.color.connected_network_secondary_color));
-        }
         mWifiSettingsIcon.setColorFilter(
                 mContext.getColor(R.color.connected_network_primary_color));
-        mConnectedWifListLayout.setBackground(mBackgroundOn);
     }
 
     void onClickConnectedWifi() {
@@ -528,7 +517,14 @@ public class InternetDialog extends SystemUIDialog implements
     }
 
     @Override
+    @WorkerThread
     public void onCapabilitiesChanged(Network network, NetworkCapabilities networkCapabilities) {
+        mHandler.post(() -> updateDialog());
+    }
+
+    @Override
+    @WorkerThread
+    public void onLost(Network network) {
         mHandler.post(() -> updateDialog());
     }
 
