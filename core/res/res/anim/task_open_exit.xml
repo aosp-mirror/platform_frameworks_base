@@ -17,19 +17,8 @@
 -->
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shareInterpolator="false"
-    android:hasRoundedCorners="true"
-    android:showWallpaper="true">
-
-    <alpha
-        android:fromAlpha="1.0"
-        android:toAlpha="1"
-        android:fillEnabled="true"
-        android:fillBefore="true"
-        android:fillAfter="true"
-        android:interpolator="@interpolator/linear"
-        android:startOffset="67"
-        android:duration="283"/>
+     android:shareInterpolator="false"
+     android:hasRoundedCorners="true">
 
     <translate
         android:fromXDelta="0"
@@ -37,22 +26,9 @@
         android:fillEnabled="true"
         android:fillBefore="true"
         android:fillAfter="true"
-        android:interpolator="@interpolator/aggressive_ease"
-        android:startOffset="50"
-        android:duration="383"/>
-
-    <scale
-        android:fromXScale="1.0"
-        android:toXScale="0.95"
-        android:fromYScale="1.0"
-        android:toYScale="0.95"
-        android:fillEnabled="true"
-        android:fillBefore="true"
-        android:fillAfter="true"
-        android:pivotX="50%"
-        android:pivotY="50%"
-        android:interpolator="@interpolator/fast_out_slow_in"
-        android:duration="283"/>
+        android:interpolator="@interpolator/fast_out_extra_slow_in"
+        android:startOffset="0"
+        android:duration="500"/>
 
     <!-- This is needed to keep the animation running while task_open_enter completes -->
     <alpha

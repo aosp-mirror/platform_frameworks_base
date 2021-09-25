@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package androidx.window.extensions.organizer;
+package androidx.window.extensions.embedding;
 
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 
@@ -32,6 +32,7 @@ import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.ClipRectAnimation;
 import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 
@@ -46,12 +47,13 @@ class TaskFragmentAnimationSpec {
 
     private static final String TAG = "TaskFragAnimationSpec";
     private static final int CHANGE_ANIMATION_DURATION = 517;
-    private static final int CHANGE_ANIMATION_FADE_DURATION = 82;
-    private static final int CHANGE_ANIMATION_FADE_OFFSET = 67;
+    private static final int CHANGE_ANIMATION_FADE_DURATION = 80;
+    private static final int CHANGE_ANIMATION_FADE_OFFSET = 30;
 
     private final Context mContext;
     private final TransitionAnimation mTransitionAnimation;
     private final Interpolator mFastOutExtraSlowInInterpolator;
+    private final LinearInterpolator mLinearInterpolator;
     private float mTransitionAnimationScaleSetting;
 
     TaskFragmentAnimationSpec(@NonNull Handler handler) {
@@ -61,6 +63,7 @@ class TaskFragmentAnimationSpec {
         AttributeCache.init(mContext);
         mFastOutExtraSlowInInterpolator = AnimationUtils.loadInterpolator(
                 mContext, android.R.interpolator.fast_out_extra_slow_in);
+        mLinearInterpolator = new LinearInterpolator();
 
         // The transition animation should be adjusted based on the developer option.
         final ContentResolver resolver = mContext.getContentResolver();
@@ -129,14 +132,15 @@ class TaskFragmentAnimationSpec {
         float startScaleY = 1.f / scaleY;
 
         // The start leash will be fade out.
-        final AnimationSet startSet = new AnimationSet(true /* shareInterpolator */);
-        startSet.setInterpolator(mFastOutExtraSlowInInterpolator);
+        final AnimationSet startSet = new AnimationSet(false /* shareInterpolator */);
         final Animation startAlpha = new AlphaAnimation(1f, 0f);
+        startAlpha.setInterpolator(mLinearInterpolator);
         startAlpha.setDuration(CHANGE_ANIMATION_FADE_DURATION);
         startAlpha.setStartOffset(CHANGE_ANIMATION_FADE_OFFSET);
         startSet.addAnimation(startAlpha);
         final Animation startScale = new ScaleAnimation(startScaleX, startScaleX, startScaleY,
                 startScaleY);
+        startScale.setInterpolator(mFastOutExtraSlowInInterpolator);
         startScale.setDuration(CHANGE_ANIMATION_DURATION);
         startSet.addAnimation(startScale);
         startSet.initialize(startBounds.width(), startBounds.height(), endBounds.width(),

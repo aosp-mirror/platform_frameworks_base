@@ -205,7 +205,7 @@ public class NavigationBarController implements
     @Override
     public void onConfigChanged(Configuration newConfig) {
         boolean isOldConfigTablet = mIsTablet;
-        mIsTablet = isTablet(newConfig, mContext);
+        mIsTablet = isTablet(mContext);
         boolean largeScreenChanged = mIsTablet != isOldConfigTablet;
         // If we folded/unfolded while in 3 button, show navbar in folded state, hide in unfolded
         if (largeScreenChanged && updateNavbarForTaskbar()) {
