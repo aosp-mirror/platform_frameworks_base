@@ -848,7 +848,7 @@
     <string name="orgTypeOther" msgid="5450675258408005553">"മറ്റുള്ളവ"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"ഇഷ്‌ടാനുസൃതം"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"ഇഷ്‌ടാനുസൃതം"</string>
-    <string name="relationTypeAssistant" msgid="4057605157116589315">"Assistant"</string>
+    <string name="relationTypeAssistant" msgid="4057605157116589315">"അസിസ്റ്റന്റ്"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"സഹോദരന്‍‌"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"കുട്ടി"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"ഗാര്‍‌ഹിക പങ്കാളി"</string>
@@ -2008,7 +2008,7 @@
     <string name="app_category_image" msgid="7307840291864213007">"ഫോട്ടോകളും ചിത്രങ്ങളും"</string>
     <string name="app_category_social" msgid="2278269325488344054">"സാമൂഹിക ആപ്സുകളും ആശയവിനിമയവും"</string>
     <string name="app_category_news" msgid="1172762719574964544">"വാർത്തകളും മാസികകളും"</string>
-    <string name="app_category_maps" msgid="6395725487922533156">"Maps &amp; Navigation"</string>
+    <string name="app_category_maps" msgid="6395725487922533156">"മാപ്പുകളും നാവിഗേഷനും"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"ഉല്‍‌പ്പാദനക്ഷമത"</string>
     <string name="app_category_accessibility" msgid="6643521607848547683">"ഉപയോഗസഹായി"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"ഉപകരണ സ്റ്റോറേജ്"</string>

@@ -656,6 +656,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean mLastImeShown;
 
     /**
+     * When set to true, the IME insets will be frozen until the next app becomes IME input target.
+     * @see InsetsPolicy#adjustVisibilityForIme
+     */
+    boolean mImeInsetsFrozenUntilStartInput;
+
+    /**
      * A flag to determine if this AR is in the process of closing or entering PIP. This is needed
      * to help AR know that the app is in the process of closing but hasn't yet started closing on
      * the WM side.
@@ -1363,6 +1369,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         if (newTask != null && isState(RESUMED)) {
             newTask.setResumedActivity(this, "onParentChanged");
+            mImeInsetsFrozenUntilStartInput = false;
         }
 
         if (rootTask != null && rootTask.topRunningActivity() == this) {
@@ -2244,6 +2251,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Cleaning splash screen token=%s", this);
             mAtmService.mTaskOrganizerController.onAppSplashScreenViewRemoved(getTask());
         }
+    }
+
+    void removeStartingWindowIfNeeded() {
+        // Removing the task snapshot after the task is actually focused (see
+        // Task#onWindowFocusChanged). Since some of the app contents may draw in this time and
+        // requires more times to draw finish, in case flicking may happen when removing the task
+        // snapshot too early. (i.e. Showing IME.)
+        if ((mStartingData instanceof SnapshotStartingData) && !getTask().isFocused()) {
+            return;
+        }
+        removeStartingWindow();
     }
 
     void removeStartingWindow() {
@@ -4759,6 +4777,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     && imeInputTarget.getWindow().mActivityRecord == this
                     && mDisplayContent.mInputMethodWindow != null
                     && mDisplayContent.mInputMethodWindow.isVisible();
+            mImeInsetsFrozenUntilStartInput = true;
         }
 
         final DisplayContent displayContent = getDisplayContent();
@@ -5816,7 +5835,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // own stuff.
             win.cancelAnimation();
         }
-        removeStartingWindow();
+        removeStartingWindowIfNeeded();
         updateReportedVisibilityLocked();
     }
 
@@ -5877,6 +5896,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // closing activity having to wait until idle timeout to be stopped or destroyed if the
             // next activity won't report idle (e.g. repeated view animation).
             mTaskSupervisor.scheduleProcessStoppingAndFinishingActivitiesIfNeeded();
+
+            // If the activity is visible, but no windows are eligible to start input, unfreeze
+            // to avoid permanently frozen IME insets.
+            if (mImeInsetsFrozenUntilStartInput && getWindow(
+                    win -> WindowManager.LayoutParams.mayUseInputMethod(win.mAttrs.flags))
+                    == null) {
+                mImeInsetsFrozenUntilStartInput = false;
+            }
         }
     }
 
@@ -7790,6 +7817,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 restartProcessIfVisible();
             }
         }
+    }
+
+    @Override
+    void onResize() {
+        // Reset freezing IME insets flag when the activity resized.
+        mImeInsetsFrozenUntilStartInput = false;
+        super.onResize();
     }
 
     /** Returns true if the configuration is compatible with this activity. */
