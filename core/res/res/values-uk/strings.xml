@@ -1758,7 +1758,7 @@
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Виберіть функції для кнопки спеціальних можливостей"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Виберіть функції для комбінації з клавішами гучності"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Сервіс <xliff:g id="SERVICE_NAME">%s</xliff:g> вимкнено"</string>
-    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Редагувати засоби"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Змінити"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Готово"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Вимкнути ярлик"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Використовувати ярлик"</string>

@@ -18,16 +18,19 @@ package com.android.systemui.shared.recents.utilities;
 
 import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
+import static android.util.DisplayMetrics.DENSITY_DEVICE_STABLE;
 
+import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.util.DisplayMetrics;
 import android.view.Surface;
+import android.view.WindowManager;
 
 /* Common code */
 public class Utilities {
@@ -117,21 +120,20 @@ public class Utilities {
         return hints;
     }
 
-    /** See {@link #isTablet(Configuration, Context)} */
+    /** @return whether or not {@param context} represents that of a large screen device or not */
+    @TargetApi(Build.VERSION_CODES.R)
     public static boolean isTablet(Context context) {
-        Configuration newConfig = context.getResources().getConfiguration();
-        return isTablet(newConfig, context);
+        final WindowManager windowManager = context.getSystemService(WindowManager.class);
+        final Rect bounds = windowManager.getCurrentWindowMetrics().getBounds();
+
+        float originalSmallestWidth = dpiFromPx(Math.min(bounds.width(), bounds.height()),
+                context.getResources().getConfiguration().densityDpi);
+        return dpiFromPx(Math.min(bounds.width(), bounds.height()), DENSITY_DEVICE_STABLE)
+                >= TABLET_MIN_DPS && originalSmallestWidth >= TABLET_MIN_DPS;
     }
 
-    /**
-     * @return whether or not {@param newConfig} represents that of a large screen device or not
-     */
-    public static boolean isTablet(Configuration newConfig, Context context) {
-        float density = Resources.getSystem().getDisplayMetrics().density;
-        int size = Math.min((int) (density * newConfig.screenWidthDp),
-                (int) (density* newConfig.screenHeightDp));
-        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-        float densityRatio = (float) metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT;
-        return (size / densityRatio) >= TABLET_MIN_DPS;
+    public static float dpiFromPx(float size, int densityDpi) {
+        float densityRatio = (float) densityDpi / DisplayMetrics.DENSITY_DEFAULT;
+        return (size / densityRatio);
     }
 }

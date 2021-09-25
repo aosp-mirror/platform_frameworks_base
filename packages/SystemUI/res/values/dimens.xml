@@ -322,10 +322,7 @@
     <!-- Dimensions related to screenshots -->
 
     <!-- The padding on the global screenshot background image -->
-    <dimen name="global_screenshot_legacy_bg_padding">20dp</dimen>
-    <dimen name="global_screenshot_bg_padding">20dp</dimen>
-    <dimen name="global_screenshot_bg_protection_height">400dp</dimen>
-    <dimen name="global_screenshot_x_scale">80dp</dimen>
+    <dimen name="screenshot_x_scale">80dp</dimen>
     <dimen name="screenshot_bg_protection_height">242dp</dimen>
     <dimen name="screenshot_preview_elevation">4dp</dimen>
     <dimen name="screenshot_offset_y">8dp</dimen>

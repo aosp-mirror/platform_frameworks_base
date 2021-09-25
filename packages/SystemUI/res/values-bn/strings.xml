@@ -1176,6 +1176,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"নেটওয়ার্ক সার্চ করা হচ্ছে…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"নেটওয়ার্কে কানেক্ট করা যায়নি"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"সবকটি দেখুন"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"নেটওয়ার্ক বদলাতে ইথারনেট ডিসকানেক্ট করুন"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> নিম্নলিখিত টাইল দ্রুত সেটিংস মেনুতে যোগ করতে চায়"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"টাইল যোগ করুন"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"টাইল যোগ করবেন না"</string>

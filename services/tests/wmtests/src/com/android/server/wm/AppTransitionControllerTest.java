@@ -31,13 +31,17 @@ import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.os.Binder;
@@ -790,5 +794,39 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         // Check if the transition has been overridden.
         verify(mDisplayContent.mAppTransition)
                 .overridePendingAppTransitionRemote(adapter, false /* sync */);
+    }
+
+    @Test
+    public void testTransitionGoodToGoForTaskFragments() {
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment changeTaskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .createActivityCount(1)
+                .setOrganizer(organizer)
+                .build();
+        final TaskFragment emptyTaskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setOrganizer(organizer)
+                .build();
+        changeTaskFragment.getTopMostActivity().allDrawn = true;
+        mDisplayContent.mAppTransition.prepareAppTransition(TRANSIT_CHANGE, 0);
+        mDisplayContent.mChangingContainers.add(changeTaskFragment);
+        spyOn(mDisplayContent.mAppTransition);
+        spyOn(emptyTaskFragment);
+
+        mDisplayContent.mAppTransitionController.handleAppTransitionReady();
+
+        // Transition not ready because there is an empty non-finishing TaskFragment.
+        verify(mDisplayContent.mAppTransition, never()).goodToGo(anyInt(), any());
+
+        doReturn(true).when(emptyTaskFragment).hasChild();
+        emptyTaskFragment.remove(false /* withTransition */, "test");
+
+        mDisplayContent.mAppTransitionController.handleAppTransitionReady();
+
+        // Transition ready because the empty (no running activity) TaskFragment is requested to be
+        // removed.
+        verify(mDisplayContent.mAppTransition).goodToGo(anyInt(), any());
     }
 }

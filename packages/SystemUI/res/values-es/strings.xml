@@ -683,7 +683,7 @@
     <string name="zen_alarm_warning_indef" msgid="5252866591716504287">"No oirás la próxima alarma (<xliff:g id="WHEN">%1$s</xliff:g>) a menos que desactives esta opción antes"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"No oirás la próxima alarma (<xliff:g id="WHEN">%1$s</xliff:g>)"</string>
     <string name="alarm_template" msgid="2234991538018805736">"a las <xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="alarm_template_far" msgid="3561752195856839456">"el <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"Ajustes rápidos, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Compartir Internet"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Perfil de trabajo"</string>
@@ -1176,6 +1176,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Buscando redes…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"No se ha podido conectar a la red"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Ver todo"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Para cambiar de red, desconecta el cable Ethernet"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> quiere añadir el siguiente recuadro a ajustes rápidos"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Añadir recuadro"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"No añadir recuadro"</string>

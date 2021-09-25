@@ -2855,7 +2855,7 @@ class ActivityStarter {
                     false /* includingEmbeddedTask */);
             final TaskFragment taskFragment = top != null ? top.getTaskFragment() : null;
             if (taskFragment != null && taskFragment.isEmbedded()
-                    && task.effectiveUid == mStartActivity.getUid()) {
+                    && canEmbedActivity(taskFragment, mStartActivity, false /* newTask */, task)) {
                 // Use the embedded TaskFragment of the top activity as the new parent if the
                 // activity can be embedded.
                 newParent = top.getTaskFragment();

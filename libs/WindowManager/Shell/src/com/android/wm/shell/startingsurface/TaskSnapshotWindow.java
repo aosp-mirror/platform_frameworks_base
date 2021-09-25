@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.startingsurface;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.graphics.Color.WHITE;
 import static android.graphics.Color.alpha;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
@@ -314,6 +315,12 @@ public class TaskSnapshotWindow {
     }
 
     void scheduleRemove(Runnable onRemove) {
+        // Show the latest content as soon as possible for unlocking to home.
+        if (mActivityType == ACTIVITY_TYPE_HOME) {
+            removeImmediately();
+            onRemove.run();
+            return;
+        }
         if (mScheduledRunnable != null) {
             mSplashScreenExecutor.removeCallbacks(mScheduledRunnable);
             mScheduledRunnable = null;

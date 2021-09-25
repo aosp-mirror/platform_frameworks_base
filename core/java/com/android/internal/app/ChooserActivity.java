@@ -240,6 +240,12 @@ public class ChooserActivity extends ResolverActivity implements
             SystemUiDeviceConfigFlags.HASH_SALT_MAX_DAYS,
             DEFAULT_SALT_EXPIRATION_DAYS);
 
+    private static final boolean DEFAULT_IS_NEARBY_SHARE_FIRST_TARGET_IN_RANKED_APP = false;
+    private boolean mIsNearbyShareFirstTargetInRankedApp =
+            DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
+                    SystemUiDeviceConfigFlags.IS_NEARBY_SHARE_FIRST_TARGET_IN_RANKED_APP,
+                    DEFAULT_IS_NEARBY_SHARE_FIRST_TARGET_IN_RANKED_APP);
+
     private Bundle mReplacementExtras;
     private IntentSender mChosenComponentSender;
     private IntentSender mRefinementIntentSender;
@@ -600,10 +606,11 @@ public class ChooserActivity extends ResolverActivity implements
 
         // Exclude out Nearby from main list if chip is present, to avoid duplication
         ComponentName nearbySharingComponent = getNearbySharingComponent();
-        boolean hasNearby = nearbySharingComponent != null;
+        boolean shouldFilterNearby = !shouldNearbyShareBeFirstInRankedRow()
+                && nearbySharingComponent != null;
 
         if (pa != null) {
-            ComponentName[] names = new ComponentName[pa.length + (hasNearby ? 1 : 0)];
+            ComponentName[] names = new ComponentName[pa.length + (shouldFilterNearby ? 1 : 0)];
             for (int i = 0; i < pa.length; i++) {
                 if (!(pa[i] instanceof ComponentName)) {
                     Log.w(TAG, "Filtered component #" + i + " not a ComponentName: " + pa[i]);
@@ -612,12 +619,12 @@ public class ChooserActivity extends ResolverActivity implements
                 }
                 names[i] = (ComponentName) pa[i];
             }
-            if (hasNearby) {
+            if (shouldFilterNearby) {
                 names[names.length - 1] = nearbySharingComponent;
             }
 
             mFilteredComponentNames = names;
-        } else if (hasNearby) {
+        } else if (shouldFilterNearby) {
             mFilteredComponentNames = new ComponentName[1];
             mFilteredComponentNames[0] = nearbySharingComponent;
         }
@@ -1240,7 +1247,9 @@ public class ChooserActivity extends ResolverActivity implements
         final ViewGroup actionRow =
                 (ViewGroup) contentPreviewLayout.findViewById(R.id.chooser_action_row);
         addActionButton(actionRow, createCopyButton());
-        addActionButton(actionRow, createNearbyButton(targetIntent));
+        if (shouldNearbyShareBeIncludedAsActionButton()) {
+            addActionButton(actionRow, createNearbyButton(targetIntent));
+        }
 
         CharSequence sharingText = targetIntent.getCharSequenceExtra(Intent.EXTRA_TEXT);
         if (sharingText == null) {
@@ -1291,7 +1300,9 @@ public class ChooserActivity extends ResolverActivity implements
         final ViewGroup actionRow =
                 (ViewGroup) contentPreviewLayout.findViewById(R.id.chooser_action_row);
         //TODO: addActionButton(actionRow, createCopyButton());
-        addActionButton(actionRow, createNearbyButton(targetIntent));
+        if (shouldNearbyShareBeIncludedAsActionButton()) {
+            addActionButton(actionRow, createNearbyButton(targetIntent));
+        }
         addActionButton(actionRow, createEditButton(targetIntent));
 
         mPreviewCoord = new ContentPreviewCoordinator(contentPreviewLayout, false);
@@ -1411,8 +1422,9 @@ public class ChooserActivity extends ResolverActivity implements
         final ViewGroup actionRow =
                 (ViewGroup) contentPreviewLayout.findViewById(R.id.chooser_action_row);
         //TODO(b/120417119): addActionButton(actionRow, createCopyButton());
-        addActionButton(actionRow, createNearbyButton(targetIntent));
-
+        if (shouldNearbyShareBeIncludedAsActionButton()) {
+            addActionButton(actionRow, createNearbyButton(targetIntent));
+        }
 
         String action = targetIntent.getAction();
         if (Intent.ACTION_SEND.equals(action)) {
@@ -1712,7 +1724,6 @@ public class ChooserActivity extends ResolverActivity implements
         }
 
         super.startSelected(which, always, filtered);
-
 
         if (currentListAdapter.getCount() > 0) {
             // Log the index of which type of target the user picked.
@@ -2303,6 +2314,12 @@ public class ChooserActivity extends ResolverActivity implements
         public boolean isComponentPinned(ComponentName name) {
             return mPinnedSharedPrefs.getBoolean(name.flattenToString(), false);
         }
+
+        @Override
+        public boolean isFixedAtTop(ComponentName name) {
+            return name != null && name.equals(getNearbySharingComponent())
+                    && shouldNearbyShareBeFirstInRankedRow();
+        }
     }
 
     @VisibleForTesting
@@ -2838,13 +2855,20 @@ public class ChooserActivity extends ResolverActivity implements
                             .targetInfoForPosition(mListPosition, /* filtered */ true);
 
                     // This should always be the case for ItemViewHolder, check for validity
-                    if (ti instanceof DisplayResolveInfo) {
+                    if (ti instanceof DisplayResolveInfo && shouldShowTargetDetails(ti)) {
                         showTargetDetails((DisplayResolveInfo) ti);
                     }
                     return true;
                 });
             }
         }
+    }
+
+    private boolean shouldShowTargetDetails(TargetInfo ti) {
+        ComponentName nearbyShare = getNearbySharingComponent();
+        //  Suppress target details for nearby share to hide pin/unpin action
+        return !(nearbyShare != null && nearbyShare.equals(ti.getResolvedComponentName())
+                && shouldNearbyShareBeFirstInRankedRow());
     }
 
     /**
@@ -3212,7 +3236,7 @@ public class ChooserActivity extends ResolverActivity implements
                         final TargetInfo ti = mChooserListAdapter.targetInfoForPosition(
                                 holder.getItemIndex(column), true);
                         // This should always be the case for non-DS targets, check for validity
-                        if (ti instanceof DisplayResolveInfo) {
+                        if (ti instanceof DisplayResolveInfo && shouldShowTargetDetails(ti)) {
                             showTargetDetails((DisplayResolveInfo) ti);
                         }
                         return true;
@@ -3860,5 +3884,13 @@ public class ChooserActivity extends ResolverActivity implements
     @Override
     protected void maybeLogProfileChange() {
         getChooserActivityLogger().logShareheetProfileChanged();
+    }
+
+    private boolean shouldNearbyShareBeFirstInRankedRow() {
+        return ActivityManager.isLowRamDeviceStatic() && mIsNearbyShareFirstTargetInRankedApp;
+    }
+
+    private boolean shouldNearbyShareBeIncludedAsActionButton() {
+        return !shouldNearbyShareBeFirstInRankedRow();
     }
 }

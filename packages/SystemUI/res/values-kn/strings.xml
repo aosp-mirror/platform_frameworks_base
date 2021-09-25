@@ -1176,9 +1176,9 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"ನೆಟ್‌ವರ್ಕ್‌ಗಳನ್ನು ಹುಡುಕಲಾಗುತ್ತಿದೆ…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಕನೆಕ್ಟ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"ಎಲ್ಲವನ್ನೂ ನೋಡಿ"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ನೆಟ್‌ವರ್ಕ್‌ಗಳನ್ನು ಬದಲಿಸಲು, ಇಥರ್ನೆಟ್ ಅನ್ನು ಡಿಸ್‌ಕನೆಕ್ಟ್ ಮಾಡಿ"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> ಈ ಕೆಳಗಿನ ಟೈಲ್ ಅನ್ನು ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‍ಗಳಿಗೆ ಸೇರಿಸಲು ಬಯಸುತ್ತದೆ"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"ಟೈಲ್ ಅನ್ನು ಸೇರಿಸಿ"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"ಟೈಲ್ ಅನ್ನು ಸೇರಿಸಬೇಡಿ"</string>
-    <!-- no translation found for qs_user_switch_dialog_title (3045189293587781366) -->
-    <skip />
+    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ಬಳಕೆದಾರ ಆಯ್ಕೆಮಾಡಿ"</string>
 </resources>

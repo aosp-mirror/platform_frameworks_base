@@ -125,7 +125,7 @@
     <string name="screenrecord_start_error" msgid="2200660692479682368">"స్క్రీన్ రికార్డింగ్ ప్రారంభించడంలో ఎర్రర్ ఏర్పడింది"</string>
     <string name="usb_preference_title" msgid="1439924437558480718">"USB ఫైల్ బదిలీ ఎంపికలు"</string>
     <string name="use_mtp_button_title" msgid="5036082897886518086">"మీడియా ప్లేయర్‌గా (MTP) మౌంట్ చేయి"</string>
-    <string name="use_ptp_button_title" msgid="7676427598943446826">"కెమెరాగా (PTP) మౌంట్ చేయి"</string>
+    <string name="use_ptp_button_title" msgid="7676427598943446826">"ఒక కెమెరాగా (PTP) మౌంట్ చేయండి"</string>
     <string name="installer_cd_button_title" msgid="5499998592841984743">"Macకు Android ఫైల్ బదిలీ యాప్ ఇన్‌స్టాల్ చేయండి"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"వెనుకకు"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"హోమ్"</string>
@@ -147,7 +147,7 @@
     <string name="accessibility_manage_notification" msgid="582215815790143983">"నోటిఫికేషన్‌లను నిర్వహించండి"</string>
     <string name="phone_label" msgid="5715229948920451352">"ఫోన్‌ను తెరువు"</string>
     <string name="voice_assist_label" msgid="3725967093735929020">"వాయిస్ అసిస్టెంట్‌ను తెరువు"</string>
-    <string name="camera_label" msgid="8253821920931143699">"కెమెరాను తెరువు"</string>
+    <string name="camera_label" msgid="8253821920931143699">"కెమెరాను తెరవండి"</string>
     <string name="cancel" msgid="1089011503403416730">"రద్దు చేయి"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"నిర్ధారించు"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"మళ్లీ ప్రయత్నించు"</string>
@@ -430,11 +430,11 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ప్రారంభించు"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ఆపు"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"పరికరం మైక్రోఫోన్‌ను అన్‌బ్లాక్ చేయమంటారా?"</string>
-    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"పరికరం కెమెరాను అన్‌బ్లాక్ చేయమంటారా?"</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"పరికరం కెమెరా, మైక్రోఫోన్‌ను అన్‌బ్లాక్ చేయమంటారా?"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"పరికరంలోని కెమెరాను అన్‌బ్లాక్ చేయమంటారా?"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"పరికరంలోని కెమెరా, మైక్రోఫోన్‌లను అన్‌బ్లాక్ చేయమంటారా?"</string>
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"మీ మైక్రోఫోన్‌ను ఉపయోగించడానికి అనుమతి పొందిన అన్ని యాప్‌లు, సర్వీస్‌లకు యాక్సెస్‌ను ఇది అన్‌బ్లాక్ చేస్తుంది."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"మీ కెమెరాను ఉపయోగించడానికి అనుమతి పొందిన అన్ని యాప్‌లు, సర్వీస్‌లకు యాక్సెస్‌ను ఇది అన్‌బ్లాక్ చేస్తుంది."</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"మీ కెమెరాను లేదా మైక్రోఫోన్‌ను ఉపయోగించడానికి అనుమతి పొందిన అన్ని యాప్‌లు, సర్వీస్‌లకు యాక్సెస్‌ను ఇది అన్‌బ్లాక్ చేస్తుంది."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"ఇది, మీ కెమెరాను ఉపయోగించడానికి అనుమతి పొందిన అన్ని యాప్‌లకు, సర్వీస్‌లకు యాక్సెస్‌ను అన్‌బ్లాక్ చేస్తుంది."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"ఇది, మీ కెమెరాను లేదా మైక్రోఫోన్‌ను ఉపయోగించడానికి అనుమతి పొందిన అన్ని యాప్‌లకు, సర్వీస్‌లకు యాక్సెస్‌ను అన్‌బ్లాక్ చేస్తుంది."</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"ఇతర పరికరం"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"స్థూలదృష్టిని టోగుల్ చేయి"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"ఛార్జ్ చేయబడింది"</string>
@@ -462,7 +462,7 @@
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"ఈ పరికరం <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>కు చెందినది"</string>
     <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"ఈ పరికరం <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ద్వారా అందించబడింది"</string>
     <string name="phone_hint" msgid="6682125338461375925">"ఫోన్ కోసం చిహ్నాన్ని స్వైప్ చేయండి"</string>
-    <string name="voice_hint" msgid="7476017460191291417">"వాయిస్ అసిస్టెంట్ చిహ్నం నుండి స్వైప్"</string>
+    <string name="voice_hint" msgid="7476017460191291417">"వాయిస్ అసిస్టెంట్ కోసం చిహ్నం నుండి స్వైప్ చేయండి"</string>
     <string name="camera_hint" msgid="4519495795000658637">"కెమెరా కోసం చిహ్నాన్ని స్వైప్ చేయండి"</string>
     <string name="interruption_level_none_with_warning" msgid="8394434073508145437">"మొత్తం నిశ్శబ్దం. దీని వలన స్క్రీన్ రీడర్‌లు కూడా నిశ్శబ్దమవుతాయి."</string>
     <string name="interruption_level_none" msgid="219484038314193379">"మొత్తం నిశ్శబ్దం"</string>
@@ -756,13 +756,13 @@
     <string name="notification_delegate_header" msgid="1264510071031479920">"ప్రాక్సీ చేయబడిన నోటిఫికేషన్"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"అన్ని <xliff:g id="APP_NAME">%1$s</xliff:g> నోటిఫికేషన్‌లు"</string>
     <string name="see_more_title" msgid="7409317011708185729">"మరిన్ని చూడండి"</string>
-    <string name="appops_camera" msgid="5215967620896725715">"ఈ యాప్ ఈ కెమెరాను ఉపయోగిస్తోంది."</string>
+    <string name="appops_camera" msgid="5215967620896725715">"ఈ యాప్, కెమెరాను ఉపయోగిస్తోంది."</string>
     <string name="appops_microphone" msgid="8805468338613070149">"ఈ యాప్ మైక్రోఫోన్‌ను ఉపయోగిస్తుంది."</string>
     <string name="appops_overlay" msgid="4822261562576558490">"ఈ యాప్ మీ స్క్రీన్‌లోని ఇతర యాప్‌లపై ప్రదర్శించబడుతోంది."</string>
-    <string name="appops_camera_mic" msgid="7032239823944420431">"ఈ యాప్ మైక్రోఫోన్ మరియు కెమెరాను ఉపయోగిస్తుంది."</string>
-    <string name="appops_camera_overlay" msgid="6466845606058816484">"ఈ యాప్ మీ స్క్రీన్‌లోని ఇతర యాప్‌లపై ప్రదర్శించబడుతోంది మరియు కెమెరాను ఉపయోగిస్తుంది."</string>
+    <string name="appops_camera_mic" msgid="7032239823944420431">"ఈ యాప్ మైక్రోఫోన్‌ను, కెమెరాను ఉపయోగిస్తోంది."</string>
+    <string name="appops_camera_overlay" msgid="6466845606058816484">"ఈ యాప్ మీ స్క్రీన్‌లోని ఇతర యాప్‌లపై ప్రదర్శించబడుతోంది, కెమెరాను ఉపయోగిస్తోంది."</string>
     <string name="appops_mic_overlay" msgid="4609326508944233061">"ఈ యాప్ మీ స్క్రీన్‌లోని ఇతర యాప్‌లపై ప్రదర్శించబడుతోంది మరియు మైక్రోఫోన్‌ను ఉపయోగిస్తుంది."</string>
-    <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"ఈ యాప్ మీ స్క్రీన్‌లోని ఇతర యాప్‌లపై ప్రదర్శించబడుతోంది మరియు మైక్రోఫోన్, కెమెరాను ఉపయోగిస్తుంది."</string>
+    <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"ఈ యాప్ మీ స్క్రీన్‌లోని ఇతర యాప్‌లపై ప్రదర్శించబడుతోంది, మైక్రోఫోన్, కెమెరాను ఉపయోగిస్తోంది."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"సెట్టింగ్‌లు"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"సరే"</string>
     <string name="feedback_alerted" msgid="5192459808484271208">"ఈ నోటిఫికేషన్, సిస్టమ్ ద్వారా దానంతట అదే &lt;b&gt;ఆటోమేటిక్‌గా ప్రమోట్ చేయబడింది&lt;/b&gt;."</string>
@@ -1176,6 +1176,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"నెట్‌వర్క్‌ల కోసం సెర్చ్ చేస్తోంది…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"నెట్‌వర్క్‌కు కనెక్ట్ చేయడం విఫలమైంది"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"అన్నీ చూడండి"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"నెట్‌వర్క్‌లను మార్చడానికి, ఈథర్‌నెట్‌ను డిస్‌కనెక్ట్ చేయండి"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"కింది టైల్‌ను క్విక్ సెట్టింగ్‌లకు జోడించడానికి <xliff:g id="APPNAME">%1$s</xliff:g> అనుమతి కోరుతోంది"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"టైల్‌ను జోడించండి"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"టైల్‌ను జోడించవద్దు"</string>

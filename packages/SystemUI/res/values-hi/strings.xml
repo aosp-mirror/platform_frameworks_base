@@ -1176,6 +1176,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"नेटवर्क खोजे जा रहे हैं…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"नेटवर्क से कनेक्ट नहीं किया जा सका"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"सभी देखें"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"नेटवर्क बदलने के लिए, पहले ईथरनेट को डिसकनेक्ट करें"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> इस टाइल को \'फटाफट सेटिंग\' में जोड़ने के लिए अनुमति चाहता है"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"टाइल जोड़ें"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"टाइल न जोड़ें"</string>

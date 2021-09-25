@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package androidx.window.extensions.organizer;
+package androidx.window.extensions.embedding;
 
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.view.Choreographer;
 import android.view.RemoteAnimationTarget;
@@ -24,6 +25,7 @@ import android.view.animation.Animation;
 import android.view.animation.Transformation;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * Wrapper to handle the TaskFragment animation update in one {@link SurfaceControl.Transaction}.
@@ -33,6 +35,7 @@ class TaskFragmentAnimationAdapter {
     private final RemoteAnimationTarget mTarget;
     private final SurfaceControl mLeash;
     private final boolean mSizeChanged;
+    private final Point mPosition;
     private final Transformation mTransformation = new Transformation();
     private final float[] mMatrix = new float[9];
     private final float[] mVecs = new float[4];
@@ -41,7 +44,7 @@ class TaskFragmentAnimationAdapter {
 
     TaskFragmentAnimationAdapter(@NonNull Animation animation,
             @NonNull RemoteAnimationTarget target) {
-        this(animation, target, target.leash, false /* sizeChanged */);
+        this(animation, target, target.leash, false /* sizeChanged */, null /* position */);
     }
 
     /**
@@ -49,11 +52,14 @@ class TaskFragmentAnimationAdapter {
      */
     TaskFragmentAnimationAdapter(@NonNull Animation animation,
             @NonNull RemoteAnimationTarget target, @NonNull SurfaceControl leash,
-            boolean sizeChanged) {
+            boolean sizeChanged, @Nullable Point position) {
         mAnimation = animation;
         mTarget = target;
         mLeash = leash;
         mSizeChanged = sizeChanged;
+        mPosition = position != null
+                ? position
+                : new Point(target.localBounds.left, target.localBounds.top);
     }
 
     /** Called on frame update. */
@@ -65,8 +71,7 @@ class TaskFragmentAnimationAdapter {
 
         currentPlayTime = Math.min(currentPlayTime, mAnimation.getDuration());
         mAnimation.getTransformation(currentPlayTime, mTransformation);
-        mTransformation.getMatrix().postTranslate(
-                mTarget.localBounds.left, mTarget.localBounds.top);
+        mTransformation.getMatrix().postTranslate(mPosition.x, mPosition.y);
         t.setMatrix(mLeash, mTransformation.getMatrix(), mMatrix);
         t.setAlpha(mLeash, mTransformation.getAlpha());
         t.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());

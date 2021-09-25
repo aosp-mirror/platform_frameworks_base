@@ -772,7 +772,8 @@ class MediaCarouselController @Inject constructor(
                     31, // MEDIA_RESUME
                 uid,
                 interactedSubcardRank,
-                interactedSubcardCardinality
+                interactedSubcardCardinality,
+                0 // received_latency_millis
         )
         /* ktlint-disable max-line-length */
     }

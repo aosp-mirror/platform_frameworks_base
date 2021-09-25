@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package androidx.window.extensions.organizer;
+package androidx.window.extensions.embedding;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -212,7 +212,9 @@ class TaskFragmentContainer {
             @NonNull WindowContainerTransaction wct, @NonNull SplitController controller) {
         // Finish own activities
         for (Activity activity : collectActivities()) {
-            activity.finish();
+            if (!activity.isFinishing()) {
+                activity.finish();
+            }
         }
 
         if (!shouldFinishDependent) {

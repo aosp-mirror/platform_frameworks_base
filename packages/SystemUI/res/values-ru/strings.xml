@@ -1188,6 +1188,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Поиск сетей…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Не удалось подключиться к сети"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Показать все"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Чтобы переключиться между сетями, отключите кабель Ethernet."</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"Приложение \"<xliff:g id="APPNAME">%1$s</xliff:g>\" хочет добавить в меню \"Быстрые настройки\" указанный параметр."</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Добавить параметр"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Не добавлять"</string>

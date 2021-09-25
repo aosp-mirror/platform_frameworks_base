@@ -891,7 +891,7 @@ class UserUsageStatsService {
             pw.printPair("shortcutId", event.mShortcutId);
         }
         if (event.mEventType == Event.STANDBY_BUCKET_CHANGED) {
-            pw.printPair("standbyBucket", event.getStandbyBucket());
+            pw.printPair("standbyBucket", event.getAppStandbyBucket());
             pw.printPair("reason", UsageStatsManager.reasonToString(event.getStandbyReason()));
         } else if (event.mEventType == Event.ACTIVITY_RESUMED
                 || event.mEventType == Event.ACTIVITY_PAUSED

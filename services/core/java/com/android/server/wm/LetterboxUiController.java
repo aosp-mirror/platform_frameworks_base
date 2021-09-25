@@ -38,6 +38,9 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Slog;
+import android.view.InsetsSource;
+import android.view.InsetsState;
+import android.view.RoundedCorner;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowManager;
@@ -295,21 +298,57 @@ final class LetterboxUiController {
     }
 
     private void updateRoundedCorners(WindowState mainWindow) {
-        int cornersRadius =
-                // Don't round corners if letterboxed only for display cutout.
-                shouldShowLetterboxUi(mainWindow)
-                                && !mainWindow.isLetterboxedForDisplayCutout()
-                        ? Math.max(0, mLetterboxConfiguration.getLetterboxActivityCornersRadius())
-                        : 0;
-        setCornersRadius(mainWindow, cornersRadius);
-    }
-
-    private void setCornersRadius(WindowState mainWindow, int cornersRadius) {
         final SurfaceControl windowSurface = mainWindow.getClientViewRootSurface();
         if (windowSurface != null && windowSurface.isValid()) {
             Transaction transaction = mActivityRecord.getSyncTransaction();
-            transaction.setCornerRadius(windowSurface, cornersRadius);
+
+            if (!isLetterboxedNotForDisplayCutout(mainWindow)
+                    || !mLetterboxConfiguration.isLetterboxActivityCornersRounded()) {
+                transaction
+                        .setWindowCrop(windowSurface, null)
+                        .setCornerRadius(windowSurface, 0);
+                return;
+            }
+
+            final InsetsState insetsState = mainWindow.getInsetsState();
+            final InsetsSource taskbarInsetsSource =
+                    insetsState.getSource(InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
+
+            Rect cropBounds = new Rect(mActivityRecord.getBounds());
+            // Activity bounds are in screen coordinates while (0,0) for activity's surface control
+            // is at the top left corner of an app window so offsetting bounds accordingly.
+            cropBounds.offsetTo(0, 0);
+            // Rounded cornerners should be displayed above the taskbar.
+            cropBounds.bottom = Math.min(cropBounds.bottom, taskbarInsetsSource.getFrame().top);
+            transaction
+                    .setWindowCrop(windowSurface, cropBounds)
+                    .setCornerRadius(windowSurface, getRoundedCorners(insetsState));
         }
+    }
+
+    // Returns rounded corners radius based on override in
+    // R.integer.config_letterboxActivityCornersRadius or min device bottom corner radii.
+    // Device corners can be different on the right and left sides but we use the same radius
+    // for all corners for consistency and pick a minimal bottom one for consistency with a
+    // taskbar rounded corners.
+    private int getRoundedCorners(InsetsState insetsState) {
+        if (mLetterboxConfiguration.getLetterboxActivityCornersRadius() >= 0) {
+            return mLetterboxConfiguration.getLetterboxActivityCornersRadius();
+        }
+        return Math.min(
+                getInsetsStateCornerRadius(insetsState, RoundedCorner.POSITION_BOTTOM_LEFT),
+                getInsetsStateCornerRadius(insetsState, RoundedCorner.POSITION_BOTTOM_RIGHT));
+    }
+
+    private int getInsetsStateCornerRadius(
+                InsetsState insetsState, @RoundedCorner.Position int position) {
+        RoundedCorner corner = insetsState.getRoundedCorners().getRoundedCorner(position);
+        return corner == null ? 0 : corner.getRadius();
+    }
+
+    private boolean isLetterboxedNotForDisplayCutout(WindowState mainWindow) {
+        return shouldShowLetterboxUi(mainWindow)
+                && !mainWindow.isLetterboxedForDisplayCutout();
     }
 
     private void updateWallpaperForLetterbox(WindowState mainWindow) {
@@ -317,9 +356,8 @@ final class LetterboxUiController {
                 mLetterboxConfiguration.getLetterboxBackgroundType();
         boolean wallpaperShouldBeShown =
                 letterboxBackgroundType == LETTERBOX_BACKGROUND_WALLPAPER
-                        && shouldShowLetterboxUi(mainWindow)
                         // Don't use wallpaper as a background if letterboxed for display cutout.
-                        && !mainWindow.isLetterboxedForDisplayCutout()
+                        && isLetterboxedNotForDisplayCutout(mainWindow)
                         // Check that dark scrim alpha or blur radius are provided
                         && (getLetterboxWallpaperBlurRadius() > 0
                                 || getLetterboxWallpaperDarkScrimAlpha() > 0)
@@ -375,6 +413,8 @@ final class LetterboxUiController {
         pw.println(prefix + "  letterboxBackgroundType="
                 + letterboxBackgroundTypeToString(
                         mLetterboxConfiguration.getLetterboxBackgroundType()));
+        pw.println(prefix + "  letterboxCornerRadius="
+                + getRoundedCorners(mainWin.getInsetsState()));
         if (mLetterboxConfiguration.getLetterboxBackgroundType()
                 == LETTERBOX_BACKGROUND_WALLPAPER) {
             pw.println(prefix + "  isLetterboxWallpaperBlurSupported="

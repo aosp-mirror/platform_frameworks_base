@@ -488,12 +488,14 @@ public class SystemConfig {
     }
 
     private void readAllPermissions() {
+        final XmlPullParser parser = Xml.newPullParser();
+
         // Read configuration from system
-        readPermissions(Environment.buildPath(
+        readPermissions(parser, Environment.buildPath(
                 Environment.getRootDirectory(), "etc", "sysconfig"), ALLOW_ALL);
 
         // Read configuration from the old permissions dir
-        readPermissions(Environment.buildPath(
+        readPermissions(parser, Environment.buildPath(
                 Environment.getRootDirectory(), "etc", "permissions"), ALLOW_ALL);
 
         // Vendors are only allowed to customize these
@@ -503,18 +505,18 @@ public class SystemConfig {
             // For backward compatibility
             vendorPermissionFlag |= (ALLOW_PERMISSIONS | ALLOW_APP_CONFIGS);
         }
-        readPermissions(Environment.buildPath(
+        readPermissions(parser, Environment.buildPath(
                 Environment.getVendorDirectory(), "etc", "sysconfig"), vendorPermissionFlag);
-        readPermissions(Environment.buildPath(
+        readPermissions(parser, Environment.buildPath(
                 Environment.getVendorDirectory(), "etc", "permissions"), vendorPermissionFlag);
 
         String vendorSkuProperty = SystemProperties.get(VENDOR_SKU_PROPERTY, "");
         if (!vendorSkuProperty.isEmpty()) {
             String vendorSkuDir = "sku_" + vendorSkuProperty;
-            readPermissions(Environment.buildPath(
+            readPermissions(parser, Environment.buildPath(
                     Environment.getVendorDirectory(), "etc", "sysconfig", vendorSkuDir),
                     vendorPermissionFlag);
-            readPermissions(Environment.buildPath(
+            readPermissions(parser, Environment.buildPath(
                     Environment.getVendorDirectory(), "etc", "permissions", vendorSkuDir),
                     vendorPermissionFlag);
         }
@@ -522,18 +524,18 @@ public class SystemConfig {
         // Allow ODM to customize system configs as much as Vendor, because /odm is another
         // vendor partition other than /vendor.
         int odmPermissionFlag = vendorPermissionFlag;
-        readPermissions(Environment.buildPath(
+        readPermissions(parser, Environment.buildPath(
                 Environment.getOdmDirectory(), "etc", "sysconfig"), odmPermissionFlag);
-        readPermissions(Environment.buildPath(
+        readPermissions(parser, Environment.buildPath(
                 Environment.getOdmDirectory(), "etc", "permissions"), odmPermissionFlag);
 
         String skuProperty = SystemProperties.get(SKU_PROPERTY, "");
         if (!skuProperty.isEmpty()) {
             String skuDir = "sku_" + skuProperty;
 
-            readPermissions(Environment.buildPath(
+            readPermissions(parser, Environment.buildPath(
                     Environment.getOdmDirectory(), "etc", "sysconfig", skuDir), odmPermissionFlag);
-            readPermissions(Environment.buildPath(
+            readPermissions(parser, Environment.buildPath(
                     Environment.getOdmDirectory(), "etc", "permissions", skuDir),
                     odmPermissionFlag);
         }
@@ -541,9 +543,9 @@ public class SystemConfig {
         // Allow OEM to customize these
         int oemPermissionFlag = ALLOW_FEATURES | ALLOW_OEM_PERMISSIONS | ALLOW_ASSOCIATIONS
                 | ALLOW_VENDOR_APEX;
-        readPermissions(Environment.buildPath(
+        readPermissions(parser, Environment.buildPath(
                 Environment.getOemDirectory(), "etc", "sysconfig"), oemPermissionFlag);
-        readPermissions(Environment.buildPath(
+        readPermissions(parser, Environment.buildPath(
                 Environment.getOemDirectory(), "etc", "permissions"), oemPermissionFlag);
 
         // Allow Product to customize these configs
@@ -558,15 +560,15 @@ public class SystemConfig {
             // DEVICE_INITIAL_SDK_INT for the devices without product interface enforcement.
             productPermissionFlag = ALLOW_ALL;
         }
-        readPermissions(Environment.buildPath(
+        readPermissions(parser, Environment.buildPath(
                 Environment.getProductDirectory(), "etc", "sysconfig"), productPermissionFlag);
-        readPermissions(Environment.buildPath(
+        readPermissions(parser, Environment.buildPath(
                 Environment.getProductDirectory(), "etc", "permissions"), productPermissionFlag);
 
         // Allow /system_ext to customize all system configs
-        readPermissions(Environment.buildPath(
+        readPermissions(parser, Environment.buildPath(
                 Environment.getSystemExtDirectory(), "etc", "sysconfig"), ALLOW_ALL);
-        readPermissions(Environment.buildPath(
+        readPermissions(parser, Environment.buildPath(
                 Environment.getSystemExtDirectory(), "etc", "permissions"), ALLOW_ALL);
 
         // Skip loading configuration from apex if it is not a system process.
@@ -580,12 +582,13 @@ public class SystemConfig {
             if (f.isFile() || f.getPath().contains("@")) {
                 continue;
             }
-            readPermissions(Environment.buildPath(f, "etc", "permissions"), apexPermissionFlag);
+            readPermissions(parser, Environment.buildPath(f, "etc", "permissions"),
+                    apexPermissionFlag);
         }
     }
 
     @VisibleForTesting
-    public void readPermissions(File libraryDir, int permissionFlag) {
+    public void readPermissions(final XmlPullParser parser, File libraryDir, int permissionFlag) {
         // Read permissions from given directory.
         if (!libraryDir.exists() || !libraryDir.isDirectory()) {
             if (permissionFlag == ALLOW_ALL) {
@@ -620,12 +623,12 @@ public class SystemConfig {
                 continue;
             }
 
-            readPermissionsFromXml(f, permissionFlag);
+            readPermissionsFromXml(parser, f, permissionFlag);
         }
 
         // Read platform permissions last so it will take precedence
         if (platformFile != null) {
-            readPermissionsFromXml(platformFile, permissionFlag);
+            readPermissionsFromXml(parser, platformFile, permissionFlag);
         }
     }
 
@@ -634,8 +637,9 @@ public class SystemConfig {
                 + permFile + " at " + parser.getPositionDescription());
     }
 
-    private void readPermissionsFromXml(File permFile, int permissionFlag) {
-        FileReader permReader = null;
+    private void readPermissionsFromXml(final XmlPullParser parser, File permFile,
+            int permissionFlag) {
+        final FileReader permReader;
         try {
             permReader = new FileReader(permFile);
         } catch (FileNotFoundException e) {
@@ -647,7 +651,6 @@ public class SystemConfig {
         final boolean lowRam = ActivityManager.isLowRamDeviceStatic();
 
         try {
-            XmlPullParser parser = Xml.newPullParser();
             parser.setInput(permReader);
 
             int type;

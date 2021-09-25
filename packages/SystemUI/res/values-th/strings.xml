@@ -1176,6 +1176,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"กำลังค้นหาเครือข่าย…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"เชื่อมต่อเครือข่ายไม่สำเร็จ"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"ดูทั้งหมด"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ตัดการเชื่อมต่ออีเทอร์เน็ตเพื่อสลับเครือข่าย"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> ต้องการเพิ่มชิ้นส่วนต่อไปนี้ในการตั้งค่าด่วน"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"เพิ่มชิ้นส่วน"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"ไม่ต้องเพิ่มชิ้นส่วน"</string>
