@@ -23,6 +23,7 @@ import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_OPEN;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
+import android.graphics.Point;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -193,10 +194,12 @@ class TaskFragmentAnimationRunner extends IRemoteAnimationRunner.Stub {
             if (target.startBounds != null) {
                 final Animation[] animations =
                         mAnimationSpec.createChangeBoundsChangeAnimations(target);
+                // The snapshot surface will always be at (0, 0) of its parent.
                 adapters.add(new TaskFragmentAnimationAdapter(animations[0], target,
-                        target.startLeash, false /* sizeChanged */));
+                        target.startLeash, false /* sizeChanged */, new Point(0, 0)));
+                // The end surface will have size change for scaling.
                 adapters.add(new TaskFragmentAnimationAdapter(animations[1], target,
-                        target.leash, true /* sizeChanged */));
+                        target.leash, true /* sizeChanged */, null /* position */));
                 continue;
             }
 
