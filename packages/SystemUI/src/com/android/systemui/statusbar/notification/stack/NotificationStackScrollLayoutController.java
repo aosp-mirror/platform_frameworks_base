@@ -173,6 +173,7 @@ public class NotificationStackScrollLayoutController {
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     // TODO: StatusBar should be encapsulated behind a Controller
     private final StatusBar mStatusBar;
+    private final NotificationGroupManagerLegacy mLegacyGroupManager;
     private final SectionHeaderController mSilentHeaderController;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
 
@@ -663,6 +664,8 @@ public class NotificationStackScrollLayoutController {
                 mStatusBar.requestNotificationUpdate("onGroupsChanged");
             }
         });
+        mLegacyGroupManager = featureFlags.isNewNotifPipelineRenderingEnabled()
+                ? null : legacyGroupManager;
         mSilentHeaderController = silentHeaderController;
         mFeatureFlags = featureFlags;
         mNotifPipeline = notifPipeline;
@@ -1224,7 +1227,11 @@ public class NotificationStackScrollLayoutController {
             final boolean inSection =
                     NotificationStackScrollLayout.matchesSelection(row, selection);
             if (matchClearable && inSection) {
-                return true;
+                if (mLegacyGroupManager == null
+                        || !mLegacyGroupManager.isSummaryOfSuppressedGroup(
+                        row.getEntry().getSbn())) {
+                    return true;
+                }
             }
         }
         return false;

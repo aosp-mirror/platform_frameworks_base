@@ -17,6 +17,7 @@
 package com.android.server.appsearch;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.appsearch.exceptions.AppSearchException;
 import android.content.Context;
 import android.os.Environment;
@@ -50,6 +51,8 @@ public final class AppSearchUserInstanceManager {
 
     @GuardedBy("mInstancesLocked")
     private final Map<UserHandle, AppSearchUserInstance> mInstancesLocked = new ArrayMap<>();
+    @GuardedBy("mStorageInfoLocked")
+    private final Map<UserHandle, UserStorageInfo> mStorageInfoLocked = new ArrayMap<>();
 
     private AppSearchUserInstanceManager() {}
 
@@ -130,6 +133,9 @@ public final class AppSearchUserInstanceManager {
                 instance.getAppSearchImpl().close();
             }
         }
+        synchronized (mStorageInfoLocked) {
+            mStorageInfoLocked.remove(userHandle);
+        }
     }
 
     /**
@@ -156,6 +162,39 @@ public final class AppSearchUserInstanceManager {
                         "AppSearchUserInstance has never been created for: " + userHandle);
             }
             return instance;
+        }
+    }
+
+    /**
+     * Returns the initialized {@link AppSearchUserInstance} for the given user, or {@code null} if
+     * no such instance exists.
+     *
+     * @param userHandle The multi-user handle of the device user calling AppSearch
+     */
+    @Nullable
+    public AppSearchUserInstance getUserInstanceOrNull(@NonNull UserHandle userHandle) {
+        Objects.requireNonNull(userHandle);
+        synchronized (mInstancesLocked) {
+            return mInstancesLocked.get(userHandle);
+        }
+    }
+
+    /**
+     * Gets an {@link UserStorageInfo} for the given user.
+     *
+     * @param userHandle The multi-user handle of the device user
+     * @return An initialized {@link UserStorageInfo} for this user
+     */
+    @NonNull
+    public UserStorageInfo getOrCreateUserStorageInfoInstance(@NonNull UserHandle userHandle) {
+        Objects.requireNonNull(userHandle);
+        synchronized (mStorageInfoLocked) {
+            UserStorageInfo userStorageInfo = mStorageInfoLocked.get(userHandle);
+            if (userStorageInfo == null) {
+                userStorageInfo = new UserStorageInfo(getAppSearchDir(userHandle));
+                mStorageInfoLocked.put(userHandle, userStorageInfo);
+            }
+            return userStorageInfo;
         }
     }
 
@@ -196,6 +235,10 @@ public final class AppSearchUserInstanceManager {
         VisibilityStoreImpl visibilityStore =
                 VisibilityStoreImpl.create(appSearchImpl, userContext);
         long prepareVisibilityStoreLatencyEndMillis = SystemClock.elapsedRealtime();
+
+        // Update storage info file
+        UserStorageInfo userStorageInfo = getOrCreateUserStorageInfoInstance(userHandle);
+        userStorageInfo.updateStorageInfoFile(appSearchImpl);
 
         initStatsBuilder
                 .setTotalLatencyMillis(

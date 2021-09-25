@@ -83,7 +83,7 @@ public final class BinderProxy implements IBinder {
          * Debuggable builds will throw an BinderProxyMapSizeException if the number of
          * map entries exceeds:
          */
-        private static final int CRASH_AT_SIZE = 20_000;
+        private static final int CRASH_AT_SIZE = 25_000;
 
         /**
          * We next warn when we exceed this bucket size.

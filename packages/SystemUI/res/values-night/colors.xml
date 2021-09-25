@@ -59,14 +59,8 @@
     <color name="global_actions_alert_text">@color/GM2_red_300</color>
 
     <!-- Global screenshot actions -->
-    <color name="global_screenshot_button_background">@color/GM2_grey_800</color>
-    <color name="global_screenshot_button_ripple">#42FFFFFF</color>
-    <color name="global_screenshot_button_text">#FFFFFF</color>
-    <color name="global_screenshot_button_border">@color/GM2_grey_600</color>
-    <color name="global_screenshot_button_icon">@color/GM2_blue_300</color>
-    <color name="global_screenshot_dismiss_background">@color/GM2_grey_800</color>
-    <color name="global_screenshot_dismiss_foreground">#FFFFFF</color>
-    <color name="global_screenshot_background_protection_start">#80000000</color> <!-- 50% black -->
+    <color name="screenshot_button_ripple">#42FFFFFF</color>
+    <color name="screenshot_background_protection_start">#80000000</color> <!-- 50% black -->
 
     <!-- Media -->
     <color name="media_divider">#85ffffff</color>

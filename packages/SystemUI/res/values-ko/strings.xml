@@ -1176,6 +1176,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"네트워크 검색 중…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"네트워크에 연결하지 못했습니다."</string>
     <string name="see_all_networks" msgid="3773666844913168122">"모두 보기"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"네트워크를 전환하려면 이더넷을 연결 해제하세요."</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g>에서 빠른 설정에 다음 타일을 추가하려고 합니다."</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"타일 추가"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"타일 추가 안함"</string>

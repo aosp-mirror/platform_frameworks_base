@@ -1176,6 +1176,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"درحال جستجوی شبکه…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"اتصال به شبکه برقرار نشد"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"مشاهده همه"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"برای تغییر شبکه، اترنت را قطع کنید"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> می‌خواهد کاشی زیر را به «تنظیمات فوری» اضافه کند"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"افزودن کاشی"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"کاشی اضافه نشود"</string>

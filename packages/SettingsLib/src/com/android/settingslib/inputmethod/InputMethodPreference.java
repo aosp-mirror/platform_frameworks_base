@@ -29,16 +29,20 @@ import android.util.Log;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.preference.Preference;
 import androidx.preference.Preference.OnPreferenceChangeListener;
 import androidx.preference.Preference.OnPreferenceClickListener;
+import androidx.preference.PreferenceViewHolder;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.settingslib.PrimarySwitchPreference;
 import com.android.settingslib.R;
 import com.android.settingslib.RestrictedLockUtilsInternal;
-import com.android.settingslib.RestrictedSwitchPreference;
 
 import java.text.Collator;
 import java.util.List;
@@ -46,15 +50,12 @@ import java.util.List;
 /**
  * Input method preference.
  *
- * This preference represents an IME. It is used for two purposes. 1) An instance with a switch
- * is used to enable or disable the IME. 2) An instance without a switch is used to invoke the
- * setting activity of the IME.
+ * This preference represents an IME. It is used for two purposes. 1) Using a switch to enable or
+ * disable the IME 2) Invoking the setting activity of the IME.
  */
-public class InputMethodPreference extends RestrictedSwitchPreference implements OnPreferenceClickListener,
-        OnPreferenceChangeListener {
+public class InputMethodPreference extends PrimarySwitchPreference
+        implements OnPreferenceClickListener, OnPreferenceChangeListener {
     private static final String TAG = InputMethodPreference.class.getSimpleName();
-    private static final String EMPTY_TEXT = "";
-    private static final int NO_WIDGET = 0;
 
     public interface OnSavePreferenceListener {
         /**
@@ -82,23 +83,15 @@ public class InputMethodPreference extends RestrictedSwitchPreference implements
      *
      * @param context The Context this is associated with.
      * @param imi The {@link InputMethodInfo} of this preference.
-     * @param isImeEnabler true if this preference is the IME enabler that has enable/disable
-     *     switches for all available IMEs, not the list of enabled IMEs.
      * @param isAllowedByOrganization false if the IME has been disabled by a device or profile
      *     owner.
      * @param onSaveListener The listener called when this preference has been changed and needs
      *     to save the state to shared preference.
      */
     public InputMethodPreference(final Context context, final InputMethodInfo imi,
-            final boolean isImeEnabler, final boolean isAllowedByOrganization,
-            final OnSavePreferenceListener onSaveListener) {
+            final boolean isAllowedByOrganization, final OnSavePreferenceListener onSaveListener) {
         this(context, imi, imi.loadLabel(context.getPackageManager()), isAllowedByOrganization,
                 onSaveListener);
-        if (!isImeEnabler) {
-            // Remove switch widget.
-            setWidgetLayoutResource(NO_WIDGET);
-        }
-        setIconSize(context.getResources().getDimensionPixelSize(R.dimen.secondary_app_icon_size));
     }
 
     @VisibleForTesting
@@ -110,9 +103,6 @@ public class InputMethodPreference extends RestrictedSwitchPreference implements
         mImi = imi;
         mIsAllowedByOrganization = isAllowedByOrganization;
         mOnSaveListener = onSaveListener;
-        // Disable on/off switch texts.
-        setSwitchTextOn(EMPTY_TEXT);
-        setSwitchTextOff(EMPTY_TEXT);
         setKey(imi.getId());
         setTitle(title);
         final String settingsActivity = imi.getSettingsActivity();
@@ -135,20 +125,36 @@ public class InputMethodPreference extends RestrictedSwitchPreference implements
         return mImi;
     }
 
-    private boolean isImeEnabler() {
-        // If this {@link SwitchPreference} doesn't have a widget layout, we explicitly hide the
-        // switch widget at constructor.
-        return getWidgetLayoutResource() != NO_WIDGET;
+    @Override
+    public void onBindViewHolder(PreferenceViewHolder holder) {
+        super.onBindViewHolder(holder);
+        final Switch switchWidget = getSwitch();
+        if (switchWidget != null) {
+            switchWidget.setOnClickListener(v -> {
+                // no-op, avoid default behavior in {@link PrimarySwitchPreference#onBindViewHolder}
+            });
+            switchWidget.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                // Avoid the invocation after we call {@link PrimarySwitchPreference#setChecked()}
+                // in {@link setCheckedInternal}
+                if (isChecked != isChecked()) {
+                    // Keep switch to previous state because we have to show the dialog first
+                    buttonView.setChecked(!isChecked);
+                    callChangeListener(isChecked());
+                }
+            });
+        }
+        final ImageView icon = holder.itemView.findViewById(android.R.id.icon);
+        final int iconSize = getContext().getResources().getDimensionPixelSize(
+                R.dimen.secondary_app_icon_size);
+        if (icon != null && iconSize > 0) {
+            icon.setLayoutParams(new LinearLayout.LayoutParams(iconSize, iconSize));
+        }
     }
 
     @Override
     public boolean onPreferenceChange(final Preference preference, final Object newValue) {
         // Always returns false to prevent default behavior.
         // See {@link TwoStatePreference#onClick()}.
-        if (!isImeEnabler()) {
-            // Prevent disabling an IME because this preference is for invoking a settings activity.
-            return false;
-        }
         if (isChecked()) {
             // Disable this IME.
             setCheckedInternal(false);
@@ -176,11 +182,6 @@ public class InputMethodPreference extends RestrictedSwitchPreference implements
     public boolean onPreferenceClick(final Preference preference) {
         // Always returns true to prevent invoking an intent without catching exceptions.
         // See {@link Preference#performClick(PreferenceScreen)}/
-        if (isImeEnabler()) {
-            // Prevent invoking a settings activity because this preference is for enabling and
-            // disabling an input method.
-            return true;
-        }
         final Context context = getContext();
         try {
             final Intent intent = getIntent();
@@ -204,9 +205,9 @@ public class InputMethodPreference extends RestrictedSwitchPreference implements
         // this preference should be disabled to prevent accidentally disabling an input method.
         // This preference should also be disabled in case the admin does not allow this input
         // method.
-        if (isAlwaysChecked && isImeEnabler()) {
+        if (isAlwaysChecked) {
             setDisabledByAdmin(null);
-            setEnabled(false);
+            setSwitchEnabled(false);
         } else if (!mIsAllowedByOrganization) {
             EnforcedAdmin admin =
                     RestrictedLockUtilsInternal.checkIfInputMethodDisallowed(getContext(),
@@ -214,6 +215,7 @@ public class InputMethodPreference extends RestrictedSwitchPreference implements
             setDisabledByAdmin(admin);
         } else {
             setEnabled(true);
+            setSwitchEnabled(true);
         }
         setChecked(mInputMethodSettingValues.isEnabledImi(mImi));
         if (!isDisabledByAdmin()) {

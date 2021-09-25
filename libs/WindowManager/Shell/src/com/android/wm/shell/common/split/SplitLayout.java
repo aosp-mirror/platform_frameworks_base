@@ -776,26 +776,31 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         boolean adjustSurfaceLayoutForIme(SurfaceControl.Transaction t,
                 SurfaceControl dividerLeash, SurfaceControl leash1, SurfaceControl leash2,
                 SurfaceControl dimLayer1, SurfaceControl dimLayer2) {
-            if (mYOffsetForIme == 0) return false;
+            final boolean showDim = mDimValue1 > 0.001f || mDimValue2 > 0.001f;
+            boolean adjusted = false;
+            if (mYOffsetForIme != 0) {
+                if (dividerLeash != null) {
+                    mTempRect.set(mDividerBounds);
+                    mTempRect.offset(0, mYOffsetForIme);
+                    t.setPosition(dividerLeash, mTempRect.left, mTempRect.top);
+                }
 
-            if (dividerLeash != null) {
-                mTempRect.set(mDividerBounds);
+                mTempRect.set(mBounds1);
                 mTempRect.offset(0, mYOffsetForIme);
-                t.setPosition(dividerLeash, mTempRect.left, mTempRect.top);
+                t.setPosition(leash1, mTempRect.left, mTempRect.top);
+
+                mTempRect.set(mBounds2);
+                mTempRect.offset(0, mYOffsetForIme);
+                t.setPosition(leash2, mTempRect.left, mTempRect.top);
+                adjusted = true;
             }
 
-            mTempRect.set(mBounds1);
-            mTempRect.offset(0, mYOffsetForIme);
-            t.setPosition(leash1, mTempRect.left, mTempRect.top);
-
-            mTempRect.set(mBounds2);
-            mTempRect.offset(0, mYOffsetForIme);
-            t.setPosition(leash2, mTempRect.left, mTempRect.top);
-
-            t.setAlpha(dimLayer1, mDimValue1).setVisibility(dimLayer1, mDimValue1 > 0.001f);
-            t.setAlpha(dimLayer2, mDimValue2).setVisibility(dimLayer2, mDimValue2 > 0.001f);
-
-            return true;
+            if (showDim) {
+                t.setAlpha(dimLayer1, mDimValue1).setVisibility(dimLayer1, mDimValue1 > 0.001f);
+                t.setAlpha(dimLayer2, mDimValue2).setVisibility(dimLayer2, mDimValue2 > 0.001f);
+                adjusted = true;
+            }
+            return adjusted;
         }
     }
 }

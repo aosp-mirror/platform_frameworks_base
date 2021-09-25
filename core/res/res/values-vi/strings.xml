@@ -1073,7 +1073,7 @@
     <string name="weeks" msgid="3516247214269821391">"tuần"</string>
     <string name="year" msgid="5182610307741238982">"năm"</string>
     <string name="years" msgid="5797714729103773425">"năm"</string>
-    <string name="now_string_shortest" msgid="3684914126941650330">"ngay lúc này"</string>
+    <string name="now_string_shortest" msgid="3684914126941650330">"vừa xong"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ph</item>
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ph</item>

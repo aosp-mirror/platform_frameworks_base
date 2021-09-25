@@ -36,6 +36,7 @@ import androidx.preference.PreferenceScreen;
 import androidx.preference.TwoStatePreference;
 
 import com.android.internal.app.LocaleHelper;
+import com.android.settingslib.PrimarySwitchPreference;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -173,9 +174,14 @@ public class InputMethodAndSubtypeUtilCompat {
             }
             // In the choose input method screen or in the subtype enabler screen,
             // <code>pref</code> is an instance of TwoStatePreference.
-            final boolean isImeChecked = (pref instanceof TwoStatePreference) ?
-                    ((TwoStatePreference) pref).isChecked()
-                    : enabledIMEsAndSubtypesMap.containsKey(imiId);
+            final boolean isImeChecked;
+            if (pref instanceof TwoStatePreference) {
+                isImeChecked = ((TwoStatePreference) pref).isChecked();
+            } else if (pref instanceof PrimarySwitchPreference) {
+                isImeChecked = ((PrimarySwitchPreference) pref).isChecked();
+            } else {
+                isImeChecked = enabledIMEsAndSubtypesMap.containsKey(imiId);
+            }
             final boolean isCurrentInputMethod = imiId.equals(currentInputMethodId);
             final boolean systemIme = imi.isSystem();
             if ((!hasHardKeyboard && InputMethodSettingValuesWrapper.getInstance(
