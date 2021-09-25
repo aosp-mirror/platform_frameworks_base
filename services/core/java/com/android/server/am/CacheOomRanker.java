@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import android.os.Process;
+import android.os.SystemClock;
 import android.provider.DeviceConfig;
 import android.util.Slog;
 
@@ -46,6 +48,14 @@ public class CacheOomRanker {
     @VisibleForTesting
     static final int DEFAULT_PRESERVE_TOP_N_APPS = 3;
     @VisibleForTesting
+    static final String KEY_OOM_RE_RANKING_USE_FREQUENT_RSS = "oom_re_ranking_rss_use_frequent_rss";
+    @VisibleForTesting
+    static final boolean DEFAULT_USE_FREQUENT_RSS = true;
+    @VisibleForTesting
+    static final String KEY_OOM_RE_RANKING_RSS_UPDATE_RATE_MS = "oom_re_ranking_rss_update_rate_ms";
+    @VisibleForTesting
+    static final long DEFAULT_RSS_UPDATE_RATE_MS = 10_000; // 10 seconds
+    @VisibleForTesting
     static final String KEY_OOM_RE_RANKING_LRU_WEIGHT = "oom_re_ranking_lru_weight";
     @VisibleForTesting
     static final float DEFAULT_OOM_RE_RANKING_LRU_WEIGHT = 0.35f;
@@ -62,6 +72,8 @@ public class CacheOomRanker {
             new ScoreComparator();
     private static final Comparator<RankedProcessRecord> CACHE_USE_COMPARATOR =
             new CacheUseComparator();
+    private static final Comparator<RankedProcessRecord> RSS_COMPARATOR =
+            new RssComparator();
     private static final Comparator<RankedProcessRecord> LAST_RSS_COMPARATOR =
             new LastRssComparator();
     private static final Comparator<RankedProcessRecord> LAST_ACTIVITY_TIME_COMPARATOR =
@@ -70,6 +82,7 @@ public class CacheOomRanker {
     private final Object mPhenotypeFlagLock = new Object();
 
     private final ActivityManagerService mService;
+    private final ProcessDependencies mProcessDependencies;
     private final ActivityManagerGlobalLock mProcLock;
     private final Object mProfilerLock;
 
@@ -78,6 +91,12 @@ public class CacheOomRanker {
     @GuardedBy("mPhenotypeFlagLock")
     @VisibleForTesting
     int mPreserveTopNApps = DEFAULT_PRESERVE_TOP_N_APPS;
+    @GuardedBy("mPhenotypeFlagLock")
+    @VisibleForTesting
+    boolean mUseFrequentRss = DEFAULT_USE_FREQUENT_RSS;
+    @GuardedBy("mPhenotypeFlagLock")
+    @VisibleForTesting
+    long mRssUpdateRateMs = DEFAULT_RSS_UPDATE_RATE_MS;
     // Weight to apply to the LRU ordering.
     @GuardedBy("mPhenotypeFlagLock")
     @VisibleForTesting
@@ -110,6 +129,10 @@ public class CacheOomRanker {
                                 updateNumberToReRank();
                             } else if (KEY_OOM_RE_RANKING_PRESERVE_TOP_N_APPS.equals(name)) {
                                 updatePreserveTopNApps();
+                            } else if (KEY_OOM_RE_RANKING_USE_FREQUENT_RSS.equals(name)) {
+                                updateUseFrequentRss();
+                            } else if (KEY_OOM_RE_RANKING_RSS_UPDATE_RATE_MS.equals(name)) {
+                                updateRssUpdateRateMs();
                             } else if (KEY_OOM_RE_RANKING_LRU_WEIGHT.equals(name)) {
                                 updateLruWeight();
                             } else if (KEY_OOM_RE_RANKING_USES_WEIGHT.equals(name)) {
@@ -123,9 +146,15 @@ public class CacheOomRanker {
             };
 
     CacheOomRanker(final ActivityManagerService service) {
+        this(service, new ProcessDependenciesImpl());
+    }
+
+    @VisibleForTesting
+    CacheOomRanker(final ActivityManagerService service, ProcessDependencies processDependencies) {
         mService = service;
         mProcLock = service.mProcLock;
         mProfilerLock = service.mAppProfiler.mProfilerLock;
+        mProcessDependencies = processDependencies;
     }
 
     /** Load settings from device config and register a listener for changes. */
@@ -190,6 +219,18 @@ public class CacheOomRanker {
     }
 
     @GuardedBy("mPhenotypeFlagLock")
+    private void updateRssUpdateRateMs() {
+        mRssUpdateRateMs = DeviceConfig.getLong(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_OOM_RE_RANKING_RSS_UPDATE_RATE_MS, DEFAULT_RSS_UPDATE_RATE_MS);
+    }
+
+    @GuardedBy("mPhenotypeFlagLock")
+    private void updateUseFrequentRss() {
+        mUseFrequentRss = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_OOM_RE_RANKING_USE_FREQUENT_RSS, DEFAULT_USE_FREQUENT_RSS);
+    }
+
+    @GuardedBy("mPhenotypeFlagLock")
     private void updateLruWeight() {
         mLruWeight = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_OOM_RE_RANKING_LRU_WEIGHT, DEFAULT_OOM_RE_RANKING_LRU_WEIGHT);
@@ -244,6 +285,8 @@ public class CacheOomRanker {
         float usesWeight;
         float rssWeight;
         int preserveTopNApps;
+        boolean useFrequentRss;
+        long rssUpdateRateMs;
         int[] lruPositions;
         RankedProcessRecord[] scoredProcessRecords;
 
@@ -252,6 +295,8 @@ public class CacheOomRanker {
             usesWeight = mUsesWeight;
             rssWeight = mRssWeight;
             preserveTopNApps = mPreserveTopNApps;
+            useFrequentRss = mUseFrequentRss;
+            rssUpdateRateMs = mRssUpdateRateMs;
             lruPositions = mLruPositions;
             scoredProcessRecords = mScoredProcessRecords;
         }
@@ -296,6 +341,33 @@ public class CacheOomRanker {
             }
         }
 
+        if (useFrequentRss) {
+            // Update RSS values for re-ranked apps.
+            long nowMs = SystemClock.elapsedRealtime();
+            for (int i = 0; i < numProcessesReRanked; ++i) {
+                RankedProcessRecord scoredProcessRecord = scoredProcessRecords[i];
+                long sinceUpdateMs =
+                        nowMs - scoredProcessRecord.proc.mState.getCacheOomRankerRssTimeMs();
+                if (scoredProcessRecord.proc.mState.getCacheOomRankerRss() != 0
+                        && sinceUpdateMs < rssUpdateRateMs) {
+                    continue;
+                }
+
+                long[] rss = mProcessDependencies.getRss(scoredProcessRecord.proc.getPid());
+                if (rss == null || rss.length == 0) {
+                    Slog.e(
+                            OomAdjuster.TAG,
+                            "Process.getRss returned bad value, not re-ranking: "
+                                    + Arrays.toString(rss));
+                    return;
+                }
+                // First element is total RSS:
+                // frameworks/base/core/jni/android_util_Process.cpp:1192
+                scoredProcessRecord.proc.mState.setCacheOomRankerRss(rss[0], nowMs);
+                scoredProcessRecord.proc.mProfile.setLastRss(rss[0]);
+            }
+        }
+
         // Add scores for each of the weighted features we want to rank based on.
         if (lruWeight > 0.0f) {
             // This doesn't use the LRU list ordering as after the first re-ranking
@@ -305,8 +377,12 @@ public class CacheOomRanker {
             addToScore(scoredProcessRecords, lruWeight);
         }
         if (rssWeight > 0.0f) {
-            synchronized (mService.mAppProfiler.mProfilerLock) {
-                Arrays.sort(scoredProcessRecords, 0, numProcessesReRanked, LAST_RSS_COMPARATOR);
+            if (useFrequentRss) {
+                Arrays.sort(scoredProcessRecords, 0, numProcessesReRanked, RSS_COMPARATOR);
+            } else {
+                synchronized (mService.mAppProfiler.mProfilerLock) {
+                    Arrays.sort(scoredProcessRecords, 0, numProcessesReRanked, LAST_RSS_COMPARATOR);
+                }
             }
             addToScore(scoredProcessRecords, rssWeight);
         }
@@ -385,6 +461,16 @@ public class CacheOomRanker {
         }
     }
 
+    private static class RssComparator implements Comparator<RankedProcessRecord> {
+        @Override
+        public int compare(RankedProcessRecord o1, RankedProcessRecord o2) {
+            // High RSS first to match least recently used.
+            return Long.compare(
+                    o2.proc.mState.getCacheOomRankerRss(),
+                    o1.proc.mState.getCacheOomRankerRss());
+        }
+    }
+
     private static class LastRssComparator implements Comparator<RankedProcessRecord> {
         @Override
         public int compare(RankedProcessRecord o1, RankedProcessRecord o2) {
@@ -396,5 +482,19 @@ public class CacheOomRanker {
     private static class RankedProcessRecord {
         public ProcessRecord proc;
         public float score;
+    }
+
+    /**
+     * Interface for mocking {@link Process} static methods.
+     */
+    interface ProcessDependencies {
+        long[] getRss(int pid);
+    }
+
+    private static class ProcessDependenciesImpl implements ProcessDependencies {
+        @Override
+        public long[] getRss(int pid) {
+            return Process.getRss(pid);
+        }
     }
 }
