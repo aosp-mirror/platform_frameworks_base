@@ -21,15 +21,22 @@ import android.content.res.Resources;
 import android.util.SparseArray;
 
 import androidx.annotation.BoolRes;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.FlagReaderPlugin;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.util.wrapper.BuildInfo;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.ArrayList;
 
 import javax.inject.Inject;
 /**
@@ -55,7 +62,7 @@ import javax.inject.Inject;
  * Calls to this class should probably be wrapped by a method in {@link FeatureFlags}.
  */
 @SysUISingleton
-public class FeatureFlagReader {
+public class FeatureFlagReader implements Dumpable {
     private final Resources mResources;
     private final boolean mAreFlagsOverrideable;
     private final PluginManager mPluginManager;
@@ -68,6 +75,7 @@ public class FeatureFlagReader {
     public FeatureFlagReader(
             @Main Resources resources,
             BuildInfo build,
+            DumpManager dumpManager,
             PluginManager pluginManager,
             SystemPropertiesHelper systemPropertiesHelper) {
         mResources = resources;
@@ -76,6 +84,7 @@ public class FeatureFlagReader {
         mAreFlagsOverrideable =
                 build.isDebuggable() && mResources.getBoolean(R.bool.are_flags_overrideable);
 
+        dumpManager.registerDumpable("FeatureFlags", this);
         mPluginManager.addPluginListener(mPluginListener, FlagReaderPlugin.class);
     }
 
@@ -169,6 +178,23 @@ public class FeatureFlagReader {
             return configName.substring(STORAGE_KEY_PREFIX.length());
         } else {
             return null;
+        }
+    }
+
+    @Override
+    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+        ArrayList<String> flagStrings = new ArrayList<>(mCachedFlags.size());
+        for (int i = 0; i < mCachedFlags.size(); i++) {
+            int key = mCachedFlags.keyAt(i);
+            // get the object by the key.
+            CachedFlag flag = mCachedFlags.get(key);
+            flagStrings.add("  " + RESNAME_PREFIX + flag.name + ": " + flag.value + "\n");
+        }
+        flagStrings.sort(String.CASE_INSENSITIVE_ORDER);
+        pw.println("AreFlagsOverrideable: " + mAreFlagsOverrideable);
+        pw.println("Cached FeatureFlags:");
+        for (String flagString : flagStrings) {
+            pw.print(flagString);
         }
     }
 

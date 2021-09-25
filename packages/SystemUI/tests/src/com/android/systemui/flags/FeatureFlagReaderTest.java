@@ -16,11 +16,14 @@
 
 package com.android.systemui.flags;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,6 +35,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.util.wrapper.BuildInfo;
 
@@ -40,10 +44,15 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 @SmallTest
 public class FeatureFlagReaderTest extends SysuiTestCase {
     @Mock private Resources mResources;
     @Mock private BuildInfo mBuildInfo;
+    @Mock private DumpManager mDumpManager;
     @Mock private PluginManager mPluginManager;
     @Mock private SystemPropertiesHelper mSystemPropertiesHelper;
 
@@ -66,7 +75,7 @@ public class FeatureFlagReaderTest extends SysuiTestCase {
         when(mBuildInfo.isDebuggable()).thenReturn(isDebuggable);
         when(mResources.getBoolean(R.bool.are_flags_overrideable)).thenReturn(isOverrideable);
         mReader = new FeatureFlagReader(
-                mResources, mBuildInfo, mPluginManager, mSystemPropertiesHelper);
+                mResources, mBuildInfo, mDumpManager, mPluginManager, mSystemPropertiesHelper);
     }
 
     @Test
@@ -127,14 +136,38 @@ public class FeatureFlagReaderTest extends SysuiTestCase {
                 .getBoolean(fakeStorageKey(FLAG_RESID_0), false);
     }
 
+    @Test
+    public void testDump() {
+        // GIVEN that the flag 0 (by override) and 1 (by default) are both true
+        overrideFlag(FLAG_RESID_0, true);
+
+        // WHEN the flags have been accessed
+        assertTrue(mReader.isEnabled(FLAG_RESID_0));
+        assertTrue(mReader.isEnabled(FLAG_RESID_1));
+
+        // THEN the dump contains the flags and their correct values
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        mReader.dump(mock(FileDescriptor.class), pw, new String[0]);
+        pw.flush();
+        String dump = sw.toString();
+        assertThat(dump).contains(" flag_testname_" + FLAG_RESID_0 + ": true\n");
+        assertThat(dump).contains(" flag_testname_" + FLAG_RESID_1 + ": true\n");
+        assertThat(dump).contains("AreFlagsOverrideable: true\n");
+    }
+
     private void defineFlag(int resId, boolean value) {
         when(mResources.getBoolean(resId)).thenReturn(value);
-        when(mResources.getResourceEntryName(resId)).thenReturn(fakeStorageKey(resId));
+        when(mResources.getResourceEntryName(resId)).thenReturn(fakeResourceEntryName(resId));
     }
 
     private void overrideFlag(int resId, boolean value) {
         when(mSystemPropertiesHelper.getBoolean(eq(fakeStorageKey(resId)), anyBoolean()))
                 .thenReturn(value);
+    }
+
+    private String fakeResourceEntryName(@BoolRes int resId) {
+        return "flag_testname_" + resId;
     }
 
     private String fakeStorageKey(@BoolRes int resId) {
