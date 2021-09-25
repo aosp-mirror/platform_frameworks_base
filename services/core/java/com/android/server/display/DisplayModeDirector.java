@@ -2293,6 +2293,7 @@ public class DisplayModeDirector {
         private final BallotBox mBallotBox;
         private final Handler mHandler;
         private final SparseIntArray mHbmMode = new SparseIntArray();
+        private final SparseBooleanArray mHbmActive = new SparseBooleanArray();
         private final Injector mInjector;
         private final DeviceConfigDisplaySettings mDeviceConfigDisplaySettings;
         private int mRefreshRateInHbmSunlight;
@@ -2361,6 +2362,7 @@ public class DisplayModeDirector {
         public void onDisplayRemoved(int displayId) {
             mBallotBox.vote(displayId, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE, null);
             mHbmMode.delete(displayId);
+            mHbmActive.delete(displayId);
         }
 
         @Override
@@ -2370,12 +2372,17 @@ public class DisplayModeDirector {
                 // Display no longer there. Assume we'll get an onDisplayRemoved very soon.
                 return;
             }
+
             final int hbmMode = info.highBrightnessMode;
-            if (hbmMode == mHbmMode.get(displayId)) {
+            final boolean isHbmActive = hbmMode != BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF &&
+                info.adjustedBrightness > info.highBrightnessTransitionPoint;
+            if (hbmMode == mHbmMode.get(displayId) &&
+                isHbmActive == mHbmActive.get(displayId)) {
                 // no change, ignore.
                 return;
             }
             mHbmMode.put(displayId, hbmMode);
+            mHbmActive.put(displayId, isHbmActive);
             recalculateVotesForDisplay(displayId);
         }
 
@@ -2389,28 +2396,36 @@ public class DisplayModeDirector {
         }
 
         private void recalculateVotesForDisplay(int displayId) {
-            final int hbmMode = mHbmMode.get(displayId, BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF);
             Vote vote = null;
-            if (hbmMode == BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT) {
-                // Device resource properties take priority over DisplayDeviceConfig
-                if (mRefreshRateInHbmSunlight > 0) {
-                    vote = Vote.forRefreshRates(mRefreshRateInHbmSunlight,
-                            mRefreshRateInHbmSunlight);
-                } else {
-                    final List<RefreshRateLimitation> limits =
-                        mDisplayManagerInternal.getRefreshRateLimitations(displayId);
-                    for (int i = 0; limits != null && i < limits.size(); i++) {
-                        final RefreshRateLimitation limitation = limits.get(i);
-                        if (limitation.type == REFRESH_RATE_LIMIT_HIGH_BRIGHTNESS_MODE) {
-                            vote = Vote.forRefreshRates(limitation.range.min, limitation.range.max);
-                            break;
+            if (mHbmActive.get(displayId, false)) {
+                final int hbmMode =
+                    mHbmMode.get(displayId, BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF);
+                if (hbmMode == BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT) {
+                    // Device resource properties take priority over DisplayDeviceConfig
+                    if (mRefreshRateInHbmSunlight > 0) {
+                        vote = Vote.forRefreshRates(mRefreshRateInHbmSunlight,
+                                mRefreshRateInHbmSunlight);
+                    } else {
+                        final List<RefreshRateLimitation> limits =
+                            mDisplayManagerInternal.getRefreshRateLimitations(displayId);
+                        for (int i = 0; limits != null && i < limits.size(); i++) {
+                            final RefreshRateLimitation limitation = limits.get(i);
+                            if (limitation.type == REFRESH_RATE_LIMIT_HIGH_BRIGHTNESS_MODE) {
+                                vote = Vote.forRefreshRates(limitation.range.min,
+                                        limitation.range.max);
+                                break;
+                            }
                         }
                     }
+                } else if (hbmMode == BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR &&
+                        mRefreshRateInHbmHdr > 0) {
+                    // HBM for HDR vote isn't supported through DisplayDeviceConfig yet, so look for
+                    // a vote from Device properties
+                    vote = Vote.forRefreshRates(mRefreshRateInHbmHdr, mRefreshRateInHbmHdr);
+                } else {
+                    Slog.w(TAG, "Unexpected HBM mode " + hbmMode + " for display ID " + displayId);
                 }
-            }
-            if (hbmMode == BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR
-                    && mRefreshRateInHbmHdr > 0) {
-                vote = Vote.forRefreshRates(mRefreshRateInHbmHdr, mRefreshRateInHbmHdr);
+
             }
             mBallotBox.vote(displayId, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE, vote);
         }
@@ -2418,6 +2433,7 @@ public class DisplayModeDirector {
         void dumpLocked(PrintWriter pw) {
             pw.println("   HbmObserver");
             pw.println("     mHbmMode: " + mHbmMode);
+            pw.println("     mHbmActive: " + mHbmActive);
             pw.println("     mRefreshRateInHbmSunlight: " + mRefreshRateInHbmSunlight);
             pw.println("     mRefreshRateInHbmHdr: " + mRefreshRateInHbmHdr);
         }

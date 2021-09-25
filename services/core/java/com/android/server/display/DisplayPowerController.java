@@ -1513,7 +1513,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     mCachedBrightnessInfo.adjustedBrightness,
                     mCachedBrightnessInfo.brightnessMin,
                     mCachedBrightnessInfo.brightnessMax,
-                    mCachedBrightnessInfo.hbmMode);
+                    mCachedBrightnessInfo.hbmMode,
+                    mCachedBrightnessInfo.highBrightnessTransitionPoint);
         }
     }
 
@@ -1528,6 +1529,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mCachedBrightnessInfo.brightnessMin = mHbmController.getCurrentBrightnessMin();
             mCachedBrightnessInfo.brightnessMax = mHbmController.getCurrentBrightnessMax();
             mCachedBrightnessInfo.hbmMode = mHbmController.getHighBrightnessMode();
+            mCachedBrightnessInfo.highBrightnessTransitionPoint =
+                mHbmController.getTransitionPoint();
         }
     }
 
@@ -2211,6 +2214,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             pw.println("  mCachedBrightnessInfo.brightnessMax=" +
                     mCachedBrightnessInfo.brightnessMax);
             pw.println("  mCachedBrightnessInfo.hbmMode=" + mCachedBrightnessInfo.hbmMode);
+            pw.println("  mCachedBrightnessInfo.highBrightnessTransitionPoint=" +
+                    mCachedBrightnessInfo.highBrightnessTransitionPoint);
         }
         pw.println("  mDisplayBlanksAfterDozeConfig=" + mDisplayBlanksAfterDozeConfig);
         pw.println("  mBrightnessBucketsInDozeConfig=" + mBrightnessBucketsInDozeConfig);
@@ -2627,5 +2632,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         public float brightnessMin;
         public float brightnessMax;
         public int hbmMode;
+        public float highBrightnessTransitionPoint;
     }
 }

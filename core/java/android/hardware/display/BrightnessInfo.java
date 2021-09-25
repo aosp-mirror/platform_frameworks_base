@@ -69,6 +69,9 @@ public final class BrightnessInfo implements Parcelable {
     /** Current maximum supported brightness. */
     public final float brightnessMaximum;
 
+    /** Brightness values greater than this point are only used in High Brightness Mode. */
+    public final float highBrightnessTransitionPoint;
+
     /**
      * Current state of high brightness mode.
      * Can be any of HIGH_BRIGHTNESS_MODE_* values.
@@ -76,17 +79,20 @@ public final class BrightnessInfo implements Parcelable {
     public final int highBrightnessMode;
 
     public BrightnessInfo(float brightness, float brightnessMinimum, float brightnessMaximum,
-            @HighBrightnessMode int highBrightnessMode) {
-        this(brightness, brightness, brightnessMinimum, brightnessMaximum, highBrightnessMode);
+            @HighBrightnessMode int highBrightnessMode, float highBrightnessTransitionPoint) {
+        this(brightness, brightness, brightnessMinimum, brightnessMaximum, highBrightnessMode,
+                highBrightnessTransitionPoint);
     }
 
     public BrightnessInfo(float brightness, float adjustedBrightness, float brightnessMinimum,
-            float brightnessMaximum, @HighBrightnessMode int highBrightnessMode) {
+            float brightnessMaximum, @HighBrightnessMode int highBrightnessMode,
+            float highBrightnessTransitionPoint) {
         this.brightness = brightness;
         this.adjustedBrightness = adjustedBrightness;
         this.brightnessMinimum = brightnessMinimum;
         this.brightnessMaximum = brightnessMaximum;
         this.highBrightnessMode = highBrightnessMode;
+        this.highBrightnessTransitionPoint = highBrightnessTransitionPoint;
     }
 
     /**
@@ -116,6 +122,7 @@ public final class BrightnessInfo implements Parcelable {
         dest.writeFloat(brightnessMinimum);
         dest.writeFloat(brightnessMaximum);
         dest.writeInt(highBrightnessMode);
+        dest.writeFloat(highBrightnessTransitionPoint);
     }
 
     public static final @android.annotation.NonNull Creator<BrightnessInfo> CREATOR =
@@ -137,6 +144,7 @@ public final class BrightnessInfo implements Parcelable {
         brightnessMinimum = source.readFloat();
         brightnessMaximum = source.readFloat();
         highBrightnessMode = source.readInt();
+        highBrightnessTransitionPoint = source.readFloat();
     }
 
 }

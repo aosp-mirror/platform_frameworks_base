@@ -26,6 +26,7 @@ import static android.hardware.display.DisplayManager.DeviceConfig.KEY_REFRESH_R
 import static android.hardware.display.DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_LOW_ZONE;
 
 import static com.android.server.display.DisplayModeDirector.Vote.INVALID_SIZE;
+import static com.android.server.display.HighBrightnessModeController.HBM_TRANSITION_POINT_INVALID;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -111,6 +112,7 @@ public class DisplayModeDirectorTest {
     private static final boolean DEBUG = false;
     private static final float FLOAT_TOLERANCE = 0.01f;
     private static final int DISPLAY_ID = 0;
+    private static final float TRANSITION_POINT = 0.763f;
 
     private Context mContext;
     private FakesInjector mInjector;
@@ -1456,16 +1458,58 @@ public class DisplayModeDirectorTest {
         Vote vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
         assertNull(vote);
 
-        // Turn on HBM
+        // Turn on HBM, with brightness in the HBM range
         when(mInjector.getBrightnessInfo(DISPLAY_ID)).thenReturn(
-                new BrightnessInfo(0.45f, 0.0f, 1.0f, BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR));
+                new BrightnessInfo(TRANSITION_POINT + FLOAT_TOLERANCE, 0.0f, 1.0f,
+                    BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR, TRANSITION_POINT));
+        listener.onDisplayChanged(DISPLAY_ID);
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
+        assertVoteForRefreshRate(vote, hbmRefreshRate);
+
+        // Turn on HBM, with brightness below the HBM range
+        when(mInjector.getBrightnessInfo(DISPLAY_ID)).thenReturn(
+                new BrightnessInfo(TRANSITION_POINT - FLOAT_TOLERANCE, 0.0f, 1.0f,
+                    BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR, TRANSITION_POINT));
+        listener.onDisplayChanged(DISPLAY_ID);
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
+        assertNull(vote);
+
+        // Turn off HBM
+        when(mInjector.getBrightnessInfo(DISPLAY_ID)).thenReturn(
+                new BrightnessInfo(0.45f, 0.0f, 1.0f, BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF,
+                    TRANSITION_POINT));
+        listener.onDisplayChanged(DISPLAY_ID);
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
+        assertNull(vote);
+
+        // Turn on HBM, with brightness in the HBM range
+        when(mInjector.getBrightnessInfo(DISPLAY_ID)).thenReturn(
+                new BrightnessInfo(TRANSITION_POINT + FLOAT_TOLERANCE, 0.0f, 1.0f,
+                    BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR, TRANSITION_POINT));
         listener.onDisplayChanged(DISPLAY_ID);
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
         assertVoteForRefreshRate(vote, hbmRefreshRate);
 
         // Turn off HBM
         when(mInjector.getBrightnessInfo(DISPLAY_ID)).thenReturn(
-                new BrightnessInfo(0.45f, 0.0f, 1.0f, BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF));
+                new BrightnessInfo(0.45f, 0.0f, 1.0f, BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF,
+                    TRANSITION_POINT));
+        listener.onDisplayChanged(DISPLAY_ID);
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
+        assertNull(vote);
+
+        // Turn on HBM, with brightness below the HBM range
+        when(mInjector.getBrightnessInfo(DISPLAY_ID)).thenReturn(
+                new BrightnessInfo(TRANSITION_POINT - FLOAT_TOLERANCE, 0.0f, 1.0f,
+                    BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR, TRANSITION_POINT));
+        listener.onDisplayChanged(DISPLAY_ID);
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
+        assertNull(vote);
+
+        // Turn off HBM
+        when(mInjector.getBrightnessInfo(DISPLAY_ID)).thenReturn(
+                new BrightnessInfo(0.45f, 0.0f, 1.0f, BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF,
+                    TRANSITION_POINT));
         listener.onDisplayChanged(DISPLAY_ID);
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
         assertNull(vote);
@@ -1535,7 +1579,8 @@ public class DisplayModeDirectorTest {
 
         // Turn on HBM
         when(mInjector.getBrightnessInfo(DISPLAY_ID)).thenReturn(
-                new BrightnessInfo(1.0f, 0.0f, 1.0f, BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT));
+                new BrightnessInfo(1.0f, 0.0f, 1.0f, BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT,
+                    TRANSITION_POINT));
         listener.onDisplayChanged(DISPLAY_ID);
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
         assertVoteForRefreshRate(vote, initialRefreshRate);
@@ -1552,14 +1597,16 @@ public class DisplayModeDirectorTest {
 
         // Turn off HBM
         when(mInjector.getBrightnessInfo(DISPLAY_ID)).thenReturn(
-                new BrightnessInfo(0.43f, 0.1f, 0.8f, BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF));
+                new BrightnessInfo(0.43f, 0.1f, 0.8f, BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF,
+                    TRANSITION_POINT));
         listener.onDisplayChanged(DISPLAY_ID);
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
         assertNull(vote);
 
         // Turn HBM on again and ensure the updated vote value stuck
         when(mInjector.getBrightnessInfo(DISPLAY_ID)).thenReturn(
-                new BrightnessInfo(1.0f, 0.0f, 1.0f, BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT));
+                new BrightnessInfo(1.0f, 0.0f, 1.0f, BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT,
+                    TRANSITION_POINT));
         listener.onDisplayChanged(DISPLAY_ID);
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
         assertVoteForRefreshRate(vote, updatedRefreshRate);
@@ -1574,7 +1621,8 @@ public class DisplayModeDirectorTest {
 
         // Turn off HBM
         when(mInjector.getBrightnessInfo(DISPLAY_ID)).thenReturn(
-                new BrightnessInfo(0.43f, 0.1f, 0.8f, BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF));
+                new BrightnessInfo(0.43f, 0.1f, 0.8f, BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF,
+                    TRANSITION_POINT));
         listener.onDisplayChanged(DISPLAY_ID);
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
         assertNull(vote);
@@ -1605,14 +1653,82 @@ public class DisplayModeDirectorTest {
 
         // Turn on HBM
         when(mInjector.getBrightnessInfo(DISPLAY_ID)).thenReturn(
-                new BrightnessInfo(1.0f, 0.0f, 1.0f, BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT));
+                new BrightnessInfo(1.0f, 0.0f, 1.0f, BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT,
+                    TRANSITION_POINT));
         listener.onDisplayChanged(DISPLAY_ID);
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
         assertNull(vote);
 
         // Turn off HBM
         when(mInjector.getBrightnessInfo(DISPLAY_ID)).thenReturn(
-                new BrightnessInfo(0.43f, 0.1f, 0.8f, BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF));
+                new BrightnessInfo(0.43f, 0.1f, 0.8f, BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF,
+                    TRANSITION_POINT));
+        listener.onDisplayChanged(DISPLAY_ID);
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
+        assertNull(vote);
+    }
+
+    @Test
+    public void testHbmVoting_HbmUnsupported() {
+        DisplayModeDirector director =
+                createDirectorFromRefreshRateArray(new float[] {60.0f, 90.0f}, 0);
+        director.start(createMockSensorManager());
+
+        ArgumentCaptor<DisplayListener> captor =
+                  ArgumentCaptor.forClass(DisplayListener.class);
+        verify(mInjector).registerDisplayListener(captor.capture(), any(Handler.class),
+                  eq(DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS
+                  | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED));
+        DisplayListener listener = captor.getValue();
+
+        // Specify Limitation
+        when(mDisplayManagerInternalMock.getRefreshRateLimitations(DISPLAY_ID)).thenReturn(
+                List.of(new RefreshRateLimitation(
+                        DisplayManagerInternal.REFRESH_RATE_LIMIT_HIGH_BRIGHTNESS_MODE,
+                        60.0f, 60.0f)));
+
+        // Verify that there is no HBM vote initially
+        Vote vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
+        assertNull(vote);
+
+        // Turn on HBM when HBM is supported; expect a valid transition point and a vote.
+        when(mInjector.getBrightnessInfo(DISPLAY_ID)).thenReturn(
+                new BrightnessInfo(1.0f, 0.0f, 1.0f, BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT,
+                    TRANSITION_POINT));
+        listener.onDisplayChanged(DISPLAY_ID);
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
+        assertVoteForRefreshRate(vote, 60.0f);
+
+        // Turn off HBM
+        when(mInjector.getBrightnessInfo(DISPLAY_ID)).thenReturn(
+                new BrightnessInfo(1.0f, 0.0f, 1.0f, BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF,
+                    TRANSITION_POINT));
+        listener.onDisplayChanged(DISPLAY_ID);
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
+        assertNull(vote);
+
+        // Turn on Sunlight HBM when HBM is unsupported; expect an invalid transition point and
+        // no vote.
+        when(mInjector.getBrightnessInfo(DISPLAY_ID)).thenReturn(
+                new BrightnessInfo(1.0f, 0.0f, 1.0f, BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT,
+                    HBM_TRANSITION_POINT_INVALID));
+        listener.onDisplayChanged(DISPLAY_ID);
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
+        assertNull(vote);
+
+        // Turn on HDR HBM when HBM is unsupported; expect an invalid transition point and
+        // no vote.
+        when(mInjector.getBrightnessInfo(DISPLAY_ID)).thenReturn(
+                new BrightnessInfo(1.0f, 0.0f, 1.0f, BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR,
+                    HBM_TRANSITION_POINT_INVALID));
+        listener.onDisplayChanged(DISPLAY_ID);
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
+        assertNull(vote);
+
+        // Turn off HBM
+        when(mInjector.getBrightnessInfo(DISPLAY_ID)).thenReturn(
+                new BrightnessInfo(1.0f, 0.0f, 1.0f, BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF,
+                    TRANSITION_POINT));
         listener.onDisplayChanged(DISPLAY_ID);
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
         assertNull(vote);
@@ -1621,7 +1737,7 @@ public class DisplayModeDirectorTest {
     private void setHbmAndAssertRefreshRate(
             DisplayModeDirector director, DisplayListener listener, int mode, float rr) {
         when(mInjector.getBrightnessInfo(DISPLAY_ID))
-                .thenReturn(new BrightnessInfo(1.0f, 0.0f, 1.0f, mode));
+                .thenReturn(new BrightnessInfo(1.0f, 0.0f, 1.0f, mode, TRANSITION_POINT));
         listener.onDisplayChanged(DISPLAY_ID);
 
         final Vote vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
@@ -1700,7 +1816,8 @@ public class DisplayModeDirectorTest {
 
         // Turn on HBM
         when(mInjector.getBrightnessInfo(DISPLAY_ID)).thenReturn(
-                new BrightnessInfo(1.0f, 0.0f, 1.0f, BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT));
+                new BrightnessInfo(1.0f, 0.0f, 1.0f, BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT,
+                    TRANSITION_POINT));
         listener.onDisplayChanged(DISPLAY_ID);
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_HIGH_BRIGHTNESS_MODE);
         assertVoteForRefreshRate(vote, 60.f);
@@ -1861,7 +1978,7 @@ public class DisplayModeDirectorTest {
 
         when(mInjector.getBrightnessInfo(DISPLAY_ID)).thenReturn(
                 new BrightnessInfo(floatBri, floatAdjBri, 0.0f, 1.0f,
-                    BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF));
+                    BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF, TRANSITION_POINT));
         listener.onDisplayChanged(DISPLAY_ID);
     }
 
