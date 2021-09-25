@@ -2244,6 +2244,21 @@ public final class Settings {
     public static final String ACTION_TETHER_SETTINGS = "android.settings.TETHER_SETTINGS";
 
     /**
+     * Activity Action: Show screen that lets user configure wifi tethering.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you safeguard against this.
+     * <p>
+     * Input: Nothing
+     * <p>
+     * Output: Nothing
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_WIFI_TETHER_SETTING =
+            "com.android.settings.WIFI_TETHER_SETTINGS";
+
+    /**
      * Broadcast to trigger notification of asking user to enable MMS.
      * Need to specify {@link #EXTRA_ENABLE_MMS_DATA_REQUEST_REASON} and {@link #EXTRA_SUB_ID}.
      *

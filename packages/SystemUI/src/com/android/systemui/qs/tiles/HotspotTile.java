@@ -47,6 +47,7 @@ import javax.inject.Inject;
 
 /** Quick settings tile: Hotspot **/
 public class HotspotTile extends QSTileImpl<BooleanState> {
+
     private final Icon mEnabledStatic = ResourceIcon.get(R.drawable.ic_hotspot);
 
     private final HotspotController mHotspotController;
@@ -98,7 +99,7 @@ public class HotspotTile extends QSTileImpl<BooleanState> {
 
     @Override
     public Intent getLongClickIntent() {
-        return new Intent(Settings.ACTION_TETHER_SETTINGS);
+        return new Intent(Settings.ACTION_WIFI_TETHER_SETTING);
     }
 
     @Override

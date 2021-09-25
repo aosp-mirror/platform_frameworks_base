@@ -3022,4 +3022,6 @@
     <string name="wifi_failed_connect_message">Failed to connect to network</string>
     <!-- Provider Model: Title to see all the networks [CHAR LIMIT=50] -->
     <string name="see_all_networks">See all</string>
+    <!-- Summary for warning to disconnect ethernet first then switch to other networks. [CHAR LIMIT=60] -->
+    <string name="to_switch_networks_disconnect_ethernet">To switch networks, disconnect ethernet</string>
 </resources>
