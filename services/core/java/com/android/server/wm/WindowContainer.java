@@ -2589,11 +2589,20 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * 3. {@link ActivityRecord} is reparented into an organized {@link TaskFragment}.
      *
      * This shouldn't be called on other {@link WindowContainer} unless there is a valid use case.
+     *
+     * @param startBounds The original bounds (on screen) of the surface we are snapshotting.
+     * @param parentBounds The parent bounds (on screen) to calculate the animation surface
+     *                     position.
      */
-    void initializeChangeTransition(Rect startBounds) {
+    void initializeChangeTransition(Rect startBounds, Rect parentBounds) {
         mDisplayContent.prepareAppTransition(TRANSIT_CHANGE);
         mDisplayContent.mChangingContainers.add(this);
-        mSurfaceFreezer.freeze(getSyncTransaction(), startBounds);
+        mTmpPoint.set(startBounds.left - parentBounds.left, startBounds.top - parentBounds.top);
+        mSurfaceFreezer.freeze(getSyncTransaction(), startBounds, mTmpPoint);
+    }
+
+    void initializeChangeTransition(Rect startBounds) {
+        initializeChangeTransition(startBounds, getParent().getBounds());
     }
 
     ArraySet<WindowContainer> getAnimationSources() {
