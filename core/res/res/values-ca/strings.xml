@@ -325,7 +325,7 @@
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telèfon"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"fer i gestionar trucades telefòniques"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Sensors corporals"</string>
-    <string name="permgroupdesc_sensors" msgid="2610631290633747752">"accedir a les dades del sensor sobre els signes vitals"</string>
+    <string name="permgroupdesc_sensors" msgid="2610631290633747752">"accedir a les dades del sensor sobre les constants vitals"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Recuperar el contingut de la finestra"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Inspecciona el contingut d\'una finestra amb què estàs interaccionant."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Activar Exploració tàctil"</string>
