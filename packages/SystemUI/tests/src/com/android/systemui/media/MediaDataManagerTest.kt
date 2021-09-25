@@ -4,6 +4,7 @@ import android.app.Notification.MediaStyle
 import android.app.PendingIntent
 import android.app.smartspace.SmartspaceAction
 import android.app.smartspace.SmartspaceTarget
+import android.content.Intent
 import android.graphics.Bitmap
 import android.media.MediaDescription
 import android.media.MediaMetadata
@@ -51,6 +52,7 @@ private const val APP_NAME = "SystemUI"
 private const val SESSION_ARTIST = "artist"
 private const val SESSION_TITLE = "title"
 private const val USER_ID = 0
+private val DISMISS_INTENT = Intent().apply { action = "dismiss" }
 
 private fun <T> anyObject(): T {
     return Mockito.anyObject<T>()
@@ -83,6 +85,7 @@ class MediaDataManagerTest : SysuiTestCase() {
     lateinit var smartspaceMediaDataProvider: SmartspaceMediaDataProvider
     @Mock lateinit var mediaSmartspaceTarget: SmartspaceTarget
     @Mock private lateinit var mediaRecommendationItem: SmartspaceAction
+    @Mock private lateinit var mediaSmartspaceBaseAction: SmartspaceAction
     lateinit var mediaDataManager: MediaDataManager
     lateinit var mediaNotification: StatusBarNotification
     @Captor lateinit var mediaDataCaptor: ArgumentCaptor<MediaData>
@@ -146,8 +149,12 @@ class MediaDataManagerTest : SysuiTestCase() {
         // treat mediaSessionBasedFilter as a listener for testing.
         listener = mediaSessionBasedFilter
 
-        val recommendationExtras = Bundle()
-        recommendationExtras.putString("package_name", PACKAGE_NAME)
+        val recommendationExtras = Bundle().apply {
+            putString("package_name", PACKAGE_NAME)
+            putParcelable("dismiss_intent", DISMISS_INTENT)
+        }
+        whenever(mediaSmartspaceBaseAction.extras).thenReturn(recommendationExtras)
+        whenever(mediaSmartspaceTarget.baseAction).thenReturn(mediaSmartspaceBaseAction)
         whenever(mediaRecommendationItem.extras).thenReturn(recommendationExtras)
         whenever(mediaSmartspaceTarget.smartspaceTargetId).thenReturn(KEY_MEDIA_SMARTSPACE)
         whenever(mediaSmartspaceTarget.featureType).thenReturn(SmartspaceTarget.FEATURE_MEDIA)
@@ -380,7 +387,8 @@ class MediaDataManagerTest : SysuiTestCase() {
         verify(listener).onSmartspaceMediaDataLoaded(
             eq(KEY_MEDIA_SMARTSPACE),
             eq(SmartspaceMediaData(KEY_MEDIA_SMARTSPACE, true /* isActive */, true /*isValid */,
-            PACKAGE_NAME, null, listOf(mediaRecommendationItem), 0)),
+                PACKAGE_NAME, mediaSmartspaceBaseAction, listOf(mediaRecommendationItem),
+                DISMISS_INTENT, 0)),
             eq(false))
     }
 
@@ -391,7 +399,8 @@ class MediaDataManagerTest : SysuiTestCase() {
         verify(listener).onSmartspaceMediaDataLoaded(
             eq(KEY_MEDIA_SMARTSPACE),
             eq(EMPTY_SMARTSPACE_MEDIA_DATA
-                .copy(targetId = KEY_MEDIA_SMARTSPACE, isActive = true, isValid = false)),
+                .copy(targetId = KEY_MEDIA_SMARTSPACE, isActive = true,
+                    isValid = false, dismissIntent = DISMISS_INTENT)),
             eq(false))
     }
 
