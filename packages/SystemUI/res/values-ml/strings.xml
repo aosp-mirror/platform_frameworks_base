@@ -1175,6 +1175,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"നെറ്റ്‌വർക്കുകൾ കാണാൻ അൺ‌ലോക്ക് ചെയ്യുക"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"നെറ്റ്‌വർക്കുകൾ തിരയുന്നു…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"നെറ്റ്‌വർക്കിൽ കണക്റ്റ് ചെയ്യാനായില്ല"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"എല്ലാം കാണുക"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"മറ്റ് നെറ്റ്‌വർക്കുകളിലേക്ക് മാറാൻ, ഇതർനെറ്റ് വിച്ഛേദിക്കുക"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"ദ്രുത ക്രമീകരണത്തിലേക്ക് ഇനിപ്പറയുന്ന ടൈൽ ചേർക്കാൻ <xliff:g id="APPNAME">%1$s</xliff:g> ആവശ്യപ്പെടുന്നു"</string>

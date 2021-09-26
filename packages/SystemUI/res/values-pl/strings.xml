@@ -1187,6 +1187,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Odblokuj, by wyświetlić sieci"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Szukam sieci…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Nie udało się połączyć z siecią"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"Pokaż wszystko"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Aby przełączać sieci, odłącz Ethernet"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"Aplikacja <xliff:g id="APPNAME">%1$s</xliff:g> chce dodać do Szybkich ustawień ten kafelek"</string>
