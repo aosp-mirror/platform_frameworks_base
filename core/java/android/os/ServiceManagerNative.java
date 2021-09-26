@@ -98,6 +98,10 @@ class ServiceManagerProxy implements IServiceManager {
         return mServiceManager.updatableViaApex(name);
     }
 
+    public ConnectionInfo getConnectionInfo(String name) throws RemoteException {
+        return mServiceManager.getConnectionInfo(name);
+    }
+
     public void registerClientCallback(String name, IBinder service, IClientCallback cb)
             throws RemoteException {
         throw new RemoteException();
