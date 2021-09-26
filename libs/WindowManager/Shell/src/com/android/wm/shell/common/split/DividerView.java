@@ -25,6 +25,7 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Property;
 import android.view.GestureDetector;
+import android.view.InsetsController;
 import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.MotionEvent;
@@ -34,7 +35,6 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
@@ -50,12 +50,6 @@ import com.android.wm.shell.animation.Interpolators;
 public class DividerView extends FrameLayout implements View.OnTouchListener {
     public static final long TOUCH_ANIMATION_DURATION = 150;
     public static final long TOUCH_RELEASE_ANIMATION_DURATION = 200;
-
-    // TODO(b/191269755): use the value defined in InsetsController.
-    private static final Interpolator RESIZE_INTERPOLATOR = Interpolators.LINEAR;
-
-    // TODO(b/191269755): use the value defined in InsetsController.
-    private static final int ANIMATION_DURATION_RESIZE = 300;
 
     /** The task bar expanded height. Used to determine whether to insets divider bounds or not. */
     private float mExpandedTaskBarHeight;
@@ -142,8 +136,8 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
             if (animate) {
                 ObjectAnimator animator = ObjectAnimator.ofInt(this,
                         DIVIDER_HEIGHT_PROPERTY, mDividerBounds.height(), mTempRect.height());
-                animator.setInterpolator(RESIZE_INTERPOLATOR);
-                animator.setDuration(ANIMATION_DURATION_RESIZE);
+                animator.setInterpolator(InsetsController.RESIZE_INTERPOLATOR);
+                animator.setDuration(InsetsController.ANIMATION_DURATION_RESIZE);
                 animator.start();
             } else {
                 DIVIDER_HEIGHT_PROPERTY.set(this, mTempRect.height());
@@ -226,16 +220,6 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
     private void setTouching() {
         setSlippery(false);
         mHandle.setTouching(true, true);
-        if (isLandscape()) {
-            mBackground.animate().scaleX(1.4f);
-        } else {
-            mBackground.animate().scaleY(1.4f);
-        }
-        mBackground.animate()
-                .setInterpolator(Interpolators.TOUCH_RESPONSE)
-                .setDuration(TOUCH_ANIMATION_DURATION)
-                .translationZ(mTouchElevation)
-                .start();
         // Lift handle as well so it doesn't get behind the background, even though it doesn't
         // cast shadow.
         mHandle.animate()
@@ -248,13 +232,6 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
     private void releaseTouching() {
         setSlippery(true);
         mHandle.setTouching(false, true);
-        mBackground.animate()
-                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                .setDuration(TOUCH_RELEASE_ANIMATION_DURATION)
-                .translationZ(0)
-                .scaleX(1f)
-                .scaleY(1f)
-                .start();
         mHandle.animate()
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .setDuration(TOUCH_RELEASE_ANIMATION_DURATION)
