@@ -710,8 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"អង្គគ្រប់គ្រងការជូនដំណឹងថាមពល"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"បើក"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"បិទ"</string>
-    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
-    <skip />
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"បើក - ផ្អែកលើមុខ"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"ជាមួយអង្គគ្រប់គ្រងការជូនដំណឹងថាមពល អ្នកអាចកំណត់កម្រិតសំខាន់ពី 0 ទៅ 5 សម្រាប់ការជូនដំណឹងរបស់កម្មវិធី។ \n\n"<b>"កម្រិត 5"</b>" \n- បង្ហាញនៅផ្នែកខាងលើបញ្ជីជូនដំណឹង \n- អនុញ្ញាតការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n\n"<b>"កម្រិត 4"</b>" \n- រារាំងការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n\n"<b>"កម្រិត 3"</b>" \n- រារាំងការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n\n"<b>"កម្រិត 2"</b>" \n- រារាំងការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n- មិនបន្លឺសំឡេង ឬញ័រ \n\n"<b>"កម្រិត 1"</b>" \n- រារាំងការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n- មិនបន្លឺសំឡេង ឬញ័រ \n- លាក់ពីអេក្រង់ចាក់សោ និងរបារស្ថានភាព \n- បង្ហាញនៅផ្នែកខាងក្រោមបញ្ជីជូនដំណឹង \n\n"<b>"កម្រិត 0"</b>" \n- រារាំងការជូនដំណឹងទាំងអស់ពីកម្មវិធី"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"ការ​ជូនដំណឹង"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"អ្នក​នឹង​មិនឃើញ​ការជូនដំណឹង​ទាំងនេះ​ទៀតទេ"</string>

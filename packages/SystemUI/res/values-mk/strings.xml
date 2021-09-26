@@ -710,8 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Контроли за известувањата за напојување"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Вклучено"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Исклучено"</string>
-    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
-    <skip />
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Вклучено - според лице"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Со контролите за известувањата за напојување, може да поставите ниво на важност од 0 до 5 за известувањата на која било апликација. \n\n"<b>"Ниво 5"</b>" \n- Прикажувај на врвот на списокот со известувања \n- Дозволи прекин во цел екран \n- Секогаш користи појавување \n\n"<b>"Ниво 4"</b>" \n- Спречи прекин во цел екран \n- Секогаш користи појавување \n\n"<b>"Ниво 3"</b>" \n- Спречи прекин во цел екран \n- Без појавување \n\n"<b>"Ниво 2"</b>" \n- Спречи прекин во цел екран \n- Без појавување \n- Без звук и вибрации \n\n"<b>"Ниво 1"</b>" \n- Спречи прекин во цел екран \n- Без појавување \n- Без звук и вибрации \n- Сокриј од заклучен екран и статусна лента \n- Прикажувај на дното на списокот со известувања \n\n"<b>"Ниво 0"</b>" \n- Блокирај ги сите известувања од апликацијата"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Известувања"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Веќе нема да ги гледате овие известувања"</string>

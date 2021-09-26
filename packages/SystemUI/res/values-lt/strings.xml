@@ -716,8 +716,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Galingi pranešimų valdikliai"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Įjungta"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Išjungta"</string>
-    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
-    <skip />
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Įjungta – pagal veidą"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Naudodami pranešimų valdiklius galite nustatyti programos pranešimų svarbos lygį nuo 0 iki 5. \n\n"<b>"5 lygis"</b>" \n– Rodyti pranešimų sąrašo viršuje \n– Leisti pertraukti, kai veikia viso ekrano režimas \n– Visada rodyti pranešimus \n\n"<b>"4 lygis"</b>" \n– Neleisti pertraukti viso ekrano režimo \n– Visada rodyti pranešimus \n\n"<b>"3 lygis"</b>" \n– Neleisti pertraukti viso ekrano režimo \n– Niekada nerodyti pranešimų \n\n"<b>"2 lygis"</b>" \n– Neleisti pertraukti viso ekrano režimo \n– Niekada nerodyti pranešimų \n– Niekada neleisti garso ir nevibruoti \n\n"<b>"1 lygis"</b>" \n– Neleisti pertraukti viso ekrano režimo \n– Niekada nerodyti pranešimų \n– Niekada neleisti garso ir nevibruoti \n– Slėpti užrakinimo ekrane ir būsenos juostoje \n– Rodyti pranešimų sąrašo apačioje \n\n"<b>"0 lygis"</b>" \n– Blokuoti visus programos pranešimus"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Pranešimai"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Nebematysite šių pranešimų"</string>

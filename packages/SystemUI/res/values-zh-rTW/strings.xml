@@ -710,8 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"電源通知控制項"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"開啟"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"關閉"</string>
-    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
-    <skip />
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"已開啟 - 依臉部方向旋轉"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"只要使用電源通知控制項，你就能為應用程式通知設定從 0 到 5 的重要性等級。\n\n"<b>"等級 5"</b>" \n- 顯示在通知清單頂端 \n- 允許全螢幕通知 \n- 一律允許短暫顯示通知 \n\n"<b>"等級 4"</b>" \n- 禁止全螢幕通知 \n- 一律允許短暫顯示通知 \n\n"<b>"等級 3"</b>" \n- 禁止全螢幕通知 \n- 一律不允許短暫顯示通知 \n\n"<b>"等級 2"</b>" \n- 禁止全螢幕通知 \n- 一律不允許短暫顯示通知 \n- 一律不發出音效或震動 \n\n"<b>"等級 1"</b>" \n- 禁止全螢幕通知 \n- 一律不允許短暫顯示通知 \n- 一律不發出音效或震動 \n- 在鎖定畫面和狀態列中隱藏 \n- 顯示在通知清單底端 \n\n"<b>"等級 0"</b>" \n- 封鎖應用程式的所有通知"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"通知"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"你不會再看到這些通知"</string>

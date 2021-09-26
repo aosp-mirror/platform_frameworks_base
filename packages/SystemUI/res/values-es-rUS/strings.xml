@@ -710,8 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Controles de activación de notificaciones"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Activado"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Desactivado"</string>
-    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
-    <skip />
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Activa - En función del rostro"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Con los controles de activación de notificaciones, puedes establecer un nivel de importancia para las notificaciones de una app. \n\n"<b>"Nivel 5"</b>" \n- Mostrar en la parte superior de la lista de notificaciones. \n- Permitir interrupción en la pantalla completa. \n- Mostrar siempre. \n\n"<b>"Nivel 4"</b>" \n- No permitir interrupción en la pantalla completa. \n- Mostrar siempre. \n\n"<b>"Nivel 3"</b>" \n- No permitir interrupción en la pantalla completa. \n- No mostrar. \n\n"<b>"Nivel 2"</b>" \n- No permitir interrupción en la pantalla completa. \n- No mostrar. \n- No sonar ni vibrar. \n\n"<b>"Nivel 1"</b>" \n- No permitir interrupción en la pantalla completa. \n- No mostrar. \n- No sonar ni vibrar. \n- Ocultar de la pantalla bloqueada y la barra de estado. \n- Mostrar al final de la lista de notificaciones. \n\n"<b>"Nivel 0"</b>" \n- Bloquear todas las notificaciones de la app."</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Notificaciones"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Ya no verás estas notificaciones"</string>
@@ -1177,8 +1176,7 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Desbloquea para ver las redes"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Buscando redes…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Se produjo un error al establecer conexión con la red"</string>
-    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
-    <skip />
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Por ahora, el Wi-Fi no se conectará automáticamente"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Ver todo"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Para cambiar de red, desconéctate de Ethernet"</string>
 </resources>

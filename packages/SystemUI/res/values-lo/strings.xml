@@ -710,8 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"ການຄວບຄຸມການແຈ້ງເຕືອນ"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"ເປີດ"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"ປິດ"</string>
-    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
-    <skip />
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"ເປີດ - ອ້າງອີງໃບໜ້າ"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"ດ້ວຍການຄວບຄຸມການແຈ້ງເຕືອນ, ທ່ານສາມາດຕັ້ງລະດັບຄວາມສຳຄັນຈາກ 0 ຮອດ 5 ໃຫ້ກັບການແຈ້ງເຕືອນແອັບໃດໜຶ່ງໄດ້. \n\n"<b>"ລະດັບ 5"</b>" \n- ສະແດງຢູ່ເທິງສຸດຂອງລາຍການແຈ້ງເຕືອນ \n- ອະນຸຍາດໃຫ້ຂັດຈັງຫວະຕອນເປີດເຕັມຈໍ \n- ແນມເບິ່ງທຸກເທື່ອ \n\n"<b>"ລະດັບ 4"</b>" \n- ກັນບໍ່ໃຫ້ຂັດຈັງຫວະຕອນເປີດເຕັມຈໍ \n- ແນມເບິ່ງທຸກເທື່ອ \n\n"<b>"ລະດັບ 3"</b>" \n- ກັນບໍ່ໃຫ້ຂັດຈັງຫວະຕອນເປີດເຕັມຈໍ \n- ບໍ່ແນມເບິ່ງ \n\n"<b>"ລະດັບ 2"</b>" \n- ກັນບໍ່ໃຫ້ຂັດຈັງຫວະຕອນເປີດເຕັມຈໍ \n- ບໍ່ແນມເບິ່ງ \n- ບໍ່ມີສຽງ ແລະ ບໍ່ມີການສັ່ນເຕືອນ \n\n"<b>"ລະດັບ 1"</b>" \n- ກັນບໍ່ໃຫ້ຂັດຈັງຫວະຕອນເປີດເຕັມຈໍ \n- ບໍ່ແນມເບິ່ງ \n- ບໍ່ມີສຽງ ແລະ ບໍ່ມີການສັ່ນເຕືອນ \n- ເຊື່ອງຈາກໜ້າຈໍລັອກ ແລະ ແຖບສະຖານະ \n- ສະແດງຢູ່ລຸ່ມສຸດຂອງລາຍການແຈ້ງເຕືອນ \n\n"<b>"ລະດັບ 0"</b>" \n- ປິດກັ້ນການແຈ້ງເຕືອນທັງໝົດຈາກແອັບ"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"ການແຈ້ງເຕືອນ"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"ທ່ານຈະບໍ່ໄດ້ຮັບການແຈ້ງເຕືອນເຫຼົ່ານີ້ອີກຕໍ່ໄປ"</string>

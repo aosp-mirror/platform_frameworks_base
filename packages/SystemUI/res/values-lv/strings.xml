@@ -713,8 +713,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Barošanas paziņojumu vadīklas"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Ieslēgts"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Izslēgts"</string>
-    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
-    <skip />
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Ieslēgta — ar sejas noteikšanu"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Izmantojot barošanas paziņojumu vadīklas, varat lietotnes paziņojumiem iestatīt svarīguma līmeni (no 0 līdz 5). \n\n"<b>"5. līmenis"</b>" \n- Tiek rādīts paziņojumu saraksta augšdaļā \n- Tiek atļauta pilnekrāna režīma pārtraukšana \n- Ieskats vienmēr atļauts \n\n"<b>"4. līmenis"</b>" \n- Tiek novērsta pilnekrāna režīma pārtraukšana \n- Ieskats vienmēr atļauts \n\n"<b>"3. līmenis"</b>" \n- Tiek novērsta pilnekrāna režīma pārtraukšana \n- Ieskats nav atļauts \n\n"<b>"2. līmenis"</b>" \n- Tiek novērsta pilnekrāna režīma pārtraukšana \n- Ieskats nav atļauts \n- Nav atļautas skaņas un vibrosignāls \n\n"<b>"1. līmenis"</b>" \n- Tiek novērsta pilnekrāna režīma pārtraukšana \n- Ieskats nav atļauts \n- Nav atļautas skaņas un vibrosignāls \n- Paziņojumi tiek paslēpti bloķēšanas ekrānā un statusa joslā \n- Paziņojumi tiek rādīti paziņojumu saraksta apakšdaļā \n\n"<b>"0. līmenis"</b>" \n- Visi lietotnes paziņojumi tiek bloķēti"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Paziņojumi"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Jūs vairs neredzēsiet šos paziņojumus."</string>
