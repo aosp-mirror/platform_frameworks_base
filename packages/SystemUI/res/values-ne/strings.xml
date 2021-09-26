@@ -1176,4 +1176,5 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"नेटवर्कहरू खोजिँदै छन्…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"नेटवर्कमा कनेक्ट गर्न सकिएन"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"सबै नेटवर्क हेर्नुहोस्"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"नेटवर्क बदल्न इथरनेट डिस्कनेक्ट गर्नुहोस्"</string>
 </resources>

@@ -1188,4 +1188,5 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Iskanje omrežij …"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Vzpostavljanje povezave z omrežjem ni uspelo."</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Prikaz vseh omrežij"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Če želite preklopiti omrežje, prekinite ethernetno povezavo."</string>
 </resources>
