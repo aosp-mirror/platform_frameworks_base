@@ -25,7 +25,7 @@ import com.android.systemui.unfold.updates.hinge.FULLY_OPEN_DEGREES
 import com.android.systemui.unfold.updates.hinge.HingeAngleProvider
 import java.util.concurrent.Executor
 
-internal class DeviceFoldStateProvider(
+class DeviceFoldStateProvider(
     context: Context,
     private val hingeAngleProvider: HingeAngleProvider,
     private val screenStatusProvider: ScreenStatusProvider,
@@ -43,6 +43,7 @@ internal class DeviceFoldStateProvider(
     private val foldStateListener = FoldStateListener(context)
 
     private var isFolded = false
+    private var isUnfoldHandled = true
 
     override fun start() {
         deviceStateManager.registerCallback(
@@ -104,6 +105,7 @@ internal class DeviceFoldStateProvider(
                 lastFoldUpdate = FOLD_UPDATE_FINISH_CLOSED
                 outputListeners.forEach { it.onFoldUpdate(FOLD_UPDATE_FINISH_CLOSED) }
                 hingeAngleProvider.stop()
+                isUnfoldHandled = false
             } else {
                 lastFoldUpdate = FOLD_UPDATE_START_OPENING
                 outputListeners.forEach { it.onFoldUpdate(FOLD_UPDATE_START_OPENING) }
@@ -115,8 +117,15 @@ internal class DeviceFoldStateProvider(
         ScreenStatusProvider.ScreenListener {
 
         override fun onScreenTurnedOn() {
-            if (!isFolded) {
+            // Trigger this event only if we are unfolded and this is the first screen
+            // turned on event since unfold started. This prevents running the animation when
+            // turning on the internal display using the power button.
+            // Initially isUnfoldHandled is true so it will be reset to false *only* when we
+            // receive 'folded' event. If SystemUI started when device is already folded it will
+            // still receive 'folded' event on startup.
+            if (!isFolded && !isUnfoldHandled) {
                 outputListeners.forEach { it.onFoldUpdate(FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE) }
+                isUnfoldHandled = true
             }
         }
     }
