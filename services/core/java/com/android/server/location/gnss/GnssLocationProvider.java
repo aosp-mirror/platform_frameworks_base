@@ -67,7 +67,6 @@ import android.location.LocationResult;
 import android.location.provider.ProviderProperties;
 import android.location.provider.ProviderRequest;
 import android.location.util.identity.CallerIdentity;
-import android.os.AsyncTask;
 import android.os.BatteryStats;
 import android.os.Bundle;
 import android.os.Handler;
@@ -112,6 +111,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Executors;
 
 /**
  * A GNSS implementation of LocationProvider used by LocationManager.
@@ -636,7 +636,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             mDownloadPsdsWakeLock.acquire(DOWNLOAD_PSDS_DATA_TIMEOUT_MS);
         }
         Log.i(TAG, "WakeLock acquired by handleDownloadPsdsData()");
-        AsyncTask.THREAD_POOL_EXECUTOR.execute(() -> {
+        Executors.newSingleThreadExecutor().execute(() -> {
             GnssPsdsDownloader psdsDownloader = new GnssPsdsDownloader(
                     mGnssConfiguration.getProperties());
             byte[] data = psdsDownloader.downloadPsdsData(psdsType);
