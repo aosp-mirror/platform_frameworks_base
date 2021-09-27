@@ -2987,6 +2987,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         mDisplayContent.setImeInputTarget(app);
 
         // Simulate app is closing and expect the last IME is shown and IME insets is frozen.
+        mDisplayContent.mOpeningApps.clear();
         app.mActivityRecord.commitVisibility(false, false);
         app.mActivityRecord.onWindowsGone();
 
@@ -3003,6 +3004,24 @@ public class ActivityRecordTests extends WindowTestsBase {
         app.mActivityRecord.onWindowsVisible();
 
         assertFalse(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
+    }
+
+    @Test
+    public void testInClosingAnimation_doNotHideSurface() {
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        makeWindowVisibleAndDrawn(app);
+
+        // Put the activity in close transition.
+        mDisplayContent.mOpeningApps.clear();
+        mDisplayContent.mClosingApps.add(app.mActivityRecord);
+        mDisplayContent.prepareAppTransition(TRANSIT_CLOSE);
+
+        // Update visibility and call to remove window
+        app.mActivityRecord.commitVisibility(false, false);
+        app.mActivityRecord.prepareSurfaces();
+
+        // Because the app is waiting for transition, it should not hide the surface.
+        assertTrue(app.mActivityRecord.isSurfaceShowing());
     }
 
     private void assertHasStartingWindow(ActivityRecord atoken) {

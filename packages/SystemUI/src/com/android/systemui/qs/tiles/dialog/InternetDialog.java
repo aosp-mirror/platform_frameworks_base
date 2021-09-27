@@ -45,7 +45,7 @@ import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowManager;
-import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -121,7 +121,7 @@ public class InternetDialog extends SystemUIDialog implements
     private TextView mMobileSummaryText;
     private Switch mMobileDataToggle;
     private Switch mWiFiToggle;
-    private Button mDoneButton;
+    private FrameLayout mDoneLayout;
     private Drawable mBackgroundOn;
     private int mListMaxHeight;
     private int mDefaultDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
@@ -227,7 +227,7 @@ public class InternetDialog extends SystemUIDialog implements
         mWifiSettingsIcon = mDialogView.requireViewById(R.id.wifi_settings_icon);
         mWifiRecyclerView = mDialogView.requireViewById(R.id.wifi_list_layout);
         mSeeAllLayout = mDialogView.requireViewById(R.id.see_all_layout);
-        mDoneButton = mDialogView.requireViewById(R.id.done);
+        mDoneLayout = mDialogView.requireViewById(R.id.done_layout);
         mSignalIcon = mDialogView.requireViewById(R.id.signal_icon);
         mMobileTitleText = mDialogView.requireViewById(R.id.mobile_title);
         mMobileSummaryText = mDialogView.requireViewById(R.id.mobile_summary);
@@ -279,7 +279,7 @@ public class InternetDialog extends SystemUIDialog implements
         mConnectedWifListLayout.setOnClickListener(null);
         mSeeAllLayout.setOnClickListener(null);
         mWiFiToggle.setOnCheckedChangeListener(null);
-        mDoneButton.setOnClickListener(null);
+        mDoneLayout.setOnClickListener(null);
         mInternetDialogController.onStop();
         mInternetDialogFactory.destroyDialog();
     }
@@ -347,7 +347,7 @@ public class InternetDialog extends SystemUIDialog implements
                     buttonView.setChecked(isChecked);
                     mWifiManager.setWifiEnabled(isChecked);
                 });
-        mDoneButton.setOnClickListener(v -> dismiss());
+        mDoneLayout.setOnClickListener(v -> dismiss());
     }
 
     @MainThread

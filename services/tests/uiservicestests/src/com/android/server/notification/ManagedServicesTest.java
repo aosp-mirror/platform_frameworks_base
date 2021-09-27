@@ -65,6 +65,7 @@ import com.google.android.collect.Lists;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
@@ -1320,16 +1321,15 @@ public class ManagedServicesTest extends UiServiceTestCase {
                 APPROVAL_BY_COMPONENT);
         ComponentName cn = ComponentName.unflattenFromString("a/a");
 
-        service.registerSystemService(cn, 0);
-        when(context.bindServiceAsUser(any(), any(), anyInt(), any())).thenAnswer(invocation -> {
-            Object[] args = invocation.getArguments();
-            ServiceConnection sc = (ServiceConnection) args[1];
-            sc.onNullBinding(cn);
-            return true;
-        });
+        ArgumentCaptor<ServiceConnection> captor = ArgumentCaptor.forClass(ServiceConnection.class);
+        when(context.bindServiceAsUser(any(), captor.capture(), anyInt(), any()))
+                .thenAnswer(invocation -> {
+                    captor.getValue().onNullBinding(cn);
+                    return true;
+                });
 
         service.registerSystemService(cn, 0);
-        assertFalse(service.isBound(cn, 0));
+        verify(context).unbindService(captor.getValue());
     }
 
     @Test

@@ -1188,4 +1188,5 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Vyhledávání sítí…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Připojení k síti se nezdařilo"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Zobrazit vše"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Pokud chcete přepnout sítě, odpojte ethernet"</string>
 </resources>

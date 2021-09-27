@@ -243,15 +243,24 @@ public class LocationProviderManager extends
                 intent.putExtra(KEY_LOCATIONS, locationResult.asList().toArray(new Location[0]));
             }
 
+            // send() SHOULD only run the completion callback if it completes successfully. however,
+            // b/199464864 (which could not be fixed in the S timeframe) means that it's possible
+            // for send() to throw an exception AND run the completion callback. if this happens, we
+            // would over-release the wakelock... we take matters into our own hands to ensure that
+            // the completion callback can only be run if send() completes successfully. this means
+            // the completion callback may be run inline - but as we've never specified what thread
+            // the callback is run on, this is fine.
+            GatedCallback gatedCallback = new GatedCallback(onCompleteCallback);
+
             mPendingIntent.send(
                     mContext,
                     0,
                     intent,
-                    onCompleteCallback != null ? (pI, i, rC, rD, rE) -> onCompleteCallback.run()
-                            : null,
+                    (pI, i, rC, rD, rE) -> gatedCallback.run(),
                     null,
                     null,
                     options.toBundle());
+            gatedCallback.allow();
         }
 
         @Override
@@ -1960,11 +1969,6 @@ public class LocationProviderManager extends
             Preconditions.checkState(Thread.holdsLock(mLock));
         }
 
-        if (mDelayedRegister != null) {
-            mAlarmHelper.cancel(mDelayedRegister);
-            mDelayedRegister = null;
-        }
-
         // calculate how long the new request should be delayed before sending it off to the
         // provider, under the assumption that once we send the request off, the provider will
         // immediately attempt to deliver a new location satisfying that request.
@@ -1997,8 +2001,8 @@ public class LocationProviderManager extends
                 public void onAlarm() {
                     synchronized (mLock) {
                         if (mDelayedRegister == this) {
-                            setProviderRequest(newRequest);
                             mDelayedRegister = null;
+                            setProviderRequest(newRequest);
                         }
                     }
                 }
@@ -2025,6 +2029,11 @@ public class LocationProviderManager extends
 
     @GuardedBy("mLock")
     void setProviderRequest(ProviderRequest request) {
+        if (mDelayedRegister != null) {
+            mAlarmHelper.cancel(mDelayedRegister);
+            mDelayedRegister = null;
+        }
+
         EVENT_LOG.logProviderUpdateRequest(mName, request);
         mProvider.getController().setRequest(request);
 
@@ -2731,6 +2740,51 @@ public class LocationProviderManager extends
                 throw e;
             } finally {
                 Binder.restoreCallingIdentity(identity);
+            }
+        }
+    }
+
+    private static class GatedCallback implements Runnable {
+
+        private @Nullable Runnable mCallback;
+
+        @GuardedBy("this")
+        private boolean mGate;
+        @GuardedBy("this")
+        private boolean mRun;
+
+        GatedCallback(Runnable callback) {
+            mCallback = callback;
+        }
+
+        public void allow() {
+            Runnable callback = null;
+            synchronized (this) {
+                mGate = true;
+                if (mRun && mCallback != null) {
+                    callback = mCallback;
+                    mCallback = null;
+                }
+            }
+
+            if (callback != null) {
+                callback.run();
+            }
+        }
+
+        @Override
+        public void run() {
+            Runnable callback = null;
+            synchronized (this) {
+                mRun = true;
+                if (mGate && mCallback != null) {
+                    callback = mCallback;
+                    mCallback = null;
+                }
+            }
+
+            if (callback != null) {
+                callback.run();
             }
         }
     }

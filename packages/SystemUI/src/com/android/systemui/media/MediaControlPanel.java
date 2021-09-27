@@ -254,7 +254,8 @@ public class MediaControlPanel {
                 openGuts();
                 return true;
             } else {
-                return false;
+                closeGuts();
+                return true;
             }
         });
         mRecommendationViewHolder.getCancel().setOnClickListener(v -> {
@@ -587,6 +588,14 @@ public class MediaControlPanel {
             ViewGroup mediaCoverContainer = mediaCoverContainers.get(uiComponentIndex);
             setSmartspaceRecItemOnClickListener(mediaCoverContainer, recommendation,
                     uiComponentIndex);
+            // Bubble up the long-click event to the card.
+            mediaCoverContainer.setOnLongClickListener(v -> {
+                View parent = (View) v.getParent();
+                if (parent != null) {
+                    parent.performLongClick();
+                }
+                return true;
+            });
 
             // Set up the accessibility label for the media item.
             String artistName = recommendation.getExtras()

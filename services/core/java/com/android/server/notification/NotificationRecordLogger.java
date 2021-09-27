@@ -59,6 +59,20 @@ public interface NotificationRecordLogger {
             InstanceId groupId);
 
     /**
+     * Logs a NotificationReported atom reflecting an adjustment to a notification.
+     * Unlike maybeLogNotificationPosted, this method is guaranteed to log a notification update,
+     * so the caller must take responsibility for checking that that logging update is necessary,
+     * and that the notification is meaningfully changed.
+     * @param r The NotificationRecord. If null, no action is taken.
+     * @param position The position at which this notification is ranked.
+     * @param buzzBeepBlink Logging code reflecting whether this notification alerted the user.
+     * @param groupId The instance Id of the group summary notification, or null.
+     */
+    void logNotificationAdjusted(@Nullable NotificationRecord r,
+            int position, int buzzBeepBlink,
+            InstanceId groupId);
+
+    /**
      * Logs a notification cancel / dismiss event using UiEventReported (event ids from the
      * NotificationCancelledEvents enum).
      * @param r The NotificationRecord. If null, no action is taken.
@@ -96,7 +110,9 @@ public interface NotificationRecordLogger {
         @UiEvent(doc = "New notification enqueued to post")
         NOTIFICATION_POSTED(162),
         @UiEvent(doc = "Notification substantially updated, or alerted again.")
-        NOTIFICATION_UPDATED(163);
+        NOTIFICATION_UPDATED(163),
+        @UiEvent(doc = "Notification adjusted by assistant.")
+        NOTIFICATION_ADJUSTED(908);
 
         private final int mId;
         NotificationReportedEvent(int id) {
@@ -349,7 +365,8 @@ public interface NotificationRecordLogger {
                     && Objects.equals(r.getSbn().getNotification().category,
                         old.getSbn().getNotification().category)
                     && (r.getImportance() == old.getImportance())
-                    && (getLoggingImportance(r) == getLoggingImportance(old)));
+                    && (getLoggingImportance(r) == getLoggingImportance(old))
+                    && r.rankingScoreMatches(old.getRankingScore()));
         }
 
         /**

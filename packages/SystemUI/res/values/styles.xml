@@ -416,7 +416,9 @@
     </style>
 
     <!-- Overridden by values-television/styles.xml with tv-specific settings -->
-    <style name="volume_dialog_theme" parent="Theme.SystemUI"/>
+    <style name="volume_dialog_theme" parent="Theme.SystemUI">
+        <item name="android:windowIsFloating">true</item>
+    </style>
 
     <style name="Theme.SystemUI.Dialog" parent="@android:style/Theme.DeviceDefault.Light.Dialog" />
 
@@ -1000,7 +1002,7 @@
 
     <style name="TextAppearance.InternetDialog.Secondary">
         <item name="android:textSize">14sp</item>
-        <item name="android:textColor">?android:attr/textColorTertiary</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
     <style name="TextAppearance.InternetDialog.Active"/>

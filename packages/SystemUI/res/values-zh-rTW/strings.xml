@@ -1176,4 +1176,5 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"正在搜尋網路…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"無法連上網路"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"查看全部"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"如要切換網路，請中斷乙太網路連線"</string>
 </resources>

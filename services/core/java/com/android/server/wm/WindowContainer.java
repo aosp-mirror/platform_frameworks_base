@@ -32,6 +32,10 @@ import static android.os.UserHandle.USER_NULL;
 import static android.view.SurfaceControl.Transaction;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.TRANSIT_CHANGE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_TO_BACK;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_TO_FRONT;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS_ANIM;
@@ -61,10 +65,13 @@ import static com.android.server.wm.WindowManagerService.logWithStack;
 import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_AFTER_ANIM;
 
 import android.annotation.CallSuper;
+import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityThread;
 import android.app.WindowConfiguration;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Point;
@@ -90,6 +97,7 @@ import android.view.animation.Animation;
 import android.window.IWindowContainerToken;
 import android.window.WindowContainerToken;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
@@ -854,6 +862,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     RootDisplayArea getRootDisplayArea() {
         WindowContainer parent = getParent();
         return parent != null ? parent.getRootDisplayArea() : null;
+    }
+
+    @Nullable
+    TaskDisplayArea getTaskDisplayArea() {
+        WindowContainer parent = getParent();
+        return parent != null ? parent.getTaskDisplayArea() : null;
     }
 
     boolean isAttached() {
@@ -2551,10 +2565,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *               some point but the meaning is too weird to work for all containers.
      * @param type The type of animation defined as {@link AnimationType}.
      * @param animationFinishedCallback The callback being triggered when the animation finishes.
+     * @param animationCancelledCallback The callback is triggered after the SurfaceAnimator sends a
+     *                                   cancel call to the underlying AnimationAdapter.
      */
     void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
             @AnimationType int type,
-            @Nullable OnAnimationFinishedCallback animationFinishedCallback) {
+            @Nullable OnAnimationFinishedCallback animationFinishedCallback,
+            @Nullable Runnable animationCancelledCallback) {
         if (DEBUG_ANIM) {
             Slog.v(TAG, "Starting animation on " + this + ": type=" + type + ", anim=" + anim);
         }
@@ -2562,7 +2579,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // TODO: This should use isVisible() but because isVisible has a really weird meaning at
         // the moment this doesn't work for all animatable window containers.
         mSurfaceAnimator.startAnimation(t, anim, hidden, type, animationFinishedCallback,
-                mSurfaceFreezer);
+                animationCancelledCallback, mSurfaceFreezer);
+    }
+
+    void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
+            @AnimationType int type,
+            @Nullable OnAnimationFinishedCallback animationFinishedCallback) {
+        startAnimation(t, anim, hidden, type, animationFinishedCallback,
+                null /* adapterAnimationCancelledCallback */);
     }
 
     void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
@@ -2796,8 +2820,26 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             if (sources != null) {
                 mSurfaceAnimationSources.addAll(sources);
             }
+
+            TaskDisplayArea taskDisplayArea = getTaskDisplayArea();
+            boolean isSettingBackgroundColor = taskDisplayArea != null
+                    && isTransitionWithBackgroundColor(transit);
+
+            if (isSettingBackgroundColor) {
+                Context uiContext = ActivityThread.currentActivityThread().getSystemUiContext();
+                @ColorInt int backgroundColor = uiContext.getColor(R.color.overview_background);
+
+                taskDisplayArea.setBackgroundColor(backgroundColor);
+            }
+
+            final Runnable cleanUpCallback = isSettingBackgroundColor
+                    ? taskDisplayArea::clearBackgroundColor : () -> {};
+
             startAnimation(getPendingTransaction(), adapter, !isVisible(),
-                    ANIMATION_TYPE_APP_TRANSITION);
+                    ANIMATION_TYPE_APP_TRANSITION,
+                    (type, anim) -> cleanUpCallback.run(),
+                    cleanUpCallback);
+
             if (adapter.getShowWallpaper()) {
                 getDisplayContent().pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
             }
@@ -2806,6 +2848,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                         thumbnailAdapter, ANIMATION_TYPE_APP_TRANSITION, (type, anim) -> { });
             }
         }
+    }
+
+    private boolean isTransitionWithBackgroundColor(@TransitionOldType int transit) {
+        return transit == TRANSIT_OLD_TASK_OPEN
+                || transit == TRANSIT_OLD_TASK_CLOSE
+                || transit == TRANSIT_OLD_TASK_TO_FRONT
+                || transit == TRANSIT_OLD_TASK_TO_BACK;
     }
 
     final SurfaceAnimationRunner getSurfaceAnimationRunner() {

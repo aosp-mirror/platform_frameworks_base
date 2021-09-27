@@ -231,14 +231,34 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
             SkASSERT(properties.effectiveLayerType() == LayerType::RenderLayer);
             SkPaint paint;
             layerNeedsPaint(layerProperties, alphaMultiplier, &paint);
-            const auto snapshotResult = renderNode->updateSnapshotIfRequired(
-                canvas->recordingContext(),
-                layerProperties.getImageFilter(),
-                clipBounds.roundOut()
-            );
-            sk_sp<SkImage> snapshotImage = snapshotResult->snapshot;
-            srcBounds = snapshotResult->outSubset;
-            offset = snapshotResult->outOffset;
+            sk_sp<SkImage> snapshotImage;
+            auto* imageFilter = layerProperties.getImageFilter();
+            auto recordingContext = canvas->recordingContext();
+            // On some GL vendor implementations, caching the result of
+            // getLayerSurface->makeImageSnapshot() causes a call to
+            // Fence::waitForever without a corresponding signal. This would
+            // lead to ANRs throughout the system.
+            // Instead only cache the SkImage created with the SkImageFilter
+            // for supported devices. Otherwise just create a new SkImage with
+            // the corresponding SkImageFilter each time.
+            // See b/193145089 and b/197263715
+            if (!Properties::enableRenderEffectCache) {
+                if (imageFilter) {
+                    auto subset = SkIRect::MakeWH(srcBounds.width(), srcBounds.height());
+                    snapshotImage = snapshotImage->makeWithFilter(recordingContext, imageFilter,
+                                                                  subset, clipBounds.roundOut(),
+                                                                  &srcBounds, &offset);
+                } else {
+                    snapshotImage = renderNode->getLayerSurface()->makeImageSnapshot();
+                }
+            } else {
+                const auto snapshotResult = renderNode->updateSnapshotIfRequired(
+                        recordingContext, layerProperties.getImageFilter(), clipBounds.roundOut());
+                snapshotImage = snapshotResult->snapshot;
+                srcBounds = snapshotResult->outSubset;
+                offset = snapshotResult->outOffset;
+            }
+
             const auto dstBounds = SkIRect::MakeXYWH(offset.x(),
                                                      offset.y(),
                                                      srcBounds.width(),
