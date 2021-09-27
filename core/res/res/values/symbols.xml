@@ -3954,6 +3954,8 @@
   <java-symbol type="integer" name="config_defaultRefreshRateInZone" />
   <java-symbol type="array" name="config_brightnessThresholdsOfPeakRefreshRate" />
   <java-symbol type="array" name="config_ambientThresholdsOfPeakRefreshRate" />
+  <java-symbol type="integer" name="config_defaultRefreshRateInHbmSunlight" />
+  <java-symbol type="integer" name="config_defaultRefreshRateInHbmHdr" />
 
   <!-- For fixed refresh rate displays in high brightness-->
   <java-symbol type="integer" name="config_fixedRefreshRateInHighZone" />
