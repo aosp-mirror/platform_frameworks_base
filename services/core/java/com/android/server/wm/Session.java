@@ -299,6 +299,17 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         }
     }
 
+
+    @Override
+    public boolean dropForAccessibility(IWindow window, int x, int y) {
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            return mDragDropController.dropForAccessibility(window, x, y);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
     /**
      * Validates the given drag data.
      */
