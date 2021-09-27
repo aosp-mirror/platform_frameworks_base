@@ -58,6 +58,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -267,6 +268,18 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 + " %s", mSyncId, wc);
         collect(wc);
         mChanges.get(wc).mExistenceChanged = true;
+    }
+
+    /**
+     * Specifies configuration change explicitly for the window container, so it can be chosen as
+     * transition target. This is usually used with transition mode
+     * {@link android.view.WindowManager#TRANSIT_CHANGE}.
+     */
+    void setKnownConfigChanges(WindowContainer<?> wc, @ActivityInfo.Config int changes) {
+        final ChangeInfo changeInfo = mChanges.get(wc);
+        if (changeInfo != null) {
+            changeInfo.mKnownConfigChanges = changes;
+        }
     }
 
     private void sendRemoteCallback(@Nullable IRemoteCallback callback) {
@@ -1218,6 +1231,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         final Rect mAbsoluteBounds = new Rect();
         boolean mShowWallpaper;
         int mRotation = ROTATION_UNDEFINED;
+        @ActivityInfo.Config int mKnownConfigChanges;
 
         ChangeInfo(@NonNull WindowContainer origState) {
             mVisible = origState.isVisibleRequested();
@@ -1240,6 +1254,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             final boolean currVisible = newState.isVisibleRequested();
             if (currVisible == mVisible && !mVisible) return false;
             return currVisible != mVisible
+                    || mKnownConfigChanges != 0
                     // if mWindowingMode is 0, this container wasn't attached at collect time, so
                     // assume no change in windowing-mode.
                     || (mWindowingMode != 0 && newState.getWindowingMode() != mWindowingMode)

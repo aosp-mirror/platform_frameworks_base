@@ -5943,6 +5943,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void startFreezingScreen(int overrideOriginalDisplayRotation) {
+        if (mAtmService.getTransitionController().isShellTransitionsEnabled()) {
+            return;
+        }
         ProtoLog.i(WM_DEBUG_ORIENTATION,
                 "Set freezing of %s: visible=%b freezing=%b visibleRequested=%b. %s",
                 appToken, isVisible(), mFreezingScreen, mVisibleRequested,
@@ -8443,9 +8446,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (shouldRelaunchLocked(changes, mTmpConfig) || forceNewConfig) {
             // Aha, the activity isn't handling the change, so DIE DIE DIE.
             configChangeFlags |= changes;
-            if (!mAtmService.getTransitionController().isShellTransitionsEnabled()) {
-                startFreezingScreenLocked(globalChanges);
-            }
+            startFreezingScreenLocked(globalChanges);
             forceNewConfig = false;
             // Do not preserve window if it is freezing screen because the original window won't be
             // able to update drawn state that causes freeze timeout.
