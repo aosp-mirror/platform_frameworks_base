@@ -32,6 +32,10 @@ import static android.os.UserHandle.USER_NULL;
 import static android.view.SurfaceControl.Transaction;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.TRANSIT_CHANGE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_TO_BACK;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_TO_FRONT;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS_ANIM;
@@ -61,10 +65,13 @@ import static com.android.server.wm.WindowManagerService.logWithStack;
 import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_AFTER_ANIM;
 
 import android.annotation.CallSuper;
+import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityThread;
 import android.app.WindowConfiguration;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Point;
@@ -90,6 +97,7 @@ import android.view.animation.Animation;
 import android.window.IWindowContainerToken;
 import android.window.WindowContainerToken;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
@@ -2814,24 +2822,23 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             }
 
             TaskDisplayArea taskDisplayArea = getTaskDisplayArea();
-            int backgroundColor = adapter.getBackgroundColor();
+            boolean isSettingBackgroundColor = taskDisplayArea != null
+                    && isTransitionWithBackgroundColor(transit);
 
-            boolean shouldSetBackgroundColor = taskDisplayArea != null && backgroundColor != 0;
+            if (isSettingBackgroundColor) {
+                Context uiContext = ActivityThread.currentActivityThread().getSystemUiContext();
+                @ColorInt int backgroundColor = uiContext.getColor(R.color.overview_background);
 
-            if (shouldSetBackgroundColor) {
                 taskDisplayArea.setBackgroundColor(backgroundColor);
             }
 
-            Runnable clearColorBackground = () -> {
-                if (shouldSetBackgroundColor) {
-                    taskDisplayArea.clearBackgroundColor();
-                }
-            };
+            final Runnable cleanUpCallback = isSettingBackgroundColor
+                    ? taskDisplayArea::clearBackgroundColor : () -> {};
 
             startAnimation(getPendingTransaction(), adapter, !isVisible(),
                     ANIMATION_TYPE_APP_TRANSITION,
-                    (type, anim) -> clearColorBackground.run(),
-                    clearColorBackground);
+                    (type, anim) -> cleanUpCallback.run(),
+                    cleanUpCallback);
 
             if (adapter.getShowWallpaper()) {
                 getDisplayContent().pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
@@ -2841,6 +2848,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                         thumbnailAdapter, ANIMATION_TYPE_APP_TRANSITION, (type, anim) -> { });
             }
         }
+    }
+
+    private boolean isTransitionWithBackgroundColor(@TransitionOldType int transit) {
+        return transit == TRANSIT_OLD_TASK_OPEN
+                || transit == TRANSIT_OLD_TASK_CLOSE
+                || transit == TRANSIT_OLD_TASK_TO_FRONT
+                || transit == TRANSIT_OLD_TASK_TO_BACK;
     }
 
     final SurfaceAnimationRunner getSurfaceAnimationRunner() {
