@@ -4431,4 +4431,6 @@
   <java-symbol type="bool" name="config_volumeShowRemoteSessions" />
 
   <java-symbol type="integer" name="config_customizedMaxCachedProcesses" />
+
+  <java-symbol type="color" name="overview_background"/>
 </resources>
