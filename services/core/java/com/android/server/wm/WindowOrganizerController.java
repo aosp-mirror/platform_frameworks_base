@@ -318,7 +318,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
      * @param caller Info about the calling process.
      */
     private void applyTransaction(@NonNull WindowContainerTransaction t, int syncId,
-            @Nullable Transition transition, @Nullable CallerInfo caller) {
+            @Nullable Transition transition, @NonNull CallerInfo caller) {
         int effects = 0;
         ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Apply window transaction, syncId=%d", syncId);
         mService.deferWindowLayout();
@@ -540,7 +540,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
     private int applyHierarchyOp(WindowContainerTransaction.HierarchyOp hop, int effects,
             int syncId, @Nullable Transition transition, boolean isInLockTaskMode,
-            @Nullable CallerInfo caller, @Nullable IBinder errorCallbackToken,
+            @NonNull CallerInfo caller, @Nullable IBinder errorCallbackToken,
             @Nullable ITaskFragmentOrganizer organizer) {
         final int type = hop.getType();
         switch (type) {
@@ -628,11 +628,28 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 final int taskId = launchOpts.getInt(
                         WindowContainerTransaction.HierarchyOp.LAUNCH_KEY_TASK_ID);
                 launchOpts.remove(WindowContainerTransaction.HierarchyOp.LAUNCH_KEY_TASK_ID);
-                final SafeActivityOptions safeOptions = caller != null
-                        ? SafeActivityOptions.fromBundle(launchOpts, caller.mPid, caller.mUid)
-                        : SafeActivityOptions.fromBundle(launchOpts);
-                mService.mTaskSupervisor.startActivityFromRecents(caller.mPid, caller.mUid,
-                        taskId, safeOptions);
+                final SafeActivityOptions safeOptions =
+                        SafeActivityOptions.fromBundle(launchOpts, caller.mPid, caller.mUid);
+                final Integer[] starterResult = { null };
+                // startActivityFromRecents should not be called in lock.
+                mService.mH.post(() -> {
+                    try {
+                        starterResult[0] = mService.mTaskSupervisor.startActivityFromRecents(
+                                caller.mPid, caller.mUid, taskId, safeOptions);
+                    } catch (Throwable t) {
+                        starterResult[0] = ActivityManager.START_CANCELED;
+                        Slog.w(TAG, t);
+                    }
+                    synchronized (mGlobalLock) {
+                        mGlobalLock.notifyAll();
+                    }
+                });
+                while (starterResult[0] == null) {
+                    try {
+                        mGlobalLock.wait();
+                    } catch (InterruptedException ignored) {
+                    }
+                }
                 break;
             case HIERARCHY_OP_TYPE_PENDING_INTENT:
                 String resolvedType = hop.getActivityIntent() != null
