@@ -17,6 +17,8 @@ package com.android.systemui.biometrics
 
 import android.content.Context
 import android.graphics.PixelFormat
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.graphics.Rect
 import android.hardware.biometrics.BiometricOverlayConstants
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD
@@ -34,6 +36,8 @@ import android.view.View
 import android.view.WindowManager
 import androidx.annotation.RawRes
 import com.airbnb.lottie.LottieAnimationView
+import com.airbnb.lottie.LottieProperty
+import com.airbnb.lottie.model.KeyPath
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
@@ -140,6 +144,7 @@ class SidefpsController @Inject constructor(
                 windowManager.updateViewLayout(overlayView, overlayViewParams)
             }
         }
+        lottie.addOverlayDynamicColor(context)
 
         return view
     }
@@ -194,3 +199,21 @@ private fun Display.asSideFpsAnimationRotation(): Float = when (rotation) {
 
 private fun Display.isPortrait(): Boolean =
     rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180
+
+private fun LottieAnimationView.addOverlayDynamicColor(context: Context) {
+    fun update() {
+        val c = context.getColor(R.color.biometric_dialog_accent)
+        for (key in listOf(".blue600", ".blue400")) {
+            addValueCallback(
+                KeyPath(key, "**"),
+                LottieProperty.COLOR_FILTER
+            ) { PorterDuffColorFilter(c, PorterDuff.Mode.SRC_ATOP) }
+        }
+    }
+
+    if (composition != null) {
+        update()
+    } else {
+        addLottieOnCompositionLoadedListener { update() }
+    }
+}
