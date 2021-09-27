@@ -710,8 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Bateria-mailaren arabera jakinarazpenak kontrolatzeko aukerak"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Aktibatuta"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Desaktibatuta"</string>
-    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
-    <skip />
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Aktibatuta: aurpegian oinarrituta"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Bateria-mailaren arabera jakinarazpenak kontrolatzeko aukerekin, 0 eta 5 bitarteko garrantzi-mailetan sailka ditzakezu aplikazioen jakinarazpenak. \n\n"<b>"5. maila"</b>" \n- Erakutsi jakinarazpenen zerrendaren goialdean. \n- Baimendu etetea pantaila osoko moduan zaudenean. \n- Agerrarazi beti jakinarazpenak. \n\n"<b>"4. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Agerrarazi beti jakinarazpenak. \n\n"<b>"3. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Ez agerrarazi jakinarazpenik inoiz. \n\n"<b>"2. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Ez agerrarazi jakinarazpenik inoiz. \n- Ez egin soinurik edo dardararik inoiz. \n\n"<b>"1. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Ez agerrarazi jakinarazpenik inoiz. \n- Ez egin soinurik edo dardararik inoiz. \n- Ezkutatu pantaila blokeatutik eta egoera-barratik. \n- Erakutsi jakinarazpenen zerrendaren behealdean. \n\n"<b>"0. maila"</b>" \n- Blokeatu aplikazioaren jakinarazpen guztiak."</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Jakinarazpenak"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Aurrerantzean ez duzu ikusiko horrelako jakinarazpenik"</string>
@@ -1177,8 +1176,7 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Sareak ikusteko, desblokeatu pantaila"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Sareak bilatzen…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Ezin izan da konektatu sarera"</string>
-    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
-    <skip />
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Oraingoz ez da automatikoki konektatuko wifira"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Ikusi guztiak"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Sarea aldatzeko, deskonektatu Ethernet-a"</string>
 </resources>

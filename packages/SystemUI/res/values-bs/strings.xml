@@ -713,7 +713,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Kontrole obavještenja o napajanju"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Uključeno"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Isključeno"</string>
-    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Uključeno – na temelju lica"</string>
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Uključeno – na osnovu lica"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Uz kontrolu obavještenja o napajanju, možete postaviti nivo značaja obavještenja iz aplikacije, i to od nivoa 0 do 5. \n\n"<b>"Nivo 5"</b>" \n- Prikaži na vrhu liste obavještenja \n- Dopusti prekid prikaza cijelog ekrana \n- Uvijek izviruj \n\n"<b>"Nvio 4"</b>" \n- Spriječi prekid prikaza cijelog ekrana \n- Uvijek izviruj \n\n"<b>"Nivo 3"</b>" \n- Spriječi prekid prikaza cijelog ekrana \n- Nikad ne izviruj \n\n"<b>"Nivo 2"</b>" \n- Spriječi prekid prikaza cijelog ekrana \n- Nikad ne izviruj \n- Nikada ne puštaj zvuk ili vibraciju \n\n"<b>"Nivo 1"</b>" \n- Spriječi prekid prikaza cijelog ekrana \n- Nikada ne izviruj \n- Nikada ne puštaj zvuk ili vibraciju \n- Sakrij sa ekrana za zaključavanje i statusne trake \n- Prikaži na dnu liste obavještenja \n\n"<b>"Nivo 0"</b>" \n- Blokiraj sva obavještenja iz aplikacije"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Obavještenja"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Nećete više vidjeti ova obavještenja"</string>
@@ -1182,8 +1182,7 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Otključajte da vidite mreže"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Traženje mreža…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Povezivanje s mrežom nije uspjelo"</string>
-    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
-    <skip />
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"WiFi se trenutno ne može automatski povezati"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Prikaži sve"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Da promijenite mrežu, isključite ethernet"</string>
 </resources>

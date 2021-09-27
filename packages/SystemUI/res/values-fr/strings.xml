@@ -710,8 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Commandes de gestion des notifications"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Activé"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Désactivé"</string>
-    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
-    <skip />
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Active - En fonction du visage"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Grâce aux commandes de gestion des notifications, vous pouvez définir le niveau d\'importance (compris entre 0 et 5) des notifications d\'une application. \n\n"<b>"Niveau 5"</b>" \n- Afficher en haut de la liste des notifications \n- Autoriser l\'interruption en plein écran \n- Toujours en aperçu \n\n"<b>"Niveau 4"</b>" \n- Empêcher l\'interruption en plein écran \n- Toujours en aperçu \n\n"<b>"Niveau 3"</b>" \n- Empêcher l\'interruption en plein écran \n- Jamais en aperçu \n\n"<b>"Niveau 2"</b>" \n- Empêcher l\'interruption en plein écran \n- Jamais en aperçu \n- Ne jamais émettre de signal sonore ni déclencher le vibreur \n\n"<b>"Niveau 1"</b>" \n- Empêcher l\'interruption en plein écran \n- Jamais en aperçu \n- Ne jamais émettre de signal sonore ni déclencher le vibreur \n- Masquer les notifications dans l\'écran de verrouillage et la barre d\'état \n- Afficher au bas de la liste des notifications \n\n"<b>"Niveau 0"</b>" \n- Bloquer toutes les notifications de l\'application"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Notifications"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Vous ne recevrez plus ces notifications"</string>
