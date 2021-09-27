@@ -346,7 +346,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     }
 
     private void updateColors() {
-        mView.updateColorAndBackgroundVisibility(mUdfpsSupported);
+        mView.updateColorAndBackgroundVisibility();
     }
 
     private void updateConfiguration() {
@@ -427,6 +427,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         boolean wasUdfpsEnrolled = mUdfpsEnrolled;
 
         mUdfpsSupported = mAuthController.getUdfpsSensorLocation() != null;
+        mView.setUseBackground(mUdfpsSupported);
+
         mUdfpsEnrolled = mKeyguardUpdateMonitor.isUdfpsEnrolled();
         if (wasUdfpsSupported != mUdfpsSupported || wasUdfpsEnrolled != mUdfpsEnrolled) {
             updateVisibility();
