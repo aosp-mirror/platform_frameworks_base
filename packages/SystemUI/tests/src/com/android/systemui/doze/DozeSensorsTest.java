@@ -47,6 +47,7 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.doze.DozeSensors.TriggerSensor;
 import com.android.systemui.plugins.SensorManagerPlugin;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.settings.FakeSettings;
@@ -85,6 +86,8 @@ public class DozeSensorsTest extends SysuiTestCase {
     private AuthController mAuthController;
     @Mock
     private ProximitySensor mProximitySensor;
+    private @DevicePostureController.DevicePostureInt int mDevicePosture =
+            DevicePostureController.DEVICE_POSTURE_UNKNOWN;
     private FakeSettings mFakeSettings = new FakeSettings();
     private SensorManagerPlugin.SensorEventListener mWakeLockScreenListener;
     private TestableLooper mTestableLooper;
@@ -101,6 +104,7 @@ public class DozeSensorsTest extends SysuiTestCase {
             ((Runnable) invocation.getArgument(0)).run();
             return null;
         }).when(mWakeLock).wrap(any(Runnable.class));
+        mDevicePosture = DevicePostureController.DEVICE_POSTURE_UNKNOWN;
         mDozeSensors = new TestableDozeSensors();
     }
 
@@ -157,7 +161,7 @@ public class DozeSensorsTest extends SysuiTestCase {
         // GIVEN we only should register sensors using prox when not in low-powered mode / off
         // and the single tap sensor uses the proximity sensor
         when(mDozeParameters.getSelectivelyRegisterSensorsUsingProx()).thenReturn(true);
-        when(mDozeParameters.singleTapUsesProx()).thenReturn(true);
+        when(mDozeParameters.singleTapUsesProx(anyInt())).thenReturn(true);
         TestableDozeSensors dozeSensors = new TestableDozeSensors();
 
         // THEN on initialization, the tap sensor isn't requested
@@ -258,12 +262,25 @@ public class DozeSensorsTest extends SysuiTestCase {
         assertTrue(triggerSensor.mRegistered);
     }
 
+    @Test
+    public void testPostureOpen_registersCorrectTapGesture() {
+        // GIVEN device posture open
+        mDevicePosture = DevicePostureController.DEVICE_POSTURE_OPENED;
+
+        // WHEN DozeSensors are initialized
+        new TestableDozeSensors();
+
+        // THEN we use the posture to determine which tap sensor to use
+        verify(mAmbientDisplayConfiguration).tapSensorType(eq(mDevicePosture));
+    }
+
     private class TestableDozeSensors extends DozeSensors {
 
         TestableDozeSensors() {
             super(getContext(), mSensorManager, mDozeParameters,
                     mAmbientDisplayConfiguration, mWakeLock, mCallback, mProxCallback, mDozeLog,
-                    mProximitySensor, mFakeSettings, mAuthController);
+                    mProximitySensor, mFakeSettings, mAuthController,
+                    mDevicePosture);
             for (TriggerSensor sensor : mSensors) {
                 if (sensor instanceof PluginSensor
                         && ((PluginSensor) sensor).mPluginSensor.getType()

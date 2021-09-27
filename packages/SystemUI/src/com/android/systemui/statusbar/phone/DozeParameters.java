@@ -22,6 +22,7 @@ import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.Log;
 import android.util.MathUtils;
 
 import androidx.annotation.NonNull;
@@ -35,6 +36,7 @@ import com.android.systemui.doze.DozeScreenState;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.tuner.TunerService;
 
 import java.io.FileDescriptor;
@@ -256,9 +258,20 @@ public class DozeParameters implements
     }
 
     /**
+     * Whether the single tap sensor uses the proximity sensor for this device posture.
+     */
+    public boolean singleTapUsesProx(@DevicePostureController.DevicePostureInt int devicePosture) {
+        return getPostureSpecificBool(
+                mResources.getIntArray(R.array.doze_single_tap_uses_prox_posture_mapping),
+                singleTapUsesProx(),
+                devicePosture
+        );
+    }
+
+    /**
      * Whether the single tap sensor uses the proximity sensor.
      */
-    public boolean singleTapUsesProx() {
+    private boolean singleTapUsesProx() {
         return mResources.getBoolean(R.bool.doze_single_tap_uses_prox);
     }
 
@@ -306,6 +319,20 @@ public class DozeParameters implements
         pw.print("getPickupVibrationThreshold(): "); pw.println(getPickupVibrationThreshold());
         pw.print("getSelectivelyRegisterSensorsUsingProx(): ");
         pw.println(getSelectivelyRegisterSensorsUsingProx());
+    }
+
+    private boolean getPostureSpecificBool(
+            int[] postureMapping,
+            boolean defaultSensorBool,
+            int posture) {
+        boolean bool = defaultSensorBool;
+        if (posture < postureMapping.length) {
+            bool = postureMapping[posture] != 0;
+        } else {
+            Log.e("DozeParameters", "Unsupported doze posture " + posture);
+        }
+
+        return bool;
     }
 
     interface Callback {

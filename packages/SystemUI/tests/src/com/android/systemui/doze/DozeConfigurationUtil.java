@@ -40,7 +40,7 @@ public class DozeConfigurationUtil {
         when(params.doubleTapReportsTouchCoordinates()).thenReturn(false);
         when(params.getDisplayNeedsBlanking()).thenReturn(false);
         when(params.getSelectivelyRegisterSensorsUsingProx()).thenReturn(false);
-        when(params.singleTapUsesProx()).thenReturn(true);
+        when(params.singleTapUsesProx(anyInt())).thenReturn(true);
         when(params.longPressUsesProx()).thenReturn(true);
         when(params.getQuickPickupAodDuration()).thenReturn(500);
 
@@ -61,14 +61,13 @@ public class DozeConfigurationUtil {
         when(config.getWakeLockScreenDebounce()).thenReturn(0L);
 
         when(config.doubleTapSensorType()).thenReturn(null);
-        when(config.tapSensorType()).thenReturn(null);
         when(config.longPressSensorType()).thenReturn(null);
         when(config.udfpsLongPressSensorType()).thenReturn(null);
         when(config.quickPickupSensorType()).thenReturn(null);
 
         when(config.tapGestureEnabled(anyInt())).thenReturn(true);
         when(config.tapSensorAvailable()).thenReturn(true);
-        when(config.tapSensorType()).thenReturn(FakeSensorManager.TAP_SENSOR_TYPE);
+        when(config.tapSensorType(anyInt())).thenReturn(FakeSensorManager.TAP_SENSOR_TYPE);
 
         when(config.dozePickupSensorAvailable()).thenReturn(false);
         when(config.wakeScreenGestureAvailable()).thenReturn(false);

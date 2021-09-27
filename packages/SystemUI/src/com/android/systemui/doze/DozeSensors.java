@@ -47,6 +47,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.plugins.SensorManagerPlugin;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.settings.SecureSettings;
@@ -82,6 +83,9 @@ public class DozeSensors {
     private boolean mListeningTouchScreenSensors;
     private boolean mListeningProxSensors;
 
+    @DevicePostureController.DevicePostureInt
+    private int mDevicePosture;
+
     // whether to only register sensors that use prox when the display state is dozing or off
     private boolean mSelectivelyRegisterProxSensors;
 
@@ -106,7 +110,8 @@ public class DozeSensors {
             DozeParameters dozeParameters, AmbientDisplayConfiguration config, WakeLock wakeLock,
             Callback callback, Consumer<Boolean> proxCallback, DozeLog dozeLog,
             ProximitySensor proximitySensor, SecureSettings secureSettings,
-            AuthController authController) {
+            AuthController authController,
+            int devicePosture) {
         mContext = context;
         mSensorManager = sensorManager;
         mConfig = config;
@@ -120,6 +125,7 @@ public class DozeSensors {
         mListeningProxSensors = !mSelectivelyRegisterProxSensors;
         mScreenOffUdfpsEnabled =
                 config.screenOffUdfpsEnabled(KeyguardUpdateMonitor.getCurrentUser());
+        mDevicePosture = devicePosture;
 
         boolean udfpsEnrolled =
                 authController.isUdfpsEnrolled(KeyguardUpdateMonitor.getCurrentUser());
@@ -150,7 +156,7 @@ public class DozeSensors {
                         true /* touchscreen */,
                         dozeLog),
                 new TriggerSensor(
-                        findSensorWithType(config.tapSensorType()),
+                        findSensorWithType(config.tapSensorType(mDevicePosture)),
                         Settings.Secure.DOZE_TAP_SCREEN_GESTURE,
                         true /* settingDef */,
                         true /* configured */,
@@ -158,7 +164,7 @@ public class DozeSensors {
                         false /* reports touch coordinates */,
                         true /* touchscreen */,
                         false /* ignoresSetting */,
-                        dozeParameters.singleTapUsesProx() /* requiresProx */,
+                        dozeParameters.singleTapUsesProx(mDevicePosture) /* requiresProx */,
                         dozeLog),
                 new TriggerSensor(
                         findSensorWithType(config.longPressSensorType()),
@@ -370,6 +376,8 @@ public class DozeSensors {
     /** Dump current state */
     public void dump(PrintWriter pw) {
         pw.println("mListening=" + mListening);
+        pw.println("mDevicePosture="
+                + DevicePostureController.devicePostureToString(mDevicePosture));
         pw.println("mListeningTouchScreenSensors=" + mListeningTouchScreenSensors);
         pw.println("mSelectivelyRegisterProxSensors=" + mSelectivelyRegisterProxSensors);
         pw.println("mListeningProxSensors=" + mListeningProxSensors);
