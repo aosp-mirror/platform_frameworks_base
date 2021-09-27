@@ -1176,4 +1176,5 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Ricerca di reti in corso…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Connessione alla rete non riuscita"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Mostra tutte"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Per cambiare rete, scollega il cavo Ethernet"</string>
 </resources>

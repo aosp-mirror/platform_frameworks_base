@@ -593,9 +593,8 @@ public class UiTranslationController {
             final View rootView = roots.get(rootNum).getView();
             if (rootView instanceof ViewGroup) {
                 findViewsTraversalByAutofillIds((ViewGroup) rootView, sourceViewIds);
-            } else {
-                addViewIfNeeded(sourceViewIds, rootView);
             }
+            addViewIfNeeded(sourceViewIds, rootView);
         }
     }
 
@@ -606,9 +605,8 @@ public class UiTranslationController {
             final View child = viewGroup.getChildAt(i);
             if (child instanceof ViewGroup) {
                 findViewsTraversalByAutofillIds((ViewGroup) child, sourceViewIds);
-            } else {
-                addViewIfNeeded(sourceViewIds, child);
             }
+            addViewIfNeeded(sourceViewIds, child);
         }
     }
 

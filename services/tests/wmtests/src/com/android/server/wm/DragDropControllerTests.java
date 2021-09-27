@@ -58,6 +58,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -70,6 +71,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
@@ -97,14 +99,20 @@ public class DragDropControllerTests extends WindowTestsBase {
     static class TestDragDropController extends DragDropController {
         private Runnable mCloseCallback;
         boolean mDeferDragStateClosed;
+        boolean mIsAccessibilityDrag;
 
         TestDragDropController(WindowManagerService service, Looper looper) {
             super(service, looper);
         }
 
         void setOnClosedCallbackLocked(Runnable runnable) {
-            assertTrue(dragDropActiveLocked());
-            mCloseCallback = runnable;
+            if (mIsAccessibilityDrag) {
+                // Accessibility does not use animation
+                assertTrue(!dragDropActiveLocked());
+            } else {
+                assertTrue(dragDropActiveLocked());
+                mCloseCallback = runnable;
+            }
         }
 
         @Override
@@ -171,12 +179,22 @@ public class DragDropControllerTests extends WindowTestsBase {
         }
         latch = new CountDownLatch(1);
         mTarget.setOnClosedCallbackLocked(latch::countDown);
+        if (mTarget.mIsAccessibilityDrag) {
+            mTarget.mIsAccessibilityDrag = false;
+            return;
+        }
         assertTrue(awaitInWmLock(() -> latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)));
     }
 
     @Test
     public void testDragFlow() {
         doDragAndDrop(0, ClipData.newPlainText("label", "Test"), 0, 0);
+    }
+
+    @Test
+    public void testA11yDragFlow() {
+        mTarget.mIsAccessibilityDrag = true;
+        doA11yDragAndDrop(0, ClipData.newPlainText("label", "Test"), 0, 0);
     }
 
     @Test
@@ -435,5 +453,23 @@ public class DragDropControllerTests extends WindowTestsBase {
         } finally {
             appSession.kill();
         }
+    }
+
+    private void doA11yDragAndDrop(int flags, ClipData data, float dropX, float dropY) {
+        spyOn(mTarget);
+        AccessibilityManager accessibilityManager = Mockito.mock(AccessibilityManager.class);
+        when(accessibilityManager.isEnabled()).thenReturn(true);
+        doReturn(accessibilityManager).when(mTarget).getAccessibilityManager();
+        startA11yDrag(flags, data, () -> {
+            boolean dropped = mTarget.dropForAccessibility(mWindow.mClient, dropX, dropY);
+            mToken = mWindow.mClient.asBinder();
+        });
+    }
+
+    private void startA11yDrag(int flags, ClipData data, Runnable r) {
+        mToken = mTarget.performDrag(0, 0, mWindow.mClient,
+                flags | View.DRAG_FLAG_ACCESSIBILITY_ACTION, null, 0, 0, 0, 0, 0, data);
+        assertNotNull(mToken);
+        r.run();
     }
 }

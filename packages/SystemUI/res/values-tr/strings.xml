@@ -1176,4 +1176,5 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Ağlar aranıyor…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Ağa bağlanılamadı"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Tümünü göster"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Ağ değiştirmek için ethernet bağlantısını kesin"</string>
 </resources>

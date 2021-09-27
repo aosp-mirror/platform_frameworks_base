@@ -43,11 +43,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
+import android.hardware.power.Boost;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PowerManagerInternal;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -62,6 +64,7 @@ import android.view.IWindowManager;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
+import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.am.AssistDataRequester;
 import com.android.server.am.AssistDataRequester.AssistDataRequesterCallbacks;
@@ -70,13 +73,20 @@ import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.ActivityAssistInfo;
 
 import java.io.PrintWriter;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
 final class VoiceInteractionSessionConnection implements ServiceConnection,
         AssistDataRequesterCallbacks {
 
-    final static String TAG = "VoiceInteractionServiceManager";
+    static final String TAG = "VoiceInteractionServiceManager";
+    static final int POWER_BOOST_TIMEOUT_MS = Integer.parseInt(
+            System.getProperty("vendor.powerhal.interaction.max", "200"));
+    static final int BOOST_TIMEOUT_MS = 300;
+    // TODO: To avoid ap doesn't call hide, only 10 secs for now, need a better way to manage it
+    //  in the future.
+    static final int MAX_POWER_BOOST_TIMEOUT = 10_000;
 
     final IBinder mToken = new Binder();
     final Object mLock;
@@ -104,6 +114,45 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
     ArrayList<IVoiceInteractionSessionShowCallback> mPendingShowCallbacks = new ArrayList<>();
     private List<ActivityAssistInfo> mPendingHandleAssistWithoutData = new ArrayList<>();
     AssistDataRequester mAssistDataRequester;
+    private final PowerManagerInternal mPowerManagerInternal;
+    private PowerBoostSetter mSetPowerBoostRunnable;
+    private final Handler mFgHandler;
+
+    class PowerBoostSetter implements Runnable {
+
+        private boolean mCanceled;
+        private final Instant mExpiryTime;
+
+        PowerBoostSetter(Instant expiryTime) {
+            mExpiryTime = expiryTime;
+        }
+
+        @Override
+        public void run() {
+            synchronized (mLock) {
+                if (mCanceled) {
+                    return;
+                }
+                // To avoid voice interaction service does not call hide to cancel setting
+                // power boost. We will cancel set boost when reaching the max timeout.
+                if (Instant.now().isBefore(mExpiryTime)) {
+                    mPowerManagerInternal.setPowerBoost(Boost.INTERACTION, BOOST_TIMEOUT_MS);
+                    if (mSetPowerBoostRunnable != null) {
+                        mFgHandler.postDelayed(mSetPowerBoostRunnable, POWER_BOOST_TIMEOUT_MS);
+                    }
+                } else {
+                    Slog.w(TAG, "Reset power boost INTERACTION because reaching max timeout.");
+                    mPowerManagerInternal.setPowerBoost(Boost.INTERACTION, /* durationMs */ -1);
+                }
+            }
+        }
+
+        void cancel() {
+            synchronized (mLock) {
+                mCanceled =  true;
+            }
+        }
+    }
 
     IVoiceInteractionSessionShowCallback mShowCallback =
             new IVoiceInteractionSessionShowCallback.Stub() {
@@ -152,7 +201,9 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
         mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
+        mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
         mAppOps = context.getSystemService(AppOpsManager.class);
+        mFgHandler = FgThread.getHandler();
         mAssistDataRequester = new AssistDataRequester(mContext, mIWindowManager,
                 (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE),
                 this, mLock, OP_ASSIST_STRUCTURE, OP_ASSIST_SCREENSHOT);
@@ -255,6 +306,13 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
                     mPendingHandleAssistWithoutData = topActivities;
                 }
             }
+            // remove if already existing one.
+            if (mSetPowerBoostRunnable != null) {
+                mSetPowerBoostRunnable.cancel();
+            }
+            mSetPowerBoostRunnable = new PowerBoostSetter(
+                    Instant.now().plusMillis(MAX_POWER_BOOST_TIMEOUT));
+            mFgHandler.post(mSetPowerBoostRunnable);
             mCallback.onSessionShown(this);
             return true;
         }
@@ -420,6 +478,12 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
                     } catch (RemoteException e) {
                     }
                 }
+                if (mSetPowerBoostRunnable != null) {
+                    mSetPowerBoostRunnable.cancel();
+                    mSetPowerBoostRunnable = null;
+                }
+                // A negative value indicates canceling previous boost.
+                mPowerManagerInternal.setPowerBoost(Boost.INTERACTION, /* durationMs */ -1);
                 mCallback.onSessionHidden(this);
             }
             if (mFullyBound) {

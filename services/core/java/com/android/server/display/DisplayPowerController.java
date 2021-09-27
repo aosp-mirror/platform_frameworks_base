@@ -721,13 +721,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         final IBinder token = device.getDisplayTokenLocked();
         final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         mHandler.post(() -> {
-            if (mDisplayDevice == device) {
-                return;
+            if (mDisplayDevice != device) {
+                mDisplayDevice = device;
+                mUniqueDisplayId = uniqueId;
+                mDisplayDeviceConfig = config;
+                loadFromDisplayDeviceConfig(token, info);
+                updatePowerState();
             }
-            mDisplayDevice = device;
-            mUniqueDisplayId = uniqueId;
-            mDisplayDeviceConfig = config;
-            loadFromDisplayDeviceConfig(token, info);
         });
     }
 

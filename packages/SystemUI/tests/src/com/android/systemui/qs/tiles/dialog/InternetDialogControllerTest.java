@@ -1,11 +1,15 @@
 package com.android.systemui.qs.tiles.dialog;
 
+import static com.android.systemui.qs.tiles.dialog.InternetDialogController.TOAST_PARAMS_HORIZONTAL_WEIGHT;
+import static com.android.systemui.qs.tiles.dialog.InternetDialogController.TOAST_PARAMS_VERTICAL_WEIGHT;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -14,8 +18,10 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.animation.Animator;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
@@ -25,7 +31,11 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.testing.TestableResources;
 import android.text.TextUtils;
+import android.view.Gravity;
+import android.view.View;
+import android.view.WindowManager;
 
 import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
@@ -41,14 +51,19 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.AccessPointController;
+import com.android.systemui.toast.SystemUIToast;
+import com.android.systemui.toast.ToastFactory;
+import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.time.FakeSystemClock;
+import com.android.wifitrackerlib.MergedCarrierEntry;
 import com.android.wifitrackerlib.WifiEntry;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -65,6 +80,11 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     private static final String CONNECTED_TITLE = "Connected Wi-Fi Title";
     private static final String CONNECTED_SUMMARY = "Connected Wi-Fi Summary";
 
+    //SystemUIToast
+    private static final int GRAVITY_FLAGS = Gravity.FILL_HORIZONTAL | Gravity.FILL_VERTICAL;
+    private static final int TOAST_MESSAGE_STRING_ID = 1;
+    private static final String TOAST_MESSAGE_STRING = "toast message";
+
     @Mock
     private WifiManager mWifiManager;
     @Mock
@@ -73,6 +93,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     private SubscriptionManager mSubscriptionManager;
     @Mock
     private Handler mHandler;
+    @Mock
+    private Handler mWorkerHandler;
     @Mock
     private ActivityStarter mActivityStarter;
     @Mock
@@ -92,6 +114,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     @Mock
     private WifiEntry mWifiEntry4;
     @Mock
+    private MergedCarrierEntry mMergedCarrierEntry;
+    @Mock
     private ServiceState mServiceState;
     @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
@@ -99,7 +123,20 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     private WifiUtils.InternetIconInjector mWifiIconInjector;
     @Mock
     InternetDialogController.InternetDialogCallback mInternetDialogCallback;
+    @Mock
+    private WindowManager mWindowManager;
+    @Mock
+    private ToastFactory mToastFactory;
+    @Mock
+    private SystemUIToast mSystemUIToast;
+    @Mock
+    private View mToastView;
+    @Mock
+    private Animator mAnimator;
+    @Mock
+    private CarrierConfigTracker mCarrierConfigTracker;
 
+    private TestableResources mTestableResources;
     private MockInternetDialogController mInternetDialogController;
     private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
     private List<WifiEntry> mAccessPoints = new ArrayList<>();
@@ -108,6 +145,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mTestableResources = mContext.getOrCreateTestableResources();
         doReturn(mTelephonyManager).when(mTelephonyManager).createForSubscriptionId(anyInt());
         when(mKeyguardStateController.isUnlocked()).thenReturn(true);
         when(mConnectedEntry.isDefaultNetwork()).thenReturn(true);
@@ -118,19 +156,65 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         when(mWifiEntry4.getConnectedState()).thenReturn(WifiEntry.CONNECTED_STATE_DISCONNECTED);
         mAccessPoints.add(mConnectedEntry);
         mAccessPoints.add(mWifiEntry1);
+        when(mAccessPointController.getMergedCarrierEntry()).thenReturn(mMergedCarrierEntry);
         when(mSubscriptionManager.getActiveSubscriptionIdList()).thenReturn(new int[]{SUB_ID});
+        when(mAccessPointController.getMergedCarrierEntry()).thenReturn(mMergedCarrierEntry);
+        when(mToastFactory.createToast(any(), anyString(), anyString(), anyInt(), anyInt()))
+            .thenReturn(mSystemUIToast);
+        when(mSystemUIToast.getView()).thenReturn(mToastView);
+        when(mSystemUIToast.getGravity()).thenReturn(GRAVITY_FLAGS);
+        when(mSystemUIToast.getInAnimation()).thenReturn(mAnimator);
 
         mInternetDialogController = new MockInternetDialogController(mContext,
                 mock(UiEventLogger.class), mock(ActivityStarter.class), mAccessPointController,
                 mSubscriptionManager, mTelephonyManager, mWifiManager,
                 mock(ConnectivityManager.class), mHandler, mExecutor, mBroadcastDispatcher,
-                mock(KeyguardUpdateMonitor.class), mGlobalSettings, mKeyguardStateController);
+                mock(KeyguardUpdateMonitor.class), mGlobalSettings, mKeyguardStateController,
+                mWindowManager, mToastFactory, mWorkerHandler, mCarrierConfigTracker);
         mSubscriptionManager.addOnSubscriptionsChangedListener(mExecutor,
                 mInternetDialogController.mOnSubscriptionsChangedListener);
         mInternetDialogController.onStart(mInternetDialogCallback, true);
         mInternetDialogController.onAccessPointsChanged(mAccessPoints);
         mInternetDialogController.mActivityStarter = mActivityStarter;
         mInternetDialogController.mWifiIconInjector = mWifiIconInjector;
+    }
+
+    @Test
+    public void connectCarrierNetwork_mergedCarrierEntryCanConnect_connectAndCreateSysUiToast() {
+        when(mMergedCarrierEntry.canConnect()).thenReturn(true);
+        mTestableResources.addOverride(R.string.wifi_wont_autoconnect_for_now,
+            TOAST_MESSAGE_STRING);
+
+        mInternetDialogController.connectCarrierNetwork();
+
+        verify(mMergedCarrierEntry).connect(null /* callback */, false /* showToast */);
+        verify(mToastFactory).createToast(any(), eq(TOAST_MESSAGE_STRING), anyString(), anyInt(),
+            anyInt());
+    }
+
+    @Test
+    public void makeOverlayToast_withGravityFlags_addViewWithLayoutParams() {
+        mTestableResources.addOverride(TOAST_MESSAGE_STRING_ID, TOAST_MESSAGE_STRING);
+
+        mInternetDialogController.makeOverlayToast(TOAST_MESSAGE_STRING_ID);
+
+        ArgumentCaptor<WindowManager.LayoutParams> paramsCaptor = ArgumentCaptor.forClass(
+            WindowManager.LayoutParams.class);
+        verify(mWindowManager).addView(eq(mToastView), paramsCaptor.capture());
+        WindowManager.LayoutParams params = paramsCaptor.getValue();
+        assertThat(params.format).isEqualTo(PixelFormat.TRANSLUCENT);
+        assertThat(params.type).isEqualTo(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL);
+        assertThat(params.horizontalWeight).isEqualTo(TOAST_PARAMS_HORIZONTAL_WEIGHT);
+        assertThat(params.verticalWeight).isEqualTo(TOAST_PARAMS_VERTICAL_WEIGHT);
+    }
+
+    @Test
+    public void makeOverlayToast_withAnimation_verifyAnimatorStart() {
+        mTestableResources.addOverride(TOAST_MESSAGE_STRING_ID, TOAST_MESSAGE_STRING);
+
+        mInternetDialogController.makeOverlayToast(TOAST_MESSAGE_STRING_ID);
+
+        verify(mAnimator).start();
     }
 
     @Test
@@ -485,6 +569,39 @@ public class InternetDialogControllerTest extends SysuiTestCase {
                 .onAccessPointsChanged(mWifiEntries, null /* connectedEntry */);
     }
 
+    @Test
+    public void setMergedCarrierWifiEnabledIfNeed_carrierProvisionsEnabled_doNothing() {
+        when(mCarrierConfigTracker.getCarrierProvisionsWifiMergedNetworksBool(SUB_ID))
+                .thenReturn(true);
+
+        mInternetDialogController.setMergedCarrierWifiEnabledIfNeed(SUB_ID, true);
+
+        verify(mMergedCarrierEntry, never()).setEnabled(anyBoolean());
+    }
+
+    @Test
+    public void setMergedCarrierWifiEnabledIfNeed_mergedCarrierEntryEmpty_doesntCrash() {
+        when(mCarrierConfigTracker.getCarrierProvisionsWifiMergedNetworksBool(SUB_ID))
+                .thenReturn(false);
+        when(mAccessPointController.getMergedCarrierEntry()).thenReturn(null);
+
+        mInternetDialogController.setMergedCarrierWifiEnabledIfNeed(SUB_ID, true);
+    }
+
+    @Test
+    public void setMergedCarrierWifiEnabledIfNeed_neededSetMergedCarrierEntry_setTogether() {
+        when(mCarrierConfigTracker.getCarrierProvisionsWifiMergedNetworksBool(SUB_ID))
+                .thenReturn(false);
+
+        mInternetDialogController.setMergedCarrierWifiEnabledIfNeed(SUB_ID, true);
+
+        verify(mMergedCarrierEntry).setEnabled(true);
+
+        mInternetDialogController.setMergedCarrierWifiEnabledIfNeed(SUB_ID, false);
+
+        verify(mMergedCarrierEntry).setEnabled(false);
+    }
+
     private String getResourcesString(String name) {
         return mContext.getResources().getString(getResourcesId(name));
     }
@@ -506,11 +623,14 @@ public class InternetDialogControllerTest extends SysuiTestCase {
                 @Main Handler handler, @Main Executor mainExecutor,
                 BroadcastDispatcher broadcastDispatcher,
                 KeyguardUpdateMonitor keyguardUpdateMonitor, GlobalSettings globalSettings,
-                KeyguardStateController keyguardStateController) {
+                KeyguardStateController keyguardStateController, WindowManager windowManager,
+                ToastFactory toastFactory, Handler workerHandler,
+                CarrierConfigTracker carrierConfigTracker) {
             super(context, uiEventLogger, starter, accessPointController, subscriptionManager,
                     telephonyManager, wifiManager, connectivityManager, handler, mainExecutor,
                     broadcastDispatcher, keyguardUpdateMonitor, globalSettings,
-                    keyguardStateController);
+                    keyguardStateController, windowManager, toastFactory, workerHandler,
+                    carrierConfigTracker);
             mGlobalSettings = globalSettings;
         }
 

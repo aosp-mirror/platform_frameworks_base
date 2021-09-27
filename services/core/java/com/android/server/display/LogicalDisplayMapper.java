@@ -22,6 +22,8 @@ import android.hardware.devicestate.DeviceStateManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerManager;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -69,7 +71,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     public static final int DISPLAY_GROUP_EVENT_CHANGED = 2;
     public static final int DISPLAY_GROUP_EVENT_REMOVED = 3;
 
-    private static final int TIMEOUT_STATE_TRANSITION_MILLIS = 500;
+    private static final int TIMEOUT_STATE_TRANSITION_MILLIS = 300;
 
     private static final int MSG_TRANSITION_TO_PENDING_DEVICE_STATE = 1;
 
@@ -98,6 +100,11 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     private final boolean mSupportsConcurrentInternalDisplays;
 
     /**
+     * Wake the device when transitioning into this device state.
+     */
+    private final int mDeviceStateOnWhichToWakeUp;
+
+    /**
      * Map of all logical displays indexed by logical display id.
      * Any modification to mLogicalDisplays must invalidate the DisplayManagerGlobal cache.
      * TODO: multi-display - Move the aforementioned comment?
@@ -113,6 +120,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     private final Listener mListener;
     private final DisplayManagerService.SyncRoot mSyncRoot;
     private final LogicalDisplayMapperHandler mHandler;
+    private final PowerManager mPowerManager;
 
     /**
      * Has an entry for every logical display that the rest of the system has been notified about.
@@ -150,12 +158,15 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             @NonNull Listener listener, @NonNull DisplayManagerService.SyncRoot syncRoot,
             @NonNull Handler handler) {
         mSyncRoot = syncRoot;
+        mPowerManager = context.getSystemService(PowerManager.class);
         mHandler = new LogicalDisplayMapperHandler(handler.getLooper());
         mDisplayDeviceRepo = repo;
         mListener = listener;
         mSingleDisplayDemoMode = SystemProperties.getBoolean("persist.demo.singledisplay", false);
         mSupportsConcurrentInternalDisplays = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_supportsConcurrentInternalDisplays);
+        mDeviceStateOnWhichToWakeUp = context.getResources().getInteger(
+                com.android.internal.R.integer.config_deviceStateOnWhichToWakeUp);
         mDisplayDeviceRepo.addListener(this);
         mDeviceStateToLayoutMap = new DeviceStateToLayoutMap();
     }
@@ -318,6 +329,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
 
         ipw.println("mSingleDisplayDemoMode=" + mSingleDisplayDemoMode);
         ipw.println("mCurrentLayout=" + mCurrentLayout);
+        ipw.println("mDeviceStateOnWhichToWakeUp=" + mDeviceStateOnWhichToWakeUp);
 
         final int logicalDisplayCount = mLogicalDisplays.size();
         ipw.println();
@@ -335,7 +347,9 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     }
 
     void setDeviceStateLocked(int state) {
-        Slog.i(TAG, "Requesting Transition to state: " + state);
+        final boolean isInteractive  = mPowerManager.isInteractive();
+        Slog.i(TAG, "Requesting Transition to state: " + state + ", from state=" + mDeviceState
+                + ", interactive=" + isInteractive);
         // As part of a state transition, we may need to turn off some displays temporarily so that
         // the transition is smooth. Plus, on some devices, only one internal displays can be
         // on at a time. We use DISPLAY_PHASE_LAYOUT_TRANSITION to mark a display that needs to be
@@ -344,8 +358,13 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             resetLayoutLocked(mDeviceState, state, LogicalDisplay.DISPLAY_PHASE_LAYOUT_TRANSITION);
         }
         mPendingDeviceState = state;
-        if (areAllTransitioningDisplaysOffLocked()) {
-            // Nothing to wait on, we're good to go
+        final boolean wakeDevice = mPendingDeviceState == mDeviceStateOnWhichToWakeUp
+                && !isInteractive;
+
+        // If all displays are off already, we can just transition here, unless the device is asleep
+        // and we plan on waking it up. In that case, fall through to the call to wakeUp, and defer
+        // the final transition until later once the device is awake.
+        if (areAllTransitioningDisplaysOffLocked() && !wakeDevice) {
             transitionToPendingStateLocked();
             return;
         }
@@ -356,6 +375,14 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         // Send the transitioning phase updates to DisplayManager so that the displays can
         // start turning OFF in preparation for the new layout.
         updateLogicalDisplaysLocked();
+
+        if (wakeDevice) {
+            // We already told the displays to turn off, now we need to wake the device as
+            // we transition to this new state. We do it here so that the waking happens between the
+            // transition from one layout to another.
+            mPowerManager.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_UNFOLD_DEVICE,
+                    "server.display:unfold");
+        }
         mHandler.sendEmptyMessageDelayed(MSG_TRANSITION_TO_PENDING_DEVICE_STATE,
                 TIMEOUT_STATE_TRANSITION_MILLIS);
     }
@@ -482,6 +509,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                 assignDisplayGroupLocked(display);
                 mLogicalDisplaysToUpdate.put(displayId, LOGICAL_DISPLAY_EVENT_CHANGED);
 
+            // The display is involved in a display layout transition
             } else if (updateState == UPDATE_STATE_TRANSITION) {
                 mLogicalDisplaysToUpdate.put(displayId,
                         LOGICAL_DISPLAY_EVENT_DEVICE_STATE_TRANSITION);
@@ -672,14 +700,14 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
 
             // We consider a display-device as changing/transition if
             // 1) It's already marked as transitioning
-            // 2) It's going from enabled to disabled
+            // 2) It's going from enabled to disabled, or vice versa
             // 3) It's enabled, but it's mapped to a new logical display ID. To the user this
             //    would look like apps moving from one screen to another since task-stacks stay
             //    with the logical display [ID].
             final boolean isTransitioning =
                     (logicalDisplay.getPhase() == LogicalDisplay.DISPLAY_PHASE_LAYOUT_TRANSITION)
-                    || (wasEnabled && !willBeEnabled)
-                    || (wasEnabled && deviceHasNewLogicalDisplayId);
+                    || (wasEnabled != willBeEnabled)
+                    || deviceHasNewLogicalDisplayId;
 
             if (isTransitioning) {
                 setDisplayPhase(logicalDisplay, phase);

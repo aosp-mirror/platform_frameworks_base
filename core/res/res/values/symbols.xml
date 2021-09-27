@@ -3846,6 +3846,7 @@
 
   <!-- For Foldables -->
   <java-symbol type="array" name="config_foldedDeviceStates" />
+  <java-symbol type="integer" name="config_deviceStateOnWhichToWakeUp" />
   <java-symbol type="string" name="config_foldedArea" />
   <java-symbol type="bool" name="config_supportsConcurrentInternalDisplays" />
   <java-symbol type="bool" name="config_unfoldTransitionEnabled" />
