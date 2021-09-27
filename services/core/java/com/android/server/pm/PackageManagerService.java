@@ -21889,7 +21889,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public boolean mayPackageQuery(String sourcePackageName, String targetPackageName, int userId) {
+    public boolean canPackageQuery(String sourcePackageName, String targetPackageName, int userId) {
         if (!mUserManager.exists(userId)) return false;
         final int callingUid = Binder.getCallingUid();
         enforceCrossUserPermission(callingUid, userId, false /*requireFullPermission*/,

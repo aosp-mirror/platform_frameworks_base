@@ -819,5 +819,5 @@ interface IPackageManager {
 
     void setKeepUninstalledPackages(in List<String> packageList);
 
-    boolean mayPackageQuery(String sourcePackageName, String targetPackageName, int userId);
+    boolean canPackageQuery(String sourcePackageName, String targetPackageName, int userId);
 }

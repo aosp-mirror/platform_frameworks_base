@@ -9357,10 +9357,10 @@ public abstract class PackageManager {
      * system, or if the caller is not able to query for details about the source or
      * target package.
      */
-    public boolean mayPackageQuery(@NonNull String sourcePackageName,
+    public boolean canPackageQuery(@NonNull String sourcePackageName,
             @NonNull String targetPackageName) throws NameNotFoundException {
         throw new UnsupportedOperationException(
-                "mayPackageQuery not implemented in subclass");
+                "canPackageQuery not implemented in subclass");
     }
 
     /**
