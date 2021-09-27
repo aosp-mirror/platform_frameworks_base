@@ -445,7 +445,8 @@ final class InstallParams extends HandlerParams {
                     // processInstallRequestAsync. In that case just notify the observer about the
                     // failure.
                     InstallRequest request = apexInstallRequests.get(0);
-                    mPm.notifyInstallObserver(request.mInstallResult, request.mArgs.mObserver);
+                    mPm.notifyInstallObserver(request.mInstallResult,
+                            request.mArgs.mObserver);
                 }
                 return;
             }
@@ -662,7 +663,7 @@ final class InstallParams extends HandlerParams {
                     final int verificationId = mPm.mPendingVerificationToken++;
                     final String rootHashString = PackageManagerServiceUtils
                             .buildVerificationRootHashString(baseCodePath, splitCodePaths);
-                    mPm.broadcastPackageVerified(verificationId, originUri,
+                    mVerificationHelper.broadcastPackageVerified(verificationId, originUri,
                             PackageManager.VERIFICATION_ALLOW, rootHashString,
                             args.mDataLoaderType, args.getUser());
                 }
