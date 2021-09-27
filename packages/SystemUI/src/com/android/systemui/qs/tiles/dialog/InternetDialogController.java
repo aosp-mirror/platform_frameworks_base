@@ -215,10 +215,10 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         mKeyguardStateController = keyguardStateController;
         mConnectionStateFilter = new IntentFilter();
         mConnectionStateFilter.addAction(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED);
+        mConnectionStateFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
         mUiEventLogger = uiEventLogger;
         mActivityStarter = starter;
         mAccessPointController = accessPointController;
-        mConfig = MobileMappings.Config.readConfig(mContext);
         mWifiIconInjector = new WifiUtils.InternetIconInjector(mContext);
         mConnectivityManagerNetworkCallback = new DataConnectivityListener();
         mWindowManager = windowManager;
@@ -242,6 +242,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         if (DEBUG) {
             Log.d(TAG, "Init, SubId: " + mDefaultDataSubId);
         }
+        mConfig = MobileMappings.Config.readConfig(mContext);
         mTelephonyManager = mTelephonyManager.createForSubscriptionId(mDefaultDataSubId);
         mInternetTelephonyCallback = new InternetTelephonyCallback();
         mTelephonyManager.registerTelephonyCallback(mExecutor, mInternetTelephonyCallback);
@@ -545,7 +546,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
     String getMobileNetworkSummary() {
         String description = getNetworkTypeDescription(mContext, mConfig,
                 mTelephonyDisplayInfo, mDefaultDataSubId);
-        return getMobileSummary(mContext, mTelephonyManager, description);
+        return getMobileSummary(mContext, description);
     }
 
     /**
@@ -573,8 +574,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
                 ? SubscriptionManager.getResourcesForSubId(context, subId).getString(resId) : "";
     }
 
-    private String getMobileSummary(Context context, TelephonyManager telephonyManager,
-            String networkTypeDescription) {
+    private String getMobileSummary(Context context, String networkTypeDescription) {
         if (!isMobileDataEnabled()) {
             return context.getString(R.string.mobile_data_off_summary);
         }
@@ -953,10 +953,13 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            if (action.equals(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)) {
+            if (TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED.equals(action)) {
                 if (DEBUG) {
                     Log.d(TAG, "ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED");
                 }
+                mConfig = MobileMappings.Config.readConfig(context);
+                updateListener();
+            } else if (WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION.equals(action)) {
                 updateListener();
             }
         }
