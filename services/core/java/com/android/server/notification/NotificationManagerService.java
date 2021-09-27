@@ -5397,6 +5397,7 @@ public class NotificationManagerService extends SystemService {
                                     == IMPORTANCE_NONE) {
                                 cancelNotificationsFromListener(token, new String[]{r.getKey()});
                             } else {
+                                r.setPendingLogUpdate(true);
                                 needsSort = true;
                             }
                         }
@@ -8057,64 +8058,151 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
+    static class NotificationRecordExtractorData {
+        // Class that stores any field in a NotificationRecord that can change via an extractor.
+        // Used to cache previous data used in a sort.
+        int mPosition;
+        int mVisibility;
+        boolean mShowBadge;
+        boolean mAllowBubble;
+        boolean mIsBubble;
+        NotificationChannel mChannel;
+        String mGroupKey;
+        ArrayList<String> mOverridePeople;
+        ArrayList<SnoozeCriterion> mSnoozeCriteria;
+        Integer mUserSentiment;
+        Integer mSuppressVisually;
+        ArrayList<Notification.Action> mSystemSmartActions;
+        ArrayList<CharSequence> mSmartReplies;
+        int mImportance;
+
+        // These fields may not trigger a reranking but diffs here may be logged.
+        float mRankingScore;
+        boolean mIsConversation;
+
+        NotificationRecordExtractorData(int position, int visibility, boolean showBadge,
+                boolean allowBubble, boolean isBubble, NotificationChannel channel, String groupKey,
+                ArrayList<String> overridePeople, ArrayList<SnoozeCriterion> snoozeCriteria,
+                Integer userSentiment, Integer suppressVisually,
+                ArrayList<Notification.Action> systemSmartActions,
+                ArrayList<CharSequence> smartReplies, int importance, float rankingScore,
+                boolean isConversation) {
+            mPosition = position;
+            mVisibility = visibility;
+            mShowBadge = showBadge;
+            mAllowBubble = allowBubble;
+            mIsBubble = isBubble;
+            mChannel = channel;
+            mGroupKey = groupKey;
+            mOverridePeople = overridePeople;
+            mSnoozeCriteria = snoozeCriteria;
+            mUserSentiment = userSentiment;
+            mSuppressVisually = suppressVisually;
+            mSystemSmartActions = systemSmartActions;
+            mSmartReplies = smartReplies;
+            mImportance = importance;
+            mRankingScore = rankingScore;
+            mIsConversation = isConversation;
+        }
+
+        // Returns whether the provided NotificationRecord differs from the cached data in any way.
+        // Should be guarded by mNotificationLock; not annotated here as this class is static.
+        boolean hasDiffForRankingLocked(NotificationRecord r, int newPosition) {
+            return mPosition != newPosition
+                    || mVisibility != r.getPackageVisibilityOverride()
+                    || mShowBadge != r.canShowBadge()
+                    || mAllowBubble != r.canBubble()
+                    || mIsBubble != r.getNotification().isBubbleNotification()
+                    || !Objects.equals(mChannel, r.getChannel())
+                    || !Objects.equals(mGroupKey, r.getGroupKey())
+                    || !Objects.equals(mOverridePeople, r.getPeopleOverride())
+                    || !Objects.equals(mSnoozeCriteria, r.getSnoozeCriteria())
+                    || !Objects.equals(mUserSentiment, r.getUserSentiment())
+                    || !Objects.equals(mSuppressVisually, r.getSuppressedVisualEffects())
+                    || !Objects.equals(mSystemSmartActions, r.getSystemGeneratedSmartActions())
+                    || !Objects.equals(mSmartReplies, r.getSmartReplies())
+                    || mImportance != r.getImportance();
+        }
+
+        // Returns whether the NotificationRecord has a change from this data for which we should
+        // log an update. This method specifically targets fields that may be changed via
+        // adjustments from the assistant.
+        //
+        // Fields here are the union of things in NotificationRecordLogger.shouldLogReported
+        // and NotificationRecord.applyAdjustments.
+        //
+        // Should be guarded by mNotificationLock; not annotated here as this class is static.
+        boolean hasDiffForLoggingLocked(NotificationRecord r, int newPosition) {
+            return mPosition != newPosition
+                    || !Objects.equals(mChannel, r.getChannel())
+                    || !Objects.equals(mGroupKey, r.getGroupKey())
+                    || !Objects.equals(mOverridePeople, r.getPeopleOverride())
+                    || !Objects.equals(mSnoozeCriteria, r.getSnoozeCriteria())
+                    || !Objects.equals(mUserSentiment, r.getUserSentiment())
+                    || !Objects.equals(mSystemSmartActions, r.getSystemGeneratedSmartActions())
+                    || !Objects.equals(mSmartReplies, r.getSmartReplies())
+                    || mImportance != r.getImportance()
+                    || !r.rankingScoreMatches(mRankingScore)
+                    || mIsConversation != r.isConversation();
+        }
+    }
+
     void handleRankingSort() {
         if (mRankingHelper == null) return;
         synchronized (mNotificationLock) {
             final int N = mNotificationList.size();
             // Any field that can change via one of the extractors needs to be added here.
-            ArrayList<String> orderBefore = new ArrayList<>(N);
-            int[] visibilities = new int[N];
-            boolean[] showBadges = new boolean[N];
-            boolean[] allowBubbles = new boolean[N];
-            boolean[] isBubble = new boolean[N];
-            ArrayList<NotificationChannel> channelBefore = new ArrayList<>(N);
-            ArrayList<String> groupKeyBefore = new ArrayList<>(N);
-            ArrayList<ArrayList<String>> overridePeopleBefore = new ArrayList<>(N);
-            ArrayList<ArrayList<SnoozeCriterion>> snoozeCriteriaBefore = new ArrayList<>(N);
-            ArrayList<Integer> userSentimentBefore = new ArrayList<>(N);
-            ArrayList<Integer> suppressVisuallyBefore = new ArrayList<>(N);
-            ArrayList<ArrayList<Notification.Action>> systemSmartActionsBefore = new ArrayList<>(N);
-            ArrayList<ArrayList<CharSequence>> smartRepliesBefore = new ArrayList<>(N);
-            int[] importancesBefore = new int[N];
+            ArrayMap<String, NotificationRecordExtractorData> extractorDataBefore =
+                    new ArrayMap<>(N);
             for (int i = 0; i < N; i++) {
                 final NotificationRecord r = mNotificationList.get(i);
-                orderBefore.add(r.getKey());
-                visibilities[i] = r.getPackageVisibilityOverride();
-                showBadges[i] = r.canShowBadge();
-                allowBubbles[i] = r.canBubble();
-                isBubble[i] = r.getNotification().isBubbleNotification();
-                channelBefore.add(r.getChannel());
-                groupKeyBefore.add(r.getGroupKey());
-                overridePeopleBefore.add(r.getPeopleOverride());
-                snoozeCriteriaBefore.add(r.getSnoozeCriteria());
-                userSentimentBefore.add(r.getUserSentiment());
-                suppressVisuallyBefore.add(r.getSuppressedVisualEffects());
-                systemSmartActionsBefore.add(r.getSystemGeneratedSmartActions());
-                smartRepliesBefore.add(r.getSmartReplies());
-                importancesBefore[i] = r.getImportance();
+                NotificationRecordExtractorData extractorData = new NotificationRecordExtractorData(
+                        i,
+                        r.getPackageVisibilityOverride(),
+                        r.canShowBadge(),
+                        r.canBubble(),
+                        r.getNotification().isBubbleNotification(),
+                        r.getChannel(),
+                        r.getGroupKey(),
+                        r.getPeopleOverride(),
+                        r.getSnoozeCriteria(),
+                        r.getUserSentiment(),
+                        r.getSuppressedVisualEffects(),
+                        r.getSystemGeneratedSmartActions(),
+                        r.getSmartReplies(),
+                        r.getImportance(),
+                        r.getRankingScore(),
+                        r.isConversation());
+                extractorDataBefore.put(r.getKey(), extractorData);
                 mRankingHelper.extractSignals(r);
             }
             mRankingHelper.sort(mNotificationList);
             for (int i = 0; i < N; i++) {
                 final NotificationRecord r = mNotificationList.get(i);
-                if (!orderBefore.get(i).equals(r.getKey())
-                        || visibilities[i] != r.getPackageVisibilityOverride()
-                        || showBadges[i] != r.canShowBadge()
-                        || allowBubbles[i] != r.canBubble()
-                        || isBubble[i] != r.getNotification().isBubbleNotification()
-                        || !Objects.equals(channelBefore.get(i), r.getChannel())
-                        || !Objects.equals(groupKeyBefore.get(i), r.getGroupKey())
-                        || !Objects.equals(overridePeopleBefore.get(i), r.getPeopleOverride())
-                        || !Objects.equals(snoozeCriteriaBefore.get(i), r.getSnoozeCriteria())
-                        || !Objects.equals(userSentimentBefore.get(i), r.getUserSentiment())
-                        || !Objects.equals(suppressVisuallyBefore.get(i),
-                        r.getSuppressedVisualEffects())
-                        || !Objects.equals(systemSmartActionsBefore.get(i),
-                                r.getSystemGeneratedSmartActions())
-                        || !Objects.equals(smartRepliesBefore.get(i), r.getSmartReplies())
-                        || importancesBefore[i] != r.getImportance()) {
+                if (!extractorDataBefore.containsKey(r.getKey())) {
+                    // This shouldn't happen given that we just built this with all the
+                    // notifications, but check just to be safe.
+                    continue;
+                }
+                if (extractorDataBefore.get(r.getKey()).hasDiffForRankingLocked(r, i)) {
                     mHandler.scheduleSendRankingUpdate();
-                    return;
+                }
+
+                // If this notification is one for which we wanted to log an update, and
+                // sufficient relevant bits are different, log update.
+                if (r.hasPendingLogUpdate()) {
+                    // We need to acquire the previous data associated with this specific
+                    // notification, as the one at the current index may be unrelated if
+                    // notification order has changed.
+                    NotificationRecordExtractorData prevData = extractorDataBefore.get(r.getKey());
+                    if (prevData.hasDiffForLoggingLocked(r, i)) {
+                        mNotificationRecordLogger.logNotificationAdjusted(r, i, 0,
+                                getGroupInstanceId(r.getSbn().getGroupKey()));
+                    }
+
+                    // Remove whether there was a diff or not; we've sorted the key, so if it
+                    // turns out there was nothing to log, that's fine too.
+                    r.setPendingLogUpdate(false);
                 }
             }
         }
