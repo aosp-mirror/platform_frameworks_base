@@ -1387,7 +1387,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         ProtoLog.v(WM_DEBUG_STATES, "Moving to PAUSING: %s", prev);
         mPausingActivity = prev;
         mLastPausedActivity = prev;
-        if (prev.isNoHistory() && !mTaskSupervisor.mNoHistoryActivities.contains(prev)) {
+        if (!prev.finishing && prev.isNoHistory()
+                && !mTaskSupervisor.mNoHistoryActivities.contains(prev)) {
             mTaskSupervisor.mNoHistoryActivities.add(prev);
         }
         prev.setState(PAUSING, "startPausingLocked");
