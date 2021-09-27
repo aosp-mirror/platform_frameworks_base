@@ -146,6 +146,9 @@ void EglManager::initialize() {
         LOG_ALWAYS_FATAL("Unsupported wide color space.");
     }
     mHasWideColorGamutSupport = EglExtensions.glColorSpace && hasWideColorSpaceExtension;
+
+    auto* vendor = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
+    Properties::enableRenderEffectCache = (strcmp(vendor, "Qualcomm") != 0);
 }
 
 EGLConfig EglManager::load8BitsConfig(EGLDisplay display, EglManager::SwapBehavior swapBehavior) {
