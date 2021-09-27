@@ -59,6 +59,7 @@ import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SELinux;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.stats.devicepolicy.DevicePolicyEnums;
@@ -1462,7 +1463,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             if (mOkToSendBroadcasts && !session.isDestroyed()) {
                 // we don't scrub the data here as this is sent only to the installer several
                 // privileged system packages
-                mPm.sendSessionUpdatedBroadcast(
+                sendSessionUpdatedBroadcast(
                         session.generateInfoForCaller(false/*icon*/, Process.SYSTEM_UID),
                         session.userId);
             }
@@ -1506,5 +1507,20 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             // after sealing.
             mSettingsWriteRequest.runNow();
         }
+    }
+
+    /**
+     * Send a {@code PackageInstaller.ACTION_SESSION_UPDATED} broadcast intent, containing
+     * the {@code sessionInfo} in the extra field {@code PackageInstaller.EXTRA_SESSION}.
+     */
+    private void sendSessionUpdatedBroadcast(PackageInstaller.SessionInfo sessionInfo,
+            int userId) {
+        if (TextUtils.isEmpty(sessionInfo.installerPackageName)) {
+            return;
+        }
+        Intent sessionUpdatedIntent = new Intent(PackageInstaller.ACTION_SESSION_UPDATED)
+                .putExtra(PackageInstaller.EXTRA_SESSION, sessionInfo)
+                .setPackage(sessionInfo.installerPackageName);
+        mContext.sendBroadcastAsUser(sessionUpdatedIntent, UserHandle.of(userId));
     }
 }

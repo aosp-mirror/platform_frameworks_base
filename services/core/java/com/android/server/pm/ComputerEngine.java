@@ -170,7 +170,7 @@ public class ComputerEngine implements Computer {
     private final UserManagerService mUserManager;
     private final PermissionManagerServiceInternal mPermissionManager;
     private final ApexManager mApexManager;
-    private final PackageManagerService.Injector mInjector;
+    private final PackageManagerServiceInjector mInjector;
     private final ComponentResolver mComponentResolver;
     private final InstantAppResolverConnection mInstantAppResolverConnection;
     private final DefaultAppProvider mDefaultAppProvider;

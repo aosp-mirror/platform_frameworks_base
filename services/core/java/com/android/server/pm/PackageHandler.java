@@ -88,11 +88,13 @@ import java.util.Collections;
 public final class PackageHandler extends Handler {
     private final PackageManagerService mPm;
     private final VerificationHelper mVerificationHelper;
+    private final BroadcastHelper mBroadcastHelper;
 
     PackageHandler(Looper looper, PackageManagerService pm) {
         super(looper);
         mPm = pm;
         mVerificationHelper = new VerificationHelper(mPm.mContext);
+        mBroadcastHelper = new BroadcastHelper(mPm.mInjector);
     }
 
     @Override
@@ -164,7 +166,7 @@ public final class PackageHandler extends Handler {
             case POST_INSTALL: {
                 if (DEBUG_INSTALL) Log.v(TAG, "Handling post-install for " + msg.arg1);
 
-                PackageManagerService.PostInstallData data = mPm.mRunningInstalls.get(msg.arg1);
+                PostInstallData data = mPm.mRunningInstalls.get(msg.arg1);
                 final boolean didRestore = (msg.arg2 != 0);
                 mPm.mRunningInstalls.delete(msg.arg1);
 
@@ -640,8 +642,8 @@ public final class PackageHandler extends Handler {
                             packageName /*targetPackage*/,
                             null /*finishedReceiver*/, updateUserIds, instantUserIds,
                             null /*broadcastAllowList*/,
-                            mPm.getTemporaryAppAllowlistBroadcastOptions(REASON_PACKAGE_REPLACED)
-                                    .toBundle());
+                            mBroadcastHelper.getTemporaryAppAllowlistBroadcastOptions(
+                                    REASON_PACKAGE_REPLACED).toBundle());
                 } else if (launchedForRestore && !res.mPkg.isSystem()) {
                     // First-install and we did a restore, so we're responsible for the
                     // first-launch broadcast.
@@ -649,7 +651,7 @@ public final class PackageHandler extends Handler {
                         Slog.i(TAG, "Post-restore of " + packageName
                                 + " sending FIRST_LAUNCH in " + Arrays.toString(firstUserIds));
                     }
-                    mPm.sendFirstLaunchBroadcast(packageName, installerPackage,
+                    mBroadcastHelper.sendFirstLaunchBroadcast(packageName, installerPackage,
                             firstUserIds, firstInstantUserIds);
                 }
 
@@ -678,7 +680,8 @@ public final class PackageHandler extends Handler {
                     final int[] uidArray = new int[]{res.mPkg.getUid()};
                     ArrayList<String> pkgList = new ArrayList<>(1);
                     pkgList.add(packageName);
-                    mPm.sendResourcesChangedBroadcast(true, true, pkgList, uidArray, null);
+                    mBroadcastHelper.sendResourcesChangedBroadcast(
+                            true, true, pkgList, uidArray, null);
                 }
             } else if (!ArrayUtils.isEmpty(res.mLibraryConsumers)) { // if static shared lib
                 for (int i = 0; i < res.mLibraryConsumers.size(); i++) {

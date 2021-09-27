@@ -24,14 +24,7 @@ import android.content.pm.parsing.component.ParsedActivity
 import android.os.Binder
 import android.os.UserHandle
 import android.util.ArrayMap
-import com.android.server.pm.AppsFilter
-import com.android.server.pm.ComponentResolver
-import com.android.server.pm.PackageManagerService
-import com.android.server.pm.PackageManagerTracedLock
-import com.android.server.pm.PackageSetting
-import com.android.server.pm.Settings
-import com.android.server.pm.UserManagerInternal
-import com.android.server.pm.UserManagerService
+import com.android.server.pm.*
 import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.parsing.pkg.PackageImpl
 import com.android.server.pm.parsing.pkg.ParsedPackage
@@ -175,7 +168,7 @@ class PackageManagerComponentLabelIconOverrideTest {
     lateinit var params: Params
 
     private lateinit var testHandler: TestHandler
-    private lateinit var mockPendingBroadcasts: PackageManagerService.PendingPackageBroadcasts
+    private lateinit var mockPendingBroadcasts: PendingPackageBroadcasts
     private lateinit var mockPkg: AndroidPackage
     private lateinit var mockPkgSetting: PackageSetting
     private lateinit var service: PackageManagerService
@@ -194,7 +187,7 @@ class PackageManagerComponentLabelIconOverrideTest {
             testHandler.sendEmptyMessage(SEND_PENDING_BROADCAST)
         }
 
-        mockPendingBroadcasts = PackageManagerService.PendingPackageBroadcasts()
+        mockPendingBroadcasts = PendingPackageBroadcasts()
 
         service = mockService()
     }
@@ -361,7 +354,7 @@ class PackageManagerComponentLabelIconOverrideTest {
                 PackageManager.PERMISSION_GRANTED
             }
         }
-        val mockInjector: PackageManagerService.Injector = mock {
+        val mockInjector: PackageManagerServiceInjector = mock {
             whenever(this.lock) { PackageManagerTracedLock() }
             whenever(this.componentResolver) { mockComponentResolver }
             whenever(this.userManagerService) { mockUserManagerService }
@@ -374,7 +367,7 @@ class PackageManagerComponentLabelIconOverrideTest {
             whenever(this.context) { mockContext }
             whenever(this.getHandler()) { testHandler }
         }
-        val testParams = PackageManagerService.TestParams().apply {
+        val testParams = PackageManagerServiceTestParams().apply {
             this.pendingPackageBroadcasts = mockPendingBroadcasts
             this.resolveComponentName = ComponentName("android", ".Test")
             this.packages = ArrayMap<String, AndroidPackage>().apply { putAll(mockedPkgs) }

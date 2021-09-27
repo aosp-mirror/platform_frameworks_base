@@ -48,8 +48,6 @@ import static android.content.pm.PackageManager.TYPE_RECEIVER;
 import static android.content.pm.PackageManager.TYPE_UNKNOWN;
 import static android.content.pm.PackageManager.UNINSTALL_REASON_UNKNOWN;
 import static android.content.pm.PackageManagerInternal.LAST_KNOWN_PACKAGE;
-import static android.os.PowerWhitelistManager.REASON_LOCKED_BOOT_COMPLETED;
-import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.os.incremental.IncrementalManager.isIncrementalPath;
 import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
@@ -78,10 +76,8 @@ import android.annotation.StringRes;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.ActivityManager;
-import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.ApplicationPackageManager;
-import android.app.BroadcastOptions;
 import android.app.IActivityManager;
 import android.app.PendingIntent;
 import android.app.admin.IDevicePolicyManager;
@@ -184,14 +180,12 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.ParcelableException;
 import android.os.PersistableBundle;
-import android.os.PowerWhitelistManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -410,7 +404,6 @@ public class PackageManagerService extends IPackageManager.Stub
     static final boolean DEBUG_BACKUP = false;
     public static final boolean DEBUG_INSTALL = false;
     public static final boolean DEBUG_REMOVE = false;
-    private static final boolean DEBUG_BROADCASTS = false;
     static final boolean DEBUG_PACKAGE_INFO = false;
     static final boolean DEBUG_INTENT_MATCHING = false;
     public static final boolean DEBUG_PACKAGE_SCANNING = false;
@@ -563,12 +556,6 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final long DEFAULT_MANDATORY_FSTRIM_INTERVAL = 3 * DateUtils.DAY_IN_MILLIS;
 
     /**
-     * The default maximum time to wait for the verification agent to return in
-     * milliseconds.
-     */
-    static final long DEFAULT_VERIFICATION_TIMEOUT = 10 * 1000;
-
-    /**
      * Default IncFs timeouts. Maximum values in IncFs is 1hr.
      *
      * <p>If flag value is empty, the default value will be assigned.
@@ -628,7 +615,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     static final String PACKAGE_MIME_TYPE = "application/vnd.android.package-archive";
 
-    private static final String PACKAGE_SCHEME = "package";
+    static final String PACKAGE_SCHEME = "package";
 
     private static final String COMPANION_PACKAGE_NAME = "com.android.companiondevicemanager";
 
@@ -662,12 +649,6 @@ public class PackageManagerService extends IPackageManager.Stub
      * build fingerprint changes.
      */
     private static final boolean FORCE_PACKAGE_PARSED_CACHE_ENABLED = false;
-
-    /**
-     * Permissions required in order to receive instant application lifecycle broadcasts.
-     */
-    private static final String[] INSTANT_APP_BROADCAST_PERMISSION =
-            new String[] { android.Manifest.permission.ACCESS_INSTANT_APPS };
 
     static final String RANDOM_DIR_PREFIX = "~~";
 
@@ -826,7 +807,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     final ApexManager mApexManager;
 
-    final Injector mInjector;
+    final PackageManagerServiceInjector mInjector;
 
     /**
      * The list of all system partitions that may contain packages in ascending order of
@@ -849,318 +830,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private static final PerUidReadTimeouts[] EMPTY_PER_UID_READ_TIMEOUTS_ARRAY = {};
 
-    /**
-     * Unit tests will instantiate, extend and/or mock to mock dependencies / behaviors.
-     *
-     * NOTE: All getters should return the same instance for every call.
-     */
-    @VisibleForTesting(visibility = Visibility.PRIVATE)
-    public static class Injector {
-
-        @VisibleForTesting(visibility = Visibility.PRIVATE)
-        interface Producer<T> {
-            /** Produce an instance of type {@link T} */
-            T produce(Injector injector, PackageManagerService packageManager);
-        }
-
-        interface ProducerWithArgument<T, R> {
-            T produce(Injector injector, PackageManagerService packageManager, R argument);
-        }
-
-        interface ServiceProducer {
-            <T> T produce(Class<T> c);
-        }
-
-        @VisibleForTesting(visibility = Visibility.PRIVATE)
-        static class Singleton<T> {
-            private final Producer<T> mProducer;
-            private volatile T mInstance = null;
-            Singleton(Producer<T> producer) {
-                this.mProducer = producer;
-            }
-            T get(Injector injector, PackageManagerService packageManagerService) {
-                if (mInstance == null) {
-                    mInstance = mProducer.produce(injector, packageManagerService);
-                }
-                return mInstance;
-            }
-        }
-
-        private PackageManagerService mPackageManager;
-
-        private final PackageAbiHelper mAbiHelper;
-        private final Context mContext;
-        private final PackageManagerTracedLock mLock;
-        private final Installer mInstaller;
-        private final Object mInstallLock;
-        private final Handler mBackgroundHandler;
-        private final Executor mBackgroundExecutor;
-        private final List<ScanPartition> mSystemPartitions;
-
-        // ----- producers -----
-        private final Singleton<ComponentResolver> mComponentResolverProducer;
-        private final Singleton<PermissionManagerServiceInternal> mPermissionManagerServiceProducer;
-        private final Singleton<UserManagerService> mUserManagerProducer;
-        private final Singleton<Settings> mSettingsProducer;
-        private final Singleton<AppsFilter> mAppsFilterProducer;
-        private final Singleton<PlatformCompat> mPlatformCompatProducer;
-        private final Singleton<SystemConfig> mSystemConfigProducer;
-        private final Singleton<PackageDexOptimizer> mPackageDexOptimizerProducer;
-        private final Singleton<DexManager> mDexManagerProducer;
-        private final Singleton<ArtManagerService> mArtManagerServiceProducer;
-        private final Singleton<ApexManager> mApexManagerProducer;
-        private final Singleton<ViewCompiler> mViewCompilerProducer;
-        private final Singleton<IncrementalManager> mIncrementalManagerProducer;
-        private final Singleton<DefaultAppProvider> mDefaultAppProviderProducer;
-        private final Singleton<DisplayMetrics> mDisplayMetricsProducer;
-        private final Producer<PackageParser2> mScanningCachingPackageParserProducer;
-        private final Producer<PackageParser2> mScanningPackageParserProducer;
-        private final Producer<PackageParser2> mPreparingPackageParserProducer;
-        private final Singleton<PackageInstallerService> mPackageInstallerServiceProducer;
-        private final ProducerWithArgument<InstantAppResolverConnection, ComponentName>
-                mInstantAppResolverConnectionProducer;
-        private final Singleton<LegacyPermissionManagerInternal>
-                mLegacyPermissionManagerInternalProducer;
-        private final SystemWrapper mSystemWrapper;
-        private final ServiceProducer mGetLocalServiceProducer;
-        private final ServiceProducer mGetSystemServiceProducer;
-        private final Singleton<ModuleInfoProvider> mModuleInfoProviderProducer;
-        private final Singleton<DomainVerificationManagerInternal>
-                mDomainVerificationManagerInternalProducer;
-        private final Singleton<Handler> mHandlerProducer;
-
-        Injector(Context context, PackageManagerTracedLock lock, Installer installer,
-                Object installLock, PackageAbiHelper abiHelper,
-                Handler backgroundHandler,
-                List<ScanPartition> systemPartitions,
-                Producer<ComponentResolver> componentResolverProducer,
-                Producer<PermissionManagerServiceInternal> permissionManagerServiceProducer,
-                Producer<UserManagerService> userManagerProducer,
-                Producer<Settings> settingsProducer,
-                Producer<AppsFilter> appsFilterProducer,
-                Producer<PlatformCompat> platformCompatProducer,
-                Producer<SystemConfig> systemConfigProducer,
-                Producer<PackageDexOptimizer> packageDexOptimizerProducer,
-                Producer<DexManager> dexManagerProducer,
-                Producer<ArtManagerService> artManagerServiceProducer,
-                Producer<ApexManager> apexManagerProducer,
-                Producer<ViewCompiler> viewCompilerProducer,
-                Producer<IncrementalManager> incrementalManagerProducer,
-                Producer<DefaultAppProvider> defaultAppProviderProducer,
-                Producer<DisplayMetrics> displayMetricsProducer,
-                Producer<PackageParser2> scanningCachingPackageParserProducer,
-                Producer<PackageParser2> scanningPackageParserProducer,
-                Producer<PackageParser2> preparingPackageParserProducer,
-                Producer<PackageInstallerService> packageInstallerServiceProducer,
-                ProducerWithArgument<InstantAppResolverConnection, ComponentName>
-                        instantAppResolverConnectionProducer,
-                Producer<ModuleInfoProvider> moduleInfoProviderProducer,
-                Producer<LegacyPermissionManagerInternal> legacyPermissionManagerInternalProducer,
-                Producer<DomainVerificationManagerInternal>
-                        domainVerificationManagerInternalProducer,
-                Producer<Handler> handlerProducer,
-                SystemWrapper systemWrapper,
-                ServiceProducer getLocalServiceProducer,
-                ServiceProducer getSystemServiceProducer) {
-            mContext = context;
-            mLock = lock;
-            mInstaller = installer;
-            mAbiHelper = abiHelper;
-            mInstallLock = installLock;
-            mBackgroundHandler = backgroundHandler;
-            mBackgroundExecutor = new HandlerExecutor(backgroundHandler);
-            mSystemPartitions = systemPartitions;
-            mComponentResolverProducer = new Singleton<>(componentResolverProducer);
-            mPermissionManagerServiceProducer = new Singleton<>(permissionManagerServiceProducer);
-            mUserManagerProducer = new Singleton<>(userManagerProducer);
-            mSettingsProducer = new Singleton<>(settingsProducer);
-            mAppsFilterProducer = new Singleton<>(appsFilterProducer);
-            mPlatformCompatProducer = new Singleton<>(platformCompatProducer);
-            mSystemConfigProducer = new Singleton<>(systemConfigProducer);
-            mPackageDexOptimizerProducer = new Singleton<>(packageDexOptimizerProducer);
-            mDexManagerProducer = new Singleton<>(dexManagerProducer);
-            mArtManagerServiceProducer = new Singleton<>(artManagerServiceProducer);
-            mApexManagerProducer = new Singleton<>(apexManagerProducer);
-            mViewCompilerProducer = new Singleton<>(viewCompilerProducer);
-            mIncrementalManagerProducer = new Singleton<>(incrementalManagerProducer);
-            mDefaultAppProviderProducer = new Singleton<>(defaultAppProviderProducer);
-            mDisplayMetricsProducer = new Singleton<>(displayMetricsProducer);
-            mScanningCachingPackageParserProducer = scanningCachingPackageParserProducer;
-            mScanningPackageParserProducer = scanningPackageParserProducer;
-            mPreparingPackageParserProducer = preparingPackageParserProducer;
-            mPackageInstallerServiceProducer = new Singleton<>(packageInstallerServiceProducer);
-            mInstantAppResolverConnectionProducer = instantAppResolverConnectionProducer;
-            mModuleInfoProviderProducer = new Singleton<>(moduleInfoProviderProducer);
-            mLegacyPermissionManagerInternalProducer = new Singleton<>(
-                    legacyPermissionManagerInternalProducer);
-            mSystemWrapper = systemWrapper;
-            mGetLocalServiceProducer = getLocalServiceProducer;
-            mGetSystemServiceProducer = getSystemServiceProducer;
-            mDomainVerificationManagerInternalProducer =
-                    new Singleton<>(domainVerificationManagerInternalProducer);
-            mHandlerProducer = new Singleton<>(handlerProducer);
-        }
-
-        /**
-         * Bootstraps this injector with the {@link PackageManagerService instance to which it
-         * belongs.
-         */
-        public void bootstrap(PackageManagerService pm) {
-            this.mPackageManager = pm;
-        }
-
-        public UserManagerInternal getUserManagerInternal() {
-            return getUserManagerService().getInternalForInjectorOnly();
-        }
-
-        public PackageAbiHelper getAbiHelper() {
-            return mAbiHelper;
-        }
-
-        public Object getInstallLock() {
-            return mInstallLock;
-        }
-
-        public List<ScanPartition> getSystemPartitions() {
-            return mSystemPartitions;
-        }
-
-        public UserManagerService getUserManagerService() {
-            return mUserManagerProducer.get(this, mPackageManager);
-        }
-
-        public PackageManagerTracedLock getLock() {
-            return mLock;
-        }
-
-        public Installer getInstaller() {
-            return mInstaller;
-        }
-
-        public ComponentResolver getComponentResolver() {
-            return mComponentResolverProducer.get(this, mPackageManager);
-        }
-
-        public PermissionManagerServiceInternal getPermissionManagerServiceInternal() {
-            return mPermissionManagerServiceProducer.get(this, mPackageManager);
-        }
-
-        public Context getContext() {
-            return mContext;
-        }
-
-        public Settings getSettings() {
-            return mSettingsProducer.get(this, mPackageManager);
-        }
-
-        public AppsFilter getAppsFilter() {
-            return mAppsFilterProducer.get(this, mPackageManager);
-        }
-
-        public PlatformCompat getCompatibility() {
-            return mPlatformCompatProducer.get(this, mPackageManager);
-        }
-
-        public SystemConfig getSystemConfig() {
-            return mSystemConfigProducer.get(this, mPackageManager);
-        }
-
-        public PackageDexOptimizer getPackageDexOptimizer() {
-            return mPackageDexOptimizerProducer.get(this, mPackageManager);
-        }
-
-        public DexManager getDexManager() {
-            return mDexManagerProducer.get(this, mPackageManager);
-        }
-
-        public ArtManagerService getArtManagerService() {
-            return mArtManagerServiceProducer.get(this, mPackageManager);
-        }
-
-        public ApexManager getApexManager() {
-            return mApexManagerProducer.get(this, mPackageManager);
-        }
-
-        public ViewCompiler getViewCompiler() {
-            return mViewCompilerProducer.get(this, mPackageManager);
-        }
-
-        public Handler getBackgroundHandler() {
-            return mBackgroundHandler;
-        }
-
-        public Executor getBackgroundExecutor() {
-            return mBackgroundExecutor;
-        }
-
-        public DisplayMetrics getDisplayMetrics() {
-            return mDisplayMetricsProducer.get(this, mPackageManager);
-        }
-
-        public <T> T getLocalService(Class<T> c) {
-            return mGetLocalServiceProducer.produce(c);
-        }
-
-        public <T> T getSystemService(Class<T> c) {
-            return mGetSystemServiceProducer.produce(c);
-        }
-
-        public SystemWrapper getSystemWrapper() {
-            return mSystemWrapper;
-        }
-
-        public IncrementalManager getIncrementalManager() {
-            return mIncrementalManagerProducer.get(this, mPackageManager);
-        }
-
-        public DefaultAppProvider getDefaultAppProvider() {
-            return mDefaultAppProviderProducer.get(this, mPackageManager);
-        }
-
-        public PackageParser2 getScanningCachingPackageParser() {
-            return mScanningCachingPackageParserProducer.produce(this, mPackageManager);
-        }
-        public PackageParser2 getScanningPackageParser() {
-            return mScanningPackageParserProducer.produce(this, mPackageManager);
-        }
-        public PackageParser2 getPreparingPackageParser() {
-            return mPreparingPackageParserProducer.produce(this, mPackageManager);
-        }
-
-        public PackageInstallerService getPackageInstallerService() {
-            return mPackageInstallerServiceProducer.get(this, mPackageManager);
-        }
-
-        public InstantAppResolverConnection getInstantAppResolverConnection(
-                ComponentName instantAppResolverComponent) {
-            return mInstantAppResolverConnectionProducer.produce(
-                    this, mPackageManager, instantAppResolverComponent);
-        }
-
-        public ModuleInfoProvider getModuleInfoProvider() {
-            return mModuleInfoProviderProducer.get(this, mPackageManager);
-        }
-
-        public LegacyPermissionManagerInternal getLegacyPermissionManagerInternal() {
-            return mLegacyPermissionManagerInternalProducer.get(this, mPackageManager);
-        }
-
-        public DomainVerificationManagerInternal getDomainVerificationManagerInternal() {
-            return mDomainVerificationManagerInternalProducer.get(this, mPackageManager);
-        }
-
-        public Handler getHandler() {
-            return mHandlerProducer.get(this, mPackageManager);
-        }
-    }
-
-    /** Provides an abstraction to static access to system state. */
-    public interface SystemWrapper {
-        void disablePackageCaches();
-        void enablePackageCaches();
-    }
-
-    private static class DefaultSystemWrapper implements SystemWrapper {
+    private static class DefaultSystemWrapper implements
+            PackageManagerServiceInjector.SystemWrapper {
 
         @Override
         public void disablePackageCaches() {
@@ -1187,69 +858,6 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             PackageManager.uncorkPackageInfoCache();
         }
-    }
-
-    @VisibleForTesting(visibility = Visibility.PRIVATE)
-    public static class TestParams {
-        public ApexManager apexManager;
-        public @Nullable String appPredictionServicePackage;
-        public ArtManagerService artManagerService;
-        public @Nullable String configuratorPackage;
-        public int defParseFlags;
-        public DefaultAppProvider defaultAppProvider;
-        public DexManager dexManager;
-        public List<ScanPartition> dirsToScanAsSystem;
-        public boolean factoryTest;
-        public ArrayMap<String, FeatureInfo> availableFeatures;
-        public Handler handler;
-        public @Nullable String incidentReportApproverPackage;
-        public IncrementalManager incrementalManager;
-        public PackageInstallerService installerService;
-        public InstantAppRegistry instantAppRegistry;
-        public InstantAppResolverConnection instantAppResolverConnection;
-        public ComponentName instantAppResolverSettingsComponent;
-        public boolean isPreNmr1Upgrade;
-        public boolean isPreNupgrade;
-        public boolean isPreQupgrade;
-        public boolean isUpgrade;
-        public LegacyPermissionManagerInternal legacyPermissionManagerInternal;
-        public DisplayMetrics Metrics;
-        public ModuleInfoProvider moduleInfoProvider;
-        public MovePackageHelper.MoveCallbacks moveCallbacks;
-        public boolean onlyCore;
-        public OverlayConfig overlayConfig;
-        public PackageDexOptimizer packageDexOptimizer;
-        public PackageParser2.Callback packageParserCallback;
-        public PendingPackageBroadcasts pendingPackageBroadcasts;
-        public PackageManagerInternal pmInternal;
-        public TestUtilityService testUtilityService;
-        public ProcessLoggingHandler processLoggingHandler;
-        public ProtectedPackages protectedPackages;
-        public @NonNull String requiredInstallerPackage;
-        public @NonNull String requiredPermissionControllerPackage;
-        public @NonNull String requiredUninstallerPackage;
-        public @Nullable String requiredVerifierPackage;
-        public String[] separateProcesses;
-        public @NonNull String servicesExtensionPackageName;
-        public @Nullable String setupWizardPackage;
-        public @NonNull String sharedSystemSharedLibraryPackageName;
-        public @Nullable String storageManagerPackage;
-        public @Nullable String defaultTextClassifierPackage;
-        public @Nullable String systemTextClassifierPackage;
-        public @Nullable String overlayConfigSignaturePackage;
-        public ViewCompiler viewCompiler;
-        public @Nullable String retailDemoPackage;
-        public @Nullable String recentsPackage;
-        public ComponentName resolveComponentName;
-        public ArrayMap<String, AndroidPackage> packages;
-        public boolean enableFreeCacheV2;
-        public int sdkVersion;
-        public File appInstallDir;
-        public File appLib32InstallDir;
-        public boolean isEngBuild;
-        public boolean isUserDebugBuild;
-        public int sdkInt = Build.VERSION.SDK_INT;
-        public final String incrementalVersion = Build.VERSION.INCREMENTAL;
     }
 
     @Watched
@@ -1323,7 +931,6 @@ public class PackageManagerService extends IPackageManager.Stub
     volatile boolean mSystemReady;
     @Watched(manual = true)
     private volatile boolean mSafeMode;
-    volatile boolean mHasSystemUidErrors;
     @Watched
     private final WatchedSparseBooleanArray mWebInstantAppsDisabled =
             new WatchedSparseBooleanArray();
@@ -1381,71 +988,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private final PackageProperty mPackageProperty = new PackageProperty();
 
-    // Set of pending broadcasts for aggregating enable/disable of components.
-    @VisibleForTesting(visibility = Visibility.PACKAGE)
-    public static class PendingPackageBroadcasts {
-        // for each user id, a map of <package name -> components within that package>
-        final SparseArray<ArrayMap<String, ArrayList<String>>> mUidMap;
-
-        public PendingPackageBroadcasts() {
-            mUidMap = new SparseArray<>(2);
-        }
-
-        public ArrayList<String> get(int userId, String packageName) {
-            ArrayMap<String, ArrayList<String>> packages = getOrAllocate(userId);
-            return packages.get(packageName);
-        }
-
-        public void put(int userId, String packageName, ArrayList<String> components) {
-            ArrayMap<String, ArrayList<String>> packages = getOrAllocate(userId);
-            packages.put(packageName, components);
-        }
-
-        public void remove(int userId, String packageName) {
-            ArrayMap<String, ArrayList<String>> packages = mUidMap.get(userId);
-            if (packages != null) {
-                packages.remove(packageName);
-            }
-        }
-
-        public void remove(int userId) {
-            mUidMap.remove(userId);
-        }
-
-        public int userIdCount() {
-            return mUidMap.size();
-        }
-
-        public int userIdAt(int n) {
-            return mUidMap.keyAt(n);
-        }
-
-        public ArrayMap<String, ArrayList<String>> packagesForUserId(int userId) {
-            return mUidMap.get(userId);
-        }
-
-        public int size() {
-            // total number of pending broadcast entries across all userIds
-            int num = 0;
-            for (int i = 0; i< mUidMap.size(); i++) {
-                num += mUidMap.valueAt(i).size();
-            }
-            return num;
-        }
-
-        public void clear() {
-            mUidMap.clear();
-        }
-
-        private ArrayMap<String, ArrayList<String>> getOrAllocate(int userId) {
-            ArrayMap<String, ArrayList<String>> map = mUidMap.get(userId);
-            if (map == null) {
-                map = new ArrayMap<>();
-                mUidMap.put(userId, map);
-            }
-            return map;
-        }
-    }
     final PendingPackageBroadcasts mPendingBroadcasts;
 
     static final int SEND_PENDING_BROADCAST = 1;
@@ -1487,24 +1029,6 @@ public class PackageManagerService extends IPackageManager.Stub
     // Stores a list of users whose package restrictions file needs to be updated
     final ArraySet<Integer> mDirtyUsers = new ArraySet<>();
 
-    // Recordkeeping of restore-after-install operations that are currently in flight
-    // between the Package Manager and the Backup Manager
-    static class PostInstallData {
-        @Nullable
-        public final InstallArgs args;
-        @NonNull
-        public final PackageInstalledInfo res;
-        @Nullable
-        public final Runnable mPostInstallRunnable;
-
-        PostInstallData(@Nullable InstallArgs args, @NonNull PackageInstalledInfo res,
-                @Nullable Runnable postInstallRunnable) {
-            this.args = args;
-            this.res = res;
-            mPostInstallRunnable = postInstallRunnable;
-        }
-    }
-
     final SparseArray<PostInstallData> mRunningInstalls = new SparseArray<>();
     int mNextInstallToken = 1;  // nonzero; will be wrapped back to 1 when ++ overflows
 
@@ -1534,6 +1058,8 @@ public class PackageManagerService extends IPackageManager.Stub
     final CompilerStats mCompilerStats = new CompilerStats();
 
     private final DomainVerificationConnection mDomainVerificationConnection;
+
+    private final BroadcastHelper mBroadcastHelper;
 
     /**
      * Invalidate the package info cache, which includes updating the cached computer.
@@ -1914,7 +1440,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    void scheduleWritePackageListLocked(int userId) {
+    private void scheduleWritePackageListLocked(int userId) {
         invalidatePackageInfoCache();
         if (!mHandler.hasMessages(WRITE_PACKAGE_LIST)) {
             Message msg = mHandler.obtainMessage(WRITE_PACKAGE_LIST);
@@ -1923,12 +1449,12 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    void scheduleWritePackageRestrictionsLocked(UserHandle user) {
+    private void scheduleWritePackageRestrictionsLocked(UserHandle user) {
         final int userId = user == null ? UserHandle.USER_ALL : user.getIdentifier();
         scheduleWritePackageRestrictionsLocked(userId);
     }
 
-    void scheduleWritePackageRestrictionsLocked(int userId) {
+    private void scheduleWritePackageRestrictionsLocked(int userId) {
         invalidatePackageInfoCache();
         final int[] userIds = (userId == UserHandle.USER_ALL)
                 ? mUserManager.getUserIds() : new int[]{userId};
@@ -1956,7 +1482,7 @@ public class PackageManagerService extends IPackageManager.Stub
         backgroundThread.start();
         Handler backgroundHandler = new Handler(backgroundThread.getLooper());
 
-        Injector injector = new Injector(
+        PackageManagerServiceInjector injector = new PackageManagerServiceInjector(
                 context, lock, installer, installLock, new PackageAbiHelperImpl(),
                 backgroundHandler,
                 SYSTEM_PARTITIONS,
@@ -2137,7 +1663,8 @@ public class PackageManagerService extends IPackageManager.Stub
      * none of the initialization is needed.
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
-    public PackageManagerService(@NonNull Injector injector, @NonNull TestParams testParams) {
+    public PackageManagerService(@NonNull PackageManagerServiceInjector injector,
+            @NonNull PackageManagerServiceTestParams testParams) {
         mInjector = injector;
         mInjector.bootstrap(this);
         mAppsFilter = injector.getAppsFilter();
@@ -2220,11 +1747,13 @@ public class PackageManagerService extends IPackageManager.Stub
         mIncrementalVersion = testParams.incrementalVersion;
         mDomainVerificationConnection = new DomainVerificationConnection(this);
 
+        mBroadcastHelper = new BroadcastHelper(mInjector);
+
         invalidatePackageInfoCache();
     }
 
-    public PackageManagerService(Injector injector, boolean onlyCore, boolean factoryTest,
-            final String buildFingerprint, final boolean isEngBuild,
+    public PackageManagerService(PackageManagerServiceInjector injector, boolean onlyCore,
+            boolean factoryTest, final String buildFingerprint, final boolean isEngBuild,
             final boolean isUserDebugBuild, final int sdkVersion, final String incrementalVersion) {
         mIsEngBuild = isEngBuild;
         mIsUserDebugBuild = isUserDebugBuild;
@@ -2362,6 +1891,8 @@ public class PackageManagerService extends IPackageManager.Stub
         mDomainVerificationConnection = new DomainVerificationConnection(this);
         mDomainVerificationManager = injector.getDomainVerificationManagerInternal();
         mDomainVerificationManager.setConnection(mDomainVerificationConnection);
+
+        mBroadcastHelper = new BroadcastHelper(mInjector);
 
         synchronized (mLock) {
             // Create the computer as soon as the state objects have been installed.  The
@@ -3262,7 +2793,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 throw new SecurityException("Package " + packageName + " is not encryption aware!");
             case PACKAGE_STARTABILITY_OK:
             default:
-                return;
         }
     }
 
@@ -6655,10 +6185,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    /*package*/ void controlDexOptBlocking(boolean block) {
-        mPackageDexOptimizer.controlDexOptBlocking(block);
-    }
-
     /**
      * Perform dexopt on the given package and return one of following result:
      *  {@link PackageDexOptimizer#DEX_OPT_SKIPPED}
@@ -8031,25 +7557,9 @@ public class PackageManagerService extends IPackageManager.Stub
             final int[] userIds, int[] instantUserIds,
             @Nullable SparseArray<int[]> broadcastAllowList,
             @Nullable Bundle bOptions) {
-        mHandler.post(() -> {
-            try {
-                final IActivityManager am = ActivityManager.getService();
-                if (am == null) return;
-                final int[] resolvedUserIds;
-                if (userIds == null) {
-                    resolvedUserIds = am.getRunningUserIds();
-                } else {
-                    resolvedUserIds = userIds;
-                }
-                doSendBroadcast(action, pkg, extras, flags, targetPkg, finishedReceiver,
-                        resolvedUserIds, false, broadcastAllowList, bOptions);
-                if (instantUserIds != null && instantUserIds != EMPTY_INT_ARRAY) {
-                    doSendBroadcast(action, pkg, extras, flags, targetPkg, finishedReceiver,
-                            instantUserIds, true, null, bOptions);
-                }
-            } catch (RemoteException ex) {
-            }
-        });
+        mHandler.post(() -> mBroadcastHelper.sendPackageBroadcast(action, pkg, extras, flags,
+                targetPkg, finishedReceiver, userIds, instantUserIds, broadcastAllowList,
+                bOptions));
     }
 
     @Override
@@ -8106,54 +7616,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    /**
-     * Sends a broadcast for the given action.
-     * <p>If {@code isInstantApp} is {@code true}, then the broadcast is protected with
-     * the {@link android.Manifest.permission#ACCESS_INSTANT_APPS} permission. This allows
-     * the system and applications allowed to see instant applications to receive package
-     * lifecycle events for instant applications.
-     */
-    private void doSendBroadcast(String action, String pkg, Bundle extras,
-            int flags, String targetPkg, IIntentReceiver finishedReceiver,
-            int[] userIds, boolean isInstantApp, @Nullable SparseArray<int[]> broadcastAllowList,
-            @Nullable Bundle bOptions) {
-        for (int id : userIds) {
-            final Intent intent = new Intent(action,
-                    pkg != null ? Uri.fromParts(PACKAGE_SCHEME, pkg, null) : null);
-            final String[] requiredPermissions =
-                    isInstantApp ? INSTANT_APP_BROADCAST_PERMISSION : null;
-            if (extras != null) {
-                intent.putExtras(extras);
-            }
-            if (targetPkg != null) {
-                intent.setPackage(targetPkg);
-            }
-            // Modify the UID when posting to other users
-            int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
-            if (uid > 0 && UserHandle.getUserId(uid) != id) {
-                uid = UserHandle.getUid(id, UserHandle.getAppId(uid));
-                intent.putExtra(Intent.EXTRA_UID, uid);
-            }
-            if (broadcastAllowList != null && PLATFORM_PACKAGE_NAME.equals(targetPkg)) {
-                intent.putExtra(Intent.EXTRA_VISIBILITY_ALLOW_LIST, broadcastAllowList.get(id));
-            }
-            intent.putExtra(Intent.EXTRA_USER_HANDLE, id);
-            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT | flags);
-            if (DEBUG_BROADCASTS) {
-                RuntimeException here = new RuntimeException("here");
-                here.fillInStackTrace();
-                Slog.d(TAG, "Sending to user " + id + ": "
-                        + intent.toShortString(false, true, false, false)
-                        + " " + intent.getExtras(), here);
-            }
-            mInjector.getLocalService(ActivityManagerInternal.class).broadcastIntent(
-                    intent, finishedReceiver, requiredPermissions,
-                    finishedReceiver != null, id,
-                    broadcastAllowList == null ? null : broadcastAllowList.get(id),
-                    bOptions);
-        }
-    }
-
     private void sendPackageAddedForUser(String packageName, PackageSetting pkgSetting,
             int userId, int dataLoaderType) {
         final boolean isSystem = PackageManagerServiceUtils.isSystemApp(pkgSetting)
@@ -8179,68 +7641,19 @@ public class PackageManagerService extends IPackageManager.Stub
         if (ArrayUtils.isEmpty(userIds) && ArrayUtils.isEmpty(instantUserIds)) {
             return;
         }
-        Bundle extras = new Bundle(1);
-        // Set to UID of the first user, EXTRA_UID is automatically updated in sendPackageBroadcast
-        final int uid = UserHandle.getUid(
-                (ArrayUtils.isEmpty(userIds) ? instantUserIds[0] : userIds[0]), appId);
-        extras.putInt(Intent.EXTRA_UID, uid);
-        extras.putInt(PackageInstaller.EXTRA_DATA_LOADER_TYPE, dataLoaderType);
-
-        sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
-                packageName, extras, 0, null, null, userIds, instantUserIds,
-                mAppsFilter.getVisibilityAllowList(
-                        getPackageSettingInternal(packageName, Process.SYSTEM_UID),
-                        userIds, mSettings.getPackagesLocked()), null);
+        SparseArray<int[]> broadcastAllowList = mAppsFilter.getVisibilityAllowList(
+                getPackageSettingInternal(packageName, Process.SYSTEM_UID),
+                userIds, mSettings.getPackagesLocked());
+        mHandler.post(() -> mBroadcastHelper.sendPackageAddedForNewUsers(
+                packageName, appId, userIds, instantUserIds, dataLoaderType, broadcastAllowList));
         if (sendBootCompleted && !ArrayUtils.isEmpty(userIds)) {
             mHandler.post(() -> {
                         for (int userId : userIds) {
-                            sendBootCompletedBroadcastToSystemApp(
+                            mBroadcastHelper.sendBootCompletedBroadcastToSystemApp(
                                     packageName, includeStopped, userId);
                         }
                     }
             );
-        }
-    }
-
-    /**
-     * The just-installed/enabled app is bundled on the system, so presumed to be able to run
-     * automatically without needing an explicit launch.
-     * Send it a LOCKED_BOOT_COMPLETED/BOOT_COMPLETED if it would ordinarily have gotten ones.
-     */
-    private void sendBootCompletedBroadcastToSystemApp(
-            String packageName, boolean includeStopped, int userId) {
-        // If user is not running, the app didn't miss any broadcast
-        if (!mUserManager.isUserRunning(userId)) {
-            return;
-        }
-        final IActivityManager am = ActivityManager.getService();
-        try {
-            // Deliver LOCKED_BOOT_COMPLETED first
-            Intent lockedBcIntent = new Intent(Intent.ACTION_LOCKED_BOOT_COMPLETED)
-                    .setPackage(packageName);
-            if (includeStopped) {
-                lockedBcIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-            }
-            final String[] requiredPermissions = {Manifest.permission.RECEIVE_BOOT_COMPLETED};
-            final BroadcastOptions bOptions = getTemporaryAppAllowlistBroadcastOptions(
-                    REASON_LOCKED_BOOT_COMPLETED);
-            am.broadcastIntentWithFeature(null, null, lockedBcIntent, null, null, 0, null, null,
-                    requiredPermissions, null, android.app.AppOpsManager.OP_NONE,
-                    bOptions.toBundle(), false, false, userId);
-
-            // Deliver BOOT_COMPLETED only if user is unlocked
-            final UserManagerInternal umInternal = mInjector.getUserManagerInternal();
-            if (umInternal.isUserUnlockingOrUnlocked(userId)) {
-                Intent bcIntent = new Intent(Intent.ACTION_BOOT_COMPLETED).setPackage(packageName);
-                if (includeStopped) {
-                    bcIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-                }
-                am.broadcastIntentWithFeature(null, null, bcIntent, null, null, 0, null, null,
-                        requiredPermissions, null, android.app.AppOpsManager.OP_NONE,
-                        bOptions.toBundle(), false, false, userId);
-            }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -8405,17 +7818,6 @@ public class PackageManagerService extends IPackageManager.Stub
         info.mBroadcastUsers = new int[] {userId};
         info.mUid = UserHandle.getUid(userId, pkgSetting.getAppId());
         info.sendPackageRemovedBroadcasts(true /*killApp*/, false /*removedBySystem*/);
-    }
-
-    private void sendDistractingPackagesChanged(String[] pkgList, int[] uidList, int userId,
-            int distractionFlags) {
-        final Bundle extras = new Bundle(3);
-        extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgList);
-        extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidList);
-        extras.putInt(Intent.EXTRA_DISTRACTION_RESTRICTIONS, distractionFlags);
-        sendPackageBroadcast(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED, null, extras,
-                Intent.FLAG_RECEIVER_REGISTERED_ONLY, null, null, new int[]{userId}, null, null,
-                null);
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
@@ -8632,8 +8034,8 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    static void setInstantAppForUser(Injector injector, PackageSetting pkgSetting,
-            int userId, boolean instantApp, boolean fullApp) {
+    static void setInstantAppForUser(PackageManagerServiceInjector injector,
+            PackageSetting pkgSetting, int userId, boolean instantApp, boolean fullApp) {
         // no state specified; do nothing
         if (!instantApp && !fullApp) {
             return;
@@ -8718,8 +8120,8 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!changedPackagesList.isEmpty()) {
             final String[] changedPackages = changedPackagesList.toArray(
                     new String[changedPackagesList.size()]);
-            sendDistractingPackagesChanged(changedPackages, changedUids.toArray(), userId,
-                    restrictionFlags);
+            mHandler.post(() -> mBroadcastHelper.sendDistractingPackagesChanged(
+                    changedPackages, changedUids.toArray(), userId, restrictionFlags));
             synchronized (mLock) {
                 scheduleWritePackageRestrictionsLocked(userId);
             }
@@ -8899,9 +8301,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 } else {
                     intentExtras = null;
                 }
-                doSendBroadcast(action, null, intentExtras,
+                mHandler.post(() -> mBroadcastHelper.doSendBroadcast(action, null, intentExtras,
                         Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND, packageName, null,
-                        targetUserIds, false, null, null);
+                        targetUserIds, false, null, null));
             }
         });
     }
@@ -8920,7 +8322,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    void unsuspendForSuspendingPackage(String suspendingPackage, int userId) {
+    private void unsuspendForSuspendingPackage(String suspendingPackage, int userId) {
         final String[] allPackages;
         synchronized (mLock) {
             allPackages = mPackages.keySet().toArray(new String[mPackages.size()]);
@@ -8928,7 +8330,7 @@ public class PackageManagerService extends IPackageManager.Stub
         removeSuspensionsBySuspendingPackage(allPackages, suspendingPackage::equals, userId);
     }
 
-    boolean isSuspendingAnyPackages(String suspendingPackage, int userId) {
+    private boolean isSuspendingAnyPackages(String suspendingPackage, int userId) {
         synchronized (mLock) {
             for (final PackageSetting ps : mSettings.getPackagesLocked().values()) {
                 if (ps.isSuspendedBy(suspendingPackage, userId)) {
@@ -8950,7 +8352,7 @@ public class PackageManagerService extends IPackageManager.Stub
      *                                   suspensions will be removed.
      * @param userId The user for which the changes are taking place.
      */
-    void removeSuspensionsBySuspendingPackage(String[] packagesToChange,
+    private void removeSuspensionsBySuspendingPackage(String[] packagesToChange,
             Predicate<String> suspendingPackagePredicate, int userId) {
         final List<String> unsuspendedPackages = new ArrayList<>();
         final IntArray unsuspendedUids = new IntArray();
@@ -8976,7 +8378,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    void removeAllDistractingPackageRestrictions(int userId) {
+    private void removeAllDistractingPackageRestrictions(int userId) {
         final String[] allPackages;
         synchronized (mLock) {
             allPackages = mPackages.keySet().toArray(new String[mPackages.size()]);
@@ -8993,7 +8395,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * @param packagesToChange The packages on which restrictions are to be removed.
      * @param userId the user for which changes are taking place.
      */
-    void removeDistractingPackageRestrictions(String[] packagesToChange, int userId) {
+    private void removeDistractingPackageRestrictions(String[] packagesToChange, int userId) {
         final List<String> changedPackages = new ArrayList<>();
         final IntArray changedUids = new IntArray();
         synchronized (mLock) {
@@ -9008,7 +8410,8 @@ public class PackageManagerService extends IPackageManager.Stub
             if (!changedPackages.isEmpty()) {
                 final String[] packageArray = changedPackages.toArray(
                         new String[changedPackages.size()]);
-                sendDistractingPackagesChanged(packageArray, changedUids.toArray(), userId, 0);
+                mHandler.post(() -> mBroadcastHelper.sendDistractingPackagesChanged(
+                        packageArray, changedUids.toArray(), userId, 0));
                 scheduleWritePackageRestrictionsLocked(userId);
             }
         }
@@ -9598,14 +9001,9 @@ public class PackageManagerService extends IPackageManager.Stub
             final boolean isInstantApp = isInstantApp(packageName, userId);
             final int[] userIds = isInstantApp ? EMPTY_INT_ARRAY : new int[] { userId };
             final int[] instantUserIds = isInstantApp ? new int[] { userId } : EMPTY_INT_ARRAY;
-            sendFirstLaunchBroadcast(packageName, installerPackage, userIds, instantUserIds);
+            mBroadcastHelper.sendFirstLaunchBroadcast(
+                    packageName, installerPackage, userIds, instantUserIds);
         });
-    }
-
-    void sendFirstLaunchBroadcast(String pkgName, String installerPkg,
-            int[] userIds, int[] instantUserIds) {
-        sendPackageBroadcast(Intent.ACTION_PACKAGE_FIRST_LAUNCH, pkgName, null, 0,
-                installerPkg, null, userIds, instantUserIds, null /* broadcastAllowList */, null);
     }
 
     /**
@@ -9618,7 +9016,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @GuardedBy("mLock")
     Map<String, ReconciledPackage> reconcilePackagesLocked(
-            final ReconcileRequest request, KeySetManagerService ksms, Injector injector)
+            final ReconcileRequest request, KeySetManagerService ksms,
+            PackageManagerServiceInjector injector)
             throws ReconcileFailure {
         final Map<String, ScanResult> scannedPackages = request.mScannedPackages;
 
@@ -11247,22 +10646,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private void postPreferredActivityChangedBroadcast(int userId) {
-        mHandler.post(() -> {
-            final IActivityManager am = ActivityManager.getService();
-            if (am == null) {
-                return;
-            }
-
-            final Intent intent = new Intent(Intent.ACTION_PREFERRED_ACTIVITY_CHANGED);
-            intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-            try {
-                am.broadcastIntentWithFeature(null, null, intent, null, null,
-                        0, null, null, null, null, android.app.AppOpsManager.OP_NONE,
-                        null, false, false, userId);
-            } catch (RemoteException e) {
-            }
-        });
+        mHandler.post(() -> mBroadcastHelper.sendPreferredActivityChangedBroadcast(userId));
     }
 
     @Override
@@ -11850,43 +11234,16 @@ public class PackageManagerService extends IPackageManager.Stub
         return getHomeActivitiesAsUser(allHomeCandidates, UserHandle.getCallingUserId());
     }
 
-    /**
-     * Send a {@code PackageInstaller.ACTION_SESSION_UPDATED} broadcast intent, containing
-     * the {@code sessionInfo} in the extra field {@code PackageInstaller.EXTRA_SESSION}.
-     */
-    public void sendSessionUpdatedBroadcast(PackageInstaller.SessionInfo sessionInfo,
-            int userId) {
-        if (TextUtils.isEmpty(sessionInfo.installerPackageName)) {
-            return;
-        }
-        Intent sessionUpdatedIntent = new Intent(PackageInstaller.ACTION_SESSION_UPDATED)
-                .putExtra(PackageInstaller.EXTRA_SESSION, sessionInfo)
-                .setPackage(sessionInfo.installerPackageName);
-        mContext.sendBroadcastAsUser(sessionUpdatedIntent, UserHandle.of(userId));
-    }
-
     public void sendSessionCommitBroadcast(PackageInstaller.SessionInfo sessionInfo, int userId) {
         UserManagerService ums = UserManagerService.getInstance();
-        if (ums != null && !sessionInfo.isStaged()) {
-            final UserInfo parent = ums.getProfileParent(userId);
-            final int launcherUid = (parent != null) ? parent.id : userId;
-            final ComponentName launcherComponent = getDefaultHomeActivity(launcherUid);
-            if (launcherComponent != null) {
-                Intent launcherIntent = new Intent(PackageInstaller.ACTION_SESSION_COMMITTED)
-                        .putExtra(PackageInstaller.EXTRA_SESSION, sessionInfo)
-                        .putExtra(Intent.EXTRA_USER, UserHandle.of(userId))
-                        .setPackage(launcherComponent.getPackageName());
-                mContext.sendBroadcastAsUser(launcherIntent, UserHandle.of(launcherUid));
-            }
-            // TODO(b/122900055) Change/Remove this and replace with new permission role.
-            if (mAppPredictionServicePackage != null) {
-                Intent predictorIntent = new Intent(PackageInstaller.ACTION_SESSION_COMMITTED)
-                        .putExtra(PackageInstaller.EXTRA_SESSION, sessionInfo)
-                        .putExtra(Intent.EXTRA_USER, UserHandle.of(userId))
-                        .setPackage(mAppPredictionServicePackage);
-                mContext.sendBroadcastAsUser(predictorIntent, UserHandle.of(launcherUid));
-            }
+        if (ums == null || sessionInfo.isStaged()) {
+            return;
         }
+        final UserInfo parent = ums.getProfileParent(userId);
+        final int launcherUid = (parent != null) ? parent.id : userId;
+        final ComponentName launcherComponent = getDefaultHomeActivity(launcherUid);
+        mBroadcastHelper.sendSessionCommitBroadcast(sessionInfo, userId, launcherUid,
+                launcherComponent, mAppPredictionServicePackage);
     }
 
     /**
@@ -12493,7 +11850,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     Slog.w(TAG, "Failed setApplicationEnabledSetting: failed to enable "
                             + "commpressed package " + setting.getPackageName());
                     updateAllowed[i] = false;
-                    continue;
                 }
             }
         }
@@ -12674,39 +12030,32 @@ public class PackageManagerService extends IPackageManager.Stub
 
     void sendPackageChangedBroadcast(String packageName,
             boolean dontKillApp, ArrayList<String> componentNames, int packageUid, String reason) {
-        if (DEBUG_INSTALL)
-            Log.v(TAG, "Sending package changed: package=" + packageName + " components="
-                    + componentNames);
-        Bundle extras = new Bundle(4);
-        extras.putString(Intent.EXTRA_CHANGED_COMPONENT_NAME, componentNames.get(0));
-        String[] nameList = new String[componentNames.size()];
-        componentNames.toArray(nameList);
-        extras.putStringArray(Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST, nameList);
-        extras.putBoolean(Intent.EXTRA_DONT_KILL_APP, dontKillApp);
-        extras.putInt(Intent.EXTRA_UID, packageUid);
-        if (reason != null) {
-            extras.putString(Intent.EXTRA_REASON, reason);
-        }
-        // If this is not reporting a change of the overall package, then only send it
-        // to registered receivers.  We don't want to launch a swath of apps for every
-        // little component state change.
-        final int flags = !componentNames.contains(packageName)
-                ? Intent.FLAG_RECEIVER_REGISTERED_ONLY : 0;
         final int userId = UserHandle.getUserId(packageUid);
         final boolean isInstantApp = isInstantApp(packageName, userId);
         final int[] userIds = isInstantApp ? EMPTY_INT_ARRAY : new int[] { userId };
         final int[] instantUserIds = isInstantApp ? new int[] { userId } : EMPTY_INT_ARRAY;
+        final SparseArray<int[]> broadcastAllowList = getBroadcastAllowList(
+                packageName, userIds, isInstantApp);
+        mHandler.post(() -> mBroadcastHelper.sendPackageChangedBroadcast(
+                packageName, dontKillApp, componentNames, packageUid, reason, userIds,
+                instantUserIds, broadcastAllowList));
+    }
+
+    private SparseArray<int[]> getBroadcastAllowList(String packageName, int[] userIds,
+            boolean isInstantApp) {
+        if (isInstantApp) {
+            return null;
+        }
         final SparseArray<int[]> broadcastAllowList;
         synchronized (mLock) {
             PackageSetting setting = getPackageSettingInternal(packageName, Process.SYSTEM_UID);
             if (setting == null) {
-                return;
+                return null;
             }
-            broadcastAllowList = isInstantApp ? null : mAppsFilter.getVisibilityAllowList(setting,
-                    userIds, mSettings.getPackagesLocked());
+            broadcastAllowList = mAppsFilter.getVisibilityAllowList(
+                    setting, userIds, mSettings.getPackagesLocked());
         }
-        sendPackageBroadcast(Intent.ACTION_PACKAGE_CHANGED,  packageName, extras, flags, null, null,
-                userIds, instantUserIds, broadcastAllowList, null);
+        return broadcastAllowList;
     }
 
     @Override
@@ -12871,7 +12220,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return ps.getInstallSource();
     }
 
-    public boolean isOrphaned(String packageName) {
+    private boolean isOrphaned(String packageName) {
         // reader
         synchronized (mLock) {
             if (!mPackages.containsKey(packageName)) {
@@ -13144,7 +12493,7 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public boolean hasSystemUidErrors() {
         // allow instant applications
-        return mHasSystemUidErrors;
+        return false;
     }
 
     @Override
@@ -13895,34 +13244,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     // ------- apps on sdcard specific code -------
-    static final boolean DEBUG_SD_INSTALL = false;
-
-    void sendResourcesChangedBroadcast(boolean mediaStatus, boolean replacing,
-            ArrayList<String> pkgList, int[] uidArr, IIntentReceiver finishedReceiver) {
-        sendResourcesChangedBroadcast(mediaStatus, replacing,
-                pkgList.toArray(new String[pkgList.size()]), uidArr, finishedReceiver);
-    }
-
-    void sendResourcesChangedBroadcast(boolean mediaStatus, boolean replacing,
-            String[] pkgList, int[] uidArr, IIntentReceiver finishedReceiver) {
-        int size = pkgList.length;
-        if (size > 0) {
-            // Send broadcasts here
-            Bundle extras = new Bundle();
-            extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgList);
-            if (uidArr != null) {
-                extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidArr);
-            }
-            if (replacing) {
-                extras.putBoolean(Intent.EXTRA_REPLACING, replacing);
-            }
-            String action = mediaStatus ? Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE
-                    : Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE;
-            // TODO: not sure how to handle this one.
-            sendPackageBroadcast(action, null, extras, 0, null, finishedReceiver,
-                    null, null, null, null);
-        }
-    }
+    private static final boolean DEBUG_SD_INSTALL = false;
 
     private void assertPackageKnownAndInstalled(String volumeUuid, String packageName, int userId)
             throws PackageManagerException {
@@ -16603,19 +15925,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            final Intent intent = new Intent(Intent.ACTION_DEVICE_CUSTOMIZATION_READY);
-            intent.setFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
-            final IActivityManager am = ActivityManager.getService();
-            final String[] requiredPermissions = {
-                Manifest.permission.RECEIVE_DEVICE_CUSTOMIZATION_READY,
-            };
-            try {
-                am.broadcastIntentWithFeature(null, null, intent, null, null, 0, null, null,
-                        requiredPermissions, null, android.app.AppOpsManager.OP_NONE, null, false,
-                        false, UserHandle.USER_ALL);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+            BroadcastHelper.sendDeviceCustomizationReadyBroadcast();
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -16819,21 +16129,6 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
         return result.toArray(new PerUidReadTimeouts[result.size()]);
-    }
-
-    static @NonNull BroadcastOptions getTemporaryAppAllowlistBroadcastOptions(
-            @PowerWhitelistManager.ReasonCode int reasonCode) {
-        long duration = 10_000;
-        final ActivityManagerInternal amInternal =
-                LocalServices.getService(ActivityManagerInternal.class);
-        if (amInternal != null) {
-            duration = amInternal.getBootTimeTempAllowListDuration();
-        }
-        final BroadcastOptions bOptions = BroadcastOptions.makeBasic();
-        bOptions.setTemporaryAppAllowlist(duration,
-                TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
-                reasonCode, "");
-        return bOptions;
     }
 
     @Override

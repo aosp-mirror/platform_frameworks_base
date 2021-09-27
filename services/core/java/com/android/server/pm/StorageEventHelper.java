@@ -52,12 +52,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** Helper class to handle storage events and private apps loading */
-public class StorageEventHelper extends StorageEventListener {
-    final PackageManagerService mPm;
+public final class StorageEventHelper extends StorageEventListener {
+    private final PackageManagerService mPm;
+    private final BroadcastHelper mBroadcastHelper;
 
     // TODO(b/198166813): remove PMS dependency
     public StorageEventHelper(PackageManagerService pm) {
         mPm = pm;
+        mBroadcastHelper = new BroadcastHelper(mPm.mInjector);
     }
 
     @Override
@@ -279,8 +281,8 @@ public class StorageEventHelper extends StorageEventListener {
             packageNames[i] = pkg.getPackageName();
             packageUids[i] = pkg.getUid();
         }
-        mPm.sendResourcesChangedBroadcast(mediaStatus, replacing, packageNames, packageUids,
-                finishedReceiver);
+        mBroadcastHelper.sendResourcesChangedBroadcast(mediaStatus, replacing, packageNames,
+                packageUids, finishedReceiver);
     }
 
     /**

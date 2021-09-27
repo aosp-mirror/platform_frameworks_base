@@ -32,7 +32,7 @@ import android.util.SparseArray;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 
-final class PackageRemovedInfo {
+public final class PackageRemovedInfo {
     final PackageSender mPackageSender;
     String mRemovedPackage;
     String mInstallerPackageName;
@@ -158,7 +158,7 @@ final class PackageRemovedInfo {
         }
     }
 
-    void populateUsers(int[] userIds, PackageSetting deletedPackageSetting) {
+    public void populateUsers(int[] userIds, PackageSetting deletedPackageSetting) {
         mRemovedUsers = userIds;
         if (mRemovedUsers == null) {
             mBroadcastUsers = null;
