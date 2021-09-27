@@ -228,7 +228,9 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                     mConfiguration.lookasideSlotSize, mConfiguration.lookasideSlotCount);
         } catch (SQLiteCantOpenDatabaseException e) {
             final StringBuilder message = new StringBuilder("Cannot open database '")
-                    .append(file).append('\'');
+                    .append(file).append('\'')
+                    .append(" with flags 0x")
+                    .append(Integer.toHexString(mConfiguration.openFlags));
 
             try {
                 // Try to diagnose for common reasons. If something fails in here, that's fine;
@@ -236,21 +238,27 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
 
                 final Path path = FileSystems.getDefault().getPath(file);
                 final Path dir = path.getParent();
-
-                if (!Files.isDirectory(dir)) {
+                if (dir == null) {
+                    message.append(": Directory not specified in the file path");
+                } else if (!Files.isDirectory(dir)) {
                     message.append(": Directory ").append(dir).append(" doesn't exist");
                 } else if (!Files.exists(path)) {
-                    message.append(": File ").append(path).append(" doesn't exist");
+                    message.append(": File ").append(path).append(
+                            " doesn't exist");
+                    if ((mConfiguration.openFlags & SQLiteDatabase.CREATE_IF_NECESSARY) != 0) {
+                        message.append(
+                                " and CREATE_IF_NECESSARY is set, check directory permissions");
+                    }
                 } else if (!Files.isReadable(path)) {
                     message.append(": File ").append(path).append(" is not readable");
                 } else if (Files.isDirectory(path)) {
                     message.append(": Path ").append(path).append(" is a directory");
                 } else {
-                    message.append(": Unknown reason");
+                    message.append(": Unable to deduct failure reason");
                 }
             } catch (Throwable th) {
-                message.append(": Unknown reason; cannot examine filesystem: ")
-                        .append(th.getMessage());
+                message.append(": Unable to deduct failure reason"
+                        + " because filesystem couldn't be examined: ").append(th.getMessage());
             }
             throw new SQLiteCantOpenDatabaseException(message.toString(), e);
         } finally {
