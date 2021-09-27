@@ -498,4 +498,9 @@ public class WindowlessWindowManager implements IWindowSession {
     public void generateDisplayHash(IWindow window, Rect boundsInWindow, String hashAlgorithm,
             RemoteCallback callback) {
     }
+
+    @Override
+    public boolean dropForAccessibility(IWindow window, int x, int y) {
+        return false;
+    }
 }
