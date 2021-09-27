@@ -76,6 +76,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.DisplayAreaOrganizer.FEATURE_ROOT;
@@ -1389,11 +1390,16 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final Configuration currentDisplayConfig = getConfiguration();
         mTmpConfiguration.setTo(currentDisplayConfig);
         computeScreenConfiguration(mTmpConfiguration);
-        configChanged |= currentDisplayConfig.diff(mTmpConfiguration) != 0;
+        final int changes = currentDisplayConfig.diff(mTmpConfiguration);
+        configChanged |= changes != 0;
 
         if (configChanged) {
             mWaitingForConfig = true;
-            mWmService.startFreezingDisplay(0 /* exitAnim */, 0 /* enterAnim */, this);
+            if (mAtmService.getTransitionController().isShellTransitionsEnabled()) {
+                requestChangeTransitionIfNeeded(changes);
+            } else {
+                mWmService.startFreezingDisplay(0 /* exitAnim */, 0 /* enterAnim */, this);
+            }
             sendNewConfiguration();
         }
 
@@ -3163,6 +3169,24 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     public ScreenRotationAnimation getRotationAnimation() {
         return mScreenRotationAnimation;
+    }
+
+    /**
+     * Requests to start a transition for the display configuration change. The given changes must
+     * be non-zero. This method is no-op if the display has been collected.
+     */
+    void requestChangeTransitionIfNeeded(@ActivityInfo.Config int changes) {
+        final TransitionController controller = mAtmService.getTransitionController();
+        if (controller.isCollecting()) {
+            if (!controller.isCollecting(this)) {
+                controller.collect(this);
+            }
+            return;
+        }
+        final Transition t = controller.requestTransitionIfNeeded(TRANSIT_CHANGE, this);
+        if (t != null) {
+            t.setKnownConfigChanges(this, changes);
+        }
     }
 
     /** If the display is in transition, there should be a screenshot covering it. */
@@ -5724,6 +5748,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
             mWmService.mDisplayNotificationController.dispatchDisplayChanged(
                     this, getConfiguration());
+            if (isReady() && mAtmService.getTransitionController().isShellTransitionsEnabled()) {
+                requestChangeTransitionIfNeeded(changes);
+            }
         }
         return changes;
     }
