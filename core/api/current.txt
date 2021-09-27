@@ -35376,7 +35376,6 @@ package android.provider {
     field public static final String EXTRA_INPUT_METHOD_ID = "input_method_id";
     field public static final String EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME = "android.provider.extra.NOTIFICATION_LISTENER_COMPONENT_NAME";
     field public static final String EXTRA_SETTINGS_LARGE_SCREEN_DEEP_LINK_INTENT_URI = "android.provider.extra.SETTINGS_LARGE_SCREEN_DEEP_LINK_INTENT_URI";
-    field public static final String EXTRA_SETTINGS_LARGE_SCREEN_DEEP_LINK_PENDING_INTENT = "android.provider.extra.SETTINGS_LARGE_SCREEN_DEEP_LINK_PENDING_INTENT";
     field public static final String EXTRA_SETTINGS_LARGE_SCREEN_HIGHLIGHT_MENU_KEY = "android.provider.extra.SETTINGS_LARGE_SCREEN_HIGHLIGHT_MENU_KEY";
     field public static final String EXTRA_SUB_ID = "android.provider.extra.SUB_ID";
     field public static final String EXTRA_WIFI_NETWORK_LIST = "android.provider.extra.WIFI_NETWORK_LIST";
