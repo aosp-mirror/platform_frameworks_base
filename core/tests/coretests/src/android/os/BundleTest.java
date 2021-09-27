@@ -16,15 +16,23 @@
 
 package android.os;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+
+import android.util.Log;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.Objects;
 
 /**
  * Unit tests for bundle that requires accessing hidden APS.  Tests that can be written only with
@@ -35,6 +43,14 @@ import org.junit.runner.RunWith;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class BundleTest {
+    private Log.TerribleFailureHandler mWtfHandler;
+
+    @After
+    public void tearDown() throws Exception {
+        if (mWtfHandler != null) {
+            Log.setWtfHandler(mWtfHandler);
+        }
+    }
 
     /**
      * Take a bundle, write it to a parcel and return the parcel.
@@ -216,5 +232,194 @@ public class BundleTest {
         // Even though one is parcelled and the other is not, both are empty, so it should
         // return true
         assertTrue(BaseBundle.kindofEquals(bundle1, bundle2));
+    }
+
+    @Test
+    public void kindofEquals_lazyValues() {
+        Parcelable p1 = new CustomParcelable(13, "Tiramisu");
+        Parcelable p2 = new CustomParcelable(13, "Tiramisu");
+
+        // 2 maps with live objects
+        Bundle a = new Bundle();
+        a.putParcelable("key1", p1);
+        Bundle b = new Bundle();
+        b.putParcelable("key1", p2);
+        assertTrue(Bundle.kindofEquals(a, b));
+
+        // 2 identical parcels
+        a.readFromParcel(getParcelledBundle(a));
+        a.setClassLoader(getClass().getClassLoader());
+        b.readFromParcel(getParcelledBundle(b));
+        b.setClassLoader(getClass().getClassLoader());
+        assertTrue(Bundle.kindofEquals(a, b));
+
+        // 2 lazy values with identical parcels inside
+        a.isEmpty();
+        b.isEmpty();
+        assertTrue(Bundle.kindofEquals(a, b));
+
+        // 1 lazy value vs 1 live object
+        a.getParcelable("key1");
+        assertFalse(Bundle.kindofEquals(a, b));
+
+        // 2 live objects
+        b.getParcelable("key1");
+        assertTrue(Bundle.kindofEquals(a, b));
+    }
+
+    @Test
+    public void kindofEquals_lazyValuesWithIdenticalParcels_returnsTrue() {
+        Parcelable p1 = new CustomParcelable(13, "Tiramisu");
+        Parcelable p2 = new CustomParcelable(13, "Tiramisu");
+        Bundle a = new Bundle();
+        a.putParcelable("key", p1);
+        a.readFromParcel(getParcelledBundle(a));
+        a.setClassLoader(getClass().getClassLoader());
+        Bundle b = new Bundle();
+        b.putParcelable("key", p2);
+        b.readFromParcel(getParcelledBundle(b));
+        b.setClassLoader(getClass().getClassLoader());
+        // 2 lazy values with identical parcels inside
+        a.isEmpty();
+        b.isEmpty();
+
+        assertTrue(Bundle.kindofEquals(a, b));
+    }
+
+    @Test
+    public void kindofEquals_lazyValuesAndDifferentClassLoaders_returnsFalse() {
+        Parcelable p1 = new CustomParcelable(13, "Tiramisu");
+        Parcelable p2 = new CustomParcelable(13, "Tiramisu");
+        Bundle a = new Bundle();
+        a.putParcelable("key", p1);
+        a.readFromParcel(getParcelledBundle(a));
+        a.setClassLoader(getClass().getClassLoader());
+        Bundle b = new Bundle();
+        b.putParcelable("key", p2);
+        b.readFromParcel(getParcelledBundle(b));
+        b.setClassLoader(Bundle.class.getClassLoader()); // BCP
+        // 2 lazy values with identical parcels inside
+        a.isEmpty();
+        b.isEmpty();
+
+        assertFalse(Bundle.kindofEquals(a, b));
+    }
+
+    @Test
+    public void kindofEquals_lazyValuesOfDifferentTypes_returnsFalse() {
+        Parcelable p = new CustomParcelable(13, "Tiramisu");
+        Parcelable[] ps = {p};
+        Bundle a = new Bundle();
+        a.putParcelable("key", p);
+        a.readFromParcel(getParcelledBundle(a));
+        a.setClassLoader(getClass().getClassLoader());
+        Bundle b = new Bundle();
+        b.putParcelableArray("key", ps);
+        b.readFromParcel(getParcelledBundle(b));
+        b.setClassLoader(getClass().getClassLoader());
+        a.isEmpty();
+        b.isEmpty();
+
+        assertFalse(Bundle.kindofEquals(a, b));
+    }
+
+    @Test
+    public void kindofEquals_lazyValuesWithDifferentLengths_returnsFalse() {
+        Parcelable p1 = new CustomParcelable(13, "Tiramisu");
+        Parcelable p2 = new CustomParcelable(13, "Tiramisuuuuuuuu");
+        Bundle a = new Bundle();
+        a.putParcelable("key", p1);
+        a.readFromParcel(getParcelledBundle(a));
+        a.setClassLoader(getClass().getClassLoader());
+        Bundle b = new Bundle();
+        b.putParcelable("key", p2);
+        b.readFromParcel(getParcelledBundle(b));
+        b.setClassLoader(getClass().getClassLoader());
+        a.isEmpty();
+        b.isEmpty();
+
+        assertFalse(Bundle.kindofEquals(a, b));
+    }
+
+    @Test
+    public void readWriteLengthMismatch_logsWtf() throws Exception {
+        mWtfHandler = Log.setWtfHandler((tag, e, system) -> {
+            throw new RuntimeException(e);
+        });
+        Parcelable parcelable = new CustomParcelable(13, "Tiramisu").setHasLengthMismatch(true);
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("p", parcelable);
+        bundle.readFromParcel(getParcelledBundle(bundle));
+        bundle.setClassLoader(getClass().getClassLoader());
+        RuntimeException e = assertThrows(RuntimeException.class, () -> bundle.getParcelable("p"));
+        assertThat(e.getCause()).isInstanceOf(Log.TerribleFailure.class);
+    }
+
+    private static class CustomParcelable implements Parcelable {
+        public final int integer;
+        public final String string;
+        public boolean hasLengthMismatch;
+
+        CustomParcelable(int integer, String string) {
+            this.integer = integer;
+            this.string = string;
+        }
+
+        protected CustomParcelable(Parcel in) {
+            integer = in.readInt();
+            string = in.readString();
+            hasLengthMismatch = in.readBoolean();
+        }
+
+        public CustomParcelable setHasLengthMismatch(boolean hasLengthMismatch) {
+            this.hasLengthMismatch = hasLengthMismatch;
+            return this;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            out.writeInt(integer);
+            out.writeString(string);
+            out.writeBoolean(hasLengthMismatch);
+            if (hasLengthMismatch) {
+                out.writeString("extra-write");
+            }
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            }
+            if (!(other instanceof CustomParcelable)) {
+                return false;
+            }
+            CustomParcelable
+                    that = (CustomParcelable) other;
+            return integer == that.integer
+                    && hasLengthMismatch == that.hasLengthMismatch
+                    && string.equals(that.string);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(integer, string, hasLengthMismatch);
+        }
+
+        public static final Creator<CustomParcelable> CREATOR = new Creator<CustomParcelable>() {
+            @Override
+            public CustomParcelable createFromParcel(Parcel in) {
+                return new CustomParcelable(in);
+            }
+            @Override
+            public CustomParcelable[] newArray(int size) {
+                return new CustomParcelable[size];
+            }
+        };
     }
 }

@@ -3363,7 +3363,7 @@ public final class Parcel {
             object = readValue(type, loader);
             int actual = dataPosition() - start;
             if (actual != length) {
-                Log.w(TAG,
+                Slog.wtfStack(TAG,
                         "Unparcelling of " + object + " of type " + Parcel.valueTypeToString(type)
                                 + "  consumed " + actual + " bytes, but " + length + " expected.");
             }
