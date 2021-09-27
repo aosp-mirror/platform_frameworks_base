@@ -238,6 +238,11 @@ static struct {
     jmethodID ctor;
 } gJankDataClassInfo;
 
+static struct {
+    jclass clazz;
+    jmethodID onTransactionCommitted;
+} gTransactionCommittedListenerClassInfo;
+
 class JNamedColorSpace {
 public:
     // ColorSpace.Named.SRGB.ordinal() = 0;
@@ -320,6 +325,44 @@ public:
 
 private:
     jobject screenCaptureListenerObject;
+    JavaVM* mVm;
+
+    JNIEnv* getenv() {
+        JNIEnv* env;
+        mVm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6);
+        return env;
+    }
+};
+
+class TransactionCommittedListenerWrapper {
+public:
+    explicit TransactionCommittedListenerWrapper(JNIEnv* env, jobject object) {
+        env->GetJavaVM(&mVm);
+        mTransactionCommittedListenerObject = env->NewGlobalRef(object);
+        LOG_ALWAYS_FATAL_IF(!mTransactionCommittedListenerObject, "Failed to make global ref");
+    }
+
+    ~TransactionCommittedListenerWrapper() {
+        getenv()->DeleteGlobalRef(mTransactionCommittedListenerObject);
+    }
+
+    void callback() {
+        JNIEnv* env = getenv();
+        env->CallVoidMethod(mTransactionCommittedListenerObject,
+                            gTransactionCommittedListenerClassInfo.onTransactionCommitted);
+    }
+
+    static void transactionCallbackThunk(void* context, nsecs_t /*latchTime*/,
+                                         const sp<Fence>& /*presentFence*/,
+                                         const std::vector<SurfaceControlStats>& /*stats*/) {
+        TransactionCommittedListenerWrapper* listener =
+                reinterpret_cast<TransactionCommittedListenerWrapper*>(context);
+        listener->callback();
+        delete listener;
+    }
+
+private:
+    jobject mTransactionCommittedListenerObject;
     JavaVM* mVm;
 
     JNIEnv* getenv() {
@@ -1736,6 +1779,17 @@ static void nativeSetFrameTimelineVsync(JNIEnv* env, jclass clazz, jlong transac
             {frameTimelineVsyncId, android::os::IInputConstants::INVALID_INPUT_EVENT_ID});
 }
 
+static void nativeAddTransactionCommittedListener(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                                  jobject transactionCommittedListenerObject) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+
+    void* context =
+            new TransactionCommittedListenerWrapper(env, transactionCommittedListenerObject);
+    transaction->addTransactionCommittedCallback(TransactionCommittedListenerWrapper::
+                                                         transactionCallbackThunk,
+                                                 context);
+}
+
 class JankDataListenerWrapper : public JankDataListener {
 public:
     JankDataListenerWrapper(JNIEnv* env, jobject onJankDataListenerObject) {
@@ -2035,6 +2089,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetLayerId },
     {"nativeSetDropInputMode", "(JJI)V",
              (void*)nativeSetDropInputMode },
+    {"nativeAddTransactionCommittedListener", "(JLandroid/view/TransactionCommittedListener;)V",
+            (void*) nativeAddTransactionCommittedListener },
         // clang-format on
 };
 
@@ -2250,6 +2306,14 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gJankDataListenerClassInfo.onJankDataAvailable =
             GetMethodIDOrDie(env, onJankDataListenerClazz, "onJankDataAvailable",
                              "([Landroid/view/SurfaceControl$JankData;)V");
+
+    jclass transactionCommittedListenerClazz =
+            FindClassOrDie(env, "android/view/TransactionCommittedListener");
+    gTransactionCommittedListenerClassInfo.clazz =
+            MakeGlobalRefOrDie(env, transactionCommittedListenerClazz);
+    gTransactionCommittedListenerClassInfo.onTransactionCommitted =
+            GetMethodIDOrDie(env, transactionCommittedListenerClazz, "onTransactionCommitted",
+                             "()V");
     return err;
 }
 

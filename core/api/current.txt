@@ -48507,6 +48507,7 @@ package android.view {
 
   public static class SurfaceControl.Transaction implements java.io.Closeable android.os.Parcelable {
     ctor public SurfaceControl.Transaction();
+    method @NonNull public android.view.SurfaceControl.Transaction addTransactionCommittedListener(@NonNull java.util.concurrent.Executor, @NonNull android.view.TransactionCommittedListener);
     method public void apply();
     method public void close();
     method public int describeContents();
@@ -48631,6 +48632,10 @@ package android.view {
     field public static final int BELOW = 2; // 0x2
     field public static final int TO_LEFT = 4; // 0x4
     field public static final int TO_RIGHT = 8; // 0x8
+  }
+
+  public interface TransactionCommittedListener {
+    method public void onTransactionCommitted();
   }
 
   public final class VelocityTracker {
