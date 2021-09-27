@@ -380,9 +380,9 @@ public class MagnificationControllerTest {
     @Test
     public void
             onFullScreenMagnificationActivationState_fullScreenActivated_logFullScreenDuration() {
-        mMagnificationController.onFullScreenMagnificationActivationState(true);
+        mMagnificationController.onFullScreenMagnificationActivationState(TEST_DISPLAY, true);
 
-        mMagnificationController.onFullScreenMagnificationActivationState(false);
+        mMagnificationController.onFullScreenMagnificationActivationState(TEST_DISPLAY, false);
 
         verify(mMagnificationController).logMagnificationUsageState(
                 eq(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN), anyLong());
@@ -460,75 +460,47 @@ public class MagnificationControllerTest {
     }
 
     @Test
-    public void onShortcutTriggered_windowModeEnabledAndCapabilitiesAll_showMagnificationButton()
+    public void onWindowActivated_windowModeEnabledAndCapabilitiesAll_showMagnificationButton()
             throws RemoteException {
         setMagnificationEnabled(MODE_WINDOW);
 
-        mMagnificationController.onShortcutTriggered(TEST_DISPLAY, MODE_WINDOW);
+        mMagnificationController.onWindowMagnificationActivationState(TEST_DISPLAY, true);
 
         verify(mWindowMagnificationManager).showMagnificationButton(eq(TEST_DISPLAY),
                 eq(MODE_WINDOW));
     }
 
     @Test
-    public void onShortcutTriggered_fullscreenEnabledAndCapabilitiesAll_showMagnificationButton()
+    public void onFullScreenActivated_fullscreenEnabledAndCapabilitiesAll_showMagnificationButton()
             throws RemoteException {
         setMagnificationEnabled(MODE_FULLSCREEN);
 
-        mMagnificationController.onShortcutTriggered(TEST_DISPLAY, MODE_FULLSCREEN);
+        mMagnificationController.onFullScreenMagnificationActivationState(TEST_DISPLAY, true);
 
         verify(mWindowMagnificationManager).showMagnificationButton(eq(TEST_DISPLAY),
                 eq(MODE_FULLSCREEN));
     }
 
     @Test
-    public void triggerShortcutToShowMagnificationBound_fullscreenMode_showMagnificationButton() {
-        setMagnificationModeSettings(MODE_FULLSCREEN);
-
-        when(mScreenMagnificationController.isForceShowMagnifiableBounds(TEST_DISPLAY)).thenReturn(
-                true);
-        mMagnificationController.onShortcutTriggered(TEST_DISPLAY, MODE_FULLSCREEN);
-
-        verify(mWindowMagnificationManager).showMagnificationButton(eq(TEST_DISPLAY),
-                eq(MODE_FULLSCREEN));
-    }
-
-    @Test
-    public void onShortcutTriggered_windowModeDisabled_removeMagnificationButton()
+    public void onWindowDeactivated_windowModeInactive_removeMagnificationButton()
             throws RemoteException {
+        setMagnificationEnabled(MODE_WINDOW);
+        mWindowMagnificationManager.disableWindowMagnification(TEST_DISPLAY, false);
 
-        mMagnificationController.onShortcutTriggered(TEST_DISPLAY, MODE_WINDOW);
+        mMagnificationController.onWindowMagnificationActivationState(TEST_DISPLAY, false);
 
         verify(mWindowMagnificationManager).removeMagnificationButton(eq(TEST_DISPLAY));
     }
 
     @Test
-    public void onTripleTap_windowModeEnabledAndCapabilitiesAll_showMagnificationButton()
-            throws RemoteException {
-        setMagnificationEnabled(MODE_WINDOW);
-
-        mMagnificationController.onTripleTapped(TEST_DISPLAY, MODE_WINDOW);
-
-        verify(mWindowMagnificationManager).showMagnificationButton(eq(TEST_DISPLAY),
-                eq(MODE_WINDOW));
-    }
-
-    @Test
-    public void onTripleTap_fullscreenEnabledAndCapabilitiesAll_showMagnificationButton()
+    public void onFullScreenDeactivated_fullscreenModeInactive_removeMagnificationButton()
             throws RemoteException {
         setMagnificationEnabled(MODE_FULLSCREEN);
+        mScreenMagnificationController.setScaleAndCenter(TEST_DISPLAY,
+                /* scale= */1, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y,
+                true, TEST_SERVICE_ID);
 
-        mMagnificationController.onTripleTapped(TEST_DISPLAY, MODE_FULLSCREEN);
-
-        verify(mWindowMagnificationManager).showMagnificationButton(eq(TEST_DISPLAY),
-                eq(MODE_FULLSCREEN));
-    }
-
-    @Test
-    public void onTripleTap_windowModeDisabled_removeMagnificationButton()
-            throws RemoteException {
-
-        mMagnificationController.onTripleTapped(TEST_DISPLAY, MODE_WINDOW);
+        mMagnificationController.onFullScreenMagnificationActivationState(TEST_DISPLAY, false);
 
         verify(mWindowMagnificationManager).removeMagnificationButton(eq(TEST_DISPLAY));
     }
@@ -574,7 +546,7 @@ public class MagnificationControllerTest {
 
     @Test
     public void imeWindowStateShown_fullScreenMagnifying_logFullScreenMode() {
-        mMagnificationController.onFullScreenMagnificationActivationState(true);
+        mMagnificationController.onFullScreenMagnificationActivationState(TEST_DISPLAY, true);
 
         mMagnificationController.onImeWindowVisibilityChanged(true);
 
@@ -591,7 +563,7 @@ public class MagnificationControllerTest {
 
     @Test
     public void imeWindowStateHidden_windowMagnifying_noLogAnyMode() {
-        mMagnificationController.onFullScreenMagnificationActivationState(true);
+        mMagnificationController.onFullScreenMagnificationActivationState(TEST_DISPLAY, true);
 
         verify(mMagnificationController, never()).logMagnificationModeWithIme(anyInt());
     }

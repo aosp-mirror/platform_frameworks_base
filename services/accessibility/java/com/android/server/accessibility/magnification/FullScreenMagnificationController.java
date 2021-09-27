@@ -353,7 +353,7 @@ public class FullScreenMagnificationController {
             mMagnificationActivated = spec.scale > 1.0f;
             if (mMagnificationActivated != lastMagnificationActivated) {
                 mMagnificationInfoChangedCallback.onFullScreenMagnificationActivationState(
-                        mMagnificationActivated);
+                        mDisplayId, mMagnificationActivated);
             }
         }
 
@@ -1614,9 +1614,10 @@ public class FullScreenMagnificationController {
          * Called when the state of the magnification activation is changed.
          * It is for the logging data of the magnification activation state.
          *
+         * @param displayId The logical display id.
          * @param activated {@code true} if the magnification is activated, otherwise {@code false}.
          */
-        void onFullScreenMagnificationActivationState(boolean activated);
+        void onFullScreenMagnificationActivationState(int displayId, boolean activated);
 
         /**
          * Called when the IME window visibility changed.
