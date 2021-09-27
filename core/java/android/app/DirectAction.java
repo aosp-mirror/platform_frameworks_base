@@ -22,14 +22,13 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.internal.util.Preconditions;
 
 import java.util.Objects;
 
 /**
- * Represents a abstract action that can be perform on this app. This are requested from
+ * Represents an abstract action that can be perform on this app. This are requested from
  * outside the app's UI (eg by SystemUI or assistant). The semantics of these actions are
  * not specified by the OS. This allows open-ended and scalable approach for defining how
  * an app interacts with components that expose alternative interaction models to the user
