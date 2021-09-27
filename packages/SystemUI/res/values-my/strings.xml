@@ -1176,4 +1176,5 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"ကွန်ရက်များကို ရှာဖွေနေသည်…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"ကွန်ရက်သို့ ချိတ်ဆက်၍မရပါ"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"အားလုံးကြည့်ရန်"</string>
+    <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ကွန်ရက်ပြောင်းရန် အီသာနက်ကို ချိတ်ဆက်မှုဖြုတ်ပါ"</string>
 </resources>
