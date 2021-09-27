@@ -376,8 +376,16 @@ public class BaseBundle {
         }
     }
 
-    /** @hide */
-    ArrayMap<String, Object> getMap() {
+    /**
+     * Returns the backing map of this bundle after deserializing every item.
+     *
+     * <p><b>Warning:</b> This method will deserialize every item on the bundle, including custom
+     * types such as {@link Parcelable} and {@link Serializable}, so only use this when you trust
+     * the source. Specifically don't use this method on app-provided bundles.
+     *
+     * @hide
+     */
+    ArrayMap<String, Object> getItemwiseMap() {
         unparcel(/* itemwise */ true);
         return mMap;
     }
@@ -500,7 +508,7 @@ public class BaseBundle {
                     final int N = fromMap.size();
                     mMap = new ArrayMap<>(N);
                     for (int i = 0; i < N; i++) {
-                        mMap.append(fromMap.keyAt(i), deepCopyValue(from.getValueAt(i)));
+                        mMap.append(fromMap.keyAt(i), deepCopyValue(fromMap.valueAt(i)));
                     }
                 }
             } else {
@@ -1772,7 +1780,7 @@ public class BaseBundle {
             pw.println("[null]");
             return;
         }
-        final ArrayMap<String, Object> map = bundle.getMap();
+        final ArrayMap<String, Object> map = bundle.getItemwiseMap();
         for (int i = 0; i < map.size(); i++) {
             dumpStats(pw, map.keyAt(i), map.valueAt(i));
         }
