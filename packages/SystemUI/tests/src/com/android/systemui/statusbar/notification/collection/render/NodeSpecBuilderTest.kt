@@ -26,6 +26,10 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.collection.getAttachState
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
+import com.android.systemui.statusbar.notification.stack.BUCKET_ALERTING
+import com.android.systemui.statusbar.notification.stack.BUCKET_PEOPLE
+import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
+import com.android.systemui.statusbar.notification.stack.PriorityBucket
 import com.android.systemui.util.mockito.any
 import org.junit.Before
 import org.junit.Test
@@ -45,11 +49,15 @@ class NodeSpecBuilderTest : SysuiTestCase() {
     private var headerController1: NodeController = buildFakeController("header1")
     private var headerController2: NodeController = buildFakeController("header2")
 
-    private val section0 = buildSection(0, headerController0)
-    private val section0NoHeader = buildSection(0, null)
-    private val section1 = buildSection(1, headerController1)
-    private val section1NoHeader = buildSection(1, null)
-    private val section2 = buildSection(2, headerController2)
+    private val section0Bucket = BUCKET_PEOPLE
+    private val section1Bucket = BUCKET_ALERTING
+    private val section2Bucket = BUCKET_SILENT
+
+    private val section0 = buildSection(0, section0Bucket, headerController0)
+    private val section0NoHeader = buildSection(0, section0Bucket, null)
+    private val section1 = buildSection(1, section1Bucket, headerController1)
+    private val section1NoHeader = buildSection(1, section1Bucket, null)
+    private val section2 = buildSection(2, section2Bucket, headerController2)
 
     private val fakeViewBarn = FakeViewBarn()
 
@@ -297,8 +305,12 @@ private fun buildFakeController(name: String): NodeController {
     return controller
 }
 
-private fun buildSection(index: Int, nodeController: NodeController?): NotifSection {
-    return NotifSection(object : NotifSectioner("Section $index") {
+private fun buildSection(
+    index: Int,
+    @PriorityBucket bucket: Int,
+    nodeController: NodeController?
+): NotifSection {
+    return NotifSection(object : NotifSectioner("Section $index (bucket=$bucket)", bucket) {
 
         override fun isInSection(entry: ListEntry?): Boolean {
             throw NotImplementedError("This should never be called")

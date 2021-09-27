@@ -22,15 +22,28 @@ import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.ShadeListBuilder;
 import com.android.systemui.statusbar.notification.collection.render.NodeController;
 import com.android.systemui.statusbar.notification.collection.render.NodeSpec;
+import com.android.systemui.statusbar.notification.stack.PriorityBucket;
 
 import java.util.List;
 
 /**
- * Pluggable for participating in notif sectioning. See {@link ShadeListBuilder#setSections}.
+ * Pluggable for participating in notif sectioning. See {@link ShadeListBuilder#setSectioners}.
  */
 public abstract class NotifSectioner extends Pluggable<NotifSectioner> {
-    protected NotifSectioner(String name) {
+    @PriorityBucket
+    private final int mBucket;
+
+    protected NotifSectioner(String name, @PriorityBucket int bucket) {
         super(name);
+        mBucket = bucket;
+    }
+
+    /**
+     * @return the "bucket" value to apply to entries in this section
+     */
+    @PriorityBucket
+    public final int getBucket() {
+        return mBucket;
     }
 
     /**

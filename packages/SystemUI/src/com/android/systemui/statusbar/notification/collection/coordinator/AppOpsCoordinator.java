@@ -30,6 +30,7 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
+import com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import javax.inject.Inject;
@@ -102,7 +103,8 @@ public class AppOpsCoordinator implements Coordinator {
     /**
      * Puts foreground service notifications into its own section.
      */
-    private final NotifSectioner mNotifSectioner = new NotifSectioner("ForegroundService") {
+    private final NotifSectioner mNotifSectioner = new NotifSectioner("ForegroundService",
+            NotificationPriorityBucketKt.BUCKET_FOREGROUND_SERVICE) {
         @Override
         public boolean isInSection(ListEntry entry) {
             NotificationEntry notificationEntry = entry.getRepresentativeEntry();

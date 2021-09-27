@@ -1660,7 +1660,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         private final String mPackage;
 
         PackageSectioner(String pkg) {
-            super("PackageSection_" + pkg);
+            super("PackageSection_" + pkg, 0);
             mPackage = pkg;
         }
 

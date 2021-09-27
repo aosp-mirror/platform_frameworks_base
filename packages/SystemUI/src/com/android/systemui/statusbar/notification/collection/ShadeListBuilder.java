@@ -52,6 +52,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifStabilityManager;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CollectionReadyForBuildListener;
+import com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.time.SystemClock;
 
@@ -738,7 +739,7 @@ public class ShadeListBuilder implements Dumpable {
             if (entry instanceof GroupEntry) {
                 GroupEntry parent = (GroupEntry) entry;
                 for (NotificationEntry child : parent.getChildren()) {
-                    child.getAttachState().setSection(section);
+                    setEntrySection(child, section);
                 }
                 parent.sortChildren(sChildComparator);
             }
@@ -957,8 +958,16 @@ public class ShadeListBuilder implements Dumpable {
             }
         }
 
-        entry.getAttachState().setSection(finalSection);
+        setEntrySection(entry, finalSection);
         return finalSection;
+    }
+
+    private void setEntrySection(ListEntry entry, NotifSection finalSection) {
+        entry.getAttachState().setSection(finalSection);
+        NotificationEntry representativeEntry = entry.getRepresentativeEntry();
+        if (representativeEntry != null && finalSection != null) {
+            representativeEntry.setBucket(finalSection.getBucket());
+        }
     }
 
     @NonNull
@@ -1039,13 +1048,13 @@ public class ShadeListBuilder implements Dumpable {
         void onRenderList(@NonNull List<ListEntry> entries);
     }
 
-    private static final NotifSectioner DEFAULT_SECTIONER =
-            new NotifSectioner("UnknownSection") {
-                @Override
-                public boolean isInSection(ListEntry entry) {
-                    return true;
-                }
-            };
+    private static final NotifSectioner DEFAULT_SECTIONER = new NotifSectioner("UnknownSection",
+            NotificationPriorityBucketKt.BUCKET_UNKNOWN) {
+        @Override
+        public boolean isInSection(ListEntry entry) {
+            return true;
+        }
+    };
 
     private static final int MIN_CHILDREN_FOR_GROUP = 2;
 
