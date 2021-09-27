@@ -36,15 +36,18 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:scaleType="centerInside"
+            android:layout_gravity="center"
+            android:adjustViewBounds="true"
             android:src="@drawable/protection_background"/>
 
         <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/lottie_view"
-            android:adjustViewBounds="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center" />
+            android:layout_gravity="center"
+            android:maxWidth="@dimen/settingslib_illustration_width"
+            android:maxHeight="@dimen/settingslib_illustration_height"
+            android:adjustViewBounds="true"/>
 
         <FrameLayout
             android:id="@+id/middleground_layout"
