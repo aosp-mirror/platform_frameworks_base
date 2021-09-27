@@ -118,7 +118,7 @@ java_library_static {
         "services.net",
         "android.hardware.common-V2-java",
         "android.hardware.light-V2.0-java",
-        "android.hardware.gnss-V1-java",
+        "android.hardware.gnss-V2-java",
         "android.hardware.power-V1-java",
         "android.hardware.power-V1.0-java",
         "android.hardware.vibrator-V2-java",
