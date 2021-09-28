@@ -2113,7 +2113,7 @@ package android.provider {
   }
 
   public static final class ContactsContract.CommonDataKinds.Phone implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
-    field public static final android.net.Uri ENTERPRISE_CONTENT_URI;
+    field @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public static final android.net.Uri ENTERPRISE_CONTENT_URI;
   }
 
   public static final class ContactsContract.PinnedPositions {
