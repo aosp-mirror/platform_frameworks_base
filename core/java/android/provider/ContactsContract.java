@@ -6159,9 +6159,10 @@ public final class ContactsContract {
             *
             * @hide
             */
-            @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+            @SystemApi
             @TestApi
-            public static final Uri ENTERPRISE_CONTENT_URI =
+            @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
+            public static final @NonNull Uri ENTERPRISE_CONTENT_URI =
                     Uri.withAppendedPath(Data.ENTERPRISE_CONTENT_URI, "phones");
 
             /**
