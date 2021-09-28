@@ -25,7 +25,6 @@ import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.View;
 
 import java.util.Arrays;
@@ -41,10 +40,20 @@ public class LaunchBubbleActivity extends Activity {
         mBubbleHelper = BubbleHelper.getInstance(this);
         setContentView(R.layout.activity_main);
         findViewById(R.id.button_create).setOnClickListener(this::add);
+        findViewById(R.id.button_cancel).setOnClickListener(this::cancel);
+        findViewById(R.id.button_cancel_all).setOnClickListener(this::cancelAll);
     }
 
     private void add(View v) {
         mBubbleHelper.addNewBubble(false /* autoExpand */, false /* suppressNotif */);
+    }
+
+    private void cancel(View v) {
+        mBubbleHelper.cancelLast();
+    }
+
+    private void cancelAll(View v) {
+        mBubbleHelper.cancelAll();
     }
 
     private void addInboxShortcut(Context context) {
