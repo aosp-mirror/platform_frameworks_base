@@ -2335,10 +2335,15 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     protected void setLayer(Transaction t, int layer) {
-
-        // Route through surface animator to accommodate that our surface control might be
-        // attached to the leash, and leash is attached to parent container.
-        mSurfaceAnimator.setLayer(t, layer);
+        if (mSurfaceFreezer.hasLeash()) {
+            // When the freezer has created animation leash parent for the window, set the layer
+            // there instead.
+            mSurfaceFreezer.setLayer(t, layer);
+        } else {
+            // Route through surface animator to accommodate that our surface control might be
+            // attached to the leash, and leash is attached to parent container.
+            mSurfaceAnimator.setLayer(t, layer);
+        }
     }
 
     int getLastLayer() {
@@ -2346,10 +2351,15 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     protected void setRelativeLayer(Transaction t, SurfaceControl relativeTo, int layer) {
-
-        // Route through surface animator to accommodate that our surface control might be
-        // attached to the leash, and leash is attached to parent container.
-        mSurfaceAnimator.setRelativeLayer(t, relativeTo, layer);
+        if (mSurfaceFreezer.hasLeash()) {
+            // When the freezer has created animation leash parent for the window, set the layer
+            // there instead.
+            mSurfaceFreezer.setRelativeLayer(t, relativeTo, layer);
+        } else {
+            // Route through surface animator to accommodate that our surface control might be
+            // attached to the leash, and leash is attached to parent container.
+            mSurfaceAnimator.setRelativeLayer(t, relativeTo, layer);
+        }
     }
 
     protected void reparentSurfaceControl(Transaction t, SurfaceControl newParent) {
