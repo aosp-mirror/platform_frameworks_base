@@ -1298,7 +1298,7 @@ package android {
     field public static final int shortcutLongLabel = 16844074; // 0x101052a
     field public static final int shortcutShortLabel = 16844073; // 0x1010529
     field public static final int shouldDisableView = 16843246; // 0x10101ee
-    field public static final int shouldUseDefaultUnfoldTransition;
+    field public static final int shouldUseDefaultDeviceStateChangeTransition;
     field public static final int showAsAction = 16843481; // 0x10102d9
     field public static final int showDefault = 16843258; // 0x10101fa
     field public static final int showDividers = 16843561; // 0x1010329
@@ -6927,7 +6927,7 @@ package android.app {
     method public android.graphics.drawable.Drawable loadIcon(android.content.pm.PackageManager);
     method public CharSequence loadLabel(android.content.pm.PackageManager);
     method public android.graphics.drawable.Drawable loadThumbnail(android.content.pm.PackageManager);
-    method public boolean shouldUseDefaultUnfoldTransition();
+    method public boolean shouldUseDefaultDeviceStateChangeTransition();
     method public boolean supportsMultipleDisplays();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.WallpaperInfo> CREATOR;

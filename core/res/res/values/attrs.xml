@@ -8371,16 +8371,18 @@
              @hide @SystemApi -->
         <attr name="supportsAmbientMode" format="boolean" />
 
-        <!-- Indicates that this wallpaper service should receive zoom updates when unfolding.
+        <!-- Indicates that this wallpaper service should receive zoom transition updates when
+             changing the device state (e.g. when folding or unfolding a foldable device).
              When this value is set to true
              {@link android.service.wallpaper.WallpaperService.Engine} could receive zoom updates
-             when folding or unfolding a foldable device. Wallpapers receive zoom updates using
+             before or after changing the device state. Wallpapers receive zoom updates using
              {@link android.service.wallpaper.WallpaperService.Engine#onZoomChanged(float)} and
-             zoom rendering should be handled manually. Default value is true.
-             When set to false wallpapers can implement custom folding/unfolding behavior
-             by listening to {@link android.hardware.Sensor#TYPE_HINGE_ANGLE}.
-             Corresponds to {@link android.app.WallpaperInfo#shouldUseDefaultUnfoldTransition()} -->
-        <attr name="shouldUseDefaultUnfoldTransition" format="boolean" />
+             zoom rendering should be handled manually. Zoom updates are delivered only when
+             {@link android.service.wallpaper.WallpaperService.Engine} is created and not destroyed.
+             Default value is true.
+             Corresponds to
+             {@link android.app.WallpaperInfo#shouldUseDefaultDeviceStateChangeTransition()} -->
+        <attr name="shouldUseDefaultDeviceStateChangeTransition" format="boolean" />
 
         <!-- Uri that specifies a settings Slice for this wallpaper. -->
         <attr name="settingsSliceUri" format="string"/>
