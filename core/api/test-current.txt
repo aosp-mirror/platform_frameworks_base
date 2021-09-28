@@ -2882,13 +2882,7 @@ package android.view {
 package android.view.accessibility {
 
   public final class AccessibilityManager {
-    method public void addAccessibilityServicesStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener, @Nullable android.os.Handler);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public java.util.List<java.lang.String> getAccessibilityShortcutTargets(int);
-    method public void removeAccessibilityServicesStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener);
-  }
-
-  public static interface AccessibilityManager.AccessibilityServicesStateChangeListener {
-    method public void onAccessibilityServicesStateChanged(android.view.accessibility.AccessibilityManager);
   }
 
   public class AccessibilityNodeInfo implements android.os.Parcelable {

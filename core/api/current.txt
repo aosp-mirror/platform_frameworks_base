@@ -50848,6 +50848,8 @@ package android.view.accessibility {
 
   public final class AccessibilityManager {
     method public void addAccessibilityRequestPreparer(android.view.accessibility.AccessibilityRequestPreparer);
+    method public void addAccessibilityServicesStateChangeListener(@NonNull java.util.concurrent.Executor, @NonNull android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener);
+    method public void addAccessibilityServicesStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener);
     method public boolean addAccessibilityStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener);
     method public void addAccessibilityStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener, @Nullable android.os.Handler);
     method public boolean addTouchExplorationStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener);
@@ -50863,12 +50865,17 @@ package android.view.accessibility {
     method public boolean isEnabled();
     method public boolean isTouchExplorationEnabled();
     method public void removeAccessibilityRequestPreparer(android.view.accessibility.AccessibilityRequestPreparer);
+    method public boolean removeAccessibilityServicesStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener);
     method public boolean removeAccessibilityStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener);
     method public boolean removeTouchExplorationStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener);
     method public void sendAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
     field public static final int FLAG_CONTENT_CONTROLS = 4; // 0x4
     field public static final int FLAG_CONTENT_ICONS = 1; // 0x1
     field public static final int FLAG_CONTENT_TEXT = 2; // 0x2
+  }
+
+  public static interface AccessibilityManager.AccessibilityServicesStateChangeListener {
+    method public void onAccessibilityServicesStateChanged(@NonNull android.view.accessibility.AccessibilityManager);
   }
 
   public static interface AccessibilityManager.AccessibilityStateChangeListener {

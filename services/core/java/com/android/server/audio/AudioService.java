@@ -8860,7 +8860,7 @@ public class AudioService extends IAudioService.Stub
         updateDefaultStreamOverrideDelay(accessibilityManager.isTouchExplorationEnabled());
         updateA11yVolumeAlias(accessibilityManager.isAccessibilityVolumeStreamActive());
         accessibilityManager.addTouchExplorationStateChangeListener(this, null);
-        accessibilityManager.addAccessibilityServicesStateChangeListener(this, null);
+        accessibilityManager.addAccessibilityServicesStateChangeListener(this);
     }
 
     //---------------------------------------------------------------------------------
