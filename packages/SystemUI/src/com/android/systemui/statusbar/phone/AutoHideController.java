@@ -171,23 +171,4 @@ public class AutoHideController {
 
         return false;
     }
-
-    /**
-     * Injectable factory for creating a {@link AutoHideController}.
-     */
-    public static class Factory {
-        private final Handler mHandler;
-        private final IWindowManager mIWindowManager;
-
-        @Inject
-        public Factory(@Main Handler handler, IWindowManager iWindowManager) {
-            mHandler = handler;
-            mIWindowManager = iWindowManager;
-        }
-
-        /** Create an {@link AutoHideController} */
-        public AutoHideController create(Context context) {
-            return new AutoHideController(context, mHandler, mIWindowManager);
-        }
-    }
 }
