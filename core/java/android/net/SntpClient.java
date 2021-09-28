@@ -20,13 +20,18 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.os.SystemClock;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.TrafficStatsConstants;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
+import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * {@hide}
@@ -64,13 +69,19 @@ public class SntpClient {
     // 70 years plus 17 leap days
     private static final long OFFSET_1900_TO_1970 = ((365L * 70L) + 17L) * 24L * 60L * 60L;
 
-    // system time computed from NTP server response
+    // The source of the current system clock time, replaceable for testing.
+    private final Supplier<Instant> mSystemTimeSupplier;
+
+    // The last offset calculated from an NTP server response
+    private long mClockOffset;
+
+    // The last system time computed from an NTP server response
     private long mNtpTime;
 
-    // value of SystemClock.elapsedRealtime() corresponding to mNtpTime
+    // The value of SystemClock.elapsedRealtime() corresponding to mNtpTime / mClockOffset
     private long mNtpTimeReference;
 
-    // round trip time in milliseconds
+    // The round trip (network) time in milliseconds
     private long mRoundTripTime;
 
     private static class InvalidServerReplyException extends Exception {
@@ -81,6 +92,12 @@ public class SntpClient {
 
     @UnsupportedAppUsage
     public SntpClient() {
+        this(Instant::now);
+    }
+
+    @VisibleForTesting
+    public SntpClient(Supplier<Instant> systemTimeSupplier) {
+        mSystemTimeSupplier = Objects.requireNonNull(systemTimeSupplier);
     }
 
     /**
@@ -126,9 +143,11 @@ public class SntpClient {
             buffer[0] = NTP_MODE_CLIENT | (NTP_VERSION << 3);
 
             // get current time and write it to the request packet
-            final long requestTime = System.currentTimeMillis();
+            final Instant requestTime = mSystemTimeSupplier.get();
+            final long requestTimestamp = requestTime.toEpochMilli();
+
             final long requestTicks = SystemClock.elapsedRealtime();
-            writeTimeStamp(buffer, TRANSMIT_TIME_OFFSET, requestTime);
+            writeTimeStamp(buffer, TRANSMIT_TIME_OFFSET, requestTimestamp);
 
             socket.send(request);
 
@@ -136,42 +155,42 @@ public class SntpClient {
             DatagramPacket response = new DatagramPacket(buffer, buffer.length);
             socket.receive(response);
             final long responseTicks = SystemClock.elapsedRealtime();
-            final long responseTime = requestTime + (responseTicks - requestTicks);
+            final Instant responseTime = requestTime.plusMillis(responseTicks - requestTicks);
+            final long responseTimestamp = responseTime.toEpochMilli();
 
             // extract the results
             final byte leap = (byte) ((buffer[0] >> 6) & 0x3);
             final byte mode = (byte) (buffer[0] & 0x7);
             final int stratum = (int) (buffer[1] & 0xff);
-            final long originateTime = readTimeStamp(buffer, ORIGINATE_TIME_OFFSET);
-            final long receiveTime = readTimeStamp(buffer, RECEIVE_TIME_OFFSET);
-            final long transmitTime = readTimeStamp(buffer, TRANSMIT_TIME_OFFSET);
-            final long referenceTime = readTimeStamp(buffer, REFERENCE_TIME_OFFSET);
+            final long originateTimestamp = readTimeStamp(buffer, ORIGINATE_TIME_OFFSET);
+            final long receiveTimestamp = readTimeStamp(buffer, RECEIVE_TIME_OFFSET);
+            final long transmitTimestamp = readTimeStamp(buffer, TRANSMIT_TIME_OFFSET);
+            final long referenceTimestamp = readTimeStamp(buffer, REFERENCE_TIME_OFFSET);
 
             /* Do validation according to RFC */
             // TODO: validate originateTime == requestTime.
-            checkValidServerReply(leap, mode, stratum, transmitTime, referenceTime);
+            checkValidServerReply(leap, mode, stratum, transmitTimestamp, referenceTimestamp);
 
-            long roundTripTime = responseTicks - requestTicks - (transmitTime - receiveTime);
-            // receiveTime = originateTime + transit + skew
-            // responseTime = transmitTime + transit - skew
-            // clockOffset = ((receiveTime - originateTime) + (transmitTime - responseTime))/2
-            //             = ((originateTime + transit + skew - originateTime) +
-            //                (transmitTime - (transmitTime + transit - skew)))/2
-            //             = ((transit + skew) + (transmitTime - transmitTime - transit + skew))/2
-            //             = (transit + skew - transit + skew)/2
-            //             = (2 * skew)/2 = skew
-            long clockOffset = ((receiveTime - originateTime) + (transmitTime - responseTime))/2;
-            EventLogTags.writeNtpSuccess(address.toString(), roundTripTime, clockOffset);
+            long roundTripTimeMillis = responseTicks - requestTicks
+                    - (transmitTimestamp - receiveTimestamp);
+
+            Duration clockOffsetDuration = calculateClockOffset(requestTimestamp,
+                    receiveTimestamp, transmitTimestamp, responseTimestamp);
+            long clockOffsetMillis = clockOffsetDuration.toMillis();
+
+            EventLogTags.writeNtpSuccess(
+                    address.toString(), roundTripTimeMillis, clockOffsetMillis);
             if (DBG) {
-                Log.d(TAG, "round trip: " + roundTripTime + "ms, " +
-                        "clock offset: " + clockOffset + "ms");
+                Log.d(TAG, "round trip: " + roundTripTimeMillis + "ms, "
+                        + "clock offset: " + clockOffsetMillis + "ms");
             }
 
             // save our results - use the times on this side of the network latency
             // (response rather than request time)
-            mNtpTime = responseTime + clockOffset;
+            mClockOffset = clockOffsetMillis;
+            mNtpTime = responseTime.plus(clockOffsetDuration).toEpochMilli();
             mNtpTimeReference = responseTicks;
-            mRoundTripTime = roundTripTime;
+            mRoundTripTime = roundTripTimeMillis;
         } catch (Exception e) {
             EventLogTags.writeNtpFailure(address.toString(), e.toString());
             if (DBG) Log.d(TAG, "request time failed: " + e);
@@ -186,11 +205,37 @@ public class SntpClient {
         return true;
     }
 
+    /** Performs the NTP clock offset calculation. */
+    @VisibleForTesting
+    public static Duration calculateClockOffset(long clientRequestTimestamp,
+            long serverReceiveTimestamp, long serverTransmitTimestamp,
+            long clientResponseTimestamp) {
+        // receiveTime = originateTime + transit + skew
+        // responseTime = transmitTime + transit - skew
+        // clockOffset = ((receiveTime - originateTime) + (transmitTime - responseTime))/2
+        //             = ((originateTime + transit + skew - originateTime) +
+        //                (transmitTime - (transmitTime + transit - skew)))/2
+        //             = ((transit + skew) + (transmitTime - transmitTime - transit + skew))/2
+        //             = (transit + skew - transit + skew)/2
+        //             = (2 * skew)/2 = skew
+        long clockOffsetMillis = ((serverReceiveTimestamp - clientRequestTimestamp)
+                + (serverTransmitTimestamp - clientResponseTimestamp)) / 2;
+        return Duration.ofMillis(clockOffsetMillis);
+    }
+
     @Deprecated
     @UnsupportedAppUsage
     public boolean requestTime(String host, int timeout) {
         Log.w(TAG, "Shame on you for calling the hidden API requestTime()!");
         return false;
+    }
+
+    /**
+     * Returns the offset calculated to apply to the client clock to arrive at {@link #getNtpTime()}
+     */
+    @VisibleForTesting
+    public long getClockOffset() {
+        return mClockOffset;
     }
 
     /**
