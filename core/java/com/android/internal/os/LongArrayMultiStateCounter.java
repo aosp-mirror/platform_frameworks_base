@@ -26,6 +26,8 @@ import dalvik.annotation.optimization.FastNative;
 
 import libcore.util.NativeAllocationRegistry;
 
+import java.util.Arrays;
+
 /**
  * Performs per-state counting of multi-element values over time. The class' behavior is illustrated
  * by this example:
@@ -62,7 +64,9 @@ public final class LongArrayMultiStateCounter implements Parcelable {
                 NativeAllocationRegistry.createMalloced(
                         LongArrayContainer.class.getClassLoader(), native_getReleaseFunc());
 
-        private final long mNativeObject;
+        // Visible to other objects in this package so that it can be passed to @CriticalNative
+        // methods.
+        final long mNativeObject;
         private final int mLength;
 
         public LongArrayContainer(int length) {
@@ -91,6 +95,13 @@ public final class LongArrayMultiStateCounter implements Parcelable {
                         "Invalid array length: " + mLength + ", expected: " + mLength);
             }
             native_getValues(mNativeObject, array);
+        }
+
+        @Override
+        public String toString() {
+            final long[] array = new long[mLength];
+            getValues(array);
+            return Arrays.toString(array);
         }
 
         @CriticalNative
@@ -133,6 +144,14 @@ public final class LongArrayMultiStateCounter implements Parcelable {
         mLength = native_getArrayLength(mNativeObject);
     }
 
+    public int getStateCount() {
+        return mStateCount;
+    }
+
+    public int getArrayLength() {
+        return mLength;
+    }
+
     /**
      * Enables or disables the counter.  When the counter is disabled, it does not
      * accumulate counts supplied by the {@link #updateValues} method.
@@ -147,7 +166,7 @@ public final class LongArrayMultiStateCounter implements Parcelable {
     public void setState(int state, long timestampMs) {
         if (state < 0 || state >= mStateCount) {
             throw new IllegalArgumentException(
-                    "State: " + state + ", outside the range: [0-" + mStateCount + "]");
+                    "State: " + state + ", outside the range: [0-" + (mStateCount - 1) + "]");
         }
         native_setState(mNativeObject, state, timestampMs);
     }
@@ -164,6 +183,17 @@ public final class LongArrayMultiStateCounter implements Parcelable {
                             + mLength);
         }
         native_updateValues(mNativeObject, longArrayContainer.mNativeObject, timestampMs);
+    }
+
+    /**
+     * Adds the supplied values to the current accumulated values in the counter.
+     */
+    public void addCounts(LongArrayContainer counts) {
+        if (counts.mLength != mLength) {
+            throw new IllegalArgumentException(
+                    "Invalid array length: " + counts.mLength + ", expected: " + mLength);
+        }
+        native_addCounts(mNativeObject, counts.mNativeObject);
     }
 
     /**
@@ -229,6 +259,10 @@ public final class LongArrayMultiStateCounter implements Parcelable {
     @CriticalNative
     private static native void native_updateValues(long nativeObject,
             long longArrayContainerNativeObject, long timestampMs);
+
+    @CriticalNative
+    private static native void native_addCounts(long nativeObject,
+            long longArrayContainerNativeObject);
 
     @CriticalNative
     private static native void native_reset(long nativeObject);
