@@ -30,6 +30,7 @@ public class OptionsSipResponse implements Parcelable {
     private int mSipResponseCode = 0;
     private int mRetryAfter = 0;
     private String mReasonPhrase = "";
+    private String mReasonHeader = "";
 
     /**
      * Gets the Options command ID.
@@ -117,6 +118,22 @@ public class OptionsSipResponse implements Parcelable {
     }
 
     /**
+     * Gets the reason header associated with the SIP response code.
+     * @hide
+     */
+    public String getReasonHeader() {
+        return mReasonHeader;
+    }
+
+    /**
+     * Sets the SIP response code reason phrase.
+     * @hide
+     */
+    public void setReasonHeader(String reasonHeader) {
+        this.mReasonHeader = reasonHeader;
+    }
+
+    /**
      * Constructor for the OptionsSipResponse class.
      * @hide
      */
@@ -138,6 +155,7 @@ public class OptionsSipResponse implements Parcelable {
         dest.writeString(mReasonPhrase);
         dest.writeParcelable(mCmdId, flags);
         dest.writeInt(mRetryAfter);
+        dest.writeString(mReasonHeader);
     }
 
     /** @hide */
@@ -164,5 +182,6 @@ public class OptionsSipResponse implements Parcelable {
         mReasonPhrase = source.readString();
         mCmdId = source.readParcelable(OptionsCmdId.class.getClassLoader());
         mRetryAfter = source.readInt();
+        mReasonHeader = source.readString();
     }
 }

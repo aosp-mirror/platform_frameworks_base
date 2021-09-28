@@ -4464,11 +4464,11 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link
-     * android.media.MediaTranscodeManager} for transcoding media.
+     * android.media.MediaTranscodingManager} for transcoding media.
      *
      * @hide
      * @see #getSystemService(String)
-     * @see android.media.MediaTranscodeManager
+     * @see android.media.MediaTranscodingManager
      */
     @SystemApi
     public static final String MEDIA_TRANSCODING_SERVICE = "media_transcoding";

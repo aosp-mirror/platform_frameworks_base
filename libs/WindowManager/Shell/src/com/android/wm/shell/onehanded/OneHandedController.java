@@ -307,6 +307,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
         mAccessibilityManager.addAccessibilityStateChangeListener(
                 mAccessibilityStateChangeListener);
 
+        mState.addSListeners(mBackgroundPanelOrganizer);
         mState.addSListeners(mTutorialHandler);
     }
 

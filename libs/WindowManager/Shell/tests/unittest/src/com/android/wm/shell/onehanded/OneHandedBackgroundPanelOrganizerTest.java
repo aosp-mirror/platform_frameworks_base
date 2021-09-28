@@ -19,6 +19,9 @@ package com.android.wm.shell.onehanded;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.DisplayAreaOrganizer.FEATURE_ONE_HANDED_BACKGROUND_PANEL;
 
+import static com.android.wm.shell.onehanded.OneHandedState.STATE_ACTIVE;
+import static com.android.wm.shell.onehanded.OneHandedState.STATE_NONE;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -108,5 +111,21 @@ public class OneHandedBackgroundPanelOrganizerTest extends OneHandedTestCase {
         mSpiedBackgroundPanelOrganizer.removeBackgroundPanelLayer();
 
         assertThat(mSpiedBackgroundPanelOrganizer.mBackgroundSurface).isNull();
+    }
+
+    @Test
+    public void testStateNone_onConfigurationChanged() {
+        mSpiedBackgroundPanelOrganizer.onStateChanged(STATE_NONE);
+        mSpiedBackgroundPanelOrganizer.onConfigurationChanged();
+
+        verify(mSpiedBackgroundPanelOrganizer, never()).showBackgroundPanelLayer();
+    }
+
+    @Test
+    public void testStateActivate_onConfigurationChanged() {
+        mSpiedBackgroundPanelOrganizer.onStateChanged(STATE_ACTIVE);
+        mSpiedBackgroundPanelOrganizer.onConfigurationChanged();
+
+        verify(mSpiedBackgroundPanelOrganizer).showBackgroundPanelLayer();
     }
 }

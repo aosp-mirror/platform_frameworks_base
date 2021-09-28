@@ -1021,7 +1021,15 @@ public final class SensorPrivacyService extends SystemService {
                 }
             }
 
-            return upgradeAndInit(version, map);
+            try {
+                return upgradeAndInit(version, map);
+            } catch (Exception e) {
+                Log.wtf(TAG, "Failed to upgrade and set sensor privacy state,"
+                        + " resetting to default.", e);
+                mEnabled = new SparseBooleanArray();
+                mIndividualEnabled = new SparseArray<>();
+                return true;
+            }
         }
 
         private boolean upgradeAndInit(int version, SparseArray map) {
@@ -1037,22 +1045,22 @@ public final class SensorPrivacyService extends SystemService {
             final int[] users = getLocalService(UserManagerInternal.class).getUserIds();
             if (version == 0) {
                 final boolean enabled = (boolean) map.get(VER0_ENABLED);
-                final SparseBooleanArray individualEnabled =
-                        (SparseBooleanArray) map.get(VER0_INDIVIDUAL_ENABLED);
+                final SparseArray<SensorState> individualEnabled =
+                        (SparseArray<SensorState>) map.get(VER0_INDIVIDUAL_ENABLED);
 
                 final SparseBooleanArray perUserEnabled = new SparseBooleanArray();
-                final SparseArray<SparseBooleanArray> perUserIndividualEnabled =
+                final SparseArray<SparseArray<SensorState>> perUserIndividualEnabled =
                         new SparseArray<>();
 
                 // Copy global state to each user
                 for (int i = 0; i < users.length; i++) {
                     int user = users[i];
                     perUserEnabled.put(user, enabled);
-                    SparseBooleanArray userIndividualSensorEnabled = new SparseBooleanArray();
+                    SparseArray<SensorState> userIndividualSensorEnabled = new SparseArray<>();
                     perUserIndividualEnabled.put(user, userIndividualSensorEnabled);
                     for (int j = 0; j < individualEnabled.size(); j++) {
                         final int sensor = individualEnabled.keyAt(j);
-                        final boolean isSensorEnabled = individualEnabled.valueAt(j);
+                        final SensorState isSensorEnabled = individualEnabled.valueAt(j);
                         userIndividualSensorEnabled.put(sensor, isSensorEnabled);
                     }
                 }
