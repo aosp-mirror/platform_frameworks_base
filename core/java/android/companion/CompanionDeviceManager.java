@@ -445,10 +445,7 @@ public final class CompanionDeviceManager {
     }
 
     /**
-     * Dispatch received message to system for processing.
-     *
-     * <p>Messages received from {@link CompanionDeviceService#onSendMessage}, which is implemented
-     * on another device, need to be dispatched to system for processing.</p>
+     * Dispatch a message to system for processing.
      *
      * <p>Calling app must declare uses-permission
      * {@link android.Manifest.permission#DELIVER_COMPANION_MESSAGES}</p>
@@ -463,10 +460,10 @@ public final class CompanionDeviceManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES)
-    public void receiveMessage(int messageId, int associationId, @NonNull byte[] message)
+    public void dispatchMessage(int messageId, int associationId, @NonNull byte[] message)
             throws DeviceNotAssociatedException {
         try {
-            mService.receiveMessage(messageId, associationId, message);
+            mService.dispatchMessage(messageId, associationId, message);
         } catch (RemoteException e) {
             ExceptionUtils.propagateIfInstanceOf(e.getCause(), DeviceNotAssociatedException.class);
             throw e.rethrowFromSystemServer();
