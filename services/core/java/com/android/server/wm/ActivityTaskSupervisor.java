@@ -2474,102 +2474,126 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         }
     }
 
+    /**
+     * Start the given task from the recent tasks. Do not hold WM global lock when calling this
+     * method to avoid potential deadlock or permission deny by UriGrantsManager when resolving
+     * activity (see {@link ActivityStarter.Request#resolveActivity} and
+     * {@link com.android.server.am.ContentProviderHelper#checkContentProviderUriPermission}).
+     *
+     * @return The result code of starter.
+     */
     int startActivityFromRecents(int callingPid, int callingUid, int taskId,
             SafeActivityOptions options) {
-        Task task = null;
+        final Task task;
+        final int taskCallingUid;
         final String callingPackage;
         final String callingFeatureId;
         final Intent intent;
         final int userId;
-        int activityType = ACTIVITY_TYPE_UNDEFINED;
-        int windowingMode = WINDOWING_MODE_UNDEFINED;
         final ActivityOptions activityOptions = options != null
                 ? options.getOptions(this)
                 : null;
         boolean moveHomeTaskForward = true;
-        if (activityOptions != null) {
-            activityType = activityOptions.getLaunchActivityType();
-            windowingMode = activityOptions.getLaunchWindowingMode();
-            if (activityOptions.freezeRecentTasksReordering()
-                    && mRecentTasks.isCallerRecents(callingUid)) {
-                mRecentTasks.setFreezeTaskListReordering();
+        synchronized (mService.mGlobalLock) {
+            int activityType = ACTIVITY_TYPE_UNDEFINED;
+            if (activityOptions != null) {
+                activityType = activityOptions.getLaunchActivityType();
+                final int windowingMode = activityOptions.getLaunchWindowingMode();
+                if (activityOptions.freezeRecentTasksReordering()
+                        && mRecentTasks.isCallerRecents(callingUid)) {
+                    mRecentTasks.setFreezeTaskListReordering();
+                }
+                if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
+                        || activityOptions.getLaunchRootTask() != null) {
+                    // Don't move home activity forward if we are launching into primary split or
+                    // there is a launch root set.
+                    moveHomeTaskForward = false;
+                }
             }
-            if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
-                    || activityOptions.getLaunchRootTask() != null) {
-                // Don't move home activity forward if we are launching into primary split or there
-                // is a launch root set.
-                moveHomeTaskForward = false;
-            }
-        }
-        if (activityType == ACTIVITY_TYPE_HOME || activityType == ACTIVITY_TYPE_RECENTS) {
-            throw new IllegalArgumentException("startActivityFromRecents: Task "
-                    + taskId + " can't be launch in the home/recents root task.");
-        }
-
-        mService.deferWindowLayout();
-        try {
-            task = mRootWindowContainer.anyTaskForId(taskId,
-                    MATCH_ATTACHED_TASK_OR_RECENT_TASKS_AND_RESTORE, activityOptions, ON_TOP);
-            if (task == null) {
-                mWindowManager.executeAppTransition();
-                throw new IllegalArgumentException(
-                        "startActivityFromRecents: Task " + taskId + " not found.");
+            if (activityType == ACTIVITY_TYPE_HOME || activityType == ACTIVITY_TYPE_RECENTS) {
+                throw new IllegalArgumentException("startActivityFromRecents: Task "
+                        + taskId + " can't be launch in the home/recents root task.");
             }
 
-            if (moveHomeTaskForward) {
-                // We always want to return to the home activity instead of the recents activity
-                // from whatever is started from the recents activity, so move the home root task
-                // forward.
-                // TODO (b/115289124): Multi-display supports for recents.
-                mRootWindowContainer.getDefaultTaskDisplayArea().moveHomeRootTaskToFront(
-                        "startActivityFromRecents");
-            }
-
-            // If the user must confirm credentials (e.g. when first launching a work app and the
-            // Work Challenge is present) let startActivityInPackage handle the intercepting.
-            if (!mService.mAmInternal.shouldConfirmCredentials(task.mUserId)
-                    && task.getRootActivity() != null) {
-                final ActivityRecord targetActivity = task.getTopNonFinishingActivity();
-
-                mRootWindowContainer.startPowerModeLaunchIfNeeded(
-                        true /* forceSend */, targetActivity);
-                final LaunchingState launchingState =
-                        mActivityMetricsLogger.notifyActivityLaunching(task.intent);
-                try {
-                    mService.moveTaskToFrontLocked(null /* appThread */, null /* callingPackage */,
-                            task.mTaskId, 0, options);
-                    // Apply options to prevent pendingOptions be taken when scheduling activity
-                    // lifecycle transaction to make sure the override pending app transition will
-                    // be applied immediately.
-                    targetActivity.applyOptionsAnimation();
-                } finally {
-                    mActivityMetricsLogger.notifyActivityLaunched(launchingState,
-                            START_TASK_TO_FRONT, false /* newActivityCreated */, targetActivity,
-                            activityOptions);
+            boolean shouldStartActivity = false;
+            mService.deferWindowLayout();
+            try {
+                task = mRootWindowContainer.anyTaskForId(taskId,
+                        MATCH_ATTACHED_TASK_OR_RECENT_TASKS_AND_RESTORE, activityOptions, ON_TOP);
+                if (task == null) {
+                    mWindowManager.executeAppTransition();
+                    throw new IllegalArgumentException(
+                            "startActivityFromRecents: Task " + taskId + " not found.");
                 }
 
-                mService.getActivityStartController().postStartActivityProcessingForLastStarter(
-                        task.getTopNonFinishingActivity(), ActivityManager.START_TASK_TO_FRONT,
-                        task.getRootTask());
+                if (moveHomeTaskForward) {
+                    // We always want to return to the home activity instead of the recents
+                    // activity from whatever is started from the recents activity, so move
+                    // the home root task forward.
+                    // TODO (b/115289124): Multi-display supports for recents.
+                    mRootWindowContainer.getDefaultTaskDisplayArea().moveHomeRootTaskToFront(
+                            "startActivityFromRecents");
+                }
 
-                // As it doesn't go to ActivityStarter.executeRequest() path, we need to resume
-                // app switching here also.
-                mService.resumeAppSwitches();
+                // If the user must confirm credentials (e.g. when first launching a work
+                // app and the Work Challenge is present) let startActivityInPackage handle
+                // the intercepting.
+                if (!mService.mAmInternal.shouldConfirmCredentials(task.mUserId)
+                        && task.getRootActivity() != null) {
+                    final ActivityRecord targetActivity = task.getTopNonFinishingActivity();
 
-                return ActivityManager.START_TASK_TO_FRONT;
+                    mRootWindowContainer.startPowerModeLaunchIfNeeded(
+                            true /* forceSend */, targetActivity);
+                    final LaunchingState launchingState =
+                            mActivityMetricsLogger.notifyActivityLaunching(task.intent);
+                    try {
+                        mService.moveTaskToFrontLocked(null /* appThread */,
+                                null /* callingPackage */, task.mTaskId, 0, options);
+                        // Apply options to prevent pendingOptions be taken when scheduling
+                        // activity lifecycle transaction to make sure the override pending app
+                        // transition will be applied immediately.
+                        targetActivity.applyOptionsAnimation();
+                    } finally {
+                        mActivityMetricsLogger.notifyActivityLaunched(launchingState,
+                                START_TASK_TO_FRONT, false /* newActivityCreated */,
+                                targetActivity, activityOptions);
+                    }
+
+                    mService.getActivityStartController().postStartActivityProcessingForLastStarter(
+                            task.getTopNonFinishingActivity(), ActivityManager.START_TASK_TO_FRONT,
+                            task.getRootTask());
+
+                    // As it doesn't go to ActivityStarter.executeRequest() path, we need to resume
+                    // app switching here also.
+                    mService.resumeAppSwitches();
+                    return ActivityManager.START_TASK_TO_FRONT;
+                }
+                // The task is empty or needs to show the confirmation for credential.
+                shouldStartActivity = true;
+            } finally {
+                if (!shouldStartActivity) {
+                    mService.continueWindowLayout();
+                }
             }
+            taskCallingUid = task.mCallingUid;
             callingPackage = task.mCallingPackage;
             callingFeatureId = task.mCallingFeatureId;
             intent = task.intent;
             intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
             userId = task.mUserId;
-            return mService.getActivityStartController().startActivityInPackage(task.mCallingUid,
+        }
+        // ActivityStarter will acquire the lock where the places need, so execute the request
+        // outside of the lock.
+        try {
+            return mService.getActivityStartController().startActivityInPackage(taskCallingUid,
                     callingPid, callingUid, callingPackage, callingFeatureId, intent, null, null,
                     null, 0, 0, options, userId, task, "startActivityFromRecents",
                     false /* validateIncomingUser */, null /* originatingPendingIntent */,
                     false /* allowBackgroundActivityStart */);
         } finally {
-            mService.continueWindowLayout();
+            synchronized (mService.mGlobalLock) {
+                mService.continueWindowLayout();
+            }
         }
     }
 
