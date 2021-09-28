@@ -33,8 +33,8 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /**
@@ -231,31 +231,24 @@ public class ScrollCaptureConnection extends IScrollCaptureConnection.Stub {
 
     private static class SafeCallback<T> {
         private final CancellationSignal mSignal;
-        private final WeakReference<T> mTargetRef;
         private final Executor mExecutor;
-        private boolean mExecuted;
+        private final AtomicReference<T> mValue;
 
-        protected SafeCallback(CancellationSignal signal, Executor executor, T target) {
+        protected SafeCallback(CancellationSignal signal, Executor executor, T value) {
             mSignal = signal;
-            mTargetRef = new WeakReference<>(target);
+            mValue = new AtomicReference<T>(value);
             mExecutor = executor;
         }
 
-        // Provide the target to the consumer to invoke, forward on handler thread ONCE,
-        // and only if noy cancelled, and the target is still available (not collected)
-        protected final void maybeAccept(Consumer<T> targetConsumer) {
-            if (mExecuted) {
-                return;
-            }
-            mExecuted = true;
+        // Provide the value to the consumer to accept only once.
+        protected final void maybeAccept(Consumer<T> consumer) {
+            T value = mValue.getAndSet(null);
             if (mSignal.isCanceled()) {
                 return;
             }
-            T target = mTargetRef.get();
-            if (target == null) {
-                return;
+            if (value != null) {
+                mExecutor.execute(() -> consumer.accept(value));
             }
-            mExecutor.execute(() -> targetConsumer.accept(target));
         }
 
         static Runnable create(CancellationSignal signal, Executor executor, Runnable target) {
