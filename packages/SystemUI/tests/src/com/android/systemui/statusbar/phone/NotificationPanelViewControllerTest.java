@@ -778,6 +778,18 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testSwitchesToBigClockInSplitShadeOnAod() {
+        mStatusBarStateController.setState(KEYGUARD);
+        enableSplitShade(/* enabled= */ true);
+        when(mMediaDataManager.hasActiveMedia()).thenReturn(true);
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+
+        mNotificationPanelViewController.setDozing(true, false, null);
+
+        verify(mKeyguardStatusViewController).displayClock(LARGE);
+    }
+
+    @Test
     public void testDisplaysSmallClockOnLockscreenInSplitShadeWhenMediaIsPlaying() {
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
