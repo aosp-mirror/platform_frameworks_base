@@ -445,6 +445,20 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         verify(smartspaceView2).registerDataProvider(plugin)
     }
 
+    @Test
+    fun testConnectAttemptBeforeInitializationShouldNotCreateSession() {
+        // GIVEN an uninitalized smartspaceView
+        // WHEN the device is provisioned
+        `when`(deviceProvisionedController.isDeviceProvisioned()).thenReturn(true)
+        `when`(deviceProvisionedController.isCurrentUserSetup()).thenReturn(true)
+        deviceProvisionedListener.onDeviceProvisionedChanged()
+
+        // THEN no calls to createSmartspaceSession should occur
+        verify(smartspaceManager, never()).createSmartspaceSession(any())
+        // THEN no listeners should be registered
+        verify(configurationController, never()).addCallback(any())
+    }
+
     private fun connectSession() {
         val view = controller.buildAndConnectView(fakeParent)
         smartspaceView = view as SmartspaceView

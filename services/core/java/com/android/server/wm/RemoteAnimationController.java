@@ -65,7 +65,6 @@ class RemoteAnimationController implements DeathRecipient {
             new ArrayList<>();
     @VisibleForTesting
     final ArrayList<NonAppWindowAnimationAdapter> mPendingNonAppAnimations = new ArrayList<>();
-    private final Rect mTmpRect = new Rect();
     private final Handler mHandler;
     private final Runnable mTimeoutRunnable = () -> cancelAnimation("timeoutRunnable");
 
@@ -85,18 +84,18 @@ class RemoteAnimationController implements DeathRecipient {
      * Creates an animation record for each individual {@link WindowContainer}.
      *
      * @param windowContainer The windows to animate.
-     * @param position The position app bounds, in screen coordinates.
+     * @param position The position app bounds relative to its parent.
      * @param localBounds The bounds of the app relative to its parent.
-     * @param stackBounds The stack bounds of the app relative to position.
-     * @param startBounds The stack bounds before the transition, in screen coordinates
+     * @param endBounds The end bounds after the transition, in screen coordinates.
+     * @param startBounds The start bounds before the transition, in screen coordinates.
      * @return The record representing animation(s) to run on the app.
      */
     RemoteAnimationRecord createRemoteAnimationRecord(WindowContainer windowContainer,
-            Point position, Rect localBounds, Rect stackBounds, Rect startBounds) {
+            Point position, Rect localBounds, Rect endBounds, Rect startBounds) {
         ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "createAnimationAdapter(): container=%s",
                 windowContainer);
         final RemoteAnimationRecord adapters = new RemoteAnimationRecord(windowContainer, position,
-                localBounds, stackBounds, startBounds);
+                localBounds, endBounds, startBounds);
         mPendingAnimations.add(adapters);
         return adapters;
     }
@@ -405,16 +404,17 @@ class RemoteAnimationController implements DeathRecipient {
                 mStartBounds = new Rect(startBounds);
                 mAdapter = new RemoteAnimationAdapterWrapper(this, endPos, localBounds, endBounds,
                         mStartBounds);
-                mTmpRect.set(startBounds);
-                mTmpRect.offsetTo(0, 0);
                 if (mRemoteAnimationAdapter.getChangeNeedsSnapshot()) {
-                    mThumbnailAdapter =
-                            new RemoteAnimationAdapterWrapper(this, new Point(0, 0), localBounds,
-                                    mTmpRect, new Rect());
+                    final Rect thumbnailLocalBounds = new Rect(startBounds);
+                    thumbnailLocalBounds.offsetTo(0, 0);
+                    // Snapshot is located at (0,0) of the animation leash. It doesn't have size
+                    // change, so the startBounds is its end bounds, and no start bounds for it.
+                    mThumbnailAdapter = new RemoteAnimationAdapterWrapper(this, new Point(0, 0),
+                            thumbnailLocalBounds, startBounds, new Rect());
                 }
             } else {
                 mAdapter = new RemoteAnimationAdapterWrapper(this, endPos, localBounds, endBounds,
-                        new Rect(endPos.x, endPos.y, endBounds.right, endBounds.bottom));
+                        new Rect());
                 mStartBounds = null;
             }
         }
@@ -458,15 +458,15 @@ class RemoteAnimationController implements DeathRecipient {
         private @AnimationType int mAnimationType;
         final Point mPosition = new Point();
         final Rect mLocalBounds;
-        final Rect mRootTaskBounds = new Rect();
+        final Rect mEndBounds = new Rect();
         final Rect mStartBounds = new Rect();
 
         RemoteAnimationAdapterWrapper(RemoteAnimationRecord record, Point position,
-                Rect localBounds, Rect rootTaskBounds, Rect startBounds) {
+                Rect localBounds, Rect endBounds, Rect startBounds) {
             mRecord = record;
             mPosition.set(position.x, position.y);
             mLocalBounds = localBounds;
-            mRootTaskBounds.set(rootTaskBounds);
+            mEndBounds.set(endBounds);
             mStartBounds.set(startBounds);
         }
 
@@ -480,12 +480,17 @@ class RemoteAnimationController implements DeathRecipient {
                 @AnimationType int type, OnAnimationFinishedCallback finishCallback) {
             ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "startAnimation");
 
-            // Restore position and stack crop until client has a chance to modify it.
             if (mStartBounds.isEmpty()) {
-                t.setPosition(animationLeash, 0, 0);
-                t.setWindowCrop(animationLeash, -1, -1);
+                // Restore position and stack crop until client has a chance to modify it.
+                t.setPosition(animationLeash, mPosition.x, mPosition.y);
+                t.setWindowCrop(animationLeash, mEndBounds.width(), mEndBounds.height());
             } else {
-                t.setPosition(animationLeash, mStartBounds.left, mStartBounds.top);
+                // Offset the change animation leash to the relative start position in parent.
+                // (mPosition) is the relative end position in parent container.
+                // (mStartBounds - mEndBounds) is the position difference between start and end.
+                // (mPosition + mStartBounds - mEndBounds) will be the relative start position.
+                t.setPosition(animationLeash, mPosition.x + mStartBounds.left - mEndBounds.left,
+                        mPosition.y + mStartBounds.top - mEndBounds.top);
                 t.setWindowCrop(animationLeash, mStartBounds.width(), mStartBounds.height());
             }
             mCapturedLeash = animationLeash;

@@ -95,7 +95,6 @@ public class AppCompatOverridesServiceTest {
     private static final String PACKAGE_2 = "com.android.test2";
     private static final String PACKAGE_3 = "com.android.test3";
     private static final String PACKAGE_4 = "com.android.test4";
-    private static final String PACKAGE_5 = "com.android.test5";
 
     private MockContext mMockContext;
     private BroadcastReceiver mPackageReceiver;
@@ -157,16 +156,14 @@ public class AppCompatOverridesServiceTest {
         mockGetApplicationInfoNotInstalled(PACKAGE_2);
         mockGetApplicationInfo(PACKAGE_3, /* versionCode= */ 10);
         mockGetApplicationInfo(PACKAGE_4, /* versionCode= */ 1);
-        mockGetApplicationInfo(PACKAGE_5, /* versionCode= */ 1);
 
         mService.registerDeviceConfigListeners();
         DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
-                .setString(PACKAGE_1, "123:::true,456::1:false,456:2::true")
+                .setString(FLAG_OWNED_CHANGE_IDS, "123,456,789")
+                .setString(PACKAGE_1, "123:::true,456::1:false,456:2::true,789:::false")
                 .setString(PACKAGE_2, "123:::true")
-                .setString(PACKAGE_3, "123:1:9:true,123:10:11:false,123:11::true,456:::")
-                .setString(PACKAGE_4, "")
-                .setString(PACKAGE_5, "123:::,789:::")
-                .setString(FLAG_OWNED_CHANGE_IDS, "123,456,789").build());
+                .setString(PACKAGE_3, "123:1:9:true,123:10:11:false,123:11::true")
+                .setString(PACKAGE_4, "").build());
 
         Map<Long, PackageOverride> addedOverrides;
         // Package 1
@@ -175,11 +172,13 @@ public class AppCompatOverridesServiceTest {
         verify(mPlatformCompat, never()).removeOverridesOnReleaseBuilds(
                 any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_1));
         addedOverrides = mOverridesToAddConfigCaptor.getValue().overrides;
-        assertThat(addedOverrides).hasSize(2);
+        assertThat(addedOverrides).hasSize(3);
         assertThat(addedOverrides.get(123L)).isEqualTo(
                 new PackageOverride.Builder().setEnabled(true).build());
         assertThat(addedOverrides.get(456L)).isEqualTo(
                 new PackageOverride.Builder().setMinVersionCode(2).setEnabled(true).build());
+        assertThat(addedOverrides.get(789L)).isEqualTo(
+                new PackageOverride.Builder().setEnabled(false).build());
         // Package 2
         verify(mPlatformCompat, never()).putOverridesOnReleaseBuilds(
                 any(CompatibilityOverrideConfig.class), eq(PACKAGE_2));
@@ -195,24 +194,37 @@ public class AppCompatOverridesServiceTest {
         assertThat(addedOverrides.get(123L)).isEqualTo(
                 new PackageOverride.Builder().setMinVersionCode(10).setMaxVersionCode(
                         11).setEnabled(false).build());
-        assertThat(mOverridesToRemoveConfigCaptor.getValue().changeIds).containsExactly(456L);
+        assertThat(mOverridesToRemoveConfigCaptor.getValue().changeIds).containsExactly(456L, 789L);
         // Package 4
         verify(mPlatformCompat, never()).putOverridesOnReleaseBuilds(
                 any(CompatibilityOverrideConfig.class), eq(PACKAGE_4));
-        verify(mPlatformCompat, never()).removeOverridesOnReleaseBuilds(
-                any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_4));
-        // Package 5
-        verify(mPlatformCompat, never()).putOverridesOnReleaseBuilds(
-                any(CompatibilityOverrideConfig.class), eq(PACKAGE_5));
         verify(mPlatformCompat).removeOverridesOnReleaseBuilds(
-                mOverridesToRemoveConfigCaptor.capture(), eq(PACKAGE_5));
-        assertThat(mOverridesToRemoveConfigCaptor.getValue().changeIds).containsExactly(123L, 789L);
+                mOverridesToRemoveConfigCaptor.capture(), eq(PACKAGE_4));
+        assertThat(mOverridesToRemoveConfigCaptor.getValue().changeIds).containsExactly(123L, 456L,
+                789L);
+    }
+
+    @Test
+    public void onPropertiesChanged_ownedChangeIdsFlagNotSet_onlyAddsOverrides()
+            throws Exception {
+        mockGetApplicationInfo(PACKAGE_1, /* versionCode= */ 0);
+
+        mService.registerDeviceConfigListeners();
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
+                .setString(PACKAGE_1, "123:::true").build());
+
+        verify(mPlatformCompat).putOverridesOnReleaseBuilds(mOverridesToAddConfigCaptor.capture(),
+                eq(PACKAGE_1));
+        verify(mPlatformCompat, never()).removeOverridesOnReleaseBuilds(
+                any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_1));
+        assertThat(mOverridesToAddConfigCaptor.getValue().overrides.keySet()).containsExactly(123L);
     }
 
     @Test
     public void onPropertiesChanged_removeOverridesFlagSetBefore_skipsOverridesToRemove()
             throws Exception {
         DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
+                .setString(FLAG_OWNED_CHANGE_IDS, "123,456,789")
                 .setString(FLAG_REMOVE_OVERRIDES, PACKAGE_1 + "=123:456," + PACKAGE_2 + "=123")
                 .setString(PACKAGE_1, "123:::true")
                 .setString(PACKAGE_4, "123:::true").build());
@@ -222,7 +234,7 @@ public class AppCompatOverridesServiceTest {
 
         mService.registerDeviceConfigListeners();
         DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
-                .setString(PACKAGE_1, "123:::true,456:::,789:::false")
+                .setString(PACKAGE_1, "123:::true,789:::false")
                 .setString(PACKAGE_2, "123:::true")
                 .setString(PACKAGE_3, "456:::true").build());
 
@@ -235,14 +247,16 @@ public class AppCompatOverridesServiceTest {
         // Package 2
         verify(mPlatformCompat, never()).putOverridesOnReleaseBuilds(
                 any(CompatibilityOverrideConfig.class), eq(PACKAGE_2));
-        verify(mPlatformCompat, never()).removeOverridesOnReleaseBuilds(
-                any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_2));
+        verify(mPlatformCompat).removeOverridesOnReleaseBuilds(
+                mOverridesToRemoveConfigCaptor.capture(), eq(PACKAGE_2));
+        assertThat(mOverridesToRemoveConfigCaptor.getValue().changeIds).containsExactly(456L, 789L);
         // Package 3
         verify(mPlatformCompat).putOverridesOnReleaseBuilds(mOverridesToAddConfigCaptor.capture(),
                 eq(PACKAGE_3));
-        verify(mPlatformCompat, never()).removeOverridesOnReleaseBuilds(
-                any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_3));
+        verify(mPlatformCompat).removeOverridesOnReleaseBuilds(
+                mOverridesToRemoveConfigCaptor.capture(), eq(PACKAGE_3));
         assertThat(mOverridesToAddConfigCaptor.getValue().overrides.keySet()).containsExactly(456L);
+        assertThat(mOverridesToRemoveConfigCaptor.getValue().changeIds).containsExactly(123L, 789L);
         // Package 4 (not applied because it hasn't changed after the listener was added)
         verify(mPlatformCompat, never()).putOverridesOnReleaseBuilds(
                 any(CompatibilityOverrideConfig.class), eq(PACKAGE_4));
@@ -253,27 +267,44 @@ public class AppCompatOverridesServiceTest {
     @Test
     public void onPropertiesChanged_removeOverridesFlagChangedNoPackageOverridesFlags_removesOnly()
             throws Exception {
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
+                .setString(FLAG_OWNED_CHANGE_IDS, "123,456,789")
+                .setString(PACKAGE_1, "")
+                .setString(PACKAGE_2, "").build());
+        mockGetApplicationInfo(PACKAGE_1, /* versionCode= */ 0);
+        mockGetApplicationInfo(PACKAGE_2, /* versionCode= */ 0);
+
         mService.registerDeviceConfigListeners();
         DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
                 .setString(FLAG_REMOVE_OVERRIDES,
-                        PACKAGE_1 + "=123:456," + PACKAGE_2 + "=789").build());
+                        PACKAGE_1 + "=123:456," + PACKAGE_2 + "=*").build());
 
         // Package 1
-        verify(mPlatformCompat).removeOverridesOnReleaseBuilds(
+        verify(mPlatformCompat, never()).putOverridesOnReleaseBuilds(
+                any(CompatibilityOverrideConfig.class), eq(PACKAGE_1));
+        verify(mPlatformCompat, times(2)).removeOverridesOnReleaseBuilds(
                 mOverridesToRemoveConfigCaptor.capture(), eq(PACKAGE_1));
-        assertThat(mOverridesToRemoveConfigCaptor.getValue().changeIds).containsExactly(123L, 456L);
+        List<CompatibilityOverridesToRemoveConfig> configs =
+                mOverridesToRemoveConfigCaptor.getAllValues();
+        assertThat(configs.size()).isAtLeast(2);
+        assertThat(configs.get(configs.size() - 2).changeIds).containsExactly(123L, 456L);
+        assertThat(configs.get(configs.size() - 1).changeIds).containsExactly(789L);
         // Package 2
+        verify(mPlatformCompat, never()).putOverridesOnReleaseBuilds(
+                any(CompatibilityOverrideConfig.class), eq(PACKAGE_2));
         verify(mPlatformCompat).removeOverridesOnReleaseBuilds(
                 mOverridesToRemoveConfigCaptor.capture(), eq(PACKAGE_2));
-        assertThat(mOverridesToRemoveConfigCaptor.getValue().changeIds).containsExactly(789L);
+        assertThat(mOverridesToRemoveConfigCaptor.getValue().changeIds).containsExactly(123L, 456L,
+                789L);
     }
 
     @Test
     public void onPropertiesChanged_removeOverridesFlagAndSomePackageOverrideFlagsChanged_ok()
             throws Exception {
         DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
+                .setString(FLAG_OWNED_CHANGE_IDS, "123,456,789")
                 .setString(FLAG_REMOVE_OVERRIDES, PACKAGE_1 + "=123:456")
-                .setString(PACKAGE_1, "123:::true,456:::,789:::false")
+                .setString(PACKAGE_1, "123:::true,789:::false")
                 .setString(PACKAGE_3, "456:::false,789:::true").build());
         mockGetApplicationInfo(PACKAGE_1, /* versionCode= */ 0);
         mockGetApplicationInfo(PACKAGE_2, /* versionCode= */ 0);
@@ -282,7 +313,7 @@ public class AppCompatOverridesServiceTest {
         mService.registerDeviceConfigListeners();
         DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
                 .setString(FLAG_REMOVE_OVERRIDES, PACKAGE_2 + "=123," + PACKAGE_3 + "=789")
-                .setString(PACKAGE_2, "123:::true,456:::").build());
+                .setString(PACKAGE_2, "123:::true").build());
 
         // Package 1
         verify(mPlatformCompat).putOverridesOnReleaseBuilds(mOverridesToAddConfigCaptor.capture(),
@@ -301,14 +332,17 @@ public class AppCompatOverridesServiceTest {
                 mOverridesToRemoveConfigCaptor.getAllValues();
         assertThat(configs.size()).isAtLeast(2);
         assertThat(configs.get(configs.size() - 2).changeIds).containsExactly(123L);
-        assertThat(configs.get(configs.size() - 1).changeIds).containsExactly(456L);
+        assertThat(configs.get(configs.size() - 1).changeIds).containsExactly(456L, 789L);
         // Package 3
         verify(mPlatformCompat).putOverridesOnReleaseBuilds(mOverridesToAddConfigCaptor.capture(),
                 eq(PACKAGE_3));
-        verify(mPlatformCompat).removeOverridesOnReleaseBuilds(
+        verify(mPlatformCompat, times(2)).removeOverridesOnReleaseBuilds(
                 mOverridesToRemoveConfigCaptor.capture(), eq(PACKAGE_3));
         assertThat(mOverridesToAddConfigCaptor.getValue().overrides.keySet()).containsExactly(456L);
-        assertThat(mOverridesToRemoveConfigCaptor.getValue().changeIds).containsExactly(789L);
+        configs = mOverridesToRemoveConfigCaptor.getAllValues();
+        assertThat(configs.size()).isAtLeast(2);
+        assertThat(configs.get(configs.size() - 2).changeIds).containsExactly(789L);
+        assertThat(configs.get(configs.size() - 1).changeIds).containsExactly(123L);
     }
 
     @Test
@@ -338,9 +372,10 @@ public class AppCompatOverridesServiceTest {
         // Package 2
         verify(mPlatformCompat).putOverridesOnReleaseBuilds(mOverridesToAddConfigCaptor.capture(),
                 eq(PACKAGE_2));
-        verify(mPlatformCompat, never()).removeOverridesOnReleaseBuilds(
-                any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_2));
+        verify(mPlatformCompat).removeOverridesOnReleaseBuilds(
+                mOverridesToRemoveConfigCaptor.capture(), eq(PACKAGE_2));
         assertThat(mOverridesToAddConfigCaptor.getValue().overrides.keySet()).containsExactly(123L);
+        assertThat(mOverridesToRemoveConfigCaptor.getValue().changeIds).containsExactly(456L, 789L);
         // Package 3
         verify(mPlatformCompat, never()).putOverridesOnReleaseBuilds(
                 any(CompatibilityOverrideConfig.class), eq(PACKAGE_3));
@@ -362,10 +397,11 @@ public class AppCompatOverridesServiceTest {
 
         mService.registerDeviceConfigListeners();
         DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
-                .setString(PACKAGE_1, "123:::true,456:::")
-                .setString(PACKAGE_2, "123:::true,456:::")
-                .setString(PACKAGE_3, "123:::true,456:::")
-                .setString(PACKAGE_4, "123:::true,456:::").build());
+                .setString(FLAG_OWNED_CHANGE_IDS, "123,456")
+                .setString(PACKAGE_1, "123:::true")
+                .setString(PACKAGE_2, "123:::true")
+                .setString(PACKAGE_3, "123:::true")
+                .setString(PACKAGE_4, "123:::true").build());
 
         // Package 1
         verify(mPlatformCompat).putOverridesOnReleaseBuilds(any(CompatibilityOverrideConfig.class),
@@ -478,12 +514,16 @@ public class AppCompatOverridesServiceTest {
     @Test
     public void packageReceiver_packageAddedIntent_appliesOverridesFromAllNamespaces()
             throws Exception {
+        // We're adding the owned_change_ids flag to make sure it's ignored.
         DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
-                .setString(PACKAGE_1, "101:::true,103:::")
+                .setString(FLAG_OWNED_CHANGE_IDS, "101,102,103")
+                .setString(PACKAGE_1, "101:::true")
                 .setString(PACKAGE_2, "102:::false").build());
         DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_2)
+                .setString(FLAG_OWNED_CHANGE_IDS, "201,202,203")
                 .setString(PACKAGE_3, "201:::false").build());
         DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_3)
+                .setString(FLAG_OWNED_CHANGE_IDS, "301,302")
                 .setString(PACKAGE_1, "301:::true,302:::false")
                 .setString(PACKAGE_2, "302:::false").build());
         mockGetApplicationInfo(PACKAGE_1, /* versionCode= */ 0);
@@ -493,19 +533,18 @@ public class AppCompatOverridesServiceTest {
 
         verify(mPlatformCompat, times(2)).putOverridesOnReleaseBuilds(
                 mOverridesToAddConfigCaptor.capture(), eq(PACKAGE_1));
-        verify(mPlatformCompat).removeOverridesOnReleaseBuilds(
-                mOverridesToRemoveConfigCaptor.capture(), eq(PACKAGE_1));
+        verify(mPlatformCompat, never()).removeOverridesOnReleaseBuilds(
+                any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_1));
         List<CompatibilityOverrideConfig> configs = mOverridesToAddConfigCaptor.getAllValues();
         assertThat(configs.get(0).overrides.keySet()).containsExactly(101L);
         assertThat(configs.get(1).overrides.keySet()).containsExactly(301L, 302L);
-        assertThat(mOverridesToRemoveConfigCaptor.getValue().changeIds).containsExactly(103L);
     }
 
     @Test
     public void packageReceiver_packageChangedIntent_appliesOverrides()
             throws Exception {
         DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
-                .setString(PACKAGE_1, "101:::true,103:::").build());
+                .setString(PACKAGE_1, "101:::true,103:::false").build());
         mockGetApplicationInfo(PACKAGE_1, /* versionCode= */ 0);
 
         mPackageReceiver.onReceive(mMockContext,
@@ -513,10 +552,10 @@ public class AppCompatOverridesServiceTest {
 
         verify(mPlatformCompat).putOverridesOnReleaseBuilds(
                 mOverridesToAddConfigCaptor.capture(), eq(PACKAGE_1));
-        verify(mPlatformCompat).removeOverridesOnReleaseBuilds(
-                mOverridesToRemoveConfigCaptor.capture(), eq(PACKAGE_1));
-        assertThat(mOverridesToAddConfigCaptor.getValue().overrides.keySet()).containsExactly(101L);
-        assertThat(mOverridesToRemoveConfigCaptor.getValue().changeIds).containsExactly(103L);
+        verify(mPlatformCompat, never()).removeOverridesOnReleaseBuilds(
+                any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_1));
+        assertThat(mOverridesToAddConfigCaptor.getValue().overrides.keySet()).containsExactly(101L,
+                103L);
     }
 
     @Test
@@ -524,13 +563,13 @@ public class AppCompatOverridesServiceTest {
             throws Exception {
         DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
                 .setString(FLAG_REMOVE_OVERRIDES, PACKAGE_1 + "=103," + PACKAGE_2 + "=101")
-                .setString(PACKAGE_1, "101:::true,103:::")
+                .setString(PACKAGE_1, "101:::true,103:::false")
                 .setString(PACKAGE_2, "102:::false").build());
         DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_2)
                 .setString(PACKAGE_1, "201:::false").build());
         DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_3)
                 .setString(FLAG_REMOVE_OVERRIDES, PACKAGE_1 + "=301," + PACKAGE_3 + "=302")
-                .setString(PACKAGE_1, "301:::true,302:::false,303:::")
+                .setString(PACKAGE_1, "301:::true,302:::false,303:::true")
                 .setString(PACKAGE_3, "302:::false").build());
         mockGetApplicationInfo(PACKAGE_1, /* versionCode= */ 0);
 
@@ -539,13 +578,12 @@ public class AppCompatOverridesServiceTest {
 
         verify(mPlatformCompat, times(3)).putOverridesOnReleaseBuilds(
                 mOverridesToAddConfigCaptor.capture(), eq(PACKAGE_1));
-        verify(mPlatformCompat).removeOverridesOnReleaseBuilds(
-                mOverridesToRemoveConfigCaptor.capture(), eq(PACKAGE_1));
+        verify(mPlatformCompat, never()).removeOverridesOnReleaseBuilds(
+                any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_1));
         List<CompatibilityOverrideConfig> configs = mOverridesToAddConfigCaptor.getAllValues();
         assertThat(configs.get(0).overrides.keySet()).containsExactly(101L);
         assertThat(configs.get(1).overrides.keySet()).containsExactly(201L);
-        assertThat(configs.get(2).overrides.keySet()).containsExactly(302L);
-        assertThat(mOverridesToRemoveConfigCaptor.getValue().changeIds).containsExactly(303L);
+        assertThat(configs.get(2).overrides.keySet()).containsExactly(302L, 303L);
     }
 
     @Test
@@ -573,7 +611,7 @@ public class AppCompatOverridesServiceTest {
             throws Exception {
         DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
                 .setString(FLAG_OWNED_CHANGE_IDS, "101,102,103")
-                .setString(PACKAGE_1, "101:::true,103:::").build());
+                .setString(PACKAGE_1, "101:::true,103:::false").build());
         DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_2)
                 .setString(FLAG_OWNED_CHANGE_IDS, "201,202")
                 .setString(PACKAGE_1, "202:::false").build());
@@ -593,14 +631,14 @@ public class AppCompatOverridesServiceTest {
             throws Exception {
         DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
                 .setString(FLAG_OWNED_CHANGE_IDS, "101,102,103")
-                .setString(PACKAGE_1, "101:::true,103:::")
+                .setString(PACKAGE_1, "101:::true,103:::false")
                 .setString(PACKAGE_2, "102:::false").build());
         DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_2)
                 .setString(FLAG_OWNED_CHANGE_IDS, "201")
                 .setString(PACKAGE_3, "201:::false").build());
         DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_3)
                 .setString(FLAG_OWNED_CHANGE_IDS, "301,302")
-                .setString(PACKAGE_1, "302:::")
+                .setString(PACKAGE_1, "302:::false")
                 .setString(PACKAGE_2, "301:::true").build());
         mockGetApplicationInfoNotInstalled(PACKAGE_1);
 
