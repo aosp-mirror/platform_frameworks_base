@@ -656,6 +656,45 @@ public final class UsbDescriptorParser {
         return false;
     }
 
+    private int calculateNumMidiPorts(boolean isOutput) {
+        int count = 0;
+        ArrayList<UsbDescriptor> descriptors =
+                getInterfaceDescriptorsForClass(UsbDescriptor.CLASSID_AUDIO);
+        for (UsbDescriptor descriptor : descriptors) {
+            // ensure that this isn't an unrecognized interface descriptor
+            if (descriptor instanceof UsbInterfaceDescriptor) {
+                UsbInterfaceDescriptor interfaceDescr = (UsbInterfaceDescriptor) descriptor;
+                if (interfaceDescr.getUsbSubclass() == UsbDescriptor.AUDIO_MIDISTREAMING) {
+                    for (int i = 0; i < interfaceDescr.getNumEndpoints(); i++) {
+                        UsbEndpointDescriptor endpoint = interfaceDescr.getEndpointDescriptor(i);
+                        // 0 is output, 1 << 7 is input.
+                        if ((endpoint.getDirection() == 0) == isOutput) {
+                            count++;
+                        }
+                    }
+                }
+            } else {
+                Log.w(TAG, "Undefined Audio Class Interface l: " + descriptor.getLength()
+                        + " t:0x" + Integer.toHexString(descriptor.getType()));
+            }
+        }
+        return count;
+    }
+
+    /**
+     * @hide
+     */
+    public int calculateNumMidiInputs() {
+        return calculateNumMidiPorts(false /*isOutput*/);
+    }
+
+    /**
+     * @hide
+     */
+    public int calculateNumMidiOutputs() {
+        return calculateNumMidiPorts(true /*isOutput*/);
+    }
+
     /**
      * @hide
      */
