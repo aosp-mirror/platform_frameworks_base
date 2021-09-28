@@ -104,7 +104,6 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.util.Preconditions;
@@ -618,10 +617,6 @@ public final class PowerManagerService extends SystemService
     @GuardedBy("mLock")
     private final SparseArray<PowerGroup> mPowerGroups = new SparseArray<>();
 
-    // A cached array of DisplayGroup Ids.
-    @GuardedBy("mLock")
-    private int[] mDisplayGroupIds;
-
     // We are currently in the middle of a batch change of uids.
     private boolean mUidsChanging;
 
@@ -670,7 +665,6 @@ public final class PowerManagerService extends SystemService
                         /* ready= */ false,
                         supportsSandman);
                 mPowerGroups.append(groupId, powerGroup);
-                mDisplayGroupIds = ArrayUtils.appendInt(mDisplayGroupIds, groupId);
                 onPowerGroupEventLocked(DISPLAY_GROUP_ADDED, powerGroup);
             }
         }
@@ -682,7 +676,6 @@ public final class PowerManagerService extends SystemService
                     Slog.wtf(TAG, "Tried to remove default display group: " + groupId);
                     return;
                 }
-                mDisplayGroupIds = ArrayUtils.removeInt(mDisplayGroupIds, groupId);
                 if (!mPowerGroups.contains(groupId)) {
                     Slog.e(TAG, "Tried to remove non-existent group:" + groupId);
                     return;
@@ -1172,7 +1165,6 @@ public final class PowerManagerService extends SystemService
             mBatteryManagerInternal = getLocalService(BatteryManagerInternal.class);
             mAttentionDetector.systemReady(mContext);
             mPowerGroups.append(Display.DEFAULT_DISPLAY_GROUP, new PowerGroup());
-            mDisplayGroupIds = new int[]{Display.DEFAULT_DISPLAY_GROUP};
             mDisplayGroupPowerChangeListener = new DisplayGroupPowerChangeListener();
             mDisplayManagerInternal.registerDisplayGroupListener(mDisplayGroupPowerChangeListener);
 
@@ -1509,10 +1501,10 @@ public final class PowerManagerService extends SystemService
                 opPackageName = wakeLock.mPackageName;
                 opUid = wakeLock.mOwnerUid;
             }
-            for (int id : mDisplayGroupIds) {
-                wakeDisplayGroupNoUpdateLocked(mPowerGroups.get(id), mClock.uptimeMillis(),
-                        PowerManager.WAKE_REASON_APPLICATION, wakeLock.mTag,
-                        opUid, opPackageName, opUid);
+            for (int idx = 0; idx < mPowerGroups.size(); idx++) {
+                wakeDisplayGroupNoUpdateLocked(mPowerGroups.valueAt(idx), mClock.uptimeMillis(),
+                        PowerManager.WAKE_REASON_APPLICATION, wakeLock.mTag, opUid, opPackageName,
+                        opUid);
             }
         }
     }
@@ -1770,8 +1762,9 @@ public final class PowerManagerService extends SystemService
     @GuardedBy("mLock")
     private boolean userActivityNoUpdateLocked(long eventTime, int event, int flags, int uid) {
         boolean updatePowerState = false;
-        for (int id : mDisplayGroupIds) {
-            if (userActivityNoUpdateLocked(mPowerGroups.get(id), eventTime, event, flags, uid)) {
+        for (int idx = 0; idx < mPowerGroups.size(); idx++) {
+            if (userActivityNoUpdateLocked(mPowerGroups.valueAt(idx), eventTime, event, flags,
+                    uid)) {
                 updatePowerState = true;
             }
         }
@@ -2508,8 +2501,8 @@ public final class PowerManagerService extends SystemService
                 mProfilePowerState.valueAt(i).mWakeLockSummary = 0;
             }
 
-            for (int groupId : mDisplayGroupIds) {
-                mPowerGroups.get(groupId).setWakeLockSummaryLocked(0);
+            for (int idx = 0; idx < mPowerGroups.size(); idx++) {
+                mPowerGroups.valueAt(idx).setWakeLockSummaryLocked(0);
             }
 
             int invalidGroupWakeLockSummary = 0;
@@ -2519,7 +2512,7 @@ public final class PowerManagerService extends SystemService
                 final Integer groupId = wakeLock.getDisplayGroupId();
                 // a wakelock with an invalid group ID should affect all groups
                 if (groupId == null || (groupId != Display.INVALID_DISPLAY_GROUP
-                        && !ArrayUtils.contains(mDisplayGroupIds, groupId))) {
+                        && !mPowerGroups.contains(groupId))) {
                     continue;
                 }
 
@@ -2543,8 +2536,8 @@ public final class PowerManagerService extends SystemService
                 }
             }
 
-            for (int groupId : mDisplayGroupIds) {
-                final PowerGroup powerGroup = mPowerGroups.get(groupId);
+            for (int idx = 0; idx < mPowerGroups.size(); idx++) {
+                final PowerGroup powerGroup = mPowerGroups.valueAt(idx);
                 final int wakeLockSummary = adjustWakeLockSummary(
                         powerGroup.getWakefulnessLocked(),
                         invalidGroupWakeLockSummary | powerGroup.getWakeLockSummaryLocked());
@@ -2706,10 +2699,10 @@ public final class PowerManagerService extends SystemService
         final boolean userInactiveOverride = mUserInactiveOverrideFromWindowManager;
         long nextTimeout = -1;
         boolean hasUserActivitySummary = false;
-        for (int groupId : mDisplayGroupIds) {
+        for (int idx = 0; idx < mPowerGroups.size(); idx++) {
             int groupUserActivitySummary = 0;
             long groupNextTimeout = 0;
-            final PowerGroup powerGroup = mPowerGroups.get(groupId);
+            final PowerGroup powerGroup = mPowerGroups.valueAt(idx);
             if (powerGroup.getWakefulnessLocked() != WAKEFULNESS_ASLEEP) {
                 final long lastUserActivityTime = powerGroup.getLastUserActivityTimeLocked();
                 final long lastUserActivityTimeNoChangeLights =
@@ -2789,7 +2782,7 @@ public final class PowerManagerService extends SystemService
             powerGroup.setUserActivitySummaryLocked(groupUserActivitySummary);
 
             if (DEBUG_SPEW) {
-                Slog.d(TAG, "updateUserActivitySummaryLocked: groupId=" + groupId
+                Slog.d(TAG, "updateUserActivitySummaryLocked: groupId=" + powerGroup.getGroupId()
                         + ", mWakefulness=" + wakefulnessToString(powerGroup.getWakefulnessLocked())
                         + ", mUserActivitySummary=0x" + Integer.toHexString(
                         groupUserActivitySummary)
@@ -3014,14 +3007,15 @@ public final class PowerManagerService extends SystemService
             return changed;
         }
         final long time = mClock.uptimeMillis();
-        for (int id : mDisplayGroupIds) {
-            final PowerGroup powerGroup = mPowerGroups.get(id);
+        for (int idx = 0; idx < mPowerGroups.size(); idx++) {
+            final PowerGroup powerGroup = mPowerGroups.valueAt(idx);
             if (!(powerGroup.getWakefulnessLocked() == WAKEFULNESS_AWAKE
                     && isItBedTimeYetLocked(powerGroup))) {
                 continue;
             }
             if (DEBUG_SPEW) {
-                Slog.d(TAG, "updateWakefulnessLocked: Bed time for group " + id);
+                Slog.d(TAG, "updateWakefulnessLocked: Bed time for group "
+                        + powerGroup.getGroupId());
             }
             if (isAttentiveTimeoutExpired(powerGroup, time)) {
                 if (DEBUG) {
@@ -3124,10 +3118,11 @@ public final class PowerManagerService extends SystemService
     private void scheduleSandmanLocked() {
         if (!mSandmanScheduled) {
             mSandmanScheduled = true;
-            for (int id : mDisplayGroupIds) {
-                if (mPowerGroups.get(id).supportsSandmanLocked()) {
+            for (int idx = 0; idx < mPowerGroups.size(); idx++) {
+                final PowerGroup powerGroup = mPowerGroups.valueAt(idx);
+                if (powerGroup.supportsSandmanLocked()) {
                     Message msg = mHandler.obtainMessage(MSG_SANDMAN);
-                    msg.arg1 = id;
+                    msg.arg1 = powerGroup.getGroupId();
                     msg.setAsynchronous(true);
                     mHandler.sendMessage(msg);
                 }
@@ -3148,7 +3143,7 @@ public final class PowerManagerService extends SystemService
         final int wakefulness;
         synchronized (mLock) {
             mSandmanScheduled = false;
-            if (!ArrayUtils.contains(mDisplayGroupIds, groupId)) {
+            if (!mPowerGroups.contains(groupId)) {
                 // Group has been removed.
                 return;
             }
@@ -3184,7 +3179,7 @@ public final class PowerManagerService extends SystemService
 
         // Update dream state.
         synchronized (mLock) {
-            if (!ArrayUtils.contains(mDisplayGroupIds, groupId)) {
+            if (!mPowerGroups.contains(groupId)) {
                 // Group has been removed.
                 return;
             }
@@ -3324,8 +3319,9 @@ public final class PowerManagerService extends SystemService
                 }
             }
 
-            for (final int groupId : mDisplayGroupIds) {
-                final PowerGroup powerGroup = mPowerGroups.get(groupId);
+            for (int idx = 0; idx < mPowerGroups.size(); idx++) {
+                final PowerGroup powerGroup = mPowerGroups.valueAt(idx);
+                final int groupId = powerGroup.getGroupId();
                 final DisplayPowerRequest displayPowerRequest =
                         powerGroup.getDisplayPowerRequestLocked();
                 displayPowerRequest.policy = getDesiredScreenPolicyLocked(powerGroup);
@@ -3577,8 +3573,8 @@ public final class PowerManagerService extends SystemService
         final boolean needDisplaySuspendBlocker = needDisplaySuspendBlockerLocked();
         final boolean autoSuspend = !needDisplaySuspendBlocker;
         boolean interactive = false;
-        for (int id : mDisplayGroupIds) {
-            interactive |= mPowerGroups.get(id).getDisplayPowerRequestLocked().isBrightOrDim();
+        for (int idx = 0; idx < mPowerGroups.size() && !interactive; idx++) {
+            interactive = mPowerGroups.valueAt(idx).getDisplayPowerRequestLocked().isBrightOrDim();
         }
 
         // Disable auto-suspend if needed.
@@ -3661,9 +3657,9 @@ public final class PowerManagerService extends SystemService
             return true;
         }
 
-        for (int id : mDisplayGroupIds) {
+        for (int idx = 0; idx < mPowerGroups.size(); idx++) {
             final DisplayPowerRequest displayPowerRequest =
-                    mPowerGroups.get(id).getDisplayPowerRequestLocked();
+                    mPowerGroups.valueAt(idx).getDisplayPowerRequestLocked();
             if (displayPowerRequest.isBrightOrDim()) {
                 // If we asked for the screen to be on but it is off due to the proximity
                 // sensor then we may suspend but only if the configuration allows it.
@@ -4227,8 +4223,8 @@ public final class PowerManagerService extends SystemService
                 mForceSuspendActive = true;
                 // Place the system in an non-interactive state
                 boolean updatePowerState = false;
-                for (int id : mDisplayGroupIds) {
-                    updatePowerState |= sleepDisplayGroupNoUpdateLocked(mPowerGroups.get(id),
+                for (int idx = 0; idx < mPowerGroups.size(); idx++) {
+                    updatePowerState |= sleepDisplayGroupNoUpdateLocked(mPowerGroups.valueAt(idx),
                             mClock.uptimeMillis(), PowerManager.GO_TO_SLEEP_REASON_FORCE_SUSPEND,
                             PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE, uid);
                 }
@@ -4530,9 +4526,9 @@ public final class PowerManagerService extends SystemService
             }
 
             pw.println("Display Group User Activity:");
-            for (int id : mDisplayGroupIds) {
-                final PowerGroup powerGroup = mPowerGroups.get(id);
-                pw.println("  displayGroupId=" + id);
+            for (int idx = 0; idx < mPowerGroups.size(); idx++) {
+                final PowerGroup powerGroup = mPowerGroups.valueAt(idx);
+                pw.println("  displayGroupId=" + powerGroup.getGroupId());
                 pw.println("  userActivitySummary=0x" + Integer.toHexString(
                         powerGroup.getUserActivitySummaryLocked()));
                 pw.println("  lastUserActivityTime=" + TimeUtils.formatUptime(
@@ -4628,11 +4624,12 @@ public final class PowerManagerService extends SystemService
             proto.write(PowerManagerServiceDumpProto.NOTIFY_LONG_DISPATCHED_MS, mNotifyLongDispatched);
             proto.write(PowerManagerServiceDumpProto.NOTIFY_LONG_NEXT_CHECK_MS, mNotifyLongNextCheck);
 
-            for (int id : mDisplayGroupIds) {
-                final PowerGroup powerGroup = mPowerGroups.get(id);
+            for (int idx = 0; idx < mPowerGroups.size(); idx++) {
+                final PowerGroup powerGroup = mPowerGroups.valueAt(idx);
                 final long userActivityToken = proto.start(
                         PowerManagerServiceDumpProto.USER_ACTIVITY);
-                proto.write(PowerManagerServiceDumpProto.UserActivityProto.DISPLAY_GROUP_ID, id);
+                proto.write(PowerManagerServiceDumpProto.UserActivityProto.DISPLAY_GROUP_ID,
+                        powerGroup.getGroupId());
                 final long userActivitySummary = powerGroup.getUserActivitySummaryLocked();
                 proto.write(PowerManagerServiceDumpProto.UserActivityProto.IS_SCREEN_BRIGHT,
                         (userActivitySummary & USER_ACTIVITY_SCREEN_BRIGHT) != 0);
