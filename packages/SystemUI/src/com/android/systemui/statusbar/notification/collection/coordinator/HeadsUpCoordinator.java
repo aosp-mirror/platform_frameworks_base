@@ -34,6 +34,7 @@ import com.android.systemui.statusbar.notification.collection.render.NodeControl
 import com.android.systemui.statusbar.notification.dagger.IncomingHeader;
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
+import com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
@@ -196,7 +197,8 @@ public class HeadsUpCoordinator implements Coordinator {
         }
     };
 
-    private final NotifSectioner mNotifSectioner = new NotifSectioner("HeadsUp") {
+    private final NotifSectioner mNotifSectioner = new NotifSectioner("HeadsUp",
+            NotificationPriorityBucketKt.BUCKET_HEADS_UP) {
         @Override
         public boolean isInSection(ListEntry entry) {
             return isCurrentlyShowingHun(entry);

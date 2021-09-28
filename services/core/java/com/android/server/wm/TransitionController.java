@@ -71,15 +71,7 @@ class TransitionController {
 
     final Lock mRunningLock = new Lock();
 
-    private final IBinder.DeathRecipient mTransitionPlayerDeath = () -> {
-        // clean-up/finish any playing transitions.
-        for (int i = 0; i < mPlayingTransitions.size(); ++i) {
-            mPlayingTransitions.get(i).cleanUpOnFailure();
-        }
-        mPlayingTransitions.clear();
-        mTransitionPlayer = null;
-        mRunningLock.doNotifyLocked();
-    };
+    private final IBinder.DeathRecipient mTransitionPlayerDeath;
 
     /** The transition currently being constructed (collecting participants). */
     private Transition mCollectingTransition = null;
@@ -90,6 +82,17 @@ class TransitionController {
     TransitionController(ActivityTaskManagerService atm) {
         mAtm = atm;
         mStatusBar = LocalServices.getService(StatusBarManagerInternal.class);
+        mTransitionPlayerDeath = () -> {
+            synchronized (mAtm.mGlobalLock) {
+                // Clean-up/finish any playing transitions.
+                for (int i = 0; i < mPlayingTransitions.size(); ++i) {
+                    mPlayingTransitions.get(i).cleanUpOnFailure();
+                }
+                mPlayingTransitions.clear();
+                mTransitionPlayer = null;
+                mRunningLock.doNotifyLocked();
+            }
+        };
     }
 
     /** @see #createTransition(int, int) */

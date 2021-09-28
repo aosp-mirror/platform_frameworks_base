@@ -665,7 +665,7 @@ public class InitAndSystemPackageHelper {
             return null;
         }
         final File dstCodePath =
-                PackageManagerService.getNextCodePath(Environment.getDataAppDirectory(null),
+                PackageManagerServiceUtils.getNextCodePath(Environment.getDataAppDirectory(null),
                         packageName);
         int ret = PackageManager.INSTALL_SUCCEEDED;
         try {

@@ -43,6 +43,7 @@ import android.util.Slog;
 import android.view.Surface;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
+import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -64,7 +65,8 @@ import java.io.PrintWriter;
 /**
  * Manages and manipulates the one handed states, transitions, and gesture for phones.
  */
-public class OneHandedController implements RemoteCallable<OneHandedController> {
+public class OneHandedController implements RemoteCallable<OneHandedController>,
+        DisplayChangeController.OnDisplayChangingListener {
     private static final String TAG = "OneHandedController";
 
     private static final String ONE_HANDED_MODE_OFFSET_PERCENTAGE =
@@ -105,19 +107,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
     private OneHandedDisplayAreaOrganizer mDisplayAreaOrganizer;
     private OneHandedBackgroundPanelOrganizer mBackgroundPanelOrganizer;
     private OneHandedUiEventLogger mOneHandedUiEventLogger;
-
-    /**
-     * Handle rotation based on OnDisplayChangingListener callback
-     */
-    private final DisplayChangeController.OnDisplayChangingListener mRotationController =
-            (display, fromRotation, toRotation, wct) -> {
-                if (!isInitialized()) {
-                    return;
-                }
-                mDisplayAreaOrganizer.onRotateDisplay(mContext, toRotation, wct);
-                mOneHandedUiEventLogger.writeEvent(
-                        OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_ROTATION_OUT);
-            };
 
     private final DisplayController.OnDisplaysChangedListener mDisplaysChangedListener =
             new DisplayController.OnDisplaysChangedListener() {
@@ -296,7 +285,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
                 getObserver(this::onSwipeToNotificationEnabledChanged);
         mShortcutEnabledObserver = getObserver(this::onShortcutEnabledChanged);
 
-        mDisplayController.addDisplayChangingController(mRotationController);
+        mDisplayController.addDisplayChangingController(this);
         setupCallback();
         registerSettingObservers(mUserId);
         setupTimeoutListener();
@@ -742,6 +731,27 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
                 pw.println(info);
             }
         }
+    }
+
+    /**
+     * Handles rotation based on OnDisplayChangingListener callback
+     */
+    @Override
+    public void onRotateDisplay(int displayId, int fromRotation, int toRotation,
+            WindowContainerTransaction wct) {
+        if (!isInitialized()) {
+            return;
+        }
+
+        if (!mOneHandedSettingsUtil.getSettingsOneHandedModeEnabled(mContext.getContentResolver(),
+                mUserId) || mOneHandedSettingsUtil.getSettingsSwipeToNotificationEnabled(
+                mContext.getContentResolver(), mUserId)) {
+            return;
+        }
+
+        mDisplayAreaOrganizer.onRotateDisplay(mContext, toRotation, wct);
+        mOneHandedUiEventLogger.writeEvent(
+                OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_ROTATION_OUT);
     }
 
     /**

@@ -3577,12 +3577,12 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public boolean mayPackageQuery(@NonNull String sourcePackageName,
+    public boolean canPackageQuery(@NonNull String sourcePackageName,
             @NonNull String targetPackageName) throws NameNotFoundException {
         Objects.requireNonNull(sourcePackageName);
         Objects.requireNonNull(targetPackageName);
         try {
-            return mPM.mayPackageQuery(sourcePackageName, targetPackageName, getUserId());
+            return mPM.canPackageQuery(sourcePackageName, targetPackageName, getUserId());
         } catch (ParcelableException e) {
             e.maybeRethrow(PackageManager.NameNotFoundException.class);
             throw new RuntimeException(e);

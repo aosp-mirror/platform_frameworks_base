@@ -19,7 +19,6 @@ package android.view.animation;
 import android.annotation.AnimRes;
 import android.annotation.ColorInt;
 import android.annotation.InterpolatorRes;
-import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -269,15 +268,6 @@ public abstract class Animation implements Cloneable {
         final int resID = a.getResourceId(com.android.internal.R.styleable.Animation_interpolator, 0);
 
         a.recycle();
-
-        Context uiContext = ActivityThread.currentActivityThread().getSystemUiContext();
-        TypedArray uiStyledAttrs = uiContext
-                .obtainStyledAttributes(attrs, com.android.internal.R.styleable.Animation);
-
-        setBackgroundColor(
-                uiStyledAttrs.getColor(com.android.internal.R.styleable.Animation_background, 0));
-
-        uiStyledAttrs.recycle();
 
         if (resID > 0) {
             setInterpolator(context, resID);

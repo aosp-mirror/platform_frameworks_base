@@ -186,11 +186,11 @@ class ScreenRotationAnimation {
             t.setAlpha(mBackColorSurface, 1);
             t.show(mBackColorSurface);
 
+            t.setLayer(mAnimLeash, SCREEN_FREEZE_LAYER_BASE);
             t.setPosition(mAnimLeash, 0, 0);
             t.setAlpha(mAnimLeash, 1);
             t.show(mAnimLeash);
 
-            t.setLayer(mScreenshotLayer, SCREEN_FREEZE_LAYER_BASE);
             t.setBuffer(mScreenshotLayer, buffer);
             t.setColorSpace(mScreenshotLayer, screenshotBuffer.getColorSpace());
             t.show(mScreenshotLayer);

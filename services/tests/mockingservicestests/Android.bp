@@ -37,6 +37,7 @@ android_test {
     ],
 
     static_libs: [
+        "frameworks-base-testutils",
         "services.core",
         "services.devicepolicy",
         "services.net",

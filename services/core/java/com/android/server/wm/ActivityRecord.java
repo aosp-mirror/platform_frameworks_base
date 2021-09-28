@@ -3790,8 +3790,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "Removing app token: %s", this);
 
-        commitVisibility(false /* visible */, true /* performLayout */);
-
         getDisplayContent().mOpeningApps.remove(this);
         getDisplayContent().mUnknownAppVisibilityController.appRemovedOrHidden(this);
         mWmService.mTaskSnapshotController.onAppRemoved(this);
@@ -3799,8 +3797,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mTaskSupervisor.mStoppingActivities.remove(this);
         waitingToShow = false;
 
-        // TODO(b/169035022): move to a more-appropriate place.
-        mAtmService.getTransitionController().collect(this);
         // Defer removal of this activity when either a child is animating, or app transition is on
         // going. App transition animation might be applied on the parent task not on the activity,
         // but the actual frame buffer is associated with the activity, so we have to keep the
@@ -3815,6 +3811,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else if (mAtmService.getTransitionController().inTransition()) {
             delayed = true;
         }
+
+        // Don't commit visibility if it is waiting to animate. It will be set post animation.
+        if (!delayed) {
+            commitVisibility(false /* visible */, true /* performLayout */);
+        } else {
+            setVisibleRequested(false /* visible */);
+        }
+
+        // TODO(b/169035022): move to a more-appropriate place.
+        mAtmService.getTransitionController().collect(this);
 
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                 "Removing app %s delayed=%b animation=%s animating=%b", this, delayed,
@@ -4972,7 +4978,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private void postApplyAnimation(boolean visible) {
         final boolean usingShellTransitions =
                 mAtmService.getTransitionController().getTransitionPlayer() != null;
-        final boolean delayed = isAnimating(PARENTS | CHILDREN,
+        final boolean delayed = isAnimating(TRANSITION | PARENTS | CHILDREN,
                 ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_WINDOW_ANIMATION
                         | ANIMATION_TYPE_RECENTS);
         if (!delayed && !usingShellTransitions) {
@@ -5943,6 +5949,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void startFreezingScreen(int overrideOriginalDisplayRotation) {
+        if (mAtmService.getTransitionController().isShellTransitionsEnabled()) {
+            return;
+        }
         ProtoLog.i(WM_DEBUG_ORIENTATION,
                 "Set freezing of %s: visible=%b freezing=%b visibleRequested=%b. %s",
                 appToken, isVisible(), mFreezingScreen, mVisibleRequested,
@@ -6909,7 +6918,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     void prepareSurfaces() {
-        final boolean show = isVisible() || isAnimating(PARENTS,
+        final boolean show = isVisible() || isAnimating(TRANSITION | PARENTS,
                 ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS);
 
         if (mSurfaceControl != null) {
@@ -8443,9 +8452,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (shouldRelaunchLocked(changes, mTmpConfig) || forceNewConfig) {
             // Aha, the activity isn't handling the change, so DIE DIE DIE.
             configChangeFlags |= changes;
-            if (!mAtmService.getTransitionController().isShellTransitionsEnabled()) {
-                startFreezingScreenLocked(globalChanges);
-            }
+            startFreezingScreenLocked(globalChanges);
             forceNewConfig = false;
             // Do not preserve window if it is freezing screen because the original window won't be
             // able to update drawn state that causes freeze timeout.

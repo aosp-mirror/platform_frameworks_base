@@ -2577,8 +2577,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     }
                 }
                 final boolean isAnimating = mAnimatingExit
-                        || isAnimating(TRANSITION | PARENTS, EXIT_ANIMATING_TYPES)
-                        && (mActivityRecord == null || !mActivityRecord.isWaitingForTransitionStart());
+                        || isAnimating(TRANSITION | PARENTS, EXIT_ANIMATING_TYPES);
                 final boolean lastWindowIsStartingWindow = startingWindow && mActivityRecord != null
                         && mActivityRecord.isLastWindow(this);
                 // We delay the removal of a window if it has a showing surface that can be used to run
