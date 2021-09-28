@@ -1592,7 +1592,7 @@
 
     <!-- Internet panel related dimensions -->
     <dimen name="internet_dialog_list_margin">12dp</dimen>
-    <dimen name="internet_dialog_list_max_height">646dp</dimen>
+    <dimen name="internet_dialog_list_max_height">662dp</dimen>
 
     <!-- The width of large/content heavy dialogs (e.g. Internet, Media output, etc) -->
     <dimen name="large_dialog_width">@dimen/match_parent</dimen>
