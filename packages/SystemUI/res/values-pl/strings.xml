@@ -716,8 +716,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Zaawansowane ustawienia powiadomień"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Wł."</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Wył."</string>
-    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
-    <skip />
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Włączono – na podstawie twarzy"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Dzięki zaawansowanym ustawieniom możesz określić poziom ważności powiadomień z aplikacji w skali od 0 do 5. \n\n"<b>"Poziom 5"</b>" \n– Pokazuj u góry listy powiadomień \n– Zezwalaj na powiadomienia na pełnym ekranie \n– Zawsze pokazuj podgląd \n\n"<b>"Poziom 4"</b>" \n– Wyłącz powiadomienia na pełnym ekranie \n– Zawsze pokazuj podgląd \n\n"<b>"Poziom 3"</b>" \n– Wyłącz powiadomienia na pełnym ekranie \n– Nigdy nie pokazuj podglądu \n\n"<b>"Poziom 2"</b>" \n– Wyłącz powiadomienia na pełnym ekranie \n– Nigdy nie pokazuj podglądu \n– NIgdy nie powiadamiaj dźwiękiem ani wibracjami \n\n"<b>"Poziom 1"</b>" \n– Wyłącz powiadomienia na pełnym ekranie \n– Nigdy nie pokazuj podglądu \n– NIgdy nie powiadamiaj dźwiękiem ani wibracjami \n– Ukrywaj na ekranie blokady i pasku stanu \n– Pokazuj u dołu listy powiadomień \n\n"<b>"Poziom 0"</b>" \n– Blokuj wszystkie powiadomienia aplikacji"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Powiadomienia"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Te powiadomienia nie będą już wyświetlane"</string>

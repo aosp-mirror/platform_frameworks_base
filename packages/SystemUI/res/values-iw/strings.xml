@@ -716,8 +716,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"פקדים של הודעות הפעלה"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"פועל"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"כבוי"</string>
-    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
-    <skip />
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"פועל – מבוסס על זיהוי פנים"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"בעזרת פקדים של התראות הפעלה, אפשר להגדיר רמת חשיבות מ-0 עד 5 להתראות אפליקציה. \n\n"<b>"רמה 5"</b>" \n- הצגה בראש רשימת ההתראות \n- לאפשר הפרעה במסך מלא \n- תמיד לאפשר הצצה \n\n"<b>"רמה 4"</b>" \n- מניעת הפרעה במסך מלא \n- תמיד לאפשר הצצה \n\n"<b>"רמה 3"</b>" \n- מניעת הפרעה במסך מלא \n- אף פעם לא לאפשר הצצה \n\n"<b>"רמה 2"</b>" \n- מניעת הפרעה במסך מלא \n- אף פעם לא לאפשר הצצה \n- אף פעם לא לאפשר קול ורטט \n\n"<b>"רמה 1"</b>" \n- מניעת הפרעה במסך מלא \n- אף פעם לא לאפשר הצצה \n- אף פעם לא לאפשר קול ורטט \n- הסתרה ממסך הנעילה ומשורת הסטטוס \n- הצגה בתחתית רשימת ההתראות \n\n"<b>"רמה 0"</b>" \n- חסימת כל ההתראות מהאפליקציה"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"התראות"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"ההתראות האלה לא יוצגו לך יותר"</string>

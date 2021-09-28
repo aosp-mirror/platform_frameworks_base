@@ -710,8 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Güç bildirim kontrolleri"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Açık"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Kapalı"</string>
-    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
-    <skip />
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Açık - Yüze göre"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Güç bildirim kontrolleriyle, bir uygulamanın bildirimleri için 0 ile 5 arasında bir önem düzeyi ayarlayabilirsiniz. \n\n"<b>"5. Düzey"</b>" \n- Bildirim listesinin en üstünde gösterilsin \n- Tam ekran kesintisine izin verilsin \n- Ekranda her zaman kısaca belirsin \n\n"<b>"4. Düzey"</b>" \n- Tam ekran kesintisi engellensin \n- Ekranda her zaman kısaca belirsin \n\n"<b>"3. Düzey"</b>" \n- Tam ekran kesintisi engellensin \n- Ekranda hiçbir zaman kısaca belirmesin \n\n"<b>"2. Düzey"</b>" \n- Tam ekran kesintisi engellensin \n- Ekranda hiçbir zaman belirmesin \n- Hiçbir zaman ses çıkarmasın ve titreştirmesin \n\n"<b>"1. Düzey"</b>" \n- Tam ekran kesintisi engellensin \n- Ekranda hiçbir zaman kısaca belirmesin \n- Hiçbir zaman ses çıkarmasın veya titreştirmesin \n- Kilit ekranından ve durum çubuğundan gizlensin \n- Bildirim listesinin en altında gösterilsin \n\n"<b>"0. Düzey"</b>" \n- Uygulamadan gelen tüm bildirimler engellensin"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Bildirimler"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Bu bildirimleri artık görmeyeceksiniz"</string>

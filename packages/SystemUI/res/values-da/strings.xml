@@ -710,8 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Kontrolelementer til notifikation om strøm"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Til"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Fra"</string>
-    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
-    <skip />
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Til – ansigtsbaseret"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Med kontrolelementer til notifikationer om strøm kan du konfigurere et vigtighedsniveau fra 0 til 5 for en apps notifikationer. \n\n"<b>"Niveau 5"</b>\n"- Vis øverst på listen over notifikationer \n- Tillad afbrydelse af fuld skærm \n- Se altid smugkig \n\n"<b>"Niveau 4"</b>\n"- Ingen afbrydelse af fuld skærm \n- Se altid smugkig \n\n"<b>"Niveau 3"</b>\n"- Ingen afbrydelse af fuld skærm \n- Se aldrig smugkig \n\n"<b>"Niveau 2"</b>\n"- Ingen afbrydelse af fuld skærm \n Se aldrig smugkig \n- Ingen lyd og vibration \n\n"<b>"Niveau 1"</b>\n"- Ingen afbrydelse af fuld skærm \n- Se aldrig smugkig \n- Ingen lyd eller vibration \n- Skjul fra låseskærm og statusbjælke \n- Vis nederst på listen over notifikationer \n\n"<b>"Niveau 0"</b>\n"- Bloker alle notifikationer fra appen."</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Notifikationer"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Du får ikke længere vist disse notifikationer"</string>
