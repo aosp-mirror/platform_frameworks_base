@@ -173,8 +173,11 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      */
     void onKeyguardOccludedChangedLw(boolean occluded);
 
-    /** Applies a keyguard occlusion change if one happened. */
-    int applyKeyguardOcclusionChange();
+    /**
+     * Applies a keyguard occlusion change if one happened.
+     * @param transitionStarted Whether keyguard (un)occlude transition is starting or not.
+     */
+    int applyKeyguardOcclusionChange(boolean transitionStarted);
 
     /**
      * Interface to the Window Manager state associated with a particular
