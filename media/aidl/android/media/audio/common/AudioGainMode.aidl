@@ -13,23 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.media.audio.common;
 
 /**
- * The aaudio MMAP policy type.
+ * Type of gain control exposed by an audio port. The values are
+ * indexes of bits in a bitmask.
+ *
  * {@hide}
  */
-@Backing(type="int")
 @VintfStability
-enum AudioMMapPolicyType {
-    /**
-     * Default aaudio mmap policy. It is used to query whether the
-     * aaudio MMAP could be used or not.
-     */
-    DEFAULT = 1,
-    /**
-     * Exclusive aaudio mmap policy. It is used to query whether the
-     * aaudio MMAP could be used in exclusive mode or not.
-     */
-    EXCLUSIVE = 2,
+@Backing(type="byte")
+enum AudioGainMode {
+    /** Gain is the same for all channels. */
+    JOINT = 0,
+    /** The gain is set individually for each channel. */
+    CHANNELS = 1,
+    /** Ramping is applied. */
+    RAMP = 2,
 }
