@@ -1139,6 +1139,8 @@ public class StatusBar extends SystemUI implements
         mNotificationPanelViewController.addExpansionListener(
                 this::dispatchPanelExpansionForKeyguardDismiss);
 
+        mUserSwitcherController.init(mNotificationShadeWindowView);
+
         // Allow plugins to reference DarkIconDispatcher and StatusBarStateController
         mPluginDependencyProvider.allowPluginDependency(DarkIconDispatcher.class);
         mPluginDependencyProvider.allowPluginDependency(StatusBarStateController.class);

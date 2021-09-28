@@ -59,6 +59,7 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_ROW_SWIPE;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_SCROLL_FLING;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__USER_SWITCH;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__WALLPAPER_TRANSITION;
 
 import android.annotation.IntDef;
@@ -171,6 +172,7 @@ public class InteractionJankMonitor {
     public static final int CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP = 34;
     public static final int CUJ_PIP_TRANSITION = 35;
     public static final int CUJ_WALLPAPER_TRANSITION = 36;
+    public static final int CUJ_USER_SWITCH = 37;
 
     private static final int NO_STATSD_LOGGING = -1;
 
@@ -216,6 +218,7 @@ public class InteractionJankMonitor {
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__PIP_TRANSITION,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__WALLPAPER_TRANSITION,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__USER_SWITCH,
     };
 
     private static volatile InteractionJankMonitor sInstance;
@@ -272,6 +275,7 @@ public class InteractionJankMonitor {
             CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP,
             CUJ_PIP_TRANSITION,
             CUJ_WALLPAPER_TRANSITION,
+            CUJ_USER_SWITCH,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -642,6 +646,8 @@ public class InteractionJankMonitor {
                 return "PIP_TRANSITION";
             case CUJ_WALLPAPER_TRANSITION:
                 return "WALLPAPER_TRANSITION";
+            case CUJ_USER_SWITCH:
+                return "USER_SWITCH";
         }
         return "UNKNOWN";
     }
