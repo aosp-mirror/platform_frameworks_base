@@ -21,7 +21,7 @@ import android.annotation.SystemApi;
 /**
  * A class with constants representing possible return values for Bluetooth APIs. General return
  * values occupy the range 0 to 99. Profile-specific return values occupy the range 100-999.
- * API-specific return values start at 1000. The exception to this is the "other" error code which
+ * API-specific return values start at 1000. The exception to this is the "UNKNOWN" error code which
  * occupies the max integer value.
  */
 public final class BluetoothStatusCodes {
