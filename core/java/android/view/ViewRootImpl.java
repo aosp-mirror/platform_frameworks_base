@@ -2864,8 +2864,13 @@ public final class ViewRootImpl implements ViewParent,
                     }
                 }
 
+                final boolean surfaceControlChanged =
+                        (relayoutResult & RELAYOUT_RES_SURFACE_CHANGED)
+                                == RELAYOUT_RES_SURFACE_CHANGED;
+
                 if (mSurfaceControl.isValid()) {
-                    updateOpacity(mWindowAttributes, dragResizing);
+                    updateOpacity(mWindowAttributes, dragResizing,
+                            surfaceControlChanged /*forceUpdate */);
                 }
 
                 if (DEBUG_LAYOUT) Log.v(mTag, "relayout: frame=" + frame.toShortString()
@@ -2900,9 +2905,7 @@ public final class ViewRootImpl implements ViewParent,
                 // RELAYOUT_RES_SURFACE_CHANGED since it should indicate that WMS created a new
                 // SurfaceControl.
                 surfaceReplaced = (surfaceGenerationId != mSurface.getGenerationId()
-                        || (relayoutResult & RELAYOUT_RES_SURFACE_CHANGED)
-                        == RELAYOUT_RES_SURFACE_CHANGED)
-                        && mSurface.isValid();
+                        || surfaceControlChanged) && mSurface.isValid();
                 if (surfaceReplaced) {
                     mSurfaceSequenceId++;
                 }
@@ -7895,7 +7898,8 @@ public final class ViewRootImpl implements ViewParent,
         return relayoutResult;
     }
 
-    private void updateOpacity(WindowManager.LayoutParams params, boolean dragResizing) {
+    private void updateOpacity(WindowManager.LayoutParams params, boolean dragResizing,
+            boolean forceUpdate) {
         boolean opaque = false;
 
         if (!PixelFormat.formatHasAlpha(params.format)
@@ -7911,7 +7915,7 @@ public final class ViewRootImpl implements ViewParent,
             opaque = true;
         }
 
-        if (mIsSurfaceOpaque == opaque) {
+        if (!forceUpdate && mIsSurfaceOpaque == opaque) {
             return;
         }
 
