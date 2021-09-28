@@ -1411,7 +1411,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         this.task = newTask;
 
         if (shouldStartChangeTransition(newParent, oldParent)) {
-            initializeChangeTransition(getBounds());
+            // The new parent and old parent may be in different position. Need to offset the
+            // animation surface to keep it in its original position.
+            initializeChangeTransition(getBounds(), newParent.getBounds());
         }
 
         super.onParentChanged(newParent, oldParent);
@@ -9276,7 +9278,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 record.getMode(), record.mAdapter.mCapturedLeash, !fillsParent(),
                 new Rect(), insets,
                 getPrefixOrderIndex(), record.mAdapter.mPosition, record.mAdapter.mLocalBounds,
-                record.mAdapter.mRootTaskBounds, task.getWindowConfiguration(),
+                record.mAdapter.mEndBounds, task.getWindowConfiguration(),
                 false /*isNotInRecents*/,
                 record.mThumbnailAdapter != null ? record.mThumbnailAdapter.mCapturedLeash : null,
                 record.mStartBounds, task.getTaskInfo(), checkEnterPictureInPictureAppOpsState());
