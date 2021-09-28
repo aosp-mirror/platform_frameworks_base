@@ -7,6 +7,9 @@
       "path": "cts/hostsidetests/stagedinstall"
     },
     {
+      "path": "cts/hostsidetests/packagemanager"
+    },
+    {
       "path": "system/apex/tests"
     }
   ],
