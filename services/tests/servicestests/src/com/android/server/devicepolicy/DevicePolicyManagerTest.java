@@ -1080,7 +1080,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpm.setActiveAdmin(admin1, /* replace =*/ false);
 
         // Fire!
-        assertThat(dpm.setDeviceOwner(admin1, "owner-name")).isTrue();
+        assertThat(dpm.setDeviceOwner(admin1, "owner-name", UserHandle.USER_SYSTEM)).isTrue();
 
         // getDeviceOwnerComponent should return the admin1 component.
         assertThat(dpm.getDeviceOwnerComponentOnCallingUser()).isEqualTo(admin1);
@@ -1311,7 +1311,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         assertExpectException(IllegalArgumentException.class,
                 /* messageRegex= */ "Invalid component",
-                () -> dpm.setDeviceOwner(new ComponentName("a.b.c", ".def")));
+                () -> dpm.setDeviceOwner(new ComponentName("a.b.c", ".def"), /* ownerName= */ null,
+                        UserHandle.USER_SYSTEM));
     }
 
     @Test
@@ -1346,7 +1347,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
         dpm.setActiveAdmin(admin1, /* replace =*/ false);
-        assertThat(dpm.setDeviceOwner(admin1, "owner-name")).isTrue();
+        assertThat(dpm.setDeviceOwner(admin1, "owner-name", UserHandle.USER_SYSTEM)).isTrue();
 
         // Verify internal calls.
         verify(getServices().iactivityManager, times(1)).updateDeviceOwner(
@@ -1410,7 +1411,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
         dpm.setActiveAdmin(admin1, /* replace =*/ false);
-        assertThat(dpm.setDeviceOwner(admin1, "owner-name")).isTrue();
+        assertThat(dpm.setDeviceOwner(admin1, "owner-name", UserHandle.USER_SYSTEM)).isTrue();
 
         verify(getServices().ibackupManager, times(1)).setBackupServiceActive(
                 eq(UserHandle.USER_SYSTEM), eq(false));
@@ -1451,7 +1452,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
         dpm.setActiveAdmin(admin1, /* replace =*/ false);
-        assertThat(dpm.setDeviceOwner(admin1, "owner-name")).isTrue();
+        assertThat(dpm.setDeviceOwner(admin1, "owner-name", UserHandle.USER_SYSTEM)).isTrue();
 
         // Verify internal calls.
         verify(getServices().iactivityManager, times(1)).updateDeviceOwner(
@@ -3026,7 +3027,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Set a device owner on the system user. Check that the system user becomes affiliated.
         setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
         dpm.setActiveAdmin(admin1, /* replace =*/ false);
-        assertThat(dpm.setDeviceOwner(admin1, "owner-name")).isTrue();
+        assertThat(dpm.setDeviceOwner(admin1, "owner-name", UserHandle.USER_SYSTEM)).isTrue();
         assertThat(dpm.isAffiliatedUser()).isTrue();
         assertThat(dpm.getAffiliationIds(admin1).isEmpty()).isTrue();
 
