@@ -33,6 +33,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -59,6 +61,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
@@ -318,6 +321,18 @@ public class HdmiControlServiceTest {
                 Constants.ADDR_PLAYBACK_1, Constants.ADDR_BROADCAST,
                 HdmiControlManager.POWER_STATUS_STANDBY);
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(reportPowerStatus);
+    }
+
+    @Test
+    public void normalBoot_queuedActionsStartedAfterBoot() {
+        Mockito.clearInvocations(mAudioSystemDeviceSpy);
+        Mockito.clearInvocations(mPlaybackDeviceSpy);
+
+        mHdmiControlServiceSpy.onBootPhase(PHASE_BOOT_COMPLETED);
+        mTestLooper.dispatchAll();
+
+        verify(mAudioSystemDeviceSpy, times(1)).startQueuedActions();
+        verify(mPlaybackDeviceSpy, times(1)).startQueuedActions();
     }
 
     @Test
