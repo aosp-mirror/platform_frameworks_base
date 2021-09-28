@@ -31,8 +31,6 @@ import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.server.compat.overrides.AppCompatOverridesParser.PackageOverrides;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -183,115 +181,84 @@ public class AppCompatOverridesParserTest {
     }
 
     @Test
-    public void parsePackageOverrides_emptyConfig_returnsEmpty() {
-        PackageOverrides result = AppCompatOverridesParser.parsePackageOverrides(/* configStr= */
-                "", /* versionCode= */ 0, /* changeIdsToSkip= */ emptySet());
+    public void parsePackageOverrides_emptyConfigNoOwnedChangeIds_returnsEmpty() {
+        Map<Long, PackageOverride> result = AppCompatOverridesParser.parsePackageOverrides(
+                /* configStr= */ "", /* versionCode= */ 0, /* changeIdsToSkip= */ emptySet());
 
-        assertThat(result.overridesToAdd).isEmpty();
-        assertThat(result.overridesToRemove).isEmpty();
+        assertThat(result).isEmpty();
     }
 
     @Test
     public void parsePackageOverrides_configWithSingleOverride_returnsOverride() {
-        PackageOverrides result = AppCompatOverridesParser.parsePackageOverrides(/* configStr= */
-                "123:::true", /* versionCode= */ 5, /* changeIdsToSkip= */ emptySet());
-
-        assertThat(result.overridesToAdd).hasSize(1);
-        assertThat(result.overridesToAdd.get(123L)).isEqualTo(
-                new PackageOverride.Builder().setEnabled(true).build());
-    }
-
-    @Test
-    public void parsePackageOverrides_configWithMultipleOverridesToAdd_returnsOverrides() {
-        PackageOverrides result = AppCompatOverridesParser.parsePackageOverrides(/* configStr= */
-                "910:3:4:false,78:10::false,12:::false,34:1:2:true,34:10::true,56::2:true,"
-                        + "56:3:4:false,34:4:8:true,78:6:7:true,910:5::true,1112::5:true,"
-                        + "56:6::true,1112:6:7:false", /* versionCode= */
-                5, /* changeIdsToSkip= */ emptySet());
-
-        assertThat(result.overridesToAdd).hasSize(6);
-        assertThat(result.overridesToAdd.get(12L)).isEqualTo(
-                new PackageOverride.Builder().setEnabled(false).build());
-        assertThat(result.overridesToAdd.get(34L)).isEqualTo(
-                new PackageOverride.Builder().setMinVersionCode(4).setMaxVersionCode(8).setEnabled(
-                        true).build());
-        assertThat(result.overridesToAdd.get(56L)).isEqualTo(
-                new PackageOverride.Builder().setMinVersionCode(3).setMaxVersionCode(4).setEnabled(
-                        false).build());
-        assertThat(result.overridesToAdd.get(78L)).isEqualTo(
-                new PackageOverride.Builder().setMinVersionCode(6).setMaxVersionCode(7).setEnabled(
-                        true).build());
-        assertThat(result.overridesToAdd.get(910L)).isEqualTo(
-                new PackageOverride.Builder().setMinVersionCode(5).setEnabled(true).build());
-        assertThat(result.overridesToAdd.get(1112L)).isEqualTo(
-                new PackageOverride.Builder().setMaxVersionCode(5).setEnabled(true).build());
-        assertThat(result.overridesToRemove).isEmpty();
-    }
-
-    @Test
-    public void parsePackageOverrides_configWithMultipleOverridesToRemove_returnsOverrides() {
-        PackageOverrides result = AppCompatOverridesParser.parsePackageOverrides(/* configStr= */
-                "12:::,34:1:2:", /* versionCode= */ 5, /* changeIdsToSkip= */ emptySet());
-
-        assertThat(result.overridesToRemove).containsExactly(12L, 34L);
-        assertThat(result.overridesToAdd).isEmpty();
-    }
-
-    @Test
-    public void parsePackageOverrides_configWithBothOverridesToAddAndRemove_returnsOverrides() {
-        // Note that change 56 is both added and removed, therefore it will only be removed.
-        PackageOverrides result = AppCompatOverridesParser.parsePackageOverrides(/* configStr= */
-                "56:::,12:::true,34:::,56:3:7:true", /* versionCode= */ 5, /* changeIdsToSkip= */
+        Map<Long, PackageOverride> result = AppCompatOverridesParser.parsePackageOverrides(
+                /* configStr= */ "123:::true", /* versionCode= */ 5, /* changeIdsToSkip= */
                 emptySet());
 
-        assertThat(result.overridesToAdd).hasSize(1);
-        assertThat(result.overridesToAdd.get(12L)).isEqualTo(
+        assertThat(result).hasSize(1);
+        assertThat(result.get(123L)).isEqualTo(
                 new PackageOverride.Builder().setEnabled(true).build());
-        assertThat(result.overridesToRemove).containsExactly(34L, 56L);
+    }
+
+    @Test
+    public void parsePackageOverrides_configWithMultipleOverrides_returnsOverrides() {
+        Map<Long, PackageOverride> result = AppCompatOverridesParser.parsePackageOverrides(
+                /* configStr= */ "910:3:4:false,78:10::false,12:::false,34:1:2:true,34:10::true,"
+                        + "56::2:true,56:3:4:false,34:4:8:true,78:6:7:true,910:5::true,"
+                        + "1112::5:true,56:6::true,1112:6:7:false", /* versionCode= */
+                5, /* changeIdsToSkip= */ emptySet());
+
+        assertThat(result).hasSize(6);
+        assertThat(result.get(12L)).isEqualTo(
+                new PackageOverride.Builder().setEnabled(false).build());
+        assertThat(result.get(34L)).isEqualTo(
+                new PackageOverride.Builder().setMinVersionCode(4).setMaxVersionCode(8).setEnabled(
+                        true).build());
+        assertThat(result.get(56L)).isEqualTo(
+                new PackageOverride.Builder().setMinVersionCode(3).setMaxVersionCode(4).setEnabled(
+                        false).build());
+        assertThat(result.get(78L)).isEqualTo(
+                new PackageOverride.Builder().setMinVersionCode(6).setMaxVersionCode(7).setEnabled(
+                        true).build());
+        assertThat(result.get(910L)).isEqualTo(
+                new PackageOverride.Builder().setMinVersionCode(5).setEnabled(true).build());
+        assertThat(result.get(1112L)).isEqualTo(
+                new PackageOverride.Builder().setMaxVersionCode(5).setEnabled(true).build());
     }
 
     @Test
     public void parsePackageOverrides_changeIdsToSkipSpecified_returnsWithoutChangeIdsToSkip() {
-        ArraySet<Long> changeIdsToSkip = new ArraySet<>();
-        changeIdsToSkip.add(34L);
-        changeIdsToSkip.add(56L);
-        changeIdsToSkip.add(910L);
-        PackageOverrides result = AppCompatOverridesParser.parsePackageOverrides(/* configStr= */
-                "12:::true,34:::,56:3:7:true,78:::", /* versionCode= */ 5, changeIdsToSkip);
+        ArraySet<Long> changeIdsToSkip = new ArraySet<>(Arrays.asList(34L, 56L));
+        Map<Long, PackageOverride> result = AppCompatOverridesParser.parsePackageOverrides(
+                /* configStr= */ "12:::true,56:3:7:true", /* versionCode= */ 5, changeIdsToSkip);
 
-        assertThat(result.overridesToAdd).hasSize(1);
-        assertThat(result.overridesToAdd.get(12L)).isEqualTo(
+        assertThat(result).hasSize(1);
+        assertThat(result.get(12L)).isEqualTo(
                 new PackageOverride.Builder().setEnabled(true).build());
-        assertThat(result.overridesToRemove).containsExactly(78L);
     }
 
     @Test
     public void parsePackageOverrides_changeIdsToSkipContainsAllIds_returnsEmpty() {
-        ArraySet<Long> changeIdsToSkip = new ArraySet<>();
-        changeIdsToSkip.add(12L);
-        changeIdsToSkip.add(34L);
-        PackageOverrides result = AppCompatOverridesParser.parsePackageOverrides(/* configStr= */
-                "12:::true,34:::", /* versionCode= */ 5, changeIdsToSkip);
+        ArraySet<Long> changeIdsToSkip = new ArraySet<>(Arrays.asList(12L, 34L));
+        Map<Long, PackageOverride> result = AppCompatOverridesParser.parsePackageOverrides(
+                /* configStr= */ "12:::true", /* versionCode= */ 5, changeIdsToSkip);
 
-        assertThat(result.overridesToAdd).isEmpty();
-        assertThat(result.overridesToRemove).isEmpty();
+        assertThat(result).isEmpty();
     }
 
     @Test
     public void parsePackageOverrides_someOverridesAreInvalid_returnsWithoutInvalidOverrides() {
         // We add a valid entry before and after the invalid ones to make sure they are applied.
-        PackageOverrides result = AppCompatOverridesParser.parsePackageOverrides(/* configStr= */
-                "12:::True,56:1:2:FALSE,56:3:true,78:4:8:true:,C1:::true,910:::no,"
-                        + "1112:1:ten:true,1112:one:10:true,,1314:7:3:false,34:one:ten:",
+        Map<Long, PackageOverride> result = AppCompatOverridesParser.parsePackageOverrides(
+                /* configStr= */ "12:::True,56:1:2:FALSE,56:3:true,78:4:8:true:,C1:::true,910:::no,"
+                        + "1112:1:ten:true,1112:one:10:true,,1314:7:3:false,34:::",
                 /* versionCode= */ 5, /* changeIdsToSkip= */ emptySet());
 
-        assertThat(result.overridesToAdd).hasSize(2);
-        assertThat(result.overridesToAdd.get(12L)).isEqualTo(
+        assertThat(result).hasSize(2);
+        assertThat(result.get(12L)).isEqualTo(
                 new PackageOverride.Builder().setEnabled(true).build());
-        assertThat(result.overridesToAdd.get(56L)).isEqualTo(
+        assertThat(result.get(56L)).isEqualTo(
                 new PackageOverride.Builder().setMinVersionCode(1).setMaxVersionCode(2).setEnabled(
                         false).build());
-        assertThat(result.overridesToRemove).containsExactly(34L);
     }
 
     private static ApplicationInfo createAppInfo(String packageName) {
