@@ -39102,6 +39102,13 @@ package android.service.textservice {
 
 package android.service.voice {
 
+  public final class VisibleActivityInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.service.voice.VoiceInteractionSession.ActivityId getActivityId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.VisibleActivityInfo> CREATOR;
+  }
+
   public class VoiceInteractionService extends android.app.Service {
     ctor public VoiceInteractionService();
     method public int getDisabledShowContext();
@@ -39163,6 +39170,7 @@ package android.service.voice {
     method public void onTaskStarted(android.content.Intent, int);
     method public void onTrimMemory(int);
     method public final void performDirectAction(@NonNull android.app.DirectAction, @Nullable android.os.Bundle, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.os.Bundle>);
+    method public final void registerVisibleActivityCallback(@NonNull java.util.concurrent.Executor, @NonNull android.service.voice.VoiceInteractionSession.VisibleActivityCallback);
     method public final void requestDirectActions(@NonNull android.service.voice.VoiceInteractionSession.ActivityId, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.util.List<android.app.DirectAction>>);
     method public void setContentView(android.view.View);
     method public void setDisabledShowContext(int);
@@ -39172,6 +39180,7 @@ package android.service.voice {
     method public void show(android.os.Bundle, int);
     method public void startAssistantActivity(android.content.Intent);
     method public void startVoiceActivity(android.content.Intent);
+    method public final void unregisterVisibleActivityCallback(@NonNull android.service.voice.VoiceInteractionSession.VisibleActivityCallback);
     field public static final int SHOW_SOURCE_ACTIVITY = 16; // 0x10
     field public static final int SHOW_SOURCE_APPLICATION = 8; // 0x8
     field public static final int SHOW_SOURCE_ASSIST_GESTURE = 4; // 0x4
@@ -39243,6 +39252,11 @@ package android.service.voice {
     method public int getCallingUid();
     method public android.os.Bundle getExtras();
     method public boolean isActive();
+  }
+
+  public static interface VoiceInteractionSession.VisibleActivityCallback {
+    method public default void onInvisible(@NonNull android.service.voice.VoiceInteractionSession.ActivityId);
+    method public default void onVisible(@NonNull android.service.voice.VisibleActivityInfo);
   }
 
   public abstract class VoiceInteractionSessionService extends android.app.Service {
