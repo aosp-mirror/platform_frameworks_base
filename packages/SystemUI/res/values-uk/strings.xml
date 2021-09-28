@@ -1187,6 +1187,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Розблокувати, щоб переглянути мережі"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Пошук мереж…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Не вдалося підключитися до мережі"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"Показати все"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Щоб вибрати іншу мережу, від’єднайте кабель Ethernet"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"Додаток <xliff:g id="APPNAME">%1$s</xliff:g> хоче додати такий параметр у меню швидких налаштувань:"</string>

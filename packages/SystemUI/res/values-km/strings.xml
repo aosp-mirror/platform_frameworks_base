@@ -1175,6 +1175,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"ដោះសោ​ដើម្បីមើល​បណ្ដាញ"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"កំពុងស្វែងរកបណ្ដាញ…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"មិន​អាច​ភ្ជាប់​បណ្ដាញ​បានទេ"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"មើលទាំងអស់"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ដើម្បី​ប្ដូរ​បណ្ដាញ សូមផ្ដាច់​អ៊ីសឺរណិត"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> ចង់បញ្ចូល​ប្រអប់​ខាងក្រោម​ទៅក្នុង​ការកំណត់រហ័ស"</string>

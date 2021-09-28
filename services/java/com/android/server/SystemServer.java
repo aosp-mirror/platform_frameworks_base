@@ -645,6 +645,21 @@ public final class SystemServer implements Dumpable {
         TimeUtils.formatDuration(mRuntimeStartElapsedTime, pw); pw.println();
     }
 
+    /**
+     * Service used to dump {@link SystemServer} state that is not associated with any service.
+     *
+     * <p>To dump all services:
+     *
+     * <pre><code>adb shell dumpsys system_server_dumper</code></pre>
+     *
+     * <p>To get a list of all services:
+     *
+     * <pre><code>adb shell dumpsys system_server_dumper --list</code></pre>
+     *
+     * <p>To dump a specific service (use {@code --list} above to get service names):
+     *
+     * <pre><code>adb shell dumpsys system_server_dumper --name NAME</code></pre>
+     */
     private final class SystemServerDumper extends Binder {
 
         @GuardedBy("mDumpables")

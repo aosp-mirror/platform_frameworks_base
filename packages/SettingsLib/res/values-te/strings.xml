@@ -194,8 +194,8 @@
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"టెక్స్ట్‌ను చదివి వినిపించేటప్పుడు, ఒక్కో భాషకు వాడాల్సిన నిర్దిష్ట వాయిస్‌ను సెట్ చేస్తుంది"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"ఒక ఉదాహరణ వినండి"</string>
     <string name="tts_play_example_summary" msgid="634044730710636383">"ప్రసంగ సమన్వయం గురించి సంక్షిప్త ప్రదర్శనను ప్లే చేయి"</string>
-    <string name="tts_install_data_title" msgid="1829942496472751703">"వాయిస్ డేటాను ఇన్‌స్టాల్ చేయి"</string>
-    <string name="tts_install_data_summary" msgid="3608874324992243851">"ప్రసంగ సమన్వయం కోసం అవసరమైన వాయిస్ డేటాను ఇన్‌స్టాల్ చేయండి"</string>
+    <string name="tts_install_data_title" msgid="1829942496472751703">"వాయిస్ డేటాను ఇన్‌స్టాల్ చేయండి"</string>
+    <string name="tts_install_data_summary" msgid="3608874324992243851">"స్పీచ్ సమన్వయం కోసం అవసరమైన వాయిస్ డేటాను ఇన్‌స్టాల్ చేయండి"</string>
     <string name="tts_engine_security_warning" msgid="3372432853837988146">"ఈ ప్రసంగ సమన్వయ ఇంజిన్ చదివి వినిపించబడే మొత్తం వచనాన్ని అలాగే పాస్‌వర్డ‌లు మరియు క్రెడిట్ కార్డు నంబర్‌ల వంటి వ్యక్తిగత డేటాను సేకరించగలదు. ఇది <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> ఇంజిన్‌లో అందించబడుతుంది. ఈ ప్రసంగ సమన్వయ ఇంజిన్ యొక్క వినియోగాన్ని ప్రారంభించాలా?"</string>
     <string name="tts_engine_network_required" msgid="8722087649733906851">"వచనం నుండి ప్రసంగం అవుట్‌పుట్ కోసం ఈ భాషకు పని చేస్తున్న నెట్‌వర్క్ కనెక్షన్ కావాలి."</string>
     <string name="tts_default_sample_string" msgid="6388016028292967973">"ఇది ప్రసంగ సమన్వయానికి ఉదాహరణ"</string>

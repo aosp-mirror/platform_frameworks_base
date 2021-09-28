@@ -22,7 +22,6 @@ import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFA
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_JUMPCUT;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
-import static android.view.WindowManager.TRANSIT_CHANGE;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
@@ -492,12 +491,6 @@ public class DisplayRotation {
             recentsAnimationController.cancelAnimationForDisplayChange();
         }
 
-        final Transition t = (useShellTransitions
-                && !mService.mAtmService.getTransitionController().isCollecting())
-                ? mService.mAtmService.getTransitionController().createTransition(TRANSIT_CHANGE)
-                : null;
-        mService.mAtmService.getTransitionController().collect(mDisplayContent);
-
         ProtoLog.v(WM_DEBUG_ORIENTATION,
                 "Display id=%d rotation changed to %d from %d, lastOrientation=%d",
                         displayId, rotation, oldRotation, lastOrientation);
@@ -511,11 +504,10 @@ public class DisplayRotation {
         mDisplayContent.setLayoutNeeded();
 
         if (useShellTransitions) {
-            if (t != null) {
-                // This created its own transition, so send a start request.
-                mService.mAtmService.getTransitionController().requestStartTransition(
-                        t, null /* trigger */, null /* remote */);
-            } else {
+            final boolean wasInTransition = mDisplayContent.inTransition();
+            mDisplayContent.requestChangeTransitionIfNeeded(
+                    ActivityInfo.CONFIG_WINDOW_CONFIGURATION);
+            if (wasInTransition) {
                 // Use remote-rotation infra since the transition has already been requested
                 // TODO(shell-transitions): Remove this once lifecycle management can cover all
                 //                          rotation cases.

@@ -1175,6 +1175,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"ネットワークを表示するにはロック解除してください"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"ネットワークを検索しています…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"ネットワークに接続できませんでした"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"すべて表示"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ネットワークを変更するにはイーサネット接続を解除してください"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> が以下のタイルをクイック設定に追加しようとしています"</string>

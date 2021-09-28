@@ -26,6 +26,7 @@ import com.android.systemui.statusbar.notification.collection.render.NodeControl
 import com.android.systemui.statusbar.notification.dagger.PeopleHeader
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_NON_PERSON
+import com.android.systemui.statusbar.notification.stack.BUCKET_PEOPLE
 import javax.inject.Inject
 
 /**
@@ -45,7 +46,7 @@ class ConversationCoordinator @Inject constructor(
         }
     }
 
-    val sectioner = object : NotifSectioner("People") {
+    val sectioner = object : NotifSectioner("People", BUCKET_PEOPLE) {
         override fun isInSection(entry: ListEntry): Boolean =
                 isConversation(entry.representativeEntry!!)
         override fun getHeaderNodeController() =

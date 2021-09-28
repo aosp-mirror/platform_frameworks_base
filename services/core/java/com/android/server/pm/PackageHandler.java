@@ -27,6 +27,7 @@ import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
 import static com.android.server.pm.PackageManagerService.DEFAULT_VERIFICATION_RESPONSE;
 import static com.android.server.pm.PackageManagerService.DEFERRED_NO_KILL_INSTALL_OBSERVER;
 import static com.android.server.pm.PackageManagerService.DEFERRED_NO_KILL_POST_DELETE;
+import static com.android.server.pm.PackageManagerService.DEFERRED_NO_KILL_POST_DELETE_DELAY_MS;
 import static com.android.server.pm.PackageManagerService.DOMAIN_VERIFICATION;
 import static com.android.server.pm.PackageManagerService.EMPTY_INT_ARRAY;
 import static com.android.server.pm.PackageManagerService.ENABLE_ROLLBACK_STATUS;
@@ -84,11 +85,14 @@ import java.util.Collections;
 /**
  * Part of PackageManagerService that handles events.
  */
-public class PackageHandler extends Handler {
-    final PackageManagerService mPm;
+public final class PackageHandler extends Handler {
+    private final PackageManagerService mPm;
+    private final VerificationHelper mVerificationHelper;
+
     PackageHandler(Looper looper, PackageManagerService pm) {
         super(looper);
         mPm = pm;
+        mVerificationHelper = new VerificationHelper(mPm.mContext);
     }
 
     @Override
@@ -256,11 +260,11 @@ public class PackageHandler extends Handler {
                         Slog.i(TAG, "Continuing with installation of " + originUri);
                         state.setVerifierResponse(Binder.getCallingUid(),
                                 PackageManager.VERIFICATION_ALLOW_WITHOUT_SUFFICIENT);
-                        mPm.broadcastPackageVerified(verificationId, originUri,
+                        mVerificationHelper.broadcastPackageVerified(verificationId, originUri,
                                 PackageManager.VERIFICATION_ALLOW, null, params.mDataLoaderType,
                                 user);
                     } else {
-                        mPm.broadcastPackageVerified(verificationId, originUri,
+                        mVerificationHelper.broadcastPackageVerified(verificationId, originUri,
                                 PackageManager.VERIFICATION_REJECT, null,
                                 params.mDataLoaderType, user);
                         params.setReturnCode(
@@ -337,7 +341,7 @@ public class PackageHandler extends Handler {
                     final Uri originUri = Uri.fromFile(params.mOriginInfo.mResolvedFile);
 
                     if (state.isInstallAllowed()) {
-                        mPm.broadcastPackageVerified(verificationId, originUri,
+                        mVerificationHelper.broadcastPackageVerified(verificationId, originUri,
                                 response.code, null, params.mDataLoaderType, params.getUser());
                     } else {
                         params.setReturnCode(
@@ -659,7 +663,7 @@ public class PackageHandler extends Handler {
                                         StorageManager.convert(
                                                 res.mPkg.getVolumeUuid()).toString());
                         int packageExternalStorageType =
-                                PackageManagerService.getPackageExternalStorageType(volume,
+                                PackageManagerServiceUtils.getPackageExternalStorageType(volume,
                                         res.mPkg.isExternalStorage());
                         // If the package was installed externally, log it.
                         if (packageExternalStorageType != StorageEnums.UNKNOWN) {
@@ -712,7 +716,7 @@ public class PackageHandler extends Handler {
                     // they may still be in use by the running application. This mitigates problems
                     // in cases where resources or code is loaded by a new Activity before
                     // ApplicationInfo changes have propagated to all application threads.
-                    mPm.scheduleDeferredNoKillPostDelete(args);
+                    scheduleDeferredNoKillPostDelete(args);
                 } else {
                     synchronized (mPm.mInstallLock) {
                         args.doPostDeleteLI(true);
@@ -780,5 +784,10 @@ public class PackageHandler extends Handler {
         return android.provider.Settings.Secure.getIntForUser(mPm.mContext.getContentResolver(),
                 android.provider.Settings.Secure.INSTALL_NON_MARKET_APPS,
                 -1, UserHandle.USER_SYSTEM);
+    }
+
+    private void scheduleDeferredNoKillPostDelete(InstallArgs args) {
+        Message message = obtainMessage(DEFERRED_NO_KILL_POST_DELETE, args);
+        sendMessageDelayed(message, DEFERRED_NO_KILL_POST_DELETE_DELAY_MS);
     }
 }

@@ -35,7 +35,6 @@ import android.app.Application;
 import android.app.AutomaticZenRule;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.app.WallpaperManager;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -17771,9 +17770,6 @@ public final class Settings {
      *
      *     Input: {@link #EXTRA_SETTINGS_LARGE_SCREEN_HIGHLIGHT_MENU_KEY} must be included to
      * specify a key that indicates the menu item which will be highlighted on settings home menu.
-     *
-     *     Input: {@link #EXTRA_SETTINGS_LARGE_SCREEN_DEEP_LINK_PENDING_INTENT} is optional. Apps
-     * can use the {@link PendingIntent} extra to launch into its private {@link Activity}.
      * <p>
      * Output: Nothing.
      */
@@ -17799,15 +17795,6 @@ public final class Settings {
      */
     public static final String EXTRA_SETTINGS_LARGE_SCREEN_HIGHLIGHT_MENU_KEY =
             "android.provider.extra.SETTINGS_LARGE_SCREEN_HIGHLIGHT_MENU_KEY";
-
-    /**
-     * Activity Extra: Apps can use the {@link PendingIntent} extra to launch into its private
-     * {@link Activity}.
-     * <p>
-     * This is an optional extra field to {@link #ACTION_SETTINGS_LARGE_SCREEN_DEEP_LINK}.
-     */
-    public static final String EXTRA_SETTINGS_LARGE_SCREEN_DEEP_LINK_PENDING_INTENT =
-            "android.provider.extra.SETTINGS_LARGE_SCREEN_DEEP_LINK_PENDING_INTENT";
 
     /**
      * Performs a strict and comprehensive check of whether a calling package is allowed to

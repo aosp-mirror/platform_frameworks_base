@@ -175,6 +175,11 @@ interface IWindowSession {
             float touchX, float touchY, float thumbCenterX, float thumbCenterY, in ClipData data);
 
     /**
+     * Drops the content of the current drag operation for accessibility
+     */
+    boolean dropForAccessibility(IWindow window, int x, int y);
+
+    /**
      * Report the result of a drop action targeted to the given window.
      * consumed is 'true' when the drop was accepted by a valid recipient,
      * 'false' otherwise.

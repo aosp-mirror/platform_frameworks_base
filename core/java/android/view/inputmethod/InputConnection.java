@@ -726,8 +726,9 @@ public interface InputConnection {
      * associated with the action.</p>
      *
      * @param editorAction This must be one of the action constants for
-     * {@link EditorInfo#imeOptions EditorInfo.editorType}, such as
-     * {@link EditorInfo#IME_ACTION_GO EditorInfo.EDITOR_ACTION_GO}.
+     * {@link EditorInfo#imeOptions EditorInfo.imeOptions}, such as
+     * {@link EditorInfo#IME_ACTION_GO EditorInfo.EDITOR_ACTION_GO}, or the value of
+     * {@link EditorInfo#actionId EditorInfo.actionId} if a custom action is available.
      * @return true on success, false if the input connection is no longer
      * valid.
      */

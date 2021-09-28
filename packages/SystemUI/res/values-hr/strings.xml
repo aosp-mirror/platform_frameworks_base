@@ -1181,6 +1181,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Otključajte za prikaz mreža"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Traženje mreža…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Povezivanje s mrežom nije uspjelo"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"Prikaži sve"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Da biste se prebacili na drugu mrežu, odspojite Ethernet"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> želi dodati sljedeću pločicu u Brze postavke"</string>

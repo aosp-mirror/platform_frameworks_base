@@ -12551,6 +12551,7 @@ package android.content.pm {
     method public abstract boolean addPermissionAsync(@NonNull android.content.pm.PermissionInfo);
     method @Deprecated public abstract void addPreferredActivity(@NonNull android.content.IntentFilter, int, @Nullable android.content.ComponentName[], @NonNull android.content.ComponentName);
     method @RequiresPermission(value="android.permission.WHITELIST_RESTRICTED_PERMISSIONS", conditional=true) public boolean addWhitelistedRestrictedPermission(@NonNull String, @NonNull String, int);
+    method public boolean canPackageQuery(@NonNull String, @NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract boolean canRequestPackageInstalls();
     method public abstract String[] canonicalToCurrentPackageNames(@NonNull String[]);
     method @CheckResult public abstract int checkPermission(@NonNull String, @NonNull String);
@@ -12646,7 +12647,6 @@ package android.content.pm {
     method public boolean isPackageSuspended();
     method @CheckResult public abstract boolean isPermissionRevokedByPolicy(@NonNull String, @NonNull String);
     method public abstract boolean isSafeMode();
-    method public boolean mayPackageQuery(@NonNull String, @NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public java.util.List<android.content.pm.PackageManager.Property> queryActivityProperty(@NonNull String);
     method @NonNull public java.util.List<android.content.pm.PackageManager.Property> queryApplicationProperty(@NonNull String);
     method @NonNull public abstract java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceivers(@NonNull android.content.Intent, int);
@@ -35376,7 +35376,6 @@ package android.provider {
     field public static final String EXTRA_INPUT_METHOD_ID = "input_method_id";
     field public static final String EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME = "android.provider.extra.NOTIFICATION_LISTENER_COMPONENT_NAME";
     field public static final String EXTRA_SETTINGS_LARGE_SCREEN_DEEP_LINK_INTENT_URI = "android.provider.extra.SETTINGS_LARGE_SCREEN_DEEP_LINK_INTENT_URI";
-    field public static final String EXTRA_SETTINGS_LARGE_SCREEN_DEEP_LINK_PENDING_INTENT = "android.provider.extra.SETTINGS_LARGE_SCREEN_DEEP_LINK_PENDING_INTENT";
     field public static final String EXTRA_SETTINGS_LARGE_SCREEN_HIGHLIGHT_MENU_KEY = "android.provider.extra.SETTINGS_LARGE_SCREEN_HIGHLIGHT_MENU_KEY";
     field public static final String EXTRA_SUB_ID = "android.provider.extra.SUB_ID";
     field public static final String EXTRA_WIFI_NETWORK_LIST = "android.provider.extra.WIFI_NETWORK_LIST";
@@ -42386,8 +42385,11 @@ package android.telephony {
     field public static final String MMS_CONFIG_UA_PROF_URL = "uaProfUrl";
     field public static final String MMS_CONFIG_USER_AGENT = "userAgent";
     field public static final int MMS_ERROR_CONFIGURATION_ERROR = 7; // 0x7
+    field public static final int MMS_ERROR_DATA_DISABLED = 11; // 0xb
     field public static final int MMS_ERROR_HTTP_FAILURE = 4; // 0x4
+    field public static final int MMS_ERROR_INACTIVE_SUBSCRIPTION = 10; // 0xa
     field public static final int MMS_ERROR_INVALID_APN = 2; // 0x2
+    field public static final int MMS_ERROR_INVALID_SUBSCRIPTION_ID = 9; // 0x9
     field public static final int MMS_ERROR_IO_ERROR = 5; // 0x5
     field public static final int MMS_ERROR_NO_DATA_NETWORK = 8; // 0x8
     field public static final int MMS_ERROR_RETRY = 6; // 0x6
@@ -48508,6 +48510,7 @@ package android.view {
 
   public static class SurfaceControl.Transaction implements java.io.Closeable android.os.Parcelable {
     ctor public SurfaceControl.Transaction();
+    method @NonNull public android.view.SurfaceControl.Transaction addTransactionCommittedListener(@NonNull java.util.concurrent.Executor, @NonNull android.view.TransactionCommittedListener);
     method public void apply();
     method public void close();
     method public int describeContents();
@@ -48632,6 +48635,10 @@ package android.view {
     field public static final int BELOW = 2; // 0x2
     field public static final int TO_LEFT = 4; // 0x4
     field public static final int TO_RIGHT = 8; // 0x8
+  }
+
+  public interface TransactionCommittedListener {
+    method public void onTransactionCommitted();
   }
 
   public final class VelocityTracker {

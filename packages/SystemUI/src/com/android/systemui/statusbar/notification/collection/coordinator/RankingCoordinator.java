@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.notification.collection.render.NodeControl
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 import com.android.systemui.statusbar.notification.dagger.AlertingHeader;
 import com.android.systemui.statusbar.notification.dagger.SilentHeader;
+import com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt;
 
 import java.util.List;
 
@@ -82,7 +83,8 @@ public class RankingCoordinator implements Coordinator {
         return mSilentNotifSectioner;
     }
 
-    private final NotifSectioner mAlertingNotifSectioner = new NotifSectioner("Alerting") {
+    private final NotifSectioner mAlertingNotifSectioner = new NotifSectioner("Alerting",
+            NotificationPriorityBucketKt.BUCKET_ALERTING) {
         @Override
         public boolean isInSection(ListEntry entry) {
             return mHighPriorityProvider.isHighPriority(entry);
@@ -99,7 +101,8 @@ public class RankingCoordinator implements Coordinator {
         }
     };
 
-    private final NotifSectioner mSilentNotifSectioner = new NotifSectioner("Silent") {
+    private final NotifSectioner mSilentNotifSectioner = new NotifSectioner("Silent",
+            NotificationPriorityBucketKt.BUCKET_SILENT) {
         @Override
         public boolean isInSection(ListEntry entry) {
             return !mHighPriorityProvider.isHighPriority(entry);

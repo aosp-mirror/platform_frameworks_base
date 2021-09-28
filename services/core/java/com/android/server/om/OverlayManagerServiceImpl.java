@@ -719,6 +719,11 @@ final class OverlayManagerServiceImpl {
         if (overlayIdmap == null) {
             pw.println("Default overlays: " + TextUtils.join(";", mDefaultOverlays));
         }
+
+        // overlay configurations
+        if (dumpState.getPackageName() == null) {
+            mOverlayConfig.dump(pw);
+        }
     }
 
     @NonNull String[] getDefaultOverlayPackages() {

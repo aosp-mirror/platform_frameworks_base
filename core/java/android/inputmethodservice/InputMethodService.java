@@ -2867,7 +2867,12 @@ public class InputMethodService extends AbstractInputMethodService {
      * Ask the input target to execute its default action via
      * {@link InputConnection#performEditorAction
      * InputConnection.performEditorAction()}.
-     * 
+     *
+     * <p>For compatibility, this method does not execute a custom action even if {@link
+     * EditorInfo#actionLabel EditorInfo.actionLabel} is set. The implementor should directly call
+     * {@link InputConnection#performEditorAction InputConnection.performEditorAction()} with
+     * {@link EditorInfo#actionId EditorInfo.actionId} if they want to execute a custom action.</p>
+     *
      * @param fromEnterKey If true, this will be executed as if the user had
      * pressed an enter key on the keyboard, that is it will <em>not</em>
      * be done if the editor has set {@link EditorInfo#IME_FLAG_NO_ENTER_ACTION
