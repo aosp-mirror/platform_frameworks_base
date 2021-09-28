@@ -80,5 +80,15 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name=".LaunchNewTaskActivity"
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.LaunchNewTaskActivity"
+                  android:configChanges="orientation|screenSize"
+                  android:label="LaunchNewTaskActivity"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
     </application>
 </manifest>

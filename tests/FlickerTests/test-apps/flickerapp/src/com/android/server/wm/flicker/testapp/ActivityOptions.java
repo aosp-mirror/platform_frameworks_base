@@ -51,4 +51,9 @@ public class ActivityOptions {
     public static final ComponentName BUTTON_ACTIVITY_COMPONENT_NAME =
             new ComponentName(FLICKER_APP_PACKAGE,
                     FLICKER_APP_PACKAGE + ".ButtonActivity");
+
+    public static final String LAUNCH_NEW_TASK_ACTIVITY_LAUNCHER_NAME = "LaunchNewTaskApp";
+    public static final ComponentName LAUNCH_NEW_TASK_ACTIVITY_COMPONENT_NAME =
+            new ComponentName(FLICKER_APP_PACKAGE,
+                    FLICKER_APP_PACKAGE + ".LaunchNewTaskActivity");
 }
