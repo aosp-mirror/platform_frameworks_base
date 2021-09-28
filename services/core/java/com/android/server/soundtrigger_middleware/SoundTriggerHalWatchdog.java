@@ -26,8 +26,6 @@ import android.os.IBinder;
 import android.util.Log;
 
 import java.util.Objects;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * An {@link ISoundTriggerHal} decorator that would enforce deadlines on all calls and reboot the
@@ -38,11 +36,11 @@ public class SoundTriggerHalWatchdog implements ISoundTriggerHal {
     private static final String TAG = "SoundTriggerHalWatchdog";
 
     private final @NonNull ISoundTriggerHal mUnderlying;
-    private final @NonNull Timer mTimer;
+    private final @NonNull UptimeTimer mTimer;
 
     public SoundTriggerHalWatchdog(@NonNull ISoundTriggerHal underlying) {
         mUnderlying = Objects.requireNonNull(underlying);
-        mTimer = new Timer("SoundTriggerHalWatchdog");
+        mTimer = new UptimeTimer("SoundTriggerHalWatchdog");
     }
 
     @Override
@@ -155,21 +153,16 @@ public class SoundTriggerHalWatchdog implements ISoundTriggerHal {
     }
 
     private class Watchdog implements AutoCloseable {
-        private final @NonNull
-        TimerTask mTask;
+        private final @NonNull UptimeTimer.Task mTask;
         // This exception is used merely for capturing a stack trace at the time of creation.
         private final @NonNull
         Exception mException = new Exception();
 
         Watchdog() {
-            mTask = new TimerTask() {
-                @Override
-                public void run() {
-                    Log.e(TAG, "HAL deadline expired. Rebooting.", mException);
-                    reboot();
-                }
-            };
-            mTimer.schedule(mTask, TIMEOUT_MS);
+            mTask = mTimer.createTask(() -> {
+                Log.e(TAG, "HAL deadline expired. Rebooting.", mException);
+                reboot();
+            }, TIMEOUT_MS);
         }
 
         @Override
