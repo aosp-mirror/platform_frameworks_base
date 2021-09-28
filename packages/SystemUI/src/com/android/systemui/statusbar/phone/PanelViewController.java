@@ -393,6 +393,12 @@ public abstract class PanelViewController {
                 // started
                 if (onKeyguard) {
                     expand = true;
+                } else if (mKeyguardStateController.isKeyguardFadingAway()) {
+                    // If we're in the middle of dismissing the keyguard, don't expand due to the
+                    // cancelled gesture. Gesture cancellation during an unlock is expected in some
+                    // situations, such keeping your finger down while swiping to unlock to an app
+                    // that is locked in landscape (the rotation will cancel the touch event).
+                    expand = false;
                 } else {
                     expand = !mPanelClosedOnDown;
                 }
