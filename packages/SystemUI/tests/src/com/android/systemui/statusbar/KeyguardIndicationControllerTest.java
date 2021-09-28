@@ -23,6 +23,7 @@ import static android.content.pm.UserInfo.FLAG_MANAGED_PROFILE;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_ALIGNMENT;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BATTERY;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_DISCLOSURE;
+import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_OWNER_INFO;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_RESTING;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_TRANSIENT;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_TRUST;
@@ -723,6 +724,20 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         // THEN the face help message is still announced for a11y
         verify(mIndicationAreaBottom).announceForAccessibility(eq(faceHelpMsg));
+    }
+
+    @Test
+    public void testEmptyOwnerInfoHidesIndicationArea() {
+        createController();
+
+        // GIVEN the owner info is set to an empty string
+        when(mLockPatternUtils.getDeviceOwnerInfo()).thenReturn("");
+
+        // WHEN asked to update the indication area
+        mController.setVisible(true);
+
+        // THEN the owner info should be hidden
+        verifyHideIndication(INDICATION_TYPE_OWNER_INFO);
     }
 
     private void sendUpdateDisclosureBroadcast() {
