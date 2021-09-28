@@ -2391,6 +2391,10 @@ package android.service.voice {
     method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public void triggerHardwareRecognitionEventForTest(int, int, boolean, int, int, int, boolean, @NonNull android.media.AudioFormat, @Nullable byte[]);
   }
 
+  public final class VisibleActivityInfo implements android.os.Parcelable {
+    ctor public VisibleActivityInfo(int, @NonNull android.os.IBinder);
+  }
+
 }
 
 package android.service.watchdog {
