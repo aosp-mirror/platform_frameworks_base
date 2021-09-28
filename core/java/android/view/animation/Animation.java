@@ -258,6 +258,8 @@ public abstract class Animation implements Cloneable {
 
         setZAdjustment(a.getInt(com.android.internal.R.styleable.Animation_zAdjustment, ZORDER_NORMAL));
 
+        setBackgroundColor(a.getInt(com.android.internal.R.styleable.Animation_background, 0));
+
         setDetachWallpaper(
                 a.getBoolean(com.android.internal.R.styleable.Animation_detachWallpaper, false));
         setShowWallpaper(
@@ -630,15 +632,16 @@ public abstract class Animation implements Cloneable {
     }
 
     /**
-     * Set background behind an animation.
+     * Set background behind animation.
      *
-     * @param bg The background color. If 0, no background.
+     * @param bg The background color.  If 0, no background.  Currently must
+     * be black, with any desired alpha level.
      *
      * @deprecated None of window animations are running with background color.
      */
     @Deprecated
     public void setBackgroundColor(@ColorInt int bg) {
-        mBackgroundColor = bg;
+        // The background color is not needed any more, do nothing.
     }
 
     /**
@@ -800,7 +803,7 @@ public abstract class Animation implements Cloneable {
     @Deprecated
     @ColorInt
     public int getBackgroundColor() {
-        return mBackgroundColor;
+        return 0;
     }
 
     /**
