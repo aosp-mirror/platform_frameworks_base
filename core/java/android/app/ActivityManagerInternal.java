@@ -652,4 +652,23 @@ public abstract class ActivityManagerInternal {
     public abstract int sendIntentSender(IIntentSender target, IBinder allowlistToken, int code,
             Intent intent, String resolvedType,
             IIntentReceiver finishedReceiver, String requiredPermission, Bundle options);
+
+    /**
+     * Sets the provider to communicate between voice interaction manager service and
+     * ActivityManagerService.
+     */
+    public abstract void setVoiceInteractionManagerProvider(
+            @Nullable VoiceInteractionManagerProvider provider);
+
+    /**
+     * Provides the interface to communicate between voice interaction manager service and
+     * ActivityManagerService.
+     */
+    public interface VoiceInteractionManagerProvider {
+        /**
+         * Notifies the service when a high-level activity event has been changed, for example,
+         * an activity was resumed or stopped.
+         */
+        void notifyActivityEventChanged();
+    }
 }

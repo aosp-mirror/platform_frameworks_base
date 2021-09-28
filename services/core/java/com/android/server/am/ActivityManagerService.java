@@ -1550,6 +1550,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     private static final int INDEX_TOTAL_MEMTRACK_GL = 14;
     private static final int INDEX_LAST = 15;
 
+    /**
+     * Used to notify activity lifecycle events.
+     */
+    @Nullable
+    volatile ActivityManagerInternal.VoiceInteractionManagerProvider
+            mVoiceInteractionManagerProvider;
+
     final class UiHandler extends Handler {
         public UiHandler() {
             super(com.android.server.UiThread.get().getLooper(), null, true);
@@ -1884,6 +1891,14 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     public IAppOpsService getAppOpsService() {
         return mAppOpsService;
+    }
+
+    /**
+     * Sets the internal voice interaction manager service.
+     */
+    private void setVoiceInteractionManagerProvider(
+            @Nullable ActivityManagerInternal.VoiceInteractionManagerProvider provider) {
+        mVoiceInteractionManagerProvider = provider;
     }
 
     static class MemBinder extends Binder {
@@ -2736,6 +2751,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 || event == Event.ACTIVITY_RESUMED || event == Event.ACTIVITY_STOPPED
                 || event == Event.ACTIVITY_DESTROYED)) {
             contentCaptureService.notifyActivityEvent(userId, activity, event);
+        }
+        // TODO(b/201234353): Move the logic to client side.
+        if (mVoiceInteractionManagerProvider != null && (event == Event.ACTIVITY_PAUSED
+                || event == Event.ACTIVITY_RESUMED || event == Event.ACTIVITY_STOPPED)) {
+            mVoiceInteractionManagerProvider.notifyActivityEventChanged();
         }
     }
 
@@ -16374,6 +16394,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
             return ActivityManagerService.this.sendIntentSender(target, allowlistToken, code,
                     intent, resolvedType, finishedReceiver, requiredPermission, options);
+        }
+
+        @Override
+        public void setVoiceInteractionManagerProvider(
+                @Nullable ActivityManagerInternal.VoiceInteractionManagerProvider provider) {
+            ActivityManagerService.this.setVoiceInteractionManagerProvider(provider);
         }
     }
 
