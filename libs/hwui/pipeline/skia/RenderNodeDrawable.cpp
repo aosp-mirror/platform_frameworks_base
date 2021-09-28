@@ -243,13 +243,12 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
             // the corresponding SkImageFilter each time.
             // See b/193145089 and b/197263715
             if (!Properties::enableRenderEffectCache) {
+                snapshotImage = renderNode->getLayerSurface()->makeImageSnapshot();
                 if (imageFilter) {
                     auto subset = SkIRect::MakeWH(srcBounds.width(), srcBounds.height());
                     snapshotImage = snapshotImage->makeWithFilter(recordingContext, imageFilter,
                                                                   subset, clipBounds.roundOut(),
                                                                   &srcBounds, &offset);
-                } else {
-                    snapshotImage = renderNode->getLayerSurface()->makeImageSnapshot();
                 }
             } else {
                 const auto snapshotResult = renderNode->updateSnapshotIfRequired(
