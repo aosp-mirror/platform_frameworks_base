@@ -38,6 +38,7 @@ import com.android.systemui.doze.DozeTriggers;
 import com.android.systemui.doze.DozeUi;
 import com.android.systemui.doze.DozeWallpaperState;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 import com.android.systemui.util.wakelock.DelayedWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
@@ -94,8 +95,15 @@ public abstract class DozeModule {
     @Provides
     @BrightnessSensor
     static Optional<Sensor> providesBrightnessSensor(
-            AsyncSensorManager sensorManager, Context context) {
-        return Optional.ofNullable(DozeSensors.findSensorWithType(sensorManager,
-                context.getString(R.string.doze_brightness_sensor_type)));
+            AsyncSensorManager sensorManager,
+            Context context,
+            DozeParameters dozeParameters,
+            DevicePostureController devicePostureController) {
+        return Optional.ofNullable(
+                DozeSensors.findSensor(
+                        sensorManager,
+                        context.getString(R.string.doze_brightness_sensor_type),
+                        dozeParameters.brightnessName(devicePostureController.getDevicePosture())
+                ));
     }
 }

@@ -283,6 +283,17 @@ public class DozeParameters implements
     }
 
     /**
+     * Sensor to use for brightness changes.
+     */
+    public String brightnessName(@DevicePostureController.DevicePostureInt int posture) {
+        return AmbientDisplayConfiguration.getSensorFromPostureMapping(
+                mResources.getStringArray(R.array.doze_brightness_sensor_name_posture_mapping),
+                null /* defaultValue */,
+                posture
+        );
+    }
+
+    /**
      * Callback to listen for DozeParameter changes.
      */
     public void addCallback(Callback callback) {

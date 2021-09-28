@@ -220,6 +220,16 @@
          always-on display) -->
     <string name="doze_brightness_sensor_type" translatable="false"></string>
 
+    <!-- Name of a sensor per posture state that provides a low-power estimate of the desired
+         display brightness, suitable to listen to while the device is asleep (e.g. during
+         always-on display) -->
+    <string-array name="doze_brightness_sensor_name_posture_mapping" translatable="false">
+        <item></item> <!-- UNKNOWN -->
+        <item></item> <!-- CLOSED -->
+        <item></item> <!-- HALF_OPENED -->
+        <item></item> <!-- OPENED -->
+    </string-array>
+
     <!-- Override value to use for proximity sensor.  -->
     <string name="proximity_sensor_type" translatable="false"></string>
 

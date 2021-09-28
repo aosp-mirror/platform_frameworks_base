@@ -19,6 +19,7 @@ package com.android.systemui.doze;
 import static com.android.systemui.doze.DozeLog.REASON_SENSOR_TAP;
 import static com.android.systemui.plugins.SensorManagerPlugin.Sensor.TYPE_WAKE_LOCK_SCREEN;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -59,6 +60,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 @RunWith(AndroidTestingRunner.class)
@@ -274,6 +280,36 @@ public class DozeSensorsTest extends SysuiTestCase {
         verify(mAmbientDisplayConfiguration).tapSensorType(eq(mDevicePosture));
     }
 
+    @Test
+    public void testFindSensor() throws Exception {
+        // GIVEN a prox sensor
+        List<Sensor> sensors = new ArrayList<>();
+        Sensor proxSensor =
+                createSensor(Sensor.TYPE_PROXIMITY, Sensor.STRING_TYPE_PROXIMITY);
+        sensors.add(proxSensor);
+
+        when(mSensorManager.getSensorList(anyInt())).thenReturn(sensors);
+
+        // WHEN we try to find the prox sensor with the same type and name
+        // THEN we find the added sensor
+        assertEquals(
+                proxSensor,
+                DozeSensors.findSensor(
+                        mSensorManager,
+                        Sensor.STRING_TYPE_PROXIMITY,
+                        proxSensor.getName()));
+
+        // WHEN we try to find a prox sensor with a different name
+        // THEN no sensor is found
+        assertEquals(
+                null,
+                DozeSensors.findSensor(
+                        mSensorManager,
+                        Sensor.STRING_TYPE_PROXIMITY,
+                        "some other name"));
+    }
+
+
     private class TestableDozeSensors extends DozeSensors {
 
         TestableDozeSensors() {
@@ -304,5 +340,24 @@ public class DozeSensorsTest extends SysuiTestCase {
                     requiresTouchScreen,
                     mDozeLog);
         }
+    }
+
+    public static void setSensorType(Sensor sensor, int type, String strType) throws Exception {
+        Method setter = Sensor.class.getDeclaredMethod("setType", Integer.TYPE);
+        setter.setAccessible(true);
+        setter.invoke(sensor, type);
+        if (strType != null) {
+            Field f = sensor.getClass().getDeclaredField("mStringType");
+            f.setAccessible(true);
+            f.set(sensor, strType);
+        }
+    }
+
+    public static Sensor createSensor(int type, String strType) throws Exception {
+        Constructor<Sensor> constr = Sensor.class.getDeclaredConstructor();
+        constr.setAccessible(true);
+        Sensor sensor = constr.newInstance();
+        setSensorType(sensor, type, strType);
+        return sensor;
     }
 }

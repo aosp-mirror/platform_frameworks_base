@@ -148,7 +148,7 @@ public class DozeSensors {
                         false /* requires prox */,
                         dozeLog),
                 new TriggerSensor(
-                        findSensorWithType(config.doubleTapSensorType()),
+                        findSensor(config.doubleTapSensorType()),
                         Settings.Secure.DOZE_DOUBLE_TAP_GESTURE,
                         true /* configured */,
                         DozeLog.REASON_SENSOR_DOUBLE_TAP,
@@ -156,7 +156,7 @@ public class DozeSensors {
                         true /* touchscreen */,
                         dozeLog),
                 new TriggerSensor(
-                        findSensorWithType(config.tapSensorType(mDevicePosture)),
+                        findSensor(config.tapSensorType(mDevicePosture)),
                         Settings.Secure.DOZE_TAP_SCREEN_GESTURE,
                         true /* settingDef */,
                         true /* configured */,
@@ -167,7 +167,7 @@ public class DozeSensors {
                         dozeParameters.singleTapUsesProx(mDevicePosture) /* requiresProx */,
                         dozeLog),
                 new TriggerSensor(
-                        findSensorWithType(config.longPressSensorType()),
+                        findSensor(config.longPressSensorType()),
                         Settings.Secure.DOZE_PULSE_ON_LONG_PRESS,
                         false /* settingDef */,
                         true /* configured */,
@@ -178,7 +178,7 @@ public class DozeSensors {
                         dozeParameters.longPressUsesProx() /* requiresProx */,
                         dozeLog),
                 new TriggerSensor(
-                        findSensorWithType(config.udfpsLongPressSensorType()),
+                        findSensor(config.udfpsLongPressSensorType()),
                         "doze_pulse_on_auth",
                         true /* settingDef */,
                         udfpsEnrolled && (alwaysOn || mScreenOffUdfpsEnabled),
@@ -206,7 +206,7 @@ public class DozeSensors {
                         mConfig.getWakeLockScreenDebounce(),
                         dozeLog),
                 new TriggerSensor(
-                        findSensorWithType(config.quickPickupSensorType()),
+                        findSensor(config.quickPickupSensorType()),
                         Settings.Secure.DOZE_QUICK_PICKUP_GESTURE,
                         true /* setting default */,
                         config.quickPickupSensorEnabled(KeyguardUpdateMonitor.getCurrentUser())
@@ -244,21 +244,29 @@ public class DozeSensors {
         mDebounceFrom = SystemClock.uptimeMillis();
     }
 
-    private Sensor findSensorWithType(String type) {
-        return findSensorWithType(mSensorManager, type);
+    private Sensor findSensor(String type) {
+        return findSensor(mSensorManager, type, null);
     }
 
     /**
-     * Utility method to find a {@link Sensor} for the supplied string type.
+     * Utility method to find a {@link Sensor} for the supplied string type and string name.
+     *
+     * Return the first sensor in the list that matches the specified inputs. Ignores type or name
+     * if the input is null or empty.
+     *
+     * @param type sensorType
+     * @parm name sensorName, to differentiate between sensors with the same type
      */
-    public static Sensor findSensorWithType(SensorManager sensorManager, String type) {
-        if (TextUtils.isEmpty(type)) {
-            return null;
-        }
-        List<Sensor> sensorList = sensorManager.getSensorList(Sensor.TYPE_ALL);
-        for (Sensor s : sensorList) {
-            if (type.equals(s.getStringType())) {
-                return s;
+    public static Sensor findSensor(SensorManager sensorManager, String type, String name) {
+        final boolean isNameSpecified = !TextUtils.isEmpty(name);
+        final boolean isTypeSpecified = !TextUtils.isEmpty(type);
+        if (isNameSpecified || isTypeSpecified) {
+            final List<Sensor> sensors = sensorManager.getSensorList(Sensor.TYPE_ALL);
+            for (Sensor sensor : sensors) {
+                if ((!isNameSpecified || name.equals(sensor.getName()))
+                        && (!isTypeSpecified || type.equals(sensor.getStringType()))) {
+                    return sensor;
+                }
             }
         }
         return null;
