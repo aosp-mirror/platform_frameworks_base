@@ -26,30 +26,14 @@
 // Log debug messages about InputDispatcherPolicy
 #define DEBUG_INPUT_DISPATCHER_POLICY 0
 
+#include <InputFlingerProperties.sysprop.h>
 #include <android-base/parseint.h>
 #include <android-base/stringprintf.h>
 #include <android/os/IInputConstants.h>
+#include <android/sysprop/InputProperties.sysprop.h>
+#include <android_os_MessageQueue.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
-#include <limits.h>
-#include <atomic>
-#include <cinttypes>
-
-#include <utils/Log.h>
-#include <utils/Looper.h>
-#include <utils/threads.h>
-#include <utils/Trace.h>
-
-#include <binder/IServiceManager.h>
-
-#include <input/PointerController.h>
-#include <input/SpriteController.h>
-#include <ui/Region.h>
-
-#include <batteryservice/include/batteryservice/BatteryServiceConstants.h>
-#include <inputflinger/InputManager.h>
-
-#include <android_os_MessageQueue.h>
 #include <android_view_InputChannel.h>
 #include <android_view_InputDevice.h>
 #include <android_view_KeyEvent.h>
@@ -57,19 +41,31 @@
 #include <android_view_PointerIcon.h>
 #include <android_view_VerifiedKeyEvent.h>
 #include <android_view_VerifiedMotionEvent.h>
-
+#include <batteryservice/include/batteryservice/BatteryServiceConstants.h>
+#include <binder/IServiceManager.h>
+#include <input/PointerController.h>
+#include <input/SpriteController.h>
+#include <inputflinger/InputManager.h>
+#include <limits.h>
 #include <nativehelper/ScopedLocalFrame.h>
 #include <nativehelper/ScopedLocalRef.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/ScopedUtfChars.h>
+#include <ui/Region.h>
+#include <utils/Log.h>
+#include <utils/Looper.h>
+#include <utils/Trace.h>
+#include <utils/threads.h>
+
+#include <atomic>
+#include <cinttypes>
+#include <vector>
 
 #include "android_hardware_display_DisplayViewport.h"
 #include "android_hardware_input_InputApplicationHandle.h"
 #include "android_hardware_input_InputWindowHandle.h"
 #include "android_util_Binder.h"
 #include "com_android_server_power_PowerManagerService.h"
-
-#include <vector>
 
 #define INDENT "  "
 
@@ -2089,11 +2085,24 @@ static void nativeReloadDeviceAliases(JNIEnv* /* env */,
             InputReaderConfiguration::CHANGE_DEVICE_ALIAS);
 }
 
-static jstring nativeDump(JNIEnv* env, jclass /* clazz */, jlong ptr) {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+static std::string dumpInputProperties() {
+    std::string out = "Input properties:\n";
+    const bool perWindowInputRotation =
+            sysprop::InputFlingerProperties::per_window_input_rotation().value_or(false);
+    out += StringPrintf("  per_window_input_rotation = %s\n", toString(perWindowInputRotation));
+    const std::string strategy =
+            sysprop::InputProperties::velocitytracker_strategy().value_or("default");
+    out += "  persist.input.velocitytracker.strategy = " + strategy + "\n";
+    out += "\n";
+    return out;
+}
 
-    std::string dump;
+static jstring nativeDump(JNIEnv* env, jclass /* clazz */, jlong ptr) {
+    std::string dump = dumpInputProperties();
+
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
     im->dump(dump);
+
     return env->NewStringUTF(dump.c_str());
 }
 
