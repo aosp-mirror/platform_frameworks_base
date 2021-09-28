@@ -1819,6 +1819,8 @@ public class AppOpsManager {
             OP_BLUETOOTH_CONNECT,
             OP_BLUETOOTH_ADVERTISE,
             OP_UWB_RANGING,
+            // Notifications
+            OP_POST_NOTIFICATION,
 
             // APPOP PERMISSIONS
             OP_ACCESS_NOTIFICATIONS,
@@ -2227,7 +2229,7 @@ public class AppOpsManager {
             android.Manifest.permission.READ_CALENDAR,
             android.Manifest.permission.WRITE_CALENDAR,
             android.Manifest.permission.ACCESS_WIFI_STATE,
-            null, // no permission required for notifications
+            android.Manifest.permission.POST_NOTIFICATIONS,
             null, // neighboring cells shares the coarse location perm
             android.Manifest.permission.CALL_PHONE,
             android.Manifest.permission.READ_SMS,
