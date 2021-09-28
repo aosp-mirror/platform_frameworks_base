@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import android.annotation.ColorInt;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
@@ -106,15 +105,5 @@ interface AnimationAdapter {
      */
     default boolean shouldDeferAnimationFinish(Runnable endDeferFinishCallback) {
         return false;
-    }
-
-    /**
-     * Gets the background color to show behind an animation.
-     *
-     * @return The background color to show behind an animation (0 for no background color).
-     */
-    @ColorInt
-    default int getBackgroundColor() {
-        return 0;
     }
 }
