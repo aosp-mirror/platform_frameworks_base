@@ -25,6 +25,7 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.WorkerThread;
 import android.app.Notification.Builder;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -1079,11 +1080,23 @@ public class NotificationManager {
     /**
      * @hide
      */
-    @TestApi
     public boolean matchesCallFilter(Bundle extras) {
         INotificationManager service = getService();
         try {
             return service.matchesCallFilter(extras);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public void cleanUpCallersAfter(long timeThreshold) {
+        INotificationManager service = getService();
+        try {
+            service.cleanUpCallersAfter(timeThreshold);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2542,6 +2555,46 @@ public class NotificationManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Returns whether a call from the provided URI is permitted to notify the user.
+     * <p>
+     * A true return value indicates one of the following: Do Not Disturb is not currently active;
+     * or the caller is a repeat caller and the current policy allows interruptions from repeat
+     * callers; or the caller is in the user's set of contacts whose calls are allowed to interrupt
+     * Do Not Disturb.
+     * </p>
+     * <p>
+     * If Do Not Disturb is enabled and either no interruptions or only alarms are allowed, this
+     * method will return false regardless of input.
+     * </p>
+     * <p>
+     * The provided URI must meet the requirements for a URI associated with a
+     * {@link Person}: it may be the {@code String} representation of a
+     * {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI}, or a
+     * <code>mailto:</code> or <code>tel:</code> schema URI matching an entry in the
+     * Contacts database. See also {@link Person.Builder#setUri} and
+     * {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI}
+     * for more information.
+     * </p>
+     * <p>
+     * NOTE: This method calls into Contacts, which may take some time, and should not be called
+     * on the main thread.
+     * </p>
+     *
+     * @param uri A URI representing a caller. Must not be null.
+     * @return A boolean indicating whether a call from the URI provided would be allowed to
+     *         interrupt the user given the current filter.
+     */
+    @WorkerThread
+    public boolean matchesCallFilter(@NonNull Uri uri) {
+        Bundle extras = new Bundle();
+        ArrayList<Person> pList = new ArrayList<>();
+        pList.add(new Person.Builder().setUri(uri.toString()).build());
+        extras.putParcelableArrayList(Notification.EXTRA_PEOPLE_LIST, pList);
+
+        return matchesCallFilter(extras);
     }
 
     /** @hide */

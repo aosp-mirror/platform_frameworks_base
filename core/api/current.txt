@@ -6255,6 +6255,7 @@ package android.app {
     method public android.app.NotificationManager.Policy getNotificationPolicy();
     method public boolean isNotificationListenerAccessGranted(android.content.ComponentName);
     method public boolean isNotificationPolicyAccessGranted();
+    method @WorkerThread public boolean matchesCallFilter(@NonNull android.net.Uri);
     method public void notify(int, android.app.Notification);
     method public void notify(String, int, android.app.Notification);
     method public void notifyAsPackage(@NonNull String, @Nullable String, int, @NonNull android.app.Notification);
