@@ -16,8 +16,6 @@
 
 package com.android.wm.shell.onehanded;
 
-import static android.os.UserHandle.myUserId;
-
 import static com.android.wm.shell.onehanded.OneHandedAnimationController.TRANSITION_DIRECTION_EXIT;
 import static com.android.wm.shell.onehanded.OneHandedAnimationController.TRANSITION_DIRECTION_TRIGGER;
 
@@ -186,20 +184,8 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
         if (mDisplayLayout.rotation() == toRotation) {
             return;
         }
-
-        if (!mOneHandedSettingsUtil.getSettingsOneHandedModeEnabled(context.getContentResolver(),
-                myUserId())) {
-            return;
-        }
-
         mDisplayLayout.rotateTo(context.getResources(), toRotation);
         updateDisplayBounds();
-
-        if (mOneHandedSettingsUtil.getSettingsSwipeToNotificationEnabled(
-                context.getContentResolver(), myUserId())) {
-            // If current settings is swipe notification, skip finishOffset.
-            return;
-        }
         finishOffset(0, TRANSITION_DIRECTION_EXIT);
     }
 
