@@ -57,6 +57,7 @@ public class NotifCoordinators implements Dumpable {
             DeviceProvisionedCoordinator deviceProvisionedCoordinator,
             BubbleCoordinator bubbleCoordinator,
             HeadsUpCoordinator headsUpCoordinator,
+            GutsCoordinator gutsCoordinator,
             ConversationCoordinator conversationCoordinator,
             PreparationCoordinator preparationCoordinator,
             MediaCoordinator mediaCoordinator,
@@ -81,6 +82,7 @@ public class NotifCoordinators implements Dumpable {
 
         if (featureFlags.isNewNotifPipelineRenderingEnabled()) {
             mCoordinators.add(headsUpCoordinator);
+            mCoordinators.add(gutsCoordinator);
             mCoordinators.add(preparationCoordinator);
         }
 

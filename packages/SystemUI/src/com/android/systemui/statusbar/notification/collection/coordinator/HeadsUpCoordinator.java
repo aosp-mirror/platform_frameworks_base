@@ -19,7 +19,8 @@ package com.android.systemui.statusbar.notification.collection.coordinator;
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.FORCE_REMOTE_INPUT_HISTORY;
 import static com.android.systemui.statusbar.notification.interruption.HeadsUpController.alertAgain;
 
-import android.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -164,17 +165,17 @@ public class HeadsUpCoordinator implements Coordinator {
 
     private final NotifLifetimeExtender mLifetimeExtender = new NotifLifetimeExtender() {
         @Override
-        public String getName() {
+        public @NonNull String getName() {
             return TAG;
         }
 
         @Override
-        public void setCallback(OnEndLifetimeExtensionCallback callback) {
+        public void setCallback(@NonNull OnEndLifetimeExtensionCallback callback) {
             mEndLifetimeExtension = callback;
         }
 
         @Override
-        public boolean shouldExtendLifetime(NotificationEntry entry, int reason) {
+        public boolean shouldExtendLifetime(@NonNull NotificationEntry entry, int reason) {
             boolean isShowingHun = isCurrentlyShowingHun(entry);
             if (isShowingHun) {
                 mNotifExtendingLifetime = entry;
@@ -183,7 +184,7 @@ public class HeadsUpCoordinator implements Coordinator {
         }
 
         @Override
-        public void cancelLifetimeExtension(NotificationEntry entry) {
+        public void cancelLifetimeExtension(@NonNull NotificationEntry entry) {
             if (Objects.equals(mNotifExtendingLifetime, entry)) {
                 mNotifExtendingLifetime = null;
             }

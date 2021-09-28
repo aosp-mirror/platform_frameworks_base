@@ -58,6 +58,7 @@ import com.android.systemui.statusbar.notification.collection.render.GroupExpans
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManagerImpl;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManagerImpl;
+import com.android.systemui.statusbar.notification.collection.render.NotifGutsViewManager;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.init.NotificationsControllerImpl;
 import com.android.systemui.statusbar.notification.init.NotificationsControllerStub;
@@ -167,6 +168,14 @@ public interface NotificationsModule {
                 onUserInteractionCallback,
                 shadeController,
                 dumpManager);
+    }
+
+    /** Provides an instance of {@link NotifGutsViewManager} */
+    @SysUISingleton
+    @Provides
+    static NotifGutsViewManager provideNotifGutsViewManager(
+            NotificationGutsManager notificationGutsManager) {
+        return notificationGutsManager;
     }
 
     /** Provides an instance of {@link VisualStabilityManager} */
