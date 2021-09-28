@@ -21,7 +21,6 @@ import static com.android.server.wm.AnimationSpecProto.WINDOW;
 import static com.android.server.wm.WindowAnimationSpecProto.ANIMATION;
 import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_NONE;
 
-import android.annotation.ColorInt;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.SystemClock;
@@ -83,12 +82,6 @@ public class WindowAnimationSpec implements AnimationSpec {
     @Override
     public long getDuration() {
         return mAnimation.computeDurationHint();
-    }
-
-    @Override
-    @ColorInt
-    public int getBackgroundColor() {
-        return mAnimation.getBackgroundColor();
     }
 
     @Override

@@ -175,29 +175,25 @@ final class AppCompatOverridesParser {
 
     /**
      * Parses the given {@code configStr}, that is expected to be a comma separated list of changes
-     * overrides, and returns a {@link PackageOverrides}.
+     * overrides, and returns a map from change ID to {@link PackageOverride} instances to add.
      *
      * <p>Each change override is in the following format:
-     * '<change-id>:<min-version-code?>:<max-version-code?>:<enabled?>'. If <enabled> is empty,
-     * this indicates that any override for the specified change ID should be removed.
+     * '<change-id>:<min-version-code?>:<max-version-code?>:<enabled>'.
      *
      * <p>If there are multiple overrides that should be added with the same change ID, the one
      * that best fits the given {@code versionCode} is added.
      *
      * <p>Any overrides whose change ID is in {@code changeIdsToSkip} are ignored.
      *
-     * <p>If a change override entry in {@code configStr} is invalid, it will be ignored. If the
-     * same change ID is both added and removed, i.e., has a change override entry with an empty
-     * enabled and another with a non-empty enabled, the change ID will only be removed.
+     * <p>If a change override entry in {@code configStr} is invalid, it will be ignored.
      */
-    static PackageOverrides parsePackageOverrides(
-            String configStr, long versionCode, Set<Long> changeIdsToSkip) {
+    static Map<Long, PackageOverride> parsePackageOverrides(String configStr, long versionCode,
+            Set<Long> changeIdsToSkip) {
         if (configStr.isEmpty()) {
-            return new PackageOverrides();
+            return emptyMap();
         }
         PackageOverrideComparator comparator = new PackageOverrideComparator(versionCode);
         Map<Long, PackageOverride> overridesToAdd = new ArrayMap<>();
-        Set<Long> overridesToRemove = new ArraySet<>();
         for (String overrideEntryString : configStr.split(",")) {
             List<String> changeIdAndVersions = Arrays.asList(overrideEntryString.split(":", 4));
             if (changeIdAndVersions.size() != 4) {
@@ -220,16 +216,6 @@ final class AppCompatOverridesParser {
             String maxVersionCodeStr = changeIdAndVersions.get(2);
 
             String enabledStr = changeIdAndVersions.get(3);
-            if (enabledStr.isEmpty()) {
-                if (!minVersionCodeStr.isEmpty() || !maxVersionCodeStr.isEmpty()) {
-                    Slog.w(
-                            TAG,
-                            "min/max version code should be empty if enabled is empty: "
-                                    + overrideEntryString);
-                }
-                overridesToRemove.add(changeId);
-                continue;
-            }
             if (!BOOLEAN_PATTERN.matcher(enabledStr).matches()) {
                 Slog.w(TAG, "Invalid enabled string in override entry: " + overrideEntryString);
                 continue;
@@ -262,39 +248,7 @@ final class AppCompatOverridesParser {
             }
         }
 
-        for (Long changeId : overridesToRemove) {
-            if (overridesToAdd.containsKey(changeId)) {
-                Slog.w(
-                        TAG,
-                        "Change ID ["
-                                + changeId
-                                + "] is both added and removed in package override flag: "
-                                + configStr);
-                overridesToAdd.remove(changeId);
-            }
-        }
-
-        return new PackageOverrides(overridesToAdd, overridesToRemove);
-    }
-
-    /**
-     * A container for a map from change ID to {@link PackageOverride} to add and a set of change
-     * IDs to remove overrides for.
-     *
-     * <p>The map of overrides to add and the set of overrides to remove are mutually exclusive.
-     */
-    static final class PackageOverrides {
-        public final Map<Long, PackageOverride> overridesToAdd;
-        public final Set<Long> overridesToRemove;
-
-        PackageOverrides() {
-            this(emptyMap(), emptySet());
-        }
-
-        PackageOverrides(Map<Long, PackageOverride> overridesToAdd, Set<Long> overridesToRemove) {
-            this.overridesToAdd = overridesToAdd;
-            this.overridesToRemove = overridesToRemove;
-        }
+        return overridesToAdd;
     }
 
     /**

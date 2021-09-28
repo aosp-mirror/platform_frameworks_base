@@ -298,4 +298,33 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
             pw.println();
         }
     }
+
+    /**
+     * Injectable factory for creating a {@link LightBarController}.
+     */
+    public static class Factory {
+        private final DarkIconDispatcher mDarkIconDispatcher;
+        private final BatteryController mBatteryController;
+        private final NavigationModeController mNavModeController;
+        private final DumpManager mDumpManager;
+
+        @Inject
+        public Factory(
+                DarkIconDispatcher darkIconDispatcher,
+                BatteryController batteryController,
+                NavigationModeController navModeController,
+                DumpManager dumpManager) {
+
+            mDarkIconDispatcher = darkIconDispatcher;
+            mBatteryController = batteryController;
+            mNavModeController = navModeController;
+            mDumpManager = dumpManager;
+        }
+
+        /** Create an {@link LightBarController} */
+        public LightBarController create(Context context) {
+            return new LightBarController(context, mDarkIconDispatcher, mBatteryController,
+                    mNavModeController, mDumpManager);
+        }
+    }
 }
