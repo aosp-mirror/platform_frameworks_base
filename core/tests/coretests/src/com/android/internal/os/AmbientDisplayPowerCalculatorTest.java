@@ -38,7 +38,8 @@ public class AmbientDisplayPowerCalculatorTest {
 
     @Rule
     public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule()
-            .setAveragePowerForOrdinal(POWER_GROUP_DISPLAY_AMBIENT, 0, 10.0);
+            .setAveragePowerForOrdinal(POWER_GROUP_DISPLAY_AMBIENT, 0, 10.0)
+            .setNumDisplays(1);
 
     @Test
     public void testMeasuredEnergyBasedModel() {
@@ -93,6 +94,38 @@ public class AmbientDisplayPowerCalculatorTest {
                 .isEqualTo(90 * MINUTE_IN_MS);
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY))
                 .isWithin(PRECISION).of(15.0);
+        assertThat(consumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
+    }
+
+    @Test
+    public void testPowerProfileBasedModel_multiDisplay() {
+        mStatsRule.setAveragePowerForOrdinal(POWER_GROUP_DISPLAY_AMBIENT, 1, 20.0)
+                .setNumDisplays(2);
+
+        BatteryStatsImpl stats = mStatsRule.getBatteryStats();
+
+        stats.noteScreenStateLocked(1, Display.STATE_OFF, 0, 0, 0);
+        stats.noteScreenStateLocked(0, Display.STATE_DOZE, 30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS,
+                30 * MINUTE_IN_MS);
+        stats.noteScreenStateLocked(1, Display.STATE_DOZE, 90 * MINUTE_IN_MS, 90 * MINUTE_IN_MS,
+                90 * MINUTE_IN_MS);
+        stats.noteScreenStateLocked(0, Display.STATE_OFF, 120 * MINUTE_IN_MS, 120 * MINUTE_IN_MS,
+                120 * MINUTE_IN_MS);
+        stats.noteScreenStateLocked(1, Display.STATE_OFF, 150 * MINUTE_IN_MS, 150 * MINUTE_IN_MS,
+                150 * MINUTE_IN_MS);
+
+        AmbientDisplayPowerCalculator calculator =
+                new AmbientDisplayPowerCalculator(mStatsRule.getPowerProfile());
+
+        mStatsRule.apply(BatteryUsageStatsRule.POWER_PROFILE_MODEL_ONLY, calculator);
+
+        BatteryConsumer consumer = mStatsRule.getDeviceBatteryConsumer();
+        // Duration should only be the union of
+        assertThat(consumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY))
+                .isEqualTo(120 * MINUTE_IN_MS);
+        assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY))
+                .isWithin(PRECISION).of(35.0);
         assertThat(consumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY))
                 .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
     }
