@@ -326,6 +326,7 @@ public class AlarmManagerService extends SystemService {
     BroadcastOptions mOptsWithoutFgs = BroadcastOptions.makeBasic();
     BroadcastOptions mOptsTimeBroadcast = BroadcastOptions.makeBasic();
     ActivityOptions mActivityOptsRestrictBal = ActivityOptions.makeBasic();
+    BroadcastOptions mBroadcastOptsRestrictBal = BroadcastOptions.makeBasic();
 
     // TODO(b/172085676): Move inside alarm store.
     private final SparseArray<AlarmManager.AlarmClockInfo> mNextAlarmClockForUser =
@@ -1700,6 +1701,7 @@ public class AlarmManagerService extends SystemService {
         mOptsWithoutFgs.setPendingIntentBackgroundActivityLaunchAllowed(false);
         mOptsTimeBroadcast.setPendingIntentBackgroundActivityLaunchAllowed(false);
         mActivityOptsRestrictBal.setPendingIntentBackgroundActivityLaunchAllowed(false);
+        mBroadcastOptsRestrictBal.setPendingIntentBackgroundActivityLaunchAllowed(false);
         mMetricsHelper = new MetricsHelper(getContext(), mLock);
 
         mListenerDeathRecipient = new IBinder.DeathRecipient() {
@@ -4560,6 +4562,18 @@ public class AlarmManagerService extends SystemService {
         return canAffordBillLocked(alarm, TareBill.getAppropriateBill(alarm));
     }
 
+    private Bundle getAlarmOperationBundle(Alarm alarm) {
+        if (alarm.mIdleOptions != null) {
+            return alarm.mIdleOptions;
+        } else {
+            if (alarm.operation.isActivity()) {
+                return mActivityOptsRestrictBal.toBundle();
+            } else {
+                return mBroadcastOptsRestrictBal.toBundle();
+            }
+        }
+    }
+
     @VisibleForTesting
     class AlarmHandler extends Handler {
         public static final int ALARM_EVENT = 1;
@@ -4599,12 +4613,7 @@ public class AlarmManagerService extends SystemService {
                         Alarm alarm = triggerList.get(i);
                         try {
                             // Disallow AlarmManager to start random background activity.
-                            final Bundle bundle;
-                            if (alarm.operation.isActivity()) {
-                                bundle = mActivityOptsRestrictBal.toBundle();
-                            } else {
-                                bundle = null;
-                            }
+                            final Bundle bundle = getAlarmOperationBundle(alarm);
                             alarm.operation.send(/* context */ null, /* code */0, /* intent */
                                     null, /* onFinished */null, /* handler */
                                     null, /* requiredPermission */ null, bundle);
@@ -5208,16 +5217,7 @@ public class AlarmManagerService extends SystemService {
                     mSendCount++;
 
                     try {
-                        final Bundle bundle;
-                        if (alarm.mIdleOptions != null) {
-                            bundle = alarm.mIdleOptions;
-                        } else {
-                            if (alarm.operation.isActivity()) {
-                                bundle = mActivityOptsRestrictBal.toBundle();
-                            } else {
-                                bundle = null;
-                            }
-                        }
+                        final Bundle bundle = getAlarmOperationBundle(alarm);
                         alarm.operation.send(getContext(), 0,
                                 mBackgroundIntent.putExtra(Intent.EXTRA_ALARM_COUNT, alarm.count),
                                 mDeliveryTracker, mHandler, null, bundle);
