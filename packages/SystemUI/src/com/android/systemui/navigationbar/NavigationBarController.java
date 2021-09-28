@@ -32,51 +32,29 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.view.IWindowManager;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
-import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.Dumpable;
-import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
-import com.android.systemui.accessibility.SystemActions;
-import com.android.systemui.assist.AssistManager;
-import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.model.SysUiState;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
-import com.android.systemui.recents.Recents;
-import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
-import com.android.systemui.statusbar.NotificationRemoteInputManager;
-import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
-import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.systemui.statusbar.policy.DeviceProvisionedController;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
-import com.android.wm.shell.pip.Pip;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.Optional;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 
 /** A controller to handle navigation bars. */
@@ -90,36 +68,12 @@ public class NavigationBarController implements
     private static final String TAG = NavigationBarController.class.getSimpleName();
 
     private final Context mContext;
-    private final WindowManager mWindowManager;
-    private final Lazy<AssistManager> mAssistManagerLazy;
-    private final AccessibilityManager mAccessibilityManager;
-    private final AccessibilityManagerWrapper mAccessibilityManagerWrapper;
-    private final DeviceProvisionedController mDeviceProvisionedController;
-    private final MetricsLogger mMetricsLogger;
-    private final OverviewProxyService mOverviewProxyService;
-    private final NavigationModeController mNavigationModeController;
-    private final AccessibilityButtonModeObserver mAccessibilityButtonModeObserver;
-    private final StatusBarStateController mStatusBarStateController;
-    private final SysUiState mSysUiFlagsContainer;
-    private final BroadcastDispatcher mBroadcastDispatcher;
-    private final CommandQueue mCommandQueue;
-    private final Optional<Pip> mPipOptional;
-    private final Optional<LegacySplitScreen> mSplitScreenOptional;
-    private final Optional<Recents> mRecentsOptional;
-    private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
-    private final ShadeController mShadeController;
-    private final NotificationRemoteInputManager mNotificationRemoteInputManager;
-    private final SystemActions mSystemActions;
-    private final UiEventLogger mUiEventLogger;
     private final Handler mHandler;
-    private final NavigationBarA11yHelper mNavigationBarA11yHelper;
+    private final NavigationBar.Factory mNavigationBarFactory;
     private final DisplayManager mDisplayManager;
-    private final NavigationBarOverlayController mNavBarOverlayController;
     private final TaskbarDelegate mTaskbarDelegate;
-    private final NotificationShadeDepthController mNotificationShadeDepthController;
     private int mNavMode;
     @VisibleForTesting boolean mIsTablet;
-    private final UserTracker mUserTracker;
 
     /** A displayId - nav bar maps. */
     @VisibleForTesting
@@ -132,72 +86,28 @@ public class NavigationBarController implements
 
     @Inject
     public NavigationBarController(Context context,
-            WindowManager windowManager,
-            Lazy<AssistManager> assistManagerLazy,
-            AccessibilityManager accessibilityManager,
-            AccessibilityManagerWrapper accessibilityManagerWrapper,
-            DeviceProvisionedController deviceProvisionedController,
-            MetricsLogger metricsLogger,
             OverviewProxyService overviewProxyService,
             NavigationModeController navigationModeController,
-            AccessibilityButtonModeObserver accessibilityButtonModeObserver,
-            StatusBarStateController statusBarStateController,
             SysUiState sysUiFlagsContainer,
-            BroadcastDispatcher broadcastDispatcher,
             CommandQueue commandQueue,
-            Optional<Pip> pipOptional,
-            Optional<LegacySplitScreen> splitScreenOptional,
-            Optional<Recents> recentsOptional,
-            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
-            ShadeController shadeController,
-            NotificationRemoteInputManager notificationRemoteInputManager,
-            NotificationShadeDepthController notificationShadeDepthController,
-            SystemActions systemActions,
             @Main Handler mainHandler,
-            UiEventLogger uiEventLogger,
-            NavigationBarOverlayController navBarOverlayController,
             ConfigurationController configurationController,
             NavigationBarA11yHelper navigationBarA11yHelper,
             TaskbarDelegate taskbarDelegate,
-            UserTracker userTracker,
+            NavigationBar.Factory navigationBarFactory,
             DumpManager dumpManager) {
         mContext = context;
-        mWindowManager = windowManager;
-        mAssistManagerLazy = assistManagerLazy;
-        mAccessibilityManager = accessibilityManager;
-        mAccessibilityManagerWrapper = accessibilityManagerWrapper;
-        mDeviceProvisionedController = deviceProvisionedController;
-        mMetricsLogger = metricsLogger;
-        mOverviewProxyService = overviewProxyService;
-        mNavigationModeController = navigationModeController;
-        mAccessibilityButtonModeObserver = accessibilityButtonModeObserver;
-        mStatusBarStateController = statusBarStateController;
-        mSysUiFlagsContainer = sysUiFlagsContainer;
-        mBroadcastDispatcher = broadcastDispatcher;
-        mCommandQueue = commandQueue;
-        mPipOptional = pipOptional;
-        mSplitScreenOptional = splitScreenOptional;
-        mRecentsOptional = recentsOptional;
-        mStatusBarOptionalLazy = statusBarOptionalLazy;
-        mShadeController = shadeController;
-        mNotificationRemoteInputManager = notificationRemoteInputManager;
-        mNotificationShadeDepthController = notificationShadeDepthController;
-        mSystemActions = systemActions;
-        mUiEventLogger = uiEventLogger;
         mHandler = mainHandler;
-        mNavigationBarA11yHelper = navigationBarA11yHelper;
+        mNavigationBarFactory = navigationBarFactory;
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
         commandQueue.addCallback(this);
         configurationController.addCallback(this);
         mConfigChanges.applyNewConfig(mContext.getResources());
-        mNavBarOverlayController = navBarOverlayController;
-        mNavMode = mNavigationModeController.addListener(this);
-        mNavigationModeController.addListener(this);
+        mNavMode = navigationModeController.addListener(this);
         mTaskbarDelegate = taskbarDelegate;
         mTaskbarDelegate.setOverviewProxyService(commandQueue, overviewProxyService,
                 navigationBarA11yHelper, navigationModeController, sysUiFlagsContainer);
         mIsTablet = isTablet(mContext);
-        mUserTracker = userTracker;
 
         dumpManager.registerDumpable(this);
     }
@@ -354,33 +264,8 @@ public class NavigationBarController implements
         final Context context = isOnDefaultDisplay
                 ? mContext
                 : mContext.createDisplayContext(display);
-        NavigationBar navBar = new NavigationBar(context,
-                mWindowManager,
-                mAssistManagerLazy,
-                mAccessibilityManager,
-                mAccessibilityManagerWrapper,
-                mDeviceProvisionedController,
-                mMetricsLogger,
-                mOverviewProxyService,
-                mNavigationModeController,
-                mAccessibilityButtonModeObserver,
-                mStatusBarStateController,
-                mSysUiFlagsContainer,
-                mBroadcastDispatcher,
-                mCommandQueue,
-                mPipOptional,
-                mSplitScreenOptional,
-                mRecentsOptional,
-                mStatusBarOptionalLazy,
-                mShadeController,
-                mNotificationRemoteInputManager,
-                mNotificationShadeDepthController,
-                mSystemActions,
-                mHandler,
-                mNavBarOverlayController,
-                mUiEventLogger,
-                mNavigationBarA11yHelper,
-                mUserTracker);
+        NavigationBar navBar = mNavigationBarFactory.create(context);
+
         mNavigationBars.put(displayId, navBar);
 
         View navigationBarView = navBar.createView(savedState);
