@@ -1385,8 +1385,10 @@ public class NotificationPanelViewController extends PanelViewController {
         boolean bypassEnabled = mKeyguardBypassController.getBypassEnabled();
         final boolean hasVisibleNotifications = mNotificationStackScrollLayoutController
                 .getVisibleNotificationCount() != 0 || mMediaDataManager.hasActiveMedia();
+        boolean splitShadeWithActiveMedia =
+                mShouldUseSplitNotificationShade && mMediaDataManager.hasActiveMedia();
         if ((hasVisibleNotifications && !mShouldUseSplitNotificationShade)
-                || (mShouldUseSplitNotificationShade && mMediaDataManager.hasActiveMedia())) {
+                || (splitShadeWithActiveMedia && !mDozing)) {
             mKeyguardStatusViewController.displayClock(SMALL);
         } else {
             mKeyguardStatusViewController.displayClock(LARGE);
@@ -1450,7 +1452,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 .getVisibleNotificationCount() != 0 || mMediaDataManager.hasActiveMedia();
         boolean hasCommunalSurface = mCommunalSource != null && mCommunalSource.get() != null;
         boolean shouldBeCentered = !mShouldUseSplitNotificationShade
-                || (!hasVisibleNotifications && !hasCommunalSurface);
+                || (!hasVisibleNotifications && !hasCommunalSurface) || mDozing;
         if (mStatusViewCentered != shouldBeCentered) {
             mStatusViewCentered = shouldBeCentered;
             ConstraintSet constraintSet = new ConstraintSet();
