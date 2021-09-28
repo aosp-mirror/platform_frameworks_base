@@ -4938,11 +4938,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // dispatchTaskInfoChangedIfNeeded() right after ActivityRecord#setVisibility() can report
         // the stale visible state, because the state will be updated after the app transition.
         // So tries to report the actual visible state again where the state is changed.
-        if (!mTaskSupervisor.inActivityVisibilityUpdate()) {
-            final Task task = getOrganizedTask();
-            if (task != null) {
-                task.dispatchTaskInfoChangedIfNeeded(false /* force */);
-            }
+        Task task = getOrganizedTask();
+        while (task != null) {
+            task.dispatchTaskInfoChangedIfNeeded(false /* force */);
+            task = task.getParent().asTask();
         }
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                 "commitVisibility: %s: visible=%b mVisibleRequested=%b", this,
