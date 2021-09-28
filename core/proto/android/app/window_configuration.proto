@@ -21,14 +21,15 @@ package android.app;
 
 import "frameworks/base/core/proto/android/graphics/rect.proto";
 import "frameworks/base/core/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/typedef.proto";
 
 /** Proto representation for WindowConfiguration.java class. */
 message WindowConfigurationProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional .android.graphics.RectProto app_bounds = 1;
-    optional int32 windowing_mode = 2;
-    optional int32 activity_type = 3;
+    optional int32 windowing_mode = 2 [(.android.typedef) = "android.app.WindowConfiguration.WindowingMode"];
+    optional int32 activity_type = 3 [(.android.typedef) = "android.app.WindowConfiguration.ActivityType"];
     optional .android.graphics.RectProto bounds = 4;
     optional .android.graphics.RectProto max_bounds = 5;
 }
