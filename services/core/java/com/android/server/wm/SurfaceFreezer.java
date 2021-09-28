@@ -123,6 +123,18 @@ class SurfaceFreezer {
         }
     }
 
+    void setLayer(SurfaceControl.Transaction t, int layer) {
+        if (mLeash != null) {
+            t.setLayer(mLeash, layer);
+        }
+    }
+
+    void setRelativeLayer(SurfaceControl.Transaction t, SurfaceControl relativeTo, int layer) {
+        if (mLeash != null) {
+            t.setRelativeLayer(mLeash, relativeTo, layer);
+        }
+    }
+
     boolean hasLeash() {
         return mLeash != null;
     }
