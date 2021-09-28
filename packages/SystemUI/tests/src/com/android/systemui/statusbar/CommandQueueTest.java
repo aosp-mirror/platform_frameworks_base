@@ -15,8 +15,6 @@
 package com.android.systemui.statusbar;
 
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
-import static android.inputmethodservice.InputMethodService.BACK_DISPOSITION_DEFAULT;
-import static android.inputmethodservice.InputMethodService.IME_INVISIBLE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
@@ -190,13 +188,8 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testShowImeButtonForSecondaryDisplay() {
-        // First show in default display to update the "last updated ime display"
-        testShowImeButton();
-
         mCommandQueue.setImeWindowStatus(SECONDARY_DISPLAY, null, 1, 2, true, false);
         waitForIdleSync();
-        verify(mCallbacks).setImeWindowStatus(eq(DEFAULT_DISPLAY), eq(null), eq(IME_INVISIBLE),
-                eq(BACK_DISPOSITION_DEFAULT), eq(false));
         verify(mCallbacks).setImeWindowStatus(
                 eq(SECONDARY_DISPLAY), eq(null), eq(1), eq(2), eq(true));
     }
