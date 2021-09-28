@@ -277,13 +277,6 @@ public class AppTransition implements Dump {
         fetchAppTransitionSpecsFromFuture();
     }
 
-    void abort() {
-        if (mRemoteAnimationController != null) {
-            mRemoteAnimationController.cancelAnimation("aborted");
-        }
-        clear();
-    }
-
     boolean isRunning() {
         return mAppTransitionState == APP_STATE_RUNNING;
     }
