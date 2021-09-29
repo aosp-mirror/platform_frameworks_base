@@ -2700,8 +2700,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         final WindowState startingWindow = createWindowState(
                 new WindowManager.LayoutParams(TYPE_APPLICATION_STARTING), activity1);
         activity1.addWindow(startingWindow);
-        activity1.attachStartingWindow(startingWindow);
         activity1.mStartingData = mock(StartingData.class);
+        activity1.attachStartingWindow(startingWindow);
         final Task task = activity1.getTask();
         final Rect taskBounds = task.getBounds();
         final int width = taskBounds.width();
@@ -2729,6 +2729,10 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertTrue(activity2.isResizeable());
         activity1.reparent(taskFragment1, POSITION_TOP);
 
+        verify(activity1.getSyncTransaction()).reparent(eq(startingWindow.mSurfaceControl),
+                eq(task.mSurfaceControl));
+        assertEquals(activity1.mStartingData, startingWindow.mStartingData);
+        assertEquals(task.mSurfaceControl, startingWindow.getAnimationLeashParent());
         assertEquals(task, activity1.mStartingData.mAssociatedTask);
         assertEquals(taskFragment1.getBounds(), activity1.getBounds());
         // The activity was resized by task fragment, but starting window must still cover the task.

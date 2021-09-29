@@ -1770,17 +1770,15 @@ public class WindowManagerService extends IWindowManager.Stub
             final boolean hideSystemAlertWindows = !mHidingNonSystemOverlayWindows.isEmpty();
             win.setForceHideNonSystemOverlayWindowIfNeeded(hideSystemAlertWindows);
 
-            if (type == TYPE_APPLICATION_STARTING && activity != null) {
-                activity.attachStartingWindow(win);
-                ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "addWindow: %s startingWindow=%s",
-                        activity, win);
-            }
-
             boolean imMayMove = true;
 
             win.mToken.addWindow(win);
             displayPolicy.addWindowLw(win, attrs);
-            if (type == TYPE_INPUT_METHOD) {
+            if (type == TYPE_APPLICATION_STARTING && activity != null) {
+                activity.attachStartingWindow(win);
+                ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "addWindow: %s startingWindow=%s",
+                        activity, win);
+            } else if (type == TYPE_INPUT_METHOD) {
                 displayContent.setInputMethodWindowLocked(win);
                 imMayMove = false;
             } else if (type == TYPE_INPUT_METHOD_DIALOG) {
