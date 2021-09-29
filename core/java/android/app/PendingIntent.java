@@ -1081,12 +1081,12 @@ public final class PendingIntent implements Parcelable {
     public void registerCancelListener(@NonNull CancelListener cancelListener) {
         if (!addCancelListener(Runnable::run, cancelListener)) {
             // Call the callback right away synchronously, if the PI has been canceled already.
-            cancelListener.onCancelled(this);
+            cancelListener.onCanceled(this);
         }
     }
 
     /**
-     * Register a listener to when this pendingIntent is cancelled.
+     * Register a listener to when this pendingIntent is canceled.
      *
      * @return true if the listener has been set successfully. false if the {@link PendingIntent}
      * has already been canceled.
@@ -1138,7 +1138,7 @@ public final class PendingIntent implements Parcelable {
         int size = cancelListeners.size();
         for (int i = 0; i < size; i++) {
             final Pair<Executor, CancelListener> pair = cancelListeners.valueAt(i);
-            pair.first.execute(() -> pair.second.onCancelled(this));
+            pair.first.execute(() -> pair.second.onCanceled(this));
         }
     }
 
@@ -1152,7 +1152,7 @@ public final class PendingIntent implements Parcelable {
     }
 
     /**
-     * Un-register a listener to when this pendingIntent is cancelled.
+     * Un-register a listener to when this pendingIntent is canceled.
      *
      * @hide
      */
@@ -1462,7 +1462,7 @@ public final class PendingIntent implements Parcelable {
     }
 
     /**
-     * A listener to when a pending intent is cancelled
+     * A listener to when a pending intent is canceled
      *
      * @hide
      */
@@ -1470,11 +1470,11 @@ public final class PendingIntent implements Parcelable {
     @TestApi
     public interface CancelListener {
         /**
-         * Called when a Pending Intent is cancelled.
+         * Called when a Pending Intent is canceled.
          *
-         * @param intent The intent that was cancelled.
+         * @param intent The intent that was canceled.
          */
-        void onCancelled(@NonNull PendingIntent intent);
+        void onCanceled(@NonNull PendingIntent intent);
     }
 
     private PendingIntentInfo getCachedInfo() {
