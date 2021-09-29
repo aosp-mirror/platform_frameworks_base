@@ -970,14 +970,14 @@ public class CameraExtensionsProxyService extends Service {
         }
 
         @Override
-        public boolean submit(Request request, Callback callback) {
+        public int submit(Request request, Callback callback) {
             ArrayList<Request> requests = new ArrayList<>();
             requests.add(request);
             return submit(requests, callback);
         }
 
         @Override
-        public boolean submit(List<Request> requests, Callback callback) {
+        public int submit(List<Request> requests, Callback callback) {
             ArrayList<android.hardware.camera2.extension.Request> captureRequests =
                     new ArrayList<>();
             int requestId = 0;
@@ -992,11 +992,11 @@ public class CameraExtensionsProxyService extends Service {
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to submit request due to remote exception!");
             }
-            return false;
+            return -1;
         }
 
         @Override
-        public boolean setRepeating(Request request, Callback callback) {
+        public int setRepeating(Request request, Callback callback) {
             try {
                 ArrayList<Request> requests = new ArrayList<>();
                 requests.add(request);
@@ -1007,7 +1007,7 @@ public class CameraExtensionsProxyService extends Service {
                 Log.e(TAG, "Failed to submit repeating request due to remote exception!");
             }
 
-            return false;
+            return -1;
         }
 
         @Override

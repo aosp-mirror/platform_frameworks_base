@@ -532,6 +532,11 @@ public final class PowerManagerService extends SystemService
     // True if the proximity sensor reads a positive result.
     private boolean mProximityPositive;
 
+    // Indicates that we have already intercepted the power key to temporarily ignore the proximity
+    // wake lock and turn the screen back on. This should get reset when prox reads 'far' again
+    // (when {@link #mProximityPositive} is set to false).
+    private boolean mInterceptedPowerKeyForProximity;
+
     // Screen brightness setting limits.
     public final float mScreenBrightnessMinimum;
     public final float mScreenBrightnessMaximum;
@@ -3313,6 +3318,7 @@ public final class PowerManagerService extends SystemService
         public void onProximityNegative() {
             synchronized (mLock) {
                 mProximityPositive = false;
+                mInterceptedPowerKeyForProximity = false;
                 mDirty |= DIRTY_PROXIMITY_POSITIVE;
                 userActivityNoUpdateLocked(Display.DEFAULT_DISPLAY_GROUP, mClock.uptimeMillis(),
                         PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, Process.SYSTEM_UID);
@@ -4156,6 +4162,8 @@ public final class PowerManagerService extends SystemService
             }
             pw.println();
             pw.println("  mRequestWaitForNegativeProximity=" + mRequestWaitForNegativeProximity);
+            pw.println("  mInterceptedPowerKeyForProximity="
+                    + mInterceptedPowerKeyForProximity);
             pw.println("  mSandmanScheduled=" + mSandmanScheduled);
             pw.println("  mBatteryLevelLow=" + mBatteryLevelLow);
             pw.println("  mLightDeviceIdleMode=" + mLightDeviceIdleMode);
@@ -5987,8 +5995,9 @@ public final class PowerManagerService extends SystemService
             final DisplayPowerRequest displayPowerRequest =
                     mDisplayGroupPowerStateMapper.getPowerRequestLocked(
                             Display.DEFAULT_DISPLAY_GROUP);
-            if (displayPowerRequest.useProximitySensor && mProximityPositive) {
+            if (mProximityPositive && !mInterceptedPowerKeyForProximity) {
                 mDisplayManagerInternal.ignoreProximitySensorUntilChanged();
+                mInterceptedPowerKeyForProximity = true;
                 return true;
             }
         }
