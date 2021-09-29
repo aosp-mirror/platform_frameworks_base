@@ -7726,27 +7726,64 @@ public class DevicePolicyManager {
     }
 
     /**
-     * @hide
-     * Sets the given package as the device owner. The package must already be installed. There
-     * must not already be a device owner.
-     * Only apps with the MANAGE_PROFILE_AND_DEVICE_OWNERS permission and the shell uid can call
-     * this method.
-     * Calling this after the setup phase of the primary user has completed is allowed only if
-     * the caller is the shell uid, and there are no additional users and no accounts.
+     * Sets the given package as the device owner.
+     *
+     * <p>Preconditions:
+     * <ul>
+     *   <li>The package must already be installed.
+     *   <li>There must not already be a device owner.
+     *   <li>Only apps with the {@code MANAGE_PROFILE_AND_DEVICE_OWNERS} permission or the
+     *       {@link Process#SHELL_UID Shell UID} can call this method.
+     * </ul>
+     *
+     * <p>Calling this after the setup phase of the device owner user has completed is allowed only
+     * if the caller is the {@link Process#SHELL_UID Shell UID}, and there are no additional users
+     * (except when the device runs on headless system user mode, in which case it could have exact
+     * one extra user, which is the current user - the device owner will be set in the
+     * {@link UserHandle#SYSTEM system} user and a profile owner will be set in the current user)
+     * and no accounts.
+     *
      * @param who the component name to be registered as device owner.
      * @param ownerName the human readable name of the institution that owns this device.
      * @param userId ID of the user on which the device owner runs.
+     *
      * @return whether the package was successfully registered as the device owner.
-     * @throws IllegalArgumentException if the package name is null or invalid
+     *
+     * @throws IllegalArgumentException if the package name is {@code null} or invalid.
      * @throws IllegalStateException If the preconditions mentioned are not met.
+     *
+     * @hide
      */
     @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
-    public boolean setDeviceOwner(
+    public boolean setDeviceOwner(@NonNull ComponentName who, @Nullable String ownerName,
+            @UserIdInt int userId) {
+        if (mService != null) {
+            try {
+                return mService.setDeviceOwner(who, ownerName, userId,
+                        /* setProfileOwnerOnCurrentUserIfNecessary= */ true);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Same as {@link #setDeviceOwner(ComponentName, String, int)}, but without setting the profile
+     * owner on current user when running on headless system user mode - should be used only by
+     * testing infra.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public boolean setDeviceOwnerOnly(
             @NonNull ComponentName who, @Nullable String ownerName, @UserIdInt int userId) {
         if (mService != null) {
             try {
-                return mService.setDeviceOwner(who, ownerName, userId);
+                return mService.setDeviceOwner(who, ownerName, userId,
+                        /* setProfileOwnerOnCurrentUserIfNecessary= */ false);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }

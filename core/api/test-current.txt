@@ -448,6 +448,7 @@ package android.app.admin {
     method @RequiresPermission("android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS") public void resetDefaultCrossProfileIntentFilters(int);
     method @RequiresPermission(allOf={"android.permission.MANAGE_DEVICE_ADMINS", android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public void setActiveAdmin(@NonNull android.content.ComponentName, boolean, int);
     method @RequiresPermission("android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS") public boolean setDeviceOwner(@NonNull android.content.ComponentName, @Nullable String, int);
+    method @RequiresPermission("android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS") public boolean setDeviceOwnerOnly(@NonNull android.content.ComponentName, @Nullable String, int);
     method @RequiresPermission("android.permission.MANAGE_DEVICE_ADMINS") public void setNextOperationSafety(int, int);
     field public static final String ACTION_DATA_SHARING_RESTRICTION_APPLIED = "android.app.action.DATA_SHARING_RESTRICTION_APPLIED";
     field public static final String ACTION_DEVICE_POLICY_CONSTANTS_CHANGED = "android.app.action.DEVICE_POLICY_CONSTANTS_CHANGED";

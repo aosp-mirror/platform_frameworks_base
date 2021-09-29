@@ -46,11 +46,13 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
 
     private static final String USER_OPTION = "--user";
     private static final String NAME_OPTION = "--name";
+    private static final String DO_ONLY_OPTION = "--device-owner-only";
 
     private final DevicePolicyManagerService mService;
     private int mUserId = UserHandle.USER_SYSTEM;
     private String mName = "";
     private ComponentName mComponent;
+    private boolean mSetDoOnly;
 
     DevicePolicyManagerServiceShellCommand(DevicePolicyManagerService service) {
         mService = Objects.requireNonNull(service);
@@ -130,8 +132,8 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
         pw.printf("  %s [ %s <USER_ID> | current ] <COMPONENT>\n",
                 CMD_SET_ACTIVE_ADMIN, USER_OPTION);
         pw.printf("    Sets the given component as active admin for an existing user.\n\n");
-        pw.printf("  %s [ %s <USER_ID> | current *EXPERIMENTAL* ] [ %s <NAME> ] "
-                + "<COMPONENT>\n", CMD_SET_DEVICE_OWNER, USER_OPTION, NAME_OPTION);
+        pw.printf("  %s [ %s <USER_ID> | current *EXPERIMENTAL* ] [ %s <NAME> ] [ %s ]"
+                + "<COMPONENT>\n", CMD_SET_DEVICE_OWNER, USER_OPTION, NAME_OPTION, DO_ONLY_OPTION);
         pw.printf("    Sets the given component as active admin, and its package as device owner."
                 + "\n\n");
         pw.printf("  %s [ %s <USER_ID> | current ] [ %s <NAME> ] <COMPONENT>\n",
@@ -254,7 +256,8 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
         mService.setActiveAdmin(mComponent, /* refreshing= */ true, mUserId);
 
         try {
-            if (!mService.setDeviceOwner(mComponent, mName, mUserId)) {
+            if (!mService.setDeviceOwner(mComponent, mName, mUserId,
+                    /* setProfileOwnerOnCurrentUserIfNecessary= */ !mSetDoOnly)) {
                 throw new RuntimeException(
                         "Can't set package " + mComponent + " as device owner.");
             }
@@ -351,6 +354,8 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
                 if (mUserId == UserHandle.USER_CURRENT) {
                     mUserId = ActivityManager.getCurrentUser();
                 }
+            } else if (DO_ONLY_OPTION.equals(opt)) {
+                mSetDoOnly = true;
             } else if (canHaveName && NAME_OPTION.equals(opt)) {
                 mName = getNextArgRequired();
             } else {
