@@ -63,7 +63,7 @@ public final class SharedMemory implements Parcelable, Closeable {
 
         mMemoryRegistration = new MemoryRegistration(mSize);
         mCleaner = Cleaner.create(mFileDescriptor,
-                new Closer(mFileDescriptor, mMemoryRegistration));
+                new Closer(mFileDescriptor.getInt$(), mMemoryRegistration));
     }
 
     /**
@@ -276,6 +276,7 @@ public final class SharedMemory implements Parcelable, Closeable {
      */
     @Override
     public void close() {
+        mFileDescriptor.setInt$(-1);
         if (mCleaner != null) {
             mCleaner.clean();
             mCleaner = null;
@@ -325,10 +326,10 @@ public final class SharedMemory implements Parcelable, Closeable {
      * Cleaner that closes the FD
      */
     private static final class Closer implements Runnable {
-        private FileDescriptor mFd;
+        private int mFd;
         private MemoryRegistration mMemoryReference;
 
-        private Closer(FileDescriptor fd, MemoryRegistration memoryReference) {
+        private Closer(int fd, MemoryRegistration memoryReference) {
             mFd = fd;
             mMemoryReference = memoryReference;
         }
@@ -336,7 +337,9 @@ public final class SharedMemory implements Parcelable, Closeable {
         @Override
         public void run() {
             try {
-                Os.close(mFd);
+                FileDescriptor fd = new FileDescriptor();
+                fd.setInt$(mFd);
+                Os.close(fd);
             } catch (ErrnoException e) { /* swallow error */ }
             mMemoryReference.release();
             mMemoryReference = null;
