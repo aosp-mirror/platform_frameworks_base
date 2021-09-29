@@ -123,7 +123,7 @@ public class TaskSnapshotWindow {
      * Ideally the delay time will be shorter when receiving
      * {@link StartingSurfaceDrawer#onImeDrawnOnTask(int)}.
      */
-    private static final long MAX_DELAY_REMOVAL_TIME_IME_VISIBLE = 450;
+    private static final long MAX_DELAY_REMOVAL_TIME_IME_VISIBLE = 600;
 
     //tmp vars for unused relayout params
     private static final Point TMP_SURFACE_SIZE = new Point();
