@@ -88,6 +88,7 @@ import android.app.IApplicationThread;
 import android.app.PendingIntent;
 import android.app.ProfilerInfo;
 import android.app.WaitResult;
+import android.app.WindowConfiguration;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
@@ -1745,6 +1746,16 @@ class ActivityStarter {
 
         mIntent.setFlags(mLaunchFlags);
 
+        boolean dreamStopping = false;
+
+        for (ActivityRecord stoppingActivity : mSupervisor.mStoppingActivities) {
+            if (stoppingActivity.getActivityType()
+                    == WindowConfiguration.ACTIVITY_TYPE_DREAM) {
+                dreamStopping = true;
+                break;
+            }
+        }
+
         // Get top task at beginning because the order may be changed when reusing existing task.
         final Task prevTopTask = mPreferredTaskDisplayArea.getFocusedRootTask();
         final Task reusedTask = getReusableTask();
@@ -1805,7 +1816,8 @@ class ActivityStarter {
 
         if (!mAvoidMoveToFront && mDoResume) {
             mTargetRootTask.getRootTask().moveToFront("reuseOrNewTask", targetTask);
-            if (!mTargetRootTask.isTopRootTaskInDisplayArea() && mService.mInternal.isDreaming()) {
+            if (!mTargetRootTask.isTopRootTaskInDisplayArea() && mService.mInternal.isDreaming()
+                    && !dreamStopping) {
                 // Launching underneath dream activity (fullscreen, always-on-top). Run the launch-
                 // -behind transition so the Activity gets created and starts in visible state.
                 mLaunchTaskBehind = true;
