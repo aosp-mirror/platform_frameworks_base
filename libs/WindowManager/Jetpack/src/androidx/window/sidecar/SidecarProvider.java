@@ -36,6 +36,6 @@ public class SidecarProvider {
      * @return API version string in MAJOR.MINOR.PATCH-description format.
      */
     public static String getApiVersion() {
-        return "0.1.0-settings_sample";
+        return "1.0.0-reference";
     }
 }
