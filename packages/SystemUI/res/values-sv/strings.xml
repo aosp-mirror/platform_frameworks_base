@@ -1175,8 +1175,7 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Lås upp för att visa nätverk"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Söker efter nätverk …"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Det gick inte att ansluta till nätverket"</string>
-    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
-    <skip />
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Du ansluts inte till wifi automatiskt för närvarande"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Visa alla"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Koppla bort Ethernet för att växla nätverk"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> vill lägga till följande ruta i snabbinställningarna"</string>
