@@ -3783,8 +3783,11 @@ public class StatusBar extends SystemUI implements
                 || mKeyguardStateController.isKeyguardFadingAway();
 
         // Do not animate the scrim expansion when triggered by the fingerprint sensor.
-        mScrimController.setExpansionAffectsAlpha(
-                !mBiometricUnlockController.isBiometricUnlock());
+        boolean onKeyguardOrHidingIt = mKeyguardStateController.isShowing()
+                || mKeyguardStateController.isKeyguardFadingAway()
+                || mKeyguardStateController.isKeyguardGoingAway();
+        mScrimController.setExpansionAffectsAlpha(!(mBiometricUnlockController.isBiometricUnlock()
+                        && onKeyguardOrHidingIt));
 
         boolean launchingAffordanceWithPreview =
                 mNotificationPanelViewController.isLaunchingAffordanceWithPreview();
