@@ -364,9 +364,9 @@ public class MediaControlPanel {
         seamlessView.setVisibility(View.VISIBLE);
         setVisibleAndAlpha(collapsedSet, R.id.media_seamless, true /*visible */);
         setVisibleAndAlpha(expandedSet, R.id.media_seamless, true /*visible */);
-        seamlessView.setOnClickListener(v -> {
-            mMediaOutputDialogFactory.create(data.getPackageName(), true);
-        });
+        seamlessView.setOnClickListener(
+                v -> mMediaOutputDialogFactory.create(data.getPackageName(), true,
+                        mPlayerViewHolder.getSeamlessButton()));
 
         ImageView iconView = mPlayerViewHolder.getSeamlessIcon();
         TextView deviceName = mPlayerViewHolder.getSeamlessText();
