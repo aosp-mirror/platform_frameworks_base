@@ -367,12 +367,6 @@ public class FrameworkServicesModule {
 
     @Provides
     @Singleton
-    static Optional<TelecomManager> provideOptionalTelecomManager(Context context) {
-        return Optional.ofNullable(context.getSystemService(TelecomManager.class));
-    }
-
-    @Provides
-    @Singleton
     static TelephonyManager provideTelephonyManager(Context context) {
         return context.getSystemService(TelephonyManager.class);
     }

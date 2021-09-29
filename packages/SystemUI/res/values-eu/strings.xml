@@ -845,7 +845,7 @@
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Arakatzailea"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Kontaktuak"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"Posta"</string>
-    <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS mezuak"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMSak"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Musika"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="5078136084632450333">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
@@ -1175,6 +1175,7 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Sareak ikusteko, desblokeatu pantaila"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Sareak bilatzen…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Ezin izan da konektatu sarera"</string>
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Oraingoz ez da automatikoki konektatuko wifira"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Ikusi guztiak"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Sarea aldatzeko, deskonektatu Ethernet-a"</string>
 </resources>

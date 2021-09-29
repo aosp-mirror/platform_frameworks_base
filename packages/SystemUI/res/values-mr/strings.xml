@@ -1175,6 +1175,7 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"नेटवर्क पाहण्यासाठी स्क्रीन अनलॉक करा"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"नेटवर्क शोधत आहे…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"नेटवर्कशी कनेक्‍ट करता आले नाही"</string>
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"सध्या वाय-फाय ऑटो-कनेक्ट होणार नाही"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"सर्व पहा"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"नेटवर्क स्विच करण्यासाठी, इथरनेट केबल डिस्कनेक्ट करा"</string>
 </resources>
