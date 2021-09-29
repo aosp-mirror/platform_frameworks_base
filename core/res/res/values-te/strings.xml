@@ -1041,7 +1041,7 @@
     <string name="search_go" msgid="2141477624421347086">"సెర్చ్"</string>
     <string name="search_hint" msgid="455364685740251925">"సెర్చ్ చేయండి..."</string>
     <string name="searchview_description_search" msgid="1045552007537359343">"సెర్చ్"</string>
-    <string name="searchview_description_query" msgid="7430242366971716338">"ప్రశ్నను వెతకండి"</string>
+    <string name="searchview_description_query" msgid="7430242366971716338">"సెర్చ్ క్వెరీ"</string>
     <string name="searchview_description_clear" msgid="1989371719192982900">"ప్రశ్నను క్లియర్ చేయి"</string>
     <string name="searchview_description_submit" msgid="6771060386117334686">"ప్రశ్నని సమర్పించండి"</string>
     <string name="searchview_description_voice" msgid="42360159504884679">"వాయిస్ సెర్చ్"</string>
@@ -1410,7 +1410,7 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"సెటప్ చేయడానికి నొక్కండి"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"సెటప్ చేయడానికి ఎంచుకోండి"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"మీరు పరికరాన్ని తిరిగి ఫార్మాట్ చేయాల్సి ఉంటుంది. తొలగించడానికి ట్యాప్ చేయండి"</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"ఫోటోలు మరియు మీడియాను బదిలీ చేయడానికి"</string>
+    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"ఫోటోలు, మీడియాను బదిలీ చేయడానికి"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"మీడియా ఫైల్స్‌ను బ్రౌజ్ చేయండి"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g>తో సమస్య ఉంది"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> పని చేయటం లేదు"</string>
@@ -1522,7 +1522,7 @@
     <string name="progress_erasing" msgid="6891435992721028004">"షేర్ చేసిన నిల్వను తొలగిస్తోంది…"</string>
     <string name="share" msgid="4157615043345227321">"షేర్"</string>
     <string name="find" msgid="5015737188624767706">"కనుగొనండి"</string>
-    <string name="websearch" msgid="5624340204512793290">"వెబ్ శోధన"</string>
+    <string name="websearch" msgid="5624340204512793290">"వెబ్ సెర్చ్"</string>
     <string name="find_next" msgid="5341217051549648153">"తదుపరిదాన్ని కనుగొను"</string>
     <string name="find_previous" msgid="4405898398141275532">"మునుపటిదాన్ని కనుగొను"</string>
     <string name="gpsNotifTicker" msgid="3207361857637620780">"<xliff:g id="NAME">%s</xliff:g> నుండి లొకేషన్ రిక్వెస్ట్‌"</string>
