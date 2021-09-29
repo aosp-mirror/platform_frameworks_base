@@ -331,9 +331,6 @@
     <style name="Animation.ShutdownUi" parent="@android:style/Animation.Toast">
     </style>
 
-    <style name="Animation.MediaOutputDialog" parent="@android:style/Animation.InputMethod">
-    </style>
-
     <!-- Standard animations for hiding and showing the status bar. -->
     <style name="Animation.StatusBar">
     </style>
@@ -434,10 +431,6 @@
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:backgroundDimEnabled">true</item>
         <item name="android:windowCloseOnTouchOutside">true</item>
-    </style>
-
-    <style name="Theme.SystemUI.Dialog.MediaOutput">
-        <item name="android:windowBackground">@drawable/media_output_dialog_background</item>
     </style>
 
     <style name="QSBorderlessButton">
