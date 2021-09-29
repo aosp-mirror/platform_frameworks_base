@@ -308,18 +308,4 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
         verify(mBouncer).updateKeyguardPosition(1.0f);
     }
-
-    @Test
-    public void testNavBarHiddenWhenSleepAnimationStarts() {
-        mStatusBarKeyguardViewManager.hide(0 /* startTime */, 0 /* fadeoutDuration */);
-        assertTrue(mStatusBarKeyguardViewManager.isNavBarVisible());
-
-        // Verify that the nav bar is hidden when the screen off animation starts
-        doReturn(true).when(mUnlockedScreenOffAnimationController).isScreenOffAnimationPlaying();
-        mWakefulnessLifecycle.dispatchFinishedGoingToSleep();
-        assertFalse(mStatusBarKeyguardViewManager.isNavBarVisible());
-
-        mWakefulnessLifecycle.dispatchFinishedWakingUp();
-        assertTrue(mStatusBarKeyguardViewManager.isNavBarVisible());
-    }
 }
