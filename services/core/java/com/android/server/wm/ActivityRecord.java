@@ -1411,9 +1411,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         this.task = newTask;
 
         if (shouldStartChangeTransition(newParent, oldParent)) {
-            // The new parent and old parent may be in different position. Need to offset the
-            // animation surface to keep it in its original position.
-            initializeChangeTransition(getBounds(), newParent.getBounds());
+            // Animate change transition on TaskFragment level to get the correct window crop.
+            newParent.initializeChangeTransition(getBounds(), getSurfaceControl());
         }
 
         super.onParentChanged(newParent, oldParent);
