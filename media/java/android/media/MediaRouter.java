@@ -48,6 +48,7 @@ import android.util.SparseIntArray;
 import android.view.Display;
 import android.view.DisplayAddress;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
@@ -148,7 +149,7 @@ public class MediaRouter {
                     ServiceManager.getService(Context.MEDIA_ROUTER_SERVICE));
 
             mSystemCategory = new RouteCategory(
-                    com.android.internal.R.string.default_audio_route_category_name,
+                    R.string.default_audio_route_category_name,
                     ROUTE_TYPE_LIVE_AUDIO | ROUTE_TYPE_LIVE_VIDEO, false);
             mSystemCategory.mIsSystem = true;
 
@@ -163,14 +164,15 @@ public class MediaRouter {
         // Called after sStatic is initialized
         void startMonitoringRoutes(Context appContext) {
             mDefaultAudioVideo = new RouteInfo(mSystemCategory);
-            mDefaultAudioVideo.mNameResId = com.android.internal.R.string.default_audio_route_name;
+            mDefaultAudioVideo.mNameResId = R.string.default_audio_route_name;
             mDefaultAudioVideo.mSupportedTypes = ROUTE_TYPE_LIVE_AUDIO | ROUTE_TYPE_LIVE_VIDEO;
             mDefaultAudioVideo.updatePresentationDisplay();
             if (((AudioManager) appContext.getSystemService(Context.AUDIO_SERVICE))
                     .isVolumeFixed()) {
                 mDefaultAudioVideo.mVolumeHandling = RouteInfo.PLAYBACK_VOLUME_FIXED;
             }
-
+            mDefaultAudioVideo.mGlobalRouteId = sStatic.mResources.getString(
+                    R.string.default_audio_route_id);
             addRouteStatic(mDefaultAudioVideo);
 
             // This will select the active wifi display route if there is one.
@@ -215,15 +217,15 @@ public class MediaRouter {
                 int name;
                 if ((newRoutes.mainType & AudioRoutesInfo.MAIN_HEADPHONES) != 0
                         || (newRoutes.mainType & AudioRoutesInfo.MAIN_HEADSET) != 0) {
-                    name = com.android.internal.R.string.default_audio_route_name_headphones;
+                    name = R.string.default_audio_route_name_headphones;
                 } else if ((newRoutes.mainType & AudioRoutesInfo.MAIN_DOCK_SPEAKERS) != 0) {
-                    name = com.android.internal.R.string.default_audio_route_name_dock_speakers;
+                    name = R.string.default_audio_route_name_dock_speakers;
                 } else if ((newRoutes.mainType&AudioRoutesInfo.MAIN_HDMI) != 0) {
-                    name = com.android.internal.R.string.default_audio_route_name_hdmi;
+                    name = R.string.default_audio_route_name_hdmi;
                 } else if ((newRoutes.mainType&AudioRoutesInfo.MAIN_USB) != 0) {
-                    name = com.android.internal.R.string.default_audio_route_name_usb;
+                    name = R.string.default_audio_route_name_usb;
                 } else {
-                    name = com.android.internal.R.string.default_audio_route_name;
+                    name = R.string.default_audio_route_name;
                 }
                 mDefaultAudioVideo.mNameResId = name;
                 dispatchRouteChanged(mDefaultAudioVideo);
@@ -243,9 +245,12 @@ public class MediaRouter {
                         final RouteInfo info = new RouteInfo(mSystemCategory);
                         info.mName = newRoutes.bluetoothName;
                         info.mDescription = mResources.getText(
-                                com.android.internal.R.string.bluetooth_a2dp_audio_route_name);
+                                R.string.bluetooth_a2dp_audio_route_name);
                         info.mSupportedTypes = ROUTE_TYPE_LIVE_AUDIO;
                         info.mDeviceType = RouteInfo.DEVICE_TYPE_BLUETOOTH;
+                        info.mGlobalRouteId = sStatic.mResources.getString(
+                                R.string.bluetooth_a2dp_audio_route_id);
+
                         mBluetoothA2dpRoute = info;
                         addRouteStatic(mBluetoothA2dpRoute);
                     } else {
@@ -508,6 +513,9 @@ public class MediaRouter {
             outer: for (int i = mRoutes.size(); i-- > 0; ) {
                 final RouteInfo route = mRoutes.get(i);
                 final String globalRouteId = route.mGlobalRouteId;
+                if (route.isDefault() || route.isBluetooth()) {
+                    continue;
+                }
                 if (globalRouteId != null) {
                     for (int j = 0; j < globalRouteCount; j++) {
                         MediaRouterClientState.RouteInfo globalRoute = globalRoutes.get(j);
@@ -1572,7 +1580,7 @@ public class MediaRouter {
         newRoute.mEnabled = isWifiDisplayEnabled(display, wfdStatus);
         newRoute.mName = display.getFriendlyDisplayName();
         newRoute.mDescription = sStatic.mResources.getText(
-                com.android.internal.R.string.wireless_display_route_description);
+                R.string.wireless_display_route_description);
         newRoute.updatePresentationDisplay();
         newRoute.mDeviceType = RouteInfo.DEVICE_TYPE_TV;
         return newRoute;
@@ -1867,19 +1875,19 @@ public class MediaRouter {
             int resId;
             switch (statusCode) {
                 case STATUS_SCANNING:
-                    resId = com.android.internal.R.string.media_route_status_scanning;
+                    resId = R.string.media_route_status_scanning;
                     break;
                 case STATUS_CONNECTING:
-                    resId = com.android.internal.R.string.media_route_status_connecting;
+                    resId = R.string.media_route_status_connecting;
                     break;
                 case STATUS_AVAILABLE:
-                    resId = com.android.internal.R.string.media_route_status_available;
+                    resId = R.string.media_route_status_available;
                     break;
                 case STATUS_NOT_AVAILABLE:
-                    resId = com.android.internal.R.string.media_route_status_not_available;
+                    resId = R.string.media_route_status_not_available;
                     break;
                 case STATUS_IN_USE:
-                    resId = com.android.internal.R.string.media_route_status_in_use;
+                    resId = R.string.media_route_status_in_use;
                     break;
                 case STATUS_CONNECTED:
                 case STATUS_NONE:

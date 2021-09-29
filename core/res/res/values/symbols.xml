@@ -1083,6 +1083,7 @@
   <java-symbol type="string" name="granularity_label_word" />
   <java-symbol type="string" name="granularity_label_link" />
   <java-symbol type="string" name="granularity_label_line" />
+  <java-symbol type="string" name="default_audio_route_id" />
   <java-symbol type="string" name="default_audio_route_name" />
   <java-symbol type="string" name="default_audio_route_name_dock_speakers" />
   <java-symbol type="string" name="default_audio_route_name_hdmi" />
@@ -1664,6 +1665,7 @@
   <java-symbol type="string" name="media_route_chooser_title" />
   <java-symbol type="string" name="media_route_chooser_title_for_remote_display" />
   <java-symbol type="string" name="media_route_controller_disconnect" />
+  <java-symbol type="string" name="bluetooth_a2dp_audio_route_id" />
   <java-symbol type="string" name="bluetooth_a2dp_audio_route_name" />
 
   <java-symbol type="dimen" name="config_minScalingSpan" />

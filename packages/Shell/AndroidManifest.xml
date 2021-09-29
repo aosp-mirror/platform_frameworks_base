@@ -554,6 +554,7 @@
 
     <!-- Permission required for CTS test - SystemMediaRouter2Test -->
     <uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_ROUTING" />
 
     <!-- Permission required for CTS test - CtsRotationResolverServiceDeviceTestCases -->
     <uses-permission android:name="android.permission.MANAGE_ROTATION_RESOLVER" />

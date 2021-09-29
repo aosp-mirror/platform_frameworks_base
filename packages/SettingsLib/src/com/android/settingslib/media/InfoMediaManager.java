@@ -112,11 +112,9 @@ public class InfoMediaManager extends MediaManager {
      */
     boolean connectDeviceWithoutPackageName(MediaDevice device) {
         boolean isConnected = false;
-        final List<RoutingSessionInfo> infos = mRouterManager.getActiveSessions();
-        if (infos.size() > 0) {
-            final RoutingSessionInfo info = infos.get(0);
+        final RoutingSessionInfo info = mRouterManager.getSystemRoutingSession(null);
+        if (info != null) {
             mRouterManager.transfer(info, device.mRouteInfo);
-
             isConnected = true;
         }
         return isConnected;
@@ -414,7 +412,10 @@ public class InfoMediaManager extends MediaManager {
     }
 
     List<RoutingSessionInfo> getActiveMediaSession() {
-        return mRouterManager.getActiveSessions();
+        List<RoutingSessionInfo> infos = new ArrayList<>();
+        infos.add(mRouterManager.getSystemRoutingSession(null));
+        infos.addAll(mRouterManager.getRemoteSessions());
+        return infos;
     }
 
     private void buildAvailableRoutes() {
