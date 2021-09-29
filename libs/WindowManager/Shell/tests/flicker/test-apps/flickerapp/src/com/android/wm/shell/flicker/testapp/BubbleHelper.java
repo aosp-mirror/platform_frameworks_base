@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.graphics.Point;
 import android.graphics.drawable.Icon;
 import android.os.SystemClock;
+import android.service.notification.StatusBarNotification;
 import android.view.WindowManager;
 
 import java.util.HashMap;
@@ -150,5 +151,28 @@ public class BubbleHelper {
                 .setIntent(bubbleIntent)
                 .setIcon(info.icon)
                 .setDesiredHeight(info.height);
+    }
+
+    public void cancel(int id) {
+        mNotificationManager.cancel(id);
+    }
+
+    public void cancelAll() {
+        mNotificationManager.cancelAll();
+    }
+
+    public void cancelLast() {
+        StatusBarNotification[] activeNotifications = mNotificationManager.getActiveNotifications();
+        if (activeNotifications.length > 0) {
+            mNotificationManager.cancel(
+                    activeNotifications[activeNotifications.length - 1].getId());
+        }
+    }
+
+    public void cancelFirst() {
+        StatusBarNotification[] activeNotifications = mNotificationManager.getActiveNotifications();
+        if (activeNotifications.length > 0) {
+            mNotificationManager.cancel(activeNotifications[0].getId());
+        }
     }
 }

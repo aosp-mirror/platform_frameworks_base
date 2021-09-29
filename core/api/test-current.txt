@@ -2134,7 +2134,7 @@ package android.provider {
   }
 
   public static final class ContactsContract.CommonDataKinds.Phone implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
-    field public static final android.net.Uri ENTERPRISE_CONTENT_URI;
+    field @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public static final android.net.Uri ENTERPRISE_CONTENT_URI;
   }
 
   public static final class ContactsContract.PinnedPositions {
@@ -2412,6 +2412,10 @@ package android.service.voice {
 
   public class AlwaysOnHotwordDetector implements android.service.voice.HotwordDetector {
     method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public void triggerHardwareRecognitionEventForTest(int, int, boolean, int, int, int, boolean, @NonNull android.media.AudioFormat, @Nullable byte[]);
+  }
+
+  public final class VisibleActivityInfo implements android.os.Parcelable {
+    ctor public VisibleActivityInfo(int, @NonNull android.os.IBinder);
   }
 
 }
@@ -2882,13 +2886,7 @@ package android.view {
 package android.view.accessibility {
 
   public final class AccessibilityManager {
-    method public void addAccessibilityServicesStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener, @Nullable android.os.Handler);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public java.util.List<java.lang.String> getAccessibilityShortcutTargets(int);
-    method public void removeAccessibilityServicesStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener);
-  }
-
-  public static interface AccessibilityManager.AccessibilityServicesStateChangeListener {
-    method public void onAccessibilityServicesStateChanged(android.view.accessibility.AccessibilityManager);
   }
 
   public class AccessibilityNodeInfo implements android.os.Parcelable {

@@ -183,7 +183,9 @@ public class BstatsCpuTimesValidationTest {
         sCpuFreqTimesAvailable = totalCpuTimes != null;
         final long[] fgCpuTimes = getAllCpuFreqTimes(Process.SYSTEM_UID,
                 PROCESS_STATE_FOREGROUND);
-        sPerProcStateTimesAvailable = fgCpuTimes != null;
+        final long[] topCpuTimes = getAllCpuFreqTimes(Process.SYSTEM_UID,
+                PROCESS_STATE_TOP);
+        sPerProcStateTimesAvailable = fgCpuTimes != null || topCpuTimes != null;
     }
 
     @Test
@@ -563,7 +565,7 @@ public class BstatsCpuTimesValidationTest {
 
             final long[] cpuTimesMs3 = getAllCpuFreqTimes(sTestPkgUid, PROCESS_STATE_TOP);
             assertCpuTimesValid(cpuTimesMs3);
-            assertCpuTimesEqual(cpuTimesMs3, cpuTimesMs, 20,
+            assertCpuTimesEqual(cpuTimesMs3, cpuTimesMs, 500,
                     "Unexpected cpu times after turning on tracking");
 
             doSomeWork(PROCESS_STATE_TOP);
@@ -588,7 +590,8 @@ public class BstatsCpuTimesValidationTest {
     private void assertCpuTimesEqual(long[] actual, long[] expected, long delta, String errMsg) {
         for (int i = actual.length - 1; i >= 0; --i) {
             if (actual[i] > expected[i] + delta || actual[i] < expected[i]) {
-                fail(errMsg + ", actual=" + actual + ", expected=" + expected + ", delta=" + delta);
+                fail(errMsg + ", actual=" + Arrays.toString(actual)
+                        + ", expected=" + Arrays.toString(expected) + ", delta=" + delta);
             }
         }
     }

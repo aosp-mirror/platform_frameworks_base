@@ -416,13 +416,12 @@ public abstract class Context {
     public static final int BIND_SCHEDULE_LIKE_TOP_APP = 0x00080000;
 
     /**
-     * Flag for {@link #bindService}: allow background activity starts from the bound service's
-     * process.
-     * This flag is only respected if the caller is holding
-     * {@link android.Manifest.permission#START_ACTIVITIES_FROM_BACKGROUND}.
+     * This flag has never been used.
      * @hide
+     * @deprecated This flag has never been used.
      */
     @SystemApi
+    @Deprecated
     public static final int BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS = 0x00100000;
 
     /**

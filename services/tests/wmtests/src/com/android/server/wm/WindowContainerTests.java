@@ -1071,6 +1071,41 @@ public class WindowContainerTests extends WindowTestsBase {
         verify(surfaceAnimator).setRelativeLayer(t, relativeParent, 1 /* layer */);
     }
 
+    @Test
+    public void testAssignAnimationLayer() {
+        final WindowContainer container = new WindowContainer(mWm);
+        container.mSurfaceControl = mock(SurfaceControl.class);
+        final SurfaceAnimator surfaceAnimator = container.mSurfaceAnimator;
+        final SurfaceFreezer surfaceFreezer = container.mSurfaceFreezer;
+        final SurfaceControl relativeParent = mock(SurfaceControl.class);
+        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+        spyOn(container);
+        spyOn(surfaceAnimator);
+        spyOn(surfaceFreezer);
+
+        container.setLayer(t, 1);
+        container.setRelativeLayer(t, relativeParent, 2);
+
+        // Set through surfaceAnimator if surfaceFreezer doesn't have leash.
+        verify(surfaceAnimator).setLayer(t, 1);
+        verify(surfaceAnimator).setRelativeLayer(t, relativeParent, 2);
+        verify(surfaceFreezer, never()).setLayer(any(), anyInt());
+        verify(surfaceFreezer, never()).setRelativeLayer(any(), any(), anyInt());
+
+        clearInvocations(surfaceAnimator);
+        clearInvocations(surfaceFreezer);
+        doReturn(true).when(surfaceFreezer).hasLeash();
+
+        container.setLayer(t, 1);
+        container.setRelativeLayer(t, relativeParent, 2);
+
+        // Set through surfaceFreezer if surfaceFreezer has leash.
+        verify(surfaceFreezer).setLayer(t, 1);
+        verify(surfaceFreezer).setRelativeLayer(t, relativeParent, 2);
+        verify(surfaceAnimator, never()).setLayer(any(), anyInt());
+        verify(surfaceAnimator, never()).setRelativeLayer(any(), any(), anyInt());
+    }
+
     /* Used so we can gain access to some protected members of the {@link WindowContainer} class */
     private static class TestWindowContainer extends WindowContainer<TestWindowContainer> {
         private final int mLayer;

@@ -91,7 +91,7 @@ class WallpaperControllerTest : SysuiTestCase() {
     @Test
     fun setUnfoldTransitionZoom_defaultUnfoldTransitionIsDisabled_doesNotUpdateWallpaperZoom() {
         wallaperController.onWallpaperInfoUpdated(createWallpaperInfo(
-            useDefaultUnfoldTransition = false
+            useDefaultTransition = false
         ))
 
         wallaperController.setUnfoldTransitionZoom(0.5f)
@@ -136,9 +136,10 @@ class WallpaperControllerTest : SysuiTestCase() {
         verify(wallpaperManager).setWallpaperZoomOut(any(), anyFloat())
     }
 
-    private fun createWallpaperInfo(useDefaultUnfoldTransition: Boolean = true): WallpaperInfo {
+    private fun createWallpaperInfo(useDefaultTransition: Boolean = true): WallpaperInfo {
         val info = mock(WallpaperInfo::class.java)
-        whenever(info.shouldUseDefaultUnfoldTransition()).thenReturn(useDefaultUnfoldTransition)
+        whenever(info.shouldUseDefaultDeviceStateChangeTransition())
+            .thenReturn(useDefaultTransition)
         return info
     }
 }

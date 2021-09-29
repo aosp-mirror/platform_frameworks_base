@@ -23,6 +23,7 @@ import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityServiceInfo.FeedbackType;
 import android.accessibilityservice.AccessibilityShortcutInfo;
+import android.annotation.CallbackExecutor;
 import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -46,6 +47,7 @@ import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -73,6 +75,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * System level service that serves as an event dispatch for {@link AccessibilityEvent}s,
@@ -263,7 +266,7 @@ public final class AccessibilityManager {
     private final ArrayMap<HighTextContrastChangeListener, Handler>
             mHighTextContrastStateChangeListeners = new ArrayMap<>();
 
-    private final ArrayMap<AccessibilityServicesStateChangeListener, Handler>
+    private final ArrayMap<AccessibilityServicesStateChangeListener, Executor>
             mServicesStateChangeListeners = new ArrayMap<>();
 
     /**
@@ -303,13 +306,20 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Listener for changes to the state of accessibility services. Changes include services being
-     * enabled or disabled, or changes to the {@link AccessibilityServiceInfo} of a running service.
-     * {@see #addAccessibilityServicesStateChangeListener}.
+     * Listener for changes to the state of accessibility services.
      *
-     * @hide
+     * <p>
+     * This refers to changes to {@link AccessibilityServiceInfo}, including:
+     * <ul>
+     *     <li>Whenever a service is enabled or disabled, or its info has been set or removed.</li>
+     *     <li>Whenever a metadata attribute of any running service's info changes.</li>
+     * </ul>
+     *
+     * @see #getEnabledAccessibilityServiceList for a list of infos of the enabled accessibility
+     * services.
+     * @see #addAccessibilityServicesStateChangeListener
+     *
      */
-    @TestApi
     public interface AccessibilityServicesStateChangeListener {
 
         /**
@@ -317,7 +327,7 @@ public final class AccessibilityManager {
          *
          * @param manager The manager that is calling back
          */
-        void onAccessibilityServicesStateChanged(AccessibilityManager manager);
+        void onAccessibilityServicesStateChanged(@NonNull  AccessibilityManager manager);
     }
 
     /**
@@ -409,7 +419,7 @@ public final class AccessibilityManager {
         public void notifyServicesStateChanged(long updatedUiTimeout) {
             updateUiTimeout(updatedUiTimeout);
 
-            final ArrayMap<AccessibilityServicesStateChangeListener, Handler> listeners;
+            final ArrayMap<AccessibilityServicesStateChangeListener, Executor> listeners;
             synchronized (mLock) {
                 if (mServicesStateChangeListeners.isEmpty()) {
                     return;
@@ -421,7 +431,7 @@ public final class AccessibilityManager {
             for (int i = 0; i < numListeners; i++) {
                 final AccessibilityServicesStateChangeListener listener =
                         mServicesStateChangeListeners.keyAt(i);
-                mServicesStateChangeListeners.valueAt(i).post(() -> listener
+                mServicesStateChangeListeners.valueAt(i).execute(() -> listener
                         .onAccessibilityServicesStateChanged(AccessibilityManager.this));
             }
         }
@@ -914,32 +924,39 @@ public final class AccessibilityManager {
     /**
      * Registers a {@link AccessibilityServicesStateChangeListener}.
      *
+     * @param executor The executor.
      * @param listener The listener.
-     * @param handler The handler on which the listener should be called back, or {@code null}
-     *                for a callback on the process's main handler.
-     * @hide
      */
-    @TestApi
     public void addAccessibilityServicesStateChangeListener(
-            @NonNull AccessibilityServicesStateChangeListener listener, @Nullable Handler handler) {
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull AccessibilityServicesStateChangeListener listener) {
         synchronized (mLock) {
-            mServicesStateChangeListeners
-                    .put(listener, (handler == null) ? mHandler : handler);
+            mServicesStateChangeListeners.put(listener, executor);
         }
+    }
+
+    /**
+     * Registers a {@link AccessibilityServicesStateChangeListener}. This will execute a callback on
+     * the process's main handler.
+     *
+     * @param listener The listener.
+     *
+     */
+    public void addAccessibilityServicesStateChangeListener(
+            @NonNull AccessibilityServicesStateChangeListener listener) {
+        addAccessibilityServicesStateChangeListener(new HandlerExecutor(mHandler), listener);
     }
 
     /**
      * Unregisters a {@link AccessibilityServicesStateChangeListener}.
      *
      * @param listener The listener.
-     *
-     * @hide
+     * @return {@code true} if the listener was previously registered.
      */
-    @TestApi
-    public void removeAccessibilityServicesStateChangeListener(
+    public boolean removeAccessibilityServicesStateChangeListener(
             @NonNull AccessibilityServicesStateChangeListener listener) {
         synchronized (mLock) {
-            mServicesStateChangeListeners.remove(listener);
+            return mServicesStateChangeListeners.remove(listener) != null;
         }
     }
 

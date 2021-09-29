@@ -4809,10 +4809,6 @@ class Task extends TaskFragment {
                         notifyClients);
             }, true /* traverseTopToBottom */);
 
-            // Notify WM shell that task visibilities may have changed
-            forAllTasks(task -> task.dispatchTaskInfoChangedIfNeeded(/* force */ false),
-                    true /* traverseTopToBottom */);
-
             if (mTranslucentActivityWaiting != null &&
                     mUndrawnActivitiesBelowTopTranslucent.isEmpty()) {
                 // Nothing is getting drawn or everything was already visible, don't wait for

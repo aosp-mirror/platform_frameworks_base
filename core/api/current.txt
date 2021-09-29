@@ -119,6 +119,7 @@ package android {
     field public static final String NFC_TRANSACTION_EVENT = "android.permission.NFC_TRANSACTION_EVENT";
     field public static final String PACKAGE_USAGE_STATS = "android.permission.PACKAGE_USAGE_STATS";
     field @Deprecated public static final String PERSISTENT_ACTIVITY = "android.permission.PERSISTENT_ACTIVITY";
+    field public static final String POST_NOTIFICATIONS = "android.permission.POST_NOTIFICATIONS";
     field @Deprecated public static final String PROCESS_OUTGOING_CALLS = "android.permission.PROCESS_OUTGOING_CALLS";
     field public static final String QUERY_ALL_PACKAGES = "android.permission.QUERY_ALL_PACKAGES";
     field public static final String READ_CALENDAR = "android.permission.READ_CALENDAR";
@@ -204,6 +205,7 @@ package android {
     field public static final String LOCATION = "android.permission-group.LOCATION";
     field public static final String MICROPHONE = "android.permission-group.MICROPHONE";
     field public static final String NEARBY_DEVICES = "android.permission-group.NEARBY_DEVICES";
+    field public static final String NOTIFICATIONS = "android.permission-group.NOTIFICATIONS";
     field public static final String PHONE = "android.permission-group.PHONE";
     field public static final String SENSORS = "android.permission-group.SENSORS";
     field public static final String SMS = "android.permission-group.SMS";
@@ -1301,7 +1303,7 @@ package android {
     field public static final int shortcutLongLabel = 16844074; // 0x101052a
     field public static final int shortcutShortLabel = 16844073; // 0x1010529
     field public static final int shouldDisableView = 16843246; // 0x10101ee
-    field public static final int shouldUseDefaultUnfoldTransition;
+    field public static final int shouldUseDefaultDeviceStateChangeTransition;
     field public static final int showAsAction = 16843481; // 0x10102d9
     field public static final int showDefault = 16843258; // 0x10101fa
     field public static final int showDividers = 16843561; // 0x1010329
@@ -6941,7 +6943,7 @@ package android.app {
     method public android.graphics.drawable.Drawable loadIcon(android.content.pm.PackageManager);
     method public CharSequence loadLabel(android.content.pm.PackageManager);
     method public android.graphics.drawable.Drawable loadThumbnail(android.content.pm.PackageManager);
-    method public boolean shouldUseDefaultUnfoldTransition();
+    method public boolean shouldUseDefaultDeviceStateChangeTransition();
     method public boolean supportsMultipleDisplays();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.WallpaperInfo> CREATOR;
@@ -9895,11 +9897,11 @@ package android.companion {
 
   public abstract class CompanionDeviceService extends android.app.Service {
     ctor public CompanionDeviceService();
+    method @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES) public final void dispatchMessage(int, int, @NonNull byte[]);
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method @MainThread public abstract void onDeviceAppeared(@NonNull String);
     method @MainThread public abstract void onDeviceDisappeared(@NonNull String);
-    method @MainThread public void onSendMessage(int, int, @NonNull byte[]);
-    method @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES) public final void receiveMessage(int, int, @NonNull byte[]);
+    method @MainThread public void onDispatchMessage(int, int, @NonNull byte[]);
     field public static final String SERVICE_INTERFACE = "android.companion.CompanionDeviceService";
   }
 
@@ -35270,6 +35272,7 @@ package android.provider {
     field public static final String ACTION_ACCESSIBILITY_SETTINGS = "android.settings.ACCESSIBILITY_SETTINGS";
     field public static final String ACTION_ADD_ACCOUNT = "android.settings.ADD_ACCOUNT_SETTINGS";
     field public static final String ACTION_AIRPLANE_MODE_SETTINGS = "android.settings.AIRPLANE_MODE_SETTINGS";
+    field public static final String ACTION_ALL_APPS_NOTIFICATION_SETTINGS = "android.settings.ALL_APPS_NOTIFICATION_SETTINGS";
     field public static final String ACTION_APN_SETTINGS = "android.settings.APN_SETTINGS";
     field public static final String ACTION_APPLICATION_DETAILS_SETTINGS = "android.settings.APPLICATION_DETAILS_SETTINGS";
     field public static final String ACTION_APPLICATION_DEVELOPMENT_SETTINGS = "android.settings.APPLICATION_DEVELOPMENT_SETTINGS";
@@ -39102,6 +39105,13 @@ package android.service.textservice {
 
 package android.service.voice {
 
+  public final class VisibleActivityInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.service.voice.VoiceInteractionSession.ActivityId getActivityId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.VisibleActivityInfo> CREATOR;
+  }
+
   public class VoiceInteractionService extends android.app.Service {
     ctor public VoiceInteractionService();
     method public int getDisabledShowContext();
@@ -39163,6 +39173,7 @@ package android.service.voice {
     method public void onTaskStarted(android.content.Intent, int);
     method public void onTrimMemory(int);
     method public final void performDirectAction(@NonNull android.app.DirectAction, @Nullable android.os.Bundle, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.os.Bundle>);
+    method public final void registerVisibleActivityCallback(@NonNull java.util.concurrent.Executor, @NonNull android.service.voice.VoiceInteractionSession.VisibleActivityCallback);
     method public final void requestDirectActions(@NonNull android.service.voice.VoiceInteractionSession.ActivityId, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.util.List<android.app.DirectAction>>);
     method public void setContentView(android.view.View);
     method public void setDisabledShowContext(int);
@@ -39172,6 +39183,7 @@ package android.service.voice {
     method public void show(android.os.Bundle, int);
     method public void startAssistantActivity(android.content.Intent);
     method public void startVoiceActivity(android.content.Intent);
+    method public final void unregisterVisibleActivityCallback(@NonNull android.service.voice.VoiceInteractionSession.VisibleActivityCallback);
     field public static final int SHOW_SOURCE_ACTIVITY = 16; // 0x10
     field public static final int SHOW_SOURCE_APPLICATION = 8; // 0x8
     field public static final int SHOW_SOURCE_ASSIST_GESTURE = 4; // 0x4
@@ -39243,6 +39255,11 @@ package android.service.voice {
     method public int getCallingUid();
     method public android.os.Bundle getExtras();
     method public boolean isActive();
+  }
+
+  public static interface VoiceInteractionSession.VisibleActivityCallback {
+    method public default void onInvisible(@NonNull android.service.voice.VoiceInteractionSession.ActivityId);
+    method public default void onVisible(@NonNull android.service.voice.VisibleActivityInfo);
   }
 
   public abstract class VoiceInteractionSessionService extends android.app.Service {
@@ -50848,6 +50865,8 @@ package android.view.accessibility {
 
   public final class AccessibilityManager {
     method public void addAccessibilityRequestPreparer(android.view.accessibility.AccessibilityRequestPreparer);
+    method public void addAccessibilityServicesStateChangeListener(@NonNull java.util.concurrent.Executor, @NonNull android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener);
+    method public void addAccessibilityServicesStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener);
     method public boolean addAccessibilityStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener);
     method public void addAccessibilityStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener, @Nullable android.os.Handler);
     method public boolean addTouchExplorationStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener);
@@ -50863,12 +50882,17 @@ package android.view.accessibility {
     method public boolean isEnabled();
     method public boolean isTouchExplorationEnabled();
     method public void removeAccessibilityRequestPreparer(android.view.accessibility.AccessibilityRequestPreparer);
+    method public boolean removeAccessibilityServicesStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener);
     method public boolean removeAccessibilityStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener);
     method public boolean removeTouchExplorationStateChangeListener(@NonNull android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener);
     method public void sendAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
     field public static final int FLAG_CONTENT_CONTROLS = 4; // 0x4
     field public static final int FLAG_CONTENT_ICONS = 1; // 0x1
     field public static final int FLAG_CONTENT_TEXT = 2; // 0x2
+  }
+
+  public static interface AccessibilityManager.AccessibilityServicesStateChangeListener {
+    method public void onAccessibilityServicesStateChanged(@NonNull android.view.accessibility.AccessibilityManager);
   }
 
   public static interface AccessibilityManager.AccessibilityStateChangeListener {

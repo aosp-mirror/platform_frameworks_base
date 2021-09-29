@@ -24,9 +24,8 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-python_binary_host {
-    name: "api_versions_trimmer",
-    srcs: ["api_versions_trimmer.py"],
+python_defaults {
+    name: "python3_version_defaults",
     version: {
         py2: {
             enabled: false,
@@ -38,6 +37,12 @@ python_binary_host {
     },
 }
 
+python_binary_host {
+    name: "api_versions_trimmer",
+    srcs: ["api_versions_trimmer.py"],
+    defaults: ["python3_version_defaults"],
+}
+
 python_test_host {
     name: "api_versions_trimmer_unittests",
     main: "api_versions_trimmer_unittests.py",
@@ -45,17 +50,28 @@ python_test_host {
         "api_versions_trimmer_unittests.py",
         "api_versions_trimmer.py",
     ],
+    defaults: ["python3_version_defaults"],
     test_options: {
         unit_test: true,
     },
-    version: {
-        py2: {
-            enabled: false,
-        },
-        py3: {
-            enabled: true,
-            embedded_launcher: false,
-        },
+}
+
+python_binary_host {
+    name: "merge_annotation_zips",
+    srcs: ["merge_annotation_zips.py"],
+    defaults: ["python3_version_defaults"],
+}
+
+python_test_host {
+    name: "merge_annotation_zips_test",
+    main: "merge_annotation_zips_test.py",
+    srcs: [
+        "merge_annotation_zips.py",
+        "merge_annotation_zips_test.py",
+    ],
+    defaults: ["python3_version_defaults"],
+    test_options: {
+        unit_test: true,
     },
 }
 

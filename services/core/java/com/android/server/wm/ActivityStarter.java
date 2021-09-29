@@ -1254,18 +1254,6 @@ class ActivityStarter {
         return activity != null && packageName.equals(activity.getPackageName());
     }
 
-    private static boolean isPendingIntentBalAllowedByCaller(ActivityOptions activityOptions) {
-        if (activityOptions == null) {
-            return ActivityOptions.PENDING_INTENT_BAL_ALLOWED_DEFAULT;
-        }
-        final Bundle options = activityOptions.toBundle();
-        if (options == null) {
-            return ActivityOptions.PENDING_INTENT_BAL_ALLOWED_DEFAULT;
-        }
-        return options.getBoolean(ActivityOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED,
-                ActivityOptions.PENDING_INTENT_BAL_ALLOWED_DEFAULT);
-    }
-
     boolean shouldAbortBackgroundActivityStart(int callingUid, int callingPid,
             final String callingPackage, int realCallingUid, int realCallingPid,
             WindowProcessController callerApp, PendingIntentRecord originatingPendingIntent,
@@ -1345,7 +1333,7 @@ class ActivityStarter {
 
         // Legacy behavior allows to use caller foreground state to bypass BAL restriction.
         final boolean balAllowedByPiSender =
-                isPendingIntentBalAllowedByCaller(checkedOptions);
+                PendingIntentRecord.isPendingIntentBalAllowedByCaller(checkedOptions);
 
         if (balAllowedByPiSender && realCallingUid != callingUid) {
             if (isPiBalOptionEnabled) {

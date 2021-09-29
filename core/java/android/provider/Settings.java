@@ -1919,7 +1919,6 @@ public final class Settings {
     /**
      * Activity Action: Show app listing settings, filtered by those that send notifications.
      *
-     * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_ALL_APPS_NOTIFICATION_SETTINGS =
