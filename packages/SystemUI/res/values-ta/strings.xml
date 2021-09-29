@@ -1176,8 +1176,7 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"நெட்வொர்க்குகளைப் பார்க்க அன்லாக் செய்யுங்கள்"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"நெட்வொர்க்குகளைத் தேடுகிறது…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"நெட்வொர்க்குடன் இணைக்க முடியவில்லை"</string>
-    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
-    <skip />
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"தற்போதைக்கு வைஃபை தானாக இணைக்கப்படாது"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"அனைத்தையும் காட்டு"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"நெட்வொர்க்குகளை மாற்ற ஈதர்நெட் இணைப்பைத் துண்டிக்கவும்"</string>
 </resources>

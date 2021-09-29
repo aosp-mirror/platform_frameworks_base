@@ -710,8 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"सशक्त सूचना नियन्त्रण"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"अन छ"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"अफ"</string>
-    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
-    <skip />
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"अन छ - अनुहारमा आधारित"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"सशक्त सूचना नियन्त्रणहरू मार्फत तपाईं अनुप्रयाेगका सूचनाहरूका लागि ० देखि ५ सम्मको महत्व सम्बन्धी स्तर सेट गर्न सक्नुहुन्छ। \n\n"<b>"स्तर ५"</b>" \n- सूचनाको सूचीको माथिल्लो भागमा देखाउने \n- पूर्ण स्क्रिनमा अवरोधका लागि अनुमति दिने \n- सधैँ चियाउने \n\n"<b>"स्तर ४"</b>" \n- पूर्ण स्क्रिनमा अवरोधलाई रोक्ने \n- सधैँ चियाउने \n\n"<b>"स्तर ३"</b>" \n- पूर्ण स्क्रिनमा अवरोधलाई रोक्ने \n- कहिल्यै नचियाउने \n\n"<b>"स्तर २"</b>" \n- पूर्ण स्क्रिनमा अवरोधलाई रोक्ने \n- कहिल्यै नचियाउने \n- कहिल्यै पनि आवाज ननिकाल्ने र कम्पन नगर्ने \n\n"<b>"स्तर १"</b>" \n- पूर्ण स्क्रिनमा अवरोध रोक्ने \n- कहिल्यै नचियाउने \n- कहिल्यै पनि आवाज ननिकाल्ने वा कम्पन नगर्ने \n- लक स्क्रिन र वस्तुस्थिति पट्टीबाट लुकाउने \n- सूचनाको सूचीको तल्लो भागमा देखाउने \n\n"<b>"स्तर ०"</b>" \n- एपका सबै सूचनाहरूलाई रोक्ने"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"सूचनाहरू"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"तपाईं अब उप्रान्त यी सूचनाहरू देख्नु हुने छैन"</string>
@@ -1177,8 +1176,7 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"नेटवर्कहरू हेर्न आफ्नो स्क्रिन अनलक गर्नुहोस्"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"नेटवर्कहरू खोजिँदै छन्…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"नेटवर्कमा कनेक्ट गर्न सकिएन"</string>
-    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
-    <skip />
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"केही समयका लागि Wi-Fi स्वतः कनेक्ट हुँदैन"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"सबै नेटवर्क हेर्नुहोस्"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"नेटवर्क बदल्न इथरनेट डिस्कनेक्ट गर्नुहोस्"</string>
 </resources>
