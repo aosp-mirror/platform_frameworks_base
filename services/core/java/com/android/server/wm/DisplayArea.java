@@ -272,6 +272,10 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     @Override
     public void dumpDebug(ProtoOutputStream proto, long fieldId, int logLevel) {
+        if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
+            return;
+        }
+
         final long token = proto.start(fieldId);
         super.dumpDebug(proto, WINDOW_CONTAINER, logLevel);
         proto.write(NAME, mName);
