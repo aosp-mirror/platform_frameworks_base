@@ -91,6 +91,7 @@ import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.pip.Pip;
 
@@ -1415,6 +1416,10 @@ public class NavigationBarView extends FrameLayout implements
 
     void removePipExclusionBoundsChangeListener(Pip pip) {
         pip.removePipExclusionBoundsChangeListener(mPipListener);
+    }
+
+    void registerBackAnimation(BackAnimation backAnimation) {
+        mEdgeBackGestureHandler.setBackAnimation(backAnimation);
     }
 
     private static void dumpButton(PrintWriter pw, String caption, ButtonDispatcher button) {
