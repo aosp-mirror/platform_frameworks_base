@@ -110,6 +110,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Debug;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
@@ -202,6 +203,11 @@ class TaskRecord extends ConfigurationContainer {
     static final int REPARENT_KEEP_STACK_AT_FRONT = 1;
     // Do not move the stack as a part of reparenting
     static final int REPARENT_LEAVE_STACK_IN_PLACE = 2;
+
+    /**
+     * Used to identify if the activity that is installed from device's system image.
+     */
+    boolean mIsEffectivelySystemApp;
 
     /**
      * The factory used to create {@link TaskRecord}. This allows OEM subclass {@link TaskRecord}.
@@ -869,17 +875,25 @@ class TaskRecord extends ConfigurationContainer {
 
     /** Sets the original intent, and the calling uid and package. */
     void setIntent(ActivityRecord r) {
-        mCallingUid = r.launchedFromUid;
-        mCallingPackage = r.launchedFromPackage;
-        setIntent(r.intent, r.info);
+        boolean updateIdentity = false;
+        if (this.intent == null) {
+            updateIdentity = true;
+        } else if (!mNeverRelinquishIdentity) {
+            updateIdentity = (effectiveUid == Process.SYSTEM_UID || mIsEffectivelySystemApp
+                    || effectiveUid == r.info.applicationInfo.uid);
+        }
+        if (updateIdentity) {
+            mCallingUid = r.launchedFromUid;
+            mCallingPackage = r.launchedFromPackage;
+            setIntent(r.intent, r.info);
+        }
         setLockTaskAuth(r);
     }
 
     /** Sets the original intent, _without_ updating the calling uid or package. */
     private void setIntent(Intent _intent, ActivityInfo info) {
         if (intent == null) {
-            mNeverRelinquishIdentity =
-                    (info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0;
+            mNeverRelinquishIdentity = (info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0;
         } else if (mNeverRelinquishIdentity) {
             return;
         }
@@ -892,6 +906,7 @@ class TaskRecord extends ConfigurationContainer {
             rootAffinity = affinity;
         }
         effectiveUid = info.applicationInfo.uid;
+        mIsEffectivelySystemApp = info.applicationInfo.isSystemApp();
         stringName = null;
 
         if (info.targetActivity == null) {
@@ -1662,12 +1677,12 @@ class TaskRecord extends ConfigurationContainer {
         // utility activities.
         int activityNdx;
         final int numActivities = mActivities.size();
-        final boolean relinquish = numActivities != 0 &&
-                (mActivities.get(0).info.flags & FLAG_RELINQUISH_TASK_IDENTITY) != 0;
-        for (activityNdx = Math.min(numActivities, 1); activityNdx < numActivities;
-                ++activityNdx) {
+        for (activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
             final ActivityRecord r = mActivities.get(activityNdx);
-            if (relinquish && (r.info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0) {
+            if ((r.info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0
+                    || (r.info.applicationInfo.uid != Process.SYSTEM_UID
+                    && !r.info.applicationInfo.isSystemApp()
+                    && r.info.applicationInfo.uid != effectiveUid)) {
                 // This will be the top activity for determining taskDescription. Pre-inc to
                 // overcome initial decrement below.
                 ++activityNdx;
@@ -1739,15 +1754,27 @@ class TaskRecord extends ConfigurationContainer {
     int findEffectiveRootIndex() {
         int effectiveNdx = 0;
         final int topActivityNdx = mActivities.size() - 1;
+        ActivityRecord root = null;
         for (int activityNdx = 0; activityNdx <= topActivityNdx; ++activityNdx) {
             final ActivityRecord r = mActivities.get(activityNdx);
             if (r.finishing) {
                 continue;
             }
-            effectiveNdx = activityNdx;
-            if ((r.info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0) {
+
+            if (root == null) {
+                // Set this as the candidate root since it isn't finishing.
+                root = r;
+                effectiveNdx = activityNdx;
+            }
+            final int uid = root == r ? effectiveUid : r.info.applicationInfo.uid;
+            if ((root.info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0
+                || (root.info.applicationInfo.uid != Process.SYSTEM_UID
+                    && !root.info.applicationInfo.isSystemApp()
+                    && root.info.applicationInfo.uid != uid)) {
                 break;
             }
+            effectiveNdx = activityNdx;
+            root = r;
         }
         return effectiveNdx;
     }
