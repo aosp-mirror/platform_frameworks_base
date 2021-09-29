@@ -824,6 +824,34 @@ public class StatusBarTest extends SysuiTestCase {
     }
 
     @Test
+    public void testSetExpansionAffectsAlpha_onlyWhenHidingKeyguard() {
+        mStatusBar.updateScrimController();
+        verify(mScrimController).setExpansionAffectsAlpha(eq(true));
+
+        clearInvocations(mScrimController);
+        when(mBiometricUnlockController.isBiometricUnlock()).thenReturn(true);
+        mStatusBar.updateScrimController();
+        verify(mScrimController).setExpansionAffectsAlpha(eq(true));
+
+        clearInvocations(mScrimController);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        mStatusBar.updateScrimController();
+        verify(mScrimController).setExpansionAffectsAlpha(eq(false));
+
+        clearInvocations(mScrimController);
+        reset(mKeyguardStateController);
+        when(mKeyguardStateController.isKeyguardFadingAway()).thenReturn(true);
+        mStatusBar.updateScrimController();
+        verify(mScrimController).setExpansionAffectsAlpha(eq(false));
+
+        clearInvocations(mScrimController);
+        reset(mKeyguardStateController);
+        when(mKeyguardStateController.isKeyguardGoingAway()).thenReturn(true);
+        mStatusBar.updateScrimController();
+        verify(mScrimController).setExpansionAffectsAlpha(eq(false));
+    }
+
+    @Test
     public void testTransitionLaunch_noPreview_doesntGoUnlocked() {
         mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);
         mStatusBar.showKeyguardImpl();
