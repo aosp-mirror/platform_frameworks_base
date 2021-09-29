@@ -3274,36 +3274,33 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /**
      * Updates the occluded state of the Keyguard.
      *
+     * @param isOccluded Whether the Keyguard is occluded by another window.
+     * @param force notify the occluded status to KeyguardService and update flags even though
+     *             occlude status doesn't change.
      * @return Whether the flags have changed and we have to redo the layout.
      */
     private boolean setKeyguardOccludedLw(boolean isOccluded, boolean force) {
         if (DEBUG_KEYGUARD) Slog.d(TAG, "setKeyguardOccluded occluded=" + isOccluded);
-        final boolean wasOccluded = mKeyguardOccluded;
-        final boolean showing = mKeyguardDelegate.isShowing();
-        final boolean changed = wasOccluded != isOccluded || force;
-        if (!isOccluded && changed && showing) {
-            mKeyguardOccluded = false;
-            mKeyguardDelegate.setOccluded(false, true /* animate */);
-            if (mKeyguardCandidate != null) {
-                if (!mKeyguardDelegate.hasLockscreenWallpaper()) {
-                    mKeyguardCandidate.getAttrs().flags |= FLAG_SHOW_WALLPAPER;
-                }
-            }
-            return true;
-        } else if (isOccluded && changed && showing) {
-            mKeyguardOccluded = true;
-            mKeyguardDelegate.setOccluded(true, false /* animate */);
-            if (mKeyguardCandidate != null) {
-                mKeyguardCandidate.getAttrs().flags &= ~FLAG_SHOW_WALLPAPER;
-            }
-            return true;
-        } else if (changed) {
-            mKeyguardOccluded = isOccluded;
-            mKeyguardDelegate.setOccluded(isOccluded, false /* animate */);
-            return false;
-        } else {
+        if (mKeyguardOccluded == isOccluded && !force) {
             return false;
         }
+
+        final boolean showing = mKeyguardDelegate.isShowing();
+        final boolean animate = showing && !isOccluded;
+        mKeyguardOccluded = isOccluded;
+        mKeyguardDelegate.setOccluded(isOccluded, animate);
+
+        if (!showing) {
+            return false;
+        }
+        if (mKeyguardCandidate != null) {
+            if (isOccluded) {
+                mKeyguardCandidate.getAttrs().flags &= ~FLAG_SHOW_WALLPAPER;
+            } else if (!mKeyguardDelegate.hasLockscreenWallpaper()) {
+                mKeyguardCandidate.getAttrs().flags |= FLAG_SHOW_WALLPAPER;
+            }
+        }
+        return true;
     }
 
     /** {@inheritDoc} */
