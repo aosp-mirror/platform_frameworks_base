@@ -537,10 +537,11 @@ public class InternalResourceService extends SystemService {
     private void setupHeavyWork() {
         synchronized (mLock) {
             loadInstalledPackageListLocked();
-            // TODO: base on if we have anything persisted
-            final boolean isFirstSetup = true;
+            final boolean isFirstSetup = !mScribe.recordExists();
             if (isFirstSetup) {
                 mAgent.grantBirthrightsLocked();
+            } else {
+                mScribe.loadFromDiskLocked();
             }
             scheduleUnusedWealthReclamationLocked();
         }
