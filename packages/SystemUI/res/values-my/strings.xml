@@ -1175,8 +1175,7 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"ကွန်ရက်များကြည့်ရန် ဖွင့်ပါ"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"ကွန်ရက်များကို ရှာဖွေနေသည်…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"ကွန်ရက်သို့ ချိတ်ဆက်၍မရပါ"</string>
-    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
-    <skip />
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi က ယခု အလိုအလျောက် ချိတ်ဆက်မည်မဟုတ်ပါ"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"အားလုံးကြည့်ရန်"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ကွန်ရက်ပြောင်းရန် အီသာနက်ကို ချိတ်ဆက်မှုဖြုတ်ပါ"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> က ‘အမြန် ဆက်တင်များ’ တွင် အောက်ပါအကွက်ငယ်ကို ထည့်လိုသည်"</string>
