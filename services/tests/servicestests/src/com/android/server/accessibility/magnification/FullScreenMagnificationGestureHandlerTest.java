@@ -42,7 +42,6 @@ import android.content.Context;
 import android.graphics.PointF;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.Settings;
 import android.util.DebugUtils;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -456,14 +455,6 @@ public class FullScreenMagnificationGestureHandlerTest {
         goFromStateIdleTo(STATE_SHORTCUT_TRIGGERED);
 
         verify(mWindowMagnificationPromptController).showNotificationIfNeeded();
-    }
-
-    @Test
-    public void testZoomedWithTripleTap_callsOnTripleTapped() {
-        goFromStateIdleTo(STATE_ZOOMED_2TAPS);
-
-        verify(mMockCallback).onTripleTapped(DISPLAY_0,
-                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
     }
 
     private void assertActionsInOrder(List<MotionEvent> actualEvents,
