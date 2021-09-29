@@ -3202,6 +3202,11 @@
          and one pSIM) -->
     <integer name="config_num_physical_slots">1</integer>
 
+    <!-- When a radio power off request is received, we will delay completing the request until
+         either IMS moves to the deregistered state or the timeout defined by this configuration
+         elapses. If 0, this feature is disabled and we do not delay radio power off requests.-->
+    <integer name="config_delay_for_ims_dereg_millis">0</integer>
+
     <!--Thresholds for LTE dbm in status bar-->
     <integer-array translatable="false" name="config_lteDbmThresholds">
         <item>-140</item>    <!-- SIGNAL_STRENGTH_NONE_OR_UNKNOWN -->
