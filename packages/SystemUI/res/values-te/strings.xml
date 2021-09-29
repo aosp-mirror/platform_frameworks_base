@@ -1175,6 +1175,7 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"నెట్‌వర్క్‌లను చూడటానికి అన్‌లాక్ చేయండి"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"నెట్‌వర్క్‌ల కోసం సెర్చ్ చేస్తోంది…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"నెట్‌వర్క్‌కు కనెక్ట్ చేయడం విఫలమైంది"</string>
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"ప్రస్తుతానికి Wi-Fi ఆటోమేటిక్‌గా కనెక్ట్ అవ్వదు"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"అన్నీ చూడండి"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"నెట్‌వర్క్‌లను మార్చడానికి, ఈథర్‌నెట్‌ను డిస్‌కనెక్ట్ చేయండి"</string>
 </resources>
