@@ -7753,6 +7753,12 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 DpmMockContext.CALLER_SYSTEM_USER_UID, admin1.getPackageName(), MODE_DEFAULT);
     }
 
+    @Test
+    public void testGetOrganizationNameForUser_calledByNonPrivilegedApp_throwsException() {
+        assertExpectException(SecurityException.class, "Calling identity is not authorized",
+                () -> dpm.getOrganizationNameForUser(UserHandle.USER_SYSTEM));
+    }
+
     private void setupVpnAuthorization(String userVpnPackage, int userVpnUid) {
         final AppOpsManager.PackageOps vpnOp = new AppOpsManager.PackageOps(userVpnPackage,
                 userVpnUid, List.of(new AppOpsManager.OpEntry(
