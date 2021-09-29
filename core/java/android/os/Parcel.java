@@ -448,6 +448,23 @@ public final class Parcel {
     }
 
     /**
+     * Retrieve a new Parcel object from the pool for use with a specific binder.
+     *
+     * Associate this parcel with a binder object. This marks the parcel as being prepared for a
+     * transaction on this specific binder object. Based on this, the format of the wire binder
+     * protocol may change. For future compatibility, it is recommended to use this for all
+     * Parcels.
+     *
+     * @hide
+     */
+    @NonNull
+    public static Parcel obtain(@NonNull IBinder binder) {
+        Parcel parcel = Parcel.obtain();
+        parcel.markForBinder(binder);
+        return parcel;
+    }
+
+    /**
      * Put a Parcel object back into the pool.  You must not touch
      * the object after this call.
      */
@@ -519,16 +536,9 @@ public final class Parcel {
     }
 
     /**
-     * Associate this parcel with a binder object. This marks the parcel as being prepared for a
-     * transaction on this specific binder object. Based on this, the format of the wire binder
-     * protocol may change. This should be called before any data is written to the parcel. If this
-     * is called multiple times, this will only be marked for the last binder. For future
-     * compatibility, it is recommended to call this on all parcels which are being sent over
-     * binder.
-     *
      * @hide
      */
-    public void markForBinder(@NonNull IBinder binder) {
+    private void markForBinder(@NonNull IBinder binder) {
         nativeMarkForBinder(mNativePtr, binder);
     }
 
