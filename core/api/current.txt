@@ -18325,6 +18325,7 @@ package android.hardware.camera2 {
     field public static final int CONTROL_SCENE_MODE_THEATRE = 7; // 0x7
     field public static final int CONTROL_VIDEO_STABILIZATION_MODE_OFF = 0; // 0x0
     field public static final int CONTROL_VIDEO_STABILIZATION_MODE_ON = 1; // 0x1
+    field public static final int CONTROL_VIDEO_STABILIZATION_MODE_PREVIEW_STABILIZATION = 2; // 0x2
     field public static final int DISTORTION_CORRECTION_MODE_FAST = 1; // 0x1
     field public static final int DISTORTION_CORRECTION_MODE_HIGH_QUALITY = 2; // 0x2
     field public static final int DISTORTION_CORRECTION_MODE_OFF = 0; // 0x0
