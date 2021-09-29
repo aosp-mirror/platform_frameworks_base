@@ -42,7 +42,7 @@ package android.app {
   }
 
   public static interface PendingIntent.CancelListener {
-    method public void onCancelled(@NonNull android.app.PendingIntent);
+    method public void onCanceled(@NonNull android.app.PendingIntent);
   }
 
   public class StatusBarManager {
