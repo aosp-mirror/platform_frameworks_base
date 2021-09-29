@@ -52,6 +52,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
 @SmallTest
 @RunWith(JUnit4.class)
@@ -521,5 +522,32 @@ public class HdmiCecLocalDeviceTvTest {
         mTestLooper.dispatchAll();
 
         verify(mAudioManager, never()).setStreamVolume(anyInt(), anyInt(), anyInt());
+    }
+
+    /**
+     * Tests that receiving a message from a device does not prevent it from being discovered
+     * by HotplugDetectionAction.
+     */
+    @Test
+    public void hotplugDetectionAction_discoversDeviceAfterMessageReceived() {
+        // Playback 1 sends a message before ACKing a poll
+        mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_1, SendMessageResult.NACK);
+        HdmiCecMessage hdmiCecMessage = HdmiCecMessageBuilder.buildActiveSource(
+                ADDR_PLAYBACK_1, ADDR_TV);
+        mNativeWrapper.onCecMessage(hdmiCecMessage);
+        mTestLooper.dispatchAll();
+
+        // Playback 1 begins ACKing polls, allowing detection by HotplugDetectionAction
+        mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_1, SendMessageResult.SUCCESS);
+        for (int pollCount = 0; pollCount < HotplugDetectionAction.TIMEOUT_COUNT; pollCount++) {
+            mTestLooper.moveTimeForward(
+                    TimeUnit.SECONDS.toMillis(HotplugDetectionAction.POLLING_INTERVAL_MS_FOR_TV));
+            mTestLooper.dispatchAll();
+        }
+
+        // Device sends <Give Physical Address> to Playback 1 after detecting it
+        HdmiCecMessage givePhysicalAddress = HdmiCecMessageBuilder.buildGivePhysicalAddress(
+                ADDR_TV, ADDR_PLAYBACK_1);
+        assertThat(mNativeWrapper.getResultMessages()).contains(givePhysicalAddress);
     }
 }

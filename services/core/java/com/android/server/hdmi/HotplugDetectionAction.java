@@ -38,9 +38,9 @@ import java.util.List;
 final class HotplugDetectionAction extends HdmiCecFeatureAction {
     private static final String TAG = "HotPlugDetectionAction";
 
-    private static final int POLLING_INTERVAL_MS_FOR_TV = 5000;
+    public static final int POLLING_INTERVAL_MS_FOR_TV = 5000;
     public static final int POLLING_INTERVAL_MS_FOR_PLAYBACK = 60000;
-    private static final int TIMEOUT_COUNT = 3;
+    public static final int TIMEOUT_COUNT = 3;
     private static final int AVR_COUNT_MAX = 3;
 
     // State in which waits for next polling
@@ -155,8 +155,9 @@ final class HotplugDetectionAction extends HdmiCecFeatureAction {
     }
 
     private void checkHotplug(List<Integer> ackedAddress, boolean audioOnly) {
-        BitSet currentInfos = infoListToBitSet(
-                localDevice().mService.getHdmiCecNetwork().getDeviceInfoList(false), audioOnly);
+        List<HdmiDeviceInfo> deviceInfoList =
+                localDevice().mService.getHdmiCecNetwork().getDeviceInfoList(false);
+        BitSet currentInfos = infoListToBitSet(deviceInfoList, audioOnly, false);
         BitSet polledResult = addressListToBitSet(ackedAddress);
 
         // At first, check removed devices.
@@ -183,7 +184,8 @@ final class HotplugDetectionAction extends HdmiCecFeatureAction {
         }
 
         // Next, check added devices.
-        BitSet added = complement(polledResult, currentInfos);
+        BitSet currentInfosWithPhysicalAddress = infoListToBitSet(deviceInfoList, audioOnly, true);
+        BitSet added = complement(polledResult, currentInfosWithPhysicalAddress);
         index = -1;
         while ((index = added.nextSetBit(index + 1)) != -1) {
             Slog.v(TAG, "Add device by hot-plug detection:" + index);
@@ -191,14 +193,15 @@ final class HotplugDetectionAction extends HdmiCecFeatureAction {
         }
     }
 
-    private static BitSet infoListToBitSet(List<HdmiDeviceInfo> infoList, boolean audioOnly) {
+    private static BitSet infoListToBitSet(
+            List<HdmiDeviceInfo> infoList, boolean audioOnly, boolean requirePhysicalAddress) {
         BitSet set = new BitSet(NUM_OF_ADDRESS);
         for (HdmiDeviceInfo info : infoList) {
-            if (audioOnly) {
-                if (info.getDeviceType() == HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM) {
-                    set.set(info.getLogicalAddress());
-                }
-            } else {
+            boolean audioOnlyConditionMet = !audioOnly
+                    || (info.getDeviceType() == HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+            boolean requirePhysicalAddressConditionMet = !requirePhysicalAddress
+                    || (info.getPhysicalAddress() != HdmiDeviceInfo.PATH_INVALID);
+            if (audioOnlyConditionMet && requirePhysicalAddressConditionMet) {
                 set.set(info.getLogicalAddress());
             }
         }
