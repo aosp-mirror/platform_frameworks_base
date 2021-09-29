@@ -1175,6 +1175,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"ನೆಟ್‌ವರ್ಕ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಲು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"ನೆಟ್‌ವರ್ಕ್‌ಗಳನ್ನು ಹುಡುಕಲಾಗುತ್ತಿದೆ…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಕನೆಕ್ಟ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"ಎಲ್ಲವನ್ನೂ ನೋಡಿ"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ನೆಟ್‌ವರ್ಕ್‌ಗಳನ್ನು ಬದಲಿಸಲು, ಇಥರ್ನೆಟ್ ಅನ್ನು ಡಿಸ್‌ಕನೆಕ್ಟ್ ಮಾಡಿ"</string>
 </resources>
