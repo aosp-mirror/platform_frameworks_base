@@ -209,7 +209,6 @@ public class TransactionParcelTests {
                 .setPendingNewIntents(referrerIntentList()).setIsForward(true)
                 .setAssistToken(new Binder()).setFixedRotationAdjustments(fixedRotationAdjustments)
                 .setShareableActivityToken(new Binder())
-                .setTaskFragmentToken(new Binder())
                 .build();
 
         writeAndPrepareForReading(item);

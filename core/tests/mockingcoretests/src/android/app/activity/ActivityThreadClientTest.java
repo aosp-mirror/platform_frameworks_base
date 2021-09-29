@@ -299,7 +299,7 @@ public class ActivityThreadClientTest {
                     null /* activityOptions */, true /* isForward */, null /* profilerInfo */,
                     mThread /* client */, null /* asssitToken */,
                     null /* fixedRotationAdjustments */, null /* shareableActivityToken */,
-                    false /* launchedFromBubble */, null /* taskfragmentToken */);
+                    false /* launchedFromBubble */);
         }
 
         @Override
