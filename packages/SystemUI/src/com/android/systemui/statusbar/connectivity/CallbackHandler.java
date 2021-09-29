@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.statusbar.policy;
+package com.android.systemui.statusbar.connectivity;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -22,11 +22,11 @@ import android.telephony.SubscriptionInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.statusbar.policy.NetworkController.EmergencyListener;
-import com.android.systemui.statusbar.policy.NetworkController.IconState;
-import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
-import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
-import com.android.systemui.statusbar.policy.NetworkController.WifiIndicators;
+import com.android.systemui.statusbar.connectivity.NetworkController.EmergencyListener;
+import com.android.systemui.statusbar.connectivity.NetworkController.IconState;
+import com.android.systemui.statusbar.connectivity.NetworkController.MobileDataIndicators;
+import com.android.systemui.statusbar.connectivity.NetworkController.SignalCallback;
+import com.android.systemui.statusbar.connectivity.NetworkController.WifiIndicators;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -235,7 +235,7 @@ public class CallbackHandler extends Handler implements EmergencyListener, Signa
                 .append("icon=").append(icon)
                 .toString();
         recordLastCallback(log);
-        obtainMessage(MSG_ETHERNET_CHANGED, icon).sendToTarget();;
+        obtainMessage(MSG_ETHERNET_CHANGED, icon).sendToTarget();
     }
 
     @Override
@@ -252,14 +252,14 @@ public class CallbackHandler extends Handler implements EmergencyListener, Signa
                     .toString();
             recordLastCallback(log);
         }
-        obtainMessage(MSG_AIRPLANE_MODE_CHANGED, icon).sendToTarget();;
+        obtainMessage(MSG_AIRPLANE_MODE_CHANGED, icon).sendToTarget();
     }
 
-    public void setListening(EmergencyListener listener, boolean listening) {
+    void setListening(EmergencyListener listener, boolean listening) {
         obtainMessage(MSG_ADD_REMOVE_EMERGENCY, listening ? 1 : 0, 0, listener).sendToTarget();
     }
 
-    public void setListening(SignalCallback listener, boolean listening) {
+    void setListening(SignalCallback listener, boolean listening) {
         obtainMessage(MSG_ADD_REMOVE_SIGNAL, listening ? 1 : 0, 0, listener).sendToTarget();
     }
 

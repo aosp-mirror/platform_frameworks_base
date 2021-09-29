@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.statusbar.policy;
+package com.android.systemui.statusbar.connectivity;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -42,6 +42,7 @@ import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.R;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.util.CarrierConfigTracker;
 
 import org.junit.Test;
@@ -280,7 +281,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     // TODO: Put this somewhere else, maybe in its own file.
     @Test
     public void testHasCorrectMobileControllers() {
-        int[] testSubscriptions = new int[] { 1, 5, 3 };
+        int[] testSubscriptions = new int[]{1, 5, 3};
         int notTestSubscription = 0;
         MobileSignalController mobileSignalController = Mockito.mock(MobileSignalController.class);
 
@@ -312,8 +313,8 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         // We will not add one subscription to make sure it's controller gets removed.
         int indexToSkipSubscription = 1;
 
-        int[] testSubscriptions = new int[] { 1, 5, 3 };
-        MobileSignalController[] mobileSignalControllers = new MobileSignalController[] {
+        int[] testSubscriptions = new int[]{1, 5, 3};
+        MobileSignalController[] mobileSignalControllers = new MobileSignalController[]{
                 Mockito.mock(MobileSignalController.class),
                 Mockito.mock(MobileSignalController.class),
                 Mockito.mock(MobileSignalController.class),
@@ -401,24 +402,24 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     @Test
     public void testOnReceive_stringsUpdatedAction_bothFalse() {
         Intent intent = createStringsUpdatedIntent(false /* showSpn */,
-              "Irrelevant" /* spn */,
-              false /* showPlmn */,
-              "Irrelevant" /* plmn */);
+                "Irrelevant" /* spn */,
+                false /* showPlmn */,
+                "Irrelevant" /* plmn */);
 
         mNetworkController.onReceive(mContext, intent);
 
         String defaultNetworkName = mMobileSignalController
                 .getTextIfExists(
-                com.android.internal.R.string.lockscreen_carrier_default).toString();
+                        com.android.internal.R.string.lockscreen_carrier_default).toString();
         assertNetworkNameEquals(defaultNetworkName);
     }
 
     @Test
     public void testOnReceive_stringsUpdatedAction_bothTrueAndNull() {
         Intent intent = createStringsUpdatedIntent(true /* showSpn */,
-            null /* spn */,
-            true /* showPlmn */,
-            null /* plmn */);
+                null /* spn */,
+                true /* showPlmn */,
+                null /* plmn */);
 
         mNetworkController.onReceive(mContext, intent);
 
@@ -433,15 +434,15 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         String plmn = "Test2";
 
         Intent intent = createStringsUpdatedIntent(true /* showSpn */,
-            spn /* spn */,
-            true /* showPlmn */,
-            plmn /* plmn */);
+                spn /* spn */,
+                true /* showPlmn */,
+                plmn /* plmn */);
 
         mNetworkController.onReceive(mContext, intent);
 
         assertNetworkNameEquals(plmn
                 + mMobileSignalController.getTextIfExists(
-                        R.string.status_bar_network_name_separator).toString()
+                R.string.status_bar_network_name_separator).toString()
                 + spn);
     }
 
@@ -477,145 +478,149 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
 
     @Test
     public void testOnUpdateDataActivity_dataOut() {
-      setupDefaultSignal();
+        setupDefaultSignal();
 
-      updateDataActivity(TelephonyManager.DATA_ACTIVITY_OUT);
+        updateDataActivity(TelephonyManager.DATA_ACTIVITY_OUT);
 
-      verifyLastQsMobileDataIndicators(true /* visible */,
-              DEFAULT_LEVEL /* icon */,
-              DEFAULT_QS_ICON /* typeIcon */,
-              false /* dataIn */,
-              true /* dataOut */);
+        verifyLastQsMobileDataIndicators(true /* visible */,
+                DEFAULT_LEVEL /* icon */,
+                DEFAULT_QS_ICON /* typeIcon */,
+                false /* dataIn */,
+                true /* dataOut */);
     }
 
     @Test
     public void testOnUpdateDataActivity_dataInOut() {
-      setupDefaultSignal();
+        setupDefaultSignal();
 
-      updateDataActivity(TelephonyManager.DATA_ACTIVITY_INOUT);
+        updateDataActivity(TelephonyManager.DATA_ACTIVITY_INOUT);
 
-      verifyLastQsMobileDataIndicators(true /* visible */,
-              DEFAULT_LEVEL /* icon */,
-              DEFAULT_QS_ICON /* typeIcon */,
-              true /* dataIn */,
-              true /* dataOut */);
+        verifyLastQsMobileDataIndicators(true /* visible */,
+                DEFAULT_LEVEL /* icon */,
+                DEFAULT_QS_ICON /* typeIcon */,
+                true /* dataIn */,
+                true /* dataOut */);
 
     }
 
     @Test
     public void testOnUpdateDataActivity_dataActivityNone() {
-      setupDefaultSignal();
+        setupDefaultSignal();
 
-      updateDataActivity(TelephonyManager.DATA_ACTIVITY_NONE);
+        updateDataActivity(TelephonyManager.DATA_ACTIVITY_NONE);
 
-      verifyLastQsMobileDataIndicators(true /* visible */,
-              DEFAULT_LEVEL /* icon */,
-              DEFAULT_QS_ICON /* typeIcon */,
-              false /* dataIn */,
-              false /* dataOut */);
+        verifyLastQsMobileDataIndicators(true /* visible */,
+                DEFAULT_LEVEL /* icon */,
+                DEFAULT_QS_ICON /* typeIcon */,
+                false /* dataIn */,
+                false /* dataOut */);
 
     }
 
     @Test
     public void testCarrierNetworkChange_carrierNetworkChange() {
-      int strength = SignalStrength.SIGNAL_STRENGTH_GREAT;
+        int strength = SignalStrength.SIGNAL_STRENGTH_GREAT;
 
-      setupDefaultSignal();
-      setLevel(strength);
+        setupDefaultSignal();
+        setLevel(strength);
 
-      // Verify baseline
-      verifyLastMobileDataIndicators(true /* visible */,
-              strength /* strengthIcon */,
-              DEFAULT_ICON /* typeIcon */);
+        // Verify baseline
+        verifyLastMobileDataIndicators(true /* visible */,
+                strength /* strengthIcon */,
+                DEFAULT_ICON /* typeIcon */);
 
-      // API call is made
-      setCarrierNetworkChange(true /* enabled */);
+        // API call is made
+        setCarrierNetworkChange(true /* enabled */);
 
-      // Carrier network change is true, show special indicator
-      verifyLastMobileDataIndicators(true /* visible */,
-              SignalDrawable.getCarrierChangeState(CellSignalStrength.getNumSignalStrengthLevels()),
-              0 /* typeIcon */);
+        // Carrier network change is true, show special indicator
+        verifyLastMobileDataIndicators(true /* visible */,
+                SignalDrawable.getCarrierChangeState(
+                        CellSignalStrength.getNumSignalStrengthLevels()),
+                0 /* typeIcon */);
 
-      // Revert back
-      setCarrierNetworkChange(false /* enabled */);
+        // Revert back
+        setCarrierNetworkChange(false /* enabled */);
 
-      // Verify back in previous state
-      verifyLastMobileDataIndicators(true /* visible */,
-              strength /* strengthIcon */,
-              DEFAULT_ICON /* typeIcon */);
+        // Verify back in previous state
+        verifyLastMobileDataIndicators(true /* visible */,
+                strength /* strengthIcon */,
+                DEFAULT_ICON /* typeIcon */);
     }
 
     @Test
     public void testCarrierNetworkChange_roamingBeforeNetworkChange() {
-      int strength = SignalStrength.SIGNAL_STRENGTH_GREAT;
+        int strength = SignalStrength.SIGNAL_STRENGTH_GREAT;
 
-      setupDefaultSignal();
-      setLevel(strength);
-      setGsmRoaming(true);
+        setupDefaultSignal();
+        setLevel(strength);
+        setGsmRoaming(true);
 
-      // Verify baseline
-      verifyLastMobileDataIndicators(true /* visible */,
-              strength /* strengthIcon */,
-              DEFAULT_ICON /* typeIcon */,
-              true /* roaming */);
+        // Verify baseline
+        verifyLastMobileDataIndicators(true /* visible */,
+                strength /* strengthIcon */,
+                DEFAULT_ICON /* typeIcon */,
+                true /* roaming */);
 
-      // API call is made
-      setCarrierNetworkChange(true /* enabled */);
+        // API call is made
+        setCarrierNetworkChange(true /* enabled */);
 
-      // Carrier network change is true, show special indicator, no roaming.
-      verifyLastMobileDataIndicators(true /* visible */,
-              SignalDrawable.getCarrierChangeState(CellSignalStrength.getNumSignalStrengthLevels()),
-              0 /* typeIcon */,
-              false /* roaming */);
+        // Carrier network change is true, show special indicator, no roaming.
+        verifyLastMobileDataIndicators(true /* visible */,
+                SignalDrawable.getCarrierChangeState(
+                        CellSignalStrength.getNumSignalStrengthLevels()),
+                0 /* typeIcon */,
+                false /* roaming */);
 
-      // Revert back
-      setCarrierNetworkChange(false /* enabled */);
+        // Revert back
+        setCarrierNetworkChange(false /* enabled */);
 
-      // Verify back in previous state
-      verifyLastMobileDataIndicators(true /* visible */,
-              strength /* strengthIcon */,
-              DEFAULT_ICON /* typeIcon */,
-              true /* roaming */);
+        // Verify back in previous state
+        verifyLastMobileDataIndicators(true /* visible */,
+                strength /* strengthIcon */,
+                DEFAULT_ICON /* typeIcon */,
+                true /* roaming */);
     }
 
     @Test
     public void testCarrierNetworkChange_roamingAfterNetworkChange() {
-      int strength = SignalStrength.SIGNAL_STRENGTH_GREAT;
+        int strength = SignalStrength.SIGNAL_STRENGTH_GREAT;
 
-      setupDefaultSignal();
-      setLevel(strength);
+        setupDefaultSignal();
+        setLevel(strength);
 
-      // Verify baseline
-      verifyLastMobileDataIndicators(true /* visible */,
-              strength /* strengthIcon */,
-              DEFAULT_ICON /* typeIcon */,
-              false /* roaming */);
+        // Verify baseline
+        verifyLastMobileDataIndicators(true /* visible */,
+                strength /* strengthIcon */,
+                DEFAULT_ICON /* typeIcon */,
+                false /* roaming */);
 
-      // API call is made
-      setCarrierNetworkChange(true /* enabled */);
+        // API call is made
+        setCarrierNetworkChange(true /* enabled */);
 
-      // Carrier network change is true, show special indicator, no roaming.
-      verifyLastMobileDataIndicators(true /* visible */,
-              SignalDrawable.getCarrierChangeState(CellSignalStrength.getNumSignalStrengthLevels()),
-              0 /* typeIcon */,
-              false /* roaming */);
+        // Carrier network change is true, show special indicator, no roaming.
+        verifyLastMobileDataIndicators(true /* visible */,
+                SignalDrawable.getCarrierChangeState(
+                        CellSignalStrength.getNumSignalStrengthLevels()),
+                0 /* typeIcon */,
+                false /* roaming */);
 
-      setGsmRoaming(true);
+        setGsmRoaming(true);
 
-      // Roaming should not show.
-      verifyLastMobileDataIndicators(true /* visible */,
-              SignalDrawable.getCarrierChangeState(CellSignalStrength.getNumSignalStrengthLevels()),
-              0 /* typeIcon */,
-              false /* roaming */);
+        // Roaming should not show.
+        verifyLastMobileDataIndicators(true /* visible */,
+                SignalDrawable.getCarrierChangeState(
+                        CellSignalStrength.getNumSignalStrengthLevels()),
+                0 /* typeIcon */,
+                false /* roaming */);
 
-      // Revert back
-      setCarrierNetworkChange(false /* enabled */);
+        // Revert back
+        setCarrierNetworkChange(false /* enabled */);
 
-      // Verify back in previous state
-      verifyLastMobileDataIndicators(true /* visible */,
-              strength /* strengthIcon */,
-              DEFAULT_ICON /* typeIcon */,
-              true /* roaming */);
+        // Verify back in previous state
+        verifyLastMobileDataIndicators(true /* visible */,
+                strength /* strengthIcon */,
+                DEFAULT_ICON /* typeIcon */,
+                true /* roaming */);
     }
 
     private void verifyEmergencyOnly(boolean isEmergencyOnly) {

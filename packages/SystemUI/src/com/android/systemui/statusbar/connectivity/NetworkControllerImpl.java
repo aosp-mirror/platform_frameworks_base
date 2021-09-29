@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.policy;
+package com.android.systemui.statusbar.connectivity;
 
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
@@ -76,7 +76,12 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.qs.tiles.dialog.InternetDialogFactory;
 import com.android.systemui.qs.tiles.dialog.InternetDialogUtil;
 import com.android.systemui.settings.CurrentUserTracker;
+import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.DataSaverController;
+import com.android.systemui.statusbar.policy.DataSaverControllerImpl;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
+import com.android.systemui.statusbar.policy.EncryptionHelper;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.util.CarrierConfigTracker;
 
@@ -376,11 +381,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
             @Override
             public void onCapabilitiesChanged(
-                Network network, NetworkCapabilities networkCapabilities) {
-                boolean lastValidated = (mLastNetworkCapabilities != null) &&
-                    mLastNetworkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED);
-                boolean validated =
-                    networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED);
+                    Network network, NetworkCapabilities networkCapabilities) {
+                boolean lastValidated = (mLastNetworkCapabilities != null)
+                        && mLastNetworkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED);
+                boolean validated = networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED);
 
                 // This callback is invoked a lot (i.e. when RSSI changes), so avoid updating
                 // icons when connectivity state has remained the same.
@@ -544,19 +548,23 @@ public class NetworkControllerImpl extends BroadcastReceiver
         return mDataUsageController;
     }
 
+    /** */
     public void addEmergencyListener(EmergencyListener listener) {
         mCallbackHandler.setListening(listener, true);
         mCallbackHandler.setEmergencyCallsOnly(isEmergencyOnly());
     }
 
+    /** */
     public void removeEmergencyListener(EmergencyListener listener) {
         mCallbackHandler.setListening(listener, false);
     }
 
+    /** */
     public boolean hasMobileDataFeature() {
         return mHasMobileDataFeature;
     }
 
+    /** */
     public boolean hasVoiceCallingFeature() {
         return mPhone.getPhoneType() != TelephonyManager.PHONE_TYPE_NONE;
     }
@@ -661,7 +669,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         }
     }
 
-    public boolean isEmergencyOnly() {
+    boolean isEmergencyOnly() {
         if (mMobileSignalControllers.size() == 0) {
             // When there are no active subscriptions, determine emengency state from last
             // broadcast.
@@ -690,8 +698,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
         if (mMobileSignalControllers.size() == 1) {
             mEmergencySource = EMERGENCY_ASSUMED_VOICE_CONTROLLER
                     + mMobileSignalControllers.keyAt(0);
-            if (DEBUG) Log.d(TAG, "Getting assumed emergency from "
-                    + mMobileSignalControllers.keyAt(0));
+            if (DEBUG)  {
+                Log.d(TAG, "Getting assumed emergency from "
+                        + mMobileSignalControllers.keyAt(0));
+            }
             return mMobileSignalControllers.valueAt(0).getState().isEmergency;
         }
         if (DEBUG) Log.e(TAG, "Cannot find controller for voice sub: " + voiceSubId);
@@ -915,7 +925,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
     @GuardedBy("mLock")
     @VisibleForTesting
-    public void setCurrentSubscriptionsLocked(List<SubscriptionInfo> subscriptions) {
+    void setCurrentSubscriptionsLocked(List<SubscriptionInfo> subscriptions) {
         Collections.sort(subscriptions, new Comparator<SubscriptionInfo>() {
             @Override
             public int compare(SubscriptionInfo lhs, SubscriptionInfo rhs) {
@@ -1125,6 +1135,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mEthernetSignalController.updateConnectivity(mConnectedTransports, mValidatedTransports);
     }
 
+    /** */
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("NetworkController state:");
 
@@ -1178,7 +1189,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mCallbackHandler.dump(pw);
     }
 
-    private static final String emergencyToString(int emergencySource) {
+    private static String emergencyToString(int emergencySource) {
         if (emergencySource > EMERGENCY_NO_SUB) {
             return "ASSUMED_VOICE_CONTROLLER(" + (emergencySource - EMERGENCY_VOICE_CONTROLLER)
                     + ")";
@@ -1423,10 +1434,12 @@ public class NetworkControllerImpl extends BroadcastReceiver
         return info;
     }
 
+    /** */
     public boolean hasEmergencyCryptKeeperText() {
         return EncryptionHelper.IS_DATA_ENCRYPTED;
     }
 
+    /** */
     public boolean isRadioOn() {
         return !mAirplaneMode;
     }

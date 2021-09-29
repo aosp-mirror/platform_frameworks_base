@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.statusbar.policy;
+package com.android.systemui.statusbar.connectivity;
 
 import static com.android.settingslib.mobile.MobileMappings.getDefaultIcons;
 import static com.android.settingslib.mobile.MobileMappings.getIconKey;
@@ -58,9 +58,9 @@ import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.settingslib.net.SignalStrengthUtil;
 import com.android.systemui.R;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.statusbar.policy.NetworkController.IconState;
-import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
-import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
+import com.android.systemui.statusbar.connectivity.NetworkController.IconState;
+import com.android.systemui.statusbar.connectivity.NetworkController.MobileDataIndicators;
+import com.android.systemui.statusbar.connectivity.NetworkController.SignalCallback;
 import com.android.systemui.util.CarrierConfigTracker;
 
 import java.io.PrintWriter;
@@ -245,7 +245,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         mProviderModelSetting = featureFlags.isProviderModelSettingEnabled();
     }
 
-    public void setConfiguration(Config config) {
+    void setConfiguration(Config config) {
         mConfig = config;
         updateInflateSignalStrength();
         mNetworkToIconLookup = mapIconSets(mConfig);
@@ -253,12 +253,12 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         updateTelephony();
     }
 
-    public void setAirplaneMode(boolean airplaneMode) {
+    void setAirplaneMode(boolean airplaneMode) {
         mCurrentState.airplaneMode = airplaneMode;
         notifyListenersIfNecessary();
     }
 
-    public void setUserSetupComplete(boolean userSetup) {
+    void setUserSetupComplete(boolean userSetup) {
         mCurrentState.userSetup = userSetup;
         notifyListenersIfNecessary();
     }
@@ -272,7 +272,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         notifyListenersIfNecessary();
     }
 
-    public void setCarrierNetworkChangeMode(boolean carrierNetworkChangeMode) {
+    void setCarrierNetworkChangeMode(boolean carrierNetworkChangeMode) {
         mCurrentState.carrierNetworkChangeMode = carrierNetworkChangeMode;
         updateTelephony();
     }
@@ -413,7 +413,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         if (mCurrentState.dataSim) {
             // If using provider model behavior, only show QS icons if the state is also default
             if (pm && !mCurrentState.isDefault) {
-                  return new QsInfo(qsTypeIcon, qsIcon, qsDescription);
+                return new QsInfo(qsTypeIcon, qsIcon, qsDescription);
             }
 
             if (mCurrentState.showQuickSettingsRatIcon() || mConfig.alwaysShowDataRatIcon) {
@@ -501,7 +501,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         return mCurrentState.carrierNetworkChangeMode;
     }
 
-    public void handleBroadcast(Intent intent) {
+    void handleBroadcast(Intent intent) {
         String action = intent.getAction();
         if (action.equals(TelephonyManager.ACTION_SERVICE_PROVIDERS_UPDATED)) {
             updateNetworkName(intent.getBooleanExtra(TelephonyManager.EXTRA_SHOW_SPN, false),
@@ -740,10 +740,10 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
      * mTelephonyDisplayInfo, and mSimState.  It should be called any time one of these is updated.
      * This will call listeners if necessary.
      */
-    private final void updateTelephony() {
+    private void updateTelephony() {
         if (Log.isLoggable(mTag, Log.DEBUG)) {
-            Log.d(mTag, "updateTelephonySignalStrength: hasService=" +
-                    Utils.isInService(mServiceState) + " ss=" + mSignalStrength
+            Log.d(mTag, "updateTelephonySignalStrength: hasService="
+                    + Utils.isInService(mServiceState) + " ss=" + mSignalStrength
                     + " displayInfo=" + mTelephonyDisplayInfo);
         }
         checkDefaultData();
