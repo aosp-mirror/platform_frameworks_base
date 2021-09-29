@@ -1414,7 +1414,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 // activity as it could lead to incorrect display metrics. For ex, IME services
                 // expect their config to match the config of the display with the IME window
                 // showing.
+                // If the configuration has been overridden by previous activity, empty it.
                 mIsActivityConfigOverrideAllowed = false;
+                unregisterActivityConfigurationListener();
                 break;
             default:
                 break;
