@@ -2335,10 +2335,15 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     protected void setLayer(Transaction t, int layer) {
-
-        // Route through surface animator to accommodate that our surface control might be
-        // attached to the leash, and leash is attached to parent container.
-        mSurfaceAnimator.setLayer(t, layer);
+        if (mSurfaceFreezer.hasLeash()) {
+            // When the freezer has created animation leash parent for the window, set the layer
+            // there instead.
+            mSurfaceFreezer.setLayer(t, layer);
+        } else {
+            // Route through surface animator to accommodate that our surface control might be
+            // attached to the leash, and leash is attached to parent container.
+            mSurfaceAnimator.setLayer(t, layer);
+        }
     }
 
     int getLastLayer() {
@@ -2346,10 +2351,15 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     protected void setRelativeLayer(Transaction t, SurfaceControl relativeTo, int layer) {
-
-        // Route through surface animator to accommodate that our surface control might be
-        // attached to the leash, and leash is attached to parent container.
-        mSurfaceAnimator.setRelativeLayer(t, relativeTo, layer);
+        if (mSurfaceFreezer.hasLeash()) {
+            // When the freezer has created animation leash parent for the window, set the layer
+            // there instead.
+            mSurfaceFreezer.setRelativeLayer(t, relativeTo, layer);
+        } else {
+            // Route through surface animator to accommodate that our surface control might be
+            // attached to the leash, and leash is attached to parent container.
+            mSurfaceAnimator.setRelativeLayer(t, relativeTo, layer);
+        }
     }
 
     protected void reparentSurfaceControl(Transaction t, SurfaceControl newParent) {
@@ -2617,11 +2627,20 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * 3. {@link ActivityRecord} is reparented into an organized {@link TaskFragment}.
      *
      * This shouldn't be called on other {@link WindowContainer} unless there is a valid use case.
+     *
+     * @param startBounds The original bounds (on screen) of the surface we are snapshotting.
+     * @param parentBounds The parent bounds (on screen) to calculate the animation surface
+     *                     position.
      */
-    void initializeChangeTransition(Rect startBounds) {
+    void initializeChangeTransition(Rect startBounds, Rect parentBounds) {
         mDisplayContent.prepareAppTransition(TRANSIT_CHANGE);
         mDisplayContent.mChangingContainers.add(this);
-        mSurfaceFreezer.freeze(getSyncTransaction(), startBounds);
+        mTmpPoint.set(startBounds.left - parentBounds.left, startBounds.top - parentBounds.top);
+        mSurfaceFreezer.freeze(getSyncTransaction(), startBounds, mTmpPoint);
+    }
+
+    void initializeChangeTransition(Rect startBounds) {
+        initializeChangeTransition(startBounds, getParent().getBounds());
     }
 
     ArraySet<WindowContainer> getAnimationSources() {

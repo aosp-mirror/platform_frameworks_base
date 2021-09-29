@@ -2636,18 +2636,19 @@ public class AudioService extends IAudioService.Stub
             case KeyEvent.KEYCODE_VOLUME_UP:
                     adjustSuggestedStreamVolume(AudioManager.ADJUST_RAISE,
                             AudioManager.USE_DEFAULT_STREAM_TYPE, flags, callingPackage, caller,
-                            Binder.getCallingUid(), true, keyEventMode);
+                            Binder.getCallingUid(), Binder.getCallingPid(), true, keyEventMode);
                 break;
             case KeyEvent.KEYCODE_VOLUME_DOWN:
                     adjustSuggestedStreamVolume(AudioManager.ADJUST_LOWER,
                             AudioManager.USE_DEFAULT_STREAM_TYPE, flags, callingPackage, caller,
-                            Binder.getCallingUid(), true, keyEventMode);
+                            Binder.getCallingUid(), Binder.getCallingPid(), true, keyEventMode);
                 break;
             case KeyEvent.KEYCODE_VOLUME_MUTE:
                 if (event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0) {
                     adjustSuggestedStreamVolume(AudioManager.ADJUST_TOGGLE_MUTE,
                             AudioManager.USE_DEFAULT_STREAM_TYPE, flags, callingPackage, caller,
-                            Binder.getCallingUid(), true, VOL_ADJUST_NORMAL);
+                            Binder.getCallingUid(), Binder.getCallingPid(),
+                            true, VOL_ADJUST_NORMAL);
                 }
                 break;
             default:
@@ -2680,7 +2681,7 @@ public class AudioService extends IAudioService.Stub
 
     /** All callers come from platform apps/system server, so no attribution tag is needed */
     private void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
-            String callingPackage, String caller, int uid, boolean hasModifyAudioSettings,
+            String callingPackage, String caller, int uid, int pid, boolean hasModifyAudioSettings,
             int keyEventMode) {
         if (DEBUG_VOL) Log.d(TAG, "adjustSuggestedStreamVolume() stream=" + suggestedStreamType
                 + ", flags=" + flags + ", caller=" + caller
@@ -2753,7 +2754,7 @@ public class AudioService extends IAudioService.Stub
             if (DEBUG_VOL) Log.d(TAG, "Volume controller suppressed adjustment");
         }
 
-        adjustStreamVolume(streamType, direction, flags, callingPackage, caller, uid,
+        adjustStreamVolume(streamType, direction, flags, callingPackage, caller, uid, pid,
                 null, hasModifyAudioSettings, keyEventMode);
     }
 
@@ -2791,12 +2792,12 @@ public class AudioService extends IAudioService.Stub
         sVolumeLogger.log(new VolumeEvent(VolumeEvent.VOL_ADJUST_STREAM_VOL, streamType,
                 direction/*val1*/, flags/*val2*/, callingPackage));
         adjustStreamVolume(streamType, direction, flags, callingPackage, callingPackage,
-                Binder.getCallingUid(), attributionTag, callingHasAudioSettingsPermission(),
-                VOL_ADJUST_NORMAL);
+                Binder.getCallingUid(), Binder.getCallingPid(), attributionTag,
+                callingHasAudioSettingsPermission(), VOL_ADJUST_NORMAL);
     }
 
     protected void adjustStreamVolume(int streamType, int direction, int flags,
-            String callingPackage, String caller, int uid, String attributionTag,
+            String callingPackage, String caller, int uid, int pid, String attributionTag,
             boolean hasModifyAudioSettings, int keyEventMode) {
         if (mUseFixedVolume) {
             return;
@@ -2818,8 +2819,7 @@ public class AudioService extends IAudioService.Stub
         if (isMuteAdjust &&
             (streamType == AudioSystem.STREAM_VOICE_CALL ||
                 streamType == AudioSystem.STREAM_BLUETOOTH_SCO) &&
-            mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.MODIFY_PHONE_STATE)
+                mContext.checkPermission(android.Manifest.permission.MODIFY_PHONE_STATE, pid, uid)
                     != PackageManager.PERMISSION_GRANTED) {
             Log.w(TAG, "MODIFY_PHONE_STATE Permission Denial: adjustStreamVolume from pid="
                     + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid());
@@ -2829,8 +2829,8 @@ public class AudioService extends IAudioService.Stub
         // If the stream is STREAM_ASSISTANT,
         // make sure that the calling app have the MODIFY_AUDIO_ROUTING permission.
         if (streamType == AudioSystem.STREAM_ASSISTANT &&
-            mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+                mContext.checkPermission(
+                android.Manifest.permission.MODIFY_AUDIO_ROUTING, pid, uid)
                     != PackageManager.PERMISSION_GRANTED) {
             Log.w(TAG, "MODIFY_AUDIO_ROUTING Permission Denial: adjustStreamVolume from pid="
                     + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid());
@@ -3987,7 +3987,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     private void setMasterMuteInternal(boolean mute, int flags, String callingPackage, int uid,
-            int userId, String attributionTag) {
+            int userId, int pid, String attributionTag) {
         // If we are being called by the system check for user we are going to change
         // so we handle user restrictions correctly.
         if (uid == android.os.Process.SYSTEM_UID) {
@@ -3999,8 +3999,8 @@ public class AudioService extends IAudioService.Stub
             return;
         }
         if (userId != UserHandle.getCallingUserId() &&
-                mContext.checkCallingOrSelfPermission(
-                        android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+                mContext.checkPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                        pid, uid)
                 != PackageManager.PERMISSION_GRANTED) {
             return;
         }
@@ -4041,7 +4041,7 @@ public class AudioService extends IAudioService.Stub
             String attributionTag) {
         enforceModifyAudioRoutingPermission();
         setMasterMuteInternal(mute, flags, callingPackage,
-                Binder.getCallingUid(), userId, attributionTag);
+                Binder.getCallingUid(), userId, Binder.getCallingPid(), attributionTag);
     }
 
     /** @see AudioManager#getStreamVolume(int) */
@@ -4944,8 +4944,8 @@ public class AudioService extends IAudioService.Stub
 
         // direction and stream type swap here because the public
         // adjustSuggested has a different order than the other methods.
-        adjustSuggestedStreamVolume(direction, streamType, flags, packageName, packageName, uid,
-                hasAudioSettingsPermission(uid, pid), VOL_ADJUST_NORMAL);
+        adjustSuggestedStreamVolume(direction, streamType, flags, packageName, packageName,
+                uid, pid, hasAudioSettingsPermission(uid, pid), VOL_ADJUST_NORMAL);
     }
 
     /** @see AudioManager#adjustStreamVolumeForUid(int, int, int, String, int, int, int) */
@@ -4964,7 +4964,7 @@ public class AudioService extends IAudioService.Stub
                     .toString()));
         }
 
-        adjustStreamVolume(streamType, direction, flags, packageName, packageName, uid,
+        adjustStreamVolume(streamType, direction, flags, packageName, packageName, uid, pid,
                 null, hasAudioSettingsPermission(uid, pid), VOL_ADJUST_NORMAL);
     }
 
@@ -8860,7 +8860,7 @@ public class AudioService extends IAudioService.Stub
         updateDefaultStreamOverrideDelay(accessibilityManager.isTouchExplorationEnabled());
         updateA11yVolumeAlias(accessibilityManager.isAccessibilityVolumeStreamActive());
         accessibilityManager.addTouchExplorationStateChangeListener(this, null);
-        accessibilityManager.addAccessibilityServicesStateChangeListener(this, null);
+        accessibilityManager.addAccessibilityServicesStateChangeListener(this);
     }
 
     //---------------------------------------------------------------------------------

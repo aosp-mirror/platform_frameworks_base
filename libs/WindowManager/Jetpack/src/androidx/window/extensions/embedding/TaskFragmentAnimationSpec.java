@@ -121,9 +121,11 @@ class TaskFragmentAnimationSpec {
      *         the second one is for the end leash.
      */
     Animation[] createChangeBoundsChangeAnimations(@NonNull RemoteAnimationTarget target) {
+        // Both start bounds and end bounds are in screen coordinates. We will post translate
+        // to the local coordinates in TaskFragmentAnimationAdapter#onAnimationUpdate
         final Rect startBounds = target.startBounds;
         final Rect parentBounds = target.taskInfo.configuration.windowConfiguration.getBounds();
-        final Rect endBounds = target.localBounds;
+        final Rect endBounds = target.screenSpaceBounds;
         float scaleX = ((float) startBounds.width()) / endBounds.width();
         float scaleY = ((float) startBounds.height()) / endBounds.height();
         // Start leash is a child of the end leash. Reverse the scale so that the start leash won't

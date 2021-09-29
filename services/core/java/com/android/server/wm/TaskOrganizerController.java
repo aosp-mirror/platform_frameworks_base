@@ -688,6 +688,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                     if (state != null) {
                         state.mOrganizer.onTaskVanished(task);
                     }
+                    mLastSentTaskInfos.remove(task);
                     break;
                 case PendingTaskEvent.EVENT_INFO_CHANGED:
                     dispatchTaskInfoChanged(event.mTask, event.mForce);

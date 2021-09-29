@@ -631,7 +631,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         }
 
         @Override
-        public void receiveMessage(int messageId, int associationId, byte[] message)
+        public void dispatchMessage(int messageId, int associationId, byte[] message)
                 throws RemoteException {
             //TODO: b/199427116
         }

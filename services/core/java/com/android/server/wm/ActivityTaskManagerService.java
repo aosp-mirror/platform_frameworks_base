@@ -1731,10 +1731,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final SafeActivityOptions safeOptions = SafeActivityOptions.fromBundle(bOptions);
         final long origId = Binder.clearCallingIdentity();
         try {
-            synchronized (mGlobalLock) {
-                return mTaskSupervisor.startActivityFromRecents(callingPid, callingUid, taskId,
-                        safeOptions);
-            }
+            return mTaskSupervisor.startActivityFromRecents(callingPid, callingUid, taskId,
+                    safeOptions);
         } finally {
             Binder.restoreCallingIdentity(origId);
         }

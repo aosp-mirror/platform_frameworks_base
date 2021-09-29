@@ -73,6 +73,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -176,6 +177,10 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     final Map<SafeResultListener, Consumer<Bundle>> mRemoteCallbacks = new ArrayMap<>();
 
     ICancellationSignal mKillCallback;
+
+    private final Map<VisibleActivityCallback, Executor> mVisibleActivityCallbacks =
+            new ArrayMap<>();
+    private final List<VisibleActivityInfo> mVisibleActivityInfos = new ArrayList<>();
 
     final IVoiceInteractor mInteractor = new IVoiceInteractor.Stub() {
         @Override
@@ -351,6 +356,13 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         @Override
         public void destroy() {
             mHandlerCaller.sendMessage(mHandlerCaller.obtainMessage(MSG_DESTROY));
+        }
+
+        @Override
+        public void updateVisibleActivityInfo(VisibleActivityInfo visibleActivityInfo, int type) {
+            mHandlerCaller.sendMessage(
+                    mHandlerCaller.obtainMessageIO(MSG_UPDATE_VISIBLE_ACTIVITY_INFO, type,
+                            visibleActivityInfo));
         }
     };
 
@@ -843,6 +855,9 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     static final int MSG_SHOW = 106;
     static final int MSG_HIDE = 107;
     static final int MSG_ON_LOCKSCREEN_SHOWN = 108;
+    static final int MSG_UPDATE_VISIBLE_ACTIVITY_INFO = 109;
+    static final int MSG_REGISTER_VISIBLE_ACTIVITY_CALLBACK = 110;
+    static final int MSG_UNREGISTER_VISIBLE_ACTIVITY_CALLBACK = 111;
 
     class MyCallbacks implements HandlerCaller.Callback, SoftInputWindow.Callback {
         @Override
@@ -927,6 +942,27 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
                 case MSG_ON_LOCKSCREEN_SHOWN:
                     if (DEBUG) Log.d(TAG, "onLockscreenShown");
                     onLockscreenShown();
+                    break;
+                case MSG_UPDATE_VISIBLE_ACTIVITY_INFO:
+                    if (DEBUG) {
+                        Log.d(TAG, "doUpdateVisibleActivityInfo: visibleActivityInfo=" + msg.obj
+                                + " type=" + msg.arg1);
+                    }
+                    doUpdateVisibleActivityInfo((VisibleActivityInfo) msg.obj, msg.arg1);
+                    break;
+                case MSG_REGISTER_VISIBLE_ACTIVITY_CALLBACK:
+                    if (DEBUG) {
+                        Log.d(TAG, "doRegisterVisibleActivityCallback");
+                    }
+                    args = (SomeArgs) msg.obj;
+                    doRegisterVisibleActivityCallback((Executor) args.arg1,
+                            (VisibleActivityCallback) args.arg2);
+                    break;
+                case MSG_UNREGISTER_VISIBLE_ACTIVITY_CALLBACK:
+                    if (DEBUG) {
+                        Log.d(TAG, "doUnregisterVisibleActivityCallback");
+                    }
+                    doUnregisterVisibleActivityCallback((VisibleActivityCallback) msg.obj);
                     break;
             }
             if (args != null) {
@@ -1119,6 +1155,86 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
                 mWindowAdded = false;
             }
             mInitialized = false;
+        }
+    }
+
+    private void doUpdateVisibleActivityInfo(VisibleActivityInfo visibleActivityInfo, int type) {
+
+        if (mVisibleActivityCallbacks.isEmpty()) {
+            return;
+        }
+
+        switch (type) {
+            case VisibleActivityInfo.TYPE_ACTIVITY_ADDED:
+                informVisibleActivityChanged(visibleActivityInfo, type);
+                mVisibleActivityInfos.add(visibleActivityInfo);
+                break;
+            case VisibleActivityInfo.TYPE_ACTIVITY_REMOVED:
+                informVisibleActivityChanged(visibleActivityInfo, type);
+                mVisibleActivityInfos.remove(visibleActivityInfo);
+                break;
+        }
+    }
+
+    private void doRegisterVisibleActivityCallback(@NonNull @CallbackExecutor Executor executor,
+            @NonNull VisibleActivityCallback callback) {
+        if (mVisibleActivityCallbacks.containsKey(callback)) {
+            if (DEBUG) {
+                Log.d(TAG, "doRegisterVisibleActivityCallback: callback has registered");
+            }
+            return;
+        }
+
+        int preCallbackCount = mVisibleActivityCallbacks.size();
+        mVisibleActivityCallbacks.put(callback, executor);
+
+        if (preCallbackCount == 0) {
+            try {
+                mSystemService.startListeningVisibleActivityChanged(mToken);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        } else {
+            for (int i = 0; i < mVisibleActivityInfos.size(); i++) {
+                final VisibleActivityInfo visibleActivityInfo = mVisibleActivityInfos.get(i);
+                executor.execute(() -> callback.onVisible(visibleActivityInfo));
+            }
+        }
+    }
+
+    private void doUnregisterVisibleActivityCallback(@NonNull VisibleActivityCallback callback) {
+        mVisibleActivityCallbacks.remove(callback);
+
+        if (mVisibleActivityCallbacks.size() == 0) {
+            mVisibleActivityInfos.clear();
+            try {
+                mSystemService.stopListeningVisibleActivityChanged(mToken);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    private void informVisibleActivityChanged(VisibleActivityInfo visibleActivityInfo, int type) {
+        for (Map.Entry<VisibleActivityCallback, Executor> e :
+                mVisibleActivityCallbacks.entrySet()) {
+            final Executor executor = e.getValue();
+            final VisibleActivityCallback visibleActivityCallback = e.getKey();
+
+            switch (type) {
+                case VisibleActivityInfo.TYPE_ACTIVITY_ADDED:
+                    Binder.withCleanCallingIdentity(() -> {
+                        executor.execute(
+                                () -> visibleActivityCallback.onVisible(visibleActivityInfo));
+                    });
+                    break;
+                case VisibleActivityInfo.TYPE_ACTIVITY_REMOVED:
+                    Binder.withCleanCallingIdentity(() -> {
+                        executor.execute(() -> visibleActivityCallback.onInvisible(
+                                visibleActivityInfo.getActivityId()));
+                    });
+                    break;
+            }
         }
     }
 
@@ -1926,6 +2042,45 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     }
 
     /**
+     * Registers a callback that will be notified when visible activities have been changed.
+     *
+     * @param executor The handler to receive the callback.
+     * @param callback The callback to receive the response.
+     *
+     * @throws IllegalStateException if calling this method before onCreate().
+     */
+    public final void registerVisibleActivityCallback(@NonNull @CallbackExecutor Executor executor,
+            @NonNull VisibleActivityCallback callback) {
+        if (DEBUG) {
+            Log.d(TAG, "registerVisibleActivityCallback");
+        }
+        if (mToken == null) {
+            throw new IllegalStateException("Can't call before onCreate()");
+        }
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        mHandlerCaller.sendMessage(
+                mHandlerCaller.obtainMessageOO(MSG_REGISTER_VISIBLE_ACTIVITY_CALLBACK, executor,
+                        callback));
+    }
+
+    /**
+     * Unregisters the callback.
+     *
+     * @param callback The callback to receive the response.
+     */
+    public final void unregisterVisibleActivityCallback(@NonNull VisibleActivityCallback callback) {
+        if (DEBUG) {
+            Log.d(TAG, "unregisterVisibleActivityCallback");
+        }
+        Objects.requireNonNull(callback);
+
+        mHandlerCaller.sendMessage(
+                mHandlerCaller.obtainMessageO(MSG_UNREGISTER_VISIBLE_ACTIVITY_CALLBACK, callback));
+    }
+
+    /**
      * Print the Service's state into the given stream.  This gets invoked by
      * {@link VoiceInteractionSessionService} when its Service
      * {@link android.app.Service#dump} method is called.
@@ -1972,6 +2127,17 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         synchronized (this) {
             return mRemoteCallbacks.remove(listener);
         }
+    }
+
+    /**
+     * Callback interface for receiving visible activity changes used for assistant usage.
+     */
+    public interface VisibleActivityCallback {
+        /** Callback to inform that an activity has become visible. */
+        default void onVisible(@NonNull VisibleActivityInfo activityInfo) {}
+
+        /** Callback to inform that a visible activity has gone. */
+        default void onInvisible(@NonNull ActivityId activityId) {}
     }
 
     /**

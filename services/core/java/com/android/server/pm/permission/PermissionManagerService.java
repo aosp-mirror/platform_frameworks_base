@@ -222,6 +222,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     /** All nearby devices permissions */
     private static final List<String> NEARBY_DEVICES_PERMISSIONS = new ArrayList<>();
 
+    /**
+     * All permissions that should be granted with the REVOKE_WHEN_REQUESTED flag, if they are
+     * implicitly added to a package
+     */
+    private static final List<String> IMPLICIT_GRANTED_PERMISSIONS = new ArrayList<>();
+
     /** If the permission of the value is granted, so is the key */
     private static final Map<String, String> FULLER_PERMISSION_MAP = new HashMap<>();
 
@@ -240,6 +246,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_ADVERTISE);
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_CONNECT);
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_SCAN);
+        IMPLICIT_GRANTED_PERMISSIONS.add(Manifest.permission.POST_NOTIFICATIONS);
     }
 
     /** Set of source package names for Privileged Permission Allowlist */
@@ -3309,6 +3316,22 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     inheritPermissionStateToNewImplicitPermissionLocked(sourcePerms, newPerm, ps,
                             pkg);
                 }
+            } else if (IMPLICIT_GRANTED_PERMISSIONS.contains(newPerm)
+                    && !origPs.hasPermissionState(newPerm)) {
+                Permission bp = mRegistry.getPermission(newPerm);
+                if (bp == null) {
+                    throw new IllegalStateException("Unknown new permission " + newPerm);
+                }
+                if ((ps.getPermissionState(newPerm).getFlags()
+                        & FLAG_PERMISSION_REVIEW_REQUIRED) != 0) {
+                    // No need to grant if review is required
+                    continue;
+                }
+                updatedUserIds = ArrayUtils.appendInt(updatedUserIds, userId);
+                ps.updatePermissionFlags(bp,
+                        FLAG_PERMISSION_REVOKE_WHEN_REQUESTED,
+                        FLAG_PERMISSION_REVOKE_WHEN_REQUESTED);
+                ps.grantPermission(bp);
             }
         }
 

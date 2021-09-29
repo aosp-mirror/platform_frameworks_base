@@ -4369,8 +4369,13 @@ class StorageManagerService extends IStorageManager.Stub
                 packageName = packagesForUid[0];
             }
 
-            if (mPmInternal.isInstantApp(packageName, UserHandle.getUserId(uid))) {
-                return StorageManager.MOUNT_MODE_EXTERNAL_NONE;
+            final long token = Binder.clearCallingIdentity();
+            try {
+                if (mPmInternal.isInstantApp(packageName, UserHandle.getUserId(uid))) {
+                    return StorageManager.MOUNT_MODE_EXTERNAL_NONE;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
 
             if (mStorageManagerInternal.isExternalStorageService(uid)) {

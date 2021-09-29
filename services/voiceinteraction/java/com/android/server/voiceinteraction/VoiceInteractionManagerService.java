@@ -167,6 +167,16 @@ public class VoiceInteractionManagerService extends SystemService {
     public void onStart() {
         publishBinderService(Context.VOICE_INTERACTION_MANAGER_SERVICE, mServiceStub);
         publishLocalService(VoiceInteractionManagerInternal.class, new LocalService());
+        mAmInternal.setVoiceInteractionManagerProvider(
+                new ActivityManagerInternal.VoiceInteractionManagerProvider() {
+                    @Override
+                    public void notifyActivityEventChanged() {
+                        if (DEBUG) {
+                            Slog.d(TAG, "call notifyActivityEventChanged");
+                        }
+                        mServiceStub.notifyActivityEventChanged();
+                    }
+                });
     }
 
     @Override
@@ -384,6 +394,14 @@ public class VoiceInteractionManagerService extends SystemService {
             if (mImpl == null) return false;
 
             return mImpl.supportsLocalVoiceInteraction();
+        }
+
+        void notifyActivityEventChanged() {
+            synchronized (this) {
+                if (mImpl == null) return;
+
+                Binder.withCleanCallingIdentity(() -> mImpl.notifyActivityEventChangedLocked());
+            }
         }
 
         @Override
@@ -1105,6 +1123,40 @@ public class VoiceInteractionManagerService extends SystemService {
                     }
                 } else {
                     Slog.i(TAG, "setDisabled(): re-enabling");
+                }
+            }
+        }
+
+        @Override
+        public void startListeningVisibleActivityChanged(@NonNull IBinder token) {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "startListeningVisibleActivityChanged without running"
+                            + " voice interaction service");
+                    return;
+                }
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    mImpl.startListeningVisibleActivityChangedLocked(token);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
+        @Override
+        public void stopListeningVisibleActivityChanged(@NonNull IBinder token) {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "stopListeningVisibleActivityChanged without running"
+                            + " voice interaction service");
+                    return;
+                }
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    mImpl.stopListeningVisibleActivityChangedLocked(token);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
                 }
             }
         }

@@ -20,5 +20,5 @@ package android.companion;
 oneway interface ICompanionDeviceService {
     void onDeviceAppeared(in String address);
     void onDeviceDisappeared(in String address);
-    void onSendMessage(in int messageId, in int associationId, in byte[] message);
+    void onDispatchMessage(in int messageId, in int associationId, in byte[] message);
 }
