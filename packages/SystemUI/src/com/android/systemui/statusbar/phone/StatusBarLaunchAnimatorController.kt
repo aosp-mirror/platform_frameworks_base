@@ -1,6 +1,7 @@
 package com.android.systemui.statusbar.phone
 
 import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.LaunchAnimator
 
 /**
  * A [ActivityLaunchAnimator.Controller] that takes care of collapsing the status bar at the right
@@ -22,7 +23,7 @@ class StatusBarLaunchAnimatorController(
         delegate.onLaunchAnimationStart(isExpandingFullyAbove)
         statusBar.notificationPanelViewController.setIsLaunchAnimationRunning(true)
         if (!isExpandingFullyAbove) {
-            statusBar.collapsePanelWithDuration(ActivityLaunchAnimator.ANIMATION_DURATION.toInt())
+            statusBar.collapsePanelWithDuration(LaunchAnimator.ANIMATION_DURATION.toInt())
         }
     }
 
@@ -33,7 +34,7 @@ class StatusBarLaunchAnimatorController(
     }
 
     override fun onLaunchAnimationProgress(
-        state: ActivityLaunchAnimator.State,
+        state: LaunchAnimator.State,
         progress: Float,
         linearProgress: Float
     ) {

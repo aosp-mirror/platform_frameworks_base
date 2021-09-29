@@ -32,6 +32,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
@@ -48,6 +49,7 @@ import com.android.settingslib.media.MediaDevice;
 import com.android.settingslib.media.MediaOutputConstants;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.R;
+import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -73,6 +75,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
     private final MediaSessionManager mMediaSessionManager;
     private final ShadeController mShadeController;
     private final ActivityStarter mActivityStarter;
+    private final DialogLaunchAnimator mDialogLaunchAnimator;
     private final List<MediaDevice> mGroupMediaDevices = new CopyOnWriteArrayList<>();
     private final boolean mAboveStatusbar;
     private final NotificationEntryManager mNotificationEntryManager;
@@ -82,6 +85,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
     private MediaController mMediaController;
     @VisibleForTesting
     Callback mCallback;
+    Callback mPreviousCallback;
     @VisibleForTesting
     LocalMediaManager mLocalMediaManager;
 
@@ -92,7 +96,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
     public MediaOutputController(@NonNull Context context, String packageName,
             boolean aboveStatusbar, MediaSessionManager mediaSessionManager, LocalBluetoothManager
             lbm, ShadeController shadeController, ActivityStarter starter,
-            NotificationEntryManager notificationEntryManager, UiEventLogger uiEventLogger) {
+            NotificationEntryManager notificationEntryManager, UiEventLogger uiEventLogger,
+            DialogLaunchAnimator dialogLaunchAnimator) {
         mContext = context;
         mPackageName = packageName;
         mMediaSessionManager = mediaSessionManager;
@@ -104,6 +109,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         mLocalMediaManager = new LocalMediaManager(mContext, lbm, imm, packageName);
         mMetricLogger = new MediaOutputMetricLogger(mContext, mPackageName);
         mUiEventLogger = uiEventLogger;
+        mDialogLaunchAnimator = dialogLaunchAnimator;
     }
 
     void start(@NonNull Callback cb) {
@@ -129,7 +135,19 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
             }
             return;
         }
+
+        if (mPreviousCallback != null) {
+            Log.w(TAG,
+                    "Callback started when mPreviousCallback is not null, which is unexpected");
+            mPreviousCallback.dismissDialog();
+        }
+
+        // If we start the output group dialog when the output dialog is shown, we need to keep a
+        // reference to the output dialog to set it back as the callback once we dismiss the output
+        // group dialog.
+        mPreviousCallback = mCallback;
         mCallback = cb;
+
         mLocalMediaManager.unregisterCallback(this);
         mLocalMediaManager.stopScan();
         mLocalMediaManager.registerCallback(this);
@@ -145,6 +163,15 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
             mLocalMediaManager.stopScan();
         }
         mMediaDevices.clear();
+
+        // If there was a previous callback, i.e. we just dismissed the output group dialog and are
+        // now back on the output dialog, then we reset the callback to its previous value.
+        mCallback = null;
+        Callback previous = mPreviousCallback;
+        mPreviousCallback = null;
+        if (previous != null) {
+            start(previous);
+        }
     }
 
     @Override
@@ -436,6 +463,10 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
     }
 
     void launchBluetoothPairing() {
+        // Dismissing a dialog into its touch surface and starting an activity at the same time
+        // looks bad, so let's make sure the dialog just fades out quickly.
+        mDialogLaunchAnimator.disableAllCurrentDialogsExitAnimations();
+
         mCallback.dismissDialog();
         final ActivityStarter.OnDismissAction postKeyguardAction = () -> {
             mContext.sendBroadcast(new Intent()
@@ -447,14 +478,10 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         mActivityStarter.dismissKeyguardThenExecute(postKeyguardAction, null, true);
     }
 
-    void launchMediaOutputDialog() {
-        mCallback.dismissDialog();
-        new MediaOutputDialog(mContext, mAboveStatusbar, this, mUiEventLogger);
-    }
-
-    void launchMediaOutputGroupDialog() {
-        mCallback.dismissDialog();
-        new MediaOutputGroupDialog(mContext, mAboveStatusbar, this);
+    void launchMediaOutputGroupDialog(View mediaOutputDialog) {
+        // We show the output group dialog from the output dialog.
+        MediaOutputGroupDialog dialog = new MediaOutputGroupDialog(mContext, mAboveStatusbar, this);
+        mDialogLaunchAnimator.showFromView(dialog, mediaOutputDialog);
     }
 
     boolean isActiveRemoteDevice(@NonNull MediaDevice device) {

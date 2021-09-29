@@ -28,6 +28,8 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.InitController;
+import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollector;
@@ -235,7 +237,9 @@ public interface StatusBarPhoneModule {
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             Optional<StartingSurface> startingSurfaceOptional,
             TunerService tunerService,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            ActivityLaunchAnimator activityLaunchAnimator,
+            DialogLaunchAnimator dialogLaunchAnimator) {
         return new StatusBar(
                 context,
                 notificationsController,
@@ -333,6 +337,8 @@ public interface StatusBarPhoneModule {
                 unlockedScreenOffAnimationController,
                 startingSurfaceOptional,
                 tunerService,
-                dumpManager);
+                dumpManager,
+                activityLaunchAnimator,
+                dialogLaunchAnimator);
     }
 }

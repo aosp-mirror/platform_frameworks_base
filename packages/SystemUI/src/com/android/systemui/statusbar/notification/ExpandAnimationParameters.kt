@@ -2,8 +2,8 @@ package com.android.systemui.statusbar.notification
 
 import android.util.MathUtils
 import com.android.internal.annotations.VisibleForTesting
-import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.animation.Interpolators
+import com.android.systemui.animation.LaunchAnimator
 import kotlin.math.min
 
 /** Parameters for the notifications expand animations. */
@@ -15,7 +15,7 @@ class ExpandAnimationParameters(
 
     topCornerRadius: Float = 0f,
     bottomCornerRadius: Float = 0f
-) : ActivityLaunchAnimator.State(top, bottom, left, right, topCornerRadius, bottomCornerRadius) {
+) : LaunchAnimator.State(top, bottom, left, right, topCornerRadius, bottomCornerRadius) {
     @VisibleForTesting
     constructor() : this(
         top = 0, bottom = 0, left = 0, right = 0, topCornerRadius = 0f, bottomCornerRadius = 0f
@@ -55,6 +55,6 @@ class ExpandAnimationParameters(
         }
 
     fun getProgress(delay: Long, duration: Long): Float {
-        return ActivityLaunchAnimator.getProgress(linearProgress, delay, duration)
+        return LaunchAnimator.getProgress(linearProgress, delay, duration)
     }
 }

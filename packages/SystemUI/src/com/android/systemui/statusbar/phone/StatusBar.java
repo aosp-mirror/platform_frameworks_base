@@ -135,6 +135,7 @@ import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DelegateLaunchAnimatorController;
+import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.biometrics.AuthRippleController;
@@ -669,7 +670,8 @@ public class StatusBar extends SystemUI implements
     private final SysuiStatusBarStateController mStatusBarStateController;
 
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
-    private ActivityLaunchAnimator mActivityLaunchAnimator;
+    private final ActivityLaunchAnimator mActivityLaunchAnimator;
+    private final DialogLaunchAnimator mDialogLaunchAnimator;
     private NotificationLaunchAnimatorControllerProvider mNotificationAnimationProvider;
     protected StatusBarNotificationPresenter mPresenter;
     private NotificationActivityStarter mNotificationActivityStarter;
@@ -792,7 +794,9 @@ public class StatusBar extends SystemUI implements
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             Optional<StartingSurface> startingSurfaceOptional,
             TunerService tunerService,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            ActivityLaunchAnimator activityLaunchAnimator,
+            DialogLaunchAnimator dialogLaunchAnimator) {
         super(context);
         mNotificationsController = notificationsController;
         mLightBarController = lightBarController;
@@ -900,6 +904,8 @@ public class StatusBar extends SystemUI implements
                 });
 
         mActivityIntentHelper = new ActivityIntentHelper(mContext);
+        mActivityLaunchAnimator = activityLaunchAnimator;
+        mDialogLaunchAnimator = dialogLaunchAnimator;
 
         // TODO(b/190746471): Find a better home for this.
         DateTimeView.setReceiverHandler(timeTickHandler);
@@ -1468,7 +1474,7 @@ public class StatusBar extends SystemUI implements
 
     private void setUpPresenter() {
         // Set up the initial notification state.
-        mActivityLaunchAnimator = new ActivityLaunchAnimator(mKeyguardHandler, mContext);
+        mActivityLaunchAnimator.setCallback(mKeyguardHandler);
         mNotificationAnimationProvider = new NotificationLaunchAnimatorControllerProvider(
                 mNotificationShadeWindowViewController,
                 mStackScrollerController.getNotificationListContainer(),
@@ -2550,7 +2556,8 @@ public class StatusBar extends SystemUI implements
                 animationController != null && !willLaunchResolverActivity && shouldAnimateLaunch(
                         true /* isActivityIntent */);
         ActivityLaunchAnimator.Controller animController =
-                animate ? wrapAnimationController(animationController, dismissShade) : null;
+                animationController != null ? wrapAnimationController(animationController,
+                        dismissShade) : null;
 
         // If we animate, we will dismiss the shade only once the animation is done. This is taken
         // care of by the StatusBarLaunchAnimationController.
@@ -4427,6 +4434,8 @@ public class StatusBar extends SystemUI implements
                             && !mBiometricUnlockController.isWakeAndUnlock()) {
                         mLightRevealScrim.setRevealAmount(1f - linear);
                     }
+
+                    mDialogLaunchAnimator.onDozeAmountChanged(linear);
                 }
 
                 @Override
