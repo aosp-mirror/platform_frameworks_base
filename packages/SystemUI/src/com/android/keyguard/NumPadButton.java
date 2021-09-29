@@ -18,6 +18,7 @@ package com.android.keyguard;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
+import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
 import android.graphics.drawable.VectorDrawable;
@@ -25,8 +26,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 
 import androidx.annotation.Nullable;
-
-import com.android.systemui.R;
 
 /**
  * Similar to the {@link NumPadKey}, but displays an image.
@@ -92,7 +91,10 @@ public class NumPadButton extends AlphaOptimizedImageButton {
     public void reloadColors() {
         if (mAnimator != null) mAnimator.reloadColors(getContext());
 
-        int imageColor = getContext().getColor(R.color.keyguard_keypad_image_color);
+        int[] customAttrs = {android.R.attr.textColorPrimaryInverse};
+        TypedArray a = getContext().obtainStyledAttributes(customAttrs);
+        int imageColor = a.getColor(0, 0);
+        a.recycle();
         ((VectorDrawable) getDrawable()).setTintList(ColorStateList.valueOf(imageColor));
     }
 }
