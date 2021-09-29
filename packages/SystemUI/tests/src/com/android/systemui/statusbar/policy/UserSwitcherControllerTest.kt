@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy
 
+import android.app.IActivityManager
 import android.app.IActivityTaskManager
 import android.app.admin.DevicePolicyManager
 import android.content.Context
@@ -31,6 +32,7 @@ import android.os.UserManager
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.util.UserIcons
 import com.android.systemui.GuestResumeSessionReceiver
@@ -54,10 +56,11 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
+import org.mockito.Mockito.`when`
 import org.mockito.Mockito.any
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when`
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
@@ -65,6 +68,7 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 class UserSwitcherControllerTest : SysuiTestCase() {
     @Mock private lateinit var keyguardStateController: KeyguardStateController
+    @Mock private lateinit var activityManager: IActivityManager
     @Mock private lateinit var deviceProvisionedController: DeviceProvisionedController
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
     @Mock private lateinit var handler: Handler
@@ -78,6 +82,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     @Mock private lateinit var secureSettings: SecureSettings
     @Mock private lateinit var falsingManager: FalsingManager
     @Mock private lateinit var dumpManager: DumpManager
+    @Mock private lateinit var interactionJankMonitor: InteractionJankMonitor
     private lateinit var testableLooper: TestableLooper
     private lateinit var uiBgExecutor: FakeExecutor
     private lateinit var uiEventLogger: UiEventLoggerFake
@@ -110,6 +115,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
 
         userSwitcherController = UserSwitcherController(
                 context,
+                activityManager,
                 userManager,
                 userTracker,
                 keyguardStateController,
@@ -125,6 +131,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 userDetailAdapter,
                 secureSettings,
                 uiBgExecutor,
+                interactionJankMonitor,
                 dumpManager)
         userSwitcherController.mPauseRefreshUsers = true
 
@@ -132,7 +139,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testAddGuest_okButtonPressed_isLogged() {
+    fun testAddGuest_okButtonPressed() {
         val emptyGuestUserRecord = UserSwitcherController.UserRecord(
                 null,
                 null,
@@ -148,6 +155,8 @@ class UserSwitcherControllerTest : SysuiTestCase() {
 
         userSwitcherController.onUserListItemClicked(emptyGuestUserRecord)
         testableLooper.processAllMessages()
+        verify(interactionJankMonitor).begin(any())
+        verify(activityManager).switchUser(guestInfo.id)
         assertEquals(1, uiEventLogger.numLogs())
         assertEquals(QSUserSwitcherEvent.QS_USER_GUEST_ADD.id, uiEventLogger.eventId(0))
     }
