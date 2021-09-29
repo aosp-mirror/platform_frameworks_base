@@ -385,6 +385,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private int[] mAllowedNetworkTypeReason;
     private long[] mAllowedNetworkTypeValue;
 
+    private static final List<LinkCapacityEstimate> INVALID_LCE_LIST =
+            new ArrayList<LinkCapacityEstimate>(Arrays.asList(new LinkCapacityEstimate(
+            LinkCapacityEstimate.LCE_TYPE_COMBINED,
+            LinkCapacityEstimate.INVALID, LinkCapacityEstimate.INVALID)));
     private List<List<LinkCapacityEstimate>> mLinkCapacityEstimateLists;
 
     /**
@@ -719,7 +723,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mPhysicalChannelConfigs.add(i, new ArrayList<>());
             mAllowedNetworkTypeReason[i] = -1;
             mAllowedNetworkTypeValue[i] = -1;
-            mLinkCapacityEstimateLists.add(i, new ArrayList<>());
+            mLinkCapacityEstimateLists.add(i, INVALID_LCE_LIST);
         }
     }
 
@@ -819,7 +823,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mPhysicalChannelConfigs.add(i, new ArrayList<>());
             mAllowedNetworkTypeReason[i] = -1;
             mAllowedNetworkTypeValue[i] = -1;
-            mLinkCapacityEstimateLists.add(i, new ArrayList<>());
+            mLinkCapacityEstimateLists.add(i, INVALID_LCE_LIST);
         }
 
         mAppOps = mContext.getSystemService(AppOpsManager.class);
