@@ -50,7 +50,7 @@ java_test_host {
         "cts-install-lib-host",
     ],
     data: [
-        ":com.android.apex.cts.shim.v2_prebuilt",
+        ":StagedInstallTestApexV2",
         ":TestAppAv1",
     ],
     test_suites: ["general-tests"],
