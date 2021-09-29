@@ -1175,6 +1175,8 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"વાઇ-ફાઇ નેટવર્ક જોવા માટે અનલૉક કરો"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"નેટવર્ક શોધી રહ્યાં છીએ…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"નેટવર્ક સાથે કનેક્ટ કરવામાં નિષ્ફળ થયાં"</string>
+    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
+    <skip />
     <string name="see_all_networks" msgid="3773666844913168122">"બધા જુઓ"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"બીજા નેટવર્ક પર જવા માટે, ઇથરનેટ ડિસ્કનેક્ટ કરો"</string>
 </resources>

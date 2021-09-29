@@ -1181,6 +1181,7 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Lai skatītu tīklus, atbloķējiet"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Notiek tīklu meklēšana…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Neizdevās izveidot savienojumu ar tīklu"</string>
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi savienojums īslaicīgi netiks izveidots automātiski."</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Visu tīklu skatīšana"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Lai pārslēgtu tīklus, atvienojiet tīkla Ethernet vadu."</string>
 </resources>

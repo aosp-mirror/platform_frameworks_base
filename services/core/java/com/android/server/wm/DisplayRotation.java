@@ -442,7 +442,9 @@ public class DisplayRotation {
                 return false;
             }
 
-            if (mDisplayContent.mFixedRotationTransitionListener
+            final RecentsAnimationController recentsAnimController =
+                    mService.getRecentsAnimationController();
+            if (recentsAnimController != null && mDisplayContent.mFixedRotationTransitionListener
                     .isTopFixedOrientationRecentsAnimating()
                     // If screen is off or the device is going to sleep, then still allow to update.
                     && mService.mPolicy.okToAnimate(false /* ignoreScreenOn */)) {
@@ -450,6 +452,7 @@ public class DisplayRotation {
                 // In order to ignore its requested orientation to avoid a sensor led rotation (e.g
                 // user rotating the device while the recents animation is running), we ignore
                 // rotation update while the animation is running.
+                recentsAnimController.setCheckRotationAfterCleanup();
                 return false;
             }
         }

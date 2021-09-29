@@ -93,6 +93,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
+import android.view.IWindowManager;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.InsetsVisibilities;
 import android.view.KeyEvent;
@@ -117,17 +118,20 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.view.AppearanceRegion;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.buttons.ButtonDispatcher;
 import com.android.systemui.navigationbar.buttons.KeyButtonView;
 import com.android.systemui.navigationbar.buttons.RotationContextButton;
 import com.android.systemui.navigationbar.gestural.QuickswitchOrientedNavHandle;
+import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
@@ -147,6 +151,8 @@ import com.android.systemui.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.pip.Pip;
@@ -155,8 +161,6 @@ import java.io.PrintWriter;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Consumer;
-
-import javax.inject.Inject;
 
 import dagger.Lazy;
 
@@ -239,13 +243,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private boolean mTransientShown;
     private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
     private LightBarController mLightBarController;
-    private final LightBarController mMainLightBarController;
-    private final LightBarController.Factory mLightBarControllerFactory;
     private AutoHideController mAutoHideController;
-    private final AutoHideController mMainAutoHideController;
-    private final AutoHideController.Factory mAutoHideControllerFactory;
-    private final Optional<TelecomManager> mTelecomManagerOptional;
-    private final InputMethodManager mInputMethodManager;
 
     @VisibleForTesting
     public int mDisplayId;
@@ -268,7 +266,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private int mCurrentRotation;
     private ViewTreeObserver.OnGlobalLayoutListener mOrientationHandleGlobalLayoutListener;
     private boolean mShowOrientedHandleForImmersiveMode;
-
 
     @com.android.internal.annotations.VisibleForTesting
     public enum NavBarActionEvent implements UiEventLogger.UiEventEnum {
@@ -481,10 +478,11 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                 }
             };
 
-    private NavigationBar(Context context,
+    public NavigationBar(Context context,
             WindowManager windowManager,
             Lazy<AssistManager> assistManagerLazy,
             AccessibilityManager accessibilityManager,
+            AccessibilityManagerWrapper accessibilityManagerWrapper,
             DeviceProvisionedController deviceProvisionedController,
             MetricsLogger metricsLogger,
             OverviewProxyService overviewProxyService,
@@ -506,13 +504,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             NavigationBarOverlayController navbarOverlayController,
             UiEventLogger uiEventLogger,
             NavigationBarA11yHelper navigationBarA11yHelper,
-            UserTracker userTracker,
-            LightBarController mainLightBarController,
-            LightBarController.Factory lightBarControllerFactory,
-            AutoHideController mainAutoHideController,
-            AutoHideController.Factory autoHideControllerFactory,
-            Optional<TelecomManager> telecomManagerOptional,
-            InputMethodManager inputMethodManager) {
+            UserTracker userTracker) {
         mContext = context;
         mWindowManager = windowManager;
         mAccessibilityManager = accessibilityManager;
@@ -539,12 +531,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mNavigationBarA11yHelper = navigationBarA11yHelper;
         mUserTracker = userTracker;
         mNotificationShadeDepthController = notificationShadeDepthController;
-        mMainLightBarController = mainLightBarController;
-        mLightBarControllerFactory = lightBarControllerFactory;
-        mMainAutoHideController = mainAutoHideController;
-        mAutoHideControllerFactory = autoHideControllerFactory;
-        mTelecomManagerOptional = telecomManagerOptional;
-        mInputMethodManager = inputMethodManager;
 
         mNavBarMode = mNavigationModeController.addListener(this);
     }
@@ -562,7 +548,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mNavigationBarView = barView.findViewById(R.id.navigation_bar_view);
 
         if (DEBUG) Log.v(TAG, "addNavigationBar: about to add " + barView);
-        mWindowManager.addView(mFrame,
+        mContext.getSystemService(WindowManager.class).addView(mFrame,
                 getBarLayoutParams(mContext.getResources().getConfiguration().windowConfiguration
                         .getRotation()));
         mDisplayId = mContext.getDisplayId();
@@ -620,7 +606,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     public void destroyView() {
         setAutoHideController(/* autoHideController */ null);
         mCommandQueue.removeCallback(this);
-        mWindowManager.removeViewImmediate(mNavigationBarView.getRootView());
+        mContext.getSystemService(WindowManager.class).removeViewImmediate(
+                mNavigationBarView.getRootView());
         mNavigationModeController.removeListener(this);
 
         mNavigationBarA11yHelper.removeA11yEventListener(mAccessibilityListener);
@@ -686,16 +673,22 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         // before notifications creation. We cannot directly use getLightBarController()
         // from NavigationBarFragment directly.
         LightBarController lightBarController = mIsOnDefaultDisplay
-                ? mMainLightBarController : mLightBarControllerFactory.create(mContext);
+                ? Dependency.get(LightBarController.class)
+                : new LightBarController(mContext,
+                        Dependency.get(DarkIconDispatcher.class),
+                        Dependency.get(BatteryController.class),
+                        Dependency.get(NavigationModeController.class),
+                        Dependency.get(DumpManager.class));
         setLightBarController(lightBarController);
 
         // TODO(b/118592525): to support multi-display, we start to add something which is
         //                    per-display, while others may be global. I think it's time to
         //                    add a new class maybe named DisplayDependency to solve
         //                    per-display Dependency problem.
-        // Alternative: this is a good case for a Dagger subcomponent. Same with LightBarController.
         AutoHideController autoHideController = mIsOnDefaultDisplay
-                ? mMainAutoHideController : mAutoHideControllerFactory.create(mContext);
+                ? Dependency.get(AutoHideController.class)
+                : new AutoHideController(mContext, mHandler,
+                        Dependency.get(IWindowManager.class));
         setAutoHideController(autoHideController);
         restoreAppearanceAndTransientState();
     }
@@ -1190,8 +1183,9 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 mHomeBlockedThisTouch = false;
-                if (mTelecomManagerOptional.isPresent()
-                        && mTelecomManagerOptional.get().isRinging()) {
+                TelecomManager telecomManager =
+                        mContext.getSystemService(TelecomManager.class);
+                if (telecomManager != null && telecomManager.isRinging()) {
                     if (statusBarOptional.map(StatusBar::isKeyguardShowing).orElse(false)) {
                         Log.i(TAG, "Ignoring HOME; there's a ringing incoming call. " +
                                 "No heads up");
@@ -1273,7 +1267,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     }
 
     private void onImeSwitcherClick(View v) {
-        mInputMethodManager.showInputMethodPickerFromSystem(
+        mContext.getSystemService(InputMethodManager.class).showInputMethodPickerFromSystem(
                 true /* showAuxiliarySubtypes */, mDisplayId);
     };
 
@@ -1707,124 +1701,5 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     @VisibleForTesting
     int getNavigationIconHints() {
         return mNavigationIconHints;
-    }
-
-    /**
-     * Injectable factory for construction a {@link NavigationBar}.
-     */
-    public static class Factory {
-        private final WindowManager mWindowManager;
-        private final Lazy<AssistManager> mAssistManagerLazy;
-        private final AccessibilityManager mAccessibilityManager;
-        private final DeviceProvisionedController mDeviceProvisionedController;
-        private final MetricsLogger mMetricsLogger;
-        private final OverviewProxyService mOverviewProxyService;
-        private final NavigationModeController mNavigationModeController;
-        private final AccessibilityButtonModeObserver mAccessibilityButtonModeObserver;
-        private final StatusBarStateController mStatusBarStateController;
-        private final SysUiState mSysUiFlagsContainer;
-        private final BroadcastDispatcher mBroadcastDispatcher;
-        private final CommandQueue mCommandQueue;
-        private final Optional<Pip> mPipOptional;
-        private final Optional<LegacySplitScreen> mSplitScreenOptional;
-        private final Optional<Recents> mRecentsOptional;
-        private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
-        private final ShadeController mShadeController;
-        private final NotificationRemoteInputManager mNotificationRemoteInputManager;
-        private final NotificationShadeDepthController mNotificationShadeDepthController;
-        private final SystemActions mSystemActions;
-        private final Handler mMainHandler;
-        private final NavigationBarOverlayController mNavbarOverlayController;
-        private final UiEventLogger mUiEventLogger;
-        private final NavigationBarA11yHelper mNavigationBarA11yHelper;
-        private final UserTracker mUserTracker;
-        private final LightBarController mMainLightBarController;
-        private final LightBarController.Factory mLightBarControllerFactory;
-        private final AutoHideController mMainAutoHideController;
-        private final AutoHideController.Factory mAutoHideControllerFactory;
-        private final Optional<TelecomManager> mTelecomManagerOptional;
-        private final InputMethodManager mInputMethodManager;
-
-        @Inject
-        public Factory(
-                WindowManager windowManager,
-                Lazy<AssistManager> assistManagerLazy,
-                AccessibilityManager accessibilityManager,
-                DeviceProvisionedController deviceProvisionedController,
-                MetricsLogger metricsLogger,
-                OverviewProxyService overviewProxyService,
-                NavigationModeController navigationModeController,
-                AccessibilityButtonModeObserver accessibilityButtonModeObserver,
-                StatusBarStateController statusBarStateController,
-                SysUiState sysUiFlagsContainer,
-                BroadcastDispatcher broadcastDispatcher,
-                CommandQueue commandQueue,
-                Optional<Pip> pipOptional,
-                Optional<LegacySplitScreen> splitScreenOptional,
-                Optional<Recents> recentsOptional,
-                Lazy<Optional<StatusBar>> statusBarOptionalLazy,
-                ShadeController shadeController,
-                NotificationRemoteInputManager notificationRemoteInputManager,
-                NotificationShadeDepthController notificationShadeDepthController,
-                SystemActions systemActions,
-                @Main Handler mainHandler,
-                NavigationBarOverlayController navbarOverlayController,
-                UiEventLogger uiEventLogger,
-                NavigationBarA11yHelper navigationBarA11yHelper,
-                UserTracker userTracker,
-                LightBarController mainLightBarController,
-                LightBarController.Factory lightBarControllerFactory,
-                AutoHideController mainAutoHideController,
-                AutoHideController.Factory autoHideControllerFactory,
-                Optional<TelecomManager> telecomManagerOptional,
-                InputMethodManager inputMethodManager) {
-            mWindowManager = windowManager;
-            mAssistManagerLazy = assistManagerLazy;
-            mAccessibilityManager = accessibilityManager;
-            mDeviceProvisionedController = deviceProvisionedController;
-            mMetricsLogger = metricsLogger;
-            mOverviewProxyService = overviewProxyService;
-            mNavigationModeController = navigationModeController;
-            mAccessibilityButtonModeObserver = accessibilityButtonModeObserver;
-            mStatusBarStateController = statusBarStateController;
-            mSysUiFlagsContainer = sysUiFlagsContainer;
-            mBroadcastDispatcher = broadcastDispatcher;
-            mCommandQueue = commandQueue;
-            mPipOptional = pipOptional;
-            mSplitScreenOptional = splitScreenOptional;
-            mRecentsOptional = recentsOptional;
-            mStatusBarOptionalLazy = statusBarOptionalLazy;
-            mShadeController = shadeController;
-            mNotificationRemoteInputManager = notificationRemoteInputManager;
-            mNotificationShadeDepthController = notificationShadeDepthController;
-            mSystemActions = systemActions;
-            mMainHandler = mainHandler;
-            mNavbarOverlayController = navbarOverlayController;
-            mUiEventLogger = uiEventLogger;
-            mNavigationBarA11yHelper = navigationBarA11yHelper;
-            mUserTracker = userTracker;
-            mMainLightBarController = mainLightBarController;
-            mLightBarControllerFactory = lightBarControllerFactory;
-            mMainAutoHideController = mainAutoHideController;
-            mAutoHideControllerFactory = autoHideControllerFactory;
-            mTelecomManagerOptional = telecomManagerOptional;
-            mInputMethodManager = inputMethodManager;
-        }
-
-        /** Construct a {@link NavigationBar} */
-        public NavigationBar create(Context context) {
-            return new NavigationBar(context, mWindowManager, mAssistManagerLazy,
-                    mAccessibilityManager, mDeviceProvisionedController, mMetricsLogger,
-                    mOverviewProxyService, mNavigationModeController,
-                    mAccessibilityButtonModeObserver, mStatusBarStateController,
-                    mSysUiFlagsContainer, mBroadcastDispatcher, mCommandQueue, mPipOptional,
-                    mSplitScreenOptional, mRecentsOptional, mStatusBarOptionalLazy,
-                    mShadeController, mNotificationRemoteInputManager,
-                    mNotificationShadeDepthController, mSystemActions, mMainHandler,
-                    mNavbarOverlayController, mUiEventLogger, mNavigationBarA11yHelper,
-                    mUserTracker, mMainLightBarController, mLightBarControllerFactory,
-                    mMainAutoHideController, mAutoHideControllerFactory, mTelecomManagerOptional,
-                    mInputMethodManager);
-        }
     }
 }

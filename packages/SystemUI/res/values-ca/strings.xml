@@ -1175,6 +1175,7 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Desbloqueja per veure xarxes"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"S\'estan cercant xarxes…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"No s\'ha pogut connectar a la xarxa"</string>
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Per ara la Wi‑Fi no es connectarà automàticament"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Mostra-ho tot"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Per canviar de xarxa, desconnecta la connexió Ethernet"</string>
 </resources>

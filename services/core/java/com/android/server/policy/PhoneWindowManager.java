@@ -508,7 +508,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mKeyguardOccludedChanged;
 
     private ActivityTaskManagerInternal.SleepTokenAcquirer mScreenOffSleepTokenAcquirer;
-    volatile boolean mKeyguardOccluded;
     Intent mHomeIntent;
     Intent mCarDockIntent;
     Intent mDeskDockIntent;
@@ -2399,7 +2398,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // the keyguard is being hidden. This is okay because starting windows never show
                 // secret information.
                 // TODO(b/113840485): Occluded may not only happen on default display
-                if (displayId == DEFAULT_DISPLAY && mKeyguardOccluded) {
+                if (displayId == DEFAULT_DISPLAY && isKeyguardOccluded()) {
                     windowFlags |= FLAG_SHOW_WHEN_LOCKED;
                 }
             }
@@ -3215,7 +3214,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return;
             }
 
-            if (!mKeyguardOccluded && mKeyguardDelegate.isInputRestricted()) {
+            if (!isKeyguardOccluded() && mKeyguardDelegate.isInputRestricted()) {
                 // when in keyguard restricted mode, must first verify unlock
                 // before launching home
                 mKeyguardDelegate.verifyUnlock(new OnKeyguardExitResult() {
@@ -3266,42 +3265,38 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void setKeyguardCandidateLw(WindowState win) {
         mKeyguardCandidate = win;
-        setKeyguardOccludedLw(mKeyguardOccluded, true /* force */);
+        setKeyguardOccludedLw(isKeyguardOccluded(), true /* force */);
     }
 
     /**
      * Updates the occluded state of the Keyguard.
      *
+     * @param isOccluded Whether the Keyguard is occluded by another window.
+     * @param force notify the occluded status to KeyguardService and update flags even though
+     *             occlude status doesn't change.
      * @return Whether the flags have changed and we have to redo the layout.
      */
     private boolean setKeyguardOccludedLw(boolean isOccluded, boolean force) {
         if (DEBUG_KEYGUARD) Slog.d(TAG, "setKeyguardOccluded occluded=" + isOccluded);
-        final boolean wasOccluded = mKeyguardOccluded;
-        final boolean showing = mKeyguardDelegate.isShowing();
-        final boolean changed = wasOccluded != isOccluded || force;
-        if (!isOccluded && changed && showing) {
-            mKeyguardOccluded = false;
-            mKeyguardDelegate.setOccluded(false, true /* animate */);
-            if (mKeyguardCandidate != null) {
-                if (!mKeyguardDelegate.hasLockscreenWallpaper()) {
-                    mKeyguardCandidate.getAttrs().flags |= FLAG_SHOW_WALLPAPER;
-                }
-            }
-            return true;
-        } else if (isOccluded && changed && showing) {
-            mKeyguardOccluded = true;
-            mKeyguardDelegate.setOccluded(true, false /* animate */);
-            if (mKeyguardCandidate != null) {
-                mKeyguardCandidate.getAttrs().flags &= ~FLAG_SHOW_WALLPAPER;
-            }
-            return true;
-        } else if (changed) {
-            mKeyguardOccluded = isOccluded;
-            mKeyguardDelegate.setOccluded(isOccluded, false /* animate */);
-            return false;
-        } else {
+        if (isKeyguardOccluded() == isOccluded && !force) {
             return false;
         }
+
+        final boolean showing = mKeyguardDelegate.isShowing();
+        final boolean animate = showing && !isOccluded;
+        mKeyguardDelegate.setOccluded(isOccluded, animate);
+
+        if (!showing) {
+            return false;
+        }
+        if (mKeyguardCandidate != null) {
+            if (isOccluded) {
+                mKeyguardCandidate.getAttrs().flags &= ~FLAG_SHOW_WALLPAPER;
+            } else if (!mKeyguardDelegate.hasLockscreenWallpaper()) {
+                mKeyguardCandidate.getAttrs().flags |= FLAG_SHOW_WALLPAPER;
+            }
+        }
+        return true;
     }
 
     /** {@inheritDoc} */
@@ -4596,7 +4591,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public boolean isKeyguardShowingAndNotOccluded() {
         if (mKeyguardDelegate == null) return false;
-        return mKeyguardDelegate.isShowing() && !mKeyguardOccluded;
+        return mKeyguardDelegate.isShowing() && !isKeyguardOccluded();
     }
 
     @Override
@@ -4622,7 +4617,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public boolean isKeyguardOccluded() {
         if (mKeyguardDelegate == null) return false;
-        return mKeyguardOccluded;
+        return mKeyguardDelegate.isOccluded();
     }
 
     /** {@inheritDoc} */
@@ -5308,7 +5303,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         proto.write(KEYGUARD_DRAW_COMPLETE, mDefaultDisplayPolicy.isKeyguardDrawComplete());
         proto.write(WINDOW_MANAGER_DRAW_COMPLETE,
                 mDefaultDisplayPolicy.isWindowManagerDrawComplete());
-        proto.write(KEYGUARD_OCCLUDED, mKeyguardOccluded);
+        proto.write(KEYGUARD_OCCLUDED, isKeyguardOccluded());
         proto.write(KEYGUARD_OCCLUDED_CHANGED, mKeyguardOccludedChanged);
         proto.write(KEYGUARD_OCCLUDED_PENDING, mPendingKeyguardOccluded);
         if (mKeyguardDelegate != null) {
@@ -5393,7 +5388,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             final int key = mDisplayHomeButtonHandlers.keyAt(i);
             pw.println(mDisplayHomeButtonHandlers.get(key));
         }
-        pw.print(prefix); pw.print("mKeyguardOccluded="); pw.print(mKeyguardOccluded);
+        pw.print(prefix); pw.print("mKeyguardOccluded="); pw.print(isKeyguardOccluded());
                 pw.print(" mKeyguardOccludedChanged="); pw.print(mKeyguardOccludedChanged);
                 pw.print(" mPendingKeyguardOccluded="); pw.println(mPendingKeyguardOccluded);
         pw.print(prefix); pw.print("mAllowLockscreenWhenOnDisplays=");

@@ -41,8 +41,8 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -436,6 +436,22 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         // The rotation transform should be preserved. In real case, it will be cleared by the next
         // move-to-top transition.
         assertTrue(activity.hasFixedRotationTransform());
+    }
+
+    @Test
+    public void testCheckRotationAfterCleanup() {
+        mWm.setRecentsAnimationController(mController);
+        spyOn(mDisplayContent.mFixedRotationTransitionListener);
+        doReturn(true).when(mDisplayContent.mFixedRotationTransitionListener)
+                .isTopFixedOrientationRecentsAnimating();
+        // Rotation update is skipped while the recents animation is running.
+        assertFalse(mDisplayContent.getDisplayRotation().updateOrientation(DisplayContentTests
+                .getRotatedOrientation(mDefaultDisplay), false /* forceUpdate */));
+        final int prevRotation = mDisplayContent.getRotation();
+        mWm.cleanupRecentsAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION);
+        waitHandlerIdle(mWm.mH);
+        // The display should be updated to the changed orientation after the animation is finished.
+        assertNotEquals(mDisplayContent.getRotation(), prevRotation);
     }
 
     @Test
