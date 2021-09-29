@@ -1937,11 +1937,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static boolean isIncrementalInstallationAllowed(String packageName) {
         final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
         final PackageSetting existingPkgSetting = pmi.getPackageSetting(packageName);
-        if (existingPkgSetting == null || existingPkgSetting.pkg == null) {
+        if (existingPkgSetting == null || existingPkgSetting.getPkg() == null) {
             return true;
         }
 
-        return !existingPkgSetting.pkg.isSystem()
+        return !existingPkgSetting.getPkg().isSystem()
                 && !existingPkgSetting.getPkgState().isUpdatedSystemApp();
     }
 

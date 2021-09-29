@@ -145,7 +145,7 @@ public final class PackageHandler extends Handler {
                             components[i] = componentsToBroadcast.valueAt(index);
                             final PackageSetting ps = mPm.mSettings.getPackageLPr(packages[i]);
                             uids[i] = (ps != null)
-                                    ? UserHandle.getUid(packageUserId, ps.appId)
+                                    ? UserHandle.getUid(packageUserId, ps.getAppId())
                                     : -1;
                             i++;
                         }

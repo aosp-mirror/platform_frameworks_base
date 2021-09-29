@@ -54,8 +54,6 @@ import java.util.Set;
  * </ul>
  *
  * @hide
- *
- * TODO(chiuwinson): Delete all of the method defaults
  */
 // TODO(b/173807334): Expose API
 //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
@@ -78,12 +76,12 @@ public interface PackageState {
      * app once the device reboots or otherwise re-scans it.
      */
     @Nullable
-    default AndroidPackageApi getAndroidPackage() { return null; }
+    AndroidPackageApi getAndroidPackage();
 
     /**
      * The non-user-specific UID
      */
-    default int getAppId() { return -1; }
+    int getAppId();
 
     /**
      * Value set through {@link PackageManager#setApplicationCategoryHint(String, int)}. Only
@@ -91,33 +89,33 @@ public interface PackageState {
      *
      * @see AndroidPackageApi#getCategory()
      */
-    default int getCategoryOverride() { return -1; }
+    int getCategoryOverride();
 
     @Nullable
-    default String getCpuAbiOverride() { return null; }
+    String getCpuAbiOverride();
 
     /**
      * In epoch milliseconds.
      */
-    default long getFirstInstallTime() { return -1; }
+    long getFirstInstallTime();
 
     /**
      * In epoch milliseconds.
      */
-    default long getLastModifiedTime() { return -1; }
+    long getLastModifiedTime();
 
     @NonNull
-    default long[] getLastPackageUsageTime() { return null; }
+    long[] getLastPackageUsageTime();
 
     /**
      * In epoch milliseconds.
      */
-    default long getLastUpdateTime() { return -1; }
+    long getLastUpdateTime();
 
     /**
      * @see AndroidPackageApi#getLongVersionCode()
      */
-    default long getLongVersionCode() { return -1; }
+    long getLongVersionCode();
 
     /**
      * Maps mime group name to the set of Mime types in a group. Mime groups declared by app are
@@ -125,28 +123,28 @@ public interface PackageState {
      * thus keys in this map should not change
      */
     @NonNull
-    default Map<String, Set<String>> getMimeGroups() { return null; }
+    Map<String, Set<String>> getMimeGroups();
 
     /**
      * @see AndroidPackageApi#getPackageName()
      */
     @NonNull
-    default String getPackageName() { return null; }
+    String getPackageName();
 
     /**
      * @see AndroidPackageApi#getPath()
      */
     @NonNull
-    default File getPath() { return null; }
+    File getPath();
 
     @Nullable
-    default String getPrimaryCpuAbi() { return null; }
+    String getPrimaryCpuAbi();
 
     @Nullable
-    default String getSeInfoOverride() { return null; }
+    String getSeInfoOverride();
 
     @Nullable
-    default String getSecondaryCpuAbi() { return null; }
+    String getSecondaryCpuAbi();
 
     /**
      * Retrieves the shared user ID. Note that the actual shared user data is not available here and
@@ -155,21 +153,21 @@ public interface PackageState {
      * @return the shared user this package is a part of, or null if it's not part of a shared user.
      */
     @Nullable
-    default Integer getSharedUserId() { return null; }
+    Integer getSharedUserId();
 
     @NonNull
-    default SigningInfo getSigningInfo() { return null; }
+    SigningInfo getSigningInfo();
 
     /**
      * Valid users for this package, for use with {@link #getUserState(int)}.
      */
-    default int[] getUserIds() { return null; }
+    int[] getUserIds();
 
     /**
      * Retrieves per-user state for this package. Acceptable user IDs are in {@link #getUserIds()}.
      */
     @Nullable
-    default PackageUserState getUserState(@UserIdInt int userId) { return null; }
+    PackageUserState getUserState(@UserIdInt int userId);
 
     /**
      * The actual files resolved for each shared library.
@@ -177,42 +175,42 @@ public interface PackageState {
      * @see R.styleable#AndroidManifestUsesLibrary
      */
     @NonNull
-    default List<String> getUsesLibraryFiles() { return null; }
+    List<String> getUsesLibraryFiles();
 
     /**
      * @see R.styleable#AndroidManifestUsesLibrary
      */
     @NonNull
-    default List<SharedLibraryInfo> getUsesLibraryInfos() { return null; }
+    List<SharedLibraryInfo> getUsesLibraryInfos();
 
     /**
      * @see R.styleable#AndroidManifestUsesStaticLibrary
      */
     @NonNull
-    default String[] getUsesStaticLibraries() { return null; }
+    String[] getUsesStaticLibraries();
 
     /**
      * @see R.styleable#AndroidManifestUsesStaticLibrary_version
      */
     @NonNull
-    default long[] getUsesStaticLibrariesVersions() { return null; }
+    long[] getUsesStaticLibrariesVersions();
 
     /**
      * @see AndroidPackageApi#getVolumeUuid()
      */
     @Nullable
-    default String getVolumeUuid() { return null; }
+    String getVolumeUuid();
 
     /**
      * @see AndroidPackageApi#isExternalStorage()
      */
-    default boolean isExternalStorage() { return false; }
+    boolean isExternalStorage();
 
     /**
      * Whether a package was installed --force-queryable such that it is always queryable by any
      * package, regardless of their manifest content.
      */
-    default boolean isForceQueryableOverride() { return false; }
+    boolean isForceQueryableOverride();
 
     /**
      * Whether a package is treated as hidden until it is installed for a user.
@@ -220,58 +218,58 @@ public interface PackageState {
      * @see PackageManager#MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS
      * @see PackageManager#setSystemAppState
      */
-    default boolean isHiddenUntilInstalled() { return false; }
+    boolean isHiddenUntilInstalled();
 
-    default boolean isInstallPermissionsFixed() { return false; }
+    boolean isInstallPermissionsFixed();
 
     /**
      * @see AndroidPackageApi#isOdm()
      */
-    default boolean isOdm() { return false; }
+    boolean isOdm();
 
     /**
      * @see AndroidPackageApi#isOem()
      */
-    default boolean isOem() { return false; }
+    boolean isOem();
 
     /**
      * @see AndroidPackageApi#isPrivileged()
      */
-    default boolean isPrivileged() { return false; }
+    boolean isPrivileged();
 
     /**
      * @see AndroidPackageApi#isProduct()
      */
-    default boolean isProduct() { return false; }
+    boolean isProduct();
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER
      */
-    default boolean isRequiredForSystemUser() { return false; }
+    boolean isRequiredForSystemUser();
 
     /**
      * @see AndroidPackageApi#isSystem()
      */
-    default boolean isSystem() { return false; }
+    boolean isSystem();
 
     /**
      * @see AndroidPackageApi#isSystemExt()
      */
-    default boolean isSystemExt() { return false; }
+    boolean isSystemExt();
 
     /**
      * Whether or not an update is available. Ostensibly only for instant apps.
      */
-    default boolean isUpdateAvailable() { return false; }
+    boolean isUpdateAvailable();
 
     /**
      * Whether this app is on the /data partition having been upgraded from a preinstalled app on a
      * system partition.
      */
-    default boolean isUpdatedSystemApp() { return false; }
+    boolean isUpdatedSystemApp();
 
     /**
      * @see AndroidPackageApi#isVendor()
      */
-    default boolean isVendor() { return false; }
+    boolean isVendor();
 }

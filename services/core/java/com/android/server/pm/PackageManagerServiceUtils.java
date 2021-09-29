@@ -134,7 +134,7 @@ public class PackageManagerServiceUtils {
     private static final long MAX_CRITICAL_INFO_DUMP_SIZE = 3 * 1000 * 1000; // 3MB
 
     public final static Predicate<PackageSetting> REMOVE_IF_NULL_PKG =
-            pkgSetting -> pkgSetting.pkg == null;
+            pkgSetting -> pkgSetting.getPkg() == null;
 
     /**
      * Components of apps targeting Android T and above will stop receiving intents from
@@ -237,19 +237,19 @@ public class PackageManagerServiceUtils {
         ArrayList<PackageSetting> sortTemp = new ArrayList<>(remainingPkgSettings.size());
 
         // Give priority to core apps.
-        applyPackageFilter(pkgSetting -> pkgSetting.pkg.isCoreApp(), result, remainingPkgSettings, sortTemp,
-                packageManagerService);
+        applyPackageFilter(pkgSetting -> pkgSetting.getPkg().isCoreApp(), result,
+                remainingPkgSettings, sortTemp, packageManagerService);
 
         // Give priority to system apps that listen for pre boot complete.
         Intent intent = new Intent(Intent.ACTION_PRE_BOOT_COMPLETED);
         final ArraySet<String> pkgNames = getPackageNamesForIntent(intent, UserHandle.USER_SYSTEM);
-        applyPackageFilter(pkgSetting -> pkgNames.contains(pkgSetting.name), result,
+        applyPackageFilter(pkgSetting -> pkgNames.contains(pkgSetting.getPackageName()), result,
                 remainingPkgSettings, sortTemp, packageManagerService);
 
         // Give priority to apps used by other apps.
         DexManager dexManager = packageManagerService.getDexManager();
         applyPackageFilter(pkgSetting ->
-                dexManager.getPackageUseInfoOrDefault(pkgSetting.name)
+                dexManager.getPackageUseInfoOrDefault(pkgSetting.getPackageName())
                         .isAnyCodePathUsedByOtherApps(),
                 result, remainingPkgSettings, sortTemp, packageManagerService);
 
@@ -266,7 +266,7 @@ public class PackageManagerServiceUtils {
                             pkgSetting1.getPkgState().getLatestForegroundPackageUseTimeInMills(),
                             pkgSetting2.getPkgState().getLatestForegroundPackageUseTimeInMills()));
             if (debug) {
-                Log.i(TAG, "Taking package " + lastUsed.name
+                Log.i(TAG, "Taking package " + lastUsed.getPackageName()
                         + " as reference in time use");
             }
             long estimatedPreviousSystemUseTime = lastUsed.getPkgState()
@@ -349,7 +349,7 @@ public class PackageManagerServiceUtils {
             if (sb.length() > 0) {
                 sb.append(", ");
             }
-            sb.append(pkgSettings.get(index).name);
+            sb.append(pkgSettings.get(index).getPackageName());
         }
         return sb.toString();
     }
@@ -538,7 +538,7 @@ public class PackageManagerServiceUtils {
      */
     public static boolean comparePackageSignatures(PackageSetting pkgSetting,
             Signature[] signatures) {
-        final SigningDetails signingDetails = pkgSetting.signatures.mSigningDetails;
+        final SigningDetails signingDetails = pkgSetting.getSigningDetails();
         return signingDetails == SigningDetails.UNKNOWN
                 || compareSignatures(signingDetails.getSignatures(), signatures)
                 == PackageManager.SIGNATURE_MATCH;
@@ -613,16 +613,16 @@ public class PackageManagerServiceUtils {
      */
     private static boolean matchSignatureInSystem(PackageSetting pkgSetting,
             PackageSetting disabledPkgSetting) {
-        if (pkgSetting.signatures.mSigningDetails.checkCapability(
-                disabledPkgSetting.signatures.mSigningDetails,
+        if (pkgSetting.getSigningDetails().checkCapability(
+                disabledPkgSetting.getSigningDetails(),
                 SigningDetails.CertCapabilities.INSTALLED_DATA)
-                || disabledPkgSetting.signatures.mSigningDetails.checkCapability(
-                pkgSetting.signatures.mSigningDetails,
+                || disabledPkgSetting.getSigningDetails().checkCapability(
+                pkgSetting.getSigningDetails(),
                 SigningDetails.CertCapabilities.ROLLBACK)) {
             return true;
         } else {
             logCriticalInfo(Log.ERROR, "Updated system app mismatches cert on /system: " +
-                    pkgSetting.name);
+                    pkgSetting.getPackageName());
             return false;
         }
     }
@@ -665,31 +665,31 @@ public class PackageManagerServiceUtils {
             PackageSetting disabledPkgSetting, SigningDetails parsedSignatures,
             boolean compareCompat, boolean compareRecover, boolean isRollback)
             throws PackageManagerException {
-        final String packageName = pkgSetting.name;
+        final String packageName = pkgSetting.getPackageName();
         boolean compatMatch = false;
-        if (pkgSetting.signatures.mSigningDetails.getSignatures() != null) {
+        if (pkgSetting.getSigningDetails().getSignatures() != null) {
             // Already existing package. Make sure signatures match
             boolean match = parsedSignatures.checkCapability(
-                    pkgSetting.signatures.mSigningDetails,
+                    pkgSetting.getSigningDetails(),
                     SigningDetails.CertCapabilities.INSTALLED_DATA)
-                            || pkgSetting.signatures.mSigningDetails.checkCapability(
+                            || pkgSetting.getSigningDetails().checkCapability(
                                     parsedSignatures,
                                     SigningDetails.CertCapabilities.ROLLBACK);
             if (!match && compareCompat) {
-                match = matchSignaturesCompat(packageName, pkgSetting.signatures,
+                match = matchSignaturesCompat(packageName, pkgSetting.getSignatures(),
                         parsedSignatures);
                 compatMatch = match;
             }
             if (!match && compareRecover) {
                 match = matchSignaturesRecover(
                         packageName,
-                        pkgSetting.signatures.mSigningDetails,
+                        pkgSetting.getSigningDetails(),
                         parsedSignatures,
                         SigningDetails.CertCapabilities.INSTALLED_DATA)
                                 || matchSignaturesRecover(
                                         packageName,
                                         parsedSignatures,
-                                        pkgSetting.signatures.mSigningDetails,
+                                        pkgSetting.getSigningDetails(),
                                         SigningDetails.CertCapabilities.ROLLBACK);
             }
 
@@ -701,7 +701,7 @@ public class PackageManagerServiceUtils {
                 // Since a rollback can only be initiated for an APK previously installed on the
                 // device allow rolling back to a previous signing key even if the rollback
                 // capability has not been granted.
-                match = pkgSetting.signatures.mSigningDetails.hasAncestorOrSelf(parsedSignatures);
+                match = pkgSetting.getSigningDetails().hasAncestorOrSelf(parsedSignatures);
             }
 
             if (!match) {
@@ -731,7 +731,8 @@ public class PackageManagerServiceUtils {
             // being the only package in the sharedUserId so far and the lineage being updated to
             // deny the sharedUserId capability of the previous key in the lineage.
             if (!match && pkgSetting.getSharedUser().packages.size() == 1
-                    && pkgSetting.getSharedUser().packages.valueAt(0).name.equals(packageName)) {
+                    && pkgSetting.getSharedUser().packages
+                            .valueAt(0).getPackageName().equals(packageName)) {
                 match = true;
             }
             if (!match && compareCompat) {
@@ -765,7 +766,7 @@ public class PackageManagerServiceUtils {
                     // if the current package in the sharedUserId is the package being updated then
                     // skip this check as the update may revoke the sharedUserId capability from
                     // the key with which this app was previously signed.
-                    if (packageName.equals(shUidPkgSetting.name)) {
+                    if (packageName.equals(shUidPkgSetting.getPackageName())) {
                         continue;
                     }
                     SigningDetails shUidSigningDetails =
@@ -778,8 +779,9 @@ public class PackageManagerServiceUtils {
                             throw new PackageManagerException(
                                     INSTALL_FAILED_SHARED_USER_INCOMPATIBLE,
                                     "Package " + packageName
-                                            + " revoked the sharedUserId capability from the "
-                                            + "signing key used to sign " + shUidPkgSetting.name);
+                                            + " revoked the sharedUserId capability from the"
+                                            + " signing key used to sign "
+                                            + shUidPkgSetting.getPackageName());
                         }
                     }
                 }
