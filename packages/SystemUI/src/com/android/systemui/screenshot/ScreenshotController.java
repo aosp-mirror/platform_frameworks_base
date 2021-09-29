@@ -940,12 +940,10 @@ public class ScreenshotController {
      */
     private Supplier<ActionTransition> getActionTransitionSupplier() {
         return () -> {
-            View preview = mScreenshotView.getTransitionView();
-            preview.setX(preview.getX() - mScreenshotView.getStaticLeftMargin());
             Pair<ActivityOptions, ExitTransitionCoordinator> transition =
                     ActivityOptions.startSharedElementAnimation(
                             mWindow, new ScreenshotExitTransitionCallbacksSupplier(true).get(),
-                            null, Pair.create(mScreenshotView.getTransitionView(),
+                            null, Pair.create(mScreenshotView.getScreenshotPreview(),
                                     ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME));
             transition.second.startExit();
 
