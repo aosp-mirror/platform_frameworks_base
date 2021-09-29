@@ -30142,7 +30142,7 @@ package android.os {
 
   public interface Parcelable {
     method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int CONTENTS_FILE_DESCRIPTOR = 1; // 0x1
     field public static final int PARCELABLE_WRITE_RETURN_VALUE = 1; // 0x1
   }
