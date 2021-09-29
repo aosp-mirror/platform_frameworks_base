@@ -335,7 +335,7 @@ public class KeyguardIndicationController {
                 info = mLockPatternUtils.getOwnerInfo(KeyguardUpdateMonitor.getCurrentUser());
             }
         }
-        if (info != null) {
+        if (!TextUtils.isEmpty(info)) {
             mRotateTextViewController.updateIndication(
                     INDICATION_TYPE_OWNER_INFO,
                     new KeyguardIndication.Builder()
@@ -433,7 +433,7 @@ public class KeyguardIndicationController {
     }
 
     private void updateResting() {
-        if (mRestingIndication != null
+        if (!TextUtils.isEmpty(mRestingIndication)
                 && !mRotateTextViewController.hasIndications()) {
             mRotateTextViewController.updateIndication(
                     INDICATION_TYPE_RESTING,

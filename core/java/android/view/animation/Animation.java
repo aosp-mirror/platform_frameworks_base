@@ -19,7 +19,6 @@ package android.view.animation;
 import android.annotation.AnimRes;
 import android.annotation.ColorInt;
 import android.annotation.InterpolatorRes;
-import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -259,6 +258,8 @@ public abstract class Animation implements Cloneable {
 
         setZAdjustment(a.getInt(com.android.internal.R.styleable.Animation_zAdjustment, ZORDER_NORMAL));
 
+        setBackgroundColor(a.getInt(com.android.internal.R.styleable.Animation_background, 0));
+
         setDetachWallpaper(
                 a.getBoolean(com.android.internal.R.styleable.Animation_detachWallpaper, false));
         setShowWallpaper(
@@ -269,15 +270,6 @@ public abstract class Animation implements Cloneable {
         final int resID = a.getResourceId(com.android.internal.R.styleable.Animation_interpolator, 0);
 
         a.recycle();
-
-        Context uiContext = ActivityThread.currentActivityThread().getSystemUiContext();
-        TypedArray uiStyledAttrs = uiContext
-                .obtainStyledAttributes(attrs, com.android.internal.R.styleable.Animation);
-
-        setBackgroundColor(
-                uiStyledAttrs.getColor(com.android.internal.R.styleable.Animation_background, 0));
-
-        uiStyledAttrs.recycle();
 
         if (resID > 0) {
             setInterpolator(context, resID);
@@ -640,15 +632,16 @@ public abstract class Animation implements Cloneable {
     }
 
     /**
-     * Set background behind an animation.
+     * Set background behind animation.
      *
-     * @param bg The background color. If 0, no background.
+     * @param bg The background color.  If 0, no background.  Currently must
+     * be black, with any desired alpha level.
      *
      * @deprecated None of window animations are running with background color.
      */
     @Deprecated
     public void setBackgroundColor(@ColorInt int bg) {
-        mBackgroundColor = bg;
+        // The background color is not needed any more, do nothing.
     }
 
     /**
@@ -810,7 +803,7 @@ public abstract class Animation implements Cloneable {
     @Deprecated
     @ColorInt
     public int getBackgroundColor() {
-        return mBackgroundColor;
+        return 0;
     }
 
     /**
