@@ -2059,8 +2059,7 @@ public class ApnSetting implements Parcelable {
                     | TYPE_FOTA | TYPE_IMS | TYPE_CBS | TYPE_IA | TYPE_EMERGENCY | TYPE_MCX
                     | TYPE_XCAP | TYPE_VSIM | TYPE_BIP | TYPE_ENTERPRISE)) == 0
                 || TextUtils.isEmpty(mApnName) || TextUtils.isEmpty(mEntryName)) {
-                throw new IllegalArgumentException("mApName=" + mApnName + ", mEntryName="
-                        + mEntryName + ", mApnTypeBitmask=" + mApnTypeBitmask);
+                return null;
             }
             return new ApnSetting(this);
         }
