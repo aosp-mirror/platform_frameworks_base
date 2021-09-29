@@ -710,8 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Erweiterte Benachrichtigungseinstellungen"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"An"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Aus"</string>
-    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
-    <skip />
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"An – gesichtsbasiert"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Mit den erweiterten Benachrichtigungseinstellungen kannst du für App-Benachrichtigungen eine Wichtigkeitsstufe von 0 bis 5 festlegen. \n\n"<b>"Stufe 5"</b>" \n- Auf der Benachrichtigungsleiste ganz oben anzeigen \n- Vollbildunterbrechung zulassen \n- Immer kurz einblenden \n\n"<b>"Stufe 4"</b>" \n- Keine Vollbildunterbrechung \n- Immer kurz einblenden \n\n"<b>"Stufe 3"</b>" \n- Keine Vollbildunterbrechung \n- Nie kurz einblenden \n\n"<b>"Stufe 2"</b>" \n- Keine Vollbildunterbrechung \n- Nie kurz einblenden \n- Weder Ton noch Vibration \n\n"<b>"Stufe 1"</b>" \n- Keine Vollbildunterbrechung \n- Nie kurz einblenden \n- Weder Ton noch Vibration \n- Auf Sperrbildschirm und Statusleiste verbergen \n- Auf der Benachrichtigungsleiste ganz unten anzeigen \n\n"<b>"Stufe 0"</b>" \n- Alle Benachrichtigungen der App sperren"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Benachrichtigungen"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Du erhältst diese Benachrichtigungen nicht mehr"</string>
@@ -1177,8 +1176,7 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Entsperren, um Netzwerke anzuzeigen"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Netzwerke werden gesucht…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Netzwerkverbindung konnte nicht hergestellt werden"</string>
-    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
-    <skip />
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Zurzeit wird keine automatische WLAN-Verbindung hergestellt"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Alle ansehen"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Trenne das Ethernetkabel, um das Netzwerk zu wechseln"</string>
 </resources>
