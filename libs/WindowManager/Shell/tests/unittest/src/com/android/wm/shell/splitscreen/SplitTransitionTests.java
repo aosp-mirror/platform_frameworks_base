@@ -316,7 +316,8 @@ public class SplitTransitionTests extends ShellTestCase {
                 mock(SurfaceControl.Transaction.class),
                 mock(SurfaceControl.Transaction.class),
                 mock(Transitions.TransitionFinishCallback.class));
-        mMainStage.activate(new Rect(0, 0, 100, 100), new WindowContainerTransaction());
+        mMainStage.activate(new Rect(0, 0, 100, 100), new WindowContainerTransaction(),
+                true /* includingTopTask */);
     }
 
     private boolean containsSplitExit(@NonNull WindowContainerTransaction wct) {
