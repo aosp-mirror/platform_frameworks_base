@@ -30,28 +30,33 @@ public abstract class HdmiClient {
     /**
      * Callback interface used to get the result of {@link #selectDevice}.
      */
-    public interface SelectedDeviceCallback {
+    public interface SelectDeviceCallback {
         /**
          * Called when the operation is finished.
          * @param result the result value of {@link #selectDevice} and can have the values mentioned
          *               in {@link HdmiControlShellCommand#getResultString}
+         * @param logicalAddress logical address of the selected device
          */
-        void onComplete(int result);
+        void onComplete(@HdmiControlManager.ControlCallbackResult int result, int logicalAddress);
     }
 
     /**
      * Selects a CEC logical device to be a new active source.
      *
+     * <p> Multiple calls to this method are handled in parallel and independently, with no
+     * guarantees about the execution order. The caller receives a callback for each call,
+     * containing the result of that call only.
+     *
      * @param logicalAddress logical address of the device to select
      * @param callback callback to get the result with
      * @throws {@link IllegalArgumentException} if the {@code callback} is null
      */
-    public void selectDevice(int logicalAddress, @NonNull SelectedDeviceCallback callback) {
+    public void selectDevice(int logicalAddress, @NonNull SelectDeviceCallback callback) {
         if (callback == null) {
             throw new IllegalArgumentException("callback must not be null.");
         }
         try {
-            mService.deviceSelect(logicalAddress, getCallbackWrapper(callback));
+            mService.deviceSelect(logicalAddress, getCallbackWrapper(callback, logicalAddress));
         } catch (RemoteException e) {
             Log.e(TAG, "failed to select device: ", e);
         }
@@ -60,11 +65,12 @@ public abstract class HdmiClient {
     /**
      * @hide
      */
-    private static IHdmiControlCallback getCallbackWrapper(final SelectedDeviceCallback callback) {
+    private static IHdmiControlCallback getCallbackWrapper(final SelectDeviceCallback callback,
+            int logicalAddress) {
         return new IHdmiControlCallback.Stub() {
             @Override
             public void onComplete(int result) {
-                callback.onComplete(result);
+                callback.onComplete(result, logicalAddress);
             }
         };
     }
