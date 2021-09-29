@@ -1117,9 +1117,11 @@ public class ScreenshotView extends FrameLayout implements
                 mPreviousX = mStartX;
                 return true;
             } else if (event.getActionMasked() == MotionEvent.ACTION_UP) {
-                if (isPastDismissThreshold()
-                        && (mDismissAnimation == null || !mDismissAnimation.isRunning())) {
-                    if (DEBUG_INPUT) {
+                if (mDismissAnimation != null && mDismissAnimation.isRunning()) {
+                    return true;
+                }
+                if (isPastDismissThreshold()) {
+                    if (DEBUG_DISMISS) {
                         Log.d(TAG, "dismiss triggered via swipe gesture");
                     }
                     mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SWIPE_DISMISSED);
@@ -1129,9 +1131,7 @@ public class ScreenshotView extends FrameLayout implements
                     if (DEBUG_DISMISS) {
                         Log.d(TAG, "swipe gesture abandoned");
                     }
-                    if ((mDismissAnimation == null || !mDismissAnimation.isRunning())) {
-                        createSwipeReturnAnimation().start();
-                    }
+                    createSwipeReturnAnimation().start();
                 }
                 return true;
             }
