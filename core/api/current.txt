@@ -50952,6 +50952,7 @@ package android.view.accessibility {
     method @Nullable public android.view.accessibility.AccessibilityNodeInfo.TouchDelegateInfo getTouchDelegateInfo();
     method public android.view.accessibility.AccessibilityNodeInfo getTraversalAfter();
     method public android.view.accessibility.AccessibilityNodeInfo getTraversalBefore();
+    method @Nullable public String getUniqueId();
     method public String getViewIdResourceName();
     method public android.view.accessibility.AccessibilityWindowInfo getWindow();
     method public int getWindowId();
@@ -51046,6 +51047,7 @@ package android.view.accessibility {
     method public void setTraversalAfter(android.view.View, int);
     method public void setTraversalBefore(android.view.View);
     method public void setTraversalBefore(android.view.View, int);
+    method public void setUniqueId(@Nullable String);
     method public void setViewIdResourceName(String);
     method public void setVisibleToUser(boolean);
     method public void writeToParcel(android.os.Parcel, int);
