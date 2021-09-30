@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-package com.android.systemui.usb;
+package com.android.systemui.usb.tv;
 
 import com.android.systemui.R;
 
 /**
- * Dialog shown when a package requests access to a USB device or accessory.
+ * Dialog shown when a package requests access to a USB device or accessory on TVs.
  */
-public class UsbPermissionActivity extends UsbDialogActivity {
+public class TvUsbPermissionActivity extends TvUsbDialogActivity {
+    private static final String TAG = TvUsbPermissionActivity.class.getSimpleName();
 
     private boolean mPermissionGranted = false;
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         final int strId;
-        boolean useRecordWarning = false;
         if (mDialogHelper.isUsbDevice()) {
-            useRecordWarning = mDialogHelper.deviceHasAudioCapture()
+            boolean useRecordWarning = mDialogHelper.deviceHasAudioCapture()
                     && !mDialogHelper.packageHasAudioRecordingPermission();
             strId = useRecordWarning
                     ? R.string.usb_device_permission_prompt_warn
@@ -40,12 +40,9 @@ public class UsbPermissionActivity extends UsbDialogActivity {
             // UsbAccessory case
             strId = R.string.usb_accessory_permission_prompt;
         }
-        setAlertParams(strId);
-        // Only show the "always use" checkbox if there is no USB/Record warning
-        if (!useRecordWarning && mDialogHelper.canBeDefault()) {
-            addAlwaysUseCheckbox();
-        }
-        setupAlert();
+        CharSequence text = getString(strId, mDialogHelper.getAppName(),
+                mDialogHelper.getDeviceDescription());
+        initUI(mDialogHelper.getAppName(), text);
     }
 
     @Override
@@ -59,9 +56,6 @@ public class UsbPermissionActivity extends UsbDialogActivity {
     @Override
     void onConfirm() {
         mDialogHelper.grantUidAccessPermission();
-        if (isAlwaysUseChecked()) {
-            mDialogHelper.setDefaultPackage();
-        }
         mPermissionGranted = true;
         finish();
     }

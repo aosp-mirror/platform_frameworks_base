@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.usb;
+package com.android.systemui.usb.tv;
 
 import com.android.systemui.R;
 
@@ -22,15 +22,15 @@ import com.android.systemui.R;
  * Dialog shown to confirm the package to start when a USB device or accessory is attached and there
  * is only one package that claims to handle this USB device or accessory.
  */
-public class UsbConfirmActivity extends UsbDialogActivity {
+public class TvUsbConfirmActivity extends TvUsbDialogActivity {
+    private static final String TAG = TvUsbConfirmActivity.class.getSimpleName();
 
     @Override
     protected void onResume() {
         super.onResume();
         final int strId;
-        boolean useRecordWarning = false;
         if (mDialogHelper.isUsbDevice()) {
-            useRecordWarning = mDialogHelper.deviceHasAudioCapture()
+            boolean useRecordWarning = mDialogHelper.deviceHasAudioCapture()
                     && !mDialogHelper.packageHasAudioRecordingPermission();
             strId = useRecordWarning
                     ? R.string.usb_device_confirm_prompt_warn
@@ -39,22 +39,14 @@ public class UsbConfirmActivity extends UsbDialogActivity {
             // UsbAccessory case
             strId = R.string.usb_accessory_confirm_prompt;
         }
-        setAlertParams(strId);
-        // Only show the "always use" checkbox if there is no USB/Record warning
-        if (!useRecordWarning) {
-            addAlwaysUseCheckbox();
-        }
-        setupAlert();
+        CharSequence text = getString(strId, mDialogHelper.getAppName(),
+                mDialogHelper.getDeviceDescription());
+        initUI(mDialogHelper.getAppName(), text);
     }
 
     @Override
     void onConfirm() {
         mDialogHelper.grantUidAccessPermission();
-        if (isAlwaysUseChecked()) {
-            mDialogHelper.setDefaultPackage();
-        } else {
-            mDialogHelper.clearDefaultPackage();
-        }
         mDialogHelper.confirmDialogStartActivity();
         finish();
     }
