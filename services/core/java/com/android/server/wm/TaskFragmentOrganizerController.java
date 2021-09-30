@@ -505,29 +505,46 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         }
         for (int i = 0, n = mPendingTaskFragmentEvents.size(); i < n; i++) {
             PendingTaskFragmentEvent event = mPendingTaskFragmentEvents.get(i);
-            final ITaskFragmentOrganizer taskFragmentOrg = event.mTaskFragmentOrg;
-            final TaskFragment taskFragment = event.mTaskFragment;
-            final TaskFragmentOrganizerState state =
-                    mTaskFragmentOrganizerState.get(taskFragmentOrg.asBinder());
-            if (state == null) continue;
-            switch (event.mEventType) {
-                case PendingTaskFragmentEvent.EVENT_APPEARED:
-                    state.onTaskFragmentAppeared(taskFragmentOrg, taskFragment);
-                    break;
-                case PendingTaskFragmentEvent.EVENT_VANISHED:
-                    state.onTaskFragmentVanished(taskFragmentOrg, taskFragment);
-                    break;
-                case PendingTaskFragmentEvent.EVENT_INFO_CHANGED:
-                    state.onTaskFragmentInfoChanged(taskFragmentOrg, taskFragment);
-                    break;
-                case PendingTaskFragmentEvent.EVENT_PARENT_INFO_CHANGED:
-                    state.onTaskFragmentParentInfoChanged(taskFragmentOrg, taskFragment);
-                    break;
-                case PendingTaskFragmentEvent.EVENT_ERROR:
-                    state.onTaskFragmentError(taskFragmentOrg, event.mErrorCallback,
-                            event.mException);
-            }
+            dispatchEvent(event);
         }
         mPendingTaskFragmentEvents.clear();
+    }
+
+    void dispatchPendingInfoChangedEvent(TaskFragment taskFragment) {
+        PendingTaskFragmentEvent event = getPendingTaskFragmentEvent(taskFragment,
+                PendingTaskFragmentEvent.EVENT_INFO_CHANGED);
+        if (event == null) {
+            return;
+        }
+
+        dispatchEvent(event);
+        mPendingTaskFragmentEvents.remove(event);
+    }
+
+    private void dispatchEvent(PendingTaskFragmentEvent event) {
+        final ITaskFragmentOrganizer taskFragmentOrg = event.mTaskFragmentOrg;
+        final TaskFragment taskFragment = event.mTaskFragment;
+        final TaskFragmentOrganizerState state =
+                mTaskFragmentOrganizerState.get(taskFragmentOrg.asBinder());
+        if (state == null) {
+            return;
+        }
+        switch (event.mEventType) {
+            case PendingTaskFragmentEvent.EVENT_APPEARED:
+                state.onTaskFragmentAppeared(taskFragmentOrg, taskFragment);
+                break;
+            case PendingTaskFragmentEvent.EVENT_VANISHED:
+                state.onTaskFragmentVanished(taskFragmentOrg, taskFragment);
+                break;
+            case PendingTaskFragmentEvent.EVENT_INFO_CHANGED:
+                state.onTaskFragmentInfoChanged(taskFragmentOrg, taskFragment);
+                break;
+            case PendingTaskFragmentEvent.EVENT_PARENT_INFO_CHANGED:
+                state.onTaskFragmentParentInfoChanged(taskFragmentOrg, taskFragment);
+                break;
+            case PendingTaskFragmentEvent.EVENT_ERROR:
+                state.onTaskFragmentError(taskFragmentOrg, event.mErrorCallback,
+                        event.mException);
+        }
     }
 }

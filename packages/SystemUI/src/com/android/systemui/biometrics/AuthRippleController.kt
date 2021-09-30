@@ -21,6 +21,7 @@ import android.content.Context
 import android.content.res.Configuration
 import android.graphics.PointF
 import android.hardware.biometrics.BiometricSourceType
+import android.util.DisplayMetrics
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -45,6 +46,7 @@ import java.io.PrintWriter
 import javax.inject.Inject
 import javax.inject.Provider
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.util.leak.RotationUtils
 
 private const val WAKE_AND_UNLOCK_FADE_DURATION = 180L
 
@@ -182,7 +184,7 @@ class AuthRippleController @Inject constructor(
     }
 
     fun updateSensorLocation() {
-        fingerprintSensorLocation = authController.fingerprintSensorLocation
+        updateFingerprintLocation()
         faceSensorLocation = authController.faceAuthSensorLocation
         fingerprintSensorLocation?.let {
             circleReveal = CircleReveal(
@@ -194,6 +196,35 @@ class AuthRippleController @Inject constructor(
                     Math.max(it.y, statusBar.displayHeight - it.y)
                 )
             )
+        }
+    }
+
+    private fun updateFingerprintLocation() {
+        val displayMetrics = DisplayMetrics()
+        sysuiContext.display?.getRealMetrics(displayMetrics)
+        val width = displayMetrics.widthPixels
+        val height = displayMetrics.heightPixels
+
+        authController.fingerprintSensorLocation?.let {
+            fingerprintSensorLocation = when (RotationUtils.getRotation(sysuiContext)) {
+                RotationUtils.ROTATION_LANDSCAPE -> {
+                    val normalizedYPos: Float = it.y / width
+                    val normalizedXPos: Float = it.x / height
+                    PointF(width * normalizedYPos, height * (1 - normalizedXPos))
+                }
+                RotationUtils.ROTATION_UPSIDE_DOWN -> {
+                    PointF(width - it.x, height - it.y)
+                }
+                RotationUtils.ROTATION_SEASCAPE -> {
+                    val normalizedYPos: Float = it.y / width
+                    val normalizedXPos: Float = it.x / height
+                    PointF(width * (1 - normalizedYPos), height * normalizedXPos)
+                }
+                else -> {
+                    // ROTATION_NONE
+                    PointF(it.x, it.y)
+                }
+            }
         }
     }
 
@@ -314,10 +345,12 @@ class AuthRippleController @Inject constructor(
                         }
                     }
                     "fingerprint" -> {
+                        updateSensorLocation()
                         pw.println("fingerprint ripple sensorLocation=$fingerprintSensorLocation")
                         showRipple(BiometricSourceType.FINGERPRINT)
                     }
                     "face" -> {
+                        updateSensorLocation()
                         pw.println("face ripple sensorLocation=$faceSensorLocation")
                         showRipple(BiometricSourceType.FACE)
                     }
