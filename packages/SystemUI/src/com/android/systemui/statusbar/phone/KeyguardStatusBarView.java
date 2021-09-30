@@ -72,6 +72,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
     private boolean mKeyguardUserSwitcherEnabled;
     private final UserManager mUserManager;
 
+    private boolean mIsPrivacyDotEnabled;
     private int mSystemIconsSwitcherHiddenExpandedMargin;
     private int mStatusBarPaddingEnd;
     private int mMinDotWidth;
@@ -112,7 +113,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
         mCutoutSpace = findViewById(R.id.cutout_space_view);
         mStatusIconArea = findViewById(R.id.status_icon_area);
         mStatusIconContainer = findViewById(R.id.statusIcons);
-
+        mIsPrivacyDotEnabled = mContext.getResources().getBoolean(R.bool.config_enablePrivacyDot);
         loadDimens();
     }
 
@@ -270,9 +271,10 @@ public class KeyguardStatusBarView extends RelativeLayout {
                         mDisplayCutout, cornerCutoutMargins, mRoundedCornerPadding);
 
         // consider privacy dot space
-        final int minLeft = isLayoutRtl() ? Math.max(mMinDotWidth, mPadding.first) : mPadding.first;
-        final int minRight = isLayoutRtl() ? mPadding.second :
-                Math.max(mMinDotWidth, mPadding.second);
+        final int minLeft = (isLayoutRtl() && mIsPrivacyDotEnabled)
+                ? Math.max(mMinDotWidth, mPadding.first) : mPadding.first;
+        final int minRight = (!isLayoutRtl() && mIsPrivacyDotEnabled)
+                ? Math.max(mMinDotWidth, mPadding.second) : mPadding.second;
 
         setPadding(minLeft, waterfallTop, minRight, 0);
     }
