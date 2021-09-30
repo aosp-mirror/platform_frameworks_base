@@ -903,6 +903,11 @@ public class BatteryStatsImpl extends BatteryStats {
          */
         public StopwatchTimer[] screenBrightnessTimers =
                 new StopwatchTimer[NUM_SCREEN_BRIGHTNESS_BINS];
+        /**
+         * Per display screen state the last time {@link #updateDisplayMeasuredEnergyStatsLocked}
+         * was called.
+         */
+        public int screenStateAtLastEnergyMeasurement = Display.STATE_UNKNOWN;
 
         DisplayBatteryStats(Clocks clocks, TimeBase timeBase) {
             screenOnTimer = new StopwatchTimer(clocks, null, -1, null,
@@ -928,6 +933,8 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     DisplayBatteryStats[] mPerDisplayBatteryStats;
+
+    private int mDisplayMismatchWtfCount = 0;
 
     boolean mInteractive;
     StopwatchTimer mInteractiveTimer;
@@ -1073,8 +1080,6 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("this")
     @VisibleForTesting
     protected @Nullable MeasuredEnergyStats mGlobalMeasuredEnergyStats;
-    /** Last known screen state. Needed for apportioning display energy. */
-    int mScreenStateAtLastEnergyMeasurement = Display.STATE_UNKNOWN;
     /** Bluetooth Power calculator for attributing measured bluetooth charge consumption to uids */
     @Nullable BluetoothPowerCalculator mBluetoothPowerCalculator = null;
     /** Cpu Power calculator for attributing measured cpu charge consumption to uids */
@@ -12924,22 +12929,43 @@ public class BatteryStatsImpl extends BatteryStats {
      * is always 0 when the screen is not "ON" and whenever the rail energy is 0 (if supported).
      * To the extent that those assumptions are violated, the algorithm will err.
      *
-     * @param chargeUC amount of charge (microcoulombs) used by Display since this was last called.
-     * @param screenState screen state at the time this data collection was scheduled
+     * @param chargesUC amount of charge (microcoulombs) used by each Display since this was last
+     *                 called.
+     * @param screenStates each screen state at the time this data collection was scheduled
      */
     @GuardedBy("this")
-    public void updateDisplayMeasuredEnergyStatsLocked(long chargeUC, int screenState,
+    public void updateDisplayMeasuredEnergyStatsLocked(long[] chargesUC, int[] screenStates,
             long elapsedRealtimeMs) {
-        if (DEBUG_ENERGY) Slog.d(TAG, "Updating display stats: " + chargeUC);
+        if (DEBUG_ENERGY) Slog.d(TAG, "Updating display stats: " + Arrays.toString(chargesUC));
         if (mGlobalMeasuredEnergyStats == null) {
             return;
         }
 
-        final @StandardPowerBucket int powerBucket =
-                MeasuredEnergyStats.getDisplayPowerBucket(mScreenStateAtLastEnergyMeasurement);
-        mScreenStateAtLastEnergyMeasurement = screenState;
+        final int numDisplays;
+        if (mPerDisplayBatteryStats.length == screenStates.length) {
+            numDisplays = screenStates.length;
+        } else {
+            // if this point is reached, it will be reached every display state change.
+            // Rate limit the wtf logging to once every 100 display updates.
+            if (mDisplayMismatchWtfCount++ % 100 == 0) {
+                Slog.wtf(TAG, "Mismatch between PowerProfile reported display count ("
+                        + mPerDisplayBatteryStats.length
+                        + ") and PowerStatsHal reported display count (" + screenStates.length
+                        + ")");
+            }
+            // Keep the show going, use the shorter of the two.
+            numDisplays = mPerDisplayBatteryStats.length < screenStates.length
+                    ? mPerDisplayBatteryStats.length : screenStates.length;
+        }
 
-        if (!mOnBatteryInternal || chargeUC <= 0) {
+        final int[] oldScreenStates = new int[numDisplays];
+        for (int i = 0; i < numDisplays; i++) {
+            final int screenState = screenStates[i];
+            oldScreenStates[i] = mPerDisplayBatteryStats[i].screenStateAtLastEnergyMeasurement;
+            mPerDisplayBatteryStats[i].screenStateAtLastEnergyMeasurement = screenState;
+        }
+
+        if (!mOnBatteryInternal) {
             // There's nothing further to update.
             return;
         }
@@ -12954,17 +12980,31 @@ public class BatteryStatsImpl extends BatteryStats {
             return;
         }
 
-        mGlobalMeasuredEnergyStats.updateStandardBucket(powerBucket, chargeUC);
+        long totalScreenOnChargeUC = 0;
+        for (int i = 0; i < numDisplays; i++) {
+            final long chargeUC = chargesUC[i];
+            if (chargeUC <= 0) {
+                // There's nothing further to update.
+                continue;
+            }
+
+            final @StandardPowerBucket int powerBucket =
+                    MeasuredEnergyStats.getDisplayPowerBucket(oldScreenStates[i]);
+            mGlobalMeasuredEnergyStats.updateStandardBucket(powerBucket, chargeUC);
+            if (powerBucket == MeasuredEnergyStats.POWER_BUCKET_SCREEN_ON) {
+                totalScreenOnChargeUC += chargeUC;
+            }
+        }
 
         // Now we blame individual apps, but only if the display was ON.
-        if (powerBucket != MeasuredEnergyStats.POWER_BUCKET_SCREEN_ON) {
+        if (totalScreenOnChargeUC <= 0) {
             return;
         }
         // TODO(b/175726779): Consider unifying the code with the non-rail display power blaming.
 
         // NOTE: fg time is NOT pooled. If two uids are both somehow in fg, then that time is
         // 'double counted' and will simply exceed the realtime that elapsed.
-        // If multidisplay becomes a reality, this is probably more reasonable than pooling.
+        // TODO(b/175726779): collect per display uid visibility for display power attribution.
 
         // Collect total time since mark so that we can normalize power.
         final SparseDoubleArray fgTimeUsArray = new SparseDoubleArray();
@@ -12977,7 +13017,8 @@ public class BatteryStatsImpl extends BatteryStats {
             if (fgTimeUs == 0) continue;
             fgTimeUsArray.put(uid.getUid(), (double) fgTimeUs);
         }
-        distributeEnergyToUidsLocked(powerBucket, chargeUC, fgTimeUsArray, 0);
+        distributeEnergyToUidsLocked(MeasuredEnergyStats.POWER_BUCKET_SCREEN_ON,
+                totalScreenOnChargeUC, fgTimeUsArray, 0);
     }
 
     /**
@@ -14883,7 +14924,12 @@ public class BatteryStatsImpl extends BatteryStats {
     public void initMeasuredEnergyStatsLocked(@Nullable boolean[] supportedStandardBuckets,
             String[] customBucketNames) {
         boolean supportedBucketMismatch = false;
-        mScreenStateAtLastEnergyMeasurement = mScreenState;
+
+        final int numDisplays = mPerDisplayBatteryStats.length;
+        for (int i = 0; i < numDisplays; i++) {
+            final int screenState = mPerDisplayBatteryStats[i].screenState;
+            mPerDisplayBatteryStats[i].screenStateAtLastEnergyMeasurement = screenState;
+        }
 
         if (supportedStandardBuckets == null) {
             if (mGlobalMeasuredEnergyStats != null) {

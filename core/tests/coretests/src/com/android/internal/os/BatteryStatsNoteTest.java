@@ -998,7 +998,7 @@ public class BatteryStatsNoteTest extends TestCase {
         bi.initMeasuredEnergyStats(new String[]{"FOO", "BAR"});
 
         clocks.realtime = 0;
-        int screen = Display.STATE_OFF;
+        int[] screen = new int[]{Display.STATE_OFF};
         boolean battery = false;
 
         final int uid1 = 10500;
@@ -1008,35 +1008,35 @@ public class BatteryStatsNoteTest extends TestCase {
         long globalDoze = 0;
 
         // Case A: uid1 off, uid2 off, battery off, screen off
-        bi.updateTimeBasesLocked(battery, screen, clocks.realtime*1000, 0);
+        bi.updateTimeBasesLocked(battery, screen[0], clocks.realtime * 1000, 0);
         bi.setOnBatteryInternal(battery);
-        bi.updateDisplayMeasuredEnergyStatsLocked(500_000, screen, clocks.realtime);
+        bi.updateDisplayMeasuredEnergyStatsLocked(new long[]{500_000}, screen, clocks.realtime);
         checkMeasuredCharge("A", uid1, blame1, uid2, blame2, globalDoze, bi);
 
         // Case B: uid1 off, uid2 off, battery ON,  screen off
         clocks.realtime += 17;
         battery = true;
-        bi.updateTimeBasesLocked(battery, screen, clocks.realtime*1000, 0);
+        bi.updateTimeBasesLocked(battery, screen[0], clocks.realtime * 1000, 0);
         bi.setOnBatteryInternal(battery);
         clocks.realtime += 19;
-        bi.updateDisplayMeasuredEnergyStatsLocked(510_000, screen, clocks.realtime);
+        bi.updateDisplayMeasuredEnergyStatsLocked(new long[]{510_000}, screen, clocks.realtime);
         checkMeasuredCharge("B", uid1, blame1, uid2, blame2, globalDoze, bi);
 
         // Case C: uid1 ON,  uid2 off, battery on,  screen off
         clocks.realtime += 18;
         setFgState(uid1, true, bi);
         clocks.realtime += 18;
-        bi.updateDisplayMeasuredEnergyStatsLocked(520_000, screen, clocks.realtime);
+        bi.updateDisplayMeasuredEnergyStatsLocked(new long[]{520_000}, screen, clocks.realtime);
         checkMeasuredCharge("C", uid1, blame1, uid2, blame2, globalDoze, bi);
 
         // Case D: uid1 on,  uid2 off, battery on,  screen ON
         clocks.realtime += 17;
-        screen = Display.STATE_ON;
-        bi.updateDisplayMeasuredEnergyStatsLocked(521_000, screen, clocks.realtime);
+        screen[0] = Display.STATE_ON;
+        bi.updateDisplayMeasuredEnergyStatsLocked(new long[]{521_000}, screen, clocks.realtime);
         blame1 += 0; // Screen had been off during the measurement period
         checkMeasuredCharge("D.1", uid1, blame1, uid2, blame2, globalDoze, bi);
         clocks.realtime += 101;
-        bi.updateDisplayMeasuredEnergyStatsLocked(530_000, screen, clocks.realtime);
+        bi.updateDisplayMeasuredEnergyStatsLocked(new long[]{530_000}, screen, clocks.realtime);
         blame1 += 530_000;
         checkMeasuredCharge("D.2", uid1, blame1, uid2, blame2, globalDoze, bi);
 
@@ -1044,33 +1044,33 @@ public class BatteryStatsNoteTest extends TestCase {
         clocks.realtime += 20;
         setFgState(uid2, true, bi);
         clocks.realtime += 40;
-        bi.updateDisplayMeasuredEnergyStatsLocked(540_000, screen, clocks.realtime);
+        bi.updateDisplayMeasuredEnergyStatsLocked(new long[]{540_000}, screen, clocks.realtime);
         // In the past 60ms, sum of fg is 20+40+40=100ms. uid1 is blamed for 60/100; uid2 for 40/100
         blame1 += 540_000 * (20 + 40) / (20 + 40 + 40);
-        blame2 += 540_000 * ( 0 + 40) / (20 + 40 + 40);
+        blame2 += 540_000 * (0 + 40) / (20 + 40 + 40);
         checkMeasuredCharge("E", uid1, blame1, uid2, blame2, globalDoze, bi);
 
         // Case F: uid1 on,  uid2 OFF, battery on,  screen on
         clocks.realtime += 40;
         setFgState(uid2, false, bi);
         clocks.realtime += 120;
-        bi.updateDisplayMeasuredEnergyStatsLocked(550_000, screen, clocks.realtime);
+        bi.updateDisplayMeasuredEnergyStatsLocked(new long[]{550_000}, screen, clocks.realtime);
         // In the past 160ms, sum f fg is 200ms. uid1 is blamed for 40+120 of it; uid2 for 40 of it.
         blame1 += 550_000 * (40 + 120) / (40 + 40 + 120);
-        blame2 += 550_000 * (40 + 0  ) / (40 + 40 + 120);
+        blame2 += 550_000 * (40 + 0) / (40 + 40 + 120);
         checkMeasuredCharge("F", uid1, blame1, uid2, blame2, globalDoze, bi);
 
         // Case G: uid1 on,  uid2 off,  battery on, screen DOZE
         clocks.realtime += 5;
-        screen = Display.STATE_DOZE;
-        bi.updateDisplayMeasuredEnergyStatsLocked(570_000, screen, clocks.realtime);
+        screen[0] = Display.STATE_DOZE;
+        bi.updateDisplayMeasuredEnergyStatsLocked(new long[]{570_000}, screen, clocks.realtime);
         blame1 += 570_000; // All of this pre-doze time is blamed on uid1.
         checkMeasuredCharge("G", uid1, blame1, uid2, blame2, globalDoze, bi);
 
         // Case H: uid1 on,  uid2 off,  battery on, screen ON
         clocks.realtime += 6;
-        screen = Display.STATE_ON;
-        bi.updateDisplayMeasuredEnergyStatsLocked(580_000, screen, clocks.realtime);
+        screen[0] = Display.STATE_ON;
+        bi.updateDisplayMeasuredEnergyStatsLocked(new long[]{580_000}, screen, clocks.realtime);
         blame1 += 0; // The screen had been doze during the energy period
         globalDoze += 580_000;
         checkMeasuredCharge("H", uid1, blame1, uid2, blame2, globalDoze, bi);
