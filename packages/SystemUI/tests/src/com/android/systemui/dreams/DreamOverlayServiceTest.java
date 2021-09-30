@@ -19,6 +19,7 @@ package com.android.systemui.dreams;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.Intent;
 import android.os.IBinder;
@@ -48,6 +49,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Arrays;
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class DreamOverlayServiceTest extends SysuiTestCase {
@@ -72,6 +75,9 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     @Mock
     OverlayProvider mProvider;
 
+    @Mock
+    DreamOverlayStateController mDreamOverlayStateController;
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
@@ -80,7 +86,8 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
 
     @Test
     public void testInteraction() throws Exception {
-        final DreamOverlayService service = new DreamOverlayService(mContext, mMainExecutor);
+        final DreamOverlayService service = new DreamOverlayService(mContext, mMainExecutor,
+                mDreamOverlayStateController);
         final IBinder proxy = service.onBind(new Intent());
         final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
         clearInvocations(mWindowManager);
@@ -116,5 +123,31 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
 
         // Ensure service informs dream host of exit.
         verify(mDreamOverlayCallback).onExitRequested();
+    }
+
+    @Test
+    public void testListening() throws Exception {
+        final DreamOverlayService service = new DreamOverlayService(mContext, mMainExecutor,
+                mDreamOverlayStateController);
+
+        final IBinder proxy = service.onBind(new Intent());
+        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+
+        // Inform the overlay service of dream starting.
+        overlay.startDream(mWindowParams, mDreamOverlayCallback);
+        mMainExecutor.runAllReady();
+
+        // Verify overlay service registered as listener with DreamOverlayStateController
+        // and inform callback of addition.
+        final ArgumentCaptor<DreamOverlayStateController.Callback> callbackCapture =
+                ArgumentCaptor.forClass(DreamOverlayStateController.Callback.class);
+
+        verify(mDreamOverlayStateController).addCallback(callbackCapture.capture());
+        when(mDreamOverlayStateController.getOverlays()).thenReturn(Arrays.asList(mProvider));
+        callbackCapture.getValue().onOverlayChanged();
+        mMainExecutor.runAllReady();
+
+        // Verify provider is asked to create overlay.
+        verify(mProvider).onCreateOverlay(any(), any(), any());
     }
 }

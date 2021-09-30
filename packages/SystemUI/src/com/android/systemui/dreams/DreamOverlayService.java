@@ -52,10 +52,20 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     private final Context mContext;
     // The Executor ensures actions and ui updates happen on the same thread.
     private final Executor mExecutor;
+    // The state controller informs the service of updates to the overlays present.
+    private final DreamOverlayStateController mStateController;
 
     // The window is populated once the dream informs the service it has begun dreaming.
     private Window mWindow;
     private ConstraintLayout mLayout;
+
+    private final DreamOverlayStateController.Callback mOverlayStateCallback =
+            new DreamOverlayStateController.Callback() {
+        @Override
+        public void onOverlayChanged() {
+            mExecutor.execute(() -> reloadOverlaysLocked());
+        }
+    };
 
     // The service listens to view changes in order to declare that input occurring in areas outside
     // the overlay should be passed through to the dream underneath.
@@ -101,6 +111,16 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mExecutor.execute(() -> addOverlayWindowLocked(layoutParams));
     }
 
+    private void reloadOverlaysLocked() {
+        if (mLayout == null) {
+            return;
+        }
+        mLayout.removeAllViews();
+        for (OverlayProvider overlayProvider : mStateController.getOverlays()) {
+            addOverlay(overlayProvider);
+        }
+    }
+
     /**
      * Inserts {@link Window} to host dream overlays into the dream's parent window. Must be called
      * from the main executing thread. The window attributes closely mirror those that are set by
@@ -134,6 +154,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
         final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
         windowManager.addView(mWindow.getDecorView(), mWindow.getAttributes());
+        mExecutor.execute(this::reloadOverlaysLocked);
     }
 
     @VisibleForTesting
@@ -158,8 +179,17 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     }
 
     @Inject
-    public DreamOverlayService(Context context, @Main Executor executor) {
+    public DreamOverlayService(Context context, @Main Executor executor,
+            DreamOverlayStateController overlayStateController) {
         mContext = context;
         mExecutor = executor;
+        mStateController = overlayStateController;
+        mStateController.addCallback(mOverlayStateCallback);
+    }
+
+    @Override
+    public void onDestroy() {
+        mStateController.removeCallback(mOverlayStateCallback);
+        super.onDestroy();
     }
 }
