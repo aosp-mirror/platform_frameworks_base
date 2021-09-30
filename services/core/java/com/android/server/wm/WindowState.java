@@ -5662,9 +5662,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     boolean needsRelativeLayeringToIme() {
-        // We only use the relative layering mode in split screen, as part of elevating the IME
-        // and windows above it's target above the docked divider.
-        if (!inSplitScreenWindowingMode()) {
+        // We use the relative layering when IME isn't attached to the app. Such as part of
+        // elevating the IME and windows above it's target above the docked divider in
+        // split-screen, or make the popupMenu to be above the IME when the parent window is the
+        // IME layering target in bubble/freeform mode.
+        if (mDisplayContent.isImeAttachedToApp()) {
             return false;
         }
 
