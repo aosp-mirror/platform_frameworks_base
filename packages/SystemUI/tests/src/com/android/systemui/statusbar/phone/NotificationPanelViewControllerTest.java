@@ -156,8 +156,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private KeyguardBottomAreaView mQsFrame;
     private KeyguardStatusView mKeyguardStatusView;
     @Mock
-    private ViewGroup mBigClockContainer;
-    @Mock
     private NotificationIconAreaController mNotificationAreaController;
     @Mock
     private HeadsUpManagerPhone mHeadsUpManager;
@@ -347,7 +345,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         when(mKeyguardBottomArea.getLeftView()).thenReturn(mock(KeyguardAffordanceView.class));
         when(mKeyguardBottomArea.getRightView()).thenReturn(mock(KeyguardAffordanceView.class));
         when(mKeyguardBottomArea.animate()).thenReturn(mock(ViewPropertyAnimator.class));
-        when(mView.findViewById(R.id.big_clock_container)).thenReturn(mBigClockContainer);
         when(mView.findViewById(R.id.qs_frame)).thenReturn(mQsFrame);
         when(mView.findViewById(R.id.keyguard_status_view))
                 .thenReturn(mock(KeyguardStatusView.class));
