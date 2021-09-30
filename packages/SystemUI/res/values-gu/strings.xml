@@ -710,8 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"પાવર સૂચના નિયંત્રણો"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"ચાલુ"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"બંધ"</string>
-    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
-    <skip />
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"ચાલુ છે - ચહેરા આધારિત રોટેશન"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"પાવર સૂચના નિયંત્રણો સાથે, તમે ઍપની સૂચનાઓ માટે 0 થી 5 સુધીના મહત્વના સ્તરને સેટ કરી શકો છો. \n\n"<b>"સ્તર 5"</b>" \n- સૂચના સૂચિની ટોચ પર બતાવો \n- પૂર્ણ સ્ક્રીન અવરોધની મંજૂરી આપો \n- હંમેશાં ત્વરિત દૃષ્ટિ કરો \n\n"<b>"સ્તર 4"</b>" \n- પૂર્ણ સ્ક્રીન અવરોધ અટકાવો \n- હંમેશાં ત્વરિત દૃષ્ટિ કરો \n\n"<b>"સ્તર 3"</b>" \n- પૂર્ણ સ્ક્રીન અવરોધ અટકાવો \n- ક્યારેય ત્વરિત દૃષ્ટિ કરશો નહીં \n\n"<b>"સ્તર 2"</b>" \n- પૂર્ણ સ્ક્રીન અવરોધ અટકાવો \n- ક્યારેય ત્વરિત દૃષ્ટિ કરશો નહીં \n- ક્યારેય અવાજ અથવા વાઇબ્રેટ કરશો નહીં \n\n"<b>"સ્તર 1"</b>" \n- પૂર્ણ સ્ક્રીન અવરોધની મંજૂરી આપો \n- ક્યારેય ત્વરિત દૃષ્ટિ કરશો નહીં \n- ક્યારેય અવાજ અથવા વાઇબ્રેટ કરશો નહીં \n- લૉક સ્ક્રીન અને સ્ટેટસ બારથી છુપાવો \n- સૂચના સૂચિના તળિયા પર બતાવો \n\n"<b>"સ્તર 0"</b>" \n- ઍપની તમામ સૂચનાઓને બ્લૉક કરો"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"નોટિફિકેશન"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"તમને હવેથી આ નોટિફિકેશન દેખાશે નહીં"</string>

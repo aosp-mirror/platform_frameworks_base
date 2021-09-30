@@ -82,7 +82,7 @@
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Inahifadhi picha ya skrini..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Inahifadhi picha ya skrini..."</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Imehifadhi picha ya skrini"</string>
-    <string name="screenshot_saved_text" msgid="7778833104901642442">"Gusa ili utazame picha ya skrini uliyohifadhi"</string>
+    <string name="screenshot_saved_text" msgid="7778833104901642442">"Gusa ili uone picha ya skrini uliyohifadhi"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Imeshindwa kuhifadhi picha ya skrini"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Ni sharti ufungue kifaa kabla ya kuhifadhi picha ya skrini"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Jaribu kupiga picha ya skrini tena"</string>
@@ -1176,8 +1176,7 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Fungua ili uangalie mitandao"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Inatafuta mitandao…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Imeshindwa kuunganisha kwenye mtandao"</string>
-    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
-    <skip />
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi haitaunganishwa kiotomatiki kwa sasa"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Angalia yote"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Ili kubadili mitandao, tenganisha ethaneti"</string>
 </resources>

@@ -1182,8 +1182,7 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Otključajte da biste videli mreže"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Traže se mreže…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Povezivanje sa mrežom nije uspelo"</string>
-    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
-    <skip />
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"WiFi trenutno ne može da se automatski poveže"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Pogledajte sve"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Da biste promenili mrežu, prekinite eternet vezu"</string>
 </resources>

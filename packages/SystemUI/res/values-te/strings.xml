@@ -710,8 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"పవర్ నోటిఫికేషన్ నియంత్రణలు"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"ఆన్‌లో ఉన్నాయి"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"ఆఫ్‌లో ఉన్నాయి"</string>
-    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
-    <skip />
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"\'ముఖం ఆధారం\'ను - ఆన్ చేయండి"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"పవర్ నోటిఫికేషన్ నియంత్రణలతో, మీరు యాప్ నోటిఫికేషన్‌ల కోసం ప్రాముఖ్యత స్థాయిని 0 నుండి 5 వరకు సెట్ చేయవచ్చు. \n\n"<b>"స్థాయి 5"</b>" \n- నోటిఫికేషన్ లిస్ట్‌ పైభాగంలో చూపబడతాయి \n- పూర్తి స్క్రీన్ అంతరాయం అనుమతించబడుతుంది \n- ఎల్లప్పుడూ త్వరిత వీక్షణ అందించబడుతుంది \n\n"<b>"స్థాయి 4"</b>\n"- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎల్లప్పుడూ త్వరిత వీక్షణ అందించబడుతుంది \n\n"<b>"స్థాయి 3"</b>" \n- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ త్వరిత వీక్షణ అందించబడదు \n\n"<b>"స్థాయి 2"</b>" \n- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ త్వరిత వీక్షణ అందించబడదు \n- ఎప్పుడూ శబ్దం మరియు వైబ్రేషన్ చేయవు \n\n"<b>"స్థాయి 1"</b>" \n- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ త్వరిత వీక్షణ అందించబడదు \n- ఎప్పుడూ శబ్దం లేదా వైబ్రేట్ చేయవు \n- లాక్ స్క్రీన్ మరియు స్థితి పట్టీ నుండి దాచబడతాయి \n- నోటిఫికేషన్ లిస్ట్‌ దిగువ భాగంలో చూపబడతాయి \n\n"<b>"స్థాయి 0"</b>" \n- యాప్ నుండి అన్ని నోటిఫికేషన్‌లు బ్లాక్ చేయబడతాయి"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"నోటిఫికేషన్‌లు"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"ఇకపై మీకు ఈ నోటిఫికేషన్‌లు కనిపించవు"</string>
@@ -1177,8 +1176,7 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"నెట్‌వర్క్‌లను చూడటానికి అన్‌లాక్ చేయండి"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"నెట్‌వర్క్‌ల కోసం సెర్చ్ చేస్తోంది…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"నెట్‌వర్క్‌కు కనెక్ట్ చేయడం విఫలమైంది"</string>
-    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
-    <skip />
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"ప్రస్తుతానికి Wi-Fi ఆటోమేటిక్‌గా కనెక్ట్ అవ్వదు"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"అన్నీ చూడండి"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"నెట్‌వర్క్‌లను మార్చడానికి, ఈథర్‌నెట్‌ను డిస్‌కనెక్ట్ చేయండి"</string>
 </resources>

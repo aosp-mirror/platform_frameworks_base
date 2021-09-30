@@ -53,6 +53,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.FaceAuthScreenBrightnessController;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -92,7 +93,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     // with the appear animations of the PIN/pattern/password views.
     private static final long NAV_BAR_SHOW_DELAY_BOUNCER = 320;
 
-    private static final long WAKE_AND_UNLOCK_SCRIM_FADEOUT_DURATION_MS = 200;
+    // The duration to fade the nav bar content in/out when the device starts to sleep
+    private static final long NAV_BAR_CONTENT_FADE_DURATION = 125;
 
     // Duration of the Keyguard dismissal animation in case the user is currently locked. This is to
     // make everything a bit slower to bridge a gap until the user is unlocked and home screen has
@@ -194,10 +196,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private boolean mLastGesturalNav;
     private boolean mLastIsDocked;
     private boolean mLastPulsing;
-    private boolean mLastAnimatedToSleep;
     private int mLastBiometricMode;
     private boolean mQsExpanded;
-    private boolean mAnimatedToSleep;
 
     private OnDismissAction mAfterKeyguardGoneAction;
     private Runnable mKeyguardGoneCancelAction;
@@ -320,20 +320,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mDockManager.addListener(mDockEventListener);
             mIsDocked = mDockManager.isDocked();
         }
-        mWakefulnessLifecycle.addObserver(new WakefulnessLifecycle.Observer() {
-            @Override
-            public void onFinishedWakingUp() {
-                mAnimatedToSleep = false;
-                updateStates();
-            }
-
-            @Override
-            public void onFinishedGoingToSleep() {
-                mAnimatedToSleep =
-                        mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying();
-                updateStates();
-            }
-        });
     }
 
     @Override
@@ -566,12 +552,26 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void onStartedWakingUp() {
         mStatusBar.getNotificationShadeWindowView().getWindowInsetsController()
                 .setAnimationsDisabled(false);
+        View currentView = getCurrentNavBarView();
+        if (currentView != null) {
+            currentView.animate()
+                    .alpha(1f)
+                    .setDuration(NAV_BAR_CONTENT_FADE_DURATION)
+                    .start();
+        }
     }
 
     @Override
     public void onStartedGoingToSleep() {
         mStatusBar.getNotificationShadeWindowView().getWindowInsetsController()
                 .setAnimationsDisabled(true);
+        View currentView = getCurrentNavBarView();
+        if (currentView != null) {
+            currentView.animate()
+                    .alpha(0f)
+                    .setDuration(NAV_BAR_CONTENT_FADE_DURATION)
+                    .start();
+        }
     }
 
     @Override
@@ -993,10 +993,28 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mLastBiometricMode = mBiometricUnlockController.getMode();
         mLastGesturalNav = mGesturalNav;
         mLastIsDocked = mIsDocked;
-        mLastAnimatedToSleep = mAnimatedToSleep;
         mStatusBar.onKeyguardViewManagerStatesUpdated();
     }
 
+    /**
+     * Updates the visibility of the nav bar content views.
+     */
+    private void updateNavigationBarContentVisibility(boolean navBarContentVisible) {
+        final NavigationBarView navBarView = mStatusBar.getNavigationBarView();
+        if (navBarView != null && navBarView.getCurrentView() != null) {
+            final View currentView = navBarView.getCurrentView();
+            currentView.setVisibility(navBarContentVisible ? View.VISIBLE : View.INVISIBLE);
+        }
+    }
+
+    private View getCurrentNavBarView() {
+        final NavigationBarView navBarView = mStatusBar.getNavigationBarView();
+        return navBarView != null ? navBarView.getCurrentView() : null;
+    }
+
+    /**
+     * Updates the visibility of the nav bar window (which will cause insets changes).
+     */
     protected void updateNavigationBarVisibility(boolean navBarVisible) {
         if (mStatusBar.getNavigationBarView() != null) {
             if (navBarVisible) {
@@ -1024,7 +1042,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         boolean hideWhileDozing = mDozing && biometricMode != MODE_WAKE_AND_UNLOCK_PULSING;
         boolean keyguardWithGestureNav = (keyguardShowing && !mDozing || mPulsing && !mIsDocked)
                 && mGesturalNav;
-        return (!mAnimatedToSleep && !keyguardShowing && !hideWhileDozing || mBouncer.isShowing()
+        return (!keyguardShowing && !hideWhileDozing || mBouncer.isShowing()
                 || mRemoteInputActive || keyguardWithGestureNav
                 || mGlobalActionsVisible);
     }
@@ -1037,7 +1055,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         boolean hideWhileDozing = mLastDozing && mLastBiometricMode != MODE_WAKE_AND_UNLOCK_PULSING;
         boolean keyguardWithGestureNav = (keyguardShowing && !mLastDozing
                 || mLastPulsing && !mLastIsDocked) && mLastGesturalNav;
-        return (!mLastAnimatedToSleep && !keyguardShowing && !hideWhileDozing || mLastBouncerShowing
+        return (!keyguardShowing && !hideWhileDozing || mLastBouncerShowing
                 || mLastRemoteInputActive || keyguardWithGestureNav
                 || mLastGlobalActionsVisible);
     }

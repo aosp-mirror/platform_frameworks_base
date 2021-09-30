@@ -710,8 +710,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"ಪವರ್ ಅಧಿಸೂಚನೆ ನಿಯಂತ್ರಣಗಳು"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"ಆನ್"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"ಆಫ್"</string>
-    <!-- no translation found for rotation_lock_camera_rotation_on (789434807790534274) -->
-    <skip />
+    <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"ಆನ್ ಆಗಿದೆ - ಮುಖ-ಆಧಾರಿತ"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"ಪವರ್ ಅಧಿಸೂಚನೆ ನಿಯಂತ್ರಣಗಳ ಮೂಲಕ, ನೀವು ಅಪ್ಲಿಕೇಶನ್‌ಗಳ ಅಧಿಸೂಚನೆಗಳನ್ನು 0 ರಿಂದ 5 ರವರೆಗಿನ ಹಂತಗಳ ಪ್ರಾಮುಖ್ಯತೆಯನ್ನು ಹೊಂದಿಸಬಹುದು. \n\n"<b>"ಹಂತ 5"</b>" \n- ಮೇಲಿನ ಅಧಿಸೂಚನೆ ಪಟ್ಟಿಯನ್ನು ತೋರಿಸಿ \n- ಪೂರ್ಣ ಪರದೆ ಅಡಚಣೆಯನ್ನು ಅನುಮತಿಸಿ \n- ಯಾವಾಗಲು ಇಣುಕು ನೋಟ \n\n"<b>"ಹಂತ 4"</b>" \n- ಪೂರ್ಣ ಪರದೆ ಅಡಚಣೆಯನ್ನು ತಡೆಯಿರಿ \n- ಯಾವಾಗಲು ಇಣುಕು ನೋಟ\n\n"<b>"ಹಂತ 3"</b>" \n- ಪೂರ್ಣ ಪರದೆ ಅಡಚಣೆಯನ್ನು ತಡೆಯಿರಿ \n- ಎಂದಿಗೂ ಇಣುಕು ನೋಟ ಬೇಡ \n\n"<b>"ಹಂತ 2"</b>" \n- ಪೂರ್ಣ ಪರದೆ ಅಡಚಣೆಯನ್ನು ತಡೆಯಿರಿ \n- ಎಂದಿಗೂ ಇಣುಕು ನೋಟ ಬೇಡ \n- ಶಬ್ದ ಮತ್ತು ವೈಬ್ರೇಷನ್ ಎಂದಿಗೂ ಮಾಡಬೇಡಿ \n\n"<b>"ಹಂತ 1"</b>" \n- ಪೂರ್ಣ ಪರದೆ ಅಡಚಣೆಯನ್ನು ತಡೆಯಿರಿ \n- ಎಂದಿಗೂ ಇಣುಕು ನೋಟ ಬೇಡ \n- ಶಬ್ದ ಮತ್ತು ವೈಬ್ರೇಷನ್ ಎಂದಿಗೂ ಮಾಡಬೇಡಿ \n- ಸ್ಥಿತಿ ಪಟ್ಟಿ ಮತ್ತು ಲಾಕ್ ಪರದೆಯಿಂದ ಮರೆಮಾಡಿ \n- ಕೆಳಗಿನ ಅಧಿಸೂಚನೆ ಪಟ್ಟಿಯನ್ನು ತೋರಿಸಿ \n\n"<b>"ಹಂತ 0"</b>" \n- ಅಪ್ಲಿಕೇಶನ್‌ನಿಂದ ಎಲ್ಲಾ ಅಧಿಸೂಚನೆಗಳನ್ನು ನಿರ್ಬಂಧಿಸಿ"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"ಅಧಿಸೂಚನೆಗಳು"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"ನೀವು ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ಇನ್ನು ಮುಂದೆ ನೋಡುವುದಿಲ್ಲ"</string>
