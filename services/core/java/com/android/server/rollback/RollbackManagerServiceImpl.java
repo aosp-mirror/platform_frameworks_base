@@ -1162,6 +1162,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
         assertInWorkerThread();
         Slog.i(TAG, "makeRollbackAvailable id=" + rollback.info.getRollbackId());
         rollback.makeAvailable();
+        mPackageHealthObserver.notifyRollbackAvailable(rollback.info);
 
         // TODO(zezeozue): Provide API to explicitly start observing instead
         // of doing this for all rollbacks. If we do this for all rollbacks,

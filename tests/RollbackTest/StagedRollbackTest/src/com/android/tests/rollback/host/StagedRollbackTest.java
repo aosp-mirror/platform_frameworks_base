@@ -192,6 +192,18 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
     }
 
     /**
+     * Tests only rebootless apex (if any) is rolled back when native crash happens
+     */
+    @Test
+    public void testNativeWatchdogTriggersRebootlessApexRollback() throws Exception {
+        pushTestApex("test.rebootless_apex_v1.apex");
+        runPhase("testNativeWatchdogTriggersRebootlessApexRollback_Phase1_Install");
+        crashProcess("system_server", NATIVE_CRASHES_THRESHOLD);
+        getDevice().waitForDeviceAvailable();
+        runPhase("testNativeWatchdogTriggersRebootlessApexRollback_Phase2_Verify");
+    }
+
+    /**
      * Tests that packages are monitored across multiple reboots.
      */
     @Test
@@ -251,6 +263,20 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
             return true;
         } catch (AssertionError ignore) {
             return false;
+        }
+    }
+
+    private void crashProcess(String processName, int numberOfCrashes) throws Exception {
+        String pid = "";
+        String lastPid = "invalid";
+        for (int i = 0; i < numberOfCrashes; ++i) {
+            // This condition makes sure before we kill the process, the process is running AND
+            // the last crash was finished.
+            while ("".equals(pid) || lastPid.equals(pid)) {
+                pid = getDevice().executeShellCommand("pidof " + processName);
+            }
+            getDevice().executeShellCommand("kill " + pid);
+            lastPid = pid;
         }
     }
 }
