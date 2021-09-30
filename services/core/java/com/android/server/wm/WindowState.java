@@ -1173,8 +1173,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (WindowManager.LayoutParams.isSystemAlertWindowType(mAttrs.type)) {
             return TouchOcclusionMode.USE_OPACITY;
         }
-        if (isAnimating(PARENTS | TRANSITION, ANIMATION_TYPE_ALL)
-                || mWmService.mAtmService.getTransitionController().inTransition(this)) {
+        if (isAnimating(PARENTS | TRANSITION, ANIMATION_TYPE_ALL) || inTransition()) {
             return TouchOcclusionMode.USE_OPACITY;
         }
         return TouchOcclusionMode.BLOCK_UNTRUSTED;
@@ -2324,7 +2323,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 && (mWindowFrames.mRelFrame.top != mWindowFrames.mLastRelFrame.top
                     || mWindowFrames.mRelFrame.left != mWindowFrames.mLastRelFrame.left)
                 && (!mIsChildWindow || !getParentWindow().hasMoved())
-                && !mWmService.mAtmService.getTransitionController().isCollecting();
+                && !mTransitionController.isCollecting();
     }
 
     boolean isObscuringDisplay() {
@@ -2710,8 +2709,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         // Don't allow transient-launch activities to take IME.
         if (rootTask != null && mActivityRecord != null
-                && mWmService.mAtmService.getTransitionController().isTransientLaunch(
-                        mActivityRecord)) {
+                && mTransitionController.isTransientLaunch(mActivityRecord)) {
             return false;
         }
 
@@ -6042,7 +6040,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         if (mActivityRecord != null
-                && mWmService.mAtmService.getTransitionController().isShellTransitionsEnabled()
+                && mTransitionController.isShellTransitionsEnabled()
                 && mAttrs.type == TYPE_APPLICATION_STARTING) {
             mWmService.mAtmService.mTaskSupervisor.getActivityMetricsLogger()
                     .notifyStartingWindowDrawn(mActivityRecord);

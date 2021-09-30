@@ -1064,7 +1064,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         mAppTransition = new AppTransition(mWmService.mContext, mWmService, this);
         mAppTransition.registerListenerLocked(mWmService.mActivityManagerAppTransitionNotifier);
-        mAtmService.getTransitionController().registerLegacyListener(
+        mTransitionController.registerLegacyListener(
                 mWmService.mActivityManagerAppTransitionNotifier);
         mAppTransition.registerListenerLocked(mFixedRotationTransitionListener);
         mAppTransitionController = new AppTransitionController(mWmService, this);
@@ -1395,7 +1395,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         if (configChanged) {
             mWaitingForConfig = true;
-            if (mAtmService.getTransitionController().isShellTransitionsEnabled()) {
+            if (mTransitionController.isShellTransitionsEnabled()) {
                 requestChangeTransitionIfNeeded(changes);
             } else {
                 mWmService.startFreezingDisplay(0 /* exitAnim */, 0 /* enterAnim */, this);
@@ -1515,7 +1515,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         } else if (currentConfig != null
                 // If waiting for a remote rotation, don't prematurely update configuration.
                 && !(mDisplayRotation.isWaitingForRemoteRotation()
-                        || mAtmService.getTransitionController().isCollecting(this))) {
+                        || mTransitionController.isCollecting(this))) {
             // No obvious action we need to take, but if our current state mismatches the
             // activity manager's, update it, disregarding font scale, which should remain set
             // to the value of the previous configuration.
@@ -1914,8 +1914,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     private void applyRotation(final int oldRotation, final int rotation) {
         mDisplayRotation.applyCurrentRotation(rotation);
-        final boolean shellTransitions =
-                mWmService.mAtmService.getTransitionController().getTransitionPlayer() != null;
+        final boolean shellTransitions = mTransitionController.getTransitionPlayer() != null;
         final boolean rotateSeamlessly =
                 mDisplayRotation.isRotatingSeamlessly() && !shellTransitions;
         final Transaction transaction =
@@ -3070,7 +3069,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (isAnimating(TRANSITION | PARENTS)
                 // isAnimating is a legacy transition query and will be removed, so also add a
                 // check for whether this is in a shell-transition when not using legacy.
-                || mAtmService.getTransitionController().inTransition()) {
+                || mTransitionController.inTransition()) {
             mDeferredRemoval = true;
             return;
         }
@@ -3176,7 +3175,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * be non-zero. This method is no-op if the display has been collected.
      */
     void requestChangeTransitionIfNeeded(@ActivityInfo.Config int changes) {
-        final TransitionController controller = mAtmService.getTransitionController();
+        final TransitionController controller = mTransitionController;
         if (controller.isCollecting()) {
             if (!controller.isCollecting(this)) {
                 controller.collect(this);
@@ -3215,8 +3214,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             screenRotationAnimation.dumpDebug(proto, SCREEN_ROTATION_ANIMATION);
         }
         mDisplayFrames.dumpDebug(proto, DISPLAY_FRAMES);
-        if (mAtmService.getTransitionController().isShellTransitionsEnabled()) {
-            mAtmService.getTransitionController().dumpDebugLegacy(proto, APP_TRANSITION);
+        if (mTransitionController.isShellTransitionsEnabled()) {
+            mTransitionController.dumpDebugLegacy(proto, APP_TRANSITION);
         } else {
             mAppTransition.dumpDebug(proto, APP_TRANSITION);
         }
@@ -5109,7 +5108,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     void requestTransitionAndLegacyPrepare(@WindowManager.TransitionType int transit,
             @WindowManager.TransitionFlags int flags) {
         prepareAppTransition(transit, flags);
-        mAtmService.getTransitionController().requestTransitionIfNeeded(transit, flags,
+        mTransitionController.requestTransitionIfNeeded(transit, flags,
                 null /* trigger */, this);
     }
 
@@ -5117,12 +5116,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     void requestTransitionAndLegacyPrepare(@WindowManager.TransitionType int transit,
             @Nullable WindowContainer trigger) {
         prepareAppTransition(transit);
-        mAtmService.getTransitionController().requestTransitionIfNeeded(transit, 0 /* flags */,
+        mTransitionController.requestTransitionIfNeeded(transit, 0 /* flags */,
                 trigger, this);
     }
 
     void executeAppTransition() {
-        mAtmService.getTransitionController().setReady(this);
+        mTransitionController.setReady(this);
         if (mAppTransition.isTransitionSet()) {
             ProtoLog.w(WM_DEBUG_APP_TRANSITIONS,
                     "Execute app transition: %s, displayId: %d Callers=%s",
@@ -5171,9 +5170,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     /** Check if pending app transition is for activity / task launch. */
     boolean isNextTransitionForward() {
         // TODO(b/191375840): decouple "forwardness" from transition system.
-        if (mAtmService.getTransitionController().isShellTransitionsEnabled()) {
+        if (mTransitionController.isShellTransitionsEnabled()) {
             @WindowManager.TransitionType int type =
-                    mAtmService.getTransitionController().getCollectingTransitionType();
+                    mTransitionController.getCollectingTransitionType();
             return type == TRANSIT_OPEN || type == TRANSIT_TO_FRONT;
         }
         return mAppTransition.containsTransitRequest(TRANSIT_OPEN)
@@ -5748,7 +5747,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
             mWmService.mDisplayNotificationController.dispatchDisplayChanged(
                     this, getConfiguration());
-            if (isReady() && mAtmService.getTransitionController().isShellTransitionsEnabled()) {
+            if (isReady() && mTransitionController.isShellTransitionsEnabled()) {
                 requestChangeTransitionIfNeeded(changes);
             }
         }

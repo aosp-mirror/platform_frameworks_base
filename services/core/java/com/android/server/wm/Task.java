@@ -4583,7 +4583,7 @@ class Task extends TaskFragment {
             // From fullscreen to PiP.
             if (topActivity != null && currentMode == WINDOWING_MODE_FULLSCREEN
                     && windowingMode == WINDOWING_MODE_PINNED
-                    && !mAtmService.getTransitionController().isShellTransitionsEnabled()) {
+                    && !mTransitionController.isShellTransitionsEnabled()) {
                 mDisplayContent.mPinnedTaskController
                         .deferOrientationChangeForEnteringPipFromFullScreenIfNeeded();
             }

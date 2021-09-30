@@ -128,7 +128,7 @@ class WallpaperController {
         }
 
         mFindResults.resetTopWallpaper = true;
-        if (mService.mAtmService.getTransitionController().getTransitionPlayer() == null) {
+        if (!w.mTransitionController.isShellTransitionsEnabled()) {
             if (w.mActivityRecord != null && !w.mActivityRecord.isVisible()
                     && !w.mActivityRecord.isAnimating(TRANSITION | PARENTS)) {
                 // If this window's app token is hidden and not animating, it is of no interest.

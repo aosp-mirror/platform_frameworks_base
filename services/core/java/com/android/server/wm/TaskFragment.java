@@ -1476,7 +1476,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             } else {
                 prev.schedulePauseTimeout();
                 // Unset readiness since we now need to wait until this pause is complete.
-                mAtmService.getTransitionController().setReady(this, false /* ready */);
+                mTransitionController.setReady(this, false /* ready */);
                 return true;
             }
 
@@ -2234,7 +2234,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return false;
         }
         return isAnimating(TRANSITION | CHILDREN, WindowState.EXIT_ANIMATING_TYPES)
-                || mAtmService.getTransitionController().inTransition(this);
+                || inTransition();
     }
 
     @Override

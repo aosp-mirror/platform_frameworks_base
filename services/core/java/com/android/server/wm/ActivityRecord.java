@@ -1532,7 +1532,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         // TODO(b/169035022): move to a more-appropriate place.
-        mAtmService.getTransitionController().collect(this);
+        mTransitionController.collect(this);
         if (prevDc.mOpeningApps.remove(this)) {
             // Transfer opening transition to new display.
             mDisplayContent.mOpeningApps.add(this);
@@ -3090,9 +3090,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         mAtmService.deferWindowLayout();
         try {
-            final Transition newTransition = (!mAtmService.getTransitionController().isCollecting()
-                    && mAtmService.getTransitionController().getTransitionPlayer() != null)
-                    ? mAtmService.getTransitionController().createTransition(TRANSIT_CLOSE) : null;
+            final Transition newTransition = (!mTransitionController.isCollecting()
+                    && mTransitionController.getTransitionPlayer() != null)
+                    ? mTransitionController.createTransition(TRANSIT_CLOSE) : null;
             mTaskSupervisor.mNoHistoryActivities.remove(this);
             makeFinishingLocked();
             // Make a local reference to its task since this.task could be set to null once this
@@ -3125,7 +3125,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             final boolean endTask = task.getTopNonFinishingActivity() == null
                     && !task.isClearingToReuseTask();
             if (newTransition != null) {
-                mAtmService.getTransitionController().requestStartTransition(newTransition,
+                mTransitionController.requestStartTransition(newTransition,
                         endTask ? task : null, null /* remote */);
             }
             if (isState(RESUMED)) {
@@ -3553,12 +3553,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (stopped) {
             abortAndClearOptionsAnimation();
         }
-        if (mAtmService.getTransitionController().isCollecting()) {
+        if (mTransitionController.isCollecting()) {
             // We don't want the finishing to change the transition ready state since there will not
             // be corresponding setReady for finishing.
-            mAtmService.getTransitionController().collectExistenceChange(this);
+            mTransitionController.collectExistenceChange(this);
         } else {
-            mAtmService.getTransitionController().requestTransitionIfNeeded(TRANSIT_CLOSE, this);
+            mTransitionController.requestTransitionIfNeeded(TRANSIT_CLOSE, this);
         }
     }
 
@@ -3810,7 +3810,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else if (getDisplayContent().mAppTransition.isTransitionSet()) {
             getDisplayContent().mClosingApps.add(this);
             delayed = true;
-        } else if (mAtmService.getTransitionController().inTransition()) {
+        } else if (mTransitionController.inTransition()) {
             delayed = true;
         }
 
@@ -3822,7 +3822,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         // TODO(b/169035022): move to a more-appropriate place.
-        mAtmService.getTransitionController().collect(this);
+        mTransitionController.collect(this);
 
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                 "Removing app %s delayed=%b animation=%s animating=%b", this, delayed,
@@ -4023,7 +4023,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
                 ProtoLog.v(WM_DEBUG_ADD_REMOVE,
                         "Removing starting %s from %s", tStartingWindow, fromActivity);
-                mAtmService.getTransitionController().collect(tStartingWindow);
+                mTransitionController.collect(tStartingWindow);
                 tStartingWindow.reparent(this, POSITION_TOP);
 
                 // Propagate other interesting state between the tokens. If the old token is displayed,
@@ -4049,7 +4049,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     // the token we transfer the animation over. Thus, set this flag to indicate
                     // we've transferred the animation.
                     mUseTransferredAnimation = true;
-                } else if (mAtmService.getTransitionController().getTransitionPlayer() != null) {
+                } else if (mTransitionController.getTransitionPlayer() != null) {
                     // In the new transit system, just set this every time we transfer the window
                     mUseTransferredAnimation = true;
                 }
@@ -4546,8 +4546,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         if (options != null) {
-            mAtmService.getTransitionController().setOverrideAnimation(options,
-                    startCallback, finishCallback);
+            mTransitionController.setOverrideAnimation(options, startCallback, finishCallback);
         }
     }
 
@@ -4778,7 +4777,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 Debug.getCallers(6));
 
         // Before setting mVisibleRequested so we can track changes.
-        mAtmService.getTransitionController().collect(this);
+        mTransitionController.collect(this);
 
         onChildVisibilityRequested(visible);
 
@@ -4850,7 +4849,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         // If in a transition, defer commits for activities that are going invisible
-        if (!visible && mAtmService.getTransitionController().inTransition(this)) {
+        if (!visible && inTransition()) {
             return;
         }
         // If we are preparing an app transition, then delay changing
@@ -4977,8 +4976,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *                this has become invisible.
      */
     private void postApplyAnimation(boolean visible) {
-        final boolean usingShellTransitions =
-                mAtmService.getTransitionController().getTransitionPlayer() != null;
+        final boolean usingShellTransitions = mTransitionController.isShellTransitionsEnabled();
         final boolean delayed = isAnimating(TRANSITION | PARENTS | CHILDREN,
                 ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_WINDOW_ANIMATION
                         | ANIMATION_TYPE_RECENTS);
@@ -5428,7 +5426,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // returns. Just need to confirm this reasoning makes sense.
             final boolean deferHidingClient = canEnterPictureInPicture
                     && !isState(STARTED, STOPPING, STOPPED, PAUSED);
-            if (!mAtmService.getTransitionController().isShellTransitionsEnabled()
+            if (!mTransitionController.isShellTransitionsEnabled()
                     && deferHidingClient && pictureInPictureArgs.isAutoEnterEnabled()) {
                 // Go ahead and just put the activity in pip if it supports auto-pip.
                 mAtmService.enterPictureInPictureMode(this, pictureInPictureArgs);
@@ -5950,7 +5948,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void startFreezingScreen(int overrideOriginalDisplayRotation) {
-        if (mAtmService.getTransitionController().isShellTransitionsEnabled()) {
+        if (mTransitionController.isShellTransitionsEnabled()) {
             return;
         }
         ProtoLog.i(WM_DEBUG_ORIENTATION,
@@ -7596,7 +7594,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     boolean isInTransition() {
-        return mAtmService.getTransitionController().inTransition() // Shell transitions.
+        return mTransitionController.inTransition() // Shell transitions.
                 || isAnimating(PARENTS | TRANSITION); // Legacy transitions.
     }
 
