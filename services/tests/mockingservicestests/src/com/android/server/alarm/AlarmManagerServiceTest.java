@@ -2898,14 +2898,10 @@ public class AlarmManagerServiceTest {
         if (idleOptions != null) {
             assertEquals(idleOptions, bundleCaptor.getValue());
         } else {
-            if (isActivity) {
-                assertFalse("BAL flag needs to be false in alarm manager",
-                        bundleCaptor.getValue().getBoolean(
-                                ActivityOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED,
-                                true));
-            } else {
-                assertNull(bundleCaptor.getValue());
-            }
+            assertFalse("BAL flag needs to be false in alarm manager",
+                    bundleCaptor.getValue().getBoolean(
+                            ActivityOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED,
+                            true));
         }
     }
 
