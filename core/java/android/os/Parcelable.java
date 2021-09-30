@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.NonNull;
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
 
@@ -202,7 +203,7 @@ public interface Parcelable {
      * @param flags Additional flags about how the object should be written.
      * May be 0 or {@link #PARCELABLE_WRITE_RETURN_VALUE}.
      */
-    public void writeToParcel(Parcel dest, @WriteFlags int flags);
+    public void writeToParcel(@NonNull Parcel dest, @WriteFlags int flags);
 
     /**
      * Interface that must be implemented and provided as a public CREATOR
