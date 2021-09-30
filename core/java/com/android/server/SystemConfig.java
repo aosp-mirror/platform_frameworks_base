@@ -108,17 +108,74 @@ public class SystemConfig {
         public final String name;
         public final String filename;
         public final String[] dependencies;
+
+        /**
+         * SDK version this library was added to the BOOTCLASSPATH.
+         *
+         * <p>At the SDK level specified in this field and higher, the apps' uses-library tags for
+         * this library will be ignored, since the library is always available on BOOTCLASSPATH.
+         *
+         * <p>0 means not specified.
+         */
+        public final int onBootclasspathSince;
+
+        /**
+         * SDK version this library was removed from the BOOTCLASSPATH.
+         *
+         * <p>At the SDK level specified in this field and higher, this library needs to be
+         * explicitly added by apps. For compatibility reasons, when an app
+         * targets an SDK less than the value of this attribute, this library is automatically
+         * added.
+         *
+         * <p>0 means not specified.
+         */
+        public final int onBootclasspathBefore;
+
+        /**
+         * Declares whether this library can be safely ignored from <uses-library> tags.
+         *
+         * <p> This can happen if the library initially had to be explicitly depended-on using that
+         * tag but has since been moved to the BOOTCLASSPATH which means now is always available
+         * and the tag is no longer required.
+         */
+        public final boolean canBeSafelyIgnored;
+
         public final boolean isNative;
 
-        SharedLibraryEntry(String name, String filename, String[] dependencies) {
-            this(name, filename, dependencies, false /* isNative */);
+
+        @VisibleForTesting
+        public SharedLibraryEntry(String name, String filename, String[] dependencies,
+                boolean isNative) {
+            this(name, filename, dependencies, 0 /* onBootclasspathSince */,
+                    0 /* onBootclasspathBefore */, isNative);
         }
 
-        SharedLibraryEntry(String name, String filename, String[] dependencies, boolean isNative) {
+        @VisibleForTesting
+        public SharedLibraryEntry(String name, String filename, String[] dependencies,
+                int onBootclasspathSince, int onBootclassPathBefore) {
+            this(name, filename, dependencies, onBootclasspathSince, onBootclassPathBefore,
+                    false /* isNative */);
+        }
+
+        SharedLibraryEntry(String name, String filename, String[] dependencies,
+                int onBootclasspathSince, int onBootclasspathBefore, boolean isNative) {
             this.name = name;
             this.filename = filename;
             this.dependencies = dependencies;
+            this.onBootclasspathSince = onBootclasspathSince;
+            this.onBootclasspathBefore = onBootclasspathBefore;
             this.isNative = isNative;
+
+            canBeSafelyIgnored = this.onBootclasspathSince != 0
+                    && isSdkAtLeast(this.onBootclasspathSince);
+        }
+
+        private static boolean isSdkAtLeast(int level) {
+            if ("REL".equals(Build.VERSION.CODENAME)) {
+                return Build.VERSION.SDK_INT >= level;
+            }
+            return level == Build.VERSION_CODES.CUR_DEVELOPMENT
+                    || Build.VERSION.SDK_INT >= level;
         }
     }
 
@@ -771,11 +828,17 @@ public class SystemConfig {
                             XmlUtils.skipCurrentTag(parser);
                         }
                     } break;
+                    case "updatable-library":
+                        // "updatable-library" is meant to behave exactly like "library"
                     case "library": {
                         if (allowLibs) {
                             String lname = parser.getAttributeValue(null, "name");
                             String lfile = parser.getAttributeValue(null, "file");
                             String ldependency = parser.getAttributeValue(null, "dependency");
+                            int minDeviceSdk = XmlUtils.readIntAttribute(parser, "min-device-sdk",
+                                    0);
+                            int maxDeviceSdk = XmlUtils.readIntAttribute(parser, "max-device-sdk",
+                                    0);
                             if (lname == null) {
                                 Slog.w(TAG, "<" + name + "> without name in " + permFile + " at "
                                         + parser.getPositionDescription());
@@ -783,10 +846,20 @@ public class SystemConfig {
                                 Slog.w(TAG, "<" + name + "> without file in " + permFile + " at "
                                         + parser.getPositionDescription());
                             } else {
-                                //Log.i(TAG, "Got library " + lname + " in " + lfile);
-                                SharedLibraryEntry entry = new SharedLibraryEntry(lname, lfile,
-                                        ldependency == null ? new String[0] : ldependency.split(":"));
-                                mSharedLibraries.put(lname, entry);
+                                boolean allowedMinSdk = minDeviceSdk <= Build.VERSION.SDK_INT;
+                                boolean allowedMaxSdk =
+                                        maxDeviceSdk == 0 || maxDeviceSdk >= Build.VERSION.SDK_INT;
+                                if (allowedMinSdk && allowedMaxSdk) {
+                                    int bcpSince = XmlUtils.readIntAttribute(parser,
+                                            "on-bootclasspath-since", 0);
+                                    int bcpBefore = XmlUtils.readIntAttribute(parser,
+                                            "on-bootclasspath-before", 0);
+                                    SharedLibraryEntry entry = new SharedLibraryEntry(lname, lfile,
+                                            ldependency == null
+                                                    ? new String[0] : ldependency.split(":"),
+                                            bcpSince, bcpBefore);
+                                    mSharedLibraries.put(lname, entry);
+                                }
                             }
                         } else {
                             logNotAllowedInPartition(name, permFile, parser);
