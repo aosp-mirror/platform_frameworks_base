@@ -596,9 +596,16 @@ public abstract class ActivityTaskManagerInternal {
     public abstract boolean isBaseOfLockedTask(String packageName);
 
     /**
-     * Create an interface to update configuration for an application.
+     * Creates an interface to update configuration for the calling application.
      */
     public abstract PackageConfigurationUpdater createPackageConfigurationUpdater();
+
+    /**
+     * Creates an interface to update configuration for an arbitrary application specified by it's
+     * packageName and userId.
+     */
+    public abstract PackageConfigurationUpdater createPackageConfigurationUpdater(
+            String packageName, int userId);
 
     /**
      * An interface to update configuration for an application, and will persist override

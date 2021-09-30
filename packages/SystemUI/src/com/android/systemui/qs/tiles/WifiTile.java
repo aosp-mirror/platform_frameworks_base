@@ -52,11 +52,11 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSIconViewImpl;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
-import com.android.systemui.statusbar.policy.NetworkController;
-import com.android.systemui.statusbar.policy.NetworkController.AccessPointController;
-import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
-import com.android.systemui.statusbar.policy.NetworkController.WifiIndicators;
-import com.android.systemui.statusbar.policy.WifiIcons;
+import com.android.systemui.statusbar.connectivity.NetworkController;
+import com.android.systemui.statusbar.connectivity.NetworkController.AccessPointController;
+import com.android.systemui.statusbar.connectivity.NetworkController.SignalCallback;
+import com.android.systemui.statusbar.connectivity.NetworkController.WifiIndicators;
+import com.android.systemui.statusbar.connectivity.WifiIcons;
 import com.android.wifitrackerlib.WifiEntry;
 
 import java.util.List;

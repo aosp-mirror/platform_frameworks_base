@@ -869,8 +869,6 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                 mPromptController.showNotificationIfNeeded();
                 zoomOn(up.getX(), up.getY());
             }
-
-            mCallback.onTripleTapped(mDisplayId, getMode());
         }
 
         private boolean isMagnifying() {

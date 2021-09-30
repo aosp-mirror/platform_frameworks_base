@@ -82,7 +82,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     };
 
     public MediaOutputBaseDialog(Context context, MediaOutputController mediaOutputController) {
-        super(context, R.style.Theme_SystemUI_Dialog_MediaOutput);
+        super(context);
         mContext = context;
         mMediaOutputController = mediaOutputController;
         mLayoutManager = new LinearLayoutManager(mContext);
@@ -97,15 +97,15 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         mDialogView = LayoutInflater.from(mContext).inflate(R.layout.media_output_dialog, null);
         final Window window = getWindow();
         final WindowManager.LayoutParams lp = window.getAttributes();
-        lp.gravity = Gravity.BOTTOM;
+        lp.gravity = Gravity.CENTER;
         // Config insets to make sure the layout is above the navigation bar
         lp.setFitInsetsTypes(statusBars() | navigationBars());
         lp.setFitInsetsSides(WindowInsets.Side.all());
         lp.setFitInsetsIgnoringVisibility(true);
         window.setAttributes(lp);
         window.setContentView(mDialogView);
-        window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        window.setWindowAnimations(R.style.Animation_MediaOutputDialog);
+        window.setLayout(mContext.getResources().getDimensionPixelSize(R.dimen.large_dialog_width),
+                ViewGroup.LayoutParams.WRAP_CONTENT);
 
         mHeaderTitle = mDialogView.requireViewById(R.id.header_title);
         mHeaderSubtitle = mDialogView.requireViewById(R.id.header_subtitle);
@@ -228,5 +228,9 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     }
 
     void onHeaderIconClick() {
+    }
+
+    View getDialogView() {
+        return mDialogView;
     }
 }

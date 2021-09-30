@@ -30,8 +30,13 @@ import android.view.WindowManager.LayoutParams;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.animation.DialogListener;
+import com.android.systemui.animation.ListenableDialog;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 
 /**
@@ -39,10 +44,10 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
  * The SystemUIDialog registers a listener for the screen off / close system dialogs broadcast,
  * and dismisses itself when it receives the broadcast.
  */
-public class SystemUIDialog extends AlertDialog {
-
+public class SystemUIDialog extends AlertDialog implements ListenableDialog {
     private final Context mContext;
     private final DismissReceiver mDismissReceiver;
+    private final Set<DialogListener> mDialogListeners = new LinkedHashSet<>();
 
     public SystemUIDialog(Context context) {
         this(context, R.style.Theme_SystemUI_Dialog);
@@ -70,6 +75,43 @@ public class SystemUIDialog extends AlertDialog {
     protected void onStop() {
         super.onStop();
         mDismissReceiver.unregister();
+    }
+
+    @Override
+    public void addListener(DialogListener listener) {
+        mDialogListeners.add(listener);
+    }
+
+    @Override
+    public void removeListener(DialogListener listener) {
+        mDialogListeners.remove(listener);
+    }
+
+    @Override
+    public void dismiss() {
+        super.dismiss();
+
+        for (DialogListener listener : new LinkedHashSet<>(mDialogListeners)) {
+            listener.onDismiss();
+        }
+    }
+
+    @Override
+    public void hide() {
+        super.hide();
+
+        for (DialogListener listener : new LinkedHashSet<>(mDialogListeners)) {
+            listener.onHide();
+        }
+    }
+
+    @Override
+    public void show() {
+        super.show();
+
+        for (DialogListener listener : new LinkedHashSet<>(mDialogListeners)) {
+            listener.onShow();
+        }
     }
 
     public void setShowForAllUsers(boolean show) {

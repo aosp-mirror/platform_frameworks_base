@@ -264,7 +264,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
 
         onConfigurationChanged(atm.getGlobalConfiguration());
-        mAtm.mPackageConfigPersister.updateConfigIfNeeded(this, mUserId, mName);
+        mAtm.mPackageConfigPersister.updateConfigIfNeeded(this, mUserId, mInfo.packageName);
     }
 
     public void setPid(int pid) {

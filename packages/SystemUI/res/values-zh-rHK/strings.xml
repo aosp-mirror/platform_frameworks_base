@@ -1175,8 +1175,7 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"解鎖即可查看網絡"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"正在搜尋網絡…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"無法連接網絡"</string>
-    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
-    <skip />
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"目前系統不會自動連線至 Wi-Fi"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"顯示全部"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"如要切換網絡，請中斷以太網連線"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"「<xliff:g id="APPNAME">%1$s</xliff:g>」想在「快速設定」選單新增以下圖塊"</string>

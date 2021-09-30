@@ -22,6 +22,9 @@ import android.content.Context;
 import android.os.Handler;
 
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.LaunchAnimator;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
@@ -62,6 +65,7 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBarRemoteInputCallback;
+import com.android.systemui.statusbar.phone.SystemUIHostDialogProvider;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallLogger;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
@@ -261,4 +265,29 @@ public interface StatusBarDependenciesModule {
     @Binds
     QSCarrierGroupController.SlotIndexResolver provideSlotIndexResolver(
             QSCarrierGroupController.SubscriptionManagerSlotIndexResolver impl);
+
+    /**
+     */
+    @Provides
+    @SysUISingleton
+    static LaunchAnimator provideLaunchAnimator(Context context) {
+        return new LaunchAnimator(context);
+    }
+
+    /**
+     */
+    @Provides
+    @SysUISingleton
+    static ActivityLaunchAnimator provideActivityLaunchAnimator(LaunchAnimator launchAnimator) {
+        return new ActivityLaunchAnimator(launchAnimator);
+    }
+
+    /**
+     */
+    @Provides
+    @SysUISingleton
+    static DialogLaunchAnimator provideDialogLaunchAnimator(Context context,
+            LaunchAnimator launchAnimator) {
+        return new DialogLaunchAnimator(context, launchAnimator, new SystemUIHostDialogProvider());
+    }
 }

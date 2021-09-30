@@ -8414,17 +8414,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             mDeviceAdminServiceController.startServiceForOwner(
                     admin.getPackageName(), userId, "set-device-owner");
 
-            Slogf.i(LOG_TAG, "Device owner set: " + admin + " on user " + userId);
+            Slogf.i(LOG_TAG, "Device owner set: %s on user %d", admin.flattenToShortString(),
+                    userId);
 
             if (mInjector.userManagerIsHeadlessSystemUserMode()) {
                 int currentForegroundUser = getCurrentForegroundUserId();
-                Slogf.i(LOG_TAG, "setDeviceOwner(): setting " + admin
-                        + " as profile owner on user " + currentForegroundUser);
+                Slogf.i(LOG_TAG, "setDeviceOwner(): setting %s as profile owner on user %d",
+                        admin.flattenToShortString(), currentForegroundUser);
                 // Sets profile owner on current foreground user since
                 // the human user will complete the DO setup workflow from there.
-                manageUserUnchecked(/* deviceOwner= */ admin, /* profileOwner= */ admin,
+                mInjector.binderWithCleanCallingIdentity(() -> manageUserUnchecked(
+                        /* deviceOwner= */ admin, /* profileOwner= */ admin,
                         /* managedUser= */ currentForegroundUser, /* adminExtras= */ null,
-                        /* showDisclaimer= */ false);
+                        /* showDisclaimer= */ false));
             }
             return true;
         }

@@ -405,6 +405,26 @@ class MediaDataManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testOnSmartspaceMediaDataLoaded_hasNullIntent_callsListener() {
+        val recommendationExtras = Bundle().apply {
+            putString("package_name", PACKAGE_NAME)
+            putParcelable("dismiss_intent", null)
+        }
+        whenever(mediaSmartspaceBaseAction.extras).thenReturn(recommendationExtras)
+        whenever(mediaSmartspaceTarget.baseAction).thenReturn(mediaSmartspaceBaseAction)
+        whenever(mediaSmartspaceTarget.iconGrid).thenReturn(listOf())
+
+        smartspaceMediaDataProvider.onTargetsAvailable(listOf(mediaSmartspaceTarget))
+
+        verify(listener).onSmartspaceMediaDataLoaded(
+            eq(KEY_MEDIA_SMARTSPACE),
+            eq(EMPTY_SMARTSPACE_MEDIA_DATA
+                .copy(targetId = KEY_MEDIA_SMARTSPACE, isActive = true,
+                    isValid = false, dismissIntent = null)),
+            eq(false))
+    }
+
+    @Test
     fun testOnSmartspaceMediaDataLoaded_hasNoneMediaTarget_notCallsListener() {
         smartspaceMediaDataProvider.onTargetsAvailable(listOf())
         verify(listener, never())

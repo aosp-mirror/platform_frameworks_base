@@ -1175,8 +1175,7 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"네트워크를 보려면 잠금 해제하세요"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"네트워크 검색 중…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"네트워크에 연결하지 못했습니다."</string>
-    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
-    <skip />
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"지금은 Wi-Fi가 자동으로 연결되지 않습니다."</string>
     <string name="see_all_networks" msgid="3773666844913168122">"모두 보기"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"네트워크를 전환하려면 이더넷을 연결 해제하세요."</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g>에서 빠른 설정에 다음 타일을 추가하려고 합니다."</string>

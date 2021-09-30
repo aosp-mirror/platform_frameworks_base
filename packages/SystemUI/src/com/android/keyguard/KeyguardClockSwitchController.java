@@ -239,16 +239,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mView.setClockPlugin(null, mStatusBarStateController.getState());
 
         mSmartspaceController.disconnect();
-
-        // TODO: This is an unfortunate necessity since smartspace plugin retains a single instance
-        // of the smartspace view -- if we don't remove the view, it can't be reused by a later
-        // instance of this class. In order to fix this, we need to modify the plugin so that
-        // (a) we get a new view each time and (b) we can properly clean up an old view by making
-        // it unregister itself as a plugin listener.
-        if (mSmartspaceView != null) {
-            mView.removeView(mSmartspaceView);
-            mSmartspaceView = null;
-        }
     }
 
     /**

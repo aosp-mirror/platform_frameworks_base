@@ -202,7 +202,6 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
             Slog.i(mLogTag, "onTripleTap()");
         }
         toggleMagnification(up.getX(), up.getY());
-        mCallback.onTripleTapped(mDisplayId, getMode());
     }
 
     void resetToDetectState() {

@@ -206,7 +206,7 @@ public class InternetDialog extends SystemUIDialog implements
         window.setContentView(mDialogView);
         //Only fix the width for large screen or tablet.
         window.setLayout(mContext.getResources().getDimensionPixelSize(
-                R.dimen.internet_dialog_list_max_width), ViewGroup.LayoutParams.WRAP_CONTENT);
+                R.dimen.large_dialog_width), ViewGroup.LayoutParams.WRAP_CONTENT);
         window.setWindowAnimations(R.style.Animation_InternetDialog);
         window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         window.addFlags(FLAG_LAYOUT_NO_LIMITS);

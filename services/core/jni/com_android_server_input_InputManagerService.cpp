@@ -451,13 +451,13 @@ void NativeInputManager::dump(std::string& dump) {
     }
     dump += "\n";
 
-    mInputManager->getReader()->dump(dump);
+    mInputManager->getReader().dump(dump);
     dump += "\n";
 
-    mInputManager->getClassifier()->dump(dump);
+    mInputManager->getClassifier().dump(dump);
     dump += "\n";
 
-    mInputManager->getDispatcher()->dump(dump);
+    mInputManager->getDispatcher().dump(dump);
     dump += "\n";
 }
 
@@ -505,33 +505,33 @@ void NativeInputManager::setDisplayViewports(JNIEnv* env, jobjectArray viewportO
         }
     } // release lock
 
-    mInputManager->getReader()->requestRefreshConfiguration(
+    mInputManager->getReader().requestRefreshConfiguration(
             InputReaderConfiguration::CHANGE_DISPLAY_INFO);
 }
 
 base::Result<std::unique_ptr<InputChannel>> NativeInputManager::createInputChannel(
         JNIEnv* /* env */, const std::string& name) {
     ATRACE_CALL();
-    return mInputManager->getDispatcher()->createInputChannel(name);
+    return mInputManager->getDispatcher().createInputChannel(name);
 }
 
 base::Result<std::unique_ptr<InputChannel>> NativeInputManager::createInputMonitor(
         JNIEnv* /* env */, int32_t displayId, bool isGestureMonitor, const std::string& name,
         int32_t pid) {
     ATRACE_CALL();
-    return mInputManager->getDispatcher()->createInputMonitor(displayId, isGestureMonitor, name,
-                                                              pid);
+    return mInputManager->getDispatcher().createInputMonitor(displayId, isGestureMonitor, name,
+                                                             pid);
 }
 
 status_t NativeInputManager::removeInputChannel(JNIEnv* /* env */,
                                                 const sp<IBinder>& connectionToken) {
     ATRACE_CALL();
-    return mInputManager->getDispatcher()->removeInputChannel(connectionToken);
+    return mInputManager->getDispatcher().removeInputChannel(connectionToken);
 }
 
 status_t NativeInputManager::pilferPointers(const sp<IBinder>& token) {
     ATRACE_CALL();
-    return mInputManager->getDispatcher()->pilferPointers(token);
+    return mInputManager->getDispatcher().pilferPointers(token);
 }
 
 void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outConfig) {
@@ -998,7 +998,7 @@ void NativeInputManager::getDispatcherConfiguration(InputDispatcherConfiguration
 }
 
 void NativeInputManager::displayRemoved(JNIEnv* env, int32_t displayId) {
-    mInputManager->getDispatcher()->displayRemoved(displayId);
+    mInputManager->getDispatcher().displayRemoved(displayId);
 }
 
 void NativeInputManager::setFocusedApplication(JNIEnv* env, int32_t displayId,
@@ -1009,15 +1009,15 @@ void NativeInputManager::setFocusedApplication(JNIEnv* env, int32_t displayId,
     std::shared_ptr<InputApplicationHandle> applicationHandle =
             android_view_InputApplicationHandle_getHandle(env, applicationHandleObj);
     applicationHandle->updateInfo();
-    mInputManager->getDispatcher()->setFocusedApplication(displayId, applicationHandle);
+    mInputManager->getDispatcher().setFocusedApplication(displayId, applicationHandle);
 }
 
 void NativeInputManager::setFocusedDisplay(JNIEnv* env, int32_t displayId) {
-    mInputManager->getDispatcher()->setFocusedDisplay(displayId);
+    mInputManager->getDispatcher().setFocusedDisplay(displayId);
 }
 
 void NativeInputManager::setInputDispatchMode(bool enabled, bool frozen) {
-    mInputManager->getDispatcher()->setInputDispatchMode(enabled, frozen);
+    mInputManager->getDispatcher().setInputDispatchMode(enabled, frozen);
 }
 
 void NativeInputManager::setSystemUiLightsOut(bool lightsOut) {
@@ -1051,7 +1051,7 @@ void NativeInputManager::setPointerSpeed(int32_t speed) {
         mLocked.pointerSpeed = speed;
     } // release lock
 
-    mInputManager->getReader()->requestRefreshConfiguration(
+    mInputManager->getReader().requestRefreshConfiguration(
             InputReaderConfiguration::CHANGE_POINTER_SPEED);
 }
 
@@ -1069,7 +1069,7 @@ void NativeInputManager::setInputDeviceEnabled(uint32_t deviceId, bool enabled) 
         }
     } // release lock
 
-    mInputManager->getReader()->requestRefreshConfiguration(
+    mInputManager->getReader().requestRefreshConfiguration(
             InputReaderConfiguration::CHANGE_ENABLED_STATE);
 }
 
@@ -1085,12 +1085,12 @@ void NativeInputManager::setShowTouches(bool enabled) {
         mLocked.showTouches = enabled;
     } // release lock
 
-    mInputManager->getReader()->requestRefreshConfiguration(
+    mInputManager->getReader().requestRefreshConfiguration(
             InputReaderConfiguration::CHANGE_SHOW_TOUCHES);
 }
 
 void NativeInputManager::requestPointerCapture(const sp<IBinder>& windowToken, bool enabled) {
-    mInputManager->getDispatcher()->requestPointerCapture(windowToken, enabled);
+    mInputManager->getDispatcher().requestPointerCapture(windowToken, enabled);
 }
 
 void NativeInputManager::setInteractive(bool interactive) {
@@ -1098,7 +1098,7 @@ void NativeInputManager::setInteractive(bool interactive) {
 }
 
 void NativeInputManager::reloadCalibration() {
-    mInputManager->getReader()->requestRefreshConfiguration(
+    mInputManager->getReader().requestRefreshConfiguration(
             InputReaderConfiguration::CHANGE_TOUCH_AFFINE_TRANSFORMATION);
 }
 
@@ -1396,7 +1396,7 @@ void NativeInputManager::setPointerCapture(const PointerCaptureRequest& request)
         mLocked.pointerCaptureRequest = request;
     } // release lock
 
-    mInputManager->getReader()->requestRefreshConfiguration(
+    mInputManager->getReader().requestRefreshConfiguration(
             InputReaderConfiguration::CHANGE_POINTER_CAPTURE);
 }
 
@@ -1481,7 +1481,7 @@ int32_t NativeInputManager::getCustomPointerIconId() {
 }
 
 void NativeInputManager::setMotionClassifierEnabled(bool enabled) {
-    mInputManager->getClassifier()->setMotionClassifierEnabled(enabled);
+    mInputManager->getClassifier().setMotionClassifierEnabled(enabled);
 }
 
 // ----------------------------------------------------------------------------
@@ -1519,24 +1519,24 @@ static jint nativeGetScanCodeState(JNIEnv* /* env */, jclass /* clazz */,
         jlong ptr, jint deviceId, jint sourceMask, jint scanCode) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    return (jint) im->getInputManager()->getReader()->getScanCodeState(
-            deviceId, uint32_t(sourceMask), scanCode);
+    return (jint)im->getInputManager()->getReader().getScanCodeState(deviceId, uint32_t(sourceMask),
+                                                                     scanCode);
 }
 
 static jint nativeGetKeyCodeState(JNIEnv* /* env */, jclass /* clazz */,
         jlong ptr, jint deviceId, jint sourceMask, jint keyCode) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    return (jint) im->getInputManager()->getReader()->getKeyCodeState(
-            deviceId, uint32_t(sourceMask), keyCode);
+    return (jint)im->getInputManager()->getReader().getKeyCodeState(deviceId, uint32_t(sourceMask),
+                                                                    keyCode);
 }
 
 static jint nativeGetSwitchState(JNIEnv* /* env */, jclass /* clazz */,
         jlong ptr, jint deviceId, jint sourceMask, jint sw) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    return (jint) im->getInputManager()->getReader()->getSwitchState(
-            deviceId, uint32_t(sourceMask), sw);
+    return (jint)im->getInputManager()->getReader().getSwitchState(deviceId, uint32_t(sourceMask),
+                                                                   sw);
 }
 
 static jboolean nativeHasKeys(JNIEnv* env, jclass /* clazz */,
@@ -1548,8 +1548,8 @@ static jboolean nativeHasKeys(JNIEnv* env, jclass /* clazz */,
     jsize numCodes = env->GetArrayLength(keyCodes);
     jboolean result;
     if (numCodes == env->GetArrayLength(keyCodes)) {
-        if (im->getInputManager()->getReader()->hasKeys(
-                deviceId, uint32_t(sourceMask), numCodes, codes, flags)) {
+        if (im->getInputManager()->getReader().hasKeys(deviceId, uint32_t(sourceMask), numCodes,
+                                                       codes, flags)) {
             result = JNI_TRUE;
         } else {
             result = JNI_FALSE;
@@ -1655,28 +1655,28 @@ static void nativeSetInputFilterEnabled(JNIEnv* /* env */, jclass /* clazz */,
         jlong ptr, jboolean enabled) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    im->getInputManager()->getDispatcher()->setInputFilterEnabled(enabled);
+    im->getInputManager()->getDispatcher().setInputFilterEnabled(enabled);
 }
 
 static void nativeSetInTouchMode(JNIEnv* /* env */, jclass /* clazz */,
         jlong ptr, jboolean inTouchMode) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    im->getInputManager()->getDispatcher()->setInTouchMode(inTouchMode);
+    im->getInputManager()->getDispatcher().setInTouchMode(inTouchMode);
 }
 
 static void nativeSetMaximumObscuringOpacityForTouch(JNIEnv* /* env */, jclass /* clazz */,
                                                      jlong ptr, jfloat opacity) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    im->getInputManager()->getDispatcher()->setMaximumObscuringOpacityForTouch(opacity);
+    im->getInputManager()->getDispatcher().setMaximumObscuringOpacityForTouch(opacity);
 }
 
 static void nativeSetBlockUntrustedTouchesMode(JNIEnv* env, jclass /* clazz */, jlong ptr,
                                                jint mode) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    im->getInputManager()->getDispatcher()->setBlockUntrustedTouchesMode(
+    im->getInputManager()->getDispatcher().setBlockUntrustedTouchesMode(
             static_cast<BlockUntrustedTouchesMode>(mode));
 }
 
@@ -1697,11 +1697,11 @@ static jint nativeInjectInputEvent(JNIEnv* env, jclass /* clazz */,
         }
 
         const InputEventInjectionResult result =
-                im->getInputManager()->getDispatcher()->injectInputEvent(&keyEvent, injectorPid,
-                                                                         injectorUid, mode,
-                                                                         std::chrono::milliseconds(
-                                                                                 timeoutMillis),
-                                                                         uint32_t(policyFlags));
+                im->getInputManager()->getDispatcher().injectInputEvent(&keyEvent, injectorPid,
+                                                                        injectorUid, mode,
+                                                                        std::chrono::milliseconds(
+                                                                                timeoutMillis),
+                                                                        uint32_t(policyFlags));
         return static_cast<jint>(result);
     } else if (env->IsInstanceOf(inputEventObj, gMotionEventClassInfo.clazz)) {
         const MotionEvent* motionEvent = android_view_MotionEvent_getNativePtr(env, inputEventObj);
@@ -1711,11 +1711,11 @@ static jint nativeInjectInputEvent(JNIEnv* env, jclass /* clazz */,
         }
 
         const InputEventInjectionResult result =
-                im->getInputManager()->getDispatcher()->injectInputEvent(motionEvent, injectorPid,
-                                                                         injectorUid, mode,
-                                                                         std::chrono::milliseconds(
-                                                                                 timeoutMillis),
-                                                                         uint32_t(policyFlags));
+                im->getInputManager()->getDispatcher().injectInputEvent(motionEvent, injectorPid,
+                                                                        injectorUid, mode,
+                                                                        std::chrono::milliseconds(
+                                                                                timeoutMillis),
+                                                                        uint32_t(policyFlags));
         return static_cast<jint>(result);
     } else {
         jniThrowRuntimeException(env, "Invalid input event type.");
@@ -1736,7 +1736,7 @@ static jobject nativeVerifyInputEvent(JNIEnv* env, jclass /* clazz */, jlong ptr
         }
 
         std::unique_ptr<VerifiedInputEvent> verifiedEvent =
-                im->getInputManager()->getDispatcher()->verifyInputEvent(keyEvent);
+                im->getInputManager()->getDispatcher().verifyInputEvent(keyEvent);
         if (verifiedEvent == nullptr) {
             return nullptr;
         }
@@ -1751,7 +1751,7 @@ static jobject nativeVerifyInputEvent(JNIEnv* env, jclass /* clazz */, jlong ptr
         }
 
         std::unique_ptr<VerifiedInputEvent> verifiedEvent =
-                im->getInputManager()->getDispatcher()->verifyInputEvent(*motionEvent);
+                im->getInputManager()->getDispatcher().verifyInputEvent(*motionEvent);
 
         if (verifiedEvent == nullptr) {
             return nullptr;
@@ -1770,7 +1770,7 @@ static void nativeToggleCapsLock(JNIEnv* env, jclass /* clazz */,
          jlong ptr, jint deviceId) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    im->getInputManager()->getReader()->toggleCapsLockState(deviceId);
+    im->getInputManager()->getReader().toggleCapsLockState(deviceId);
 }
 
 static void nativeDisplayRemoved(JNIEnv* env, jclass /* clazz */, jlong ptr, jint displayId) {
@@ -1826,8 +1826,8 @@ static jboolean nativeTransferTouchFocus(JNIEnv* env, jclass /* clazz */, jlong 
     sp<IBinder> toChannelToken = ibinderForJavaObject(env, toChannelTokenObj);
 
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
-    if (im->getInputManager()->getDispatcher()->transferTouchFocus(fromChannelToken, toChannelToken,
-                                                                   isDragDrop)) {
+    if (im->getInputManager()->getDispatcher().transferTouchFocus(fromChannelToken, toChannelToken,
+                                                                  isDragDrop)) {
         return JNI_TRUE;
     } else {
         return JNI_FALSE;
@@ -1839,7 +1839,7 @@ static jboolean nativeTransferTouch(JNIEnv* env, jclass /* clazz */, jlong ptr,
     sp<IBinder> destChannelToken = ibinderForJavaObject(env, destChannelTokenObj);
 
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
-    if (im->getInputManager()->getDispatcher()->transferTouch(destChannelToken)) {
+    if (im->getInputManager()->getDispatcher().transferTouch(destChannelToken)) {
         return JNI_TRUE;
     } else {
         return JNI_FALSE;
@@ -1889,7 +1889,7 @@ static void nativeVibrate(JNIEnv* env, jclass /* clazz */, jlong ptr, jint devic
     jint* amplitudes = static_cast<jint*>(env->GetPrimitiveArrayCritical(amplitudesObj, nullptr));
 
     VibrationSequence sequence(patternSize);
-    std::vector<int32_t> vibrators = im->getInputManager()->getReader()->getVibratorIds(deviceId);
+    std::vector<int32_t> vibrators = im->getInputManager()->getReader().getVibratorIds(deviceId);
     for (size_t i = 0; i < patternSize; i++) {
         // VibrationEffect.validate guarantees duration > 0.
         std::chrono::milliseconds duration(patternMillis[i]);
@@ -1904,7 +1904,7 @@ static void nativeVibrate(JNIEnv* env, jclass /* clazz */, jlong ptr, jint devic
     env->ReleasePrimitiveArrayCritical(patternObj, patternMillis, JNI_ABORT);
     env->ReleasePrimitiveArrayCritical(amplitudesObj, amplitudes, JNI_ABORT);
 
-    im->getInputManager()->getReader()->vibrate(deviceId, sequence, repeat, token);
+    im->getInputManager()->getReader().vibrate(deviceId, sequence, repeat, token);
 }
 
 static void nativeVibrateCombined(JNIEnv* env, jclass /* clazz */, jlong ptr, jint deviceId,
@@ -1954,25 +1954,25 @@ static void nativeVibrateCombined(JNIEnv* env, jclass /* clazz */, jlong ptr, ji
         sequence.addElement(element);
     }
 
-    im->getInputManager()->getReader()->vibrate(deviceId, sequence, repeat, token);
+    im->getInputManager()->getReader().vibrate(deviceId, sequence, repeat, token);
 }
 
 static void nativeCancelVibrate(JNIEnv* /* env */,
         jclass /* clazz */, jlong ptr, jint deviceId, jint token) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    im->getInputManager()->getReader()->cancelVibrate(deviceId, token);
+    im->getInputManager()->getReader().cancelVibrate(deviceId, token);
 }
 
 static bool nativeIsVibrating(JNIEnv* /* env */, jclass /* clazz */, jlong ptr, jint deviceId) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    return im->getInputManager()->getReader()->isVibrating(deviceId);
+    return im->getInputManager()->getReader().isVibrating(deviceId);
 }
 
 static jintArray nativeGetVibratorIds(JNIEnv* env, jclass clazz, jlong ptr, jint deviceId) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
-    std::vector<int32_t> vibrators = im->getInputManager()->getReader()->getVibratorIds(deviceId);
+    std::vector<int32_t> vibrators = im->getInputManager()->getReader().getVibratorIds(deviceId);
 
     jintArray vibIdArray = env->NewIntArray(vibrators.size());
     if (vibIdArray != nullptr) {
@@ -1986,7 +1986,7 @@ static jobject nativeGetLights(JNIEnv* env, jclass clazz, jlong ptr, jint device
     jobject jLights = env->NewObject(gArrayListClassInfo.clazz, gArrayListClassInfo.constructor);
 
     std::vector<InputDeviceLightInfo> lights =
-            im->getInputManager()->getReader()->getLights(deviceId);
+            im->getInputManager()->getReader().getLights(deviceId);
 
     for (size_t i = 0; i < lights.size(); i++) {
         const InputDeviceLightInfo& lightInfo = lights[i];
@@ -2031,7 +2031,7 @@ static jint nativeGetLightPlayerId(JNIEnv* env, jclass /* clazz */, jlong ptr, j
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
     std::optional<int32_t> ret =
-            im->getInputManager()->getReader()->getLightPlayerId(deviceId, lightId);
+            im->getInputManager()->getReader().getLightPlayerId(deviceId, lightId);
 
     return static_cast<jint>(ret.value_or(0));
 }
@@ -2041,7 +2041,7 @@ static jint nativeGetLightColor(JNIEnv* env, jclass /* clazz */, jlong ptr, jint
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
     std::optional<int32_t> ret =
-            im->getInputManager()->getReader()->getLightColor(deviceId, lightId);
+            im->getInputManager()->getReader().getLightColor(deviceId, lightId);
     return static_cast<jint>(ret.value_or(0));
 }
 
@@ -2049,27 +2049,27 @@ static void nativeSetLightPlayerId(JNIEnv* env, jclass /* clazz */, jlong ptr, j
                                    jint lightId, jint playerId) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    im->getInputManager()->getReader()->setLightPlayerId(deviceId, lightId, playerId);
+    im->getInputManager()->getReader().setLightPlayerId(deviceId, lightId, playerId);
 }
 
 static void nativeSetLightColor(JNIEnv* env, jclass /* clazz */, jlong ptr, jint deviceId,
                                 jint lightId, jint color) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    im->getInputManager()->getReader()->setLightColor(deviceId, lightId, color);
+    im->getInputManager()->getReader().setLightColor(deviceId, lightId, color);
 }
 
 static jint nativeGetBatteryCapacity(JNIEnv* env, jclass /* clazz */, jlong ptr, jint deviceId) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    std::optional<int32_t> ret = im->getInputManager()->getReader()->getBatteryCapacity(deviceId);
+    std::optional<int32_t> ret = im->getInputManager()->getReader().getBatteryCapacity(deviceId);
     return static_cast<jint>(ret.value_or(android::os::IInputConstants::INVALID_BATTERY_CAPACITY));
 }
 
 static jint nativeGetBatteryStatus(JNIEnv* env, jclass /* clazz */, jlong ptr, jint deviceId) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    std::optional<int32_t> ret = im->getInputManager()->getReader()->getBatteryStatus(deviceId);
+    std::optional<int32_t> ret = im->getInputManager()->getReader().getBatteryStatus(deviceId);
     return static_cast<jint>(ret.value_or(BATTERY_STATUS_UNKNOWN));
 }
 
@@ -2077,7 +2077,7 @@ static void nativeReloadKeyboardLayouts(JNIEnv* /* env */,
         jclass /* clazz */, jlong ptr) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    im->getInputManager()->getReader()->requestRefreshConfiguration(
+    im->getInputManager()->getReader().requestRefreshConfiguration(
             InputReaderConfiguration::CHANGE_KEYBOARD_LAYOUTS);
 }
 
@@ -2085,7 +2085,7 @@ static void nativeReloadDeviceAliases(JNIEnv* /* env */,
         jclass /* clazz */, jlong ptr) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    im->getInputManager()->getReader()->requestRefreshConfiguration(
+    im->getInputManager()->getReader().requestRefreshConfiguration(
             InputReaderConfiguration::CHANGE_DEVICE_ALIAS);
 }
 
@@ -2100,15 +2100,15 @@ static jstring nativeDump(JNIEnv* env, jclass /* clazz */, jlong ptr) {
 static void nativeMonitor(JNIEnv* /* env */, jclass /* clazz */, jlong ptr) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    im->getInputManager()->getReader()->monitor();
-    im->getInputManager()->getDispatcher()->monitor();
+    im->getInputManager()->getReader().monitor();
+    im->getInputManager()->getDispatcher().monitor();
 }
 
 static jboolean nativeIsInputDeviceEnabled(JNIEnv* env /* env */,
         jclass /* clazz */, jlong ptr, jint deviceId) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    return im->getInputManager()->getReader()->isInputDeviceEnabled(deviceId);
+    return im->getInputManager()->getReader().isInputDeviceEnabled(deviceId);
 }
 
 static void nativeEnableInputDevice(JNIEnv* /* env */,
@@ -2157,18 +2157,18 @@ static jboolean nativeCanDispatchToDisplay(JNIEnv* env, jclass /* clazz */, jlon
         jint deviceId, jint displayId) {
 
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
-    return im->getInputManager()->getReader()->canDispatchToDisplay(deviceId, displayId);
+    return im->getInputManager()->getReader().canDispatchToDisplay(deviceId, displayId);
 }
 
 static void nativeNotifyPortAssociationsChanged(JNIEnv* env, jclass /* clazz */, jlong ptr) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
-    im->getInputManager()->getReader()->requestRefreshConfiguration(
+    im->getInputManager()->getReader().requestRefreshConfiguration(
             InputReaderConfiguration::CHANGE_DISPLAY_INFO);
 }
 
 static void nativeChangeUniqueIdAssociation(JNIEnv* env, jclass /* clazz */, jlong ptr) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
-    im->getInputManager()->getReader()->requestRefreshConfiguration(
+    im->getInputManager()->getReader().requestRefreshConfiguration(
             InputReaderConfiguration::CHANGE_DISPLAY_INFO);
 }
 
@@ -2213,7 +2213,7 @@ static jobject createInputSensorInfo(JNIEnv* env, jstring name, jstring vendor, 
 static jobjectArray nativeGetSensorList(JNIEnv* env, jclass /* clazz */, jlong ptr, jint deviceId) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
     std::vector<InputDeviceSensorInfo> sensors =
-            im->getInputManager()->getReader()->getSensors(deviceId);
+            im->getInputManager()->getReader().getSensors(deviceId);
 
     jobjectArray arr = env->NewObjectArray(sensors.size(), gInputSensorInfo.clazz, nullptr);
     for (int i = 0; i < sensors.size(); i++) {
@@ -2247,29 +2247,29 @@ static jboolean nativeEnableSensor(JNIEnv* env, jclass /* clazz */, jlong ptr, j
 
     return im->getInputManager()
             ->getReader()
-            ->enableSensor(deviceId, static_cast<InputDeviceSensorType>(sensorType),
-                           std::chrono::microseconds(samplingPeriodUs),
-                           std::chrono::microseconds(maxBatchReportLatencyUs));
+            .enableSensor(deviceId, static_cast<InputDeviceSensorType>(sensorType),
+                          std::chrono::microseconds(samplingPeriodUs),
+                          std::chrono::microseconds(maxBatchReportLatencyUs));
 }
 
 static void nativeDisableSensor(JNIEnv* env, jclass /* clazz */, jlong ptr, jint deviceId,
                                 jint sensorType) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    im->getInputManager()->getReader()->disableSensor(deviceId,
-                                                      static_cast<InputDeviceSensorType>(
-                                                              sensorType));
+    im->getInputManager()->getReader().disableSensor(deviceId,
+                                                     static_cast<InputDeviceSensorType>(
+                                                             sensorType));
 }
 
 static jboolean nativeFlushSensor(JNIEnv* env, jclass /* clazz */, jlong ptr, jint deviceId,
                                   jint sensorType) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    im->getInputManager()->getReader()->flushSensor(deviceId,
-                                                    static_cast<InputDeviceSensorType>(sensorType));
-    return im->getInputManager()->getDispatcher()->flushSensor(deviceId,
-                                                               static_cast<InputDeviceSensorType>(
-                                                                       sensorType));
+    im->getInputManager()->getReader().flushSensor(deviceId,
+                                                   static_cast<InputDeviceSensorType>(sensorType));
+    return im->getInputManager()->getDispatcher().flushSensor(deviceId,
+                                                              static_cast<InputDeviceSensorType>(
+                                                                      sensorType));
 }
 
 // ----------------------------------------------------------------------------

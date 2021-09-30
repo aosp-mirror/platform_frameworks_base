@@ -12578,11 +12578,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             // If the change is enabled, but neither exported or not exported is set, we need to log
-            // an error so the consumer can know to explicitly set the value for their flag
-            if (!onlyProtectedBroadcasts && (Compatibility.isChangeEnabled(
-                    DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED)
-                    && (flags & (Context.RECEIVER_EXPORTED | Context.RECEIVER_NOT_EXPORTED))
-                    == 0)) {
+            // an error so the consumer can know to explicitly set the value for their flag.
+            // If the caller is registering for a sticky broadcast with a null receiver, we won't
+            // require a flag
+            if (!onlyProtectedBroadcasts && receiver != null && (
+                    Compatibility.isChangeEnabled(
+                            DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED)
+                            && (flags & (Context.RECEIVER_EXPORTED | Context.RECEIVER_NOT_EXPORTED))
+                            == 0)) {
                 Slog.e(TAG,
                         callerPackage + ": Targeting T+ (version " + Build.VERSION_CODES.TIRAMISU
                                 + " and above) requires that one of RECEIVER_EXPORTED or "

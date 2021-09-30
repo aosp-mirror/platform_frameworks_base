@@ -17,10 +17,13 @@
 package com.android.server.wallpaper;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.Manifest.permission.QUERY_ALL_PACKAGES;
+import static android.Manifest.permission.READ_WALLPAPER_INTERNAL;
 import static android.app.WallpaperManager.COMMAND_REAPPLY;
 import static android.app.WallpaperManager.FLAG_LOCK;
 import static android.app.WallpaperManager.FLAG_SYSTEM;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AUTO;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.ParcelFileDescriptor.MODE_CREATE;
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
@@ -2064,7 +2067,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     private boolean hasCrossUserPermission() {
         final int interactPermission =
                 mContext.checkCallingPermission(INTERACT_ACROSS_USERS_FULL);
-        return interactPermission == PackageManager.PERMISSION_GRANTED;
+        return interactPermission == PERMISSION_GRANTED;
     }
 
     @Override
@@ -2255,9 +2258,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     @Override
     public ParcelFileDescriptor getWallpaperWithFeature(String callingPkg, String callingFeatureId,
             IWallpaperManagerCallback cb, final int which, Bundle outParams, int wallpaperUserId) {
-        final int hasPrivilege = mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.READ_WALLPAPER_INTERNAL);
-        if (hasPrivilege != PackageManager.PERMISSION_GRANTED) {
+        final boolean hasPrivilege = hasPermission(READ_WALLPAPER_INTERNAL);
+        if (!hasPrivilege) {
             mContext.getSystemService(StorageManager.class).checkPermissionReadImages(true,
                     Binder.getCallingPid(), Binder.getCallingUid(), callingPkg, callingFeatureId);
         }
@@ -2301,17 +2303,26 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
+    private boolean hasPermission(String permission) {
+        return mContext.checkCallingOrSelfPermission(permission) == PERMISSION_GRANTED;
+    }
+
     @Override
     public WallpaperInfo getWallpaperInfo(int userId) {
-        userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
-                Binder.getCallingUid(), userId, false, true, "getWallpaperInfo", null);
-        synchronized (mLock) {
-            WallpaperData wallpaper = mWallpaperMap.get(userId);
-            if (wallpaper != null && wallpaper.connection != null) {
-                return wallpaper.connection.mInfo;
+        final boolean allow =
+                hasPermission(READ_WALLPAPER_INTERNAL) || hasPermission(QUERY_ALL_PACKAGES);
+        if (allow) {
+            userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, false, true, "getWallpaperInfo", null);
+            synchronized (mLock) {
+                WallpaperData wallpaper = mWallpaperMap.get(userId);
+                if (wallpaper != null && wallpaper.connection != null) {
+                    return wallpaper.connection.mInfo;
+                }
             }
-            return null;
         }
+
+        return null;
     }
 
     @Override
@@ -2935,7 +2946,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 final int hasPrivilege = mIPackageManager.checkPermission(
                         android.Manifest.permission.AMBIENT_WALLPAPER, wi.getPackageName(),
                         serviceUserId);
-                if (hasPrivilege != PackageManager.PERMISSION_GRANTED) {
+                if (hasPrivilege != PERMISSION_GRANTED) {
                     String msg = "Selected service does not have "
                             + android.Manifest.permission.AMBIENT_WALLPAPER
                             + ": " + componentName;
@@ -3056,7 +3067,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     private void checkPermission(String permission) {
-        if (PackageManager.PERMISSION_GRANTED!= mContext.checkCallingOrSelfPermission(permission)) {
+        if (!hasPermission(permission)) {
             throw new SecurityException("Access denied to process: " + Binder.getCallingPid()
                     + ", must have permission " + permission);
         }
