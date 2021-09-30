@@ -15,6 +15,8 @@
  */
 package com.android.systemui.biometrics
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.content.Context
 import android.graphics.PixelFormat
 import android.graphics.PorterDuff
@@ -33,6 +35,8 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
+import android.view.ViewPropertyAnimator
+import android.view.WindowInsets
 import android.view.WindowManager
 import androidx.annotation.RawRes
 import com.airbnb.lottie.LottieAnimationView
@@ -42,6 +46,7 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.recents.OverviewProxyService
 import com.android.systemui.util.concurrency.DelayableExecutor
 import javax.inject.Inject
 
@@ -56,9 +61,10 @@ class SidefpsController @Inject constructor(
     private val layoutInflater: LayoutInflater,
     fingerprintManager: FingerprintManager?,
     private val windowManager: WindowManager,
-    @Main mainExecutor: DelayableExecutor,
+    overviewProxyService: OverviewProxyService,
     displayManager: DisplayManager,
-    @Main handler: Handler
+    @Main mainExecutor: DelayableExecutor,
+    @Main private val handler: Handler
 ) {
     @VisibleForTesting
     val sensorProps: FingerprintSensorPropertiesInternal = fingerprintManager
@@ -74,15 +80,33 @@ class SidefpsController @Inject constructor(
         BiometricDisplayListener.SensorType.SideFingerprint(sensorProps)
     ) { onOrientationChanged() }
 
+    @VisibleForTesting
+    val overviewProxyListener = object : OverviewProxyService.OverviewProxyListener {
+        override fun onTaskbarStatusUpdated(visible: Boolean, stashed: Boolean) {
+            overlayView?.let { view ->
+                handler.postDelayed({ updateOverlayVisibility(view) }, 500)
+            }
+        }
+    }
+
+    private val animationDuration =
+        context.resources.getInteger(android.R.integer.config_mediumAnimTime).toLong()
+
+    private var overlayHideAnimator: ViewPropertyAnimator? = null
+
     private var overlayView: View? = null
         set(value) {
             field?.let { oldView ->
                 windowManager.removeView(oldView)
                 orientationListener.disable()
             }
+            overlayHideAnimator?.cancel()
+            overlayHideAnimator = null
+
             field = value
             field?.let { newView ->
                 windowManager.addView(newView, overlayViewParams)
+                updateOverlayVisibility(newView)
                 orientationListener.enable()
             }
         }
@@ -90,11 +114,8 @@ class SidefpsController @Inject constructor(
     private val overlayViewParams = WindowManager.LayoutParams(
         WindowManager.LayoutParams.WRAP_CONTENT,
         WindowManager.LayoutParams.WRAP_CONTENT,
-        WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
-        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                or WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+        WindowManager.LayoutParams.TYPE_SYSTEM_ERROR,
+        Utils.FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS,
         PixelFormat.TRANSLUCENT
     ).apply {
         title = TAG
@@ -121,6 +142,7 @@ class SidefpsController @Inject constructor(
 
             override fun hide(sensorId: Int) = mainExecutor.execute { overlayView = null }
         })
+        overviewProxyService.addCallback(overviewProxyListener)
     }
 
     private fun onOrientationChanged() {
@@ -176,6 +198,33 @@ class SidefpsController @Inject constructor(
         overlayViewParams.x = x
         overlayViewParams.y = y
     }
+
+    private fun updateOverlayVisibility(view: View) {
+        if (view != overlayView) {
+            return
+        }
+
+        // hide after a few seconds if the sensor is oriented down and there are
+        // large overlapping system bars
+        if ((context.display?.rotation == Surface.ROTATION_270) &&
+            windowManager.currentWindowMetrics.windowInsets.hasBigNavigationBar()) {
+            overlayHideAnimator = view.animate()
+                .alpha(0f)
+                .setStartDelay(3_000)
+                .setDuration(animationDuration)
+                .setListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator) {
+                        view.visibility = View.GONE
+                        overlayHideAnimator = null
+                    }
+                })
+        } else {
+            overlayHideAnimator?.cancel()
+            overlayHideAnimator = null
+            view.alpha = 1f
+            view.visibility = View.VISIBLE
+        }
+    }
 }
 
 @BiometricOverlayConstants.ShowReason
@@ -199,6 +248,9 @@ private fun Display.asSideFpsAnimationRotation(): Float = when (rotation) {
 
 private fun Display.isPortrait(): Boolean =
     rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180
+
+private fun WindowInsets.hasBigNavigationBar(): Boolean =
+    getInsets(WindowInsets.Type.navigationBars()).bottom >= 70
 
 private fun LottieAnimationView.addOverlayDynamicColor(context: Context) {
     fun update() {
