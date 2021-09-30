@@ -260,6 +260,9 @@ public class BaseBundle {
     /**
      * Returns the value for key {@code key}.
      *
+     * This call should always be made after {@link #unparcel()} or inside a lock after making sure
+     * {@code mMap} is not null.
+     *
      * @hide
      */
     final Object getValue(String key) {
@@ -270,15 +273,15 @@ public class BaseBundle {
     /**
      * Returns the value for a certain position in the array map.
      *
+     * This call should always be made after {@link #unparcel()} or inside a lock after making sure
+     * {@code mMap} is not null.
+     *
      * @hide
      */
     final Object getValueAt(int i) {
         Object object = mMap.valueAt(i);
         if (object instanceof Supplier<?>) {
-            Supplier<?> supplier = (Supplier<?>) object;
-            synchronized (this) {
-                object = supplier.get();
-            }
+            object = ((Supplier<?>) object).get();
             mMap.setValueAt(i, object);
         }
         return object;
