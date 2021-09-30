@@ -275,7 +275,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     public void disconnect() {
         synchronized (mProfileLock) {
-            mLocalAdapter.disconnectAllEnabledProfiles(mDevice);
+            mDevice.disconnect();
         }
         // Disconnect  PBAP server in case its connected
         // This is to ensure all the profiles are disconnected as some CK/Hs do not
@@ -316,7 +316,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         }
 
         mConnectAttempted = SystemClock.elapsedRealtime();
-        connectAllEnabledProfiles();
+        connectDevice();
     }
 
     public long getHiSyncId() {
@@ -373,7 +373,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         connect();
     }
 
-    private void connectAllEnabledProfiles() {
+    private void connectDevice() {
         synchronized (mProfileLock) {
             // Try to initialize the profiles if they were not.
             if (mProfiles.isEmpty()) {
@@ -388,7 +388,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                 return;
             }
 
-            mLocalAdapter.connectAllEnabledProfiles(mDevice);
+            mDevice.connect();
         }
     }
 
@@ -772,8 +772,8 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
          * Otherwise, allow the connect on UUID change.
          */
         if ((mConnectAttempted + timeout) > SystemClock.elapsedRealtime()) {
-            Log.d(TAG, "onUuidChanged: triggering connectAllEnabledProfiles");
-            connectAllEnabledProfiles();
+            Log.d(TAG, "onUuidChanged: triggering connectDevice");
+            connectDevice();
         }
 
         dispatchAttributesChanged();
