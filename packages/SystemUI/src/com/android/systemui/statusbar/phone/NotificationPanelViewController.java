@@ -323,7 +323,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private KeyguardUserSwitcherController mKeyguardUserSwitcherController;
     private KeyguardStatusBarView mKeyguardStatusBar;
     private KeyguardStatusBarViewController mKeyguardStatusBarViewController;
-    private ViewGroup mBigClockContainer;
     @VisibleForTesting QS mQs;
     private FrameLayout mQsFrame;
     @Nullable
@@ -885,7 +884,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private void onFinishInflate() {
         loadDimens();
         mKeyguardStatusBar = mView.findViewById(R.id.keyguard_header);
-        mBigClockContainer = mView.findViewById(R.id.big_clock_container);
         mCommunalView = mView.findViewById(R.id.communal_host);
 
         FrameLayout userAvatarContainer = null;
@@ -1192,7 +1190,6 @@ public class NotificationPanelViewController extends PanelViewController {
                         R.layout.keyguard_user_switcher /* layoutId */,
                         showKeyguardUserSwitcher /* enabled */);
 
-        mBigClockContainer.removeAllViews();
         updateViewControllers(mView.findViewById(R.id.keyguard_status_view), userAvatarView,
                 keyguardUserSwitcherView, mView.findViewById(R.id.idle_host_view), mCommunalView);
 
@@ -2325,7 +2322,6 @@ public class NotificationPanelViewController extends PanelViewController {
         if (mBarState == StatusBarState.SHADE_LOCKED || mBarState == KEYGUARD) {
             updateKeyguardBottomAreaAlpha();
             positionClockAndNotifications();
-            updateBigClockAlpha();
         }
 
         if (mAccessibilityManager.isEnabled()) {
@@ -3107,20 +3103,6 @@ public class NotificationPanelViewController extends PanelViewController {
         mLockIconViewController.setAlpha(alpha);
     }
 
-    /**
-     * Custom clock fades away when user drags up to unlock or pulls down quick settings.
-     *
-     * Updates alpha of custom clock to match the alpha of the KeyguardBottomArea. See
-     * {@link #updateKeyguardBottomAreaAlpha}.
-     */
-    private void updateBigClockAlpha() {
-        float expansionAlpha = MathUtils.map(
-                isUnlockHintRunning() ? 0 : KeyguardBouncer.ALPHA_EXPANSION_THRESHOLD, 1f, 0f, 1f,
-                getExpandedFraction());
-        float alpha = Math.min(expansionAlpha, 1 - computeQsExpansionFraction());
-        mBigClockContainer.setAlpha(alpha);
-    }
-
     @Override
     protected void onExpandingStarted() {
         super.onExpandingStarted();
@@ -3470,7 +3452,6 @@ public class NotificationPanelViewController extends PanelViewController {
         }
         mNotificationStackScrollLayoutController.setExpandedHeight(expandedHeight);
         updateKeyguardBottomAreaAlpha();
-        updateBigClockAlpha();
         updateStatusBarIcons();
     }
 
