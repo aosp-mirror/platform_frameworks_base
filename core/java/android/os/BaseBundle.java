@@ -431,7 +431,7 @@ public class BaseBundle {
      *
      * @hide
      */
-    public static boolean kindofEquals(BaseBundle a, BaseBundle b) {
+    public static boolean kindofEquals(@Nullable BaseBundle a, @Nullable BaseBundle b) {
         return (a == b) || (a != null && a.kindofEquals(b));
     }
 
