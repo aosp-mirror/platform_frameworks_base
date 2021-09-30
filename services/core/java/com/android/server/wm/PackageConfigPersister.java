@@ -272,6 +272,24 @@ public class PackageConfigPersister {
         }
     }
 
+    /**
+     * Retrieves and returns application configuration from persisted records if it exists, else
+     * returns null.
+     */
+    ActivityTaskManagerInternal.PackageConfig findPackageConfiguration(String packageName,
+            int userId) {
+        synchronized (mLock) {
+            PackageConfigRecord packageConfigRecord = findRecord(mModified, packageName, userId);
+            if (packageConfigRecord == null) {
+                Slog.w(TAG, "App-specific configuration not found for packageName: " + packageName
+                        + " and userId: " + userId);
+                return null;
+            }
+            return new ActivityTaskManagerInternal.PackageConfig(
+                    packageConfigRecord.mNightMode, packageConfigRecord.mLocales);
+        }
+    }
+
     // store a changed data so we don't need to get the process
     static class PackageConfigRecord {
         final String mName;

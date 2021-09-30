@@ -462,6 +462,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 container.onRequestedOverrideConfigurationChanged(c);
             }
             effects |= TRANSACT_EFFECTS_CLIENT_CONFIG;
+            if (windowMask != 0 && container.isEmbedded()) {
+                // Changing bounds of the embedded TaskFragments may result in lifecycle changes.
+                effects |= TRANSACT_EFFECTS_LIFECYCLE;
+            }
         }
         if ((change.getChangeMask() & WindowContainerTransaction.Change.CHANGE_FOCUSABLE) != 0) {
             if (container.setFocusable(change.getFocusable())) {

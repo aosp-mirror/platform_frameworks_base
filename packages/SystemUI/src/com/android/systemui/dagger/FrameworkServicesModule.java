@@ -74,6 +74,7 @@ import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.appwidget.IAppWidgetService;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.LatencyTracker;
 import com.android.systemui.dagger.qualifiers.DisplayId;
@@ -216,6 +217,12 @@ public class FrameworkServicesModule {
     @Nullable
     static FingerprintManager providesFingerprintManager(Context context) {
         return context.getSystemService(FingerprintManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static InteractionJankMonitor provideInteractionJankMonitor() {
+        return InteractionJankMonitor.getInstance();
     }
 
     @Provides
