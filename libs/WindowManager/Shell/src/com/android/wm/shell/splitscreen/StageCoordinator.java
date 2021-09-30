@@ -250,7 +250,8 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         setSideStagePosition(sideStagePosition, wct);
         mMainStage.activate(getMainStageBounds(), wct);
         mSideStage.addTask(task, getSideStageBounds(), wct);
-        mTaskOrganizer.applyTransaction(wct);
+        mSyncQueue.queue(wct);
+        mSyncQueue.runInSync(t -> updateSurfaceBounds(null /* layout */, t));
         return true;
     }
 
@@ -446,15 +447,15 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         setSideStagePosition(sideStagePosition, true /* updateBounds */, wct);
     }
 
-    private void setSideStagePosition(@SplitPosition int sideStagePosition,
-            boolean updateBounds, @Nullable WindowContainerTransaction wct) {
+    private void setSideStagePosition(@SplitPosition int sideStagePosition, boolean updateBounds,
+            @Nullable WindowContainerTransaction wct) {
         if (mSideStagePosition == sideStagePosition) return;
         mSideStagePosition = sideStagePosition;
         sendOnStagePositionChanged();
 
         if (mSideStageListener.mVisible && updateBounds) {
             if (wct == null) {
-                // onBoundsChanged builds/applies a wct with the contents of updateWindowBounds.
+                // onLayoutChanged builds/applies a wct with the contents of updateWindowBounds.
                 onLayoutChanged(mSplitLayout);
             } else {
                 updateWindowBounds(mSplitLayout, wct);
@@ -675,29 +676,11 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
 
         mSyncQueue.runInSync(t -> {
-            final SurfaceControl sideStageLeash = mSideStage.mRootLeash;
-            final SurfaceControl mainStageLeash = mMainStage.mRootLeash;
-
-            if (sideStageVisible) {
-                final Rect sideStageBounds = getSideStageBounds();
-                t.setPosition(sideStageLeash,
-                        sideStageBounds.left, sideStageBounds.top)
-                        .setWindowCrop(sideStageLeash,
-                                sideStageBounds.width(), sideStageBounds.height());
-            }
-
-            if (mainStageVisible) {
-                final Rect mainStageBounds = getMainStageBounds();
-                t.setPosition(mainStageLeash, mainStageBounds.left, mainStageBounds.top)
-                        .setWindowCrop(mainStageLeash,
-                                mainStageBounds.width(), mainStageBounds.height());
-            }
-
             // Same above, we only set root tasks and divider leash visibility when both stage
             // change to visible or invisible to avoid flicker.
             if (sameVisibility) {
-                t.setVisibility(sideStageLeash, bothStageVisible)
-                        .setVisibility(mainStageLeash, bothStageVisible);
+                t.setVisibility(mSideStage.mRootLeash, bothStageVisible)
+                        .setVisibility(mMainStage.mRootLeash, bothStageVisible);
                 applyDividerVisibility(t);
             }
         });
