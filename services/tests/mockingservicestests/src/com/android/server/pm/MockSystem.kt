@@ -168,8 +168,8 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
     class Mocks {
         val lock = PackageManagerTracedLock()
         val installLock = Any()
-        val injector: PackageManagerService.Injector = mock()
-        val systemWrapper: PackageManagerService.SystemWrapper = mock()
+        val injector: PackageManagerServiceInjector = mock()
+        val systemWrapper: PackageManagerServiceInjector.SystemWrapper = mock()
         val context: Context = mock()
         val userManagerService: UserManagerService = mock()
         val componentResolver: ComponentResolver = mock()

@@ -465,7 +465,7 @@ final class InstallParams extends HandlerParams {
             for (InstallRequest request : apkInstallRequests) {
                 mPm.restoreAndPostInstall(request.mArgs.mUser.getIdentifier(),
                         request.mInstallResult,
-                        new PackageManagerService.PostInstallData(request.mArgs,
+                        new PostInstallData(request.mArgs,
                                 request.mInstallResult, null));
             }
         });
@@ -1592,7 +1592,8 @@ final class InstallParams extends HandlerParams {
                         final int[] uidArray = new int[]{oldPackage.getUid()};
                         final ArrayList<String> pkgList = new ArrayList<>(1);
                         pkgList.add(oldPackage.getPackageName());
-                        mPm.sendResourcesChangedBroadcast(false, true, pkgList, uidArray, null);
+                        mBroadcastHelper.sendResourcesChangedBroadcast(
+                                false, true, pkgList, uidArray, null);
                     }
 
                     // Update the in-memory copy of the previous code paths.
