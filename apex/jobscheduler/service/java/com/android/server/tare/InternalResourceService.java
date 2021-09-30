@@ -109,7 +109,7 @@ public class InternalResourceService extends SystemService {
 
     @NonNull
     @GuardedBy("mLock")
-    private List<PackageInfo> mPkgCache = new ArrayList<>();
+    private final List<PackageInfo> mPkgCache = new ArrayList<>();
 
     /** Cached mapping of UIDs (for all users) to a list of packages in the UID. */
     @GuardedBy("mLock")
@@ -222,7 +222,7 @@ public class InternalResourceService extends SystemService {
         mEconomyManagerStub = new EconomyManagerStub();
         mScribe = new Scribe(this);
         mCompleteEconomicPolicy = new CompleteEconomicPolicy(this);
-        mAgent = new Agent(this);
+        mAgent = new Agent(this, mScribe);
 
         mConfigObserver = new ConfigObserver(mHandler, context);
 
@@ -859,7 +859,7 @@ public class InternalResourceService extends SystemService {
             pw.print("/");
             pw.println(narcToString(mCompleteEconomicPolicy.getMaxSatiatedCirculation()));
 
-            final long currentCirculation = mAgent.getCurrentCirculationLocked();
+            final long currentCirculation = mScribe.getNarcsInCirculationLocked();
             pw.print("Current GDP: ");
             pw.print(narcToString(currentCirculation));
             pw.print(" (");
@@ -868,6 +868,9 @@ public class InternalResourceService extends SystemService {
 
             pw.println();
             mCompleteEconomicPolicy.dump(pw);
+
+            pw.println();
+            mScribe.dumpLocked(pw);
 
             pw.println();
             mAgent.dumpLocked(pw);

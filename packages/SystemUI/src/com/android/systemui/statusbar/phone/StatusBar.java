@@ -135,6 +135,7 @@ import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DelegateLaunchAnimatorController;
+import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.biometrics.AuthRippleController;
@@ -196,6 +197,7 @@ import com.android.systemui.statusbar.PowerButtonReveal;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
@@ -223,7 +225,6 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.tuner.TunerService;
@@ -669,7 +670,8 @@ public class StatusBar extends SystemUI implements
     private final SysuiStatusBarStateController mStatusBarStateController;
 
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
-    private ActivityLaunchAnimator mActivityLaunchAnimator;
+    private final ActivityLaunchAnimator mActivityLaunchAnimator;
+    private final DialogLaunchAnimator mDialogLaunchAnimator;
     private NotificationLaunchAnimatorControllerProvider mNotificationAnimationProvider;
     protected StatusBarNotificationPresenter mPresenter;
     private NotificationActivityStarter mNotificationActivityStarter;
@@ -792,7 +794,9 @@ public class StatusBar extends SystemUI implements
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             Optional<StartingSurface> startingSurfaceOptional,
             TunerService tunerService,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            ActivityLaunchAnimator activityLaunchAnimator,
+            DialogLaunchAnimator dialogLaunchAnimator) {
         super(context);
         mNotificationsController = notificationsController;
         mLightBarController = lightBarController;
@@ -900,6 +904,8 @@ public class StatusBar extends SystemUI implements
                 });
 
         mActivityIntentHelper = new ActivityIntentHelper(mContext);
+        mActivityLaunchAnimator = activityLaunchAnimator;
+        mDialogLaunchAnimator = dialogLaunchAnimator;
 
         // TODO(b/190746471): Find a better home for this.
         DateTimeView.setReceiverHandler(timeTickHandler);
@@ -1138,6 +1144,8 @@ public class StatusBar extends SystemUI implements
         mNotificationPanelViewController.addExpansionListener(mWakeUpCoordinator);
         mNotificationPanelViewController.addExpansionListener(
                 this::dispatchPanelExpansionForKeyguardDismiss);
+
+        mUserSwitcherController.init(mNotificationShadeWindowView);
 
         // Allow plugins to reference DarkIconDispatcher and StatusBarStateController
         mPluginDependencyProvider.allowPluginDependency(DarkIconDispatcher.class);
@@ -1467,7 +1475,7 @@ public class StatusBar extends SystemUI implements
 
     private void setUpPresenter() {
         // Set up the initial notification state.
-        mActivityLaunchAnimator = new ActivityLaunchAnimator(mKeyguardHandler, mContext);
+        mActivityLaunchAnimator.setCallback(mKeyguardHandler);
         mNotificationAnimationProvider = new NotificationLaunchAnimatorControllerProvider(
                 mNotificationShadeWindowViewController,
                 mStackScrollerController.getNotificationListContainer(),
@@ -2549,7 +2557,8 @@ public class StatusBar extends SystemUI implements
                 animationController != null && !willLaunchResolverActivity && shouldAnimateLaunch(
                         true /* isActivityIntent */);
         ActivityLaunchAnimator.Controller animController =
-                animate ? wrapAnimationController(animationController, dismissShade) : null;
+                animationController != null ? wrapAnimationController(animationController,
+                        dismissShade) : null;
 
         // If we animate, we will dismiss the shade only once the animation is done. This is taken
         // care of by the StatusBarLaunchAnimationController.
@@ -3775,8 +3784,11 @@ public class StatusBar extends SystemUI implements
                 || mKeyguardStateController.isKeyguardFadingAway();
 
         // Do not animate the scrim expansion when triggered by the fingerprint sensor.
-        mScrimController.setExpansionAffectsAlpha(
-                !mBiometricUnlockController.isBiometricUnlock());
+        boolean onKeyguardOrHidingIt = mKeyguardStateController.isShowing()
+                || mKeyguardStateController.isKeyguardFadingAway()
+                || mKeyguardStateController.isKeyguardGoingAway();
+        mScrimController.setExpansionAffectsAlpha(!(mBiometricUnlockController.isBiometricUnlock()
+                        && onKeyguardOrHidingIt));
 
         boolean launchingAffordanceWithPreview =
                 mNotificationPanelViewController.isLaunchingAffordanceWithPreview();
@@ -4426,6 +4438,8 @@ public class StatusBar extends SystemUI implements
                             && !mBiometricUnlockController.isWakeAndUnlock()) {
                         mLightRevealScrim.setRevealAmount(1f - linear);
                     }
+
+                    mDialogLaunchAnimator.onDozeAmountChanged(linear);
                 }
 
                 @Override

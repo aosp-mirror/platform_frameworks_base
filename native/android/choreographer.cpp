@@ -40,6 +40,11 @@ void AChoreographer_postFrameCallbackDelayed64(AChoreographer* choreographer,
     return AChoreographer_routePostFrameCallbackDelayed64(choreographer, callback, data,
                                                           delayMillis);
 }
+void AChoreographer_postExtendedFrameCallback(AChoreographer* choreographer,
+                                              AChoreographer_extendedFrameCallback callback,
+                                              void* data) {
+    return AChoreographer_routePostExtendedFrameCallback(choreographer, callback, data);
+}
 void AChoreographer_registerRefreshRateCallback(AChoreographer* choreographer,
                                                 AChoreographer_refreshRateCallback callback,
                                                 void* data) {
@@ -49,4 +54,28 @@ void AChoreographer_unregisterRefreshRateCallback(AChoreographer* choreographer,
                                                   AChoreographer_refreshRateCallback callback,
                                                   void* data) {
     return AChoreographer_routeUnregisterRefreshRateCallback(choreographer, callback, data);
+}
+int64_t AChoreographerFrameCallbackData_getFrameTimeNanos(
+        const AChoreographerFrameCallbackData* data) {
+    return AChoreographerFrameCallbackData_routeGetFrameTimeNanos(data);
+}
+size_t AChoreographerFrameCallbackData_getFrameTimelinesLength(
+        const AChoreographerFrameCallbackData* data) {
+    return AChoreographerFrameCallbackData_routeGetFrameTimelinesLength(data);
+}
+size_t AChoreographerFrameCallbackData_getPreferredFrameTimelineIndex(
+        const AChoreographerFrameCallbackData* data) {
+    return AChoreographerFrameCallbackData_routeGetPreferredFrameTimelineIndex(data);
+}
+int64_t AChoreographerFrameCallbackData_getFrameTimelineVsyncId(
+        const AChoreographerFrameCallbackData* data, size_t index) {
+    return AChoreographerFrameCallbackData_routeGetFrameTimelineVsyncId(data, index);
+}
+int64_t AChoreographerFrameCallbackData_getFrameTimelineExpectedPresentTime(
+        const AChoreographerFrameCallbackData* data, size_t index) {
+    return AChoreographerFrameCallbackData_routeGetFrameTimelineExpectedPresentTime(data, index);
+}
+int64_t AChoreographerFrameCallbackData_getFrameTimelineDeadline(
+        const AChoreographerFrameCallbackData* data, size_t index) {
+    return AChoreographerFrameCallbackData_routeGetFrameTimelineDeadline(data, index);
 }

@@ -74,14 +74,26 @@ class LockscreenSmartspaceController @Inject constructor(
 ) {
     private var session: SmartspaceSession? = null
     private val plugin: BcSmartspaceDataPlugin? = optionalPlugin.orElse(null)
-    private lateinit var smartspaceView: SmartspaceView
 
-    lateinit var view: View
-        private set
+    // Smartspace can be used on multiple displays, such as when the user casts their screen
+    private var smartspaceViews = mutableSetOf<SmartspaceView>()
 
     private var showSensitiveContentForCurrentUser = false
     private var showSensitiveContentForManagedUser = false
     private var managedUserHandle: UserHandle? = null
+
+    var stateChangeListener = object : View.OnAttachStateChangeListener {
+        override fun onViewAttachedToWindow(v: View) {
+            smartspaceViews.add(v as SmartspaceView)
+
+            updateTextColorFromWallpaper()
+            statusBarStateListener.onDozeAmountChanged(0f, statusBarStateController.dozeAmount)
+        }
+
+        override fun onViewDetachedFromWindow(v: View) {
+            smartspaceViews.remove(v as SmartspaceView)
+        }
+    }
 
     fun isEnabled(): Boolean {
         execution.assertIsMainThread()
@@ -90,17 +102,16 @@ class LockscreenSmartspaceController @Inject constructor(
     }
 
     /**
-     * Constructs the smartspace view and connects it to the smartspace service. Subsequent calls
-     * are idempotent until [disconnect] is called.
+     * Constructs the smartspace view and connects it to the smartspace service.
      */
-    fun buildAndConnectView(parent: ViewGroup): View {
+    fun buildAndConnectView(parent: ViewGroup): View? {
         execution.assertIsMainThread()
 
         if (!isEnabled()) {
             throw RuntimeException("Cannot build view when not enabled")
         }
 
-        buildView(parent)
+        val view = buildView(parent)
         connectSession()
 
         return view
@@ -110,14 +121,9 @@ class LockscreenSmartspaceController @Inject constructor(
         session?.requestSmartspaceUpdate()
     }
 
-    private fun buildView(parent: ViewGroup) {
+    private fun buildView(parent: ViewGroup): View? {
         if (plugin == null) {
-            return
-        }
-        if (this::view.isInitialized) {
-            // Due to some oddities with a singleton smartspace view, allow reparenting
-            (view.getParent() as ViewGroup?)?.removeView(view)
-            return
+            return null
         }
 
         val ssView = plugin.getView(parent)
@@ -132,12 +138,7 @@ class LockscreenSmartspaceController @Inject constructor(
             }
         })
         ssView.setFalsingManager(falsingManager)
-
-        this.smartspaceView = ssView
-        this.view = ssView as View
-
-        updateTextColorFromWallpaper()
-        statusBarStateListener.onDozeAmountChanged(0f, statusBarStateController.dozeAmount)
+        return (ssView as View).apply { addOnAttachStateChangeListener(stateChangeListener) }
     }
 
     private fun connectSession() {
@@ -165,8 +166,6 @@ class LockscreenSmartspaceController @Inject constructor(
 
     /**
      * Disconnects the smartspace view from the smartspace service and cleans up any resources.
-     * Calling [buildAndConnectView] again will cause the same view to be reconnected to the
-     * service.
      */
     fun disconnect() {
         execution.assertIsMainThread()
@@ -231,7 +230,7 @@ class LockscreenSmartspaceController @Inject constructor(
     private val statusBarStateListener = object : StatusBarStateController.StateListener {
         override fun onDozeAmountChanged(linear: Float, eased: Float) {
             execution.assertIsMainThread()
-            smartspaceView.setDozeAmount(eased)
+            smartspaceViews.forEach { it.setDozeAmount(eased) }
         }
     }
 
@@ -256,7 +255,7 @@ class LockscreenSmartspaceController @Inject constructor(
 
     private fun updateTextColorFromWallpaper() {
         val wallpaperTextColor = Utils.getColorAttrDefaultColor(context, R.attr.wallpaperTextColor)
-        smartspaceView.setPrimaryTextColor(wallpaperTextColor)
+        smartspaceViews.forEach { it.setPrimaryTextColor(wallpaperTextColor) }
     }
 
     private fun reloadSmartspace() {

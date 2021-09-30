@@ -211,7 +211,9 @@ private:
     // corresponding callbacks for each display event type
     static int choreographerCallback(int fd, int events, void* data);
     // Callback that will be run on vsync ticks.
-    static void frameCallback(int64_t frameTimeNanos, void* data);
+    static void extendedFrameCallback(const AChoreographerFrameCallbackData* cbData, void* data);
+    void frameCallback(int64_t vsyncId, int64_t frameDeadline, int64_t frameTimeNanos,
+                       int64_t frameInterval);
     // Callback that will be run whenver there is a refresh rate change.
     static void refreshRateCallback(int64_t vsyncPeriod, void* data);
     void drainDisplayEventQueue();

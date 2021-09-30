@@ -260,16 +260,11 @@ public final class StorageSessionController {
     }
 
     /**
-     * Restarts all sessions for {@code userId}.
-     *
-     * Does nothing if {@link #shouldHandle} is {@code false}
-     *
-     * This call blocks and waits for all sessions to be started, however any failures when starting
-     * a session will be ignored.
+     * Makes sure we initialize the ExternalStorageService component.
      */
     public void onUnlockUser(int userId) throws ExternalStorageServiceException {
         Slog.i(TAG, "On user unlock " + userId);
-        if (shouldHandle(null) && userId == 0) {
+        if (userId == 0) {
             initExternalStorageServiceComponent();
         }
     }

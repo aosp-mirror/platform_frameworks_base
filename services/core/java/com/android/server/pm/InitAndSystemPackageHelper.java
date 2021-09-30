@@ -185,7 +185,7 @@ public class InitAndSystemPackageHelper {
                 /*
                  * If the package is scanned, it's not erased.
                  */
-                final AndroidPackage scannedPkg = mPm.mPackages.get(ps.name);
+                final AndroidPackage scannedPkg = mPm.mPackages.get(ps.getPackageName());
                 if (scannedPkg != null) {
                     /*
                      * If the system app is both scanned and in the
@@ -194,23 +194,24 @@ public class InitAndSystemPackageHelper {
                      * scanned package so the previously user-installed
                      * application can be scanned.
                      */
-                    if (mPm.mSettings.isDisabledSystemPackageLPr(ps.name)) {
+                    if (mPm.mSettings.isDisabledSystemPackageLPr(ps.getPackageName())) {
                         logCriticalInfo(Log.WARN,
-                                "Expecting better updated system app for " + ps.name
+                                "Expecting better updated system app for "
+                                        + ps.getPackageName()
                                         + "; removing system app.  Last known"
                                         + " codePath=" + ps.getPathString()
-                                        + ", versionCode=" + ps.versionCode
+                                        + ", versionCode=" + ps.getVersionCode()
                                         + "; scanned versionCode="
                                         + scannedPkg.getLongVersionCode());
                         mPm.removePackageLI(scannedPkg, true);
-                        mPm.mExpectingBetter.put(ps.name, ps.getPath());
+                        mPm.mExpectingBetter.put(ps.getPackageName(), ps.getPath());
                     }
 
                     continue;
                 }
 
-                if (!mPm.mSettings.isDisabledSystemPackageLPr(ps.name)) {
-                    logCriticalInfo(Log.WARN, "System package " + ps.name
+                if (!mPm.mSettings.isDisabledSystemPackageLPr(ps.getPackageName())) {
+                    logCriticalInfo(Log.WARN, "System package " + ps.getPackageName()
                             + " no longer exists; its data will be wiped");
                     mPm.removePackageDataLIF(ps, userIds, null, 0, false);
                 } else {
@@ -219,17 +220,17 @@ public class InitAndSystemPackageHelper {
                     // still a package. the latter can happen if an OTA keeps the same
                     // code path, but, changes the package name.
                     final PackageSetting disabledPs =
-                            mPm.mSettings.getDisabledSystemPkgLPr(ps.name);
+                            mPm.mSettings.getDisabledSystemPkgLPr(ps.getPackageName());
                     if (disabledPs.getPath() == null || !disabledPs.getPath().exists()
-                            || disabledPs.pkg == null) {
-                        possiblyDeletedUpdatedSystemApps.add(ps.name);
+                            || disabledPs.getPkg() == null) {
+                        possiblyDeletedUpdatedSystemApps.add(ps.getPackageName());
                     } else {
                         // We're expecting that the system app should remain disabled, but add
                         // it to expecting better to recover in case the data version cannot
                         // be scanned.
                         // TODO(b/197869066): mExpectingBetter should be able to pulled out into
                         // this class and used only by the PMS initialization
-                        mPm.mExpectingBetter.put(disabledPs.name, disabledPs.getPath());
+                        mPm.mExpectingBetter.put(disabledPs.getPackageName(), disabledPs.getPath());
                     }
                 }
             }
@@ -744,7 +745,7 @@ public class InitAndSystemPackageHelper {
             boolean writeSettings, int defParseFlags, List<ScanPartition> dirsToScanAsSystem)
             throws SystemDeleteException {
         final boolean applyUserRestrictions = outInfo != null && (outInfo.mOrigUsers != null);
-        final AndroidPackage deletedPkg = deletedPs.pkg;
+        final AndroidPackage deletedPkg = deletedPs.getPkg();
         // Confirm if the system package has been updated
         // An updated system app can be deleted. This will also have to restore
         // the system pkg from system partition
@@ -771,7 +772,7 @@ public class InitAndSystemPackageHelper {
             outInfo.mIsRemovedPackageSystemUpdate = true;
         }
 
-        if (disabledPs.versionCode < deletedPs.versionCode) {
+        if (disabledPs.getVersionCode() < deletedPs.getVersionCode()) {
             // Delete data for downgrades
             flags &= ~PackageManager.DELETE_KEEP_DATA;
         } else {
@@ -789,7 +790,7 @@ public class InitAndSystemPackageHelper {
             // during scan [scanning checks the disabled packages]. We will reverse
             // this later, after we've "installed" the stub.
             // Reinstate the old system package
-            enableSystemPackageLPw(disabledPs.pkg);
+            enableSystemPackageLPw(disabledPs.getPkg());
             // Remove any native libraries from the upgraded package.
             removeNativeBinariesLI(deletedPs);
         }
@@ -806,7 +807,7 @@ public class InitAndSystemPackageHelper {
             // TODO(b/194319951): can we avoid this; throw would come from scan...
             throw new SystemDeleteException(e);
         } finally {
-            if (disabledPs.pkg.isStub()) {
+            if (disabledPs.getPkg().isStub()) {
                 // We've re-installed the stub; make sure it's disabled here. If package was
                 // originally enabled, we'll install the compressed version of the application
                 // and re-enable it afterward.
@@ -829,7 +830,7 @@ public class InitAndSystemPackageHelper {
 
     private void removeNativeBinariesLI(PackageSetting ps) {
         if (ps != null) {
-            NativeLibraryHelper.removeNativeBinariesLI(ps.legacyNativeLibraryPathString);
+            NativeLibraryHelper.removeNativeBinariesLI(ps.getLegacyNativeLibraryPath());
         }
     }
 

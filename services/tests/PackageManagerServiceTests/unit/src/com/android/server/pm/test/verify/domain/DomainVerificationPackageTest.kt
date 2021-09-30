@@ -20,6 +20,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.PackageUserState
 import android.content.pm.Signature
+import android.content.pm.SigningDetails
 import android.content.pm.parsing.component.ParsedActivity
 import android.content.pm.parsing.component.ParsedIntentInfo
 import android.content.pm.verify.domain.DomainOwner
@@ -41,7 +42,9 @@ import com.android.server.pm.PackageSetting
 import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.test.verify.domain.DomainVerificationTestUtils.mockPackageSettings
 import com.android.server.pm.verify.domain.DomainVerificationService
+import com.android.server.testutils.mock
 import com.android.server.testutils.mockThrowOnUnmocked
+import com.android.server.testutils.spy
 import com.android.server.testutils.whenever
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -49,8 +52,11 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.ArgumentMatchers.anyString
+import org.mockito.Mockito
+import org.mockito.Mockito.doReturn
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.security.PublicKey
 import java.util.UUID
 
 class DomainVerificationPackageTest {
@@ -81,16 +87,16 @@ class DomainVerificationPackageTest {
     fun addPackageFirstTime() {
         val service = makeService(pkg1, pkg2)
         service.addPackage(pkg1)
-        val info = service.getInfo(pkg1.getPackageName())
-        assertThat(info.packageName).isEqualTo(pkg1.getPackageName())
+        val info = service.getInfo(pkg1.packageName)
+        assertThat(info.packageName).isEqualTo(pkg1.packageName)
         assertThat(info.identifier).isEqualTo(pkg1.domainSetId)
         assertThat(info.hostToStateMap).containsExactlyEntriesIn(mapOf(
                 DOMAIN_1 to STATE_NO_RESPONSE,
                 DOMAIN_2 to STATE_NO_RESPONSE,
         ))
 
-        val userState = service.getUserState(pkg1.getPackageName())
-        assertThat(userState.packageName).isEqualTo(pkg1.getPackageName())
+        val userState = service.getUserState(pkg1.packageName)
+        assertThat(userState.packageName).isEqualTo(pkg1.packageName)
         assertThat(userState.identifier).isEqualTo(pkg1.domainSetId)
         assertThat(userState.isLinkHandlingAllowed).isEqualTo(true)
         assertThat(userState.user.identifier).isEqualTo(USER_ID)
@@ -100,7 +106,7 @@ class DomainVerificationPackageTest {
         ))
 
         assertThat(service.queryValidVerificationPackageNames())
-                .containsExactly(pkg1.getPackageName())
+                .containsExactly(pkg1.packageName)
     }
 
     @Test
@@ -109,14 +115,14 @@ class DomainVerificationPackageTest {
         val pkg2 = mockPkgSetting(PKG_TWO, UUID_TWO, SIGNATURE_TWO, isSystemApp = true)
 
         val service = makeService(
-            systemConfiguredPackageNames = ArraySet(setOf(pkg1.getPackageName(), pkg2.getPackageName())),
+            systemConfiguredPackageNames = ArraySet(setOf(pkg1.packageName, pkg2.packageName)),
             pkg1, pkg2
         )
         service.addPackage(pkg1)
         service.addPackage(pkg2)
 
-        service.getInfo(pkg1.getPackageName()).apply {
-            assertThat(packageName).isEqualTo(pkg1.getPackageName())
+        service.getInfo(pkg1.packageName).apply {
+            assertThat(packageName).isEqualTo(pkg1.packageName)
             assertThat(identifier).isEqualTo(pkg1.domainSetId)
             assertThat(hostToStateMap).containsExactlyEntriesIn(
                 mapOf(
@@ -126,8 +132,8 @@ class DomainVerificationPackageTest {
             )
         }
 
-        service.getUserState(pkg1.getPackageName()).apply {
-            assertThat(packageName).isEqualTo(pkg1.getPackageName())
+        service.getUserState(pkg1.packageName).apply {
+            assertThat(packageName).isEqualTo(pkg1.packageName)
             assertThat(identifier).isEqualTo(pkg1.domainSetId)
             assertThat(isLinkHandlingAllowed).isEqualTo(true)
             assertThat(user.identifier).isEqualTo(USER_ID)
@@ -139,8 +145,8 @@ class DomainVerificationPackageTest {
             )
         }
 
-        service.getInfo(pkg2.getPackageName()).apply {
-            assertThat(packageName).isEqualTo(pkg2.getPackageName())
+        service.getInfo(pkg2.packageName).apply {
+            assertThat(packageName).isEqualTo(pkg2.packageName)
             assertThat(identifier).isEqualTo(pkg2.domainSetId)
             assertThat(hostToStateMap).containsExactlyEntriesIn(
                 mapOf(
@@ -150,8 +156,8 @@ class DomainVerificationPackageTest {
             )
         }
 
-        service.getUserState(pkg2.getPackageName()).apply {
-            assertThat(packageName).isEqualTo(pkg2.getPackageName())
+        service.getUserState(pkg2.packageName).apply {
+            assertThat(packageName).isEqualTo(pkg2.packageName)
             assertThat(identifier).isEqualTo(pkg2.domainSetId)
             assertThat(isLinkHandlingAllowed).isEqualTo(true)
             assertThat(user.identifier).isEqualTo(USER_ID)
@@ -164,7 +170,7 @@ class DomainVerificationPackageTest {
         }
 
         assertThat(service.queryValidVerificationPackageNames())
-                .containsExactly(pkg1.getPackageName(), pkg2.getPackageName())
+                .containsExactly(pkg1.packageName, pkg2.packageName)
     }
 
     @Test
@@ -175,7 +181,7 @@ class DomainVerificationPackageTest {
             <domain-verifications>
                 <active>
                     <package-state
-                        packageName="${pkg1.getPackageName()}"
+                        packageName="${pkg1.packageName}"
                         id="${pkg1.domainSetId}"
                         signature="$DIGEST_ONE"
                         >
@@ -190,8 +196,8 @@ class DomainVerificationPackageTest {
         val service = makeService(pkg1, pkg2)
         service.restoreSettings(Xml.resolvePullParser(xml.byteInputStream()))
         service.addPackage(pkg1)
-        val info = service.getInfo(pkg1.getPackageName())
-        assertThat(info.packageName).isEqualTo(pkg1.getPackageName())
+        val info = service.getInfo(pkg1.packageName)
+        assertThat(info.packageName).isEqualTo(pkg1.packageName)
         assertThat(info.identifier).isEqualTo(pkg1.domainSetId)
         assertThat(info.hostToStateMap).containsExactlyEntriesIn(
             mapOf(
@@ -200,8 +206,8 @@ class DomainVerificationPackageTest {
             )
         )
 
-        val userState = service.getUserState(pkg1.getPackageName())
-        assertThat(userState.packageName).isEqualTo(pkg1.getPackageName())
+        val userState = service.getUserState(pkg1.packageName)
+        assertThat(userState.packageName).isEqualTo(pkg1.packageName)
         assertThat(userState.identifier).isEqualTo(pkg1.domainSetId)
         assertThat(userState.isLinkHandlingAllowed).isEqualTo(true)
         assertThat(userState.user.identifier).isEqualTo(USER_ID)
@@ -213,7 +219,7 @@ class DomainVerificationPackageTest {
         )
 
         assertThat(service.queryValidVerificationPackageNames())
-            .containsExactly(pkg1.getPackageName())
+            .containsExactly(pkg1.packageName)
     }
 
     @Test
@@ -224,7 +230,7 @@ class DomainVerificationPackageTest {
             <domain-verifications>
                 <active>
                     <package-state
-                        packageName="${pkg1.getPackageName()}"
+                        packageName="${pkg1.packageName}"
                         id="${pkg1.domainSetId}"
                         signature="INVALID_SIGNATURE"
                         >
@@ -239,8 +245,8 @@ class DomainVerificationPackageTest {
         val service = makeService(pkg1, pkg2)
         service.restoreSettings(Xml.resolvePullParser(xml.byteInputStream()))
         service.addPackage(pkg1)
-        val info = service.getInfo(pkg1.getPackageName())
-        assertThat(info.packageName).isEqualTo(pkg1.getPackageName())
+        val info = service.getInfo(pkg1.packageName)
+        assertThat(info.packageName).isEqualTo(pkg1.packageName)
         assertThat(info.identifier).isEqualTo(pkg1.domainSetId)
         assertThat(info.hostToStateMap).containsExactlyEntriesIn(
             mapOf(
@@ -249,8 +255,8 @@ class DomainVerificationPackageTest {
             )
         )
 
-        val userState = service.getUserState(pkg1.getPackageName())
-        assertThat(userState.packageName).isEqualTo(pkg1.getPackageName())
+        val userState = service.getUserState(pkg1.packageName)
+        assertThat(userState.packageName).isEqualTo(pkg1.packageName)
         assertThat(userState.identifier).isEqualTo(pkg1.domainSetId)
         assertThat(userState.isLinkHandlingAllowed).isEqualTo(true)
         assertThat(userState.user.identifier).isEqualTo(USER_ID)
@@ -262,7 +268,7 @@ class DomainVerificationPackageTest {
         )
 
         assertThat(service.queryValidVerificationPackageNames())
-            .containsExactly(pkg1.getPackageName())
+            .containsExactly(pkg1.packageName)
     }
 
     @Test
@@ -273,7 +279,7 @@ class DomainVerificationPackageTest {
             <domain-verifications>
                 <active>
                     <package-state
-                        packageName="${pkg1.getPackageName()}"
+                        packageName="${pkg1.packageName}"
                         id="${pkg1.domainSetId}"
                         >
                         <state>
@@ -311,8 +317,8 @@ class DomainVerificationPackageTest {
 
         service.addPackage(pkg1)
 
-        val userState = service.getUserState(pkg1.getPackageName())
-        assertThat(userState.packageName).isEqualTo(pkg1.getPackageName())
+        val userState = service.getUserState(pkg1.packageName)
+        assertThat(userState.packageName).isEqualTo(pkg1.packageName)
         assertThat(userState.identifier).isEqualTo(pkg1.domainSetId)
         assertThat(userState.isLinkHandlingAllowed).isEqualTo(false)
         assertThat(userState.user.identifier).isEqualTo(USER_ID)
@@ -348,7 +354,7 @@ class DomainVerificationPackageTest {
             <domain-verifications>
                 <active>
                     <package-state
-                        packageName="${pkg1.getPackageName()}"
+                        packageName="${pkg1.packageName}"
                         id="${pkg1.domainSetId}"
                         signature="$DIGEST_ONE"
                         >
@@ -381,8 +387,8 @@ class DomainVerificationPackageTest {
             service: DomainVerificationService,
             expectRestore: Boolean = false
     ) {
-        val info = service.getInfo(pkg1.getPackageName())
-        assertThat(info.packageName).isEqualTo(pkg1.getPackageName())
+        val info = service.getInfo(pkg1.packageName)
+        assertThat(info.packageName).isEqualTo(pkg1.packageName)
         assertThat(info.identifier).isEqualTo(pkg1.domainSetId)
         assertThat(info.hostToStateMap).containsExactlyEntriesIn(mapOf(
                 // To share the majority of code, special case restoration to check a different int
@@ -390,8 +396,8 @@ class DomainVerificationPackageTest {
                 DOMAIN_2 to STATE_NO_RESPONSE,
         ))
 
-        val userState = service.getUserState(pkg1.getPackageName())
-        assertThat(userState.packageName).isEqualTo(pkg1.getPackageName())
+        val userState = service.getUserState(pkg1.packageName)
+        assertThat(userState.packageName).isEqualTo(pkg1.packageName)
         assertThat(userState.identifier).isEqualTo(pkg1.domainSetId)
         assertThat(userState.isLinkHandlingAllowed).isEqualTo(false)
         assertThat(userState.user.identifier).isEqualTo(USER_ID)
@@ -401,10 +407,10 @@ class DomainVerificationPackageTest {
         ))
 
         assertThat(service.queryValidVerificationPackageNames())
-                .containsExactly(pkg1.getPackageName())
+                .containsExactly(pkg1.packageName)
 
         // Re-enable link handling to check that the 3/4 domains were stripped
-        service.setDomainVerificationLinkHandlingAllowed(pkg1.getPackageName(), true, USER_ID)
+        service.setDomainVerificationLinkHandlingAllowed(pkg1.packageName, true, USER_ID)
 
         assertThat(service.getOwnersForDomain(DOMAIN_1, USER_ID))
                 .containsExactly(DomainOwner(PKG_ONE, false))
@@ -630,7 +636,7 @@ class DomainVerificationPackageTest {
         serviceBefore.addPackage(pkg2)
 
         serviceBefore.setStatus(pkg1.domainSetId, setOf(DOMAIN_1), STATE_SUCCESS)
-        serviceBefore.setDomainVerificationLinkHandlingAllowed(pkg1.getPackageName(), false, 10)
+        serviceBefore.setDomainVerificationLinkHandlingAllowed(pkg1.packageName, false, 10)
         serviceBefore.setUserSelection(pkg2.domainSetId, setOf(DOMAIN_2), true, 0)
         serviceBefore.setUserSelection(pkg2.domainSetId, setOf(DOMAIN_3), true, 10)
 
@@ -758,11 +764,11 @@ class DomainVerificationPackageTest {
         systemConfiguredPackageNames: ArraySet<String> = ArraySet(),
         vararg pkgSettings: PackageSetting
     ) = makeService(systemConfiguredPackageNames = systemConfiguredPackageNames) {
-        pkgName -> pkgSettings.find { pkgName == it.getPackageName() }
+        pkgName -> pkgSettings.find { pkgName == it.packageName }
     }
 
     private fun makeService(vararg pkgSettings: PackageSetting) =
-        makeService { pkgName -> pkgSettings.find { pkgName == it.getPackageName() } }
+        makeService { pkgName -> pkgSettings.find { pkgName == it.packageName } }
 
     private fun makeService(
         systemConfiguredPackageNames: ArraySet<String> = ArraySet(),
@@ -829,14 +835,18 @@ class DomainVerificationPackageTest {
         }
 
         whenever(getPkg()) { pkg }
-        whenever(getPackageName()) { pkgName }
+        whenever(packageName) { pkgName }
         whenever(this.domainSetId) { domainSetId }
         whenever(getInstantApp(anyInt())) { false }
         whenever(firstInstallTime) { 0L }
         whenever(readUserState(0)) { PackageUserState() }
         whenever(readUserState(10)) { PackageUserState() }
-        whenever(signatures) { arrayOf(Signature(signature)) }
         whenever(isSystem) { isSystemApp }
+
+        val mockSigningDetails = SigningDetails(arrayOf(spy(Signature(signature)) {
+            doReturn(mock<PublicKey>()).whenever(this).publicKey
+        }), SigningDetails.SignatureSchemeVersion.UNKNOWN)
+        whenever(signingDetails).thenReturn(mockSigningDetails)
     }
 
     private fun DomainVerificationService.assertState(
@@ -845,8 +855,8 @@ class DomainVerificationPackageTest {
         linkHandingAllowed: Boolean = true,
         hostToStateMap: Map<String, Int>
     ) {
-        getUserState(pkg.getPackageName(), userId).apply {
-            assertThat(this.packageName).isEqualTo(pkg.getPackageName())
+        getUserState(pkg.packageName, userId).apply {
+            assertThat(this.packageName).isEqualTo(pkg.packageName)
             assertThat(this.identifier).isEqualTo(pkg.domainSetId)
             assertThat(this.isLinkHandlingAllowed).isEqualTo(linkHandingAllowed)
             assertThat(this.user.identifier).isEqualTo(userId)

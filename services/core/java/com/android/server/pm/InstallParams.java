@@ -585,23 +585,25 @@ final class InstallParams extends HandlerParams {
                             prepareResult.mPackageToScan, prepareResult.mParseFlags,
                             prepareResult.mScanFlags, System.currentTimeMillis(),
                             request.mArgs.mUser, request.mArgs.mAbiOverride);
-                    if (null != preparedScans.put(result.mPkgSetting.pkg.getPackageName(),
+                    if (null != preparedScans.put(result.mPkgSetting.getPkg().getPackageName(),
                             result)) {
                         request.mInstallResult.setError(
                                 PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE,
-                                "Duplicate package " + result.mPkgSetting.pkg.getPackageName()
+                                "Duplicate package "
+                                        + result.mPkgSetting.getPkg().getPackageName()
                                         + " in multi-package install request.");
                         return;
                     }
                     createdAppId.put(packageName,
                             scanPackageHelper.optimisticallyRegisterAppId(result));
-                    versionInfos.put(result.mPkgSetting.pkg.getPackageName(),
-                            mPm.getSettingsVersionForPackage(result.mPkgSetting.pkg));
+                    versionInfos.put(result.mPkgSetting.getPkg().getPackageName(),
+                            mPm.getSettingsVersionForPackage(result.mPkgSetting.getPkg()));
                     if (result.mStaticSharedLibraryInfo != null) {
                         final PackageSetting sharedLibLatestVersionSetting =
                                 mPm.getSharedLibLatestVersionSetting(result);
                         if (sharedLibLatestVersionSetting != null) {
-                            lastStaticSharedLibSettings.put(result.mPkgSetting.pkg.getPackageName(),
+                            lastStaticSharedLibSettings.put(
+                                    result.mPkgSetting.getPkg().getPackageName(),
                                     sharedLibLatestVersionSetting);
                         }
                     }
@@ -899,8 +901,8 @@ final class InstallParams extends HandlerParams {
                     }
                 }
 
-                if (ps.pkg != null) {
-                    systemApp = ps.pkg.isSystem();
+                if (ps.getPkg() != null) {
+                    systemApp = ps.getPkg().isSystem();
                 }
                 res.mOrigUsers = ps.queryInstalledUsers(mPm.mUserManager.getUserIds(), true);
             }
@@ -1064,8 +1066,8 @@ final class InstallParams extends HandlerParams {
 
                 // We moved the entire application as-is, so bring over the
                 // previously derived ABI information.
-                parsedPackage.setPrimaryCpuAbi(ps.primaryCpuAbiString)
-                        .setSecondaryCpuAbi(ps.secondaryCpuAbiString);
+                parsedPackage.setPrimaryCpuAbi(ps.getPrimaryCpuAbi())
+                        .setSecondaryCpuAbi(ps.getSecondaryCpuAbi());
             }
 
         } else {
@@ -1252,7 +1254,7 @@ final class InstallParams extends HandlerParams {
                 res.mRemovedInfo = new PackageRemovedInfo(mPm);
                 res.mRemovedInfo.mUid = oldPackage.getUid();
                 res.mRemovedInfo.mRemovedPackage = oldPackage.getPackageName();
-                res.mRemovedInfo.mInstallerPackageName = ps.installSource.installerPackageName;
+                res.mRemovedInfo.mInstallerPackageName = ps.getInstallSource().installerPackageName;
                 res.mRemovedInfo.mIsStaticSharedLib =
                         parsedPackage.getStaticSharedLibName() != null;
                 res.mRemovedInfo.mIsUpdate = true;
@@ -1392,8 +1394,7 @@ final class InstallParams extends HandlerParams {
                 // the scanned package checks out, has signing certificate rotation
                 // history, and is newer; bring it over
                 synchronized (mPm.mLock) {
-                    sourcePackageSetting.signatures.mSigningDetails =
-                            parsedPackage.getSigningDetails();
+                    sourcePackageSetting.setSigningDetails(parsedPackage.getSigningDetails());
                 }
                 return true;
             } else {
@@ -1544,8 +1545,9 @@ final class InstallParams extends HandlerParams {
                 // Set the update and install times
                 PackageSetting deletedPkgSetting = mPm.getPackageSetting(
                         oldPackage.getPackageName());
-                reconciledPkg.mPkgSetting.firstInstallTime = deletedPkgSetting.firstInstallTime;
-                reconciledPkg.mPkgSetting.lastUpdateTime = System.currentTimeMillis();
+                reconciledPkg.mPkgSetting
+                        .setFirstInstallTime(deletedPkgSetting.getFirstInstallTime())
+                        .setLastUpdateTime(System.currentTimeMillis());
 
                 res.mRemovedInfo.mBroadcastAllowList = mPm.mAppsFilter.getVisibilityAllowList(
                         reconciledPkg.mPkgSetting, request.mAllUsers,
@@ -1615,7 +1617,7 @@ final class InstallParams extends HandlerParams {
                                 parsedPackage.getPackageName());
                         if (ps2 != null) {
                             res.mRemovedInfo.mRemovedForAllUsers =
-                                    mPm.mPackages.get(ps2.name) == null;
+                                    mPm.mPackages.get(ps2.getPackageName()) == null;
                         }
                     }
                 }
@@ -1728,7 +1730,7 @@ final class InstallParams extends HandlerParams {
                     ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, userId, installerPackageName);
                 }
 
-                mPm.mSettings.addInstallerPackageNames(ps.installSource);
+                mPm.mSettings.addInstallerPackageNames(ps.getInstallSource());
 
                 // When replacing an existing package, preserve the original install reason for all
                 // users that had the package installed before. Similarly for uninstall reasons.
@@ -1771,10 +1773,10 @@ final class InstallParams extends HandlerParams {
                 if (IncrementalManager.isIncrementalPath(codePath)
                         && mPm.mIncrementalManager != null) {
                     final IncrementalStatesCallback incrementalStatesCallback =
-                            new IncrementalStatesCallback(ps.name, mPm);
+                            new IncrementalStatesCallback(ps.getPackageName(), mPm);
                     ps.setIncrementalStatesCallback(incrementalStatesCallback);
                     mPm.mIncrementalManager.registerLoadingProgressCallback(codePath,
-                            new IncrementalProgressListener(ps.name, mPm));
+                            new IncrementalProgressListener(ps.getPackageName(), mPm));
                 }
 
                 // Ensure that the uninstall reason is UNKNOWN for users with the package installed.
@@ -1837,7 +1839,7 @@ final class InstallParams extends HandlerParams {
         for (ReconciledPackage reconciledPkg : commitRequest.mReconciledPackages.values()) {
             final boolean instantApp = ((reconciledPkg.mScanResult.mRequest.mScanFlags
                     & SCAN_AS_INSTANT_APP) != 0);
-            final AndroidPackage pkg = reconciledPkg.mPkgSetting.pkg;
+            final AndroidPackage pkg = reconciledPkg.mPkgSetting.getPkg();
             final String packageName = pkg.getPackageName();
             final String codePath = pkg.getPath();
             final boolean onIncremental = mPm.mIncrementalManager != null
@@ -1978,9 +1980,9 @@ final class InstallParams extends HandlerParams {
         final PackageRemovedInfo pkgRemovedInfo = pkgInstalledInfo.mRemovedInfo;
 
         PackageChangeEvent pkgChangeEvent = new PackageChangeEvent();
-        pkgChangeEvent.packageName = pkgSetting.pkg.getPackageName();
-        pkgChangeEvent.version = pkgSetting.versionCode;
-        pkgChangeEvent.lastUpdateTimeMillis = pkgSetting.lastUpdateTime;
+        pkgChangeEvent.packageName = pkgSetting.getPkg().getPackageName();
+        pkgChangeEvent.version = pkgSetting.getLongVersionCode();
+        pkgChangeEvent.lastUpdateTimeMillis = pkgSetting.getLastUpdateTime();
         pkgChangeEvent.newInstalled = (pkgRemovedInfo == null || !pkgRemovedInfo.mIsUpdate);
         pkgChangeEvent.dataRemoved = (pkgRemovedInfo != null && pkgRemovedInfo.mDataRemoved);
         pkgChangeEvent.isDeleted = false;

@@ -19,9 +19,7 @@ package com.android.server.accessibility.magnification;
 import static com.android.server.testutils.TestUtils.strictMock;
 
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.graphics.PointF;
@@ -148,14 +146,6 @@ public class WindowMagnificationGestureHandlerTest {
                 }
             });
         });
-    }
-
-    @Test
-    public void onTripleTap_callsOnTripleTapped() {
-        goFromStateIdleTo(STATE_SHOW_MAGNIFIER_TRIPLE_TAP);
-
-        verify(mMockCallback).onTripleTapped(eq(DISPLAY_0),
-                eq(mWindowMagnificationGestureHandler.getMode()));
     }
 
     private void forEachState(IntConsumer action) {

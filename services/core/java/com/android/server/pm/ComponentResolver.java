@@ -542,7 +542,7 @@ public class ComponentResolver
             final PackageSetting disabledPkgSetting = (PackageSetting) sPackageManagerInternal
                     .getDisabledSystemPackage(pair.first.getPackageName());
             final AndroidPackage disabledPkg =
-                    disabledPkgSetting == null ? null : disabledPkgSetting.pkg;
+                    disabledPkgSetting == null ? null : disabledPkgSetting.getPkg();
             final List<ParsedActivity> systemActivities =
                     disabledPkg != null ? disabledPkg.getActivities() : null;
             adjustPriority(systemActivities, pair.first, pair.second, setupWizardPackage);

@@ -78,6 +78,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
@@ -170,6 +171,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private TelephonyListenerManager mTelephonyListenerManager;
     @Mock
     private FeatureFlags mFeatureFlags;
+    @Mock
+    private InteractionJankMonitor mInteractionJankMonitor;
     @Mock
     private Vibrator mVibrator;
     @Captor
@@ -737,6 +740,16 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testMultiUserJankMonitor_whenUserSwitches() throws Exception {
+        final IRemoteCallback reply = new IRemoteCallback.Stub() {
+            @Override
+            public void sendResult(Bundle data) {} // do nothing
+        };
+        mKeyguardUpdateMonitor.handleUserSwitchComplete(10 /* user */);
+        verify(mInteractionJankMonitor).end(eq(InteractionJankMonitor.CUJ_USER_SWITCH));
+    }
+
+    @Test
     public void testGetUserCanSkipBouncer_whenTrust() {
         int user = KeyguardUpdateMonitor.getCurrentUser();
         mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */, user, 0 /* flags */);
@@ -1051,7 +1064,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                     mRingerModeTracker, mBackgroundExecutor,
                     mStatusBarStateController, mLockPatternUtils,
                     mAuthController, mTelephonyListenerManager, mFeatureFlags,
-                    mVibrator);
+                    mInteractionJankMonitor, mVibrator);
             setStrongAuthTracker(KeyguardUpdateMonitorTest.this.mStrongAuthTracker);
         }
 

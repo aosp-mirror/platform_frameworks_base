@@ -67,7 +67,7 @@ public class KeyguardServiceDelegate {
         boolean showing;
         boolean showingAndNotOccluded;
         boolean inputRestricted;
-        boolean occluded;
+        volatile boolean occluded;
         boolean secure;
         boolean dreaming;
         boolean systemIsReady;
@@ -270,6 +270,10 @@ public class KeyguardServiceDelegate {
             mKeyguardService.setOccluded(isOccluded, animate);
         }
         mKeyguardState.occluded = isOccluded;
+    }
+
+    public boolean isOccluded() {
+        return mKeyguardState.occluded;
     }
 
     public void dismiss(IKeyguardDismissCallback callback, CharSequence message) {

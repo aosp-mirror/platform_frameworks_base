@@ -25,6 +25,7 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
@@ -55,6 +56,7 @@ import android.view.WindowManagerGlobal;
 import android.widget.BaseAdapter;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.RestrictedLockUtilsInternal;
@@ -75,6 +77,7 @@ import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.qs.QSUserSwitcherEvent;
 import com.android.systemui.qs.tiles.UserDetailView;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.user.CreateUserActivity;
@@ -107,6 +110,7 @@ public class UserSwitcherController implements Dumpable {
     private static final int PAUSE_REFRESH_USERS_TIMEOUT_MS = 3000;
 
     private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
+    private static final long MULTI_USER_JOURNEY_TIMEOUT = 20000l;
 
     protected final Context mContext;
     protected final UserTracker mUserTracker;
@@ -123,6 +127,7 @@ public class UserSwitcherController implements Dumpable {
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final TelephonyListenerManager mTelephonyListenerManager;
     private final IActivityTaskManager mActivityTaskManager;
+    private final InteractionJankMonitor mInteractionJankMonitor;
 
     private ArrayList<UserRecord> mUsers = new ArrayList<>();
     @VisibleForTesting
@@ -141,15 +146,18 @@ public class UserSwitcherController implements Dumpable {
     private Intent mSecondaryUserServiceIntent;
     private SparseBooleanArray mForcePictureLoadForUserId = new SparseBooleanArray(2);
     private final UiEventLogger mUiEventLogger;
+    private final IActivityManager mActivityManager;
     public final DetailAdapter mUserDetailAdapter;
     private final Executor mBgExecutor;
     private final boolean mGuestUserAutoCreated;
     private final AtomicBoolean mGuestIsResetting;
     private final AtomicBoolean mGuestCreationScheduled;
     private FalsingManager mFalsingManager;
+    private NotificationShadeWindowView mRootView;
 
     @Inject
     public UserSwitcherController(Context context,
+            IActivityManager activityManager,
             UserManager userManager,
             UserTracker userTracker,
             KeyguardStateController keyguardStateController,
@@ -165,14 +173,17 @@ public class UserSwitcherController implements Dumpable {
             UserDetailAdapter userDetailAdapter,
             SecureSettings secureSettings,
             @Background Executor bgExecutor,
+            InteractionJankMonitor interactionJankMonitor,
             DumpManager dumpManager) {
         mContext = context;
+        mActivityManager = activityManager;
         mUserTracker = userTracker;
         mBroadcastDispatcher = broadcastDispatcher;
         mTelephonyListenerManager = telephonyListenerManager;
         mActivityTaskManager = activityTaskManager;
         mUiEventLogger = uiEventLogger;
         mFalsingManager = falsingManager;
+        mInteractionJankMonitor = interactionJankMonitor;
         mGuestResumeSessionReceiver = new GuestResumeSessionReceiver(
                 this, mUserTracker, mUiEventLogger, secureSettings);
         mUserDetailAdapter = userDetailAdapter;
@@ -485,8 +496,11 @@ public class UserSwitcherController implements Dumpable {
 
     protected void switchToUserId(int id) {
         try {
+            mInteractionJankMonitor.begin(InteractionJankMonitor.Configuration.Builder
+                    .withView(InteractionJankMonitor.CUJ_USER_SWITCH, mRootView)
+                    .setTimeout(MULTI_USER_JOURNEY_TIMEOUT));
             pauseRefreshUsers();
-            ActivityManager.getService().switchUser(id);
+            mActivityManager.switchUser(id);
         } catch (RemoteException e) {
             Log.e(TAG, "Couldn't switch user.", e);
         }
@@ -791,6 +805,10 @@ public class UserSwitcherController implements Dumpable {
             return UserHandle.USER_NULL;
         }
         return guest.id;
+    }
+
+    public void init(NotificationShadeWindowView notificationShadeWindowView) {
+        mRootView = notificationShadeWindowView;
     }
 
     public static abstract class BaseUserAdapter extends BaseAdapter {

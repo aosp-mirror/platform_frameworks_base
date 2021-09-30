@@ -1098,9 +1098,9 @@ public class LocationProviderManager extends
         }
 
         @Override
-        public void onCancelled(PendingIntent intent) {
+        public void onCanceled(PendingIntent intent) {
             if (D) {
-                Log.d(TAG, mName + " provider registration " + getIdentity() + " cancelled");
+                Log.d(TAG, mName + " provider registration " + getIdentity() + " canceled");
             }
 
             synchronized (mLock) {

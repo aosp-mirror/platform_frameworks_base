@@ -687,7 +687,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             final Runnable r;
             synchronized (mLock) {
                 assertNotChild("StagedSession#abandon");
-                assertCallerIsOwnerOrRoot();
+                assertCallerIsOwnerOrRootOrSystem();
                 if (isInTerminalState()) {
                     // We keep the session in the database if it's in a finalized state. It will be
                     // removed by PackageInstallerService when the last update time is old enough.
@@ -1937,11 +1937,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static boolean isIncrementalInstallationAllowed(String packageName) {
         final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
         final PackageSetting existingPkgSetting = pmi.getPackageSetting(packageName);
-        if (existingPkgSetting == null || existingPkgSetting.pkg == null) {
+        if (existingPkgSetting == null || existingPkgSetting.getPkg() == null) {
             return true;
         }
 
-        return !existingPkgSetting.pkg.isSystem()
+        return !existingPkgSetting.getPkg().isSystem()
                 && !existingPkgSetting.getPkgState().isUpdatedSystemApp();
     }
 
@@ -3784,7 +3784,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private void abandonNonStaged() {
         synchronized (mLock) {
             assertNotChild("abandonNonStaged");
-            assertCallerIsOwnerOrRoot();
+            assertCallerIsOwnerOrRootOrSystem();
             if (mRelinquished) {
                 if (LOGD) Slog.d(TAG, "Ignoring abandon after commit relinquished control");
                 return;

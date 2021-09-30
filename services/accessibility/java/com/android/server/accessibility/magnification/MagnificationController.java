@@ -48,11 +48,12 @@ import com.android.server.accessibility.AccessibilityManagerService;
  *   the user touch interaction starts if magnification capabilities is all. </li>
  *   <li> 2. {@link #onTouchInteractionEnd} shows magnification switch UI when
  *   the user touch interaction ends if magnification capabilities is all. </li>
- *   <li> 3. {@link #onShortcutTriggered} updates magnification switch UI depending on
- *   magnification capabilities and magnification active state when magnification shortcut
- *   is triggered.</li>
- *   <li> 4. {@link #onTripleTapped} updates magnification switch UI depending on magnification
- *   capabilities and magnification active state when triple-tap gesture is detected. </li>
+ *   <li> 3. {@link #onWindowMagnificationActivationState} updates magnification switch UI
+ *   depending on magnification capabilities and magnification active state when window
+ *   magnification activation state change.</li>
+ *   <li> 4. {@link #onFullScreenMagnificationActivationState} updates magnification switch UI
+ *   depending on magnification capabilities and magnification active state when fullscreen
+ *   magnification activation state change.</li>
  *   <li> 4. {@link #onRequestMagnificationSpec} updates magnification switch UI depending on
  *   magnification capabilities and magnification active state when new magnification spec is
  *   changed by external request from calling public APIs. </li>
@@ -140,16 +141,6 @@ public class MagnificationController implements WindowMagnificationManager.Callb
         if (isActivated(displayId, mode)) {
             getWindowMagnificationMgr().showMagnificationButton(displayId, mode);
         }
-    }
-
-    @Override
-    public void onShortcutTriggered(int displayId, int mode) {
-        updateMagnificationButton(displayId, mode);
-    }
-
-    @Override
-    public void onTripleTapped(int displayId, int mode) {
-        updateMagnificationButton(displayId, mode);
     }
 
     private void updateMagnificationButton(int displayId, int mode) {
@@ -250,6 +241,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
                 mActivatedMode = ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
             }
         }
+        updateMagnificationButton(displayId, ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
     }
 
     private void disableFullScreenMagnificationIfNeeded(int displayId) {
@@ -264,7 +256,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
     }
 
     @Override
-    public void onFullScreenMagnificationActivationState(boolean activated) {
+    public void onFullScreenMagnificationActivationState(int displayId, boolean activated) {
         if (activated) {
             mFullScreenModeEnabledTime = SystemClock.uptimeMillis();
 
@@ -280,6 +272,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
                 mActivatedMode = ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
             }
         }
+        updateMagnificationButton(displayId, ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
     }
 
     @Override

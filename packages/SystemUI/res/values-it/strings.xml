@@ -1175,8 +1175,7 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Sblocca per visualizzare le reti"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Ricerca di reti in corso…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Connessione alla rete non riuscita"</string>
-    <!-- no translation found for wifi_wont_autoconnect_for_now (5782282612749867762) -->
-    <skip />
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Connessione automatica rete Wi-Fi non attiva al momento"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Mostra tutte"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Per cambiare rete, scollega il cavo Ethernet"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> vuole aggiungere il seguente riquadro alle Impostazioni rapide"</string>

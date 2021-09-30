@@ -46,6 +46,7 @@ import org.mockito.junit.MockitoJUnit
 @RunWithLooper
 class ActivityLaunchAnimatorTest : SysuiTestCase() {
     private val launchContainer = LinearLayout(mContext)
+    private val launchAnimator = LaunchAnimator(mContext, isForTesting = true)
     @Mock lateinit var callback: ActivityLaunchAnimator.Callback
     @Spy private val controller = TestLaunchAnimatorController(launchContainer)
     @Mock lateinit var iCallback: IRemoteAnimationFinishedCallback
@@ -56,7 +57,8 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        activityLaunchAnimator = ActivityLaunchAnimator(callback, mContext)
+        activityLaunchAnimator = ActivityLaunchAnimator(launchAnimator)
+        activityLaunchAnimator.callback = callback
     }
 
     private fun startIntentWithAnimation(
@@ -120,7 +122,8 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
     @Test
     fun animatesIfActivityIsAlreadyOpenAndIsOnKeyguard() {
         `when`(callback.isOnKeyguard()).thenReturn(true)
-        val animator = ActivityLaunchAnimator(callback, context)
+        val animator = ActivityLaunchAnimator(launchAnimator)
+        animator.callback = callback
 
         val willAnimateCaptor = ArgumentCaptor.forClass(Boolean::class.java)
         var animationAdapter: RemoteAnimationAdapter? = null
@@ -208,7 +211,7 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
 private class TestLaunchAnimatorController(
     override var launchContainer: ViewGroup
 ) : ActivityLaunchAnimator.Controller {
-    override fun createAnimatorState() = ActivityLaunchAnimator.State(
+    override fun createAnimatorState() = LaunchAnimator.State(
             top = 100,
             bottom = 200,
             left = 300,
@@ -232,7 +235,7 @@ private class TestLaunchAnimatorController(
     }
 
     override fun onLaunchAnimationProgress(
-        state: ActivityLaunchAnimator.State,
+        state: LaunchAnimator.State,
         progress: Float,
         linearProgress: Float
     ) {

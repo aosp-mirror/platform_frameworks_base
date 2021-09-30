@@ -806,6 +806,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private CharSequence mContentDescription;
     private CharSequence mTooltipText;
     private String mViewIdResourceName;
+    private String mUniqueId;
     private ArrayList<String> mExtraDataKeys;
 
     @UnsupportedAppUsage
@@ -3463,6 +3464,28 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Sets the unique id to act as a key to identify the node. If the node instance is replaced
+     * after refreshing the layout, calling this API to assign the same unique id to the new
+     * alike node can help accessibility service to identify it.
+     *
+     * @param uniqueId The unique id that is associated with a visible node on the screen
+     */
+    public void setUniqueId(@Nullable String uniqueId) {
+        enforceNotSealed();
+        mUniqueId = uniqueId;
+    }
+
+    /**
+     * Gets the unique id of the node.
+     *
+     * @return The unique id
+     */
+    @Nullable
+    public String getUniqueId() {
+        return mUniqueId;
+    }
+
+    /**
      * Sets the token and node id of the leashed parent.
      *
      * @param token The token.
@@ -3764,6 +3787,10 @@ public class AccessibilityNodeInfo implements Parcelable {
             nonDefaultFields |= bitAt(fieldIndex);
         }
         fieldIndex++;
+        if (!Objects.equals(mUniqueId, DEFAULT.mUniqueId)) {
+            nonDefaultFields |= bitAt(fieldIndex);
+        }
+        fieldIndex++;
         if (mTextSelectionStart != DEFAULT.mTextSelectionStart) {
             nonDefaultFields |= bitAt(fieldIndex);
         }
@@ -3903,6 +3930,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeCharSequence(mTooltipText);
 
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeString(mViewIdResourceName);
+        if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeString(mUniqueId);
 
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeInt(mTextSelectionStart);
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeInt(mTextSelectionEnd);
@@ -3982,6 +4010,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mTraversalAfter = other.mTraversalAfter;
         mWindowId = other.mWindowId;
         mConnectionId = other.mConnectionId;
+        mUniqueId = other.mUniqueId;
         mBoundsInParent.set(other.mBoundsInParent);
         mBoundsInScreen.set(other.mBoundsInScreen);
         mPackageName = other.mPackageName;
@@ -4154,6 +4183,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (isBitSet(nonDefaultFields, fieldIndex++)) mPaneTitle = parcel.readCharSequence();
         if (isBitSet(nonDefaultFields, fieldIndex++)) mTooltipText = parcel.readCharSequence();
         if (isBitSet(nonDefaultFields, fieldIndex++)) mViewIdResourceName = parcel.readString();
+        if (isBitSet(nonDefaultFields, fieldIndex++)) mUniqueId = parcel.readString();
 
         if (isBitSet(nonDefaultFields, fieldIndex++)) mTextSelectionStart = parcel.readInt();
         if (isBitSet(nonDefaultFields, fieldIndex++)) mTextSelectionEnd = parcel.readInt();
@@ -4480,6 +4510,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append("; contentDescription: ").append(mContentDescription);
         builder.append("; tooltipText: ").append(mTooltipText);
         builder.append("; viewIdResName: ").append(mViewIdResourceName);
+        builder.append("; uniqueId: ").append(mUniqueId);
 
         builder.append("; checkable: ").append(isCheckable());
         builder.append("; checked: ").append(isChecked());

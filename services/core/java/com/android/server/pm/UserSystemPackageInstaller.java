@@ -215,7 +215,7 @@ class UserSystemPackageInstaller {
         for (int userId : mUm.getUserIds()) {
             final Set<String> userWhitelist = getInstallablePackagesForUserId(userId);
             pmInt.forEachPackageSetting(pkgSetting -> {
-                AndroidPackage pkg = pkgSetting.pkg;
+                AndroidPackage pkg = pkgSetting.getPkg();
                 if (pkg == null || !pkg.isSystem()) {
                     return;
                 }
@@ -262,7 +262,7 @@ class UserSystemPackageInstaller {
                     == PackageManager.UNINSTALL_REASON_USER_TYPE;
         } else {
             // Only proceed with uninstall if the package is new to the device.
-            return isFirstBoot || (isUpgrade && !preOtaPkgs.contains(pkgSetting.name));
+            return isFirstBoot || (isUpgrade && !preOtaPkgs.contains(pkgSetting.getPackageName()));
         }
     }
 

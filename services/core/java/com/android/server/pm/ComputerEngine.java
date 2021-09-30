@@ -556,10 +556,10 @@ public class ComputerEngine implements Computer {
             final PackageSetting setting =
                     getPackageSettingInternal(pkgName, Process.SYSTEM_UID);
             result = null;
-            if (setting != null && setting.pkg != null && (resolveForStart
+            if (setting != null && setting.getPkg() != null && (resolveForStart
                     || !shouldFilterApplicationLocked(setting, filterCallingUid, userId))) {
                 result = filterIfNotSystemUser(mComponentResolver.queryActivities(
-                        intent, resolvedType, flags, setting.pkg.getActivities(), userId),
+                        intent, resolvedType, flags, setting.getPkg().getActivities(), userId),
                         userId);
             }
             if (result == null || result.size() == 0) {
@@ -679,17 +679,17 @@ public class ComputerEngine implements Computer {
             if (shouldFilterApplicationLocked(ps, filterCallingUid, userId)) {
                 return null;
             }
-            if (ps.pkg == null) {
+            if (ps.getPkg() == null) {
                 final PackageInfo pInfo = generatePackageInfo(ps, flags, userId);
                 if (pInfo != null) {
                     return pInfo.applicationInfo;
                 }
                 return null;
             }
-            ApplicationInfo ai = PackageInfoUtils.generateApplicationInfo(ps.pkg, flags,
+            ApplicationInfo ai = PackageInfoUtils.generateApplicationInfo(ps.getPkg(), flags,
                     ps.readUserState(userId), userId, ps);
             if (ai != null) {
-                ai.packageName = resolveExternalPackageNameLPr(ps.pkg);
+                ai.packageName = resolveExternalPackageNameLPr(ps.getPkg());
             }
             return ai;
         }
@@ -1366,18 +1366,19 @@ public class ComputerEngine implements Computer {
         }
 
         final PackageUserState state = ps.readUserState(userId);
-        AndroidPackage p = ps.pkg;
+        AndroidPackage p = ps.getPkg();
         if (p != null) {
             // Compute GIDs only if requested
             final int[] gids = (flags & PackageManager.GET_GIDS) == 0 ? EMPTY_INT_ARRAY
-                    : mPermissionManager.getGidsForUid(UserHandle.getUid(userId, ps.appId));
+                    : mPermissionManager.getGidsForUid(UserHandle.getUid(userId, ps.getAppId()));
             // Compute granted permissions only if package has requested permissions
             final Set<String> permissions = ((flags & PackageManager.GET_PERMISSIONS) == 0
                     || ArrayUtils.isEmpty(p.getRequestedPermissions())) ? Collections.emptySet()
-                    : mPermissionManager.getGrantedPermissions(ps.name, userId);
+                    : mPermissionManager.getGrantedPermissions(ps.getPackageName(), userId);
 
             PackageInfo packageInfo = PackageInfoUtils.generate(p, gids, flags,
-                    ps.firstInstallTime, ps.lastUpdateTime, permissions, state, userId, ps);
+                    ps.getFirstInstallTime(), ps.getLastUpdateTime(), permissions, state, userId,
+                    ps);
 
             if (packageInfo == null) {
                 return null;
@@ -1389,18 +1390,18 @@ public class ComputerEngine implements Computer {
             return packageInfo;
         } else if ((flags & MATCH_UNINSTALLED_PACKAGES) != 0 && state.isAvailable(flags)) {
             PackageInfo pi = new PackageInfo();
-            pi.packageName = ps.name;
-            pi.setLongVersionCode(ps.versionCode);
-            pi.sharedUserId = (ps.sharedUser != null) ? ps.sharedUser.name : null;
-            pi.firstInstallTime = ps.firstInstallTime;
-            pi.lastUpdateTime = ps.lastUpdateTime;
+            pi.packageName = ps.getPackageName();
+            pi.setLongVersionCode(ps.getVersionCode());
+            pi.sharedUserId = (ps.getSharedUser() != null) ? ps.getSharedUser().name : null;
+            pi.firstInstallTime = ps.getFirstInstallTime();
+            pi.lastUpdateTime = ps.getLastUpdateTime();
 
             ApplicationInfo ai = new ApplicationInfo();
-            ai.packageName = ps.name;
-            ai.uid = UserHandle.getUid(userId, ps.appId);
-            ai.primaryCpuAbi = ps.primaryCpuAbiString;
-            ai.secondaryCpuAbi = ps.secondaryCpuAbiString;
-            ai.setVersionCode(ps.versionCode);
+            ai.packageName = ps.getPackageName();
+            ai.uid = UserHandle.getUid(userId, ps.getAppId());
+            ai.primaryCpuAbi = ps.getPrimaryCpuAbi();
+            ai.secondaryCpuAbi = ps.getSecondaryCpuAbi();
+            ai.setVersionCode(ps.getVersionCode());
             ai.flags = ps.pkgFlags;
             ai.privateFlags = ps.pkgPrivateFlags;
             pi.applicationInfo = PackageInfoWithoutStateUtils.generateDelegateApplicationInfo(
@@ -1408,7 +1409,7 @@ public class ComputerEngine implements Computer {
 
             if (DEBUG_PACKAGE_INFO) {
                 Log.v(TAG, "ps.pkg is n/a for ["
-                        + ps.name + "]. Provides a minimum info.");
+                        + ps.getPackageName() + "]. Provides a minimum info.");
             }
             return pi;
         } else {
@@ -1824,7 +1825,7 @@ public class ComputerEngine implements Computer {
         if (obj instanceof PackageSetting) {
             final PackageSetting ps = (PackageSetting) obj;
             final boolean isInstantApp = ps.getInstantApp(UserHandle.getUserId(callingUid));
-            return isInstantApp ? ps.pkg.getPackageName() : null;
+            return isInstantApp ? ps.getPkg().getPackageName() : null;
         }
         return null;
     }
@@ -1964,7 +1965,7 @@ public class ComputerEngine implements Computer {
                 final PackageSetting ps = sus.packages.valueAt(index);
                 if (ps.getInstalled(userId)
                         && !shouldFilterApplicationLocked(ps, callingUid, userId)) {
-                    res[i++] = ps.name;
+                    res[i++] = ps.getPackageName();
                 }
             }
             return ArrayUtils.trimToSize(res, i);
@@ -1972,7 +1973,7 @@ public class ComputerEngine implements Computer {
             final PackageSetting ps = (PackageSetting) obj;
             if (ps.getInstalled(userId)
                     && !shouldFilterApplicationLocked(ps, callingUid, userId)) {
-                return new String[]{ps.name};
+                return new String[]{ps.getPackageName()};
             }
         }
         return null;
@@ -2049,12 +2050,12 @@ public class ComputerEngine implements Computer {
         }
 
         // No package means no static lib as it is always on internal storage
-        if (ps == null || ps.pkg == null || !ps.pkg.isStaticSharedLibrary()) {
+        if (ps == null || ps.getPkg() == null || !ps.getPkg().isStaticSharedLibrary()) {
             return false;
         }
 
         final SharedLibraryInfo libraryInfo = getSharedLibraryInfoLPr(
-                ps.pkg.getStaticSharedLibName(), ps.pkg.getStaticSharedLibVersion());
+                ps.getPkg().getStaticSharedLibName(), ps.getPkg().getStaticSharedLibVersion());
         if (libraryInfo == null) {
             return false;
         }
@@ -2066,7 +2067,7 @@ public class ComputerEngine implements Computer {
         }
 
         for (String uidPackageName : uidPackageNames) {
-            if (ps.name.equals(uidPackageName)) {
+            if (ps.getPackageName().equals(uidPackageName)) {
                 return false;
             }
             PackageSetting uidPs = mSettings.getPackageLPr(uidPackageName);
@@ -2076,7 +2077,7 @@ public class ComputerEngine implements Computer {
                 if (index < 0) {
                     continue;
                 }
-                if (uidPs.pkg.getUsesStaticLibrariesVersions()[index]
+                if (uidPs.getPkg().getUsesStaticLibrariesVersions()[index]
                         == libraryInfo.getLongVersion()) {
                     return false;
                 }
@@ -2211,7 +2212,7 @@ public class ComputerEngine implements Computer {
                         && (isCallerSameApp(packageName, callingUid)
                         || canViewInstantApps(callingUid, userId)
                         || mInstantAppRegistry.isInstantAccessGranted(
-                        userId, UserHandle.getAppId(callingUid), ps.appId));
+                        userId, UserHandle.getAppId(callingUid), ps.getAppId()));
         if (returnAllowed) {
             return ps.getInstantApp(userId);
         }
@@ -2368,7 +2369,7 @@ public class ComputerEngine implements Computer {
             return callerIsInstantApp;
         }
         // if the target and caller are the same application, don't filter
-        if (isCallerSameApp(ps.name, callingUid)) {
+        if (isCallerSameApp(ps.getPackageName(), callingUid)) {
             return false;
         }
         if (callerIsInstantApp) {
@@ -2388,7 +2389,7 @@ public class ComputerEngine implements Computer {
                 return !isComponentVisibleToInstantApp(component, componentType);
             }
             // request for application; if no components have been explicitly exposed, filter
-            return !ps.pkg.isVisibleToInstantApps();
+            return !ps.getPkg().isVisibleToInstantApps();
         }
         if (ps.getInstantApp(userId)) {
             // caller can see all components of all instant applications, don't filter
@@ -2402,7 +2403,7 @@ public class ComputerEngine implements Computer {
             // request for an instant application; if the caller hasn't been granted access,
             //filter
             return !mInstantAppRegistry.isInstantAccessGranted(
-                    userId, UserHandle.getAppId(callingUid), ps.appId);
+                    userId, UserHandle.getAppId(callingUid), ps.getAppId());
         }
         int appId = UserHandle.getAppId(callingUid);
         final SettingBase callingPs = mSettings.getSettingLPr(appId);
@@ -2464,7 +2465,7 @@ public class ComputerEngine implements Computer {
             final PackageSetting ps = mSettings.getPackageLPr(packageName);
             if (ps != null && ps.isMatch(flags)
                     && !shouldFilterApplicationLocked(ps, callingUid, userId)) {
-                return UserHandle.getUid(userId, ps.appId);
+                return UserHandle.getUid(userId, ps.getAppId());
             }
         }
 
@@ -2735,7 +2736,7 @@ public class ComputerEngine implements Computer {
                 return ((SharedUserSetting) obj).signatures.mSigningDetails;
             } else if (obj instanceof PackageSetting) {
                 final PackageSetting ps = (PackageSetting) obj;
-                return ps.signatures.mSigningDetails;
+                return ps.getSigningDetails();
             }
         }
         return SigningDetails.UNKNOWN;
@@ -2871,7 +2872,7 @@ public class ComputerEngine implements Computer {
 
             case DumpState.DUMP_QUERIES:
             {
-                final Integer filteringAppId = setting == null ? null : setting.appId;
+                final Integer filteringAppId = setting == null ? null : setting.getAppId();
                 mAppsFilter.dumpQueries(
                         pw, filteringAppId, dumpState, mUserManager.getUserIds(),
                         this::getPackagesForUidInternalBody);

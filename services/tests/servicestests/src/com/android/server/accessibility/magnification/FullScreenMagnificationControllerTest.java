@@ -1138,7 +1138,7 @@ public class FullScreenMagnificationControllerTest {
     public void testSetScale_toMagnifying_shouldNotifyActivatedState() {
         setScaleToMagnifying();
 
-        verify(mRequestObserver).onFullScreenMagnificationActivationState(eq(true));
+        verify(mRequestObserver).onFullScreenMagnificationActivationState(eq(DISPLAY_0), eq(true));
     }
 
     @Test
@@ -1146,7 +1146,7 @@ public class FullScreenMagnificationControllerTest {
         setScaleToMagnifying();
 
         mFullScreenMagnificationController.reset(DISPLAY_0, mAnimationCallback);
-        verify(mRequestObserver).onFullScreenMagnificationActivationState(eq(false));
+        verify(mRequestObserver).onFullScreenMagnificationActivationState(eq(DISPLAY_0), eq(false));
     }
 
     @Test

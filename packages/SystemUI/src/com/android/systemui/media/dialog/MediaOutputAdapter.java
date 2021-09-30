@@ -45,11 +45,14 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
     private static final String TAG = "MediaOutputAdapter";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
+    private final MediaOutputDialog mMediaOutputDialog;
     private ViewGroup mConnectedItem;
     private boolean mIncludeDynamicGroup;
 
-    public MediaOutputAdapter(MediaOutputController controller) {
+    public MediaOutputAdapter(MediaOutputController controller,
+            MediaOutputDialog mediaOutputDialog) {
         super(controller);
+        mMediaOutputDialog = mediaOutputDialog;
     }
 
     @Override
@@ -136,7 +139,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 mDivider.setTransitionAlpha(1);
                 mAddIcon.setVisibility(View.VISIBLE);
                 mAddIcon.setTransitionAlpha(1);
-                mAddIcon.setOnClickListener(v -> onEndItemClick());
+                mAddIcon.setOnClickListener(this::onEndItemClick);
             } else {
                 // Init non-active device layout
                 mDivider.setVisibility(View.GONE);
@@ -197,7 +200,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     mDivider.setTransitionAlpha(1);
                     mAddIcon.setVisibility(View.VISIBLE);
                     mAddIcon.setTransitionAlpha(1);
-                    mAddIcon.setOnClickListener(v -> onEndItemClick());
+                    mAddIcon.setOnClickListener(this::onEndItemClick);
                 } else {
                     mDivider.setVisibility(View.GONE);
                     mAddIcon.setVisibility(View.GONE);
@@ -232,8 +235,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             }
         }
 
-        private void onEndItemClick() {
-            mController.launchMediaOutputGroupDialog();
+        private void onEndItemClick(View view) {
+            mController.launchMediaOutputGroupDialog(mMediaOutputDialog.getDialogView());
         }
     }
 }

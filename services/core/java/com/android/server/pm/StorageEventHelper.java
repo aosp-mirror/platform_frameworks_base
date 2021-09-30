@@ -94,15 +94,16 @@ public class StorageEventHelper extends StorageEventListener {
         synchronized (mPm.mLock) {
             final List<PackageSetting> packages = mPm.mSettings.getVolumePackagesLPr(fsUuid);
             for (PackageSetting ps : packages) {
-                Slog.d(TAG, "Destroying " + ps.name + " because volume was forgotten");
-                mPm.deletePackageVersioned(new VersionedPackage(ps.name,
+                Slog.d(TAG, "Destroying " + ps.getPackageName()
+                        + " because volume was forgotten");
+                mPm.deletePackageVersioned(new VersionedPackage(ps.getPackageName(),
                                 PackageManager.VERSION_CODE_HIGHEST),
                         new PackageManager.LegacyPackageDeleteObserver(null).getBinder(),
                         UserHandle.USER_SYSTEM, PackageManager.DELETE_ALL_USERS);
                 // Try very hard to release any references to this package
                 // so we don't risk the system server being killed due to
                 // open FDs
-                AttributeCache.instance().removePackage(ps.name);
+                AttributeCache.instance().removePackage(ps.getPackageName());
             }
 
             mPm.mSettings.onVolumeForgotten(fsUuid);
@@ -134,7 +135,7 @@ public class StorageEventHelper extends StorageEventListener {
         }
 
         for (PackageSetting ps : packages) {
-            freezers.add(mPm.freezePackage(ps.name, "loadPrivatePackagesInner"));
+            freezers.add(mPm.freezePackage(ps.getPackageName(), "loadPrivatePackagesInner"));
             synchronized (mPm.mInstallLock) {
                 final AndroidPackage pkg;
                 try {
@@ -148,7 +149,7 @@ public class StorageEventHelper extends StorageEventListener {
 
                 if (!Build.FINGERPRINT.equals(ver.fingerprint)) {
                     mPm.clearAppDataLIF(
-                            ps.pkg, UserHandle.USER_ALL, FLAG_STORAGE_DE | FLAG_STORAGE_CE
+                            ps.getPkg(), UserHandle.USER_ALL, FLAG_STORAGE_DE | FLAG_STORAGE_CE
                             | FLAG_STORAGE_EXTERNAL | Installer.FLAG_CLEAR_CODE_CACHE_ONLY
                             | Installer.FLAG_CLEAR_APP_DATA_KEEP_ART_PROFILES);
                 }
@@ -226,16 +227,16 @@ public class StorageEventHelper extends StorageEventListener {
                 final List<PackageSetting> packages =
                         mPm.mSettings.getVolumePackagesLPr(volumeUuid);
                 for (PackageSetting ps : packages) {
-                    if (ps.pkg == null) continue;
+                    if (ps.getPkg() == null) continue;
 
-                    final AndroidPackage pkg = ps.pkg;
+                    final AndroidPackage pkg = ps.getPkg();
                     final int deleteFlags = PackageManager.DELETE_KEEP_DATA;
                     final PackageRemovedInfo outInfo = new PackageRemovedInfo(mPm);
 
-                    try (PackageFreezer freezer = mPm.freezePackageForDelete(ps.name, deleteFlags,
-                            "unloadPrivatePackagesInner")) {
-                        if (mPm.deletePackageLIF(ps.name, null, false, userIds, deleteFlags,
-                                outInfo, false)) {
+                    try (PackageFreezer freezer = mPm.freezePackageForDelete(ps.getPackageName(),
+                            deleteFlags, "unloadPrivatePackagesInner")) {
+                        if (mPm.deletePackageLIF(ps.getPackageName(), null, false, userIds,
+                                deleteFlags, outInfo, false)) {
                             unloaded.add(pkg);
                         } else {
                             Slog.w(TAG, "Failed to unload " + ps.getPath());
@@ -245,7 +246,7 @@ public class StorageEventHelper extends StorageEventListener {
                     // Try very hard to release any references to this package
                     // so we don't risk the system server being killed due to
                     // open FDs
-                    AttributeCache.instance().removePackage(ps.name);
+                    AttributeCache.instance().removePackage(ps.getPackageName());
                 }
 
                 mPm.writeSettingsLPrTEMP();

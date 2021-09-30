@@ -305,9 +305,6 @@ public class NotificationEntryManager implements
             NotificationEntry entry = mPendingNotifications.get(key);
             entry.abortTask();
             mPendingNotifications.remove(key);
-            for (NotifCollectionListener listener : mNotifCollectionListeners) {
-                listener.onEntryCleanUp(entry);
-            }
             mLogger.logInflationAborted(key, "pending", reason);
         }
         NotificationEntry addedEntry = getActiveNotificationUnfiltered(key);
@@ -477,6 +474,18 @@ public class NotificationEntryManager implements
                 if (!lifetimeExtended) {
                     // At this point, we are guaranteed the notification will be removed
                     abortExistingInflation(key, "removeNotification");
+                    // Fix for b/201097913: NotifCollectionListener#onEntryRemoved specifies that
+                    //   #onEntryRemoved should be called when a notification is cancelled,
+                    //   regardless of whether the notification was pending or active.
+                    // Note that mNotificationEntryListeners are NOT notified of #onEntryRemoved
+                    //   because for that interface, #onEntryRemoved should only be called for
+                    //   active entries, NOT pending ones.
+                    for (NotifCollectionListener listener : mNotifCollectionListeners) {
+                        listener.onEntryRemoved(pendingEntry, REASON_UNKNOWN);
+                    }
+                    for (NotifCollectionListener listener : mNotifCollectionListeners) {
+                        listener.onEntryCleanUp(pendingEntry);
+                    }
                     mAllNotifications.remove(pendingEntry);
                     mLeakDetector.trackGarbage(pendingEntry);
                 }

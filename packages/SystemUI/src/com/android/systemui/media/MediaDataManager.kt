@@ -889,7 +889,7 @@ class MediaDataManager(
             dismissIntent = target
                 .baseAction
                 .extras
-                .getParcelable(EXTRAS_SMARTSPACE_DISMISS_INTENT_KEY) as Intent
+                .getParcelable(EXTRAS_SMARTSPACE_DISMISS_INTENT_KEY) as Intent?
         }
         packageName(target)?.let {
             return SmartspaceMediaData(target.smartspaceTargetId, isActive, true, it,

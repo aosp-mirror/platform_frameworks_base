@@ -112,7 +112,7 @@ public final class MovePackageHelper {
                         "3rd party apps are not allowed on internal storage");
             }
 
-            currentVolumeUuid = ps.volumeUuid;
+            currentVolumeUuid = ps.getVolumeUuid();
 
             final File probe = new File(pkg.getPath());
             final File probeOat = new File(probe, "oat");
@@ -137,8 +137,8 @@ public final class MovePackageHelper {
 
             isCurrentLocationExternal = pkg.isExternalStorage();
             codeFile = new File(pkg.getPath());
-            installSource = ps.installSource;
-            packageAbiOverride = ps.cpuAbiOverrideString;
+            installSource = ps.getInstallSource();
+            packageAbiOverride = ps.getCpuAbiOverride();
             appId = UserHandle.getAppId(pkg.getUid());
             seinfo = AndroidPackageUtils.getSeInfo(pkg, ps);
             label = String.valueOf(pm.getApplicationLabel(
@@ -350,8 +350,8 @@ public final class MovePackageHelper {
         final String[] codePaths = { ps.getPathString() };
 
         try {
-            mPm.mInstaller.getAppSize(ps.volumeUuid, packageNames, userId, 0,
-                    ps.appId, ceDataInodes, codePaths, stats);
+            mPm.mInstaller.getAppSize(ps.getVolumeUuid(), packageNames, userId, 0,
+                    ps.getAppId(), ceDataInodes, codePaths, stats);
 
             // For now, ignore code size of packages on system partition
             if (PackageManagerServiceUtils.isSystemApp(ps)

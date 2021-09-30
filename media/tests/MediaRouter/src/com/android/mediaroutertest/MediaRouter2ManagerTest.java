@@ -115,7 +115,8 @@ public class MediaRouter2ManagerTest {
     public void setUp() throws Exception {
         mContext = InstrumentationRegistry.getTargetContext();
         mUiAutomation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
-        mUiAutomation.adoptShellPermissionIdentity(Manifest.permission.MEDIA_CONTENT_CONTROL);
+        mUiAutomation.adoptShellPermissionIdentity(Manifest.permission.MEDIA_CONTENT_CONTROL,
+                Manifest.permission.MODIFY_AUDIO_ROUTING);
         MediaRouter2ManagerTestActivity.startActivity(mContext);
 
         mManager = MediaRouter2Manager.getInstance(mContext);
@@ -305,7 +306,7 @@ public class MediaRouter2ManagerTest {
 
         mManager.selectRoute(mPackageName, routeToSelect);
         assertTrue(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
-        assertEquals(2, mManager.getActiveSessions().size());
+        assertEquals(1, mManager.getRemoteSessions().size());
     }
 
     @Test
@@ -368,7 +369,7 @@ public class MediaRouter2ManagerTest {
                 .addFeature(FEATURE_REMOTE_PLAYBACK)
                 .build();
 
-        mManager.transfer(mManager.getSystemRoutingSession(), unknownRoute);
+        mManager.transfer(mManager.getSystemRoutingSession(null), unknownRoute);
         assertFalse(onSessionCreatedLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS));
         assertTrue(onTransferFailedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
     }
@@ -512,12 +513,12 @@ public class MediaRouter2ManagerTest {
         assertFalse(managerOnSessionReleasedLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS));
 
         assertEquals(2, sessions.size());
-        List<String> activeSessionIds = mManager.getActiveSessions().stream()
+        List<String> remoteSessionIds = mManager.getRemoteSessions().stream()
                 .map(RoutingSessionInfo::getId)
                 .collect(Collectors.toList());
-        // The old session shouldn't appear on the active session list.
-        assertFalse(activeSessionIds.contains(sessions.get(0).getId()));
-        assertTrue(activeSessionIds.contains(sessions.get(1).getId()));
+        // The old session shouldn't appear on the session list.
+        assertFalse(remoteSessionIds.contains(sessions.get(0).getId()));
+        assertTrue(remoteSessionIds.contains(sessions.get(1).getId()));
 
         assertFalse(serviceOnReleaseSessionLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS));
         mManager.releaseSession(sessions.get(0));
@@ -554,13 +555,14 @@ public class MediaRouter2ManagerTest {
         assertTrue(onFailedLatch.await(MediaRouter2Manager.TRANSFER_TIMEOUT_MS,
                 TimeUnit.MILLISECONDS));
     }
+
     @Test
     public void testSetSystemRouteVolume() throws Exception {
         // ensure client
         addManagerCallback(new MediaRouter2Manager.Callback() {});
         String selectedSystemRouteId =
                 MediaRouter2Utils.getOriginalId(
-                mManager.getActiveSessions().get(0).getSelectedRoutes().get(0));
+                mManager.getSystemRoutingSession(mPackageName).getSelectedRoutes().get(0));
         Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
         MediaRoute2Info volRoute = routes.get(selectedSystemRouteId);
         assertNotNull(volRoute);
@@ -814,11 +816,6 @@ public class MediaRouter2ManagerTest {
         assertTrue(onSessionCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
     }
 
-    @Test
-    public void testGetActiveSessions_returnsNonEmptyList() {
-        assertFalse(mManager.getActiveSessions().isEmpty());
-    }
-
     Map<String, MediaRoute2Info> waitAndGetRoutesWithManager(List<String> routeFeatures)
             throws Exception {
         CountDownLatch addedLatch = new CountDownLatch(1);
@@ -938,7 +935,7 @@ public class MediaRouter2ManagerTest {
         // ensure ManagerRecord in MediaRouter2ServiceImpl
         addManagerCallback(new MediaRouter2Manager.Callback() {});
 
-        for (RoutingSessionInfo session : mManager.getActiveSessions()) {
+        for (RoutingSessionInfo session : mManager.getRemoteSessions()) {
             mManager.releaseSession(session);
         }
     }
