@@ -147,6 +147,17 @@ public class AccessPointTest {
     }
 
     @Test
+    public void testCompareTo_GivesNull() {
+        WifiConfiguration spyConfig = spy(new WifiConfiguration());
+
+        when(spyConfig.isPasspoint()).thenReturn(true);
+        spyConfig.providerFriendlyName = null;
+        AccessPoint passpointAp = new AccessPoint(mContext, spyConfig);
+
+        assertThat(passpointAp.getTitle()).isEqualTo("");
+    }
+
+    @Test
     public void testCompareTo_GivesActiveBeforeInactive() {
         AccessPoint activeAp = new TestAccessPointBuilder(mContext).setActive(true).build();
         AccessPoint inactiveAp = new TestAccessPointBuilder(mContext).setActive(false).build();
