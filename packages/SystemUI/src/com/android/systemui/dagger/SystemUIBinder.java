@@ -23,6 +23,7 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.accessibility.WindowMagnification;
 import com.android.systemui.biometrics.AuthController;
+import com.android.systemui.dreams.DreamOverlayRegistrant;
 import com.android.systemui.globalactions.GlobalActionsComponent;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.dagger.KeyguardModule;
@@ -188,4 +189,11 @@ public abstract class SystemUIBinder {
     @IntoMap
     @ClassKey(HomeSoundEffectController.class)
     public abstract SystemUI bindHomeSoundEffectController(HomeSoundEffectController sysui);
+
+    /** Inject into DreamOverlay. */
+    @Binds
+    @IntoMap
+    @ClassKey(DreamOverlayRegistrant.class)
+    public abstract SystemUI bindDreamOverlayRegistrant(
+            DreamOverlayRegistrant dreamOverlayRegistrant);
 }

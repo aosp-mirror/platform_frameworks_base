@@ -715,4 +715,7 @@
     <!-- Flag to enable privacy dot views, it shall be true for normal case -->
     <bool name="config_enablePrivacyDot">true</bool>
 
+    <!-- Flag to enable dream overlay service and its registration -->
+    <bool name="config_dreamOverlayServiceEnabled">false</bool>
+
 </resources>

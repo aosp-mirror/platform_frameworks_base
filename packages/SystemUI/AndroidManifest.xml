@@ -673,6 +673,11 @@
             android:name=".keyguard.KeyguardService"
             android:exported="true" />
 
+        <service
+            android:name=".dreams.DreamOverlayService"
+            android:enabled="@bool/config_dreamOverlayServiceEnabled"
+            android:exported="true" />
+
         <activity android:name=".keyguard.WorkLockActivity"
                   android:label="@string/accessibility_desc_work_lock"
                   android:permission="android.permission.MANAGE_USERS"
