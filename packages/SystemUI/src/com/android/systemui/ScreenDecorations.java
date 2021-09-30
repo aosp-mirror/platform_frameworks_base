@@ -161,8 +161,6 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     private boolean mPendingRotationChange;
     private boolean mIsRoundedCornerMultipleRadius;
     private boolean mIsPrivacyDotEnabled;
-    private int mStatusBarHeightPortrait;
-    private int mStatusBarHeightLandscape;
     private Drawable mRoundedCornerDrawable;
     private Drawable mRoundedCornerDrawableTop;
     private Drawable mRoundedCornerDrawableBottom;
@@ -315,7 +313,6 @@ public class ScreenDecorations extends SystemUI implements Tunable {
 
     private void setupDecorations() {
         if (hasRoundedCorners() || shouldDrawCutout() || mIsPrivacyDotEnabled) {
-            updateStatusBarHeight();
             final DisplayCutout cutout = getCutout();
             for (int i = 0; i < BOUNDS_POSITION_LENGTH; i++) {
                 if (shouldShowCutout(i, cutout) || shouldShowRoundedCorner(i, cutout)
@@ -326,7 +323,8 @@ public class ScreenDecorations extends SystemUI implements Tunable {
                 }
             }
 
-            if (mIsPrivacyDotEnabled) {
+            if (mTopLeftDot != null && mTopRightDot != null && mBottomLeftDot != null
+                    && mBottomRightDot != null) {
                 // Overlays have been created, send the dots to the controller
                 //TODO: need a better way to do this
                 mDotViewController.initialize(
@@ -430,7 +428,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         if (mOverlays[pos] != null) {
             return;
         }
-        mOverlays[pos] = overlayForPosition(pos);
+        mOverlays[pos] = overlayForPosition(pos, cutout);
 
         mCutoutViews[pos] = new DisplayCutoutView(mContext, pos, this);
         ((ViewGroup) mOverlays[pos]).addView(mCutoutViews[pos]);
@@ -462,10 +460,46 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     /**
      * Allow overrides for top/bottom positions
      */
-    private View overlayForPosition(@BoundsPosition int pos) {
+    private View overlayForPosition(@BoundsPosition int pos, @Nullable DisplayCutout cutout) {
         final int layoutId = (pos == BOUNDS_POSITION_LEFT || pos == BOUNDS_POSITION_TOP)
                 ? R.layout.rounded_corners_top : R.layout.rounded_corners_bottom;
-        return LayoutInflater.from(mContext).inflate(layoutId, null);
+        final ViewGroup vg = (ViewGroup) LayoutInflater.from(mContext).inflate(layoutId, null);
+        initPrivacyDotView(vg, pos, cutout);
+        return vg;
+    }
+
+    private void initPrivacyDotView(@NonNull ViewGroup viewGroup, @BoundsPosition int pos,
+            @Nullable DisplayCutout cutout) {
+        final View left = viewGroup.findViewById(R.id.privacy_dot_left_container);
+        final View right = viewGroup.findViewById(R.id.privacy_dot_right_container);
+        if (!shouldShowPrivacyDot(pos, cutout)) {
+            viewGroup.removeView(left);
+            viewGroup.removeView(right);
+            return;
+        }
+
+        switch (pos) {
+            case BOUNDS_POSITION_LEFT: {
+                mTopLeftDot = left;
+                mBottomLeftDot = right;
+                break;
+            }
+            case BOUNDS_POSITION_TOP: {
+                mTopLeftDot = left;
+                mTopRightDot = right;
+                break;
+            }
+            case BOUNDS_POSITION_RIGHT: {
+                mTopRightDot = left;
+                mBottomRightDot = right;
+                break;
+            }
+            case BOUNDS_POSITION_BOTTOM: {
+                mBottomLeftDot = left;
+                mBottomRightDot = right;
+                break;
+            }
+        }
     }
 
     private void updateView(@BoundsPosition int pos, @Nullable DisplayCutout cutout) {
@@ -483,8 +517,6 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         if (mCutoutViews != null && mCutoutViews[pos] != null) {
             mCutoutViews[pos].setRotation(mRotation);
         }
-
-        updatePrivacyDotView(pos, cutout);
     }
 
     @VisibleForTesting
@@ -671,14 +703,6 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         }
     }
 
-    private void updateStatusBarHeight() {
-        mStatusBarHeightLandscape = mContext.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.status_bar_height_landscape);
-        mStatusBarHeightPortrait = mContext.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.status_bar_height_portrait);
-        mDotViewController.setStatusBarHeights(mStatusBarHeightPortrait, mStatusBarHeightLandscape);
-    }
-
     private void updateRoundedCornerRadii() {
         // We should eventually move to just using the intrinsic size of the drawables since
         // they should be sized to the exact pixels they want to cover. Therefore I'm purposely not
@@ -809,26 +833,6 @@ public class ScreenDecorations extends SystemUI implements Tunable {
             ((FrameLayout.LayoutParams) rounded.getLayoutParams()).gravity = gravity;
             setRoundedCornerOrientation(rounded, gravity);
             rounded.setVisibility(View.VISIBLE);
-        }
-    }
-
-    private void updatePrivacyDotView(@BoundsPosition int pos, @Nullable DisplayCutout cutout) {
-        final ViewGroup viewGroup = (ViewGroup) mOverlays[pos];
-
-        final View left = viewGroup.findViewById(R.id.privacy_dot_left_container);
-        final View right = viewGroup.findViewById(R.id.privacy_dot_right_container);
-        if (shouldShowPrivacyDot(pos, cutout)) {
-            // TODO (b/201481944) Privacy Dots pos and var are wrong with long side cutout enable
-            if (pos == BOUNDS_POSITION_LEFT || pos == BOUNDS_POSITION_TOP) {
-                mTopLeftDot = left;
-                mTopRightDot = right;
-            } else {
-                mBottomLeftDot = left;
-                mBottomRightDot = right;
-            }
-        } else {
-            viewGroup.removeView(left);
-            viewGroup.removeView(right);
         }
     }
 

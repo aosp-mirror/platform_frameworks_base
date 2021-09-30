@@ -179,6 +179,11 @@ class StatusBarContentInsetsProvider @Inject constructor(
                 minRight)
     }
 
+    fun getStatusBarPaddingTop(@Rotation rotation: Int? = null): Int {
+        val res = rotation?.let { it -> getResourcesForRotation(it, context) } ?: context.resources
+        return res.getDimensionPixelSize(R.dimen.status_bar_padding_top)
+    }
+
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
         insetsCache.snapshot().forEach { (key, rect) ->
             pw.println("$key -> $rect")
