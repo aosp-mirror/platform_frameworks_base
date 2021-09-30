@@ -318,11 +318,35 @@ public class LocalBluetoothProfileManager {
                     }
                 }
             }
+
+            if (getCsipSetCoordinatorProfile() != null
+                    && mProfile instanceof CsipSetCoordinatorProfile
+                    && newState == BluetoothProfile.STATE_CONNECTED) {
+                // Check if the GroupID has being initialized
+                if (cachedDevice.getGroupId() == BluetoothCsipSetCoordinator.GROUP_ID_INVALID) {
+                    final Map<Integer, ParcelUuid> groupIdMap = getCsipSetCoordinatorProfile()
+                            .getGroupUuidMapByDevice(cachedDevice.getDevice());
+                    if (groupIdMap != null) {
+                        for (Map.Entry<Integer, ParcelUuid> entry: groupIdMap.entrySet()) {
+                            if (entry.getValue().equals(BluetoothUuid.BASE_UUID)) {
+                                cachedDevice.setGroupId(entry.getKey());
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
             cachedDevice.onProfileStateChanged(mProfile, newState);
             // Dispatch profile changed after device update
-            if (!(cachedDevice.getHiSyncId() != BluetoothHearingAid.HI_SYNC_ID_INVALID
-                    && mDeviceManager.onProfileConnectionStateChangedIfProcessed(cachedDevice,
-                    newState))) {
+            boolean needDispatchProfileConnectionState = true;
+            if (cachedDevice.getHiSyncId() != BluetoothHearingAid.HI_SYNC_ID_INVALID
+                    || cachedDevice.getGroupId() != BluetoothCsipSetCoordinator.GROUP_ID_INVALID) {
+                needDispatchProfileConnectionState = !mDeviceManager
+                        .onProfileConnectionStateChangedIfProcessed(cachedDevice, newState,
+                        mProfile.getProfileId());
+            }
+            if (needDispatchProfileConnectionState) {
                 cachedDevice.refresh();
                 mEventManager.dispatchProfileConnectionStateChanged(cachedDevice, newState,
                         mProfile.getProfileId());

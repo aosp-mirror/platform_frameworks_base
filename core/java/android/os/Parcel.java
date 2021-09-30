@@ -16,6 +16,8 @@
 
 package android.os;
 
+import static java.util.Objects.requireNonNull;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
@@ -3412,12 +3414,19 @@ public final class Parcel {
         private final int mLength;
         private final int mType;
         @Nullable private final ClassLoader mLoader;
-        @Nullable private Parcel mSource;
         @Nullable private Object mObject;
-        @Nullable private Parcel mValueParcel;
+        @Nullable private volatile Parcel mValueParcel;
+
+        /**
+         * This goes from non-null to null once. Always check the nullability of this object before
+         * performing any operations, either involving itself or mObject since the happens-before
+         * established by this volatile will guarantee visibility of either. We can assume this
+         * parcel won't change anymore.
+         */
+        @Nullable private volatile Parcel mSource;
 
         LazyValue(Parcel source, int position, int length, int type, @Nullable ClassLoader loader) {
-            mSource = source;
+            mSource = requireNonNull(source);
             mPosition = position;
             mLength = length;
             mType = type;
@@ -3426,38 +3435,41 @@ public final class Parcel {
 
         @Override
         public Object get() {
-            if (mObject == null) {
-                int restore = mSource.dataPosition();
-                try {
-                    mSource.setDataPosition(mPosition);
-                    mObject = mSource.readValue(mLoader);
-                } finally {
-                    mSource.setDataPosition(restore);
-                }
-                mSource = null;
-                if (mValueParcel != null) {
-                    mValueParcel.recycle();
-                    mValueParcel = null;
+            Parcel source = mSource;
+            if (source != null) {
+                synchronized (source) {
+                    int restore = source.dataPosition();
+                    try {
+                        source.setDataPosition(mPosition);
+                        mObject = source.readValue(mLoader);
+                    } finally {
+                        source.setDataPosition(restore);
+                    }
+                    mSource = null;
                 }
             }
             return mObject;
         }
 
         public void writeToParcel(Parcel out) {
-            if (mObject == null) {
-                out.appendFrom(mSource, mPosition, mLength + 8);
+            Parcel source = mSource;
+            if (source != null) {
+                out.appendFrom(source, mPosition, mLength + 8);
             } else {
                 out.writeValue(mObject);
             }
         }
 
         public boolean hasFileDescriptors() {
-            return getValueParcel().hasFileDescriptors();
+            Parcel source = mSource;
+            return (source != null)
+                    ? getValueParcel(source).hasFileDescriptors()
+                    : Parcel.hasFileDescriptors(mObject);
         }
 
         @Override
         public String toString() {
-            return mObject == null
+            return (mSource != null)
                     ? "Supplier{" + valueTypeToString(mType) + "@" + mPosition + "+" + mLength + '}'
                     : "Supplier{" + mObject + "}";
         }
@@ -3476,41 +3488,49 @@ public final class Parcel {
                 return false;
             }
             LazyValue value = (LazyValue) other;
-            // Check if they are either both serialized or both deserialized
-            if ((mObject == null) != (value.mObject == null)) {
+            // Check if they are either both serialized or both deserialized.
+            Parcel source = mSource;
+            Parcel otherSource = value.mSource;
+            if ((source == null) != (otherSource == null)) {
                 return false;
             }
-            // If both are deserialized, compare the live objects
-            if (mObject != null) {
-                return mObject.equals(value.mObject);
+            // If both are deserialized, compare the live objects.
+            if (source == null) {
+                // Note that here it's guaranteed that both mObject references contain valid values
+                // (possibly null) since mSource will have provided the memory barrier for those and
+                // once deserialized we never go back to serialized state.
+                return Objects.equals(mObject, value.mObject);
             }
-            // Better safely fail here since this could mean we get different objects
+            // Better safely fail here since this could mean we get different objects.
             if (!Objects.equals(mLoader, value.mLoader)) {
                 return false;
             }
-            // Otherwise compare metadata prior to comparing payload
+            // Otherwise compare metadata prior to comparing payload.
             if (mType != value.mType || mLength != value.mLength) {
                 return false;
             }
-            // Finally we compare the payload
-            return getValueParcel().compareData(value.getValueParcel()) == 0;
+            // Finally we compare the payload.
+            return getValueParcel(source).compareData(value.getValueParcel(otherSource)) == 0;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(mObject, mLoader, mType, mLength);
+            // Accessing mSource first to provide memory barrier for mObject
+            return Objects.hash(mSource == null, mObject, mLoader, mType, mLength);
         }
 
         /** This extracts the parcel section responsible for the object and returns it. */
-        private Parcel getValueParcel() {
-            if (mValueParcel == null) {
-                mValueParcel = Parcel.obtain();
+        private Parcel getValueParcel(Parcel source) {
+            Parcel parcel = mValueParcel;
+            if (parcel == null) {
+                parcel = Parcel.obtain();
                 // mLength is the length of object representation, excluding the type and length.
                 // mPosition is the position of the entire value container, right before the type.
                 // So, we add 4 bytes for the type + 4 bytes for the length written.
-                mValueParcel.appendFrom(mSource, mPosition, mLength + 8);
+                parcel.appendFrom(source, mPosition, mLength + 8);
+                mValueParcel = parcel;
             }
-            return mValueParcel;
+            return parcel;
         }
     }
 
