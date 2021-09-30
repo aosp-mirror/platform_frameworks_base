@@ -2863,14 +2863,31 @@ public final class DisplayManagerService extends SystemService {
         @Override // Binder call
         public void setBrightnessConfigurationForUser(
                 BrightnessConfiguration c, @UserIdInt int userId, String packageName) {
-            mLogicalDisplayMapper.forEachLocked(logicalDisplay -> {
-                if (logicalDisplay.getDisplayInfoLocked().type != Display.TYPE_INTERNAL) {
-                    return;
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS,
+                    "Permission required to change the display's brightness configuration");
+            if (userId != UserHandle.getCallingUserId()) {
+                mContext.enforceCallingOrSelfPermission(
+                        Manifest.permission.INTERACT_ACROSS_USERS,
+                        "Permission required to change the display brightness"
+                                + " configuration of another user");
+            }
+            final long token = Binder.clearCallingIdentity();
+            try {
+                synchronized (mSyncRoot) {
+                    mLogicalDisplayMapper.forEachLocked(logicalDisplay -> {
+                        if (logicalDisplay.getDisplayInfoLocked().type != Display.TYPE_INTERNAL) {
+                            return;
+                        }
+                        final DisplayDevice displayDevice =
+                                logicalDisplay.getPrimaryDisplayDeviceLocked();
+                        setBrightnessConfigurationForDisplayInternal(c, displayDevice.getUniqueId(),
+                                userId, packageName);
+                    });
                 }
-                final DisplayDevice displayDevice = logicalDisplay.getPrimaryDisplayDeviceLocked();
-                setBrightnessConfigurationForDisplay(c, displayDevice.getUniqueId(), userId,
-                        packageName);
-            });
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         @Override // Binder call
