@@ -402,16 +402,6 @@ public class PhoneStatusBarView extends PanelBar {
                 getPaddingBottom());
     }
 
-    public void setHeadsUpVisible(boolean headsUpVisible) {
-        mHeadsUpVisible = headsUpVisible;
-        updateVisibility();
-    }
-
-    @Override
-    protected boolean shouldPanelBeVisible() {
-        return mHeadsUpVisible || super.shouldPanelBeVisible();
-    }
-
     /** An interface that will provide whether panel is enabled. */
     interface PanelEnabledProvider {
         /** Returns true if the panel is enabled and false otherwise. */
