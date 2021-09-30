@@ -15,6 +15,10 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public boolean updateMccMncConfiguration(@NonNull String, @NonNull String);
   }
 
+  public class ActivityOptions {
+    method @NonNull public static android.app.ActivityOptions fromBundle(@NonNull android.os.Bundle);
+  }
+
   public class AppOpsManager {
     field public static final String OPSTR_NO_ISOLATED_STORAGE = "android:no_isolated_storage";
   }

@@ -995,11 +995,13 @@ public class LauncherAppsService extends SystemService {
             // Note the target activity doesn't have to be exported.
 
             // Flag for bubble
-            ActivityOptions options = ActivityOptions.fromBundle(startActivityOptions);
-            if (options != null && options.isApplyActivityFlagsForBubbles()) {
-                // Flag for bubble to make behaviour match documentLaunchMode=always.
-                intents[0].addFlags(FLAG_ACTIVITY_NEW_DOCUMENT);
-                intents[0].addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+            if (startActivityOptions != null) {
+                ActivityOptions options = ActivityOptions.fromBundle(startActivityOptions);
+                if (options.isApplyActivityFlagsForBubbles()) {
+                    // Flag for bubble to make behaviour match documentLaunchMode=always.
+                    intents[0].addFlags(FLAG_ACTIVITY_NEW_DOCUMENT);
+                    intents[0].addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+                }
             }
 
             intents[0].addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
