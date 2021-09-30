@@ -17,10 +17,10 @@ package android.os;
 
 import android.Manifest;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.content.ComponentName;
 import android.content.Context;
 import android.util.ArraySet;
 import android.util.Log;
@@ -138,9 +138,9 @@ public class SystemConfigManager {
      * @return The enabled component
      * {@hide}
      */
-    @SystemApi
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @NonNull
-    public List<String> getEnabledComponentOverrides(@NonNull String packageName) {
+    public List<ComponentName> getEnabledComponentOverrides(@NonNull String packageName) {
         try {
             return mInterface.getEnabledComponentOverrides(packageName);
         } catch (RemoteException e) {
