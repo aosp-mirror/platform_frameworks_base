@@ -2253,17 +2253,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    void removeStartingWindowIfNeeded() {
-        // Removing the task snapshot after the task is actually focused (see
-        // Task#onWindowFocusChanged). Since some of the app contents may draw in this time and
-        // requires more times to draw finish, in case flicking may happen when removing the task
-        // snapshot too early. (i.e. Showing IME.)
-        if ((mStartingData instanceof SnapshotStartingData) && !getTask().isFocused()) {
-            return;
-        }
-        removeStartingWindow();
-    }
-
     void removeStartingWindow() {
         removeStartingWindowAnimation(true /* prepareAnimation */);
     }
@@ -5835,7 +5824,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // own stuff.
             win.cancelAnimation();
         }
-        removeStartingWindowIfNeeded();
+        removeStartingWindow();
         updateReportedVisibilityLocked();
     }
 
