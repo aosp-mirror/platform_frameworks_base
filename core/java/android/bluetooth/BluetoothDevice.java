@@ -1680,6 +1680,90 @@ public final class BluetoothDevice implements Parcelable, Attributable {
         return false;
     }
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {
+            BluetoothStatusCodes.SUCCESS,
+            BluetoothStatusCodes.ERROR_BLUETOOTH_NOT_ENABLED,
+            BluetoothStatusCodes.ERROR_BLUETOOTH_NOT_ALLOWED,
+            BluetoothStatusCodes.ERROR_MISSING_BLUETOOTH_CONNECT_PERMISSION,
+            BluetoothStatusCodes.ERROR_DEVICE_NOT_BONDED
+    })
+    public @interface ConnectionReturnValues{}
+
+    /**
+     * Connects all user enabled and supported bluetooth profiles between the local and remote
+     * device. If no profiles are user enabled (e.g. first connection), we connect all supported
+     * profiles. If the device is not already connected, this will page the device before initiating
+     * profile connections. Connection is asynchronous and you should listen to each profile's
+     * broadcast intent ACTION_CONNECTION_STATE_CHANGED to verify whether connection was successful.
+     * For example, to verify a2dp is connected, you would listen for
+     * {@link BluetoothA2dp#ACTION_CONNECTION_STATE_CHANGED}
+     *
+     * @return whether the messages were successfully sent to try to connect all profiles
+     * @throws IllegalArgumentException if the device address is invalid
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+            android.Manifest.permission.MODIFY_PHONE_STATE,
+    })
+    public @ConnectionReturnValues int connect() {
+        if (!BluetoothAdapter.checkBluetoothAddress(getAddress())) {
+            throw new IllegalArgumentException("device cannot have an invalid address");
+        }
+
+        try {
+            if (sService == null) {
+                Log.e(TAG, "BT not enabled. Cannot connect to remote device.");
+                return BluetoothStatusCodes.ERROR_BLUETOOTH_NOT_ENABLED;
+            }
+            return sService.connectAllEnabledProfiles(this, mAttributionSource);
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Disconnects all connected bluetooth profiles between the local and remote device.
+     * Disconnection is asynchronous and you should listen to each profile's broadcast intent
+     * ACTION_CONNECTION_STATE_CHANGED to verify whether disconnection was successful. For example,
+     * to verify a2dp is disconnected, you would listen for
+     * {@link BluetoothA2dp#ACTION_CONNECTION_STATE_CHANGED}
+     *
+     * @return whether the messages were successfully sent to try to disconnect all profiles
+     * @throws IllegalArgumentException if the device address is invalid
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
+    public @ConnectionReturnValues int disconnect() {
+        if (!BluetoothAdapter.checkBluetoothAddress(getAddress())) {
+            throw new IllegalArgumentException("device cannot have an invalid address");
+        }
+
+        try {
+            if (sService == null) {
+                Log.e(TAG, "BT not enabled. Cannot disconnect from remote device.");
+                return BluetoothStatusCodes.ERROR_BLUETOOTH_NOT_ENABLED;
+            }
+            return sService.disconnectAllEnabledProfiles(this, mAttributionSource);
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /**
      * Returns whether there is an open connection to this device.
      *
