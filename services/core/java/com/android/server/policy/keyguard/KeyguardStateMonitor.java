@@ -83,8 +83,14 @@ public class KeyguardStateMonitor extends IKeyguardStateCallback.Stub {
         return mHasLockscreenWallpaper;
     }
 
+    public int getCurrentUser() {
+        return mCurrentUserId;
+    }
+
     @Override // Binder interface
-    public void onShowingStateChanged(boolean showing) {
+    public void onShowingStateChanged(boolean showing, int userId) {
+        if (userId != mCurrentUserId) return;
+
         mIsShowing = showing;
 
         mCallback.onShowingChanged();
