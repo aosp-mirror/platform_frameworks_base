@@ -623,7 +623,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void transitionToUnlocked() {
-        mScrimController.setPanelExpansion(0f);
+        mScrimController.setRawPanelExpansionFraction(0f);
         mScrimController.transitionTo(ScrimState.UNLOCKED);
         finishAnimationsImmediately();
         assertScrimAlpha(Map.of(
@@ -638,7 +638,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         ));
 
         // Back scrim should be visible after start dragging
-        mScrimController.setPanelExpansion(0.3f);
+        mScrimController.setRawPanelExpansionFraction(0.3f);
         assertScrimAlpha(Map.of(
                 mScrimInFront, TRANSPARENT,
                 mNotificationsScrim, SEMI_TRANSPARENT,
@@ -663,20 +663,20 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void panelExpansion() {
-        mScrimController.setPanelExpansion(0f);
-        mScrimController.setPanelExpansion(0.5f);
+        mScrimController.setRawPanelExpansionFraction(0f);
+        mScrimController.setRawPanelExpansionFraction(0.5f);
         mScrimController.transitionTo(ScrimState.UNLOCKED);
         finishAnimationsImmediately();
 
         reset(mScrimBehind);
-        mScrimController.setPanelExpansion(0f);
-        mScrimController.setPanelExpansion(1.0f);
+        mScrimController.setRawPanelExpansionFraction(0f);
+        mScrimController.setRawPanelExpansionFraction(1.0f);
         finishAnimationsImmediately();
 
         assertEquals("Scrim alpha should change after setPanelExpansion",
                 mScrimBehindAlpha, mScrimBehind.getViewAlpha(), 0.01f);
 
-        mScrimController.setPanelExpansion(0f);
+        mScrimController.setRawPanelExpansionFraction(0f);
         finishAnimationsImmediately();
 
         assertEquals("Scrim alpha should change after setPanelExpansion",
@@ -723,21 +723,21 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void panelExpansionAffectsAlpha() {
-        mScrimController.setPanelExpansion(0f);
-        mScrimController.setPanelExpansion(0.5f);
+        mScrimController.setRawPanelExpansionFraction(0f);
+        mScrimController.setRawPanelExpansionFraction(0.5f);
         mScrimController.transitionTo(ScrimState.UNLOCKED);
         finishAnimationsImmediately();
 
         final float scrimAlpha = mScrimBehind.getViewAlpha();
         reset(mScrimBehind);
         mScrimController.setExpansionAffectsAlpha(false);
-        mScrimController.setPanelExpansion(0.8f);
+        mScrimController.setRawPanelExpansionFraction(0.8f);
         verifyZeroInteractions(mScrimBehind);
         assertEquals("Scrim opacity shouldn't change when setExpansionAffectsAlpha "
                 + "is false", scrimAlpha, mScrimBehind.getViewAlpha(), 0.01f);
 
         mScrimController.setExpansionAffectsAlpha(true);
-        mScrimController.setPanelExpansion(0.1f);
+        mScrimController.setRawPanelExpansionFraction(0.1f);
         finishAnimationsImmediately();
         Assert.assertNotEquals("Scrim opacity should change when setExpansionAffectsAlpha "
                 + "is true", scrimAlpha, mScrimBehind.getViewAlpha(), 0.01f);
@@ -747,7 +747,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     public void transitionToUnlockedFromOff() {
         // Simulate unlock with fingerprint without AOD
         mScrimController.transitionTo(ScrimState.OFF);
-        mScrimController.setPanelExpansion(0f);
+        mScrimController.setRawPanelExpansionFraction(0f);
         finishAnimationsImmediately();
         mScrimController.transitionTo(ScrimState.UNLOCKED);
 
@@ -769,7 +769,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     public void transitionToUnlockedFromAod() {
         // Simulate unlock with fingerprint
         mScrimController.transitionTo(ScrimState.AOD);
-        mScrimController.setPanelExpansion(0f);
+        mScrimController.setRawPanelExpansionFraction(0f);
         finishAnimationsImmediately();
         mScrimController.transitionTo(ScrimState.UNLOCKED);
 
@@ -948,7 +948,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void testConservesExpansionOpacityAfterTransition() {
         mScrimController.transitionTo(ScrimState.UNLOCKED);
-        mScrimController.setPanelExpansion(0.5f);
+        mScrimController.setRawPanelExpansionFraction(0.5f);
         finishAnimationsImmediately();
 
         final float expandedAlpha = mScrimBehind.getViewAlpha();
@@ -1075,7 +1075,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void testScrimsOpaque_whenShadeFullyExpanded() {
         mScrimController.transitionTo(ScrimState.UNLOCKED);
-        mScrimController.setPanelExpansion(1);
+        mScrimController.setRawPanelExpansionFraction(1);
         // notifications scrim alpha change require calling setQsPosition
         mScrimController.setQsPosition(0, 300);
         finishAnimationsImmediately();
@@ -1089,7 +1089,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void testScrimsVisible_whenShadeVisible() {
         mScrimController.transitionTo(ScrimState.UNLOCKED);
-        mScrimController.setPanelExpansion(0.3f);
+        mScrimController.setRawPanelExpansionFraction(0.3f);
         // notifications scrim alpha change require calling setQsPosition
         mScrimController.setQsPosition(0, 300);
         finishAnimationsImmediately();
@@ -1124,7 +1124,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     public void testScrimsVisible_whenShadeVisible_clippingQs() {
         mScrimController.setClipsQsScrim(true);
         mScrimController.transitionTo(ScrimState.UNLOCKED);
-        mScrimController.setPanelExpansion(0.3f);
+        mScrimController.setRawPanelExpansionFraction(0.3f);
         // notifications scrim alpha change require calling setQsPosition
         mScrimController.setQsPosition(0.5f, 300);
         finishAnimationsImmediately();
@@ -1150,7 +1150,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     public void testNotificationScrimTransparent_whenOnLockscreen() {
         mScrimController.transitionTo(ScrimState.KEYGUARD);
         // even if shade is not pulled down, panel has expansion of 1 on the lockscreen
-        mScrimController.setPanelExpansion(1);
+        mScrimController.setRawPanelExpansionFraction(1);
         mScrimController.setQsPosition(0f, /*qs panel bottom*/ 0);
 
         assertScrimAlpha(Map.of(
@@ -1160,7 +1160,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void testNotificationScrimVisible_afterOpeningShadeFromLockscreen() {
-        mScrimController.setPanelExpansion(1);
+        mScrimController.setRawPanelExpansionFraction(1);
         mScrimController.transitionTo(ScrimState.SHADE_LOCKED);
         finishAnimationsImmediately();
 
@@ -1203,11 +1203,11 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void testNotificationTransparency_followsTransitionToFullShade() {
         mScrimController.transitionTo(ScrimState.SHADE_LOCKED);
-        mScrimController.setPanelExpansion(1.0f);
+        mScrimController.setRawPanelExpansionFraction(1.0f);
         finishAnimationsImmediately();
         float shadeLockedAlpha = mNotificationsScrim.getViewAlpha();
         mScrimController.transitionTo(ScrimState.KEYGUARD);
-        mScrimController.setPanelExpansion(1.0f);
+        mScrimController.setRawPanelExpansionFraction(1.0f);
         finishAnimationsImmediately();
         float keyguardAlpha = mNotificationsScrim.getViewAlpha();
 
@@ -1227,7 +1227,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     private void assertAlphaAfterExpansion(ScrimView scrim, float expectedAlpha, float expansion) {
-        mScrimController.setPanelExpansion(expansion);
+        mScrimController.setRawPanelExpansionFraction(expansion);
         finishAnimationsImmediately();
         // alpha is not changing linearly thus 0.2 of leeway when asserting
         assertEquals(expectedAlpha, mNotificationsScrim.getViewAlpha(), 0.2);
