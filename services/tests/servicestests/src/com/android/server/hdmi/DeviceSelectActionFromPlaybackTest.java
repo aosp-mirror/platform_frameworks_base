@@ -65,31 +65,13 @@ public class DeviceSelectActionFromPlaybackTest {
     private static final byte[] POWER_ON = new byte[] { POWER_STATUS_ON };
     private static final byte[] POWER_STANDBY = new byte[] { POWER_STATUS_STANDBY };
     private static final byte[] POWER_TRANSIENT_TO_ON = new byte[] { POWER_STATUS_TRANSIENT_TO_ON };
-    private static final HdmiCecMessage REPORT_POWER_STATUS_ON = new HdmiCecMessage(
-            ADDR_PLAYBACK_2, ADDR_PLAYBACK_1, Constants.MESSAGE_REPORT_POWER_STATUS, POWER_ON);
-    private static final HdmiCecMessage REPORT_POWER_STATUS_STANDBY = new HdmiCecMessage(
-            ADDR_PLAYBACK_2, ADDR_PLAYBACK_1, Constants.MESSAGE_REPORT_POWER_STATUS, POWER_STANDBY);
-    private static final HdmiCecMessage REPORT_POWER_STATUS_TRANSIENT_TO_ON = new HdmiCecMessage(
-            ADDR_PLAYBACK_2, ADDR_PLAYBACK_1, Constants.MESSAGE_REPORT_POWER_STATUS,
-            POWER_TRANSIENT_TO_ON);
-    private static final HdmiCecMessage SET_STREAM_PATH = HdmiCecMessageBuilder.buildSetStreamPath(
-            ADDR_PLAYBACK_1, PHYSICAL_ADDRESS_PLAYBACK_2);
-    private static final HdmiCecMessage ROUTING_CHANGE = HdmiCecMessageBuilder.buildRoutingChange(
-            ADDR_PLAYBACK_1, PHYSICAL_ADDRESS_PLAYBACK_3, PHYSICAL_ADDRESS_PLAYBACK_2);
-    private static final HdmiCecMessage ACTIVE_SOURCE = HdmiCecMessageBuilder.buildActiveSource(
-            ADDR_PLAYBACK_2, PHYSICAL_ADDRESS_PLAYBACK_2);
-    private static final HdmiDeviceInfo INFO_PLAYBACK_1 = new HdmiDeviceInfo(
-            ADDR_PLAYBACK_1, PHYSICAL_ADDRESS_PLAYBACK_1, PORT_1, HdmiDeviceInfo.DEVICE_PLAYBACK,
-            0x1234, "Playback 1",
-            HdmiControlManager.POWER_STATUS_ON, HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
-    private static final HdmiDeviceInfo INFO_PLAYBACK_2 = new HdmiDeviceInfo(
-            ADDR_PLAYBACK_2, PHYSICAL_ADDRESS_PLAYBACK_2, PORT_2, HdmiDeviceInfo.DEVICE_PLAYBACK,
-            0x1234, "Playback 2",
-            HdmiControlManager.POWER_STATUS_ON, HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
-    private static final HdmiDeviceInfo INFO_PLAYBACK_3 = new HdmiDeviceInfo(
-            ADDR_PLAYBACK_3, PHYSICAL_ADDRESS_PLAYBACK_3, PORT_3, HdmiDeviceInfo.DEVICE_PLAYBACK,
-            0x1234, "Playback 3",
-            HdmiControlManager.POWER_STATUS_ON, HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
+
+    private HdmiCecMessage mReportPowerStatusOn;
+    private HdmiCecMessage mReportPowerStatusStandby;
+    private HdmiCecMessage mReportPowerStatusTransientToOn;
+    private HdmiCecMessage mSetStreamPath;
+    private HdmiCecMessage mRoutingChange;
+    private HdmiCecMessage mActiveSource;
 
     private HdmiCecController mHdmiCecController;
     private HdmiCecLocalDevicePlayback mHdmiCecLocalDevicePlayback;
@@ -102,6 +84,10 @@ public class DeviceSelectActionFromPlaybackTest {
     private Looper mMyLooper;
     private TestLooper mTestLooper = new TestLooper();
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
+
+    private int mPlaybackLogicalAddress1;
+    private int mPlaybackLogicalAddress2;
+    private int mPlaybackLogicalAddress3;
 
     @Before
     public void setUp() {
@@ -157,9 +143,54 @@ public class DeviceSelectActionFromPlaybackTest {
         mTestLooper.dispatchAll();
         mNativeWrapper.clearResultMessages();
 
-        mHdmiControlService.getHdmiCecNetwork().addCecDevice(INFO_PLAYBACK_1);
-        mHdmiControlService.getHdmiCecNetwork().addCecDevice(INFO_PLAYBACK_2);
-        mHdmiControlService.getHdmiCecNetwork().addCecDevice(INFO_PLAYBACK_3);
+        // The addresses depend on local device's LA.
+        // This help the tests to pass with every local device LA.
+        synchronized (mHdmiCecLocalDevicePlayback.mLock) {
+            mPlaybackLogicalAddress1 =
+                    mHdmiCecLocalDevicePlayback.getDeviceInfo().getLogicalAddress();
+        }
+        mPlaybackLogicalAddress2 = mPlaybackLogicalAddress1 == ADDR_PLAYBACK_2
+                ? ADDR_PLAYBACK_1 : ADDR_PLAYBACK_2;
+        mPlaybackLogicalAddress3 = mPlaybackLogicalAddress1 == ADDR_PLAYBACK_3
+                ? ADDR_PLAYBACK_1 : ADDR_PLAYBACK_3;
+
+        mReportPowerStatusOn = new HdmiCecMessage(
+                mPlaybackLogicalAddress2, mPlaybackLogicalAddress1,
+                Constants.MESSAGE_REPORT_POWER_STATUS, POWER_ON);
+        mReportPowerStatusStandby = new HdmiCecMessage(
+                mPlaybackLogicalAddress2, mPlaybackLogicalAddress1,
+                Constants.MESSAGE_REPORT_POWER_STATUS, POWER_STANDBY);
+        mReportPowerStatusTransientToOn = new HdmiCecMessage(
+                mPlaybackLogicalAddress2, mPlaybackLogicalAddress1,
+                Constants.MESSAGE_REPORT_POWER_STATUS, POWER_TRANSIENT_TO_ON);
+        mSetStreamPath = HdmiCecMessageBuilder.buildSetStreamPath(
+                mPlaybackLogicalAddress1, PHYSICAL_ADDRESS_PLAYBACK_2);
+        mRoutingChange = HdmiCecMessageBuilder.buildRoutingChange(
+                mPlaybackLogicalAddress1, PHYSICAL_ADDRESS_PLAYBACK_3,
+                PHYSICAL_ADDRESS_PLAYBACK_2);
+        mActiveSource = HdmiCecMessageBuilder.buildActiveSource(
+                mPlaybackLogicalAddress2, PHYSICAL_ADDRESS_PLAYBACK_2);
+
+        HdmiDeviceInfo infoPlayback1 = new HdmiDeviceInfo(
+                mPlaybackLogicalAddress1, PHYSICAL_ADDRESS_PLAYBACK_1, PORT_1,
+                HdmiDeviceInfo.DEVICE_PLAYBACK,
+                0x1234, "Playback 1",
+                HdmiControlManager.POWER_STATUS_ON, HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
+        HdmiDeviceInfo infoPlayback2 = new HdmiDeviceInfo(
+                mPlaybackLogicalAddress2, PHYSICAL_ADDRESS_PLAYBACK_2, PORT_2,
+                HdmiDeviceInfo.DEVICE_PLAYBACK,
+                0x1234, "Playback 2",
+                HdmiControlManager.POWER_STATUS_ON, HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
+        HdmiDeviceInfo infoPlayback3 = new HdmiDeviceInfo(
+                mPlaybackLogicalAddress3, PHYSICAL_ADDRESS_PLAYBACK_3, PORT_3,
+                HdmiDeviceInfo.DEVICE_PLAYBACK,
+                0x1234, "Playback 3",
+                HdmiControlManager.POWER_STATUS_ON, HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
+
+        mHdmiControlService.getHdmiCecNetwork().addCecDevice(infoPlayback1);
+        mHdmiControlService.getHdmiCecNetwork().addCecDevice(infoPlayback2);
+        mHdmiControlService.getHdmiCecNetwork().addCecDevice(infoPlayback3);
+
     }
 
     private static class TestActionTimer implements ActionTimer {
@@ -198,7 +229,7 @@ public class DeviceSelectActionFromPlaybackTest {
             TestCallback callback,
             boolean isCec20) {
         HdmiDeviceInfo hdmiDeviceInfo =
-                mHdmiControlService.getHdmiCecNetwork().getCecDeviceInfo(ADDR_PLAYBACK_2);
+                mHdmiControlService.getHdmiCecNetwork().getCecDeviceInfo(mPlaybackLogicalAddress2);
         DeviceSelectActionFromPlayback action = new DeviceSelectActionFromPlayback(
                 mHdmiCecLocalDevicePlayback,
                 hdmiDeviceInfo, callback, isCec20);
@@ -214,23 +245,23 @@ public class DeviceSelectActionFromPlaybackTest {
         TestCallback callback = new TestCallback();
         DeviceSelectActionFromPlayback action = createDeviceSelectActionFromPlayback(actionTimer,
                 callback, /*isCec20=*/false);
-        mHdmiControlService.setActiveSource(ADDR_PLAYBACK_3, PHYSICAL_ADDRESS_PLAYBACK_3,
+        mHdmiControlService.setActiveSource(mPlaybackLogicalAddress3, PHYSICAL_ADDRESS_PLAYBACK_3,
                 "testDeviceSelectFromPlayback");
         action.start();
         mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(ROUTING_CHANGE);
+        assertThat(mNativeWrapper.getResultMessages()).contains(mRoutingChange);
         mNativeWrapper.clearResultMessages();
         assertThat(actionTimer.getState()).isEqualTo(STATE_WAIT_FOR_REPORT_POWER_STATUS);
-        action.processCommand(REPORT_POWER_STATUS_ON);
+        action.processCommand(mReportPowerStatusOn);
         mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(ROUTING_CHANGE);
-        action.processCommand(ACTIVE_SOURCE);
+        assertThat(mNativeWrapper.getResultMessages()).contains(mRoutingChange);
+        action.processCommand(mActiveSource);
         assertThat(callback.getResult()).isEqualTo(HdmiControlManager.RESULT_SUCCESS);
     }
 
     @Test
     public void testDeviceSelect_DeviceInStandbyStatus_Cec14b() {
-        mHdmiControlService.setActiveSource(ADDR_PLAYBACK_3, PHYSICAL_ADDRESS_PLAYBACK_3,
+        mHdmiControlService.setActiveSource(mPlaybackLogicalAddress3, PHYSICAL_ADDRESS_PLAYBACK_3,
                 "testDeviceSelectFromPlayback");
         TestActionTimer actionTimer = new TestActionTimer();
         TestCallback callback = new TestCallback();
@@ -238,25 +269,25 @@ public class DeviceSelectActionFromPlaybackTest {
                 callback, /*isCec20=*/false);
         action.start();
         mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(ROUTING_CHANGE);
+        assertThat(mNativeWrapper.getResultMessages()).contains(mRoutingChange);
         mNativeWrapper.clearResultMessages();
         assertThat(actionTimer.getState()).isEqualTo(STATE_WAIT_FOR_REPORT_POWER_STATUS);
-        action.processCommand(REPORT_POWER_STATUS_STANDBY);
+        action.processCommand(mReportPowerStatusStandby);
         mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(ROUTING_CHANGE);
+        assertThat(mNativeWrapper.getResultMessages()).contains(mRoutingChange);
         mNativeWrapper.clearResultMessages();
         assertThat(actionTimer.getState()).isEqualTo(STATE_WAIT_FOR_DEVICE_POWER_ON);
         action.handleTimerEvent(STATE_WAIT_FOR_DEVICE_POWER_ON);
-        action.processCommand(REPORT_POWER_STATUS_ON);
+        action.processCommand(mReportPowerStatusOn);
         mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(ROUTING_CHANGE);
-        action.processCommand(ACTIVE_SOURCE);
+        assertThat(mNativeWrapper.getResultMessages()).contains(mRoutingChange);
+        action.processCommand(mActiveSource);
         assertThat(callback.getResult()).isEqualTo(HdmiControlManager.RESULT_SUCCESS);
     }
 
     @Test
     public void testDeviceSelect_DeviceInStandbyStatusWithSomeTimeouts_Cec14b() {
-        mHdmiControlService.setActiveSource(ADDR_PLAYBACK_3, PHYSICAL_ADDRESS_PLAYBACK_3,
+        mHdmiControlService.setActiveSource(mPlaybackLogicalAddress3, PHYSICAL_ADDRESS_PLAYBACK_3,
                 "testDeviceSelectFromPlayback");
         TestActionTimer actionTimer = new TestActionTimer();
         TestCallback callback = new TestCallback();
@@ -264,27 +295,27 @@ public class DeviceSelectActionFromPlaybackTest {
                 callback, /*isCec20=*/false);
         action.start();
         mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(ROUTING_CHANGE);
+        assertThat(mNativeWrapper.getResultMessages()).contains(mRoutingChange);
         mNativeWrapper.clearResultMessages();
         assertThat(actionTimer.getState()).isEqualTo(STATE_WAIT_FOR_REPORT_POWER_STATUS);
-        action.processCommand(REPORT_POWER_STATUS_STANDBY);
+        action.processCommand(mReportPowerStatusStandby);
         assertThat(actionTimer.getState()).isEqualTo(STATE_WAIT_FOR_DEVICE_POWER_ON);
         action.handleTimerEvent(STATE_WAIT_FOR_DEVICE_POWER_ON);
         assertThat(actionTimer.getState()).isEqualTo(STATE_WAIT_FOR_REPORT_POWER_STATUS);
-        action.processCommand(REPORT_POWER_STATUS_TRANSIENT_TO_ON);
+        action.processCommand(mReportPowerStatusTransientToOn);
         assertThat(actionTimer.getState()).isEqualTo(STATE_WAIT_FOR_DEVICE_POWER_ON);
         action.handleTimerEvent(STATE_WAIT_FOR_DEVICE_POWER_ON);
         assertThat(actionTimer.getState()).isEqualTo(STATE_WAIT_FOR_REPORT_POWER_STATUS);
-        action.processCommand(REPORT_POWER_STATUS_ON);
+        action.processCommand(mReportPowerStatusOn);
         mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(ROUTING_CHANGE);
-        action.processCommand(ACTIVE_SOURCE);
+        assertThat(mNativeWrapper.getResultMessages()).contains(mRoutingChange);
+        action.processCommand(mActiveSource);
         assertThat(callback.getResult()).isEqualTo(HdmiControlManager.RESULT_SUCCESS);
     }
 
     @Test
     public void testDeviceSelect_DeviceInStandbyAfterTimeoutForReportPowerStatus_Cec14b() {
-        mHdmiControlService.setActiveSource(ADDR_PLAYBACK_3, PHYSICAL_ADDRESS_PLAYBACK_3,
+        mHdmiControlService.setActiveSource(mPlaybackLogicalAddress3, PHYSICAL_ADDRESS_PLAYBACK_3,
                 "testDeviceSelectFromPlayback");
         TestActionTimer actionTimer = new TestActionTimer();
         TestCallback callback = new TestCallback();
@@ -292,118 +323,118 @@ public class DeviceSelectActionFromPlaybackTest {
                 callback, /*isCec20=*/false);
         action.start();
         mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(ROUTING_CHANGE);
+        assertThat(mNativeWrapper.getResultMessages()).contains(mRoutingChange);
         mNativeWrapper.clearResultMessages();
         assertThat(actionTimer.getState()).isEqualTo(STATE_WAIT_FOR_REPORT_POWER_STATUS);
-        action.processCommand(REPORT_POWER_STATUS_STANDBY);
+        action.processCommand(mReportPowerStatusStandby);
         assertThat(actionTimer.getState()).isEqualTo(STATE_WAIT_FOR_DEVICE_POWER_ON);
         action.handleTimerEvent(STATE_WAIT_FOR_DEVICE_POWER_ON);
         assertThat(actionTimer.getState()).isEqualTo(STATE_WAIT_FOR_REPORT_POWER_STATUS);
-        action.processCommand(REPORT_POWER_STATUS_TRANSIENT_TO_ON);
+        action.processCommand(mReportPowerStatusTransientToOn);
         assertThat(actionTimer.getState()).isEqualTo(STATE_WAIT_FOR_DEVICE_POWER_ON);
         action.handleTimerEvent(STATE_WAIT_FOR_DEVICE_POWER_ON);
         assertThat(actionTimer.getState()).isEqualTo(STATE_WAIT_FOR_REPORT_POWER_STATUS);
         action.handleTimerEvent(STATE_WAIT_FOR_REPORT_POWER_STATUS);
         // Give up getting power status, and just send <Routing Change>
         mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(ROUTING_CHANGE);
-        action.processCommand(ACTIVE_SOURCE);
+        assertThat(mNativeWrapper.getResultMessages()).contains(mRoutingChange);
+        action.processCommand(mActiveSource);
         assertThat(callback.getResult()).isEqualTo(HdmiControlManager.RESULT_SUCCESS);
     }
 
     @Test
-    public void testDeviceSelect_ReachSetStreamPath_Cec14b() {
+    public void testDeviceSelect_ReachmSetStreamPath_Cec14b() {
         TestActionTimer actionTimer = new TestActionTimer();
         TestCallback callback = new TestCallback();
         DeviceSelectActionFromPlayback action = createDeviceSelectActionFromPlayback(actionTimer,
                 callback, /*isCec20=*/false);
-        mHdmiControlService.setActiveSource(ADDR_PLAYBACK_3, PHYSICAL_ADDRESS_PLAYBACK_3,
+        mHdmiControlService.setActiveSource(mPlaybackLogicalAddress3, PHYSICAL_ADDRESS_PLAYBACK_3,
                 "testDeviceSelectFromPlayback");
         action.start();
         mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(ROUTING_CHANGE);
+        assertThat(mNativeWrapper.getResultMessages()).contains(mRoutingChange);
         mNativeWrapper.clearResultMessages();
         assertThat(actionTimer.getState()).isEqualTo(STATE_WAIT_FOR_REPORT_POWER_STATUS);
-        action.processCommand(REPORT_POWER_STATUS_ON);
+        action.processCommand(mReportPowerStatusOn);
         mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(ROUTING_CHANGE);
+        assertThat(mNativeWrapper.getResultMessages()).contains(mRoutingChange);
         mNativeWrapper.clearResultMessages();
         assertThat(actionTimer.getState()).isEqualTo(
                 STATE_WAIT_FOR_ACTIVE_SOURCE_MESSAGE_AFTER_ROUTING_CHANGE);
         action.handleTimerEvent(STATE_WAIT_FOR_ACTIVE_SOURCE_MESSAGE_AFTER_ROUTING_CHANGE);
         mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(SET_STREAM_PATH);
-        action.processCommand(ACTIVE_SOURCE);
+        assertThat(mNativeWrapper.getResultMessages()).contains(mSetStreamPath);
+        action.processCommand(mActiveSource);
         assertThat(callback.getResult()).isEqualTo(HdmiControlManager.RESULT_SUCCESS);
     }
 
     @Test
-    public void testDeviceSelect_ReachSetStreamPathDeviceInPowerOnStatus_Cec20() {
-        mHdmiControlService.getHdmiCecNetwork().updateDevicePowerStatus(ADDR_PLAYBACK_2,
+    public void testDeviceSelect_ReachmSetStreamPathDeviceInPowerOnStatus_Cec20() {
+        mHdmiControlService.getHdmiCecNetwork().updateDevicePowerStatus(mPlaybackLogicalAddress2,
                 HdmiControlManager.POWER_STATUS_ON);
         TestActionTimer actionTimer = new TestActionTimer();
         TestCallback callback = new TestCallback();
         DeviceSelectActionFromPlayback action = createDeviceSelectActionFromPlayback(actionTimer,
                 callback, /*isCec20=*/true);
-        mHdmiControlService.setActiveSource(ADDR_PLAYBACK_3, PHYSICAL_ADDRESS_PLAYBACK_3,
+        mHdmiControlService.setActiveSource(mPlaybackLogicalAddress3, PHYSICAL_ADDRESS_PLAYBACK_3,
                 "testDeviceSelectFromPlayback");
         action.start();
         mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(ROUTING_CHANGE);
+        assertThat(mNativeWrapper.getResultMessages()).contains(mRoutingChange);
         mNativeWrapper.clearResultMessages();
         assertThat(actionTimer.getState()).isEqualTo(
                 STATE_WAIT_FOR_ACTIVE_SOURCE_MESSAGE_AFTER_ROUTING_CHANGE);
         action.handleTimerEvent(STATE_WAIT_FOR_ACTIVE_SOURCE_MESSAGE_AFTER_ROUTING_CHANGE);
         mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(SET_STREAM_PATH);
-        action.processCommand(ACTIVE_SOURCE);
+        assertThat(mNativeWrapper.getResultMessages()).contains(mSetStreamPath);
+        action.processCommand(mActiveSource);
         assertThat(callback.getResult()).isEqualTo(HdmiControlManager.RESULT_SUCCESS);
     }
 
     @Test
     public void testDeviceSelect_DeviceInPowerOnStatus_Cec20() {
-        mHdmiControlService.getHdmiCecNetwork().updateDevicePowerStatus(ADDR_PLAYBACK_2,
+        mHdmiControlService.getHdmiCecNetwork().updateDevicePowerStatus(mPlaybackLogicalAddress2,
                 HdmiControlManager.POWER_STATUS_ON);
         TestActionTimer actionTimer = new TestActionTimer();
         TestCallback callback = new TestCallback();
         DeviceSelectActionFromPlayback action = createDeviceSelectActionFromPlayback(actionTimer,
                 callback, /*isCec20=*/true);
-        mHdmiControlService.setActiveSource(ADDR_PLAYBACK_3, PHYSICAL_ADDRESS_PLAYBACK_3,
+        mHdmiControlService.setActiveSource(mPlaybackLogicalAddress3, PHYSICAL_ADDRESS_PLAYBACK_3,
                 "testDeviceSelectFromPlayback");
         action.start();
         mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(ROUTING_CHANGE);
-        action.processCommand(ACTIVE_SOURCE);
+        assertThat(mNativeWrapper.getResultMessages()).contains(mRoutingChange);
+        action.processCommand(mActiveSource);
         assertThat(callback.getResult()).isEqualTo(HdmiControlManager.RESULT_SUCCESS);
     }
 
     @Test
     public void testDeviceSelect_DeviceInPowerUnknownStatus_Cec20() {
-        mHdmiControlService.getHdmiCecNetwork().updateDevicePowerStatus(ADDR_PLAYBACK_2,
+        mHdmiControlService.getHdmiCecNetwork().updateDevicePowerStatus(mPlaybackLogicalAddress2,
                 HdmiControlManager.POWER_STATUS_UNKNOWN);
         TestActionTimer actionTimer = new TestActionTimer();
         TestCallback callback = new TestCallback();
         DeviceSelectActionFromPlayback action = createDeviceSelectActionFromPlayback(actionTimer,
                 callback, /*isCec20=*/true);
-        mHdmiControlService.setActiveSource(ADDR_PLAYBACK_3, PHYSICAL_ADDRESS_PLAYBACK_3,
+        mHdmiControlService.setActiveSource(mPlaybackLogicalAddress3, PHYSICAL_ADDRESS_PLAYBACK_3,
                 "testDeviceSelectFromPlayback");
         action.start();
         mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(ROUTING_CHANGE);
+        assertThat(mNativeWrapper.getResultMessages()).contains(mRoutingChange);
         mNativeWrapper.clearResultMessages();
         assertThat(actionTimer.getState()).isEqualTo(STATE_WAIT_FOR_REPORT_POWER_STATUS);
-        action.processCommand(REPORT_POWER_STATUS_ON);
+        action.processCommand(mReportPowerStatusOn);
         mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(ROUTING_CHANGE);
-        action.processCommand(ACTIVE_SOURCE);
+        assertThat(mNativeWrapper.getResultMessages()).contains(mRoutingChange);
+        action.processCommand(mActiveSource);
         assertThat(callback.getResult()).isEqualTo(HdmiControlManager.RESULT_SUCCESS);
     }
 
     @Test
     public void testDeviceSelect_DeviceInStandbyStatus_Cec20() {
-        mHdmiControlService.getHdmiCecNetwork().updateDevicePowerStatus(ADDR_PLAYBACK_2,
+        mHdmiControlService.getHdmiCecNetwork().updateDevicePowerStatus(mPlaybackLogicalAddress2,
                 HdmiControlManager.POWER_STATUS_STANDBY);
-        mHdmiControlService.setActiveSource(ADDR_PLAYBACK_3, PHYSICAL_ADDRESS_PLAYBACK_3,
+        mHdmiControlService.setActiveSource(mPlaybackLogicalAddress3, PHYSICAL_ADDRESS_PLAYBACK_3,
                 "testDeviceSelectFromPlayback");
         TestActionTimer actionTimer = new TestActionTimer();
         TestCallback callback = new TestCallback();
@@ -411,18 +442,18 @@ public class DeviceSelectActionFromPlaybackTest {
                 callback, /*isCec20=*/true);
         action.start();
         mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(ROUTING_CHANGE);
+        assertThat(mNativeWrapper.getResultMessages()).contains(mRoutingChange);
         mNativeWrapper.clearResultMessages();
         assertThat(actionTimer.getState()).isEqualTo(STATE_WAIT_FOR_REPORT_POWER_STATUS);
-        action.processCommand(REPORT_POWER_STATUS_STANDBY);
+        action.processCommand(mReportPowerStatusStandby);
         mTestLooper.dispatchAll();
         mNativeWrapper.clearResultMessages();
         assertThat(actionTimer.getState()).isEqualTo(STATE_WAIT_FOR_DEVICE_POWER_ON);
         action.handleTimerEvent(STATE_WAIT_FOR_DEVICE_POWER_ON);
-        action.processCommand(REPORT_POWER_STATUS_ON);
+        action.processCommand(mReportPowerStatusOn);
         mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(ROUTING_CHANGE);
-        action.processCommand(ACTIVE_SOURCE);
+        assertThat(mNativeWrapper.getResultMessages()).contains(mRoutingChange);
+        action.processCommand(mActiveSource);
         assertThat(callback.getResult()).isEqualTo(HdmiControlManager.RESULT_SUCCESS);
     }
 }
