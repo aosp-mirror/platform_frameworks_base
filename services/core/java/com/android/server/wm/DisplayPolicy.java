@@ -304,6 +304,10 @@ public class DisplayPolicy {
     // needs to be opaque.
     private WindowState mNavBarBackgroundWindow;
 
+    // The window that draws fake rounded corners and should provide insets to calculate the correct
+    // rounded corner insets.
+    private WindowState mRoundedCornerWindow;
+
     /**
      * Windows to determine the color of status bar. See {@link #mNavBarColorWindowCandidate} for
      * the conditions of being candidate window.
@@ -934,6 +938,18 @@ public class DisplayPolicy {
             mExtraNavBarAltPosition = getAltBarPosition(attrs);
         }
 
+        if (attrs.insetsRoundedCornerFrame) {
+            // Currently, only support one rounded corner window which is the TaskBar.
+            if (mRoundedCornerWindow != null && mRoundedCornerWindow != win) {
+                throw new IllegalArgumentException("Found multiple rounded corner window :"
+                        + " current = " + mRoundedCornerWindow
+                        + " new = " + win);
+            }
+            mRoundedCornerWindow = win;
+        } else if (mRoundedCornerWindow == win) {
+            mRoundedCornerWindow = null;
+        }
+
         attrs.flags = sanitizeFlagSlippery(attrs.flags, attrs.privateFlags, win.getName());
     }
 
@@ -1255,6 +1271,10 @@ public class DisplayPolicy {
         if (mLastFocusedWindow == win) {
             mLastFocusedWindow = null;
         }
+        if (mRoundedCornerWindow == win) {
+            mRoundedCornerWindow = null;
+        }
+
         mInsetsSourceWindowsExceptIme.remove(win);
     }
 
@@ -1283,6 +1303,10 @@ public class DisplayPolicy {
 
     WindowState getNavigationBar() {
         return mNavigationBar != null ? mNavigationBar : mNavigationBarAlt;
+    }
+
+    WindowState getRoundedCornerWindow() {
+        return mRoundedCornerWindow;
     }
 
     /**

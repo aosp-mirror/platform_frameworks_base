@@ -3555,6 +3555,17 @@ public interface WindowManager extends ViewManager {
         public Insets providedInternalImeInsets = Insets.NONE;
 
         /**
+         * If specified, the frame that used to calculate relative {@link RoundedCorner} will be
+         * the window frame of this window minus the insets that this window provides.
+         *
+         * Task bar will draw fake rounded corners above itself, so we need this insets to calculate
+         * correct rounded corners for this window.
+         *
+         * @hide
+         */
+        public boolean insetsRoundedCornerFrame = false;
+
+        /**
          * {@link LayoutParams} to be applied to the window when layout with a assigned rotation.
          * This will make layout during rotation change smoothly.
          *
@@ -3929,6 +3940,7 @@ public interface WindowManager extends ViewManager {
             }
             providedInternalInsets.writeToParcel(out, 0 /* parcelableFlags */);
             providedInternalImeInsets.writeToParcel(out, 0 /* parcelableFlags */);
+            out.writeBoolean(insetsRoundedCornerFrame);
             if (paramsForRotation != null) {
                 checkNonRecursiveParams();
                 out.writeInt(paramsForRotation.length);
@@ -4009,6 +4021,7 @@ public interface WindowManager extends ViewManager {
             }
             providedInternalInsets = Insets.CREATOR.createFromParcel(in);
             providedInternalImeInsets = Insets.CREATOR.createFromParcel(in);
+            insetsRoundedCornerFrame = in.readBoolean();
             int paramsForRotationLength = in.readInt();
             if (paramsForRotationLength > 0) {
                 paramsForRotation = new LayoutParams[paramsForRotationLength];
@@ -4320,6 +4333,11 @@ public interface WindowManager extends ViewManager {
                 changes |= LAYOUT_CHANGED;
             }
 
+            if (insetsRoundedCornerFrame != o.insetsRoundedCornerFrame) {
+                insetsRoundedCornerFrame = o.insetsRoundedCornerFrame;
+                changes |= LAYOUT_CHANGED;
+            }
+
             if (!Arrays.equals(paramsForRotation, o.paramsForRotation)) {
                 paramsForRotation = o.paramsForRotation;
                 checkNonRecursiveParams();
@@ -4528,6 +4546,10 @@ public interface WindowManager extends ViewManager {
             if (!providedInternalImeInsets.equals(Insets.NONE)) {
                 sb.append(" providedInternalImeInsets=");
                 sb.append(providedInternalImeInsets);
+            }
+            if (insetsRoundedCornerFrame) {
+                sb.append(" insetsRoundedCornerFrame=");
+                sb.append(insetsRoundedCornerFrame);
             }
             if (paramsForRotation != null && paramsForRotation.length != 0) {
                 sb.append(System.lineSeparator());
