@@ -240,6 +240,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      */
     private int mTaskFragmentOrganizerPid = ActivityRecord.INVALID_PID;
 
+    final Point mLastSurfaceSize = new Point();
+
     private final Rect mTmpInsets = new Rect();
     private final Rect mTmpBounds = new Rect();
     private final Rect mTmpFullBounds = new Rect();
@@ -1654,6 +1656,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         }
     }
 
+    @Override
     void onChildPositionChanged(WindowContainer child) {
         super.onChildPositionChanged(child);
 
@@ -2049,12 +2052,56 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (shouldStartChangeTransition(mTmpPrevBounds)) {
             initializeChangeTransition(mTmpPrevBounds);
         } else if (mTaskFragmentOrganizer != null) {
-            // Update the surface position here instead of in the organizer so that we can make sure
+            // Update the surface here instead of in the organizer so that we can make sure
             // it can be synced with the surface freezer.
-            updateSurfacePosition(getSyncTransaction());
+            final SurfaceControl.Transaction t = getSyncTransaction();
+            updateSurfacePosition(t);
+            updateOrganizedTaskFragmentSurfaceSize(t, false /* forceUpdate */);
         }
 
         sendTaskFragmentInfoChanged();
+    }
+
+    /** Updates the surface size so that the sub windows cannot be shown out of bounds. */
+    private void updateOrganizedTaskFragmentSurfaceSize(SurfaceControl.Transaction t,
+            boolean forceUpdate) {
+        if (mTaskFragmentOrganizer == null) {
+            // We only want to update for organized TaskFragment. Task will handle itself.
+            return;
+        }
+        if (mSurfaceControl == null || mSurfaceAnimator.hasLeash() || mSurfaceFreezer.hasLeash()) {
+            return;
+        }
+
+        final Rect bounds = getBounds();
+        final int width = bounds.width();
+        final int height = bounds.height();
+        if (!forceUpdate && width == mLastSurfaceSize.x && height == mLastSurfaceSize.y) {
+            return;
+        }
+        t.setWindowCrop(mSurfaceControl, width, height);
+        mLastSurfaceSize.set(width, height);
+    }
+
+    @Override
+    public void onAnimationLeashCreated(SurfaceControl.Transaction t, SurfaceControl leash) {
+        super.onAnimationLeashCreated(t, leash);
+        // Reset surface bounds for animation. It will be taken care by the animation leash, and
+        // reset again onAnimationLeashLost.
+        if (mTaskFragmentOrganizer != null
+                && (mLastSurfaceSize.x != 0 || mLastSurfaceSize.y != 0)) {
+            t.setWindowCrop(mSurfaceControl, 0, 0);
+            mLastSurfaceSize.set(0, 0);
+        }
+    }
+
+    @Override
+    public void onAnimationLeashLost(SurfaceControl.Transaction t) {
+        super.onAnimationLeashLost(t);
+        // Update the surface bounds after animation.
+        if (mTaskFragmentOrganizer != null) {
+            updateOrganizedTaskFragmentSurfaceSize(t, true /* forceUpdate */);
+        }
     }
 
     /** Whether we should prepare a transition for this {@link TaskFragment} bounds change. */
@@ -2075,9 +2122,14 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     @Override
     void setSurfaceControl(SurfaceControl sc) {
         super.setSurfaceControl(sc);
-        // If the TaskFragmentOrganizer was set before we created the SurfaceControl, we need to
-        // emit the callbacks now.
-        sendTaskFragmentAppeared();
+        if (mTaskFragmentOrganizer != null) {
+            final SurfaceControl.Transaction t = getSyncTransaction();
+            updateSurfacePosition(t);
+            updateOrganizedTaskFragmentSurfaceSize(t, false /* forceUpdate */);
+            // If the TaskFragmentOrganizer was set before we created the SurfaceControl, we need to
+            // emit the callbacks now.
+            sendTaskFragmentAppeared();
+        }
     }
 
     void sendTaskFragmentInfoChanged() {

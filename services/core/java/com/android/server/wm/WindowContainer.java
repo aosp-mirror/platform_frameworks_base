@@ -3163,7 +3163,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PROTECTED)
     void updateSurfacePosition(Transaction t) {
-        if (mSurfaceControl == null || mSurfaceAnimator.hasLeash()) {
+        if (mSurfaceControl == null || mSurfaceAnimator.hasLeash() || mSurfaceFreezer.hasLeash()) {
             return;
         }
 

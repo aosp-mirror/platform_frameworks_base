@@ -480,7 +480,6 @@ class Task extends TaskFragment {
 
     private Dimmer mDimmer = new Dimmer(this);
     private final Rect mTmpDimBoundsRect = new Rect();
-    private final Point mLastSurfaceSize = new Point();
 
     /** @see #setCanAffectSystemUiFlags */
     private boolean mCanAffectSystemUiFlags = true;
