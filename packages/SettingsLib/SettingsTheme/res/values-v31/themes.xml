@@ -26,6 +26,7 @@
         <item name="preferenceTheme">@style/PreferenceTheme.SettingsLib</item>
         <item name="android:switchStyle">@style/Switch.SettingsLib</item>
         <item name="android:progressBarStyleHorizontal">@style/HorizontalProgressBar.SettingsLib</item>
+        <item name="android:spinnerStyle">@style/Spinner.SettingsLib</item>
     </style>
 
     <!-- Using in SubSettings page including injected settings page -->
