@@ -54,6 +54,27 @@ final class LetterboxConfiguration {
     /** Using wallpaper as a background which can be blurred or dimmed with dark scrim. */
     static final int LETTERBOX_BACKGROUND_WALLPAPER = 3;
 
+    /**
+     * Enum for Letterbox reachability position types.
+     *
+     * <p>Order from left to right is important since it's used in {@link
+     * #movePositionForReachabilityToNextRightStop} and {@link
+     * #movePositionForReachabilityToNextLeftStop}.
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({LETTERBOX_REACHABILITY_POSITION_LEFT, LETTERBOX_REACHABILITY_POSITION_CENTER,
+            LETTERBOX_REACHABILITY_POSITION_RIGHT})
+    @interface LetterboxReachabilityPosition {};
+
+    /** Letterboxed app window is aligned to the left side. */
+    static final int LETTERBOX_REACHABILITY_POSITION_LEFT = 0;
+
+    /** Letterboxed app window is positioned in the horizontal center. */
+    static final int LETTERBOX_REACHABILITY_POSITION_CENTER = 1;
+
+    /** Letterboxed app window is aligned to the right side. */
+    static final int LETTERBOX_REACHABILITY_POSITION_RIGHT = 2;
+
     final Context mContext;
 
     // Aspect ratio of letterbox for fixed orientation, values <=
@@ -85,25 +106,25 @@ final class LetterboxConfiguration {
     // side of the screen and 1.0 to the right side.
     private float mLetterboxHorizontalPositionMultiplier;
 
-    // Default horizontal position of a center of the letterboxed app window when reachability is
-    // enabled and an app is fullscreen in landscape device orientatio. 0 corresponds to the left
-    // side of the screen and 1.0 to the right side.
-    // It is used as a starting point for mLetterboxHorizontalMultiplierForReachability.
-    private float mDefaultPositionMultiplierForReachability;
+    // Default horizontal position the letterboxed app window when reachability is enabled and
+    // an app is fullscreen in landscape device orientatio.
+    // It is used as a starting point for mLetterboxPositionForReachability.
+    @LetterboxReachabilityPosition
+    private int mDefaultPositionForReachability;
 
     // Whether reachability repositioning is allowed for letterboxed fullscreen apps in landscape
     // device orientation.
     private boolean mIsReachabilityEnabled;
 
-    // Horizontal position of a center of the letterboxed app window. 0 corresponds to
-    // the left side of the screen and 1 to the right side. Keep it global to prevent
-    // "jumps" when switching between letterboxed apps. It's updated to reposition the app
-    // window in response to a double tap gesture (see LetterboxUiController#handleDoubleTap).
-    // Used in LetterboxUiController#getHorizontalPositionMultiplier which is called from
+    // Horizontal position of a center of the letterboxed app window which is global to prevent
+    // "jumps" when switching between letterboxed apps. It's updated to reposition the app window
+    // in response to a double tap gesture (see LetterboxUiController#handleDoubleTap). Used in
+    // LetterboxUiController#getHorizontalPositionMultiplier which is called from
     // ActivityRecord#updateResolvedBoundsHorizontalPosition.
     // TODO(b/199426138): Global reachability setting causes a jump when resuming an app from
     // Overview after changing position in another app.
-    private volatile float mLetterboxHorizontalMultiplierForReachability;
+    @LetterboxReachabilityPosition
+    private volatile int mLetterboxPositionForReachability;
 
     LetterboxConfiguration(Context systemUiContext) {
         mContext = systemUiContext;
@@ -120,9 +141,8 @@ final class LetterboxConfiguration {
                 R.dimen.config_letterboxHorizontalPositionMultiplier);
         mIsReachabilityEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsReachabilityEnabled);
-        mDefaultPositionMultiplierForReachability = mContext.getResources().getFloat(
-                R.dimen.config_letterboxDefaultPositionMultiplierForReachability);
-        mLetterboxHorizontalMultiplierForReachability = mDefaultPositionMultiplierForReachability;
+        mDefaultPositionForReachability = readLetterboxReachabilityPositionFromConfig(mContext);
+        mLetterboxPositionForReachability = mDefaultPositionForReachability;
     }
 
     /**
@@ -395,58 +415,90 @@ final class LetterboxConfiguration {
     }
 
     /*
-     * Gets default horizontal position of a center of the letterboxed app window when reachability
-     * is enabled specified in {@link
-     * R.dimen.config_letterboxDefaultPositionMultiplierForReachability} or via an ADB command.
-     * 0 corresponds to the left side of the screen and 1 to the right side. The returned value is
-     * >= 0.0 and <= 1.0.
+     * Gets default horizontal position of the letterboxed app window when reachability is enabled.
+     * Specified in {@link R.integer.config_letterboxDefaultPositionForReachability} or via an ADB
+     * command.
      */
-    float getDefaultPositionMultiplierForReachability() {
-        return (mDefaultPositionMultiplierForReachability < 0.0f
-                || mDefaultPositionMultiplierForReachability > 1.0f)
-                        // Default to a right position if invalid value is provided.
-                        ? 1.0f : mDefaultPositionMultiplierForReachability;
+    @LetterboxReachabilityPosition
+    int getDefaultPositionForReachability() {
+        return mDefaultPositionForReachability;
     }
 
     /**
-     * Overrides default horizontal position of a center of the letterboxed app window when
-     * reachability is enabled. If given value < 0.0 or > 1.0, then it and a value of {@link
-     * R.dimen.config_letterboxDefaultPositionMultiplierForReachability} are ignored and the right
-     * position (1.0) is used.
+     * Overrides default horizonal position of the letterboxed app window when reachability
+     * is enabled.
      */
-    void setDefaultPositionMultiplierForReachability(float multiplier) {
-        mDefaultPositionMultiplierForReachability = multiplier;
+    void setDefaultPositionForReachability(@LetterboxReachabilityPosition int position) {
+        mDefaultPositionForReachability = position;
     }
 
     /**
-     * Resets default horizontal position of a center of the letterboxed app window when
-     * reachability is enabled to {@link
-     * R.dimen.config_letterboxDefaultPositionMultiplierForReachability}.
+     * Resets default horizontal position of the letterboxed app window when reachability is
+     * enabled to {@link R.integer.config_letterboxDefaultPositionForReachability}.
      */
-    void resetDefaultPositionMultiplierForReachability() {
-        mDefaultPositionMultiplierForReachability = mContext.getResources().getFloat(
-                R.dimen.config_letterboxDefaultPositionMultiplierForReachability);
+    void resetDefaultPositionForReachability() {
+        mDefaultPositionForReachability = readLetterboxReachabilityPositionFromConfig(mContext);
+    }
+
+    @LetterboxReachabilityPosition
+    private static int readLetterboxReachabilityPositionFromConfig(Context context) {
+        int position = context.getResources().getInteger(
+                R.integer.config_letterboxDefaultPositionForReachability);
+        return position == LETTERBOX_REACHABILITY_POSITION_LEFT
+                    || position == LETTERBOX_REACHABILITY_POSITION_CENTER
+                    || position == LETTERBOX_REACHABILITY_POSITION_RIGHT
+                    ? position : LETTERBOX_REACHABILITY_POSITION_CENTER;
     }
 
     /*
      * Gets horizontal position of a center of the letterboxed app window when reachability
      * is enabled specified. 0 corresponds to the left side of the screen and 1 to the right side.
      *
-     * <p>The position multiplier is changed to a symmetrical value computed as (1 - current
-     * multiplier) after each double tap in the letterbox area.
+     * <p>The position multiplier is changed after each double tap in the letterbox area.
      */
     float getHorizontalMultiplierForReachability() {
-        return mLetterboxHorizontalMultiplierForReachability;
+        switch (mLetterboxPositionForReachability) {
+            case LETTERBOX_REACHABILITY_POSITION_LEFT:
+                return 0.0f;
+            case LETTERBOX_REACHABILITY_POSITION_CENTER:
+                return 0.5f;
+            case LETTERBOX_REACHABILITY_POSITION_RIGHT:
+                return 1.0f;
+            default:
+                throw new AssertionError(
+                    "Unexpected letterbox position type: " + mLetterboxPositionForReachability);
+        }
+    }
+
+    /** Returns a string representing the given {@link LetterboxReachabilityPosition}. */
+    static String letterboxReachabilityPositionToString(
+            @LetterboxReachabilityPosition int position) {
+        switch (position) {
+            case LETTERBOX_REACHABILITY_POSITION_LEFT:
+                return "LETTERBOX_REACHABILITY_POSITION_LEFT";
+            case LETTERBOX_REACHABILITY_POSITION_CENTER:
+                return "LETTERBOX_REACHABILITY_POSITION_CENTER";
+            case LETTERBOX_REACHABILITY_POSITION_RIGHT:
+                return "LETTERBOX_REACHABILITY_POSITION_RIGHT";
+            default:
+                throw new AssertionError(
+                    "Unexpected letterbox position type: " + position);
+        }
     }
 
     /**
-     * Changes horizontal position of a center of the letterboxed app window to the opposite
-     * (1 - current multiplier) when reachability is enabled specified. 0 corresponds to the left
-     * side of the screen and 1 to the right side.
+     * Changes letterbox position for reachability to the next available one on the right side.
      */
-    void flipHorizontalMultiplierForReachability() {
-        mLetterboxHorizontalMultiplierForReachability =
-                1.0f - mLetterboxHorizontalMultiplierForReachability;
+    void movePositionForReachabilityToNextRightStop() {
+        mLetterboxPositionForReachability = Math.min(
+                mLetterboxPositionForReachability + 1, LETTERBOX_REACHABILITY_POSITION_RIGHT);
+    }
+
+    /**
+     * Changes letterbox position for reachability to the next available one on the left side.
+     */
+    void movePositionForReachabilityToNextLeftStop() {
+        mLetterboxPositionForReachability = Math.max(mLetterboxPositionForReachability - 1, 0);
     }
 
 }

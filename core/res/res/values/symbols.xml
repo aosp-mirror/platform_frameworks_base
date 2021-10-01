@@ -4265,7 +4265,7 @@
   <java-symbol type="color" name="config_letterboxBackgroundColor" />
   <java-symbol type="dimen" name="config_letterboxHorizontalPositionMultiplier" />
   <java-symbol type="bool" name="config_letterboxIsReachabilityEnabled" />
-  <java-symbol type="dimen" name="config_letterboxDefaultPositionMultiplierForReachability" />
+  <java-symbol type="integer" name="config_letterboxDefaultPositionForReachability" />
 
   <java-symbol type="bool" name="config_hideDisplayCutoutWithDisplayArea" />
 
