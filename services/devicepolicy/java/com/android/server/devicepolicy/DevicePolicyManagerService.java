@@ -14060,6 +14060,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
+        Preconditions.checkCallAuthorization(canManageUsers(caller));
         Preconditions.checkCallAuthorization(isManagedProfile(userHandle),
                 "You can not get organization name outside a managed profile, userId = %d",
                 userHandle);
