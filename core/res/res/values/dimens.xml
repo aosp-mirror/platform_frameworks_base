@@ -58,6 +58,9 @@
     <!-- How much we expand the touchable region of the status bar below the notch to catch touches
          that just start below the notch. -->
     <dimen name="display_cutout_touchable_region_size">12dp</dimen>
+    <!-- The default margin used in immersive mode to capture the start of a swipe gesture from the
+         edge of the screen to show the system bars. -->
+    <dimen name="system_gestures_start_threshold">24dp</dimen>
 
     <!-- Height of the bottom navigation bar frame; this is different than navigation_bar_height
          where that is the height reported to all the other windows to resize themselves around the
