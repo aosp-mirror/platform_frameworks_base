@@ -233,14 +233,14 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
                             + " already exists");
                 }
                 mTaskListeners.put(listenerType, listener);
+            }
 
-                // Notify the listener of all existing tasks with the given type.
-                for (int i = mTasks.size() - 1; i >= 0; --i) {
-                    final TaskAppearedInfo data = mTasks.valueAt(i);
-                    final TaskListener taskListener = getTaskListener(data.getTaskInfo());
-                    if (taskListener != listener) continue;
-                    listener.onTaskAppeared(data.getTaskInfo(), data.getLeash());
-                }
+            // Notify the listener of all existing tasks with the given type.
+            for (int i = mTasks.size() - 1; i >= 0; --i) {
+                final TaskAppearedInfo data = mTasks.valueAt(i);
+                final TaskListener taskListener = getTaskListener(data.getTaskInfo());
+                if (taskListener != listener) continue;
+                listener.onTaskAppeared(data.getTaskInfo(), data.getLeash());
             }
         }
     }
@@ -266,8 +266,12 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
                 tasks.add(data);
             }
 
-            // Remove listener
-            mTaskListeners.removeAt(index);
+            // Remove listener, there can be the multiple occurrences, so search the whole list.
+            for (int i = mTaskListeners.size() - 1; i >= 0; --i) {
+                if (mTaskListeners.valueAt(i) == listener) {
+                    mTaskListeners.removeAt(i);
+                }
+            }
 
             // Associate tasks with new listeners if needed.
             for (int i = tasks.size() - 1; i >= 0; --i) {
