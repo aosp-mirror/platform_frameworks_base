@@ -199,8 +199,9 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         `when`(deviceProvisionedController.isDeviceProvisioned()).thenReturn(false)
         `when`(deviceProvisionedController.isCurrentUserSetup()).thenReturn(false)
 
-        // WHEN a connection attempt is made
-        controller.buildAndConnectView(fakeParent)
+        // WHEN a connection attempt is made and view is attached
+        val view = controller.buildAndConnectView(fakeParent)
+        controller.stateChangeListener.onViewAttachedToWindow(view)
 
         // THEN no session is created
         verify(smartspaceManager, never()).createSmartspaceSession(any())
