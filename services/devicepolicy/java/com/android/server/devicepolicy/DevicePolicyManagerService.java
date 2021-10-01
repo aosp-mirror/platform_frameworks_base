@@ -8356,7 +8356,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public boolean setDeviceOwner(ComponentName admin, String ownerName, int userId) {
+    public boolean setDeviceOwner(ComponentName admin, String ownerName, int userId,
+            boolean setProfileOwnerOnCurrentUserIfNecessary) {
         if (!mHasFeature) {
             logMissingFeatureAction("Cannot set " + ComponentName.flattenToShortString(admin)
                     + " as device owner for user " + userId);
@@ -8420,7 +8421,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             Slogf.i(LOG_TAG, "Device owner set: %s on user %d", admin.flattenToShortString(),
                     userId);
 
-            if (mInjector.userManagerIsHeadlessSystemUserMode()) {
+            if (setProfileOwnerOnCurrentUserIfNecessary
+                    && mInjector.userManagerIsHeadlessSystemUserMode()) {
                 int currentForegroundUser = getCurrentForegroundUserId();
                 Slogf.i(LOG_TAG, "setDeviceOwner(): setting %s as profile owner on user %d",
                         admin.flattenToShortString(), currentForegroundUser);
@@ -17433,7 +17435,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         // TODO(b/178187130): Directly set DO and remove the check once silent provisioning is no
         //  longer used.
         if (getDeviceOwnerComponent(/* callingUserOnly= */ true) == null) {
-            return setDeviceOwner(adminComponent, name, userId);
+            return setDeviceOwner(adminComponent, name, userId,
+                    /* setProfileOwnerOnCurrentUserIfNecessary= */ true);
         }
         return true;
     }
