@@ -1245,13 +1245,17 @@ public final class BluetoothAdapter {
     /**
      * Turn off the local Bluetooth adapter and don't persist the setting.
      *
+     * @param persist Indicate whether the off state should be persisted following the next reboot
      * @return true to indicate adapter shutdown has begun, or false on immediate error
      * @hide
      */
-    @UnsupportedAppUsage(trackingBug = 171933273)
+    @SystemApi
     @RequiresLegacyBluetoothAdminPermission
     @RequiresBluetoothConnectPermission
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
     public boolean disable(boolean persist) {
 
         try {

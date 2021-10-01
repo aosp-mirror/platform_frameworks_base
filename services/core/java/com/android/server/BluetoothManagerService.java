@@ -1154,6 +1154,11 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
     public boolean disable(AttributionSource attributionSource, boolean persist)
             throws RemoteException {
+        if (!persist) {
+            mContext.enforceCallingOrSelfPermission(BLUETOOTH_PRIVILEGED,
+                    "Need BLUETOOTH_PRIVILEGED permission");
+        }
+
         final String packageName = attributionSource.getPackageName();
         if (!checkBluetoothPermissions(attributionSource, "disable", true)) {
             if (DBG) {
@@ -2599,7 +2604,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             intent.putExtra(BluetoothAdapter.EXTRA_PREVIOUS_STATE, prevState);
             intent.putExtra(BluetoothAdapter.EXTRA_STATE, newState);
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-            mContext.sendBroadcastAsUser(intent, UserHandle.ALL, null, 
+            mContext.sendBroadcastAsUser(intent, UserHandle.ALL, null,
                     getTempAllowlistBroadcastOptions());
         }
     }
