@@ -450,6 +450,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mControlsComponent);
         mNotificationPanelViewController.initDependencies(
                 mStatusBar,
+                () -> {},
                 mNotificationShelfController);
         mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);
         mNotificationPanelViewController.setBar(mPanelBar);

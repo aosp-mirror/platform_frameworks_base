@@ -58,6 +58,14 @@ public abstract class PanelBar extends FrameLayout {
     private int mState = STATE_CLOSED;
     private boolean mTracking;
 
+    /** Updates the panel state if necessary. */
+    public void updateState(@PanelState int state) {
+        if (DEBUG) LOG("update state: %d -> %d", mState, state);
+        if (mState != state) {
+            go(state);
+        }
+    }
+
     private void go(@PanelState int state) {
         if (DEBUG) LOG("go state: %d -> %d", mState, state);
         mState = state;
@@ -171,30 +179,10 @@ public abstract class PanelBar extends FrameLayout {
             go(STATE_OPEN);
         } else if (fullyClosed && !mTracking && mState != STATE_CLOSED) {
             go(STATE_CLOSED);
-            onPanelCollapsed();
         }
 
         if (SPEW) LOG("panelExpansionChanged: end state=%d [%s%s ]", mState,
                 fullyOpened?" fullyOpened":"", fullyClosed?" fullyClosed":"");
-    }
-
-    public void collapsePanel(boolean animate, boolean delayed, float speedUpFactor) {
-        boolean waiting = false;
-        PanelViewController pv = mPanel;
-        if (animate && !pv.isFullyCollapsed()) {
-            pv.collapse(delayed, speedUpFactor);
-            waiting = true;
-        } else {
-            pv.resetViews(false /* animate */);
-            pv.setExpandedFraction(0); // just in case
-        }
-        if (DEBUG) LOG("collapsePanel: animate=%s waiting=%s", animate, waiting);
-        if (!waiting && mState != STATE_CLOSED) {
-            // it's possible that nothing animated, so we replicate the termination
-            // conditions of panelExpansionChanged here
-            go(STATE_CLOSED);
-            onPanelCollapsed();
-        }
     }
 
     public void onPanelPeeked() {
@@ -203,10 +191,6 @@ public abstract class PanelBar extends FrameLayout {
 
     public boolean isClosed() {
         return mState == STATE_CLOSED;
-    }
-
-    public void onPanelCollapsed() {
-        if (DEBUG) LOG("onPanelCollapsed");
     }
 
     public void onTrackingStarted() {

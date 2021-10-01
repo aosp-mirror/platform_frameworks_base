@@ -1526,6 +1526,24 @@ public class NotificationPanelViewController extends PanelViewController {
         mNotificationStackScrollLayoutController.resetScrollPosition();
     }
 
+    /** Collapses the panel. */
+    public void collapsePanel(boolean animate, boolean delayed, float speedUpFactor) {
+        boolean waiting = false;
+        if (animate && !isFullyCollapsed()) {
+            collapse(delayed, speedUpFactor);
+            waiting = true;
+        } else {
+            resetViews(false /* animate */);
+            setExpandedFraction(0); // just in case
+        }
+        if (!waiting) {
+            // it's possible that nothing animated, so we replicate the termination
+            // conditions of panelExpansionChanged here
+            // TODO(b/200063118): This can likely go away in a future refactor CL.
+            mBar.updateState(STATE_CLOSED);
+        }
+    }
+
     @Override
     public void collapse(boolean delayed, float speedUpFactor) {
         if (!canPanelBeCollapsed()) {
@@ -3052,6 +3070,7 @@ public class NotificationPanelViewController extends PanelViewController {
             mAffordanceHelper.animateHideLeftRightIcon();
         }
         mNotificationStackScrollLayoutController.onPanelTrackingStarted();
+        cancelPendingPanelCollapse();
     }
 
     @Override
@@ -3671,13 +3690,27 @@ public class NotificationPanelViewController extends PanelViewController {
         mNotificationStackScrollLayoutController.setScrollingEnabled(b);
     }
 
+    private Runnable mHideExpandedRunnable;
+    private final Runnable mMaybeHideExpandedRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (getExpansionFraction() == 0.0f) {
+                mView.post(mHideExpandedRunnable);
+            }
+        }
+    };
+
     /**
      * Initialize objects instead of injecting to avoid circular dependencies.
+     *
+     * @param hideExpandedRunnable a runnable to run when we need to hide the expanded panel.
      */
     public void initDependencies(
             StatusBar statusBar,
+            Runnable hideExpandedRunnable,
             NotificationShelfController notificationShelfController) {
         setStatusBar(statusBar);
+        mHideExpandedRunnable = hideExpandedRunnable;
         mNotificationStackScrollLayoutController.setShelfController(notificationShelfController);
         mNotificationShelfController = notificationShelfController;
         mLockscreenShadeTransitionController.bindController(notificationShelfController);
@@ -4568,6 +4601,11 @@ public class NotificationPanelViewController extends PanelViewController {
         }
     }
 
+    /** Removes any pending runnables that would collapse the panel. */
+    public void cancelPendingPanelCollapse() {
+        mView.removeCallbacks(mMaybeHideExpandedRunnable);
+    }
+
     private final PanelBar.PanelStateChangeListener mPanelStateChangeListener =
             new PanelBar.PanelStateChangeListener() {
 
@@ -4581,6 +4619,11 @@ public class NotificationPanelViewController extends PanelViewController {
 
                     if (state == STATE_OPEN && mCurrentState != state) {
                         mView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+                    }
+                    if (state == STATE_CLOSED) {
+                        // Close the status bar in the next frame so we can show the end of the
+                        // animation.
+                        mView.post(mMaybeHideExpandedRunnable);
                     }
                     mCurrentState = state;
                 }

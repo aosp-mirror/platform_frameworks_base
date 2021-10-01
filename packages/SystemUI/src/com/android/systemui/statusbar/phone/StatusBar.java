@@ -1316,6 +1316,7 @@ public class StatusBar extends SystemUI implements
 
         mNotificationPanelViewController.initDependencies(
                 this,
+                this::makeExpandedInvisible,
                 mNotificationShelfController);
 
         BackDropView backdrop = mNotificationShadeWindowView.findViewById(R.id.backdrop);
@@ -2157,7 +2158,8 @@ public class StatusBar extends SystemUI implements
 
     public void animateCollapseQuickSettings() {
         if (mState == StatusBarState.SHADE) {
-            mStatusBarView.collapsePanel(true, false /* delayed */, 1.0f /* speedUpFactor */);
+            mNotificationPanelViewController.collapsePanel(
+                    true, false /* delayed */, 1.0f /* speedUpFactor */);
         }
     }
 
@@ -2170,7 +2172,7 @@ public class StatusBar extends SystemUI implements
         }
 
         // Ensure the panel is fully collapsed (just in case; bug 6765842, 7260868)
-        mStatusBarView.collapsePanel(/*animate=*/ false, false /* delayed*/,
+        mNotificationPanelViewController.collapsePanel(/*animate=*/ false, false /* delayed*/,
                 1.0f /* speedUpFactor */);
 
         mNotificationPanelViewController.closeQs();
@@ -4464,7 +4466,7 @@ public class StatusBar extends SystemUI implements
                     mNavigationBarController.touchAutoDim(mDisplayId);
                     Trace.beginSection("StatusBar#updateKeyguardState");
                     if (mState == StatusBarState.KEYGUARD && mStatusBarView != null) {
-                        mStatusBarView.removePendingHideExpandedRunnables();
+                        mNotificationPanelViewController.cancelPendingPanelCollapse();
                     }
                     updateDozingState();
                     checkBarModes();

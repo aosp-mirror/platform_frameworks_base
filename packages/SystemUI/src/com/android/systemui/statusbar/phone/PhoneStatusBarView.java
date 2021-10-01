@@ -55,14 +55,6 @@ public class PhoneStatusBarView extends PanelBar {
     StatusBar mBar;
 
     private ScrimController mScrimController;
-    private Runnable mHideExpandedRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if (mPanelFraction == 0.0f) {
-                mBar.makeExpandedInvisible();
-            }
-        }
-    };
     private DarkReceiver mBattery;
     private DarkReceiver mClock;
     private int mRotationOrientation = -1;
@@ -84,7 +76,6 @@ public class PhoneStatusBarView extends PanelBar {
      * Draw this many pixels into the left/right side of the cutout to optimally use the space
      */
     private int mCutoutSideNudge = 0;
-    private boolean mHeadsUpVisible;
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -208,17 +199,6 @@ public class PhoneStatusBarView extends PanelBar {
     }
 
     @Override
-    public void onPanelCollapsed() {
-        super.onPanelCollapsed();
-        // Close the status bar in the next frame so we can show the end of the animation.
-        post(mHideExpandedRunnable);
-    }
-
-    public void removePendingHideExpandedRunnables() {
-        removeCallbacks(mHideExpandedRunnable);
-    }
-
-    @Override
     public boolean onTouchEvent(MotionEvent event) {
         boolean barConsumedEvent = mBar.interceptTouchEvent(event);
 
@@ -238,7 +218,6 @@ public class PhoneStatusBarView extends PanelBar {
         super.onTrackingStarted();
         mBar.onTrackingStarted();
         mScrimController.onTrackingStarted();
-        removePendingHideExpandedRunnables();
     }
 
     @Override

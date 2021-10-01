@@ -1435,4 +1435,8 @@ public abstract class PanelViewController {
     private void cancelJankMonitoring(int cuj) {
         InteractionJankMonitor.getInstance().cancel(cuj);
     }
+
+    protected float getExpansionFraction() {
+        return mExpandedFraction;
+    }
 }
