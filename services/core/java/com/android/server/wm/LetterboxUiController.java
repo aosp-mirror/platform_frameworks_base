@@ -210,12 +210,23 @@ final class LetterboxUiController {
         return mActivityRecord.mWmService.mContext.getResources();
     }
 
-    private void handleDoubleTap() {
+    private void handleDoubleTap(int x) {
         if (!isReachabilityEnabled() || mActivityRecord.isInTransition()) {
             return;
         }
 
-        mLetterboxConfiguration.flipHorizontalMultiplierForReachability();
+        if (mLetterbox.getInnerFrame().left <= x && mLetterbox.getInnerFrame().right >= x) {
+            // Only react to clicks at the sides of the letterboxed app window.
+            return;
+        }
+
+        if (mLetterbox.getInnerFrame().left > x) {
+            // Moving to the next stop on the left side of the app window: right > center > left.
+            mLetterboxConfiguration.movePositionForReachabilityToNextLeftStop();
+        } else if (mLetterbox.getInnerFrame().right < x) {
+            // Moving to the next stop on the right side of the app window: left > center > right.
+            mLetterboxConfiguration.movePositionForReachabilityToNextRightStop();
+        }
 
         // TODO(197549949): Add animation for transition.
         mActivityRecord.recomputeConfiguration();
