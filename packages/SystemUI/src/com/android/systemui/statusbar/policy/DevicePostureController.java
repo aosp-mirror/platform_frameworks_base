@@ -50,6 +50,26 @@ public interface DevicePostureController extends CallbackController<Callback> {
     /** Return the current device posture. */
     @DevicePostureInt int getDevicePosture();
 
+    /**
+     * String representation of DevicePostureInt.
+     */
+    static String devicePostureToString(@DevicePostureInt int posture) {
+        switch (posture) {
+            case DEVICE_POSTURE_CLOSED:
+                return "DEVICE_POSTURE_CLOSED";
+            case DEVICE_POSTURE_HALF_OPENED:
+                return "DEVICE_POSTURE_HALF_OPENED";
+            case DEVICE_POSTURE_OPENED:
+                return "DEVICE_POSTURE_OPENED";
+            case DEVICE_POSTURE_FLIPPED:
+                return "DEVICE_POSTURE_FLIPPED";
+            case DEVICE_POSTURE_UNKNOWN:
+                return "DEVICE_POSTURE_UNKNOWN";
+            default:
+                return "UNSUPPORTED POSTURE posture=" + posture;
+        }
+    }
+
     /** Callback to be notified about device posture changes. */
     interface Callback {
         /** Called when the posture changes. */

@@ -45,6 +45,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.doze.DozeTriggers.DozingUpdateUiEvent;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.concurrency.FakeThreadFactory;
@@ -86,6 +87,8 @@ public class DozeTriggersTest extends SysuiTestCase {
     private UiEventLogger mUiEventLogger;
     @Mock
     private KeyguardStateController mKeyguardStateController;
+    @Mock
+    private DevicePostureController mDevicePostureController;
 
     private DozeTriggers mTriggers;
     private FakeSensorManager mSensors;
@@ -117,7 +120,8 @@ public class DozeTriggersTest extends SysuiTestCase {
         mTriggers = new DozeTriggers(mContext, mHost, config, dozeParameters,
                 asyncSensorManager, wakeLock, mDockManager, mProximitySensor,
                 mProximityCheck, mock(DozeLog.class), mBroadcastDispatcher, new FakeSettings(),
-                mAuthController, mExecutor, mUiEventLogger, mKeyguardStateController);
+                mAuthController, mExecutor, mUiEventLogger, mKeyguardStateController,
+                mDevicePostureController);
         mTriggers.setDozeMachine(mMachine);
         waitForSensorManager();
     }
