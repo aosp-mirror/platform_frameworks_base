@@ -21,11 +21,12 @@ import android.hardware.biometrics.BiometricSourceType
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
+import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.commandline.CommandRegistry
@@ -34,6 +35,8 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.StatusBar
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.leak.RotationUtils
+import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -48,12 +51,15 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
-
+import org.mockito.MockitoSession
+import org.mockito.quality.Strictness
 import javax.inject.Provider
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 class AuthRippleControllerTest : SysuiTestCase() {
+    private lateinit var staticMockSession: MockitoSession
+
     private lateinit var controller: AuthRippleController
     @Mock private lateinit var statusBar: StatusBar
     @Mock private lateinit var rippleView: AuthRippleView
@@ -74,6 +80,12 @@ class AuthRippleControllerTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        staticMockSession = mockitoSession()
+                .mockStatic(RotationUtils::class.java)
+                .strictness(Strictness.LENIENT)
+                .startMocking()
+
+        `when`(RotationUtils.getRotation(context)).thenReturn(RotationUtils.ROTATION_NONE)
         `when`(udfpsControllerProvider.get()).thenReturn(udfpsController)
 
         controller = AuthRippleController(
@@ -94,6 +106,11 @@ class AuthRippleControllerTest : SysuiTestCase() {
         )
         controller.init()
         `when`(statusBar.lightRevealScrim).thenReturn(lightRevealScrim)
+    }
+
+    @After
+    fun tearDown() {
+        staticMockSession.finishMocking()
     }
 
     @Test
