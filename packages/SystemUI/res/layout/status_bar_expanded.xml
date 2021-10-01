@@ -29,12 +29,6 @@
     <include layout="@layout/communal_host_view"
              android:visibility="gone"/>
 
-    <FrameLayout
-        android:id="@+id/big_clock_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone" />
-
     <ViewStub
         android:id="@+id/keyguard_qs_user_switch_stub"
         android:layout="@layout/keyguard_qs_user_switch"
