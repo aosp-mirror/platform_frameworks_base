@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"πραγματοποιεί και να διαχειρίζεται τηλ/κές κλήσεις"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Αισθητήρες σώματος"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"πρόσβαση στα δεδομένα αισθητήρα σχετικά με τις ζωτικές ενδείξεις σας"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Ειδοποιήσεις"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"εμφάνιση ειδοποιήσεων"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Ανάκτηση του περιεχομένου του παραθύρου"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Έλεγχος του περιεχομένου ενός παραθύρου με το οποίο αλληλεπιδράτε."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Ενεργοποίηση της \"Εξερεύνησης με άγγιγμα\""</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Επιτρέπει στην εφαρμογή την απενεργοποίηση του κλειδώματος πληκτρολογίου και άλλης σχετικής ασφάλειας με κωδικό πρόσβασης. Για παράδειγμα, το κλείδωμα πληκτρολογίου στο τηλέφωνο απενεργοποιείται όταν λαμβάνεται εισερχόμενη τηλεφωνική κλήση και ενεργοποιείται ξανά όταν η κλήση τερματιστεί."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"υποβολή αιτήματος για πολυπλοκότητα οθόνης κλειδώματος"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Επιτρέπει στην εφαρμογή να μάθει το επίπεδο πολυπλοκότητας του κλειδώματος οθόνης (υψηλό, μέσο, χαμηλό ή κανένα), το οποίο υποδεικνύει το πιθανό εύρος του μήκους και του τύπου κλειδώματος οθόνης. Η εφαρμογή μπορεί επίσης να προτείνει στους χρήστες να ενημερώσουν το κλείδωμα οθόνης σε ένα συγκεκριμένο επίπεδο, όμως οι χρήστες μπορούν να την αγνοήσουν και να συνεχίσουν. Λάβετε υπόψη ότι το κλείδωμα οθόνης δεν αποθηκεύεται σε απλό κείμενο. Συνεπώς, η εφαρμογή δεν γνωρίζει τον κωδικό."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"εμφάνιση ειδοποιήσεων"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Επιτρέπει στην εφαρμογή να εμφανίζει ειδοποιήσεις"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"χρήση βιομετρικού εξοπλισμού"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Επιτρέπει στην εφαρμογή να χρησιμοποιεί βιομετρικό εξοπλισμό για έλεγχο ταυτότητας"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"διαχείριση εξοπλισμού δακτυλικού αποτυπώματος"</string>

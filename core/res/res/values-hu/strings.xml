@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"telefonhívások kezdeményezése és kezelése"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Testérzékelők"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"az érzékelők által mért, életjelekkel kapcsolatos adatok elérése"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Értesítések"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"értesítések megjelenítése"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Ablaktartalom lekérdezése"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"A használt ablak tartalmának vizsgálata."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Felfedezés érintéssel bekapcsolása"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Lehetővé teszi az alkalmazás számára a billentyűzár és bármely kapcsolódó jelszavas védelem kikapcsolását. Például a telefon feloldja a billentyűzárat bejövő hívás esetén, majd újra bekapcsolja azt a hívás végeztével."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"képernyőzár összetettségi szintjének lekérése"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Lehetővé teszi az alkalmazás számára, hogy megismerje a képernyőzár összetettségi szintjét (magas, közepes, alacsony vagy nincs), amely jelzi a képernyőzár lehetséges típusát és hosszát. Az alkalmazás ezenkívül javaslatot tehet a felhasználóknak a képernyőzár bizonyos szintre való frissítésére, de ezt a javaslatot a felhasználók figyelmen kívül hagyhatják. A képernyőzárat nem egyszerű szöveges formátumban tárolja a rendszer, ezért az alkalmazás nem fogja tudni a pontos jelszót."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"értesítések megjelenítése"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Lehetővé teszi az alkalmazás számára az értesítések megjelenítését"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"biometrikus hardver használata"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Lehetővé teszi az alkalmazás számára a biometrikus hardver hitelesítésre való használatát"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"ujjlenyomat-olvasó hardver kezelése"</string>

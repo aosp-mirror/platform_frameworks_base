@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"կատարել զանգեր և կառավարել զանգերը"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Մարմնի տվիչներ"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"օգտագործել սենսորների տվյալները ձեր օրգանիզմի վիճակի մասին"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Ծանուցումներ"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"ցուցադրել ծանուցումներ"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Առբերել պատուհանի բովանդակությունը"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Վերլուծել գործող պատուհանի բովանդակությունը"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Միացնել Հպման միջոցով հետազոտումը"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Թույլ է տալիս հավելվածին անջատել ստեղնաշարի կողպումը և ցանկացած կապված գաղտնաբառի պաշտպանվածությունը: Սրա ճիշտ օրինակն է, երբ հեռախոսը անջատում է ստեղնաշարի կողպումը մուտքային զանգ ստանալիս, հետո այն կրկին միացնում է, երբ զանգը ավարտվում է:"</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"հարցում էկրանի կողպման բարդության մակարդակի մասին"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Հավելվածին հասանելի կդառնան էկրանի կողպման բարդության մակարդակի մասին տեղեկությունները (բարձր, միջին, ցածր կամ ոչ մեկը), այդ թվում՝ կողպման տեսակի և գաղտնաբառի երկարության մասին տվյալները: Բացի այդ, հավելվածը կկարողանա առաջարկել օգտատերերին բարձրացնել կողպման բարդության մակարդակը: Օգտատերերը կարող են անտեսել այդ առաջարկները: Նկատի ունեցեք, որ գաղտնաբառը չի պահվում բաց տեքստի տեսքով և հասանելի չէ հավելվածին:"</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"ցուցադրել ծանուցումներ"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Թույլ է տալիս հավելվածին ցուցադրել ծանուցումներ"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"կենսաչափական սարքի օգտագործում"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Հավելվածին թույլ է տալիս օգտագործել նույնականացման համար նախատեսված կենսաչափական սարքը"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"կառավարել մատնահետքերի գրանցման սարքը"</string>

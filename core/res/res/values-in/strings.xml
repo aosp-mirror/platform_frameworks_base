@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"melakukan dan mengelola panggilan telepon"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Sensor tubuh"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"mengakses data sensor tentang tanda-tanda vital"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Notifikasi"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"tampilkan notifikasi"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Membaca konten di jendela"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Memeriksa konten di jendela yang sedang Anda buka."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Mengaktifkan Jelajahi dengan Sentuhan"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Memungkinkan aplikasi menonaktifkan kunci tombol dan keamanan sandi apa pun yang terkait. Misalnya, ponsel menonaktifkan kunci tombol saat menerima panggilan telepon masuk, kemudian mengaktifkan kembali kunci tombol ketika panggilan selesai."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"meminta kompleksitas kunci layar"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Mengizinkan aplikasi mempelajari tingkat kompleksitas kunci layar (tinggi, sedang, rendah, atau tidak ada), yang menunjukkan kemungkinan rentang durasi dan jenis kunci layar. Aplikasi juga dapat menyarankan agar pengguna memperbarui kunci layar ke tingkat tertentu, namun pengguna dapat mengabaikan dan keluar dengan bebas. Perhatikan bahwa kunci layar tidak disimpan dalam teks biasa, sehingga aplikasi tidak mengetahui sandi yang sebenarnya."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"tampilkan notifikasi"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Mengizinkan aplikasi untuk menampilkan notifikasi"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"gunakan hardware biometrik"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Mengizinkan aplikasi menggunakan hardware biometrik untuk autentikasi"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"kelola hardware sidik jari"</string>

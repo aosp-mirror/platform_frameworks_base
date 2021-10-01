@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"eseguire e gestire le telefonate"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Sensori del corpo"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"accedere ai dati dei sensori relativi ai tuoi parametri vitali"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Notifiche"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"Visualizzazione di notifiche"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Recuperare contenuti della finestra"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Esamina i contenuti di una finestra con cui interagisci."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Attivare Esplora al tocco"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Consente all\'applicazione di disattivare il blocco tastiera ed eventuali protezioni tramite password associate. Ad esempio, il telefono disattiva il blocco tastiera quando riceve una telefonata in arrivo e lo riattiva al termine della chiamata."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"richiesta di complessità del blocco schermo"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Consente all\'app di conoscere il livello di complessità del blocco schermo (alto, medio, basso o nessuno), che indica l\'intervallo di caratteri possibile e il tipo di blocco schermo. L\'app può inoltre suggerire agli utenti di aggiornare il blocco schermo a un livello specifico di complessità, ma gli utenti possono ignorare liberamente il suggerimento e uscire. Tieni presente che il blocco schermo non viene memorizzato come testo non crittografato, quindi l\'app non conosce la password esatta."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"Visualizzazione di notifiche"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Consente all\'app di mostrare notifiche"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"utilizzo di hardware biometrico"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Consente all\'app di utilizzare hardware biometrico per eseguire l\'autenticazione"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"gestione di hardware per il riconoscimento delle impronte"</string>

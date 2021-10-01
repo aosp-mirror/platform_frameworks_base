@@ -332,6 +332,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"nawiązywanie połączeń telefonicznych i zarządzanie nimi"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Czujniki na ciele"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"dostęp do danych czujnika podstawowych funkcji życiowych"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Powiadomienia"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"pokazuj powiadomienia"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Pobieranie zawartości okna"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Sprawdzanie zawartości okna, z którego korzystasz."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Włączenie czytania dotykiem"</string>
@@ -555,6 +557,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Pozwala aplikacji na wyłączenie blokady klawiatury i wszystkich związanych z tym haseł zabezpieczających. Na przykład telefon wyłącza blokadę klawiatury, gdy odbiera połączenie przychodzące, a następnie włącza ją ponownie po zakończeniu połączenia."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"żądaj informacji o stopniu złożoności blokady ekranu"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Zezwala aplikacji na poznanie stopnia złożoności blokady ekranu (wysoki, średni, niski lub brak), który wskazuje na możliwy zakres długości oraz typ blokady ekranu. Aplikacja może też zasugerować zaktualizowanie blokady ekranu pod kątem określonego stopnia trudności, ale użytkownik może to zignorować i zamknąć komunikat. Pamiętaj, że blokada ekranu nie jest zapisywana jako tekst jawny, więc aplikacja nie pozna dokładnego hasła."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"pokazuj powiadomienia"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Zezwala aplikacji na pokazywanie powiadomień"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"używanie sprzętu biometrycznego"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Zezwala aplikacji na używanie sprzętu biometrycznego na potrzeby autoryzacji"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"zarządzanie czytnikiem linii papilarnych"</string>

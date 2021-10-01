@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"egin eta kudeatu telefono-deiak"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Gorputz-sentsoreak"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"atzitu bizi-konstanteei buruzko sentsorearen datuak"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Jakinarazpenak"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"jakinarazpenak erakutsi"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Eskuratu leihoko edukia"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Arakatu irekita daukazun leihoko edukia."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Aktibatu \"Arakatu ukituta\""</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Teklen blokeoa eta erlazionatutako pasahitz-segurtasuna desgaitzeko baimena ematen die aplikazioei. Adibidez, telefonoak teklen blokeoa desgaitzen du telefono-deiak jasotzen dituenean, eta berriro gaitzen du deiak amaitzean."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"eskatu pantailaren blokeoa konplexua izatea"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Pantailaren blokeoaren konplexutasun-maila (handia, ertaina, txikia edo bat ere ez) jakiteko baimena ematen die aplikazioei. Informazio horrekin, pantailaren blokeoaren luzera-barruti edo mota posiblea ondoriozta liteke. Halaber, pantailaren blokeoa maila jakin batera igotzeko iradoki diezaiekete aplikazioek erabiltzaileei, baina horri ez ikusi egin eta aplikazioak erabiltzen jarraitzeko aukera dute erabiltzaileek. Kontuan izan pantailaren blokeoa ez dela gordetzen testu arrunt gisa; beraz, aplikazioek ez dute jakingo pasahitz zehatza zein den."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"jakinarazpenak erakutsi"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Jakinarazpenak erakusteko baimena ematen die aplikazioei"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"erabili hardware biometrikoa"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Autentifikatzeko hardware biometrikoa erabiltzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"kudeatu hatz-marken hardwarea"</string>

@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ਫ਼ੋਨ ਕਾਲਾਂ ਕਰਨ ਅਤੇ ਉਹਨਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਨ"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"ਸਰੀਰ ਸੰਬੰਧੀ ਸੈਂਸਰ"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"ਆਪਣੇ ਸਰੀਰ ਦੇ ਅਹਿਮ ਚਿੰਨ੍ਹਾਂ ਬਾਰੇ ਸੰਵੇਦਕ ਡਾਟਾ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"ਸੂਚਨਾਵਾਂ"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"ਸੂਚਨਾਵਾਂ ਦਿਖਾਓ"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"ਵਿੰਡੋ ਸਮੱਗਰੀ ਮੁੜ ਪ੍ਰਾਪਤ ਕਰਨਾ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"ਉਸ ਵਿੰਡੋ ਸਮੱਗਰੀ ਦੀ ਜਾਂਚ ਕਰੋ, ਜਿਸ ਨਾਲ ਤੁਸੀਂ ਅੰਤਰਕਿਰਿਆ ਕਰ ਰਹੇ ਹੋ"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"\'ਸਪੱਰਸ਼ ਰਾਹੀਂ ਪੜਚੋਲ ਕਰੋ\' ਚਾਲੂ ਕਰਨਾ"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"ਐਪ ਨੂੰ ਕੀਲਾਕ ਅਤੇ ਕਿਸੇ ਵੀ ਸੰਬੰਧਿਤ ਪਾਸਵਰਡ ਸੁਰੱਖਿਆ ਨੂੰ ਬੰਦ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਫ਼ੋਨ ਇੱਕ ਇਨਕਮਿੰਗ ਫ਼ੋਨ ਕਾਲ ਪ੍ਰਾਪਤ ਕਰਨ ਵੇਲੇ ਬੰਦ ਕਰਦਾ ਹੈ, ਫਿਰ ਜਦੋਂ ਕਾਲ ਖਤਮ ਹੁੰਦੀ ਹੈ ਤਾਂ ਕੀਲਾਕ ਨੂੰ ਮੁੜ-ਚਾਲੂ ਕਰਦਾ ਹੈ।"</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਜਟਿਲਤਾ ਲਈ ਬੇਨਤੀ ਕਰੋ"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"ਐਪ ਨੂੰ ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਜਟਿਲਤਾ ਦੇ ਪੱਧਰ ਬਾਰੇ ਜਾਣਨ ਦਿਓ (ਉੱਚ, ਮੱਧਮ, ਘੱਟ ਜਾਂ ਕੋਈ ਨਹੀਂ), ਜੋ ਲੰਬਾਈ ਦੀ ਸੰਭਵ ਰੇਂਜ ਅਤੇ ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਕਿਸਮ ਦਾ ਸੰਕੇਤ ਦਿੰਦਾ ਹੈ। ਐਪ ਵਰਤੋਂਕਾਰਾਂ ਨੂੰ ਇੱਕ ਖਾਸ ਪੱਧਰ ਤੱਕ ਸਕ੍ਰੀਨ ਲਾਕ ਅੱਪਡੇਟ ਕਰਨ ਲਈ ਸੁਝਾਅ ਵੀ ਦੇ ਸਕਦੀ ਹੈ ਪਰ ਵਰਤੋਂਕਾਰ ਇਸਨੂੰ ਅਣਡਿੱਠ ਕਰ ਸਕਦੇ ਹਨ। ਨੋਟ ਕਰੋ ਕਿ ਸਕ੍ਰੀਨ ਲਾਕ ਸਧਾਰਨ ਲਿਖਤ ਵਿੱਚ ਸਟੋਰ ਨਹੀਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਇਸ ਲਈ ਐਪ ਸਹੀ ਪਾਸਵਰਡ ਬਾਰੇ ਨਹੀਂ ਜਾਣਦੀ ਹੈ।"</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"ਸੂਚਨਾਵਾਂ ਦਿਖਾਓ"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"ਇਸ ਨਾਲ ਐਪ ਨੂੰ ਸੂਚਨਾਵਾਂ ਦਿਖਾਉਣ ਦੀ ਆਗਿਆ ਮਿਲਦੀ ਹੈ"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"ਬਾਇਓਮੈਟ੍ਰਿਕ ਹਾਰਡਵੇਅਰ ਵਰਤੋ"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"ਐਪ ਨੂੰ ਪ੍ਰਮਾਣੀਕਰਨ ਲਈ ਬਾਇਓਮੈਟ੍ਰਿਕ ਹਾਰਡਵੇਅਰ ਵਰਤਣ ਦਿੰਦਾ ਹੈ"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਹਾਰਡਵੇਅਰ ਵਿਵਸਥਿਤ ਕਰੋ"</string>

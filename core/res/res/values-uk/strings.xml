@@ -332,6 +332,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"телефонувати та керувати дзвінками"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Датчики на тілі"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"отримувати доступ до інформації датчиків про ваші життєві показники"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Сповіщення"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"показувати сповіщення"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Отримувати вміст вікна"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Перевіряти вміст вікна, з яким ви взаємодієте."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Увімкнути функцію дослідження дотиком"</string>
@@ -555,6 +557,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Дозволяє програмі вимикати блокування клавіатури та будь-який пов’язаний паролем захист. Наприклад: телефон вимикає блокування клавіатури під час отримання вхідного дзвінка, після закінчення якого блокування клавіатури відновлюється."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"запитувати рівень складності блокування екрана"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Дозволяє додатку визначати рівень складності способу блокування екрана (високий, середній, низький або нульовий). Враховуються кількість символів і тип блокування. Додаток також може пропонувати вибрати складніший тип блокування екрана, але це не обов’язково робити. Примітка: оскільки пароль зашифровано, додаток його не знає."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"показувати сповіщення"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Дозволяє додатку показувати сповіщення"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"використовувати біометричне апаратне забезпечення"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Додаток може використовувати біометричне апаратне забезпечення для автентифікації"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"керувати сканером відбитків пальців"</string>

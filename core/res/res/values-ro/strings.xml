@@ -329,6 +329,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"inițieze și să gestioneze apeluri telefonice"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Senzori corporali"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"acceseze datele de la senzori despre semnele vitale"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Notificări"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"să afișeze notificări"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Analizeze conținutul ferestrei"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Inspectează conținutul unei ferestre cu care interacționați."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Activeze funcția Explorați prin atingere"</string>
@@ -552,6 +554,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Permite aplicației să dezactiveze blocarea tastelor și orice modalitate asociată de securizare prin parolă. De exemplu, telefonul dezactivează blocarea tastelor când se primește un apel telefonic și reactivează blocarea tastelor la terminarea apelului."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"solicitați complexitatea blocării ecranului"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Permite aplicației să învețe nivelul de complexitate al blocării ecranului (ridicat, mediu, scăzut sau fără), fapt ce indică intervalul posibil de lungime a parolei și tipul de blocare a ecranului. Aplicația le poate sugera utilizatorilor să își actualizeze blocarea ecranului la un anumit nivel, dar utilizatorii pot ignora sugestia și pot naviga în continuare. Rețineți că blocarea ecranului nu este stocată ca text simplu, astfel încât aplicația să nu cunoască parola exactă."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"să afișeze notificări"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Permite aplicației să afișeze notificări"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"utilizați hardware biometric"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Permite aplicației să folosească hardware biometric pentru autentificare"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"gestionează hardware-ul pentru amprentă"</string>

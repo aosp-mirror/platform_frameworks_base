@@ -326,6 +326,10 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ଫୋନ୍‍ କଲ୍‍ କରେ ଏବଂ ପରିଚାଳନା କରେ"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"ବଡି ସେନ୍ସର୍"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"ଆପଣଙ୍କ ଗୁରୁତପୂର୍ଣ୍ଣ ସଂକେତଗୁଡ଼ିକ ବିଷୟରେ ସେନ୍ସର୍‍ ଡାଟା ଆକ୍ସେସ୍‍ କରେ"</string>
+    <!-- no translation found for permgrouplab_notifications (5472972361980668884) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_notifications (4608679556801506580) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"ୱିଣ୍ଡୋ କଣ୍ଟେଣ୍ଟ ହାସଲ କରନ୍ତୁ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"ଆପଣ କାମ କରୁଥିବା ୱିଣ୍ଡୋର କଣ୍ଟେଣ୍ଟକୁ ଯାଞ୍ଚ କରନ୍ତୁ।"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"ସ୍ପର୍ଶ ଦ୍ୱାରା ଏକ୍ସପ୍ଲୋର୍‍ ଅନ୍‍ କରନ୍ତୁ"</string>
@@ -549,6 +553,10 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"ଆପ୍‌କୁ କୀ\'ଲକ୍ କିମ୍ବା ସେଥିରେ ଥିବା କୌଣସି ପାସ୍‌ୱର୍ଡ ସୁରକ୍ଷାକୁ ଅକ୍ଷମ କରିବା ପାଇଁ ଅନୁମତି ଦିଏ, ଉଦାହରଣସ୍ୱରୂପ, ଇନ୍‌କମିଙ୍ଗ ଫୋନ୍‌ କଲ୍ ପ୍ରାପ୍ତ କରିବା ସମୟରେ ଫୋନ୍‌ଟି କୀ\'ଲକ୍‌କୁ ଅକ୍ଷମ କରିଦିଏ, ତା’ପରେ କଲ୍ ସମାପ୍ତ ହେବାପରେ ପୁଣି କୀ\'ଲକ୍‌କୁ ସକ୍ଷମ କରିଥାଏ।"</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ସ୍କ୍ରିନ୍ ଲକ୍ ଜଟିଳତା ସଂକ୍ରାନ୍ତ ଅନୁରୋଧ"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"ସ୍କ୍ରିନ୍ ଲକ୍‌ର ଜଟିଳତା ସ୍ତର (ଉଚ୍ଚ, ମଧ୍ୟମ, ନିମ୍ନ କିମ୍ବା କିଛିନୁହେଁ), ଜାଣିବାକୁ ଆପ୍‌କୁ ଅନୁମତି ଦିଅନ୍ତୁ, ଯାହା ସ୍କ୍ରିନ୍ ଲକ୍‌ର ସମ୍ଭାବ୍ୟ ପରିସୀମାର ଲମ୍ବ ଏବଂ ପ୍ରକାର ସୂଚୀତ କରେ। ଆପ୍ ଏହା ମଧ୍ୟ ଉପଯୋଗକର୍ତ୍ତାମାନଙ୍କୁ ପରାମର୍ଶ ଦେଇପାରେ ଯେ ସେମାନେ ସ୍କ୍ରିନ୍ ଲକ୍‌କୁ ଏକ ନିର୍ଦ୍ଧିଷ୍ଟ ସ୍ତର ପର୍ଯ୍ୟନ୍ତ ଅପ୍‌ଡେଟ୍ କରିପାରନ୍ତି, କିନ୍ତୁ ଉପଯୋଗକର୍ତ୍ତାମାନେ ନିଜ ଇଚ୍ଛାରେ ଏହାକୁ ଉପେକ୍ଷା ଏବଂ ନାଭିଗେଟ୍ କରିପାରିବେ। ଧ୍ୟାନ ଦିଅନ୍ତୁ ଯେ, ସ୍କ୍ରିନ୍ ଲକ୍ ସରଳ ଟେକ୍ସଟ୍‌ରେ ଷ୍ଟୋର୍ କରାଯାଇନଥାଏ ତେଣୁ ଆପ୍ ସଠିକ୍ ପାସ୍‌‍ୱର୍ଡ ଜାଣିପାରି ନଥାଏ।"</string>
+    <!-- no translation found for permlab_postNotification (4875401198597803658) -->
+    <skip />
+    <!-- no translation found for permdesc_postNotification (5974977162462877075) -->
+    <skip />
     <string name="permlab_useBiometric" msgid="6314741124749633786">"ବାୟୋମେଟ୍ରିକ୍‌ ହାର୍ଡୱେର୍‌ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"ସ୍ୱୀକୃତି ପାଇଁ ବାୟୋମେଟ୍ରିକ୍‌ ହାର୍ଡୱେର୍‌ ବ୍ୟବହାର କରିବାକୁ ଅନୁମତି ଦିଏ"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"ଟିପଚିହ୍ନ ହାର୍ଡୱେର୍‍ ପରିଚାଳନା କରନ୍ତୁ"</string>
