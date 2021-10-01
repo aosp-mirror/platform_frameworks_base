@@ -2394,6 +2394,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     private void start() {
         removeAllProcessGroups();
 
+        CriticalEventLog.init();
         mBatteryStatsService.publish();
         mAppOpsService.publish();
         Slog.d("AppOps", "AppOpsService published");
@@ -3199,7 +3200,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             ProcessCpuTracker processCpuTracker, SparseArray<Boolean> lastPids,
             ArrayList<Integer> nativePids, StringWriter logExceptionCreatingFile) {
         return dumpStackTraces(firstPids, processCpuTracker, lastPids, nativePids,
-                logExceptionCreatingFile, null, null);
+                logExceptionCreatingFile, null, null, null);
     }
 
     /**
@@ -3209,13 +3210,14 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param nativePids optional list of native pids to dump stack crawls
      * @param logExceptionCreatingFile optional writer to which we log errors creating the file
      * @param subject optional line related to the error
+     * @param criticalEventSection optional lines containing recent critical events.
      */
     public static File dumpStackTraces(ArrayList<Integer> firstPids,
             ProcessCpuTracker processCpuTracker, SparseArray<Boolean> lastPids,
             ArrayList<Integer> nativePids, StringWriter logExceptionCreatingFile,
-            String subject) {
+            String subject, String criticalEventSection) {
         return dumpStackTraces(firstPids, processCpuTracker, lastPids, nativePids,
-                logExceptionCreatingFile, null, subject);
+                logExceptionCreatingFile, null, subject, criticalEventSection);
     }
 
     /**
@@ -3225,7 +3227,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     /* package */ static File dumpStackTraces(ArrayList<Integer> firstPids,
             ProcessCpuTracker processCpuTracker, SparseArray<Boolean> lastPids,
             ArrayList<Integer> nativePids, StringWriter logExceptionCreatingFile,
-            long[] firstPidOffsets, String subject) {
+            long[] firstPidOffsets, String subject, String criticalEventSection) {
         ArrayList<Integer> extraPids = null;
 
         Slog.i(TAG, "dumpStackTraces pids=" + lastPids + " nativepids=" + nativePids);
@@ -3277,12 +3279,17 @@ public class ActivityManagerService extends IActivityManager.Stub
             return null;
         }
 
-        if (subject != null) {
+        if (subject != null || criticalEventSection != null) {
             try (FileOutputStream fos = new FileOutputStream(tracesFile, true)) {
-                String header = "Subject: " + subject + "\n";
-                fos.write(header.getBytes(StandardCharsets.UTF_8));
+                if (subject != null) {
+                    String header = "Subject: " + subject + "\n\n";
+                    fos.write(header.getBytes(StandardCharsets.UTF_8));
+                }
+                if (criticalEventSection != null) {
+                    fos.write(criticalEventSection.getBytes(StandardCharsets.UTF_8));
+                }
             } catch (IOException e) {
-                Slog.w(TAG, "Exception writing subject to ANR dump file:", e);
+                Slog.w(TAG, "Exception writing to ANR dump file:", e);
             }
         }
 
