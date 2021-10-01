@@ -39,11 +39,12 @@ public class WindowExtensionsImpl implements WindowExtensions {
         return 1;
     }
 
-    @Override
-    public boolean isWindowLayoutComponentAvailable() {
-        return true;
-    }
-
+    /**
+     * Returns a reference implementation of {@link WindowLayoutComponent} if available,
+     * {@code null} otherwise. The implementation must match the API level reported in
+     * {@link WindowExtensions#getWindowLayoutComponent()}.
+     * @return {@link WindowLayoutComponent} OEM implementation
+     */
     @Override
     public WindowLayoutComponent getWindowLayoutComponent() {
         if (mWindowLayoutComponent == null) {
@@ -58,24 +59,10 @@ public class WindowExtensionsImpl implements WindowExtensions {
     }
 
     /**
-     * Returns {@code true} if {@link ActivityEmbeddingComponent} is present on the device,
-     * {@code false} otherwise. If the component is not available the developer will receive a
-     * single callback with empty data or default values where possible.
-     */
-    @Override
-    public boolean isEmbeddingComponentAvailable() {
-        return true;
-    }
-
-    /**
-     * Returns the OEM implementation of {@link ActivityEmbeddingComponent} if it is supported on
-     * the device. The implementation must match the API level reported in
-     * {@link androidx.window.extensions.WindowExtensions}. An
-     * {@link UnsupportedOperationException} will be thrown if the device does not support
-     * Activity Embedding. Use
-     * {@link WindowExtensions#isEmbeddingComponentAvailable()} to determine if
-     * {@link ActivityEmbeddingComponent} is present.
-     * @return the OEM implementation of {@link ActivityEmbeddingComponent}
+     * Returns a reference implementation of {@link ActivityEmbeddingComponent} if available,
+     * {@code null} otherwise. The implementation must match the API level reported in
+     * {@link WindowExtensions#getWindowLayoutComponent()}.
+     * @return {@link ActivityEmbeddingComponent} OEM implementation.
      */
     @NonNull
     public ActivityEmbeddingComponent getActivityEmbeddingComponent() {
