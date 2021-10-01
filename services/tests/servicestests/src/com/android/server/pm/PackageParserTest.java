@@ -850,7 +850,7 @@ public class PackageParserTest {
         assertEquals(a.theme, that.theme);
         assertEquals(a.fullBackupContent, that.fullBackupContent);
         assertEquals(a.uiOptions, that.uiOptions);
-        assertEquals(a.flags, that.flags);
+        assertEquals(Integer.toBinaryString(a.flags), Integer.toBinaryString(that.flags));
         assertEquals(a.privateFlags, that.privateFlags);
         assertEquals(a.requiresSmallestWidthDp, that.requiresSmallestWidthDp);
         assertEquals(a.compatibleWidthLimitDp, that.compatibleWidthLimitDp);

@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.view.View.INVISIBLE;
+import static android.view.View.VISIBLE;
+
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE;
 import static com.android.systemui.classifier.Classifier.BOUNCER_UNLOCK;
 import static com.android.systemui.classifier.Classifier.GENERIC;
@@ -315,7 +318,7 @@ public abstract class PanelViewController {
     }
 
     private void startOpening(MotionEvent event) {
-        notifyBarPanelExpansionChanged();
+        updatePanelExpansionAndVisibility();
         maybeVibrateOnOpening();
 
         //TODO: keyguard opens QS a different way; log that too?
@@ -447,7 +450,7 @@ public abstract class PanelViewController {
     protected void onTrackingStopped(boolean expand) {
         mTracking = false;
         mBar.onTrackingStopped(expand);
-        notifyBarPanelExpansionChanged();
+        updatePanelExpansionAndVisibility();
     }
 
     protected void onTrackingStarted() {
@@ -455,7 +458,7 @@ public abstract class PanelViewController {
         mTracking = true;
         mBar.onTrackingStarted();
         notifyExpandingStarted();
-        notifyBarPanelExpansionChanged();
+        updatePanelExpansionAndVisibility();
     }
 
     /**
@@ -685,7 +688,7 @@ public abstract class PanelViewController {
         } else {
             cancelJankMonitoring(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
         }
-        notifyBarPanelExpansionChanged();
+        updatePanelExpansionAndVisibility();
     }
 
     protected abstract boolean shouldUseDismissingAnimation();
@@ -760,7 +763,7 @@ public abstract class PanelViewController {
         mExpandedFraction = Math.min(1f,
                 maxPanelHeight == 0 ? 0 : mExpandedHeight / maxPanelHeight);
         onHeightUpdated(mExpandedHeight);
-        notifyBarPanelExpansionChanged();
+        updatePanelExpansionAndVisibility();
     }
 
     /**
@@ -878,7 +881,7 @@ public abstract class PanelViewController {
         if (mExpanding) {
             notifyExpandingFinished();
         }
-        notifyBarPanelExpansionChanged();
+        updatePanelExpansionAndVisibility();
 
         // Wait for window manager to pickup the change, so we know the maximum height of the panel
         // then.
@@ -916,7 +919,7 @@ public abstract class PanelViewController {
         }
         if (mInstantExpanding) {
             mInstantExpanding = false;
-            notifyBarPanelExpansionChanged();
+            updatePanelExpansionAndVisibility();
         }
     }
 
@@ -1022,7 +1025,7 @@ public abstract class PanelViewController {
             public void onAnimationEnd(Animator animation) {
                 setAnimator(null);
                 onAnimationFinished.run();
-                notifyBarPanelExpansionChanged();
+                updatePanelExpansionAndVisibility();
             }
         });
         animator.start();
@@ -1059,17 +1062,37 @@ public abstract class PanelViewController {
         return animator;
     }
 
-    protected void notifyBarPanelExpansionChanged() {
+    /** Update the visibility of {@link PanelView} if necessary. */
+    public void updateVisibility() {
+        mView.setVisibility(shouldPanelBeVisible() ? VISIBLE : INVISIBLE);
+    }
+
+    /** Returns true if {@link PanelView} should be visible. */
+    abstract boolean shouldPanelBeVisible();
+
+    /**
+     * Updates the panel expansion and {@link PanelView} visibility if necessary.
+     *
+     * TODO(b/200063118): Could public calls to this method be replaced with calls to
+     *   {@link #updateVisibility()}? That would allow us to make this method private.
+     */
+    public void updatePanelExpansionAndVisibility() {
         if (mBar != null) {
-            mBar.panelExpansionChanged(
-                    mExpandedFraction,
-                    mExpandedFraction > 0f || mInstantExpanding
-                            || isPanelVisibleBecauseOfHeadsUp() || mTracking
-                            || mHeightAnimator != null && !mIsSpringBackAnimation);
+            mBar.panelExpansionChanged(mExpandedFraction, isExpanded());
         }
+        updateVisibility();
         for (int i = 0; i < mExpansionListeners.size(); i++) {
             mExpansionListeners.get(i).onPanelExpansionChanged(mExpandedFraction, mTracking);
         }
+    }
+
+    public boolean isExpanded() {
+        return mExpandedFraction > 0f
+                || mInstantExpanding
+                || isPanelVisibleBecauseOfHeadsUp()
+                || mTracking
+                || mHeightAnimator != null
+                && !mIsSpringBackAnimation;
     }
 
     public void addExpansionListener(PanelExpansionListener panelExpansionListener) {

@@ -82,7 +82,8 @@ final class ReconciledPackage {
         combined.putAll(mRequest.mAllPackages);
 
         for (ScanResult scanResult : mRequest.mScannedPackages.values()) {
-            combined.put(scanResult.mPkgSetting.name, scanResult.mRequest.mParsedPackage);
+            combined.put(scanResult.mPkgSetting.getPackageName(),
+                    scanResult.mRequest.mParsedPackage);
         }
 
         return combined;

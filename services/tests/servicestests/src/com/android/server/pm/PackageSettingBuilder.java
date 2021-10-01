@@ -175,14 +175,14 @@ public class PackageSettingBuilder {
                 mSecondaryCpuAbiString, mCpuAbiOverrideString, mPVersionCode, mPkgFlags,
                 mPrivateFlags, mSharedUserId, mUsesStaticLibraries, mUsesStaticLibrariesVersions,
                 mMimeGroups, mDomainSetId);
-        packageSetting.signatures = mSigningDetails != null
+        packageSetting.setSignatures(mSigningDetails != null
                 ? new PackageSignatures(mSigningDetails)
-                : new PackageSignatures();
-        packageSetting.pkg = mPkg;
-        packageSetting.appId = mAppId;
-        packageSetting.volumeUuid = this.mVolumeUuid;
+                : new PackageSignatures());
+        packageSetting.setPkg(mPkg);
+        packageSetting.setAppId(mAppId);
+        packageSetting.setVolumeUuid(this.mVolumeUuid);
         if (mInstallSource != null) {
-            packageSetting.installSource = mInstallSource;
+            packageSetting.setInstallSource(mInstallSource);
         }
         for (int i = 0; i < mUserStates.size(); i++) {
             packageSetting.setUserState(mUserStates.keyAt(i), mUserStates.valueAt(i));

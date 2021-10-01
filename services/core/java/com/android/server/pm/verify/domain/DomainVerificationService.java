@@ -949,7 +949,8 @@ public class DomainVerificationService extends SystemService
         } else {
             pkgState = mSettings.removeRestoredState(pkgName);
             if (pkgState != null && !Objects.equals(pkgState.getBackupSignatureHash(),
-                    PackageUtils.computeSignaturesSha256Digest(newPkgSetting.getSignatures()))) {
+                    PackageUtils.computeSignaturesSha256Digest(
+                            newPkgSetting.getSigningDetails().getSignatures()))) {
                 // If restoring and the signatures don't match, drop the state
                 pkgState = null;
             }
@@ -1072,7 +1073,7 @@ public class DomainVerificationService extends SystemService
                         }
 
                         return PackageUtils.computeSignaturesSha256Digest(
-                                pkgSetting.getSignatures());
+                                pkgSetting.getSigningDetails().getSignatures());
                     };
                 }
 

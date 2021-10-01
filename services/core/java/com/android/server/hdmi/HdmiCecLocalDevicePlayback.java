@@ -105,7 +105,40 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
                         }
                     });
         }
+        launchDeviceDiscovery();
         startQueuedActions();
+    }
+
+    @ServiceThreadOnly
+    private void launchDeviceDiscovery() {
+        assertRunOnServiceThread();
+        clearDeviceInfoList();
+        DeviceDiscoveryAction action = new DeviceDiscoveryAction(this,
+                new DeviceDiscoveryAction.DeviceDiscoveryCallback() {
+                    @Override
+                    public void onDeviceDiscoveryDone(List<HdmiDeviceInfo> deviceInfos) {
+                        for (HdmiDeviceInfo info : deviceInfos) {
+                            mService.getHdmiCecNetwork().addCecDevice(info);
+                        }
+
+                        // Since we removed all devices when it starts and device discovery action
+                        // does not poll local devices, we should put device info of local device
+                        // manually here.
+                        for (HdmiCecLocalDevice device : mService.getAllLocalDevices()) {
+                            synchronized (device.mLock) {
+                                mService.getHdmiCecNetwork().addCecDevice(device.getDeviceInfo());
+                            }
+                        }
+
+                        List<HotplugDetectionAction> hotplugActions =
+                                getActions(HotplugDetectionAction.class);
+                        if (hotplugActions.isEmpty()) {
+                            addAndStartAction(
+                                    new HotplugDetectionAction(HdmiCecLocalDevicePlayback.this));
+                        }
+                    }
+                });
+        addAndStartAction(action);
     }
 
     @Override
@@ -450,9 +483,12 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     @Override
     @ServiceThreadOnly
     protected void disableDevice(boolean initiatedByCec, PendingActionClearedCallback callback) {
-        super.disableDevice(initiatedByCec, callback);
-
         assertRunOnServiceThread();
+        removeAction(DeviceDiscoveryAction.class);
+        removeAction(HotplugDetectionAction.class);
+        removeAction(NewDeviceAction.class);
+        super.disableDevice(initiatedByCec, callback);
+        clearDeviceInfoList();
         checkIfPendingActionsCleared();
     }
 

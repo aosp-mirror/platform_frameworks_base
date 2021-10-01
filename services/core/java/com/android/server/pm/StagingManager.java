@@ -496,7 +496,7 @@ public class StagingManager {
         long ceDataInode = -1;
         final PackageSetting ps = mPmi.getPackageSetting(packageName);
         if (ps != null) {
-            appId = ps.appId;
+            appId = ps.getAppId();
             ceDataInode = ps.getCeDataInode(UserHandle.USER_SYSTEM);
             // NOTE: We ignore the user specified in the InstallParam because we know this is
             // an update, and hence need to restore data for all installed users.

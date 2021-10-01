@@ -45,5 +45,18 @@
 
     <!-- Component name of the activity used to inform a user about a sensory being blocked because
      of privacy settings. -->
-    <string name="config_sensorUseStartedActivity">com.android.systemui/com.android.systemui.sensorprivacy.television.TvUnblockSensorActivity</string>
+    <string name="config_sensorUseStartedActivity" translatable="false">
+        com.android.systemui/com.android.systemui.sensorprivacy.television.TvUnblockSensorActivity
+    </string>
+
+    <!-- Component name of the activity that shows the request for access to a usb device. -->
+    <string name="config_usbPermissionActivity" translatable="false">
+        com.android.systemui/com.android.systemui.usb.tv.TvUsbPermissionActivity
+    </string>
+
+    <!-- Component name of the activity that confirms the activity to start when a usb device is
+     plugged in. -->
+    <string name="config_usbConfirmActivity" translatable="false">
+        com.android.systemui/com.android.systemui.usb.tv.TvUsbConfirmActivity
+    </string>
 </resources>

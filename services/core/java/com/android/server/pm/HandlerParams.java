@@ -41,12 +41,14 @@ abstract class HandlerParams {
     @NonNull
     final PackageManagerService mPm;
     final VerificationHelper mVerificationHelper;
+    final BroadcastHelper mBroadcastHelper;
 
     // TODO(b/198166813): remove PMS dependency
     HandlerParams(UserHandle user, PackageManagerService pm) {
         mUser = user;
         mPm = pm;
         mVerificationHelper = new VerificationHelper(mPm.mContext);
+        mBroadcastHelper = new BroadcastHelper(mPm.mInjector);
     }
 
     UserHandle getUser() {
@@ -89,7 +91,7 @@ abstract class HandlerParams {
             if (dataOwnerPkg  == null) {
                 PackageSetting ps = mPm.mSettings.getPackageLPr(packageName);
                 if (ps != null) {
-                    dataOwnerPkg = ps.pkg;
+                    dataOwnerPkg = ps.getPkg();
                 }
             }
 

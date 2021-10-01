@@ -29,6 +29,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.PointF;
 import android.hardware.biometrics.BiometricAuthenticator.Modality;
 import android.hardware.biometrics.BiometricConstants;
@@ -97,7 +98,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     private final Provider<UdfpsController> mUdfpsControllerFactory;
     private final Provider<SidefpsController> mSidefpsControllerFactory;
     @Nullable private final PointF mFaceAuthSensorLocation;
-    @Nullable private final PointF mFingerprintLocation;
+    @Nullable private PointF mFingerprintLocation;
     private final Set<Callback> mCallbacks = new HashSet<>();
 
     // TODO: These should just be saved from onSaveState
@@ -481,14 +482,27 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                     (float) faceAuthLocation[1]);
         }
 
-        mFingerprintLocation = new PointF(DisplayUtils.getWidth(mContext) / 2,
-                mContext.getResources().getDimensionPixelSize(
-                com.android.systemui.R.dimen.physical_fingerprint_sensor_center_screen_location_y));
+        updateFingerprintLocation();
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
 
         context.registerReceiver(mBroadcastReceiver, filter);
+    }
+
+    private void updateFingerprintLocation() {
+        int xLocation = DisplayUtils.getWidth(mContext) / 2;
+        try {
+            xLocation = mContext.getResources().getDimensionPixelSize(
+                    com.android.systemui.R.dimen
+                            .physical_fingerprint_sensor_center_screen_location_x);
+        } catch (Resources.NotFoundException e) {
+        }
+        int yLocation = mContext.getResources().getDimensionPixelSize(
+                com.android.systemui.R.dimen.physical_fingerprint_sensor_center_screen_location_y);
+        mFingerprintLocation = new PointF(
+                xLocation,
+                yLocation);
     }
 
     @SuppressWarnings("deprecation")
@@ -767,6 +781,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        updateFingerprintLocation();
 
         // Save the state of the current dialog (buttons showing, etc)
         if (mCurrentDialog != null) {
@@ -796,6 +811,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     }
 
     private void onOrientationChanged() {
+        updateFingerprintLocation();
         if (mCurrentDialog != null) {
             mCurrentDialog.onOrientationChanged();
         }

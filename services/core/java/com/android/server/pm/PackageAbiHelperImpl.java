@@ -511,15 +511,16 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
             // when scannedPackage is an update of an existing package. Without this check,
             // we will never be able to change the ABI of any package belonging to a shared
             // user, even if it's compatible with other packages.
-            if (scannedPackage != null && scannedPackage.getPackageName().equals(ps.name)) {
+            if (scannedPackage != null && scannedPackage.getPackageName().equals(
+                    ps.getPackageName())) {
                 continue;
             }
-            if (ps.primaryCpuAbiString == null) {
+            if (ps.getPrimaryCpuAbi() == null) {
                 continue;
             }
 
             final String instructionSet =
-                    VMRuntime.getInstructionSet(ps.primaryCpuAbiString);
+                    VMRuntime.getInstructionSet(ps.getPrimaryCpuAbi());
             if (requiredInstructionSet != null && !requiredInstructionSet.equals(instructionSet)) {
                 // We have a mismatch between instruction sets (say arm vs arm64) warn about
                 // this but there's not much we can do.
@@ -545,7 +546,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
             // scannedPackage did not require an ABI, in which case we have to adjust
             // scannedPackage to match the ABI of the set (which is the same as
             // requirer's ABI)
-            adjustedAbi = requirer.primaryCpuAbiString;
+            adjustedAbi = requirer.getPrimaryCpuAbi();
         } else {
             // requirer == null implies that we're updating all ABIs in the set to
             // match scannedPackage.

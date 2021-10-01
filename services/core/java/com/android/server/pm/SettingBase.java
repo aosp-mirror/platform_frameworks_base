@@ -101,24 +101,20 @@ public abstract class SettingBase implements Watchable, Snappable {
      * purposes other than migration.
      */
     @Deprecated
-    protected final LegacyPermissionState mLegacyPermissionsState;
+    protected final LegacyPermissionState mLegacyPermissionsState = new LegacyPermissionState();
 
     SettingBase(int pkgFlags, int pkgPrivateFlags) {
         setFlags(pkgFlags);
         setPrivateFlags(pkgPrivateFlags);
-        mLegacyPermissionsState = new LegacyPermissionState();
     }
 
-    SettingBase(SettingBase orig) {
-        mLegacyPermissionsState = new LegacyPermissionState();
-        doCopy(orig);
+    SettingBase(@Nullable SettingBase orig) {
+        if (orig != null) {
+            copySettingBase(orig);
+        }
     }
 
-    public void copyFrom(SettingBase orig) {
-        doCopy(orig);
-    }
-
-    private void doCopy(SettingBase orig) {
+    public final void copySettingBase(SettingBase orig) {
         pkgFlags = orig.pkgFlags;
         pkgPrivateFlags = orig.pkgPrivateFlags;
         mLegacyPermissionsState.copyFrom(orig.mLegacyPermissionsState);

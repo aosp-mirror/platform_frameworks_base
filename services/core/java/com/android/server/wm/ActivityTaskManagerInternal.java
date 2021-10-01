@@ -608,6 +608,44 @@ public abstract class ActivityTaskManagerInternal {
             String packageName, int userId);
 
     /**
+     * Retrieves and returns the app-specific configuration for an arbitrary application specified
+     * by its packageName and userId. Returns null if no app-specific configuration has been set.
+     */
+    @Nullable
+    public abstract PackageConfig getApplicationConfig(String packageName,
+            int userId);
+
+    /**
+     * Holds app-specific configurations.
+     */
+    public static class PackageConfig {
+        /**
+         * nightMode for the application, null if app-specific nightMode is not set.
+         */
+        @Nullable
+        public final Integer mNightMode;
+
+        /**
+         * {@link LocaleList} for the application, null if app-specific locales are not set.
+         */
+        @Nullable
+        public final LocaleList mLocales;
+
+        PackageConfig(Integer nightMode, LocaleList locales) {
+            mNightMode = nightMode;
+            mLocales = locales;
+        }
+
+        /**
+         * Returns the string representation of the app-specific configuration.
+         */
+        @Override
+        public String toString() {
+            return "PackageConfig: nightMode " + mNightMode + " locales " + mLocales;
+        }
+    }
+
+    /**
      * An interface to update configuration for an application, and will persist override
      * configuration for this package.
      */
