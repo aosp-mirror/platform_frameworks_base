@@ -81,8 +81,11 @@ final class CompatConfig {
     private final OverrideValidatorImpl mOverrideValidator;
     private final AndroidBuildClassifier mAndroidBuildClassifier;
     private Context mContext;
-    @GuardedBy("mOverridesFile")
+    private final Object mOverridesFileLock = new Object();
+    @GuardedBy("mOverridesFileLock")
     private File mOverridesFile;
+    @GuardedBy("mOverridesFileLock")
+    private File mBackupOverridesFile;
 
     @VisibleForTesting
     CompatConfig(AndroidBuildClassifier androidBuildClassifier, Context context) {
@@ -550,13 +553,24 @@ final class CompatConfig {
 
         loadOverrides(staticOverridesFile);
 
-        mOverridesFile = dynamicOverridesFile;
-        loadOverrides(dynamicOverridesFile);
+        synchronized (mOverridesFileLock) {
+            mOverridesFile = dynamicOverridesFile;
+            mBackupOverridesFile = makeBackupFile(dynamicOverridesFile);
+            if (mBackupOverridesFile.exists()) {
+                mOverridesFile.delete();
+                mBackupOverridesFile.renameTo(mOverridesFile);
+            }
+            loadOverrides(mOverridesFile);
+        }
 
         if (staticOverridesFile.exists()) {
             // Only save overrides if there is a static overrides file.
             saveOverrides();
         }
+    }
+
+    private File makeBackupFile(File overridesFile) {
+        return new File(overridesFile.getPath() + ".bak");
     }
 
     private void loadOverrides(File overridesFile) {
@@ -591,10 +605,11 @@ final class CompatConfig {
      * Persist compat framework overrides to /data/misc/appcompat/compat_framework_overrides.xml
      */
     void saveOverrides() {
-        if (mOverridesFile == null) {
-            return;
-        }
-        synchronized (mOverridesFile) {
+        synchronized (mOverridesFileLock) {
+            if (mOverridesFile == null || mBackupOverridesFile == null) {
+                return;
+            }
+
             Overrides overrides = new Overrides();
             List<ChangeOverrides> changeOverridesList = overrides.getChangeOverrides();
             for (CompatChange c : mChanges.values()) {
@@ -603,6 +618,20 @@ final class CompatConfig {
                     changeOverridesList.add(changeOverrides);
                 }
             }
+
+            // Rename the file to the backup.
+            if (mOverridesFile.exists()) {
+                if (mBackupOverridesFile.exists()) {
+                    mOverridesFile.delete();
+                } else {
+                    if (!mOverridesFile.renameTo(mBackupOverridesFile)) {
+                        Slog.e(TAG, "Couldn't rename file " + mOverridesFile
+                                + " to " + mBackupOverridesFile);
+                        return;
+                    }
+                }
+            }
+
             // Create the file if it doesn't already exist
             try {
                 mOverridesFile.createNewFile();
@@ -616,6 +645,9 @@ final class CompatConfig {
             } catch (IOException e) {
                 Slog.e(TAG, e.toString());
             }
+
+            // Remove the backup if the write succeeds.
+            mBackupOverridesFile.delete();
         }
     }
 
