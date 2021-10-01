@@ -469,8 +469,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSetMinFraction() {
-        mNotificationPanelViewController.setMinFraction(0.5f);
+    public void testSetPanelScrimMinFraction() {
+        mNotificationPanelViewController.setPanelScrimMinFraction(0.5f);
         verify(mNotificationShadeDepthController).setPanelPullDownMinFraction(eq(0.5f));
     }
 

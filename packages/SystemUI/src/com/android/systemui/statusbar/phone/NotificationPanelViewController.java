@@ -1801,15 +1801,6 @@ public class NotificationPanelViewController extends PanelViewController {
         return !mQsTouchAboveFalsingThreshold;
     }
 
-    /**
-     * Percentage of panel expansion offset, caused by pulling down on a heads-up.
-     */
-    @Override
-    public void setMinFraction(float minFraction) {
-        mMinFraction = minFraction;
-        mDepthController.setPanelPullDownMinFraction(mMinFraction);
-    }
-
     private float computeQsExpansionFraction() {
         if (mQSAnimatingHiddenFromCollapsed) {
             // When hiding QS from collapsed state, the expansion can sometimes temporarily
@@ -3337,8 +3328,14 @@ public class NotificationPanelViewController extends PanelViewController {
         return mBarState == KEYGUARD;
     }
 
+    /**
+     * Sets the minimum fraction for the panel expansion offset. This may be non-zero in certain
+     * cases, such as if there's a heads-up notification.
+     */
     public void setPanelScrimMinFraction(float minFraction) {
         mBar.onPanelMinFractionChanged(minFraction);
+        mMinFraction = minFraction;
+        mDepthController.setPanelPullDownMinFraction(mMinFraction);
     }
 
     public void clearNotificationEffects() {
