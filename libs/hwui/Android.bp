@@ -272,7 +272,6 @@ cc_defaults {
                 "apex/android_bitmap.cpp",
                 "apex/android_canvas.cpp",
                 "apex/jni_runtime.cpp",
-                "apex/renderthread.cpp",
             ],
         },
         host: {

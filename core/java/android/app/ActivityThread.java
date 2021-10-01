@@ -4578,8 +4578,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
     private void handleDumpGfxInfo(DumpComponentInfo info) {
         try {
-            nDumpGraphicsInfo(info.fd.getFileDescriptor());
-            WindowManagerGlobal.getInstance().dumpGfxInfo(info.fd.getFileDescriptor(), info.args);
+            ThreadedRenderer.handleDumpGfxInfo(info.fd.getFileDescriptor(), info.args);
         } catch (Exception e) {
             Log.w(TAG, "Caught exception from dumpGfxInfo()", e);
         } finally {
@@ -7905,6 +7904,5 @@ public final class ActivityThread extends ClientTransactionHandler
 
     // ------------------ Regular JNI ------------------------
     private native void nPurgePendingResources();
-    private native void nDumpGraphicsInfo(FileDescriptor fd);
     private native void nInitZygoteChildHeapProfiling();
 }
