@@ -34,6 +34,9 @@ import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
+import static com.android.systemui.statusbar.phone.PanelBar.STATE_CLOSED;
+import static com.android.systemui.statusbar.phone.PanelBar.STATE_OPEN;
+import static com.android.systemui.statusbar.phone.PanelBar.STATE_OPENING;
 
 import static java.lang.Float.isNaN;
 
@@ -79,6 +82,7 @@ import android.view.ViewPropertyAnimator;
 import android.view.ViewStub;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
@@ -4624,9 +4628,21 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     private final PanelBar.PanelStateChangeListener mPanelStateChangeListener =
-            state -> {
-                mAmbientState.setIsShadeOpening(state == PanelBar.STATE_OPENING);
-                updateQSExpansionEnabledAmbient();
+            new PanelBar.PanelStateChangeListener() {
+
+                @PanelBar.PanelState
+                private int mCurrentState = STATE_CLOSED;
+
+                @Override
+                public void onStateChanged(@PanelBar.PanelState int state) {
+                    mAmbientState.setIsShadeOpening(state == STATE_OPENING);
+                    updateQSExpansionEnabledAmbient();
+
+                    if (state == STATE_OPEN && mCurrentState != state) {
+                        mView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+                    }
+                    mCurrentState = state;
+                }
             };
 
     public PanelBar.PanelStateChangeListener getPanelStateChangeListener() {

@@ -54,7 +54,7 @@ public abstract class PanelBar extends FrameLayout {
     public static final int STATE_OPENING = 1;
     public static final int STATE_OPEN = 2;
 
-    PanelViewController mPanel;
+    private PanelViewController mPanel;
     @Nullable private PanelStateChangeListener mPanelStateChangeListener;
     private int mState = STATE_CLOSED;
     private boolean mTracking;
@@ -178,7 +178,6 @@ public abstract class PanelBar extends FrameLayout {
         }
         if (fullyOpened && !mTracking) {
             go(STATE_OPEN);
-            onPanelFullyOpened();
         } else if (fullyClosed && !mTracking && mState != STATE_CLOSED) {
             go(STATE_CLOSED);
             onPanelCollapsed();
@@ -217,10 +216,6 @@ public abstract class PanelBar extends FrameLayout {
 
     public void onPanelCollapsed() {
         if (DEBUG) LOG("onPanelCollapsed");
-    }
-
-    public void onPanelFullyOpened() {
-        if (DEBUG) LOG("onPanelFullyOpened");
     }
 
     public void onTrackingStarted() {
