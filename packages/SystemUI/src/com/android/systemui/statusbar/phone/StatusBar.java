@@ -898,6 +898,8 @@ public class StatusBar extends SystemUI implements
         lockscreenShadeTransitionController.setStatusbar(this);
 
         mExpansionChangedListeners = new ArrayList<>();
+        addExpansionChangedListener(
+                (expansion, expanded) -> mScrimController.setRawPanelExpansionFraction(expansion));
 
         mBubbleExpandListener =
                 (isExpanding, key) -> mContext.getMainExecutor().execute(() -> {
@@ -1399,6 +1401,12 @@ public class StatusBar extends SystemUI implements
         // listen for USER_SETUP_COMPLETE setting (per-user)
         mDeviceProvisionedController.addCallback(mUserSetupObserver);
         mUserSetupObserver.onUserSetupChanged();
+
+        for (ExpansionChangedListener listener : mExpansionChangedListeners) {
+            // The initial expansion amount comes from mNotificationPanelViewController, so we
+            // should send the amount once we've fully set up that controller.
+            sendInitialExpansionAmount(listener);
+        }
 
         // disable profiling bars, since they overlap and clutter the output on app windows
         ThreadedRenderer.overrideProperty("disableProfileBars", "true");
@@ -4227,9 +4235,11 @@ public class StatusBar extends SystemUI implements
     }
 
     private void sendInitialExpansionAmount(ExpansionChangedListener expansionChangedListener) {
-        expansionChangedListener.onExpansionChanged(
-                mNotificationPanelViewController.getExpandedFraction(),
-                mNotificationPanelViewController.isExpanded());
+        if (mNotificationPanelViewController != null) {
+            expansionChangedListener.onExpansionChanged(
+                    mNotificationPanelViewController.getExpandedFraction(),
+                    mNotificationPanelViewController.isExpanded());
+        }
     }
 
     public void removeExpansionChangedListener(@NonNull ExpansionChangedListener listener) {
