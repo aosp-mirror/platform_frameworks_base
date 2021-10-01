@@ -1848,7 +1848,7 @@ public class UserManager {
             Manifest.permission.MANAGE_USERS}, // Can be INTERACT_ACROSS_USERS instead.
             conditional = true)
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    @UserHandleAware()
+    @UserHandleAware
     public boolean canSwitchUsers() {
         boolean allowUserSwitchingWhenSystemUserLocked = Settings.Global.getInt(
                 mContext.getContentResolver(),
@@ -1929,13 +1929,33 @@ public class UserManager {
      * Returns the userId for the context user.
      *
      * @return the userId of the context user.
+     *
+     * @deprecated To get the <em>calling</em> user, use {@link UserHandle#myUserId()}.
+     *             To get the <em>context</em> user, get it directly from the context.
+     *
      * @hide
      */
+    @Deprecated
     @UnsupportedAppUsage
     @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     // *** Do NOT use this in UserManager. Instead always use mUserId. ***
     public @UserIdInt int getUserHandle() {
         return getContextUserIfAppropriate();
+    }
+
+    /**
+     * Returns the userId for the user that this process is running under
+     * (<em>not</em> the context user).
+     *
+     * @return the userId of <em>this process</em>.
+     *
+     * @deprecated Use {@link UserHandle#myUserId()}
+     * @hide
+     */
+    @Deprecated
+    // NOT @UserHandleAware
+    public @UserIdInt int getProcessUserId() {
+        return UserHandle.myUserId();
     }
 
     /**
@@ -2012,7 +2032,7 @@ public class UserManager {
             return false;
         }
         // Caution: This is NOT @UserHandleAware (because mContext is getApplicationContext and
-        // holds a different userId), but for R+ it returns false, so it doesn't matter anyway.
+        // can hold a different userId), but for R+ it returns false, so it doesn't matter anyway.
         return mContext.getPackageManager()
                 .isPackageAvailable("com.coffeestainstudios.goatsimulator");
     }
@@ -2447,7 +2467,7 @@ public class UserManager {
      */
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
-    @UserHandleAware()
+    @UserHandleAware
     public boolean isEphemeralUser() {
         return isUserEphemeral(mUserId);
     }
@@ -3315,7 +3335,7 @@ public class UserManager {
     @TestApi
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
-    @UserHandleAware()
+    @UserHandleAware
     public @Nullable UserInfo createRestrictedProfile(@Nullable String name) {
         try {
             final int parentUserId = mUserId;
@@ -4605,7 +4625,7 @@ public class UserManager {
             android.Manifest.permission.MANAGE_USERS,
             android.Manifest.permission.CREATE_USERS // And INTERACT_ if diff profile group
     })
-    @UserHandleAware()
+    @UserHandleAware
     public boolean isUserSwitcherEnabled() {
         return isUserSwitcherEnabled(true);
     }
@@ -4622,7 +4642,7 @@ public class UserManager {
             android.Manifest.permission.MANAGE_USERS,
             android.Manifest.permission.CREATE_USERS // And INTERACT_ if diff profile group
     })
-    @UserHandleAware()
+    @UserHandleAware
     public boolean isUserSwitcherEnabled(boolean showEvenIfNotActionable) {
         if (!supportsMultipleUsers()) {
             return false;
