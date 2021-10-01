@@ -37,10 +37,18 @@ namespace {
 
 // Must match the value from GnssMeasurement.java
 const uint32_t ADR_STATE_HALF_CYCLE_REPORTED = (1 << 4);
+extern jmethodID method_locationCtor;
 
 } // anonymous namespace
 
+extern jclass class_location;
 extern jobject mCallbacksObj;
+
+namespace gnss {
+void Utils_class_init_once(JNIEnv* env);
+} // namespace gnss
+
+jobject& getCallbacksObj();
 
 jboolean checkHidlReturn(hardware::Return<bool>& result, const char* errorMessage);
 
@@ -189,6 +197,9 @@ private:
 };
 
 JNIEnv* getJniEnv();
+
+template <class T>
+jobject translateGnssLocation(JNIEnv* env, const T& location);
 
 } // namespace android
 
