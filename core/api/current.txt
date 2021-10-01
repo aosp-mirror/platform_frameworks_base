@@ -47166,6 +47166,15 @@ package android.util {
     field public float ydpi;
   }
 
+  public interface Dumpable {
+    method public void dump(@NonNull java.io.PrintWriter, @Nullable String[]);
+    method @NonNull public default String getDumpableName();
+  }
+
+  public interface DumpableContainer {
+    method public boolean addDumpable(@NonNull android.util.Dumpable);
+  }
+
   public class EventLog {
     method public static int getTagCode(String);
     method public static String getTagName(int);
