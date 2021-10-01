@@ -48,6 +48,8 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.LOGTAG_INPUT_FOCUS;
 
+import static java.lang.Integer.MAX_VALUE;
+
 import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -581,10 +583,11 @@ final class InputMonitor {
             if (mAddRecentsAnimationInputConsumerHandle && shouldApplyRecentsInputConsumer) {
                 if (recentsAnimationController.updateInputConsumerForApp(
                         mRecentsAnimationInputConsumer.mWindowHandle)) {
-                    final WindowState highestLayerWindow =
-                            recentsAnimationController.getHighestLayerWindow();
-                    if (highestLayerWindow != null) {
-                        mRecentsAnimationInputConsumer.show(mInputTransaction, highestLayerWindow);
+                    final DisplayArea targetDA =
+                            recentsAnimationController.getTargetAppDisplayArea();
+                    if (targetDA != null) {
+                        mRecentsAnimationInputConsumer.reparent(mInputTransaction, targetDA);
+                        mRecentsAnimationInputConsumer.show(mInputTransaction, MAX_VALUE - 1);
                         mAddRecentsAnimationInputConsumerHandle = false;
                     }
                 }
@@ -597,7 +600,7 @@ final class InputMonitor {
                             rootTask.getSurfaceControl());
                     // We set the layer to z=MAX-1 so that it's always on top.
                     mPipInputConsumer.reparent(mInputTransaction, rootTask);
-                    mPipInputConsumer.show(mInputTransaction, Integer.MAX_VALUE - 1);
+                    mPipInputConsumer.show(mInputTransaction, MAX_VALUE - 1);
                     mAddPipInputConsumerHandle = false;
                 }
             }
