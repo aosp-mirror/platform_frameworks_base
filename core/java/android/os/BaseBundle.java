@@ -1048,7 +1048,7 @@ public class BaseBundle {
      */
     char getChar(String key, char defaultValue) {
         unparcel();
-        Object o = getValue(key);
+        Object o = mMap.get(key);
         if (o == null) {
             return defaultValue;
         }
@@ -1451,7 +1451,7 @@ public class BaseBundle {
     @Nullable
     short[] getShortArray(@Nullable String key) {
         unparcel();
-        Object o = getValue(key);
+        Object o = mMap.get(key);
         if (o == null) {
             return null;
         }
@@ -1474,7 +1474,7 @@ public class BaseBundle {
     @Nullable
     char[] getCharArray(@Nullable String key) {
         unparcel();
-        Object o = getValue(key);
+        Object o = mMap.get(key);
         if (o == null) {
             return null;
         }
@@ -1543,7 +1543,7 @@ public class BaseBundle {
     @Nullable
     float[] getFloatArray(@Nullable String key) {
         unparcel();
-        Object o = getValue(key);
+        Object o = mMap.get(key);
         if (o == null) {
             return null;
         }
