@@ -46,7 +46,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
-/** Tests for {@link ActiveSourceAction} */
+/** Tests for {@link PowerStatusMonitorAction} */
 @SmallTest
 @RunWith(JUnit4.class)
 public class PowerStatusMonitorActionTest {

@@ -291,7 +291,7 @@ public final class ScanPackageHelper {
     @VisibleForTesting
     @NonNull
     public ScanResult scanPackageOnlyLI(@NonNull ScanRequest request,
-            PackageManagerService.Injector injector,
+            PackageManagerServiceInjector injector,
             boolean isUnderFactoryTest, long currentTime)
             throws PackageManagerException {
         final PackageAbiHelper packageAbiHelper = injector.getAbiHelper();

@@ -345,7 +345,7 @@ public class AppsFilter implements Watchable, Snappable {
 
     private static class FeatureConfigImpl implements FeatureConfig, CompatChange.ChangeListener {
         private static final String FILTERING_ENABLED_NAME = "package_query_filtering_enabled";
-        private final PackageManagerService.Injector mInjector;
+        private final PackageManagerServiceInjector mInjector;
         private final PackageManagerInternal mPmInternal;
         private volatile boolean mFeatureEnabled =
                 PackageManager.APP_ENUMERATION_ENABLED_BY_DEFAULT;
@@ -356,7 +356,7 @@ public class AppsFilter implements Watchable, Snappable {
         private AppsFilter mAppsFilter;
 
         private FeatureConfigImpl(
-                PackageManagerInternal pmInternal, PackageManagerService.Injector injector) {
+                PackageManagerInternal pmInternal, PackageManagerServiceInjector injector) {
             mPmInternal = pmInternal;
             mInjector = injector;
         }
@@ -478,7 +478,7 @@ public class AppsFilter implements Watchable, Snappable {
 
     /** Builder method for an AppsFilter */
     public static AppsFilter create(
-            PackageManagerInternal pms, PackageManagerService.Injector injector) {
+            PackageManagerInternal pms, PackageManagerServiceInjector injector) {
         final boolean forceSystemAppsQueryable =
                 injector.getContext().getResources()
                         .getBoolean(R.bool.config_forceSystemPackagesQueryable);

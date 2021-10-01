@@ -86,7 +86,7 @@ public class ScanTests {
     @Mock
     PlatformCompat mMockCompatibility;
     @Mock
-    PackageManagerService.Injector mMockInjector;
+    PackageManagerServiceInjector mMockInjector;
     @Mock
     PackageManagerService mMockPackageManager;
 

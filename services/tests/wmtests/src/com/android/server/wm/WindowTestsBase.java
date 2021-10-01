@@ -699,6 +699,15 @@ class WindowTestsBase extends SystemServiceTestsBase {
         return builder.build();
     }
 
+    static TaskFragment createTaskFragmentWithEmbeddedActivity(@NonNull Task parentTask,
+            TaskFragmentOrganizer organizer) {
+        return new TaskFragmentBuilder(parentTask.mAtmService)
+                .setParentTask(parentTask)
+                .createActivityCount(1)
+                .setOrganizer(organizer)
+                .build();
+    }
+
     /** Creates a {@link DisplayContent} that supports IME and adds it to the system. */
     DisplayContent createNewDisplay() {
         return createNewDisplayWithImeSupport(DISPLAY_IME_POLICY_LOCAL);

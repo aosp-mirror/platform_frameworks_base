@@ -25,6 +25,7 @@ import android.content.pm.parsing.ParsingPackage;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.SystemConfig;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 import java.util.ArrayList;
@@ -62,6 +63,11 @@ public class PackageBackwardCompatibility extends PackageSharedLibraryUpdater {
         packageUpdaters.add(new AndroidTestRunnerSplitUpdater());
 
         boolean bootClassPathContainsATB = !addUpdaterForAndroidTestBase(packageUpdaters);
+
+        // ApexSharedLibraryUpdater should be the last one, to allow modifications introduced by
+        // mainline after dessert release.
+        packageUpdaters.add(new ApexSharedLibraryUpdater(
+                SystemConfig.getInstance().getSharedLibraries()));
 
         PackageSharedLibraryUpdater[] updaterArray = packageUpdaters
                 .toArray(new PackageSharedLibraryUpdater[0]);
@@ -105,6 +111,11 @@ public class PackageBackwardCompatibility extends PackageSharedLibraryUpdater {
     private final boolean mBootClassPathContainsATB;
 
     private final PackageSharedLibraryUpdater[] mPackageUpdaters;
+
+    @VisibleForTesting
+    PackageSharedLibraryUpdater[] getPackageUpdaters() {
+        return mPackageUpdaters;
+    }
 
     private PackageBackwardCompatibility(
             boolean bootClassPathContainsATB, PackageSharedLibraryUpdater[] packageUpdaters) {

@@ -7709,33 +7709,6 @@ public class DevicePolicyManager {
 
     /**
      * @hide
-     * Sets the given package as the device owner.
-     * Same as {@link #setDeviceOwner(ComponentName, String)} but without setting a device owner name.
-     * @param who the component name to be registered as device owner.
-     * @return whether the package was successfully registered as the device owner.
-     * @throws IllegalArgumentException if the package name is null or invalid
-     * @throws IllegalStateException If the preconditions mentioned are not met.
-     */
-    public boolean setDeviceOwner(ComponentName who) {
-        return setDeviceOwner(who, null);
-    }
-
-    /**
-     * @hide
-     */
-    public boolean setDeviceOwner(ComponentName who, int userId)  {
-        return setDeviceOwner(who, null, userId);
-    }
-
-    /**
-     * @hide
-     */
-    public boolean setDeviceOwner(ComponentName who, String ownerName) {
-        return setDeviceOwner(who, ownerName, UserHandle.USER_SYSTEM);
-    }
-
-    /**
-     * @hide
      * Sets the given package as the device owner. The package must already be installed. There
      * must not already be a device owner.
      * Only apps with the MANAGE_PROFILE_AND_DEVICE_OWNERS permission and the shell uid can call

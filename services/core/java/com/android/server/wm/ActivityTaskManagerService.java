@@ -6558,6 +6558,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
+        @Nullable
+        public ActivityTaskManagerInternal.PackageConfig getApplicationConfig(String packageName,
+                int userId) {
+            return mPackageConfigPersister.findPackageConfiguration(packageName, userId);
+        }
+
+        @Override
         public boolean hasSystemAlertWindowPermission(int callingUid, int callingPid,
                 String callingPackage) {
             return ActivityTaskManagerService.this.hasSystemAlertWindowPermission(callingUid,

@@ -533,40 +533,81 @@ public class AppTransitionController {
      *
      * @return {@code true} if the transition is overridden.
      */
-    @VisibleForTesting
-    boolean overrideWithTaskFragmentRemoteAnimation(@TransitionOldType int transit,
+    private boolean overrideWithTaskFragmentRemoteAnimation(@TransitionOldType int transit,
             ArraySet<Integer> activityTypes) {
         final ArrayList<WindowContainer> allWindows = new ArrayList<>();
         allWindows.addAll(mDisplayContent.mClosingApps);
         allWindows.addAll(mDisplayContent.mOpeningApps);
         allWindows.addAll(mDisplayContent.mChangingContainers);
 
-        // Find the common TaskFragmentOrganizer of all windows.
-        ITaskFragmentOrganizer organizer = null;
+        // It should only animated by the organizer if all windows are below the same leaf Task.
+        Task leafTask = null;
         for (int i = allWindows.size() - 1; i >= 0; i--) {
             final ActivityRecord r = getAppFromContainer(allWindows.get(i));
             if (r == null) {
                 return false;
             }
+            // The activity may be a child of embedded Task, but we want to find the owner Task.
+            // As a result, find the organized TaskFragment first.
             final TaskFragment organizedTaskFragment = r.getOrganizedTaskFragment();
-            final ITaskFragmentOrganizer curOrganizer = organizedTaskFragment != null
-                    ? organizedTaskFragment.getTaskFragmentOrganizer()
-                    : null;
-            if (curOrganizer == null) {
-                // All windows must below an organized TaskFragment.
+            // There are also cases where the Task contains non-embedded activity, such as launching
+            // split TaskFragments from a non-embedded activity.
+            // The hierarchy may looks like this:
+            // - Task
+            //    - Activity
+            //    - TaskFragment
+            //       - Activity
+            //    - TaskFragment
+            //       - Activity
+            // We also want to have the organizer handle the transition for such case.
+            final Task task = organizedTaskFragment != null
+                    ? organizedTaskFragment.getTask()
+                    : r.getTask();
+            if (task == null) {
                 return false;
             }
-            if (organizer == null) {
-                organizer = curOrganizer;
-            } else if (!organizer.asBinder().equals(curOrganizer.asBinder())) {
-                // They must be controlled by the same organizer.
+            // We don't want the organizer to handle transition of other non-embedded Task.
+            if (leafTask != null && leafTask != task) {
                 return false;
             }
+            final ActivityRecord rootActivity = task.getRootActivity();
+            // We don't want the organizer to handle transition when the whole app is closing.
+            if (rootActivity == null) {
+                return false;
+            }
+            // We don't want the organizer to handle transition of non-embedded activity of other
+            // app.
+            if (r.getUid() != rootActivity.getUid() && !r.isEmbedded()) {
+                return false;
+            }
+            leafTask = task;
+        }
+        if (leafTask == null) {
+            return false;
         }
 
-        final RemoteAnimationDefinition definition = organizer != null
+        // We don't support remote animation for Task with multiple TaskFragmentOrganizers.
+        final ITaskFragmentOrganizer[] organizer = new ITaskFragmentOrganizer[1];
+        final boolean hasMultipleOrganizers = leafTask.forAllLeafTaskFragments(taskFragment -> {
+            final ITaskFragmentOrganizer tfOrganizer = taskFragment.getTaskFragmentOrganizer();
+            if (tfOrganizer == null) {
+                return false;
+            }
+            if (organizer[0] != null && !organizer[0].asBinder().equals(tfOrganizer.asBinder())) {
+                return true;
+            }
+            organizer[0] = tfOrganizer;
+            return false;
+        });
+        if (hasMultipleOrganizers) {
+            ProtoLog.e(WM_DEBUG_APP_TRANSITIONS, "We don't support remote animation for"
+                    + " Task with multiple TaskFragmentOrganizers.");
+            return false;
+        }
+
+        final RemoteAnimationDefinition definition = organizer[0] != null
                 ? mDisplayContent.mAtmService.mTaskFragmentOrganizerController
-                    .getRemoteAnimationDefinition(organizer)
+                    .getRemoteAnimationDefinition(organizer[0])
                 : null;
         final RemoteAnimationAdapter adapter = definition != null
                 ? definition.getAdapter(transit, activityTypes)
