@@ -133,7 +133,6 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
     private final List<UserBatteryConsumer> mUserBatteryConsumers;
     private final AggregateBatteryConsumer[] mAggregateBatteryConsumers;
     private final Parcel mHistoryBuffer;
-    private final List<BatteryStats.HistoryTag> mHistoryTagPool;
     private CursorWindow mBatteryConsumersCursorWindow;
 
     private BatteryUsageStats(@NonNull Builder builder) {
@@ -145,7 +144,6 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
         mDischargedPowerLowerBound = builder.mDischargedPowerLowerBoundMah;
         mDischargedPowerUpperBound = builder.mDischargedPowerUpperBoundMah;
         mHistoryBuffer = builder.mHistoryBuffer;
-        mHistoryTagPool = builder.mHistoryTagPool;
         mBatteryTimeRemainingMs = builder.mBatteryTimeRemainingMs;
         mChargeTimeRemainingMs = builder.mChargeTimeRemainingMs;
         mCustomPowerComponentNames = builder.mCustomPowerComponentNames;
@@ -283,7 +281,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
     /**
      * Returns the names of custom power components in order, so the first name in the array
      * corresponds to the custom componentId
-     * {@link BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID}.
+     * {@link BatteryConsumer#FIRST_CUSTOM_POWER_COMPONENT_ID}.
      */
     @NonNull
     public String[] getCustomPowerComponentNames() {
@@ -299,8 +297,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
             throw new IllegalStateException(
                     "Battery history was not requested in the BatteryUsageStatsQuery");
         }
-        return new BatteryStatsHistoryIterator(new BatteryStatsHistory(mHistoryBuffer),
-                mHistoryTagPool);
+        return new BatteryStatsHistoryIterator(new BatteryStatsHistory(mHistoryBuffer));
     }
 
     @Override
@@ -361,19 +358,8 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
 
             mHistoryBuffer = Parcel.obtain();
             mHistoryBuffer.unmarshall(historyBlob, 0, historyBlob.length);
-
-            int historyTagCount = source.readInt();
-            mHistoryTagPool = new ArrayList<>(historyTagCount);
-            for (int i = 0; i < historyTagCount; i++) {
-                BatteryStats.HistoryTag tag = new BatteryStats.HistoryTag();
-                tag.string = source.readString();
-                tag.uid = source.readInt();
-                tag.poolIdx = source.readInt();
-                mHistoryTagPool.add(tag);
-            }
         } else {
             mHistoryBuffer = null;
-            mHistoryTagPool = null;
         }
     }
 
@@ -395,13 +381,6 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
         if (mHistoryBuffer != null) {
             dest.writeBoolean(true);
             dest.writeBlob(mHistoryBuffer.marshall());
-            dest.writeInt(mHistoryTagPool.size());
-            for (int i = mHistoryTagPool.size() - 1; i >= 0; i--) {
-                final BatteryStats.HistoryTag tag = mHistoryTagPool.get(i);
-                dest.writeString(tag.string);
-                dest.writeInt(tag.uid);
-                dest.writeInt(tag.poolIdx);
-            }
         } else {
             dest.writeBoolean(false);
         }
@@ -769,7 +748,6 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
         private final SparseArray<UserBatteryConsumer.Builder> mUserBatteryConsumerBuilders =
                 new SparseArray<>();
         private Parcel mHistoryBuffer;
-        private List<BatteryStats.HistoryTag> mHistoryTagPool;
 
         public Builder(@NonNull String[] customPowerComponentNames) {
             this(customPowerComponentNames, false);
@@ -888,10 +866,8 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
          * Sets the parceled recent history.
          */
         @NonNull
-        public Builder setBatteryHistory(Parcel historyBuffer,
-                List<BatteryStats.HistoryTag> historyTagPool) {
+        public Builder setBatteryHistory(Parcel historyBuffer) {
             mHistoryBuffer = historyBuffer;
-            mHistoryTagPool = historyTagPool;
             return this;
         }
 

@@ -27,6 +27,7 @@ import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidUserSysTimeReader;
 import com.android.internal.power.MeasuredEnergyStats;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Queue;
@@ -36,13 +37,19 @@ import java.util.concurrent.Future;
  * Mocks a BatteryStatsImpl object.
  */
 public class MockBatteryStatsImpl extends BatteryStatsImpl {
-    public Clock mClock;
     public boolean mForceOnBattery;
     private NetworkStats mNetworkStats;
 
+    MockBatteryStatsImpl() {
+        this(new MockClock());
+    }
+
     MockBatteryStatsImpl(Clock clock) {
-        super(clock);
-        this.mClock = mClock;
+        this(clock, null);
+    }
+
+    MockBatteryStatsImpl(Clock clock, File historyDirectory) {
+        super(clock, historyDirectory);
         initTimersAndCounters();
 
         setExternalStatsSyncLocked(new DummyExternalStatsSync());
@@ -51,10 +58,6 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         // A no-op handler.
         mHandler = new Handler(Looper.getMainLooper()) {
         };
-    }
-
-    MockBatteryStatsImpl() {
-        this(new MockClock());
     }
 
     public void initMeasuredEnergyStats(String[] customBucketNames) {

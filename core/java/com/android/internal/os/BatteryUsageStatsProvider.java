@@ -31,7 +31,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Uses accumulated battery stats data and PowerCalculators to produce power
@@ -186,16 +185,7 @@ public class BatteryUsageStatsProvider {
             }
 
             BatteryStatsImpl batteryStatsImpl = (BatteryStatsImpl) mStats;
-            ArrayList<BatteryStats.HistoryTag> tags = new ArrayList<>(
-                    batteryStatsImpl.mHistoryTagPool.size());
-            for (Map.Entry<BatteryStats.HistoryTag, Integer> entry :
-                    batteryStatsImpl.mHistoryTagPool.entrySet()) {
-                final BatteryStats.HistoryTag tag = entry.getKey();
-                tag.poolIdx = entry.getValue();
-                tags.add(tag);
-            }
-
-            batteryUsageStatsBuilder.setBatteryHistory(batteryStatsImpl.mHistoryBuffer, tags);
+            batteryUsageStatsBuilder.setBatteryHistory(batteryStatsImpl.mHistoryBuffer);
         }
 
         return batteryUsageStatsBuilder.build();
