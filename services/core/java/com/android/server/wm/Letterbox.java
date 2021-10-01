@@ -36,6 +36,7 @@ import android.view.WindowManager;
 
 import com.android.server.UiThread;
 
+import java.util.function.IntConsumer;
 import java.util.function.Supplier;
 
 /**
@@ -70,7 +71,7 @@ public class Letterbox {
     private final LetterboxSurface mFullWindowSurface = new LetterboxSurface("fullWindow");
     private final LetterboxSurface[] mSurfaces = { mLeft, mTop, mRight, mBottom };
     // Reachability gestures.
-    private final Runnable mDoubleTapCallback;
+    private final IntConsumer mDoubleTapCallback;
 
     /**
      * Constructs a Letterbox.
@@ -84,7 +85,7 @@ public class Letterbox {
             Supplier<Boolean> hasWallpaperBackgroundSupplier,
             Supplier<Integer> blurRadiusSupplier,
             Supplier<Float> darkScrimAlphaSupplier,
-            Runnable doubleTapCallback) {
+            IntConsumer doubleTapCallback) {
         mSurfaceControlFactory = surfaceControlFactory;
         mTransactionFactory = transactionFactory;
         mAreCornersRounded = areCornersRounded;
@@ -262,7 +263,7 @@ public class Letterbox {
         @Override
         public boolean onDoubleTapEvent(MotionEvent e) {
             if (e.getAction() == MotionEvent.ACTION_UP) {
-                mDoubleTapCallback.run();
+                mDoubleTapCallback.accept((int) e.getX());
                 return true;
             }
             return false;
