@@ -118,7 +118,6 @@ filegroup {
         ":libbluetooth-binder-aidl",
         ":libcamera_client_aidl",
         ":libcamera_client_framework_aidl",
-        ":packagemanager_aidl",
         ":libupdate_engine_aidl",
         ":resourcemanager_aidl",
         ":storaged_aidl",
@@ -209,6 +208,7 @@ java_library {
     name: "framework-internal-utils",
     static_libs: [
         "apex_aidl_interface-java",
+        "packagemanager_aidl-java",
         "framework-protos",
         "updatable-driver-protos",
         "ota_metadata_proto_java",
