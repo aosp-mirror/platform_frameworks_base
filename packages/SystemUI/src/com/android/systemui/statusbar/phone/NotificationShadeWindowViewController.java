@@ -171,6 +171,13 @@ public class NotificationShadeWindowViewController {
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
     }
 
+    /**
+     * @return Location where to place the KeyguardBouncer
+     */
+    public ViewGroup getBouncerContainer() {
+        return mView.findViewById(R.id.keyguard_bouncer_container);
+    }
+
     /** Inflates the {@link R.layout#status_bar_expanded} layout and sets it up. */
     public void setupExpandedStatusBar() {
         mStackScrollLayout = mView.findViewById(R.id.notification_stack_scroller);
