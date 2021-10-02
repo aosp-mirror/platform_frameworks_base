@@ -308,6 +308,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @NonNull WindowToken mToken;
     // The same object as mToken if this is an app window and null for non-app windows.
     ActivityRecord mActivityRecord;
+    /** Non-null if this is a starting window. */
+    StartingData mStartingData;
 
     // mAttrs.flags is tested in animation without being locked. If the bits tested are ever
     // modified they will need to be locked.
@@ -5485,6 +5487,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mWillReplaceWindow;
     }
 
+    private boolean isStartingWindowAssociatedToTask() {
+        return mStartingData != null && mStartingData.mAssociatedTask != null;
+    }
+
     private void applyDims() {
         if (!mAnimatingExit && mAppDied) {
             mIsDimming = true;
@@ -5634,7 +5640,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             outPoint.offset(-parent.mWindowFrames.mFrame.left + mTmpPoint.x,
                     -parent.mWindowFrames.mFrame.top + mTmpPoint.y);
         } else if (parentWindowContainer != null) {
-            final Rect parentBounds = parentWindowContainer.getBounds();
+            final Rect parentBounds = isStartingWindowAssociatedToTask()
+                    ? mStartingData.mAssociatedTask.getBounds()
+                    : parentWindowContainer.getBounds();
             outPoint.offset(-parentBounds.left, -parentBounds.top);
         }
 
@@ -5717,6 +5725,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     void assignLayer(Transaction t, int layer) {
+        if (isStartingWindowAssociatedToTask()) {
+            // The starting window should cover the task.
+            t.setLayer(mSurfaceControl, Integer.MAX_VALUE);
+            return;
+        }
         // See comment in assignRelativeLayerForImeTargetChild
         if (needsRelativeLayeringToIme()) {
             getDisplayContent().assignRelativeLayerForImeTargetChild(t, this);
@@ -5727,6 +5740,24 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     boolean isDimming() {
         return mIsDimming;
+    }
+
+    @Override
+    protected void reparentSurfaceControl(Transaction t, SurfaceControl newParent) {
+        if (isStartingWindowAssociatedToTask()) {
+            // Its surface is already put in task. Don't reparent when transferring starting window
+            // across activities.
+            return;
+        }
+        super.reparentSurfaceControl(t, newParent);
+    }
+
+    @Override
+    public SurfaceControl getAnimationLeashParent() {
+        if (isStartingWindowAssociatedToTask()) {
+            return mStartingData.mAssociatedTask.mSurfaceControl;
+        }
+        return super.getAnimationLeashParent();
     }
 
     // TODO(b/70040778): We should aim to eliminate the last user of TYPE_APPLICATION_MEDIA

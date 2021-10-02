@@ -28,8 +28,8 @@ package {
 sdk {
     name: "media-module-sdk",
     bootclasspath_fragments: ["com.android.media-bootclasspath-fragment"],
+    systemserverclasspath_fragments: ["com.android.media-systemserverclasspath-fragment"],
     java_sdk_libs: [
         "framework-media",
-        "service-media-s",
     ],
 }

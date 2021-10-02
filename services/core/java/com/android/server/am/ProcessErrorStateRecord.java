@@ -400,9 +400,10 @@ class ProcessErrorStateRecord {
         StringWriter tracesFileException = new StringWriter();
         // To hold the start and end offset to the ANR trace file respectively.
         final long[] offsets = new long[2];
+        final String criticalEventLog = CriticalEventLog.getInstance().logLinesForAnrFile();
         File tracesFile = ActivityManagerService.dumpStackTraces(firstPids,
                 isSilentAnr ? null : processCpuTracker, isSilentAnr ? null : lastPids,
-                nativePids, tracesFileException, offsets, annotation);
+                nativePids, tracesFileException, offsets, annotation, criticalEventLog);
 
         if (isMonitorCpuUsage()) {
             mService.updateCpuStatsNow();

@@ -1411,9 +1411,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         this.task = newTask;
 
         if (shouldStartChangeTransition(newParent, oldParent)) {
-            // The new parent and old parent may be in different position. Need to offset the
-            // animation surface to keep it in its original position.
-            initializeChangeTransition(getBounds(), newParent.getBounds());
+            // Animate change transition on TaskFragment level to get the correct window crop.
+            newParent.initializeChangeTransition(getBounds(), getSurfaceControl());
         }
 
         super.onParentChanged(newParent, oldParent);
@@ -1482,7 +1481,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // The starting window should keep covering its task when the activity is
                 // reparented to a task fragment that may not fill the task bounds.
                 associateStartingDataWithTask();
-                overrideConfigurationPropagation(mStartingWindow, task);
+                attachStartingSurfaceToAssociatedTask();
             }
             mImeInsetsFrozenUntilStartInput = false;
         }
@@ -2383,11 +2382,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void attachStartingWindow(@NonNull WindowState startingWindow) {
+        startingWindow.mStartingData = mStartingData;
         mStartingWindow = startingWindow;
         if (mStartingData != null && mStartingData.mAssociatedTask != null) {
-            // Associate the configuration of starting window with the task.
-            overrideConfigurationPropagation(startingWindow, mStartingData.mAssociatedTask);
+            attachStartingSurfaceToAssociatedTask();
         }
+    }
+
+    private void attachStartingSurfaceToAssociatedTask() {
+        // Associate the configuration of starting window with the task.
+        overrideConfigurationPropagation(mStartingWindow, mStartingData.mAssociatedTask);
+        getSyncTransaction().reparent(mStartingWindow.mSurfaceControl,
+                mStartingData.mAssociatedTask.mSurfaceControl);
     }
 
     private void associateStartingDataWithTask() {

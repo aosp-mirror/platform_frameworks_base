@@ -72,8 +72,11 @@ class SurfaceFreezer {
      *
      * @param startBounds The original bounds (on screen) of the surface we are snapshotting.
      * @param relativePosition The related position of the snapshot surface to its parent.
+     * @param freezeTarget The surface to take snapshot from. If {@code null}, we will take a
+     *                     snapshot from the {@link #mAnimatable} surface.
      */
-    void freeze(SurfaceControl.Transaction t, Rect startBounds, Point relativePosition) {
+    void freeze(SurfaceControl.Transaction t, Rect startBounds, Point relativePosition,
+            @Nullable SurfaceControl freezeTarget) {
         mFreezeBounds.set(startBounds);
 
         mLeash = SurfaceAnimator.createAnimationLeash(mAnimatable, mAnimatable.getSurfaceControl(),
@@ -82,7 +85,7 @@ class SurfaceFreezer {
                 mWmService.mTransactionFactory);
         mAnimatable.onAnimationLeashCreated(t, mLeash);
 
-        SurfaceControl freezeTarget = mAnimatable.getFreezeSnapshotTarget();
+        freezeTarget = freezeTarget != null ? freezeTarget : mAnimatable.getFreezeSnapshotTarget();
         if (freezeTarget != null) {
             SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer = createSnapshotBuffer(
                     freezeTarget, startBounds);

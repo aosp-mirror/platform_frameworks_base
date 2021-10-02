@@ -2624,23 +2624,27 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * For now, this will only be called for the following cases:
      * 1. {@link Task} is changing windowing mode between fullscreen and freeform.
      * 2. {@link TaskFragment} is organized and is changing window bounds.
-     * 3. {@link ActivityRecord} is reparented into an organized {@link TaskFragment}.
+     * 3. {@link ActivityRecord} is reparented into an organized {@link TaskFragment}. (The
+     *    transition will happen on the {@link TaskFragment} for this case).
      *
-     * This shouldn't be called on other {@link WindowContainer} unless there is a valid use case.
+     * This shouldn't be called on other {@link WindowContainer} unless there is a valid
+     * use case.
      *
      * @param startBounds The original bounds (on screen) of the surface we are snapshotting.
-     * @param parentBounds The parent bounds (on screen) to calculate the animation surface
-     *                     position.
+     * @param freezeTarget The surface to take snapshot from. If {@code null}, we will take a
+     *                     snapshot from {@link #getFreezeSnapshotTarget()}.
      */
-    void initializeChangeTransition(Rect startBounds, Rect parentBounds) {
+    void initializeChangeTransition(Rect startBounds, @Nullable SurfaceControl freezeTarget) {
         mDisplayContent.prepareAppTransition(TRANSIT_CHANGE);
         mDisplayContent.mChangingContainers.add(this);
+        // Calculate the relative position in parent container.
+        final Rect parentBounds = getParent().getBounds();
         mTmpPoint.set(startBounds.left - parentBounds.left, startBounds.top - parentBounds.top);
-        mSurfaceFreezer.freeze(getSyncTransaction(), startBounds, mTmpPoint);
+        mSurfaceFreezer.freeze(getSyncTransaction(), startBounds, mTmpPoint, freezeTarget);
     }
 
     void initializeChangeTransition(Rect startBounds) {
-        initializeChangeTransition(startBounds, getParent().getBounds());
+        initializeChangeTransition(startBounds, null /* freezeTarget */);
     }
 
     ArraySet<WindowContainer> getAnimationSources() {
@@ -3163,7 +3167,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PROTECTED)
     void updateSurfacePosition(Transaction t) {
-        if (mSurfaceControl == null || mSurfaceAnimator.hasLeash()) {
+        if (mSurfaceControl == null || mSurfaceAnimator.hasLeash() || mSurfaceFreezer.hasLeash()) {
             return;
         }
 

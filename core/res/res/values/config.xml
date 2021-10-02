@@ -4925,16 +4925,15 @@
         device orientation. -->
     <bool name="config_letterboxIsReachabilityEnabled">false</bool>
 
-    <!-- Default horizonal position of a center of the letterboxed app window when reachability is
-        enabled and an app is fullscreen in landscape device orientation.
-        0 corresponds to the left side of the screen and 1 to the right side. If given value < 0.0
-        or > 1, it is ignored and right positionis used (1.0). The position multiplier is changed
-        to a symmetrical value computed as (1 - current multiplier) after each double tap in the
-        letterbox area. -->
-    <item name="config_letterboxDefaultPositionMultiplierForReachability"
-          format="float" type="dimen">
-        0.9
-    </item>
+    <!-- Default horizonal position of the letterboxed app window when reachability is
+        enabled and an app is fullscreen in landscape device orientation. When reachability is
+        enabled, the position can change between left, center and right. This config defines the
+        default one:
+            - Option 0 - Left.
+            - Option 1 - Center.
+            - Option 2 - Right.
+        If given value is outside of this range, the option 1 (center) is assummed. -->
+    <integer name="config_letterboxDefaultPositionForReachability">1</integer>
 
     <!-- If true, hide the display cutout with display area -->
     <bool name="config_hideDisplayCutoutWithDisplayArea">false</bool>

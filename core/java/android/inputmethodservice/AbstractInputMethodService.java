@@ -66,7 +66,17 @@ import java.io.PrintWriter;
 public abstract class AbstractInputMethodService extends WindowProviderService
         implements KeyEvent.Callback {
     private InputMethod mInputMethod;
-    
+
+    /**
+     * Keep the strong reference to {@link InputMethodServiceInternal} to ensure that it will not be
+     * garbage-collected until {@link AbstractInputMethodService} gets garbage-collected.
+     *
+     * <p>This is necessary because {@link RemoteInputConnection} internally uses
+     * {@link java.lang.ref.WeakReference} to hold {@link InputMethodServiceInternal}.</p>
+     */
+    @Nullable
+    private InputMethodServiceInternal mInputMethodServiceInternal;
+
     final KeyEvent.DispatcherState mDispatcherState
             = new KeyEvent.DispatcherState();
 
@@ -225,7 +235,10 @@ public abstract class AbstractInputMethodService extends WindowProviderService
         if (mInputMethod == null) {
             mInputMethod = onCreateInputMethodInterface();
         }
-        return new IInputMethodWrapper(createInputMethodServiceInternal(), mInputMethod);
+        if (mInputMethodServiceInternal == null) {
+            mInputMethodServiceInternal = createInputMethodServiceInternal();
+        }
+        return new IInputMethodWrapper(mInputMethodServiceInternal, mInputMethod);
     }
 
     /**

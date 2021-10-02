@@ -826,7 +826,7 @@ public final class DisplayManagerService extends SystemService {
                 Settings.Global.USER_PREFERRED_RESOLUTION_HEIGHT, -1);
         final int width = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.USER_PREFERRED_RESOLUTION_WIDTH, -1);
-        Display.Mode mode = new Display.Mode(height, width, refreshRate);
+        Display.Mode mode = new Display.Mode(width, height, refreshRate);
         mUserPreferredMode = isResolutionAndRefreshRateValid(mode) ? mode : null;
     }
 
