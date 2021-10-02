@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"membuat dan mengurus panggilan telefon"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Penderia tubuh"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"akses data penderia tentang tanda vital anda"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Pemberitahuan"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"tunjukkan pemberitahuan"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Dapatkan kembali kandungan tetingkap"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Periksa kandungan tetingkap yang berinteraksi dengan anda."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Hidupkan Teroka melalui Sentuhan"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Membenarkan apl melumpuhkan kunci kekunci dan sebarang keselamatan kata laluan yang berkaitan. Sebagai contoh, telefon melumpuhkan kunci kekunci apabila menerima panggilan telefon masuk kemudian mendayakan semula kunci kekunci apabila panggilan selesai."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"minta kerumitan kunci skrin"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Benarkan apl mengetahui tahap kekompleksan kunci skrin (tinggi, sederhana, rendah atau tiada) yang menunjukkan kemungkinan julat panjang dan jenis kunci skrin. Apl juga boleh mencadangkan kepada pengguna supaya mengemas kini kunci skrin pada tahap tertentu namun pengguna boleh mengabaikan dan menavigasi keluar dengan bebas. Sila ambil perhatian bahawa kunci skrin tidak disimpan dalam format teks biasa, maka apl tidak mengetahui kata laluan yang tepat."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"tunjukkan pemberitahuan"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Membenarkan apl menunjukkan pemberitahuan"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"gunakan perkakasan biometrik"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Membenarkan apl menggunakan perkakasan biometrik untuk pengesahan"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"urus perkakasan cap jari"</string>

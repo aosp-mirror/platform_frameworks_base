@@ -332,6 +332,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"осуществлять вызовы и управлять ими"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Нательные датчики"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"доступ к данным датчиков о состоянии организма"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Уведомления"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"показ уведомлений"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Получать содержимое окна"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Анализировать содержимое активного окна."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Включать Изучение касанием"</string>
@@ -555,6 +557,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Приложение сможет отключать блокировку экрана и другие функции защиты. Например, блокировка экрана будет отключаться при получении входящего вызова и включаться после завершения разговора."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"Запрос данных об уровне сложности блокировки экрана"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Приложение получит доступ к сведениям об уровне сложности блокировки экрана (высокий, средний, низкий или отсутствует), в том числе о типе блокировки и длине пароля. Кроме того, оно сможет предлагать пользователям повысить уровень сложности блокировки. Эти рекомендации необязательны. Обратите внимание, что пароль не хранится в виде открытого текста и недоступен приложению."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"показ уведомлений"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Приложение сможет показывать уведомления."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"Использование биометрического оборудования"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Приложение сможет использовать биометрическое оборудование для аутентификации"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"управление сканером отпечатков пальцев"</string>

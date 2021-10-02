@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"撥打電話及管理通話"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"人體感測器"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"存取與你生命徵象相關的感應器資料"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"通知"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"顯示通知"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"擷取視窗內容"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"檢查你存取的視窗內容。"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"啟用輕觸探索功能"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"允許應用程式停用按鍵鎖定以及其他相關的密碼安全性功能。例如：手機收到來電時停用按鍵鎖定，通話結束後重新啟用按鍵鎖定。"</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"要求螢幕鎖定的複雜度"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"允許應用程式記住螢幕鎖定的複雜度 (高、中、低或無)，即螢幕鎖定的可能長度範圍和類型。這樣一來，應用程式還能建議使用者將螢幕鎖定更新為特定複雜度，但使用者可選擇忽略建議並離開應用程式。請注意，系統不會以純文字格式儲存螢幕鎖定選項的內容，因此應用程式不會知道確切密碼。"</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"顯示通知"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"允許應用程式顯示通知"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"使用生物特徵硬體"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"允許應用程式使用生物特徵硬體進行驗證"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"管理指紋硬體"</string>

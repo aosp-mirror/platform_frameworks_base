@@ -332,6 +332,10 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"opravljanje in upravljanje telefonskih klicev"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Tipala telesnih funkcij"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"dostop do podatkov tipala o vaših vitalnih znakih"</string>
+    <!-- no translation found for permgrouplab_notifications (5472972361980668884) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_notifications (4608679556801506580) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Pridobiti vsebino okna"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Preverjanje vsebine okna, ki ga uporabljate."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Vklopiti raziskovanje z dotikom"</string>
@@ -555,6 +559,10 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Aplikaciji dovoljuje, da onemogoči zaklep tipkovnice in morebitno povezano varnostno geslo. Telefon na primer onemogoči zaklep tipkovnice pri dohodnem klicu ter vnovič omogoči zaklep, ko je klic končan."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"zahteva zapletenost zaklepanja zaslona"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Aplikaciji dovoljuje, da pridobi raven zapletenosti zaklepanja zaslona (visoka, srednja, nizka ali brez), ki označuje možen obseg dolžine in vrsto zaklepanja zaslona. Aplikacija lahko tudi predlaga uporabnikom, da posodobijo zaklepanje zaslona na določeno raven, vendar lahko uporabniki to opozorilo prezrejo in ga zaprejo tako, da se pomaknejo stran. Upoštevajte, da zaklepanje zaslona ni shranjeno v golem besedilu, tako da aplikacija ne pozna točnega gesla."</string>
+    <!-- no translation found for permlab_postNotification (4875401198597803658) -->
+    <skip />
+    <!-- no translation found for permdesc_postNotification (5974977162462877075) -->
+    <skip />
     <string name="permlab_useBiometric" msgid="6314741124749633786">"uporaba strojne opreme za biometrične podatke"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Aplikaciji omogoča uporabo strojne opreme za biometrične podatke za preverjanje pristnosti"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"upravljanje strojne opreme za prstne odtise"</string>

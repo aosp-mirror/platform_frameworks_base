@@ -332,6 +332,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"skambinti ir tvarkyti telefonų skambučius"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Kūno jutikliai"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"pasiekti jutiklių duomenis apie gyvybinius ženklus"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Pranešimai"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"rodyti pranešimus"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Gauti lango turinį"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Tikrinti lango, su kuriuo sąveikaujate, turinį."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Įjungti „Naršyti paliečiant“"</string>
@@ -555,6 +557,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Leidžiama programai neleisti klavišo užrakto ir visos susijusios slaptažodžio apsaugos. Pvz., telefonas neleidžia klavišo užrakto priimant gaunamąjį skambutį ir pakartotinai jį įgalina, kai skambutis baigiamas."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"pateikti ekrano užrakto sudėtingumo užklausą"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Leidžiama programai sužinoti ekrano užrakto sudėtingumo lygį (aukštas, vidutinis, žemas arba nėra), nurodantį galimą ekrano užrakto trukmės diapazoną ir tipą. Be to, programa gali pasiūlyti naudotojams atnaujinti ekrano užraktą į tam tikrą lygį, bet naudotojai gali laisvai nepaisyti ir išeiti. Atminkite, kad ekrano užraktas nesaugomas kaip grynasis tekstas, todėl programa nežino tikslaus slaptažodžio."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"rodyti pranešimus"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Programai leidžiama rodyti pranešimus"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"naudoti biometrinę aparatinę įrangą"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Leidžiama programai naudoti biometrinę aparatinę įrangą tapatybei nustatyti"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"tvarkyti piršto antspaudo aparatinę įrangą"</string>

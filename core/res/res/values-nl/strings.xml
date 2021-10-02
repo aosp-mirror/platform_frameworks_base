@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"telefoneren en gesprekken beheren"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Lichaamssensoren"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"toegang krijgen tot sensorgegevens over je vitale functies"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Meldingen"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"meldingen laten zien"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Content van vensters ophalen"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"De content inspecteren van een venster waarmee je interactie hebt."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Verkennen via aanraking aanzetten"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Hiermee kan de app de toetsenblokkering en bijbehorende wachtwoordbeveiliging uitzetten. Zo kan de telefoon de toetsenblokkering uitzetten als je wordt gebeld en de toetsenblokkering weer aanzetten als het gesprek is beëindigd."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"complexiteit van schermvergrendeling opvragen"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Hiermee krijgt de app toestemming om het complexiteitsniveau van de schermvergrendeling te achterhalen (hoog, midden, laag of geen). Dat geeft een indicatie van het mogelijke lengtebereik en type van de schermvergrendeling. De app kan gebruikers ook voorstellen de schermvergrendeling naar een bepaald niveau te updaten, maar gebruikers kunnen dit altijd negeren en de app verlaten. De schermvergrendeling wordt niet opgeslagen als platte tekst, zodat de app het precieze wachtwoord niet weet."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"meldingen laten zien"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Hiermee kan de app meldingen laten zien"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"biometrische hardware gebruiken"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Hiermee kan de app biometrische hardware gebruiken voor verificatie"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"Vingerafdrukhardware beheren"</string>

@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"برقراری و مدیریت تماس‌های تلفنی"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"حسگرهای بدن"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"دسترسی به داده‌های حسگر در رابطه با علائم حیاتی شما"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"اعلان‌ها"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"نمایش اعلان"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"محتوای پنجره را بازیابی کند"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"محتوای پنجره‌ای را که درحال تعامل با آن هستید بررسی می‌کند."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"فعال‌سازی کاوش لمسی"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"به برنامه امکان می‌دهد قفل کلید و هر گونه امنیت گذرواژه مرتبط را غیرفعال کند. به‌عنوان مثال تلفن هنگام دریافت یک تماس تلفنی ورودی قفل کلید را غیرفعال می‌کند و بعد از پایان تماس، قفل کلید را دوباره فعال می‌کند."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"درخواست پیچیدگی قفل صفحه"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"به برنامه اجازه می‌دهد سطح پیچیدگی قفل صفحه (بالا، متوسط، پایین، یا هیچ‌کدام) را بیاموزد که نشان‌دهنده بازه ممکن طول و نوع قفل صفحه است. همچنین برنامه می‌تواند به کاربران پیشنهاد دهد قفل صفحه را به سطح خاصی به‌روزرسانی کنند، اما کاربران می‌توانند آزادانه این پیشنهاد را نادیده بگیرند و به سطح دیگری بروند. توجه داشته باشید که قفل صفحه در قالب نوشتار ساده ذخیره نمی‌شود، بنابراین برنامه گذرواژه دقیق را نمی‌داند."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"نمایش اعلان"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"به این برنامه اجازه می‌دهد اعلان نمایش دهد"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"استفاده از سخت‌افزار بیومتریک"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"به برنامه امکان می‌دهد از سخت‌افزار بیومتریک برای اصالت‌سنجی استفاده کند"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"مدیریت سخت‌افزار اثر انگشت"</string>

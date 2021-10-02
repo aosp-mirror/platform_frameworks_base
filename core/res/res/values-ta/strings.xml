@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"யாரையும் தொலைபேசியில் அழைக்கலாம்"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"உடல் சென்சார்கள்"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"உங்கள் உடல் இயக்கம் பற்றி உணர்விகள் கூறும் தகவலைப் பார்க்கலாம்"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"அறிவிப்புகள்"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"அறிவிப்புகளைக் காட்டும்"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"சாளர உள்ளடக்கத்தைப் பெறும்"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"நீங்கள் பணியாற்றிக் கொண்டிருக்கும் சாளரத்தின் உள்ளடக்கத்தைப் பார்க்கலாம்."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"தொடுவதன் மூலம் அறிவதை இயக்கும்"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"விசைப்பூட்டையும், தொடர்புடைய கடவுச்சொல் பாதுகாப்பையும் முடக்கப் ஆப்ஸை அனுமதிக்கிறது. எடுத்துக்காட்டாக, உள்வரும் மொபைல் அழைப்பைப் பெறும்போது மொபைல் விசைப்பூட்டை முடக்குகிறது, பிறகு அழைப்பு முடிந்தவுடன் விசைப்பூட்டை மீண்டும் இயக்குகிறது."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"திரைப் பூட்டு தொடர்பான சிக்கலைத் தீர்க்க அனுமதி கோருதல்"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"திரைப் பூட்டு தொடர்பான சிக்கலின் தன்மையை (அதிகம், நடுத்தரம், குறைவு அல்லது ஏதுமில்லை) அறிந்துகொள்ள ஆப்ஸை அனுமதிக்கிறது. இதன் மூலம் திரைப் பூட்டின் அளவு வரம்பையும் வகையையும் தெரிந்துகொள்ளலாம். மேலும் திரைப் பூட்டைக் குறிப்பிட்ட நிலைக்கு மாற்றிக் கொள்ளலாம் என்பதையும் பயனர்களுக்கு ஆப்ஸ் பரிந்துரைக்க முடியும். ஆனால் தங்கள் விருப்பப்படி அவற்றைப் பயனர்கள் நிராகரிக்கவோ ஏற்கவோ இயலும். கவனத்திற்கு: திரைப் பூட்டு எளிய உரையிலானதாக சேமிக்கப்படுவதில்லை என்பதால் சரியான கடவுச்சொல்லை ஆப்ஸால் அறிய இயலாது."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"அறிவிப்புகளைக் காட்டுதல்"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"அறிவிப்புகளைக் காட்ட ஆப்ஸை அனுமதிக்கும்"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"பயோமெட்ரிக் வன்பொருளைப் பயன்படுத்து"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"பயோமெட்ரிக் வன்பொருளைப் பயன்படுத்தி அங்கீகரிப்பதற்கு, ஆப்ஸை அனுமதிக்கும்"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"கைரேகை வன்பொருளை நிர்வகி"</string>

@@ -326,6 +326,10 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"yenza uphinde uphathe amakholi wefoni"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Izinzwa zomzimba"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"finyelela idatha yesizweli mayelana nezimpawu zakho ezibalulekile"</string>
+    <!-- no translation found for permgrouplab_notifications (5472972361980668884) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_notifications (4608679556801506580) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Thola okuqukethwe kwewindi"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Hlola okuqukethwe kwewindi ohlanganyela nalo."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Vula ukuhlola ngokuthinta"</string>
@@ -549,6 +553,10 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Ivumela uhlelo lokusebenza ukukhubaza ukuvala ukhiye nanoma yikuphi ukuphepha kwephasiwedi okuhlobene. Isibonelo, ifoni ikhubaza ukuvala ukhiye lapho ithola ikholi yefoni engenayo, bese inike amandla kabusha ukuvala ukhiye lapho ikholi isiqedile."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"cela ubunkimbinkimbi kokukhiya isikrini"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Ivumela uhlelo lokusebenza ukuthi lifunde ileveli yobunkimbinkimbi bokukhiya isikrini (okuphezulu, okuphakathi nendawo, okuphansi noma lutho), obubonisa ibanga elingaba khona lobude nohlobo lokukhiya isikrini Uhlelo lokusebenza lungaphinda luphakamise kubasebenzisi ukuthi babuyekeze ukukhiya isikrini kuleveli elithile kodwa abasebenzisi bangaziba ngokukhululekile baphinde bazulazule nje. Qaphela ukuthi ukukhiya isikrini akugcinwa kumbhalo osobala ukuze uhlelo lokusebenza lungayazi iphasiwedi enembile."</string>
+    <!-- no translation found for permlab_postNotification (4875401198597803658) -->
+    <skip />
+    <!-- no translation found for permdesc_postNotification (5974977162462877075) -->
+    <skip />
     <string name="permlab_useBiometric" msgid="6314741124749633786">"sebenzisa izingxenyekazi zekhompyutha ze-biometric"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Ivumela uhlelo lokusebenza ukuthi lusebenzise izingxenyekazi zekhompyutha ze-biometric ukuze kuqinisekiswe"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"phatha izingxenyekazi zekhompyutha zezigxivizo zeminwe"</string>
