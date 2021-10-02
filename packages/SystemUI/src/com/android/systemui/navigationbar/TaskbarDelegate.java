@@ -20,6 +20,7 @@ import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE;
@@ -34,9 +35,13 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_S
 
 import android.app.StatusBarManager;
 import android.app.StatusBarManager.WindowVisibleState;
+import android.content.ComponentCallbacks;
 import android.content.Context;
+import android.content.res.Configuration;
+import android.hardware.display.DisplayManager;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
+import android.view.Display;
 import android.view.InsetsVisibilities;
 import android.view.View;
 import android.view.WindowInsetsController.Behavior;
@@ -55,7 +60,8 @@ import javax.inject.Singleton;
 
 @Singleton
 public class TaskbarDelegate implements CommandQueue.Callbacks,
-        OverviewProxyService.OverviewProxyListener, NavigationModeController.ModeChangedListener {
+        OverviewProxyService.OverviewProxyListener, NavigationModeController.ModeChangedListener,
+        ComponentCallbacks {
 
     private final EdgeBackGestureHandler mEdgeBackGestureHandler;
 
@@ -71,11 +77,16 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     private int mDisabledFlags;
     private @WindowVisibleState int mTaskBarWindowState = WINDOW_STATE_SHOWING;
     private @Behavior int mBehavior;
+    private final Context mContext;
+    private final DisplayManager mDisplayManager;
+    private Context mWindowContext;
 
     @Inject
     public TaskbarDelegate(Context context) {
         mEdgeBackGestureHandler = Dependency.get(EdgeBackGestureHandler.Factory.class)
                 .create(context);
+        mContext = context;
+        mDisplayManager = mContext.getSystemService(DisplayManager.class);
     }
 
     public void setOverviewProxyService(CommandQueue commandQueue,
@@ -97,6 +108,10 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mNavigationModeController.removeListener(this);
         mNavigationBarA11yHelper.removeA11yEventListener(mNavA11yEventListener);
         mEdgeBackGestureHandler.onNavBarDetached();
+        if (mWindowContext != null) {
+            mWindowContext.unregisterComponentCallbacks(this);
+            mWindowContext = null;
+        }
     }
 
     public void init(int displayId) {
@@ -107,6 +122,10 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
                 mNavigationModeController.addListener(this));
         mNavigationBarA11yHelper.registerA11yEventListener(mNavA11yEventListener);
         mEdgeBackGestureHandler.onNavBarAttached();
+        // Initialize component callback
+        Display display = mDisplayManager.getDisplay(displayId);
+        mWindowContext = mContext.createWindowContext(display, TYPE_APPLICATION, null);
+        mWindowContext.registerComponentCallbacks(this);
         // Set initial state for any listeners
         updateSysuiFlags();
     }
@@ -193,4 +212,12 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     private boolean allowSystemGestureIgnoringBarVisibility() {
         return mBehavior != BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
     }
+
+    @Override
+    public void onConfigurationChanged(Configuration configuration) {
+        mEdgeBackGestureHandler.onConfigurationChanged(configuration);
+    }
+
+    @Override
+    public void onLowMemory() {}
 }

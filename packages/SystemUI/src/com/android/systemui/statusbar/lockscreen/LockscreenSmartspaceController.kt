@@ -86,6 +86,7 @@ class LockscreenSmartspaceController @Inject constructor(
     var stateChangeListener = object : View.OnAttachStateChangeListener {
         override fun onViewAttachedToWindow(v: View) {
             smartspaceViews.add(v as SmartspaceView)
+            connectSession()
 
             updateTextColorFromWallpaper()
             statusBarStateListener.onDozeAmountChanged(0f, statusBarStateController.dozeAmount)
@@ -93,6 +94,10 @@ class LockscreenSmartspaceController @Inject constructor(
 
         override fun onViewDetachedFromWindow(v: View) {
             smartspaceViews.remove(v as SmartspaceView)
+
+            if (smartspaceViews.isEmpty()) {
+                disconnect()
+            }
         }
     }
 

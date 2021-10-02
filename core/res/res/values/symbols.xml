@@ -3255,6 +3255,7 @@
 
   <java-symbol type="string" name="config_dozeDoubleTapSensorType" />
   <java-symbol type="string" name="config_dozeTapSensorType" />
+  <java-symbol type="array" name="config_dozeTapSensorPostureMapping" />
   <java-symbol type="bool" name="config_dozePulsePickup" />
 
   <!-- Used for MimeIconUtils. -->
@@ -4262,7 +4263,7 @@
   <java-symbol type="color" name="config_letterboxBackgroundColor" />
   <java-symbol type="dimen" name="config_letterboxHorizontalPositionMultiplier" />
   <java-symbol type="bool" name="config_letterboxIsReachabilityEnabled" />
-  <java-symbol type="dimen" name="config_letterboxDefaultPositionMultiplierForReachability" />
+  <java-symbol type="integer" name="config_letterboxDefaultPositionForReachability" />
 
   <java-symbol type="bool" name="config_hideDisplayCutoutWithDisplayArea" />
 

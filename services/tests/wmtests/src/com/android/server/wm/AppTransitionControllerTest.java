@@ -27,6 +27,8 @@ import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CHANGE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -44,6 +46,7 @@ import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import android.annotation.Nullable;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -763,36 +766,129 @@ public class AppTransitionControllerTest extends WindowTestsBase {
     }
 
     @Test
-    public void testGetRemoteAnimationOverrideTaskFragmentOrganizer() {
-        // TaskFragmentOrganizer registers remote animation.
+    public void testOverrideTaskFragmentAdapter_overrideWithEmbeddedActivity() {
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
-        final ITaskFragmentOrganizer iOrganizer =
-                ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder());
-        final RemoteAnimationDefinition definition = new RemoteAnimationDefinition();
         final RemoteAnimationAdapter adapter = new RemoteAnimationAdapter(
                 new TestRemoteAnimationRunner(), 10, 1);
-        definition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_CHANGE, adapter);
-        mAtm.mTaskFragmentOrganizerController.registerOrganizer(iOrganizer);
-        mAtm.mTaskFragmentOrganizerController.registerRemoteAnimations(iOrganizer, definition);
+        setupTaskFragmentRemoteAnimation(organizer, adapter);
 
         // Create a TaskFragment with embedded activity.
-        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
-                .setParentTask(createTask(mDisplayContent))
-                .createActivityCount(1)
-                .setOrganizer(organizer)
-                .build();
+        final TaskFragment taskFragment = createTaskFragmentWithEmbeddedActivity(
+                createTask(mDisplayContent), organizer);
         final ActivityRecord activity = taskFragment.getTopMostActivity();
         activity.allDrawn = true;
         spyOn(mDisplayContent.mAppTransition);
 
-        // Prepare a transition for TaskFragment.
-        mDisplayContent.mAppTransition.prepareAppTransition(TRANSIT_CHANGE, 0);
-        mDisplayContent.mOpeningApps.add(activity);
-        mDisplayContent.mChangingContainers.add(taskFragment);
-        mDisplayContent.mAppTransitionController.handleAppTransitionReady();
+        // Prepare a transition.
+        prepareAndTriggerAppTransition(activity, null /* closingActivity */, taskFragment);
 
-        // Check if the transition has been overridden.
+        // Should be overridden.
         verify(mDisplayContent.mAppTransition)
+                .overridePendingAppTransitionRemote(adapter, false /* sync */);
+    }
+
+    @Test
+    public void testOverrideTaskFragmentAdapter_overrideWithNonEmbeddedActivity() {
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final RemoteAnimationAdapter adapter = new RemoteAnimationAdapter(
+                new TestRemoteAnimationRunner(), 10, 1);
+        setupTaskFragmentRemoteAnimation(organizer, adapter);
+
+        final Task task = createTask(mDisplayContent);
+        // Closing non-embedded activity.
+        final ActivityRecord closingActivity = createActivityRecord(task);
+        closingActivity.allDrawn = true;
+        // Opening TaskFragment with embedded activity.
+        final TaskFragment taskFragment = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        final ActivityRecord openingActivity = taskFragment.getTopMostActivity();
+        openingActivity.allDrawn = true;
+        spyOn(mDisplayContent.mAppTransition);
+
+        // Prepare a transition.
+        prepareAndTriggerAppTransition(openingActivity, closingActivity, taskFragment);
+
+        // Should be overridden.
+        verify(mDisplayContent.mAppTransition)
+                .overridePendingAppTransitionRemote(adapter, false /* sync */);
+    }
+
+    @Test
+    public void testOverrideTaskFragmentAdapter_overrideEmbeddedActivityWithDiffUid() {
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final RemoteAnimationAdapter adapter = new RemoteAnimationAdapter(
+                new TestRemoteAnimationRunner(), 10, 1);
+        setupTaskFragmentRemoteAnimation(organizer, adapter);
+
+        final Task task = createTask(mDisplayContent);
+        // Closing TaskFragment with embedded activity.
+        final TaskFragment taskFragment1 = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        final ActivityRecord closingActivity = taskFragment1.getTopMostActivity();
+        closingActivity.allDrawn = true;
+        closingActivity.info.applicationInfo.uid = 12345;
+        // Opening TaskFragment with embedded activity with different UID.
+        final TaskFragment taskFragment2 = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        final ActivityRecord openingActivity = taskFragment2.getTopMostActivity();
+        openingActivity.info.applicationInfo.uid = 54321;
+        openingActivity.allDrawn = true;
+        spyOn(mDisplayContent.mAppTransition);
+
+        // Prepare a transition.
+        prepareAndTriggerAppTransition(openingActivity, closingActivity, taskFragment1);
+
+        // Should be overridden.
+        verify(mDisplayContent.mAppTransition)
+                .overridePendingAppTransitionRemote(adapter, false /* sync */);
+    }
+
+    @Test
+    public void testOverrideTaskFragmentAdapter_noOverrideWithTwoApps() {
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final RemoteAnimationAdapter adapter = new RemoteAnimationAdapter(
+                new TestRemoteAnimationRunner(), 10, 1);
+        setupTaskFragmentRemoteAnimation(organizer, adapter);
+
+        // Closing activity in Task1.
+        final ActivityRecord closingActivity = createActivityRecord(mDisplayContent);
+        closingActivity.allDrawn = true;
+        // Opening TaskFragment with embedded activity in Task2.
+        final TaskFragment taskFragment = createTaskFragmentWithEmbeddedActivity(
+                createTask(mDisplayContent), organizer);
+        final ActivityRecord openingActivity = taskFragment.getTopMostActivity();
+        openingActivity.allDrawn = true;
+        spyOn(mDisplayContent.mAppTransition);
+
+        // Prepare a transition for TaskFragment.
+        prepareAndTriggerAppTransition(openingActivity, closingActivity, taskFragment);
+
+        // Should not be overridden.
+        verify(mDisplayContent.mAppTransition, never())
+                .overridePendingAppTransitionRemote(adapter, false /* sync */);
+    }
+
+    @Test
+    public void testOverrideTaskFragmentAdapter_noOverrideNonEmbeddedActivityWithDiffUid() {
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final RemoteAnimationAdapter adapter = new RemoteAnimationAdapter(
+                new TestRemoteAnimationRunner(), 10, 1);
+        setupTaskFragmentRemoteAnimation(organizer, adapter);
+
+        final Task task = createTask(mDisplayContent);
+        // Closing TaskFragment with embedded activity.
+        final TaskFragment taskFragment = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        final ActivityRecord closingActivity = taskFragment.getTopMostActivity();
+        closingActivity.allDrawn = true;
+        closingActivity.info.applicationInfo.uid = 12345;
+        // Opening non-embedded activity with different UID.
+        final ActivityRecord openingActivity = createActivityRecord(task);
+        openingActivity.info.applicationInfo.uid = 54321;
+        openingActivity.allDrawn = true;
+        spyOn(mDisplayContent.mAppTransition);
+
+        // Prepare a transition.
+        prepareAndTriggerAppTransition(openingActivity, closingActivity, taskFragment);
+
+        // Should not be overridden
+        verify(mDisplayContent.mAppTransition, never())
                 .overridePendingAppTransitionRemote(adapter, false /* sync */);
     }
 
@@ -800,22 +896,18 @@ public class AppTransitionControllerTest extends WindowTestsBase {
     public void testTransitionGoodToGoForTaskFragments() {
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final Task task = createTask(mDisplayContent);
-        final TaskFragment changeTaskFragment = new TaskFragmentBuilder(mAtm)
-                .setParentTask(task)
-                .createActivityCount(1)
-                .setOrganizer(organizer)
-                .build();
+        final TaskFragment changeTaskFragment =
+                createTaskFragmentWithEmbeddedActivity(task, organizer);
         final TaskFragment emptyTaskFragment = new TaskFragmentBuilder(mAtm)
                 .setParentTask(task)
                 .setOrganizer(organizer)
                 .build();
         changeTaskFragment.getTopMostActivity().allDrawn = true;
-        mDisplayContent.mAppTransition.prepareAppTransition(TRANSIT_CHANGE, 0);
-        mDisplayContent.mChangingContainers.add(changeTaskFragment);
         spyOn(mDisplayContent.mAppTransition);
         spyOn(emptyTaskFragment);
 
-        mDisplayContent.mAppTransitionController.handleAppTransitionReady();
+        prepareAndTriggerAppTransition(
+                null /* openingActivity */, null /* closingActivity*/, changeTaskFragment);
 
         // Transition not ready because there is an empty non-finishing TaskFragment.
         verify(mDisplayContent.mAppTransition, never()).goodToGo(anyInt(), any());
@@ -828,5 +920,35 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         // Transition ready because the empty (no running activity) TaskFragment is requested to be
         // removed.
         verify(mDisplayContent.mAppTransition).goodToGo(anyInt(), any());
+    }
+
+    /** Registers remote animation for the organizer. */
+    private void setupTaskFragmentRemoteAnimation(TaskFragmentOrganizer organizer,
+            RemoteAnimationAdapter adapter) {
+        final ITaskFragmentOrganizer iOrganizer =
+                ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder());
+        final RemoteAnimationDefinition definition = new RemoteAnimationDefinition();
+        definition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_CHANGE, adapter);
+        definition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_OPEN, adapter);
+        definition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_CLOSE, adapter);
+        mAtm.mTaskFragmentOrganizerController.registerOrganizer(iOrganizer);
+        mAtm.mTaskFragmentOrganizerController.registerRemoteAnimations(iOrganizer, definition);
+    }
+
+    private void prepareAndTriggerAppTransition(@Nullable ActivityRecord openingActivity,
+            @Nullable ActivityRecord closingActivity, @Nullable TaskFragment changingTaskFragment) {
+        if (openingActivity != null) {
+            mDisplayContent.mAppTransition.prepareAppTransition(TRANSIT_OPEN, 0);
+            mDisplayContent.mOpeningApps.add(openingActivity);
+        }
+        if (closingActivity != null) {
+            mDisplayContent.mAppTransition.prepareAppTransition(TRANSIT_CLOSE, 0);
+            mDisplayContent.mClosingApps.add(closingActivity);
+        }
+        if (changingTaskFragment != null) {
+            mDisplayContent.mAppTransition.prepareAppTransition(TRANSIT_CHANGE, 0);
+            mDisplayContent.mChangingContainers.add(changingTaskFragment);
+        }
+        mDisplayContent.mAppTransitionController.handleAppTransitionReady();
     }
 }
