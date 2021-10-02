@@ -4492,6 +4492,13 @@
          If non-positive, then the refresh rate is unchanged even if thresholds are configured. -->
     <integer name="config_fixedRefreshRateInHighZone">0</integer>
 
+    <!-- Default refresh rate while the device has high brightness mode enabled for Sunlight.
+         This value overrides values from DisplayDeviceConfig -->
+    <integer name="config_defaultRefreshRateInHbmSunlight">0</integer>
+
+    <!-- Default refresh rate while the device has high brightness mode enabled for HDR. -->
+    <integer name="config_defaultRefreshRateInHbmHdr">0</integer>
+
     <!-- The type of the light sensor to be used by the display framework for things like
          auto-brightness. If unset, then it just gets the default sensor of type TYPE_LIGHT. -->
     <string name="config_displayLightSensorType" translatable="false" />
