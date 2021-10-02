@@ -38,6 +38,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -172,6 +173,10 @@ public final class CachedAppOptimizer {
     @GuardedBy("mProcLock")
     private final ArrayList<ProcessRecord> mPendingCompactionProcesses =
             new ArrayList<ProcessRecord>();
+
+    @GuardedBy("mProcLock")
+    private final SparseArray<ProcessRecord> mFrozenProcesses =
+            new SparseArray<>();
 
     private final ActivityManagerService mAm;
 
@@ -424,6 +429,15 @@ public final class CachedAppOptimizer {
             pw.println("  " + KEY_USE_FREEZER + "=" + mUseFreezer);
             pw.println("  " + KEY_FREEZER_STATSD_SAMPLE_RATE + "=" + mFreezerStatsdSampleRate);
             pw.println("  " + KEY_FREEZER_DEBOUNCE_TIMEOUT + "=" + mFreezerDebounceTimeout);
+            synchronized (mProcLock) {
+                int size = mFrozenProcesses.size();
+                pw.println("  Apps frozen: " + size);
+                for (int i = 0; i < size; i++) {
+                    ProcessRecord app = mFrozenProcesses.valueAt(i);
+                    pw.println("    " + app.mOptRecord.getFreezeUnfreezeTime()
+                            + ": " + app.getPid() + " " + app.processName);
+                }
+            }
             if (DEBUG_COMPACTION) {
                 for (Map.Entry<Integer, LastCompactionStats> entry
                         : mLastCompactionStats.entrySet()) {
@@ -1001,6 +1015,7 @@ public final class CachedAppOptimizer {
 
             opt.setFreezeUnfreezeTime(SystemClock.uptimeMillis());
             opt.setFrozen(false);
+            mFrozenProcesses.delete(pid);
         } catch (Exception e) {
             Slog.e(TAG_AM, "Unable to unfreeze " + pid + " " + app.processName
                     + ". This might cause inconsistency or UI hangs.");
@@ -1021,7 +1036,7 @@ public final class CachedAppOptimizer {
      * To be called when the given app is killed.
      */
     @GuardedBy({"mAm", "mProcLock"})
-    void unscheduleFreezeAppLSP(ProcessRecord app) {
+    void onCleanupApplicationRecordLocked(ProcessRecord app) {
         if (mUseFreezer) {
             final ProcessCachedOptimizerRecord opt = app.mOptRecord;
             if (opt.isPendingFreeze()) {
@@ -1029,6 +1044,8 @@ public final class CachedAppOptimizer {
                 mFreezeHandler.removeMessages(SET_FROZEN_PROCESS_MSG, app);
                 opt.setPendingFreeze(false);
             }
+
+            mFrozenProcesses.delete(app.getPid());
         }
     }
 
@@ -1293,7 +1310,8 @@ public final class CachedAppOptimizer {
         }
     }
 
-    private final class FreezeHandler extends Handler {
+    private final class FreezeHandler extends Handler implements
+            ProcLocksReader.ProcLocksReaderCallback {
         private FreezeHandler() {
             super(mCachedAppOptimizerThread.getLooper());
         }
@@ -1335,20 +1353,6 @@ public final class CachedAppOptimizer {
             final ProcessCachedOptimizerRecord opt = proc.mOptRecord;
 
             opt.setPendingFreeze(false);
-
-            try {
-                // pre-check for locks to avoid unnecessary freeze/unfreeze operations
-                if (mProcLocksReader.hasFileLocks(pid)) {
-                    if (DEBUG_FREEZER) {
-                        Slog.d(TAG_AM, name + " (" + pid + ") holds file locks, not freezing");
-                    }
-                    return;
-                }
-            } catch (Exception e) {
-                Slog.e(TAG_AM, "Not freezing. Unable to check file locks for " + name + "(" + pid
-                        + "): " + e);
-                return;
-            }
 
             synchronized (mProcLock) {
                 pid = proc.getPid();
@@ -1403,6 +1407,7 @@ public final class CachedAppOptimizer {
 
                     opt.setFreezeUnfreezeTime(SystemClock.uptimeMillis());
                     opt.setFrozen(true);
+                    mFrozenProcesses.put(pid, proc);
                 } catch (Exception e) {
                     Slog.w(TAG_AM, "Unable to freeze " + pid + " " + name);
                 }
@@ -1450,16 +1455,13 @@ public final class CachedAppOptimizer {
             }
 
             try {
-                // post-check to prevent races
-                if (mProcLocksReader.hasFileLocks(pid)) {
-                    if (DEBUG_FREEZER) {
-                        Slog.d(TAG_AM, name + " (" + pid + ") holds file locks, reverting freeze");
-                    }
-                    unfreezeAppLSP(proc);
-                }
+                // post-check to prevent deadlock
+                mProcLocksReader.handleBlockingFileLocks(this);
             } catch (Exception e) {
                 Slog.e(TAG_AM, "Unable to check file locks for " + name + "(" + pid + "): " + e);
-                unfreezeAppLSP(proc);
+                synchronized (mProcLock) {
+                    unfreezeAppLSP(proc);
+                }
             }
         }
 
@@ -1475,6 +1477,21 @@ public final class CachedAppOptimizer {
                         pid,
                         processName,
                         frozenDuration);
+            }
+        }
+
+        @GuardedBy({"mAm"})
+        @Override
+        public void onBlockingFileLock(int pid) {
+            if (DEBUG_FREEZER) {
+                Slog.d(TAG_AM, "Process (pid=" + pid + ") holds blocking file lock");
+            }
+            synchronized (mProcLock) {
+                ProcessRecord app = mFrozenProcesses.get(pid);
+                if (app != null) {
+                    Slog.i(TAG_AM, app.processName + " (" + pid + ") holds blocking file lock");
+                    unfreezeAppLSP(app);
+                }
             }
         }
     }

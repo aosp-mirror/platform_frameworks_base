@@ -17,6 +17,7 @@
 package com.android.internal.util;
 
 import java.io.Closeable;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ProtocolException;
@@ -47,6 +48,9 @@ public class ProcFileReader implements Closeable {
     public ProcFileReader(InputStream stream, int bufferSize) throws IOException {
         mStream = stream;
         mBuffer = new byte[bufferSize];
+        if (stream.markSupported()) {
+            mStream.mark(0);
+        }
 
         // read enough to answer hasMoreData
         fillBuf();
@@ -255,6 +259,24 @@ public class ProcFileReader implements Closeable {
         } else {
             consumeBuf(tokenIndex + 1);
         }
+    }
+
+    /**
+     * Reset file position and internal buffer
+     * @throws IOException
+     */
+    public void rewind() throws IOException {
+        if (mStream instanceof FileInputStream) {
+            ((FileInputStream) mStream).getChannel().position(0);
+        } else if (mStream.markSupported()) {
+            mStream.reset();
+        } else {
+            throw new IOException("The InputStream is NOT markable");
+        }
+
+        mTail = 0;
+        mLineFinished = false;
+        fillBuf();
     }
 
     @Override

@@ -45,6 +45,7 @@ import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.ZygoteConnectionConstants;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.am.ActivityManagerService;
+import com.android.server.am.CriticalEventLog;
 import com.android.server.am.TraceErrorLogger;
 import com.android.server.wm.SurfaceAnimationThread;
 
@@ -661,10 +662,15 @@ public class Watchdog {
             } // END synchronized (mLock)
 
             if (doWaitedHalfDump) {
+                // Get critical event log before logging the half watchdog so that it doesn't
+                // occur in the log.
+                String criticalEvents = CriticalEventLog.getInstance().logLinesForAnrFile();
+                CriticalEventLog.getInstance().logHalfWatchdog(subject);
+
                 // We've waited half the deadlock-detection interval.  Pull a stack
                 // trace and wait another half.
                 ActivityManagerService.dumpStackTraces(pids, null, null,
-                        getInterestingNativePids(), null, subject);
+                        getInterestingNativePids(), null, subject, criticalEvents);
                 continue;
             }
 
@@ -673,18 +679,20 @@ public class Watchdog {
             // Then kill this process so that the system will restart.
             EventLog.writeEvent(EventLogTags.WATCHDOG, subject);
 
-            final UUID errorId;
+            final UUID errorId = mTraceErrorLogger.generateErrorId();
             if (mTraceErrorLogger.isAddErrorIdEnabled()) {
-                errorId = mTraceErrorLogger.generateErrorId();
                 mTraceErrorLogger.addErrorIdToTrace("system_server", errorId);
-            } else {
-                errorId = null;
             }
 
             // Log the atom as early as possible since it is used as a mechanism to trigger
             // Perfetto. Ideally, the Perfetto trace capture should happen as close to the
             // point in time when the Watchdog happens as possible.
             FrameworkStatsLog.write(FrameworkStatsLog.SYSTEM_SERVER_WATCHDOG_OCCURRED, subject);
+
+            // Get critical event log before logging the watchdog so that it doesn't occur in the
+            // log.
+            String criticalEvents = CriticalEventLog.getInstance().logLinesForAnrFile();
+            CriticalEventLog.getInstance().logWatchdog(subject, errorId);
 
             long anrTime = SystemClock.uptimeMillis();
             StringBuilder report = new StringBuilder();
@@ -693,7 +701,7 @@ public class Watchdog {
             StringWriter tracesFileException = new StringWriter();
             final File stack = ActivityManagerService.dumpStackTraces(
                     pids, processCpuTracker, new SparseArray<>(), getInterestingNativePids(),
-                    tracesFileException, subject);
+                    tracesFileException, subject, criticalEvents);
 
             // Give some extra time to make sure the stack traces get written.
             // The system's been hanging for a minute, another second or two won't hurt much.

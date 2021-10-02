@@ -46,9 +46,7 @@ import android.media.soundtrigger.SoundModelType;
 import android.os.HidlMemoryUtil;
 import android.os.ParcelFileDescriptor;
 import android.os.SharedMemory;
-import android.system.ErrnoException;
 
-import java.io.FileDescriptor;
 import java.nio.ByteBuffer;
 import java.util.List;
 
@@ -69,7 +67,7 @@ class TestUtil {
         model.uuid = "12345678-2345-3456-4567-abcdef987654";
         model.vendorUuid = "87654321-5432-6543-7654-456789fedcba";
         byte[] data = new byte[]{91, 92, 93, 94, 95};
-        model.data = new ParcelFileDescriptor(byteArrayToFileDescriptor(data));
+        model.data = byteArrayToParcelFileDescriptor(data);
         model.dataSize = data.length;
         return model;
     }
@@ -449,13 +447,12 @@ class TestUtil {
         assertEquals(43, event.phraseExtras[0].levels[0].levelPercent);
     }
 
-    private static FileDescriptor byteArrayToFileDescriptor(byte[] data) {
-        try {
-            SharedMemory shmem = SharedMemory.create("", data.length);
+    private static ParcelFileDescriptor byteArrayToParcelFileDescriptor(byte[] data) {
+        try (SharedMemory shmem = SharedMemory.create("", data.length)) {
             ByteBuffer buffer = shmem.mapReadWrite();
             buffer.put(data);
-            return shmem.getFileDescriptor();
-        } catch (ErrnoException e) {
+            return shmem.getFdDup();
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

@@ -366,11 +366,11 @@ void ASurfaceTransaction_setBuffer(ASurfaceTransaction* aSurfaceTransaction,
 
     sp<GraphicBuffer> graphic_buffer(reinterpret_cast<GraphicBuffer*>(buffer));
 
-    transaction->setBuffer(surfaceControl, graphic_buffer);
+    std::optional<sp<Fence>> fence = std::nullopt;
     if (acquire_fence_fd != -1) {
-        sp<Fence> fence = new Fence(acquire_fence_fd);
-        transaction->setAcquireFence(surfaceControl, fence);
+        fence = new Fence(acquire_fence_fd);
     }
+    transaction->setBuffer(surfaceControl, graphic_buffer, fence);
 }
 
 void ASurfaceTransaction_setGeometry(ASurfaceTransaction* aSurfaceTransaction,
