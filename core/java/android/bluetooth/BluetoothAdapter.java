@@ -511,6 +511,12 @@ public final class BluetoothAdapter {
     @SystemApi
     public static final int ACTIVE_DEVICE_ALL = 2;
 
+    /** @hide */
+    @IntDef({BluetoothProfile.HEADSET, BluetoothProfile.A2DP,
+            BluetoothProfile.HEARING_AID})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ActiveDeviceProfile {}
+
     /**
      * Broadcast Action: The local Bluetooth adapter has started the remote
      * device discovery process.
@@ -2006,6 +2012,51 @@ public final class BluetoothAdapter {
         }
 
         return false;
+    }
+
+    /**
+     * Get the active devices for the BluetoothProfile specified
+     *
+     * @param profile is the profile from which we want the active devices.
+     *                Possible values are:
+     *                {@link BluetoothProfile#HEADSET},
+     *                {@link BluetoothProfile#A2DP},
+     *                {@link BluetoothProfile#HEARING_AID}
+     * @return A list of active bluetooth devices
+     * @throws IllegalArgumentException If profile is not one of {@link ActiveDeviceProfile}
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
+    public @NonNull List<BluetoothDevice> getActiveDevices(@ActiveDeviceProfile int profile) {
+        if (profile != BluetoothProfile.HEADSET
+                && profile != BluetoothProfile.A2DP
+                && profile != BluetoothProfile.HEARING_AID) {
+            Log.e(TAG, "Invalid profile param value in getActiveDevices");
+            throw new IllegalArgumentException("Profiles must be one of "
+                    + "BluetoothProfile.A2DP, "
+                    + "BluetoothProfile.HEARING_AID, or"
+                    + "BluetoothProfile.HEARING_AID");
+        }
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) {
+                if (DBG) {
+                    Log.d(TAG, "getActiveDevices(profile= "
+                            + BluetoothProfile.getProfileName(profile) + ")");
+                }
+                return mService.getActiveDevices(profile, mAttributionSource);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+
+        return new ArrayList<>();
     }
 
     /**
