@@ -65,6 +65,10 @@ final class LetterboxUiController {
     private final LetterboxConfiguration mLetterboxConfiguration;
     private final ActivityRecord mActivityRecord;
 
+    // Taskbar expanded height. Used to determine whether to crop an app window to display rounded
+    // corners above the taskbar.
+    private float mExpandedTaskBarHeight;
+
     private boolean mShowWallpaperForLetterboxBackground;
 
     @Nullable
@@ -76,6 +80,8 @@ final class LetterboxUiController {
         // is created in its constructor. It shouldn't be used in this constructor but it's safe
         // to use it after since controller is only used in ActivityRecord.
         mActivityRecord = activityRecord;
+        mExpandedTaskBarHeight =
+                getResources().getDimensionPixelSize(R.dimen.taskbar_frame_height);
     }
 
     /** Cleans up {@link Letterbox} if it exists.*/
@@ -204,12 +210,23 @@ final class LetterboxUiController {
         return mActivityRecord.mWmService.mContext.getResources();
     }
 
-    private void handleDoubleTap() {
+    private void handleDoubleTap(int x) {
         if (!isReachabilityEnabled() || mActivityRecord.isInTransition()) {
             return;
         }
 
-        mLetterboxConfiguration.flipHorizontalMultiplierForReachability();
+        if (mLetterbox.getInnerFrame().left <= x && mLetterbox.getInnerFrame().right >= x) {
+            // Only react to clicks at the sides of the letterboxed app window.
+            return;
+        }
+
+        if (mLetterbox.getInnerFrame().left > x) {
+            // Moving to the next stop on the left side of the app window: right > center > left.
+            mLetterboxConfiguration.movePositionForReachabilityToNextLeftStop();
+        } else if (mLetterbox.getInnerFrame().right < x) {
+            // Moving to the next stop on the right side of the app window: left > center > right.
+            mLetterboxConfiguration.movePositionForReachabilityToNextRightStop();
+        }
 
         // TODO(197549949): Add animation for transition.
         mActivityRecord.recomputeConfiguration();
@@ -314,12 +331,27 @@ final class LetterboxUiController {
             final InsetsSource taskbarInsetsSource =
                     insetsState.getSource(InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
 
-            Rect cropBounds = new Rect(mActivityRecord.getBounds());
-            // Activity bounds are in screen coordinates while (0,0) for activity's surface control
-            // is at the top left corner of an app window so offsetting bounds accordingly.
-            cropBounds.offsetTo(0, 0);
-            // Rounded cornerners should be displayed above the taskbar.
-            cropBounds.bottom = Math.min(cropBounds.bottom, taskbarInsetsSource.getFrame().top);
+            Rect cropBounds = null;
+
+            // Rounded corners should be displayed above the taskbar. When taskbar is hidden,
+            // an insets frame is equal to a navigation bar which shouldn't affect position of
+            // rounded corners since apps are expected to handle navigation bar inset.
+            // This condition checks whether the taskbar is visible.
+            if (taskbarInsetsSource.getFrame().height() >= mExpandedTaskBarHeight) {
+                cropBounds = new Rect(mActivityRecord.getBounds());
+                // Activity bounds are in screen coordinates while (0,0) for activity's surface
+                // control is at the top left corner of an app window so offsetting bounds
+                // accordingly.
+                cropBounds.offsetTo(0, 0);
+                // Rounded cornerners should be displayed above the taskbar.
+                cropBounds.bottom =
+                        Math.min(cropBounds.bottom, taskbarInsetsSource.getFrame().top);
+                if (mActivityRecord.inSizeCompatMode()
+                        && mActivityRecord.getSizeCompatScale() < 1.0f) {
+                    cropBounds.scale(1.0f / mActivityRecord.getSizeCompatScale());
+                }
+            }
+
             transaction
                     .setWindowCrop(windowSurface, cropBounds)
                     .setCornerRadius(windowSurface, getRoundedCorners(insetsState));

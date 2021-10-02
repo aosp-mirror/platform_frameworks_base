@@ -41,6 +41,7 @@ import com.android.systemui.dock.DockManager;
 import com.android.systemui.doze.DozeMachine.State;
 import com.android.systemui.doze.dagger.DozeScope;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -95,6 +96,9 @@ public class DozeTriggers implements DozeMachine.Part {
     private final DelayableExecutor mMainExecutor;
     private final KeyguardStateController mKeyguardStateController;
     private final UiEventLogger mUiEventLogger;
+    private final DevicePostureController mDevicePostureController;
+
+    private @DevicePostureController.DevicePostureInt int mDevicePosture;
 
     private long mNotificationPulseTime;
     private boolean mPulsePending;
@@ -182,7 +186,8 @@ public class DozeTriggers implements DozeMachine.Part {
             SecureSettings secureSettings, AuthController authController,
             @Main DelayableExecutor mainExecutor,
             UiEventLogger uiEventLogger,
-            KeyguardStateController keyguardStateController) {
+            KeyguardStateController keyguardStateController,
+            DevicePostureController devicePostureController) {
         mContext = context;
         mDozeHost = dozeHost;
         mConfig = config;
@@ -190,9 +195,11 @@ public class DozeTriggers implements DozeMachine.Part {
         mSensorManager = sensorManager;
         mWakeLock = wakeLock;
         mAllowPulseTriggers = true;
+        mDevicePostureController = devicePostureController;
+        mDevicePosture = devicePostureController.getDevicePosture();
         mDozeSensors = new DozeSensors(context, mSensorManager, dozeParameters,
                 config, wakeLock, this::onSensor, this::onProximityFar, dozeLog, proximitySensor,
-                secureSettings, authController);
+                secureSettings, authController, mDevicePosture);
         mUiModeManager = mContext.getSystemService(UiModeManager.class);
         mDockManager = dockManager;
         mProxCheck = proxCheck;

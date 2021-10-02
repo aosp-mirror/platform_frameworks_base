@@ -23,6 +23,9 @@ import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_SOLID_COLOR;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_WALLPAPER;
+import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_REACHABILITY_POSITION_CENTER;
+import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_REACHABILITY_POSITION_LEFT;
+import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_REACHABILITY_POSITION_RIGHT;
 
 import android.content.res.Resources.NotFoundException;
 import android.graphics.Color;
@@ -44,6 +47,7 @@ import com.android.internal.protolog.ProtoLogImpl;
 import com.android.server.LocalServices;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.wm.LetterboxConfiguration.LetterboxBackgroundType;
+import com.android.server.wm.LetterboxConfiguration.LetterboxReachabilityPosition;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -787,22 +791,33 @@ public class WindowManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private int runSetLetterboxDefaultPositionMultiplierForReachability(PrintWriter pw)
+    private int runSetLetterboxDefaultPositionForReachability(PrintWriter pw)
             throws RemoteException {
-        final float multiplier;
+        @LetterboxReachabilityPosition final int position;
         try {
             String arg = getNextArgRequired();
-            multiplier = Float.parseFloat(arg);
-        } catch (NumberFormatException  e) {
-            getErrPrintWriter().println("Error: bad multiplier format " + e);
-            return -1;
+            switch (arg) {
+                case "left":
+                    position = LETTERBOX_REACHABILITY_POSITION_LEFT;
+                    break;
+                case "center":
+                    position = LETTERBOX_REACHABILITY_POSITION_CENTER;
+                    break;
+                case "right":
+                    position = LETTERBOX_REACHABILITY_POSITION_RIGHT;
+                    break;
+                default:
+                    getErrPrintWriter().println(
+                            "Error: 'left', 'center' or 'right' are expected as an argument");
+                    return -1;
+            }
         } catch (IllegalArgumentException  e) {
             getErrPrintWriter().println(
-                    "Error: multiplier should be provided as an argument " + e);
+                    "Error: 'left', 'center' or 'right' are expected as an argument" + e);
             return -1;
         }
         synchronized (mInternal.mGlobalLock) {
-            mLetterboxConfiguration.setDefaultPositionMultiplierForReachability(multiplier);
+            mLetterboxConfiguration.setDefaultPositionForReachability(position);
         }
         return 0;
     }
@@ -841,8 +856,8 @@ public class WindowManagerShellCommand extends ShellCommand {
                 case "--isReachabilityEnabled":
                     runSetLetterboxIsReachabilityEnabled(pw);
                     break;
-                case "--defaultPositionMultiplierReachability":
-                    runSetLetterboxDefaultPositionMultiplierForReachability(pw);
+                case "--defaultPositionForReachability":
+                    runSetLetterboxDefaultPositionForReachability(pw);
                     break;
                 default:
                     getErrPrintWriter().println(
@@ -885,8 +900,8 @@ public class WindowManagerShellCommand extends ShellCommand {
                     case "isReachabilityEnabled":
                         mLetterboxConfiguration.getIsReachabilityEnabled();
                         break;
-                    case "defaultPositionMultiplierForReachability":
-                        mLetterboxConfiguration.getDefaultPositionMultiplierForReachability();
+                    case "defaultPositionForReachability":
+                        mLetterboxConfiguration.getDefaultPositionForReachability();
                         break;
                     default:
                         getErrPrintWriter().println(
@@ -982,7 +997,7 @@ public class WindowManagerShellCommand extends ShellCommand {
             mLetterboxConfiguration.resetLetterboxBackgroundWallpaperDarkScrimAlpha();
             mLetterboxConfiguration.resetLetterboxHorizontalPositionMultiplier();
             mLetterboxConfiguration.resetIsReachabilityEnabled();
-            mLetterboxConfiguration.resetDefaultPositionMultiplierForReachability();
+            mLetterboxConfiguration.resetDefaultPositionForReachability();
         }
     }
 
@@ -996,8 +1011,9 @@ public class WindowManagerShellCommand extends ShellCommand {
                     + mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio());
             pw.println("Is reachability enabled: "
                     + mLetterboxConfiguration.getIsReachabilityEnabled());
-            pw.println("Default position multiplier for reachability: "
-                    + mLetterboxConfiguration.getDefaultPositionMultiplierForReachability());
+            pw.println("Default position for reachability: "
+                    + LetterboxConfiguration.letterboxReachabilityPositionToString(
+                            mLetterboxConfiguration.getDefaultPositionForReachability()));
 
             pw.println("Background type: "
                     + LetterboxConfiguration.letterboxBackgroundTypeToString(
@@ -1135,11 +1151,9 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("      --isReachabilityEnabled [true|1|false|0]");
         pw.println("        Whether reachability repositioning is allowed for letterboxed");
         pw.println("        fullscreen apps in landscape device orientation.");
-        pw.println("      --defaultPositionMultiplierReachability multiplier");
-        pw.println("        Default horizontal position of app window center when reachability is");
-        pw.println("        enabled. If multiplier < 0.0 or > 1, both it and ");
-        pw.println("        R.dimen.config_letterboxDefaultPositionMultiplierForReachability");
-        pw.println("        are ignored and right position (1.0) is used.");
+        pw.println("      --defaultPositionForReachability [left|center|right]");
+        pw.println("        Default horizontal position of app window  when reachability is.");
+        pw.println("        enabled.");
         pw.println("  reset-letterbox-style [aspectRatio|cornerRadius|backgroundType");
         pw.println("      |backgroundColor|wallpaperBlurRadius|wallpaperDarkScrimAlpha");
         pw.println("      |horizontalPositionMultiplier|isReachabilityEnabled");

@@ -35,6 +35,8 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.junit.Assert.assertEquals;
@@ -42,6 +44,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 
 import android.graphics.Rect;
 import android.os.Binder;
@@ -54,6 +57,7 @@ import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
+import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.ITaskFragmentOrganizer;
 import android.window.TaskFragmentOrganizer;
@@ -397,7 +401,9 @@ public class AppTransitionTests extends WindowTestsBase {
     @Test
     public void testActivityRecordReparentToTaskFragment() {
         final ActivityRecord activity = createActivityRecord(mDc);
+        final SurfaceControl activityLeash = mock(SurfaceControl.class);
         activity.setVisibility(true);
+        activity.setSurfaceControl(activityLeash);
         final Task task = activity.getTask();
 
         // Add a TaskFragment of half of the Task size.
@@ -412,15 +418,20 @@ public class AppTransitionTests extends WindowTestsBase {
         final Rect taskBounds = new Rect();
         task.getBounds(taskBounds);
         taskFragment.setBounds(0, 0, taskBounds.right / 2, taskBounds.bottom);
+        spyOn(taskFragment);
 
         assertTrue(mDc.mChangingContainers.isEmpty());
         assertFalse(mDc.mAppTransition.isTransitionSet());
 
         // Schedule app transition when reparent activity to a TaskFragment of different size.
+        final Rect startBounds = new Rect(activity.getBounds());
         activity.reparent(taskFragment, POSITION_TOP);
 
-        assertTrue(mDc.mChangingContainers.contains(activity));
+        // It should transit at TaskFragment level with snapshot on the activity surface.
+        verify(taskFragment).initializeChangeTransition(activity.getBounds(), activityLeash);
+        assertTrue(mDc.mChangingContainers.contains(taskFragment));
         assertTrue(mDc.mAppTransition.containsTransitRequest(TRANSIT_CHANGE));
+        assertEquals(startBounds, taskFragment.mSurfaceFreezer.mFreezeBounds);
     }
 
     private class TestRemoteAnimationRunner implements IRemoteAnimationRunner {
