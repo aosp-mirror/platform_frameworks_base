@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ហៅទូរស័ព្ទ និងគ្រប់គ្រងការហៅទូរស័ព្ទ"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"ឧបករណ៍​ចាប់សញ្ញា​រាងកាយ"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"ចូលដំណើរការទិន្នន័យឧបករណ៍ចាប់សញ្ញាអំពីស្ថានភាពសុខភាពរបស់អ្នក"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"ការ​ជូនដំណឹង"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"បង្ហាញ​ការជូនដំណឹង"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"ទាញយក​ខ្លឹមសារ​វិនដូ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"ពិនិត្យ​ខ្លឹមសារវិនដូ​ដែល​អ្នក​កំពុង​ទាក់ទង​ជា​មួយ។"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"បើក​ការ​រក​មើល​​ដោយ​ប៉ះ"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"ឲ្យ​កម្មវិធី​បិទ​ការ​ចាក់សោ​សុវត្ថិភាព​ពាក្យ​សម្ងាត់​ដែល​បាន​ភ្ជាប់​ណា​មួយ។ ​ឧទាហរណ៍​ត្រឹមត្រូវ​​​នៃ​ការ​បិទ​ទូរស័ព្ទ​ពេល​ទទួលការ​ហៅ​ចូល បន្ទាប់​ម​បើក​សោ​ពេល​ការ​ហៅ​បាន​បញ្ចប់។"</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ស្នើ​សុំកម្រិត​​ស្មុគស្មាញ​នៃការចាក់សោអេក្រង់"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"អនុញ្ញាតឱ្យ​កម្មវិធី​រៀនអំពី​កម្រិតស្មុគស្មាញ​ការនៃការចាក់សោអេក្រង់ (ខ្ពស់ មធ្យម​ ទាប ឬគ្មាន) ដែល​បញ្ជាក់អំពី​​ប្រវែង និងប្រភេទ​នៃការចាក់សោអេក្រង់។ កម្មវិធី​នេះ​ក៏​អាច​ណែនាំឱ្យ​អ្នកប្រើប្រាស់​ធ្វើបច្ចុប្បន្នភាព​ការចាក់សោ​អេក្រង់​ទៅកម្រិតជាក់លាក់​ផងដែរ ប៉ុន្តែ​អ្នកប្រើប្រាស់​អាច​មិនអើពើនឹង​ការណែនាំនេះ​ដោយសេរី។ សូម​ចំណាំថា ការចាក់សោអេក្រង់​មិន​ត្រូវបាន​រក្សាទុក​ជាអត្ថបទ​ធម្មតាទេ ដូច្នេះ​កម្មវិធីនេះ​មិន​ស្គាល់​ពាក្យសម្ងាត់​ពិតប្រាកដ​ឡើយ។"</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"បង្ហាញ​ការជូនដំណឹង"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"អនុញ្ញាតឱ្យ​កម្មវិធីបង្ហាញ​ការជូនដំណឹង"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"ប្រើ​ឧបករណ៍​ស្កេន​ស្នាមម្រាមដៃ"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"អនុញ្ញាត​ឱ្យ​កម្មវិធី​ប្រើ​ឧបករណ៍​ស្កេន​ស្នាមម្រាមដៃ​សម្រាប់​ការផ្ទៀងផ្ទាត់"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"គ្រប់គ្រងផ្នែករឹងស្នាមម្រាមដៃ"</string>

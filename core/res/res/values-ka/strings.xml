@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"სატელეფონო ზარების განხორციელება და მართვა"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"სხეულის სენსორები"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"თქვენი სასიცოცხლო ფუნქციების შესახებ სენსორის მონაცემებზე წვდომა"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"შეტყობინებები"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"შეტყობინებების ჩვენება"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"ფანჯრის კონტენტის მოძიება"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"იმ ფანჯრის კონტენტის შემოწმება, რომელშიც მუშაობთ."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"„შეხებით აღმოჩენის“ ჩართვა"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"შეეძლება კლავიატურის დაბლოკვისა და პაროლით უზრუნველყოფილი ნებისმიერი უსაფრთხოების ფუნქციის დეაქტივაცია. მაგალითად, ტელეფონი შემომავალი ზარის დროს აუქმებს კლავიატურის დაბლოკვას და კვლავ ააქტიურებს მას, როგორც კი ზარი დასრულდება."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ეკრანის დაბლოკვის მეთოდის სირთულის შესახებ ინფორმაციის მოთხოვნა"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"საშუალებას აძლევს აპს, შეიტყოს ეკრანის დაბლოკვის მეთოდის სირთულე (მაღალი, საშუალო, დაბალი ან არანაირი), რისი მეშვეობითაც შესაძლებელია ეკრანის დაბლოკვის მეთოდის სიგრძის შესაძლო დიაპაზონისა და ტიპის განსაზღვრა. გარდა ამისა, აპს შეუძლია მომხმარებლებისთვის ეკრანის დაბლოკვის მეთოდის გარკვეულ დონემდე გაძლიერების შეთავაზება, თუმცა მომხმარებლებს შეეძლებათ აღნიშნული შეტყობინების უგულებელყოფა და სხვა ეკრანზე გადასვლა. გაითვალისწინეთ, რომ ეკრანის დაბლოკვის მეთოდი არ ინახება ჩვეულებრივი ტექსტის სახით, ამიტომ აპს არ ეცოდინება ზუსტი პაროლი."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"შეტყობინებების ჩვენება"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"უფლებას აძლევს აპს, აჩვენოს შეტყობინებები"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"ბიომეტრიული აპარატის გამოყენება"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"საშუალებას აძლევს აპს, ავტორიზაციისთვის გამოიყენოს ბიომეტრიული აპარატი"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"თითის ანაბეჭდის აპარატის მართვა"</string>

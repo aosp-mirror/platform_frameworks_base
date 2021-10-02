@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"faça e gerencie chamadas telefônicas"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Sensores corporais"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"acesse dados do sensor sobre seus sinais vitais"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Notificações"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"mostrar notificações"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Acessar conteúdo de uma janela"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Inspeciona o conteúdo de uma janela com a qual você está interagindo."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Ativar Explorar por toque"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Permite que o app desative o bloqueio de teclas e qualquer segurança por senha associada. Por exemplo, o telefone desativa o bloqueio de telas ao receber uma chamada e o reativa quando a chamada é finalizada."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"Solicitar complexidade do bloqueio de tela"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Permite que o app saiba o nível de complexidade do bloqueio de tela (alto, médio, baixo ou nenhum), que indica o intervalo possível de comprimento e o tipo de bloqueio de tela. O app também pode sugerir a atualização do bloqueio de tela até um certo nível, mas os usuários podem ignorar a sugestão. O bloqueio de tela não é armazenado em texto simples, então o app não tem acesso à senha exata."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"mostrar notificações"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Permite que o app mostre notificações"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"Usar hardware de biometria"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Permite que o app use hardware de biometria para autenticação"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"gerenciar hardware de impressão digital"</string>

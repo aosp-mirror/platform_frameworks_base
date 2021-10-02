@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"телефон чалуу жана аларды башкаруу"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Дене сенсорлору"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"организмдин абалына көз салган сенсордун дайындарына мүмкүнчүлүк алуу"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Билдирмелер"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"билдирмелерди көрсөтүү"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Терезедеги мазмунду алып турат"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Учурда ачылып турган терезедеги маалыматты талдайт."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"\"Сыйпалап изилдөө\" мүмкүнчүлүгүн иштетет"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Колдонмого экрандын бөгөттөөчү жана ага байланыштуу сырсөз коргоосун өчүрүү уруксатын берет. Мисалы, чалуу келгенде экрандын бөгөтүн алып салат, чалуу бүткөндө кайрадан орнотот."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"экранды бөгөттөөнүн татаалдык деңгээлин суроо"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Колдонмого экранды бөгөттөөнүн татаалдыгын (татаал, орточо, оңой же такыр жок) үйрөнүүгө мүмкүнчүлүк берет. Татаалдык деңгээли сырсөздүн узундугу жана экранды бөгөттөөнүн түрү боюнча айырмаланат. Колдонмо экранды бөгөттөөнү белгилүү деңгээлге тууралоону колдонуучуларга сунуштай да алат, бирок колдонуучулар ага көңүл бурбай койсо болот. Сырсөздү колдонмо билбеши үчүн, экранды бөгөттөө сырсөзүн кадимки текстте сактоого болбойт."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"билдирмелерди көрсөтүү"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Колдонмолор билдирмелерди көрсөтө алат"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"биометрикалык аппаратты колдонуу"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Колдонмого аныктыгын текшерүү үчүн биометрикалык аппаратты пайдалануу мүмкүндүгүн берет"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"манжа изинин аппараттык камсыздоосун башкаруу"</string>

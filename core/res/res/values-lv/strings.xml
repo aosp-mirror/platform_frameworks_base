@@ -329,6 +329,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"veikt un pārvaldīt tālruņa zvanus"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Ķermeņa sensori"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"piekļūt sensoru datiem par jūsu veselības rādījumiem"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Paziņojumi"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"rādīt paziņojumus"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Izgūt loga saturu."</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Skatīt tā loga saturu, ar kuru mijiedarbojaties."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Aktivizēt funkciju “Pārlūkot pieskaroties”."</string>
@@ -552,6 +554,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Ļauj lietotnei atspējot taustiņslēgu un visu saistīto paroļu drošību. Piemēram, tālrunis atspējo taustiņslēgu, saņemot ienākošu zvanu, un pēc zvana pabeigšanas atkārtoti iespējo taustiņslēgu."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ekrāna bloķēšanas sarežģītības pakāpes informācijas pieprasījums"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Atļauj lietotnei saglabāt informāciju par ekrāna bloķēšanas sarežģītības pakāpi (augsta, vidēja, zema, nav), kas apzīmē iespējamo garumu un ekrāna bloķēšanas veidus. Lietotnē lietotājiem var tikt rādīts arī ieteikums ekrāna bloķēšanai iestatīt citu līmeni, taču šo ieteikumu var ignorēt un aizvērt. Ņemiet vērā, ka ekrāna bloķēšanas parole netiek glabāta vienkārša teksta formātā, tāpēc lietotnei nav piekļuves precīzai parolei."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"Paziņojumu rādīšana"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Ļauj lietotnei rādīt paziņojumus."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"izmantot biometrisko datu aparatūru"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Atļauj lietotnei izmantot biometrisko datu aparatūru autentificēšanai"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"pārvaldīt pirkstu nospiedumu aparatūru"</string>

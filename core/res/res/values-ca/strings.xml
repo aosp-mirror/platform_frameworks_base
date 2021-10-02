@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"fer i gestionar trucades telefòniques"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Sensors corporals"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"accedir a les dades del sensor sobre les constants vitals"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Notificacions"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"mostra notificacions"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Recuperar el contingut de la finestra"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Inspecciona el contingut d\'una finestra amb què estàs interaccionant."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Activar Exploració tàctil"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Permet que l\'aplicació desactivi el bloqueig del teclat i qualsevol element de seguretat de contrasenyes associat. Per exemple, el telèfon desactiva el bloqueig del teclat en rebre una trucada entrant i, a continuació, reactiva el bloqueig del teclat quan finalitza la trucada."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"sol·licita una determinada complexitat del bloqueig de pantalla"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Permet que l\'aplicació conegui el nivell de complexitat del bloqueig de pantalla (alt, mitjà, baix o cap), que indica la llargària i el tipus de bloqueig de pantalla possibles. L\'aplicació també pot suggerir que els usuaris actualitzin el bloqueig de pantalla a un nivell determinat, però els usuaris poden ignorar aquestes recomanacions. Tingues en compte que el bloqueig de pantalla no s\'emmagatzema com a text sense format, de manera que l\'aplicació no coneix la contrasenya exacta."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"mostra notificacions"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Permet que l\'aplicació mostri notificacions"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"utilitza maquinari biomètric"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Permet que l\'aplicació faci servir maquinari biomètric per a l\'autenticació"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"Gestionar el maquinari d\'empremtes digitals"</string>

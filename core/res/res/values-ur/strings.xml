@@ -326,6 +326,10 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"فون کالز کریں اور ان کا نظم کریں"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"باڈی سینسرز"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"اپنی علامات حیات کے متعلق سنسر ڈیٹا تک رسائی حاصل کریں"</string>
+    <!-- no translation found for permgrouplab_notifications (5472972361980668884) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_notifications (4608679556801506580) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"ونڈو مواد بازیافت کرنے کی"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"کسی ایسی ونڈو کے مواد کا معائنہ کریں جس کے ساتھ آپ تعامل کر رہے ہیں۔"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"ٹچ کے ذریعے دریافت کریں کو آن کرنے کی"</string>
@@ -549,6 +553,10 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"ایپ کو کلیدی لاک اور کسی بھی متعلقہ پاس ورڈ سیکیورٹی کو غیر فعال کرنے کی اجازت دیتا ہے۔ مثلاً، کوئی آنے والی فون کال موصول ہونے کے وقت فون کلیدی لاک کو غیر فعال کرتا ہے، پھر کال پوری ہوجانے پر کلیدی لاک کو دوبارہ فعال کردیتا ہے۔"</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"اسکرین لاک کی پیچیدگی کی درخواست کریں"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"اپپ کو اسکرین لاک کی پیچیدگی (بہت زیادہ، درمیانی، کم یا کوئی بھی نہیں) کو جاننے کی اجازت دیتی ہے، جو طوالت کی ممکنہ حد اور اسکرین لاک کی قسم کو بتاتی ہے۔ اپپ صارفین کو یہ مشوره بھی دے سکتی ہے کہ وہ اسکرین لاک کو مخصوص لیول تک اپ ڈیٹ کریں لیکن صارفین آزادانہ طور پر نظر انداز اور نیویگیٹ کر سکتے ہیں۔ نوٹ کریں کہ اسکرین لاک پلین ٹیکسٹ میں اسٹور نہیں کیا جاتا ہے اس لیے اپپ کو صحیح پاس ورڈ نہیں معلوم ہوتا ہے۔"</string>
+    <!-- no translation found for permlab_postNotification (4875401198597803658) -->
+    <skip />
+    <!-- no translation found for permdesc_postNotification (5974977162462877075) -->
+    <skip />
     <string name="permlab_useBiometric" msgid="6314741124749633786">"بایومیٹرک ہارڈ ویئر استعمال کریں"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"ایپ کو توثیق کے لیے بایومیٹرک ہارڈ ویئر استعمال کرنے کی اجازت دیتا ہے"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"فنگر پرنٹ ہارڈ ویئر کا نظم کریں"</string>

@@ -332,6 +332,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"telefonovanie a správu hovorov"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Telové senzory"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"prístup k dátam senzorov vašich životných funkcií"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Upozornenia"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"zobrazovať upozornenia"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Načítať obsah okna"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Môžete preskúmať obsah okna, s ktorým pracujete."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Zapnúť funkciu Preskúmanie dotykom"</string>
@@ -555,6 +557,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Umožňuje aplikácii zakázať uzamknutie klávesnice a akékoľvek súvisiace zabezpečenie heslom. Príkladom je zakázanie uzamknutia klávesnice pri prichádzajúcom telefonickom hovore a jeho opätovné povolenie po skončení hovoru."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"požadovať zložitosť zámky obrazovky"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Umožňuje aplikácii zapamätať si úroveň zložitosti zámky obrazovky (vysoká, stredná, nízka alebo žiadna), ktorá udáva pravdepodobný rozsah dĺžky a typu zámky obrazovky. Aplikácia tiež navrhuje používateľom aktualizáciu zámky obrazovky na určitú úroveň, používatelia sa však môžu na základe vlastného uváženia rozhodnúť tento návrh ignorovať a prejsť inam. Upozorňujeme, že zámka obrazovky nie je uložená vo forme obyčajného textu, takže aplikácia nepozná presné heslo."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"zobrazovať upozornenia"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Povolí aplikácii zobrazovať upozornenia"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"používať biometrický hardvér"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Umožňuje aplikácii používať na overenie totožnosti biometrický hardvér"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"spravovať hardvér na snímanie odtlačkov prstov"</string>

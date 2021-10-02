@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"қоңырау шалу және телефон қоңырауларын басқару"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Дене датчиктері"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"ағза күйінің көрсеткіштері туралы сенсор деректеріне қатынасу"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Хабарландырулар"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"хабарландыруларды көрсету"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Терезе мазмұнын оқып отыру"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Ашық тұрған терезе мазмұнын тексеру."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Түртілген элементтерді дыбыстау функциясын қосу"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Қолданбаларға кілтперне және басқа кілтсөзге қатысты қауіпсіздік шараларын өшіру мүмкіндігін береді. Мысалы, телефон кіріс қоңырауларын алғанда кілтпернені өшіреді және қоңырау аяқталғанда қайта қосады."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"экранды құлыптау күрделілігін сұрау"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Қолданбаға экран құлпының күрделілік деңгейін (жоғары, орташа, төмен немесе жоқ), соның ішінде ұзындығының ықтимал ауқымын және оның түрін анықтауға мүмкіндік береді. Сонымен қатар қолданба пайдаланушыларға құлыпты белгілі бір деңгейге жаңартуды ұсынады. Бірақ бұл ұсыныстарды елемеуге болады. Экран құлпы қарапайым мәтін түрінде сақталмайтындықтан, құпия сөз қолданбаға белгісіз болатынын ескеріңіз."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"хабарландыруларды көрсету"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Қолданбаға хабарландыруларды көрсетуге мүмкіндік береді."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"биометрикалық жабдықты пайдалану"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Аутентификациялау үшін қолданбаға биометрикалық жабдықты пайдалануға рұқсат береді"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"саусақ ізі жабдығын басқару"</string>

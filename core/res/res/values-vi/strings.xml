@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"thực hiện và quản lý cuộc gọi điện thoại"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Cảm biến cơ thể"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"truy cập dữ liệu cảm biến về dấu hiệu sinh tồn của bạn"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Thông báo"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"hiển thị thông báo"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Truy xuất nội dung cửa sổ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Kiểm tra nội dung của cửa sổ bạn đang tương tác."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Bật Khám phá bằng cách chạm"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Cho phép ứng dụng tắt khóa phím và bất kỳ bảo mật mật khẩu được liên kết nào. Ví dụ: điện thoại tắt khóa phím khi nhận được cuộc gọi đến, sau đó bật lại khóa phím khi cuộc gọi kết thúc."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"cần biết độ phức tạp của khóa màn hình"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Cho phép ứng dụng nắm được độ phức tạp của khóa màn hình (cao, trung bình, thấp hoặc không có). Mức độ này cho biết độ dài và loại khóa màn hình có thể có. Ngoài ra, ứng dụng có thể gợi ý người dùng cập nhật khóa màn hình lên một mức độ nhất định, nhưng người dùng có thể tùy ý bỏ qua và chuyển sang phần khác. Lưu ý rằng khóa màn hình không được lưu dưới dạng văn bản thuần túy, vì vậy, ứng dụng sẽ không biết mật khẩu chính xác."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"hiển thị thông báo"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Cho phép ứng dụng hiển thị thông báo"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"sử dụng phần cứng sinh trắc học"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Cho phép ứng dụng dùng phần cứng sinh trắc học để xác thực"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"quản lý phần cứng vân tay"</string>

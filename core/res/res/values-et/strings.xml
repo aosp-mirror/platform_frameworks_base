@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"helistamine ja telefonikõnede haldamine"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Kehaandurid"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"juurdepääs anduri andmetele teie eluliste näitajate kohta"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Märguanded"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"märguannete kuvamine"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Akna sisu toomine"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Kasutatava akna sisu kontrollimine."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Puudutusega sirvimise sisselülitamine"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Võimaldab rakendusel keelata klahviluku ja muu seotud parooli turvalisuse. Näiteks keelab telefon klahviluku sissetuleva kõne vastuvõtmisel ja lubab klahviluku uuesti, kui kõne on lõpetatud."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ekraaniluku keerukuse taotlemine"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Lubab rakendusel vaadata ekraaniluku keerukuse taset (kõrge, keskmine, madal või puudub), mis näitab ekraaniluku võimalikku pikkust ja tüüpi. Rakendus võib kasutajatele soovitada ka ekraaniluku viimist teatud tasemele, kuid kasutajad võivad seda eirata ja kuvalt lahkuda. Pange tähele, et ekraanilukku ei salvestata lihttekstina, seega ei tea rakendus täpset parooli."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"märguannete kuvamine"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Lubab rakendusel märguandeid kuvada"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"kasutada biomeetrilist riistvara"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Võimaldab rakendusel autentimiseks kasutada biomeetrilist riistvara"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"sõrmejälje riistvara haldamine"</string>

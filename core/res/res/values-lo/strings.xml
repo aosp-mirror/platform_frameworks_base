@@ -326,6 +326,10 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ໂທ ແລະ​ຈັດ​ການ​ການ​ໂທ​ລະ​ສັບ"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"ເຊັນເຊີຮ່າງກາຍ"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"ເຂົ້າ​ຫາ​ຂໍ້​ມູນ​ເຊັນ​ເຊີ​ກ່ຽວ​ກັບ​ສັນ​ຍານ​ຊີບ​ຂອງ​ທ່ານ"</string>
+    <!-- no translation found for permgrouplab_notifications (5472972361980668884) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_notifications (4608679556801506580) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"ດຶງຂໍ້ມູນເນື້ອຫາໃນໜ້າຈໍ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"ກວດກາເນື້ອຫາຂອງໜ້າຈໍທີ່ທ່ານກຳລັງມີປະຕິສຳພັນນຳ."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"ເປີດໃຊ້ \"ການສຳຫຼວດໂດຍສຳຜັດ\""</string>
@@ -549,6 +553,10 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"ອະນຸຍາດໃຫ້ແອັບຯປິດການເຮັດວຽກຂອງປຸ່ມລັອກ ແລະລະບົບຄວາມປອດໄພຂອງລະຫັດຜ່ານທີ່ເຊື່ອມໂຍງກັນ. ໂຕຢ່າງ: ໂທລະສັບຈະປິດການເຮັດວຽກຂອງປຸ່ມລັອກເມື່ອມີສາຍໂທເຂົ້າ ຈາກນັ້ນຈຶ່ງເປີດໃຊ້ໄດ້ອີກເມື່ອວາງສາຍແລ້ວ."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ຮ້ອງຂໍຄວາມຊັບຊ້ອນການລັອກໜ້າຈໍ"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"ອະນຸຍາດໃຫ້ແອັບສຶກສາລະດັບຄວາມຊັບຊ້ອນຂອງໜ້າຈໍລັອກ (ສູງ, ກາງ ຫຼື ບໍ່ມີ), ເຊິ່ງລະບຸຂອບເຂດຄວາມເປັນໄປໄດ້ຂອງຄວາມຍາວ ແລະ ປະເພດຂອງການລັອກໜ້າຈໍ. ແອັບນີ້ສາມາດແນະນຳຜູ້ໃຊ້ວ່າເຂົາເຈົ້າສາມາດອັບເດດໜ້າຈໍລັອກເປັນລະດັບໃດໜຶ່ງເປັນການສະເພາະໄດ້, ແຕ່ຜູ້ໃຊ້ສາມາດທີ່ຈະບໍ່ສົນໃຈ ຫຼື ເປີດໄປອັນອື່ນໄດ້. ກະລຸນາຮັບຊາບວ່າການລັອກໜ້າຈໍບໍ່ໄດ້ບັນທຶກໃນແບບຂໍ້ຄວາມທຳມະດາ, ດັ່ງນັ້ນແອັບຈະບໍ່ຮູ້ລະຫັດຜ່ານທີ່ແນ່ນອນ."</string>
+    <!-- no translation found for permlab_postNotification (4875401198597803658) -->
+    <skip />
+    <!-- no translation found for permdesc_postNotification (5974977162462877075) -->
+    <skip />
     <string name="permlab_useBiometric" msgid="6314741124749633786">"ໃຊ້ຮາດແວຊີວະມິຕິ"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"ອະນຸຍາດໃຫ້ແອັບນຳໃຊ້ຮາດແວຊີວະມິຕິສຳລັບການພິສູດຢືນຢັນ"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"ຈັດ​ການ​ຮາດ​ແວ​ລາຍ​ນີ້ວ​ມື"</string>

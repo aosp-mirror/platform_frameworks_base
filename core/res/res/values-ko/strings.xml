@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"전화 걸기 및 관리"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"신체 센서"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"생체 신호에 관한 센서 데이터에 액세스"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"알림"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"알림 표시"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"창 콘텐츠 가져오기"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"상호작용 중인 창의 콘텐츠를 검사합니다."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"터치하여 탐색 사용"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"앱이 키 잠금 및 관련 비밀번호 보안을 사용중지할 수 있도록 허용합니다. 예를 들어, 휴대전화가 수신전화를 받을 때 키 잠금을 사용중지했다가 통화가 끝나면 키 잠금을 다시 사용할 수 있습니다."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"화면 잠금 복잡도 요청"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"앱이 화면 잠금 길이와 유형의 가능한 범위를 나타내는 잠금 화면 복잡도 수준(높음, 보통, 낮음 또는 없음)을 파악하도록 허용합니다. 앱이 사용자에게 화면 잠금을 특정 수준으로 업데이트할 것을 제안할 수도 있지만, 사용자는 자유롭게 이를 무시하고 다른 곳으로 이동할 수 있습니다. 화면 잠금은 일반 텍스트로 저장되지 않으므로 앱에서 정확한 비밀번호를 알 수 없습니다."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"알림 표시"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"앱에서 알림을 표시하도록 허용"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"생체 인식 하드웨어 사용"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"앱에서 생체 인식 하드웨어를 인증에 사용하도록 허용합니다."</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"지문 하드웨어 관리"</string>

@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"hacer y administrar llamadas telefónicas"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Sensores corporales"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"acceder a datos de sensores de tus constantes vitales"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Notificaciones"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"mostrar notificaciones"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Comprobar el contenido de la ventana"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Inspecciona el contenido de una ventana con la que estés interactuando."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Activar la exploración táctil"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Permite que la aplicación inhabilite el bloqueo del teclado y cualquier protección con contraseña asociada. Por ejemplo, el teléfono puede inhabilitar el bloqueo del teclado cuando se recibe una llamada telefónica y volver a habilitarlo cuando finaliza la llamada."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"solicitar complejidad del bloqueo de pantalla"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Permite que la aplicación entienda el nivel de complejidad del bloqueo de pantalla (alto, medio, bajo o ninguno) que indica la longitud y el tipo del bloqueo de pantalla posibles. La aplicación también puede sugerir a los usuarios que actualicen el bloqueo de pantalla para que tenga un nivel concreto de complejidad, pero los usuarios pueden ignorar la advertencia libremente. El bloqueo de pantalla no se almacena en texto sin formato, así que la aplicación no puede saber cuál es la contraseña exacta."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"mostrar notificaciones"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Permite que la aplicación muestre notificaciones"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"usar hardware biométrico"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Permite que la aplicación utilice el hardware biométrico para realizar la autenticación"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"administrar hardware de huellas digitales"</string>

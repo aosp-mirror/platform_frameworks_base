@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"hringja og stjórna símtölum"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Líkamsskynjarar"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"aðgangur að skynjaragögnum yfir lífsmörk þín"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Tilkynningar"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"sýna tilkynningar"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Sækja innihald glugga"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Kanna innihald glugga sem þú ert að nota."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Kveikja á snertikönnun"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Leyfir forriti að slökkva á símalásnum og öðrum öryggisaðgerðum tengdum aðgangsorði. Til dæmis gerir síminn lásinn óvirkan þegar símtal berst og læsist svo aftur að símtali loknu."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"biðja um flókinn skjálás"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Leyfir forritinu að læra hversu flókinn skjálásinn er (erfiður, miðlungs, léttur eða enginn), sem gefur til kynna lengd og tegund skjálássins. Forritið getur einnig lagt til að notendur geri skjálásinn flóknari upp að tilteknu marki, en notendur geta valið að hunsa það og halda áfram að vafra. Hafðu í huga að skjálásinn er ekki geymdur í ódulkóðuðum texta svo forritið veit ekki nákvæmt aðgangsorð."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"sýna tilkynningar"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Leyfir forritinu að sýna tilkynningar"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"nota búnað fyrir líffræðileg gögn"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Leyfir forritinu að nota búnað fyrir líffræðileg gögn til auðkenningar"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"stjórna fingrafarabúnaði"</string>

@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"soittaa ja hallinnoida puheluita"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Kehon anturit"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"käyttää anturitietoja elintoiminnoistasi"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Ilmoitukset"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"näyttää ilmoituksia"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Noutaa ikkunan sisältöä"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Tarkistaa käyttämäsi ikkunan sisältö."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Ottaa kosketuksella tutkimisen käyttöön"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Antaa sovelluksen ottaa näppäinlukon ja siihen liittyvän salasanasuojauksen pois käytöstä. Esimerkki: puhelin poistaa näppäinlukon käytöstä puhelun saapuessa ja asettaa lukon takaisin käyttöön puhelun päättyessä."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"pyytää näytön lukituksen monimutkaisuutta"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Sovellus saa luvan selvittää näytön lukituksen monimutkaisuuden (korkea, keskitaso tai matala) eli sen pituusluokan ja tyypin. Sovellus voi myös ehdottaa käyttäjille näytön lukituksen vaihtamista tietylle tasolle, mutta he voivat ohittaa tämän ja poistua. Itse näytön lukitusta ei säilytetä tekstimuodossa, joten sovellus ei tiedä sitä tarkalleen."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"näyttää ilmoituksia"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Antaa sovelluksen näyttää ilmoituksia"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"käytä biometristä laitteistoa"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Sallii sovelluksen käyttää biometristä laitteistoa todennukseen"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"sormenjälkilaitteiston hallinnointi"</string>
