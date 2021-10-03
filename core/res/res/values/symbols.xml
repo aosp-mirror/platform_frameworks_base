@@ -476,6 +476,7 @@
   <java-symbol type="string" name="config_deviceSpecificDevicePolicyManagerService" />
   <java-symbol type="string" name="config_deviceSpecificAudioService" />
   <java-symbol type="integer" name="config_num_physical_slots" />
+  <java-symbol type="integer" name="config_delay_for_ims_dereg_millis" />
   <java-symbol type="array" name="config_integrityRuleProviderPackages" />
   <java-symbol type="bool" name="config_useAssistantVolume" />
   <java-symbol type="string" name="config_bandwidthEstimateSource" />
