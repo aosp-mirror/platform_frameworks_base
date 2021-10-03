@@ -326,6 +326,10 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ഫോൺ വിളിക്കുകയും നിയന്ത്രിക്കുകയും ചെയ്യുക"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"ബോഡി സെൻസർ"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"നിങ്ങളുടെ ജീവാധാര ലക്ഷണങ്ങളെ കുറിച്ചുള്ള സെൻസർ വിവരങ്ങൾ ആക്സസ് ചെയ്യുക"</string>
+    <!-- no translation found for permgrouplab_notifications (5472972361980668884) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_notifications (4608679556801506580) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"വിൻഡോ ഉള്ളടക്കം വീണ്ടെടുക്കുക"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"നിങ്ങൾ സംവദിക്കുന്ന ഒരു വിൻഡോയുടെ ഉള്ളടക്കം പരിശോധിക്കുക."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"സ്‌പർശനം വഴി പര്യവേക്ഷണം ചെയ്യുക, ഓണാക്കുക"</string>
@@ -549,6 +553,10 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"കീലോക്കും ഏതെങ്കിലും അനുബന്ധ പാസ്‌വേഡ് സുരക്ഷയും പ്രവർത്തനരഹിതമാക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഉദാഹരണത്തിന്, ഒരു ഇൻകമിംഗ് കോൾ സ്വീകരിക്കുമ്പോൾ ഫോൺ കീലോക്ക് പ്രവർത്തനരഹിതമാക്കുന്നു, കോൾ അവസാനിക്കുമ്പോൾ കീലോക്ക് വീണ്ടും പ്രവർത്തനക്ഷമമാകുന്നു."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"സ്‌ക്രീൻ ലോക്ക് സങ്കീർണ്ണത അഭ്യർത്ഥിക്കുക"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"സ്ക്രീൻ ലോക്കിന്റെ സാധ്യമായ നീളവും തരവും സൂചിപ്പിക്കുന്ന, അതിന്റെ സങ്കീർണ്ണത നില (ഉയർന്നത്, ഇടത്തരം, കുറഞ്ഞത് അല്ലെങ്കിൽ ഒന്നുമില്ല) മനസ്സിലാക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു. സ്‌ക്രീൻ ലോക്ക് ഒരു പ്രത്യേക തലത്തിലേക്ക് അപ്ഡേറ്റ് ചെയ്യാൻ ഉപയോക്താക്കളെ നിർദ്ദേശിക്കാനും ആപ്പിനാവും, പക്ഷെ ഉപയോക്താക്കൾക്ക് എളുപ്പത്തിൽ അവഗണിക്കാനും മറ്റൊന്നിലേക്ക് നാവിഗേറ്റ് ചെയ്യാനുമാവും. പ്ലെയിൻടെക്‌സ്‌റ്റിൽ സ്ക്രീൻ ലോക്ക് സംഭരിക്കപ്പെട്ടിട്ടില്ലെന്ന കാര്യം ശ്രദ്ധിക്കുക, അതിനാൽ ആപ്പിന് കൃത്യമായ പാസ്‌വേഡ് അറിയില്ല."</string>
+    <!-- no translation found for permlab_postNotification (4875401198597803658) -->
+    <skip />
+    <!-- no translation found for permdesc_postNotification (5974977162462877075) -->
+    <skip />
     <string name="permlab_useBiometric" msgid="6314741124749633786">"ബയോമെട്രിക് ഹാർ‌ഡ്‌വെയർ ഉപയോഗിക്കുക"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"പരിശോധിച്ചുറപ്പിക്കുന്നതിനായി, ബയോമെട്രിക് ഹാർഡ്‌വെയർ ഉപയോഗിക്കാൻ ആപ്പിനെ അനുവദിക്കുക"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"ഫിംഗർപ്രിന്റ് ഹാർഡ്‌വെയർ നിയന്ത്രിക്കുക"</string>

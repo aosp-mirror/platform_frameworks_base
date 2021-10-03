@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"telefon aramaları yapma ve yönetme"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Vücut sensörleri"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"hayati belirtilerinizle ilgili sensör verilerine erişme"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Bildirimler"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"bildirimleri göster"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Pencere içeriğini alma"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Etkileşim kurduğunuz pencerenin içeriğini inceler."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Dokunarak Keşfet\'i açma"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Uygulamaya, tuş kilidini ve ilişkili tüm şifreli güvenlik önlemlerini devre dışı bırakma izni verir. Örneğin, telefon, çağrı alındığında tuş kilidinin devre dışı bırakır ve sonra, görüşme bittiğinde kilidi yeniden etkinleştirir."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ekran kilidi karmaşıklığı iste"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Uygulamanın, ekran kilidi karmaşıklık seviyesini (yüksek, orta, düşük veya yok) öğrenmesini sağlar. Ekran kilidi karmaşıklık seviyesi, ekran kilidinin olası uzunluk aralığını ve türünü gösterir. Uygulama, kullanıcılara ekran kilidini belirli bir seviyeye güncellemelerini de önerebilir, ancak kullanıcılar bunu istedikleri gibi yoksayabilir ve geçebilirler. Ekran kilidi şifrelenmemiş metin olarak saklanmadığı için uygulamanın şifreyi tam olarak bilmediğini unutmayın."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"bildirimleri göster"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Uygulamanın bildirimleri göstermesine izin verir"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"biyometrik donanım kullan"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Uygulamanın kimlik doğrulama için biyometrik donanım kullanmasına izin verir"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"parmak izi donanımını yönetme"</string>

@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"tumawag at mamahala ng mga tawag sa telepono"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Mga sensor ng katawan"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"i-access ang data ng sensor tungkol sa iyong vital signs"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Mga Notification"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"magpakita ng mga notification"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Kunin ang content ng window"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Siyasatin ang nilalaman ng isang window kung saan ka nakikipag-ugnayan."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"I-on ang Explore by Touch"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Pinapayagan ang app na i-disable ang keylock at anumang nauugnay na seguridad sa password. Halimbawa, hindi pinapagana ng telepono ang keylock kapag nakakatanggap ng papasok na tawag sa telepono, pagkatapos ay muling pinapagana ang keylock kapag tapos na ang tawag."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"humiling ng pagiging kumplikado ng lock ng screen"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Pinapayagan ang app na malaman ang antas ng pagiging kumplikado ng lock ng screen (mataas, katamtaman, mababa, o wala), na nagsasaad ng posibleng hanay ng haba at uri ng lock ng screen. Puwede ring imungkahi ng app sa mga user na i-update nila ang lock ng screen sa isang partikular na antas ngunit malaya ang mga user na balewalain ito at mag-navigate palayo. Tandaang hindi naka-store bilang plaintext ang lock ng screen kaya hindi alam ng app ang eksaktong password."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"magpakita ng mga notification"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Pinapayagan ang app na magpakita ng mga notification"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"gumamit ng biometric hardware"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Pinapayagan ang app na gumamit ng biometric hardware para sa pag-authenticate"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"pamahalaan ang hardware ng fingerprint"</string>

@@ -332,6 +332,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"uskutečňování a spravování telefonních hovorů"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Tělesné senzory"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"přístup k datům ze snímačů vašich životních funkcí"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Oznámení"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"zobrazovat oznámení"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Načítat obsah oken"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Může prozkoumávat obsah oken, se kterými pracujete."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Zapnout funkci Prozkoumání dotykem"</string>
@@ -555,6 +557,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Umožňuje aplikaci vypnout zámek kláves a související zabezpečení heslem. Telefon například vypne zámek klávesnice při příchozím hovoru a po skončení hovoru jej zase zapne."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"zjištění složitosti zámku obrazovky"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Umožňuje aplikaci zjistit úroveň složitosti zámku obrazovky (vysoká, střední, nízká nebo žádná), která ukazuje možnou délku a typ zámku obrazovky. Aplikace také může uživatelům navrhovat, aby zámek obrazovky upravili na určitou úroveň, ale uživatelé mohou návrhy klidně ignorovat a odejít. Zámek obrazovky není uložen jako prostý text, a tak aplikace přesné heslo nezná."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"zobrazovat oznámení"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Povolí aplikaci zobrazovat oznámení"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"použití biometrického hardwaru"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Umožňuje aplikaci použít k ověření biometrický hardware"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"správa hardwaru na čtení otisků prstů"</string>

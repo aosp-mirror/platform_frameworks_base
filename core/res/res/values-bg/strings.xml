@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"да извършва телефонни обаждания и да ги управлява"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Сензори за тяло"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"достъп до сензорните данни за жизнените ви показатели"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Известия"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"показване на известията"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Извличане на съдържанието от прозореца"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Инспектиране на съдържанието на прозорец, с който взаимодействате."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Включване на изследването чрез докосване"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Разрешава на приложението да деактивира заключването на клавиатурата и свързаната защита с парола. Например телефонът деактивира заключването при получаване на входящо обаждане и после го активира отново, когато обаждането завърши."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"заявяване на сложност на опцията за заключване на екрана"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Разрешава на приложението да разбере нивото на сложност на опцията за заключване на екрана (високо, средно, ниско или липса на такова), което указва възможния диапазон на дължината и типа на опцията. Приложението може също да предложи на потребителите да актуализират опцията за заключване на екрана до определено ниво, но те могат да пренебрегнат това и да излязат от него. Обърнете внимание, че опцията за заключване на екрана не се съхранява като обикновен текст, така че приложението не знае точната парола."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"показване на известията"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Разрешава на приложението да показва известия"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"използване на хардуера за биометрични данни"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Разрешава на приложението да използва хардуера за биометрични данни с цел удостоверяване"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"управление на хардуера за отпечатъци"</string>

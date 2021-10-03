@@ -124,7 +124,7 @@
     <string name="roamingTextSearching" msgid="5323235489657753486">"సేవ కోసం శోధిస్తోంది"</string>
     <string name="wfcRegErrorTitle" msgid="3193072971584858020">"Wi‑Fi కాలింగ్‌ని సెటప్ చేయడం సాధ్యపడలేదు"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="468830943567116703">"Wi-Fiతో కాల్స్‌ను చేయడానికి మరియు మెసేజ్‌లను పంపించడానికి, మొదట ఈ సేవను సెటప్ చేయాల్సిందిగా మీ క్యారియర్‌‌కి చెప్పండి. ఆ తర్వాత సెట్టింగ్‌ల నుండి Wi-Fi కాలింగ్‌ని మళ్లీ ఆన్ చేయండి. (లోపం కోడ్: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+    <item msgid="468830943567116703">"Wi-Fiతో కాల్స్‌ను చేయడానికి, మెసేజ్‌లను పంపించడానికి, ముందుగా ఈ సర్వీస్‌ను సెటప్ చేయాల్సిందిగా మీ క్యారియర్‌‌ను అడగండి. ఆ తర్వాత సెట్టింగ్‌ల నుండి Wi-Fi కాలింగ్‌ను మళ్లీ ఆన్ చేయండి. (ఎర్రర్ కోడ్: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="4795145070505729156">"మీ క్యారియర్‌తో Wi‑Fi కాలింగ్‌ని నమోదు చేయడంలో సమస్య: <xliff:g id="CODE">%1$s</xliff:g>"</item>
@@ -306,10 +306,10 @@
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"మీ కాంటాక్ట్‌లను యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"లొకేషన్"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"ఈ పరికర లొకేషన్‌ను యాక్సెస్ చేయడానికి"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"క్యాలెండర్"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"మీ క్యాలెండర్‌ను యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS మెసేజ్‌లను పంపడం మరియు వీక్షించడం"</string>
+    <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS మెసేజ్‌లను పంపడం, వీక్షించడం"</string>
     <string name="permgrouplab_storage" msgid="1938416135375282333">"ఫైల్స్, మీడియా"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"మీ పరికరంలోని ఫోటోలు, మీడియా మరియు ఫైళ్లను యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"మైక్రోఫోన్"</string>
@@ -326,6 +326,10 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ఫోన్ కాల్స్‌ చేయడం మరియు నిర్వహించడం"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"శరీర సెన్సార్‌లు"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"మీ అత్యంత కీలకమైన గుర్తుల గురించి సెన్సార్ డేటాని యాక్సెస్ చేస్తుంది"</string>
+    <!-- no translation found for permgrouplab_notifications (5472972361980668884) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_notifications (4608679556801506580) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"విండో కంటెంట్‍ను తిరిగి పొందుతుంది"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"మీరు పరస్పర చర్య చేస్తున్న విండో కంటెంట్‌‍ను పరిశీలిస్తుంది."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"తాకడం ద్వారా విశ్లేషణను ప్రారంభిస్తుంది"</string>
@@ -356,10 +360,10 @@
     <string name="permdesc_processOutgoingCalls" msgid="7833149750590606334">"కాల్‌ను వేరే నంబర్‌కు దారి మళ్లించే లేదా మొత్తంగా కాల్‌ను ఆపివేసే ఎంపిక సహాయంతో అవుట్‌గోయింగ్ కాల్ సమయంలో డయల్ చేయబడుతున్న నంబర్‌ను చూడటానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_answerPhoneCalls" msgid="4131324833663725855">"ఫోన్ కాల్స్‌కు సమాధానమివ్వు"</string>
     <string name="permdesc_answerPhoneCalls" msgid="894386681983116838">"ఇన్‌కమింగ్ ఫోన్ కాల్స్‌కు సమాధానమివ్వడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_receiveSms" msgid="505961632050451881">"వచన మెసేజ్‌లను (SMS) స్వీకరించడం"</string>
-    <string name="permdesc_receiveSms" msgid="1797345626687832285">"SMS మెసేజ్‌లను స్వీకరించడానికి మరియు ప్రాసెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. యాప్ మీ డివైజ్‌కు పంపబడిన మెసేజ్‌లను మీకు చూపకుండానే పర్యవేక్షించగలదని లేదా తొలగించగలదని దీని అర్థం."</string>
-    <string name="permlab_receiveMms" msgid="4000650116674380275">"వచన మెసేజ్‌లను (MMS) స్వీకరించడం"</string>
-    <string name="permdesc_receiveMms" msgid="958102423732219710">"MMS మెసేజ్‌లను స్వీకరించడానికి మరియు ప్రాసెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. యాప్ మీ డివైజ్‌కు పంపబడిన మెసేజ్‌లను మీకు చూపకుండానే పర్యవేక్షించగలదని లేదా తొలగించగలదని దీని అర్థం."</string>
+    <string name="permlab_receiveSms" msgid="505961632050451881">"టెక్స్ట్ మెసేజ్‌లను (SMS) స్వీకరించడం"</string>
+    <string name="permdesc_receiveSms" msgid="1797345626687832285">"SMS మెసేజ్‌లను స్వీకరించడానికి, ప్రాసెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. మీ డివైజ్‌కు వచ్చిన మెసేజ్‌లను మీకు చూపకుండానే యాప్ పర్యవేక్షించగలదని లేదా తొలగించగలదని దీని అర్థం."</string>
+    <string name="permlab_receiveMms" msgid="4000650116674380275">"టెక్స్ట్ మెసేజ్‌లను (MMS) స్వీకరించడం"</string>
+    <string name="permdesc_receiveMms" msgid="958102423732219710">"MMS మెసేజ్‌లను స్వీకరించడానికి, ప్రాసెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. మీ డివైజ్‌కు వచ్చిన మెసేజ్‌లను మీకు చూపకుండానే యాప్ పర్యవేక్షించగలదని లేదా తొలగించగలదని దీని అర్థం."</string>
     <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"సెల్ ప్రసార మెసేజ్‌లను ఫార్వర్డ్ చేయడం"</string>
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"సెల్ ప్రసార మెసేజ్‌లను స్వీకరించినప్పుడు, వాటిని ఫార్వర్డ్ చేయడానికి సెల్ ప్రసార మాడ్యూల్‌కు కట్టుబడి ఉండేందుకు యాప్‌ను అనుమతిస్తుంది. ఎమర్జెన్సీ పరిస్థితుల గురించి మిమ్మల్ని హెచ్చరించడానికి కొన్ని లొకేషన్లలో సెల్ ప్రసార అలర్ట్‌లు డెలివరీ చేయబడతాయి. ఎమర్జెన్సీ సెల్ ప్రసార అలర్ట్‌ను స్వీకరించినప్పుడు హానికరమైన యాప్‌లు మీ పరికరం పనితీరుకు లేదా నిర్వహణకు ఆటంకం కలిగించే అవకాశం ఉంది."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"కొనసాగుతున్న కాల్స్‌ను మేనేజ్ చేయి"</string>
@@ -368,14 +372,14 @@
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"మీ పరికరం స్వీకరించిన సెల్ ప్రసార మెసేజ్‌లను చదవడానికి యాప్‌ను అనుమతిస్తుంది. ఎమర్జెన్సీ పరిస్థితుల గురించి మిమ్మల్ని హెచ్చరించడానికి కొన్ని లొకేషన్లలో సెల్ ప్రసార అలర్ట్‌లు డెలివరీ చేయబడతాయి. ఎమర్జెన్సీ సెల్ ప్రసార అలర్ట్‌ను స్వీకరించినప్పుడు హానికరమైన యాప్‌లు మీ పరికరం పనితీరుకు లేదా నిర్వహణకు ఆటంకం కలిగించే అవకాశం ఉంది."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"చందా చేయబడిన ఫీడ్‌లను చదవడం"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="6911349196661811865">"ప్రస్తుతం సమకాలీకరించిన ఫీడ్‌ల గురించి వివరాలను పొందడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_sendSms" msgid="7757368721742014252">"SMS మెసేజ్‌లను పంపడం మరియు వీక్షించడం"</string>
+    <string name="permlab_sendSms" msgid="7757368721742014252">"SMS మెసేజ్‌లను పంపడం, వీక్షించడం"</string>
     <string name="permdesc_sendSms" msgid="6757089798435130769">"SMS మెసేజ్‌లు పంపడానికి యాప్‌ను అనుమతిస్తుంది. దీని వలన ఊహించని ఛార్జీలు విధించబడవచ్చు. హానికరమైన యాప్‌లు మీ నిర్ధారణ లేకుండానే మెసేజ్‌లను పంపడం ద్వారా మీకు డబ్బు ఖర్చయ్యేలా చేయవచ్చు."</string>
-    <string name="permlab_readSms" msgid="5164176626258800297">"మీ వచన మెసేజ్‌లు (SMS లేదా MMS) చదవడం"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="7912990447198112829">"ఈ యాప్‌ మీ టాబ్లెట్‌లో నిల్వ చేసిన అన్ని SMS (వచన) మెసేజ్‌లను చదవగలదు."</string>
-    <string name="permdesc_readSms" product="tv" msgid="3054753345758011986">"ఈ యాప్ మీ Android TV పరికరంలో నిల్వ అయిన SMS (వచనం) సందేశాలన్నింటినీ చదవగలదు."</string>
-    <string name="permdesc_readSms" product="default" msgid="774753371111699782">"ఈ యాప్‌ మీ ఫోన్‌లో నిల్వ చేసిన అన్ని SMS (వచన) మెసేజ్‌లను చదవగలదు."</string>
-    <string name="permlab_receiveWapPush" msgid="4223747702856929056">"వచన మెసేజ్‌లను (WAP) స్వీకరించడం"</string>
-    <string name="permdesc_receiveWapPush" msgid="1638677888301778457">"WAP మెసేజ్‌లను స్వీకరించడానికి మరియు ప్రాసెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. ఈ అనుమతి మీకు పంపబడిన మెసేజ్‌లను మీకు చూపకుండానే పర్యవేక్షించగల లేదా తొలగించగల సామర్థ్యాన్ని కలిగి ఉంటుంది."</string>
+    <string name="permlab_readSms" msgid="5164176626258800297">"మీ టెక్స్ట్ మెసేజ్‌లు (SMS లేదా MMS) చదవడం"</string>
+    <string name="permdesc_readSms" product="tablet" msgid="7912990447198112829">"ఈ యాప్‌ మీ టాబ్లెట్‌లో స్టోర్ చేసిన అన్ని SMS (టెక్స్ట్) మెసేజ్‌లను చదవగలదు."</string>
+    <string name="permdesc_readSms" product="tv" msgid="3054753345758011986">"ఈ యాప్ మీ Android TV పరికరంలో స్టోర్ అయిన SMS (టెక్స్ట్) మెసేజ్‌లు అన్నింటిని చదవగలదు."</string>
+    <string name="permdesc_readSms" product="default" msgid="774753371111699782">"ఈ యాప్‌ మీ ఫోన్‌లో నిల్వ చేసిన అన్ని SMS (టెక్స్ట్) మెసేజ్‌లను చదవగలదు."</string>
+    <string name="permlab_receiveWapPush" msgid="4223747702856929056">"టెక్స్ట్ మెసేజ్‌లను (WAP) స్వీకరించడం"</string>
+    <string name="permdesc_receiveWapPush" msgid="1638677888301778457">"WAP మెసేజ్‌లను స్వీకరించడానికి, ప్రాసెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. ఈ అనుమతి మీకు వచ్చిన మెసేజ్‌లను మీకు చూపకుండానే పర్యవేక్షించగల లేదా తొలగించగల సామర్థ్యాన్ని కలిగి ఉంటుంది."</string>
     <string name="permlab_getTasks" msgid="7460048811831750262">"అమలవుతున్న యాప్‌లను పునరుద్ధరించడం"</string>
     <string name="permdesc_getTasks" msgid="7388138607018233726">"ప్రస్తుతం మరియు ఇటీవల అమలవుతున్న విధుల గురించి వివరణాత్మక సమాచారాన్ని తిరిగి పొందడానికి యాప్‌ను అనుమతిస్తుంది. ఇది పరికరంలో ఉపయోగించబడిన యాప్‌ల గురించి సమాచారాన్ని కనుగొనడానికి యాప్‌ను అనుమతించవచ్చు."</string>
     <string name="permlab_manageProfileAndDeviceOwners" msgid="639849495253987493">"ప్రొఫైల్ మరియు పరికర యజమానులను నిర్వహించడం"</string>
@@ -431,9 +435,9 @@
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ఈ యాప్‌ మీ Android TV పరికరంలో నిల్వ చేసిన క్యాలెండర్ ఈవెంట్‌లన్నీ చదవగలదు, మీ క్యాలెండర్ డేటాను షేర్ చేయగలదు లేదా సేవ్ చేయగలదు."</string>
     <string name="permdesc_readCalendar" product="default" msgid="9118823807655829957">"ఈ యాప్ మీ ఫోన్‌లో నిల్వ చేసిన క్యాలెండర్ ఈవెంట్‌లన్నీ చదవగలదు మరియు మీ క్యాలెండర్ డేటాను షేర్ చేయగలదు లేదా సేవ్ చేయగలదు."</string>
     <string name="permlab_writeCalendar" msgid="6422137308329578076">"యజమానికి తెలియకుండానే క్యాలెండర్ ఈవెంట్‌లను జోడించి లేదా సవరించి, అతిథులకు ఇమెయిల్ పంపడం"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"ఈ యాప్ మీ టాబ్లెట్‌లో క్యాలెండర్ ఈవెంట్‌లను జోడించగలదు, తీసివేయగలదు లేదా మార్చగలదు. ఈ యాప్ క్యాలెండర్ యజమానుల నుండి వచ్చినట్లుగా మెసేజ్‌లను పంపగలదు లేదా ఈవెంట్‌లను వాటి యజమానులకు తెలియకుండానే మార్చగలదు."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="951246749004952706">"ఈ యాప్ మీ Android TV పరికరంలో క్యాలెండర్ ఈవెంట్‌లను జోడించగలదు, తీసివేయగలదు లేదా మార్చగలదు. ఈ యాప్ క్యాలెండర్ యజమానుల నుండి వచ్చినట్లుగా మెసేజ్‌లను పంపగలదు లేదా ఈవెంట్‌లను వాటి యజమానులకు తెలియకుండానే మార్చగలదు."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"ఈ యాప్ మీ ఫోన్‌లో క్యాలెండర్ ఈవెంట్‌లను జోడించగలదు, తీసివేయగలదు లేదా మార్చగలదు. ఈ యాప్ క్యాలెండర్ యజమానుల నుండి వచ్చినట్లుగా మెసేజ్‌లను పంపగలదు లేదా ఈవెంట్‌లను వాటి యజమానులకు తెలియకుండానే మార్చగలదు."</string>
+    <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"ఈ యాప్ మీ టాబ్లెట్‌లో క్యాలెండర్ ఈవెంట్లను జోడించగలదు, తీసివేయగలదు లేదా మార్చగలదు. ఈ యాప్ క్యాలెండర్ ఓనర్ల నుండి వచ్చినట్లుగా మెసేజ్‌లను పంపగలదు లేదా ఈవెంట్లను వాటి ఓనర్లకు తెలియకుండానే మార్చగలదు."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="951246749004952706">"ఈ యాప్ మీ Android TV పరికరంలో క్యాలెండర్ ఈవెంట్లను జోడించగలదు, తీసివేయగలదు లేదా మార్చగలదు. ఈ యాప్ క్యాలెండర్ ఓనర్ల నుండి వచ్చినట్లుగా మెసేజ్‌లను పంపగలదు లేదా ఈవెంట్లను వాటి ఓనర్లకు తెలియకుండానే మార్చగలదు."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"ఈ యాప్ మీ ఫోన్‌లో క్యాలెండర్ ఈవెంట్లను జోడించగలదు, తీసివేయగలదు లేదా మార్చగలదు. ఈ యాప్ క్యాలెండర్ ఓనర్ల నుండి వచ్చినట్లుగా మెసేజ్‌లను పంపగలదు, లేదా ఈవెంట్లను వాటి ఓనర్లకు తెలియకుండానే మార్చగలదు."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"అదనపు లొకేషన్ ప్రొవైడర్ కమాండ్‌లను యాక్సెస్ చేయడం"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"అదనపు లొకేషన్ ప్రొవైడర్ కమాండ్లను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. ఇది GPS లేదా ఇతర లొకేషన్ సోర్స్‌ల నిర్వహణలో యాప్‌ ప్రమేయం ఉండేలా అనుమతించవచ్చు."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"స్క్రీన్‌పై ఉన్నప్పుడు మాత్రమే ఖచ్చితమైన లొకేషన్‌ను యాక్సెస్ చేయండి"</string>
@@ -549,6 +553,10 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"కీలాక్ మరియు ఏదైనా అనుబంధించబడిన పాస్‌వర్డ్ భద్రతను నిలిపివేయడానికి యాప్‌ను అనుమతిస్తుంది. ఉదాహరణకు, ఇన్‌కమింగ్ ఫోన్ కాల్ వస్తున్నప్పుడు ఫోన్ కీలాక్‌ను నిలిపివేస్తుంది, ఆపై కాల్ ముగిసిన తర్వాత కీలాక్‌ను మళ్లీ ప్రారంభిస్తుంది."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"స్క్రీన్ లాక్ సంక్లిష్టత రిక్వెస్ట్‌"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"ఇది మీ స్క్రీన్ లాక్ పాస్‌వర్డ్‌ సంక్లిష్టత స్థాయి (తీవ్రంగా ఉండాలా, ఓ మోస్తరుగా ఉండాలా, తక్కువ తీవ్రంగా ఉండాలా లేదా అస్సలు తీవ్రత ఉండకూడదా) తెలుసుకోవడానికి యాప్‌ను అనుమతిస్తుంది, అంటే పొడుగు ఎంత ఉండాలి, ఏ రకమైన స్క్రీన్ లాక్ పధ్ధతి అనుసరించాలో సూచిస్తుంది. అలాగే, స్క్రీన్ లాక్‌ పాస్‌వర్డ్‌ సంక్లిష్టతను ఏ స్థాయికి సెట్ చేసుకుంటే బాగుంటుందో కూడా వినియోగదారులకు యాప్ సూచించగలదు, కానీ వినియోగదారులు నిరభ్యంతరంగా ఆ సూచనలను పట్టించుకోకుండా వారి ఇష్టం మేరకు చక్కగా సెట్ చేసుకోవచ్చు. ఇంకో ముఖ్య విషయం, స్క్రీన్ లాక్‌ అన్నది సాదా వచన రూపంలో నిల్వ చేయబడదు, కనుక ఖచ్చితమైన పాస్‌వర్డ్‌ ఏమిటనేది యాప్‌కు తెలియదు."</string>
+    <!-- no translation found for permlab_postNotification (4875401198597803658) -->
+    <skip />
+    <!-- no translation found for permdesc_postNotification (5974977162462877075) -->
+    <skip />
     <string name="permlab_useBiometric" msgid="6314741124749633786">"బయోమెట్రిక్ హార్డ్‌వేర్‌ని ఉపయోగించు"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"ప్రమాణీకరణ కోసం బయోమెట్రిక్ హార్డ్‌వేర్‌ను ఉపయోగించడానికి యాప్‌ని అనుమతిస్తుంది"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"వేలిముద్ర హార్డ్‌వేర్‌ని నిర్వహించడానికి అనుమతి"</string>
@@ -817,7 +825,7 @@
     <string name="phoneTypeTtyTdd" msgid="532038552105328779">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="7522314392003565121">"కార్యాలయ మొబైల్"</string>
     <string name="phoneTypeWorkPager" msgid="3748332310638505234">"కార్యాలయ పేజర్"</string>
-    <string name="phoneTypeAssistant" msgid="757550783842231039">"Assistant"</string>
+    <string name="phoneTypeAssistant" msgid="757550783842231039">"అసిస్టెంట్"</string>
     <string name="phoneTypeMms" msgid="1799747455131365989">"MMS"</string>
     <string name="eventTypeCustom" msgid="3257367158986466481">"అనుకూలం"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"పుట్టినరోజు"</string>
@@ -850,7 +858,7 @@
     <string name="orgTypeOther" msgid="5450675258408005553">"ఇతరం"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"అనుకూలం"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"అనుకూలం"</string>
-    <string name="relationTypeAssistant" msgid="4057605157116589315">"Assistant"</string>
+    <string name="relationTypeAssistant" msgid="4057605157116589315">"అసిస్టెంట్"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"సోదరుడు"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"బిడ్డ"</string>
     <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"జీవిత భాగస్వామి"</string>
@@ -1014,7 +1022,7 @@
     <string name="permlab_setAlarm" msgid="1158001610254173567">"అలారం సెట్ చేయడం"</string>
     <string name="permdesc_setAlarm" msgid="2185033720060109640">"ఇన్‌స్టాల్ చేయబడిన అలారం గడియారం యాప్‌లో అలారంను సెట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. కొన్ని అలారం గల గడియారం యాప్‌లు ఈ ఫీచర్‌ను అమలు చేయకపోవచ్చు."</string>
     <string name="permlab_addVoicemail" msgid="4770245808840814471">"వాయిస్ మెయిల్‌ను జోడించడం"</string>
-    <string name="permdesc_addVoicemail" msgid="5470312139820074324">"మీ వాయిస్ మెయిల్ ఇన్‌బాక్స్‌కి మెసేజ్‌లను జోడించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permdesc_addVoicemail" msgid="5470312139820074324">"మీ వాయిస్ మెయిల్ ఇన్‌బాక్స్‌కు మెసేజ్‌లను జోడించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="8605631647492879449">"బ్రౌజర్ భౌగోళిక స్థానం అనుమతులను సవరించడం"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="5817346421222227772">"బ్రౌజర్ యొక్క భౌగోళిక లొకేషన్ అనుమతులను సవరించడానికి యాప్‌ను అనుమతిస్తుంది. హానికరమైన యాప్‌లు ఏకపక్ష వెబ్ సైట్‌లకు లొకేషన్ సమాచారాన్ని అనుమతించడానికి దీన్ని ఉపయోగించవచ్చు."</string>
     <string name="save_password_message" msgid="2146409467245462965">"మీరు బ్రౌజర్ ఈ పాస్‌వర్డ్‌ను గుర్తుపెట్టుకోవాలని కోరుకుంటున్నారా?"</string>
@@ -2011,7 +2019,7 @@
     <string name="app_category_image" msgid="7307840291864213007">"ఫోటోలు, ఇమేజ్‌లు"</string>
     <string name="app_category_social" msgid="2278269325488344054">"సామాజికం &amp; కమ్యూనికేషన్"</string>
     <string name="app_category_news" msgid="1172762719574964544">"వార్తలు &amp; వార్తాపత్రికలు"</string>
-    <string name="app_category_maps" msgid="6395725487922533156">"Maps &amp; నావిగేషన్"</string>
+    <string name="app_category_maps" msgid="6395725487922533156">"మ్యాప్స్ &amp; నావిగేషన్"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"ఉత్పాదకత"</string>
     <string name="app_category_accessibility" msgid="6643521607848547683">"యాక్సెసిబిలిటీ"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"పరికర నిల్వ"</string>
@@ -2056,7 +2064,7 @@
     <string name="etws_primary_default_message_earthquake" msgid="8401079517718280669">"ప్రశాంతంగా ఉండండి మరియు దగ్గర్లో తలదాచుకోండి."</string>
     <string name="etws_primary_default_message_tsunami" msgid="5828171463387976279">"వెంటనే తీర ప్రాంతాలు మరియు నదీ పరీవాహక ప్రాంతాలను ఖాళీ చేసి మెట్ట ప్రాంతాలకు తరలి వెళ్లండి."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="4888224011071875068">"ప్రశాంతంగా ఉండండి మరియు దగ్గర్లో తలదాచుకోండి."</string>
-    <string name="etws_primary_default_message_test" msgid="4583367373909549421">"అత్యవసర మెసేజ్‌ల పరీక్ష"</string>
+    <string name="etws_primary_default_message_test" msgid="4583367373909549421">"అత్యవసర మెసేజ్‌ల టెస్ట్"</string>
     <string name="notification_reply_button_accessibility" msgid="5235776156579456126">"రిప్లయి పంపండి"</string>
     <string name="etws_primary_default_message_others" msgid="7958161706019130739"></string>
     <string name="mmcc_authentication_reject" msgid="4891965994643876369">"వాయిస్ కోసం SIM అనుమతించబడదు"</string>
@@ -2102,7 +2110,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"సరే"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ఆఫ్ చేయండి"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"మరింత తెలుసుకోండి"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12లో Android అనుకూల నోటిఫికేషన్‌లను, మెరుగైన నోటిఫికేషన్‌లు భర్తీ చేశాయి. సూచించిన చర్యలు, రిప్లయిలను ఈ ఫీచర్ చూపించి, మీ నోటిఫికేషన్‌లను ఆర్గనైజ్ చేస్తుంది.\n\nకాంటాక్ట్ పేర్లు, మెసేజ్‌లు లాంటి వ్యక్తిగత సమాచారంతో సహా నోటిఫికేషన్ కంటెంట్‌ను మెరుగైన నోటిఫికేషన్‌లు యాక్సెస్ చేయవచ్చు. ఫోన్ కాల్స్‌కు సమాధానమివ్వడం, \'అంతరాయం కలిగించవద్దు\' ఆప్షన్‌ను కంట్రోల్ చేయడం లాంటి నోటిఫికేషన్‌లను విస్మరించడం లేదా ప్రతిస్పందించడం కూడా ఈ ఫీచర్ చేయగలదు."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12లో Android అనుకూల నోటిఫికేషన్‌లను, మెరుగైన నోటిఫికేషన్‌లు రీప్లేస్‌ చేశాయి. ఈ ఫీచర్, సూచించిన చర్యలను, రిప్లయిలను చూపించి, మీ నోటిఫికేషన్‌లను ఆర్గనైజ్ చేస్తుంది.\n\nకాంటాక్ట్ పేర్లు, మెసేజ్‌లు లాంటి వ్యక్తిగత సమాచారంతో పాటు నోటిఫికేషన్ కంటెంట్‌ను మెరుగైన నోటిఫికేషన్‌లు యాక్సెస్ చేస్తాయి. ఫోన్ కాల్స్‌కు సమాధానమివ్వడం, \'అంతరాయం కలిగించవద్దు\' ఆప్షన్‌ను కంట్రోల్ చేయడం వంటి నోటిఫికేషన్‌లను విస్మరించడం లేదా వాటికి ప్రతిస్పందించడం కూడా ఈ ఫీచర్ చేయగలదు."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"రొటీన్ మోడ్ సమాచార నోటిఫికేషన్"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"మామూలుగా ఛార్జ్ చేసేలోపు బ్యాటరీ ఖాళీ కావచ్చు"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"బ్యాటరీ జీవితకాలాన్ని పెంచడానికి బ్యాటరీ సేవర్ యాక్టివేట్ చేయబడింది"</string>

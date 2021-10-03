@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"telefon zəngləri edin və onları idarə edin"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Bədən sensorları"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"Həyati əlamətlər haqqında sensor dataya daxil olun"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Bildirişlər"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"bildirişləri göstərmək"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Pəncərənin məzmununu əldə edin"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Əlaqədə olduğunuz pəncərənin məzmununu nəzərdən keçirin."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Toxunuşla öyrənmə funksiyasını aktiv edin"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Tətbiqə kilid açarını və təhlükəsizlik parolunu deaktiv etməyə imkan verir. Qanuni misal budur ki, telefon zəng qəbul edən zaman kilidi açır və zəng qurtarandan sonra kilidi bağlayır."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ekran kilidi mürəkkəbliyi tələb edin"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Tətbiqin ekran kilidinin uzunluğunu və növünü göstərən mürəkəblilik dərəcəsini (yüksək, orta, aşağı və ya heç biri) öyrənməsinə icazə verir. Tətbiq ekran kilidinin müəyyən səviyyəyə yenilənməsini təklif edə bilər. İstifadəçilər bu təklifdən imtina edə və davam edə bilər. Yadda saxlayın ekran kilidi açıq mətn formatında saxlanılmır, buna görə də tətbiq dəqiq parolu bilməyəcək."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"bildirişləri göstərmək"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Tətbiqə bildirişləri göstərmək icazəsi verir"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"biometrik proqramdan istifadə edin"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Doğrulama üçün biometrik proqramdan istifadə etməyə imkan verir"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"barmaq izi avadanlığını idarə edin"</string>

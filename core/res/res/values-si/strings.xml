@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"දුරකථන ඇමතුම් සිදු කිරීම සහ කළමනාකරණය කිරීම"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"ශරීර සංවේදක"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"ඔබේ ජෛව ලක්ෂණ පිළිබඳ සංවේදක දත්ත වෙත පිවිසෙන්න"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"දැනුම්දීම්"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"දැනුම්දීම් පෙන්වන්න"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"කවුළු අන්න්තර්ගතය ලබාගන්න"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"ඔබ අන්තර්ක්‍රියාකාරී වන කවුළුවේ අන්තර්ගතය පරීක්ෂා කරන්න."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"ස්පර්ශයෙන් ගවේෂණය සක්‍රිය කරන්න"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"යතුරු අගුල සහ ඕනෑම සම්බන්ධිත මුරපද ආරක්ෂාවක් අබල කිරීමට යෙදුමට අවසර දෙන්න. මෙහි උදාහරණයක් වන්නේ පැමිණෙන ඇමතුමක් ලැබෙද්දී, දුරකථනය අක්‍රිය වන අතර ඇමතුම අවසාන වන විට යතුරු අගුල නැවත සක්‍රිය වෙයි."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"තිර අඟුලු සංකීර්ණතාව ඉල්ලන්න"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"යෙදුමට තිර අගුලෙහි තිබිය හැකි දිගෙහි පරාසය සහ වර්ගය පිළිබිඹු කරන, තිර අඟුලු සංකීර්ණතා මට්ටම (ඉහළ, මධ්‍යම, අඩු හෝ රහිත) දැන ගැනීමට ඉඩ දෙයි. යෙදුම පරිශීලකයින්ට තිර අඟුල නිශ්චිත මට්ටමකට යාවත්කාලීන කිරීමට යෝජනා කළ හැකි නමුත් ඔවුන්ට නිදහසේ නොසලකා හැර ඉවතට සංචලන කළ හැක. තිර අඟුල සරල පෙළින් ගබඩා කර නැති බැවින් යෙදුම නිවැරදි මුරපදය නොදන්නා බව සලකන්න."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"දැනුම්දීම් පෙන්වන්න"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"දැනුම්දීම් පෙන්වීමට යෙදුමට ඉඩ දෙයි"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"ජීවමිතික දෘඪාංග භාවිත කරන්න"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"සත්‍යාපනය සඳහා ජීවමිතික දෘඪාංග භාවිත කිරීමට යෙදුමට ඉඩ දෙයි"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"ඇඟිලි සලකුණු දෘඩාංග කළමනාකරණය කිරීම."</string>

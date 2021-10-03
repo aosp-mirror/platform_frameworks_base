@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"утасны дуудлага хийх, дуудлага удирдах"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Биеийн мэдрэгч"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"таны биеийн байдлын талаарх мэдрэгч бүхий өгөгдөлд нэвтрэх"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Мэдэгдэл"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"мэдэгдэл харуулах"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Цонхны агуулгыг авах"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Таны харилцан үйлчлэх цонхны контентоос шалгах."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Хүрэлтээр сонсохыг асаах"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Апп нь түгжээ болон бусад холбоотой нууц үгийн аюулгүй байдлыг идэвхгүй болгох боломжтой. Жишээ нь бол утас нь дуудлага ирэх үед түгжээг идэвхгүй болгох ба дуудлага дуусахад буцаан идэвхтэй болгодог."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"дэлгэцийн түгжээний төвөгтэй байдлын хүсэлт тавих"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Аппад дэлгэцийн түгжээний боломжтой уртын хэмжээ болон төрлийг заадаг дэлгэцийн түгжээний төвөгтэй байдлын түвшнийг (өндөр, дундаж, бага эсвэл байхгүй) мэдэж авахыг зөвшөөрдөг. Түүнчлэн, апп хэрэглэгчдэд дэлгэцийн түгжээг тодорхой түвшинд шинэчлэхийг санал болгох боломжтой хэдий ч хэрэглэгч үүнийг чөлөөтэй үл хэрэгсэж, орхих боломжтой. Дэлгэцийн түгжээг ил бичвэрээр хадгалдаггүй тул энэ апп тодорхой нууц үгийг мэддэггүй болохыг анхаарна уу."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"мэдэгдэл харуулах"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Аппад мэдэгдэл харуулахыг зөвшөөрнө"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"биометрийн техник хангамжийг ашиглах"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Aппад биометрийн техник хангамжийг баталгаажуулалтад ашиглахыг зөвшөөрдөг"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"хурууны хээний төхөөрөмжийг удирдах"</string>

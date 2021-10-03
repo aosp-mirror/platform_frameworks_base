@@ -329,6 +329,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"poziva i upravlja pozivima"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Tjelesni senzori"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"pristupa podacima senzora o vašim vitalnim funkcijama"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Obavještenja"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"prikaz obavještenja"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Preuzima sadržaj prozora"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Pregleda sadržaj prozora koji trenutno koristite."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Uključi opciju Istraživanje dodirom"</string>
@@ -552,6 +554,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Omogućava aplikaciji deaktivaciju zaključane tastature i svih povezanih zaštita. Naprimjer, telefon deaktivira zaključavanje tastature kod dolaznog telefonskog poziva, a zatim ponovo aktivira zaključavanje tastature kada je poziv završen."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"zahtjev za kompleksnost zaključavanja ekrana"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Omogućava aplikaciji da sazna nivo kompleksnosti zaključavanja ekrana (visoki, srednji, niski ili bez zaključavanja), što naznačava mogući raspon trajanja i vrste zaključavanja ekrana. Aplikacija također može korisnicima predložiti da ažuriraju zaključavanje ekrana do određenog nivoa, ali korisnici slobodno mogu ignorirati prijedlog i napustiti stranicu. Važno je napomenuti da se zaključavanje ekrana ne pohranjuje kao obični tekst tako da aplikacija ne zna tačnu lozinku."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"prikaz obavještenja"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Dozvoljava aplikaciji da prikazuje obavještenja"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"koristi biometrijski hardver za otiske prstij"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Omogućava aplikaciji da za autentifikaciju koristi biometrijski hardver"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"upravljanje hardverom za otisak prsta"</string>

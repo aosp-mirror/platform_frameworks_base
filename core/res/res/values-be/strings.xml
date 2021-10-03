@@ -332,6 +332,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"рабіць тэлефонныя выклікі і кіраваць імі"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Датчыкі цела"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"атрымліваць з датчыка даныя асноўных фізіялагічных паказчыкаў"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Апавяшчэнні"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"паказваць апавяшчэнні"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Атрымліваць змесціва вакна"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Аналізаваць змесціва актыўнага вакна."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Уключаць Азнаямленне дотыкам"</string>
@@ -555,6 +557,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Дазваляе прыкладанням адключаць блакiроўку клавіятуры і любыя сродкі абароны, звязаныя з паролем. Прыкладам гэтага з\'яўляецца адключэнне тэлефонам блакiроўкi клавіятуры пры атрыманні ўваходнага выкліку і паўторнае ўключэнне блакiроўкi клавіятуры, калі выклік завершаны."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"запытваць узровень складанасці блакіроўкі экрана"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Дазваляе праграме вызначаць узровень складанасці блакіроўкі экрана (высокі, сярэдні, нізкі ці нулявы), які залежыць ад даўжыні пароля і ад тыпу блакіроўкі экрана. Праграма можа прапанаваць карыстальнікам ускладніць блакіроўку экрана, аднак гэту прапанову можна ігнараваць. Заўважце, што праграма не можа ведаць тып і пароль блакіроўкі экрана, таму што яны захоўваюцца ў зашыфраваным выглядзе."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"паказваць апавяшчэнні"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Дазваляе праграме паказваць апавяшчэнні"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"выкарыстоўваць біяметрычнае абсталяванне"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Дазваляе праграме выкарыстоўваць для аўтэнтыфікацыі біяметрычнае абсталяванне"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"кіраваць апаратнымі сродкамі для адбіткаў пальцаў"</string>

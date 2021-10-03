@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"kryej dhe menaxho telefonata"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Sensorët e trupit"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"qasu tek të dhënat e sensorëve rreth shenjave të tua jetësore"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Njoftimet"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"shfaq njoftimet"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Nxjerrë përmbajtjen e dritares"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Inspekton përmbajtjen e dritares me të cilën po ndërvepron."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Aktivizojë funksionin \"Eksploro me prekje\""</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Lejon aplikacionin të çaktivizojë kyçjen e tasteve dhe çdo mbrojtje të lidhur me fjalëkalimin. Për shembull, telefoni çaktivizon kyçjen e tasteve kur merr një telefonatë hyrëse, pastaj riaktivizon kyçjen e tasteve kur mbaron telefonata."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"kërko kompleksitetin e kyçjes së ekranit"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Lejo që aplikacioni të mësojë nivelin e kompleksitetit të kyçjes së ekranit (i lartë, i mesëm, i ulët ose asnjë), që tregon gamën e mundshme të gjatësisë dhe llojin e kyçjes së ekranit. Aplikacioni mund t\'u sugjerojë gjithashtu përdoruesve që të përditësojnë kyçjen e ekranit në një nivel të caktuar, por përdoruesit mund ta shpërfillin lirshëm dhe të navigojnë më tej. Ki parasysh se kyçja e ekranit nuk ruhet në tekst të thjeshtë, prandaj aplikacioni nuk e di fjalëkalimin e saktë."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"shfaq njoftimet"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Lejon që aplikacioni të shfaqë njoftime"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"përdor harduerin biometrik"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"E lejon aplikacionin që të përdorë harduerin biometrik për vërtetimin"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"të menaxhojë harduerin e gjurmës së gishtit"</string>

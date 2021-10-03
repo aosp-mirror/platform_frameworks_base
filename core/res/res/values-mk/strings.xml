@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"упатува и управува со телефонски повици"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Телесни сензори"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"пристапува до податоците од сензорите за виталните знаци"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Известувања"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"да прикажува известувања"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Преземе содржина на прозорец"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Ја следи содржината на прозорецот со кој се комуницира."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Вклучи „Истражувај со допир“"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Овозможува апликацијата да го оневозможи заклучувањето и каква било безбедност поврзана со лозинка. На пример, телефонот го оневозможува заклучувањето при прием на телефонски повик, а потоа повторно го овозможува заклучувањето кога повикот ќе заврши."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"побарува сложеност за заклучувањето на екранот"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Дозволува апликацијата да го научи нивото на сложеност за заклучувањето на екранот (високо, средно, ниско или нема), коешто ги означува можниот опсег на должината и типот на заклучувањето на екранот. Апликацијата може да им дава предлози на корисниците да го ажурираат заклучувањето на екранот на одредено ниво, но корисниците можат да го игнорираат и да продолжат понатаму. Имајте предвид дека заклучувањето на екранот не се складира како обичен текст, па апликацијата не ја знае точната лозинка."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"да прикажува известувања"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Ѝ дозволува на апликацијата да прикажува известувања"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"користи биометриски хардвер"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Дозволува апликацијата да користи биометриски хардвер за проверка"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"управувај хардвер за отпечатоци"</string>

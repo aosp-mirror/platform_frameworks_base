@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"telefon qo‘ng‘iroqlarini amalga oshirish va boshqarish"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Tana sezgichlari"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"organizm holati haqidagi sezgich ma’lumotlariga kirish"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Bildirishnomalar"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"bildirishnomalarni chiqarish"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Oynadagi kontentni o‘qiydi"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Joriy oynadagi kontent mazmunini aniqlaydi."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Teginib o‘rganish xizmatini yoqadi"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Ilovaga ekran qulfini va har qanday parol  yordamidagi xavfsizlik himoyalarini o‘chirishga ruxsat beradi. Masalan, kirish qo‘ng‘irog‘ida telefon ekran qulfini o‘chiradi va qo‘ng‘iroq tugashi bilan qulfni yoqadi."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ekran qulfi qiyinligi darajasini talab qilish"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Ilova ekran qulfining qiyinlik darajasi (yuqori, oʻrta, past yoki hech qanday), jumladan, qulf turi va parol uzunligi haqida axborotga ruxsat oladi. Bundan tashqari, foydalanuvchilarga qulflash qiyinligi darajasini oshirish taklif etiladi. Bu tavsiyalar majburiy emas. Parollar ochiq matn sifatida saqlanmaydi va ilova uni ocha olmaydi."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"bildirishnomalarni chiqarish"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Ilovaga bildirishnomalarni chiqarish uchun ruxsat beradi"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"biometrik sensordan foydalanish"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Haqiqiylikni tekshirish uchun biometrik sensordan foydalanish imkonini beradi"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"barmoq izi skanerini boshqarish"</string>

@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"foretage og administrere telefonopkald"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Kropssensorer"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"få adgang til sensordata om dine livstegn"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Notifikationer"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"vise notifikationer"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Hente indholdet i vinduet"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Undersøge indholdet i et vindue, du interagerer med."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Aktivere Udforsk ved berøring"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Tillader, at appen kan deaktivere tastaturlåsen og anden form for tilknyttet adgangskodesikkerhed. Telefonen deaktiverer f.eks. tastaturlåsen ved indgående telefonopkald og aktiverer tastaturlåsen igen, når opkaldet er afsluttet."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"anmode om skærmlåsens kompleksitet"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Giver appen tilladelse til at kende skærmlåsens kompleksitet (høj, medium, lav eller ingen), hvilket kan afsløre oplysninger om skærmlåsens længde og type. Appen kan også foreslå brugerne at opdatere deres skærmlås til et bestemt niveau, men brugerne kan frit ignorere det og gå videre. Bemærk! Skærmlåsen gemmes ikke som almindelig tekst, så appen kender ikke den nøjagtige adgangskode."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"vise notifikationer"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Giver appen tilladelse til at vise notifikationer"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"brug biometrisk hardware"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Tillader, at appen kan bruge biometrisk hardware til godkendelse"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"administrer hardware til fingeraftryk"</string>

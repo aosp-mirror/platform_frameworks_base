@@ -326,6 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ring og administrer anrop"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Kroppssensorer"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"få tilgang til sensordata om de vitale tegnene dine"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Varsler"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"vise varsler"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"hente innhold i vinduer"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Appen analyserer innholdet i vinduer du samhandler med."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"slå på berøringsutforsking"</string>
@@ -549,6 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Lar appen deaktivere tastelåsen og eventuell tilknyttet passordsikkerhet. Et eksempel er at telefonen deaktiverer tastelåsen når du mottar et innkommende anrop, og deretter aktiverer tastelåsen igjen når samtalen er ferdig."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"be om skjermlåsens kompleksitet"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Lar appen lære skjermlåsens kompleksitetsnivå (høy, middels, lav eller ingen), som indikerer det mulige området for lengde og type skjermlås. Appen kan foreslå at brukeren oppdaterer skjermlåsen til et bestemt nivå, men brukere kan velge å ignorere dette og navigere bort. Vær oppmerksom på at skjermlåsen ikke er lagret klartekst, så appen kan ikke se det nøyaktige passordet."</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"vise varsler"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Lar appen vise varsler"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"bruke biometrisk maskinvare"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Lar appen bruke biometrisk maskinvare til godkjenning"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"administrere fingeravtrykkmaskinvare"</string>
