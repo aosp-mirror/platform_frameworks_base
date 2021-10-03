@@ -629,7 +629,7 @@ public class HdmiCecMessageValidatorTest {
     }
 
     private IntegerSubject assertMessageValidity(String message) {
-        return assertThat(mHdmiCecMessageValidator.isValid(buildMessage(message)));
+        return assertThat(mHdmiCecMessageValidator.isValid(buildMessage(message), false));
     }
 
     /**

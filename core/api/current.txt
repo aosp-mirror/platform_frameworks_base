@@ -29998,12 +29998,15 @@ package android.os {
     method public int readInt();
     method public void readIntArray(@NonNull int[]);
     method public void readList(@NonNull java.util.List, @Nullable ClassLoader);
+    method public <T> void readList(@NonNull java.util.List<? super T>, @Nullable ClassLoader, @NonNull Class<T>);
     method public long readLong();
     method public void readLongArray(@NonNull long[]);
     method public void readMap(@NonNull java.util.Map, @Nullable ClassLoader);
     method @Nullable public <T extends android.os.Parcelable> T readParcelable(@Nullable ClassLoader);
+    method @Nullable public <T extends android.os.Parcelable> T readParcelable(@Nullable ClassLoader, @NonNull Class<T>);
     method @Nullable public android.os.Parcelable[] readParcelableArray(@Nullable ClassLoader);
     method @Nullable public android.os.Parcelable.Creator<?> readParcelableCreator(@Nullable ClassLoader);
+    method @Nullable public <T> android.os.Parcelable.Creator<T> readParcelableCreator(@Nullable ClassLoader, @NonNull Class<T>);
     method @NonNull public <T extends android.os.Parcelable> java.util.List<T> readParcelableList(@NonNull java.util.List<T>, @Nullable ClassLoader);
     method @Nullable public android.os.PersistableBundle readPersistableBundle();
     method @Nullable public android.os.PersistableBundle readPersistableBundle(@Nullable ClassLoader);
@@ -30142,7 +30145,7 @@ package android.os {
 
   public interface Parcelable {
     method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int CONTENTS_FILE_DESCRIPTOR = 1; // 0x1
     field public static final int PARCELABLE_WRITE_RETURN_VALUE = 1; // 0x1
   }
