@@ -17,7 +17,9 @@
 package com.android.server.wm;
 
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.Display.isSuspendedState;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
+import static android.window.WindowProviderService.isWindowProviderService;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_ERROR;
@@ -80,7 +82,7 @@ class WindowContextListenerController {
      * @param options a bundle used to pass window-related options.
      */
     void registerWindowContainerListener(@NonNull IBinder clientToken,
-            @NonNull WindowContainer container, int ownerUid, @WindowType int type,
+            @NonNull WindowContainer<?> container, int ownerUid, @WindowType int type,
             @Nullable Bundle options) {
         WindowContextListenerImpl listener = mListeners.get(clientToken);
         if (listener == null) {
@@ -101,6 +103,16 @@ class WindowContextListenerController {
             return;
         }
         listener.unregister();
+    }
+
+    void dispatchPendingConfigurationIfNeeded(int displayId) {
+        for (int i = mListeners.size() - 1; i >= 0; --i) {
+            final WindowContextListenerImpl listener = mListeners.valueAt(i);
+            if (listener.getWindowContainer().getDisplayContent().getDisplayId() == displayId
+                    && listener.mHasPendingConfiguration) {
+                listener.reportConfigToWindowTokenClient();
+            }
+        }
     }
 
     /**
@@ -138,7 +150,7 @@ class WindowContextListenerController {
         return listener != null ? listener.mOptions : null;
     }
 
-    @Nullable WindowContainer getContainer(IBinder clientToken) {
+    @Nullable WindowContainer<?> getContainer(IBinder clientToken) {
         final WindowContextListenerImpl listener = mListeners.get(clientToken);
         return listener != null ? listener.mContainer : null;
     }
@@ -163,7 +175,7 @@ class WindowContextListenerController {
     class WindowContextListenerImpl implements WindowContainerListener {
         @NonNull private final IBinder mClientToken;
         private final int mOwnerUid;
-        @NonNull private WindowContainer mContainer;
+        @NonNull private WindowContainer<?> mContainer;
         /**
          * The options from {@link Context#createWindowContext(int, Bundle)}.
          * <p>It can be used for choosing the {@link DisplayArea} where the window context
@@ -177,7 +189,9 @@ class WindowContextListenerController {
         private int mLastReportedDisplay = INVALID_DISPLAY;
         private Configuration mLastReportedConfig;
 
-        private WindowContextListenerImpl(IBinder clientToken, WindowContainer container,
+        private boolean mHasPendingConfiguration;
+
+        private WindowContextListenerImpl(IBinder clientToken, WindowContainer<?> container,
                 int ownerUid, @WindowType int type, @Nullable Bundle options) {
             mClientToken = clientToken;
             mContainer = Objects.requireNonNull(container);
@@ -197,11 +211,11 @@ class WindowContextListenerController {
 
         /** TEST ONLY: returns the {@link WindowContainer} of the listener */
         @VisibleForTesting
-        WindowContainer getWindowContainer() {
+        WindowContainer<?> getWindowContainer() {
             return mContainer;
         }
 
-        private void updateContainer(@NonNull WindowContainer newContainer) {
+        private void updateContainer(@NonNull WindowContainer<?> newContainer) {
             Objects.requireNonNull(newContainer);
 
             if (mContainer.equals(newContainer)) {
@@ -246,12 +260,20 @@ class WindowContextListenerController {
             if (mDeathRecipient == null) {
                 throw new IllegalStateException("Invalid client token: " + mClientToken);
             }
-
-            if (mLastReportedConfig == null) {
-                mLastReportedConfig = new Configuration();
+            // If the display of window context associated window container is suspended, don't
+            // report the configuration update. Note that we still dispatch the configuration update
+            // to WindowProviderService to make it compatible with Service#onConfigurationChanged.
+            // Service always receives #onConfigurationChanged callback regardless of display state.
+            if (!isWindowProviderService(mOptions)
+                    && isSuspendedState(mContainer.getDisplayContent().getDisplayInfo().state)) {
+                mHasPendingConfiguration = true;
+                return;
             }
             final Configuration config = mContainer.getConfiguration();
             final int displayId = mContainer.getDisplayContent().getDisplayId();
+            if (mLastReportedConfig == null) {
+                mLastReportedConfig = new Configuration();
+            }
             if (config.equals(mLastReportedConfig) && displayId == mLastReportedDisplay) {
                 // No changes since last reported time.
                 return;
@@ -266,6 +288,7 @@ class WindowContextListenerController {
             } catch (RemoteException e) {
                 ProtoLog.w(WM_ERROR, "Could not report config changes to the window token client.");
             }
+            mHasPendingConfiguration = false;
         }
 
         @Override
@@ -283,7 +306,7 @@ class WindowContextListenerController {
                 // If we cannot obtain the DisplayContent, the DisplayContent may also be removed.
                 // We should proceed the removal process.
                 if (dc != null) {
-                    final DisplayArea da = dc.findAreaForToken(windowToken);
+                    final DisplayArea<?> da = dc.findAreaForToken(windowToken);
                     updateContainer(da);
                     return;
                 }
