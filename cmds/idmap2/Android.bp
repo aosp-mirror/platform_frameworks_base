@@ -52,6 +52,7 @@ cc_defaults {
         "-readability-const-return-type",
         "-readability-convert-member-functions-to-static",
         "-readability-else-after-return",
+        "-readability-identifier-length",
         "-readability-named-parameter",
         "-readability-redundant-access-specifiers",
         "-readability-uppercase-literal-suffix",
