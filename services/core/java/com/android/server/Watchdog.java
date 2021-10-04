@@ -142,6 +142,8 @@ public class Watchdog {
     );
 
     public static final String[] AIDL_INTERFACE_PREFIXES_OF_INTEREST = new String[] {
+            "android.hardware.biometrics.face.IFace/",
+            "android.hardware.biometrics.fingerprint.IFingerprint/",
             "android.hardware.light.ILights/",
             "android.hardware.power.stats.IPowerStats/",
     };
