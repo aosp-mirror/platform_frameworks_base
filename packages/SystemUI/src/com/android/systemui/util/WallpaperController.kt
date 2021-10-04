@@ -40,8 +40,8 @@ class WallpaperController @Inject constructor(private val wallpaperManager: Wall
         this.wallpaperInfo = wallpaperInfo
     }
 
-    private val shouldUseDefaultDeviceStateChangeTransition: Boolean
-        get() = wallpaperInfo?.shouldUseDefaultDeviceStateChangeTransition()
+    private val shouldUseDefaultDisplayStateChangeTransition: Boolean
+        get() = wallpaperInfo?.shouldUseDefaultDisplayStateChangeTransition()
             ?: true
 
     fun setNotificationShadeZoom(zoomOut: Float) {
@@ -50,7 +50,7 @@ class WallpaperController @Inject constructor(private val wallpaperManager: Wall
     }
 
     fun setUnfoldTransitionZoom(zoomOut: Float) {
-        if (shouldUseDefaultDeviceStateChangeTransition) {
+        if (shouldUseDefaultDisplayStateChangeTransition) {
             unfoldTransitionZoomOut = zoomOut
             updateZoom()
         }
