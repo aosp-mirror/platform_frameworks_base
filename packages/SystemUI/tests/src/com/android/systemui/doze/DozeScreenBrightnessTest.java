@@ -51,6 +51,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.concurrency.FakeThreadFactory;
@@ -93,6 +94,8 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
     DevicePostureController mDevicePostureController;
     @Mock
     DozeLog mDozeLog;
+    @Mock
+    private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
     private FakeThreadFactory mFakeThreadFactory = new FakeThreadFactory(mFakeExecutor);
 
@@ -130,7 +133,8 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
                 mWakefulnessLifecycle,
                 mDozeParameters,
                 mDevicePostureController,
-                mDozeLog);
+                mDozeLog,
+                mUnlockedScreenOffAnimationController);
     }
 
     @Test
@@ -236,7 +240,8 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
                 mWakefulnessLifecycle,
                 mDozeParameters,
                 mDevicePostureController,
-                mDozeLog);
+                mDozeLog,
+                mUnlockedScreenOffAnimationController);
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
         mScreen.transitionTo(INITIALIZED, DOZE);
         reset(mDozeHost);
@@ -273,7 +278,8 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
                 mWakefulnessLifecycle,
                 mDozeParameters,
                 mDevicePostureController,
-                mDozeLog);
+                mDozeLog,
+                mUnlockedScreenOffAnimationController);
 
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
         mScreen.transitionTo(INITIALIZED, DOZE_AOD);
@@ -304,7 +310,8 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
                 mWakefulnessLifecycle,
                 mDozeParameters,
                 mDevicePostureController,
-                mDozeLog);
+                mDozeLog,
+                mUnlockedScreenOffAnimationController);
 
         // GIVEN the device is in AOD
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
@@ -342,7 +349,8 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
                 mWakefulnessLifecycle,
                 mDozeParameters,
                 mDevicePostureController,
-                mDozeLog);
+                mDozeLog,
+                mUnlockedScreenOffAnimationController);
 
         // GIVEN device is in AOD
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
@@ -384,7 +392,8 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
                 mWakefulnessLifecycle,
                 mDozeParameters,
                 mDevicePostureController,
-                mDozeLog);
+                mDozeLog,
+                mUnlockedScreenOffAnimationController);
         verify(mDevicePostureController).addCallback(postureCallbackCaptor.capture());
 
         // GIVEN device is in AOD
@@ -470,13 +479,14 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
         when(mWakefulnessLifecycle.getLastSleepReason()).thenReturn(
                 PowerManager.GO_TO_SLEEP_REASON_TIMEOUT);
         when(mDozeParameters.shouldControlUnlockedScreenOff()).thenReturn(true);
+        when(mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()).thenReturn(true);
 
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
         mScreen.transitionTo(INITIALIZED, DOZE);
 
         // If we're dozing after a timeout, and playing the unlocked screen animation, we should
-        // stay at dim brightness, because the screen dims just before timeout.
-        assertEquals(mServiceFake.screenBrightness, DIM_BRIGHTNESS);
+        // stay at or below dim brightness, because the screen dims just before timeout.
+        assertTrue(mServiceFake.screenBrightness <= DIM_BRIGHTNESS);
     }
 
     @Test
@@ -484,6 +494,7 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
         when(mWakefulnessLifecycle.getLastSleepReason()).thenReturn(
                 PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON);
         when(mDozeParameters.shouldControlUnlockedScreenOff()).thenReturn(true);
+        when(mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()).thenReturn(true);
 
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
         mScreen.transitionTo(INITIALIZED, DOZE);
@@ -498,6 +509,7 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
         when(mWakefulnessLifecycle.getLastSleepReason()).thenReturn(
                 PowerManager.GO_TO_SLEEP_REASON_TIMEOUT);
         when(mDozeParameters.shouldControlUnlockedScreenOff()).thenReturn(false);
+        when(mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()).thenReturn(false);
 
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
         mScreen.transitionTo(INITIALIZED, DOZE);
