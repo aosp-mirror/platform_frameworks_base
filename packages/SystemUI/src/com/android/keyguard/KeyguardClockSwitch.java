@@ -11,6 +11,7 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
@@ -93,6 +94,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
     private int[] mColorPalette;
 
     private int mClockSwitchYAmount;
+    @VisibleForTesting boolean mChildrenAreLaidOut = false;
 
     public KeyguardClockSwitch(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -284,9 +286,29 @@ public class KeyguardClockSwitch extends RelativeLayout {
         if (mDisplayedClockSize != null && clockSize == mDisplayedClockSize) {
             return false;
         }
-        animateClockChange(clockSize == LARGE);
-        mDisplayedClockSize = clockSize;
+
+        // let's make sure clock is changed only after all views were laid out so we can
+        // translate them properly
+        if (mChildrenAreLaidOut) {
+            animateClockChange(clockSize == LARGE);
+            mDisplayedClockSize = clockSize;
+        } else {
+            getViewTreeObserver().addOnPreDrawListener(new OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    switchToClock(clockSize);
+                    getViewTreeObserver().removeOnPreDrawListener(this);
+                    return true;
+                }
+            });
+        }
         return true;
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+        mChildrenAreLaidOut = true;
     }
 
     public Paint getPaint() {
