@@ -379,6 +379,13 @@ static void android_view_ThreadedRenderer_dumpProfileInfo(JNIEnv* env, jobject c
     proxy->dumpProfileInfo(fd, dumpFlags);
 }
 
+static void android_view_ThreadedRenderer_dumpGlobalProfileInfo(JNIEnv* env, jobject clazz,
+                                                                jobject javaFileDescriptor,
+                                                                jint dumpFlags) {
+    int fd = jniGetFDFromFileDescriptor(env, javaFileDescriptor);
+    RenderProxy::dumpGraphicsMemory(fd, true, dumpFlags & DumpFlags::Reset);
+}
+
 static void android_view_ThreadedRenderer_addRenderNode(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jlong renderNodePtr, jboolean placeFront) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
@@ -910,6 +917,8 @@ static const JNINativeMethod gMethods[] = {
         {"nNotifyFramePending", "(J)V", (void*)android_view_ThreadedRenderer_notifyFramePending},
         {"nDumpProfileInfo", "(JLjava/io/FileDescriptor;I)V",
          (void*)android_view_ThreadedRenderer_dumpProfileInfo},
+        {"nDumpGlobalProfileInfo", "(Ljava/io/FileDescriptor;I)V",
+         (void*)android_view_ThreadedRenderer_dumpGlobalProfileInfo},
         {"setupShadersDiskCache", "(Ljava/lang/String;Ljava/lang/String;)V",
          (void*)android_view_ThreadedRenderer_setupShadersDiskCache},
         {"nAddRenderNode", "(JJZ)V", (void*)android_view_ThreadedRenderer_addRenderNode},
