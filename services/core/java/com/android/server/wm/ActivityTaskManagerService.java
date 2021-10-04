@@ -4518,17 +4518,25 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 reason);
     }
 
-    final class SleepTokenAcquirerImpl implements ActivityTaskManagerInternal.SleepTokenAcquirer {
+    /**
+     * Sleep tokens cause the activity manager to put the top activity to sleep.
+     * They are used by components such as dreams that may hide and block interaction
+     * with underlying activities.
+     */
+    final class SleepTokenAcquirer {
         private final String mTag;
         private final SparseArray<RootWindowContainer.SleepToken> mSleepTokens =
                 new SparseArray<>();
 
-        SleepTokenAcquirerImpl(@NonNull String tag) {
+        SleepTokenAcquirer(@NonNull String tag) {
             mTag = tag;
         }
 
-        @Override
-        public void acquire(int displayId) {
+        /**
+         * Acquires a sleep token.
+         * @param displayId The display to apply to.
+         */
+        void acquire(int displayId) {
             synchronized (mGlobalLock) {
                 if (!mSleepTokens.contains(displayId)) {
                     mSleepTokens.append(displayId,
@@ -4538,8 +4546,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         }
 
-        @Override
-        public void release(int displayId) {
+        /**
+         * Releases the sleep token.
+         * @param displayId The display to apply to.
+         */
+        void release(int displayId) {
             synchronized (mGlobalLock) {
                 final RootWindowContainer.SleepToken token = mSleepTokens.get(displayId);
                 if (token != null) {
@@ -5216,12 +5227,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     final class LocalService extends ActivityTaskManagerInternal {
-        @Override
-        public SleepTokenAcquirer createSleepTokenAcquirer(@NonNull String tag) {
-            Objects.requireNonNull(tag);
-            return new SleepTokenAcquirerImpl(tag);
-        }
-
         @Override
         public ComponentName getHomeActivityForUser(int userId) {
             synchronized (mGlobalLock) {
