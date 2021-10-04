@@ -1358,7 +1358,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         try {
             ActivityManager.getService().startActivityFromRecents(targetTask.persistentId, null);
-        } catch (RemoteException e) {
+        } catch (RemoteException | IllegalArgumentException e) {
             Slog.e(TAG, "Failed to start task " + targetTask.persistentId + " from recents", e);
         }
     }
