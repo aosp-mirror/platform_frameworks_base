@@ -119,7 +119,7 @@ final class MoveInstallArgs extends InstallArgs {
                     Slog.w(TAG, String.valueOf(e));
                 }
             }
-            mPm.removeCodePathLI(codeFile);
+            mRemovePackageHelper.removeCodePathLI(codeFile);
         }
     }
 

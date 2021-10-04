@@ -55,11 +55,16 @@ import java.util.List;
 public final class StorageEventHelper extends StorageEventListener {
     private final PackageManagerService mPm;
     private final BroadcastHelper mBroadcastHelper;
+    private final DeletePackageHelper mDeletePackageHelper;
+    private final RemovePackageHelper mRemovePackageHelper;
 
     // TODO(b/198166813): remove PMS dependency
-    public StorageEventHelper(PackageManagerService pm) {
+    public StorageEventHelper(PackageManagerService pm, DeletePackageHelper deletePackageHelper,
+            RemovePackageHelper removePackageHelper) {
         mPm = pm;
         mBroadcastHelper = new BroadcastHelper(mPm.mInjector);
+        mDeletePackageHelper = deletePackageHelper;
+        mRemovePackageHelper = removePackageHelper;
     }
 
     @Override
@@ -237,8 +242,8 @@ public final class StorageEventHelper extends StorageEventListener {
 
                     try (PackageFreezer freezer = mPm.freezePackageForDelete(ps.getPackageName(),
                             deleteFlags, "unloadPrivatePackagesInner")) {
-                        if (mPm.deletePackageLIF(ps.getPackageName(), null, false, userIds,
-                                deleteFlags, outInfo, false)) {
+                        if (mDeletePackageHelper.deletePackageLIF(ps.getPackageName(), null, false,
+                                userIds, deleteFlags, outInfo, false)) {
                             unloaded.add(pkg);
                         } else {
                             Slog.w(TAG, "Failed to unload " + ps.getPath());
@@ -330,7 +335,7 @@ public final class StorageEventHelper extends StorageEventListener {
                 File fileToDelete = filesToDelete.get(i);
                 logCriticalInfo(Log.WARN, "Destroying orphaned at " + fileToDelete);
                 synchronized (mPm.mInstallLock) {
-                    mPm.removeCodePathLI(fileToDelete);
+                    mRemovePackageHelper.removeCodePathLI(fileToDelete);
                 }
             }
         }

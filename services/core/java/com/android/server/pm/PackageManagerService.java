@@ -18,7 +18,6 @@ package com.android.server.pm;
 import static android.Manifest.permission.DELETE_PACKAGES;
 import static android.Manifest.permission.INSTALL_PACKAGES;
 import static android.Manifest.permission.MANAGE_DEVICE_ADMINS;
-import static android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS;
 import static android.Manifest.permission.REQUEST_DELETE_PACKAGES;
 import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
 import static android.app.AppOpsManager.MODE_IGNORED;
@@ -46,10 +45,8 @@ import static android.content.pm.PackageManager.TYPE_ACTIVITY;
 import static android.content.pm.PackageManager.TYPE_PROVIDER;
 import static android.content.pm.PackageManager.TYPE_RECEIVER;
 import static android.content.pm.PackageManager.TYPE_UNKNOWN;
-import static android.content.pm.PackageManager.UNINSTALL_REASON_UNKNOWN;
 import static android.content.pm.PackageManagerInternal.LAST_KNOWN_PACKAGE;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
-import static android.os.incremental.IncrementalManager.isIncrementalPath;
 import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_EXTERNAL;
@@ -279,7 +276,6 @@ import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
-import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 import com.android.server.pm.permission.LegacyPermissionManagerService;
@@ -304,7 +300,6 @@ import com.android.server.utils.WatchedLongSparseArray;
 import com.android.server.utils.WatchedSparseBooleanArray;
 import com.android.server.utils.WatchedSparseIntArray;
 import com.android.server.utils.Watcher;
-import com.android.server.wm.ActivityTaskManagerInternal;
 
 import dalvik.system.VMRuntime;
 
@@ -883,7 +878,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     // Mapping from instrumentation class names to info about them.
     @Watched
-    final WatchedArrayMap<ComponentName, ParsedInstrumentation> mInstrumentation =
+    private final WatchedArrayMap<ComponentName, ParsedInstrumentation> mInstrumentation =
             new WatchedArrayMap<>();
     private final SnapshotCache<WatchedArrayMap<ComponentName, ParsedInstrumentation>>
             mInstrumentationSnapshot =
@@ -1060,6 +1055,9 @@ public class PackageManagerService extends IPackageManager.Stub
     private final DomainVerificationConnection mDomainVerificationConnection;
 
     private final BroadcastHelper mBroadcastHelper;
+    private final RemovePackageHelper mRemovePackageHelper;
+    private final DeletePackageHelper mDeletePackageHelper;
+    private final InitAndSystemPackageHelper mInitAndSystemPackageHelper;
 
     /**
      * Invalidate the package info cache, which includes updating the cached computer.
@@ -1449,7 +1447,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private void scheduleWritePackageRestrictionsLocked(UserHandle user) {
+    void scheduleWritePackageRestrictionsLocked(UserHandle user) {
         final int userId = user == null ? UserHandle.USER_ALL : user.getIdentifier();
         scheduleWritePackageRestrictionsLocked(userId);
     }
@@ -1748,6 +1746,10 @@ public class PackageManagerService extends IPackageManager.Stub
         mDomainVerificationConnection = new DomainVerificationConnection(this);
 
         mBroadcastHelper = new BroadcastHelper(mInjector);
+        mRemovePackageHelper = new RemovePackageHelper(this);
+        mInitAndSystemPackageHelper = new InitAndSystemPackageHelper(this, mRemovePackageHelper);
+        mDeletePackageHelper = new DeletePackageHelper(this, mRemovePackageHelper,
+                mInitAndSystemPackageHelper);
 
         invalidatePackageInfoCache();
     }
@@ -1893,6 +1895,10 @@ public class PackageManagerService extends IPackageManager.Stub
         mDomainVerificationManager.setConnection(mDomainVerificationConnection);
 
         mBroadcastHelper = new BroadcastHelper(mInjector);
+        mRemovePackageHelper = new RemovePackageHelper(this);
+        mInitAndSystemPackageHelper = new InitAndSystemPackageHelper(this, mRemovePackageHelper);
+        mDeletePackageHelper = new DeletePackageHelper(this, mRemovePackageHelper,
+                mInitAndSystemPackageHelper);
 
         synchronized (mLock) {
             // Create the computer as soon as the state objects have been installed.  The
@@ -2034,8 +2040,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // scanning apk in apex.
             mApexManager.scanApexPackagesTraced(packageParser, executorService);
 
-            final InitAndSystemPackageHelper helper = new InitAndSystemPackageHelper(this);
-            helper.scanSystemDirs(mDirsToScanAsSystem, mIsUpgrade,
+            mInitAndSystemPackageHelper.scanSystemDirs(mDirsToScanAsSystem, mIsUpgrade,
                     packageParser, executorService, mPlatformPackage, mIsPreNMR1Upgrade,
                     systemParseFlags, systemScanFlags);
             // Parse overlay configuration files to set default enable state, mutability, and
@@ -2044,7 +2049,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     consumer -> mPmInternal.forEachPackage(
                             pkg -> consumer.accept(pkg, pkg.isSystem())));
             final int[] userIds = mUserManager.getUserIds();
-            helper.cleanupSystemPackagesAndInstallStubs(mDirsToScanAsSystem,
+            mInitAndSystemPackageHelper.cleanupSystemPackagesAndInstallStubs(mDirsToScanAsSystem,
                     mIsUpgrade, packageParser, executorService, mOnlyCore, packageSettings,
                     startTime, mAppInstallDir, mPlatformPackage, mIsPreNMR1Upgrade,
                     scanFlags, systemParseFlags, systemScanFlags, userIds);
@@ -2764,7 +2769,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * <li>The calling application is the default app prediction service.</li>
      * </ol>
      */
-    private boolean canViewInstantApps(int callingUid, int userId) {
+    boolean canViewInstantApps(int callingUid, int userId) {
         return mComputer.canViewInstantApps(callingUid, userId);
     }
 
@@ -3259,8 +3264,9 @@ public class PackageManagerService extends IPackageManager.Stub
             for (int i = 0; i < packageCount; i++) {
                 final VersionedPackage pkgToDelete = packagesToDelete.get(i);
                 // Delete the package synchronously (will fail of the lib used for any user).
-                if (deletePackageX(pkgToDelete.getPackageName(), pkgToDelete.getLongVersionCode(),
-                        UserHandle.USER_SYSTEM, PackageManager.DELETE_ALL_USERS,
+                if (mDeletePackageHelper.deletePackageX(pkgToDelete.getPackageName(),
+                        pkgToDelete.getLongVersionCode(), UserHandle.USER_SYSTEM,
+                        PackageManager.DELETE_ALL_USERS,
                         true /*removedBySystem*/) == PackageManager.DELETE_SUCCEEDED) {
                     if (volume.getUsableSpace() >= neededSpace) {
                         return true;
@@ -3560,7 +3566,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @GuardedBy("mLock")
-    private List<VersionedPackage> getPackagesUsingSharedLibraryLPr(
+    List<VersionedPackage> getPackagesUsingSharedLibraryLPr(
             SharedLibraryInfo libInfo, int flags, int callingUid, int userId) {
         List<VersionedPackage> versionedPackages = null;
         final int packageCount = mSettings.getPackagesLocked().size();
@@ -6388,7 +6394,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Nullable
-    private SharedLibraryInfo getSharedLibraryInfoLPr(String name, long version) {
+    SharedLibraryInfo getSharedLibraryInfoLPr(String name, long version) {
         return mComputer.getSharedLibraryInfoLPr(name, version);
     }
 
@@ -6523,45 +6529,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    @GuardedBy("mInstallLock")
-    void removeCodePathLI(File codePath) {
-        if (codePath.isDirectory()) {
-            final File codePathParent = codePath.getParentFile();
-            final boolean needRemoveParent = codePathParent.getName().startsWith(RANDOM_DIR_PREFIX);
-            try {
-                final boolean isIncremental = (mIncrementalManager != null && isIncrementalPath(
-                        codePath.getAbsolutePath()));
-                if (isIncremental) {
-                    if (needRemoveParent) {
-                        mIncrementalManager.rmPackageDir(codePathParent);
-                    } else {
-                        mIncrementalManager.rmPackageDir(codePath);
-                    }
-                }
-
-                mInstaller.rmPackageDir(codePath.getAbsolutePath());
-                if (needRemoveParent) {
-                    mInstaller.rmPackageDir(codePathParent.getAbsolutePath());
-                    removeCachedResult(codePathParent);
-                }
-            } catch (InstallerException e) {
-                Slog.w(TAG, "Failed to remove code path", e);
-            }
-        } else {
-            codePath.delete();
-        }
-    }
-
-    private void removeCachedResult(@NonNull File codePath) {
-        if (mCacheDir == null) {
-            return;
-        }
-
-        final PackageCacher cacher = new PackageCacher(mCacheDir);
-        // Find and delete the cached result belong to the given codePath.
-        cacher.cleanCachedResult(codePath);
-    }
-
     int[] resolveUserIds(int userId) {
         return (userId == UserHandle.USER_ALL) ? mUserManager.getUserIds() : new int[] { userId };
     }
@@ -6590,47 +6557,6 @@ public class PackageManagerService extends IPackageManager.Stub
             } catch (InstallerException e) {
                 Slog.w(TAG, String.valueOf(e));
             }
-        }
-    }
-
-    private void destroyAppDataLIF(AndroidPackage pkg, int userId, int flags) {
-        if (pkg == null) {
-            Slog.wtf(TAG, "Package was null!", new Throwable());
-            return;
-        }
-        destroyAppDataLeafLIF(pkg, userId, flags);
-    }
-
-    private void destroyAppDataLeafLIF(AndroidPackage pkg, int userId, int flags) {
-        final PackageSetting ps;
-        synchronized (mLock) {
-            ps = mSettings.getPackageLPr(pkg.getPackageName());
-        }
-        for (int realUserId : resolveUserIds(userId)) {
-            final long ceDataInode = (ps != null) ? ps.getCeDataInode(realUserId) : 0;
-            try {
-                mInstaller.destroyAppData(pkg.getVolumeUuid(), pkg.getPackageName(), realUserId,
-                        flags, ceDataInode);
-            } catch (InstallerException e) {
-                Slog.w(TAG, String.valueOf(e));
-            }
-            mDexManager.notifyPackageDataDestroyed(pkg.getPackageName(), userId);
-        }
-    }
-
-    private void destroyAppProfilesLIF(AndroidPackage pkg) {
-        if (pkg == null) {
-            Slog.wtf(TAG, "Package was null!", new Throwable());
-            return;
-        }
-        destroyAppProfilesLeafLIF(pkg);
-    }
-
-    private void destroyAppProfilesLeafLIF(AndroidPackage pkg) {
-        try {
-            mInstaller.destroyAppProfiles(pkg.getPackageName());
-        } catch (InstallerException e) {
-            Slog.w(TAG, String.valueOf(e));
         }
     }
 
@@ -6972,7 +6898,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (!pkg.isSystem() || pkgSetting.getPkgState().isUpdatedSystemApp()) {
                         final int flags = pkgSetting.getPkgState().isUpdatedSystemApp()
                                 ? PackageManager.DELETE_KEEP_DATA : 0;
-                        deletePackageLIF(pkg.getPackageName(), null, true,
+                        mDeletePackageHelper.deletePackageLIF(pkg.getPackageName(), null, true,
                                 mUserManager.getUserIds(), flags, null,
                                 true);
                     }
@@ -7148,7 +7074,7 @@ public class PackageManagerService extends IPackageManager.Stub
         versionedLib.put(libraryInfo.getLongVersion(), libraryInfo);
     }
 
-    private boolean removeSharedLibraryLPw(String name, long version) {
+    boolean removeSharedLibraryLPw(String name, long version) {
         WatchedLongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(name);
         if (versionedLib == null) {
             return false;
@@ -7461,96 +7387,6 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         } finally {
             Binder.restoreCallingIdentity(token);
-        }
-    }
-
-    void removePackageLI(AndroidPackage pkg, boolean chatty) {
-        // Remove the parent package setting
-        PackageSetting ps = getPackageSetting(pkg.getPackageName());
-        if (ps != null) {
-            removePackageLI(ps.getPackageName(), chatty);
-        } else if (DEBUG_REMOVE && chatty) {
-            Log.d(TAG, "Not removing package " + pkg.getPackageName() + "; mExtras == null");
-        }
-    }
-
-    private void removePackageLI(String packageName, boolean chatty) {
-        if (DEBUG_INSTALL) {
-            if (chatty)
-                Log.d(TAG, "Removing package " + packageName);
-        }
-
-        // writer
-        synchronized (mLock) {
-            final AndroidPackage removedPackage = mPackages.remove(packageName);
-            if (removedPackage != null) {
-                cleanPackageDataStructuresLILPw(removedPackage, chatty);
-            }
-        }
-    }
-
-    private void cleanPackageDataStructuresLILPw(AndroidPackage pkg, boolean chatty) {
-        mComponentResolver.removeAllComponents(pkg, chatty);
-        mPermissionManager.onPackageRemoved(pkg);
-        mPackageProperty.removeAllProperties(pkg);
-
-        final int instrumentationSize = ArrayUtils.size(pkg.getInstrumentations());
-        StringBuilder r = null;
-        int i;
-        for (i = 0; i < instrumentationSize; i++) {
-            ParsedInstrumentation a = pkg.getInstrumentations().get(i);
-            mInstrumentation.remove(a.getComponentName());
-            if (DEBUG_REMOVE && chatty) {
-                if (r == null) {
-                    r = new StringBuilder(256);
-                } else {
-                    r.append(' ');
-                }
-                r.append(a.getName());
-            }
-        }
-        if (r != null) {
-            if (DEBUG_REMOVE) Log.d(TAG, "  Instrumentation: " + r);
-        }
-
-        r = null;
-        if (pkg.isSystem()) {
-            // Only system apps can hold shared libraries.
-            final int libraryNamesSize = pkg.getLibraryNames().size();
-            for (i = 0; i < libraryNamesSize; i++) {
-                String name = pkg.getLibraryNames().get(i);
-                if (removeSharedLibraryLPw(name, 0)) {
-                    if (DEBUG_REMOVE && chatty) {
-                        if (r == null) {
-                            r = new StringBuilder(256);
-                        } else {
-                            r.append(' ');
-                        }
-                        r.append(name);
-                    }
-                }
-            }
-        }
-
-        r = null;
-
-        // Any package can hold static shared libraries.
-        if (pkg.getStaticSharedLibName() != null) {
-            if (removeSharedLibraryLPw(pkg.getStaticSharedLibName(),
-                    pkg.getStaticSharedLibVersion())) {
-                if (DEBUG_REMOVE && chatty) {
-                    if (r == null) {
-                        r = new StringBuilder(256);
-                    } else {
-                        r.append(' ');
-                    }
-                    r.append(pkg.getStaticSharedLibName());
-                }
-            }
-        }
-
-        if (r != null) {
-            if (DEBUG_REMOVE) Log.d(TAG, "  Libraries: " + r);
         }
     }
 
@@ -8325,7 +8161,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private void unsuspendForSuspendingPackage(String suspendingPackage, int userId) {
+    void unsuspendForSuspendingPackage(String suspendingPackage, int userId) {
         final String[] allPackages;
         synchronized (mLock) {
             allPackages = mPackages.keySet().toArray(new String[mPackages.size()]);
@@ -8381,7 +8217,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private void removeAllDistractingPackageRestrictions(int userId) {
+    void removeAllDistractingPackageRestrictions(int userId) {
         final String[] allPackages;
         synchronized (mLock) {
             allPackages = mPackages.keySet().toArray(new String[mPackages.size()]);
@@ -9071,7 +8907,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 final boolean killApp = (scanResult.mRequest.mScanFlags & SCAN_DONT_KILL_APP) == 0;
                 final int deleteFlags = PackageManager.DELETE_KEEP_DATA
                         | (killApp ? 0 : PackageManager.DELETE_DONT_KILL_APP);
-                deletePackageAction = mayDeletePackageLocked(res.mRemovedInfo,
+                deletePackageAction = DeletePackageHelper.mayDeletePackageLocked(res.mRemovedInfo,
                         prepareResult.mOriginalPs, prepareResult.mDisabledPs,
                         deleteFlags, null /* all users */);
                 if (deletePackageAction == null) {
@@ -9369,18 +9205,6 @@ public class PackageManagerService extends IPackageManager.Stub
         return ps;
     }
 
-    private void notifyPackageChangeObserversOnDelete(String packageName, long version) {
-        PackageChangeEvent pkgChangeEvent = new PackageChangeEvent();
-        pkgChangeEvent.packageName = packageName;
-        pkgChangeEvent.version = version;
-        pkgChangeEvent.lastUpdateTimeMillis = 0L;
-        pkgChangeEvent.newInstalled = false;
-        pkgChangeEvent.dataRemoved = false;
-        pkgChangeEvent.isDeleted = true;
-
-        notifyPackageChangeObservers(pkgChangeEvent);
-    }
-
     void notifyPackageChangeObservers(PackageChangeEvent event) {
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "notifyPackageChangeObservers");
@@ -9439,7 +9263,8 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         if (installedForUsersCount > 1) {
-            deletePackageVersionedInternal(versionedPackage, observer, userId, 0, true);
+            mDeletePackageHelper.deletePackageVersionedInternal(
+                    versionedPackage, observer, userId, 0, true);
         } else {
             try {
                 observer.onPackageDeleted(packageName, PackageManager.DELETE_FAILED_INTERNAL_ERROR,
@@ -9452,144 +9277,8 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public void deletePackageVersioned(VersionedPackage versionedPackage,
             final IPackageDeleteObserver2 observer, final int userId, final int deleteFlags) {
-        deletePackageVersionedInternal(versionedPackage, observer, userId, deleteFlags, false);
-    }
-
-    private void deletePackageVersionedInternal(VersionedPackage versionedPackage,
-            final IPackageDeleteObserver2 observer, final int userId, final int deleteFlags,
-            final boolean allowSilentUninstall) {
-        final int callingUid = Binder.getCallingUid();
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.DELETE_PACKAGES, null);
-        final boolean canViewInstantApps = canViewInstantApps(callingUid, userId);
-        Preconditions.checkNotNull(versionedPackage);
-        Preconditions.checkNotNull(observer);
-        Preconditions.checkArgumentInRange(versionedPackage.getLongVersionCode(),
-                PackageManager.VERSION_CODE_HIGHEST,
-                Long.MAX_VALUE, "versionCode must be >= -1");
-
-        final String packageName = versionedPackage.getPackageName();
-        final long versionCode = versionedPackage.getLongVersionCode();
-        final String internalPackageName;
-
-        try {
-            if (mInjector.getLocalService(ActivityTaskManagerInternal.class)
-                    .isBaseOfLockedTask(packageName)) {
-                observer.onPackageDeleted(
-                        packageName, PackageManager.DELETE_FAILED_APP_PINNED, null);
-                EventLog.writeEvent(0x534e4554, "127605586", -1, "");
-                return;
-            }
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-
-        synchronized (mLock) {
-            // Normalize package name to handle renamed packages and static libs
-            internalPackageName = resolveInternalPackageNameLPr(packageName, versionCode);
-        }
-
-        final int uid = Binder.getCallingUid();
-        if (!isOrphaned(internalPackageName)
-                && !allowSilentUninstall
-                && !isCallerAllowedToSilentlyUninstall(uid, internalPackageName)) {
-            mHandler.post(() -> {
-                try {
-                    final Intent intent = new Intent(Intent.ACTION_UNINSTALL_PACKAGE);
-                    intent.setData(Uri.fromParts(PACKAGE_SCHEME, packageName, null));
-                    intent.putExtra(PackageInstaller.EXTRA_CALLBACK, observer.asBinder());
-                    observer.onUserActionRequired(intent);
-                } catch (RemoteException re) {
-                }
-            });
-            return;
-        }
-        final boolean deleteAllUsers = (deleteFlags & PackageManager.DELETE_ALL_USERS) != 0;
-        final int[] users = deleteAllUsers ? mUserManager.getUserIds() : new int[]{userId};
-        if (UserHandle.getUserId(uid) != userId || (deleteAllUsers && users.length > 1)) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                    "deletePackage for user " + userId);
-        }
-
-        if (isUserRestricted(userId, UserManager.DISALLOW_UNINSTALL_APPS)) {
-            mHandler.post(() -> {
-                try {
-                    observer.onPackageDeleted(packageName,
-                            PackageManager.DELETE_FAILED_USER_RESTRICTED, null);
-                } catch (RemoteException re) {
-                }
-            });
-            return;
-        }
-
-        if (!deleteAllUsers && getBlockUninstallForUser(internalPackageName, userId)) {
-            mHandler.post(() -> {
-                try {
-                    observer.onPackageDeleted(packageName,
-                            PackageManager.DELETE_FAILED_OWNER_BLOCKED, null);
-                } catch (RemoteException re) {
-                }
-            });
-            return;
-        }
-
-        if (DEBUG_REMOVE) {
-            Slog.d(TAG, "deletePackageAsUser: pkg=" + internalPackageName + " user=" + userId
-                    + " deleteAllUsers: " + deleteAllUsers + " version="
-                    + (versionCode == PackageManager.VERSION_CODE_HIGHEST
-                    ? "VERSION_CODE_HIGHEST" : versionCode));
-        }
-        // Queue up an async operation since the package deletion may take a little while.
-        mHandler.post(() -> {
-            int returnCode;
-            final PackageSetting ps = mSettings.getPackageLPr(internalPackageName);
-            boolean doDeletePackage = true;
-            if (ps != null) {
-                final boolean targetIsInstantApp =
-                        ps.getInstantApp(UserHandle.getUserId(callingUid));
-                doDeletePackage = !targetIsInstantApp
-                        || canViewInstantApps;
-            }
-            if (doDeletePackage) {
-                if (!deleteAllUsers) {
-                    returnCode = deletePackageX(internalPackageName, versionCode,
-                            userId, deleteFlags, false /*removedBySystem*/);
-                } else {
-                    int[] blockUninstallUserIds = getBlockUninstallForUsers(
-                            internalPackageName, users);
-                    // If nobody is blocking uninstall, proceed with delete for all users
-                    if (ArrayUtils.isEmpty(blockUninstallUserIds)) {
-                        returnCode = deletePackageX(internalPackageName, versionCode,
-                                userId, deleteFlags, false /*removedBySystem*/);
-                    } else {
-                        // Otherwise uninstall individually for users with blockUninstalls=false
-                        final int userFlags = deleteFlags & ~PackageManager.DELETE_ALL_USERS;
-                        for (int userId1 : users) {
-                            if (!ArrayUtils.contains(blockUninstallUserIds, userId1)) {
-                                returnCode = deletePackageX(internalPackageName, versionCode,
-                                        userId1, userFlags, false /*removedBySystem*/);
-                                if (returnCode != PackageManager.DELETE_SUCCEEDED) {
-                                    Slog.w(TAG, "Package delete failed for user " + userId1
-                                            + ", returnCode " + returnCode);
-                                }
-                            }
-                        }
-                        // The app has only been marked uninstalled for certain users.
-                        // We still need to report that delete was blocked
-                        returnCode = PackageManager.DELETE_FAILED_OWNER_BLOCKED;
-                    }
-                }
-            } else {
-                returnCode = PackageManager.DELETE_FAILED_INTERNAL_ERROR;
-            }
-            try {
-                observer.onPackageDeleted(packageName, returnCode, null);
-            } catch (RemoteException e) {
-                Log.i(TAG, "Observer no longer exists.");
-            } //end catch
-            notifyPackageChangeObserversOnDelete(packageName, versionCode);
-        });
+        mDeletePackageHelper.deletePackageVersionedInternal(
+                versionedPackage, observer, userId, deleteFlags, false);
     }
 
     private String resolveExternalPackageNameLPr(AndroidPackage pkg) {
@@ -9597,7 +9286,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @GuardedBy("mLock")
-    private String resolveInternalPackageNameLPr(String packageName, long versionCode) {
+    String resolveInternalPackageNameLPr(String packageName, long versionCode) {
         return mComputer.resolveInternalPackageNameLPr(packageName, versionCode);
     }
 
@@ -9605,51 +9294,6 @@ public class PackageManagerService extends IPackageManager.Stub
         final int callingUserId = UserHandle.getUserId(callingUid);
         return mRequiredVerifierPackage != null &&
                 callingUid == getPackageUid(mRequiredVerifierPackage, 0, callingUserId);
-    }
-
-    private boolean isCallerAllowedToSilentlyUninstall(int callingUid, String pkgName) {
-        if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID
-              || UserHandle.getAppId(callingUid) == Process.SYSTEM_UID) {
-            return true;
-        }
-        final int callingUserId = UserHandle.getUserId(callingUid);
-        // If the caller installed the pkgName, then allow it to silently uninstall.
-        if (callingUid == getPackageUid(getInstallerPackageName(pkgName), 0, callingUserId)) {
-            return true;
-        }
-
-        // Allow package verifier to silently uninstall.
-        if (mRequiredVerifierPackage != null &&
-                callingUid == getPackageUid(mRequiredVerifierPackage, 0, callingUserId)) {
-            return true;
-        }
-
-        // Allow package uninstaller to silently uninstall.
-        if (mRequiredUninstallerPackage != null &&
-                callingUid == getPackageUid(mRequiredUninstallerPackage, 0, callingUserId)) {
-            return true;
-        }
-
-        // Allow storage manager to silently uninstall.
-        if (mStorageManagerPackage != null &&
-                callingUid == getPackageUid(mStorageManagerPackage, 0, callingUserId)) {
-            return true;
-        }
-
-        // Allow caller having MANAGE_PROFILE_AND_DEVICE_OWNERS permission to silently
-        // uninstall for device owner provisioning.
-        return checkUidPermission(MANAGE_PROFILE_AND_DEVICE_OWNERS, callingUid)
-                == PERMISSION_GRANTED;
-    }
-
-    private int[] getBlockUninstallForUsers(String packageName, int[] userIds) {
-        int[] result = EMPTY_INT_ARRAY;
-        for (int userId : userIds) {
-            if (getBlockUninstallForUser(packageName, userId)) {
-                result = ArrayUtils.appendInt(result, userId);
-            }
-        }
-        return result;
     }
 
     @Override
@@ -9668,7 +9312,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return isPackageDeviceAdmin(packageName, UserHandle.USER_ALL);
     }
 
-    private boolean isPackageDeviceAdmin(String packageName, int userId) {
+    boolean isPackageDeviceAdmin(String packageName, int userId) {
         final IDevicePolicyManager dpm = getDevicePolicyManager();
         try {
             if (dpm != null) {
@@ -9711,313 +9355,8 @@ public class PackageManagerService extends IPackageManager.Stub
         return mDevicePolicyManager;
     }
 
-    private boolean shouldKeepUninstalledPackageLPr(String packageName) {
+    boolean shouldKeepUninstalledPackageLPr(String packageName) {
         return mKeepUninstalledPackages != null && mKeepUninstalledPackages.contains(packageName);
-    }
-
-    /**
-     *  This method is an internal method that could be get invoked either
-     *  to delete an installed package or to clean up a failed installation.
-     *  After deleting an installed package, a broadcast is sent to notify any
-     *  listeners that the package has been removed. For cleaning up a failed
-     *  installation, the broadcast is not necessary since the package's
-     *  installation wouldn't have sent the initial broadcast either
-     *  The key steps in deleting a package are
-     *  deleting the package information in internal structures like mPackages,
-     *  deleting the packages base directories through installd
-     *  updating mSettings to reflect current status
-     *  persisting settings for later use
-     *  sending a broadcast if necessary
-     *
-     *  @param removedBySystem A boolean to indicate the package was removed automatically without
-     *                         the user-initiated action.
-     */
-    int deletePackageX(String packageName, long versionCode, int userId, int deleteFlags,
-            boolean removedBySystem) {
-        final PackageRemovedInfo info = new PackageRemovedInfo(this);
-        final boolean res;
-
-        final int removeUser = (deleteFlags & PackageManager.DELETE_ALL_USERS) != 0
-                ? UserHandle.USER_ALL : userId;
-
-        if (isPackageDeviceAdmin(packageName, removeUser)) {
-            Slog.w(TAG, "Not removing package " + packageName + ": has active device admin");
-            return PackageManager.DELETE_FAILED_DEVICE_POLICY_MANAGER;
-        }
-
-        final PackageSetting uninstalledPs;
-        final PackageSetting disabledSystemPs;
-        final AndroidPackage pkg;
-
-        // for the uninstall-updates case and restricted profiles, remember the per-
-        // user handle installed state
-        int[] allUsers;
-        final int freezeUser;
-        final SparseArray<TempUserState> priorUserStates;
-        final InitAndSystemPackageHelper helper = new InitAndSystemPackageHelper(this);
-        /** enabled state of the uninstalled application */
-        synchronized (mLock) {
-            uninstalledPs = mSettings.getPackageLPr(packageName);
-            if (uninstalledPs == null) {
-                Slog.w(TAG, "Not removing non-existent package " + packageName);
-                return PackageManager.DELETE_FAILED_INTERNAL_ERROR;
-            }
-
-            if (versionCode != PackageManager.VERSION_CODE_HIGHEST
-                    && uninstalledPs.getLongVersionCode() != versionCode) {
-                Slog.w(TAG, "Not removing package " + packageName + " with versionCode "
-                        + uninstalledPs.getLongVersionCode() + " != " + versionCode);
-                return PackageManager.DELETE_FAILED_INTERNAL_ERROR;
-            }
-
-            disabledSystemPs = mSettings.getDisabledSystemPkgLPr(packageName);
-            // Static shared libs can be declared by any package, so let us not
-            // allow removing a package if it provides a lib others depend on.
-            pkg = mPackages.get(packageName);
-
-            allUsers = mUserManager.getUserIds();
-
-            if (pkg != null && pkg.getStaticSharedLibName() != null) {
-                SharedLibraryInfo libraryInfo = getSharedLibraryInfoLPr(
-                        pkg.getStaticSharedLibName(), pkg.getStaticSharedLibVersion());
-                if (libraryInfo != null) {
-                    for (int currUserId : allUsers) {
-                        if (removeUser != UserHandle.USER_ALL && removeUser != currUserId) {
-                            continue;
-                        }
-                        List<VersionedPackage> libClientPackages = getPackagesUsingSharedLibraryLPr(
-                                libraryInfo, MATCH_KNOWN_PACKAGES, Process.SYSTEM_UID, currUserId);
-                        if (!ArrayUtils.isEmpty(libClientPackages)) {
-                            Slog.w(TAG, "Not removing package " + pkg.getManifestPackageName()
-                                    + " hosting lib " + libraryInfo.getName() + " version "
-                                    + libraryInfo.getLongVersion() + " used by " + libClientPackages
-                                    + " for user " + currUserId);
-                            return PackageManager.DELETE_FAILED_USED_SHARED_LIBRARY;
-                        }
-                    }
-                }
-            }
-
-            info.mOrigUsers = uninstalledPs.queryInstalledUsers(allUsers, true);
-
-            if (PackageManagerServiceUtils.isUpdatedSystemApp(uninstalledPs)
-                    && ((deleteFlags & PackageManager.DELETE_SYSTEM_APP) == 0)) {
-                // We're downgrading a system app, which will apply to all users, so
-                // freeze them all during the downgrade
-                freezeUser = UserHandle.USER_ALL;
-                priorUserStates = new SparseArray<>();
-                for (int i = 0; i < allUsers.length; i++) {
-                    PackageUserState userState = uninstalledPs.readUserState(allUsers[i]);
-                    priorUserStates.put(allUsers[i],
-                            new TempUserState(userState.enabled, userState.lastDisableAppCaller,
-                                    userState.installed));
-                }
-            } else {
-                freezeUser = removeUser;
-                priorUserStates = null;
-            }
-        }
-
-        synchronized (mInstallLock) {
-            if (DEBUG_REMOVE) Slog.d(TAG, "deletePackageX: pkg=" + packageName + " user=" + userId);
-            try (PackageFreezer freezer = freezePackageForDelete(packageName, freezeUser,
-                    deleteFlags, "deletePackageX")) {
-                res = deletePackageLIF(packageName, UserHandle.of(removeUser), true, allUsers,
-                        deleteFlags | PackageManager.DELETE_CHATTY, info, true);
-            }
-            synchronized (mLock) {
-                if (res) {
-                    if (pkg != null) {
-                        mInstantAppRegistry.onPackageUninstalledLPw(pkg, uninstalledPs,
-                                info.mRemovedUsers);
-                    }
-                    updateSequenceNumberLP(uninstalledPs, info.mRemovedUsers);
-                    updateInstantAppInstallerLocked(packageName);
-                }
-            }
-            ApplicationPackageManager.invalidateGetPackagesForUidCache();
-        }
-
-        if (res) {
-            final boolean killApp = (deleteFlags & PackageManager.DELETE_DONT_KILL_APP) == 0;
-            info.sendPackageRemovedBroadcasts(killApp, removedBySystem);
-            info.sendSystemPackageUpdatedBroadcasts();
-        }
-        // Force a gc here.
-        Runtime.getRuntime().gc();
-        // Delete the resources here after sending the broadcast to let
-        // other processes clean up before deleting resources.
-        synchronized (mInstallLock) {
-            if (info.mArgs != null) {
-                info.mArgs.doPostDeleteLI(true);
-            }
-
-            boolean reEnableStub = false;
-
-            if (priorUserStates != null) {
-                synchronized (mLock) {
-                    for (int i = 0; i < allUsers.length; i++) {
-                        TempUserState priorUserState = priorUserStates.get(allUsers[i]);
-                        int enabledState = priorUserState.enabledState;
-                        PackageSetting pkgSetting = getPackageSetting(packageName);
-                        pkgSetting.setEnabled(enabledState, allUsers[i],
-                                priorUserState.lastDisableAppCaller);
-
-                        AndroidPackage aPkg = pkgSetting.getPkg();
-                        boolean pkgEnabled = aPkg != null && aPkg.isEnabled();
-                        if (!reEnableStub && priorUserState.installed
-                                && ((enabledState == COMPONENT_ENABLED_STATE_DEFAULT && pkgEnabled)
-                                        || enabledState == COMPONENT_ENABLED_STATE_ENABLED)) {
-                            reEnableStub = true;
-                        }
-                    }
-                    mSettings.writeAllUsersPackageRestrictionsLPr();
-                }
-            }
-
-            final AndroidPackage stubPkg =
-                    (disabledSystemPs == null) ? null : disabledSystemPs.getPkg();
-            if (stubPkg != null && stubPkg.isStub()) {
-                final PackageSetting stubPs;
-                synchronized (mLock) {
-                    stubPs = mSettings.getPackageLPr(stubPkg.getPackageName());
-                }
-
-                if (stubPs != null) {
-                    if (reEnableStub) {
-                        if (DEBUG_COMPRESSION) {
-                            Slog.i(TAG, "Enabling system stub after removal; pkg: "
-                                    + stubPkg.getPackageName());
-                        }
-                        helper.enableCompressedPackage(stubPkg, stubPs, mDefParseFlags,
-                                mDirsToScanAsSystem);
-                    } else if (DEBUG_COMPRESSION) {
-                        Slog.i(TAG, "System stub disabled for all users, leaving uncompressed "
-                                + "after removal; pkg: " + stubPkg.getPackageName());
-                    }
-                }
-            }
-        }
-
-        return res ? PackageManager.DELETE_SUCCEEDED : PackageManager.DELETE_FAILED_INTERNAL_ERROR;
-    }
-
-    /*
-     * This method deletes the package from internal data structures. If the DELETE_KEEP_DATA
-     * flag is not set, the data directory is removed as well.
-     * make sure this flag is set for partially installed apps. If not its meaningless to
-     * delete a partially installed application.
-     */
-    void removePackageDataLIF(final PackageSetting deletedPs, @NonNull int[] allUserHandles,
-            PackageRemovedInfo outInfo, int flags, boolean writeSettings) {
-        String packageName = deletedPs.getPackageName();
-        if (DEBUG_REMOVE) Slog.d(TAG, "removePackageDataLI: " + deletedPs);
-        // Retrieve object to delete permissions for shared user later on
-        final AndroidPackage deletedPkg = deletedPs.getPkg();
-        if (outInfo != null) {
-            outInfo.mRemovedPackage = packageName;
-            outInfo.mInstallerPackageName = deletedPs.getInstallSource().installerPackageName;
-            outInfo.mIsStaticSharedLib = deletedPkg != null
-                    && deletedPkg.getStaticSharedLibName() != null;
-            outInfo.populateUsers(deletedPs == null ? null
-                    : deletedPs.queryInstalledUsers(mUserManager.getUserIds(), true), deletedPs);
-        }
-
-        removePackageLI(deletedPs.getPackageName(), (flags & PackageManager.DELETE_CHATTY) != 0);
-
-        if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
-            final AndroidPackage resolvedPkg;
-            if (deletedPkg != null) {
-                resolvedPkg = deletedPkg;
-            } else {
-                // We don't have a parsed package when it lives on an ejected
-                // adopted storage device, so fake something together
-                resolvedPkg = PackageImpl.buildFakeForDeletion(deletedPs.getPackageName(),
-                        deletedPs.getVolumeUuid());
-            }
-            destroyAppDataLIF(resolvedPkg, UserHandle.USER_ALL,
-                    FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL);
-            destroyAppProfilesLIF(resolvedPkg);
-            if (outInfo != null) {
-                outInfo.mDataRemoved = true;
-            }
-        }
-
-        int removedAppId = -1;
-
-        // writer
-        boolean installedStateChanged = false;
-        if (deletedPs != null) {
-            if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
-                final SparseBooleanArray changedUsers = new SparseBooleanArray();
-                synchronized (mLock) {
-                    mDomainVerificationManager.clearPackage(deletedPs.getPackageName());
-                    mSettings.getKeySetManagerService().removeAppKeySetDataLPw(packageName);
-                    mAppsFilter.removePackage(getPackageSetting(packageName),
-                            false /* isReplace */);
-                    removedAppId = mSettings.removePackageLPw(packageName);
-                    if (outInfo != null) {
-                        outInfo.mRemovedAppId = removedAppId;
-                    }
-                    if (!mSettings.isDisabledSystemPackageLPr(packageName)) {
-                        // If we don't have a disabled system package to reinstall, the package is
-                        // really gone and its permission state should be removed.
-                        final SharedUserSetting sus = deletedPs.getSharedUser();
-                        List<AndroidPackage> sharedUserPkgs = sus != null ? sus.getPackages()
-                                : null;
-                        if (sharedUserPkgs == null) {
-                            sharedUserPkgs = Collections.emptyList();
-                        }
-                        mPermissionManager.onPackageUninstalled(packageName, deletedPs.getAppId(),
-                                deletedPs.getPkg(), sharedUserPkgs, UserHandle.USER_ALL);
-                    }
-                    clearPackagePreferredActivitiesLPw(
-                            deletedPs.getPackageName(), changedUsers, UserHandle.USER_ALL);
-
-                    mSettings.removeRenamedPackageLPw(deletedPs.getRealName());
-                }
-                if (changedUsers.size() > 0) {
-                    updateDefaultHomeNotLocked(changedUsers);
-                    postPreferredActivityChangedBroadcast(UserHandle.USER_ALL);
-                }
-            }
-            // make sure to preserve per-user disabled state if this removal was just
-            // a downgrade of a system app to the factory package
-            if (outInfo != null && outInfo.mOrigUsers != null) {
-                if (DEBUG_REMOVE) {
-                    Slog.d(TAG, "Propagating install state across downgrade");
-                }
-                for (int userId : allUserHandles) {
-                    final boolean installed = ArrayUtils.contains(outInfo.mOrigUsers, userId);
-                    if (DEBUG_REMOVE) {
-                        Slog.d(TAG, "    user " + userId + " => " + installed);
-                    }
-                    if (installed != deletedPs.getInstalled(userId)) {
-                        installedStateChanged = true;
-                    }
-                    deletedPs.setInstalled(installed, userId);
-                    if (installed) {
-                        deletedPs.setUninstallReason(UNINSTALL_REASON_UNKNOWN, userId);
-                    }
-                }
-            }
-        }
-        synchronized (mLock) {
-            // can downgrade to reader
-            if (writeSettings) {
-                // Save settings now
-                writeSettingsLPrTEMP();
-            }
-            if (installedStateChanged) {
-                mSettings.writeKernelMappingLPr(deletedPs);
-            }
-        }
-        if (removedAppId != -1) {
-            // A user ID was deleted here. Go through all users and remove it
-            // from KeyStore.
-            removeKeystoreDataIfNeeded(
-                    mInjector.getUserManagerInternal(), UserHandle.USER_ALL, removedAppId);
-        }
     }
 
     private static @Nullable ScanPartition resolveApexToScanPartition(
@@ -10030,29 +9369,6 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
         return null;
-    }
-
-    void deleteInstalledPackageLIF(PackageSetting ps,
-            boolean deleteCodeAndResources, int flags, @NonNull int[] allUserHandles,
-            PackageRemovedInfo outInfo, boolean writeSettings) {
-        synchronized (mLock) {
-            if (outInfo != null) {
-                outInfo.mUid = ps.getAppId();
-                outInfo.mBroadcastAllowList = mAppsFilter.getVisibilityAllowList(ps,
-                        allUserHandles, mSettings.getPackagesLocked());
-            }
-        }
-
-        // Delete package data from internal structures and also remove data if flag is set
-        removePackageDataLIF(ps, allUserHandles, outInfo, flags, writeSettings);
-
-        // Delete application code and resources only for parent packages
-        if (deleteCodeAndResources && (outInfo != null)) {
-            outInfo.mArgs = createInstallArgsForExisting(
-                    ps.getPathString(), getAppDexInstructionSets(
-                            ps.getPrimaryCpuAbi(), ps.getSecondaryCpuAbi()));
-            if (DEBUG_SD_INSTALL) Slog.i(TAG, "args=" + outInfo.mArgs);
-        }
     }
 
     @Override
@@ -10105,235 +9421,6 @@ public class PackageManagerService extends IPackageManager.Stub
             writeSettingsLPrTEMP();
         }
         return true;
-    }
-
-    /**
-     * @return a {@link DeletePackageAction} if the provided package and related state may be
-     * deleted, {@code null} otherwise.
-     */
-    @Nullable
-    @GuardedBy("mLock")
-    private static DeletePackageAction mayDeletePackageLocked(
-            PackageRemovedInfo outInfo, PackageSetting ps, @Nullable PackageSetting disabledPs,
-            int flags, UserHandle user) {
-        if (ps == null) {
-            return null;
-        }
-        if (PackageManagerServiceUtils.isSystemApp(ps)) {
-            final boolean deleteSystem = (flags & PackageManager.DELETE_SYSTEM_APP) != 0;
-            final boolean deleteAllUsers =
-                    user == null || user.getIdentifier() == UserHandle.USER_ALL;
-            if ((!deleteSystem || deleteAllUsers) && disabledPs == null) {
-                Slog.w(TAG, "Attempt to delete unknown system package "
-                        + ps.getPkg().getPackageName());
-                return null;
-            }
-            // Confirmed if the system package has been updated
-            // An updated system app can be deleted. This will also have to restore
-            // the system pkg from system partition reader
-        }
-        return new DeletePackageAction(ps, disabledPs, outInfo, flags, user);
-    }
-
-    /*
-     * This method handles package deletion in general
-     */
-    boolean deletePackageLIF(@NonNull String packageName, UserHandle user,
-            boolean deleteCodeAndResources, @NonNull int[] allUserHandles, int flags,
-            PackageRemovedInfo outInfo, boolean writeSettings) {
-        final DeletePackageAction action;
-        synchronized (mLock) {
-            final PackageSetting ps = mSettings.getPackageLPr(packageName);
-            final PackageSetting disabledPs = mSettings.getDisabledSystemPkgLPr(ps);
-            action = mayDeletePackageLocked(outInfo, ps, disabledPs, flags, user);
-        }
-        if (DEBUG_REMOVE) Slog.d(TAG, "deletePackageLI: " + packageName + " user " + user);
-        if (null == action) {
-            if (DEBUG_REMOVE) Slog.d(TAG, "deletePackageLI: action was null");
-            return false;
-        }
-
-        try {
-            executeDeletePackageLIF(action, packageName, deleteCodeAndResources,
-                    allUserHandles, writeSettings);
-        } catch (SystemDeleteException e) {
-            if (DEBUG_REMOVE) Slog.d(TAG, "deletePackageLI: system deletion failure", e);
-            return false;
-        }
-        return true;
-    }
-
-    /** Deletes a package. Only throws when install of a disabled package fails. */
-    void executeDeletePackageLIF(DeletePackageAction action,
-            String packageName, boolean deleteCodeAndResources,
-            @NonNull int[] allUserHandles, boolean writeSettings) throws SystemDeleteException {
-        final PackageSetting ps = action.mDeletingPs;
-        final PackageRemovedInfo outInfo = action.mRemovedInfo;
-        final UserHandle user = action.mUser;
-        final int flags = action.mFlags;
-        final boolean systemApp = PackageManagerServiceUtils.isSystemApp(ps);
-
-        // We need to get the permission state before package state is (potentially) destroyed.
-        final SparseBooleanArray hadSuspendAppsPermission = new SparseBooleanArray();
-        for (int userId : allUserHandles) {
-            hadSuspendAppsPermission.put(userId, checkPermission(Manifest.permission.SUSPEND_APPS,
-                    packageName, userId) == PERMISSION_GRANTED);
-        }
-
-        final int userId = user == null ? UserHandle.USER_ALL : user.getIdentifier();
-
-        if ((!systemApp || (flags & PackageManager.DELETE_SYSTEM_APP) != 0)
-                && userId != UserHandle.USER_ALL) {
-            // The caller is asking that the package only be deleted for a single
-            // user.  To do this, we just mark its uninstalled state and delete
-            // its data. If this is a system app, we only allow this to happen if
-            // they have set the special DELETE_SYSTEM_APP which requests different
-            // semantics than normal for uninstalling system apps.
-            final boolean clearPackageStateAndReturn;
-            synchronized (mLock) {
-                markPackageUninstalledForUserLPw(ps, user);
-                if (!systemApp) {
-                    // Do not uninstall the APK if an app should be cached
-                    boolean keepUninstalledPackage = shouldKeepUninstalledPackageLPr(packageName);
-                    if (ps.isAnyInstalled(mUserManager.getUserIds()) || keepUninstalledPackage) {
-                        // Other users still have this package installed, so all
-                        // we need to do is clear this user's data and save that
-                        // it is uninstalled.
-                        if (DEBUG_REMOVE) Slog.d(TAG, "Still installed by other users");
-                        clearPackageStateAndReturn = true;
-                    } else {
-                        // We need to set it back to 'installed' so the uninstall
-                        // broadcasts will be sent correctly.
-                        if (DEBUG_REMOVE) Slog.d(TAG, "Not installed by other users, full delete");
-                        ps.setInstalled(true, userId);
-                        mSettings.writeKernelMappingLPr(ps);
-                        clearPackageStateAndReturn = false;
-                    }
-                } else {
-                    // This is a system app, so we assume that the
-                    // other users still have this package installed, so all
-                    // we need to do is clear this user's data and save that
-                    // it is uninstalled.
-                    if (DEBUG_REMOVE) Slog.d(TAG, "Deleting system app");
-                    clearPackageStateAndReturn = true;
-                }
-            }
-            if (clearPackageStateAndReturn) {
-                clearPackageStateForUserLIF(ps, userId, outInfo, flags);
-                synchronized (mLock) {
-                    scheduleWritePackageRestrictionsLocked(user);
-                }
-                return;
-            }
-        }
-
-        // TODO(b/109941548): break reasons for ret = false out into mayDelete method
-        if (systemApp) {
-            if (DEBUG_REMOVE) Slog.d(TAG, "Removing system package: " + ps.getPackageName());
-            // When an updated system application is deleted we delete the existing resources
-            // as well and fall back to existing code in system partition
-            final InitAndSystemPackageHelper helper = new InitAndSystemPackageHelper(this);
-            helper.deleteSystemPackageLIF(action, ps, allUserHandles, flags, outInfo,
-                    writeSettings, mDefParseFlags, mDirsToScanAsSystem);
-        } else {
-            if (DEBUG_REMOVE) Slog.d(TAG, "Removing non-system package: " + ps.getPackageName());
-            deleteInstalledPackageLIF(ps, deleteCodeAndResources, flags, allUserHandles,
-                    outInfo, writeSettings);
-        }
-
-        // If the package removed had SUSPEND_APPS, unset any restrictions that might have been in
-        // place for all affected users.
-        int[] affectedUserIds = (outInfo != null) ? outInfo.mRemovedUsers : null;
-        if (affectedUserIds == null) {
-            affectedUserIds = resolveUserIds(userId);
-        }
-        for (final int affectedUserId : affectedUserIds) {
-            if (hadSuspendAppsPermission.get(affectedUserId)) {
-                unsuspendForSuspendingPackage(packageName, affectedUserId);
-                removeAllDistractingPackageRestrictions(affectedUserId);
-            }
-        }
-
-        // Take a note whether we deleted the package for all users
-        if (outInfo != null) {
-            outInfo.mRemovedForAllUsers = mPackages.get(ps.getPackageName()) == null;
-        }
-    }
-
-    @GuardedBy("mLock")
-    private void markPackageUninstalledForUserLPw(PackageSetting ps, UserHandle user) {
-        final int[] userIds = (user == null || user.getIdentifier() == UserHandle.USER_ALL)
-                ? mUserManager.getUserIds() : new int[] {user.getIdentifier()};
-        for (int nextUserId : userIds) {
-            if (DEBUG_REMOVE) {
-                Slog.d(TAG, "Marking package:" + ps.getPackageName()
-                        + " uninstalled for user:" + nextUserId);
-            }
-            ps.setUserState(nextUserId, 0, COMPONENT_ENABLED_STATE_DEFAULT,
-                    false /*installed*/,
-                    true /*stopped*/,
-                    true /*notLaunched*/,
-                    false /*hidden*/,
-                    0 /*distractionFlags*/,
-                    false /*suspended*/,
-                    null /*suspendParams*/,
-                    false /*instantApp*/,
-                    false /*virtualPreload*/,
-                    null /*lastDisableAppCaller*/,
-                    null /*enabledComponents*/,
-                    null /*disabledComponents*/,
-                    PackageManager.INSTALL_REASON_UNKNOWN,
-                    PackageManager.UNINSTALL_REASON_UNKNOWN,
-                    null /*harmfulAppWarning*/,
-                    null /*splashScreenTheme*/);
-        }
-        mSettings.writeKernelMappingLPr(ps);
-    }
-
-    private void clearPackageStateForUserLIF(PackageSetting ps, int userId,
-            PackageRemovedInfo outInfo, int flags) {
-        final AndroidPackage pkg;
-        synchronized (mLock) {
-            pkg = mPackages.get(ps.getPackageName());
-        }
-
-        destroyAppProfilesLIF(pkg);
-
-        final SharedUserSetting sus = ps.getSharedUser();
-        List<AndroidPackage> sharedUserPkgs = sus != null ? sus.getPackages() : null;
-        if (sharedUserPkgs == null) {
-            sharedUserPkgs = Collections.emptyList();
-        }
-        final int[] userIds = (userId == UserHandle.USER_ALL) ? mUserManager.getUserIds()
-                : new int[] {userId};
-        for (int nextUserId : userIds) {
-            if (DEBUG_REMOVE) {
-                Slog.d(TAG, "Updating package:" + ps.getPackageName() + " install state for user:"
-                        + nextUserId);
-            }
-            if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
-                destroyAppDataLIF(pkg, nextUserId,
-                        FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL);
-            }
-            removeKeystoreDataIfNeeded(mInjector.getUserManagerInternal(), nextUserId,
-                    ps.getAppId());
-            clearPackagePreferredActivities(ps.getPackageName(), nextUserId);
-            mDomainVerificationManager.clearPackageForUser(ps.getPackageName(), nextUserId);
-        }
-        mPermissionManager.onPackageUninstalled(ps.getPackageName(), ps.getAppId(), pkg,
-                sharedUserPkgs, userId);
-
-        if (outInfo != null) {
-            if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
-                outInfo.mDataRemoved = true;
-            }
-            outInfo.mRemovedPackage = ps.getPackageName();
-            outInfo.mInstallerPackageName = ps.getInstallSource().installerPackageName;
-            outInfo.mIsStaticSharedLib = pkg != null && pkg.getStaticSharedLibName() != null;
-            outInfo.mRemovedAppId = ps.getAppId();
-            outInfo.mRemovedUsers = userIds;
-            outInfo.mBroadcastUsers = userIds;
-        }
     }
 
     @Override
@@ -10468,7 +9555,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * Remove entries from the keystore daemon. Will only remove it if the
      * {@code appId} is valid.
      */
-    private static void removeKeystoreDataIfNeeded(UserManagerInternal um, @UserIdInt int userId,
+    static void removeKeystoreDataIfNeeded(UserManagerInternal um, @UserIdInt int userId,
             @AppIdInt int appId) {
         if (appId < 0) {
             return;
@@ -10648,7 +9735,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private void postPreferredActivityChangedBroadcast(int userId) {
+    void postPreferredActivityChangedBroadcast(int userId) {
         mHandler.post(() -> mBroadcastHelper.sendPreferredActivityChangedBroadcast(userId));
     }
 
@@ -10775,7 +9862,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /** This method takes a specific user id as well as UserHandle.USER_ALL. */
-    private void clearPackagePreferredActivities(String packageName, int userId) {
+    void clearPackagePreferredActivities(String packageName, int userId) {
         final SparseBooleanArray changedUsers = new SparseBooleanArray();
         synchronized (mLock) {
             clearPackagePreferredActivitiesLPw(packageName, changedUsers, userId);
@@ -10791,7 +9878,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     /** This method takes a specific user id as well as UserHandle.USER_ALL. */
     @GuardedBy("mLock")
-    private void clearPackagePreferredActivitiesLPw(String packageName,
+    void clearPackagePreferredActivitiesLPw(String packageName,
             @NonNull SparseBooleanArray outUserChanged, int userId) {
         mSettings.clearPackagePreferredActivities(packageName, outUserChanged, userId);
     }
@@ -11280,7 +10367,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /** <b>must not hold {@link #mLock}</b> */
-    private void updateDefaultHomeNotLocked(SparseBooleanArray userIds) {
+    void updateDefaultHomeNotLocked(SparseBooleanArray userIds) {
         if (Thread.holdsLock(mLock)) {
             Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName()
                     + " is holding mLock", new Throwable());
@@ -11822,7 +10909,6 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        final InitAndSystemPackageHelper helper = new InitAndSystemPackageHelper(this);
         // More work for application enabled setting updates
         for (int i = 0; i < targetSize; i++) {
             final ComponentEnabledSetting setting = settings.get(i);
@@ -11848,8 +10934,8 @@ public class PackageManagerService extends IPackageManager.Stub
             if (isSystemStub
                     && (newState == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
                     || newState == PackageManager.COMPONENT_ENABLED_STATE_ENABLED)) {
-                if (!helper.enableCompressedPackage(deletedPkg, pkgSetting, mDefParseFlags,
-                        mDirsToScanAsSystem)) {
+                if (!mInitAndSystemPackageHelper.enableCompressedPackage(deletedPkg, pkgSetting,
+                        mDefParseFlags, mDirsToScanAsSystem)) {
                     Slog.w(TAG, "Failed setApplicationEnabledSetting: failed to enable "
                             + "commpressed package " + setting.getPackageName());
                     updateAllowed[i] = false;
@@ -12223,15 +11309,6 @@ public class PackageManagerService extends IPackageManager.Stub
         return ps.getInstallSource();
     }
 
-    private boolean isOrphaned(String packageName) {
-        // reader
-        synchronized (mLock) {
-            if (!mPackages.containsKey(packageName)) {
-                return false;
-            }
-            return mSettings.isOrphaned(packageName);
-        }
-    }
 
     @Override
     public int getApplicationEnabledSetting(String packageName, int userId) {
@@ -12383,7 +11460,8 @@ public class PackageManagerService extends IPackageManager.Stub
         mUserManager.systemReady();
 
         // Watch for external volumes that come and go over time
-        final StorageEventHelper storageEventHelper = new StorageEventHelper(this);
+        final StorageEventHelper storageEventHelper = new StorageEventHelper(this,
+                mDeletePackageHelper, mRemovePackageHelper);
         final StorageManager storage = mInjector.getSystemService(StorageManager.class);
         storage.registerListener(storageEventHelper);
 
@@ -13246,9 +12324,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    // ------- apps on sdcard specific code -------
-    private static final boolean DEBUG_SD_INSTALL = false;
-
     private void assertPackageKnownAndInstalled(String volumeUuid, String packageName, int userId)
             throws PackageManagerException {
         synchronized (mLock) {
@@ -13520,7 +12595,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (e != null) {
                         logCriticalInfo(Log.WARN, "Failed to create app data for " + packageName
                                 + ", but trying to recover: " + e);
-                        destroyAppDataLeafLIF(pkg, userId, flags);
+                        mRemovePackageHelper.destroyAppDataLeafLIF(pkg, userId, flags);
                         try {
                             ceDataInode = mInstaller.createAppData(volumeUuid, packageName, userId,
                                     flags, appId, seInfo, pkg.getTargetSdkVersion());
@@ -13808,7 +12883,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     Slog.i(TAG, "  Removing package " + packageName);
                 }
                 //end run
-                mHandler.post(() -> deletePackageX(packageName, PackageManager.VERSION_CODE_HIGHEST,
+                mHandler.post(() -> mDeletePackageHelper.deletePackageX(
+                        packageName, PackageManager.VERSION_CODE_HIGHEST,
                         userId, 0, true /*removedBySystem*/));
             }
         }
@@ -14021,7 +13097,8 @@ public class PackageManagerService extends IPackageManager.Stub
             // TODO Implement atomic delete if package is unused
             // It is currently possible that the package will be deleted even if it is installed
             // after this method returns.
-            mHandler.post(() -> deletePackageX(packageName, PackageManager.VERSION_CODE_HIGHEST,
+            mHandler.post(() -> mDeletePackageHelper.deletePackageX(
+                    packageName, PackageManager.VERSION_CODE_HIGHEST,
                     0, PackageManager.DELETE_ALL_USERS, true /*removedBySystem*/));
         }
     }
@@ -16252,20 +15329,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private static class TempUserState {
-        public final int enabledState;
-        @Nullable
-        public final String lastDisableAppCaller;
-        public final boolean installed;
-
-        private TempUserState(int enabledState, @Nullable String lastDisableAppCaller,
-                boolean installed) {
-            this.enabledState = enabledState;
-            this.lastDisableAppCaller = lastDisableAppCaller;
-            this.installed = installed;
-        }
-    }
-
     public boolean getSafeMode() {
         return mSafeMode;
     }
@@ -16276,5 +15339,21 @@ public class PackageManagerService extends IPackageManager.Stub
 
     public DefaultAppProvider getDefaultAppProvider() {
         return mDefaultAppProvider;
+    }
+
+    public File getCacheDir() {
+        return mCacheDir;
+    }
+
+    public List<ScanPartition> getDirsToScanAsSystem() {
+        return mDirsToScanAsSystem;
+    }
+
+    public PackageProperty getPackageProperty() {
+        return mPackageProperty;
+    }
+
+    public WatchedArrayMap<ComponentName, ParsedInstrumentation> getInstrumentation() {
+        return mInstrumentation;
     }
 }

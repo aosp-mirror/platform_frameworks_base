@@ -362,11 +362,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     }
 
     private void removeStagingDirs(ArraySet<File> stagingDirsToRemove) {
+        final RemovePackageHelper removePackageHelper = new RemovePackageHelper(mPm);
         // Clean up orphaned staging directories
         for (File stage : stagingDirsToRemove) {
             Slog.w(TAG, "Deleting orphan stage " + stage);
             synchronized (mPm.mInstallLock) {
-                mPm.removeCodePathLI(stage);
+                removePackageHelper.removeCodePathLI(stage);
             }
         }
     }

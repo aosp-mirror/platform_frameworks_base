@@ -861,9 +861,11 @@ class InstantAppRegistry implements Watchable, Snappable {
 
         if (packagesToDelete != null) {
             final int packageCount = packagesToDelete.size();
+            final DeletePackageHelper deletePackageHelper = new DeletePackageHelper(mService);
             for (int i = 0; i < packageCount; i++) {
                 final String packageToDelete = packagesToDelete.get(i);
-                if (mService.deletePackageX(packageToDelete, PackageManager.VERSION_CODE_HIGHEST,
+                if (deletePackageHelper.deletePackageX(packageToDelete,
+                        PackageManager.VERSION_CODE_HIGHEST,
                         UserHandle.USER_SYSTEM, PackageManager.DELETE_ALL_USERS,
                         true /*removedBySystem*/) == PackageManager.DELETE_SUCCEEDED) {
                     if (file.getUsableSpace() >= neededSpace) {

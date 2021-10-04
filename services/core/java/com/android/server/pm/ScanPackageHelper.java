@@ -928,7 +928,8 @@ public final class ScanPackageHelper {
                 try (@SuppressWarnings("unused") PackageFreezer freezer = mPm.freezePackage(
                         parsedPackage.getPackageName(),
                         "scanPackageInternalLI")) {
-                    mPm.deletePackageLIF(parsedPackage.getPackageName(), null, true,
+                    DeletePackageHelper deletePackageHelper = new DeletePackageHelper(mPm);
+                    deletePackageHelper.deletePackageLIF(parsedPackage.getPackageName(), null, true,
                             mPm.mUserManager.getUserIds(), 0, null, false);
                 }
                 pkgSetting = null;

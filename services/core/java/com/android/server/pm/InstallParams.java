@@ -1538,6 +1538,8 @@ final class InstallParams extends HandlerParams {
             final ParsedPackage parsedPackage = scanRequest.mParsedPackage;
             final String packageName = parsedPackage.getPackageName();
             final PackageInstalledInfo res = reconciledPkg.mInstallResult;
+            final RemovePackageHelper removePackageHelper = new RemovePackageHelper(mPm);
+            final DeletePackageHelper deletePackageHelper = new DeletePackageHelper(mPm);
 
             if (reconciledPkg.mPrepareResult.mReplace) {
                 AndroidPackage oldPackage = mPm.mPackages.get(packageName);
@@ -1554,7 +1556,7 @@ final class InstallParams extends HandlerParams {
                         mPm.mSettings.getPackagesLocked());
                 if (reconciledPkg.mPrepareResult.mSystem) {
                     // Remove existing system package
-                    mPm.removePackageLI(oldPackage, true);
+                    removePackageHelper.removePackageLI(oldPackage, true);
                     if (!disableSystemPackageLPw(oldPackage)) {
                         // We didn't need to disable the .apk as a current system package,
                         // which means we are replacing another update that is already
@@ -1572,7 +1574,8 @@ final class InstallParams extends HandlerParams {
                 } else {
                     try {
                         // Settings will be written during the call to updateSettingsLI().
-                        mPm.executeDeletePackageLIF(reconciledPkg.mDeletePackageAction, packageName,
+                        deletePackageHelper.executeDeletePackageLIF(
+                                reconciledPkg.mDeletePackageAction, packageName,
                                 true, request.mAllUsers, false);
                     } catch (SystemDeleteException e) {
                         if (mPm.mIsEngBuild) {

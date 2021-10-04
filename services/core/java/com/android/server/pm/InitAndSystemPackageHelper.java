@@ -85,12 +85,14 @@ import java.util.concurrent.ExecutorService;
  * further cleanup and eventually all the installation/scanning related logic will go to another
  * class.
  */
-public class InitAndSystemPackageHelper {
-    final PackageManagerService mPm;
+final class InitAndSystemPackageHelper {
+    private final PackageManagerService mPm;
+    private final RemovePackageHelper mRemovePackageHelper;
 
     // TODO(b/198166813): remove PMS dependency
-    public InitAndSystemPackageHelper(PackageManagerService pm) {
+    InitAndSystemPackageHelper(PackageManagerService pm, RemovePackageHelper removePackageHelper) {
         mPm = pm;
+        mRemovePackageHelper = removePackageHelper;
     }
 
     /**
@@ -203,7 +205,7 @@ public class InitAndSystemPackageHelper {
                                         + ", versionCode=" + ps.getVersionCode()
                                         + "; scanned versionCode="
                                         + scannedPkg.getLongVersionCode());
-                        mPm.removePackageLI(scannedPkg, true);
+                        mRemovePackageHelper.removePackageLI(scannedPkg, true);
                         mPm.mExpectingBetter.put(ps.getPackageName(), ps.getPath());
                     }
 
@@ -213,7 +215,7 @@ public class InitAndSystemPackageHelper {
                 if (!mPm.mSettings.isDisabledSystemPackageLPr(ps.getPackageName())) {
                     logCriticalInfo(Log.WARN, "System package " + ps.getPackageName()
                             + " no longer exists; its data will be wiped");
-                    mPm.removePackageDataLIF(ps, userIds, null, 0, false);
+                    mRemovePackageHelper.removePackageDataLIF(ps, userIds, null, 0, false);
                 } else {
                     // we still have a disabled system package, but, it still might have
                     // been removed. check the code path still exists and check there's
@@ -300,7 +302,7 @@ public class InitAndSystemPackageHelper {
 
                     // remove the package from the system and re-scan it without any
                     // special privileges
-                    mPm.removePackageLI(pkg, true);
+                    mRemovePackageHelper.removePackageLI(pkg, true);
                     try {
                         final File codePath = new File(pkg.getPath());
                         scanPackageHelper.scanPackageTracedLI(codePath, 0, scanFlags, 0, null);
@@ -316,7 +318,7 @@ public class InitAndSystemPackageHelper {
                 // partition], completely remove the package data.
                 final PackageSetting ps = mPm.mSettings.getPackageLPr(packageName);
                 if (ps != null && mPm.mPackages.get(packageName) == null) {
-                    mPm.removePackageDataLIF(ps, userIds, null, 0, false);
+                    mRemovePackageHelper.removePackageDataLIF(ps, userIds, null, 0, false);
 
                 }
                 logCriticalInfo(Log.WARN, msg);
@@ -486,7 +488,7 @@ public class InitAndSystemPackageHelper {
                     && errorCode != PackageManager.INSTALL_SUCCEEDED) {
                 logCriticalInfo(Log.WARN,
                         "Deleting invalid package at " + parseResult.scanFile);
-                mPm.removeCodePathLI(parseResult.scanFile);
+                mRemovePackageHelper.removeCodePathLI(parseResult.scanFile);
             }
         }
     }
@@ -638,7 +640,7 @@ public class InitAndSystemPackageHelper {
         synchronized (mPm.mLock) {
             mPm.mSettings.disableSystemPackageLPw(stubPkg.getPackageName(), true /*replaced*/);
         }
-        mPm.removePackageLI(stubPkg, true /*chatty*/);
+        mRemovePackageHelper.removePackageLI(stubPkg, true /*chatty*/);
         final ScanPackageHelper scanPackageHelper = new ScanPackageHelper(mPm);
         try {
             return scanPackageHelper.scanPackageTracedLI(scanFile, parseFlags, scanFlags, 0, null);
@@ -646,7 +648,7 @@ public class InitAndSystemPackageHelper {
             Slog.w(TAG, "Failed to install compressed system package:" + stubPkg.getPackageName(),
                     e);
             // Remove the failed install
-            mPm.removeCodePathLI(scanFile);
+            mRemovePackageHelper.removeCodePathLI(scanFile);
             throw e;
         }
     }
@@ -723,7 +725,7 @@ public class InitAndSystemPackageHelper {
             if (!dstCodePath.exists()) {
                 return null;
             }
-            mPm.removeCodePathLI(dstCodePath);
+            mRemovePackageHelper.removeCodePathLI(dstCodePath);
             return null;
         }
 
@@ -737,52 +739,15 @@ public class InitAndSystemPackageHelper {
     }
 
     /**
-     * Tries to delete system package.
+     * Tries to restore the disabled system package after an update has been deleted.
      */
     @GuardedBy({"mPm.mLock", "mPm.mInstallLock"})
-    public void deleteSystemPackageLIF(DeletePackageAction action, PackageSetting deletedPs,
-            @NonNull int[] allUserHandles, int flags, @Nullable PackageRemovedInfo outInfo,
-            boolean writeSettings, int defParseFlags, List<ScanPartition> dirsToScanAsSystem)
+    public void restoreDisabledSystemPackageLIF(DeletePackageAction action,
+            PackageSetting deletedPs, @NonNull int[] allUserHandles,
+            @Nullable PackageRemovedInfo outInfo,
+            boolean writeSettings, int defParseFlags, List<ScanPartition> dirsToScanAsSystem,
+            PackageSetting disabledPs)
             throws SystemDeleteException {
-        final boolean applyUserRestrictions = outInfo != null && (outInfo.mOrigUsers != null);
-        final AndroidPackage deletedPkg = deletedPs.getPkg();
-        // Confirm if the system package has been updated
-        // An updated system app can be deleted. This will also have to restore
-        // the system pkg from system partition
-        // reader
-        final PackageSetting disabledPs = action.mDisabledPs;
-        if (DEBUG_REMOVE) {
-            Slog.d(TAG, "deleteSystemPackageLI: newPs=" + deletedPkg.getPackageName()
-                    + " disabledPs=" + disabledPs);
-        }
-        Slog.d(TAG, "Deleting system pkg from data partition");
-
-        if (DEBUG_REMOVE) {
-            if (applyUserRestrictions) {
-                Slog.d(TAG, "Remembering install states:");
-                for (int userId : allUserHandles) {
-                    final boolean finstalled = ArrayUtils.contains(outInfo.mOrigUsers, userId);
-                    Slog.d(TAG, "   u=" + userId + " inst=" + finstalled);
-                }
-            }
-        }
-
-        if (outInfo != null) {
-            // Delete the updated package
-            outInfo.mIsRemovedPackageSystemUpdate = true;
-        }
-
-        if (disabledPs.getVersionCode() < deletedPs.getVersionCode()) {
-            // Delete data for downgrades
-            flags &= ~PackageManager.DELETE_KEEP_DATA;
-        } else {
-            // Preserve data by setting flag
-            flags |= PackageManager.DELETE_KEEP_DATA;
-        }
-
-        mPm.deleteInstalledPackageLIF(deletedPs, true, flags, allUserHandles,
-                outInfo, writeSettings);
-
         // writer
         synchronized (mPm.mLock) {
             // NOTE: The system package always needs to be enabled; even if it's for
@@ -802,7 +767,7 @@ public class InitAndSystemPackageHelper {
                     outInfo == null ? null : outInfo.mOrigUsers, writeSettings, defParseFlags,
                     dirsToScanAsSystem);
         } catch (PackageManagerException e) {
-            Slog.w(TAG, "Failed to restore system package:" + deletedPkg.getPackageName() + ": "
+            Slog.w(TAG, "Failed to restore system package:" + deletedPs.getPackageName() + ": "
                     + e.getMessage());
             // TODO(b/194319951): can we avoid this; throw would come from scan...
             throw new SystemDeleteException(e);
@@ -812,7 +777,7 @@ public class InitAndSystemPackageHelper {
                 // originally enabled, we'll install the compressed version of the application
                 // and re-enable it afterward.
                 final PackageSetting stubPs = mPm.mSettings.getPackageLPr(
-                        deletedPkg.getPackageName());
+                        deletedPs.getPackageName());
                 if (stubPs != null) {
                     int userId = action.mUser == null
                             ? UserHandle.USER_ALL : action.mUser.getIdentifier();
