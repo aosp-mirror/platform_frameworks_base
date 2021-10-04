@@ -486,8 +486,6 @@ public final class Parcel {
      * transaction on this specific binder object. Based on this, the format of the wire binder
      * protocol may change. For future compatibility, it is recommended to use this for all
      * Parcels.
-     *
-     * @hide
      */
     @NonNull
     public static Parcel obtain(@NonNull IBinder binder) {
