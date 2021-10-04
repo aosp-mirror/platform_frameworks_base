@@ -195,7 +195,8 @@ public class NavigationBarController implements
         mNavigationModeController.addListener(this);
         mTaskbarDelegate = taskbarDelegate;
         mTaskbarDelegate.setOverviewProxyService(commandQueue, overviewProxyService,
-                navigationBarA11yHelper, navigationModeController, sysUiFlagsContainer);
+                navigationBarA11yHelper, navigationModeController, sysUiFlagsContainer,
+                dumpManager);
         mIsTablet = isTablet(mContext);
         mUserTracker = userTracker;
 
