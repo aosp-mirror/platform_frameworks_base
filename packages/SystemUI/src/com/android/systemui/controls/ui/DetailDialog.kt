@@ -43,7 +43,7 @@ import com.android.wm.shell.TaskView
 class DetailDialog(
     val activityContext: Context?,
     val taskView: TaskView,
-    val intent: Intent,
+    val pendingIntent: PendingIntent,
     val cvh: ControlViewHolder
 ) : Dialog(
     activityContext ?: cvh.context,
@@ -59,6 +59,14 @@ class DetailDialog(
 
     var detailTaskId = INVALID_TASK_ID
 
+    private val fillInIntent = Intent().apply {
+        putExtra(EXTRA_USE_PANEL, true)
+
+        // Apply flags to make behaviour match documentLaunchMode=always.
+        addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT)
+        addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
+    }
+
     fun removeDetailTask() {
         if (detailTaskId == INVALID_TASK_ID) return
         ActivityTaskManager.getInstance().removeTask(detailTaskId)
@@ -67,13 +75,6 @@ class DetailDialog(
 
     val stateCallback = object : TaskView.Listener {
         override fun onInitialized() {
-            val launchIntent = Intent(intent)
-            launchIntent.putExtra(EXTRA_USE_PANEL, true)
-
-            // Apply flags to make behaviour match documentLaunchMode=always.
-            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT)
-            launchIntent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
-
             val options = activityContext?.let {
                 ActivityOptions.makeCustomAnimation(
                     it,
@@ -82,9 +83,8 @@ class DetailDialog(
                 )
             } ?: ActivityOptions.makeBasic()
             taskView.startActivity(
-                PendingIntent.getActivity(context, 0, launchIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE),
-                null /* fillInIntent */,
+                pendingIntent,
+                fillInIntent,
                 options,
                 getTaskViewBounds()
             )
@@ -97,6 +97,9 @@ class DetailDialog(
 
         override fun onTaskCreated(taskId: Int, name: ComponentName?) {
             detailTaskId = taskId
+            requireViewById<ViewGroup>(R.id.controls_activity_view).apply {
+                setAlpha(1f)
+            }
         }
 
         override fun onReleased() {
@@ -121,6 +124,7 @@ class DetailDialog(
 
         requireViewById<ViewGroup>(R.id.controls_activity_view).apply {
             addView(taskView)
+            setAlpha(0f)
         }
 
         requireViewById<ImageView>(R.id.control_detail_close).apply {
@@ -134,7 +138,7 @@ class DetailDialog(
                 removeDetailTask()
                 dismiss()
                 context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
-                v.context.startActivity(intent)
+                pendingIntent.send()
             }
         }
 
