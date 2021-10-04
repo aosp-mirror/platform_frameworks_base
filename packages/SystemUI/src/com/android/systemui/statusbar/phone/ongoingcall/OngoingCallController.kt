@@ -26,10 +26,12 @@ import android.util.Log
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
+import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
@@ -37,6 +39,8 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.Co
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.policy.CallbackController
 import com.android.systemui.util.time.SystemClock
+import java.io.FileDescriptor
+import java.io.PrintWriter
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -51,13 +55,14 @@ class OngoingCallController @Inject constructor(
     private val activityStarter: ActivityStarter,
     @Main private val mainExecutor: Executor,
     private val iActivityManager: IActivityManager,
-    private val logger: OngoingCallLogger
-) : CallbackController<OngoingCallListener> {
+    private val logger: OngoingCallLogger,
+    private val dumpManager: DumpManager,
+) : CallbackController<OngoingCallListener>, Dumpable {
 
     /** Non-null if there's an active call notification. */
     private var callNotificationInfo: CallNotificationInfo? = null
     /** True if the application managing the call is visible to the user. */
-    private var isCallAppVisible: Boolean = true
+    private var isCallAppVisible: Boolean = false
     private var chipView: View? = null
     private var uidObserver: IUidObserver.Stub? = null
 
@@ -120,6 +125,7 @@ class OngoingCallController @Inject constructor(
     }
 
     fun init() {
+        dumpManager.registerDumpable(this)
         if (featureFlags.isOngoingCallStatusBarChipEnabled) {
             notifCollection.addCollectionListener(notifListener)
         }
@@ -298,6 +304,11 @@ class OngoingCallController @Inject constructor(
          * See b/192379214.
          */
         fun hasValidStartTime(): Boolean = callStartTime > 0
+    }
+
+    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+        pw.println("Active call notification: $callNotificationInfo")
+        pw.println("Call app visible: $isCallAppVisible")
     }
 }
 
