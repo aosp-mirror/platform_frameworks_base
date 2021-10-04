@@ -31473,6 +31473,7 @@ package android.os {
     method public boolean hasFileDescriptors();
     method public byte[] marshall();
     method @NonNull public static android.os.Parcel obtain();
+    method @NonNull public static android.os.Parcel obtain(@NonNull android.os.IBinder);
     method @Nullable public Object[] readArray(@Nullable ClassLoader);
     method @Nullable public java.util.ArrayList readArrayList(@Nullable ClassLoader);
     method public void readBinderArray(@NonNull android.os.IBinder[]);
