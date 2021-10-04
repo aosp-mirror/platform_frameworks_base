@@ -97,6 +97,7 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
         mLargeClockFrame = mKeyguardClockSwitch.findViewById(R.id.lockscreen_clock_view_large);
         mLargeClockView = mKeyguardClockSwitch.findViewById(R.id.animatable_clock_view_large);
         mBigClock = new TextClock(getContext());
+        mKeyguardClockSwitch.mChildrenAreLaidOut = true;
         MockitoAnnotations.initMocks(this);
     }
 
