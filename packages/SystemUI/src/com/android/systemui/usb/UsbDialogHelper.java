@@ -37,14 +37,11 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.Log;
 
-import com.android.systemui.usb.tv.TvUsbPermissionActivity;
-
-
 /**
  * Helper class to separate model and view for USB permission and confirm dialogs.
  */
 public class UsbDialogHelper {
-    private static final String TAG = TvUsbPermissionActivity.class.getSimpleName();
+    private static final String TAG = UsbDialogHelper.class.getSimpleName();
     private static final String EXTRA_RESOLVE_INFO = "rinfo";
 
     private final UsbDevice mDevice;
