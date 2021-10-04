@@ -50,7 +50,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.incremental.IncrementalManager;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -78,33 +77,32 @@ final class DeletePackageHelper {
     private static final boolean DEBUG_SD_INSTALL = false;
 
     private final PackageManagerService mPm;
-    private final IncrementalManager mIncrementalManager;
-    private final Installer mInstaller;
     private final UserManagerInternal mUserManagerInternal;
     private final PermissionManagerServiceInternal mPermissionManager;
     private final RemovePackageHelper mRemovePackageHelper;
     private final InitAndSystemPackageHelper mInitAndSystemPackageHelper;
+    private final AppDataHelper mAppDataHelper;
 
     // TODO(b/198166813): remove PMS dependency
     DeletePackageHelper(PackageManagerService pm, RemovePackageHelper removePackageHelper,
-            InitAndSystemPackageHelper initAndSystemPackageHelper) {
+            InitAndSystemPackageHelper initAndSystemPackageHelper,
+            AppDataHelper appDataHelper) {
         mPm = pm;
-        mIncrementalManager = mPm.mInjector.getIncrementalManager();
-        mInstaller = mPm.mInjector.getInstaller();
         mUserManagerInternal = mPm.mInjector.getUserManagerInternal();
         mPermissionManager = mPm.mInjector.getPermissionManagerServiceInternal();
         mRemovePackageHelper = removePackageHelper;
         mInitAndSystemPackageHelper = initAndSystemPackageHelper;
+        mAppDataHelper = appDataHelper;
     }
 
     DeletePackageHelper(PackageManagerService pm) {
         mPm = pm;
-        mIncrementalManager = mPm.mInjector.getIncrementalManager();
-        mInstaller = mPm.mInjector.getInstaller();
+        mAppDataHelper = new AppDataHelper(mPm);
         mUserManagerInternal = mPm.mInjector.getUserManagerInternal();
         mPermissionManager = mPm.mInjector.getPermissionManagerServiceInternal();
-        mRemovePackageHelper = new RemovePackageHelper(mPm);
-        mInitAndSystemPackageHelper = new InitAndSystemPackageHelper(mPm, mRemovePackageHelper);
+        mRemovePackageHelper = new RemovePackageHelper(mPm, mAppDataHelper);
+        mInitAndSystemPackageHelper = new InitAndSystemPackageHelper(mPm, mRemovePackageHelper,
+                mAppDataHelper);
     }
 
     /**
@@ -457,7 +455,7 @@ final class DeletePackageHelper {
             pkg = mPm.mPackages.get(ps.getPackageName());
         }
 
-        mRemovePackageHelper.destroyAppProfilesLIF(pkg);
+        mAppDataHelper.destroyAppProfilesLIF(pkg);
 
         final SharedUserSetting sus = ps.getSharedUser();
         List<AndroidPackage> sharedUserPkgs = sus != null ? sus.getPackages() : null;
@@ -472,7 +470,7 @@ final class DeletePackageHelper {
                         + nextUserId);
             }
             if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
-                mRemovePackageHelper.destroyAppDataLIF(pkg, nextUserId,
+                mAppDataHelper.destroyAppDataLIF(pkg, nextUserId,
                         FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL);
             }
             PackageManagerService.removeKeystoreDataIfNeeded(mUserManagerInternal, nextUserId,
