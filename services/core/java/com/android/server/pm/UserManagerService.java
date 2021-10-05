@@ -859,11 +859,12 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public List<UserInfo> getProfiles(@UserIdInt int userId, boolean enabledOnly) {
-        boolean returnFullInfo = true;
+        boolean returnFullInfo;
         if (userId != UserHandle.getCallingUserId()) {
             checkManageOrCreateUsersPermission("getting profiles related to user " + userId);
+            returnFullInfo = true;
         } else {
-            returnFullInfo = hasManageUsersPermission();
+            returnFullInfo = hasManageOrCreateUsersPermission();
         }
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -1660,9 +1661,13 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public boolean isRestricted() {
+    public boolean isRestricted(@UserIdInt int userId) {
+        if (userId != UserHandle.getCallingUserId()) {
+            checkManageOrCreateUsersPermission("query isRestricted for user " + userId);
+        }
         synchronized (mUsersLock) {
-            return getUserInfoLU(UserHandle.getCallingUserId()).isRestricted();
+            final UserInfo userInfo = getUserInfoLU(userId);
+            return userInfo == null ? false : userInfo.isRestricted();
         }
     }
 
@@ -1683,15 +1688,14 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public boolean hasRestrictedProfiles() {
+    public boolean hasRestrictedProfiles(@UserIdInt int userId) {
         checkManageUsersPermission("hasRestrictedProfiles");
-        final int callingUserId = UserHandle.getCallingUserId();
         synchronized (mUsersLock) {
             final int userSize = mUsers.size();
             for (int i = 0; i < userSize; i++) {
                 UserInfo profile = mUsers.valueAt(i).info;
-                if (callingUserId != profile.id
-                        && profile.restrictedProfileParentId == callingUserId) {
+                if (userId != profile.id
+                        && profile.restrictedProfileParentId == userId) {
                     return true;
                 }
             }
@@ -2542,6 +2546,14 @@ public class UserManagerService extends IUserManager.Stub {
      */
     private static final boolean hasManageUsersPermission() {
         final int callingUid = Binder.getCallingUid();
+        return hasManageUsersPermission(callingUid);
+    }
+
+    /**
+     * @return whether the given UID is system UID or root's UID or the has the permission
+     * {@link android.Manifest.permission#MANAGE_USERS MANAGE_USERS}.
+     */
+    private static boolean hasManageUsersPermission(int callingUid) {
         return UserHandle.isSameApp(callingUid, Process.SYSTEM_UID)
                 || callingUid == Process.ROOT_UID
                 || hasPermissionGranted(android.Manifest.permission.MANAGE_USERS, callingUid);
@@ -2553,9 +2565,7 @@ public class UserManagerService extends IUserManager.Stub {
      */
     private static final boolean hasManageUsersOrPermission(String alternativePermission) {
         final int callingUid = Binder.getCallingUid();
-        return UserHandle.isSameApp(callingUid, Process.SYSTEM_UID)
-                || callingUid == Process.ROOT_UID
-                || hasPermissionGranted(android.Manifest.permission.MANAGE_USERS, callingUid)
+        return hasManageUsersPermission(callingUid)
                 || hasPermissionGranted(alternativePermission, callingUid);
     }
 
@@ -4943,39 +4953,39 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public String getSeedAccountName() throws RemoteException {
+    public String getSeedAccountName(@UserIdInt int userId) throws RemoteException {
         checkManageUsersPermission("Cannot get seed account information");
         synchronized (mUsersLock) {
-            UserData userData = getUserDataLU(UserHandle.getCallingUserId());
-            return userData.seedAccountName;
+            final UserData userData = getUserDataLU(userId);
+            return userData == null ? null : userData.seedAccountName;
         }
     }
 
     @Override
-    public String getSeedAccountType() throws RemoteException {
+    public String getSeedAccountType(@UserIdInt int userId) throws RemoteException {
         checkManageUsersPermission("Cannot get seed account information");
         synchronized (mUsersLock) {
-            UserData userData = getUserDataLU(UserHandle.getCallingUserId());
-            return userData.seedAccountType;
+            final UserData userData = getUserDataLU(userId);
+            return userData == null ? null : userData.seedAccountType;
         }
     }
 
     @Override
-    public PersistableBundle getSeedAccountOptions() throws RemoteException {
+    public PersistableBundle getSeedAccountOptions(@UserIdInt int userId) throws RemoteException {
         checkManageUsersPermission("Cannot get seed account information");
         synchronized (mUsersLock) {
-            UserData userData = getUserDataLU(UserHandle.getCallingUserId());
-            return userData.seedAccountOptions;
+            final UserData userData = getUserDataLU(userId);
+            return userData == null ? null : userData.seedAccountOptions;
         }
     }
 
     @Override
-    public void clearSeedAccountData() throws RemoteException {
+    public void clearSeedAccountData(@UserIdInt int userId) throws RemoteException {
         checkManageUsersPermission("Cannot clear seed account information");
         synchronized (mPackagesLock) {
             UserData userData;
             synchronized (mUsersLock) {
-                userData = getUserDataLU(UserHandle.getCallingUserId());
+                userData = getUserDataLU(userId);
                 if (userData == null) return;
                 userData.clearSeedAccountData();
             }

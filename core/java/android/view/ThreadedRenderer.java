@@ -609,11 +609,7 @@ public final class ThreadedRenderer extends HardwareRenderer {
         return mHeight;
     }
 
-    /**
-     * Outputs extra debugging information in the specified file descriptor.
-     */
-    void dumpGfxInfo(PrintWriter pw, FileDescriptor fd, String[] args) {
-        pw.flush();
+    private static int dumpArgsToFlags(String[] args) {
         // If there's no arguments, eg 'dumpsys gfxinfo', then dump everything.
         // If there's a targetted package, eg 'dumpsys gfxinfo com.android.systemui', then only
         // dump the summary information
@@ -631,7 +627,21 @@ public final class ThreadedRenderer extends HardwareRenderer {
                     break;
             }
         }
-        dumpProfileInfo(fd, flags);
+        return flags;
+    }
+
+    /** @hide */
+    public static void handleDumpGfxInfo(FileDescriptor fd, String[] args) {
+        dumpGlobalProfileInfo(fd, dumpArgsToFlags(args));
+        WindowManagerGlobal.getInstance().dumpGfxInfo(fd, args);
+    }
+
+    /**
+     * Outputs extra debugging information in the specified file descriptor.
+     */
+    void dumpGfxInfo(PrintWriter pw, FileDescriptor fd, String[] args) {
+        pw.flush();
+        dumpProfileInfo(fd, dumpArgsToFlags(args));
     }
 
     Picture captureRenderingCommands() {

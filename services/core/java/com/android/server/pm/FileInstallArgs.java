@@ -217,7 +217,7 @@ class FileInstallArgs extends InstallArgs {
         if (mCodeFile == null || !mCodeFile.exists()) {
             return false;
         }
-        mPm.removeCodePathLI(mCodeFile);
+        mRemovePackageHelper.removeCodePathLI(mCodeFile);
         return true;
     }
 

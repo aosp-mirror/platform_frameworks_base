@@ -108,7 +108,8 @@ public:
     // Not exported, only used for testing
     void resetProfileInfo();
     uint32_t frameTimePercentile(int p);
-    static void dumpGraphicsMemory(int fd, bool includeProfileData = true);
+    static void dumpGraphicsMemory(int fd, bool includeProfileData = true,
+                                   bool resetProfile = false);
     static void getMemoryUsage(size_t* cpuUsage, size_t* gpuUsage);
 
     static void rotateProcessStatsBuffer();

@@ -69,7 +69,7 @@ interface IUserManager {
     String getUserAccount(int userId);
     void setUserAccount(int userId, String accountName);
     long getUserCreationTime(int userId);
-    boolean isRestricted();
+    boolean isRestricted(int userId);
     boolean canHaveRestrictedProfile(int userId);
     int getUserSerialNumber(int userId);
     int getUserHandle(int userSerialNumber);
@@ -93,10 +93,10 @@ interface IUserManager {
     boolean isQuietModeEnabled(int userId);
     void setSeedAccountData(int userId, in String accountName,
             in String accountType, in PersistableBundle accountOptions, boolean persist);
-    String getSeedAccountName();
-    String getSeedAccountType();
-    PersistableBundle getSeedAccountOptions();
-    void clearSeedAccountData();
+    String getSeedAccountName(int userId);
+    String getSeedAccountType(int userId);
+    PersistableBundle getSeedAccountOptions(int userId);
+    void clearSeedAccountData(int userId);
     boolean someUserHasSeedAccount(in String accountName, in String accountType);
     boolean isProfile(int userId);
     boolean isManagedProfile(int userId);
@@ -118,7 +118,7 @@ interface IUserManager {
     boolean isUserRunning(int userId);
     boolean isUserForeground(int userId);
     boolean isUserNameSet(int userId);
-    boolean hasRestrictedProfiles();
+    boolean hasRestrictedProfiles(int userId);
     boolean requestQuietModeEnabled(String callingPackage, boolean enableQuietMode, int userId, in IntentSender target, int flags);
     String getUserName();
     long getUserStartRealtime();

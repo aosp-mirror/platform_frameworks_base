@@ -22,6 +22,7 @@ import android.os.Build;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.android.internal.R;
 
@@ -32,7 +33,7 @@ import com.android.internal.R;
  */
 @TestApi
 public class AmbientDisplayConfiguration {
-
+    private static final String TAG = "AmbientDisplayConfig";
     private final Context mContext;
     private final boolean mAlwaysOnByDefault;
 
@@ -141,8 +142,17 @@ public class AmbientDisplayConfiguration {
     }
 
     /** {@hide} */
-    public String tapSensorType() {
+    private String tapSensorType() {
         return mContext.getResources().getString(R.string.config_dozeTapSensorType);
+    }
+
+    /** {@hide} */
+    public String tapSensorType(int posture) {
+        return getSensorFromPostureMapping(
+                mContext.getResources().getStringArray(R.array.config_dozeTapSensorPostureMapping),
+                tapSensorType(),
+                posture
+        );
     }
 
     /** {@hide} */
@@ -240,5 +250,20 @@ public class AmbientDisplayConfiguration {
 
     private boolean boolSetting(String name, int user, int def) {
         return Settings.Secure.getIntForUser(mContext.getContentResolver(), name, def, user) != 0;
+    }
+
+    /** {@hide} */
+    public static String getSensorFromPostureMapping(
+            String[] postureMapping,
+            String defaultValue,
+            int posture) {
+        String sensorType = defaultValue;
+        if (posture < postureMapping.length) {
+            sensorType = postureMapping[posture];
+        } else {
+            Log.e(TAG, "Unsupported doze posture " + posture);
+        }
+
+        return TextUtils.isEmpty(sensorType) ? defaultValue : sensorType;
     }
 }

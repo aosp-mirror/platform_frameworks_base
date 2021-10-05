@@ -63,6 +63,8 @@ public class UsbResolverActivity extends ResolverActivity {
         Intent intent = getIntent();
         Parcelable targetParcelable = intent.getParcelableExtra(Intent.EXTRA_INTENT);
         if (!(targetParcelable instanceof Intent)) {
+            super.onCreate(savedInstanceState);
+            onStop(); // unregister receiver registered in onCreate (PackageMonitor)
             Log.w("UsbResolverActivity", "Target is not an intent: " + targetParcelable);
             finish();
             return;
@@ -95,6 +97,8 @@ public class UsbResolverActivity extends ResolverActivity {
         } else {
             mAccessory = (UsbAccessory)target.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
             if (mAccessory == null) {
+                super.onCreate(savedInstanceState);
+                onStop(); // unregister receiver registered in onCreate (PackageMonitor)
                 Log.e(TAG, "no device or accessory");
                 finish();
                 return;

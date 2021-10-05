@@ -47,6 +47,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.plugins.SensorManagerPlugin;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.settings.SecureSettings;
@@ -82,6 +83,9 @@ public class DozeSensors {
     private boolean mListeningTouchScreenSensors;
     private boolean mListeningProxSensors;
 
+    @DevicePostureController.DevicePostureInt
+    private int mDevicePosture;
+
     // whether to only register sensors that use prox when the display state is dozing or off
     private boolean mSelectivelyRegisterProxSensors;
 
@@ -106,7 +110,8 @@ public class DozeSensors {
             DozeParameters dozeParameters, AmbientDisplayConfiguration config, WakeLock wakeLock,
             Callback callback, Consumer<Boolean> proxCallback, DozeLog dozeLog,
             ProximitySensor proximitySensor, SecureSettings secureSettings,
-            AuthController authController) {
+            AuthController authController,
+            int devicePosture) {
         mContext = context;
         mSensorManager = sensorManager;
         mConfig = config;
@@ -120,6 +125,7 @@ public class DozeSensors {
         mListeningProxSensors = !mSelectivelyRegisterProxSensors;
         mScreenOffUdfpsEnabled =
                 config.screenOffUdfpsEnabled(KeyguardUpdateMonitor.getCurrentUser());
+        mDevicePosture = devicePosture;
 
         boolean udfpsEnrolled =
                 authController.isUdfpsEnrolled(KeyguardUpdateMonitor.getCurrentUser());
@@ -142,7 +148,7 @@ public class DozeSensors {
                         false /* requires prox */,
                         dozeLog),
                 new TriggerSensor(
-                        findSensorWithType(config.doubleTapSensorType()),
+                        findSensor(config.doubleTapSensorType()),
                         Settings.Secure.DOZE_DOUBLE_TAP_GESTURE,
                         true /* configured */,
                         DozeLog.REASON_SENSOR_DOUBLE_TAP,
@@ -150,7 +156,7 @@ public class DozeSensors {
                         true /* touchscreen */,
                         dozeLog),
                 new TriggerSensor(
-                        findSensorWithType(config.tapSensorType()),
+                        findSensor(config.tapSensorType(mDevicePosture)),
                         Settings.Secure.DOZE_TAP_SCREEN_GESTURE,
                         true /* settingDef */,
                         true /* configured */,
@@ -158,10 +164,10 @@ public class DozeSensors {
                         false /* reports touch coordinates */,
                         true /* touchscreen */,
                         false /* ignoresSetting */,
-                        dozeParameters.singleTapUsesProx() /* requiresProx */,
+                        dozeParameters.singleTapUsesProx(mDevicePosture) /* requiresProx */,
                         dozeLog),
                 new TriggerSensor(
-                        findSensorWithType(config.longPressSensorType()),
+                        findSensor(config.longPressSensorType()),
                         Settings.Secure.DOZE_PULSE_ON_LONG_PRESS,
                         false /* settingDef */,
                         true /* configured */,
@@ -172,7 +178,7 @@ public class DozeSensors {
                         dozeParameters.longPressUsesProx() /* requiresProx */,
                         dozeLog),
                 new TriggerSensor(
-                        findSensorWithType(config.udfpsLongPressSensorType()),
+                        findSensor(config.udfpsLongPressSensorType()),
                         "doze_pulse_on_auth",
                         true /* settingDef */,
                         udfpsEnrolled && (alwaysOn || mScreenOffUdfpsEnabled),
@@ -200,7 +206,7 @@ public class DozeSensors {
                         mConfig.getWakeLockScreenDebounce(),
                         dozeLog),
                 new TriggerSensor(
-                        findSensorWithType(config.quickPickupSensorType()),
+                        findSensor(config.quickPickupSensorType()),
                         Settings.Secure.DOZE_QUICK_PICKUP_GESTURE,
                         true /* setting default */,
                         config.quickPickupSensorEnabled(KeyguardUpdateMonitor.getCurrentUser())
@@ -238,21 +244,29 @@ public class DozeSensors {
         mDebounceFrom = SystemClock.uptimeMillis();
     }
 
-    private Sensor findSensorWithType(String type) {
-        return findSensorWithType(mSensorManager, type);
+    private Sensor findSensor(String type) {
+        return findSensor(mSensorManager, type, null);
     }
 
     /**
-     * Utility method to find a {@link Sensor} for the supplied string type.
+     * Utility method to find a {@link Sensor} for the supplied string type and string name.
+     *
+     * Return the first sensor in the list that matches the specified inputs. Ignores type or name
+     * if the input is null or empty.
+     *
+     * @param type sensorType
+     * @parm name sensorName, to differentiate between sensors with the same type
      */
-    public static Sensor findSensorWithType(SensorManager sensorManager, String type) {
-        if (TextUtils.isEmpty(type)) {
-            return null;
-        }
-        List<Sensor> sensorList = sensorManager.getSensorList(Sensor.TYPE_ALL);
-        for (Sensor s : sensorList) {
-            if (type.equals(s.getStringType())) {
-                return s;
+    public static Sensor findSensor(SensorManager sensorManager, String type, String name) {
+        final boolean isNameSpecified = !TextUtils.isEmpty(name);
+        final boolean isTypeSpecified = !TextUtils.isEmpty(type);
+        if (isNameSpecified || isTypeSpecified) {
+            final List<Sensor> sensors = sensorManager.getSensorList(Sensor.TYPE_ALL);
+            for (Sensor sensor : sensors) {
+                if ((!isNameSpecified || name.equals(sensor.getName()))
+                        && (!isTypeSpecified || type.equals(sensor.getStringType()))) {
+                    return sensor;
+                }
             }
         }
         return null;
@@ -370,6 +384,8 @@ public class DozeSensors {
     /** Dump current state */
     public void dump(PrintWriter pw) {
         pw.println("mListening=" + mListening);
+        pw.println("mDevicePosture="
+                + DevicePostureController.devicePostureToString(mDevicePosture));
         pw.println("mListeningTouchScreenSensors=" + mListeningTouchScreenSensors);
         pw.println("mSelectivelyRegisterProxSensors=" + mSelectivelyRegisterProxSensors);
         pw.println("mListeningProxSensors=" + mListeningProxSensors);

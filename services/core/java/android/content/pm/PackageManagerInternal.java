@@ -781,6 +781,14 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
     @Nullable
     public abstract int[] getVisibilityAllowList(@NonNull String packageName, int userId);
 
+    /**
+     * Returns whether the given UID either declares &lt;queries&gt; element with the given package
+     * name in its app's manifest, has {@link android.Manifest.permission.QUERY_ALL_PACKAGES}, or
+     * package visibility filtering is enabled on it. If the UID is part of a shared user ID,
+     * return {@code true} if any one application belongs to the shared user ID meets the criteria.
+     */
+    public abstract boolean canQueryPackage(int callingUid, @Nullable String packageName);
+
     /** Returns whether the given package was signed by the platform */
     public abstract boolean isPlatformSigned(String pkg);
 

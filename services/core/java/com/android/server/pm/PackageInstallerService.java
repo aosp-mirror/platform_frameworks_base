@@ -362,11 +362,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     }
 
     private void removeStagingDirs(ArraySet<File> stagingDirsToRemove) {
+        final RemovePackageHelper removePackageHelper = new RemovePackageHelper(mPm);
         // Clean up orphaned staging directories
         for (File stage : stagingDirsToRemove) {
             Slog.w(TAG, "Deleting orphan stage " + stage);
             synchronized (mPm.mInstallLock) {
-                mPm.removeCodePathLI(stage);
+                removePackageHelper.removeCodePathLI(stage);
             }
         }
     }
@@ -972,28 +973,39 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         return "smdl" + sessionId + ".tmp";
     }
 
+    private boolean shouldFilterSession(int uid, SessionInfo info) {
+        if (info == null) {
+            return false;
+        }
+        return uid != info.getInstallerUid() && !mPm.canQueryPackage(uid, info.getAppPackageName());
+    }
+
     @Override
     public SessionInfo getSessionInfo(int sessionId) {
+        final int callingUid = Binder.getCallingUid();
+        final SessionInfo result;
         synchronized (mSessions) {
             final PackageInstallerSession session = mSessions.get(sessionId);
-
-            return (session != null && !(session.isStaged() && session.isDestroyed()))
-                    ? session.generateInfoForCaller(true /*withIcon*/, Binder.getCallingUid())
+            result = (session != null && !(session.isStaged() && session.isDestroyed()))
+                    ? session.generateInfoForCaller(true /* includeIcon */, callingUid)
                     : null;
         }
+        return shouldFilterSession(callingUid, result) ? null : result;
     }
 
     @Override
     public ParceledListSlice<SessionInfo> getStagedSessions() {
+        final int callingUid = Binder.getCallingUid();
         final List<SessionInfo> result = new ArrayList<>();
         synchronized (mSessions) {
             for (int i = 0; i < mSessions.size(); i++) {
                 final PackageInstallerSession session = mSessions.valueAt(i);
                 if (session.isStaged() && !session.isDestroyed()) {
-                    result.add(session.generateInfoForCaller(false, Binder.getCallingUid()));
+                    result.add(session.generateInfoForCaller(false /* includeIcon */, callingUid));
                 }
             }
         }
+        result.removeIf(info -> shouldFilterSession(callingUid, info));
         return new ParceledListSlice<>(result);
     }
 
@@ -1009,10 +1021,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 final PackageInstallerSession session = mSessions.valueAt(i);
                 if (session.userId == userId && !session.hasParentSessionId()
                         && !(session.isStaged() && session.isDestroyed())) {
-                    result.add(session.generateInfoForCaller(false, callingUid));
+                    result.add(session.generateInfoForCaller(false /* includeIcon */, callingUid));
                 }
             }
         }
+        result.removeIf(info -> shouldFilterSession(callingUid, info));
         return new ParceledListSlice<>(result);
     }
 
@@ -1135,7 +1148,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
      * Assume permissions already checked and caller's identity cleared
      */
     public void registerCallback(IPackageInstallerCallback callback, IntPredicate userCheck) {
-        mCallbacks.register(callback, userCheck);
+        mCallbacks.register(callback, new BroadcastCookie(Binder.getCallingUid(), userCheck));
     }
 
     @Override
@@ -1208,6 +1221,15 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         } else {
             return (session != null) && (callingUid == session.getInstallerUid());
         }
+    }
+
+    private boolean shouldFilterSession(int uid, int sessionId) {
+        final PackageInstallerSession session = getSession(sessionId);
+        if (session == null) {
+            return false;
+        }
+        return uid != session.getInstallerUid()
+                && !mPm.canQueryPackage(uid, session.getPackageName());
     }
 
     static class PackageDeleteObserverAdapter extends PackageDeleteObserver {
@@ -1317,7 +1339,17 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         return set;
     }
 
-    private static class Callbacks extends Handler {
+    private static final class BroadcastCookie {
+        public final int callingUid;
+        public final IntPredicate userCheck;
+
+        BroadcastCookie(int callingUid, IntPredicate userCheck) {
+            this.callingUid = callingUid;
+            this.userCheck = userCheck;
+        }
+    }
+
+    private class Callbacks extends Handler {
         private static final int MSG_SESSION_CREATED = 1;
         private static final int MSG_SESSION_BADGING_CHANGED = 2;
         private static final int MSG_SESSION_ACTIVE_CHANGED = 3;
@@ -1331,8 +1363,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             super(looper);
         }
 
-        public void register(IPackageInstallerCallback callback, IntPredicate userCheck) {
-            mCallbacks.register(callback, userCheck);
+        public void register(IPackageInstallerCallback callback, BroadcastCookie cookie) {
+            mCallbacks.register(callback, cookie);
         }
 
         public void unregister(IPackageInstallerCallback callback) {
@@ -1341,12 +1373,14 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         @Override
         public void handleMessage(Message msg) {
+            final int sessionId = msg.arg1;
             final int userId = msg.arg2;
             final int n = mCallbacks.beginBroadcast();
             for (int i = 0; i < n; i++) {
                 final IPackageInstallerCallback callback = mCallbacks.getBroadcastItem(i);
-                final IntPredicate userCheck = (IntPredicate) mCallbacks.getBroadcastCookie(i);
-                if (userCheck.test(userId)) {
+                final BroadcastCookie cookie = (BroadcastCookie) mCallbacks.getBroadcastCookie(i);
+                if (cookie.userCheck.test(userId)
+                        && !shouldFilterSession(cookie.callingUid, sessionId)) {
                     try {
                         invokeCallback(callback, msg);
                     } catch (RemoteException ignored) {

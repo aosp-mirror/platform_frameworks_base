@@ -252,11 +252,12 @@ public interface StatusBarDependenciesModule {
             ActivityStarter activityStarter,
             @Main Executor mainExecutor,
             IActivityManager iActivityManager,
-            OngoingCallLogger logger) {
+            OngoingCallLogger logger,
+            DumpManager dumpManager) {
         OngoingCallController ongoingCallController =
                 new OngoingCallController(
                         notifCollection, featureFlags, systemClock, activityStarter, mainExecutor,
-                        iActivityManager, logger);
+                        iActivityManager, logger, dumpManager);
         ongoingCallController.init();
         return ongoingCallController;
     }
