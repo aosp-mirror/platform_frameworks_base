@@ -1394,7 +1394,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         ProtoLog.v(WM_DEBUG_STATES, "Moving to PAUSING: %s", prev);
         mPausingActivity = prev;
         mLastPausedActivity = prev;
-        if (prev.isNoHistory() && !mTaskSupervisor.mNoHistoryActivities.contains(prev)) {
+        if (!prev.finishing && prev.isNoHistory()
+                && !mTaskSupervisor.mNoHistoryActivities.contains(prev)) {
             mTaskSupervisor.mNoHistoryActivities.add(prev);
         }
         prev.setState(PAUSING, "startPausingLocked");
@@ -1478,7 +1479,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             } else {
                 prev.schedulePauseTimeout();
                 // Unset readiness since we now need to wait until this pause is complete.
-                mAtmService.getTransitionController().setReady(this, false /* ready */);
+                mTransitionController.setReady(this, false /* ready */);
                 return true;
             }
 
@@ -2151,10 +2152,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         }
     }
 
-    int getTaskFragmentOrganizerPid() {
-        return mTaskFragmentOrganizerPid;
-    }
-
     /**
      * Returns a {@link TaskFragmentInfo} with information from this TaskFragment. Should not be
      * called from {@link Task}.
@@ -2286,7 +2283,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return false;
         }
         return isAnimating(TRANSITION | CHILDREN, WindowState.EXIT_ANIMATING_TYPES)
-                || mAtmService.getTransitionController().inTransition(this);
+                || inTransition();
     }
 
     @Override

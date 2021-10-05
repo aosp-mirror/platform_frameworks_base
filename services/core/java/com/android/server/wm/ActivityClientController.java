@@ -1072,7 +1072,7 @@ class ActivityClientController extends IActivityClientController.Stub {
                 r.mDisplayContent.mAppTransition.overridePendingAppTransition(
                         packageName, enterAnim, exitAnim, null, null,
                         r.mOverrideTaskTransition);
-                mService.getTransitionController().setOverrideAnimation(
+                r.mTransitionController.setOverrideAnimation(
                         TransitionInfo.AnimationOptions.makeCustomAnimOptions(packageName,
                                 enterAnim, exitAnim, r.mOverrideTaskTransition),
                         null /* startCallback */, null /* finishCallback */);

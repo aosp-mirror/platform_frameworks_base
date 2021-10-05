@@ -1804,7 +1804,7 @@ public class WindowManagerService extends IWindowManager.Stub
             winAnimator.mEnterAnimationPending = true;
             winAnimator.mEnteringAnimation = true;
             // Check if we need to prepare a transition for replacing window first.
-            if (mAtmService.getTransitionController().getTransitionPlayer() == null
+            if (!win.mTransitionController.isShellTransitionsEnabled()
                     && activity != null && activity.isVisible()
                     && !prepareWindowReplacementTransition(activity)) {
                 // If not, check if need to set up a dummy transition during display freeze
@@ -2569,7 +2569,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (win.mAttrs.type == TYPE_APPLICATION_STARTING) {
             transit = WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
         }
-        if (mAtmService.getTransitionController().inTransition(win)) {
+        if (win.inTransition()) {
             focusMayChange = true;
             win.mAnimatingExit = true;
         } else if (win.isWinVisibleLw() && winAnimator.applyAnimationLocked(transit, false)) {
@@ -4051,7 +4051,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     final boolean pendingRemoteRotation = rotationChanged
                             && (displayContent.getDisplayRotation().isWaitingForRemoteRotation()
-                            || mAtmService.getTransitionController().isCollecting());
+                            || displayContent.mTransitionController.isCollecting());
                     // Even if alwaysSend, we are waiting for a transition or remote to provide
                     // rotated configuration, so we can't update configuration yet.
                     if (!pendingRemoteRotation) {

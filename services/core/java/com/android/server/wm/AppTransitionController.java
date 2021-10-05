@@ -1108,6 +1108,11 @@ public class AppTransitionController {
         //    the same transition.
         for (int i = rootTasks.size() - 1; i >= 0; i--) {
             final Task rootTask = rootTasks.valueAt(i);
+            if (rootTask == null) {
+                // It is possible that one activity may have been removed from the hierarchy. No
+                // need to check for this case.
+                continue;
+            }
             final boolean notReady = rootTask.forAllLeafTaskFragments(taskFragment -> {
                 if (!taskFragment.isReadyToTransit()) {
                     ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "Organized TaskFragment is not ready= %s",

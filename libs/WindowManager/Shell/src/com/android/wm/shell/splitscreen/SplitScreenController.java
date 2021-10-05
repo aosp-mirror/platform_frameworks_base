@@ -257,11 +257,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                     }
                 }
 
-                final RemoteAnimationTarget divider = mStageCoordinator.getDividerBarLegacyTarget();
-                if (divider.leash != null) {
-                    t.show(divider.leash);
-                }
-
                 t.apply();
                 if (finishedCallback != null) {
                     try {
@@ -300,7 +295,9 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
         transaction.apply();
         transaction.close();
-        return new RemoteAnimationTarget[]{mStageCoordinator.getDividerBarLegacyTarget()};
+        return new RemoteAnimationTarget[]{
+                mStageCoordinator.getDividerBarLegacyTarget(),
+                mStageCoordinator.getOutlineLegacyTarget()};
     }
 
     /**

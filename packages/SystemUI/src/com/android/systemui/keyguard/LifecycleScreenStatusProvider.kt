@@ -15,12 +15,12 @@
  */
 package com.android.systemui.keyguard
 
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider.ScreenListener
 import javax.inject.Inject
+import javax.inject.Singleton
 
-@SysUISingleton
+@Singleton
 class LifecycleScreenStatusProvider @Inject constructor(screenLifecycle: ScreenLifecycle) :
     ScreenStatusProvider, ScreenLifecycle.Observer {
 
