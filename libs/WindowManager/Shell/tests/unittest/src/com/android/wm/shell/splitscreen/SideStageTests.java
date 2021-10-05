@@ -29,6 +29,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.window.WindowContainerTransaction;
 
+import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
@@ -58,6 +59,7 @@ public class SideStageTests extends ShellTestCase {
     private SideStage mSideStage;
 
     @Before
+    @UiThreadTest
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mRootTask = new TestRunningTaskInfoBuilder().build();
