@@ -103,7 +103,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     private final SplitWindowManager mSplitWindowManager;
     private final DisplayImeController mDisplayImeController;
     private final ImePositionProcessor mImePositionProcessor;
-    private final DismissingParallaxPolicy mDismissingParallaxPolicy;
+    private final DismissingEffectPolicy mDismissingEffectPolicy;
     private final ShellTaskOrganizer mTaskOrganizer;
     private final InsetsState mInsetsState = new InsetsState();
 
@@ -119,7 +119,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     public SplitLayout(String windowName, Context context, Configuration configuration,
             SplitLayoutHandler splitLayoutHandler,
             SplitWindowManager.ParentContainerCallbacks parentContainerCallbacks,
-            DisplayImeController displayImeController, ShellTaskOrganizer taskOrganizer) {
+            DisplayImeController displayImeController, ShellTaskOrganizer taskOrganizer,
+            boolean applyDismissingParallax) {
         mContext = context.createConfigurationContext(configuration);
         mOrientation = configuration.orientation;
         mRotation = configuration.windowConfiguration.getRotation();
@@ -129,7 +130,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                 parentContainerCallbacks);
         mTaskOrganizer = taskOrganizer;
         mImePositionProcessor = new ImePositionProcessor(mContext.getDisplayId());
-        mDismissingParallaxPolicy = new DismissingParallaxPolicy();
+        mDismissingEffectPolicy = new DismissingEffectPolicy(applyDismissingParallax);
 
         final Resources resources = context.getResources();
         mDividerWindowWidth = resources.getDimensionPixelSize(
@@ -247,7 +248,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         }
         DockedDividerUtils.sanitizeStackBounds(mBounds1, true /** topLeft */);
         DockedDividerUtils.sanitizeStackBounds(mBounds2, false /** topLeft */);
-        mDismissingParallaxPolicy.applyDividerPosition(position, isLandscape);
+        mDismissingEffectPolicy.applyDividerPosition(position, isLandscape);
     }
 
     /** Inflates {@link DividerView} on the root surface. */
@@ -290,7 +291,6 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
      */
     void updateDivideBounds(int position) {
         updateBounds(position);
-        mSplitWindowManager.setResizingSplits(true);
         mSplitLayoutHandler.onLayoutSizeChanging(this);
     }
 
@@ -298,13 +298,11 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         mDividePosition = position;
         updateBounds(mDividePosition);
         mSplitLayoutHandler.onLayoutSizeChanged(this);
-        mSplitWindowManager.setResizingSplits(false);
     }
 
     /** Resets divider position. */
     public void resetDividerPosition() {
         mDividePosition = mDividerSnapAlgorithm.getMiddleTarget().position;
-        mSplitWindowManager.setResizingSplits(false);
         updateBounds(mDividePosition);
         mWinToken1 = null;
         mWinToken2 = null;
@@ -360,8 +358,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     @VisibleForTesting
     void flingDividePosition(int from, int to, @Nullable Runnable flingFinishedCallback) {
         if (from == to) {
-            // No animation run, it should stop resizing here.
-            mSplitWindowManager.setResizingSplits(false);
+            // No animation run, still callback to stop resizing.
+            mSplitLayoutHandler.onLayoutSizeChanged(this);
             return;
         }
         ValueAnimator animator = ValueAnimator
@@ -425,7 +423,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             return;
         }
 
-        mDismissingParallaxPolicy.adjustDismissingSurface(t, leash1, leash2, dimLayer1, dimLayer2);
+        mDismissingEffectPolicy.adjustDismissingSurface(t, leash1, leash2, dimLayer1, dimLayer2);
     }
 
     /** Apply recorded task layout to the {@link WindowContainerTransaction}. */
@@ -543,7 +541,10 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
      * Calculates and applies proper dismissing parallax offset and dimming value to hint users
      * dismissing gesture.
      */
-    private class DismissingParallaxPolicy {
+    private class DismissingEffectPolicy {
+        /** Indicates whether to offset splitting bounds to hint dismissing progress or not. */
+        private final boolean mApplyParallax;
+
         // The current dismissing side.
         int mDismissingSide = DOCKED_INVALID;
 
@@ -552,6 +553,10 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
 
         // The dimming value to hint the dismissing side and progress.
         float mDismissingDimValue = 0.0f;
+
+        DismissingEffectPolicy(boolean applyDismissingParallax) {
+            mApplyParallax = applyDismissingParallax;
+        }
 
         /**
          * Applies a parallax to the task to hint dismissing progress.
@@ -627,12 +632,14 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                     return false;
             }
 
-            t.setPosition(targetLeash,
-                    mTempRect.left + mDismissingParallaxOffset.x,
-                    mTempRect.top + mDismissingParallaxOffset.y);
-            // Transform the screen-based split bounds to surface-based crop bounds.
-            mTempRect.offsetTo(-mDismissingParallaxOffset.x, -mDismissingParallaxOffset.y);
-            t.setWindowCrop(targetLeash, mTempRect);
+            if (mApplyParallax) {
+                t.setPosition(targetLeash,
+                        mTempRect.left + mDismissingParallaxOffset.x,
+                        mTempRect.top + mDismissingParallaxOffset.y);
+                // Transform the screen-based split bounds to surface-based crop bounds.
+                mTempRect.offsetTo(-mDismissingParallaxOffset.x, -mDismissingParallaxOffset.y);
+                t.setWindowCrop(targetLeash, mTempRect);
+            }
             t.setAlpha(targetDimLayer, mDismissingDimValue)
                     .setVisibility(targetDimLayer, mDismissingDimValue > 0.001f);
             return true;
