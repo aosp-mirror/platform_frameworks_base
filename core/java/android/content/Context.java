@@ -3002,7 +3002,7 @@ public abstract class Context {
      * @param receiver The BroadcastReceiver to handle the broadcast.
      * @param filter Selects the Intent broadcasts to be received.
      * @param flags Additional options for the receiver. As of
-     * {@link android.os.Build.VERSION_CODES#TIRAMISU}, either {@link #RECEIVER_EXPORTED} or
+     * Android T, either {@link #RECEIVER_EXPORTED} or
      * {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being registered
      *            for protected broadcasts, and may additionally specify
      *            {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS} if {@link #RECEIVER_EXPORTED} is
@@ -3079,7 +3079,7 @@ public abstract class Context {
      * @param scheduler Handler identifying the thread that will receive
      *      the Intent.  If null, the main thread of the process will be used.
      * @param flags Additional options for the receiver. As of
-     * {@link android.os.Build.VERSION_CODES#TIRAMISU}, either {@link #RECEIVER_EXPORTED} or
+     * Android T, either {@link #RECEIVER_EXPORTED} or
      * {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being registered
      *            for protected broadcasts, and may additionally specify
      *            {@link #RECEIVER_VISIBLE_TO_INSTANT_APPS} if {@link #RECEIVER_EXPORTED} is
@@ -3143,7 +3143,7 @@ public abstract class Context {
      * @param scheduler Handler identifying the thread that will receive
      *      the Intent. If {@code null}, the main thread of the process will be used.
      * @param flags Additional options for the receiver. As of
-     *      {@link android.os.Build.VERSION_CODES#TIRAMISU}, either {@link #RECEIVER_EXPORTED} or
+     *      Android T, either {@link #RECEIVER_EXPORTED} or
      *      {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being
      *      registered for protected broadcasts
      *
@@ -3210,7 +3210,7 @@ public abstract class Context {
      * @param scheduler Handler identifying the thread that will receive
      *      the Intent.  If null, the main thread of the process will be used.
      * @param flags Additional options for the receiver. As of
-     *      {@link android.os.Build.VERSION_CODES#TIRAMISU}, either {@link #RECEIVER_EXPORTED} or
+     *      Android T, either {@link #RECEIVER_EXPORTED} or
      *      {@link #RECEIVER_NOT_EXPORTED} must be specified if the receiver isn't being
      *      registered for protected broadcasts
      *
