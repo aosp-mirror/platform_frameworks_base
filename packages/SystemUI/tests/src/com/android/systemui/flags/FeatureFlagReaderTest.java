@@ -55,6 +55,7 @@ public class FeatureFlagReaderTest extends SysuiTestCase {
     @Mock private DumpManager mDumpManager;
     @Mock private PluginManager mPluginManager;
     @Mock private SystemPropertiesHelper mSystemPropertiesHelper;
+    @Mock private FlagReader mFlagReader;
 
     private FeatureFlagReader mReader;
 
@@ -75,7 +76,7 @@ public class FeatureFlagReaderTest extends SysuiTestCase {
         when(mBuildInfo.isDebuggable()).thenReturn(isDebuggable);
         when(mResources.getBoolean(R.bool.are_flags_overrideable)).thenReturn(isOverrideable);
         mReader = new FeatureFlagReader(
-                mResources, mBuildInfo, mDumpManager, mPluginManager, mSystemPropertiesHelper);
+                mResources, mBuildInfo, mDumpManager, mSystemPropertiesHelper, mFlagReader);
     }
 
     @Test

@@ -16,7 +16,6 @@
 
 package com.android.systemui.flags;
 
-import android.content.Context;
 import android.content.res.Resources;
 import android.util.SparseArray;
 
@@ -29,9 +28,6 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.plugins.FlagReaderPlugin;
-import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.util.wrapper.BuildInfo;
 
 import java.io.FileDescriptor;
@@ -65,70 +61,36 @@ import javax.inject.Inject;
 public class FeatureFlagReader implements Dumpable {
     private final Resources mResources;
     private final boolean mAreFlagsOverrideable;
-    private final PluginManager mPluginManager;
     private final SystemPropertiesHelper mSystemPropertiesHelper;
     private final SparseArray<CachedFlag> mCachedFlags = new SparseArray<>();
 
-    private FlagReaderPlugin mPlugin = new FlagReaderPlugin(){};
+    private FlagReader mFlagReader;
 
     @Inject
     public FeatureFlagReader(
             @Main Resources resources,
             BuildInfo build,
             DumpManager dumpManager,
-            PluginManager pluginManager,
-            SystemPropertiesHelper systemPropertiesHelper) {
+            SystemPropertiesHelper systemPropertiesHelper,
+            FlagReader reader) {
         mResources = resources;
-        mPluginManager = pluginManager;
+        mFlagReader = reader;
         mSystemPropertiesHelper = systemPropertiesHelper;
         mAreFlagsOverrideable =
                 build.isDebuggable() && mResources.getBoolean(R.bool.are_flags_overrideable);
-
         dumpManager.registerDumpable("FeatureFlags", this);
-        mPluginManager.addPluginListener(mPluginListener, FlagReaderPlugin.class);
     }
-
-    private final PluginListener<FlagReaderPlugin> mPluginListener =
-            new PluginListener<FlagReaderPlugin>() {
-                public void onPluginConnected(FlagReaderPlugin plugin, Context context) {
-                    mPlugin = plugin;
-                }
-
-                public void onPluginDisconnected(FlagReaderPlugin plugin) {
-                    mPlugin = new FlagReaderPlugin() {};
-                }
-            };
 
     boolean isEnabled(BooleanFlag flag) {
-        return mPlugin.isEnabled(flag.getId(), flag.getDefault());
+        return mFlagReader.isEnabled(flag.getId(), flag.getDefault());
     }
 
-    String getValue(StringFlag flag) {
-        return mPlugin.getValue(flag.getId(), flag.getDefault());
+    void addListener(FlagReader.Listener listener) {
+        mFlagReader.addListener(listener);
     }
 
-    int getValue(IntFlag flag) {
-        return mPlugin.getValue(flag.getId(), flag.getDefault());
-    }
-
-    long getValue(LongFlag flag) {
-        return mPlugin.getValue(flag.getId(), flag.getDefault());
-    }
-
-    float getValue(FloatFlag flag) {
-        return mPlugin.getValue(flag.getId(), flag.getDefault());
-    }
-
-    double getValue(DoubleFlag flag) {
-        return mPlugin.getValue(flag.getId(), flag.getDefault());
-    }
-
-    void addListener(FlagReaderPlugin.Listener listener) {
-        mPlugin.addListener(listener);
-    }
-
-    void removeListener(FlagReaderPlugin.Listener listener) {
-        mPlugin.removeListener(listener);
+    void removeListener(FlagReader.Listener listener) {
+        mFlagReader.removeListener(listener);
     }
 
     /**
