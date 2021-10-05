@@ -149,6 +149,7 @@ import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.pkg.PackageUserState;
 import android.content.pm.pkg.PackageUserStateInternal;
 import android.content.pm.pkg.PackageUserStateUtils;
+import android.content.pm.pkg.SuspendParams;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
@@ -6015,7 +6016,7 @@ public class PackageManagerService extends IPackageManager.Stub
             final Bundle allExtras = new Bundle();
             if (pus.isSuspended()) {
                 for (int i = 0; i < pus.getSuspendParams().size(); i++) {
-                    final PackageUserState.SuspendParams params = pus.getSuspendParams().valueAt(i);
+                    final SuspendParams params = pus.getSuspendParams().valueAt(i);
                     if (params != null && params.appExtras != null) {
                         allExtras.putAll(params.appExtras);
                     }
@@ -9191,8 +9192,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     final PackageUserStateInternal pus = ps.readUserState(userId);
                     if (pus.isSuspended()) {
                         for (int i = 0; i < pus.getSuspendParams().size(); i++) {
-                            final PackageUserState.SuspendParams params =
-                                    pus.getSuspendParams().valueAt(i);
+                            final SuspendParams params = pus.getSuspendParams().valueAt(i);
                             if (params != null && params.launcherExtras != null) {
                                 allExtras.putAll(params.launcherExtras);
                             }
@@ -9278,8 +9278,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (ps != null) {
                     final PackageUserStateInternal pus = ps.readUserState(userId);
                     if (pus.isSuspended()) {
-                        final PackageUserState.SuspendParams suspendParams =
-                                pus.getSuspendParams().get(suspendingPackage);
+                        final SuspendParams suspendParams = pus.getSuspendParams()
+                                .get(suspendingPackage);
                         return (suspendParams != null) ? suspendParams.dialogInfo : null;
                     }
                 }

@@ -44,6 +44,7 @@ import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.pkg.PackageUserState;
 import android.content.pm.pkg.PackageUserStateInternal;
+import android.content.pm.pkg.SuspendParams;
 import android.os.BaseBundle;
 import android.os.PersistableBundle;
 import android.os.Process;
@@ -252,8 +253,7 @@ public class PackageManagerSettingsTests {
         assertThat(packageUserState1.isSuspended(), is(true));
         assertThat(packageUserState1.getSuspendParams().size(), is(1));
         assertThat(packageUserState1.getSuspendParams().keyAt(0), is(PACKAGE_NAME_3));
-        final PackageUserState.SuspendParams params =
-                packageUserState1.getSuspendParams().valueAt(0);
+        final SuspendParams params = packageUserState1.getSuspendParams().valueAt(0);
         watcher.verifyNoChangeReported("fetch user state");
         assertThat(params, is(notNullValue()));
         assertThat(params.appExtras.size(), is(1));
@@ -340,7 +340,7 @@ public class PackageManagerSettingsTests {
         watcher.verifyNoChangeReported("read package param");
 
         assertThat(readPus1.getSuspendParams().keyAt(0), is("suspendingPackage1"));
-        final PackageUserState.SuspendParams params11 = readPus1.getSuspendParams().valueAt(0);
+        final SuspendParams params11 = readPus1.getSuspendParams().valueAt(0);
         watcher.verifyNoChangeReported("read package param");
         assertThat(params11, is(notNullValue()));
         assertThat(params11.dialogInfo, is(dialogInfo1));
@@ -350,7 +350,7 @@ public class PackageManagerSettingsTests {
         watcher.verifyNoChangeReported("read package param");
 
         assertThat(readPus1.getSuspendParams().keyAt(1), is("suspendingPackage2"));
-        final PackageUserState.SuspendParams params12 = readPus1.getSuspendParams().valueAt(1);
+        final SuspendParams params12 = readPus1.getSuspendParams().valueAt(1);
         assertThat(params12, is(notNullValue()));
         assertThat(params12.dialogInfo, is(dialogInfo2));
         assertThat(BaseBundle.kindofEquals(params12.appExtras, appExtras2), is(true));
@@ -363,7 +363,7 @@ public class PackageManagerSettingsTests {
         assertThat(readPus2.isSuspended(), is(true));
         assertThat(readPus2.getSuspendParams().size(), is(1));
         assertThat(readPus2.getSuspendParams().keyAt(0), is("suspendingPackage3"));
-        final PackageUserState.SuspendParams params21 = readPus2.getSuspendParams().valueAt(0);
+        final SuspendParams params21 = readPus2.getSuspendParams().valueAt(0);
         assertThat(params21, is(notNullValue()));
         assertThat(params21.dialogInfo, is(nullValue()));
         assertThat(BaseBundle.kindofEquals(params21.appExtras, appExtras1), is(true));
@@ -957,7 +957,7 @@ public class PackageManagerSettingsTests {
         assertSame(origPkgSetting.getSignatures(), testPkgSetting.getSignatures());
         assertThat(origPkgSetting.getSignatures(), is(testPkgSetting.getSignatures()));
         assertThat(origPkgSetting.getLastModifiedTime(), is(testPkgSetting.getLastModifiedTime()));
-        assertNotSame(origPkgSetting.getUserState(), is(testPkgSetting.getUserState()));
+        assertNotSame(origPkgSetting.getUserStates(), is(testPkgSetting.getUserStates()));
         // No equals() method for SparseArray object
         // assertThat(origPkgSetting.getUserState(), is(testPkgSetting.getUserState()));
         assertThat(origPkgSetting.getLongVersionCode(), is(testPkgSetting.getLongVersionCode()));

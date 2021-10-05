@@ -58,6 +58,7 @@ import android.content.pm.parsing.component.ParsedProcess;
 import android.content.pm.pkg.PackageUserState;
 import android.content.pm.pkg.PackageUserStateInternal;
 import android.content.pm.pkg.PackageUserStateUtils;
+import android.content.pm.pkg.SuspendParams;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -289,17 +290,17 @@ public final class Settings implements Watchable, Snappable {
     private static final String TAG_DEFAULT_DIALER = "default-dialer";
     private static final String TAG_VERSION = "version";
     /**
-     * @deprecated Moved to {@link PackageUserState.SuspendParams}
+     * @deprecated Moved to {@link SuspendParams}
      */
     @Deprecated
     private static final String TAG_SUSPENDED_DIALOG_INFO = "suspended-dialog-info";
     /**
-     * @deprecated Moved to {@link PackageUserState.SuspendParams}
+     * @deprecated Moved to {@link SuspendParams}
      */
     @Deprecated
     private static final String TAG_SUSPENDED_APP_EXTRAS = "suspended-app-extras";
     /**
-     * @deprecated Moved to {@link PackageUserState.SuspendParams}
+     * @deprecated Moved to {@link SuspendParams}
      */
     @Deprecated
     private static final String TAG_SUSPENDED_LAUNCHER_EXTRAS = "suspended-launcher-extras";
@@ -1730,7 +1731,7 @@ public final class Settings implements Watchable, Snappable {
                     SuspendDialogInfo oldSuspendDialogInfo = null;
 
                     int packageDepth = parser.getDepth();
-                    ArrayMap<String, PackageUserState.SuspendParams> suspendParamsMap = null;
+                    ArrayMap<String, SuspendParams> suspendParamsMap = null;
                     while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
                             && (type != XmlPullParser.END_TAG
                             || parser.getDepth() > packageDepth)) {
@@ -1766,7 +1767,7 @@ public final class Settings implements Watchable, Snappable {
                                     suspendParamsMap = new ArrayMap<>();
                                 }
                                 suspendParamsMap.put(suspendingPackage,
-                                        PackageUserState.SuspendParams.restoreFromXml(parser));
+                                        SuspendParams.restoreFromXml(parser));
                                 break;
                             default:
                                 Slog.wtf(TAG, "Unknown tag " + parser.getName() + " under tag "
@@ -1779,8 +1780,8 @@ public final class Settings implements Watchable, Snappable {
                                 .build();
                     }
                     if (suspended && suspendParamsMap == null) {
-                        final PackageUserState.SuspendParams suspendParams =
-                                PackageUserState.SuspendParams.getInstanceOrNull(
+                        final SuspendParams suspendParams =
+                                SuspendParams.getInstanceOrNull(
                                         oldSuspendDialogInfo,
                                         suspendedAppExtras,
                                         suspendedLauncherExtras);
@@ -2065,7 +2066,7 @@ public final class Settings implements Watchable, Snappable {
                         final String suspendingPackage = ustate.getSuspendParams().keyAt(i);
                         serializer.startTag(null, TAG_SUSPEND_PARAMS);
                         serializer.attribute(null, ATTR_SUSPENDING_PACKAGE, suspendingPackage);
-                        final PackageUserState.SuspendParams params =
+                        final SuspendParams params =
                                 ustate.getSuspendParams().valueAt(i);
                         if (params != null) {
                             params.saveToXml(serializer);
@@ -4217,7 +4218,6 @@ public final class Settings implements Watchable, Snappable {
         }
         if (pkgSetting.getStopped(userId) != stopped) {
             pkgSetting.setStopped(stopped, userId);
-            // pkgSetting.pkg.mSetStopped = stopped;
             if (pkgSetting.getNotLaunched(userId)) {
                 if (pkgSetting.getInstallSource().installerPackageName != null) {
                     pm.notifyFirstLaunch(pkgSetting.getPackageName(),
@@ -4770,7 +4770,7 @@ public final class Settings implements Watchable, Snappable {
                     pw.print(prefix);
                     pw.print("    suspendingPackage=");
                     pw.print(pus.getSuspendParams().keyAt(i));
-                    final PackageUserState.SuspendParams params = pus.getSuspendParams().valueAt(i);
+                    final SuspendParams params = pus.getSuspendParams().valueAt(i);
                     if (params != null) {
                         pw.print(" dialogInfo=");
                         pw.print(params.dialogInfo);

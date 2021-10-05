@@ -18,6 +18,7 @@ package android.content.pm.parsing;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
@@ -74,6 +75,14 @@ import java.util.List;
 public interface PkgWithoutStatePackageInfo {
 
     /**
+     * Set of Activities parsed from the manifest.
+     *
+     * This contains minimal system state and does not
+     * provide the same information as {@link ActivityInfo}. Effective state can be queried through
+     * {@link android.content.pm.PackageManager#getActivityInfo(ComponentName, int)} or by
+     * combining state from from com.android.server.pm.pkg.PackageState and
+     * {@link android.content.pm.pkg.PackageUserState}.
+     *
      * @see ActivityInfo
      * @see PackageInfo#activities
      */
@@ -137,6 +146,14 @@ public interface PkgWithoutStatePackageInfo {
     List<ParsedPermission> getPermissions();
 
     /**
+     * Set of {@link android.content.ContentProvider ContentProviders} parsed from the manifest.
+     *
+     * This contains minimal system state and does not
+     * provide the same information as {@link ProviderInfo}. Effective state can be queried through
+     * {@link android.content.pm.PackageManager#getProviderInfo(ComponentName, int)} or by
+     * combining state from from com.android.server.pm.pkg.PackageState and
+     * {@link android.content.pm.pkg.PackageUserState}.
+     *
      * @see ProviderInfo
      * @see PackageInfo#providers
      */
@@ -144,9 +161,18 @@ public interface PkgWithoutStatePackageInfo {
     List<ParsedProvider> getProviders();
 
     /**
+     * Set of {@link android.content.BroadcastReceiver BroadcastReceivers} parsed from the manifest.
+     *
+     * This contains minimal system state and does not
+     * provide the same information as {@link ActivityInfo}. Effective state can be queried through
+     * {@link android.content.pm.PackageManager#getReceiverInfo(ComponentName, int)} or by
+     * combining state from from com.android.server.pm.pkg.PackageState and
+     * {@link android.content.pm.pkg.PackageUserState}.
+     *
      * Since they share several attributes, receivers are parsed as {@link ParsedActivity}, even
-     * though they represent different functionality. TODO(b/135203078): Reconsider this and maybe
-     * make ParsedReceiver so it's not so confusing
+     * though they represent different functionality.
+     *
+     * TODO(b/135203078): Reconsider this and maybe make ParsedReceiver so it's not so confusing
      *
      * @see ActivityInfo
      * @see PackageInfo#receivers
@@ -173,8 +199,6 @@ public interface PkgWithoutStatePackageInfo {
     List<String> getRequestedPermissions();
 
     /**
-     * The required account type without which this application will not function.
-     *
      * @see PackageInfo#requiredAccountType
      * @see R.styleable#AndroidManifestApplication_requiredAccountType
      */
@@ -182,7 +206,7 @@ public interface PkgWithoutStatePackageInfo {
     String getRequiredAccountType();
 
     /**
-     * The restricted account authenticator type that is used by this application
+     * The restricted account authenticator type that is used by this application.
      *
      * @see PackageInfo#restrictedAccountType
      * @see R.styleable#AndroidManifestApplication_restrictedAccountType
@@ -191,6 +215,14 @@ public interface PkgWithoutStatePackageInfo {
     String getRestrictedAccountType();
 
     /**
+     * Set of {@link android.app.Service Services} parsed from the manifest.
+     *
+     * This contains minimal system state and does not
+     * provide the same information as {@link ServiceInfo}. Effective state can be queried through
+     * {@link android.content.pm.PackageManager#getServiceInfo(ComponentName, int)} or by
+     * combining state from from com.android.server.pm.pkg.PackageState and
+     * {@link android.content.pm.pkg.PackageUserState}.
+     *
      * @see ServiceInfo
      * @see PackageInfo#services
      */

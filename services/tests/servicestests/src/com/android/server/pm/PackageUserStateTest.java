@@ -28,6 +28,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.overlay.OverlayPaths;
 import android.content.pm.pkg.PackageUserState;
+import android.content.pm.pkg.SuspendParams;
 import android.os.PersistableBundle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -178,10 +179,9 @@ public class PackageUserStateTest {
         assertThat(testUserState03.equals(oldUserState), is(false));
     }
 
-    private static PackageUserState.SuspendParams createSuspendParams(SuspendDialogInfo dialogInfo,
+    private static SuspendParams createSuspendParams(SuspendDialogInfo dialogInfo,
             PersistableBundle appExtras, PersistableBundle launcherExtras) {
-        return PackageUserState.SuspendParams.getInstanceOrNull(
-                dialogInfo, appExtras, launcherExtras);
+        return SuspendParams.getInstanceOrNull(dialogInfo, appExtras, launcherExtras);
     }
 
     private static PersistableBundle createPersistableBundle(String lKey, long lValue, String sKey,
@@ -221,10 +221,10 @@ public class PackageUserStateTest {
                 .setMessage("dialogMessage2")
                 .build();
 
-        final ArrayMap<String, PackageUserState.SuspendParams> paramsMap1 = new ArrayMap<>();
+        final ArrayMap<String, SuspendParams> paramsMap1 = new ArrayMap<>();
         paramsMap1.put(suspendingPackage1, createSuspendParams(dialogInfo1, appExtras1,
                 launcherExtras1));
-        final ArrayMap<String, PackageUserState.SuspendParams> paramsMap2 = new ArrayMap<>();
+        final ArrayMap<String, SuspendParams> paramsMap2 = new ArrayMap<>();
         paramsMap2.put(suspendingPackage2, createSuspendParams(dialogInfo2,
                 appExtras2, launcherExtras2));
 
@@ -277,8 +277,8 @@ public class PackageUserStateTest {
                 .setMessage("dialogMessage2")
                 .build();
 
-        final PackageUserState.SuspendParams params1;
-        PackageUserState.SuspendParams params2;
+        final SuspendParams params1;
+        SuspendParams params2;
         params1 = createSuspendParams(dialogInfo1, appExtras1, launcherExtras1);
         params2 = createSuspendParams(dialogInfo1, appExtras1, launcherExtras1);
         // Everything is same

@@ -18,6 +18,7 @@ package com.android.server.pm.pkg;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.Size;
 import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
 import android.content.pm.ApplicationInfo;
@@ -26,6 +27,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningInfo;
 import android.content.pm.pkg.PackageUserState;
+import android.util.SparseArray;
 
 import com.android.internal.R;
 import com.android.server.pm.PackageSetting;
@@ -79,7 +81,8 @@ public interface PackageState {
     AndroidPackageApi getAndroidPackage();
 
     /**
-     * The non-user-specific UID
+     * The non-user-specific UID, or the UID if the user ID is
+     * {@link android.os.UserHandle#USER_SYSTEM}.
      */
     int getAppId();
 
@@ -91,28 +94,43 @@ public interface PackageState {
      */
     int getCategoryOverride();
 
+    /**
+     * The install time CPU override, if any. This value is written at install time
+     * and doesn't change during the life of an install. If non-null,
+     * {@link #getPrimaryCpuAbi()} will also contain the same value.
+     */
     @Nullable
     String getCpuAbiOverride();
 
     /**
-     * In epoch milliseconds.
+     * In epoch milliseconds. The timestamp of the first install of the particular app on the
+     * device, surviving past app updates. This does not survive full uninstalls + reinstalls.
      */
     long getFirstInstallTime();
 
     /**
-     * In epoch milliseconds.
+     * In epoch milliseconds. The last modified time of the file directory which houses the app
+     * APKs. Only updated on package update; does not track realtime modifications.
      */
     long getLastModifiedTime();
 
+    /**
+     * An aggregation across the framework of the last time an app was used for a particular reason.
+     * Keys are indexes into the array represented by {@link PackageManager.NotifyReason}, values
+     * are in epoch milliseconds.
+     */
+    @Size(PackageManager.NOTIFY_PACKAGE_USE_REASONS_COUNT)
     @NonNull
     long[] getLastPackageUsageTime();
 
     /**
-     * In epoch milliseconds.
+     * In epoch milliseconds. The timestamp of the last time the package on device went through
+     * an update package installation.
      */
     long getLastUpdateTime();
 
     /**
+     * Cached here in case the physical code directory on device is unmounted.
      * @see AndroidPackageApi#getLongVersionCode()
      */
     long getLongVersionCode();
@@ -120,7 +138,7 @@ public interface PackageState {
     /**
      * Maps mime group name to the set of Mime types in a group. Mime groups declared by app are
      * populated with empty sets at construction. Mime groups can not be created/removed at runtime,
-     * thus keys in this map should not change
+     * thus keys in this map should not change.
      */
     @NonNull
     Map<String, Set<String>> getMimeGroups();
@@ -137,12 +155,15 @@ public interface PackageState {
     @NonNull
     File getPath();
 
+    /**
+     * @see ApplicationInfo#primaryCpuAbi
+     */
     @Nullable
     String getPrimaryCpuAbi();
 
-    @Nullable
-    String getSeInfoOverride();
-
+    /**
+     * @see ApplicationInfo#secondaryCpuAbi
+     */
     @Nullable
     String getSecondaryCpuAbi();
 
@@ -158,16 +179,8 @@ public interface PackageState {
     @NonNull
     SigningInfo getSigningInfo();
 
-    /**
-     * Valid users for this package, for use with {@link #getUserState(int)}.
-     */
-    int[] getUserIds();
-
-    /**
-     * Retrieves per-user state for this package. Acceptable user IDs are in {@link #getUserIds()}.
-     */
     @Nullable
-    PackageUserState getUserState(@UserIdInt int userId);
+    SparseArray<? extends PackageUserState> getUserStates();
 
     /**
      * The actual files resolved for each shared library.
@@ -220,6 +233,9 @@ public interface PackageState {
      */
     boolean isHiddenUntilInstalled();
 
+    /**
+     * @see com.android.server.pm.permission.UserPermissionState
+     */
     boolean isInstallPermissionsFixed();
 
     /**

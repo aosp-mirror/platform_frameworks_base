@@ -21,6 +21,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.parsing.PkgWithoutStateAppInfo;
 
 import com.android.server.pm.PackageManagerService;
+import com.android.server.pm.pkg.PackageState;
 
 /**
  * Equivalent of {@link PkgWithoutStateAppInfo} but contains fields that are set inside {@link
@@ -50,8 +51,12 @@ public interface PkgAppInfo extends PkgWithoutStateAppInfo {
     String getSecondaryNativeLibraryDir();
 
     /**
-     * @see ApplicationInfo#uid
+     * This is an appId, the {@link ApplicationInfo#uid} if the user ID is
+     * {@link android.os.UserHandle#SYSTEM}.
+     *
+     * @deprecated Use {@link PackageState#getAppId()} instead.
      */
+    @Deprecated
     int getUid();
 
     /**

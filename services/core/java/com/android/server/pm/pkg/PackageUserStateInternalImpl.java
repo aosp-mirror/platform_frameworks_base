@@ -20,9 +20,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.pm.overlay.OverlayPaths;
-import android.content.pm.pkg.PackageUserState;
 import android.content.pm.pkg.PackageUserStateImpl;
 import android.content.pm.pkg.PackageUserStateInternal;
+import android.content.pm.pkg.SuspendParams;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -41,7 +41,7 @@ public class PackageUserStateInternalImpl extends PackageUserStateImpl implement
 
     /** Suspending package to suspend params */
     @Nullable
-    private ArrayMap<String, PackageUserState.SuspendParams> mSuspendParams;
+    private ArrayMap<String, SuspendParams> mSuspendParams;
 
     @Nullable
     private OverlayPaths mCachedOverlayPaths;
@@ -209,7 +209,7 @@ public class PackageUserStateInternalImpl extends PackageUserStateImpl implement
      * Suspending package to suspend params
      */
     @DataClass.Generated.Member
-    public @Nullable ArrayMap<String,PackageUserState.SuspendParams> getSuspendParams() {
+    public @Nullable ArrayMap<String, SuspendParams> getSuspendParams() {
         return mSuspendParams;
     }
 
@@ -227,7 +227,7 @@ public class PackageUserStateInternalImpl extends PackageUserStateImpl implement
      * Suspending package to suspend params
      */
     @DataClass.Generated.Member
-    public @NonNull PackageUserStateInternalImpl setSuspendParams(@NonNull ArrayMap<String,PackageUserState.SuspendParams> value) {
+    public @NonNull PackageUserStateInternalImpl setSuspendParams(@NonNull ArrayMap<String, SuspendParams> value) {
         mSuspendParams = value;
         return this;
     }
