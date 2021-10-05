@@ -1908,6 +1908,10 @@ public abstract class BatteryStats implements Parcelable {
         public final HistoryTag localWakeReasonTag = new HistoryTag();
         public final HistoryTag localEventTag = new HistoryTag();
 
+        // Includes a tag's first occurrence in the parcel, so the value of the tag is written
+        // rather than just its index in the history tag pool.
+        public boolean tagsFirstOccurrence;
+
         @UnsupportedAppUsage
         public HistoryItem() {
         }
@@ -2014,6 +2018,7 @@ public abstract class BatteryStats implements Parcelable {
             wakeReasonTag = null;
             eventCode = EVENT_NONE;
             eventTag = null;
+            tagsFirstOccurrence = false;
         }
 
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
@@ -2061,6 +2066,7 @@ public abstract class BatteryStats implements Parcelable {
             } else {
                 eventTag = null;
             }
+            tagsFirstOccurrence = o.tagsFirstOccurrence;
             currentTime = o.currentTime;
         }
 
