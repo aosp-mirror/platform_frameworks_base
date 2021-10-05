@@ -27,7 +27,6 @@ import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_UNDEF
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TASK_ORG;
 
 import android.app.ActivityManager;
-import android.graphics.Rect;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.window.WindowContainerToken;
@@ -40,6 +39,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.SurfaceUtils;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.split.SplitLayout;
@@ -69,6 +69,7 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
     private final SyncTransactionQueue mSyncQueue;
     private final DisplayController mDisplayController;
     private final DisplayImeController mDisplayImeController;
+    private final DisplayInsetsController mDisplayInsetsController;
     private SplitLayout mSplitLayout;
 
     private final SplitWindowManager.ParentContainerCallbacks mParentContainerCallbacks =
@@ -80,7 +81,12 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
 
         @Override
         public void onLeashReady(SurfaceControl leash) {
-            mSyncQueue.runInSync(t -> t.show(leash));
+            mSyncQueue.runInSync(t -> t
+                    .show(leash)
+                    .setLayer(leash, SPLIT_DIVIDER_LAYER)
+                    .setPosition(leash,
+                            mSplitLayout.getDividerBounds().left,
+                            mSplitLayout.getDividerBounds().top));
         }
     };
 
@@ -89,6 +95,7 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
         mSyncQueue = controller.getSyncTransactionQueue();
         mDisplayController = controller.getDisplayController();
         mDisplayImeController = controller.getDisplayImeController();
+        mDisplayInsetsController = controller.getDisplayInsetsController();
     }
 
     int getRootTaskId() {
@@ -125,6 +132,7 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
                 mDisplayController.getDisplayContext(mRootTaskInfo.displayId),
                 mRootTaskInfo.configuration, this /* layoutChangeListener */,
                 mParentContainerCallbacks, mDisplayImeController, mController.getTaskOrganizer());
+        mDisplayInsetsController.addInsetsChangedListener(mRootTaskInfo.displayId, mSplitLayout);
 
         final WindowContainerToken token1 = task1.token;
         final WindowContainerToken token2 = task2.token;
@@ -190,22 +198,17 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
         if (mTaskLeash1 == null || mTaskLeash2 == null) return;
 
         mSplitLayout.init();
-        final SurfaceControl dividerLeash = mSplitLayout.getDividerLeash();
-        final Rect dividerBounds = mSplitLayout.getDividerBounds();
 
-        // TODO: Is there more we need to do here?
-        mSyncQueue.runInSync(t -> {
-            t.setLayer(dividerLeash, SPLIT_DIVIDER_LAYER)
-                    .setPosition(mTaskLeash1, mTaskInfo1.positionInParent.x,
-                            mTaskInfo1.positionInParent.y)
-                    .setPosition(mTaskLeash2, mTaskInfo2.positionInParent.x,
-                            mTaskInfo2.positionInParent.y)
-                    .setPosition(dividerLeash, dividerBounds.left, dividerBounds.top)
-                    .show(dividerLeash)
-                    .show(mRootTaskLeash)
-                    .show(mTaskLeash1)
-                    .show(mTaskLeash2);
-        });
+        mSyncQueue.runInSync(t -> t
+                .show(mRootTaskLeash)
+                .show(mTaskLeash1)
+                .show(mTaskLeash2)
+                .setPosition(mTaskLeash1,
+                        mTaskInfo1.positionInParent.x,
+                        mTaskInfo1.positionInParent.y)
+                .setPosition(mTaskLeash2,
+                        mTaskInfo2.positionInParent.x,
+                        mTaskInfo2.positionInParent.y));
     }
 
     @Override
@@ -227,10 +230,9 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
             }
             mRootTaskInfo = taskInfo;
 
-            if (mSplitLayout != null) {
-                if (mSplitLayout.updateConfiguration(mRootTaskInfo.configuration)) {
-                    onLayoutChanged(mSplitLayout);
-                }
+            if (mSplitLayout != null
+                    && mSplitLayout.updateConfiguration(mRootTaskInfo.configuration)) {
+                onLayoutChanged(mSplitLayout);
             }
         } else if (taskInfo.taskId == getTaskId1()) {
             mTaskInfo1 = taskInfo;
