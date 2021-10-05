@@ -303,7 +303,6 @@ public class SettingsBackupTest {
                     Settings.Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED,
                     Settings.Global.HDMI_CONTROL_ENABLED,
                     Settings.Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
-                    Settings.Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED,
                     Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED,
                     Settings.Global.HIDDEN_API_POLICY,
                     Settings.Global.FORCE_NON_DEBUGGABLE_FINAL_BUILD_FOR_COMPAT,

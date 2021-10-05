@@ -530,7 +530,7 @@ public class HdmiCecConfig {
             case HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST:
                 return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL:
-                return STORAGE_GLOBAL_SETTINGS;
+                return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING:
                 return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY:
@@ -571,7 +571,7 @@ public class HdmiCecConfig {
             case HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST:
                 return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL:
-                return Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED;
+                return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING:
                 return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY:
