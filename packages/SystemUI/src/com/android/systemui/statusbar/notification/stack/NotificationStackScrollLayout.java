@@ -140,6 +140,8 @@ import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
 import com.android.systemui.tuner.TunerService;
@@ -280,6 +282,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private boolean mExpandedInThisMotion;
     private boolean mShouldShowShelfOnly;
     protected boolean mScrollingEnabled;
+    private boolean mIsCurrentUserSetup;
     protected FooterView mFooterView;
     protected EmptyShadeView mEmptyShadeView;
     private boolean mDismissAllInProgress;
@@ -481,6 +484,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private final Rect mTmpRect = new Rect();
     private final NotificationEntryManager mEntryManager =
             Dependency.get(NotificationEntryManager.class);
+    private final DeviceProvisionedController mDeviceProvisionedController =
+            Dependency.get(DeviceProvisionedController.class);
     private final IStatusBarService mBarService = IStatusBarService.Stub.asInterface(
             ServiceManager.getService(Context.STATUS_BAR_SERVICE));
     @VisibleForTesting
@@ -597,6 +602,28 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             }
         }, HIGH_PRIORITY, Settings.Secure.NOTIFICATION_DISMISS_RTL);
 
+        mDeviceProvisionedController.addCallback(
+                new DeviceProvisionedListener() {
+                    @Override
+                    public void onDeviceProvisionedChanged() {
+                        updateCurrentUserIsSetup();
+                    }
+
+                    @Override
+                    public void onUserSwitched() {
+                        updateCurrentUserIsSetup();
+                    }
+
+                    @Override
+                    public void onUserSetupChanged() {
+                        updateCurrentUserIsSetup();
+                    }
+
+                    private void updateCurrentUserIsSetup() {
+                        setCurrentUserSetup(mDeviceProvisionedController.isCurrentUserSetup());
+                    }
+                });
+
         mEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
             public void onPostEntryUpdated(NotificationEntry entry) {
@@ -683,6 +710,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         boolean showDismissView = mClearAllEnabled && hasActiveClearableNotifications(ROWS_ALL);
         boolean showFooterView = (showDismissView ||
                 mEntryManager.getNotificationData().getActiveNotifications().size() != 0)
+                && mIsCurrentUserSetup  // see: b/193149550
                 && mStatusBarState != StatusBarState.KEYGUARD
                 && !mRemoteInputManager.getController().isRemoteInputActive();
 
@@ -5731,6 +5759,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         if (mIsExpanded) {
             // The bottom might change because we're using the final actual height of the view
             mAnimateBottomOnLayout = true;
+        }
+    }
+
+    /**
+     * Sets whether the current user is set up, which is required to show the footer (b/193149550)
+     */
+    public void setCurrentUserSetup(boolean isCurrentUserSetup) {
+        if (mIsCurrentUserSetup != isCurrentUserSetup) {
+            mIsCurrentUserSetup = isCurrentUserSetup;
+            updateFooter();
         }
     }
 
