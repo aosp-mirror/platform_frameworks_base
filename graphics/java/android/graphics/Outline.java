@@ -312,7 +312,10 @@ public final class Outline {
     }
 
     /**
-     * Offsets the Outline by (dx,dy)
+     * Offsets the Outline by (dx,dy). Offsetting is cumulative, so additional calls to
+     * offset() will add to previous offset values. Offset only applies to the current
+     * geometry (setRect(), setPath(), etc.); setting new geometry resets any existing
+     * offset.
      */
     public void offset(int dx, int dy) {
         if (mMode == MODE_ROUND_RECT) {
