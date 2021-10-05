@@ -83,7 +83,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
             }
 
             @Override
-            public void onOverlayChanged() {
+            public void onThemeChanged() {
                 initResources();
             }
         });

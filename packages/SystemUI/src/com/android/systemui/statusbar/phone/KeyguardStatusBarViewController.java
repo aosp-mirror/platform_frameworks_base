@@ -100,13 +100,8 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
                 }
 
                 @Override
-                public void onOverlayChanged() {
-                    mView.onOverlayChanged();
-                    KeyguardStatusBarViewController.this.onThemeChanged();
-                }
-
-                @Override
                 public void onThemeChanged() {
+                    mView.onOverlayChanged();
                     KeyguardStatusBarViewController.this.onThemeChanged();
                 }
             };
