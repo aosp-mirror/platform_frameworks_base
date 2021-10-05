@@ -46,8 +46,12 @@ import android.view.InsetsVisibilities;
 import android.view.View;
 import android.view.WindowInsetsController.Behavior;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.Dependency;
+import com.android.systemui.Dumpable;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.recents.OverviewProxyService;
@@ -55,13 +59,16 @@ import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.CommandQueue;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
 public class TaskbarDelegate implements CommandQueue.Callbacks,
         OverviewProxyService.OverviewProxyListener, NavigationModeController.ModeChangedListener,
-        ComponentCallbacks {
+        ComponentCallbacks, Dumpable {
 
     private final EdgeBackGestureHandler mEdgeBackGestureHandler;
 
@@ -93,13 +100,14 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
             OverviewProxyService overviewProxyService,
             NavigationBarA11yHelper navigationBarA11yHelper,
             NavigationModeController navigationModeController,
-            SysUiState sysUiState) {
+            SysUiState sysUiState, DumpManager dumpManager) {
         // TODO: adding this in the ctor results in a dagger dependency cycle :(
         mCommandQueue = commandQueue;
         mOverviewProxyService = overviewProxyService;
         mNavigationBarA11yHelper = navigationBarA11yHelper;
         mNavigationModeController = navigationModeController;
         mSysUiState = sysUiState;
+        dumpManager.registerDumpable(this);
     }
 
     public void destroy() {
@@ -220,4 +228,14 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
 
     @Override
     public void onLowMemory() {}
+
+    @Override
+    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+        pw.println("TaskbarDelegate (displayId=" + mDisplayId + "):");
+        pw.println("  mNavigationIconHints=" + mNavigationIconHints);
+        pw.println("  mDisabledFlags=" + mDisabledFlags);
+        pw.println("  mTaskBarWindowState=" + mTaskBarWindowState);
+        pw.println("  mBehavior=" + mBehavior);
+        mEdgeBackGestureHandler.dump(pw);
+    }
 }
