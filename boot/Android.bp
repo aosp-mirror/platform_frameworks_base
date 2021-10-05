@@ -107,6 +107,11 @@ platform_bootclasspath {
             apex: "com.android.wifi",
             module: "com.android.wifi-bootclasspath-fragment",
         },
+        // only used for auto
+        {
+            apex: "com.android.car.framework",
+            module: "com.android.car.framework-bootclasspath-fragment",
+        },
     ],
 
     // Additional information needed by hidden api processing.
