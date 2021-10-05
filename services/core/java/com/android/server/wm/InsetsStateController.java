@@ -254,7 +254,7 @@ class InsetsStateController {
             if (p == null) continue;
             final WindowContainer wc = p.mWin;
             if (wc == null) continue;
-            mDisplayContent.mAtmService.getTransitionController().collect(wc);
+            mDisplayContent.mTransitionController.collect(wc);
         }
     }
 

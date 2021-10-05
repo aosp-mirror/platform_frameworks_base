@@ -1598,14 +1598,15 @@ class ActivityStarter {
         // startActivityInner. Otherwise, logic in startActivityInner could start a different
         // transition based on a sub-action.
         // Only do the create here (and defer requestStart) since startActivityInner might abort.
-        final Transition newTransition = (!mService.getTransitionController().isCollecting()
-                && mService.getTransitionController().getTransitionPlayer() != null)
-                ? mService.getTransitionController().createTransition(TRANSIT_OPEN) : null;
+        final TransitionController transitionController = r.mTransitionController;
+        final Transition newTransition = (!transitionController.isCollecting()
+                && transitionController.getTransitionPlayer() != null)
+                ? transitionController.createTransition(TRANSIT_OPEN) : null;
         RemoteTransition remoteTransition = r.takeRemoteTransition();
         if (newTransition != null && remoteTransition != null) {
             newTransition.setRemoteTransition(remoteTransition);
         }
-        mService.getTransitionController().collect(r);
+        transitionController.collect(r);
         final boolean isTransient = r.getOptions() != null && r.getOptions().getTransientLaunch();
         try {
             mService.deferWindowLayout();
@@ -1652,19 +1653,19 @@ class ActivityStarter {
                 if (started) {
                     // The activity is started new rather than just brought forward, so record
                     // it as an existence change.
-                    mService.getTransitionController().collectExistenceChange(r);
+                    transitionController.collectExistenceChange(r);
                 }
                 if (isTransient) {
                     // `r` isn't guaranteed to be the actual relevant activity, so we must wait
                     // until after we launched to identify the relevant activity.
-                    mService.getTransitionController().setTransientLaunch(mLastStartActivityRecord);
+                    transitionController.setTransientLaunch(mLastStartActivityRecord);
                 }
                 if (newTransition != null) {
-                    mService.getTransitionController().requestStartTransition(newTransition,
+                    transitionController.requestStartTransition(newTransition,
                             mTargetTask, remoteTransition);
                 } else if (started) {
                     // Make the collecting transition wait until this request is ready.
-                    mService.getTransitionController().setReady(r, false);
+                    transitionController.setReady(r, false);
                 }
             }
         }
@@ -2803,7 +2804,7 @@ class ActivityStarter {
                 mNewTaskInfo != null ? mNewTaskInfo : mStartActivity.info,
                 mNewTaskIntent != null ? mNewTaskIntent : mIntent, mVoiceSession,
                 mVoiceInteractor, toTop, mStartActivity, mSourceRecord, mOptions);
-        mService.getTransitionController().collectExistenceChange(task);
+        task.mTransitionController.collectExistenceChange(task);
         addOrReparentStartingActivity(task, "setTaskFromReuseOrCreateNewTask - mReuseTask");
 
         ProtoLog.v(WM_DEBUG_TASKS, "Starting new activity %s in new task %s",

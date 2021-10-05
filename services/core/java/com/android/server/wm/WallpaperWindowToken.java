@@ -112,7 +112,7 @@ class WallpaperWindowToken extends WindowToken {
             setVisibility(visible);
         }
         final WallpaperController wallpaperController = mDisplayContent.mWallpaperController;
-        if (mWmService.mAtmService.getTransitionController().getTransitionPlayer() != null) {
+        if (mTransitionController.isShellTransitionsEnabled()) {
             return;
         }
 
@@ -157,12 +157,12 @@ class WallpaperWindowToken extends WindowToken {
      */
     void setVisibility(boolean visible) {
         // Before setting mVisibleRequested so we can track changes.
-        mWmService.mAtmService.getTransitionController().collect(this);
+        mTransitionController.collect(this);
 
         setVisibleRequested(visible);
 
         // If in a transition, defer commits for activities that are going invisible
-        if (!visible && (mWmService.mAtmService.getTransitionController().inTransition()
+        if (!visible && (mTransitionController.inTransition()
                 || getDisplayContent().mAppTransition.isRunning())) {
             return;
         }
