@@ -526,7 +526,7 @@ public class HdmiCecConfig {
             case HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE:
                 return STORAGE_GLOBAL_SETTINGS;
             case HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE:
-                return STORAGE_GLOBAL_SETTINGS;
+                return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST:
                 return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL:
@@ -567,7 +567,7 @@ public class HdmiCecConfig {
             case HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE:
                 return Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP;
             case HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE:
-                return Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED;
+                return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST:
                 return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL:
@@ -637,9 +637,6 @@ public class HdmiCecConfig {
             case Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP:
                 notifySettingChanged(HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE);
                 break;
-            case Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED:
-                notifySettingChanged(HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE);
-                break;
             case Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED:
                 notifySettingChanged(HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY);
                 break;
@@ -688,7 +685,6 @@ public class HdmiCecConfig {
         String[] settings = new String[] {
                 Global.HDMI_CONTROL_ENABLED,
                 Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
-                Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED,
                 Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED,
                 Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
         };
