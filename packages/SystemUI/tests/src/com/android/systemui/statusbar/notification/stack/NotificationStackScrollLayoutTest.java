@@ -280,6 +280,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Test
     public void testUpdateFooter_noNotifications() {
         setBarStateForTest(StatusBarState.SHADE);
+        mStackScroller.setCurrentUserSetup(true);
+
         FooterView view = mock(FooterView.class);
         mStackScroller.setFooterView(view);
         mStackScroller.updateFooter();
@@ -289,6 +291,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Test
     public void testUpdateFooter_remoteInput() {
         setBarStateForTest(StatusBarState.SHADE);
+        mStackScroller.setCurrentUserSetup(true);
 
         ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
         when(row.canViewBeDismissed()).thenReturn(true);
@@ -308,6 +311,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Test
     public void testUpdateFooter_oneClearableNotification() {
         setBarStateForTest(StatusBarState.SHADE);
+        mStackScroller.setCurrentUserSetup(true);
 
         when(mEmptyShadeView.getVisibility()).thenReturn(GONE);
         when(mStackScrollLayoutController.hasActiveClearableNotifications(ROWS_ALL))
@@ -321,8 +325,25 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
+    public void testUpdateFooter_oneClearableNotification_beforeUserSetup() {
+        setBarStateForTest(StatusBarState.SHADE);
+        mStackScroller.setCurrentUserSetup(false);
+
+        when(mEmptyShadeView.getVisibility()).thenReturn(GONE);
+        when(mStackScrollLayoutController.hasActiveClearableNotifications(ROWS_ALL))
+                .thenReturn(true);
+        when(mStackScrollLayoutController.hasActiveNotifications()).thenReturn(true);
+
+        FooterView view = mock(FooterView.class);
+        mStackScroller.setFooterView(view);
+        mStackScroller.updateFooter();
+        verify(mStackScroller).updateFooterView(false, true, true);
+    }
+
+    @Test
     public void testUpdateFooter_oneNonClearableNotification() {
         setBarStateForTest(StatusBarState.SHADE);
+        mStackScroller.setCurrentUserSetup(true);
 
         ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
         when(row.canViewBeDismissed()).thenReturn(false);
@@ -341,6 +362,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Test
     public void testUpdateFooter_atEnd() {
+        mStackScroller.setCurrentUserSetup(true);
+
         // add footer
         mStackScroller.inflateFooterView();
 
