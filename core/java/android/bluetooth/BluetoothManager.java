@@ -88,8 +88,9 @@ public final class BluetoothManager {
                 uid = android.os.Process.SYSTEM_UID;
             }
             try {
-                res = new AttributionSource(uid,
-                        AppGlobals.getPackageManager().getPackagesForUid(uid)[0], null);
+                res = new AttributionSource.Builder(uid)
+                    .setPackageName(AppGlobals.getPackageManager().getPackagesForUid(uid)[0])
+                    .build();
             } catch (RemoteException ignored) {
             }
         }
