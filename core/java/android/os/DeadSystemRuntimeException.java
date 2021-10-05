@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-#include "android/graphics/renderthread.h"
+package android.os;
 
-#include <renderthread/RenderProxy.h>
-
-using namespace android;
-
-void ARenderThread_dumpGraphicsMemory(int fd) {
-    uirenderer::renderthread::RenderProxy::dumpGraphicsMemory(fd);
+/**
+ * Exception thrown when a call into system_server resulted in a
+ * DeadObjectException, meaning that the system_server has died.  There's
+ * nothing apps can do at this point - the system will automatically restart -
+ * so there's no point in catching this.
+ *
+ * @hide
+ */
+public class DeadSystemRuntimeException extends RuntimeException {
+    public DeadSystemRuntimeException() {
+        super(new DeadSystemException());
+    }
 }

@@ -1749,6 +1749,7 @@
   <java-symbol type="dimen" name="taskbar_frame_height" />
   <java-symbol type="dimen" name="status_bar_height" />
   <java-symbol type="dimen" name="display_cutout_touchable_region_size" />
+  <java-symbol type="dimen" name="system_gestures_start_threshold" />
   <java-symbol type="dimen" name="quick_qs_offset_height" />
   <java-symbol type="drawable" name="ic_jog_dial_sound_off" />
   <java-symbol type="drawable" name="ic_jog_dial_sound_on" />
@@ -3259,6 +3260,7 @@
 
   <java-symbol type="string" name="config_dozeDoubleTapSensorType" />
   <java-symbol type="string" name="config_dozeTapSensorType" />
+  <java-symbol type="array" name="config_dozeTapSensorPostureMapping" />
   <java-symbol type="bool" name="config_dozePulsePickup" />
 
   <!-- Used for MimeIconUtils. -->

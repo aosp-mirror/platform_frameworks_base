@@ -191,6 +191,15 @@
      low powered state yet. -->
     <bool name="doze_single_tap_uses_prox">true</bool>
 
+    <!-- Doze: whether the single tap sensor uses the proximity sensor in the given posture.
+        See doze_single_tap_uses_prox for usage. -->
+    <integer-array name="doze_single_tap_uses_prox_posture_mapping">
+        <item>1</item> <!-- UNKNOWN -->
+        <item>1</item> <!-- CLOSED -->
+        <item>1</item> <!-- HALF_OPENED -->
+        <item>1</item> <!-- OPENED -->
+    </integer-array>
+
     <!-- Doze: whether the long press sensor uses the proximity sensor.
      If both this parameter and doze_selectively_register_prox are true, registration for the
      sensor will be delayed when the device first enters dozing but the device has not entered its
@@ -210,6 +219,16 @@
          brightness, suitable to listen to while the device is asleep (e.g. during
          always-on display) -->
     <string name="doze_brightness_sensor_type" translatable="false"></string>
+
+    <!-- Name of a sensor per posture state that provides a low-power estimate of the desired
+         display brightness, suitable to listen to while the device is asleep (e.g. during
+         always-on display) -->
+    <string-array name="doze_brightness_sensor_name_posture_mapping" translatable="false">
+        <item></item> <!-- UNKNOWN -->
+        <item></item> <!-- CLOSED -->
+        <item></item> <!-- HALF_OPENED -->
+        <item></item> <!-- OPENED -->
+    </string-array>
 
     <!-- Override value to use for proximity sensor.  -->
     <string name="proximity_sensor_type" translatable="false"></string>

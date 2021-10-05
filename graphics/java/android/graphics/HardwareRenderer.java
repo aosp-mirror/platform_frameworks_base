@@ -823,6 +823,13 @@ public class HardwareRenderer {
     /**
      * @hide
      */
+    public static void dumpGlobalProfileInfo(FileDescriptor fd, @DumpFlags int dumpFlags) {
+        nDumpGlobalProfileInfo(fd, dumpFlags);
+    }
+
+    /**
+     * @hide
+     */
     public void dumpProfileInfo(FileDescriptor fd, @DumpFlags int dumpFlags) {
         nDumpProfileInfo(mNativeProxy, fd, dumpFlags);
     }
@@ -1389,6 +1396,8 @@ public class HardwareRenderer {
 
     private static native void nDumpProfileInfo(long nativeProxy, FileDescriptor fd,
             @DumpFlags int dumpFlags);
+
+    private static native void nDumpGlobalProfileInfo(FileDescriptor fd, @DumpFlags int dumpFlags);
 
     private static native void nAddRenderNode(long nativeProxy, long rootRenderNode,
             boolean placeFront);

@@ -33,6 +33,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
@@ -105,7 +106,9 @@ class OngoingCallControllerTest : SysuiTestCase() {
                 mockActivityStarter,
                 mainExecutor,
                 mockIActivityManager,
-                OngoingCallLogger(uiEventLoggerFake))
+                OngoingCallLogger(uiEventLoggerFake),
+                DumpManager(),
+        )
         controller.init()
         controller.addCallback(mockOngoingCallListener)
         controller.setChipView(chipView)
