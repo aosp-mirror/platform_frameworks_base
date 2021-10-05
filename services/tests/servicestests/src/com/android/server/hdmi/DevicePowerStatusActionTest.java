@@ -34,6 +34,7 @@ import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.media.AudioManager;
 import android.os.Looper;
 import android.os.test.TestLooper;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -50,6 +51,7 @@ import java.util.Collections;
 
 /** Tests for {@link DevicePowerStatusAction} */
 @SmallTest
+@Presubmit
 @RunWith(JUnit4.class)
 public class DevicePowerStatusActionTest {
 

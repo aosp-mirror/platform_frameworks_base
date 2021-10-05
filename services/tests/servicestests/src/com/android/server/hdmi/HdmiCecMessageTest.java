@@ -15,6 +15,8 @@
  */
 package com.android.server.hdmi;
 
+import android.platform.test.annotations.Presubmit;
+
 import androidx.test.filters.SmallTest;
 
 import com.google.common.testing.EqualsTester;
@@ -25,6 +27,7 @@ import org.junit.runners.JUnit4;
 
 /** Tests for {@link HdmiCecMessage} class. */
 @SmallTest
+@Presubmit
 @RunWith(JUnit4.class)
 public class HdmiCecMessageTest {
 
