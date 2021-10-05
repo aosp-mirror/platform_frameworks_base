@@ -24,6 +24,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 
 import android.annotation.CallSuper;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -80,12 +81,16 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     protected SparseArray<ActivityManager.RunningTaskInfo> mChildrenTaskInfo = new SparseArray<>();
     private final SparseArray<SurfaceControl> mChildrenLeashes = new SparseArray<>();
 
+    private final StageTaskUnfoldController mStageTaskUnfoldController;
+
     StageTaskListener(ShellTaskOrganizer taskOrganizer, int displayId,
             StageListenerCallbacks callbacks, SyncTransactionQueue syncQueue,
-            SurfaceSession surfaceSession) {
+            SurfaceSession surfaceSession,
+            @Nullable StageTaskUnfoldController stageTaskUnfoldController) {
         mCallbacks = callbacks;
         mSyncQueue = syncQueue;
         mSurfaceSession = surfaceSession;
+        mStageTaskUnfoldController = stageTaskUnfoldController;
         taskOrganizer.createRootTask(displayId, WINDOWING_MODE_MULTI_WINDOW, this);
     }
 
@@ -158,6 +163,10 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
                     + "\n mRootTaskInfo: " + mRootTaskInfo);
         }
+
+        if (mStageTaskUnfoldController != null) {
+            mStageTaskUnfoldController.onTaskAppeared(taskInfo, leash);
+        }
     }
 
     @Override
@@ -209,6 +218,10 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         } else {
             throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
                     + "\n mRootTaskInfo: " + mRootTaskInfo);
+        }
+
+        if (mStageTaskUnfoldController != null) {
+            mStageTaskUnfoldController.onTaskVanished(taskInfo);
         }
     }
 
