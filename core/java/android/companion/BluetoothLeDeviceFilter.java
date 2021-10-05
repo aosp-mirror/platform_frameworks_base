@@ -75,7 +75,7 @@ public final class BluetoothLeDeviceFilter implements DeviceFilter<ScanResult> {
             String renameSuffix, int renameBytesFrom, int renameBytesLength,
             int renameNameFrom, int renameNameLength, boolean renameBytesReverseOrder) {
         mNamePattern = namePattern;
-        mScanFilter = ObjectUtils.firstNotNull(scanFilter, ScanFilter.EMPTY);
+        mScanFilter = ObjectUtils.firstNotNull(scanFilter, new ScanFilter.Builder().build());
         mRawDataFilter = rawDataFilter;
         mRawDataFilterMask = rawDataFilterMask;
         mRenamePrefix = renamePrefix;
