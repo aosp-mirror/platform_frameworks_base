@@ -24,8 +24,6 @@ import android.app.INotificationManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.om.OverlayManager;
-import android.hardware.SensorManager;
-import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.display.ColorDisplayManager;
 import android.os.Handler;
@@ -56,7 +54,6 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.AlwaysOnDisplayPolicy;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
-import com.android.systemui.keyguard.LifecycleScreenStatusProvider;
 import com.android.systemui.qs.ReduceBrightColorsController;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
@@ -69,9 +66,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.theme.ThemeOverlayApplier;
-import com.android.systemui.unfold.UnfoldTransitionFactory;
-import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
-import com.android.systemui.unfold.config.UnfoldTransitionConfig;
 import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -282,37 +276,6 @@ public class DependencyProvider {
     @Provides
     public WindowManagerWrapper providesWindowManagerWrapper() {
         return WindowManagerWrapper.getInstance();
-    }
-
-    /** */
-    @Provides
-    @SysUISingleton
-    public UnfoldTransitionProgressProvider provideUnfoldTransitionProgressProvider(
-            Context context,
-            UnfoldTransitionConfig config,
-            LifecycleScreenStatusProvider screenStatusProvider,
-            DeviceStateManager deviceStateManager,
-            SensorManager sensorManager,
-            @Main Executor executor,
-            @Main Handler handler
-    ) {
-        return UnfoldTransitionFactory
-                .createUnfoldTransitionProgressProvider(
-                        context,
-                        config,
-                        screenStatusProvider,
-                        deviceStateManager,
-                        sensorManager,
-                        handler,
-                        executor
-                );
-    }
-
-    /** */
-    @Provides
-    @SysUISingleton
-    public UnfoldTransitionConfig provideUnfoldTransitionConfig(Context context) {
-        return UnfoldTransitionFactory.createConfig(context);
     }
 
     /** */
