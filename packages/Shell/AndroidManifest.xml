@@ -424,6 +424,7 @@
 
     <!-- Permissions required for CTS test - TunerTest -->
     <uses-permission android:name="android.permission.ACCESS_TV_DESCRAMBLER" />
+    <uses-permission android:name="android.permission.ACCESS_TV_SHARED_FILTER" />
     <uses-permission android:name="android.permission.ACCESS_TV_TUNER" />
     <uses-permission android:name="android.permission.TUNER_RESOURCE_ACCESS" />
 

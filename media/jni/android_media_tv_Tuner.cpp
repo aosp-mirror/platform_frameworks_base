@@ -298,6 +298,7 @@ struct fields_t {
     jfieldID dvrRecorderContext;
     jfieldID dvrPlaybackContext;
     jfieldID mediaEventContext;
+    jfieldID sharedFilterContext;
     jmethodID frontendInitID;
     jmethodID filterInitID;
     jmethodID timeFilterInitID;
@@ -314,6 +315,9 @@ struct fields_t {
     jmethodID descramblerInitID;
     jmethodID linearBlockInitID;
     jmethodID linearBlockSetInternalStateID;
+    jmethodID sharedFilterInitID;
+    jmethodID onSharedFilterStatusID;
+    jmethodID onSharedFilterEventID;
 };
 
 static fields_t gFields;
@@ -884,10 +888,11 @@ void FilterClientCallbackImpl::onFilterEvent(const vector<DemuxFilterEvent> &eve
     }
     jobject filter(env->NewLocalRef(mFilterObj));
     if (!env->IsSameObject(filter, nullptr)) {
-        env->CallVoidMethod(
-                filter,
-                gFields.onFilterEventID,
-                array);
+        jmethodID methodID = gFields.onFilterEventID;
+        if (mSharedFilter) {
+            methodID = gFields.onSharedFilterEventID;
+        }
+        env->CallVoidMethod(filter, methodID, array);
     } else {
         ALOGE("FilterClientCallbackImpl::onFilterEvent:"
               "Filter object has been freed. Ignoring callback.");
@@ -899,13 +904,14 @@ void FilterClientCallbackImpl::onFilterStatus(const DemuxFilterStatus status) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     jobject filter(env->NewLocalRef(mFilterObj));
     if (!env->IsSameObject(filter, nullptr)) {
-        env->CallVoidMethod(
-                filter,
-                gFields.onFilterStatusID,
-                (jint)status);
+        jmethodID methodID = gFields.onFilterStatusID;
+        if (mSharedFilter) {
+            methodID = gFields.onSharedFilterStatusID;
+        }
+        env->CallVoidMethod(filter, methodID, (jint)static_cast<uint8_t>(status));
     } else {
         ALOGE("FilterClientCallbackImpl::onFilterStatus:"
-                "Filter object has been freed. Ignoring callback.");
+              "Filter object has been freed. Ignoring callback.");
     }
 }
 
@@ -914,6 +920,15 @@ void FilterClientCallbackImpl::setFilter(jweak filterObj, sp<FilterClient> filte
     // Java Object
     mFilterObj = filterObj;
     mFilterClient = filterClient;
+    mSharedFilter = false;
+}
+
+void FilterClientCallbackImpl::setSharedFilter(jweak filterObj, sp<FilterClient> filterClient) {
+    ALOGV("FilterClientCallbackImpl::setFilter");
+    // Java Object
+    mFilterObj = filterObj;
+    mFilterClient = filterClient;
+    mSharedFilter = true;
 }
 
 FilterClientCallbackImpl::~FilterClientCallbackImpl() {
@@ -2974,6 +2989,10 @@ static sp<FilterClient> getFilterClient(JNIEnv *env, jobject filter) {
     return (FilterClient *)env->GetLongField(filter, gFields.filterContext);
 }
 
+static sp<FilterClient> getSharedFilterClient(JNIEnv *env, jobject filter) {
+    return (FilterClient *)env->GetLongField(filter, gFields.sharedFilterContext);
+}
+
 static sp<LnbClient> getLnbClient(JNIEnv *env, jobject lnb) {
     return (LnbClient *)env->GetLongField(lnb, gFields.lnbContext);
 }
@@ -3048,6 +3067,14 @@ static void android_media_tv_Tuner_native_init(JNIEnv *env) {
     gFields.onFilterEventID =
             env->GetMethodID(filterClazz, "onFilterEvent",
                     "([Landroid/media/tv/tuner/filter/FilterEvent;)V");
+
+    jclass sharedFilterClazz = env->FindClass("android/media/tv/tuner/filter/SharedFilter");
+    gFields.sharedFilterContext = env->GetFieldID(filterClazz, "mNativeContext", "J");
+    gFields.sharedFilterInitID = env->GetMethodID(sharedFilterClazz, "<init>", "()V");
+    gFields.onSharedFilterStatusID = env->GetMethodID(sharedFilterClazz, "onFilterStatus", "(I)V");
+    gFields.onSharedFilterEventID =
+            env->GetMethodID(sharedFilterClazz, "onFilterEvent",
+                             "([Landroid/media/tv/tuner/filter/FilterEvent;)V");
 
     jclass timeFilterClazz = env->FindClass("android/media/tv/tuner/filter/TimeFilter");
     gFields.timeFilterContext = env->GetFieldID(timeFilterClazz, "mNativeContext", "J");
@@ -3718,7 +3745,12 @@ static jint android_media_tv_Tuner_set_filter_data_source(
 }
 
 static jint android_media_tv_Tuner_start_filter(JNIEnv *env, jobject filter) {
-    sp<FilterClient> filterClient = getFilterClient(env, filter);
+    sp<FilterClient> filterClient = nullptr;
+    if (env->IsInstanceOf(filter, env->FindClass("android/media/tv/tuner/filter/SharedFilter"))) {
+        filterClient = getSharedFilterClient(env, filter);
+    } else {
+        filterClient = getFilterClient(env, filter);
+    }
     if (filterClient == nullptr) {
         ALOGD("Failed to start filter: filter client not found");
         return (int)Result::NOT_INITIALIZED;
@@ -3727,7 +3759,12 @@ static jint android_media_tv_Tuner_start_filter(JNIEnv *env, jobject filter) {
 }
 
 static jint android_media_tv_Tuner_stop_filter(JNIEnv *env, jobject filter) {
-    sp<FilterClient> filterClient = getFilterClient(env, filter);
+    sp<FilterClient> filterClient = nullptr;
+    if (env->IsInstanceOf(filter, env->FindClass("android/media/tv/tuner/filter/SharedFilter"))) {
+        filterClient = getSharedFilterClient(env, filter);
+    } else {
+        filterClient = getFilterClient(env, filter);
+    }
     if (filterClient == nullptr) {
         ALOGD("Failed to stop filter: filter client not found");
         return (int)Result::NOT_INITIALIZED;
@@ -3736,17 +3773,27 @@ static jint android_media_tv_Tuner_stop_filter(JNIEnv *env, jobject filter) {
 }
 
 static jint android_media_tv_Tuner_flush_filter(JNIEnv *env, jobject filter) {
-    sp<FilterClient> filterClient = getFilterClient(env, filter);
+    sp<FilterClient> filterClient = nullptr;
+    if (env->IsInstanceOf(filter, env->FindClass("android/media/tv/tuner/filter/SharedFilter"))) {
+        filterClient = getSharedFilterClient(env, filter);
+    } else {
+        filterClient = getFilterClient(env, filter);
+    }
     if (filterClient == nullptr) {
         ALOGD("Failed to flush filter: filter client not found");
-        return (int)Result::NOT_INITIALIZED;
+        return (jint)Result::NOT_INITIALIZED;
     }
     return (jint)filterClient->flush();
 }
 
 static jint android_media_tv_Tuner_read_filter_fmq(
         JNIEnv *env, jobject filter, jbyteArray buffer, jlong offset, jlong size) {
-    sp<FilterClient> filterClient = getFilterClient(env, filter);
+    sp<FilterClient> filterClient = nullptr;
+    if (env->IsInstanceOf(filter, env->FindClass("android/media/tv/tuner/filter/SharedFilter"))) {
+        filterClient = getSharedFilterClient(env, filter);
+    } else {
+        filterClient = getFilterClient(env, filter);
+    }
     if (filterClient == nullptr) {
         jniThrowException(env, "java/lang/IllegalStateException",
                 "Failed to read filter FMQ: filter client not found");
@@ -3766,14 +3813,57 @@ static jint android_media_tv_Tuner_read_filter_fmq(
 }
 
 static jint android_media_tv_Tuner_close_filter(JNIEnv *env, jobject filter) {
-    sp<FilterClient> filterClient = getFilterClient(env, filter);
+    sp<FilterClient> filterClient = nullptr;
+    bool shared = env->IsInstanceOf(
+        filter, env->FindClass("android/media/tv/tuner/filter/SharedFilter"));
+    if (shared) {
+        filterClient = getSharedFilterClient(env, filter);
+    } else {
+        filterClient = getFilterClient(env, filter);
+    }
     if (filterClient == nullptr) {
         jniThrowException(env, "java/lang/IllegalStateException",
                 "Failed to close filter: filter client not found");
         return 0;
     }
 
-    return (jint)filterClient->close();
+    Result r = filterClient->close();
+    filterClient->decStrong(filter);
+       env->SetLongField(filter, gFields.sharedFilterContext, 0);
+    if (shared) {
+    } else {
+        env->SetLongField(filter, gFields.filterContext, 0);
+    }
+
+    return (jint)r;
+}
+
+static jstring android_media_tv_Tuner_create_shared_filter(JNIEnv *env, jobject filter) {
+    sp<FilterClient> filterClient = getFilterClient(env, filter);
+    if (filterClient == nullptr) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "Failed to create shared filter: filter client not found");
+        return nullptr;
+    }
+
+    string token = filterClient->createSharedFilter();
+    if (token.empty()) {
+        return nullptr;
+    }
+    return env->NewStringUTF(token.data());
+}
+
+static void android_media_tv_Tuner_release_shared_filter(
+        JNIEnv *env, jobject filter, jstring token) {
+    sp<FilterClient> filterClient = getFilterClient(env, filter);
+    if (filterClient == nullptr) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "Failed to release shared filter: filter client not found");
+        return;
+    }
+
+    std::string filterToken(env->GetStringUTFChars(token, nullptr));
+    filterClient->releaseSharedFilter(filterToken);
 }
 
 static sp<TimeFilterClient> getTimeFilterClient(JNIEnv *env, jobject filter) {
@@ -3843,10 +3933,8 @@ static int android_media_tv_Tuner_time_filter_close(JNIEnv *env, jobject filter)
     }
 
     Result r = timeFilterClient->close();
-    if (r == Result::SUCCESS) {
-        timeFilterClient->decStrong(filter);
-        env->SetLongField(filter, gFields.timeFilterContext, 0);
-    }
+    timeFilterClient->decStrong(filter);
+    env->SetLongField(filter, gFields.timeFilterContext, 0);
     return (int)r;
 }
 
@@ -3896,9 +3984,8 @@ static jint android_media_tv_Tuner_close_descrambler(JNIEnv* env, jobject descra
         return (jint)Result::NOT_INITIALIZED;
     }
     Result r = descramblerClient->close();
-    if (r == Result::SUCCESS) {
-        descramblerClient->decStrong(descrambler);
-    }
+    descramblerClient->decStrong(descrambler);
+    env->SetLongField(descrambler, gFields.descramblerContext, 0);
     return (jint)r;
 }
 
@@ -3933,6 +4020,29 @@ static jint android_media_tv_Tuner_close_tuner(JNIEnv* env, jobject thiz) {
 static jint android_media_tv_Tuner_close_demux(JNIEnv* env, jobject thiz, jint /* handle */) {
     sp<JTuner> tuner = getTuner(env, thiz);
     return tuner->closeDemux();
+}
+
+static jobject android_media_tv_Tuner_open_shared_filter(
+        JNIEnv* env, jobject /* thiz */, jstring token) {
+
+    sp<TunerClient> tunerClient = new TunerClient();
+    std::string filterToken(env->GetStringUTFChars(token, nullptr));
+    sp<FilterClient> filterClient;
+    sp<FilterClientCallbackImpl> callback = new FilterClientCallbackImpl();
+    filterClient = tunerClient->openSharedFilter(filterToken, callback);
+    if (filterClient == nullptr) {
+        ALOGD("Failed to open shared filter %s", filterToken.c_str());
+        return nullptr;
+    }
+
+    jobject filterObj = env->NewObject(env->FindClass("android/media/tv/tuner/filter/SharedFilter"),
+                                       gFields.sharedFilterInitID);
+
+    filterClient->incStrong(filterObj);
+    env->SetLongField(filterObj, gFields.sharedFilterContext, (jlong)filterClient.get());
+    callback->setSharedFilter(env->NewWeakGlobalRef(filterObj), filterClient);
+
+    return filterObj;
 }
 
 static jint android_media_tv_Tuner_close_frontend(JNIEnv* env, jobject thiz, jint /* handle */) {
@@ -4014,7 +4124,14 @@ static jint android_media_tv_Tuner_close_dvr(JNIEnv* env, jobject dvr) {
         ALOGD("Failed to close dvr: dvr client not found");
         return (jint)Result::NOT_INITIALIZED;
     }
-    return (jint)dvrClient->close();
+    Result r = dvrClient->close();
+    bool isRecorder =
+            env->IsInstanceOf(dvr, env->FindClass("android/media/tv/tuner/dvr/DvrRecorder"));
+    jfieldID fieldId =
+            isRecorder ? gFields.dvrRecorderContext : gFields.dvrPlaybackContext;
+    dvrClient->decStrong(dvr);
+    env->SetLongField(dvr, fieldId, 0);
+    return (jint)r;
 }
 
 static jint android_media_tv_Tuner_lnb_set_voltage(JNIEnv* env, jobject lnb, jint voltage) {
@@ -4043,10 +4160,8 @@ static int android_media_tv_Tuner_lnb_send_diseqc_msg(JNIEnv* env, jobject lnb, 
 static int android_media_tv_Tuner_close_lnb(JNIEnv* env, jobject lnb) {
     sp<LnbClient> lnbClient = getLnbClient(env, lnb);
     Result r = lnbClient->close();
-    if (r == Result::SUCCESS) {
-        lnbClient->decStrong(lnb);
-        env->SetLongField(lnb, gFields.lnbContext, 0);
-    }
+    lnbClient->decStrong(lnb);
+    env->SetLongField(lnb, gFields.lnbContext, 0);
     return (jint)r;
 }
 
@@ -4221,6 +4336,9 @@ static const JNINativeMethod gTunerMethods[] = {
     { "nativeClose", "()I", (void *)android_media_tv_Tuner_close_tuner },
     { "nativeCloseFrontend", "(I)I", (void *)android_media_tv_Tuner_close_frontend },
     { "nativeCloseDemux", "(I)I", (void *)android_media_tv_Tuner_close_demux },
+    {"nativeOpenSharedFilter",
+            "(Ljava/lang/String;)Landroid/media/tv/tuner/filter/SharedFilter;",
+            (void *)android_media_tv_Tuner_open_shared_filter},
 };
 
 static const JNINativeMethod gFilterMethods[] = {
@@ -4238,6 +4356,18 @@ static const JNINativeMethod gFilterMethods[] = {
     { "nativeFlushFilter", "()I", (void *)android_media_tv_Tuner_flush_filter },
     { "nativeRead", "([BJJ)I", (void *)android_media_tv_Tuner_read_filter_fmq },
     { "nativeClose", "()I", (void *)android_media_tv_Tuner_close_filter },
+    {"nativeCreateSharedFilter", "()Ljava/lang/String;",
+            (void *)android_media_tv_Tuner_create_shared_filter},
+    {"nativeReleaseSharedFilter", "(Ljava/lang/String;)V",
+            (void *)android_media_tv_Tuner_release_shared_filter},
+};
+
+static const JNINativeMethod gSharedFilterMethods[] = {
+    {"nativeStartSharedFilter", "()I", (void *)android_media_tv_Tuner_start_filter},
+    {"nativeStopSharedFilter", "()I", (void *)android_media_tv_Tuner_stop_filter},
+    {"nativeFlushSharedFilter", "()I", (void *)android_media_tv_Tuner_flush_filter},
+    {"nativeSharedRead", "([BJJ)I", (void *)android_media_tv_Tuner_read_filter_fmq},
+    {"nativeSharedClose", "()I", (void *)android_media_tv_Tuner_close_filter},
 };
 
 static const JNINativeMethod gTimeFilterMethods[] = {
@@ -4319,6 +4449,13 @@ static bool register_android_media_tv_Tuner(JNIEnv *env) {
             gFilterMethods,
             NELEM(gFilterMethods)) != JNI_OK) {
         ALOGE("Failed to register filter native methods");
+        return false;
+    }
+    if (AndroidRuntime::registerNativeMethods(
+            env, "android/media/tv/tuner/filter/SharedFilter",
+            gSharedFilterMethods,
+            NELEM(gSharedFilterMethods)) != JNI_OK) {
+        ALOGE("Failed to register shared filter native methods");
         return false;
     }
     if (AndroidRuntime::registerNativeMethods(

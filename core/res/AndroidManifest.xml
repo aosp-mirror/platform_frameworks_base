@@ -5802,6 +5802,12 @@
     <permission android:name="android.permission.ACCESS_TV_DESCRAMBLER"
         android:protectionLevel="signature|privileged|vendorPrivileged" />
 
+    <!-- @SystemApi Allows an application to access shared filter of TV tuner HAL
+         <p>Not for use by third-party applications.
+         @hide -->
+    <permission android:name="android.permission.ACCESS_TV_SHARED_FILTER"
+        android:protectionLevel="signature|privileged|vendorPrivileged" />
+
     <!-- Allows an application to create trusted displays. @hide -->
     <permission android:name="android.permission.ADD_TRUSTED_DISPLAY"
                 android:protectionLevel="signature" />

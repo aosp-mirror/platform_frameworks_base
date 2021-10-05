@@ -425,6 +425,7 @@ applications that come with the platform
         <permission name="android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS"/>
         <!-- Permissions required for CTS test - TunerTest -->
         <permission name="android.permission.ACCESS_TV_DESCRAMBLER" />
+        <permission name="android.permission.ACCESS_TV_SHARED_FILTER" />
         <permission name="android.permission.ACCESS_TV_TUNER" />
         <permission name="android.permission.TUNER_RESOURCE_ACCESS" />
         <!-- Permissions required for CTS test - TVInputManagerTest -->

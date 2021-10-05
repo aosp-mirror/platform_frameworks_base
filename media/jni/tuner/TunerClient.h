@@ -20,10 +20,12 @@
 #include <aidl/android/media/tv/tuner/ITunerService.h>
 #include <android/binder_parcel_utils.h>
 
-#include "DemuxClient.h"
 #include "ClientHelper.h"
-#include "FrontendClient.h"
+#include "DemuxClient.h"
 #include "DescramblerClient.h"
+#include "FilterClient.h"
+#include "FilterClientCallback.h"
+#include "FrontendClient.h"
 #include "LnbClient.h"
 
 using Status = ::ndk::ScopedAStatus;
@@ -115,6 +117,15 @@ public:
      * while the low 16 bits are the minor version. Default value is unknown version 0.
      */
     int32_t getHalTunerVersion() { return mTunerVersion; }
+
+    /**
+     * Open a new shared filter client.
+     *
+     * @param filterToken the shared filter token created by FilterClient.
+     * @param cb the FilterClientCallback to receive filter events.
+     * @return a newly created TunerFilter interface.
+     */
+    sp<FilterClient> openSharedFilter(const string& filterToken, sp<FilterClientCallback> cb);
 
 private:
     /**
