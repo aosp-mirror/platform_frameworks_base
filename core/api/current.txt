@@ -11078,6 +11078,7 @@ package android.content {
     field public static final String ACTION_AIRPLANE_MODE_CHANGED = "android.intent.action.AIRPLANE_MODE";
     field public static final String ACTION_ALL_APPS = "android.intent.action.ALL_APPS";
     field public static final String ACTION_ANSWER = "android.intent.action.ANSWER";
+    field public static final String ACTION_APPLICATION_LOCALE_CHANGED = "android.intent.action.APPLICATION_LOCALE_CHANGED";
     field public static final String ACTION_APPLICATION_PREFERENCES = "android.intent.action.APPLICATION_PREFERENCES";
     field public static final String ACTION_APPLICATION_RESTRICTIONS_CHANGED = "android.intent.action.APPLICATION_RESTRICTIONS_CHANGED";
     field public static final String ACTION_APP_ERROR = "android.intent.action.APP_ERROR";
@@ -11298,6 +11299,7 @@ package android.content {
     field public static final String EXTRA_INSTALLER_PACKAGE_NAME = "android.intent.extra.INSTALLER_PACKAGE_NAME";
     field public static final String EXTRA_INTENT = "android.intent.extra.INTENT";
     field public static final String EXTRA_KEY_EVENT = "android.intent.extra.KEY_EVENT";
+    field public static final String EXTRA_LOCALE_LIST = "android.intent.extra.LOCALE_LIST";
     field public static final String EXTRA_LOCAL_ONLY = "android.intent.extra.LOCAL_ONLY";
     field public static final String EXTRA_LOCUS_ID = "android.intent.extra.LOCUS_ID";
     field public static final String EXTRA_MIME_TYPES = "android.intent.extra.MIME_TYPES";

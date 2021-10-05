@@ -64,6 +64,7 @@
     <protected-broadcast android:name="android.intent.action.CONFIGURATION_CHANGED" />
     <protected-broadcast android:name="android.intent.action.SPLIT_CONFIGURATION_CHANGED" />
     <protected-broadcast android:name="android.intent.action.LOCALE_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.APPLICATION_LOCALE_CHANGED" />
     <protected-broadcast android:name="android.intent.action.BATTERY_CHANGED" />
     <protected-broadcast android:name="android.intent.action.BATTERY_LEVEL_CHANGED" />
     <protected-broadcast android:name="android.intent.action.BATTERY_LOW" />

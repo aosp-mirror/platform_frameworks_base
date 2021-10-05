@@ -2099,6 +2099,14 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_PACKAGE_NAME = "android.intent.extra.PACKAGE_NAME";
 
     /**
+     * Intent extra: A {@link android.os.LocaleList}
+     * <p>
+     * Type: LocaleList
+     * </p>
+     */
+    public static final String EXTRA_LOCALE_LIST = "android.intent.extra.LOCALE_LIST";
+
+    /**
      * Intent extra: A {@link Bundle} of extras for a package being suspended. Will be sent as an
      * extra with {@link #ACTION_MY_PACKAGE_SUSPENDED}.
      *
@@ -3070,13 +3078,46 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_SPLIT_CONFIGURATION_CHANGED =
             "android.intent.action.SPLIT_CONFIGURATION_CHANGED";
     /**
-     * Broadcast Action: The current device's locale has changed.
+     * Broadcast Action: The receiver's effective locale has changed.
+     *
+     * This happens when the device locale, or the
+     *  {(TODO: will only compile after ag/15518063) @link LocaleManager#setApplicationLocales}
+     *  receiving app's locale changed.
+     *
+     * Can be received by manifest-declared receivers.
+     *
+     * <p class="note"> If only the app locale changed, includes the following extras:
+     * <ul>
+     * <li>{@link #EXTRA_PACKAGE_NAME} is the name of the package for which locale changed.
+     * <li>{@link #EXTRA_LOCALE_LIST} contains locales that are currently set for specified app
+     * </ul>
      *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_LOCALE_CHANGED = "android.intent.action.LOCALE_CHANGED";
+    /**
+     * Broadcast Action: Locale of a particular app has changed.
+     *
+     * <p class="note"> This broadcast is explicitly sent to the
+     * {@link android.content.pm.InstallSourceInfo#getInstallingPackageName} installer
+     *     of the app whose locale has changed.
+     * <p class="note"> The broadcast could also be received by manifest-declared receivers with
+     * {@code android.permission.READ_APP_SPECIFIC_LOCALES}
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     *
+     * <p>Includes the following extras:
+     * <ul>
+     * <li>{@link #EXTRA_PACKAGE_NAME} is the name of the package for which locale changed.
+     * <li>{@link #EXTRA_LOCALE_LIST} contains locales that are currently set for specified app
+     * </ul>
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_APPLICATION_LOCALE_CHANGED =
+            "android.intent.action.APPLICATION_LOCALE_CHANGED";
     /**
      * Broadcast Action:  This is a <em>sticky broadcast</em> containing the
      * charging state, level, and other information about the battery.
