@@ -273,17 +273,6 @@ interface IWindowSession {
     oneway void updatePointerIcon(IWindow window);
 
     /**
-     * Update the location of a child display in its parent window. This enables windows in the
-     * child display to compute the global transformation matrix.
-     *
-     * @param window The parent window of the display.
-     * @param x The x coordinate in the parent window.
-     * @param y The y coordinate in the parent window.
-     * @param displayId The id of the display to be notified.
-     */
-    oneway void updateDisplayContentLocation(IWindow window, int x, int y, int displayId);
-
-    /**
      * Update a tap exclude region identified by provided id in the window. Touches on this region
      * will neither be dispatched to this window nor change the focus to this window. Passing an
      * invalid region will remove the area from the exclude region of this window.

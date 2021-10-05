@@ -7045,42 +7045,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private void checkCallerOwnsDisplay(int displayId) {
-        final Display display = mDisplayManager.getDisplay(displayId);
-        if (display == null) {
-            throw new IllegalArgumentException(
-                    "Cannot find display for non-existent displayId: " + displayId);
-        }
-
-        final int callingUid = Binder.getCallingUid();
-        final int displayOwnerUid = display.getOwnerUid();
-        if (callingUid != displayOwnerUid) {
-            throw new SecurityException("The caller doesn't own the display.");
-        }
-    }
-
-    /** @see Session#updateDisplayContentLocation(IWindow, int, int, int)  */
-    void updateDisplayContentLocation(IWindow client, int x, int y, int displayId) {
-        checkCallerOwnsDisplay(displayId);
-
-        synchronized (mGlobalLock) {
-            final long token = Binder.clearCallingIdentity();
-            try {
-                final WindowState win = windowForClientLocked(null, client, false);
-                if (win == null) {
-                    ProtoLog.w(WM_ERROR, "Bad requesting window %s", client);
-                    return;
-                }
-                final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-                if (displayContent != null) {
-                    displayContent.updateLocation(win, x, y);
-                }
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-    }
-
     /**
      * Update a tap exclude region in the window identified by the provided id. Touches down on this
      * region will not:
@@ -7153,29 +7117,6 @@ public class WindowManagerService extends IWindowManager.Stub
         } catch (RemoteException e) {
             ProtoLog.w(WM_ERROR,
                     "requestScrollCapture: caught exception dispatching callback: %s", e);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
-    @Override
-    public void dontOverrideDisplayInfo(int displayId) {
-        final long token = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                final DisplayContent dc = getDisplayContentOrCreate(displayId, null /* token */);
-                if (dc == null) {
-                    throw new IllegalArgumentException(
-                            "Trying to configure a non existent display.");
-                }
-                // We usually set the override info in DisplayManager so that we get consistent
-                // values when displays are changing. However, we don't do this for displays that
-                // serve as containers for ActivityViews because we don't want letter-/pillar-boxing
-                // during resize.
-                dc.mShouldOverrideDisplayConfiguration = false;
-                mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(displayId,
-                        null /* info */);
-            }
         } finally {
             Binder.restoreCallingIdentity(token);
         }

@@ -444,11 +444,6 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public void updateDisplayContentLocation(android.view.IWindow window, int x, int y,
-            int displayId) {
-    }
-
-    @Override
     public void updateTapExcludeRegion(android.view.IWindow window,
             android.graphics.Region region) {
     }
