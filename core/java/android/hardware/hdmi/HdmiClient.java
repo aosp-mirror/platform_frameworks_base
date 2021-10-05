@@ -1,11 +1,15 @@
 package android.hardware.hdmi;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.hardware.hdmi.HdmiControlManager.VendorCommandListener;
+import android.os.Binder;
 import android.os.RemoteException;
 import android.util.Log;
+
+import java.util.concurrent.Executor;
 
 /**
  * Parent for classes of various HDMI-CEC device type used to access
@@ -28,16 +32,17 @@ public abstract class HdmiClient {
     }
 
     /**
-     * Callback interface used to get the result of {@link #selectDevice}.
+     * Listener interface used to get the result of {@link #selectDevice}.
      */
-    public interface SelectDeviceCallback {
+    public interface OnDeviceSelectedListener {
         /**
          * Called when the operation is finished.
          * @param result the result value of {@link #selectDevice} and can have the values mentioned
          *               in {@link HdmiControlShellCommand#getResultString}
          * @param logicalAddress logical address of the selected device
          */
-        void onComplete(@HdmiControlManager.ControlCallbackResult int result, int logicalAddress);
+        void onDeviceSelected(@HdmiControlManager.ControlCallbackResult int result,
+                int logicalAddress);
     }
 
     /**
@@ -48,15 +53,19 @@ public abstract class HdmiClient {
      * containing the result of that call only.
      *
      * @param logicalAddress logical address of the device to select
-     * @param callback callback to get the result with
-     * @throws {@link IllegalArgumentException} if the {@code callback} is null
+     * @param listener listener to get the result with
+     * @throws {@link IllegalArgumentException} if the {@code listener} is null
      */
-    public void selectDevice(int logicalAddress, @NonNull SelectDeviceCallback callback) {
-        if (callback == null) {
-            throw new IllegalArgumentException("callback must not be null.");
+    public void selectDevice(
+            int logicalAddress,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnDeviceSelectedListener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("listener must not be null.");
         }
         try {
-            mService.deviceSelect(logicalAddress, getCallbackWrapper(callback, logicalAddress));
+            mService.deviceSelect(logicalAddress,
+                    getCallbackWrapper(logicalAddress, executor, listener));
         } catch (RemoteException e) {
             Log.e(TAG, "failed to select device: ", e);
         }
@@ -65,12 +74,14 @@ public abstract class HdmiClient {
     /**
      * @hide
      */
-    private static IHdmiControlCallback getCallbackWrapper(final SelectDeviceCallback callback,
-            int logicalAddress) {
+    private static IHdmiControlCallback getCallbackWrapper(int logicalAddress,
+            final Executor executor, final OnDeviceSelectedListener listener) {
         return new IHdmiControlCallback.Stub() {
             @Override
             public void onComplete(int result) {
-                callback.onComplete(result, logicalAddress);
+                Binder.withCleanCallingIdentity(
+                        () -> executor.execute(() -> listener.onDeviceSelected(result,
+                                logicalAddress)));
             }
         };
     }
