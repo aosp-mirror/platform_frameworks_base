@@ -29,9 +29,10 @@ import android.content.Intent;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.PackageUserState;
 import android.content.pm.ResolveInfo;
 import android.content.pm.parsing.component.ParsedActivity;
+import android.content.pm.pkg.PackageUserState;
+import android.content.pm.pkg.PackageUserStateUtils;
 import android.content.pm.verify.domain.DomainOwner;
 import android.content.pm.verify.domain.DomainVerificationInfo;
 import android.content.pm.verify.domain.DomainVerificationManager;
@@ -1743,13 +1744,13 @@ public class DomainVerificationService extends SystemService
                 userId, debugObject);
         if (includeNegative && approvalLevel == APPROVAL_LEVEL_NONE) {
             PackageUserState pkgUserState = pkgSetting.readUserState(userId);
-            if (!pkgUserState.installed) {
+            if (!pkgUserState.isInstalled()) {
                 return APPROVAL_LEVEL_NOT_INSTALLED;
             }
 
             AndroidPackage pkg = pkgSetting.getPkg();
             if (pkg != null) {
-                if (!pkgUserState.isPackageEnabled(pkg)) {
+                if (!PackageUserStateUtils.isPackageEnabled(pkgUserState, pkg)) {
                     return APPROVAL_LEVEL_DISABLED;
                 } else if (mCollector.containsAutoVerifyDomain(pkgSetting.getPkg(), host)) {
                     return APPROVAL_LEVEL_UNVERIFIED;
@@ -1783,7 +1784,7 @@ public class DomainVerificationService extends SystemService
             return APPROVAL_LEVEL_NONE;
         }
 
-        if (!pkgUserState.installed) {
+        if (!pkgUserState.isInstalled()) {
             if (DEBUG_APPROVAL) {
                 debugApproval(packageName, debugObject, userId, false,
                         "package not installed for user");
@@ -1791,7 +1792,7 @@ public class DomainVerificationService extends SystemService
             return APPROVAL_LEVEL_NONE;
         }
 
-        if (!pkgUserState.isPackageEnabled(pkg)) {
+        if (!PackageUserStateUtils.isPackageEnabled(pkgUserState, pkg)) {
             if (DEBUG_APPROVAL) {
                 debugApproval(packageName, debugObject, userId, false,
                         "package not enabled for user");
@@ -1799,7 +1800,7 @@ public class DomainVerificationService extends SystemService
             return APPROVAL_LEVEL_NONE;
         }
 
-        if (pkgUserState.suspended) {
+        if (pkgUserState.isSuspended()) {
             if (DEBUG_APPROVAL) {
                 debugApproval(packageName, debugObject, userId, false,
                         "package suspended for user");

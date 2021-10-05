@@ -18,9 +18,10 @@ package com.android.server.pm.test.verify.domain
 
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.pm.PackageUserState
 import android.content.pm.parsing.component.ParsedActivity
 import android.content.pm.parsing.component.ParsedIntentInfo
+import android.content.pm.pkg.PackageUserState
+import android.content.pm.pkg.PackageUserStateInternal
 import android.content.pm.verify.domain.DomainVerificationManager
 import android.content.pm.verify.domain.DomainVerificationState
 import android.content.pm.verify.domain.DomainVerificationUserState
@@ -138,14 +139,14 @@ class DomainVerificationUserStateOverrideTest {
             whenever(activities) { activityList }
         }
 
-        whenever(getPkg()) { pkg }
-        whenever(getPackageName()) { pkgName }
+        whenever(this.pkg) { pkg }
+        whenever(packageName) { pkgName }
         whenever(this.domainSetId) { domainSetId }
         whenever(getInstantApp(anyInt())) { false }
         whenever(firstInstallTime) { 0L }
-        whenever(readUserState(0)) { PackageUserState() }
-        whenever(readUserState(1)) { PackageUserState() }
-        whenever(isSystem()) { false }
+        whenever(readUserState(0)) { PackageUserStateInternal.DEFAULT }
+        whenever(readUserState(1)) { PackageUserStateInternal.DEFAULT }
+        whenever(isSystem) { false }
     }
 
     @Test

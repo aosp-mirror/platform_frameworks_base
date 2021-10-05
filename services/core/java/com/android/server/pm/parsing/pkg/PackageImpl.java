@@ -48,7 +48,7 @@ import java.io.File;
  * and not exposed to the core SDK.
  *
  * Many of the fields contained here will eventually be moved inside
- * {@link com.android.server.pm.PackageSetting} or {@link android.content.pm.PackageUserState}.
+ * {@link com.android.server.pm.PackageSetting} or {@link android.content.pm.pkg.PackageUserState}.
  *
  * @hide
  */

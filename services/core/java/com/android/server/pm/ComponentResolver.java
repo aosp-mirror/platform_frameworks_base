@@ -33,7 +33,6 @@ import android.content.pm.AuxiliaryResolveInfo;
 import android.content.pm.InstantAppResolveInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.PackageUserState;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -43,6 +42,7 @@ import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedMainComponent;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
+import android.content.pm.pkg.PackageUserState;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -1549,7 +1549,7 @@ public class ComponentResolver
                     && (!matchExplicitlyVisibleOnly || info.isExplicitlyVisibleToInstantApp());
             final boolean matchInstantApp = (mFlags & PackageManager.MATCH_INSTANT) != 0;
             // throw out filters that aren't visible to ephemeral apps
-            if (matchVisibleToInstantApp && !(componentVisible || userState.instantApp)) {
+            if (matchVisibleToInstantApp && !(componentVisible || userState.isInstantApp())) {
                 if (DEBUG) {
                     log("Filter(s) not visible to ephemeral apps"
                             + "; matchVisibleToInstantApp=" + matchVisibleToInstantApp
@@ -1563,7 +1563,7 @@ public class ComponentResolver
                 return null;
             }
             // throw out instant app filters if we're not explicitly requesting them
-            if (!matchInstantApp && userState.instantApp) {
+            if (!matchInstantApp && userState.isInstantApp()) {
                 if (DEBUG) {
                     log("Instant app filter is not explicitly requested", info, match, userId);
                 }
@@ -1571,7 +1571,7 @@ public class ComponentResolver
             }
             // throw out instant app filters if updates are available; will trigger
             // instant app resolution
-            if (userState.instantApp && ps.isUpdateAvailable()) {
+            if (userState.isInstantApp() && ps.isUpdateAvailable()) {
                 if (DEBUG) {
                     log("Instant app update is available", info, match, userId);
                 }
@@ -1599,7 +1599,7 @@ public class ComponentResolver
             }
             res.iconResourceId = info.getIcon();
             res.system = res.activityInfo.applicationInfo.isSystemApp();
-            res.isInstantAppAvailable = userState.instantApp;
+            res.isInstantAppAvailable = userState.isInstantApp();
             return res;
         }
 
@@ -1846,16 +1846,16 @@ public class ComponentResolver
             final boolean isInstantApp = (mFlags & PackageManager.MATCH_INSTANT) != 0;
             // throw out filters that aren't visible to instant applications
             if (matchVisibleToInstantApp
-                    && !(filter.isVisibleToInstantApp() || userState.instantApp)) {
+                    && !(filter.isVisibleToInstantApp() || userState.isInstantApp())) {
                 return null;
             }
             // throw out instant application filters if we're not explicitly requesting them
-            if (!isInstantApp && userState.instantApp) {
+            if (!isInstantApp && userState.isInstantApp()) {
                 return null;
             }
             // throw out instant application filters if updates are available; will trigger
             // instant application resolution
-            if (userState.instantApp && ps.isUpdateAvailable()) {
+            if (userState.isInstantApp() && ps.isUpdateAvailable()) {
                 return null;
             }
             final ApplicationInfo appInfo = PackageInfoUtils.generateApplicationInfo(
@@ -2093,16 +2093,16 @@ public class ComponentResolver
             final boolean isInstantApp = (mFlags & PackageManager.MATCH_INSTANT) != 0;
             // throw out filters that aren't visible to ephemeral apps
             if (matchVisibleToInstantApp
-                    && !(filter.isVisibleToInstantApp() || userState.instantApp)) {
+                    && !(filter.isVisibleToInstantApp() || userState.isInstantApp())) {
                 return null;
             }
             // throw out ephemeral filters if we're not explicitly requesting them
-            if (!isInstantApp && userState.instantApp) {
+            if (!isInstantApp && userState.isInstantApp()) {
                 return null;
             }
             // throw out instant app filters if updates are available; will trigger
             // instant app resolution
-            if (userState.instantApp && ps.isUpdateAvailable()) {
+            if (userState.isInstantApp() && ps.isUpdateAvailable()) {
                 return null;
             }
             final ResolveInfo res = new ResolveInfo();

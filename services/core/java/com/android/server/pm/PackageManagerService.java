@@ -62,7 +62,6 @@ import static com.android.server.pm.PackageManagerServiceUtils.compareSignatures
 import static com.android.server.pm.PackageManagerServiceUtils.dumpCriticalInfo;
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 import static com.android.server.pm.PackageManagerServiceUtils.verifySignatures;
-import static com.android.server.pm.parsing.PackageInfoUtils.checkUseInstalledOrHidden;
 
 import android.Manifest;
 import android.annotation.AppIdInt;
@@ -138,7 +137,6 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManagerInternal.PackageListObserver;
 import android.content.pm.PackageManagerInternal.PrivateResolveFlags;
 import android.content.pm.PackagePartitions;
-import android.content.pm.PackageUserState;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
@@ -166,6 +164,9 @@ import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedMainComponent;
 import android.content.pm.parsing.component.ParsedProvider;
+import android.content.pm.pkg.PackageUserState;
+import android.content.pm.pkg.PackageUserStateInternal;
+import android.content.pm.pkg.PackageUserStateUtils;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
@@ -2842,7 +2843,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (ps != null) {
                     final PackageUserState state = ps.readUserState(userId);
                     if (state != null) {
-                        return checkUseInstalledOrHidden(p, ps, state, 0 /*flags*/);
+                        return PackageUserStateUtils.isAvailable(state, 0);
                     }
                 }
             }
@@ -3577,7 +3578,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 continue;
             }
 
-            if (!ps.readUserState(userId).isAvailable(flags)) {
+            if (!PackageUserStateUtils.isAvailable(ps.readUserState(userId), flags)) {
                 continue;
             }
 
@@ -7164,7 +7165,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 // The instance stored in PackageManagerService is special cased to be non-user
                 // specific, so initialize all the needed fields here.
                 mAndroidApplication = PackageInfoUtils.generateApplicationInfo(pkg, 0,
-                        new PackageUserState(), UserHandle.USER_SYSTEM, pkgSetting);
+                        PackageUserState.DEFAULT, UserHandle.USER_SYSTEM, pkgSetting);
 
                 if (!mResolverReplaced) {
                     mResolveActivity.applicationInfo = mAndroidApplication;
@@ -7314,7 +7315,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // The instance created in PackageManagerService is special cased to be non-user
             // specific, so initialize all the needed fields here.
             ApplicationInfo appInfo = PackageInfoUtils.generateApplicationInfo(pkg, 0,
-                    new PackageUserState(), UserHandle.USER_SYSTEM, pkgSetting);
+                    PackageUserState.DEFAULT, UserHandle.USER_SYSTEM, pkgSetting);
 
             // Set up information for custom user intent resolution activity.
             mResolveActivity.applicationInfo = appInfo;
@@ -8102,11 +8103,11 @@ public class PackageManagerService extends IPackageManager.Stub
             if (ps == null) {
                 return null;
             }
-            final PackageUserState pus = ps.readUserState(userId);
+            final PackageUserStateInternal pus = ps.readUserState(userId);
             final Bundle allExtras = new Bundle();
-            if (pus.suspended) {
-                for (int i = 0; i < pus.suspendParams.size(); i++) {
-                    final PackageUserState.SuspendParams params = pus.suspendParams.valueAt(i);
+            if (pus.isSuspended()) {
+                for (int i = 0; i < pus.getSuspendParams().size(); i++) {
+                    final PackageUserState.SuspendParams params = pus.getSuspendParams().valueAt(i);
                     if (params != null && params.appExtras != null) {
                         allExtras.putAll(params.appExtras);
                     }
@@ -13692,11 +13693,11 @@ public class PackageManagerService extends IPackageManager.Stub
                 final PackageSetting ps = mSettings.getPackageLPr(packageName);
                 final Bundle allExtras = new Bundle();
                 if (ps != null) {
-                    final PackageUserState pus = ps.readUserState(userId);
-                    if (pus.suspended) {
-                        for (int i = 0; i < pus.suspendParams.size(); i++) {
+                    final PackageUserStateInternal pus = ps.readUserState(userId);
+                    if (pus.isSuspended()) {
+                        for (int i = 0; i < pus.getSuspendParams().size(); i++) {
                             final PackageUserState.SuspendParams params =
-                                    pus.suspendParams.valueAt(i);
+                                    pus.getSuspendParams().valueAt(i);
                             if (params != null && params.launcherExtras != null) {
                                 allExtras.putAll(params.launcherExtras);
                             }
@@ -13758,11 +13759,11 @@ public class PackageManagerService extends IPackageManager.Stub
             synchronized (mLock) {
                 final PackageSetting ps = mSettings.getPackageLPr(suspendedPackage);
                 if (ps != null) {
-                    final PackageUserState pus = ps.readUserState(userId);
-                    if (pus.suspended) {
+                    final PackageUserStateInternal pus = ps.readUserState(userId);
+                    if (pus.isSuspended()) {
                         String suspendingPackage = null;
-                        for (int i = 0; i < pus.suspendParams.size(); i++) {
-                            suspendingPackage = pus.suspendParams.keyAt(i);
+                        for (int i = 0; i < pus.getSuspendParams().size(); i++) {
+                            suspendingPackage = pus.getSuspendParams().keyAt(i);
                             if (PLATFORM_PACKAGE_NAME.equals(suspendingPackage)) {
                                 return suspendingPackage;
                             }
@@ -13780,10 +13781,10 @@ public class PackageManagerService extends IPackageManager.Stub
             synchronized (mLock) {
                 final PackageSetting ps = mSettings.getPackageLPr(suspendedPackage);
                 if (ps != null) {
-                    final PackageUserState pus = ps.readUserState(userId);
-                    if (pus.suspended) {
+                    final PackageUserStateInternal pus = ps.readUserState(userId);
+                    if (pus.isSuspended()) {
                         final PackageUserState.SuspendParams suspendParams =
-                                pus.suspendParams.get(suspendingPackage);
+                                pus.getSuspendParams().get(suspendingPackage);
                         return (suspendParams != null) ? suspendParams.dialogInfo : null;
                     }
                 }
