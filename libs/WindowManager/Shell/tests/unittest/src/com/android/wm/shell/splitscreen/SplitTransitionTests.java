@@ -51,6 +51,7 @@ import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
 
+import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -96,6 +97,7 @@ public class SplitTransitionTests extends ShellTestCase {
     private ActivityManager.RunningTaskInfo mSideChild;
 
     @Before
+    @UiThreadTest
     public void setup() {
         MockitoAnnotations.initMocks(this);
         final ShellExecutor mockExecutor = mock(ShellExecutor.class);

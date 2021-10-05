@@ -17,15 +17,19 @@
 package com.android.wm.shell.splitscreen;
 
 import android.annotation.CallSuper;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Rect;
+import android.view.InsetsSourceControl;
+import android.view.InsetsState;
+import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.SyncTransactionQueue;
 
 /**
@@ -34,7 +38,8 @@ import com.android.wm.shell.common.SyncTransactionQueue;
  *
  * @see StageCoordinator
  */
-class SideStage extends StageTaskListener {
+class SideStage extends StageTaskListener implements
+        DisplayInsetsController.OnInsetsChangedListener {
     private static final String TAG = SideStage.class.getSimpleName();
     private final Context mContext;
     private OutlineManager mOutlineManager;
@@ -77,33 +82,61 @@ class SideStage extends StageTaskListener {
         return true;
     }
 
-    void enableOutline(boolean enable) {
-        if (enable) {
-            if (mOutlineManager == null && mRootTaskInfo != null) {
-                mOutlineManager = new OutlineManager(mContext, mRootTaskInfo.configuration);
-                mSyncQueue.runInSync(t -> mOutlineManager.inflate(t, mRootLeash, Color.YELLOW));
-                updateOutlineBounds();
-            }
-        } else {
-            if (mOutlineManager != null) {
-                mOutlineManager.release();
-                mOutlineManager = null;
-            }
-        }
+    @Nullable
+    public SurfaceControl getOutlineLeash() {
+        return mOutlineManager.getOutlineLeash();
     }
 
-    private void updateOutlineBounds() {
-        if (mOutlineManager == null || mRootTaskInfo == null || !mRootTaskInfo.isVisible) return;
-        mOutlineManager.drawOutlineBounds(
-                mRootTaskInfo.configuration.windowConfiguration.getBounds());
+    @Override
+    @CallSuper
+    public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
+        super.onTaskAppeared(taskInfo, leash);
+        if (isRootTask(taskInfo)) {
+            mOutlineManager = new OutlineManager(mContext, taskInfo.configuration);
+            enableOutline(true);
+        }
     }
 
     @Override
     @CallSuper
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
         super.onTaskInfoChanged(taskInfo);
-        if (mRootTaskInfo != null && mRootTaskInfo.taskId == taskInfo.taskId) {
-            updateOutlineBounds();
+        if (isRootTask(taskInfo)) {
+            mOutlineManager.setRootBounds(taskInfo.configuration.windowConfiguration.getBounds());
         }
+    }
+
+    private boolean isRootTask(ActivityManager.RunningTaskInfo taskInfo) {
+        return mRootTaskInfo != null && mRootTaskInfo.taskId == taskInfo.taskId;
+    }
+
+    void enableOutline(boolean enable) {
+        if (mOutlineManager == null) {
+            return;
+        }
+
+        if (enable) {
+            if (mRootTaskInfo != null) {
+                mOutlineManager.inflate(mRootLeash,
+                        mRootTaskInfo.configuration.windowConfiguration.getBounds());
+            }
+        } else {
+            mOutlineManager.release();
+        }
+    }
+
+    void setOutlineVisibility(boolean visible) {
+        mOutlineManager.setVisibility(visible);
+    }
+
+    @Override
+    public void insetsChanged(InsetsState insetsState) {
+        mOutlineManager.onInsetsChanged(insetsState);
+    }
+
+    @Override
+    public void insetsControlChanged(InsetsState insetsState,
+            InsetsSourceControl[] activeControls) {
+        insetsChanged(insetsState);
     }
 }
