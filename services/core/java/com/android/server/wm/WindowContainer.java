@@ -197,10 +197,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * Applied as part of the animation pass in "prepareSurfaces".
      */
     protected final SurfaceAnimator mSurfaceAnimator;
-    private boolean mAnyParentAnimating;
 
     final SurfaceFreezer mSurfaceFreezer;
     protected final WindowManagerService mWmService;
+    final TransitionController mTransitionController;
 
     /**
      * Sources which triggered a surface animation on this container. An animation target can be
@@ -331,6 +331,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     WindowContainer(WindowManagerService wms) {
         mWmService = wms;
+        mTransitionController = mWmService.mAtmService.getTransitionController();
         mPendingTransaction = wms.mTransactionFactory.get();
         mSyncTransaction = wms.mTransactionFactory.get();
         mSurfaceAnimator = new SurfaceAnimator(this, this::onAnimationFinished, wms);
@@ -1008,7 +1009,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     boolean inTransition() {
-        return mWmService.mAtmService.getTransitionController().inTransition(this);
+        return mTransitionController.inTransition(this);
     }
 
     void sendAppVisibilityToClients() {
@@ -2310,7 +2311,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void assignLayer(Transaction t, int layer) {
         // Don't assign layers while a transition animation is playing
         // TODO(b/173528115): establish robust best-practices around z-order fighting.
-        if (mWmService.mAtmService.getTransitionController().isPlaying()) return;
+        if (mTransitionController.isPlaying()) return;
         final boolean changed = layer != mLastLayer || mLastRelativeToLayer != null;
         if (mSurfaceControl != null && changed) {
             setLayer(t, layer);

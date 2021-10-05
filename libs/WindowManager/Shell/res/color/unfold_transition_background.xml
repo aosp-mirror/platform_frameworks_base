@@ -13,14 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <com.android.wm.shell.splitscreen.OutlineView
-        android:id="@+id/split_outline"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent" />
-
-</FrameLayout>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Matches taskbar color -->
+    <item android:color="@android:color/system_neutral2_500" android:lStar="35" />
+</selector>

@@ -853,10 +853,6 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                         proc.getThread(), r.appToken);
 
                 final boolean isTransitionForward = r.isTransitionForward();
-                IBinder fragmentToken = null;
-                if (r.getTaskFragment().getTaskFragmentOrganizerPid() == r.getPid()) {
-                    fragmentToken = r.getTaskFragment().getFragmentToken();
-                }
                 clientTransaction.addCallback(LaunchActivityItem.obtain(new Intent(r.intent),
                         System.identityHashCode(r), r.info,
                         // TODO: Have this take the merged configuration instead of separate global
@@ -868,7 +864,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                         results, newIntents, r.takeOptions(), isTransitionForward,
                         proc.createProfilerInfoIfNeeded(), r.assistToken, activityClientController,
                         r.createFixedRotationAdjustmentsIfNeeded(), r.shareableActivityToken,
-                        r.getLaunchedFromBubble(), fragmentToken));
+                        r.getLaunchedFromBubble()));
 
                 // Set desired final state.
                 final ActivityLifecycleItem lifecycleItem;
@@ -1391,7 +1387,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 mUserLeaving = true;
             }
 
-            mService.getTransitionController().requestTransitionIfNeeded(TRANSIT_TO_FRONT,
+            task.mTransitionController.requestTransitionIfNeeded(TRANSIT_TO_FRONT,
                     0 /* flags */, task, task /* readyGroupRef */,
                     options != null ? options.getRemoteTransition() : null);
             reason = reason + " findTaskToMoveToFront";
@@ -1567,17 +1563,17 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             return;
         }
         if (task.isVisible()) {
-            if (mService.getTransitionController().isCollecting()) {
+            if (task.mTransitionController.isCollecting()) {
                 // We don't want the finishing to change the transition ready state since there will
                 // not be corresponding setReady for finishing.
-                mService.getTransitionController().collectExistenceChange(task);
+                task.mTransitionController.collectExistenceChange(task);
             } else {
-                mService.getTransitionController().requestTransitionIfNeeded(TRANSIT_CLOSE, task);
+                task.mTransitionController.requestTransitionIfNeeded(TRANSIT_CLOSE, task);
             }
         } else {
             // Removing a non-visible task doesn't require a transition, but if there is one
             // collecting, this should be a member just in case.
-            mService.getTransitionController().collect(task);
+            task.mTransitionController.collect(task);
         }
         task.mInRemoveTask = true;
         try {
@@ -1891,7 +1887,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             final ActivityRecord s = mStoppingActivities.get(i);
             final boolean animating = s.isAnimating(TRANSITION | PARENTS,
                     ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS)
-                    || mService.getTransitionController().inTransition(s);
+                    || s.inTransition();
             ProtoLog.v(WM_DEBUG_STATES, "Stopping %s: nowVisible=%b animating=%b "
                     + "finishing=%s", s, s.nowVisible, animating, s.finishing);
             if (!animating || mService.mShuttingDown) {
@@ -2192,7 +2188,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         }
 
         if (!task.supportsSplitScreenWindowingMode() || forceNonResizable) {
-            if (mService.getTransitionController().getTransitionPlayer() != null) return;
+            if (task.mTransitionController.isShellTransitionsEnabled()) return;
             // Dismiss docked root task. If task appeared to be in docked root task but is not
             // resizable - we need to move it to top of fullscreen root task, otherwise it will
             // be covered.

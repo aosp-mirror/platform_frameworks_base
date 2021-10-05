@@ -138,8 +138,11 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             mRootTaskInfo = taskInfo;
             mCallbacks.onRootTaskAppeared();
             sendStatusChanged();
-            mSyncQueue.runInSync(t -> mDimLayer =
-                    SurfaceUtils.makeDimLayer(t, mRootLeash, "Dim layer", mSurfaceSession));
+            mSyncQueue.runInSync(t -> {
+                t.hide(mRootLeash);
+                mDimLayer =
+                        SurfaceUtils.makeDimLayer(t, mRootLeash, "Dim layer", mSurfaceSession);
+            });
         } else if (taskInfo.parentTaskId == mRootTaskInfo.taskId) {
             final int taskId = taskInfo.taskId;
             mChildrenLeashes.put(taskId, leash);

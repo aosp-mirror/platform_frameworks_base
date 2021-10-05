@@ -252,7 +252,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         // Getting the parent bounds using the updated container - it will have the recent value.
         final Rect parentBounds = getParentContainerBounds(updatedContainer);
         final SplitRule rule = splitContainer.getSplitRule();
-        final Activity activity = splitContainer.getPrimaryContainer().getTopNonFinishingActivity();
+        final TaskFragmentContainer primaryContainer = splitContainer.getPrimaryContainer();
+        final Activity activity = primaryContainer.getTopNonFinishingActivity();
         if (activity == null) {
             return;
         }
@@ -264,10 +265,12 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
 
         // If the task fragments are not registered yet, the positions will be updated after they
         // are created again.
-        resizeTaskFragmentIfRegistered(wct, splitContainer.getPrimaryContainer(),
-                primaryRectBounds);
-        resizeTaskFragmentIfRegistered(wct, splitContainer.getSecondaryContainer(),
-                secondaryRectBounds);
+        resizeTaskFragmentIfRegistered(wct, primaryContainer, primaryRectBounds);
+        final TaskFragmentContainer secondaryContainer = splitContainer.getSecondaryContainer();
+        resizeTaskFragmentIfRegistered(wct, secondaryContainer, secondaryRectBounds);
+
+        setAdjacentTaskFragments(wct, primaryContainer.getTaskFragmentToken(),
+                secondaryContainer.getTaskFragmentToken(), rule);
     }
 
     /**
