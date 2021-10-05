@@ -758,9 +758,7 @@ final class VerificationParams extends HandlerParams {
             String errorMsg = null;
             for (VerificationParams params : mVerificationState) {
                 int status = params.mRet;
-                if (status == PackageManager.INSTALL_UNKNOWN) {
-                    return;
-                } else if (status != PackageManager.INSTALL_SUCCEEDED) {
+                if (status != PackageManager.INSTALL_SUCCEEDED) {
                     completeStatus = status;
                     errorMsg = params.mErrorMessage;
                     break;
