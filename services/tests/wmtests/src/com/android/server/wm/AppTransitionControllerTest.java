@@ -922,6 +922,40 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         verify(mDisplayContent.mAppTransition).goodToGo(anyInt(), any());
     }
 
+    @Test
+    public void testTransitionGoodToGoForTaskFragments_detachedApp() {
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment changeTaskFragment =
+                createTaskFragmentWithEmbeddedActivity(task, organizer);
+        final TaskFragment emptyTaskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setOrganizer(organizer)
+                .build();
+        changeTaskFragment.getTopMostActivity().allDrawn = true;
+        // To make sure that having a detached activity won't cause any issue.
+        final ActivityRecord detachedActivity = createActivityRecord(task);
+        detachedActivity.removeImmediately();
+        assertNull(detachedActivity.getRootTask());
+        spyOn(mDisplayContent.mAppTransition);
+        spyOn(emptyTaskFragment);
+
+        prepareAndTriggerAppTransition(
+                null /* openingActivity */, detachedActivity, changeTaskFragment);
+
+        // Transition not ready because there is an empty non-finishing TaskFragment.
+        verify(mDisplayContent.mAppTransition, never()).goodToGo(anyInt(), any());
+
+        doReturn(true).when(emptyTaskFragment).hasChild();
+        emptyTaskFragment.remove(false /* withTransition */, "test");
+
+        mDisplayContent.mAppTransitionController.handleAppTransitionReady();
+
+        // Transition ready because the empty (no running activity) TaskFragment is requested to be
+        // removed.
+        verify(mDisplayContent.mAppTransition).goodToGo(anyInt(), any());
+    }
+
     /** Registers remote animation for the organizer. */
     private void setupTaskFragmentRemoteAnimation(TaskFragmentOrganizer organizer,
             RemoteAnimationAdapter adapter) {
