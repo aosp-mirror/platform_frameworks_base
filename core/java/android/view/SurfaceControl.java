@@ -243,6 +243,76 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeSetTransformHint(long nativeObject, int transformHint);
     private static native int nativeGetTransformHint(long nativeObject);
 
+    /**
+     * Transforms that can be applied to buffers as they are displayed to a window.
+     *
+     * Supported transforms are any combination of horizontal mirror, vertical mirror, and
+     * clock-wise 90 degree rotation, in that order. Rotations of 180 and 270 degrees are made up
+     * of those basic transforms.
+     * Mirrors {@code ANativeWindowTransform} definitions.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"BUFFER_TRANSFORM_"},
+            value = {BUFFER_TRANSFORM_IDENTITY, BUFFER_TRANSFORM_MIRROR_HORIZONTAL,
+                    BUFFER_TRANSFORM_MIRROR_VERTICAL, BUFFER_TRANSFORM_ROTATE_90,
+                    BUFFER_TRANSFORM_ROTATE_180, BUFFER_TRANSFORM_ROTATE_270,
+                    BUFFER_TRANSFORM_MIRROR_HORIZONTAL | BUFFER_TRANSFORM_ROTATE_90,
+                    BUFFER_TRANSFORM_MIRROR_VERTICAL | BUFFER_TRANSFORM_ROTATE_90})
+    public @interface BufferTransform {
+    }
+
+    /**
+     * Identity transform.
+     *
+     * These transforms that can be applied to buffers as they are displayed to a window.
+     * @see HardwareBuffer
+     *
+     * Supported transforms are any combination of horizontal mirror, vertical mirror, and
+     * clock-wise 90 degree rotation, in that order. Rotations of 180 and 270 degrees are
+     * made up of those basic transforms.
+     */
+    public static final int BUFFER_TRANSFORM_IDENTITY = 0x00;
+    /**
+     * Mirror horizontally. Can be combined with {@link #BUFFER_TRANSFORM_MIRROR_VERTICAL}
+     * and {@link #BUFFER_TRANSFORM_ROTATE_90}.
+     */
+    public static final int BUFFER_TRANSFORM_MIRROR_HORIZONTAL = 0x01;
+    /**
+     * Mirror vertically. Can be combined with {@link #BUFFER_TRANSFORM_MIRROR_HORIZONTAL}
+     * and {@link #BUFFER_TRANSFORM_ROTATE_90}.
+     */
+    public static final int BUFFER_TRANSFORM_MIRROR_VERTICAL = 0x02;
+    /**
+     * Rotate 90 degrees clock-wise. Can be combined with {@link
+     * #BUFFER_TRANSFORM_MIRROR_HORIZONTAL} and {@link #BUFFER_TRANSFORM_MIRROR_VERTICAL}.
+     */
+    public static final int BUFFER_TRANSFORM_ROTATE_90 = 0x04;
+    /**
+     * Rotate 180 degrees clock-wise. Cannot be combined with other transforms.
+     */
+    public static final int BUFFER_TRANSFORM_ROTATE_180 =
+            BUFFER_TRANSFORM_MIRROR_HORIZONTAL | BUFFER_TRANSFORM_MIRROR_VERTICAL;
+    /**
+     * Rotate 270 degrees clock-wise. Cannot be combined with other transforms.
+     */
+    public static final int BUFFER_TRANSFORM_ROTATE_270 =
+            BUFFER_TRANSFORM_ROTATE_180 | BUFFER_TRANSFORM_ROTATE_90;
+
+    /**
+     * @hide
+     */
+    public static @BufferTransform int rotationToBufferTransform(@Surface.Rotation int rotation) {
+        switch (rotation) {
+            case Surface.ROTATION_0: return BUFFER_TRANSFORM_IDENTITY;
+            case Surface.ROTATION_90: return BUFFER_TRANSFORM_ROTATE_90;
+            case Surface.ROTATION_180: return BUFFER_TRANSFORM_ROTATE_180;
+            case Surface.ROTATION_270: return BUFFER_TRANSFORM_ROTATE_270;
+        }
+        Log.e(TAG, "Trying to convert unknown rotation=" + rotation);
+        return BUFFER_TRANSFORM_IDENTITY;
+    }
+
     @Nullable
     @GuardedBy("mLock")
     private ArrayList<OnReparentListener> mReparentListeners;
