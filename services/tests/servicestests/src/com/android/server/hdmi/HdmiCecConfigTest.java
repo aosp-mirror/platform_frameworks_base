@@ -18,7 +18,6 @@ package com.android.server.hdmi;
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
@@ -26,13 +25,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 
-import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Resources;
 import android.hardware.hdmi.HdmiControlManager;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
-import android.provider.Settings.Global;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -40,15 +37,11 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.R;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 @SmallTest
 @Presubmit
@@ -367,18 +360,6 @@ public final class HdmiCecConfigTest {
     }
 
     @Test
-    public void getIntValue_GlobalSetting_BasicSanity() {
-        when(mStorageAdapter.retrieveGlobalSetting(
-                  Global.HDMI_CONTROL_ENABLED,
-                  Integer.toString(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED)))
-            .thenReturn(Integer.toString(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED));
-        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
-        assertThat(hdmiCecConfig.getIntValue(
-                    HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED))
-                .isEqualTo(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
-    }
-
-    @Test
     public void getIntValue_SharedPref_BasicSanity() {
         when(mStorageAdapter.retrieveSharedPref(
                   HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
@@ -454,16 +435,6 @@ public final class HdmiCecConfigTest {
     }
 
     @Test
-    public void setIntValue_GlobalSetting_BasicSanity() {
-        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
-        hdmiCecConfig.setIntValue(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
-                                  HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
-        verify(mStorageAdapter).storeGlobalSetting(
-                  Global.HDMI_CONTROL_ENABLED,
-                  Integer.toString(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED));
-    }
-
-    @Test
     public void setIntValue_SharedPref_BasicSanity() {
         HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
         hdmiCecConfig.setIntValue(
@@ -501,52 +472,5 @@ public final class HdmiCecConfigTest {
                 HdmiControlManager.SYSTEM_AUDIO_MODE_MUTING_DISABLED);
         verify(mSettingChangeListener, never()).onChange(
                 HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING);
-    }
-
-    /**
-     * Externally modified Global Settings still need to be supported. This test verifies that
-     * setting change notification is being forwarded to listeners registered via HdmiCecConfig.
-     */
-    @Test
-    @Ignore("b/175381065")
-    public void globalSettingObserver_BasicSanity() throws Exception {
-        CountDownLatch notifyLatch = new CountDownLatch(1);
-        // Get current value of the setting in the system.
-        String originalValue = Global.getString(mContext.getContentResolver(),
-                Global.HDMI_CONTROL_ENABLED);
-        try {
-            HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
-            hdmiCecConfig.registerGlobalSettingsObserver(mTestLooper.getLooper());
-            HdmiCecConfig.SettingChangeListener latchUpdateListener =
-                    new HdmiCecConfig.SettingChangeListener() {
-                        @Override
-                        public void onChange(
-                                @NonNull @HdmiControlManager.CecSettingName String setting) {
-                            notifyLatch.countDown();
-                            assertThat(setting).isEqualTo(
-                                    HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED);
-                        }
-                    };
-            hdmiCecConfig.registerChangeListener(
-                    HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
-                    latchUpdateListener);
-
-            // Flip the value of the setting.
-            String valueToSet = ((originalValue == null || originalValue.equals("1")) ? "0" : "1");
-            Global.putString(mContext.getContentResolver(), Global.HDMI_CONTROL_ENABLED,
-                    valueToSet);
-            assertThat(Global.getString(mContext.getContentResolver(),
-                    Global.HDMI_CONTROL_ENABLED)).isEqualTo(valueToSet);
-            mTestLooper.dispatchAll();
-
-            if (!notifyLatch.await(TIMEOUT_CONTENT_CHANGE_SEC, TimeUnit.SECONDS)) {
-                fail("Timed out waiting for the notify callback");
-            }
-            hdmiCecConfig.unregisterGlobalSettingsObserver();
-        } finally {
-            // Restore the previous value of the setting in the system.
-            Global.putString(mContext.getContentResolver(), Global.HDMI_CONTROL_ENABLED,
-                    originalValue);
-        }
     }
 }

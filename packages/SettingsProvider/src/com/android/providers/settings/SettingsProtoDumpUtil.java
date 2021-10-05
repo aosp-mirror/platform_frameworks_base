@@ -802,9 +802,6 @@ class SettingsProtoDumpUtil {
 
         final long hdmiToken = p.start(GlobalSettingsProto.HDMI);
         dumpSetting(s, p,
-                Settings.Global.HDMI_CONTROL_ENABLED,
-                GlobalSettingsProto.Hdmi.CONTROL_ENABLED);
-        dumpSetting(s, p,
                 Settings.Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
                 GlobalSettingsProto.Hdmi.CONTROL_AUTO_DEVICE_OFF_ENABLED);
         p.end(hdmiToken);

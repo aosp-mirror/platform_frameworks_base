@@ -518,7 +518,7 @@ public class HdmiCecConfig {
     private int getStorage(@NonNull Setting setting) {
         switch (setting.getName()) {
             case HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED:
-                return STORAGE_GLOBAL_SETTINGS;
+                return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION:
                 return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_ROUTING_CONTROL:
@@ -559,7 +559,7 @@ public class HdmiCecConfig {
     private String getStorageKey(@NonNull Setting setting) {
         switch (setting.getName()) {
             case HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED:
-                return Global.HDMI_CONTROL_ENABLED;
+                return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION:
                 return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_ROUTING_CONTROL:
@@ -631,9 +631,6 @@ public class HdmiCecConfig {
 
     private void notifyGlobalSettingChanged(String setting) {
         switch (setting) {
-            case Global.HDMI_CONTROL_ENABLED:
-                notifySettingChanged(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED);
-                break;
             case Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED:
                 notifySettingChanged(HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP);
                 break;
@@ -677,7 +674,6 @@ public class HdmiCecConfig {
         mSettingsObserver = new SettingsObserver(handler);
         ContentResolver resolver = mContext.getContentResolver();
         String[] settings = new String[] {
-                Global.HDMI_CONTROL_ENABLED,
                 Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
         };
         for (String setting: settings) {
