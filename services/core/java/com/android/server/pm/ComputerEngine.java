@@ -1811,7 +1811,7 @@ public class ComputerEngine implements Computer {
 
     @Nullable
     public final SharedLibraryInfo getSharedLibraryInfoLPr(String name, long version) {
-        return PackageManagerService.getSharedLibraryInfo(
+        return SharedLibraryHelper.getSharedLibraryInfo(
                 name, version, mSharedLibraries, null);
     }
 
