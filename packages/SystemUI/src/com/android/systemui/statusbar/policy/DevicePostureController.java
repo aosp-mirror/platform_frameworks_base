@@ -46,6 +46,7 @@ public interface DevicePostureController extends CallbackController<Callback> {
     int DEVICE_POSTURE_HALF_OPENED = 2;
     int DEVICE_POSTURE_OPENED = 3;
     int DEVICE_POSTURE_FLIPPED = 4;
+    int SUPPORTED_POSTURES_SIZE = DEVICE_POSTURE_FLIPPED + 1;
 
     /** Return the current device posture. */
     @DevicePostureInt int getDevicePosture();
