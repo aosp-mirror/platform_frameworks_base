@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.policy;
+package com.android.systemui.statusbar.connectivity;
 
 import static android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WWAN;
 import static android.telephony.NetworkRegistrationInfo.DOMAIN_PS;
@@ -72,10 +72,11 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.statusbar.connectivity.NetworkController.IconState;
+import com.android.systemui.statusbar.connectivity.NetworkController.MobileDataIndicators;
+import com.android.systemui.statusbar.connectivity.NetworkController.SignalCallback;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
-import com.android.systemui.statusbar.policy.NetworkController.IconState;
-import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
-import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -268,7 +269,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         setSubscriptions(mSubId);
         mMobileSignalController = mNetworkController.mMobileSignalControllers.get(mSubId);
         ArgumentCaptor<ConnectivityManager.NetworkCallback> callbackArg =
-            ArgumentCaptor.forClass(ConnectivityManager.NetworkCallback.class);
+                ArgumentCaptor.forClass(ConnectivityManager.NetworkCallback.class);
         verify(mMockCm, atLeastOnce())
             .registerDefaultNetworkCallback(callbackArg.capture(), isA(Handler.class));
         int captureSize = callbackArg.getAllValues().size();
@@ -404,7 +405,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     }
 
     private static void setConnectivityCommon(NetworkCapabilities.Builder builder,
-        int networkType, boolean validated, boolean isConnected){
+            int networkType, boolean validated, boolean isConnected) {
         // TODO: Separate out into several NetworkCapabilities.
         if (isConnected) {
             builder.addTransportType(networkType);
@@ -538,7 +539,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     }
 
     protected void verifyLastMobileDataIndicators(boolean visible, int icon, int typeIcon,
-        boolean roaming, boolean inet) {
+            boolean roaming, boolean inet) {
         ArgumentCaptor<MobileDataIndicators> indicatorsArg =
                 ArgumentCaptor.forClass(MobileDataIndicators.class);
 
@@ -646,7 +647,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     }
 
     protected void assertNetworkNameEquals(String expected) {
-       assertEquals("Network name", expected, mMobileSignalController.getState().networkName);
+        assertEquals("Network name", expected, mMobileSignalController.getState().networkName);
     }
 
     protected void assertDataNetworkNameEquals(String expected) {

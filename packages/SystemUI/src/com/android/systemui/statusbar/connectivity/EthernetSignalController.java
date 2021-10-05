@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.statusbar.policy;
+package com.android.systemui.statusbar.connectivity;
 
 import android.content.Context;
 import android.net.NetworkCapabilities;
@@ -21,12 +21,12 @@ import android.net.NetworkCapabilities;
 import com.android.settingslib.AccessibilityContentDescriptions;
 import com.android.settingslib.SignalIcon.IconGroup;
 import com.android.settingslib.SignalIcon.State;
-import com.android.systemui.statusbar.policy.NetworkController.IconState;
-import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
+import com.android.systemui.statusbar.connectivity.NetworkController.IconState;
+import com.android.systemui.statusbar.connectivity.NetworkController.SignalCallback;
 
 import java.util.BitSet;
 
-
+/** */
 public class EthernetSignalController extends
         SignalController<State, IconGroup> {
 
