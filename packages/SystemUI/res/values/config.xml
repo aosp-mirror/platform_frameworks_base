@@ -224,14 +224,22 @@
          display brightness, suitable to listen to while the device is asleep (e.g. during
          always-on display) -->
     <string-array name="doze_brightness_sensor_name_posture_mapping" translatable="false">
-        <item></item> <!-- UNKNOWN -->
-        <item></item> <!-- CLOSED -->
-        <item></item> <!-- HALF_OPENED -->
-        <item></item> <!-- OPENED -->
+        <!-- UNKNOWN -->
+        <!-- CLOSED -->
+        <!-- HALF_OPENED -->
+        <!-- OPENED -->
     </string-array>
 
     <!-- Override value to use for proximity sensor.  -->
     <string name="proximity_sensor_type" translatable="false"></string>
+
+    <!-- Sensor type per posture state to use for proximity sensor -->
+    <string-array name="proximity_sensor_posture_mapping" translatable="false">
+        <!-- UNKNOWN -->
+        <!-- CLOSED -->
+        <!-- HALF_OPENED -->
+        <!-- OPENED -->
+    </string-array>
 
     <!-- If using proximity_sensor_type, specifies a threshold value to distinguish near and
          far break points. A sensor value less than this is considered "near". -->
@@ -245,6 +253,15 @@
 
     <!-- Override value to use for proximity sensor as confirmation for proximity_sensor_type. -->
     <string name="proximity_sensor_secondary_type" translatable="false"></string>
+
+    <!-- Sensor type per posture state to use for proximity sensor as a confirmation for
+        proximity_sensor_type. -->
+    <string-array name="proximity_sensor_secondary_posture_mapping" translatable="false">
+        <!-- UNKNOWN -->
+        <!-- CLOSED -->
+        <!-- HALF_OPENED -->
+        <!-- OPENED -->
+    </string-array>
 
     <!-- If using proximity_sensor_secondary_type, specifies a threshold value to distinguish
          near and far break points. A sensor value less than this is considered "near". -->
