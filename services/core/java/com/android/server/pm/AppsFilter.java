@@ -1526,6 +1526,24 @@ public class AppsFilter implements Watchable, Snappable {
         }
     }
 
+    boolean canQueryPackage(@NonNull AndroidPackage querying, String potentialTarget) {
+        int appId = UserHandle.getAppId(querying.getUid());
+        if (appId < Process.FIRST_APPLICATION_UID) {
+            return true;
+        }
+
+        // Check if FILTER_APPLICATION_QUERY is enabled on the given package.
+        if (!mFeatureConfig.packageIsEnabled(querying)) {
+            return true;
+        }
+
+        if (requestsQueryAllPackages(querying)) {
+            return true;
+        }
+
+        return !querying.getQueriesPackages().isEmpty()
+                && querying.getQueriesPackages().contains(potentialTarget);
+    }
 
     private static boolean requestsQueryAllPackages(@NonNull AndroidPackage pkg) {
         // we're not guaranteed to have permissions yet analyzed at package add, so we inspect the
