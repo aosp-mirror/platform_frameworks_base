@@ -131,7 +131,8 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
         mSplitLayout = new SplitLayout(TAG + "SplitDivider",
                 mDisplayController.getDisplayContext(mRootTaskInfo.displayId),
                 mRootTaskInfo.configuration, this /* layoutChangeListener */,
-                mParentContainerCallbacks, mDisplayImeController, mController.getTaskOrganizer());
+                mParentContainerCallbacks, mDisplayImeController, mController.getTaskOrganizer(),
+                true /* applyDismissingParallax */);
         mDisplayInsetsController.addInsetsChangedListener(mRootTaskInfo.displayId, mSplitLayout);
 
         final WindowContainerToken token1 = task1.token;
