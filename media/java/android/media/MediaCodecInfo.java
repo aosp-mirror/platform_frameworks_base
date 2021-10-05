@@ -28,6 +28,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Process;
 import android.os.SystemProperties;
+import android.sysprop.MediaProperties;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Range;
@@ -196,12 +197,19 @@ public final class MediaCodecInfo {
     private static final Range<Rational> POSITIVE_RATIONALS =
             Range.create(new Rational(1, Integer.MAX_VALUE),
                          new Rational(Integer.MAX_VALUE, 1));
-    private static final Range<Integer> SIZE_RANGE =
-            Process.is64Bit() ? Range.create(1, 32768) : Range.create(1, 4096);
     private static final Range<Integer> FRAME_RATE_RANGE = Range.create(0, 960);
     private static final Range<Integer> BITRATE_RANGE = Range.create(0, 500000000);
     private static final int DEFAULT_MAX_SUPPORTED_INSTANCES = 32;
     private static final int MAX_SUPPORTED_INSTANCES_LIMIT = 256;
+
+    private static final class LazyHolder {
+        private static final Range<Integer> SIZE_RANGE = Process.is64Bit()
+                ? Range.create(1, 32768)
+                : Range.create(1, MediaProperties.resolution_limit_32bit().orElse(4096));
+    }
+    private static Range<Integer> getSizeRange() {
+        return LazyHolder.SIZE_RANGE;
+    }
 
     // found stuff that is not supported by framework (=> this should not happen)
     private static final int ERROR_UNRECOGNIZED   = (1 << 0);
@@ -2234,12 +2242,12 @@ public final class MediaCodecInfo {
         private void initWithPlatformLimits() {
             mBitrateRange = BITRATE_RANGE;
 
-            mWidthRange  = SIZE_RANGE;
-            mHeightRange = SIZE_RANGE;
+            mWidthRange  = getSizeRange();
+            mHeightRange = getSizeRange();
             mFrameRateRange = FRAME_RATE_RANGE;
 
-            mHorizontalBlockRange = SIZE_RANGE;
-            mVerticalBlockRange   = SIZE_RANGE;
+            mHorizontalBlockRange = getSizeRange();
+            mVerticalBlockRange   = getSizeRange();
 
             // full positive ranges are supported as these get calculated
             mBlockCountRange      = POSITIVE_INTEGERS;
@@ -2253,7 +2261,7 @@ public final class MediaCodecInfo {
             mHeightAlignment = 2;
             mBlockWidth = 2;
             mBlockHeight = 2;
-            mSmallerDimensionUpperLimit = SIZE_RANGE.getUpper();
+            mSmallerDimensionUpperLimit = getSizeRange().getUpper();
         }
 
         private @Nullable List<PerformancePoint> getPerformancePoints(Map<String, Object> map) {
@@ -2494,10 +2502,10 @@ public final class MediaCodecInfo {
                 // codec supports profiles that we don't know.
                 // Use supplied values clipped to platform limits
                 if (widths != null) {
-                    mWidthRange = SIZE_RANGE.intersect(widths);
+                    mWidthRange = getSizeRange().intersect(widths);
                 }
                 if (heights != null) {
-                    mHeightRange = SIZE_RANGE.intersect(heights);
+                    mHeightRange = getSizeRange().intersect(heights);
                 }
                 if (counts != null) {
                     mBlockCountRange = POSITIVE_INTEGERS.intersect(
