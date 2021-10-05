@@ -26,7 +26,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.demomode.DemoModeCommandReceiver;
 import com.android.systemui.plugins.DarkIconDispatcher;
-import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.ViewController;
 
