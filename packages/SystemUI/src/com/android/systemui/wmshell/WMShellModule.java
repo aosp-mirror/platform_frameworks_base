@@ -126,9 +126,10 @@ public class WMShellModule {
     static AppPairsController provideAppPairs(ShellTaskOrganizer shellTaskOrganizer,
             SyncTransactionQueue syncQueue, DisplayController displayController,
             @ShellMainThread ShellExecutor mainExecutor,
-            DisplayImeController displayImeController) {
+            DisplayImeController displayImeController,
+            DisplayInsetsController displayInsetsController) {
         return new AppPairsController(shellTaskOrganizer, syncQueue, displayController,
-                mainExecutor, displayImeController);
+                mainExecutor, displayImeController, displayInsetsController);
     }
 
     //
