@@ -153,6 +153,10 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
             colorState = mNextMessageColorState;
             mNextMessageColorState = ColorStateList.valueOf(DEFAULT_COLOR);
         }
+        if (mAltBouncerShowing) {
+            // alt bouncer has a black scrim, so always show the text in white
+            colorState = ColorStateList.valueOf(Color.WHITE);
+        }
         setTextColor(colorState);
     }
 
