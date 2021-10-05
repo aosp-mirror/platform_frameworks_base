@@ -155,7 +155,7 @@ public class DozeUi implements DozeMachine.Part, TunerService.Tunable,
                     public void onPulseStarted() {
                         try {
                             mMachine.requestState(
-                                    reason == DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN
+                                    reason == DozeLog.PULSE_REASON_SENSOR_WAKE_REACH
                                             ? DozeMachine.State.DOZE_PULSING_BRIGHT
                                             : DozeMachine.State.DOZE_PULSING);
                         } catch (IllegalStateException e) {
