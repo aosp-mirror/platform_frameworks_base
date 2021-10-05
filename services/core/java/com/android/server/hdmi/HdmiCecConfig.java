@@ -534,7 +534,7 @@ public class HdmiCecConfig {
             case HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING:
                 return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY:
-                return STORAGE_GLOBAL_SETTINGS;
+                return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP:
                 return STORAGE_GLOBAL_SETTINGS;
             case HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_TV:
@@ -575,7 +575,7 @@ public class HdmiCecConfig {
             case HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING:
                 return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY:
-                return Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED;
+                return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP:
                 return Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED;
             case HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_TV:
@@ -637,9 +637,6 @@ public class HdmiCecConfig {
             case Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP:
                 notifySettingChanged(HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE);
                 break;
-            case Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED:
-                notifySettingChanged(HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY);
-                break;
             case Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED:
                 notifySettingChanged(HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP);
                 break;
@@ -685,7 +682,6 @@ public class HdmiCecConfig {
         String[] settings = new String[] {
                 Global.HDMI_CONTROL_ENABLED,
                 Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
-                Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED,
                 Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
         };
         for (String setting: settings) {

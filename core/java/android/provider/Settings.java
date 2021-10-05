@@ -11050,16 +11050,6 @@ public final class Settings {
         public static final String HDMI_CONTROL_ENABLED = "hdmi_control_enabled";
 
         /**
-         * Whether TV will automatically turn on upon reception of the CEC command
-         * &lt;Text View On&gt; or &lt;Image View On&gt;. (0 = false, 1 = true)
-         *
-         * @hide
-         */
-        @Readable
-        public static final String HDMI_CONTROL_AUTO_WAKEUP_ENABLED =
-                "hdmi_control_auto_wakeup_enabled";
-
-        /**
          * Whether TV will also turn off other CEC devices when it goes to standby mode.
          * (0 = false, 1 = true)
          *
