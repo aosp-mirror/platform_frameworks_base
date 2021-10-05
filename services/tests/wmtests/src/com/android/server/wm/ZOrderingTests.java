@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
@@ -37,6 +38,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.WindowStateAnimator.PRESERVED_SURFACE_LAYER;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -491,6 +493,29 @@ public class ZOrderingTests extends WindowTestsBase {
 
         mDisplayContent.assignChildLayers(mTransaction);
         assertZOrderGreaterThan(mTransaction, mNavBarWindow.mToken.getSurfaceControl(),
+                mDisplayContent.getImeContainer().getSurfaceControl());
+    }
+
+    @Test
+    public void testPopupWindowAndParentIsImeTarget_expectHigherThanIme_inMultiWindow() {
+        // Simulate the app window is in multi windowing mode and being IME target
+        mAppWindow.getConfiguration().windowConfiguration.setWindowingMode(
+                WINDOWING_MODE_MULTI_WINDOW);
+        mDisplayContent.setImeLayeringTarget(mAppWindow);
+        mDisplayContent.setImeInputTarget(mAppWindow);
+
+        // Create a popupWindow
+        assertWindowHigher(mImeWindow, mAppWindow);
+        final WindowState popupWindow = createWindow(mAppWindow, TYPE_APPLICATION_PANEL,
+                mDisplayContent, "PopupWindow");
+        spyOn(popupWindow);
+
+        mDisplayContent.assignChildLayers(mTransaction);
+
+        // Verify the surface layer of the popupWindow should higher than IME
+        verify(popupWindow).needsRelativeLayeringToIme();
+        assertThat(popupWindow.needsRelativeLayeringToIme()).isTrue();
+        assertZOrderGreaterThan(mTransaction, popupWindow.getSurfaceControl(),
                 mDisplayContent.getImeContainer().getSurfaceControl());
     }
 }
