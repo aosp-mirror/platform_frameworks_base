@@ -235,6 +235,14 @@ public class JobParameters implements Parcelable {
     public static final int STOP_REASON_USER = 13;
     /** The system is doing some processing that requires stopping this job. */
     public static final int STOP_REASON_SYSTEM_PROCESSING = 14;
+    /**
+     * The system's estimate of when the app will be launched changed significantly enough to
+     * decide this job shouldn't be running right now. This will mostly apply to prefetch jobs.
+     *
+     * @see JobInfo#isPrefetch()
+     * @see JobInfo.Builder#setPrefetch(boolean)
+     */
+    public static final int STOP_REASON_ESTIMATED_APP_LAUNCH_TIME_CHANGED = 15;
 
     /** @hide */
     @IntDef(prefix = {"STOP_REASON_"}, value = {
@@ -253,6 +261,7 @@ public class JobParameters implements Parcelable {
             STOP_REASON_APP_STANDBY,
             STOP_REASON_USER,
             STOP_REASON_SYSTEM_PROCESSING,
+            STOP_REASON_ESTIMATED_APP_LAUNCH_TIME_CHANGED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface StopReason {
