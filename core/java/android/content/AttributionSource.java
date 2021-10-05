@@ -474,6 +474,18 @@ public final class AttributionSource implements Parcelable {
             mAttributionSourceState.uid = uid;
         }
 
+        public Builder(@NonNull AttributionSource current) {
+            if (current == null) {
+                throw new IllegalArgumentException("current AttributionSource can not be null");
+            }
+            mAttributionSourceState.uid = current.getUid();
+            mAttributionSourceState.packageName = current.getPackageName();
+            mAttributionSourceState.attributionTag = current.getAttributionTag();
+            mAttributionSourceState.token = current.getToken();
+            mAttributionSourceState.renouncedPermissions =
+                current.mAttributionSourceState.renouncedPermissions;
+        }
+
         /**
          * The package that is accessing the permission protected data.
          */
