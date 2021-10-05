@@ -2406,13 +2406,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final VerificationParams verifyingSession = prepareForVerification();
         if (isMultiPackage()) {
             final List<PackageInstallerSession> childSessions = getChildSessions();
-            // Spot check to reject a non-staged multi package install of APEXes and APKs.
-            if (!params.isStaged && containsApkSession()
-                    && sessionContains(s -> s.isApexSession())) {
-                throw new PackageManagerException(
-                    PackageManager.INSTALL_FAILED_SESSION_INVALID,
-                    "Non-staged multi package install of APEX and APK packages is not supported");
-            }
             List<VerificationParams> verifyingChildSessions =
                     new ArrayList<>(childSessions.size());
             boolean success = true;
@@ -4171,6 +4164,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throw new IllegalStateException("Multipackage Inconsistency: session "
                     + childSession.sessionId + " and session " + sessionId
                     + " have inconsistent rollback settings");
+        }
+        boolean hasAPK = containsApkSession() || !childSession.isApexSession();
+        boolean hasAPEX = sessionContains(s -> s.isApexSession()) || childSession.isApexSession();
+        if (!params.isStaged && hasAPK && hasAPEX) {
+            throw new IllegalStateException("Mix of APK and APEX is not supported for "
+                    + "non-staged multi-package session");
         }
 
         try {
