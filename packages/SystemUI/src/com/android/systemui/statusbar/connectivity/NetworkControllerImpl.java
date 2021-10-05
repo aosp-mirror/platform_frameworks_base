@@ -721,8 +721,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
     @Override
     public void addCallback(@NonNull SignalCallback cb) {
         cb.setSubs(mCurrentSubscriptions);
-        cb.setIsAirplaneMode(new IconState(mAirplaneMode,
-                TelephonyIcons.FLIGHT_MODE_ICON, R.string.accessibility_airplane_mode, mContext));
+        cb.setIsAirplaneMode(
+                new IconState(
+                        mAirplaneMode,
+                        TelephonyIcons.FLIGHT_MODE_ICON,
+                        mContext.getString(R.string.accessibility_airplane_mode)));
         cb.setNoSims(mHasNoSubs, mSimDetected);
         if (mProviderModelSetting) {
             cb.setConnectivityStatus(mNoDefaultNetwork, !mInetCondition, mNoNetworksAvailable);
@@ -1056,8 +1059,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
      * notifyAllListeners.
      */
     private void notifyListeners() {
-        mCallbackHandler.setIsAirplaneMode(new IconState(mAirplaneMode,
-                TelephonyIcons.FLIGHT_MODE_ICON, R.string.accessibility_airplane_mode, mContext));
+        mCallbackHandler.setIsAirplaneMode(
+                new IconState(
+                        mAirplaneMode,
+                        TelephonyIcons.FLIGHT_MODE_ICON,
+                        mContext.getString(R.string.accessibility_airplane_mode)));
         mCallbackHandler.setNoSims(mHasNoSubs, mSimDetected);
     }
 
@@ -1241,9 +1247,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
         String airplane = args.getString("airplane");
         if (airplane != null) {
             boolean show = airplane.equals("show");
-            mCallbackHandler.setIsAirplaneMode(new IconState(show,
-                    TelephonyIcons.FLIGHT_MODE_ICON, R.string.accessibility_airplane_mode,
-                    mContext));
+            mCallbackHandler.setIsAirplaneMode(
+                    new IconState(
+                            show,
+                            TelephonyIcons.FLIGHT_MODE_ICON,
+                            mContext.getString(R.string.accessibility_airplane_mode)));
         }
         String fully = args.getString("fully");
         if (fully != null) {

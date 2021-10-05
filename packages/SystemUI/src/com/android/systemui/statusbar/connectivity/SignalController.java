@@ -23,8 +23,6 @@ import android.util.Log;
 
 import com.android.settingslib.SignalIcon.IconGroup;
 import com.android.settingslib.SignalIcon.State;
-import com.android.systemui.statusbar.connectivity.NetworkController.IconState;
-import com.android.systemui.statusbar.connectivity.NetworkController.SignalCallback;
 
 import java.io.PrintWriter;
 import java.util.BitSet;

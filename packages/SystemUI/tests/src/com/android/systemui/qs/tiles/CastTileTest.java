@@ -43,8 +43,10 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.statusbar.connectivity.IconState;
 import com.android.systemui.statusbar.connectivity.NetworkController;
-import com.android.systemui.statusbar.connectivity.NetworkController.WifiIndicators;
+import com.android.systemui.statusbar.connectivity.SignalCallback;
+import com.android.systemui.statusbar.connectivity.WifiIndicators;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.HotspotController;
@@ -77,7 +79,7 @@ public class CastTileTest extends SysuiTestCase {
     @Mock
     private QSTileHost mHost;
     @Mock
-    NetworkController.SignalCallback mSignalCallback;
+    SignalCallback mSignalCallback;
     @Mock
     private MetricsLogger mMetricsLogger;
     @Mock
@@ -122,8 +124,8 @@ public class CastTileTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         mCastTile.handleSetListening(true);
-        ArgumentCaptor<NetworkController.SignalCallback> signalCallbackArgumentCaptor =
-                ArgumentCaptor.forClass(NetworkController.SignalCallback.class);
+        ArgumentCaptor<SignalCallback> signalCallbackArgumentCaptor =
+                ArgumentCaptor.forClass(SignalCallback.class);
         verify(mNetworkController).observe(any(LifecycleOwner.class),
                 signalCallbackArgumentCaptor.capture());
         mSignalCallback = signalCallbackArgumentCaptor.getValue();
@@ -139,10 +141,9 @@ public class CastTileTest extends SysuiTestCase {
     // All these tests for enabled/disabled wifi have hotspot not enabled
     @Test
     public void testStateUnavailable_wifiDisabled() {
-        NetworkController.IconState qsIcon =
-                new NetworkController.IconState(false, 0, "");
+        IconState qsIcon = new IconState(false, 0, "");
         WifiIndicators indicators = new WifiIndicators(
-                false, mock(NetworkController.IconState.class),
+                false, mock(IconState.class),
                 qsIcon, false,false, "",
                 false, "");
         mSignalCallback.setWifiIndicators(indicators);
@@ -153,10 +154,9 @@ public class CastTileTest extends SysuiTestCase {
 
     @Test
     public void testStateUnavailable_wifiNotConnected() {
-        NetworkController.IconState qsIcon =
-                new NetworkController.IconState(false, 0, "");
+        IconState qsIcon = new IconState(false, 0, "");
         WifiIndicators indicators = new WifiIndicators(
-                true, mock(NetworkController.IconState.class),
+                true, mock(IconState.class),
                 qsIcon, false,false, "",
                 false, "");
         mSignalCallback.setWifiIndicators(indicators);
@@ -166,10 +166,9 @@ public class CastTileTest extends SysuiTestCase {
     }
 
     private void enableWifiAndProcessMessages() {
-        NetworkController.IconState qsIcon =
-                new NetworkController.IconState(true, 0, "");
+        IconState qsIcon = new IconState(true, 0, "");
         WifiIndicators indicators = new WifiIndicators(
-                true, mock(NetworkController.IconState.class),
+                true, mock(IconState.class),
                 qsIcon, false,false, "",
                 false, "");
         mSignalCallback.setWifiIndicators(indicators);

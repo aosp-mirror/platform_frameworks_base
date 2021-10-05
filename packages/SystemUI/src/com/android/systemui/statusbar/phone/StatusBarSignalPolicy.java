@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.os.Handler;
 import android.telephony.SubscriptionInfo;
@@ -26,11 +27,11 @@ import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.statusbar.connectivity.IconState;
+import com.android.systemui.statusbar.connectivity.MobileDataIndicators;
 import com.android.systemui.statusbar.connectivity.NetworkController;
-import com.android.systemui.statusbar.connectivity.NetworkController.IconState;
-import com.android.systemui.statusbar.connectivity.NetworkController.MobileDataIndicators;
-import com.android.systemui.statusbar.connectivity.NetworkController.WifiIndicators;
-import com.android.systemui.statusbar.connectivity.NetworkControllerImpl;
+import com.android.systemui.statusbar.connectivity.SignalCallback;
+import com.android.systemui.statusbar.connectivity.WifiIndicators;
 import com.android.systemui.statusbar.policy.SecurityController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
@@ -44,7 +45,7 @@ import javax.inject.Inject;
 
 /** Controls the signal policies for icons shown in the StatusBar. **/
 @SysUISingleton
-public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallback,
+public class StatusBarSignalPolicy implements SignalCallback,
         SecurityController.SecurityControllerCallback, Tunable {
     private static final String TAG = "StatusBarSignalPolicy";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -169,7 +170,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     }
 
     @Override
-    public void setWifiIndicators(WifiIndicators indicators) {
+    public void setWifiIndicators(@NonNull WifiIndicators indicators) {
         if (DEBUG) {
             Log.d(TAG, "setWifiIndicators: " + indicators);
         }
@@ -219,7 +220,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     }
 
     @Override
-    public void setCallIndicator(IconState statusIcon, int subId) {
+    public void setCallIndicator(@NonNull IconState statusIcon, int subId) {
         if (DEBUG) {
             Log.d(TAG, "setCallIndicator: "
                     + "statusIcon = " + statusIcon + ","
@@ -247,7 +248,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     }
 
     @Override
-    public void setMobileDataIndicators(MobileDataIndicators indicators) {
+    public void setMobileDataIndicators(@NonNull MobileDataIndicators indicators) {
         if (DEBUG) {
             Log.d(TAG, "setMobileDataIndicators: " + indicators);
         }

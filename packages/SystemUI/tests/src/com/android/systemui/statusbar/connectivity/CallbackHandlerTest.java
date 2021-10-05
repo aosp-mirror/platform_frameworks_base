@@ -29,10 +29,6 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.connectivity.NetworkController.EmergencyListener;
-import com.android.systemui.statusbar.connectivity.NetworkController.IconState;
-import com.android.systemui.statusbar.connectivity.NetworkController.MobileDataIndicators;
-import com.android.systemui.statusbar.connectivity.NetworkController.SignalCallback;
-import com.android.systemui.statusbar.connectivity.NetworkController.WifiIndicators;
 import com.android.systemui.tests.R;
 
 import org.junit.Before;

@@ -56,9 +56,9 @@ class AccessPointControllerImplTest : SysuiTestCase() {
     @Mock
     private lateinit var wifiPickerTracker: WifiPickerTracker
     @Mock
-    private lateinit var callback: NetworkController.AccessPointController.AccessPointCallback
+    private lateinit var callback: AccessPointController.AccessPointCallback
     @Mock
-    private lateinit var otherCallback: NetworkController.AccessPointController.AccessPointCallback
+    private lateinit var otherCallback: AccessPointController.AccessPointCallback
     @Mock
     private lateinit var wifiEntryConnected: WifiEntry
     @Mock
