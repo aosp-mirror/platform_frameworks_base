@@ -1189,6 +1189,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             info.createdMillis = createdMillis;
             info.updatedMillis = updatedMillis;
             info.requireUserAction = params.requireUserAction;
+            info.installerUid = mInstallerUid;
         }
         return info;
     }
@@ -2143,14 +2144,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void onSystemDataLoaderUnrecoverable() {
-        final PackageManagerService packageManagerService = mPm;
+        final DeletePackageHelper deletePackageHelper = new DeletePackageHelper(mPm);
         final String packageName = getPackageName();
         if (TextUtils.isEmpty(packageName)) {
             // The package has not been installed.
             return;
         }
         mHandler.post(() -> {
-            if (packageManagerService.deletePackageX(packageName,
+            if (deletePackageHelper.deletePackageX(packageName,
                     PackageManager.VERSION_CODE_HIGHEST, UserHandle.USER_SYSTEM,
                     PackageManager.DELETE_ALL_USERS, true /*removedBySystem*/)
                     != PackageManager.DELETE_SUCCEEDED) {

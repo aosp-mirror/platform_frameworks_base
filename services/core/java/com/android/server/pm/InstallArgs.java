@@ -60,6 +60,7 @@ abstract class InstallArgs {
     @Nullable String[] mInstructionSets;
 
     @NonNull final PackageManagerService mPm;
+    @NonNull final RemovePackageHelper mRemovePackageHelper;
 
     InstallArgs(OriginInfo originInfo, MoveInfo moveInfo, IPackageInstallObserver2 observer,
             int installFlags, InstallSource installSource, String volumeUuid,
@@ -90,6 +91,7 @@ abstract class InstallArgs {
         mForceQueryableOverride = forceQueryableOverride;
         mDataLoaderType = dataLoaderType;
         mPm = pm;
+        mRemovePackageHelper = new RemovePackageHelper(mPm);
     }
 
     /** New install */

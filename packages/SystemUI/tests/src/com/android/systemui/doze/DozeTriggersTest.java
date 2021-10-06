@@ -53,7 +53,8 @@ import com.android.systemui.util.sensors.AsyncSensorManager;
 import com.android.systemui.util.sensors.FakeProximitySensor;
 import com.android.systemui.util.sensors.FakeSensorManager;
 import com.android.systemui.util.sensors.FakeThresholdSensor;
-import com.android.systemui.util.sensors.ProximitySensor;
+import com.android.systemui.util.sensors.ProximityCheck;
+import com.android.systemui.util.sensors.ThresholdSensorEvent;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.wakelock.WakeLock;
@@ -80,7 +81,7 @@ public class DozeTriggersTest extends SysuiTestCase {
     @Mock
     private DockManager mDockManager;
     @Mock
-    private ProximitySensor.ProximityCheck mProximityCheck;
+    private ProximityCheck mProximityCheck;
     @Mock
     private AuthController mAuthController;
     @Mock
@@ -136,14 +137,14 @@ public class DozeTriggersTest extends SysuiTestCase {
         mTriggers.transitionTo(DozeMachine.State.INITIALIZED, DozeMachine.State.DOZE);
         clearInvocations(mMachine);
 
-        mProximitySensor.setLastEvent(new ProximitySensor.ThresholdSensorEvent(true, 1));
+        mProximitySensor.setLastEvent(new ThresholdSensorEvent(true, 1));
         captor.getValue().onNotificationAlerted(null /* pulseSuppressedListener */);
         mProximitySensor.alertListeners();
 
         verify(mMachine, never()).requestState(any());
         verify(mMachine, never()).requestPulse(anyInt());
 
-        mProximitySensor.setLastEvent(new ProximitySensor.ThresholdSensorEvent(false, 2));
+        mProximitySensor.setLastEvent(new ThresholdSensorEvent(false, 2));
         mProximitySensor.alertListeners();
         waitForSensorManager();
         captor.getValue().onNotificationAlerted(null /* pulseSuppressedListener */);

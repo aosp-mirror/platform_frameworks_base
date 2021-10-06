@@ -425,7 +425,8 @@ public class TrustAgentWrapper {
         mBound = context.bindServiceAsUser(intent, mConnection,
                 Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE, user);
         if (mBound) {
-            mContext.registerReceiver(mBroadcastReceiver, alarmFilter, PERMISSION, null);
+            mContext.registerReceiver(mBroadcastReceiver, alarmFilter, PERMISSION, null,
+                    Context.RECEIVER_EXPORTED);
         } else {
             Log.e(TAG, "Can't bind to TrustAgent " + mName.flattenToShortString());
         }

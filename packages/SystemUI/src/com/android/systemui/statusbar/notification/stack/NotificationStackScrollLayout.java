@@ -253,6 +253,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private boolean mExpandedInThisMotion;
     private boolean mShouldShowShelfOnly;
     protected boolean mScrollingEnabled;
+    private boolean mIsCurrentUserSetup;
     protected FooterView mFooterView;
     protected EmptyShadeView mEmptyShadeView;
     private boolean mDismissAllInProgress;
@@ -682,6 +683,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         boolean showDismissView = mClearAllEnabled &&
                 mController.hasActiveClearableNotifications(ROWS_ALL);
         boolean showFooterView = (showDismissView || getVisibleNotificationCount() > 0)
+                && mIsCurrentUserSetup  // see: b/193149550
                 && mStatusBarState != StatusBarState.KEYGUARD
                 && !mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying()
                 && !mIsRemoteInputActive;
@@ -5605,6 +5607,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     public void animateNextTopPaddingChange() {
         mAnimateNextTopPaddingChange = true;
+    }
+
+    /**
+     * Sets whether the current user is set up, which is required to show the footer (b/193149550)
+     */
+    public void setCurrentUserSetup(boolean isCurrentUserSetup) {
+        if (mIsCurrentUserSetup != isCurrentUserSetup) {
+            mIsCurrentUserSetup = isCurrentUserSetup;
+            updateFooter();
+        }
     }
 
     /**

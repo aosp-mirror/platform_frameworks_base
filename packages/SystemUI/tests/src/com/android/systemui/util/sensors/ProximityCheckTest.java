@@ -49,7 +49,7 @@ public class ProximityCheckTest extends SysuiTestCase {
 
     private TestableCallback mTestableCallback = new TestableCallback();
 
-    private ProximitySensor.ProximityCheck mProximityCheck;
+    private ProximityCheck mProximityCheck;
 
     @Before
     public void setUp() throws Exception {
@@ -58,7 +58,7 @@ public class ProximityCheckTest extends SysuiTestCase {
         thresholdSensor.setLoaded(true);
         mFakeProximitySensor = new FakeProximitySensor(thresholdSensor, null, mFakeExecutor);
 
-        mProximityCheck = new ProximitySensor.ProximityCheck(mFakeProximitySensor, mFakeExecutor);
+        mProximityCheck = new ProximityCheck(mFakeProximitySensor, mFakeExecutor);
     }
 
     @Test
@@ -67,7 +67,7 @@ public class ProximityCheckTest extends SysuiTestCase {
 
         assertNull(mTestableCallback.mLastResult);
 
-        mFakeProximitySensor.setLastEvent(new ProximitySensor.ThresholdSensorEvent(true, 0));
+        mFakeProximitySensor.setLastEvent(new ThresholdSensorEvent(true, 0));
         mFakeProximitySensor.alertListeners();
 
         assertTrue(mTestableCallback.mLastResult);
@@ -103,7 +103,7 @@ public class ProximityCheckTest extends SysuiTestCase {
 
         mProximityCheck.check(100, mTestableCallback);
 
-        mFakeProximitySensor.setLastEvent(new ProximitySensor.ThresholdSensorEvent(true, 0));
+        mFakeProximitySensor.setLastEvent(new ThresholdSensorEvent(true, 0));
         mFakeProximitySensor.alertListeners();
 
         assertThat(mTestableCallback.mLastResult).isNotNull();
@@ -123,7 +123,7 @@ public class ProximityCheckTest extends SysuiTestCase {
 
         assertNull(mTestableCallback.mLastResult);
 
-        mFakeProximitySensor.setLastEvent(new ProximitySensor.ThresholdSensorEvent(true, 0));
+        mFakeProximitySensor.setLastEvent(new ThresholdSensorEvent(true, 0));
         mFakeProximitySensor.alertListeners();
 
         assertTrue(mTestableCallback.mLastResult);

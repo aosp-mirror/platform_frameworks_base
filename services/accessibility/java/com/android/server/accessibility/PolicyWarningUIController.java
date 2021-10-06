@@ -95,7 +95,7 @@ public class PolicyWarningUIController {
         filter.addAction(ACTION_A11Y_SETTINGS);
         filter.addAction(ACTION_DISMISS_NOTIFICATION);
         mContext.registerReceiver(mNotificationController, filter,
-                Manifest.permission.MANAGE_ACCESSIBILITY, mMainHandler);
+                Manifest.permission.MANAGE_ACCESSIBILITY, mMainHandler, Context.RECEIVER_EXPORTED);
 
     }
 

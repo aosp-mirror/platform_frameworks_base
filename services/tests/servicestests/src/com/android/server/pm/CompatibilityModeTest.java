@@ -25,17 +25,16 @@ import static android.content.pm.ApplicationInfo.FLAG_SUPPORTS_XLARGE_SCREENS;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageUserState;
 import android.content.pm.parsing.PackageInfoWithoutStateUtils;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.os.Build;
 
 import com.android.server.pm.parsing.pkg.PackageImpl;
+import com.android.server.pm.pkg.PackageUserStateInternalImpl;
 
 import org.junit.After;
 import org.junit.Before;
@@ -45,16 +44,14 @@ public class CompatibilityModeTest {
 
     private boolean mCompatibilityModeEnabled;;
     private PackageImpl mMockAndroidPackage;
-    private PackageUserState mMockUserState;
+    private PackageUserStateInternalImpl mMockUserState;
 
     @Before
     public void setUp() {
         mCompatibilityModeEnabled = ParsingPackageUtils.sCompatibilityModeEnabled;
         mMockAndroidPackage = mock(PackageImpl.class);
-        mMockUserState = mock(PackageUserState.class);
-        mMockUserState.installed = true;
-        when(mMockUserState.isAvailable(anyInt())).thenReturn(true);
-        when(mMockUserState.getAllOverlayPaths()).thenReturn(null);
+        mMockUserState = new PackageUserStateInternalImpl();
+        mMockUserState.setInstalled(true);
     }
 
     @After

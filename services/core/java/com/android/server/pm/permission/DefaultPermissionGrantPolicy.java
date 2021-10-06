@@ -558,10 +558,12 @@ final class DefaultPermissionGrantPolicy {
 
         // SetupWizard
         final String setupWizardPackage = ArrayUtils.firstOrNull(getKnownPackages(
-                        PackageManagerInternal.PACKAGE_SETUP_WIZARD, userId));
+                PackageManagerInternal.PACKAGE_SETUP_WIZARD, userId));
         grantPermissionsToSystemPackage(pm, setupWizardPackage, userId, PHONE_PERMISSIONS,
                 CONTACTS_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS, CAMERA_PERMISSIONS);
-        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH, 0)) {
+        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH, 0)
+                || mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE,
+                0)) {
             grantPermissionsToSystemPackage(
                     pm, setupWizardPackage, userId, NEARBY_DEVICES_PERMISSIONS);
         }

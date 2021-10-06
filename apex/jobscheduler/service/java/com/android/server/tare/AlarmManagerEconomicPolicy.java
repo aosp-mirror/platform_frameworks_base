@@ -94,6 +94,7 @@ import static com.android.server.tare.Modifier.COST_MODIFIER_DEVICE_IDLE;
 import static com.android.server.tare.Modifier.COST_MODIFIER_POWER_SAVE_MODE;
 import static com.android.server.tare.Modifier.COST_MODIFIER_PROCESS_STATE;
 import static com.android.server.tare.TareUtils.arcToNarc;
+import static com.android.server.tare.TareUtils.narcToString;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -342,6 +343,11 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
 
     @Override
     void dump(IndentingPrintWriter pw) {
+        pw.print("Min satiated balance", narcToString(mMinSatiatedBalance)).println();
+        pw.print("Max satiated balance", narcToString(mMaxSatiatedBalance)).println();
+        pw.print("Min satiated circulation", narcToString(mMaxSatiatedCirculation)).println();
+
+        pw.println();
         pw.println("Actions:");
         pw.increaseIndent();
         for (int i = 0; i < mActions.size(); ++i) {

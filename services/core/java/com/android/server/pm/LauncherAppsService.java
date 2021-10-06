@@ -278,6 +278,7 @@ public class LauncherAppsService extends SystemService {
             verifyCallingPackage(callingPackage);
             List<SessionInfo> sessionInfos = new ArrayList<>();
             int[] userIds = mUm.getEnabledProfileIds(getCallingUserId());
+            final int callingUid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
                 for (int userId : userIds) {
@@ -287,7 +288,16 @@ public class LauncherAppsService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
+            sessionInfos.removeIf(info -> shouldFilterSession(callingUid, info));
             return new ParceledListSlice<>(sessionInfos);
+        }
+
+        private boolean shouldFilterSession(int uid, SessionInfo session) {
+            if (session == null) {
+                return false;
+            }
+            return uid != session.getInstallerUid()
+                    && !mPackageManagerInternal.canQueryPackage(uid, session.getAppPackageName());
         }
 
         private PackageInstallerService getPackageInstallerService() {
@@ -377,7 +387,7 @@ public class LauncherAppsService extends SystemService {
         void verifyCallingPackage(String callingPackage) {
             int packageUid = -1;
             try {
-                packageUid = AppGlobals.getPackageManager().getPackageUid(callingPackage,
+                packageUid = mIPM.getPackageUid(callingPackage,
                         PackageManager.MATCH_DIRECT_BOOT_AWARE
                                 | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                                 | PackageManager.MATCH_UNINSTALLED_PACKAGES,

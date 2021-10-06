@@ -157,7 +157,7 @@ public class ObjectPoolTests {
                 .setPendingResults(resultInfoList()).setPendingNewIntents(referrerIntentList())
                 .setIsForward(true).setAssistToken(assistToken)
                 .setShareableActivityToken(shareableActivityToken)
-                .setTaskFragmentToken(new Binder()).build();
+                .build();
 
         LaunchActivityItem emptyItem = new LaunchActivityItemBuilder().build();
         LaunchActivityItem item = itemSupplier.get();

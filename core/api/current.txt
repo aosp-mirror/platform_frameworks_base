@@ -8055,6 +8055,7 @@ package android.app.job {
     field public static final int STOP_REASON_CONSTRAINT_DEVICE_IDLE = 8; // 0x8
     field public static final int STOP_REASON_CONSTRAINT_STORAGE_NOT_LOW = 9; // 0x9
     field public static final int STOP_REASON_DEVICE_STATE = 4; // 0x4
+    field public static final int STOP_REASON_ESTIMATED_APP_LAUNCH_TIME_CHANGED = 15; // 0xf
     field public static final int STOP_REASON_PREEMPT = 2; // 0x2
     field public static final int STOP_REASON_QUOTA = 10; // 0xa
     field public static final int STOP_REASON_SYSTEM_PROCESSING = 14; // 0xe
@@ -10003,6 +10004,7 @@ package android.content {
 
   public static final class AttributionSource.Builder {
     ctor public AttributionSource.Builder(int);
+    ctor public AttributionSource.Builder(@NonNull android.content.AttributionSource);
     method @NonNull public android.content.AttributionSource build();
     method @NonNull public android.content.AttributionSource.Builder setAttributionTag(@Nullable String);
     method @NonNull public android.content.AttributionSource.Builder setNext(@Nullable android.content.AttributionSource);
@@ -11078,6 +11080,7 @@ package android.content {
     field public static final String ACTION_AIRPLANE_MODE_CHANGED = "android.intent.action.AIRPLANE_MODE";
     field public static final String ACTION_ALL_APPS = "android.intent.action.ALL_APPS";
     field public static final String ACTION_ANSWER = "android.intent.action.ANSWER";
+    field public static final String ACTION_APPLICATION_LOCALE_CHANGED = "android.intent.action.APPLICATION_LOCALE_CHANGED";
     field public static final String ACTION_APPLICATION_PREFERENCES = "android.intent.action.APPLICATION_PREFERENCES";
     field public static final String ACTION_APPLICATION_RESTRICTIONS_CHANGED = "android.intent.action.APPLICATION_RESTRICTIONS_CHANGED";
     field public static final String ACTION_APP_ERROR = "android.intent.action.APP_ERROR";
@@ -11298,6 +11301,7 @@ package android.content {
     field public static final String EXTRA_INSTALLER_PACKAGE_NAME = "android.intent.extra.INSTALLER_PACKAGE_NAME";
     field public static final String EXTRA_INTENT = "android.intent.extra.INTENT";
     field public static final String EXTRA_KEY_EVENT = "android.intent.extra.KEY_EVENT";
+    field public static final String EXTRA_LOCALE_LIST = "android.intent.extra.LOCALE_LIST";
     field public static final String EXTRA_LOCAL_ONLY = "android.intent.extra.LOCAL_ONLY";
     field public static final String EXTRA_LOCUS_ID = "android.intent.extra.LOCUS_ID";
     field public static final String EXTRA_MIME_TYPES = "android.intent.extra.MIME_TYPES";
@@ -22820,7 +22824,7 @@ package android.media {
 
   public class MediaMetadataRetriever implements java.lang.AutoCloseable {
     ctor public MediaMetadataRetriever();
-    method public void close();
+    method public void close() throws java.io.IOException;
     method @Nullable public String extractMetadata(int);
     method @Nullable public byte[] getEmbeddedPicture();
     method @Nullable public android.graphics.Bitmap getFrameAtIndex(int, @NonNull android.media.MediaMetadataRetriever.BitmapParams);
@@ -22837,7 +22841,7 @@ package android.media {
     method @Nullable public android.graphics.Bitmap getPrimaryImage();
     method @Nullable public android.graphics.Bitmap getScaledFrameAtTime(long, int, @IntRange(from=1) int, @IntRange(from=1) int);
     method @Nullable public android.graphics.Bitmap getScaledFrameAtTime(long, int, @IntRange(from=1) int, @IntRange(from=1) int, @NonNull android.media.MediaMetadataRetriever.BitmapParams);
-    method public void release();
+    method public void release() throws java.io.IOException;
     method public void setDataSource(String) throws java.lang.IllegalArgumentException;
     method public void setDataSource(String, java.util.Map<java.lang.String,java.lang.String>) throws java.lang.IllegalArgumentException;
     method public void setDataSource(java.io.FileDescriptor, long, long) throws java.lang.IllegalArgumentException;
@@ -34946,6 +34950,7 @@ package android.provider {
   }
 
   public static final class ContactsContract.Settings implements android.provider.ContactsContract.SettingsColumns {
+    method @Nullable public static android.accounts.Account getDefaultAccount(@NonNull android.content.ContentResolver);
     field public static final String ACTION_SET_DEFAULT_ACCOUNT = "android.provider.action.SET_DEFAULT_ACCOUNT";
     field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/setting";
     field public static final String CONTENT_TYPE = "vnd.android.cursor.dir/setting";

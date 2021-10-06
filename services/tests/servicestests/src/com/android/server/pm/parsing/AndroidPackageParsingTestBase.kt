@@ -19,13 +19,11 @@ package com.android.server.pm.parsing
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
-import android.content.pm.ComponentInfo
 import android.content.pm.ConfigurationInfo
 import android.content.pm.FeatureInfo
 import android.content.pm.InstrumentationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageParser
-import android.content.pm.PackageUserState
 import android.content.pm.PermissionInfo
 import android.content.pm.ProviderInfo
 import android.content.pm.ServiceInfo
@@ -40,14 +38,11 @@ import com.android.server.pm.PackageManagerService
 import com.android.server.pm.PackageSetting
 import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.pkg.PackageStateUnserialized
+import com.android.server.pm.pkg.PackageUserStateInternalImpl
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
 import org.junit.BeforeClass
-import org.mockito.Mockito.any
-import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.anyInt
-import org.mockito.Mockito.anyString
-import org.mockito.Mockito.mock
 import java.io.File
 
 open class AndroidPackageParsingTestBase {
@@ -90,13 +85,7 @@ open class AndroidPackageParsingTestBase {
                 }
                 .distinct()
 
-        private val dummyUserState = mock(PackageUserState::class.java).apply {
-            installed = true
-            whenever(isAvailable(anyInt())) { true }
-            whenever(isMatch(any<ComponentInfo>(), anyInt())) { true }
-            whenever(isMatch(anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(),
-                    anyString(), anyInt())) { true }
-        }
+        private val dummyUserState = PackageUserStateInternalImpl()
 
         val oldPackages = mutableListOf<PackageParser.Package>()
 

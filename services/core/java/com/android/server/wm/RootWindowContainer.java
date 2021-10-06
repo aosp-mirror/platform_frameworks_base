@@ -2211,7 +2211,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // display area, so reparent.
                 rootTask.reparent(taskDisplayArea, true /* onTop */);
             }
-            mService.getTransitionController().requestTransitionIfNeeded(TRANSIT_PIP, rootTask);
+            rootTask.mTransitionController.requestTransitionIfNeeded(TRANSIT_PIP, rootTask);
 
             // Defer the windowing mode change until after the transition to prevent the activity
             // from doing work and changing the activity visuals while animating

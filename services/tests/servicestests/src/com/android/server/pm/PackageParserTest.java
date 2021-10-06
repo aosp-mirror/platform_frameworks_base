@@ -40,7 +40,6 @@ import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.Property;
-import android.content.pm.PackageUserState;
 import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
@@ -54,6 +53,7 @@ import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
 import android.content.pm.parsing.component.ParsedUsesPermission;
+import android.content.pm.pkg.PackageUserState;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -645,9 +645,9 @@ public class PackageParserTest {
         assertArrayEquals(a.getSplitFlags(), b.getSplitFlags());
 
         PackageInfo aInfo = PackageInfoUtils.generate(a, new int[]{}, 0, 0, 0,
-                Collections.emptySet(), new PackageUserState(), 0, mockPkgSetting(a));
+                Collections.emptySet(), PackageUserState.DEFAULT, 0, mockPkgSetting(a));
         PackageInfo bInfo = PackageInfoUtils.generate(b, new int[]{}, 0, 0, 0,
-                Collections.emptySet(), new PackageUserState(), 0, mockPkgSetting(b));
+                Collections.emptySet(), PackageUserState.DEFAULT, 0, mockPkgSetting(b));
         assertApplicationInfoEqual(aInfo.applicationInfo, bInfo.applicationInfo);
 
         assertEquals(ArrayUtils.size(a.getPermissions()), ArrayUtils.size(b.getPermissions()));
@@ -802,9 +802,9 @@ public class PackageParserTest {
 
         // Validity check for ServiceInfo.
         ServiceInfo aInfo = PackageInfoUtils.generateServiceInfo(aPkg, a, 0,
-                new PackageUserState(), 0, mockPkgSetting(aPkg));
+                PackageUserState.DEFAULT, 0, mockPkgSetting(aPkg));
         ServiceInfo bInfo = PackageInfoUtils.generateServiceInfo(bPkg, b, 0,
-                new PackageUserState(), 0, mockPkgSetting(bPkg));
+                PackageUserState.DEFAULT, 0, mockPkgSetting(bPkg));
         assertApplicationInfoEqual(aInfo.applicationInfo, bInfo.applicationInfo);
         assertEquals(a.getName(), b.getName());
     }
@@ -829,9 +829,9 @@ public class PackageParserTest {
 
         // Validity check for ActivityInfo.
         ActivityInfo aInfo = PackageInfoUtils.generateActivityInfo(aPkg, a, 0,
-                new PackageUserState(), 0, mockPkgSetting(aPkg));
+                PackageUserState.DEFAULT, 0, mockPkgSetting(aPkg));
         ActivityInfo bInfo = PackageInfoUtils.generateActivityInfo(bPkg, b, 0,
-                new PackageUserState(), 0, mockPkgSetting(bPkg));
+                PackageUserState.DEFAULT, 0, mockPkgSetting(bPkg));
         assertApplicationInfoEqual(aInfo.applicationInfo, bInfo.applicationInfo);
         assertEquals(a.getName(), b.getName());
     }

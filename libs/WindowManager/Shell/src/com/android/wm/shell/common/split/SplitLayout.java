@@ -189,24 +189,28 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         final int rotation = configuration.windowConfiguration.getRotation();
         final Rect rootBounds = configuration.windowConfiguration.getBounds();
         final int orientation = configuration.orientation;
-        if (rotation != mRotation || !mRootBounds.equals(rootBounds)
-                || orientation != mOrientation) {
-            mContext = mContext.createConfigurationContext(configuration);
-            mSplitWindowManager.setConfiguration(configuration);
-            mOrientation = orientation;
-            mTempRect.set(mRootBounds);
-            mRootBounds.set(rootBounds);
-            mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds);
-            initDividerPosition(mTempRect);
-            affectsLayout = true;
+
+        if (mOrientation == orientation
+                && rotation == mRotation
+                && mRootBounds.equals(rootBounds)) {
+            return false;
         }
+
+        mContext = mContext.createConfigurationContext(configuration);
+        mSplitWindowManager.setConfiguration(configuration);
+        mOrientation = orientation;
+        mTempRect.set(mRootBounds);
+        mRootBounds.set(rootBounds);
+        mRotation = rotation;
+        mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds);
+        initDividerPosition(mTempRect);
 
         if (mInitialized) {
             release();
             init();
         }
 
-        return affectsLayout;
+        return true;
     }
 
     private void initDividerPosition(Rect oldBounds) {
