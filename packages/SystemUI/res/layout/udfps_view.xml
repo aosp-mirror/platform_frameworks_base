@@ -20,7 +20,7 @@
     android:id="@+id/udfps_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    systemui:sensorTouchAreaCoefficient="0.75"
+    systemui:sensorTouchAreaCoefficient="1.0"
     android:contentDescription="@string/accessibility_fingerprint_label">
 
     <ViewStub

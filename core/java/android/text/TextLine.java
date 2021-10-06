@@ -782,7 +782,7 @@ public class TextLine {
 
         int spanStart = runStart;
         int spanLimit;
-        if (mSpanned == null) {
+        if (mSpanned == null || runStart == runLimit) {
             spanLimit = runLimit;
         } else {
             int target = after ? offset + 1 : offset;

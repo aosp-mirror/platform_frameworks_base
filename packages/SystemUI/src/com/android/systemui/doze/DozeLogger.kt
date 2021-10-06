@@ -160,6 +160,14 @@ class DozeLogger @Inject constructor(
         })
     }
 
+    fun logDisplayStateDelayedByUdfps(delayedDisplayState: Int) {
+        buffer.log(TAG, INFO, {
+            str1 = Display.stateToString(delayedDisplayState)
+        }, {
+            "Delaying display state change to: $str1 due to UDFPS activity"
+        })
+    }
+
     fun logDisplayStateChanged(displayState: Int) {
         buffer.log(TAG, INFO, {
             str1 = Display.stateToString(displayState)

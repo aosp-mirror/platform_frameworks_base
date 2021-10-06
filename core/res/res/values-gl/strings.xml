@@ -981,7 +981,7 @@
     <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"Confirmar navegación"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"Abandonar esta páxina"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"Permanecer nesta páxina"</string>
-    <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nEstás seguro de que queres saír desta páxina?"</string>
+    <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nSeguro que queres saír desta páxina?"</string>
     <string name="save_password_label" msgid="9161712335355510035">"Confirmar"</string>
     <string name="double_tap_toast" msgid="7065519579174882778">"Consello: Toca dúas veces para achegar e afastar o zoom."</string>
     <string name="autofill_this_form" msgid="3187132440451621492">"Encher"</string>

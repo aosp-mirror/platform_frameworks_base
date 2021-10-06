@@ -88,4 +88,9 @@ oneway interface ITaskOrganizer {
      * user has pressed back on the root activity of a task controlled by the task organizer.
      */
     void onBackPressedOnTaskRoot(in ActivityManager.RunningTaskInfo taskInfo);
+
+    /**
+     * Called when the IME has drawn on the organized task.
+     */
+    void onImeDrawnOnTask(int taskId);
 }

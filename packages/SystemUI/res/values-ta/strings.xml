@@ -512,7 +512,7 @@
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> மூலம் ரெக்கார்டிங் செய்யவோ அனுப்புவதற்கோ தொடங்கிவீட்டீர்களா?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"மீண்டும் காட்டாதே"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"எல்லாவற்றையும் அழி"</string>
-    <string name="manage_notifications_text" msgid="6885645344647733116">"அறிவிப்புகளை நிர்வகி"</string>
+    <string name="manage_notifications_text" msgid="6885645344647733116">"நிர்வகி"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"இதுவரை வந்த அறிவிப்புகள்"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"புதிது"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"சைலன்ட்"</string>
