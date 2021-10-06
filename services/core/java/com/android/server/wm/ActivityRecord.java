@@ -4940,7 +4940,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else {
             // If we are being set visible, and the starting window is not yet displayed,
             // then make sure it doesn't get displayed.
-            if (mStartingWindow != null && !mStartingWindow.isDrawn()) {
+            if (mStartingWindow != null && !mStartingWindow.isDrawn()
+                    && (firstWindowDrawn || allDrawn)) {
                 mStartingWindow.clearPolicyVisibilityFlag(LEGACY_POLICY_VISIBILITY);
                 mStartingWindow.mLegacyPolicyVisibilityAfterAnim = false;
             }
