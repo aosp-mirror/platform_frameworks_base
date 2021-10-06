@@ -35,6 +35,7 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -103,6 +104,10 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
     /**
      * Constructs a PersistableBundle from a Bundle.  Does only a shallow copy of the Bundle.
      *
+     * <p><b>Warning:</b> This method will deserialize every item on the bundle, including custom
+     * types such as {@link Parcelable} and {@link Serializable}, so only use this when you trust
+     * the source. Specifically don't use this method on app-provided bundles.
+     *
      * @param b a Bundle to be copied.
      *
      * @throws IllegalArgumentException if any element of {@code b} cannot be persisted.
@@ -110,7 +115,7 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
      * @hide
      */
     public PersistableBundle(Bundle b) {
-        this(b.getMap());
+        this(b.getItemwiseMap());
     }
 
     /**
