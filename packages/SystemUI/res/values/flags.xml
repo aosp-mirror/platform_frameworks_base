@@ -48,6 +48,8 @@
 
     <bool name="flag_ongoing_call_in_immersive">false</bool>
 
+    <bool name="flag_ongoing_call_in_immersive_chip_tap">true</bool>
+
     <bool name="flag_smartspace">false</bool>
 
     <bool name="flag_smartspace_deduping">true</bool>
