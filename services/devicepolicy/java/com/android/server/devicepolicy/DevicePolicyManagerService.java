@@ -10630,19 +10630,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         }
         final String adminPkg = admin.getPackageName();
-        try {
-            // Install the profile owner if not present.
-            if (!mIPackageManager.isPackageAvailable(adminPkg, userId)) {
-                mIPackageManager.installExistingPackageAsUser(adminPkg, userId,
-                        PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
-                        PackageManager.INSTALL_REASON_POLICY,
-                        /* allowlistedRestrictedPermissions= */ null);
+        mInjector.binderWithCleanCallingIdentity(() -> {
+            try {
+                // Install the profile owner if not present.
+                if (!mIPackageManager.isPackageAvailable(adminPkg, userId)) {
+                    mIPackageManager.installExistingPackageAsUser(adminPkg, userId,
+                            PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
+                            PackageManager.INSTALL_REASON_POLICY,
+                            /* allowlistedRestrictedPermissions= */ null);
+                }
+            } catch (RemoteException e) {
+                // Does not happen, same process
+                Slogf.wtf(LOG_TAG, e, "Failed to install admin package %s for user %d",
+                        adminPkg, userId);
             }
-        } catch (RemoteException e) {
-            // Does not happen, same process
-            Slogf.wtf(LOG_TAG, e, "Failed to install admin package %s for user %d",
-                    adminPkg, userId);
-        }
+        });
 
         // Set admin.
         setActiveAdmin(profileOwner, /* refreshing= */ true, userId);

@@ -42,7 +42,6 @@ import android.content.pm.ComponentInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.PackageUserState;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
@@ -56,6 +55,9 @@ import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedMainComponent;
 import android.content.pm.parsing.component.ParsedPermission;
 import android.content.pm.parsing.component.ParsedProcess;
+import android.content.pm.pkg.PackageUserState;
+import android.content.pm.pkg.PackageUserStateInternal;
+import android.content.pm.pkg.PackageUserStateUtils;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -288,17 +290,17 @@ public final class Settings implements Watchable, Snappable {
     private static final String TAG_DEFAULT_DIALER = "default-dialer";
     private static final String TAG_VERSION = "version";
     /**
-     * @deprecated Moved to {@link android.content.pm.PackageUserState.SuspendParams}
+     * @deprecated Moved to {@link PackageUserState.SuspendParams}
      */
     @Deprecated
     private static final String TAG_SUSPENDED_DIALOG_INFO = "suspended-dialog-info";
     /**
-     * @deprecated Moved to {@link android.content.pm.PackageUserState.SuspendParams}
+     * @deprecated Moved to {@link PackageUserState.SuspendParams}
      */
     @Deprecated
     private static final String TAG_SUSPENDED_APP_EXTRAS = "suspended-app-extras";
     /**
-     * @deprecated Moved to {@link android.content.pm.PackageUserState.SuspendParams}
+     * @deprecated Moved to {@link PackageUserState.SuspendParams}
      */
     @Deprecated
     private static final String TAG_SUSPENDED_LAUNCHER_EXTRAS = "suspended-launcher-extras";
@@ -1163,7 +1165,7 @@ public final class Settings implements Watchable, Snappable {
         }
         for (UserInfo user : allUsers) {
             final PackageUserState oldUserState = oldPackage == null
-                    ? PackageSetting.DEFAULT_USER_STATE
+                    ? PackageUserState.DEFAULT
                     : oldPackage.readUserState(user.id);
             if (!oldUserState.equals(newPackage.readUserState(user.id))) {
                 writePackageRestrictionsLPr(user.id);
@@ -1994,87 +1996,91 @@ public final class Settings implements Watchable, Snappable {
 
             if (DEBUG_MU) Log.i(TAG, "Writing " + userPackagesStateFile);
             for (final PackageSetting pkg : mPackages.values()) {
-                final PackageUserState ustate = pkg.readUserState(userId);
+                final PackageUserStateInternal ustate = pkg.readUserState(userId);
                 if (DEBUG_MU) {
-                    Log.i(TAG, "  pkg=" + pkg.getPackageName() + ", installed=" + ustate.installed
-                            + ", state=" + ustate.enabled);
+                    Log.i(TAG, "  pkg=" + pkg.getPackageName()
+                            + ", installed=" + ustate.isInstalled()
+                            + ", state=" + ustate.getEnabledState());
                 }
 
                 serializer.startTag(null, TAG_PACKAGE);
                 serializer.attribute(null, ATTR_NAME, pkg.getPackageName());
-                if (ustate.ceDataInode != 0) {
-                    serializer.attributeLong(null, ATTR_CE_DATA_INODE, ustate.ceDataInode);
+                if (ustate.getCeDataInode() != 0) {
+                    serializer.attributeLong(null, ATTR_CE_DATA_INODE, ustate.getCeDataInode());
                 }
-                if (!ustate.installed) {
+                if (!ustate.isInstalled()) {
                     serializer.attributeBoolean(null, ATTR_INSTALLED, false);
                 }
-                if (ustate.stopped) {
+                if (ustate.isStopped()) {
                     serializer.attributeBoolean(null, ATTR_STOPPED, true);
                 }
-                if (ustate.notLaunched) {
+                if (ustate.isNotLaunched()) {
                     serializer.attributeBoolean(null, ATTR_NOT_LAUNCHED, true);
                 }
-                if (ustate.hidden) {
+                if (ustate.isHidden()) {
                     serializer.attributeBoolean(null, ATTR_HIDDEN, true);
                 }
-                if (ustate.distractionFlags != 0) {
-                    serializer.attributeInt(null, ATTR_DISTRACTION_FLAGS, ustate.distractionFlags);
+                if (ustate.getDistractionFlags() != 0) {
+                    serializer.attributeInt(null, ATTR_DISTRACTION_FLAGS,
+                            ustate.getDistractionFlags());
                 }
-                if (ustate.suspended) {
+                if (ustate.isSuspended()) {
                     serializer.attributeBoolean(null, ATTR_SUSPENDED, true);
                 }
-                if (ustate.instantApp) {
+                if (ustate.isInstantApp()) {
                     serializer.attributeBoolean(null, ATTR_INSTANT_APP, true);
                 }
-                if (ustate.virtualPreload) {
+                if (ustate.isVirtualPreload()) {
                     serializer.attributeBoolean(null, ATTR_VIRTUAL_PRELOAD, true);
                 }
-                if (ustate.enabled != COMPONENT_ENABLED_STATE_DEFAULT) {
-                    serializer.attributeInt(null, ATTR_ENABLED, ustate.enabled);
-                    if (ustate.lastDisableAppCaller != null) {
+                if (ustate.getEnabledState() != COMPONENT_ENABLED_STATE_DEFAULT) {
+                    serializer.attributeInt(null, ATTR_ENABLED, ustate.getEnabledState());
+                    if (ustate.getLastDisableAppCaller() != null) {
                         serializer.attribute(null, ATTR_ENABLED_CALLER,
-                                ustate.lastDisableAppCaller);
+                                ustate.getLastDisableAppCaller());
                     }
                 }
-                if (ustate.installReason != PackageManager.INSTALL_REASON_UNKNOWN) {
-                    serializer.attributeInt(null, ATTR_INSTALL_REASON, ustate.installReason);
+                if (ustate.getInstallReason() != PackageManager.INSTALL_REASON_UNKNOWN) {
+                    serializer.attributeInt(null, ATTR_INSTALL_REASON,
+                            ustate.getInstallReason());
                 }
-                if (ustate.uninstallReason != PackageManager.UNINSTALL_REASON_UNKNOWN) {
-                    serializer.attributeInt(null, ATTR_UNINSTALL_REASON, ustate.uninstallReason);
+                if (ustate.getUninstallReason() != PackageManager.UNINSTALL_REASON_UNKNOWN) {
+                    serializer.attributeInt(null, ATTR_UNINSTALL_REASON,
+                            ustate.getUninstallReason());
                 }
-                if (ustate.harmfulAppWarning != null) {
+                if (ustate.getHarmfulAppWarning() != null) {
                     serializer.attribute(null, ATTR_HARMFUL_APP_WARNING,
-                            ustate.harmfulAppWarning);
+                            ustate.getHarmfulAppWarning());
                 }
-                if (ustate.splashScreenTheme != null) {
+                if (ustate.getSplashScreenTheme() != null) {
                     serializer.attribute(null, ATTR_SPLASH_SCREEN_THEME,
-                            ustate.splashScreenTheme);
+                            ustate.getSplashScreenTheme());
                 }
-                if (ustate.suspended) {
-                    for (int i = 0; i < ustate.suspendParams.size(); i++) {
-                        final String suspendingPackage = ustate.suspendParams.keyAt(i);
+                if (ustate.isSuspended()) {
+                    for (int i = 0; i < ustate.getSuspendParams().size(); i++) {
+                        final String suspendingPackage = ustate.getSuspendParams().keyAt(i);
                         serializer.startTag(null, TAG_SUSPEND_PARAMS);
                         serializer.attribute(null, ATTR_SUSPENDING_PACKAGE, suspendingPackage);
                         final PackageUserState.SuspendParams params =
-                                ustate.suspendParams.valueAt(i);
+                                ustate.getSuspendParams().valueAt(i);
                         if (params != null) {
                             params.saveToXml(serializer);
                         }
                         serializer.endTag(null, TAG_SUSPEND_PARAMS);
                     }
                 }
-                if (!ArrayUtils.isEmpty(ustate.enabledComponents)) {
+                if (!ArrayUtils.isEmpty(ustate.getEnabledComponentsNoCopy())) {
                     serializer.startTag(null, TAG_ENABLED_COMPONENTS);
-                    for (final String name : ustate.enabledComponents) {
+                    for (final String name : ustate.getEnabledComponentsNoCopy()) {
                         serializer.startTag(null, TAG_ITEM);
                         serializer.attribute(null, ATTR_NAME, name);
                         serializer.endTag(null, TAG_ITEM);
                     }
                     serializer.endTag(null, TAG_ENABLED_COMPONENTS);
                 }
-                if (!ArrayUtils.isEmpty(ustate.disabledComponents)) {
+                if (!ArrayUtils.isEmpty(ustate.getDisabledComponentsNoCopy())) {
                     serializer.startTag(null, TAG_DISABLED_COMPONENTS);
-                    for (final String name : ustate.disabledComponents) {
+                    for (final String name : ustate.getDisabledComponentsNoCopy()) {
                         serializer.startTag(null, TAG_ITEM);
                         serializer.attribute(null, ATTR_NAME, name);
                         serializer.endTag(null, TAG_ITEM);
@@ -4158,7 +4164,7 @@ public final class Settings implements Watchable, Snappable {
         if (ps == null) return false;
 
         final PackageUserState userState = ps.readUserState(userId);
-        return userState.isMatch(componentInfo, flags);
+        return PackageUserStateUtils.isMatch(userState, componentInfo, flags);
     }
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
@@ -4168,7 +4174,8 @@ public final class Settings implements Watchable, Snappable {
         if (ps == null) return false;
 
         final PackageUserState userState = ps.readUserState(userId);
-        return userState.isMatch(pkg.isSystem(), pkg.isEnabled(), component, flags);
+        return PackageUserStateUtils.isMatch(userState, pkg.isSystem(), pkg.isEnabled(), component,
+                flags);
     }
 
     boolean isOrphaned(String packageName) {
@@ -4771,12 +4778,12 @@ public final class Settings implements Watchable, Snappable {
             if (ps.getSuspended(user.id)) {
                 pw.print(prefix);
                 pw.println("  Suspend params:");
-                final PackageUserState pus = ps.readUserState(user.id);
-                for (int i = 0; i < pus.suspendParams.size(); i++) {
+                final PackageUserStateInternal pus = ps.readUserState(user.id);
+                for (int i = 0; i < pus.getSuspendParams().size(); i++) {
                     pw.print(prefix);
                     pw.print("    suspendingPackage=");
-                    pw.print(pus.suspendParams.keyAt(i));
-                    final PackageUserState.SuspendParams params = pus.suspendParams.valueAt(i);
+                    pw.print(pus.getSuspendParams().keyAt(i));
+                    final PackageUserState.SuspendParams params = pus.getSuspendParams().valueAt(i);
                     if (params != null) {
                         pw.print(" dialogInfo=");
                         pw.print(params.dialogInfo);

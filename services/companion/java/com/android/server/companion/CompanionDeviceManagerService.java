@@ -145,6 +145,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
@@ -155,6 +156,15 @@ import java.util.function.Function;
 /** @hide */
 @SuppressLint("LongLogTag")
 public class CompanionDeviceManagerService extends SystemService implements Binder.DeathRecipient {
+
+    private static final Map<String, String> DEVICE_PROFILE_TO_PERMISSION;
+    static {
+        final Map<String, String> map = new ArrayMap<>();
+        map.put(AssociationRequest.DEVICE_PROFILE_WATCH,
+                Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH);
+
+        DEVICE_PROFILE_TO_PERMISSION = Collections.unmodifiableMap(map);
+    }
 
     private static final ComponentName SERVICE_TO_BIND_TO = ComponentName.createRelative(
             CompanionDeviceManager.COMPANION_DEVICE_DISCOVERY_PACKAGE_NAME,
@@ -429,7 +439,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             checkCallerIsSystemOr(callingPackage);
             int userId = getCallingUserId();
             checkUsesFeature(callingPackage, userId);
-            checkProfilePermissions(request);
+            final String deviceProfile = request.getDeviceProfile();
+            validateDeviceProfileAndCheckPermission(deviceProfile);
 
             mFindDeviceCallback = callback;
             mRequest = request;
@@ -442,13 +453,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             }
             callback.asBinder().linkToDeath(CompanionDeviceManagerService.this /* recipient */, 0);
 
-            AndroidFuture<String> fetchProfileDescription =
-                    request.getDeviceProfile() == null
-                            ? AndroidFuture.completedFuture(null)
-                            : getDeviceProfilePermissionDescription(
-                                    request.getDeviceProfile());
-
-            mOngoingDeviceDiscovery = fetchProfileDescription.thenComposeAsync(description -> {
+            mOngoingDeviceDiscovery = getDeviceProfilePermissionDescription(deviceProfile)
+                    .thenComposeAsync(description -> {
                 Slog.d(LOG_TAG, "fetchProfileDescription done: " + description);
 
                 request.setDeviceProfilePrivilegesDescription(description);
@@ -464,8 +470,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             }, FgThread.getExecutor()).whenComplete(uncheckExceptions((deviceAddress, err) -> {
                 if (err == null) {
                     Association association = new Association(userId, deviceAddress, callingPackage,
-                            mRequest.getDeviceProfile(), false,
-                            System.currentTimeMillis());
+                            deviceProfile, false, System.currentTimeMillis());
                     addAssociation(association, userId);
                 } else {
                     Slog.e(LOG_TAG, "Failed to discover device(s)", err);
@@ -542,18 +547,18 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             }
         }
 
-        private void checkProfilePermissions(AssociationRequest request) {
-            checkProfilePermission(request,
-                    AssociationRequest.DEVICE_PROFILE_WATCH,
-                    Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH);
-        }
+        private void validateDeviceProfileAndCheckPermission(@Nullable String deviceProfile) {
+            // Device profile can be null.
+            if (deviceProfile == null) return;
 
-        private void checkProfilePermission(
-                AssociationRequest request, String profile, String permission) {
-            if (profile.equals(request.getDeviceProfile())
-                    && getContext().checkCallingOrSelfPermission(permission)
-                            != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Using " + profile + " requires " + permission);
+            if (!DEVICE_PROFILE_TO_PERMISSION.containsKey(deviceProfile)) {
+                throw new IllegalArgumentException("Unsupported device profile: " + deviceProfile);
+            }
+
+            final String permission = DEVICE_PROFILE_TO_PERMISSION.get(deviceProfile);
+            if (getContext().checkCallingOrSelfPermission(permission) != PERMISSION_GRANTED) {
+                throw new SecurityException("Application must hold " + permission + " to associate "
+                        + "with a device with " + deviceProfile + " profile.");
             }
         }
 
@@ -1517,8 +1522,14 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         return result;
     }
 
-    private AndroidFuture<String> getDeviceProfilePermissionDescription(String deviceProfile) {
-        AndroidFuture<String> result = new AndroidFuture<>();
+    @NonNull
+    private AndroidFuture<String> getDeviceProfilePermissionDescription(
+            @Nullable String deviceProfile) {
+        if (deviceProfile == null) {
+            return AndroidFuture.completedFuture(null);
+        }
+
+        final AndroidFuture<String> result = new AndroidFuture<>();
         mPermissionControllerManager.getPrivilegesDescriptionStringForProfile(
                 deviceProfile, FgThread.getExecutor(), desc -> {
                         try {

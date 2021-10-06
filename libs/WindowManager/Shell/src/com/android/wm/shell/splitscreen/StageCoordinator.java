@@ -201,6 +201,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 mSurfaceSession);
         mDisplayImeController = displayImeController;
         mDisplayInsetsController = displayInsetsController;
+        mDisplayInsetsController.addInsetsChangedListener(mDisplayId, mSideStage);
         mRootTDAOrganizer.registerListener(displayId, this);
         final DeviceStateManager deviceStateManager =
                 mContext.getSystemService(DeviceStateManager.class);
@@ -682,6 +683,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 t.setVisibility(mSideStage.mRootLeash, bothStageVisible)
                         .setVisibility(mMainStage.mRootLeash, bothStageVisible);
                 applyDividerVisibility(t);
+                applyOutlineVisibility(t);
             }
         });
     }
@@ -700,6 +702,19 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                             mSplitLayout.getDividerBounds().top);
         } else {
             t.hide(dividerLeash);
+        }
+    }
+
+    private void applyOutlineVisibility(SurfaceControl.Transaction t) {
+        final SurfaceControl outlineLeash = mSideStage.getOutlineLeash();
+        if (outlineLeash == null) {
+            return;
+        }
+
+        if (mDividerVisible) {
+            t.show(outlineLeash).setLayer(outlineLeash, SPLIT_DIVIDER_LAYER);
+        } else {
+            t.hide(outlineLeash);
         }
     }
 
@@ -762,6 +777,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     @Override
     public void onLayoutChanging(SplitLayout layout) {
         mSyncQueue.runInSync(t -> updateSurfaceBounds(layout, t));
+        mSideStage.setOutlineVisibility(false);
     }
 
     @Override
@@ -770,6 +786,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         updateWindowBounds(layout, wct);
         mSyncQueue.queue(wct);
         mSyncQueue.runInSync(t -> updateSurfaceBounds(layout, t));
+        mSideStage.setOutlineVisibility(true);
         mLogger.logResize(mSplitLayout.getDividerPositionAsFraction());
     }
 
@@ -1139,6 +1156,18 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         final Rect bounds = mSplitLayout.getDividerBounds();
         return new RemoteAnimationTarget(-1 /* taskId */, -1 /* mode */,
                 mSplitLayout.getDividerLeash(), false /* isTranslucent */, null /* clipRect */,
+                null /* contentInsets */, Integer.MAX_VALUE /* prefixOrderIndex */,
+                new android.graphics.Point(0, 0) /* position */, bounds, bounds,
+                new WindowConfiguration(), true, null /* startLeash */, null /* startBounds */,
+                null /* taskInfo */, false /* allowEnterPip */, TYPE_DOCK_DIVIDER);
+    }
+
+    RemoteAnimationTarget getOutlineLegacyTarget() {
+        final Rect bounds = mSideStage.mRootTaskInfo.configuration.windowConfiguration.getBounds();
+        // Leverage TYPE_DOCK_DIVIDER type when wrapping outline remote animation target in order to
+        // distinguish as a split auxiliary target in Launcher.
+        return new RemoteAnimationTarget(-1 /* taskId */, -1 /* mode */,
+                mSideStage.getOutlineLeash(), false /* isTranslucent */, null /* clipRect */,
                 null /* contentInsets */, Integer.MAX_VALUE /* prefixOrderIndex */,
                 new android.graphics.Point(0, 0) /* position */, bounds, bounds,
                 new WindowConfiguration(), true, null /* startLeash */, null /* startBounds */,

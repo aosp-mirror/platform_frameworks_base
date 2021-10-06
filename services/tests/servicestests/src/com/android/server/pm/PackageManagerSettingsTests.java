@@ -40,9 +40,10 @@ import android.annotation.NonNull;
 import android.app.PropertyInvalidatedCache;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageUserState;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
+import android.content.pm.pkg.PackageUserState;
+import android.content.pm.pkg.PackageUserStateInternal;
 import android.os.BaseBundle;
 import android.os.PersistableBundle;
 import android.os.Process;
@@ -208,24 +209,24 @@ public class PackageManagerSettingsTests {
         settingsUnderTest.readPackageRestrictionsLPr(0);
 
         PackageSetting ps1 = settingsUnderTest.mPackages.get(PACKAGE_NAME_1);
-        PackageUserState packageUserState1 = ps1.readUserState(0);
-        assertThat(packageUserState1.suspended, is(true));
-        assertThat(packageUserState1.suspendParams.size(), is(1));
-        assertThat(packageUserState1.suspendParams.keyAt(0), is("android"));
-        assertThat(packageUserState1.suspendParams.valueAt(0), is(nullValue()));
+        PackageUserStateInternal packageUserState1 = ps1.readUserState(0);
+        assertThat(packageUserState1.isSuspended(), is(true));
+        assertThat(packageUserState1.getSuspendParams().size(), is(1));
+        assertThat(packageUserState1.getSuspendParams().keyAt(0), is("android"));
+        assertThat(packageUserState1.getSuspendParams().valueAt(0), is(nullValue()));
 
         // Verify that the snapshot returns the same answers
         ps1 = snapshot.mPackages.get(PACKAGE_NAME_1);
         packageUserState1 = ps1.readUserState(0);
-        assertThat(packageUserState1.suspended, is(true));
-        assertThat(packageUserState1.suspendParams.size(), is(1));
-        assertThat(packageUserState1.suspendParams.keyAt(0), is("android"));
-        assertThat(packageUserState1.suspendParams.valueAt(0), is(nullValue()));
+        assertThat(packageUserState1.isSuspended(), is(true));
+        assertThat(packageUserState1.getSuspendParams().size(), is(1));
+        assertThat(packageUserState1.getSuspendParams().keyAt(0), is("android"));
+        assertThat(packageUserState1.getSuspendParams().valueAt(0), is(nullValue()));
 
         PackageSetting ps2 = settingsUnderTest.mPackages.get(PACKAGE_NAME_2);
-        PackageUserState packageUserState2 = ps2.readUserState(0);
-        assertThat(packageUserState2.suspended, is(false));
-        assertThat(packageUserState2.suspendParams, is(nullValue()));
+        PackageUserStateInternal packageUserState2 = ps2.readUserState(0);
+        assertThat(packageUserState2.isSuspended(), is(false));
+        assertThat(packageUserState2.getSuspendParams(), is(nullValue()));
 
         // Verify that the snapshot returns different answers
         ps2 = snapshot.mPackages.get(PACKAGE_NAME_2);
@@ -246,12 +247,13 @@ public class PackageManagerSettingsTests {
 
         final PackageSetting ps1 = settingsUnderTest.mPackages.get(PACKAGE_NAME_1);
         watcher.verifyNoChangeReported("get package 1");
-        final PackageUserState packageUserState1 = ps1.readUserState(0);
+        final PackageUserStateInternal packageUserState1 = ps1.readUserState(0);
         watcher.verifyNoChangeReported("readUserState");
-        assertThat(packageUserState1.suspended, is(true));
-        assertThat(packageUserState1.suspendParams.size(), is(1));
-        assertThat(packageUserState1.suspendParams.keyAt(0), is(PACKAGE_NAME_3));
-        final PackageUserState.SuspendParams params = packageUserState1.suspendParams.valueAt(0);
+        assertThat(packageUserState1.isSuspended(), is(true));
+        assertThat(packageUserState1.getSuspendParams().size(), is(1));
+        assertThat(packageUserState1.getSuspendParams().keyAt(0), is(PACKAGE_NAME_3));
+        final PackageUserState.SuspendParams params =
+                packageUserState1.getSuspendParams().valueAt(0);
         watcher.verifyNoChangeReported("fetch user state");
         assertThat(params, is(notNullValue()));
         assertThat(params.appExtras.size(), is(1));
@@ -330,15 +332,15 @@ public class PackageManagerSettingsTests {
         // now read and verify
         settingsUnderTest.readPackageRestrictionsLPr(0);
         watcher.verifyChangeReported("readPackageRestrictions");
-        final PackageUserState readPus1 = settingsUnderTest.mPackages.get(PACKAGE_NAME_1)
+        final PackageUserStateInternal readPus1 = settingsUnderTest.mPackages.get(PACKAGE_NAME_1)
                 .readUserState(0);
         watcher.verifyNoChangeReported("package get 1");
-        assertThat(readPus1.suspended, is(true));
-        assertThat(readPus1.suspendParams.size(), is(2));
+        assertThat(readPus1.isSuspended(), is(true));
+        assertThat(readPus1.getSuspendParams().size(), is(2));
         watcher.verifyNoChangeReported("read package param");
 
-        assertThat(readPus1.suspendParams.keyAt(0), is("suspendingPackage1"));
-        final PackageUserState.SuspendParams params11 = readPus1.suspendParams.valueAt(0);
+        assertThat(readPus1.getSuspendParams().keyAt(0), is("suspendingPackage1"));
+        final PackageUserState.SuspendParams params11 = readPus1.getSuspendParams().valueAt(0);
         watcher.verifyNoChangeReported("read package param");
         assertThat(params11, is(notNullValue()));
         assertThat(params11.dialogInfo, is(dialogInfo1));
@@ -347,8 +349,8 @@ public class PackageManagerSettingsTests {
                 is(true));
         watcher.verifyNoChangeReported("read package param");
 
-        assertThat(readPus1.suspendParams.keyAt(1), is("suspendingPackage2"));
-        final PackageUserState.SuspendParams params12 = readPus1.suspendParams.valueAt(1);
+        assertThat(readPus1.getSuspendParams().keyAt(1), is("suspendingPackage2"));
+        final PackageUserState.SuspendParams params12 = readPus1.getSuspendParams().valueAt(1);
         assertThat(params12, is(notNullValue()));
         assertThat(params12.dialogInfo, is(dialogInfo2));
         assertThat(BaseBundle.kindofEquals(params12.appExtras, appExtras2), is(true));
@@ -356,22 +358,22 @@ public class PackageManagerSettingsTests {
                 is(true));
         watcher.verifyNoChangeReported("read package param");
 
-        final PackageUserState readPus2 = settingsUnderTest.mPackages.get(PACKAGE_NAME_2)
+        final PackageUserStateInternal readPus2 = settingsUnderTest.mPackages.get(PACKAGE_NAME_2)
                 .readUserState(0);
-        assertThat(readPus2.suspended, is(true));
-        assertThat(readPus2.suspendParams.size(), is(1));
-        assertThat(readPus2.suspendParams.keyAt(0), is("suspendingPackage3"));
-        final PackageUserState.SuspendParams params21 = readPus2.suspendParams.valueAt(0);
+        assertThat(readPus2.isSuspended(), is(true));
+        assertThat(readPus2.getSuspendParams().size(), is(1));
+        assertThat(readPus2.getSuspendParams().keyAt(0), is("suspendingPackage3"));
+        final PackageUserState.SuspendParams params21 = readPus2.getSuspendParams().valueAt(0);
         assertThat(params21, is(notNullValue()));
         assertThat(params21.dialogInfo, is(nullValue()));
         assertThat(BaseBundle.kindofEquals(params21.appExtras, appExtras1), is(true));
         assertThat(params21.launcherExtras, is(nullValue()));
         watcher.verifyNoChangeReported("read package param");
 
-        final PackageUserState readPus3 = settingsUnderTest.mPackages.get(PACKAGE_NAME_3)
+        final PackageUserStateInternal readPus3 = settingsUnderTest.mPackages.get(PACKAGE_NAME_3)
                 .readUserState(0);
-        assertThat(readPus3.suspended, is(false));
-        assertThat(readPus3.suspendParams, is(nullValue()));
+        assertThat(readPus3.isSuspended(), is(false));
+        assertThat(readPus3.getSuspendParams(), is(nullValue()));
         watcher.verifyNoChangeReported("package get 3");
     }
 
@@ -411,15 +413,15 @@ public class PackageManagerSettingsTests {
         settingsUnderTest.readPackageRestrictionsLPr(0);
         final PackageUserState readPus1 = settingsUnderTest.mPackages.get(PACKAGE_NAME_1)
                 .readUserState(0);
-        assertThat(readPus1.distractionFlags, is(distractionFlags1));
+        assertThat(readPus1.getDistractionFlags(), is(distractionFlags1));
 
         final PackageUserState readPus2 = settingsUnderTest.mPackages.get(PACKAGE_NAME_2)
                 .readUserState(0);
-        assertThat(readPus2.distractionFlags, is(distractionFlags2));
+        assertThat(readPus2.getDistractionFlags(), is(distractionFlags2));
 
         final PackageUserState readPus3 = settingsUnderTest.mPackages.get(PACKAGE_NAME_3)
                 .readUserState(0);
-        assertThat(readPus3.distractionFlags, is(distractionFlags3));
+        assertThat(readPus3.getDistractionFlags(), is(distractionFlags3));
     }
 
     @Test
@@ -895,13 +897,13 @@ public class PackageManagerSettingsTests {
 
     private void verifyUserState(PackageUserState userState, PackageUserState oldUserState,
             boolean userStateChanged, boolean notLaunched, boolean stopped, boolean installed) {
-        assertThat(userState.enabled, is(0));
-        assertThat(userState.hidden, is(false));
-        assertThat(userState.installed, is(installed));
-        assertThat(userState.notLaunched, is(notLaunched));
-        assertThat(userState.stopped, is(stopped));
-        assertThat(userState.suspended, is(false));
-        assertThat(userState.distractionFlags, is(0));
+        assertThat(userState.getEnabledState(), is(0));
+        assertThat(userState.isHidden(), is(false));
+        assertThat(userState.isInstalled(), is(installed));
+        assertThat(userState.isNotLaunched(), is(notLaunched));
+        assertThat(userState.isStopped(), is(stopped));
+        assertThat(userState.isSuspended(), is(false));
+        assertThat(userState.getDistractionFlags(), is(0));
         if (oldUserState != null) {
             assertThat(userState.equals(oldUserState), is(not(userStateChanged)));
         }

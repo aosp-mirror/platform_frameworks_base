@@ -158,7 +158,7 @@ public class ScanTests {
         final ScanResult scanResult = executeScan(scanRequest);
 
         for (int uid : userIds) {
-            assertThat(scanResult.mPkgSetting.readUserState(uid).installed, is(true));
+            assertThat(scanResult.mPkgSetting.readUserState(uid).isInstalled(), is(true));
         }
     }
 

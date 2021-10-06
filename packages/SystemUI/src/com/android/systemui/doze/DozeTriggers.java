@@ -46,6 +46,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.sensors.AsyncSensorManager;
+import com.android.systemui.util.sensors.ProximityCheck;
 import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.wakelock.WakeLock;
@@ -90,7 +91,7 @@ public class DozeTriggers implements DozeMachine.Part {
     private final TriggerReceiver mBroadcastReceiver = new TriggerReceiver();
     private final DockEventListener mDockEventListener = new DockEventListener();
     private final DockManager mDockManager;
-    private final ProximitySensor.ProximityCheck mProxCheck;
+    private final ProximityCheck mProxCheck;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final AuthController mAuthController;
     private final DelayableExecutor mMainExecutor;
@@ -181,7 +182,8 @@ public class DozeTriggers implements DozeMachine.Part {
             AmbientDisplayConfiguration config,
             DozeParameters dozeParameters, AsyncSensorManager sensorManager,
             WakeLock wakeLock, DockManager dockManager,
-            ProximitySensor proximitySensor, ProximitySensor.ProximityCheck proxCheck,
+            ProximitySensor proximitySensor,
+            ProximityCheck proxCheck,
             DozeLog dozeLog, BroadcastDispatcher broadcastDispatcher,
             SecureSettings secureSettings, AuthController authController,
             @Main DelayableExecutor mainExecutor,

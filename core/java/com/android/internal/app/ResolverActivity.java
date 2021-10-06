@@ -314,6 +314,15 @@ public class ResolverActivity extends Activity implements
         return intent;
     }
 
+    /**
+     * Call {@link Activity#onCreate} without initializing anything further. This should
+     * only be used when the activity is about to be immediately finished to avoid wasting
+     * initializing steps and leaking resources.
+     */
+    protected void super_onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // Use a specialized prompt when we're handling the 'Home' app startActivity()

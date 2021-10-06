@@ -413,7 +413,7 @@ public class DisplayRotation {
      */
     boolean updateRotationUnchecked(boolean forceUpdate) {
         final boolean useShellTransitions =
-                mService.mAtmService.getTransitionController().getTransitionPlayer() != null;
+                mDisplayContent.mTransitionController.isShellTransitionsEnabled();
 
         final int displayId = mDisplayContent.getDisplayId();
         if (!forceUpdate && !useShellTransitions) {
@@ -586,17 +586,17 @@ public class DisplayRotation {
             mService.mH.removeCallbacks(mDisplayRotationHandlerTimeout);
             mIsWaitingForRemoteRotation = false;
 
-            if (mService.mAtmService.getTransitionController().getTransitionPlayer() != null) {
-                if (!mService.mAtmService.getTransitionController().isCollecting()) {
+            if (mDisplayContent.mTransitionController.isShellTransitionsEnabled()) {
+                if (!mDisplayContent.mTransitionController.isCollecting()) {
                     throw new IllegalStateException("Trying to rotate outside a transition");
                 }
-                mService.mAtmService.getTransitionController().collect(mDisplayContent);
+                mDisplayContent.mTransitionController.collect(mDisplayContent);
                 // Go through all tasks and collect them before the rotation
                 // TODO(shell-transitions): move collect() to onConfigurationChange once wallpaper
                 //       handling is synchronized.
                 mDisplayContent.forAllTasks(task -> {
                     if (task.isVisible()) {
-                        mService.mAtmService.getTransitionController().collect(task);
+                        mDisplayContent.mTransitionController.collect(task);
                     }
                 });
                 mDisplayContent.getInsetsStateController().addProvidersToTransition();

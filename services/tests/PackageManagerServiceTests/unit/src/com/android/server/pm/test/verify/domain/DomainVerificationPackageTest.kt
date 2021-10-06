@@ -18,11 +18,11 @@ package com.android.server.pm.test.verify.domain
 
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.pm.PackageUserState
 import android.content.pm.Signature
 import android.content.pm.SigningDetails
 import android.content.pm.parsing.component.ParsedActivity
 import android.content.pm.parsing.component.ParsedIntentInfo
+import android.content.pm.pkg.PackageUserStateInternal
 import android.content.pm.verify.domain.DomainOwner
 import android.content.pm.verify.domain.DomainVerificationInfo.STATE_MODIFIABLE_VERIFIED
 import android.content.pm.verify.domain.DomainVerificationInfo.STATE_NO_RESPONSE
@@ -834,13 +834,13 @@ class DomainVerificationPackageTest {
             whenever(activities) { activityList }
         }
 
-        whenever(getPkg()) { pkg }
+        whenever(this.pkg) { pkg }
         whenever(packageName) { pkgName }
         whenever(this.domainSetId) { domainSetId }
         whenever(getInstantApp(anyInt())) { false }
         whenever(firstInstallTime) { 0L }
-        whenever(readUserState(0)) { PackageUserState() }
-        whenever(readUserState(10)) { PackageUserState() }
+        whenever(readUserState(0)) { PackageUserStateInternal.DEFAULT }
+        whenever(readUserState(10)) { PackageUserStateInternal.DEFAULT }
         whenever(isSystem) { isSystemApp }
 
         val mockSigningDetails = SigningDetails(arrayOf(spy(Signature(signature)) {

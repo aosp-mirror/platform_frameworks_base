@@ -27,6 +27,8 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.freeform.FreeformTaskListener;
+import com.android.wm.shell.fullscreen.FullscreenTaskListener;
+import com.android.wm.shell.fullscreen.FullscreenUnfoldController;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.splitscreen.SplitScreenController;
@@ -52,6 +54,7 @@ public class ShellInitImpl {
     private final Optional<AppPairsController> mAppPairsOptional;
     private final Optional<PipTouchHandler> mPipTouchHandlerOptional;
     private final FullscreenTaskListener mFullscreenTaskListener;
+    private final Optional<FullscreenUnfoldController> mFullscreenUnfoldController;
     private final Optional<FreeformTaskListener> mFreeformTaskListenerOptional;
     private final ShellExecutor mMainExecutor;
     private final Transitions mTransitions;
@@ -71,6 +74,7 @@ public class ShellInitImpl {
             Optional<AppPairsController> appPairsOptional,
             Optional<PipTouchHandler> pipTouchHandlerOptional,
             FullscreenTaskListener fullscreenTaskListener,
+            Optional<FullscreenUnfoldController> fullscreenUnfoldTransitionController,
             Optional<Optional<FreeformTaskListener>> freeformTaskListenerOptional,
             Transitions transitions,
             StartingWindowController startingWindow,
@@ -86,6 +90,7 @@ public class ShellInitImpl {
         mAppPairsOptional = appPairsOptional;
         mFullscreenTaskListener = fullscreenTaskListener;
         mPipTouchHandlerOptional = pipTouchHandlerOptional;
+        mFullscreenUnfoldController = fullscreenUnfoldTransitionController;
         mFreeformTaskListenerOptional = freeformTaskListenerOptional.flatMap(f -> f);
         mTransitions = transitions;
         mMainExecutor = mainExecutor;
@@ -128,6 +133,8 @@ public class ShellInitImpl {
         mFreeformTaskListenerOptional.ifPresent(f ->
                 mShellTaskOrganizer.addListenerForType(
                         f, ShellTaskOrganizer.TASK_LISTENER_TYPE_FREEFORM));
+
+        mFullscreenUnfoldController.ifPresent(FullscreenUnfoldController::init);
     }
 
     @ExternalThread

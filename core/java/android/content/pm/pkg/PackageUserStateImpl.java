@@ -1,0 +1,429 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package android.content.pm.pkg;
+
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.content.pm.PackageManager;
+import android.content.pm.overlay.OverlayPaths;
+import android.util.ArrayMap;
+import android.util.ArraySet;
+
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.DataClass;
+
+import java.util.Map;
+import java.util.Set;
+
+/** @hide */
+@DataClass(genConstructor = false, genBuilder = false, genEqualsHashCode = true)
+@DataClass.Suppress({"mOverlayPathsLock", "mOverlayPaths", "mSharedLibraryOverlayPathsLock",
+        "mSharedLibraryOverlayPaths", "setOverlayPaths"})
+public class PackageUserStateImpl implements PackageUserState {
+
+    @Nullable
+    protected ArraySet<String> mDisabledComponents;
+    @Nullable
+    protected ArraySet<String> mEnabledComponents;
+
+    private long mCeDataInode;
+    private boolean mInstalled = true;
+    private boolean mStopped;
+    private boolean mNotLaunched;
+    private boolean mHidden; // Is the app restricted by owner / admin
+    private int mDistractionFlags;
+    private boolean mSuspended;
+    private boolean mInstantApp;
+    private boolean mVirtualPreload;
+    private int mEnabledState = PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
+    @PackageManager.InstallReason
+    private int mInstallReason = PackageManager.INSTALL_REASON_UNKNOWN;
+    @PackageManager.UninstallReason
+    private int mUninstallReason = PackageManager.UNINSTALL_REASON_UNKNOWN;
+    @Nullable
+    private String mHarmfulAppWarning;
+    @Nullable
+    private String mLastDisableAppCaller;
+
+    @Nullable
+    protected OverlayPaths mOverlayPaths;
+
+    // Lib name to overlay paths
+    @Nullable
+    protected ArrayMap<String, OverlayPaths> mSharedLibraryOverlayPaths;
+
+    @Nullable
+    private String mSplashScreenTheme;
+
+    public PackageUserStateImpl() {
+    }
+
+    @VisibleForTesting
+    public PackageUserStateImpl(PackageUserStateImpl other) {
+        mDisabledComponents = ArrayUtils.cloneOrNull(other.mDisabledComponents);
+        mEnabledComponents = ArrayUtils.cloneOrNull(other.mEnabledComponents);
+        mOverlayPaths = other.mOverlayPaths;
+        if (other.mSharedLibraryOverlayPaths != null) {
+            mSharedLibraryOverlayPaths = new ArrayMap<>(other.mSharedLibraryOverlayPaths);
+        }
+        this.mDisabledComponents = other.mDisabledComponents;
+        this.mEnabledComponents = other.mEnabledComponents;
+        this.mCeDataInode = other.mCeDataInode;
+        this.mInstalled = other.mInstalled;
+        this.mStopped = other.mStopped;
+        this.mNotLaunched = other.mNotLaunched;
+        this.mHidden = other.mHidden;
+        this.mDistractionFlags = other.mDistractionFlags;
+        this.mSuspended = other.mSuspended;
+        this.mInstantApp = other.mInstantApp;
+        this.mVirtualPreload = other.mVirtualPreload;
+        this.mEnabledState = other.mEnabledState;
+        this.mInstallReason = other.mInstallReason;
+        this.mUninstallReason = other.mUninstallReason;
+        this.mHarmfulAppWarning = other.mHarmfulAppWarning;
+        this.mLastDisableAppCaller = other.mLastDisableAppCaller;
+        this.mOverlayPaths = other.mOverlayPaths;
+        this.mSharedLibraryOverlayPaths = other.mSharedLibraryOverlayPaths;
+        this.mSplashScreenTheme = other.mSplashScreenTheme;
+    }
+
+    @Override
+    public boolean isComponentEnabled(String componentName) {
+        // TODO: Not locked
+        return ArrayUtils.contains(mEnabledComponents, componentName);
+    }
+
+    @Override
+    public boolean isComponentDisabled(String componentName) {
+        // TODO: Not locked
+        return ArrayUtils.contains(mDisabledComponents, componentName);
+    }
+
+    @Override
+    public OverlayPaths getAllOverlayPaths() {
+        if (mOverlayPaths == null && mSharedLibraryOverlayPaths == null) {
+            return null;
+        }
+        final OverlayPaths.Builder newPaths = new OverlayPaths.Builder();
+        newPaths.addAll(mOverlayPaths);
+        if (mSharedLibraryOverlayPaths != null) {
+            for (final OverlayPaths libOverlayPaths : mSharedLibraryOverlayPaths.values()) {
+                newPaths.addAll(libOverlayPaths);
+            }
+        }
+        return newPaths.build();
+    }
+
+
+
+    // Code below generated by codegen v1.0.23.
+    //
+    // DO NOT MODIFY!
+    // CHECKSTYLE:OFF Generated code
+    //
+    // To regenerate run:
+    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/content/pm/pkg/PackageUserStateImpl.java
+    //
+    // To exclude the generated code from IntelliJ auto-formatting enable (one-time):
+    //   Settings > Editor > Code Style > Formatter Control
+    //@formatter:off
+
+
+    @DataClass.Generated.Member
+    public @Nullable ArraySet<String> getDisabledComponents() {
+        return mDisabledComponents;
+    }
+
+    @DataClass.Generated.Member
+    public @Nullable ArraySet<String> getEnabledComponents() {
+        return mEnabledComponents;
+    }
+
+    @DataClass.Generated.Member
+    public long getCeDataInode() {
+        return mCeDataInode;
+    }
+
+    @DataClass.Generated.Member
+    public boolean isInstalled() {
+        return mInstalled;
+    }
+
+    @DataClass.Generated.Member
+    public boolean isStopped() {
+        return mStopped;
+    }
+
+    @DataClass.Generated.Member
+    public boolean isNotLaunched() {
+        return mNotLaunched;
+    }
+
+    @DataClass.Generated.Member
+    public boolean isHidden() {
+        return mHidden;
+    }
+
+    @DataClass.Generated.Member
+    public int getDistractionFlags() {
+        return mDistractionFlags;
+    }
+
+    @DataClass.Generated.Member
+    public boolean isSuspended() {
+        return mSuspended;
+    }
+
+    @DataClass.Generated.Member
+    public boolean isInstantApp() {
+        return mInstantApp;
+    }
+
+    @DataClass.Generated.Member
+    public boolean isVirtualPreload() {
+        return mVirtualPreload;
+    }
+
+    @DataClass.Generated.Member
+    public int getEnabledState() {
+        return mEnabledState;
+    }
+
+    @DataClass.Generated.Member
+    public @PackageManager.InstallReason int getInstallReason() {
+        return mInstallReason;
+    }
+
+    @DataClass.Generated.Member
+    public @PackageManager.UninstallReason int getUninstallReason() {
+        return mUninstallReason;
+    }
+
+    @DataClass.Generated.Member
+    public @Nullable String getHarmfulAppWarning() {
+        return mHarmfulAppWarning;
+    }
+
+    @DataClass.Generated.Member
+    public @Nullable String getLastDisableAppCaller() {
+        return mLastDisableAppCaller;
+    }
+
+    @DataClass.Generated.Member
+    public @Nullable OverlayPaths getOverlayPaths() {
+        return mOverlayPaths;
+    }
+
+    @DataClass.Generated.Member
+    public @Nullable ArrayMap<String,OverlayPaths> getSharedLibraryOverlayPaths() {
+        return mSharedLibraryOverlayPaths;
+    }
+
+    @DataClass.Generated.Member
+    public @Nullable String getSplashScreenTheme() {
+        return mSplashScreenTheme;
+    }
+
+    @DataClass.Generated.Member
+    public @NonNull PackageUserStateImpl setDisabledComponents(@NonNull ArraySet<String> value) {
+        mDisabledComponents = value;
+        return this;
+    }
+
+    @DataClass.Generated.Member
+    public @NonNull PackageUserStateImpl setEnabledComponents(@NonNull ArraySet<String> value) {
+        mEnabledComponents = value;
+        return this;
+    }
+
+    @DataClass.Generated.Member
+    public @NonNull PackageUserStateImpl setCeDataInode( long value) {
+        mCeDataInode = value;
+        return this;
+    }
+
+    @DataClass.Generated.Member
+    public @NonNull PackageUserStateImpl setInstalled( boolean value) {
+        mInstalled = value;
+        return this;
+    }
+
+    @DataClass.Generated.Member
+    public @NonNull PackageUserStateImpl setStopped( boolean value) {
+        mStopped = value;
+        return this;
+    }
+
+    @DataClass.Generated.Member
+    public @NonNull PackageUserStateImpl setNotLaunched( boolean value) {
+        mNotLaunched = value;
+        return this;
+    }
+
+    @DataClass.Generated.Member
+    public @NonNull PackageUserStateImpl setHidden( boolean value) {
+        mHidden = value;
+        return this;
+    }
+
+    @DataClass.Generated.Member
+    public @NonNull PackageUserStateImpl setDistractionFlags( int value) {
+        mDistractionFlags = value;
+        return this;
+    }
+
+    @DataClass.Generated.Member
+    public @NonNull PackageUserStateImpl setSuspended( boolean value) {
+        mSuspended = value;
+        return this;
+    }
+
+    @DataClass.Generated.Member
+    public @NonNull PackageUserStateImpl setInstantApp( boolean value) {
+        mInstantApp = value;
+        return this;
+    }
+
+    @DataClass.Generated.Member
+    public @NonNull PackageUserStateImpl setVirtualPreload( boolean value) {
+        mVirtualPreload = value;
+        return this;
+    }
+
+    @DataClass.Generated.Member
+    public @NonNull PackageUserStateImpl setEnabledState( int value) {
+        mEnabledState = value;
+        return this;
+    }
+
+    @DataClass.Generated.Member
+    public @NonNull PackageUserStateImpl setInstallReason(@PackageManager.InstallReason int value) {
+        mInstallReason = value;
+        com.android.internal.util.AnnotationValidations.validate(
+                PackageManager.InstallReason.class, null, mInstallReason);
+        return this;
+    }
+
+    @DataClass.Generated.Member
+    public @NonNull PackageUserStateImpl setUninstallReason(@PackageManager.UninstallReason int value) {
+        mUninstallReason = value;
+        com.android.internal.util.AnnotationValidations.validate(
+                PackageManager.UninstallReason.class, null, mUninstallReason);
+        return this;
+    }
+
+    @DataClass.Generated.Member
+    public @NonNull PackageUserStateImpl setHarmfulAppWarning(@NonNull String value) {
+        mHarmfulAppWarning = value;
+        return this;
+    }
+
+    @DataClass.Generated.Member
+    public @NonNull PackageUserStateImpl setLastDisableAppCaller(@NonNull String value) {
+        mLastDisableAppCaller = value;
+        return this;
+    }
+
+    @DataClass.Generated.Member
+    public @NonNull PackageUserStateImpl setSharedLibraryOverlayPaths(@NonNull ArrayMap<String,OverlayPaths> value) {
+        mSharedLibraryOverlayPaths = value;
+        return this;
+    }
+
+    @DataClass.Generated.Member
+    public @NonNull PackageUserStateImpl setSplashScreenTheme(@NonNull String value) {
+        mSplashScreenTheme = value;
+        return this;
+    }
+
+    @Override
+    @DataClass.Generated.Member
+    public boolean equals(@Nullable Object o) {
+        // You can override field equality logic by defining either of the methods like:
+        // boolean fieldNameEquals(PackageUserStateImpl other) { ... }
+        // boolean fieldNameEquals(FieldType otherValue) { ... }
+
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        @SuppressWarnings("unchecked")
+        PackageUserStateImpl that = (PackageUserStateImpl) o;
+        //noinspection PointlessBooleanExpression
+        return true
+                && java.util.Objects.equals(mDisabledComponents, that.mDisabledComponents)
+                && java.util.Objects.equals(mEnabledComponents, that.mEnabledComponents)
+                && mCeDataInode == that.mCeDataInode
+                && mInstalled == that.mInstalled
+                && mStopped == that.mStopped
+                && mNotLaunched == that.mNotLaunched
+                && mHidden == that.mHidden
+                && mDistractionFlags == that.mDistractionFlags
+                && mSuspended == that.mSuspended
+                && mInstantApp == that.mInstantApp
+                && mVirtualPreload == that.mVirtualPreload
+                && mEnabledState == that.mEnabledState
+                && mInstallReason == that.mInstallReason
+                && mUninstallReason == that.mUninstallReason
+                && java.util.Objects.equals(mHarmfulAppWarning, that.mHarmfulAppWarning)
+                && java.util.Objects.equals(mLastDisableAppCaller, that.mLastDisableAppCaller)
+                && java.util.Objects.equals(mOverlayPaths, that.mOverlayPaths)
+                && java.util.Objects.equals(mSharedLibraryOverlayPaths, that.mSharedLibraryOverlayPaths)
+                && java.util.Objects.equals(mSplashScreenTheme, that.mSplashScreenTheme);
+    }
+
+    @Override
+    @DataClass.Generated.Member
+    public int hashCode() {
+        // You can override field hashCode logic by defining methods like:
+        // int fieldNameHashCode() { ... }
+
+        int _hash = 1;
+        _hash = 31 * _hash + java.util.Objects.hashCode(mDisabledComponents);
+        _hash = 31 * _hash + java.util.Objects.hashCode(mEnabledComponents);
+        _hash = 31 * _hash + Long.hashCode(mCeDataInode);
+        _hash = 31 * _hash + Boolean.hashCode(mInstalled);
+        _hash = 31 * _hash + Boolean.hashCode(mStopped);
+        _hash = 31 * _hash + Boolean.hashCode(mNotLaunched);
+        _hash = 31 * _hash + Boolean.hashCode(mHidden);
+        _hash = 31 * _hash + mDistractionFlags;
+        _hash = 31 * _hash + Boolean.hashCode(mSuspended);
+        _hash = 31 * _hash + Boolean.hashCode(mInstantApp);
+        _hash = 31 * _hash + Boolean.hashCode(mVirtualPreload);
+        _hash = 31 * _hash + mEnabledState;
+        _hash = 31 * _hash + mInstallReason;
+        _hash = 31 * _hash + mUninstallReason;
+        _hash = 31 * _hash + java.util.Objects.hashCode(mHarmfulAppWarning);
+        _hash = 31 * _hash + java.util.Objects.hashCode(mLastDisableAppCaller);
+        _hash = 31 * _hash + java.util.Objects.hashCode(mOverlayPaths);
+        _hash = 31 * _hash + java.util.Objects.hashCode(mSharedLibraryOverlayPaths);
+        _hash = 31 * _hash + java.util.Objects.hashCode(mSplashScreenTheme);
+        return _hash;
+    }
+
+    @DataClass.Generated(
+            time = 1633391914126L,
+            codegenVersion = "1.0.23",
+            sourceFile = "frameworks/base/core/java/android/content/pm/pkg/PackageUserStateImpl.java",
+            inputSignatures = "protected @android.annotation.Nullable android.util.ArraySet<java.lang.String> mDisabledComponents\nprotected @android.annotation.Nullable android.util.ArraySet<java.lang.String> mEnabledComponents\nprivate  long mCeDataInode\nprivate  boolean mInstalled\nprivate  boolean mStopped\nprivate  boolean mNotLaunched\nprivate  boolean mHidden\nprivate  int mDistractionFlags\nprivate  boolean mSuspended\nprivate  boolean mInstantApp\nprivate  boolean mVirtualPreload\nprivate  int mEnabledState\nprivate @android.content.pm.PackageManager.InstallReason int mInstallReason\nprivate @android.content.pm.PackageManager.UninstallReason int mUninstallReason\nprivate @android.annotation.Nullable java.lang.String mHarmfulAppWarning\nprivate @android.annotation.Nullable java.lang.String mLastDisableAppCaller\nprotected @android.annotation.Nullable android.content.pm.overlay.OverlayPaths mOverlayPaths\nprotected @android.annotation.Nullable android.util.ArrayMap<java.lang.String,android.content.pm.overlay.OverlayPaths> mSharedLibraryOverlayPaths\nprivate @android.annotation.Nullable java.lang.String mSplashScreenTheme\npublic @java.lang.Override boolean isComponentEnabled(java.lang.String)\npublic @java.lang.Override boolean isComponentDisabled(java.lang.String)\npublic @java.lang.Override android.content.pm.overlay.OverlayPaths getAllOverlayPaths()\nclass PackageUserStateImpl extends java.lang.Object implements [android.content.pm.pkg.PackageUserState]\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=false, genEqualsHashCode=true)")
+    @Deprecated
+    private void __metadata() {}
+
+
+    //@formatter:on
+    // End of generated code
+
+}

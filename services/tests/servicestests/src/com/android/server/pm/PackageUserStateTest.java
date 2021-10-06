@@ -17,7 +17,6 @@
 package com.android.server.pm;
 
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
-import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
@@ -26,9 +25,9 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import android.content.pm.PackageManager;
-import android.content.pm.PackageUserState;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.overlay.OverlayPaths;
+import android.content.pm.pkg.PackageUserState;
 import android.os.PersistableBundle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -37,6 +36,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.pm.pkg.PackageStateUnserialized;
+import com.android.server.pm.pkg.PackageUserStateInternalImpl;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,142 +47,141 @@ public class PackageUserStateTest {
 
     @Test
     public void testPackageUserState01() {
-        final PackageUserState testUserState = new PackageUserState();
-        PackageUserState oldUserState;
+        final PackageUserStateInternalImpl testUserState = new PackageUserStateInternalImpl();
+        PackageUserStateInternalImpl oldUserState;
 
-        oldUserState = new PackageUserState();
+        oldUserState = new PackageUserStateInternalImpl();
         assertThat(testUserState.equals(null), is(false));
         assertThat(testUserState.equals(testUserState), is(true));
         assertThat(testUserState.equals(oldUserState), is(true));
 
-        oldUserState = new PackageUserState();
-        oldUserState.ceDataInode = 4000L;
+        oldUserState = new PackageUserStateInternalImpl();
+        oldUserState.setCeDataInode(4000L);
         assertThat(testUserState.equals(oldUserState), is(false));
 
-        oldUserState = new PackageUserState();
-        oldUserState.enabled = COMPONENT_ENABLED_STATE_ENABLED;
+        oldUserState = new PackageUserStateInternalImpl();
+        oldUserState.setEnabledState(COMPONENT_ENABLED_STATE_ENABLED);
         assertThat(testUserState.equals(oldUserState), is(false));
 
-        oldUserState = new PackageUserState();
-        oldUserState.hidden = true;
+        oldUserState = new PackageUserStateInternalImpl();
+        oldUserState.setHidden(true);
         assertThat(testUserState.equals(oldUserState), is(false));
 
-        oldUserState = new PackageUserState();
-        oldUserState.installed = false;
+        oldUserState = new PackageUserStateInternalImpl();
+        oldUserState.setInstalled(false);
         assertThat(testUserState.equals(oldUserState), is(false));
 
-        oldUserState = new PackageUserState();
-        oldUserState.notLaunched = true;
+        oldUserState = new PackageUserStateInternalImpl();
+        oldUserState.setNotLaunched(true);
         assertThat(testUserState.equals(oldUserState), is(false));
 
-        oldUserState = new PackageUserState();
-        oldUserState.stopped = true;
+        oldUserState = new PackageUserStateInternalImpl();
+        oldUserState.setStopped(true);
         assertThat(testUserState.equals(oldUserState), is(false));
 
-        oldUserState = new PackageUserState();
-        oldUserState.suspended = true;
+        oldUserState = new PackageUserStateInternalImpl();
+        oldUserState.setSuspended(true);
         assertThat(testUserState.equals(oldUserState), is(false));
 
-        oldUserState = new PackageUserState();
-        oldUserState.uninstallReason = PackageManager.UNINSTALL_REASON_USER_TYPE;
+        oldUserState = new PackageUserStateInternalImpl();
+        oldUserState.setUninstallReason(PackageManager.UNINSTALL_REASON_USER_TYPE);
         assertThat(testUserState.equals(oldUserState), is(false));
     }
 
     @Test
     public void testPackageUserState02() {
-        final PackageUserState testUserState01 = new PackageUserState();
-        PackageUserState oldUserState;
+        final PackageUserStateInternalImpl testUserState01 = new PackageUserStateInternalImpl();
+        PackageUserStateInternalImpl oldUserState;
 
-        oldUserState = new PackageUserState();
-        oldUserState.lastDisableAppCaller = "unit_test";
+        oldUserState = new PackageUserStateInternalImpl();
+        oldUserState.setLastDisableAppCaller("unit_test");
         assertThat(testUserState01.equals(oldUserState), is(false));
 
-        final PackageUserState testUserState02 = new PackageUserState();
-        testUserState02.lastDisableAppCaller = "unit_test";
+        final PackageUserStateInternalImpl testUserState02 = new PackageUserStateInternalImpl();
+        testUserState02.setLastDisableAppCaller("unit_test");
         assertThat(testUserState02.equals(oldUserState), is(true));
 
-        final PackageUserState testUserState03 = new PackageUserState();
-        testUserState03.lastDisableAppCaller = "unit_test_00";
+        final PackageUserStateInternalImpl testUserState03 = new PackageUserStateInternalImpl();
+        testUserState03.setLastDisableAppCaller("unit_test_00");
         assertThat(testUserState03.equals(oldUserState), is(false));
     }
 
     @Test
     public void testPackageUserState03() {
-        final PackageUserState oldUserState = new PackageUserState();
+        final PackageUserStateInternalImpl oldUserState = new PackageUserStateInternalImpl();
 
         // only new user state has array defined; different
-        final PackageUserState testUserState01 = new PackageUserState();
-        testUserState01.disabledComponents = new ArraySet<>();
+        final PackageUserStateInternalImpl testUserState01 = new PackageUserStateInternalImpl();
+        testUserState01.setDisabledComponents(new ArraySet<>());
         assertThat(testUserState01.equals(oldUserState), is(false));
 
         // only old user state has array defined; different
-        final PackageUserState testUserState02 = new PackageUserState();
-        oldUserState.disabledComponents = new ArraySet<>();
+        final PackageUserStateInternalImpl testUserState02 = new PackageUserStateInternalImpl();
+        oldUserState.setDisabledComponents(new ArraySet<>());
         assertThat(testUserState02.equals(oldUserState), is(false));
 
         // both states have array defined; not different
-        final PackageUserState testUserState03 = new PackageUserState();
-        testUserState03.disabledComponents = new ArraySet<>();
+        final PackageUserStateInternalImpl testUserState03 = new PackageUserStateInternalImpl();
+        testUserState03.setDisabledComponents(new ArraySet<>());
         assertThat(testUserState03.equals(oldUserState), is(true));
         // fewer elements in old user state; different
-        testUserState03.disabledComponents.add("com.android.unit_test01");
-        testUserState03.disabledComponents.add("com.android.unit_test02");
-        testUserState03.disabledComponents.add("com.android.unit_test03");
-        oldUserState.disabledComponents.add("com.android.unit_test03");
-        oldUserState.disabledComponents.add("com.android.unit_test02");
+        testUserState03.getDisabledComponentsNoCopy().add("com.android.unit_test01");
+        testUserState03.getDisabledComponentsNoCopy().add("com.android.unit_test02");
+        testUserState03.getDisabledComponentsNoCopy().add("com.android.unit_test03");
+        oldUserState.getDisabledComponentsNoCopy().add("com.android.unit_test03");
+        oldUserState.getDisabledComponentsNoCopy().add("com.android.unit_test02");
         assertThat(testUserState03.equals(oldUserState), is(false));
         // same elements in old user state; not different
-        oldUserState.disabledComponents.add("com.android.unit_test01");
+        oldUserState.getDisabledComponentsNoCopy().add("com.android.unit_test01");
         assertThat(testUserState03.equals(oldUserState), is(true));
         // more elements in old user state; different
-        oldUserState.disabledComponents.add("com.android.unit_test04");
+        oldUserState.getDisabledComponentsNoCopy().add("com.android.unit_test04");
         assertThat(testUserState03.equals(oldUserState), is(false));
         // different elements in old user state; different
-        testUserState03.disabledComponents.add("com.android.unit_test_04");
+        testUserState03.getDisabledComponentsNoCopy().add("com.android.unit_test_04");
         assertThat(testUserState03.equals(oldUserState), is(false));
     }
 
     @Test
     public void testPackageUserState04() {
-        final PackageUserState oldUserState = new PackageUserState();
+        final PackageUserStateInternalImpl oldUserState = new PackageUserStateInternalImpl();
 
         // only new user state has array defined; different
-        final PackageUserState testUserState01 = new PackageUserState();
-        testUserState01.enabledComponents = new ArraySet<>();
+        final PackageUserStateInternalImpl testUserState01 = new PackageUserStateInternalImpl();
+        testUserState01.setEnabledComponents(new ArraySet<>());
         assertThat(testUserState01.equals(oldUserState), is(false));
 
         // only old user state has array defined; different
-        final PackageUserState testUserState02 = new PackageUserState();
-        oldUserState.enabledComponents = new ArraySet<>();
+        final PackageUserStateInternalImpl testUserState02 = new PackageUserStateInternalImpl();
+        oldUserState.setEnabledComponents(new ArraySet<>());
         assertThat(testUserState02.equals(oldUserState), is(false));
 
         // both states have array defined; not different
-        final PackageUserState testUserState03 = new PackageUserState();
-        testUserState03.enabledComponents = new ArraySet<>();
+        final PackageUserStateInternalImpl testUserState03 = new PackageUserStateInternalImpl();
+        testUserState03.setEnabledComponents(new ArraySet<>());
         assertThat(testUserState03.equals(oldUserState), is(true));
         // fewer elements in old user state; different
-        testUserState03.enabledComponents.add("com.android.unit_test01");
-        testUserState03.enabledComponents.add("com.android.unit_test02");
-        testUserState03.enabledComponents.add("com.android.unit_test03");
-        oldUserState.enabledComponents.add("com.android.unit_test03");
-        oldUserState.enabledComponents.add("com.android.unit_test02");
+        testUserState03.getEnabledComponentsNoCopy().add("com.android.unit_test01");
+        testUserState03.getEnabledComponentsNoCopy().add("com.android.unit_test02");
+        testUserState03.getEnabledComponentsNoCopy().add("com.android.unit_test03");
+        oldUserState.getEnabledComponentsNoCopy().add("com.android.unit_test03");
+        oldUserState.getEnabledComponentsNoCopy().add("com.android.unit_test02");
         assertThat(testUserState03.equals(oldUserState), is(false));
         // same elements in old user state; not different
-        oldUserState.enabledComponents.add("com.android.unit_test01");
+        oldUserState.getEnabledComponentsNoCopy().add("com.android.unit_test01");
         assertThat(testUserState03.equals(oldUserState), is(true));
         // more elements in old user state; different
-        oldUserState.enabledComponents.add("com.android.unit_test04");
+        oldUserState.getEnabledComponentsNoCopy().add("com.android.unit_test04");
         assertThat(testUserState03.equals(oldUserState), is(false));
         // different elements in old user state; different
-        testUserState03.enabledComponents.add("com.android.unit_test_04");
+        testUserState03.getEnabledComponentsNoCopy().add("com.android.unit_test_04");
         assertThat(testUserState03.equals(oldUserState), is(false));
     }
 
     private static PackageUserState.SuspendParams createSuspendParams(SuspendDialogInfo dialogInfo,
             PersistableBundle appExtras, PersistableBundle launcherExtras) {
-        PackageUserState.SuspendParams obj = PackageUserState.SuspendParams.getInstanceOrNull(
+        return PackageUserState.SuspendParams.getInstanceOrNull(
                 dialogInfo, appExtras, launcherExtras);
-        return obj;
     }
 
     private static PersistableBundle createPersistableBundle(String lKey, long lValue, String sKey,
@@ -230,29 +229,32 @@ public class PackageUserStateTest {
                 appExtras2, launcherExtras2));
 
 
-        final PackageUserState testUserState1 = new PackageUserState();
-        testUserState1.suspended = true;
-        testUserState1.suspendParams = paramsMap1;
+        final PackageUserStateInternalImpl testUserState1 = new PackageUserStateInternalImpl();
+        testUserState1.setSuspended(true);
+        testUserState1.setSuspendParams(paramsMap1);
 
-        PackageUserState testUserState2 = new PackageUserState(testUserState1);
+        PackageUserStateInternalImpl testUserState2 =
+                new PackageUserStateInternalImpl(testUserState1);
         assertThat(testUserState1.equals(testUserState2), is(true));
-        testUserState2.suspendParams = paramsMap2;
+        testUserState2.setSuspendParams(paramsMap2);
         // Should not be equal since suspendParams maps are different
         assertThat(testUserState1.equals(testUserState2), is(false));
     }
 
     @Test
     public void testPackageUserState06() {
-        final PackageUserState userState1 = new PackageUserState();
-        assertThat(userState1.distractionFlags, is(PackageManager.RESTRICTION_NONE));
-        userState1.distractionFlags = PackageManager.RESTRICTION_HIDE_FROM_SUGGESTIONS;
+        final PackageUserStateInternalImpl userState1 = new PackageUserStateInternalImpl();
+        assertThat(userState1.getDistractionFlags(), is(PackageManager.RESTRICTION_NONE));
+        userState1.setDistractionFlags(PackageManager.RESTRICTION_HIDE_FROM_SUGGESTIONS);
 
-        final PackageUserState copyOfUserState1 = new PackageUserState(userState1);
-        assertThat(userState1.distractionFlags, is(copyOfUserState1.distractionFlags));
+        final PackageUserStateInternalImpl copyOfUserState1 =
+                new PackageUserStateInternalImpl(userState1);
+        assertThat(userState1.getDistractionFlags(), is(copyOfUserState1.getDistractionFlags()));
         assertThat(userState1.equals(copyOfUserState1), is(true));
 
-        final PackageUserState userState2 = new PackageUserState(userState1);
-        userState2.distractionFlags = PackageManager.RESTRICTION_HIDE_NOTIFICATIONS;
+        final PackageUserStateInternalImpl userState2 =
+                new PackageUserStateInternalImpl(userState1);
+        userState2.setDistractionFlags(PackageManager.RESTRICTION_HIDE_NOTIFICATIONS);
         assertThat(userState1.equals(userState2), is(false));
     }
 
@@ -352,7 +354,7 @@ public class PackageUserStateTest {
 
     @Test
     public void testOverlayPaths() {
-        final PackageUserState testState = new PackageUserState();
+        final PackageUserStateInternalImpl testState = new PackageUserStateInternalImpl();
         assertFalse(testState.setOverlayPaths(null));
         assertFalse(testState.setOverlayPaths(new OverlayPaths.Builder().build()));
 
@@ -366,7 +368,7 @@ public class PackageUserStateTest {
     }
     @Test
     public void testSharedLibOverlayPaths() {
-        final PackageUserState testState = new PackageUserState();
+        final PackageUserStateInternalImpl testState = new PackageUserStateInternalImpl();
         final String LIB_ONE = "lib1";
         final String LIB_TW0 = "lib2";
         assertFalse(testState.setSharedLibraryOverlayPaths(LIB_ONE, null));

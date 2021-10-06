@@ -28,7 +28,6 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.dagger.WMSingleton;
-import com.android.wm.shell.FullscreenTaskListener;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.ShellCommandHandlerImpl;
@@ -57,6 +56,8 @@ import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.common.annotations.ShellSplashscreenThread;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.freeform.FreeformTaskListener;
+import com.android.wm.shell.fullscreen.FullscreenTaskListener;
+import com.android.wm.shell.fullscreen.FullscreenUnfoldController;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutoutController;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
@@ -79,6 +80,7 @@ import com.android.wm.shell.tasksurfacehelper.TaskSurfaceHelper;
 import com.android.wm.shell.tasksurfacehelper.TaskSurfaceHelperController;
 import com.android.wm.shell.transition.ShellTransitions;
 import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.unfold.ShellUnfoldProgressProvider;
 
 import java.util.Optional;
 
@@ -218,8 +220,28 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static FullscreenTaskListener provideFullscreenTaskListener(SyncTransactionQueue syncQueue) {
-        return new FullscreenTaskListener(syncQueue);
+    static FullscreenTaskListener provideFullscreenTaskListener(
+            SyncTransactionQueue syncQueue, Optional<FullscreenUnfoldController> controller) {
+        return new FullscreenTaskListener(syncQueue, controller);
+    }
+
+    //
+    // Unfold transition
+    //
+
+    @WMSingleton
+    @Provides
+    static Optional<FullscreenUnfoldController> provideFullscreenUnfoldController(
+            Context context,
+            Optional<ShellUnfoldProgressProvider> progressProvider,
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
+            DisplayInsetsController displayInsetsController,
+            @ShellMainThread ShellExecutor mainExecutor
+    ) {
+        return progressProvider.map(shellUnfoldTransitionProgressProvider ->
+                new FullscreenUnfoldController(context, mainExecutor,
+                        shellUnfoldTransitionProgressProvider, rootTaskDisplayAreaOrganizer,
+                        displayInsetsController));
     }
 
     //
@@ -474,6 +496,7 @@ public abstract class WMShellBaseModule {
             Optional<AppPairsController> appPairsOptional,
             Optional<PipTouchHandler> pipTouchHandlerOptional,
             FullscreenTaskListener fullscreenTaskListener,
+            Optional<FullscreenUnfoldController> appUnfoldTransitionController,
             Optional<Optional<FreeformTaskListener>> freeformTaskListener,
             Transitions transitions,
             StartingWindowController startingWindow,
@@ -489,6 +512,7 @@ public abstract class WMShellBaseModule {
                 appPairsOptional,
                 pipTouchHandlerOptional,
                 fullscreenTaskListener,
+                appUnfoldTransitionController,
                 freeformTaskListener,
                 transitions,
                 startingWindow,

@@ -41,9 +41,9 @@ import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.PackageChangeEvent;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageUserState;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.VersionedPackage;
+import android.content.pm.pkg.PackageUserState;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Process;
@@ -201,8 +201,8 @@ final class DeletePackageHelper {
                 for (int i = 0; i < allUsers.length; i++) {
                     PackageUserState userState = uninstalledPs.readUserState(allUsers[i]);
                     priorUserStates.put(allUsers[i],
-                            new TempUserState(userState.enabled, userState.lastDisableAppCaller,
-                                    userState.installed));
+                            new TempUserState(userState.getEnabledState(),
+                                    userState.getLastDisableAppCaller(), userState.isInstalled()));
                 }
             } else {
                 freezeUser = removeUser;
