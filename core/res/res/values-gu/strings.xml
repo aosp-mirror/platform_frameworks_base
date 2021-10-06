@@ -326,10 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ફોન કૉલ કરો અને મેનેજ કરો"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"બૉડી સેન્સર"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"તમારા મહત્વપૂર્ણ ચિહ્નો વિશે સેન્સર ડેટા ઍક્સેસ કરો"</string>
-    <!-- no translation found for permgrouplab_notifications (5472972361980668884) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_notifications (4608679556801506580) -->
-    <skip />
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"નોટિફિકેશન"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"નોટિફિકેશન બતાવો"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"વિંડો કન્ટેન્ટ પુનઃપ્રાપ્ત કરો"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"તમે જેની સાથે ક્રિયા-પ્રતિક્રિયા કરી રહ્યાં છો તે વિંડોનું કન્ટેન્ટ તપાસો."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"સ્પર્શ કરીને શોધખોળ કરવું ચાલુ કરો"</string>
@@ -553,10 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"એપ્લિકેશનને કીલૉક અને કોઈપણ સંકળાયેલ પાસવર્ડ સુરક્ષા અક્ષમ કરવાની મંજૂરી આપે છે. ઉદાહરણ તરીકે, ઇનકમિંગ ફોન કૉલ પ્રાપ્ત કરતી વખતે ફોન, કીલૉકને અક્ષમ કરે છે, પછી કૉલ સમાપ્ત થઈ જવા પર કીલૉક ફરીથી સક્ષમ કરે છે."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"સ્ક્રીન લૉકની જટિલતા જાણવા માટે વિનંતી કરો"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"ઍપને સ્ક્રીન લૉકની જટિલતાનું લેવલ (ઊંચું, મધ્યમ, નીચું અથવા કોઈ નહીં) જાણવાની મંજૂરી આપે છે, જે સ્ક્રીન લૉકના પ્રકાર અને લંબાઈની સંભવિત શ્રેણી સૂચવે છે. ઍપ વપરાશકર્તાઓને સ્ક્રીન લૉકને ચોક્કસ લેવલ સુધી અપડેટ કરવાનું સૂચન પણ કરી શકે છે, પરંતુ વપરાશકર્તાઓ મુક્ત રીતે અવગણીને નૅવિગેટ કરી શકે છે. નોંધી લો કે સ્ક્રીન લૉકનો plaintextમાં સંગ્રહ કરવામાં આવતો નથી, તેથી ઍપને ચોક્કસ પાસવર્ડની જાણ હોતી નથી."</string>
-    <!-- no translation found for permlab_postNotification (4875401198597803658) -->
-    <skip />
-    <!-- no translation found for permdesc_postNotification (5974977162462877075) -->
-    <skip />
+    <string name="permlab_postNotification" msgid="4875401198597803658">"નોટિફિકેશન બતાવો"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"ઍપને નોટિફિકેશન બતાવવાની મંજૂરી આપે છે"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"બાયોમેટ્રિક હાર્ડવેરનો ઉપયોગ કરો"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"ઍપને પ્રમાણીકરણ માટે બાયોમેટ્રિક હાર્ડવેરનો ઉપયોગ કરવાની મંજૂરી આપે છે"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"ફિંગરપ્રિન્ટ હાર્ડવેરને મેનેજ કરો"</string>
