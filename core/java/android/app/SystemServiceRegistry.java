@@ -26,6 +26,8 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.appsearch.AppSearchManagerFrameworkInitializer;
 import android.app.blob.BlobStoreManagerFrameworkInitializer;
+import android.app.communal.CommunalManager;
+import android.app.communal.ICommunalManager;
 import android.app.contentsuggestions.ContentSuggestionsManager;
 import android.app.contentsuggestions.IContentSuggestionsManager;
 import android.app.job.JobSchedulerFrameworkInitializer;
@@ -1460,7 +1462,23 @@ public final class SystemServiceRegistry {
                     @Override
                     public DisplayHashManager createService(ContextImpl ctx) {
                         return new DisplayHashManager();
-                    }});
+                    }
+                });
+
+        registerService(Context.COMMUNAL_MANAGER_SERVICE, CommunalManager.class,
+                new CachedServiceFetcher<CommunalManager>() {
+                    @Override
+                    public CommunalManager createService(ContextImpl ctx) {
+                        if (!ctx.getPackageManager().hasSystemFeature(
+                                PackageManager.FEATURE_COMMUNAL_MODE)) {
+                            return null;
+                        }
+                        IBinder iBinder =
+                                ServiceManager.getService(Context.COMMUNAL_MANAGER_SERVICE);
+                        return iBinder != null ? new CommunalManager(
+                                ICommunalManager.Stub.asInterface(iBinder)) : null;
+                    }
+                });
 
         sInitializing = true;
         try {
