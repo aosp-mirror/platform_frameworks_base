@@ -286,7 +286,7 @@
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Réduit la décharge de la batterie et améliore les performances du réseau"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Quand ce mode est activé, l\'adresse MAC de cet appareil peut changer chaque fois qu\'il se connecte à un réseau Wi-Fi où le changement aléatoire d\'adresse MAC est activé"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Facturé à l\'usage"</string>
-    <string name="wifi_unmetered_label" msgid="6174142840934095093">"Non facturé à l\'usage"</string>
+    <string name="wifi_unmetered_label" msgid="6174142840934095093">"Sans compteur"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Tailles des tampons de l\'enregistreur"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Tailles enreg. par tampon journal"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Effacer l\'espace de stockage persistant de l\'enregistreur ?"</string>

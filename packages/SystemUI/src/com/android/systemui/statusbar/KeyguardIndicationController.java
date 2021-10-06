@@ -811,13 +811,8 @@ public class KeyguardIndicationController {
                 mStatusBarKeyguardViewManager.showBouncerMessage(message, mInitialTextColorState);
             }
         } else if (mKeyguardUpdateMonitor.isScreenOn()) {
-            if (mKeyguardUpdateMonitor.isUdfpsAvailable()) {
-                showTransientIndication(mContext.getString(R.string.keyguard_unlock_press),
-                        false /* isError */, true /* hideOnScreenOff */);
-            } else {
-                showTransientIndication(mContext.getString(R.string.keyguard_unlock),
-                        false /* isError */, true /* hideOnScreenOff */);
-            }
+            showTransientIndication(mContext.getString(R.string.keyguard_unlock),
+                    false /* isError */, true /* hideOnScreenOff */);
         }
     }
 
