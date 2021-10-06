@@ -3887,7 +3887,6 @@ public final class ActivityThread extends ClientTransactionHandler
                         Intent intent = new Intent(activityIntent);
                         intent.setFlags(intent.getFlags() & ~(Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                                 | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION));
-                        intent.removeUnsafeExtras();
                         content.setDefaultIntent(intent);
                     }
                 } else {

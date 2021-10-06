@@ -3573,14 +3573,17 @@ public final class Parcel {
             Parcel source = mSource;
             if (source != null) {
                 synchronized (source) {
-                    int restore = source.dataPosition();
-                    try {
-                        source.setDataPosition(mPosition);
-                        mObject = source.readValue(mLoader);
-                    } finally {
-                        source.setDataPosition(restore);
+                    // Check mSource != null guarantees callers won't ever see different objects.
+                    if (mSource != null) {
+                        int restore = source.dataPosition();
+                        try {
+                            source.setDataPosition(mPosition);
+                            mObject = source.readValue(mLoader);
+                        } finally {
+                            source.setDataPosition(restore);
+                        }
+                        mSource = null;
                     }
-                    mSource = null;
                 }
             }
             return mObject;
