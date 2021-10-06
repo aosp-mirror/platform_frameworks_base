@@ -16,7 +16,7 @@
 
 package android.service.notification;
 
-import static android.app.NotificationChannel.PLACEHOLDER_CONVERSATION_ID;
+import static android.text.TextUtils.formatSimple;
 
 import android.annotation.NonNull;
 import android.app.Notification;
@@ -31,8 +31,6 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
-import android.provider.Settings;
-import android.text.TextUtils;
 
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.nano.MetricsProto;
@@ -258,7 +256,7 @@ public class StatusBarNotification implements Parcelable {
 
     @Override
     public String toString() {
-        return String.format(
+        return formatSimple(
                 "StatusBarNotification(pkg=%s user=%s id=%d tag=%s key=%s: %s)",
                 this.pkg, this.user, this.id, this.tag,
                 this.key, this.notification);

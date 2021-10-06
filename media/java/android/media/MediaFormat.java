@@ -24,6 +24,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.AbstractSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -225,6 +226,15 @@ public final class MediaFormat {
 
     @UnsupportedAppUsage
     private Map<String, Object> mMap;
+
+    /**
+     * A key describing the log session ID for MediaCodec. The log session ID is a random 32-byte
+     * hexadecimal string that is used to associate metrics from multiple media codec instances
+     * to the same playback or recording session.
+     * The associated value is a string.
+     * @hide
+     */
+    public static final String LOG_SESSION_ID = "log-session-id";
 
     /**
      * A key describing the mime type of the MediaFormat.
@@ -447,6 +457,52 @@ public final class MediaFormat {
      * </p>
      */
     public static final String KEY_CAPTURE_RATE = "capture-rate";
+
+    /**
+     * A key for retrieving the slow-motion marker information associated with a video track.
+     * <p>
+     * The associated value is a ByteBuffer in {@link ByteOrder#BIG_ENDIAN}
+     * (networking order) of the following format:
+     * </p>
+     * <pre class="prettyprint">
+     *     float(32) playbackRate;
+     *     unsigned int(32) numMarkers;
+     *     for (i = 0;i < numMarkers; i++) {
+     *         int(64) timestampUs;
+     *         float(32) speedRatio;
+     *     }</pre>
+     * The meaning of each field is as follows:
+     * <table border="1" width="90%" align="center" cellpadding="5">
+     *     <tbody>
+     *     <tr>
+     *         <td>playbackRate</td>
+     *         <td>The frame rate at which the playback should happen (or the flattened
+     *             clip should be).</td>
+     *     </tr>
+     *     <tr>
+     *         <td>numMarkers</td>
+     *         <td>The number of slow-motion markers that follows.</td>
+     *     </tr>
+     *     <tr>
+     *         <td>timestampUs</td>
+     *         <td>The starting point of a new segment.</td>
+     *     </tr>
+     *     <tr>
+     *         <td>speedRatio</td>
+     *         <td>The playback speed for that segment. The playback speed is a floating
+     *             point number, indicating how fast the time progresses relative to that
+     *             written in the container. (Eg. 4.0 means time goes 4x as fast, which
+     *             makes 30fps become 120fps.)</td>
+     *     </tr>
+     * </table>
+     * <p>
+     * The following constraints apply to the timestampUs of the markers:
+     * </p>
+     * <li>The timestampUs shall be monotonically increasing.</li>
+     * <li>The timestampUs shall fall within the time span of the video track.</li>
+     * <li>The first timestampUs should match that of the first video sample.</li>
+     */
+    public static final String KEY_SLOW_MOTION_MARKERS = "slow-motion-markers";
 
     /**
      * A key describing the frequency of key frames expressed in seconds between key frames.
@@ -970,6 +1026,82 @@ public final class MediaFormat {
     public static final String KEY_BITRATE_MODE = "bitrate-mode";
 
     /**
+     * A key describing the maximum Quantization Parameter allowed for encoding video.
+     * This key applies to all three video picture types (I, P, and B).
+     * The value is used directly for picture type I; a per-mime formula is used
+     * to calculate the value for the remaining picture types.
+     *
+     * This calculation can be avoided by directly specifying values for each picture type
+     * using the type-specific keys {@link #KEY_VIDEO_QP_I_MAX}, {@link #KEY_VIDEO_QP_P_MAX},
+     * and {@link #KEY_VIDEO_QP_B_MAX}.
+     *
+     * The associated value is an integer.
+     */
+    public static final String KEY_VIDEO_QP_MAX = "video-qp-max";
+
+    /**
+     * A key describing the minimum Quantization Parameter allowed for encoding video.
+     * This key applies to all three video frame types (I, P, and B).
+     * The value is used directly for picture type I; a per-mime formula is used
+     * to calculate the value for the remaining picture types.
+     *
+     * This calculation can be avoided by directly specifying values for each picture type
+     * using the type-specific keys {@link #KEY_VIDEO_QP_I_MIN}, {@link #KEY_VIDEO_QP_P_MIN},
+     * and {@link #KEY_VIDEO_QP_B_MIN}.
+     *
+     * The associated value is an integer.
+     */
+    public static final String KEY_VIDEO_QP_MIN = "video-qp-min";
+
+    /**
+     * A key describing the maximum Quantization Parameter allowed for encoding video.
+     * This value applies to video I-frames.
+     *
+     * The associated value is an integer.
+     */
+    public static final String KEY_VIDEO_QP_I_MAX = "video-qp-i-max";
+
+    /**
+     * A key describing the minimum Quantization Parameter allowed for encoding video.
+     * This value applies to video I-frames.
+     *
+     * The associated value is an integer.
+     */
+    public static final String KEY_VIDEO_QP_I_MIN = "video-qp-i-min";
+
+    /**
+     * A key describing the maximum Quantization Parameter allowed for encoding video.
+     * This value applies to video P-frames.
+     *
+     * The associated value is an integer.
+     */
+    public static final String KEY_VIDEO_QP_P_MAX = "video-qp-p-max";
+
+    /**
+     * A key describing the minimum Quantization Parameter allowed for encoding video.
+     * This value applies to video P-frames.
+     *
+     * The associated value is an integer.
+     */
+    public static final String KEY_VIDEO_QP_P_MIN = "video-qp-p-min";
+
+    /**
+     * A key describing the maximum Quantization Parameter allowed for encoding video.
+     * This value applies to video B-frames.
+     *
+     * The associated value is an integer.
+     */
+    public static final String KEY_VIDEO_QP_B_MAX = "video-qp-b-max";
+
+    /**
+     * A key describing the minimum Quantization Parameter allowed for encoding video.
+     * This value applies to video B-frames.
+     *
+     * The associated value is an integer.
+     */
+    public static final String KEY_VIDEO_QP_B_MIN = "video-qp-b-min";
+
+    /**
      * A key describing the audio session ID of the AudioTrack associated
      * to a tunneled video codec.
      * The associated value is an integer.
@@ -977,6 +1109,17 @@ public final class MediaFormat {
      * @see MediaCodecInfo.CodecCapabilities#FEATURE_TunneledPlayback
      */
     public static final String KEY_AUDIO_SESSION_ID = "audio-session-id";
+
+    /**
+     * A key describing the audio hardware sync ID of the AudioTrack associated
+     * to a tunneled video codec. The associated value is an integer.
+     *
+     * @hide
+     *
+     * @see MediaCodecInfo.CodecCapabilities#FEATURE_TunneledPlayback
+     * @see AudioManager#getAudioHwSyncForSession
+     */
+    public static final String KEY_AUDIO_HW_SYNC = "audio-hw-sync";
 
     /**
      * A key for boolean AUTOSELECT behavior for the track. Tracks with AUTOSELECT=true
@@ -1143,6 +1286,22 @@ public final class MediaFormat {
     public static final String KEY_HDR10_PLUS_INFO = "hdr10-plus-info";
 
     /**
+     * An optional key describing the opto-electronic transfer function
+     * requested for the output video content.
+     *
+     * The associated value is an integer: 0 if unspecified, or one of the
+     * COLOR_TRANSFER_ values. When unspecified the component will not touch the
+     * video content; otherwise the component will tone-map the raw video frame
+     * to match the requested transfer function.
+     *
+     * After configure, component's input format will contain this key to note
+     * whether the request is supported or not. If the value in the input format
+     * is the same as the requested value, the request is supported. The value
+     * is set to 0 if unsupported.
+     */
+    public static final String KEY_COLOR_TRANSFER_REQUEST = "color-transfer-request";
+
+    /**
      * A key describing a unique ID for the content of a media track.
      *
      * <p>This key is used by {@link MediaExtractor}. Some extractors provide multiple encodings
@@ -1199,6 +1358,18 @@ public final class MediaFormat {
      * B frames; it's up to the encoder to decide.
      */
     public static final String KEY_MAX_B_FRAMES = "max-bframes";
+
+    /**
+     * A key for applications to opt out of allowing
+     * a Surface to discard undisplayed/unconsumed frames
+     * as means to catch up after falling behind.
+     * This value is an integer.
+     * The value 0 indicates the surface is not allowed to drop frames.
+     * The value 1 indicates the surface is allowed to drop frames.
+     *
+     * {@link MediaCodec} describes the semantics.
+     */
+    public static final String KEY_ALLOW_FRAME_DROP = "allow-frame-drop";
 
     /* package private */ MediaFormat(@NonNull Map<String, Object> map) {
         mMap = map;

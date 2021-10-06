@@ -16,18 +16,35 @@
 
 package com.android.server.apphibernation;
 
+import android.annotation.CurrentTimeMillisLong;
+
+import java.text.SimpleDateFormat;
+
 /**
  * Data class that contains hibernation state info of a package for a user.
  */
 final class UserLevelState {
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     public String packageName;
     public boolean hibernated;
+    @CurrentTimeMillisLong
+    public long lastUnhibernatedMs;
+
+    UserLevelState() {}
+
+    UserLevelState(UserLevelState state) {
+        packageName = state.packageName;
+        hibernated = state.hibernated;
+        lastUnhibernatedMs = state.lastUnhibernatedMs;
+    }
 
     @Override
     public String toString() {
         return "UserLevelState{"
                 + "packageName='" + packageName + '\''
-                + ", hibernated=" + hibernated
+                + ", hibernated=" + hibernated + '\''
+                + ", lastUnhibernated=" + DATE_FORMAT.format(lastUnhibernatedMs)
                 + '}';
     }
 }

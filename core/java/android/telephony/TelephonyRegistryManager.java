@@ -300,13 +300,13 @@ public class TelephonyRegistryManager {
     /**
      * Notify call state changed on certain subscription.
      *
-     * @param subId for which call state changed.
      * @param slotIndex for which call state changed. Can be derived from subId except when subId is
      * invalid.
+     * @param subId for which call state changed.
      * @param state latest call state. e.g, offhook, ringing
      * @param incomingNumber incoming phone number.
      */
-    public void notifyCallStateChanged(int subId, int slotIndex, @CallState int state,
+    public void notifyCallStateChanged(int slotIndex, int subId, @CallState int state,
             @Nullable String incomingNumber) {
         try {
             sRegistry.notifyCallState(slotIndex, subId, state, incomingNumber);
@@ -883,6 +883,7 @@ public class TelephonyRegistryManager {
             eventList.add(TelephonyCallback.EVENT_CELL_LOCATION_CHANGED);
         }
 
+        // Note: Legacy PhoneStateListeners use EVENT_LEGACY_CALL_STATE_CHANGED
         if (telephonyCallback instanceof TelephonyCallback.CallStateListener) {
             eventList.add(TelephonyCallback.EVENT_CALL_STATE_CHANGED);
         }
@@ -897,10 +898,6 @@ public class TelephonyRegistryManager {
 
         if (telephonyCallback instanceof TelephonyCallback.SignalStrengthsListener) {
             eventList.add(TelephonyCallback.EVENT_SIGNAL_STRENGTHS_CHANGED);
-        }
-
-        if (telephonyCallback instanceof TelephonyCallback.AlwaysReportedSignalStrengthListener) {
-            eventList.add(TelephonyCallback.EVENT_ALWAYS_REPORTED_SIGNAL_STRENGTH_CHANGED);
         }
 
         if (telephonyCallback instanceof TelephonyCallback.CellInfoListener) {
@@ -1026,8 +1023,10 @@ public class TelephonyRegistryManager {
             eventList.add(TelephonyCallback.EVENT_CELL_LOCATION_CHANGED);
         }
 
+        // Note: Legacy call state listeners can get the phone number which is not provided in the
+        // new version in TelephonyCallback.
         if ((eventMask & PhoneStateListener.LISTEN_CALL_STATE) != 0) {
-            eventList.add(TelephonyCallback.EVENT_CALL_STATE_CHANGED);
+            eventList.add(TelephonyCallback.EVENT_LEGACY_CALL_STATE_CHANGED);
         }
 
         if ((eventMask & PhoneStateListener.LISTEN_DATA_CONNECTION_STATE) != 0) {

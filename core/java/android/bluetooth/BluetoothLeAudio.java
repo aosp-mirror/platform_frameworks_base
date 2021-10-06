@@ -23,6 +23,11 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SuppressLint;
+import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
+import android.bluetooth.annotations.RequiresLegacyBluetoothPermission;
+import android.content.Attributable;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
@@ -66,6 +71,9 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      * {@link #STATE_DISCONNECTED}, {@link #STATE_CONNECTING},
      * {@link #STATE_CONNECTED}, {@link #STATE_DISCONNECTING}.
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_LE_AUDIO_CONNECTION_STATE_CHANGED =
             "android.bluetooth.action.LE_AUDIO_CONNECTION_STATE_CHANGED";
@@ -81,6 +89,9 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      *
      * @hide
      */
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_LE_AUDIO_ACTIVE_DEVICE_CHANGED =
             "android.bluetooth.action.LE_AUDIO_ACTIVE_DEVICE_CHANGED";
@@ -228,7 +239,8 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
     public static final String EXTRA_LE_AUDIO_AVAILABLE_CONTEXTS =
             "android.bluetooth.extra.LE_AUDIO_AVAILABLE_CONTEXTS";
 
-    private BluetoothAdapter mAdapter;
+    private final BluetoothAdapter mAdapter;
+    private final AttributionSource mAttributionSource;
     private final BluetoothProfileConnector<IBluetoothLeAudio> mProfileConnector =
             new BluetoothProfileConnector(this, BluetoothProfile.LE_AUDIO, "BluetoothLeAudio",
                     IBluetoothLeAudio.class.getName()) {
@@ -242,8 +254,10 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      * Create a BluetoothLeAudio proxy object for interacting with the local
      * Bluetooth LeAudio service.
      */
-    /*package*/ BluetoothLeAudio(Context context, ServiceListener listener) {
-        mAdapter = BluetoothAdapter.getDefaultAdapter();
+    /* package */ BluetoothLeAudio(Context context, ServiceListener listener,
+            BluetoothAdapter adapter) {
+        mAdapter = adapter;
+        mAttributionSource = adapter.getAttributionSource();
         mProfileConnector.connect(context, listener);
         mCloseGuard = new CloseGuard();
         mCloseGuard.open("close");
@@ -252,7 +266,6 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
     /**
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public void close() {
         mProfileConnector.disconnect();
     }
@@ -261,7 +274,6 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
         return mProfileConnector.getService();
     }
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     protected void finalize() {
         if (mCloseGuard != null) {
             mCloseGuard.warnIfOpen();
@@ -284,13 +296,14 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      * @return false on immediate error, true otherwise
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean connect(@Nullable BluetoothDevice device) {
         if (DBG) log("connect(" + device + ")");
         try {
             final IBluetoothLeAudio service = getService();
             if (service != null && mAdapter.isEnabled() && isValidDevice(device)) {
-                return service.connect(device);
+                return service.connect(device, mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return false;
@@ -323,13 +336,14 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      * @return false on immediate error, true otherwise
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean disconnect(@Nullable BluetoothDevice device) {
         if (DBG) log("disconnect(" + device + ")");
         try {
             final IBluetoothLeAudio service = getService();
             if (service != null && mAdapter.isEnabled() && isValidDevice(device)) {
-                return service.disconnect(device);
+                return service.disconnect(device, mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return false;
@@ -343,12 +357,15 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      * {@inheritDoc}
      */
     @Override
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public @NonNull List<BluetoothDevice> getConnectedDevices() {
         if (VDBG) log("getConnectedDevices()");
         try {
             final IBluetoothLeAudio service = getService();
             if (service != null && mAdapter.isEnabled()) {
-                return service.getConnectedDevices();
+                return Attributable.setAttributionSource(
+                        service.getConnectedDevices(mAttributionSource), mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return new ArrayList<BluetoothDevice>();
@@ -362,13 +379,17 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      * {@inheritDoc}
      */
     @Override
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public @NonNull List<BluetoothDevice> getDevicesMatchingConnectionStates(
             @NonNull int[] states) {
         if (VDBG) log("getDevicesMatchingStates()");
         try {
             final IBluetoothLeAudio service = getService();
             if (service != null && mAdapter.isEnabled()) {
-                return service.getDevicesMatchingConnectionStates(states);
+                return Attributable.setAttributionSource(
+                        service.getDevicesMatchingConnectionStates(states, mAttributionSource),
+                        mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return new ArrayList<BluetoothDevice>();
@@ -382,14 +403,16 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      * {@inheritDoc}
      */
     @Override
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public @BtProfileState int getConnectionState(@NonNull BluetoothDevice device) {
         if (VDBG) log("getState(" + device + ")");
         try {
             final IBluetoothLeAudio service = getService();
             if (service != null && mAdapter.isEnabled()
                     && isValidDevice(device)) {
-                return service.getConnectionState(device);
+                return service.getConnectionState(device, mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return BluetoothProfile.STATE_DISCONNECTED;
@@ -419,14 +442,15 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      * @return false on immediate error, true otherwise
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public boolean setActiveDevice(@Nullable BluetoothDevice device) {
         if (DBG) log("setActiveDevice(" + device + ")");
         try {
             final IBluetoothLeAudio service = getService();
             if (service != null && mAdapter.isEnabled()
                     && ((device == null) || isValidDevice(device))) {
-                service.setActiveDevice(device);
+                service.setActiveDevice(device, mAttributionSource);
                 return true;
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
@@ -444,13 +468,16 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      * @hide
      */
     @NonNull
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public List<BluetoothDevice> getActiveDevices() {
         if (VDBG) log("getActiveDevices()");
         try {
             final IBluetoothLeAudio service = getService();
             if (service != null && mAdapter.isEnabled()) {
-                return service.getActiveDevices();
+                return Attributable.setAttributionSource(
+                        service.getActiveDevices(mAttributionSource), mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return new ArrayList<>();
@@ -466,13 +493,15 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      * @param device LE Audio capable device
      * @return group id that this device currently belongs to
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresLegacyBluetoothPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public int getGroupId(@NonNull BluetoothDevice device) {
         if (VDBG) log("getGroupId()");
         try {
             final IBluetoothLeAudio service = getService();
             if (service != null && mAdapter.isEnabled()) {
-                return service.getGroupId(device);
+                return service.getGroupId(device, mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return GROUP_ID_INVALID;
@@ -494,7 +523,11 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      * @return true if connectionPolicy is set, false on error
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED,
+    })
     public boolean setConnectionPolicy(@NonNull BluetoothDevice device,
             @ConnectionPolicy int connectionPolicy) {
         if (DBG) log("setConnectionPolicy(" + device + ", " + connectionPolicy + ")");
@@ -506,7 +539,7 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
                         && connectionPolicy != BluetoothProfile.CONNECTION_POLICY_ALLOWED) {
                     return false;
                 }
-                return service.setConnectionPolicy(device, connectionPolicy);
+                return service.setConnectionPolicy(device, connectionPolicy, mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return false;
@@ -527,14 +560,15 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      * @return connection policy of the device
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public @ConnectionPolicy int getConnectionPolicy(@Nullable BluetoothDevice device) {
         if (VDBG) log("getConnectionPolicy(" + device + ")");
         try {
             final IBluetoothLeAudio service = getService();
             if (service != null && mAdapter.isEnabled()
                     && isValidDevice(device)) {
-                return service.getConnectionPolicy(device);
+                return service.getConnectionPolicy(device, mAttributionSource);
             }
             if (service == null) Log.w(TAG, "Proxy not attached to service");
             return BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;

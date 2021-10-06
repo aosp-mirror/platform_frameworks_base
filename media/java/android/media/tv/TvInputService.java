@@ -153,7 +153,7 @@ public abstract class TvInputService extends Service {
 
     @Override
     public final IBinder onBind(Intent intent) {
-        return new ITvInputService.Stub() {
+        ITvInputService.Stub tvInputServiceBinder = new ITvInputService.Stub() {
             @Override
             public void registerCallback(ITvInputServiceCallback cb) {
                 if (cb != null) {
@@ -182,7 +182,8 @@ public abstract class TvInputService extends Service {
                 args.arg2 = cb;
                 args.arg3 = inputId;
                 args.arg4 = sessionId;
-                mServiceHandler.obtainMessage(ServiceHandler.DO_CREATE_SESSION, args).sendToTarget();
+                mServiceHandler.obtainMessage(ServiceHandler.DO_CREATE_SESSION,
+                        args).sendToTarget();
             }
 
             @Override
@@ -229,6 +230,26 @@ public abstract class TvInputService extends Service {
                         deviceInfo).sendToTarget();
             }
         };
+        IBinder ext = createExtension();
+        if (ext != null) {
+            tvInputServiceBinder.setExtension(ext);
+        }
+        return tvInputServiceBinder;
+    }
+
+    /**
+     * Returns a new {@link android.os.Binder}
+     *
+     * <p> if an extension is provided on top of existing {@link TvInputService}; otherwise,
+     * return {@code null}. Override to provide extended interface.
+     *
+     * @see android.os.Binder#setExtension(IBinder)
+     * @hide
+     */
+    @Nullable
+    @SystemApi
+    public IBinder createExtension() {
+        return null;
     }
 
     /**

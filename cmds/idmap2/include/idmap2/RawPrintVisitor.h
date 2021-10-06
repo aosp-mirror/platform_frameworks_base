@@ -44,13 +44,14 @@ class RawPrintVisitor : public Visitor {
   void print(uint8_t value, const char* fmt, ...);
   void print(uint16_t value, const char* fmt, ...);
   void print(uint32_t value, const char* fmt, ...);
-  void print(const std::string& value, size_t encoded_size, const char* fmt, ...);
+  void print(const std::string& value, bool print_value, const char* fmt, ...);
+  void align();
+  void pad(size_t padding);
 
   std::ostream& stream_;
-  std::vector<std::unique_ptr<const ApkAssets>> apk_assets_;
-  AssetManager2 target_am_;
-  AssetManager2 overlay_am_;
   size_t offset_;
+  std::unique_ptr<TargetResourceContainer> target_;
+  std::unique_ptr<OverlayResourceContainer> overlay_;
 };
 
 }  // namespace idmap2

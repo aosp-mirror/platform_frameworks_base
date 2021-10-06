@@ -16,6 +16,8 @@
 
 package android.telephony;
 
+import static android.text.TextUtils.formatSimple;
+
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -310,8 +312,8 @@ public class SubscriptionInfo implements Parcelable {
     /**
      * Returns the ICC ID.
      *
-     * Starting with API level 30, returns the ICC ID if the calling app has been granted the
-     * READ_PRIVILEGED_PHONE_STATE permission, has carrier privileges (see
+     * Starting with API level 29 Security Patch 2021-04-05, returns the ICC ID if the calling app
+     * has been granted the READ_PRIVILEGED_PHONE_STATE permission, has carrier privileges (see
      * {@link TelephonyManager#hasCarrierPrivileges}), or is a device owner or profile owner that
      * has been granted the READ_PHONE_STATE permission. The profile owner is an app that owns a
      * managed profile on the device; for more details see <a
@@ -430,7 +432,7 @@ public class SubscriptionInfo implements Parcelable {
         // Set text size scaled by density
         paint.setTextSize(TEXT_SIZE * metrics.density);
         // Convert sim slot index to localized string
-        final String index = String.format("%d", mSimSlotIndex + 1);
+        final String index = formatSimple("%d", mSimSlotIndex + 1);
         final Rect textBound = new Rect();
         paint.getTextBounds(index, 0, 1, textBound);
         final float xOffset = (width / 2.f) - textBound.centerX();
@@ -702,8 +704,8 @@ public class SubscriptionInfo implements Parcelable {
     /**
      * Returns the card string of the SIM card which contains the subscription.
      *
-     * Starting with API level 30, returns the card string if the calling app has been granted the
-     * READ_PRIVILEGED_PHONE_STATE permission, has carrier privileges (see
+     * Starting with API level 29 Security Patch 2021-04-05, returns the card string if the calling
+     * app has been granted the READ_PRIVILEGED_PHONE_STATE permission, has carrier privileges (see
      * {@link TelephonyManager#hasCarrierPrivileges}), or is a device owner or profile owner that
      * has been granted the READ_PHONE_STATE permission. The profile owner is an app that owns a
      * managed profile on the device; for more details see <a

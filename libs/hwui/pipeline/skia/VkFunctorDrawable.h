@@ -19,7 +19,6 @@
 #include "FunctorDrawable.h"
 
 #include <SkImageInfo.h>
-#include <ui/GraphicBuffer.h>
 #include <utils/RefBase.h>
 
 namespace android {

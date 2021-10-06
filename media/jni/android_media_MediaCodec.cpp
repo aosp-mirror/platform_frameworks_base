@@ -62,6 +62,7 @@
 #include <media/stagefright/foundation/AString.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/PersistentSurface.h>
+#include <mediadrm/DrmUtils.h>
 #include <mediadrm/ICrypto.h>
 
 #include <private/android/AHardwareBufferHelpers.h>
@@ -81,6 +82,7 @@ enum {
     EVENT_CALLBACK = 1,
     EVENT_SET_CALLBACK = 2,
     EVENT_FRAME_RENDERED = 3,
+    EVENT_FIRST_TUNNEL_FRAME_READY = 4,
 };
 
 // From MediaFormat.java
@@ -288,6 +290,18 @@ JMediaCodec::~JMediaCodec() {
     mClass = NULL;
 }
 
+status_t JMediaCodec::enableOnFirstTunnelFrameReadyListener(jboolean enable) {
+    if (enable) {
+        if (mOnFirstTunnelFrameReadyNotification == NULL) {
+            mOnFirstTunnelFrameReadyNotification = new AMessage(kWhatFirstTunnelFrameReady, this);
+        }
+    } else {
+        mOnFirstTunnelFrameReadyNotification.clear();
+    }
+
+    return mCodec->setOnFirstTunnelFrameReadyNotification(mOnFirstTunnelFrameReadyNotification);
+}
+
 status_t JMediaCodec::enableOnFrameRenderedListener(jboolean enable) {
     if (enable) {
         if (mOnFrameRenderedNotification == NULL) {
@@ -332,6 +346,7 @@ status_t JMediaCodec::configure(
     mGraphicOutput = (mime.startsWithIgnoreCase("video/") || mime.startsWithIgnoreCase("image/"))
             && !(flags & CONFIGURE_FLAG_ENCODE);
     mHasCryptoOrDescrambler = (crypto != nullptr) || (descrambler != nullptr);
+    mCrypto = crypto;
 
     return mCodec->configure(
             format, mSurfaceTextureClient, crypto, descrambler, flags);
@@ -1144,6 +1159,27 @@ void JMediaCodec::handleCallback(const sp<AMessage> &msg) {
     env->DeleteLocalRef(obj);
 }
 
+void JMediaCodec::handleFirstTunnelFrameReadyNotification(const sp<AMessage> &msg) {
+    int32_t arg1 = 0, arg2 = 0;
+    jobject obj = NULL;
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+
+    sp<AMessage> data;
+    CHECK(msg->findMessage("data", &data));
+
+    status_t err = ConvertMessageToMap(env, data, &obj);
+    if (err != OK) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+
+    env->CallVoidMethod(
+            mObject, gFields.postEventFromNativeID,
+            EVENT_FIRST_TUNNEL_FRAME_READY, arg1, arg2, obj);
+
+    env->DeleteLocalRef(obj);
+}
+
 void JMediaCodec::handleFrameRenderedNotification(const sp<AMessage> &msg) {
     int32_t arg1 = 0, arg2 = 0;
     jobject obj = NULL;
@@ -1186,10 +1222,17 @@ void JMediaCodec::onMessageReceived(const sp<AMessage> &msg) {
             }
             break;
         }
+        case kWhatFirstTunnelFrameReady:
+        {
+            handleFirstTunnelFrameReadyNotification(msg);
+            break;
+        }
         default:
             TRESPASS();
     }
 }
+
+jint MediaErrorToJavaError(status_t err);
 
 }  // namespace android
 
@@ -1238,7 +1281,8 @@ static void throwCodecException(JNIEnv *env, status_t err, int32_t actionCode, c
     env->Throw(exception);
 }
 
-static void throwCryptoException(JNIEnv *env, status_t err, const char *msg) {
+static void throwCryptoException(JNIEnv *env, status_t err, const char *msg,
+        const sp<ICrypto> &crypto) {
     ScopedLocalRef<jclass> clazz(
             env, env->FindClass("android/media/MediaCodec$CryptoException"));
     CHECK(clazz.get() != NULL);
@@ -1247,7 +1291,7 @@ static void throwCryptoException(JNIEnv *env, status_t err, const char *msg) {
         env->GetMethodID(clazz.get(), "<init>", "(ILjava/lang/String;)V");
     CHECK(constructID != NULL);
 
-    const char *defaultMsg = "Unknown Error";
+    std::string defaultMsg = "Unknown Error";
 
     /* translate OS errors to Java API CryptoException errorCodes (which are positive) */
     switch (err) {
@@ -1287,11 +1331,17 @@ static void throwCryptoException(JNIEnv *env, status_t err, const char *msg) {
             err = gCryptoErrorCodes.cryptoErrorLostState;
             defaultMsg = "Session state was lost, open a new session and retry";
             break;
-        default:  /* Other negative DRM error codes go out as is. */
+        default:  /* Other negative DRM error codes go out best-effort. */
+            err = MediaErrorToJavaError(err);
+            defaultMsg = StrCryptoError(err);
             break;
     }
 
-    jstring msgObj = env->NewStringUTF(msg != NULL ? msg : defaultMsg);
+    std::string msgStr(msg != NULL ? msg : defaultMsg.c_str());
+    if (crypto != NULL) {
+        msgStr = DrmUtils::GetExceptionMessage(err, msgStr.c_str(), crypto);
+    }
+    jstring msgObj = env->NewStringUTF(msgStr.c_str());
 
     jthrowable exception =
         (jthrowable)env->NewObject(clazz.get(), constructID, err, msgObj);
@@ -1301,7 +1351,7 @@ static void throwCryptoException(JNIEnv *env, status_t err, const char *msg) {
 
 static jint throwExceptionAsNecessary(
         JNIEnv *env, status_t err, int32_t actionCode = ACTION_CODE_FATAL,
-        const char *msg = NULL) {
+        const char *msg = NULL, const sp<ICrypto>& crypto = NULL) {
     switch (err) {
         case OK:
             return 0;
@@ -1325,12 +1375,28 @@ static jint throwExceptionAsNecessary(
 
         default:
             if (isCryptoError(err)) {
-                throwCryptoException(env, err, msg);
+                throwCryptoException(env, err, msg, crypto);
                 return 0;
             }
             throwCodecException(env, err, actionCode, msg);
             return 0;
     }
+}
+
+static void android_media_MediaCodec_native_enableOnFirstTunnelFrameReadyListener(
+        JNIEnv *env,
+        jobject thiz,
+        jboolean enabled) {
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+
+    if (codec == NULL || codec->initCheck() != OK) {
+        throwExceptionAsNecessary(env, INVALID_OPERATION);
+        return;
+    }
+
+    status_t err = codec->enableOnFirstTunnelFrameReadyListener(enabled);
+
+    throwExceptionAsNecessary(env, err);
 }
 
 static void android_media_MediaCodec_native_enableOnFrameRenderedListener(
@@ -1987,7 +2053,8 @@ static void android_media_MediaCodec_queueSecureInputBuffer(
     subSamples = NULL;
 
     throwExceptionAsNecessary(
-            env, err, ACTION_CODE_FATAL, errorDetailMsg.empty() ? NULL : errorDetailMsg.c_str());
+            env, err, ACTION_CODE_FATAL, errorDetailMsg.empty() ? NULL : errorDetailMsg.c_str(),
+            codec->getCrypto());
 }
 
 static jobject android_media_MediaCodec_mapHardwareBuffer(JNIEnv *env, jclass, jobject bufferObj) {
@@ -2336,6 +2403,8 @@ static void android_media_MediaCodec_native_queueHardwareBuffer(
     c2_status_t c2err = sGrallocAlloc->priorGraphicAllocation(handle, &alloc);
     if (c2err != C2_OK) {
         ALOGW("Failed to wrap AHardwareBuffer into C2GraphicAllocation");
+        native_handle_close(handle);
+        native_handle_delete(handle);
         throwExceptionAsNecessary(env, BAD_VALUE);
         return;
     }
@@ -2817,7 +2886,7 @@ static void android_media_MediaCodec_native_init(JNIEnv *env, jclass) {
     gFields.cryptoInfoModeID = env->GetFieldID(clazz.get(), "mode", "I");
     CHECK(gFields.cryptoInfoModeID != NULL);
 
-    gFields.cryptoInfoPatternID = env->GetFieldID(clazz.get(), "pattern",
+    gFields.cryptoInfoPatternID = env->GetFieldID(clazz.get(), "mPattern",
         "Landroid/media/MediaCodec$CryptoInfo$Pattern;");
     CHECK(gFields.cryptoInfoPatternID != NULL);
 
@@ -3295,6 +3364,9 @@ static const JNINativeMethod gMethods[] = {
 
     { "native_setInputSurface", "(Landroid/view/Surface;)V",
       (void *)android_media_MediaCodec_setInputSurface },
+
+    { "native_enableOnFirstTunnelFrameReadyListener", "(Z)V",
+      (void *)android_media_MediaCodec_native_enableOnFirstTunnelFrameReadyListener },
 
     { "native_enableOnFrameRenderedListener", "(Z)V",
       (void *)android_media_MediaCodec_native_enableOnFrameRenderedListener },

@@ -19,16 +19,18 @@ package com.android.server.pm;
 import android.content.ComponentName;
 import android.content.IntentFilter;
 import android.util.Log;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
 import com.android.internal.util.XmlUtils;
+import com.android.server.utils.SnapshotCache;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 
-class PersistentPreferredActivity extends IntentFilter {
+class PersistentPreferredActivity extends WatchedIntentFilter {
     private static final String ATTR_NAME = "name"; // component name
     private static final String ATTR_FILTER = "filter"; // filter
     private static final String ATTR_SET_BY_DPM = "set-by-dpm"; // set by DPM
@@ -40,13 +42,42 @@ class PersistentPreferredActivity extends IntentFilter {
     final ComponentName mComponent;
     final boolean mIsSetByDpm;
 
+    // The cache for snapshots, so they are not rebuilt if the base object has not
+    // changed.
+    final SnapshotCache<PersistentPreferredActivity> mSnapshot;
+
+    private SnapshotCache makeCache() {
+        return new SnapshotCache<PersistentPreferredActivity>(this, this) {
+            @Override
+            public PersistentPreferredActivity createSnapshot() {
+                PersistentPreferredActivity s = new PersistentPreferredActivity(mSource);
+                s.seal();
+                return s;
+            }};
+    }
+
     PersistentPreferredActivity(IntentFilter filter, ComponentName activity, boolean isSetByDpm) {
         super(filter);
         mComponent = activity;
         mIsSetByDpm = isSetByDpm;
+        mSnapshot = makeCache();
     }
 
-    PersistentPreferredActivity(XmlPullParser parser) throws XmlPullParserException, IOException {
+    PersistentPreferredActivity(WatchedIntentFilter filter, ComponentName activity,
+            boolean isSetByDpm) {
+        this(filter.mFilter, activity, isSetByDpm);
+    }
+
+    // Copy constructor used only to create a snapshot
+    private PersistentPreferredActivity(PersistentPreferredActivity f) {
+        super(f);
+        mComponent = f.mComponent;
+        mIsSetByDpm = f.mIsSetByDpm;
+        mSnapshot = new SnapshotCache.Sealed();
+    }
+
+    PersistentPreferredActivity(TypedXmlPullParser parser)
+            throws XmlPullParserException, IOException {
         String shortComponent = parser.getAttributeValue(null, ATTR_NAME);
         mComponent = ComponentName.unflattenFromString(shortComponent);
         if (mComponent == null) {
@@ -55,7 +86,7 @@ class PersistentPreferredActivity extends IntentFilter {
                             "Bad activity name " + shortComponent +
                             " at " + parser.getPositionDescription());
         }
-        mIsSetByDpm = Boolean.parseBoolean(parser.getAttributeValue(null, ATTR_SET_BY_DPM));
+        mIsSetByDpm = parser.getAttributeBoolean(null, ATTR_SET_BY_DPM, false);
 
         int outerDepth = parser.getDepth();
         String tagName = parser.getName();
@@ -77,21 +108,26 @@ class PersistentPreferredActivity extends IntentFilter {
             }
         }
         if (tagName.equals(ATTR_FILTER)) {
-            readFromXml(parser);
+            mFilter.readFromXml(parser);
         } else {
             PackageManagerService.reportSettingsProblem(Log.WARN,
                     "Missing element filter at " +
                     parser.getPositionDescription());
             XmlUtils.skipCurrentTag(parser);
         }
+        mSnapshot = makeCache();
     }
 
-    public void writeToXml(XmlSerializer serializer) throws IOException {
+    public void writeToXml(TypedXmlSerializer serializer) throws IOException {
         serializer.attribute(null, ATTR_NAME, mComponent.flattenToShortString());
-        serializer.attribute(null, ATTR_SET_BY_DPM, Boolean.toString(mIsSetByDpm));
+        serializer.attributeBoolean(null, ATTR_SET_BY_DPM, mIsSetByDpm);
         serializer.startTag(null, ATTR_FILTER);
-            super.writeToXml(serializer);
+        mFilter.writeToXml(serializer);
         serializer.endTag(null, ATTR_FILTER);
+    }
+
+    public IntentFilter getIntentFilter() {
+        return mFilter;
     }
 
     @Override
@@ -99,5 +135,9 @@ class PersistentPreferredActivity extends IntentFilter {
         return "PersistentPreferredActivity{0x" + Integer.toHexString(System.identityHashCode(this))
                 + " " + mComponent.flattenToShortString()
                 + ", mIsSetByDpm=" + mIsSetByDpm + "}";
+    }
+
+    public PersistentPreferredActivity snapshot() {
+        return mSnapshot.snapshot();
     }
 }

@@ -24,7 +24,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.media.MediaRoute2Info;
-import android.media.MediaRouter2Manager;
 import android.media.session.MediaSessionManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -41,6 +40,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.phone.ShadeController;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,7 +65,6 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     private final NotificationEntryManager mNotificationEntryManager =
             mock(NotificationEntryManager.class);
     private final UiEventLogger mUiEventLogger = mock(UiEventLogger.class);
-    private final MediaRouter2Manager mRouterManager = mock(MediaRouter2Manager.class);
 
     private MediaOutputDialog mMediaOutputDialog;
     private MediaOutputController mMediaOutputController;
@@ -75,13 +74,18 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     public void setUp() {
         mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE, false,
                 mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
-                mNotificationEntryManager, mUiEventLogger, mRouterManager);
+                mNotificationEntryManager, mUiEventLogger);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
         mMediaOutputDialog = new MediaOutputDialog(mContext, false,
                 mMediaOutputController, mUiEventLogger);
 
         when(mLocalMediaManager.getCurrentConnectedDevice()).thenReturn(mMediaDevice);
         when(mMediaDevice.getFeatures()).thenReturn(mFeatures);
+    }
+
+    @After
+    public void tearDown() {
+        mMediaOutputDialog.dismissDialog();
     }
 
     @Test

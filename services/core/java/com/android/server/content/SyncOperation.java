@@ -103,6 +103,13 @@ public class SyncOperation {
     /** Stores the number of times this sync operation failed and had to be retried. */
     int retries;
 
+    /**
+     * Indicates if a sync that was originally scheduled as an EJ is being re-scheduled as a
+     * regular job. Specifically, this will be {@code true} if a sync is being backed-off but
+     * {@link ContentResolver#SYNC_EXTRAS_IGNORE_BACKOFF} is not set.
+     */
+    boolean scheduleEjAsRegularJob;
+
     /** jobId of the JobScheduler job corresponding to this sync */
     public int jobId;
 
@@ -251,6 +258,7 @@ public class SyncOperation {
         jobInfoExtras.putLong("expectedRuntime", expectedRuntime);
         jobInfoExtras.putInt("retries", retries);
         jobInfoExtras.putInt("syncExemptionFlag", syncExemptionFlag);
+        jobInfoExtras.putBoolean("ejDowngradedToRegular", scheduleEjAsRegularJob);
         return jobInfoExtras;
     }
 
@@ -318,6 +326,7 @@ public class SyncOperation {
         op.jobId = jobExtras.getInt("jobId");
         op.expectedRuntime = jobExtras.getLong("expectedRuntime");
         op.retries = jobExtras.getInt("retries");
+        op.scheduleEjAsRegularJob = jobExtras.getBoolean("ejDowngradedToRegular");
         return op;
     }
 
@@ -407,6 +416,12 @@ public class SyncOperation {
         }
         if (extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false)) {
             sb.append(" EXPEDITED");
+        }
+        if (extras.getBoolean(ContentResolver.SYNC_EXTRAS_SCHEDULE_AS_EXPEDITED_JOB, false)) {
+            sb.append(" EXPEDITED-JOB");
+            if (scheduleEjAsRegularJob) {
+                sb.append("(scheduled-as-regular)");
+            }
         }
         switch (syncExemptionFlag) {
             case ContentResolver.SYNC_EXEMPTION_NONE:
@@ -535,6 +550,11 @@ public class SyncOperation {
 
     boolean hasRequireCharging() {
         return mImmutableExtras.getBoolean(ContentResolver.SYNC_EXTRAS_REQUIRE_CHARGING, false);
+    }
+
+    boolean isScheduledAsExpeditedJob() {
+        return mImmutableExtras.getBoolean(
+                ContentResolver.SYNC_EXTRAS_SCHEDULE_AS_EXPEDITED_JOB, false);
     }
 
     boolean isAppStandbyExempted() {

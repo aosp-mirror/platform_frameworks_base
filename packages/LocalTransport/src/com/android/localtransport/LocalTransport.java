@@ -66,6 +66,8 @@ public class LocalTransport extends BackupTransport {
 
     private static final String INCREMENTAL_DIR = "_delta";
     private static final String FULL_DATA_DIR = "_full";
+    private static final String DEVICE_NAME_FOR_D2D_RESTORE_SET = "D2D";
+    private static final String DEFAULT_DEVICE_NAME_FOR_RESTORE_SET = "flash";
 
     // The currently-active restore set always has the same (nonzero!) token
     private static final long CURRENT_SET_TOKEN = 1;
@@ -143,11 +145,6 @@ public class LocalTransport extends BackupTransport {
         return null;
     }
 
-    /** @removed Replaced with dataManagementIntentLabel in the API */
-    public String dataManagementLabel() {
-        return TRANSPORT_DATA_MANAGEMENT_LABEL;
-    }
-
     @Override
     @Nullable
     public CharSequence dataManagementIntentLabel() {
@@ -166,6 +163,12 @@ public class LocalTransport extends BackupTransport {
         // using this it to pull data from the agent
         if (mParameters.isFakeEncryptionFlag()) {
             flags |= BackupAgent.FLAG_FAKE_CLIENT_SIDE_ENCRYPTION_ENABLED;
+        }
+        if (mParameters.isDeviceTransfer()) {
+            flags |= BackupAgent.FLAG_DEVICE_TO_DEVICE_TRANSFER;
+        }
+        if (mParameters.isEncrypted()) {
+            flags |= BackupAgent.FLAG_CLIENT_SIDE_ENCRYPTION_ENABLED;
         }
         return flags;
     }
@@ -333,7 +336,7 @@ public class LocalTransport extends BackupTransport {
                 try (FileOutputStream out = new FileOutputStream(element)) {
                     out.write(op.value, 0, op.value.length);
                 } catch (IOException e) {
-                    Log.e(TAG, "Unable to update key file " + element);
+                    Log.e(TAG, "Unable to update key file " + element, e);
                     return TRANSPORT_ERROR;
                 }
             }
@@ -602,8 +605,10 @@ public class LocalTransport extends BackupTransport {
         existing[num++] = CURRENT_SET_TOKEN;
 
         RestoreSet[] available = new RestoreSet[num];
+        String deviceName = mParameters.isDeviceTransfer() ? DEVICE_NAME_FOR_D2D_RESTORE_SET
+                : DEFAULT_DEVICE_NAME_FOR_RESTORE_SET;
         for (int i = 0; i < available.length; i++) {
-            available[i] = new RestoreSet("Local disk image", "flash", existing[i]);
+            available[i] = new RestoreSet("Local disk image", deviceName, existing[i]);
         }
         return available;
     }

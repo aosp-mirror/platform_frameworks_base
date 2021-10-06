@@ -69,13 +69,13 @@
 
     <issue
         id="NewApi"
-        message="Call requires API level R (current min is 21): `android.content.Context#getAttributionTag`"
-        errorLine1="            return provider.call(context.getPackageName(), context.getAttributionTag(),"
-        errorLine2="                                                                   ~~~~~~~~~~~~~~~~~">
+        message="Call requires API level 31 (current min is 21): `android.content.Context#getAttributionSource`"
+        errorLine1="            return provider.call(context.getAttributionSource(),"
+        errorLine2="                                         ~~~~~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/packages/SettingsLib/Tile/src/com/android/settingslib/drawer/TileUtils.java"
             line="558"
-            column="68"/>
+            column="42"/>
     </issue>
 
 </issues>

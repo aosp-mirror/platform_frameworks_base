@@ -16,7 +16,7 @@ filegroup {
 
 java_library_static {
     name: "services.coverage",
-    defaults: ["services_defaults"],
+    defaults: ["platform_service_defaults"],
     srcs: [":services.coverage-sources"],
     libs: ["jacocoagent"],
 }

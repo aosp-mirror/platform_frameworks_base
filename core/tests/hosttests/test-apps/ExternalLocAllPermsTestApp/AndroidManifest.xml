@@ -32,6 +32,9 @@
     <uses-permission android:name="android.permission.BIND_INPUT_METHOD" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
     <uses-permission android:name="android.permission.BRICK" />
     <uses-permission android:name="android.permission.BROADCAST_PACKAGE_REMOVED" />
     <uses-permission android:name="android.permission.BROADCAST_SMS" />

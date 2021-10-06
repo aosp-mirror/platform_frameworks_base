@@ -20,6 +20,7 @@ android_test {
         "androidx.test.rules",
         "mockito-target-minus-junit4",
         "truth-prebuilt",
+        "platform-test-annotations",
     ],
     java_resource_dirs: ["res"],
     certificate: "platform",

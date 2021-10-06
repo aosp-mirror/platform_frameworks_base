@@ -1,0 +1,50 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+import "frameworks/base/core/proto/android/view/inputmethod/editorinfo.proto";
+
+package android.server.inputmethod;
+
+option java_multiple_files = true;
+
+message InputMethodManagerServiceProto {
+    optional string cur_method_id = 1;
+    optional int32 cur_seq = 2;
+    optional string cur_client = 3;
+    optional string cur_focused_window_name = 4;
+    optional string last_ime_target_window_name = 5;
+    optional string cur_focused_window_soft_input_mode = 6;
+    optional .android.view.inputmethod.EditorInfoProto cur_attribute = 7;
+    optional string cur_id = 8;
+    optional bool show_requested = 9;
+    optional bool show_explicitly_requested = 10;
+    optional bool show_forced = 11;
+    optional bool input_shown = 12;
+    optional bool in_fullscreen_mode = 13;
+    optional string cur_token = 14;
+    optional int32 cur_token_display_id = 15;
+    optional bool system_ready = 16;
+    optional int32 last_switch_user_id = 17;
+    optional bool have_connection = 18;
+    optional bool bound_to_method = 19;
+    optional bool is_interactive = 20;
+    optional int32 back_disposition = 21;
+    optional int32 ime_window_visibility = 22;
+    optional bool show_ime_with_hard_keyboard = 23;
+    optional bool accessibility_requesting_no_soft_keyboard = 24;
+}

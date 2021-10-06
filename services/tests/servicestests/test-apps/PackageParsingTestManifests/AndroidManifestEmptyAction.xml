@@ -15,14 +15,15 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.servicestests.pm.parsing.emptyaction">
+     package="com.android.servicestests.pm.parsing.emptyaction">
 
     <application>
-        <activity android:name="com.android.servicestests.pm.parsing.test.TestActivity">
+        <activity android:name="com.android.servicestests.pm.parsing.test.TestActivity"
+             android:exported="true">
             <intent-filter>
-                <action android:name="" />
+                <action android:name=""/>
                 <!-- Non-empty action use to verify filter, since 0 action filters are stripped -->
-                <action android:name="com.android.servicestests.pm.parsing.test.TEST_ACTION" />
+                <action android:name="com.android.servicestests.pm.parsing.test.TEST_ACTION"/>
                 <category android:name="com.android.servicestests.pm.parsing.test.TEST_CATEGORY"/>
             </intent-filter>
         </activity>

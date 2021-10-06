@@ -21,10 +21,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeTrue;
 
 import android.platform.test.annotations.RootPermissionTest;
 
+import com.android.blockdevicewriter.BlockDeviceWriter;
+import com.android.fsverity.AddFsVerityCertRule;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.log.LogUtil.CLog;
@@ -35,6 +36,7 @@ import com.android.tradefed.util.CommandStatus;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -85,29 +87,21 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
     private static final String DAMAGING_EXECUTABLE = "/data/local/tmp/block_device_writer";
     private static final String CERT_PATH = "/data/local/tmp/ApkVerityTestCert.der";
 
-    private static final String APK_VERITY_STANDARD_MODE = "2";
-
     /** Only 4K page is supported by fs-verity currently. */
     private static final int FSVERITY_PAGE_SIZE = 4096;
 
+    @Rule
+    public final AddFsVerityCertRule mAddFsVerityCertRule =
+            new AddFsVerityCertRule(this, CERT_PATH);
+
     private ITestDevice mDevice;
-    private String mKeyId;
+    private boolean mDmRequireFsVerity;
 
     @Before
     public void setUp() throws DeviceNotAvailableException {
         mDevice = getDevice();
-
-        String apkVerityMode = mDevice.getProperty("ro.apk_verity.mode");
-        assumeTrue(mDevice.getLaunchApiLevel() >= 30
-                || APK_VERITY_STANDARD_MODE.equals(apkVerityMode));
-
-        mKeyId = expectRemoteCommandToSucceed(
-                "mini-keyctl padd asymmetric fsv_test .fs-verity < " + CERT_PATH).trim();
-        if (!mKeyId.matches("^\\d+$")) {
-            String keyId = mKeyId;
-            mKeyId = null;
-            fail("Key ID is not decimal: " + keyId);
-        }
+        mDmRequireFsVerity = "true".equals(
+                mDevice.getProperty("pm.dexopt.dm.require_fsverity"));
 
         uninstallPackage(TARGET_PACKAGE);
     }
@@ -115,10 +109,6 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
     @After
     public void tearDown() throws DeviceNotAvailableException {
         uninstallPackage(TARGET_PACKAGE);
-
-        if (mKeyId != null) {
-            expectRemoteCommandToSucceed("mini-keyctl unlink " + mKeyId + " .fs-verity");
-        }
     }
 
     @Test
@@ -137,7 +127,7 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
         verifyInstalledFiles(
                 INSTALLED_BASE_APK,
                 INSTALLED_BASE_APK_FSV_SIG);
-        verifyInstalledFilesHaveFsverity();
+        verifyInstalledFilesHaveFsverity(INSTALLED_BASE_APK);
     }
 
     @Test
@@ -164,7 +154,9 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
                 INSTALLED_BASE_APK_FSV_SIG,
                 INSTALLED_SPLIT_APK,
                 INSTALLED_SPLIT_APK_FSV_SIG);
-        verifyInstalledFilesHaveFsverity();
+        verifyInstalledFilesHaveFsverity(
+                INSTALLED_BASE_APK,
+                INSTALLED_SPLIT_APK);
     }
 
     @Test
@@ -180,7 +172,9 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
                 INSTALLED_BASE_APK_FSV_SIG,
                 INSTALLED_BASE_DM,
                 INSTALLED_BASE_DM_FSV_SIG);
-        verifyInstalledFilesHaveFsverity();
+        verifyInstalledFilesHaveFsverity(
+                INSTALLED_BASE_APK,
+                INSTALLED_BASE_DM);
     }
 
     @Test
@@ -202,7 +196,11 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
                 INSTALLED_SPLIT_APK_FSV_SIG,
                 INSTALLED_SPLIT_DM,
                 INSTALLED_SPLIT_DM_FSV_SIG);
-        verifyInstalledFilesHaveFsverity();
+        verifyInstalledFilesHaveFsverity(
+                INSTALLED_BASE_APK,
+                INSTALLED_BASE_DM,
+                INSTALLED_SPLIT_APK,
+                INSTALLED_SPLIT_DM);
     }
 
     @Test
@@ -226,7 +224,9 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
                 INSTALLED_BASE_APK_FSV_SIG,
                 INSTALLED_SPLIT_APK,
                 INSTALLED_SPLIT_APK_FSV_SIG);
-        verifyInstalledFilesHaveFsverity();
+        verifyInstalledFilesHaveFsverity(
+                INSTALLED_BASE_APK,
+                INSTALLED_SPLIT_APK);
     }
 
     @Test
@@ -263,18 +263,6 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
                 INSTALLED_BASE_APK,
                 INSTALLED_SPLIT_APK,
                 INSTALLED_SPLIT_APK_FSV_SIG);
-
-    }
-
-    @Test
-    public void testInstallOnlyBaseHasFsvSig()
-            throws DeviceNotAvailableException, FileNotFoundException {
-        new InstallMultiple()
-                .addFileAndSignature(BASE_APK)
-                .addFile(BASE_APK_DM)
-                .addFile(SPLIT_APK)
-                .addFile(SPLIT_APK_DM)
-                .runExpectingFailure();
     }
 
     @Test
@@ -284,18 +272,83 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
                 .addFile(BASE_APK)
                 .addFileAndSignature(BASE_APK_DM)
                 .addFile(SPLIT_APK)
-                .addFile(SPLIT_APK_DM)
+                .addFileAndSignature(SPLIT_APK_DM)
+                .run();
+        verifyInstalledFiles(
+                INSTALLED_BASE_APK,
+                INSTALLED_BASE_DM,
+                INSTALLED_BASE_DM_FSV_SIG,
+                INSTALLED_SPLIT_APK,
+                INSTALLED_SPLIT_DM,
+                INSTALLED_SPLIT_DM_FSV_SIG);
+        verifyInstalledFilesHaveFsverity(
+                INSTALLED_BASE_DM,
+                INSTALLED_SPLIT_DM);
+    }
+
+    @Test
+    public void testInstallDmWithoutFsvSig_Base()
+            throws DeviceNotAvailableException, FileNotFoundException {
+        InstallMultiple installer = new InstallMultiple()
+                .addFile(BASE_APK)
+                .addFile(BASE_APK_DM)
+                .addFile(SPLIT_APK)
+                .addFileAndSignature(SPLIT_APK_DM);
+        if (mDmRequireFsVerity) {
+            installer.runExpectingFailure();
+        } else {
+            installer.run();
+            verifyInstalledFiles(
+                    INSTALLED_BASE_APK,
+                    INSTALLED_BASE_DM,
+                    INSTALLED_SPLIT_APK,
+                    INSTALLED_SPLIT_DM,
+                    INSTALLED_SPLIT_DM_FSV_SIG);
+            verifyInstalledFilesHaveFsverity(INSTALLED_SPLIT_DM);
+        }
+    }
+
+    @Test
+    public void testInstallDmWithoutFsvSig_Split()
+            throws DeviceNotAvailableException, FileNotFoundException {
+        InstallMultiple installer = new InstallMultiple()
+                .addFile(BASE_APK)
+                .addFileAndSignature(BASE_APK_DM)
+                .addFile(SPLIT_APK)
+                .addFile(SPLIT_APK_DM);
+        if (mDmRequireFsVerity) {
+            installer.runExpectingFailure();
+        } else {
+            installer.run();
+            verifyInstalledFiles(
+                    INSTALLED_BASE_APK,
+                    INSTALLED_BASE_DM,
+                    INSTALLED_BASE_DM_FSV_SIG,
+                    INSTALLED_SPLIT_APK,
+                    INSTALLED_SPLIT_DM);
+            verifyInstalledFilesHaveFsverity(INSTALLED_BASE_DM);
+        }
+    }
+
+    @Test
+    public void testInstallSomeApkIsMissingFsvSig_Base()
+            throws DeviceNotAvailableException, FileNotFoundException {
+        new InstallMultiple()
+                .addFileAndSignature(BASE_APK)
+                .addFileAndSignature(BASE_APK_DM)
+                .addFile(SPLIT_APK)
+                .addFileAndSignature(SPLIT_APK_DM)
                 .runExpectingFailure();
     }
 
     @Test
-    public void testInstallOnlySplitHasFsvSig()
+    public void testInstallSomeApkIsMissingFsvSig_Split()
             throws DeviceNotAvailableException, FileNotFoundException {
         new InstallMultiple()
                 .addFile(BASE_APK)
-                .addFile(BASE_APK_DM)
+                .addFileAndSignature(BASE_APK_DM)
                 .addFileAndSignature(SPLIT_APK)
-                .addFile(SPLIT_APK_DM)
+                .addFileAndSignature(SPLIT_APK_DM)
                 .runExpectingFailure();
     }
 
@@ -348,22 +401,23 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
         long offsetFirstByte = 0;
 
         // The first two pages should be both readable at first.
-        assertTrue(canReadByte(apkPath, offsetFirstByte));
+        assertTrue(BlockDeviceWriter.canReadByte(mDevice, apkPath, offsetFirstByte));
         if (apkSize > offsetFirstByte + FSVERITY_PAGE_SIZE) {
-            assertTrue(canReadByte(apkPath, offsetFirstByte + FSVERITY_PAGE_SIZE));
+            assertTrue(BlockDeviceWriter.canReadByte(mDevice, apkPath,
+                    offsetFirstByte + FSVERITY_PAGE_SIZE));
         }
 
         // Damage the file directly against the block device.
         damageFileAgainstBlockDevice(apkPath, offsetFirstByte);
 
         // Expect actual read from disk to fail but only at damaged page.
-        dropCaches();
-        assertFalse(canReadByte(apkPath, offsetFirstByte));
+        BlockDeviceWriter.dropCaches(mDevice);
+        assertFalse(BlockDeviceWriter.canReadByte(mDevice, apkPath, offsetFirstByte));
         if (apkSize > offsetFirstByte + FSVERITY_PAGE_SIZE) {
             long lastByteOfTheSamePage =
                     offsetFirstByte % FSVERITY_PAGE_SIZE + FSVERITY_PAGE_SIZE - 1;
-            assertFalse(canReadByte(apkPath, lastByteOfTheSamePage));
-            assertTrue(canReadByte(apkPath, lastByteOfTheSamePage + 1));
+            assertFalse(BlockDeviceWriter.canReadByte(mDevice, apkPath, lastByteOfTheSamePage));
+            assertTrue(BlockDeviceWriter.canReadByte(mDevice, apkPath, lastByteOfTheSamePage + 1));
         }
     }
 
@@ -376,55 +430,55 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
         long offsetOfLastByte = apkSize - 1;
 
         // The first two pages should be both readable at first.
-        assertTrue(canReadByte(apkPath, offsetOfLastByte));
+        assertTrue(BlockDeviceWriter.canReadByte(mDevice, apkPath, offsetOfLastByte));
         if (offsetOfLastByte - FSVERITY_PAGE_SIZE > 0) {
-            assertTrue(canReadByte(apkPath, offsetOfLastByte - FSVERITY_PAGE_SIZE));
+            assertTrue(BlockDeviceWriter.canReadByte(mDevice, apkPath,
+                    offsetOfLastByte - FSVERITY_PAGE_SIZE));
         }
 
         // Damage the file directly against the block device.
         damageFileAgainstBlockDevice(apkPath, offsetOfLastByte);
 
         // Expect actual read from disk to fail but only at damaged page.
-        dropCaches();
-        assertFalse(canReadByte(apkPath, offsetOfLastByte));
+        BlockDeviceWriter.dropCaches(mDevice);
+        assertFalse(BlockDeviceWriter.canReadByte(mDevice, apkPath, offsetOfLastByte));
         if (offsetOfLastByte - FSVERITY_PAGE_SIZE > 0) {
             long firstByteOfTheSamePage = offsetOfLastByte - offsetOfLastByte % FSVERITY_PAGE_SIZE;
-            assertFalse(canReadByte(apkPath, firstByteOfTheSamePage));
-            assertTrue(canReadByte(apkPath, firstByteOfTheSamePage - 1));
+            assertFalse(BlockDeviceWriter.canReadByte(mDevice, apkPath, firstByteOfTheSamePage));
+            assertTrue(BlockDeviceWriter.canReadByte(mDevice, apkPath, firstByteOfTheSamePage - 1));
         }
     }
 
-    private void verifyInstalledFilesHaveFsverity() throws DeviceNotAvailableException {
+    private void verifyInstalledFilesHaveFsverity(String... filenames)
+            throws DeviceNotAvailableException {
         // Verify that all files are protected by fs-verity
         String apkPath = getApkPath(TARGET_PACKAGE);
         String appDir = apkPath.substring(0, apkPath.lastIndexOf("/"));
         long kTargetOffset = 0;
-        for (String basename : expectRemoteCommandToSucceed("ls " + appDir).split("\n")) {
-            if (basename.endsWith(".apk") || basename.endsWith(".dm")) {
-                String path = appDir + "/" + basename;
-                damageFileAgainstBlockDevice(path, kTargetOffset);
+        for (String basename : filenames) {
+            String path = appDir + "/" + basename;
+            damageFileAgainstBlockDevice(path, kTargetOffset);
 
-                // Retry is sometimes needed to pass the test. Package manager may have FD leaks
-                // (see b/122744005 as example) that prevents the file in question to be evicted
-                // from filesystem cache. Forcing GC workarounds the problem.
-                int retry = 5;
-                for (; retry > 0; retry--) {
-                    dropCaches();
-                    if (!canReadByte(path, kTargetOffset)) {
-                        break;
-                    }
-                    try {
-                        CLog.d("lsof: " + expectRemoteCommandToSucceed("lsof " + apkPath));
-                        Thread.sleep(1000);
-                        String pid = expectRemoteCommandToSucceed("pidof system_server");
-                        mDevice.executeShellV2Command("kill -10 " + pid);  // force GC
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        return;
-                    }
+            // Retry is sometimes needed to pass the test. Package manager may have FD leaks
+            // (see b/122744005 as example) that prevents the file in question to be evicted
+            // from filesystem cache. Forcing GC workarounds the problem.
+            int retry = 5;
+            for (; retry > 0; retry--) {
+                BlockDeviceWriter.dropCaches(mDevice);
+                if (!BlockDeviceWriter.canReadByte(mDevice, path, kTargetOffset)) {
+                    break;
                 }
-                assertTrue("Read from " + path + " should fail", retry > 0);
+                try {
+                    CLog.d("lsof: " + expectRemoteCommandToSucceed("lsof " + apkPath));
+                    Thread.sleep(1000);
+                    String pid = expectRemoteCommandToSucceed("pidof system_server");
+                    mDevice.executeShellV2Command("kill -10 " + pid);  // force GC
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
             }
+            assertTrue("Read from " + path + " should fail", retry > 0);
         }
     }
 
@@ -463,16 +517,6 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
 
     private long getFileSizeInBytes(String packageName) throws DeviceNotAvailableException {
         return Long.parseLong(expectRemoteCommandToSucceed("stat -c '%s' " + packageName).trim());
-    }
-
-    private void dropCaches() throws DeviceNotAvailableException {
-        expectRemoteCommandToSucceed("sync && echo 1 > /proc/sys/vm/drop_caches");
-    }
-
-    private boolean canReadByte(String filePath, long offset) throws DeviceNotAvailableException {
-        CommandResult result = mDevice.executeShellV2Command(
-                "dd if=" + filePath + " bs=1 count=1 skip=" + Long.toString(offset));
-        return result.getStatus() == CommandStatus.SUCCESS;
     }
 
     private String expectRemoteCommandToSucceed(String cmd) throws DeviceNotAvailableException {

@@ -24,6 +24,7 @@ import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManager.PasswordComplexity;
 import android.app.admin.PasswordMetrics;
@@ -51,6 +52,7 @@ import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;
 import com.android.internal.widget.LockscreenCredential;
+import com.android.internal.widget.VerifyCredentialResponse;
 
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -133,6 +135,42 @@ public class KeyguardManager {
      */
     public static final String EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS = "check_dpm";
 
+    /**
+     *
+     * Password lock type, see {@link #setLock}
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int PASSWORD = 0;
+
+    /**
+     *
+     * Pin lock type, see {@link #setLock}
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int PIN = 1;
+
+    /**
+     *
+     * Pattern lock type, see {@link #setLock}
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int PATTERN = 2;
+
+    /**
+     * Available lock types
+     */
+    @IntDef({
+            PASSWORD,
+            PIN,
+            PATTERN
+    })
+    @interface LockTypes {}
 
     /**
      * Get an intent to prompt the user to confirm credentials (pin, pattern, password or biometrics
@@ -598,33 +636,29 @@ public class KeyguardManager {
     @SystemApi
     public void requestDismissKeyguard(@NonNull Activity activity, @Nullable CharSequence message,
             @Nullable KeyguardDismissCallback callback) {
-        try {
-            ActivityTaskManager.getService().dismissKeyguard(
-                    activity.getActivityToken(), new IKeyguardDismissCallback.Stub() {
-                @Override
-                public void onDismissError() throws RemoteException {
-                    if (callback != null && !activity.isDestroyed()) {
-                        activity.mHandler.post(callback::onDismissError);
-                    }
+        ActivityClient.getInstance().dismissKeyguard(
+                activity.getActivityToken(), new IKeyguardDismissCallback.Stub() {
+            @Override
+            public void onDismissError() throws RemoteException {
+                if (callback != null && !activity.isDestroyed()) {
+                    activity.mHandler.post(callback::onDismissError);
                 }
+            }
 
-                @Override
-                public void onDismissSucceeded() throws RemoteException {
-                    if (callback != null && !activity.isDestroyed()) {
-                        activity.mHandler.post(callback::onDismissSucceeded);
-                    }
+            @Override
+            public void onDismissSucceeded() throws RemoteException {
+                if (callback != null && !activity.isDestroyed()) {
+                    activity.mHandler.post(callback::onDismissSucceeded);
                 }
+            }
 
-                @Override
-                public void onDismissCancelled() throws RemoteException {
-                    if (callback != null && !activity.isDestroyed()) {
-                        activity.mHandler.post(callback::onDismissCancelled);
-                    }
+            @Override
+            public void onDismissCancelled() throws RemoteException {
+                if (callback != null && !activity.isDestroyed()) {
+                    activity.mHandler.post(callback::onDismissCancelled);
                 }
-            }, message);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+            }
+        }, message);
     }
 
     /**
@@ -664,14 +698,15 @@ public class KeyguardManager {
     }
 
     private boolean checkInitialLockMethodUsage() {
-        if (mContext.checkCallingOrSelfPermission(Manifest.permission.SET_INITIAL_LOCK)
-                != PackageManager.PERMISSION_GRANTED) {
+        if (!hasPermission(Manifest.permission.SET_INITIAL_LOCK)) {
             throw new SecurityException("Requires SET_INITIAL_LOCK permission.");
         }
-        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
-            return false;
-        }
-        return true;
+        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
+    }
+
+    private boolean hasPermission(String permission) {
+        return PackageManager.PERMISSION_GRANTED == mContext.checkCallingOrSelfPermission(
+                permission);
     }
 
     /**
@@ -699,7 +734,7 @@ public class KeyguardManager {
         PasswordMetrics adminMetrics =
                 devicePolicyManager.getPasswordMinimumMetrics(mContext.getUserId());
         // Check if the password fits the mold of a pin or pattern.
-        boolean isPinOrPattern = lockType != LockTypes.PASSWORD;
+        boolean isPinOrPattern = lockType != PASSWORD;
 
         return PasswordMetrics.validatePassword(
                 adminMetrics, complexity, isPinOrPattern, password).size() == 0;
@@ -760,38 +795,14 @@ public class KeyguardManager {
             Log.e(TAG, "Password is not valid, rejecting call to setLock");
             return false;
         }
-        boolean success = false;
+        boolean success;
         try {
-            switch (lockType) {
-                case LockTypes.PASSWORD:
-                    CharSequence passwordStr = new String(password, Charset.forName("UTF-8"));
-                    lockPatternUtils.setLockCredential(
-                            LockscreenCredential.createPassword(passwordStr),
-                            /* savedPassword= */ LockscreenCredential.createNone(),
-                            userId);
-                    success = true;
-                    break;
-                case LockTypes.PIN:
-                    CharSequence pinStr = new String(password);
-                    lockPatternUtils.setLockCredential(
-                            LockscreenCredential.createPin(pinStr),
-                            /* savedPassword= */ LockscreenCredential.createNone(),
-                            userId);
-                    success = true;
-                    break;
-                case LockTypes.PATTERN:
-                    List<LockPatternView.Cell> pattern =
-                            LockPatternUtils.byteArrayToPattern(password);
-                    lockPatternUtils.setLockCredential(
-                            LockscreenCredential.createPattern(pattern),
-                            /* savedPassword= */ LockscreenCredential.createNone(),
-                            userId);
-                    pattern.clear();
-                    success = true;
-                    break;
-                default:
-                    Log.e(TAG, "Unknown lock type, returning a failure");
-            }
+            LockscreenCredential credential = createLockscreenCredential(
+                    lockType, password);
+            success = lockPatternUtils.setLockCredential(
+                    credential,
+                    /* savedPassword= */ LockscreenCredential.createNone(),
+                    userId);
         } catch (Exception e) {
             Log.e(TAG, "Save lock exception", e);
             success = false;
@@ -802,16 +813,79 @@ public class KeyguardManager {
     }
 
     /**
-    * Available lock types
-    */
-    @IntDef({
-            LockTypes.PASSWORD,
-            LockTypes.PIN,
-            LockTypes.PATTERN
+     * Set the lockscreen password to {@code newPassword} after validating the current password
+     * against {@code currentPassword}.
+     * <p>If no password is currently set, {@code currentPassword} should be set to {@code null}.
+     * <p>To clear the current password, {@code newPassword} should be set to {@code null}.
+     *
+     * @return {@code true} if password successfully set.
+     *
+     * @throws IllegalArgumentException if {@code newLockType} or {@code currentLockType}
+     * is invalid.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(anyOf = {
+            Manifest.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS,
+            Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE
     })
-    @interface LockTypes {
-        int PASSWORD = 0;
-        int PIN = 1;
-        int PATTERN = 2;
+    public boolean setLock(@LockTypes int newLockType, @Nullable byte[] newPassword,
+            @LockTypes int currentLockType, @Nullable byte[] currentPassword) {
+        final LockPatternUtils lockPatternUtils = new LockPatternUtils(mContext);
+        final int userId = mContext.getUserId();
+        LockscreenCredential currentCredential = createLockscreenCredential(
+                currentLockType, currentPassword);
+        LockscreenCredential newCredential = createLockscreenCredential(
+                newLockType, newPassword);
+        return lockPatternUtils.setLockCredential(newCredential, currentCredential, userId);
+    }
+
+    /**
+     * Verifies the current lock credentials against {@code password}.
+     * <p>To check if no password is set, {@code password} should be set to {@code null}.
+     *
+     * @return {@code true} if credentials match
+     *
+     * @throws IllegalArgumentException if {@code lockType} is invalid.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(anyOf = {
+            Manifest.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS,
+            Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE
+    })
+    public boolean checkLock(@LockTypes int lockType, @Nullable byte[] password) {
+        final LockPatternUtils lockPatternUtils = new LockPatternUtils(mContext);
+        final LockscreenCredential credential = createLockscreenCredential(
+                lockType, password);
+        final VerifyCredentialResponse response = lockPatternUtils.verifyCredential(
+                credential, mContext.getUserId(), /* flags= */ 0);
+        if (response == null) {
+            return false;
+        }
+        return response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK;
+    }
+
+    private LockscreenCredential createLockscreenCredential(
+            @LockTypes int lockType, @Nullable byte[] password) {
+        if (password == null) {
+            return LockscreenCredential.createNone();
+        }
+        switch (lockType) {
+            case PASSWORD:
+                CharSequence passwordStr = new String(password, Charset.forName("UTF-8"));
+                return LockscreenCredential.createPassword(passwordStr);
+            case PIN:
+                CharSequence pinStr = new String(password);
+                return LockscreenCredential.createPin(pinStr);
+            case PATTERN:
+                List<LockPatternView.Cell> pattern =
+                        LockPatternUtils.byteArrayToPattern(password);
+                return LockscreenCredential.createPattern(pattern);
+            default:
+                throw new IllegalArgumentException("Unknown lock type " + lockType);
+        }
     }
 }

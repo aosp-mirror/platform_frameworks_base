@@ -17,6 +17,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Stjórnun fylgdartækja"</string>
-    <string name="chooser_title" msgid="4958797271463138976">"Tengjast við &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
-    <string name="confirmation_title" msgid="5683126664999349196">"Tengja &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; við &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="chooser_title" msgid="2262294130493605839">"Velja <xliff:g id="PROFILE_NAME">%1$s</xliff:g> sem &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; á að stjórna"</string>
+    <string name="profile_name_generic" msgid="6851028682723034988">"tæki"</string>
+    <string name="profile_name_watch" msgid="576290739483672360">"úr"</string>
+    <string name="confirmation_title" msgid="8455544820286920304">"Veita &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; stjórn á: &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="profile_summary" msgid="2059360676631420073">"Þetta forrit er nauðsynlegt til að hafa umsjón með <xliff:g id="PROFILE_NAME">%1$s</xliff:g>. <xliff:g id="PRIVILEGES_DISCPLAIMER">%2$s</xliff:g>"</string>
+    <string name="consent_yes" msgid="8344487259618762872">"Leyfa"</string>
+    <string name="consent_no" msgid="2640796915611404382">"Ekki leyfa"</string>
 </resources>

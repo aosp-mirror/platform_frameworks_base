@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+~ Copyright (C) 2021 The Android Open Source Project
+~
+~ Licensed under the Apache License, Version 2.0 (the "License");
+~ you may not use this file except in compliance with the License.
+~ You may obtain a copy of the License at
+~
+~      http://www.apache.org/licenses/LICENSE-2.0
+~
+~ Unless required by applicable law or agreed to in writing, software
+~ distributed under the License is distributed on an "AS IS" BASIS,
+~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~ See the License for the specific language governing permissions and
+~ limitations under the License.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:padding="16dp"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="start|top">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:gravity="start|top"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/person_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <ImageView
+                android:id="@+id/availability"
+                android:layout_marginStart="-2dp"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:background="@drawable/availability_dot_10dp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/messages_count"
+            android:layout_alignParentEnd="true"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Notification.Title"
+            android:textColor="?androidprv:attr/textColorOnAccent"
+            android:background="@drawable/people_space_messages_count_background"
+            android:textSize="14sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <include layout="@layout/people_tile_punctuation_background_large" />
+
+        <include layout="@layout/people_tile_emoji_background_large" />
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/below_name_text_padding"
+            android:layout_gravity="start|center_vertical"
+            android:gravity="start|center_vertical"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:text="@string/empty_user_name"
+            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Notification.Title"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="@dimen/name_text_size_for_large_content" />
+
+        <LinearLayout
+            android:id="@+id/content"
+            android:layout_below="@id/name"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/status_icon_and_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="4dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/predefined_icon"
+                    android:tint="?android:attr/textColorSecondary"
+                    android:gravity="start|center_vertical"
+                    android:layout_width="@dimen/regular_predefined_icon"
+                    android:layout_height="@dimen/regular_predefined_icon" />
+
+                <TextView
+                    android:layout_gravity="center"
+                    android:id="@+id/subtext"
+                    android:paddingBottom="4dp"
+                    android:gravity="center_vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:singleLine="true"
+                    android:text="@string/empty_user_name"
+                    android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Notification.Title"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="12sp" />
+            </LinearLayout>
+            <ImageView
+                android:id="@+id/image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/people_space_content_background"
+                android:clipToOutline="true"
+                android:gravity="center"
+                android:scaleType="centerCrop" />
+
+            <TextView
+                android:layout_gravity="center"
+                android:id="@+id/text_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:singleLine="false"
+                android:text="@string/empty_status"
+                android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Notification.Title"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="@dimen/content_text_size_for_large" />
+        </LinearLayout>
+    </RelativeLayout>
+</LinearLayout>

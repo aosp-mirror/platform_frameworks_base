@@ -24,17 +24,15 @@
     android:layout_gravity="center_vertical|end"
     android:focusable="true" >
 
-        <FrameLayout
-            android:id="@+id/background"
+        <LinearLayout
+            android:id="@+id/icons_container"
             android:layout_height="@dimen/ongoing_appops_chip_height"
             android:layout_width="wrap_content"
-            android:minWidth="48dp"
-            android:layout_gravity="center_vertical">
-                <LinearLayout
-                    android:id="@+id/icons_container"
-                    android:layout_height="match_parent"
-                    android:layout_width="wrap_content"
-                    android:gravity="center_vertical"
-                    />
-          </FrameLayout>
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:minWidth="@dimen/ongoing_appops_chip_min_width"
+            android:maxWidth="@dimen/ongoing_appops_chip_max_width"
+            />
 </com.android.systemui.privacy.OngoingPrivacyChip>

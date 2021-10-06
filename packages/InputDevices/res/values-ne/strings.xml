@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="8016145283189546017">"इनपुट डिभाइस"</string>
+    <string name="app_label" msgid="8016145283189546017">"इनपुट उपकरणहरु"</string>
     <string name="keyboard_layouts_label" msgid="6688773268302087545">"Android किबोर्ड"</string>
     <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"अङ्ग्रेजी (बेलायत)"</string>
     <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"अङ्ग्रेजी (अमेरिकी)"</string>
@@ -19,6 +19,7 @@
     <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"स्विस-जर्मन"</string>
     <string name="keyboard_layout_belgian" msgid="2011984572838651558">"बेल्जियन"</string>
     <string name="keyboard_layout_bulgarian" msgid="8951224309972028398">"बुल्गेरियन"</string>
+    <string name="keyboard_layout_bulgarian_phonetic" msgid="7568914730360106653">"बुल्गेरियन फोनेटिक किबोर्ड"</string>
     <string name="keyboard_layout_italian" msgid="6497079660449781213">"इटालियन"</string>
     <string name="keyboard_layout_danish" msgid="8036432066627127851">"डेनिश"</string>
     <string name="keyboard_layout_norwegian" msgid="9090097917011040937">"नर्वेजियन"</string>

@@ -169,4 +169,24 @@ public class MotionEventTest {
             assertEquals(0x3 << 30, ID_SOURCE_MASK & event.getId());
         }
     }
+
+    @Test
+    public void testEventRotation() {
+        final MotionEvent event = MotionEvent.obtain(0 /* downTime */, 0 /* eventTime */,
+                    ACTION_DOWN, 30 /* x */, 50 /* y */, 0 /* metaState */);
+        MotionEvent rot90 = MotionEvent.obtain(event);
+        rot90.transform(MotionEvent.createRotateMatrix(/* 90 deg */1, 1000, 600));
+        assertEquals(50, (int) rot90.getX());
+        assertEquals(570, (int) rot90.getY());
+
+        MotionEvent rot180 = MotionEvent.obtain(event);
+        rot180.transform(MotionEvent.createRotateMatrix(/* 180 deg */2, 1000, 600));
+        assertEquals(970, (int) rot180.getX());
+        assertEquals(550, (int) rot180.getY());
+
+        MotionEvent rot270 = MotionEvent.obtain(event);
+        rot270.transform(MotionEvent.createRotateMatrix(/* 270 deg */3, 1000, 600));
+        assertEquals(950, (int) rot270.getX());
+        assertEquals(30, (int) rot270.getY());
+    }
 }

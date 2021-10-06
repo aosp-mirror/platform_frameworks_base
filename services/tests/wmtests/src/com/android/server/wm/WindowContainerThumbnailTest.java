@@ -18,15 +18,13 @@ package com.android.server.wm;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
-import static org.mockito.ArgumentMatchers.any;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 
-import android.graphics.GraphicBuffer;
-import android.graphics.PixelFormat;
+import android.hardware.HardwareBuffer;
 import android.platform.test.annotations.Presubmit;
-import android.view.Surface;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
@@ -46,14 +44,14 @@ import org.junit.runner.RunWith;
 @RunWith(WindowTestRunner.class)
 public class WindowContainerThumbnailTest extends WindowTestsBase {
     private WindowContainerThumbnail buildThumbnail() {
-        final GraphicBuffer buffer = GraphicBuffer.create(1, 1, PixelFormat.RGBA_8888,
-                GraphicBuffer.USAGE_SW_READ_RARELY | GraphicBuffer.USAGE_SW_WRITE_NEVER);
+        final HardwareBuffer buffer = HardwareBuffer.create(1, 1, HardwareBuffer.RGBA_8888,
+                1, HardwareBuffer.USAGE_CPU_READ_RARELY);
         final ActivityRecord mockAr = mock(ActivityRecord.class);
         when(mockAr.getPendingTransaction()).thenReturn(new StubTransaction());
         when(mockAr.makeChildSurface(any())).thenReturn(new MockSurfaceControlBuilder());
         when(mockAr.makeSurface()).thenReturn(new MockSurfaceControlBuilder());
-        return new WindowContainerThumbnail(new StubTransaction(), mockAr,
-                buffer, false, mock(Surface.class), mock(SurfaceAnimator.class));
+        return new WindowContainerThumbnail(new StubTransaction(), mockAr, buffer,
+                mock(SurfaceAnimator.class));
     }
 
     @Test

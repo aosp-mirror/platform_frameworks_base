@@ -28,7 +28,8 @@ import android.graphics.Bitmap;
 
 /** {@hide} */
 interface IPackageInstaller {
-    int createSession(in PackageInstaller.SessionParams params, String installerPackageName, int userId);
+    int createSession(in PackageInstaller.SessionParams params, String installerPackageName,
+            String installerAttributionTag, int userId);
 
     void updateSessionAppIcon(int sessionId, in Bitmap appIcon);
     void updateSessionAppLabel(int sessionId, String appLabel);
@@ -60,4 +61,9 @@ interface IPackageInstaller {
     void setPermissionsResult(int sessionId, boolean accepted);
 
     void bypassNextStagedInstallerCheck(boolean value);
+
+    void bypassNextAllowedApexUpdateCheck(boolean value);
+
+    void setAllowUnlimitedSilentUpdates(String installerPackageName);
+    void setSilentUpdatesThrottleTime(long throttleTimeInSeconds);
 }

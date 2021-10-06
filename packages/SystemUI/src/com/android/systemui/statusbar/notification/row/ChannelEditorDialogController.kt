@@ -37,12 +37,10 @@ import android.view.Window
 import android.view.WindowInsets.Type.statusBars
 import android.view.WindowManager
 import android.widget.TextView
-
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.R
-
+import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
-import javax.inject.Singleton
 
 private const val TAG = "ChannelDialogController"
 
@@ -58,7 +56,7 @@ private const val TAG = "ChannelDialogController"
  *   - the next 3 channels sorted alphabetically for that app   <on/off>
  *   -                                                          <on/off>
  */
-@Singleton
+@SysUISingleton
 class ChannelEditorDialogController @Inject constructor(
     c: Context,
     private val noMan: INotificationManager,

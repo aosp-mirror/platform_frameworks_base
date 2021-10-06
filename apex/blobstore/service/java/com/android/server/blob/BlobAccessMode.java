@@ -27,8 +27,8 @@ import android.content.pm.PackageManager;
 import android.util.ArraySet;
 import android.util.Base64;
 import android.util.DebugUtils;
+import android.util.IndentingPrintWriter;
 
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;

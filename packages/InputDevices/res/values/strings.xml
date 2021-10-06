@@ -54,6 +54,9 @@
     <!-- Bulgarian keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_bulgarian">Bulgarian</string>
 
+    <!-- Bulgarian keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_bulgarian_phonetic">Bulgarian, Phonetic</string>
+
     <!-- Italian keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_italian">Italian</string>
 

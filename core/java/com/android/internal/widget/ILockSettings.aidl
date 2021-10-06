@@ -47,8 +47,10 @@ interface ILockSettings {
     void resetKeyStore(int userId);
     VerifyCredentialResponse checkCredential(in LockscreenCredential credential, int userId,
             in ICheckCredentialProgressCallback progressCallback);
-    VerifyCredentialResponse verifyCredential(in LockscreenCredential credential, long challenge, int userId);
-    VerifyCredentialResponse verifyTiedProfileChallenge(in LockscreenCredential credential, long challenge, int userId);
+    VerifyCredentialResponse verifyCredential(in LockscreenCredential credential, int userId, int flags);
+    VerifyCredentialResponse verifyTiedProfileChallenge(in LockscreenCredential credential, int userId, int flags);
+    VerifyCredentialResponse verifyGatekeeperPasswordHandle(long gatekeeperPasswordHandle, long challenge, int userId);
+    void removeGatekeeperPasswordHandle(long gatekeeperPasswordHandle);
     boolean checkVoldPassword(int userId);
     int getCredentialType(int userId);
     byte[] getHashFactor(in LockscreenCredential currentCredential, int userId);
@@ -93,4 +95,5 @@ interface ILockSettings {
     boolean hasSecureLockScreen();
     boolean tryUnlockWithCachedUnifiedChallenge(int userId);
     void removeCachedUnifiedChallenge(int userId);
+    void updateEncryptionPassword(int type, in byte[] password);
 }

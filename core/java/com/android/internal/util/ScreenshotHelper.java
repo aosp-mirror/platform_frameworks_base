@@ -362,6 +362,7 @@ public class ScreenshotHelper {
                                 resetConnection();
                                 // only log an error if we're still within the timeout period
                                 if (handler.hasCallbacks(mScreenshotTimeout)) {
+                                    Log.e(TAG, "Screenshot service disconnected");
                                     handler.removeCallbacks(mScreenshotTimeout);
                                     notifyScreenshotError();
                                 }

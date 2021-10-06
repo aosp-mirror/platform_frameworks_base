@@ -25,6 +25,10 @@ import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothUuid;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -33,12 +37,16 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.LruCache;
+import android.util.Pair;
 
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.settingslib.R;
 import com.android.settingslib.Utils;
+import com.android.settingslib.utils.ThreadUtils;
+import com.android.settingslib.widget.AdaptiveOutlineDrawable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -104,10 +112,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     private boolean mIsA2dpProfileConnectedFail = false;
     private boolean mIsHeadsetProfileConnectedFail = false;
     private boolean mIsHearingAidProfileConnectedFail = false;
-    // Group member devices for the coordinated set
-    private Set<CachedBluetoothDevice> mMemberDevices = new HashSet<CachedBluetoothDevice>();
     // Group second device for Hearing Aid
     private CachedBluetoothDevice mSubDevice;
+    // Group member devices for the coordinated set
+    private Set<CachedBluetoothDevice> mMemberDevices = new HashSet<CachedBluetoothDevice>();
+    @VisibleForTesting
+    LruCache<String, BitmapDrawable> mDrawableCache;
 
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -140,6 +150,19 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         fillData();
         mHiSyncId = BluetoothHearingAid.HI_SYNC_ID_INVALID;
         mGroupId = BluetoothCsipSetCoordinator.GROUP_ID_INVALID;
+        initDrawableCache();
+    }
+
+    private void initDrawableCache() {
+        int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+        int cacheSize = maxMemory / 8;
+
+        mDrawableCache = new LruCache<String, BitmapDrawable>(cacheSize) {
+            @Override
+            protected int sizeOf(String key, BitmapDrawable bitmap) {
+                return bitmap.getBitmap().getByteCount() / 1024;
+            }
+        };
     }
 
     /**
@@ -250,7 +273,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     public void disconnect() {
         synchronized (mProfileLock) {
-            mLocalAdapter.disconnectAllEnabledProfiles(mDevice);
+            mDevice.disconnect();
         }
         // Disconnect  PBAP server in case its connected
         // This is to ensure all the profiles are disconnected as some CK/Hs do not
@@ -291,7 +314,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         }
 
         mConnectAttempted = SystemClock.elapsedRealtime();
-        connectAllEnabledProfiles();
+        connectDevice();
     }
 
     public long getHiSyncId() {
@@ -348,7 +371,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         connect();
     }
 
-    private void connectAllEnabledProfiles() {
+    private void connectDevice() {
         synchronized (mProfileLock) {
             // Try to initialize the profiles if they were not.
             if (mProfiles.isEmpty()) {
@@ -363,7 +386,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                 return;
             }
 
-            mLocalAdapter.connectAllEnabledProfiles(mDevice);
+            mDevice.connect();
         }
     }
 
@@ -426,6 +449,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             if (dev != null) {
                 final boolean successful = dev.removeBond();
                 if (successful) {
+                    releaseLruCache();
                     if (BluetoothUtils.D) {
                         Log.d(TAG, "Command sent successfully:REMOVE_BOND " + describe(null));
                     }
@@ -545,7 +569,21 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     void refresh() {
-        dispatchAttributesChanged();
+        ThreadUtils.postOnBackgroundThread(() -> {
+            if (BluetoothUtils.isAdvancedDetailsHeader(mDevice)) {
+                Uri uri = BluetoothUtils.getUriMetaData(getDevice(),
+                        BluetoothDevice.METADATA_MAIN_ICON);
+                if (uri != null && mDrawableCache.get(uri.toString()) == null) {
+                    mDrawableCache.put(uri.toString(),
+                            (BitmapDrawable) BluetoothUtils.getBtDrawableWithDescription(
+                                    mContext, this).first);
+                }
+            }
+
+            ThreadUtils.postOnMainThread(() -> {
+                dispatchAttributesChanged();
+            });
+        });
     }
 
     public void setJustDiscovered(boolean justDiscovered) {
@@ -731,8 +769,8 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
          * Otherwise, allow the connect on UUID change.
          */
         if ((mConnectAttempted + timeout) > SystemClock.elapsedRealtime()) {
-            Log.d(TAG, "onUuidChanged: triggering connectAllEnabledProfiles");
-            connectAllEnabledProfiles();
+            Log.d(TAG, "onUuidChanged: triggering connectDevice");
+            connectDevice();
         }
 
         dispatchAttributesChanged();
@@ -896,11 +934,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         if (BluetoothUuid.containsAnyUuid(uuids, PbapServerProfile.PBAB_CLIENT_UUIDS)) {
             // The pairing dialog now warns of phone-book access for paired devices.
             // No separate prompt is displayed after pairing.
+            final BluetoothClass bluetoothClass = mDevice.getBluetoothClass();
             if (mDevice.getPhonebookAccessPermission() == BluetoothDevice.ACCESS_UNKNOWN) {
-                if (mDevice.getBluetoothClass().getDeviceClass()
-                        == BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE ||
-                    mDevice.getBluetoothClass().getDeviceClass()
-                        == BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET) {
+                if (bluetoothClass != null && (bluetoothClass.getDeviceClass()
+                        == BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE
+                        || bluetoothClass.getDeviceClass()
+                        == BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET)) {
                     EventLog.writeEvent(0x534e4554, "138529441", -1, "");
                 }
                 mDevice.setPhonebookAccessPermission(BluetoothDevice.ACCESS_REJECTED);
@@ -1050,7 +1089,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     private boolean isProfileConnectedFail() {
         return mIsA2dpProfileConnectedFail || mIsHearingAidProfileConnectedFail
-                || mIsHeadsetProfileConnectedFail;
+                || (!isConnectedSapDevice() && mIsHeadsetProfileConnectedFail);
     }
 
     /**
@@ -1193,6 +1232,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                 BluetoothProfile.STATE_CONNECTED;
     }
 
+    private boolean isConnectedSapDevice() {
+        SapProfile sapProfile = mProfileManager.getSapProfile();
+        return sapProfile != null && sapProfile.getConnectionStatus(mDevice)
+                == BluetoothProfile.STATE_CONNECTED;
+    }
+
     public CachedBluetoothDevice getSubDevice() {
         return mSubDevice;
     }
@@ -1263,5 +1308,32 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         newMainDevie.mRssi = tmpRssi;
         newMainDevie.mJustDiscovered = tmpJustDiscovered;
         fetchActiveDevices();
+    }
+
+    /**
+     * Get cached bluetooth icon with description
+     */
+    public Pair<Drawable, String> getDrawableWithDescription() {
+        Uri uri = BluetoothUtils.getUriMetaData(mDevice, BluetoothDevice.METADATA_MAIN_ICON);
+        Pair<Drawable, String> pair = BluetoothUtils.getBtClassDrawableWithDescription(
+                mContext, this);
+
+        if (BluetoothUtils.isAdvancedDetailsHeader(mDevice) && uri != null) {
+            BitmapDrawable drawable = mDrawableCache.get(uri.toString());
+            if (drawable != null) {
+                Resources resources = mContext.getResources();
+                return new Pair<>(new AdaptiveOutlineDrawable(
+                        resources, drawable.getBitmap()), pair.second);
+            }
+
+            refresh();
+        }
+
+        return new Pair<>(BluetoothUtils.buildBtRainbowDrawable(
+                        mContext, pair.first, getAddress().hashCode()), pair.second);
+    }
+
+    void releaseLruCache() {
+        mDrawableCache.evictAll();
     }
 }

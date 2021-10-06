@@ -69,7 +69,7 @@ public class SliceShellCommand extends ShellCommand {
             return -1;
         }
         Context context = mService.getContext();
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             Uri uri = new Uri.Builder()
                     .scheme(ContentResolver.SCHEME_CONTENT)

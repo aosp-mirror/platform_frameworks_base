@@ -19,23 +19,23 @@ package com.google.android.test.dpi;
 import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.Application;
-import android.os.Bundle;
-import android.graphics.BitmapFactory;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.ScrollView;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
 
 public class DpiTestActivity extends Activity {
     public DpiTestActivity() {
@@ -64,7 +64,7 @@ public class DpiTestActivity extends Activity {
                     | ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES;
                 app.getResources().setCompatibilityInfo(new CompatibilityInfo(ai,
                         getResources().getConfiguration().screenLayout,
-                        getResources().getConfiguration().smallestScreenWidthDp, false));
+                        getResources().getConfiguration().smallestScreenWidthDp, false, 1f));
             }
         } catch (PackageManager.NameNotFoundException e) {
             throw new RuntimeException("ouch", e);

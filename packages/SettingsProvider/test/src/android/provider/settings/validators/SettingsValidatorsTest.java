@@ -56,8 +56,8 @@ public class SettingsValidatorsTest {
     }
 
     @Test
-    public void testNonNegativeIntegerValidator_onNullValue_returnsFalse() {
-        assertFalse(SettingsValidators.NON_NEGATIVE_INTEGER_VALIDATOR.validate(null));
+    public void testNonNegativeIntegerValidator_onNullValue_returnsTrue() {
+        assertTrue(SettingsValidators.NON_NEGATIVE_INTEGER_VALIDATOR.validate(null));
     }
 
     @Test
@@ -69,8 +69,8 @@ public class SettingsValidatorsTest {
     }
 
     @Test
-    public void testAnyIntegerValidator_onNullValue_returnsFalse() {
-        assertFalse(SettingsValidators.ANY_INTEGER_VALIDATOR.validate(null));
+    public void testAnyIntegerValidator_onNullValue_returnsTrue() {
+        assertTrue(SettingsValidators.ANY_INTEGER_VALIDATOR.validate(null));
     }
 
     @Test
@@ -91,8 +91,8 @@ public class SettingsValidatorsTest {
     }
 
     @Test
-    public void testLenientIpAddressValidator_onNullValue_returnsFalse() {
-        assertFalse(SettingsValidators.LENIENT_IP_ADDRESS_VALIDATOR.validate(null));
+    public void testLenientIpAddressValidator_onNullValue_returnsTrue() {
+        assertTrue(SettingsValidators.LENIENT_IP_ADDRESS_VALIDATOR.validate(null));
     }
 
     @Test
@@ -120,8 +120,8 @@ public class SettingsValidatorsTest {
     }
 
     @Test
-    public void testLocaleValidator_onNullValue_returnsFalse() {
-        assertFalse(SettingsValidators.LOCALE_VALIDATOR.validate(null));
+    public void testLocaleValidator_onNullValue_returnsTrue() {
+        assertTrue(SettingsValidators.LOCALE_VALIDATOR.validate(null));
     }
 
     @Test
@@ -149,11 +149,11 @@ public class SettingsValidatorsTest {
     }
 
     @Test
-    public void testDiscreteValueValidator_onNullValue_returnsFalse() {
+    public void testDiscreteValueValidator_onNullValue_returnsTrue() {
         String[] discreteTypes = new String[]{"Type1", "Type2"};
         Validator v = new DiscreteValueValidator(discreteTypes);
 
-        assertFalse(v.validate(null));
+        assertTrue(v.validate(null));
     }
 
     @Test
@@ -167,10 +167,10 @@ public class SettingsValidatorsTest {
     }
 
     @Test
-    public void testInclusiveIntegerRangeValidator_onNullValue_returnsFalse() {
+    public void testInclusiveIntegerRangeValidator_onNullValue_returnsTrue() {
         Validator v = new InclusiveIntegerRangeValidator(0, 5);
 
-        assertFalse(v.validate(null));
+        assertTrue(v.validate(null));
     }
 
     @Test
@@ -184,10 +184,10 @@ public class SettingsValidatorsTest {
     }
 
     @Test
-    public void testInclusiveFloatRangeValidator_onNullValue_returnsFalse() {
+    public void testInclusiveFloatRangeValidator_onNullValue_returnsTrue() {
         Validator v = new InclusiveFloatRangeValidator(0.0f, 5.0f);
 
-        assertFalse(v.validate(null));
+        assertTrue(v.validate(null));
     }
 
     @Test
@@ -220,11 +220,6 @@ public class SettingsValidatorsTest {
     }
 
     @Test
-    public void dateFormatValidator_onNullValue_returnsFalse() {
-        assertFalse(SettingsValidators.DATE_FORMAT_VALIDATOR.validate(null));
-    }
-
-    @Test
     public void testJSONObjectValidator() throws JSONException {
         Validator v = SettingsValidators.JSON_OBJECT_VALIDATOR;
 
@@ -240,8 +235,8 @@ public class SettingsValidatorsTest {
     }
 
     @Test
-    public void testJSONObjectValidator_onNullValue_returnsFalse() {
-        assertFalse(SettingsValidators.JSON_OBJECT_VALIDATOR.validate(null));
+    public void testJSONObjectValidator_onNullValue_returnsTrue() {
+        assertTrue(SettingsValidators.JSON_OBJECT_VALIDATOR.validate(null));
     }
 
     @Test

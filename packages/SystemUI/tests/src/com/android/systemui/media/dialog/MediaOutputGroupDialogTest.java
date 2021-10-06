@@ -21,7 +21,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import android.media.MediaRouter2Manager;
 import android.media.session.MediaSessionManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -65,7 +64,6 @@ public class MediaOutputGroupDialogTest extends SysuiTestCase {
     private NotificationEntryManager mNotificationEntryManager =
             mock(NotificationEntryManager.class);
     private final UiEventLogger mUiEventLogger = mock(UiEventLogger.class);
-    private final MediaRouter2Manager mRouterManager = mock(MediaRouter2Manager.class);
 
     private MediaOutputGroupDialog mMediaOutputGroupDialog;
     private MediaOutputController mMediaOutputController;
@@ -75,7 +73,7 @@ public class MediaOutputGroupDialogTest extends SysuiTestCase {
     public void setUp() {
         mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE, false,
                 mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
-                mNotificationEntryManager, mUiEventLogger, mRouterManager);
+                mNotificationEntryManager, mUiEventLogger);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
         mMediaOutputGroupDialog = new MediaOutputGroupDialog(mContext, false,
                 mMediaOutputController);

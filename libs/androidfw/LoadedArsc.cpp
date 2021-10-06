@@ -33,7 +33,6 @@
 #endif
 #endif
 
-#include "androidfw/ByteBucketArray.h"
 #include "androidfw/Chunk.h"
 #include "androidfw/ResourceUtils.h"
 #include "androidfw/Util.h"
@@ -42,6 +41,7 @@ using android::base::StringPrintf;
 
 namespace android {
 
+constexpr const static int kFrameworkPackageId = 0x01;
 constexpr const static int kAppPackageId = 0x7f;
 
 namespace {
@@ -49,42 +49,27 @@ namespace {
 // Builder that helps accumulate Type structs and then create a single
 // contiguous block of memory to store both the TypeSpec struct and
 // the Type structs.
-class TypeSpecPtrBuilder {
- public:
-  explicit TypeSpecPtrBuilder(incfs::verified_map_ptr<ResTable_typeSpec> header)
-      : header_(header) {
-  }
+struct TypeSpecBuilder {
+  explicit TypeSpecBuilder(incfs::verified_map_ptr<ResTable_typeSpec> header) : header_(header) {}
 
   void AddType(incfs::verified_map_ptr<ResTable_type> type) {
-    types_.push_back(type);
+    TypeSpec::TypeEntry& entry = type_entries.emplace_back();
+    entry.config.copyFromDtoH(type->config);
+    entry.type = type;
   }
 
-  TypeSpecPtr Build() {
-    // Check for overflow.
-    using ElementType = incfs::verified_map_ptr<ResTable_type>;
-    if ((std::numeric_limits<size_t>::max() - sizeof(TypeSpec)) / sizeof(ElementType) <
-        types_.size()) {
-      return {};
-    }
-    TypeSpec* type_spec =
-        (TypeSpec*)::malloc(sizeof(TypeSpec) + (types_.size() * sizeof(ElementType)));
-    type_spec->type_spec = header_;
-    type_spec->type_count = types_.size();
-    memcpy(type_spec + 1, types_.data(), types_.size() * sizeof(ElementType));
-    return TypeSpecPtr(type_spec);
+  TypeSpec Build() {
+    return {header_, std::move(type_entries)};
   }
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(TypeSpecPtrBuilder);
+  DISALLOW_COPY_AND_ASSIGN(TypeSpecBuilder);
 
   incfs::verified_map_ptr<ResTable_typeSpec> header_;
-  std::vector<incfs::verified_map_ptr<ResTable_type>> types_;
+  std::vector<TypeSpec::TypeEntry> type_entries;
 };
 
 }  // namespace
-
-LoadedPackage::LoadedPackage() = default;
-LoadedPackage::~LoadedPackage() = default;
 
 // Precondition: The header passed in has already been verified, so reading any fields and trusting
 // the ResChunk_header is safe.
@@ -322,15 +307,10 @@ base::expected<incfs::map_ptr<ResTable_entry>, NullOrIOError> LoadedPackage::Get
 }
 
 base::expected<std::monostate, IOError> LoadedPackage::CollectConfigurations(
-    bool exclude_mipmap, std::set<ResTable_config>* out_configs) const {
-  const size_t type_count = type_specs_.size();
-  for (size_t i = 0; i < type_count; i++) {
-    const TypeSpecPtr& type_spec = type_specs_[i];
-    if (type_spec == nullptr) {
-      continue;
-    }
+    bool exclude_mipmap, std::set<ResTable_config>* out_configs) const {\
+  for (const auto& type_spec : type_specs_) {
     if (exclude_mipmap) {
-      const int type_idx = type_spec->type_spec->id - 1;
+      const int type_idx = type_spec.first - 1;
       const auto type_name16 = type_string_pool_.stringAt(type_idx);
       if (UNLIKELY(IsIOError(type_name16))) {
         return base::unexpected(GetIOError(type_name16.error()));
@@ -354,11 +334,8 @@ base::expected<std::monostate, IOError> LoadedPackage::CollectConfigurations(
       }
     }
 
-    const auto iter_end = type_spec->types + type_spec->type_count;
-    for (auto iter = type_spec->types; iter != iter_end; ++iter) {
-      ResTable_config config;
-      config.copyFromDtoH((*iter)->config);
-      out_configs->insert(config);
+    for (const auto& type_entry : type_spec.second.type_entries) {
+      out_configs->insert(type_entry.config);
     }
   }
   return {};
@@ -366,19 +343,12 @@ base::expected<std::monostate, IOError> LoadedPackage::CollectConfigurations(
 
 void LoadedPackage::CollectLocales(bool canonicalize, std::set<std::string>* out_locales) const {
   char temp_locale[RESTABLE_MAX_LOCALE_LEN];
-  const size_t type_count = type_specs_.size();
-  for (size_t i = 0; i < type_count; i++) {
-    const TypeSpecPtr& type_spec = type_specs_[i];
-    if (type_spec != nullptr) {
-      const auto iter_end = type_spec->types + type_spec->type_count;
-      for (auto iter = type_spec->types; iter != iter_end; ++iter) {
-        ResTable_config configuration;
-        configuration.copyFromDtoH((*iter)->config);
-        if (configuration.locale != 0) {
-          configuration.getBcp47Locale(temp_locale, canonicalize);
-          std::string locale(temp_locale);
-          out_locales->insert(std::move(locale));
-        }
+  for (const auto& type_spec : type_specs_) {
+    for (const auto& type_entry : type_spec.second.type_entries) {
+      if (type_entry.config.locale != 0) {
+        type_entry.config.getBcp47Locale(temp_locale, canonicalize);
+        std::string locale(temp_locale);
+        out_locales->insert(std::move(locale));
       }
     }
   }
@@ -398,14 +368,13 @@ base::expected<uint32_t, NullOrIOError> LoadedPackage::FindEntryByName(
     return base::unexpected(key_idx.error());
   }
 
-  const TypeSpec* type_spec = type_specs_[*type_idx].get();
+  const TypeSpec* type_spec = GetTypeSpecByTypeIndex(*type_idx);
   if (type_spec == nullptr) {
     return base::unexpected(std::nullopt);
   }
 
-  const auto iter_end = type_spec->types + type_spec->type_count;
-  for (auto iter = type_spec->types; iter != iter_end; ++iter) {
-    const incfs::verified_map_ptr<ResTable_type>& type = *iter;
+  for (const auto& type_entry : type_spec->type_entries) {
+    const incfs::verified_map_ptr<ResTable_type>& type = type_entry.type;
 
     size_t entry_count = dtohl(type->entryCount);
     for (size_t entry_idx = 0; entry_idx < entry_count; entry_idx++) {
@@ -492,7 +461,7 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
   // A map of TypeSpec builders, each associated with an type index.
   // We use these to accumulate the set of Types available for a TypeSpec, and later build a single,
   // contiguous block of memory that holds all the Types together with the TypeSpec.
-  std::unordered_map<int, std::unique_ptr<TypeSpecPtrBuilder>> type_builder_map;
+  std::unordered_map<int, std::unique_ptr<TypeSpecBuilder>> type_builder_map;
 
   ChunkIterator iter(chunk.data_ptr(), chunk.data_size());
   while (iter.HasNext()) {
@@ -562,9 +531,9 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
           return {};
         }
 
-        std::unique_ptr<TypeSpecPtrBuilder>& builder_ptr = type_builder_map[type_spec->id - 1];
+        std::unique_ptr<TypeSpecBuilder>& builder_ptr = type_builder_map[type_spec->id];
         if (builder_ptr == nullptr) {
-          builder_ptr = util::make_unique<TypeSpecPtrBuilder>(type_spec.verified());
+          builder_ptr = util::make_unique<TypeSpecBuilder>(type_spec.verified());
           loaded_package->resource_ids_.set(type_spec->id, entry_count);
         } else {
           LOG(WARNING) << StringPrintf("RES_TABLE_TYPE_SPEC_TYPE already defined for ID %02x",
@@ -584,7 +553,7 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
         }
 
         // Type chunks must be preceded by their TypeSpec chunks.
-        std::unique_ptr<TypeSpecPtrBuilder>& builder_ptr = type_builder_map[type->id - 1];
+        std::unique_ptr<TypeSpecBuilder>& builder_ptr = type_builder_map[type->id];
         if (builder_ptr != nullptr) {
           builder_ptr->AddType(type.verified());
         } else {
@@ -707,6 +676,42 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
         }
       } break;
 
+      case RES_TABLE_STAGED_ALIAS_TYPE: {
+        if (loaded_package->package_id_ != kFrameworkPackageId) {
+          LOG(WARNING) << "Alias chunk ignored for non-framework package '"
+                       << loaded_package->package_name_ << "'";
+          break;
+        }
+
+        std::unordered_set<uint32_t> finalized_ids;
+        const auto lib_alias = child_chunk.header<ResTable_staged_alias_header>();
+        if (!lib_alias) {
+          return {};
+        }
+        const auto entry_begin = child_chunk.data_ptr().convert<ResTable_staged_alias_entry>();
+        const auto entry_end = entry_begin + dtohl(lib_alias->count);
+        for (auto entry_iter = entry_begin; entry_iter != entry_end; ++entry_iter) {
+          if (!entry_iter) {
+            return {};
+          }
+          auto finalized_id = dtohl(entry_iter->finalizedResId);
+          if (!finalized_ids.insert(finalized_id).second) {
+            LOG(ERROR) << StringPrintf("Repeated finalized resource id '%08x' in staged aliases.",
+                                       finalized_id);
+            return {};
+          }
+
+          auto staged_id = dtohl(entry_iter->stagedResId);
+          auto [_, success] = loaded_package->alias_id_map_.insert(std::make_pair(staged_id,
+                                                                                  finalized_id));
+          if (!success) {
+            LOG(ERROR) << StringPrintf("Repeated staged resource id '%08x' in staged aliases.",
+                                       staged_id);
+            return {};
+          }
+        }
+      } break;
+
       default:
         LOG(WARNING) << StringPrintf("Unknown chunk type '%02x'.", chunk.type());
         break;
@@ -722,14 +727,9 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
 
   // Flatten and construct the TypeSpecs.
   for (auto& entry : type_builder_map) {
-    uint8_t type_idx = static_cast<uint8_t>(entry.first);
-    TypeSpecPtr type_spec_ptr = entry.second->Build();
-    if (type_spec_ptr == nullptr) {
-      LOG(ERROR) << "Too many type configurations, overflow detected.";
-      return {};
-    }
-
-    loaded_package->type_specs_.editItemAt(type_idx) = std::move(type_spec_ptr);
+    TypeSpec type_spec = entry.second->Build();
+    uint8_t type_id = static_cast<uint8_t>(entry.first);
+    loaded_package->type_specs_[type_id] = std::move(type_spec);
   }
 
   return std::move(loaded_package);
@@ -801,10 +801,10 @@ bool LoadedArsc::LoadTable(const Chunk& chunk, const LoadedIdmap* loaded_idmap,
   return true;
 }
 
-std::unique_ptr<const LoadedArsc> LoadedArsc::Load(incfs::map_ptr<void> data,
-                                                   const size_t length,
-                                                   const LoadedIdmap* loaded_idmap,
-                                                   const package_property_t property_flags) {
+std::unique_ptr<LoadedArsc> LoadedArsc::Load(incfs::map_ptr<void> data,
+                                             const size_t length,
+                                             const LoadedIdmap* loaded_idmap,
+                                             const package_property_t property_flags) {
   ATRACE_NAME("LoadedArsc::Load");
 
   // Not using make_unique because the constructor is private.
@@ -833,11 +833,10 @@ std::unique_ptr<const LoadedArsc> LoadedArsc::Load(incfs::map_ptr<void> data,
     }
   }
 
-  // Need to force a move for mingw32.
-  return std::move(loaded_arsc);
+  return loaded_arsc;
 }
 
-std::unique_ptr<const LoadedArsc> LoadedArsc::CreateEmpty() {
+std::unique_ptr<LoadedArsc> LoadedArsc::CreateEmpty() {
   return std::unique_ptr<LoadedArsc>(new LoadedArsc());
 }
 

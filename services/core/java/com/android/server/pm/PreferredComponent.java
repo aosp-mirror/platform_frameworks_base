@@ -16,19 +16,20 @@
 
 package com.android.server.pm;
 
-import android.content.pm.PackageManagerInternal;
-import com.android.internal.util.XmlUtils;
-
-import com.android.server.LocalServices;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
-
 import android.content.ComponentName;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
+
+import com.android.internal.util.XmlUtils;
+import com.android.server.LocalServices;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -57,7 +58,7 @@ public class PreferredComponent {
     private final String mSetupWizardPackageName;
 
     public interface Callbacks {
-        public boolean onReadTag(String tagName, XmlPullParser parser)
+        public boolean onReadTag(String tagName, TypedXmlPullParser parser)
                 throws XmlPullParserException, IOException;
     }
 
@@ -97,7 +98,7 @@ public class PreferredComponent {
         }
     }
 
-    public PreferredComponent(Callbacks callbacks, XmlPullParser parser)
+    public PreferredComponent(Callbacks callbacks, TypedXmlPullParser parser)
             throws XmlPullParserException, IOException {
         mCallbacks = callbacks;
         mShortComponent = parser.getAttributeValue(null, ATTR_NAME);
@@ -105,12 +106,9 @@ public class PreferredComponent {
         if (mComponent == null) {
             mParseError = "Bad activity name " + mShortComponent;
         }
-        String matchStr = parser.getAttributeValue(null, ATTR_MATCH);
-        mMatch = matchStr != null ? Integer.parseInt(matchStr, 16) : 0;
-        String setCountStr = parser.getAttributeValue(null, ATTR_SET);
-        int setCount = setCountStr != null ? Integer.parseInt(setCountStr) : 0;
-        String alwaysStr = parser.getAttributeValue(null, ATTR_ALWAYS);
-        mAlways = alwaysStr != null ? Boolean.parseBoolean(alwaysStr) : true;
+        mMatch = parser.getAttributeIntHex(null, ATTR_MATCH, 0);
+        int setCount = parser.getAttributeInt(null, ATTR_SET, 0);
+        mAlways = parser.getAttributeBoolean(null, ATTR_ALWAYS, true);
 
         String[] myPackages = setCount > 0 ? new String[setCount] : null;
         String[] myClasses = setCount > 0 ? new String[setCount] : null;
@@ -182,15 +180,15 @@ public class PreferredComponent {
         return mParseError;
     }
 
-    public void writeToXml(XmlSerializer serializer, boolean full) throws IOException {
+    public void writeToXml(TypedXmlSerializer serializer, boolean full) throws IOException {
         final int NS = mSetClasses != null ? mSetClasses.length : 0;
         serializer.attribute(null, ATTR_NAME, mShortComponent);
         if (full) {
             if (mMatch != 0) {
-                serializer.attribute(null, ATTR_MATCH, Integer.toHexString(mMatch));
+                serializer.attributeIntHex(null, ATTR_MATCH, mMatch);
             }
-            serializer.attribute(null, ATTR_ALWAYS, Boolean.toString(mAlways));
-            serializer.attribute(null, ATTR_SET, Integer.toString(NS));
+            serializer.attributeBoolean(null, ATTR_ALWAYS, mAlways);
+            serializer.attributeInt(null, ATTR_SET, NS);
             for (int s=0; s<NS; s++) {
                 serializer.startTag(null, TAG_SET);
                 serializer.attribute(null, ATTR_NAME, mSetComponents[s]);

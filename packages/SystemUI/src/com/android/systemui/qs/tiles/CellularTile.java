@@ -37,6 +37,8 @@ import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
 import android.widget.Switch;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.net.DataUsageController;
@@ -45,6 +47,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile.SignalState;
@@ -56,6 +59,7 @@ import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
+import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
 import javax.inject.Inject;
@@ -75,14 +79,15 @@ public class CellularTile extends QSTileImpl<SignalState> {
             QSHost host,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
+            FalsingManager falsingManager,
             MetricsLogger metricsLogger,
             StatusBarStateController statusBarStateController,
             ActivityStarter activityStarter,
             QSLogger qsLogger,
             NetworkController networkController
     ) {
-        super(host, backgroundLooper, mainHandler, metricsLogger, statusBarStateController,
-                activityStarter, qsLogger);
+        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+                statusBarStateController, activityStarter, qsLogger);
         mController = networkController;
         mDataController = mController.getMobileDataController();
         mDetailAdapter = new CellularDetailAdapter();
@@ -113,7 +118,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
     }
 
     @Override
-    protected void handleClick() {
+    protected void handleClick(@Nullable View view) {
         if (getState().state == Tile.STATE_UNAVAILABLE) {
             return;
         }
@@ -154,7 +159,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
     }
 
     @Override
-    protected void handleSecondaryClick() {
+    protected void handleSecondaryClick(@Nullable View view) {
         if (mDataController.isMobileDataSupported()) {
             showDetail(true);
         } else {
@@ -264,21 +269,17 @@ public class CellularTile extends QSTileImpl<SignalState> {
         private final CallbackInfo mInfo = new CallbackInfo();
 
         @Override
-        public void setMobileDataIndicators(IconState statusIcon, IconState qsIcon, int statusType,
-                int qsType, boolean activityIn, boolean activityOut,
-                CharSequence typeContentDescription,
-                CharSequence typeContentDescriptionHtml, CharSequence description,
-                boolean isWide, int subId, boolean roaming) {
-            if (qsIcon == null) {
+        public void setMobileDataIndicators(MobileDataIndicators indicators) {
+            if (indicators.qsIcon == null) {
                 // Not data sim, don't display.
                 return;
             }
             mInfo.dataSubscriptionName = mController.getMobileDataNetworkName();
-            mInfo.dataContentDescription =
-                    (description != null) ? typeContentDescriptionHtml : null;
-            mInfo.activityIn = activityIn;
-            mInfo.activityOut = activityOut;
-            mInfo.roaming = roaming;
+            mInfo.dataContentDescription = indicators.description != null
+                    ? indicators.typeContentDescriptionHtml : null;
+            mInfo.activityIn = indicators.activityIn;
+            mInfo.activityOut = indicators.activityOut;
+            mInfo.roaming = indicators.roaming;
             mInfo.multipleSubs = mController.getNumberSubscriptions() > 1;
             refreshState(mInfo);
         }
