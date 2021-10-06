@@ -2405,17 +2405,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         });
     }
 
-    void removeStartingWindowIfNeeded() {
-        // Removing the task snapshot after the task is actually focused (see
-        // Task#onWindowFocusChanged). Since some of the app contents may draw in this time and
-        // requires more times to draw finish, in case flicking may happen when removing the task
-        // snapshot too early. (i.e. Showing IME.)
-        if ((mStartingData instanceof SnapshotStartingData) && !getTask().isFocused()) {
-            return;
-        }
-        removeStartingWindow();
-    }
-
     void removeStartingWindow() {
         if (transferSplashScreenIfNeeded()) {
             return;
@@ -4940,7 +4929,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else {
             // If we are being set visible, and the starting window is not yet displayed,
             // then make sure it doesn't get displayed.
-            if (mStartingWindow != null && !mStartingWindow.isDrawn()) {
+            if (mStartingWindow != null && !mStartingWindow.isDrawn()
+                    && (firstWindowDrawn || allDrawn)) {
                 mStartingWindow.clearPolicyVisibilityFlag(LEGACY_POLICY_VISIBILITY);
                 mStartingWindow.mLegacyPolicyVisibilityAfterAnim = false;
             }
@@ -6080,13 +6070,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final Task associatedTask =
                 mSharedStartingData != null ? mSharedStartingData.mAssociatedTask : null;
         if (associatedTask == null) {
-            removeStartingWindowIfNeeded();
+            removeStartingWindow();
         } else if (associatedTask.getActivity(
                 r -> r.mVisibleRequested && !r.firstWindowDrawn) == null) {
             // The last drawn activity may not be the one that owns the starting window.
             final ActivityRecord r = associatedTask.topActivityContainsStartingWindow();
             if (r != null) {
-                r.removeStartingWindowIfNeeded();
+                r.removeStartingWindow();
             }
         }
         updateReportedVisibilityLocked();

@@ -123,14 +123,13 @@ public class TaskSnapshotWindow {
      * Ideally the delay time will be shorter when receiving
      * {@link StartingSurfaceDrawer#onImeDrawnOnTask(int)}.
      */
-    private static final long MAX_DELAY_REMOVAL_TIME_IME_VISIBLE = 450;
+    private static final long MAX_DELAY_REMOVAL_TIME_IME_VISIBLE = 600;
 
     //tmp vars for unused relayout params
     private static final Point TMP_SURFACE_SIZE = new Point();
 
     private final Window mWindow;
     private final Runnable mClearWindowHandler;
-    private final long mDelayRemovalTime;
     private final ShellExecutor mSplashScreenExecutor;
     private final SurfaceControl mSurfaceControl;
     private final IWindowSession mSession;
@@ -221,13 +220,10 @@ public class TaskSnapshotWindow {
             taskDescription.setBackgroundColor(WHITE);
         }
 
-        final long delayRemovalTime = snapshot.hasImeSurface() ? MAX_DELAY_REMOVAL_TIME_IME_VISIBLE
-                : DELAY_REMOVAL_TIME_GENERAL;
-
         final TaskSnapshotWindow snapshotSurface = new TaskSnapshotWindow(
                 surfaceControl, snapshot, layoutParams.getTitle(), taskDescription, appearance,
                 windowFlags, windowPrivateFlags, taskBounds, orientation, activityType,
-                delayRemovalTime, topWindowInsetsState, clearWindowHandler, splashScreenExecutor);
+                topWindowInsetsState, clearWindowHandler, splashScreenExecutor);
         final Window window = snapshotSurface.mWindow;
 
         final InsetsState tmpInsetsState = new InsetsState();
@@ -265,9 +261,8 @@ public class TaskSnapshotWindow {
     public TaskSnapshotWindow(SurfaceControl surfaceControl,
             TaskSnapshot snapshot, CharSequence title, TaskDescription taskDescription,
             int appearance, int windowFlags, int windowPrivateFlags, Rect taskBounds,
-            int currentOrientation, int activityType, long delayRemovalTime,
-            InsetsState topWindowInsetsState, Runnable clearWindowHandler,
-            ShellExecutor splashScreenExecutor) {
+            int currentOrientation, int activityType, InsetsState topWindowInsetsState,
+            Runnable clearWindowHandler, ShellExecutor splashScreenExecutor) {
         mSplashScreenExecutor = splashScreenExecutor;
         mSession = WindowManagerGlobal.getWindowSession();
         mWindow = new Window();
@@ -283,7 +278,6 @@ public class TaskSnapshotWindow {
         mStatusBarColor = taskDescription.getStatusBarColor();
         mOrientationOnCreation = currentOrientation;
         mActivityType = activityType;
-        mDelayRemovalTime = delayRemovalTime;
         mTransaction = new SurfaceControl.Transaction();
         mClearWindowHandler = clearWindowHandler;
         mHasImeSurface = snapshot.hasImeSurface();
@@ -314,7 +308,7 @@ public class TaskSnapshotWindow {
         mSystemBarBackgroundPainter.drawNavigationBarBackground(c);
     }
 
-    void scheduleRemove(Runnable onRemove) {
+    void scheduleRemove(Runnable onRemove, boolean deferRemoveForIme) {
         // Show the latest content as soon as possible for unlocking to home.
         if (mActivityType == ACTIVITY_TYPE_HOME) {
             removeImmediately();
@@ -329,9 +323,12 @@ public class TaskSnapshotWindow {
             TaskSnapshotWindow.this.removeImmediately();
             onRemove.run();
         };
-        mSplashScreenExecutor.executeDelayed(mScheduledRunnable, mDelayRemovalTime);
+        final long delayRemovalTime = mHasImeSurface && deferRemoveForIme
+                ? MAX_DELAY_REMOVAL_TIME_IME_VISIBLE
+                : DELAY_REMOVAL_TIME_GENERAL;
+        mSplashScreenExecutor.executeDelayed(mScheduledRunnable, delayRemovalTime);
         if (DEBUG) {
-            Slog.d(TAG, "Defer removing snapshot surface in " + mDelayRemovalTime);
+            Slog.d(TAG, "Defer removing snapshot surface in " + delayRemovalTime);
         }
     }
 

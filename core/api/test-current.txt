@@ -3191,13 +3191,6 @@ package android.window {
     method @Nullable public android.view.View getBrandingView();
   }
 
-  public final class StartingWindowInfo implements android.os.Parcelable {
-    ctor public StartingWindowInfo();
-    method public int describeContents();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.window.StartingWindowInfo> CREATOR;
-  }
-
   public final class TaskAppearedInfo implements android.os.Parcelable {
     ctor public TaskAppearedInfo(@NonNull android.app.ActivityManager.RunningTaskInfo, @NonNull android.view.SurfaceControl);
     method public int describeContents();
@@ -3264,7 +3257,6 @@ package android.window {
 
   public class TaskOrganizer extends android.window.WindowOrganizer {
     ctor public TaskOrganizer();
-    method @BinderThread public void addStartingWindow(@NonNull android.window.StartingWindowInfo, @NonNull android.os.IBinder);
     method @BinderThread public void copySplashScreenView(int);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void createRootTask(int, int, @Nullable android.os.IBinder);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public boolean deleteRootTask(@NonNull android.window.WindowContainerToken);
@@ -3277,7 +3269,6 @@ package android.window {
     method @BinderThread public void onTaskInfoChanged(@NonNull android.app.ActivityManager.RunningTaskInfo);
     method @BinderThread public void onTaskVanished(@NonNull android.app.ActivityManager.RunningTaskInfo);
     method @CallSuper @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public java.util.List<android.window.TaskAppearedInfo> registerOrganizer();
-    method @BinderThread public void removeStartingWindow(int, @Nullable android.view.SurfaceControl, @Nullable android.graphics.Rect, boolean);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void setInterceptBackPressedOnTaskRoot(@NonNull android.window.WindowContainerToken, boolean);
     method @CallSuper @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void unregisterOrganizer();
   }

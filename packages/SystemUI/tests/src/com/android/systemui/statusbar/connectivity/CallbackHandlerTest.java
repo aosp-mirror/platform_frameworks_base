@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.statusbar.policy;
+package com.android.systemui.statusbar.connectivity;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
@@ -28,11 +28,11 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.policy.NetworkController.EmergencyListener;
-import com.android.systemui.statusbar.policy.NetworkController.IconState;
-import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
-import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
-import com.android.systemui.statusbar.policy.NetworkController.WifiIndicators;
+import com.android.systemui.statusbar.connectivity.NetworkController.EmergencyListener;
+import com.android.systemui.statusbar.connectivity.NetworkController.IconState;
+import com.android.systemui.statusbar.connectivity.NetworkController.MobileDataIndicators;
+import com.android.systemui.statusbar.connectivity.NetworkController.SignalCallback;
+import com.android.systemui.statusbar.connectivity.NetworkController.WifiIndicators;
 import com.android.systemui.tests.R;
 
 import org.junit.Before;
@@ -182,7 +182,8 @@ public class CallbackHandlerTest extends SysuiTestCase {
 
     @Test
     public void testSignalCallback_setIsAirplaneMode() {
-        IconState state = new IconState(true, R.drawable.stat_sys_airplane_mode, "Test Description");
+        IconState state =
+                new IconState(true, R.drawable.stat_sys_airplane_mode, "Test Description");
         mHandler.setIsAirplaneMode(state);
         waitForCallbacks();
 

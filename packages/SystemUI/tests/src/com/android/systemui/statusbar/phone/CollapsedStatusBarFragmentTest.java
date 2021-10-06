@@ -45,10 +45,10 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DisableFlagsLogger;
 import com.android.systemui.statusbar.OperatorNameViewController;
+import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.statusbar.policy.NetworkController;
 
 import org.junit.Before;
 import org.junit.Ignore;

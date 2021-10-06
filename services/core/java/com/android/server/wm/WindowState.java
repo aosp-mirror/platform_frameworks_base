@@ -2216,7 +2216,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         mWmService.mAccessibilityController;
                 final int winTransit = TRANSIT_EXIT;
                 mWinAnimator.applyAnimationLocked(winTransit, false /* isEntrance */);
-                if (accessibilityController != null) {
+                if (accessibilityController.hasCallbacks()) {
                     accessibilityController.onWindowTransition(this, winTransit);
                 }
             }
@@ -2237,7 +2237,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         if (isVisibleNow() && animateExit) {
             mWinAnimator.applyAnimationLocked(TRANSIT_EXIT, false);
-            if (mWmService.mAccessibilityController != null) {
+            if (mWmService.mAccessibilityController.hasCallbacks()) {
                 mWmService.mAccessibilityController.onWindowTransition(this, TRANSIT_EXIT);
             }
             changed = true;
@@ -2287,7 +2287,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             startMoveAnimation(left, top);
         }
 
-        if (mWmService.mAccessibilityController != null) {
+        if (mWmService.mAccessibilityController.hasCallbacks()) {
             mWmService.mAccessibilityController.onSomeWindowResizedOrMoved(getDisplayId());
         }
         updateLocationInParentDisplayIfNeeded();
@@ -2573,7 +2573,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         setDisplayLayoutNeeded();
                         mWmService.requestTraversal();
                     }
-                    if (mWmService.mAccessibilityController != null) {
+                    if (mWmService.mAccessibilityController.hasCallbacks()) {
                         mWmService.mAccessibilityController.onWindowTransition(this, transit);
                     }
                 }
@@ -3598,7 +3598,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mAttrs.type >= FIRST_SYSTEM_WINDOW && mAttrs.type != TYPE_TOAST) {
             mWmService.mAtmService.mActiveUids.onNonAppSurfaceVisibilityChanged(mOwnerUid, shown);
         }
-        if (mIsImWindow && mWmService.mAccessibilityController != null) {
+        if (mIsImWindow && mWmService.mAccessibilityController.hasCallbacks()) {
             mWmService.mAccessibilityController.onImeSurfaceShownChanged(this, shown);
         }
     }
@@ -3942,7 +3942,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         "Requested redraw for orientation change: %s", this);
             }
 
-            if (mWmService.mAccessibilityController != null) {
+            if (mWmService.mAccessibilityController.hasCallbacks()) {
                 mWmService.mAccessibilityController.onSomeWindowResizedOrMoved(displayId);
             }
             updateLocationInParentDisplayIfNeeded();
@@ -5068,7 +5068,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (isAnimating()) {
             return;
         }
-        if (mWmService.mAccessibilityController != null) {
+        if (mWmService.mAccessibilityController.hasCallbacks()) {
             mWmService.mAccessibilityController.onSomeWindowResizedOrMoved(getDisplayId());
         }
 
