@@ -5091,14 +5091,19 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public PendingIntentInfo getInfoForIntentSender(IIntentSender sender) {
         if (sender instanceof PendingIntentRecord) {
-            PendingIntentRecord res = (PendingIntentRecord) sender;
+            final PendingIntentRecord res = (PendingIntentRecord) sender;
+            final String packageName = res.key.packageName;
+            final int uid = res.uid;
+            final boolean shouldFilter = getPackageManagerInternal().filterAppAccess(
+                    packageName, Binder.getCallingUid(), UserHandle.getUserId(uid));
             return new PendingIntentInfo(
-                    res.key.packageName,
-                    res.uid,
+                    shouldFilter ? null : packageName,
+                    shouldFilter ? INVALID_UID : uid,
                     (res.key.flags & PendingIntent.FLAG_IMMUTABLE) != 0,
                     res.key.type);
         } else {
-            return new PendingIntentInfo(null, -1, false, ActivityManager.INTENT_SENDER_UNKNOWN);
+            return new PendingIntentInfo(null, INVALID_UID, false,
+                    ActivityManager.INTENT_SENDER_UNKNOWN);
         }
     }
 
