@@ -10685,7 +10685,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         }
 
-        if (!mOwners.hasDeviceOwner() || !user.isFull() || user.isManagedProfile()) return;
+        if (!mOwners.hasDeviceOwner() || !user.isFull() || user.isManagedProfile()
+                || user.isGuest()) {
+            return;
+        }
 
         if (mInjector.userManagerIsHeadlessSystemUserMode()) {
             ComponentName admin = mOwners.getDeviceOwnerComponent();
