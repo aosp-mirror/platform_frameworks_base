@@ -46,6 +46,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Arrays;
+import java.util.Random;
 import java.util.function.Supplier;
 
 @RunWith(AndroidJUnit4.class)
@@ -134,6 +135,7 @@ public class SntpClientTest {
     private SntpClient mClient;
     private Network mNetwork;
     private Supplier<Instant> mSystemTimeSupplier;
+    private Random mRandom;
 
     @SuppressWarnings("unchecked")
     @Before
@@ -143,9 +145,13 @@ public class SntpClientTest {
         // A mock network has NETID_UNSET, which allows the test to run, with a loopback server,
         // even w/o external networking.
         mNetwork = mock(Network.class, CALLS_REAL_METHODS);
+        mRandom = mock(Random.class);
 
         mSystemTimeSupplier = mock(Supplier.class);
-        mClient = new SntpClient(mSystemTimeSupplier);
+        // Returning zero means the "randomized" bottom bits of the clients transmit timestamp /
+        // server's originate timestamp will be zeros.
+        when(mRandom.nextInt()).thenReturn(0);
+        mClient = new SntpClient(mSystemTimeSupplier, mRandom);
     }
 
     /** Tests when the client and server are in ERA0. b/199481251. */
@@ -258,14 +264,14 @@ public class SntpClientTest {
             long simulatedClientElapsedTimeMillis = totalElapsedTimeMillis;
 
             // Create some symmetrical timestamps.
-            long clientRequestTimestamp =
-                    clientTime.minusMillis(simulatedClientElapsedTimeMillis / 2).toEpochMilli();
-            long clientResponseTimestamp =
-                    clientTime.plusMillis(simulatedClientElapsedTimeMillis / 2).toEpochMilli();
-            long serverReceiveTimestamp =
-                    serverTime.minusMillis(simulatedServerElapsedTimeMillis / 2).toEpochMilli();
-            long serverTransmitTimestamp =
-                    serverTime.plusMillis(simulatedServerElapsedTimeMillis / 2).toEpochMilli();
+            Timestamp64 clientRequestTimestamp = Timestamp64.fromInstant(
+                    clientTime.minusMillis(simulatedClientElapsedTimeMillis / 2));
+            Timestamp64 clientResponseTimestamp = Timestamp64.fromInstant(
+                    clientTime.plusMillis(simulatedClientElapsedTimeMillis / 2));
+            Timestamp64 serverReceiveTimestamp = Timestamp64.fromInstant(
+                    serverTime.minusMillis(simulatedServerElapsedTimeMillis / 2));
+            Timestamp64 serverTransmitTimestamp = Timestamp64.fromInstant(
+                    serverTime.plusMillis(simulatedServerElapsedTimeMillis / 2));
 
             Duration actualOffset = SntpClient.calculateClockOffset(
                     clientRequestTimestamp, serverReceiveTimestamp,
