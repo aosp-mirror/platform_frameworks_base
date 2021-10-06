@@ -74,6 +74,8 @@
         <permission name="android.car.permission.CAR_TEST_SERVICE"/>
         <permission name="android.car.permission.CAR_UX_RESTRICTIONS_CONFIGURATION"/>
         <permission name="android.car.permission.CAR_VENDOR_EXTENSION"/>
+        <!-- use for AndroidCarApiTest -->
+        <permission name="android.car.permission.CONTROL_CAR_APP_LAUNCH"/>
         <permission name="android.car.permission.CONTROL_CAR_CLIMATE"/>
         <permission name="android.car.permission.CONTROL_CAR_DOORS"/>
         <permission name="android.car.permission.CONTROL_CAR_EXTERIOR_LIGHTS"/>
