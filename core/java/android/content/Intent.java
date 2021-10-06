@@ -8851,16 +8851,6 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     /**
-     * Filter extras to only basic types.
-     * @hide
-     */
-    public void removeUnsafeExtras() {
-        if (mExtras != null) {
-            mExtras = mExtras.filterValues();
-        }
-    }
-
-    /**
      * @return Whether {@link #maybeStripForHistory} will return an lightened intent or
      * return itself as-is.
      * @hide
