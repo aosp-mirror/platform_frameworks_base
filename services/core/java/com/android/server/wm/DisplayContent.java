@@ -1666,7 +1666,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     /** Returns {@code true} if the IME is possible to show on the launching activity. */
-    private boolean mayImeShowOnLaunchingActivity(@NonNull ActivityRecord r) {
+    boolean mayImeShowOnLaunchingActivity(@NonNull ActivityRecord r) {
         final WindowState win = r.findMainWindow();
         if (win == null) {
             return false;
