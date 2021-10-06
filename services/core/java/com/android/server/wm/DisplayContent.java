@@ -1284,7 +1284,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         addWindowToken(token.token, token);
 
-        if (mWmService.mAccessibilityController != null) {
+        if (mWmService.mAccessibilityController.hasCallbacks()) {
             final int prevDisplayId = prevDc != null ? prevDc.getDisplayId() : INVALID_DISPLAY;
             mWmService.mAccessibilityController.onSomeWindowResizedOrMoved(prevDisplayId,
                     getDisplayId());
@@ -3569,7 +3569,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // focused one starts firing events.
         // TODO(b/151179149) investigate what info accessibility service needs before input can
         // dispatch focus to clients.
-        if (mWmService.mAccessibilityController != null) {
+        if (mWmService.mAccessibilityController.hasCallbacks()) {
             mWmService.mH.sendMessage(PooledLambda.obtainMessage(
                     this::updateAccessibilityOnWindowFocusChanged,
                     mWmService.mAccessibilityController));
@@ -5216,7 +5216,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
         if (!mLocationInParentWindow.equals(x, y)) {
             mLocationInParentWindow.set(x, y);
-            if (mWmService.mAccessibilityController != null) {
+            if (mWmService.mAccessibilityController.hasCallbacks()) {
                 mWmService.mAccessibilityController.onSomeWindowResizedOrMoved(mDisplayId);
             }
             notifyLocationInParentDisplayChanged();
@@ -5774,7 +5774,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @Override
     void onResize() {
         super.onResize();
-        if (mWmService.mAccessibilityController != null) {
+        if (mWmService.mAccessibilityController.hasCallbacks()) {
             mWmService.mAccessibilityController.onDisplaySizeChanged(this);
         }
     }
