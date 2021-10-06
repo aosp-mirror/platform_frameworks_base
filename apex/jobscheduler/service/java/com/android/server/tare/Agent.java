@@ -17,7 +17,6 @@
 package com.android.server.tare;
 
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
-import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
 import static com.android.server.tare.EconomicPolicy.REGULATION_BASIC_INCOME;
 import static com.android.server.tare.EconomicPolicy.REGULATION_BIRTHRIGHT;
@@ -32,7 +31,7 @@ import static com.android.server.tare.TareUtils.narcToString;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.AlarmManager;
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.os.Handler;
@@ -43,7 +42,6 @@ import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArrayMap;
 
@@ -52,13 +50,13 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.usage.AppStandbyInternal;
+import com.android.server.utils.AlarmQueue;
 
 import libcore.util.EmptyArray;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.PriorityQueue;
 import java.util.function.Consumer;
 
 /**
@@ -103,12 +101,11 @@ class Agent {
             mActionAffordabilityNotes = new SparseArrayMap<>();
 
     /**
-     * Listener to track and manage when apps will cross the closest affordability threshold (in
+     * Queue to track and manage when apps will cross the closest affordability threshold (in
      * both directions).
      */
     @GuardedBy("mLock")
-    private final BalanceThresholdAlarmListener mBalanceThresholdAlarmListener =
-            new BalanceThresholdAlarmListener();
+    private final BalanceThresholdAlarmQueue mBalanceThresholdAlarmQueue;
 
     /**
      * Comparator to use to sort apps before we distribute ARCs so that we try to give the most
@@ -159,7 +156,6 @@ class Agent {
             };
 
     private static final int MSG_CHECK_BALANCE = 0;
-    private static final int MSG_SET_BALANCE_ALARM = 1;
 
     Agent(@NonNull InternalResourceService irs, @NonNull Scribe scribe) {
         mLock = irs.getLock();
@@ -167,6 +163,8 @@ class Agent {
         mScribe = scribe;
         mHandler = new AgentHandler(TareHandlerThread.get().getLooper());
         mAppStandbyInternal = LocalServices.getService(AppStandbyInternal.class);
+        mBalanceThresholdAlarmQueue = new BalanceThresholdAlarmQueue(
+                mIrs.getContext(), TareHandlerThread.get().getLooper());
     }
 
     private class TotalDeltaCalculator implements Consumer<OngoingEvent> {
@@ -692,7 +690,7 @@ class Agent {
     @GuardedBy("mLock")
     void onPackageRemovedLocked(final int userId, @NonNull final String pkgName) {
         reclaimAssetsLocked(userId, pkgName);
-        mBalanceThresholdAlarmListener.removeAlarmLocked(userId, pkgName);
+        mBalanceThresholdAlarmQueue.removeAlarmForKey(new Package(userId, pkgName));
     }
 
     /**
@@ -712,7 +710,7 @@ class Agent {
     @GuardedBy("mLock")
     void onUserRemovedLocked(final int userId, @NonNull final List<String> pkgNames) {
         reclaimAssetsLocked(userId, pkgNames);
-        mBalanceThresholdAlarmListener.removeAlarmsLocked(userId);
+        mBalanceThresholdAlarmQueue.removeAlarmsForUserId(userId);
     }
 
     @GuardedBy("mLock")
@@ -817,7 +815,7 @@ class Agent {
                 mCurrentOngoingEvents.get(userId, pkgName);
         if (ongoingEvents == null) {
             // No ongoing transactions. No reason to schedule
-            mBalanceThresholdAlarmListener.removeAlarmLocked(userId, pkgName);
+            mBalanceThresholdAlarmQueue.removeAlarmForKey(new Package(userId, pkgName));
             return;
         }
         mTrendCalculator.reset(
@@ -829,7 +827,7 @@ class Agent {
         if (lowerTimeMs == TrendCalculator.WILL_NOT_CROSS_THRESHOLD) {
             if (upperTimeMs == TrendCalculator.WILL_NOT_CROSS_THRESHOLD) {
                 // Will never cross a threshold based on current events.
-                mBalanceThresholdAlarmListener.removeAlarmLocked(userId, pkgName);
+                mBalanceThresholdAlarmQueue.removeAlarmForKey(new Package(userId, pkgName));
                 return;
             }
             timeToThresholdMs = upperTimeMs;
@@ -837,14 +835,14 @@ class Agent {
             timeToThresholdMs = (upperTimeMs == TrendCalculator.WILL_NOT_CROSS_THRESHOLD)
                     ? lowerTimeMs : Math.min(lowerTimeMs, upperTimeMs);
         }
-        mBalanceThresholdAlarmListener.addAlarmLocked(userId, pkgName,
+        mBalanceThresholdAlarmQueue.addAlarm(new Package(userId, pkgName),
                 SystemClock.elapsedRealtime() + timeToThresholdMs);
     }
 
     @GuardedBy("mLock")
     void tearDownLocked() {
         mCurrentOngoingEvents.clear();
-        mBalanceThresholdAlarmListener.dropAllAlarmsLocked();
+        mBalanceThresholdAlarmQueue.removeAllAlarms();
     }
 
     @VisibleForTesting
@@ -869,261 +867,60 @@ class Agent {
         }
     }
 
-    /**
-     * An {@link AlarmManager.OnAlarmListener} that will queue up all pending alarms and only
-     * schedule one alarm for the earliest alarm.
-     */
-    private abstract class AlarmQueueListener implements AlarmManager.OnAlarmListener {
-        final class Package {
-            public final String packageName;
-            public final int userId;
+    private static final class Package {
+        public final String packageName;
+        public final int userId;
 
-            Package(int userId, String packageName) {
-                this.userId = userId;
-                this.packageName = packageName;
-            }
-
-            @Override
-            public String toString() {
-                return appToString(userId, packageName);
-            }
-
-            @Override
-            public boolean equals(Object obj) {
-                if (obj == null) {
-                    return false;
-                }
-                if (this == obj) {
-                    return true;
-                }
-                if (obj instanceof Package) {
-                    Package other = (Package) obj;
-                    return userId == other.userId && Objects.equals(packageName, other.packageName);
-                } else {
-                    return false;
-                }
-            }
-
-            @Override
-            public int hashCode() {
-                return packageName.hashCode() + userId;
-            }
+        Package(int userId, String packageName) {
+            this.userId = userId;
+            this.packageName = packageName;
         }
-
-        class AlarmQueue extends PriorityQueue<Pair<Package, Long>> {
-            AlarmQueue() {
-                super(1, (o1, o2) -> (int) (o1.second - o2.second));
-            }
-
-            boolean contains(@NonNull Package pkg) {
-                Pair[] alarms = toArray(new Pair[size()]);
-                for (int i = alarms.length - 1; i >= 0; --i) {
-                    if (pkg.equals(alarms[i].first)) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-
-            /**
-             * Remove any instances of the Package from the queue.
-             *
-             * @return true if an instance was removed, false otherwise.
-             */
-            boolean remove(@NonNull Package pkg) {
-                boolean removed = false;
-                Pair[] alarms = toArray(new Pair[size()]);
-                for (int i = alarms.length - 1; i >= 0; --i) {
-                    if (pkg.equals(alarms[i].first)) {
-                        remove(alarms[i]);
-                        removed = true;
-                    }
-                }
-                return removed;
-            }
-        }
-
-        @GuardedBy("mLock")
-        private final AlarmQueue mAlarmQueue = new AlarmQueue();
-        private final String mAlarmTag;
-        /** Whether to use an exact alarm or an inexact alarm. */
-        private final boolean mExactAlarm;
-        /** The minimum amount of time between check alarms. */
-        private final long mMinTimeBetweenAlarmsMs;
-        /** The next time the alarm is set to go off, in the elapsed realtime timebase. */
-        @GuardedBy("mLock")
-        private long mTriggerTimeElapsed = 0;
-
-        protected AlarmQueueListener(@NonNull String alarmTag, boolean exactAlarm,
-                long minTimeBetweenAlarmsMs) {
-            mAlarmTag = alarmTag;
-            mExactAlarm = exactAlarm;
-            mMinTimeBetweenAlarmsMs = minTimeBetweenAlarmsMs;
-        }
-
-        @GuardedBy("mLock")
-        boolean hasAlarmScheduledLocked(int userId, @NonNull String pkgName) {
-            final Package pkg = new Package(userId, pkgName);
-            return mAlarmQueue.contains(pkg);
-        }
-
-        @GuardedBy("mLock")
-        void addAlarmLocked(int userId, @NonNull String pkgName, long alarmTimeElapsed) {
-            final Package pkg = new Package(userId, pkgName);
-            mAlarmQueue.remove(pkg);
-            mAlarmQueue.offer(new Pair<>(pkg, alarmTimeElapsed));
-            setNextAlarmLocked();
-        }
-
-        @GuardedBy("mLock")
-        void removeAlarmLocked(@NonNull Package pkg) {
-            if (mAlarmQueue.remove(pkg)) {
-                setNextAlarmLocked();
-            }
-        }
-
-        @GuardedBy("mLock")
-        void removeAlarmLocked(int userId, @NonNull String packageName) {
-            removeAlarmLocked(new Package(userId, packageName));
-        }
-
-        @GuardedBy("mLock")
-        void removeAlarmsLocked(int userId) {
-            boolean removed = false;
-            Pair[] alarms = mAlarmQueue.toArray(new Pair[mAlarmQueue.size()]);
-            for (int i = alarms.length - 1; i >= 0; --i) {
-                final Package pkg = (Package) alarms[i].first;
-                if (userId == pkg.userId) {
-                    mAlarmQueue.remove(alarms[i]);
-                    removed = true;
-                }
-            }
-            if (removed) {
-                setNextAlarmLocked();
-            }
-        }
-
-        /** Sets an alarm with {@link AlarmManager} for the earliest alarm in the queue. */
-        @GuardedBy("mLock")
-        void setNextAlarmLocked() {
-            setNextAlarmLocked(SystemClock.elapsedRealtime());
-        }
-
-        /**
-         * Sets an alarm with {@link AlarmManager} for the earliest alarm in the queue, using
-         * {@code earliestTriggerElapsed} as a floor.
-         */
-        @GuardedBy("mLock")
-        private void setNextAlarmLocked(long earliestTriggerElapsed) {
-            if (mAlarmQueue.size() > 0) {
-                final Pair<Package, Long> alarm = mAlarmQueue.peek();
-                final long nextTriggerTimeElapsed = Math.max(earliestTriggerElapsed, alarm.second);
-                // Only schedule the alarm if one of the following is true:
-                // 1. There isn't one currently scheduled
-                // 2. The new alarm is significantly earlier than the previous alarm. If it's
-                // earlier but not significantly so, then we essentially delay the check for some
-                // apps by up to a minute.
-                // 3. The alarm is after the current alarm.
-                if (mTriggerTimeElapsed == 0
-                        || nextTriggerTimeElapsed < mTriggerTimeElapsed - MINUTE_IN_MILLIS
-                        || mTriggerTimeElapsed < nextTriggerTimeElapsed) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "Scheduling start alarm at " + nextTriggerTimeElapsed
-                                + " for app " + alarm.first);
-                    }
-                    mHandler.post(() -> {
-                        // Never call out to AlarmManager with the lock held. This sits below AM.
-                        AlarmManager alarmManager =
-                                mIrs.getContext().getSystemService(AlarmManager.class);
-                        if (alarmManager != null) {
-                            if (mExactAlarm) {
-                                alarmManager.setExact(AlarmManager.ELAPSED_REALTIME,
-                                        nextTriggerTimeElapsed, mAlarmTag, this, mHandler);
-                            } else {
-                                alarmManager.setWindow(AlarmManager.ELAPSED_REALTIME,
-                                        nextTriggerTimeElapsed, mMinTimeBetweenAlarmsMs / 2,
-                                        mAlarmTag, this, mHandler);
-                            }
-                        } else {
-                            mHandler.sendEmptyMessageDelayed(MSG_SET_BALANCE_ALARM, 30_000);
-                        }
-                    });
-                    mTriggerTimeElapsed = nextTriggerTimeElapsed;
-                }
-            } else {
-                mHandler.post(() -> {
-                    // Never call out to AlarmManager with the lock held. This sits below AM.
-                    AlarmManager alarmManager =
-                            mIrs.getContext().getSystemService(AlarmManager.class);
-                    if (alarmManager != null) {
-                        // This should only be null at boot time. No concerns around not
-                        // cancelling if we get null here.
-                        alarmManager.cancel(this);
-                    }
-                });
-                mTriggerTimeElapsed = 0;
-            }
-        }
-
-        @GuardedBy("mLock")
-        void dropAllAlarmsLocked() {
-            mAlarmQueue.clear();
-            setNextAlarmLocked(0);
-        }
-
-        @GuardedBy("mLock")
-        protected abstract void processExpiredAlarmLocked(int userId, @NonNull String packageName);
 
         @Override
-        public void onAlarm() {
-            synchronized (mLock) {
-                final long nowElapsed = SystemClock.elapsedRealtime();
-                while (mAlarmQueue.size() > 0) {
-                    final Pair<Package, Long> alarm = mAlarmQueue.peek();
-                    if (alarm.second <= nowElapsed) {
-                        processExpiredAlarmLocked(alarm.first.userId, alarm.first.packageName);
-                        mAlarmQueue.remove(alarm);
-                    } else {
-                        break;
-                    }
-                }
-                setNextAlarmLocked(nowElapsed + mMinTimeBetweenAlarmsMs);
-            }
+        public String toString() {
+            return appToString(userId, packageName);
         }
 
-        @GuardedBy("mLock")
-        void dumpLocked(IndentingPrintWriter pw) {
-            pw.print(mAlarmTag);
-            pw.println(" alarms:");
-            pw.increaseIndent();
-
-            if (mAlarmQueue.size() == 0) {
-                pw.println("NOT WAITING");
-            } else {
-                Pair[] alarms = mAlarmQueue.toArray(new Pair[mAlarmQueue.size()]);
-                for (int i = 0; i < alarms.length; ++i) {
-                    final Package pkg = (Package) alarms[i].first;
-                    pw.print(pkg);
-                    pw.print(": ");
-                    pw.print(alarms[i].second);
-                    pw.println();
-                }
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
             }
+            if (this == obj) {
+                return true;
+            }
+            if (obj instanceof Package) {
+                Package other = (Package) obj;
+                return userId == other.userId && Objects.equals(packageName, other.packageName);
+            }
+            return false;
+        }
 
-            pw.decreaseIndent();
+        @Override
+        public int hashCode() {
+            return packageName.hashCode() + userId;
         }
     }
 
     /** Track when apps will cross the closest affordability threshold (in both directions). */
-    private class BalanceThresholdAlarmListener extends AlarmQueueListener {
-        private BalanceThresholdAlarmListener() {
-            super(ALARM_TAG_AFFORDABILITY_CHECK, true, 15_000L);
+    private class BalanceThresholdAlarmQueue extends AlarmQueue<Package> {
+        private BalanceThresholdAlarmQueue(Context context, Looper looper) {
+            super(context, looper, ALARM_TAG_AFFORDABILITY_CHECK, "Affordability check", true,
+                    15_000L);
         }
 
         @Override
-        @GuardedBy("mLock")
-        protected void processExpiredAlarmLocked(int userId, @NonNull String packageName) {
-            mHandler.obtainMessage(MSG_CHECK_BALANCE, userId, 0, packageName).sendToTarget();
+        protected boolean isForUser(@NonNull Package key, int userId) {
+            return key.userId == userId;
+        }
+
+        @Override
+        protected void processExpiredAlarms(@NonNull ArraySet<Package> expired) {
+            for (int i = 0; i < expired.size(); ++i) {
+                Package p = expired.valueAt(i);
+                mHandler.obtainMessage(MSG_CHECK_BALANCE, p.userId, 0, p.packageName)
+                        .sendToTarget();
+            }
         }
     }
 
@@ -1288,13 +1085,6 @@ class Agent {
                     }
                 }
                 break;
-
-                case MSG_SET_BALANCE_ALARM: {
-                    synchronized (mLock) {
-                        mBalanceThresholdAlarmListener.setNextAlarmLocked();
-                    }
-                }
-                break;
             }
         }
     }
@@ -1302,6 +1092,6 @@ class Agent {
     @GuardedBy("mLock")
     void dumpLocked(IndentingPrintWriter pw) {
         pw.println();
-        mBalanceThresholdAlarmListener.dumpLocked(pw);
+        mBalanceThresholdAlarmQueue.dump(pw);
     }
 }

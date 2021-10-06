@@ -56,7 +56,6 @@ import android.provider.DeviceConfig;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseArrayMap;
@@ -76,11 +75,11 @@ import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateControllerProto;
 import com.android.server.usage.AppStandbyInternal;
 import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
+import com.android.server.utils.AlarmQueue;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.PriorityQueue;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -323,10 +322,10 @@ public final class QuotaController extends StateController {
             new SparseArrayMap<>();
 
     /**
-     * Listener to track and manage when each package comes back within quota.
+     * Queue to track and manage when each package comes back within quota.
      */
     @GuardedBy("mLock")
-    private final InQuotaAlarmListener mInQuotaAlarmListener = new InQuotaAlarmListener();
+    private final InQuotaAlarmQueue mInQuotaAlarmQueue;
 
     /** Cached calculation results for each app, with the standby buckets as the array indices. */
     private final SparseArrayMap<String, ExecutionStats[]> mExecutionStatsCache =
@@ -589,11 +588,12 @@ public final class QuotaController extends StateController {
         mHandler = new QcHandler(mContext.getMainLooper());
         mChargeTracker = new ChargingTracker();
         mChargeTracker.startTracking();
-        mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+        mAlarmManager = mContext.getSystemService(AlarmManager.class);
         mQcConstants = new QcConstants();
         mBackgroundJobsController = backgroundJobsController;
         mConnectivityController = connectivityController;
         mIsEnabled = !mConstants.USE_TARE_POLICY;
+        mInQuotaAlarmQueue = new InQuotaAlarmQueue(mContext, mContext.getMainLooper());
 
         // Set up the app standby bucketing tracker
         AppStandbyInternal appStandby = LocalServices.getService(AppStandbyInternal.class);
@@ -742,7 +742,7 @@ public final class QuotaController extends StateController {
         mEJPkgTimers.delete(userId);
         mTimingSessions.delete(userId);
         mEJTimingSessions.delete(userId);
-        mInQuotaAlarmListener.removeAlarmsLocked(userId);
+        mInQuotaAlarmQueue.removeAlarmsForUserId(userId);
         mExecutionStatsCache.delete(userId);
         mEJStats.delete(userId);
         mSystemInstallers.remove(userId);
@@ -768,7 +768,7 @@ public final class QuotaController extends StateController {
         }
         mTimingSessions.delete(userId, packageName);
         mEJTimingSessions.delete(userId, packageName);
-        mInQuotaAlarmListener.removeAlarmLocked(userId, packageName);
+        mInQuotaAlarmQueue.removeAlarmForKey(new Package(userId, packageName));
         mExecutionStatsCache.delete(userId, packageName);
         mEJStats.delete(userId, packageName);
         mTopAppTrackers.delete(userId, packageName);
@@ -1657,7 +1657,7 @@ public final class QuotaController extends StateController {
             // exempted.
             maybeScheduleStartAlarmLocked(userId, packageName, realStandbyBucket);
         } else {
-            mInQuotaAlarmListener.removeAlarmLocked(userId, packageName);
+            mInQuotaAlarmQueue.removeAlarmForKey(new Package(userId, packageName));
         }
         return changed;
     }
@@ -1695,7 +1695,7 @@ public final class QuotaController extends StateController {
             if (isWithinQuotaLocked(userId, packageName, realStandbyBucket) && isWithinEJQuota) {
                 // TODO(141645789): we probably shouldn't cancel the alarm until we've verified
                 // that all jobs for the userId-package are within quota.
-                mInQuotaAlarmListener.removeAlarmLocked(userId, packageName);
+                mInQuotaAlarmQueue.removeAlarmForKey(new Package(userId, packageName));
             } else {
                 mToScheduleStartAlarms.add(userId, packageName, realStandbyBucket);
             }
@@ -1760,7 +1760,7 @@ public final class QuotaController extends StateController {
                         + getRemainingExecutionTimeLocked(userId, packageName, standbyBucket)
                         + "ms in its quota.");
             }
-            mInQuotaAlarmListener.removeAlarmLocked(userId, packageName);
+            mInQuotaAlarmQueue.removeAlarmForKey(new Package(userId, packageName));
             mHandler.obtainMessage(MSG_CHECK_PACKAGE, userId, 0, packageName).sendToTarget();
             return;
         }
@@ -1825,7 +1825,7 @@ public final class QuotaController extends StateController {
                             + nowElapsed + ", inQuotaTime=" + inQuotaTimeElapsed + ": " + stats);
             inQuotaTimeElapsed = nowElapsed + 5 * MINUTE_IN_MILLIS;
         }
-        mInQuotaAlarmListener.addAlarmLocked(userId, packageName, inQuotaTimeElapsed);
+        mInQuotaAlarmQueue.addAlarm(new Package(userId, packageName), inQuotaTimeElapsed);
     }
 
     private boolean setConstraintSatisfied(@NonNull JobStatus jobStatus, long nowElapsed,
@@ -2805,176 +2805,25 @@ public final class QuotaController extends StateController {
         }
     }
 
-    static class AlarmQueue extends PriorityQueue<Pair<Package, Long>> {
-        AlarmQueue() {
-            super(1, (o1, o2) -> (int) (o1.second - o2.second));
-        }
-
-        /**
-         * Remove any instances of the Package from the queue.
-         *
-         * @return true if an instance was removed, false otherwise.
-         */
-        boolean remove(@NonNull Package pkg) {
-            boolean removed = false;
-            Pair[] alarms = toArray(new Pair[size()]);
-            for (int i = alarms.length - 1; i >= 0; --i) {
-                if (pkg.equals(alarms[i].first)) {
-                    remove(alarms[i]);
-                    removed = true;
-                }
-            }
-            return removed;
-        }
-    }
-
     /** Track when UPTCs are expected to come back into quota. */
-    private class InQuotaAlarmListener implements AlarmManager.OnAlarmListener {
-        @GuardedBy("mLock")
-        private final AlarmQueue mAlarmQueue = new AlarmQueue();
-        /** The next time the alarm is set to go off, in the elapsed realtime timebase. */
-        @GuardedBy("mLock")
-        private long mTriggerTimeElapsed = 0;
-        /** The minimum amount of time between quota check alarms. */
-        @GuardedBy("mLock")
-        private long mMinQuotaCheckDelayMs = QcConstants.DEFAULT_MIN_QUOTA_CHECK_DELAY_MS;
-
-        @GuardedBy("mLock")
-        void addAlarmLocked(int userId, @NonNull String pkgName, long inQuotaTimeElapsed) {
-            final Package pkg = new Package(userId, pkgName);
-            mAlarmQueue.remove(pkg);
-            mAlarmQueue.offer(new Pair<>(pkg, inQuotaTimeElapsed));
-            setNextAlarmLocked();
-        }
-
-        @GuardedBy("mLock")
-        void setMinQuotaCheckDelayMs(long minDelayMs) {
-            mMinQuotaCheckDelayMs = minDelayMs;
-        }
-
-        @GuardedBy("mLock")
-        void removeAlarmLocked(@NonNull Package pkg) {
-            if (mAlarmQueue.remove(pkg)) {
-                setNextAlarmLocked();
-            }
-        }
-
-        @GuardedBy("mLock")
-        void removeAlarmLocked(int userId, @NonNull String packageName) {
-            removeAlarmLocked(new Package(userId, packageName));
-        }
-
-        @GuardedBy("mLock")
-        void removeAlarmsLocked(int userId) {
-            boolean removed = false;
-            Pair[] alarms = mAlarmQueue.toArray(new Pair[mAlarmQueue.size()]);
-            for (int i = alarms.length - 1; i >= 0; --i) {
-                final Package pkg = (Package) alarms[i].first;
-                if (userId == pkg.userId) {
-                    mAlarmQueue.remove(alarms[i]);
-                    removed = true;
-                }
-            }
-            if (removed) {
-                setNextAlarmLocked();
-            }
-        }
-
-        @GuardedBy("mLock")
-        private void setNextAlarmLocked() {
-            setNextAlarmLocked(sElapsedRealtimeClock.millis());
-        }
-
-        @GuardedBy("mLock")
-        private void setNextAlarmLocked(long earliestTriggerElapsed) {
-            if (mAlarmQueue.size() > 0) {
-                final Pair<Package, Long> alarm = mAlarmQueue.peek();
-                final long nextTriggerTimeElapsed = Math.max(earliestTriggerElapsed, alarm.second);
-                // Only schedule the alarm if one of the following is true:
-                // 1. There isn't one currently scheduled
-                // 2. The new alarm is significantly earlier than the previous alarm. If it's
-                // earlier but not significantly so, then we essentially delay the job a few extra
-                // minutes.
-                // 3. The alarm is after the current alarm.
-                if (mTriggerTimeElapsed == 0
-                        || nextTriggerTimeElapsed < mTriggerTimeElapsed - 3 * MINUTE_IN_MILLIS
-                        || mTriggerTimeElapsed < nextTriggerTimeElapsed) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "Scheduling start alarm at " + nextTriggerTimeElapsed
-                                + " for app " + alarm.first);
-                    }
-                    mAlarmManager.set(AlarmManager.ELAPSED_REALTIME, nextTriggerTimeElapsed,
-                            ALARM_TAG_QUOTA_CHECK, this, mHandler);
-                    mTriggerTimeElapsed = nextTriggerTimeElapsed;
-                }
-            } else {
-                mAlarmManager.cancel(this);
-                mTriggerTimeElapsed = 0;
-            }
+    private class InQuotaAlarmQueue extends AlarmQueue<Package> {
+        private InQuotaAlarmQueue(Context context, Looper looper) {
+            super(context, looper, ALARM_TAG_QUOTA_CHECK, "In quota", false,
+                    QcConstants.DEFAULT_MIN_QUOTA_CHECK_DELAY_MS);
         }
 
         @Override
-        public void onAlarm() {
-            synchronized (mLock) {
-                while (mAlarmQueue.size() > 0) {
-                    final Pair<Package, Long> alarm = mAlarmQueue.peek();
-                    if (alarm.second <= sElapsedRealtimeClock.millis()) {
-                        mHandler.obtainMessage(MSG_CHECK_PACKAGE, alarm.first.userId, 0,
-                                alarm.first.packageName).sendToTarget();
-                        mAlarmQueue.remove(alarm);
-                    } else {
-                        break;
-                    }
-                }
-                setNextAlarmLocked(sElapsedRealtimeClock.millis() + mMinQuotaCheckDelayMs);
-            }
+        protected boolean isForUser(@NonNull Package key, int userId) {
+            return key.userId == userId;
         }
 
-        @GuardedBy("mLock")
-        void dumpLocked(IndentingPrintWriter pw) {
-            pw.println("In quota alarms:");
-            pw.increaseIndent();
-
-            if (mAlarmQueue.size() == 0) {
-                pw.println("NOT WAITING");
-            } else {
-                Pair[] alarms = mAlarmQueue.toArray(new Pair[mAlarmQueue.size()]);
-                for (int i = 0; i < alarms.length; ++i) {
-                    final Package pkg = (Package) alarms[i].first;
-                    pw.print(pkg);
-                    pw.print(": ");
-                    pw.print(alarms[i].second);
-                    pw.println();
-                }
+        @Override
+        protected void processExpiredAlarms(@NonNull ArraySet<Package> expired) {
+            for (int i = 0; i < expired.size(); ++i) {
+                Package p = expired.valueAt(i);
+                mHandler.obtainMessage(MSG_CHECK_PACKAGE, p.userId, 0, p.packageName)
+                        .sendToTarget();
             }
-
-            pw.decreaseIndent();
-        }
-
-        @GuardedBy("mLock")
-        void dumpLocked(ProtoOutputStream proto, long fieldId) {
-            final long token = proto.start(fieldId);
-
-            proto.write(
-                    StateControllerProto.QuotaController.InQuotaAlarmListener.TRIGGER_TIME_ELAPSED,
-                    mTriggerTimeElapsed);
-
-            Pair[] alarms = mAlarmQueue.toArray(new Pair[mAlarmQueue.size()]);
-            for (int i = 0; i < alarms.length; ++i) {
-                final long aToken = proto.start(
-                        StateControllerProto.QuotaController.InQuotaAlarmListener.ALARMS);
-
-                final Package pkg = (Package) alarms[i].first;
-                pkg.dumpDebug(proto,
-                        StateControllerProto.QuotaController.InQuotaAlarmListener.Alarm.PKG);
-                proto.write(
-                        StateControllerProto.QuotaController.InQuotaAlarmListener.Alarm.IN_QUOTA_TIME_ELAPSED,
-                        (Long) alarms[i].second);
-
-                proto.end(aToken);
-            }
-
-            proto.end(token);
         }
     }
 
@@ -3563,7 +3412,7 @@ public final class QuotaController extends StateController {
                             properties.getLong(key, DEFAULT_MIN_QUOTA_CHECK_DELAY_MS);
                     // We don't need to re-evaluate execution stats or constraint status for this.
                     // Limit the delay to the range [0, 15] minutes.
-                    mInQuotaAlarmListener.setMinQuotaCheckDelayMs(
+                    mInQuotaAlarmQueue.setMinTimeBetweenAlarmsMs(
                             Math.min(15 * MINUTE_IN_MILLIS, Math.max(0, MIN_QUOTA_CHECK_DELAY_MS)));
                     break;
                 case KEY_EJ_TOP_APP_TIME_CHUNK_SIZE_MS:
@@ -4104,7 +3953,7 @@ public final class QuotaController extends StateController {
 
     @VisibleForTesting
     long getMinQuotaCheckDelayMs() {
-        return mInQuotaAlarmListener.mMinQuotaCheckDelayMs;
+        return mInQuotaAlarmQueue.getMinTimeBetweenAlarmsMs();
     }
 
     @VisibleForTesting
@@ -4302,7 +4151,7 @@ public final class QuotaController extends StateController {
         pw.decreaseIndent();
 
         pw.println();
-        mInQuotaAlarmListener.dumpLocked(pw);
+        mInQuotaAlarmQueue.dump(pw);
         pw.decreaseIndent();
     }
 
@@ -4437,9 +4286,6 @@ public final class QuotaController extends StateController {
                 proto.end(psToken);
             }
         }
-
-        mInQuotaAlarmListener.dumpLocked(proto,
-                StateControllerProto.QuotaController.IN_QUOTA_ALARM_LISTENER);
 
         proto.end(mToken);
         proto.end(token);
