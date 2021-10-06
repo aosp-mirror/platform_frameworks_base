@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.policy;
+package com.android.systemui.statusbar.connectivity;
 
 import android.content.Context;
 import android.content.Intent;
@@ -22,29 +22,44 @@ import android.telephony.SubscriptionInfo;
 
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.demomode.DemoMode;
-import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
+import com.android.systemui.statusbar.connectivity.NetworkController.SignalCallback;
+import com.android.systemui.statusbar.policy.CallbackController;
+import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.wifitrackerlib.MergedCarrierEntry;
 import com.android.wifitrackerlib.WifiEntry;
 
 import java.util.List;
 
+/** */
 public interface NetworkController extends CallbackController<SignalCallback>, DemoMode {
-
+    /** */
     boolean hasMobileDataFeature();
+    /** */
     void setWifiEnabled(boolean enabled);
+    /** */
     AccessPointController getAccessPointController();
+    /** */
     DataUsageController getMobileDataController();
+    /** */
     DataSaverController getDataSaverController();
+    /** */
     String getMobileDataNetworkName();
+    /** */
     boolean isMobileDataNetworkInService();
+    /** */
     int getNumberSubscriptions();
 
+    /** */
     boolean hasVoiceCallingFeature();
 
+    /** */
     void addEmergencyListener(EmergencyListener listener);
+    /** */
     void removeEmergencyListener(EmergencyListener listener);
+    /** */
     boolean hasEmergencyCryptKeeperText();
 
+    /** */
     boolean isRadioOn();
 
     /**
@@ -143,7 +158,8 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
         }
     }
 
-    public interface SignalCallback {
+    /** */
+    interface SignalCallback {
         /**
          * Callback for listeners to be able to update the state of any UI tracking connectivity of
          * WiFi networks.
@@ -156,14 +172,19 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
          */
         default void setMobileDataIndicators(MobileDataIndicators mobileDataIndicators) {}
 
+        /** */
         default void setSubs(List<SubscriptionInfo> subs) {}
 
+        /** */
         default void setNoSims(boolean show, boolean simDetected) {}
 
+        /** */
         default void setEthernetIndicators(IconState icon) {}
 
+        /** */
         default void setIsAirplaneMode(IconState icon) {}
 
+        /** */
         default void setMobileDataEnabled(boolean enabled) {}
 
         /**

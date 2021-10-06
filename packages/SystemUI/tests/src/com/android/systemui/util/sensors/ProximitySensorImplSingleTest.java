@@ -42,7 +42,7 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class ProximitySensorSingleTest extends SysuiTestCase {
+public class ProximitySensorImplSingleTest extends SysuiTestCase {
     private ProximitySensor mProximitySensor;
     private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
     private FakeThresholdSensor mThresholdSensor;
@@ -54,7 +54,7 @@ public class ProximitySensorSingleTest extends SysuiTestCase {
         mThresholdSensor = new FakeThresholdSensor();
         mThresholdSensor.setLoaded(true);
 
-        mProximitySensor = new ProximitySensor(
+        mProximitySensor = new ProximitySensorImpl(
                 mThresholdSensor, new FakeThresholdSensor(), mFakeExecutor, new FakeExecution());
     }
 
@@ -215,7 +215,7 @@ public class ProximitySensorSingleTest extends SysuiTestCase {
     public void testPreventRecursiveAlert() {
         TestableListener listenerA = new TestableListener() {
             @Override
-            public void onThresholdCrossed(ProximitySensor.ThresholdSensorEvent proximityEvent) {
+            public void onThresholdCrossed(ThresholdSensorEvent proximityEvent) {
                 super.onThresholdCrossed(proximityEvent);
                 if (mCallCount < 2) {
                     mProximitySensor.alertListeners();
@@ -231,11 +231,11 @@ public class ProximitySensorSingleTest extends SysuiTestCase {
     }
 
     private static class TestableListener implements ThresholdSensor.Listener {
-        ThresholdSensor.ThresholdSensorEvent mLastEvent;
+        ThresholdSensorEvent mLastEvent;
         int mCallCount = 0;
 
         @Override
-        public void onThresholdCrossed(ThresholdSensor.ThresholdSensorEvent proximityEvent) {
+        public void onThresholdCrossed(ThresholdSensorEvent proximityEvent) {
             mLastEvent = proximityEvent;
             mCallCount++;
         }

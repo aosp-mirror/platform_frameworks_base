@@ -24,6 +24,8 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.util.Arrays;
+
 import com.android.internal.R;
 
 /**
@@ -258,10 +260,11 @@ public class AmbientDisplayConfiguration {
             String defaultValue,
             int posture) {
         String sensorType = defaultValue;
-        if (posture < postureMapping.length) {
+        if (postureMapping != null && posture < postureMapping.length) {
             sensorType = postureMapping[posture];
         } else {
-            Log.e(TAG, "Unsupported doze posture " + posture);
+            Log.e(TAG, "Unsupported doze posture " + posture
+                  + " postureMapping=" + Arrays.toString(postureMapping));
         }
 
         return TextUtils.isEmpty(sensorType) ? defaultValue : sensorType;
