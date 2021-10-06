@@ -160,7 +160,7 @@ public final class SensorPrivacyService extends SystemService {
 
     private SensorPrivacyManagerInternalImpl mSensorPrivacyManagerInternal;
 
-    private EmergencyCallHelper mEmergencyCallHelper;
+    private CallStateHelper mCallStateHelper;
     private KeyguardManager mKeyguardManager;
 
     private int mCurrentUser = USER_NULL;
@@ -191,7 +191,7 @@ public final class SensorPrivacyService extends SystemService {
     public void onBootPhase(int phase) {
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
             mKeyguardManager = mContext.getSystemService(KeyguardManager.class);
-            mEmergencyCallHelper = new EmergencyCallHelper();
+            mCallStateHelper = new CallStateHelper();
         } else if (phase == PHASE_ACTIVITY_MANAGER_READY) {
             mCameraPrivacyLightController = new CameraPrivacyLightController(mContext);
         }
@@ -702,7 +702,7 @@ public final class SensorPrivacyService extends SystemService {
         }
 
         private boolean canChangeIndividualSensorPrivacy(@UserIdInt int userId, int sensor) {
-            if (sensor == MICROPHONE && mEmergencyCallHelper.isInEmergencyCall()) {
+            if (sensor == MICROPHONE && mCallStateHelper.isInEmergencyCall()) {
                 // During emergency call the microphone toggle managed automatically
                 Log.i(TAG, "Can't change mic toggle during an emergency call");
                 return false;
@@ -1523,16 +1523,16 @@ public final class SensorPrivacyService extends SystemService {
         }
     }
 
-    private class EmergencyCallHelper {
+    private class CallStateHelper {
         private OutgoingEmergencyStateCallback mEmergencyStateCallback;
         private CallStateCallback mCallStateCallback;
 
         private boolean mIsInEmergencyCall;
         private boolean mMicUnmutedForEmergencyCall;
 
-        private Object mEmergencyStateLock = new Object();
+        private Object mCallStateLock = new Object();
 
-        EmergencyCallHelper() {
+        CallStateHelper() {
             mEmergencyStateCallback = new OutgoingEmergencyStateCallback();
             mCallStateCallback = new CallStateCallback();
 
@@ -1543,7 +1543,7 @@ public final class SensorPrivacyService extends SystemService {
         }
 
         boolean isInEmergencyCall() {
-            synchronized (mEmergencyStateLock) {
+            synchronized (mCallStateLock) {
                 return mIsInEmergencyCall;
             }
         }
@@ -1563,12 +1563,14 @@ public final class SensorPrivacyService extends SystemService {
             public void onCallStateChanged(int state) {
                 if (state == TelephonyManager.CALL_STATE_IDLE) {
                     onCallOver();
+                } else {
+                    onCall();
                 }
             }
         }
 
         private void onEmergencyCall() {
-            synchronized (mEmergencyStateLock) {
+            synchronized (mCallStateLock) {
                 if (!mIsInEmergencyCall) {
                     mIsInEmergencyCall = true;
                     if (mSensorPrivacyServiceImpl
@@ -1583,8 +1585,19 @@ public final class SensorPrivacyService extends SystemService {
             }
         }
 
+        private void onCall() {
+            long token = Binder.clearCallingIdentity();
+            try {
+                synchronized (mCallStateLock) {
+                    mSensorPrivacyServiceImpl.showSensorUseDialog(MICROPHONE);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
         private void onCallOver() {
-            synchronized (mEmergencyStateLock) {
+            synchronized (mCallStateLock) {
                 if (mIsInEmergencyCall) {
                     mIsInEmergencyCall = false;
                     if (mMicUnmutedForEmergencyCall) {
