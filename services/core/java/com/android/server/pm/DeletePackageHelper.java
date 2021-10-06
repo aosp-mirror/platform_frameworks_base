@@ -463,6 +463,7 @@ final class DeletePackageHelper {
         final SharedUserSetting sus = ps.getSharedUser();
         final List<AndroidPackage> sharedUserPkgs =
                 sus != null ? sus.getPackages() : Collections.emptyList();
+        final PreferredActivityHelper preferredActivityHelper = new PreferredActivityHelper(mPm);
         final int[] userIds = (userId == UserHandle.USER_ALL) ? mUserManagerInternal.getUserIds()
                 : new int[] {userId};
         for (int nextUserId : userIds) {
@@ -476,7 +477,8 @@ final class DeletePackageHelper {
             }
             PackageManagerService.removeKeystoreDataIfNeeded(mUserManagerInternal, nextUserId,
                     ps.getAppId());
-            mPm.clearPackagePreferredActivities(ps.getPackageName(), nextUserId);
+            preferredActivityHelper.clearPackagePreferredActivities(ps.getPackageName(),
+                    nextUserId);
             mPm.mDomainVerificationManager.clearPackageForUser(ps.getPackageName(), nextUserId);
         }
         mPermissionManager.onPackageUninstalled(ps.getPackageName(), ps.getAppId(), pkg,

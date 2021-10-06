@@ -316,7 +316,9 @@ final class RemovePackageHelper {
                 mPm.mSettings.removeRenamedPackageLPw(deletedPs.getRealName());
             }
             if (changedUsers.size() > 0) {
-                mPm.updateDefaultHomeNotLocked(changedUsers);
+                final PreferredActivityHelper preferredActivityHelper =
+                        new PreferredActivityHelper(mPm);
+                preferredActivityHelper.updateDefaultHomeNotLocked(changedUsers);
                 mPm.postPreferredActivityChangedBroadcast(UserHandle.USER_ALL);
             }
         }

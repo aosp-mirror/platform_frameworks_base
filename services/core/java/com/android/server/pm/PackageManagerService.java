@@ -21,7 +21,6 @@ import static android.Manifest.permission.MANAGE_DEVICE_ADMINS;
 import static android.Manifest.permission.REQUEST_DELETE_PACKAGES;
 import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
 import static android.app.AppOpsManager.MODE_IGNORED;
-import static android.content.Intent.CATEGORY_DEFAULT;
 import static android.content.pm.PackageManager.CERT_INPUT_RAW_X509;
 import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
@@ -68,7 +67,6 @@ import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.ApplicationPackageManager;
 import android.app.IActivityManager;
-import android.app.PendingIntent;
 import android.app.admin.IDevicePolicyManager;
 import android.app.admin.SecurityLog;
 import android.app.role.RoleManager;
@@ -79,7 +77,6 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IIntentReceiver;
-import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
@@ -205,9 +202,7 @@ import android.util.EventLog;
 import android.util.ExceptionUtils;
 import android.util.IntArray;
 import android.util.Log;
-import android.util.LogPrinter;
 import android.util.Pair;
-import android.util.PrintStreamPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -219,7 +214,6 @@ import android.view.Display;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.F2fsUtils;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.content.om.OverlayConfig;
@@ -245,7 +239,6 @@ import com.android.server.apphibernation.AppHibernationManagerInternal;
 import com.android.server.apphibernation.AppHibernationService;
 import com.android.server.compat.CompatChange;
 import com.android.server.compat.PlatformCompat;
-import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.Settings.VersionInfo;
 import com.android.server.pm.dex.ArtManagerService;
@@ -288,9 +281,6 @@ import dalvik.system.VMRuntime;
 import libcore.util.EmptyArray;
 import libcore.util.HexEncoding;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -300,7 +290,6 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
@@ -990,10 +979,6 @@ public class PackageManagerService extends IPackageManager.Stub
     final SparseArray<PostInstallData> mRunningInstalls = new SparseArray<>();
     int mNextInstallToken = 1;  // nonzero; will be wrapped back to 1 when ++ overflows
 
-    // XML tags for backup/restore of various bits of state
-    private static final String TAG_PREFERRED_BACKUP = "pa";
-    private static final String TAG_DEFAULT_APPS = "da";
-
     final @Nullable String mRequiredVerifierPackage;
     final @NonNull String mRequiredInstallerPackage;
     final @NonNull String mRequiredUninstallerPackage;
@@ -1022,6 +1007,8 @@ public class PackageManagerService extends IPackageManager.Stub
     private final DeletePackageHelper mDeletePackageHelper;
     private final InitAndSystemPackageHelper mInitAndSystemPackageHelper;
     private final AppDataHelper mAppDataHelper;
+    private final PreferredActivityHelper mPreferredActivityHelper;
+    private final ResolveIntentHelper mResolveIntentHelper;
 
     /**
      * Invalidate the package info cache, which includes updating the cached computer.
@@ -1416,7 +1403,7 @@ public class PackageManagerService extends IPackageManager.Stub
         scheduleWritePackageRestrictionsLocked(userId);
     }
 
-    private void scheduleWritePackageRestrictionsLocked(int userId) {
+    void scheduleWritePackageRestrictionsLocked(int userId) {
         invalidatePackageInfoCache();
         final int[] userIds = (userId == UserHandle.USER_ALL)
                 ? mUserManager.getUserIds() : new int[]{userId};
@@ -1718,6 +1705,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 mAppDataHelper);
         mDeletePackageHelper = new DeletePackageHelper(this, mRemovePackageHelper,
                 mInitAndSystemPackageHelper, mAppDataHelper);
+        mPreferredActivityHelper = new PreferredActivityHelper(this);
+        mResolveIntentHelper = new ResolveIntentHelper(this, mPreferredActivityHelper);
 
         invalidatePackageInfoCache();
     }
@@ -1870,6 +1859,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 mAppDataHelper);
         mDeletePackageHelper = new DeletePackageHelper(this, mRemovePackageHelper,
                 mInitAndSystemPackageHelper, mAppDataHelper);
+        mPreferredActivityHelper = new PreferredActivityHelper(this);
+        mResolveIntentHelper = new ResolveIntentHelper(this, mPreferredActivityHelper);
 
         synchronized (mLock) {
             // Create the computer as soon as the state objects have been installed.  The
@@ -2380,9 +2371,10 @@ public class PackageManagerService extends IPackageManager.Stub
     private @Nullable String getRequiredButNotReallyRequiredVerifierLPr() {
         final Intent intent = new Intent(Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
 
-        final List<ResolveInfo> matches = queryIntentReceiversInternal(intent, PACKAGE_MIME_TYPE,
-                MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
-                UserHandle.USER_SYSTEM, Binder.getCallingUid());
+        final List<ResolveInfo> matches =
+                mResolveIntentHelper.queryIntentReceiversInternal(intent, PACKAGE_MIME_TYPE,
+                        MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
+                        UserHandle.USER_SYSTEM, Binder.getCallingUid());
         if (matches.size() == 1) {
             return matches.get(0).getComponentInfo().packageName;
         } else if (matches.size() == 0) {
@@ -2476,9 +2468,10 @@ public class PackageManagerService extends IPackageManager.Stub
     private @NonNull ComponentName getIntentFilterVerifierComponentNameLPr() {
         final Intent intent = new Intent(Intent.ACTION_INTENT_FILTER_NEEDS_VERIFICATION);
 
-        final List<ResolveInfo> matches = queryIntentReceiversInternal(intent, PACKAGE_MIME_TYPE,
-                MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
-                UserHandle.USER_SYSTEM, Binder.getCallingUid());
+        final List<ResolveInfo> matches =
+                mResolveIntentHelper.queryIntentReceiversInternal(intent, PACKAGE_MIME_TYPE,
+                        MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
+                        UserHandle.USER_SYSTEM, Binder.getCallingUid());
         ResolveInfo best = null;
         final int N = matches.size();
         for (int i = 0; i < N; i++) {
@@ -2504,9 +2497,10 @@ public class PackageManagerService extends IPackageManager.Stub
     @Nullable
     private ComponentName getDomainVerificationAgentComponentNameLPr() {
         Intent intent = new Intent(Intent.ACTION_DOMAINS_NEED_VERIFICATION);
-        List<ResolveInfo> matches = queryIntentReceiversInternal(intent, null,
-                MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
-                UserHandle.USER_SYSTEM, Binder.getCallingUid());
+        List<ResolveInfo> matches =
+                mResolveIntentHelper.queryIntentReceiversInternal(intent, null,
+                        MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
+                        UserHandle.USER_SYSTEM, Binder.getCallingUid());
         ResolveInfo best = null;
         final int N = matches.size();
         for (int i = 0; i < N; i++) {
@@ -3228,7 +3222,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * action and a {@code android.intent.category.BROWSABLE} category</li>
      * </ul>
      */
-    private int updateFlagsForResolve(int flags, int userId, int callingUid,
+    int updateFlagsForResolve(int flags, int userId, int callingUid,
             boolean wantInstantApps, boolean isImplicitImageCaptureIntentAndNotSetByDpc) {
         return mComputer.updateFlagsForResolve(flags, userId, callingUid,
                 wantInstantApps, isImplicitImageCaptureIntentAndNotSetByDpc);
@@ -4268,124 +4262,25 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public ResolveInfo resolveIntent(Intent intent, String resolvedType,
             int flags, int userId) {
-        return resolveIntentInternal(intent, resolvedType, flags, 0 /*privateResolveFlags*/,
-                userId, false, Binder.getCallingUid());
-    }
-
-    /**
-     * Normally instant apps can only be resolved when they're visible to the caller.
-     * However, if {@code resolveForStart} is {@code true}, all instant apps are visible
-     * since we need to allow the system to start any installed application.
-     */
-    private ResolveInfo resolveIntentInternal(Intent intent, String resolvedType, int flags,
-            @PrivateResolveFlags int privateResolveFlags, int userId, boolean resolveForStart,
-            int filterCallingUid) {
-        try {
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "resolveIntent");
-
-            if (!mUserManager.exists(userId)) return null;
-            final int callingUid = Binder.getCallingUid();
-            flags = updateFlagsForResolve(flags, userId, filterCallingUid, resolveForStart,
-                    isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId, resolvedType,
-                            flags));
-            enforceCrossUserPermission(callingUid, userId, false /*requireFullPermission*/,
-                    false /*checkShell*/, "resolve intent");
-
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "queryIntentActivities");
-            final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType,
-                    flags, privateResolveFlags, filterCallingUid, userId, resolveForStart,
-                    true /*allowDynamicSplits*/);
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-
-            final boolean queryMayBeFiltered =
-                    UserHandle.getAppId(filterCallingUid) >= Process.FIRST_APPLICATION_UID
-                            && !resolveForStart;
-
-            final ResolveInfo bestChoice =
-                    chooseBestActivity(
-                            intent, resolvedType, flags, privateResolveFlags, query, userId,
-                            queryMayBeFiltered);
-            final boolean nonBrowserOnly =
-                    (privateResolveFlags & PackageManagerInternal.RESOLVE_NON_BROWSER_ONLY) != 0;
-            if (nonBrowserOnly && bestChoice != null && bestChoice.handleAllWebDataURI) {
-                return null;
-            }
-            return bestChoice;
-        } finally {
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-        }
+        return mResolveIntentHelper.resolveIntentInternal(intent, resolvedType, flags,
+                0 /*privateResolveFlags*/, userId, false, Binder.getCallingUid());
     }
 
     @Override
     public ResolveInfo findPersistentPreferredActivity(Intent intent, int userId) {
-        if (!UserHandle.isSameApp(Binder.getCallingUid(), Process.SYSTEM_UID)) {
-            throw new SecurityException(
-                    "findPersistentPreferredActivity can only be run by the system");
-        }
-        if (!mUserManager.exists(userId)) {
-            return null;
-        }
-        final int callingUid = Binder.getCallingUid();
-        intent = PackageManagerServiceUtils.updateIntentForResolve(intent);
-        final String resolvedType = intent.resolveTypeIfNeeded(mContext.getContentResolver());
-        final int flags = updateFlagsForResolve(
-                0, userId, callingUid, false /*includeInstantApps*/,
-                isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId, resolvedType, 0));
-        final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType, flags,
-                userId);
-        synchronized (mLock) {
-            return findPersistentPreferredActivityLP(intent, resolvedType, flags, query, false,
-                    userId);
-        }
+        return mPreferredActivityHelper.findPersistentPreferredActivity(intent, userId);
     }
 
     @Override
     public void setLastChosenActivity(Intent intent, String resolvedType, int flags,
             IntentFilter filter, int match, ComponentName activity) {
-        setLastChosenActivity(intent, resolvedType, flags,
+        mPreferredActivityHelper.setLastChosenActivity(intent, resolvedType, flags,
                               new WatchedIntentFilter(filter), match, activity);
-    }
-
-    /**
-     * Variant that takes a {@link WatchedIntentFilter}
-     */
-    public void setLastChosenActivity(Intent intent, String resolvedType, int flags,
-            WatchedIntentFilter filter, int match, ComponentName activity) {
-        if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
-            return;
-        }
-        final int userId = UserHandle.getCallingUserId();
-        if (DEBUG_PREFERRED) {
-            Log.v(TAG, "setLastChosenActivity intent=" + intent
-                + " resolvedType=" + resolvedType
-                + " flags=" + flags
-                + " filter=" + filter
-                + " match=" + match
-                + " activity=" + activity);
-            filter.dump(new PrintStreamPrinter(System.out), "    ");
-        }
-        intent.setComponent(null);
-        final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType, flags,
-                userId);
-        // Find any earlier preferred or last chosen entries and nuke them
-        findPreferredActivityNotLocked(
-                intent, resolvedType, flags, query, false, true, false, userId);
-        // Add the new activity as the last chosen for this filter
-        addPreferredActivity(filter, match, null, activity, false, userId,
-                "Setting last chosen", false);
     }
 
     @Override
     public ResolveInfo getLastChosenActivity(Intent intent, String resolvedType, int flags) {
-        if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
-            return null;
-        }
-        final int userId = UserHandle.getCallingUserId();
-        if (DEBUG_PREFERRED) Log.v(TAG, "Querying last chosen activity for " + intent);
-        final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType, flags,
-                userId);
-        return findPreferredActivityNotLocked(
-                intent, resolvedType, flags, query, false, false, false, userId);
+        return mPreferredActivityHelper.getLastChosenActivity(intent, resolvedType, flags);
     }
 
     private void requestInstantAppResolutionPhaseTwo(AuxiliaryResolveInfo responseObj,
@@ -4400,115 +4295,6 @@ public class PackageManagerService extends IPackageManager.Stub
         mHandler.sendMessage(msg);
     }
 
-    private ResolveInfo chooseBestActivity(Intent intent, String resolvedType,
-            int flags, int privateResolveFlags, List<ResolveInfo> query, int userId,
-            boolean queryMayBeFiltered) {
-        if (query != null) {
-            final int N = query.size();
-            if (N == 1) {
-                return query.get(0);
-            } else if (N > 1) {
-                final boolean debug = ((intent.getFlags() & Intent.FLAG_DEBUG_LOG_RESOLUTION) != 0);
-                // If there is more than one activity with the same priority,
-                // then let the user decide between them.
-                ResolveInfo r0 = query.get(0);
-                ResolveInfo r1 = query.get(1);
-                if (DEBUG_INTENT_MATCHING || debug) {
-                    Slog.v(TAG, r0.activityInfo.name + "=" + r0.priority + " vs "
-                            + r1.activityInfo.name + "=" + r1.priority);
-                }
-                // If the first activity has a higher priority, or a different
-                // default, then it is always desirable to pick it.
-                if (r0.priority != r1.priority
-                        || r0.preferredOrder != r1.preferredOrder
-                        || r0.isDefault != r1.isDefault) {
-                    return query.get(0);
-                }
-                // If we have saved a preference for a preferred activity for
-                // this Intent, use that.
-                ResolveInfo ri = findPreferredActivityNotLocked(intent, resolvedType,
-                        flags, query, true, false, debug, userId, queryMayBeFiltered);
-                if (ri != null) {
-                    return ri;
-                }
-                int browserCount = 0;
-                for (int i = 0; i < N; i++) {
-                    ri = query.get(i);
-                    if (ri.handleAllWebDataURI) {
-                        browserCount++;
-                    }
-                    // If we have an ephemeral app, use it
-                    if (ri.activityInfo.applicationInfo.isInstantApp()) {
-                        final String packageName = ri.activityInfo.packageName;
-                        final PackageSetting ps = mSettings.getPackageLPr(packageName);
-                        if (ps != null && PackageManagerServiceUtils.hasAnyDomainApproval(
-                                mDomainVerificationManager, ps, intent, flags, userId)) {
-                            return ri;
-                        }
-                    }
-                }
-                if ((privateResolveFlags
-                        & PackageManagerInternal.RESOLVE_NON_RESOLVER_ONLY) != 0) {
-                    return null;
-                }
-                ri = new ResolveInfo(mResolveInfo);
-                // if all resolve options are browsers, mark the resolver's info as if it were
-                // also a browser.
-                ri.handleAllWebDataURI = browserCount == N;
-                ri.activityInfo = new ActivityInfo(ri.activityInfo);
-                ri.activityInfo.labelRes = ResolverActivity.getLabelRes(intent.getAction());
-                // If all of the options come from the same package, show the application's
-                // label and icon instead of the generic resolver's.
-                // Some calls like Intent.resolveActivityInfo query the ResolveInfo from here
-                // and then throw away the ResolveInfo itself, meaning that the caller loses
-                // the resolvePackageName. Therefore the activityInfo.labelRes above provides
-                // a fallback for this case; we only set the target package's resources on
-                // the ResolveInfo, not the ActivityInfo.
-                final String intentPackage = intent.getPackage();
-                if (!TextUtils.isEmpty(intentPackage) && allHavePackage(query, intentPackage)) {
-                    final ApplicationInfo appi = query.get(0).activityInfo.applicationInfo;
-                    ri.resolvePackageName = intentPackage;
-                    if (userNeedsBadging(userId)) {
-                        ri.noResourceId = true;
-                    } else {
-                        ri.icon = appi.icon;
-                    }
-                    ri.iconResourceId = appi.icon;
-                    ri.labelRes = appi.labelRes;
-                }
-                ri.activityInfo.applicationInfo = new ApplicationInfo(
-                        ri.activityInfo.applicationInfo);
-                if (userId != 0) {
-                    ri.activityInfo.applicationInfo.uid = UserHandle.getUid(userId,
-                            UserHandle.getAppId(ri.activityInfo.applicationInfo.uid));
-                }
-                // Make sure that the resolver is displayable in car mode
-                if (ri.activityInfo.metaData == null) ri.activityInfo.metaData = new Bundle();
-                ri.activityInfo.metaData.putBoolean(Intent.METADATA_DOCK_HOME, true);
-                return ri;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Return true if the given list is not empty and all of its contents have
-     * an activityInfo with the given package name.
-     */
-    private boolean allHavePackage(List<ResolveInfo> list, String packageName) {
-        if (ArrayUtils.isEmpty(list)) {
-            return false;
-        }
-        for (int i = 0, N = list.size(); i < N; i++) {
-            final ResolveInfo ri = list.get(i);
-            final ActivityInfo ai = ri != null ? ri.activityInfo : null;
-            if (ai == null || !packageName.equals(ai.packageName)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     /**
      * From Android R, camera intents have to match system apps. The only exception to this is if
      * the DPC has set the camera persistent preferred activity. This case was introduced
@@ -4519,14 +4305,14 @@ public class PackageManagerService extends IPackageManager.Stub
      * activity was not set by the DPC.
      */
     @GuardedBy("mLock")
-    private boolean isImplicitImageCaptureIntentAndNotSetByDpcLocked(Intent intent, int userId,
+    boolean isImplicitImageCaptureIntentAndNotSetByDpcLocked(Intent intent, int userId,
             String resolvedType, int flags) {
         return mComputer.isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId,
                 resolvedType, flags);
     }
 
     @GuardedBy("mLock")
-    private ResolveInfo findPersistentPreferredActivityLP(Intent intent,
+    ResolveInfo findPersistentPreferredActivityLP(Intent intent,
             String resolvedType,
             int flags, List<ResolveInfo> query, boolean debug, int userId) {
         return mComputer.findPersistentPreferredActivityLP(intent,
@@ -4541,7 +4327,7 @@ public class PackageManagerService extends IPackageManager.Stub
         ResolveInfo mPreferredResolveInfo;
     }
 
-    private FindPreferredActivityBodyResult findPreferredActivityInternal(
+    FindPreferredActivityBodyResult findPreferredActivityInternal(
             Intent intent, String resolvedType, int flags,
             List<ResolveInfo> query, boolean always,
             boolean removeMatches, boolean debug, int userId, boolean queryMayBeFiltered) {
@@ -4549,42 +4335,6 @@ public class PackageManagerService extends IPackageManager.Stub
             intent, resolvedType, flags,
             query, always,
             removeMatches, debug, userId, queryMayBeFiltered);
-    }
-
-    private ResolveInfo findPreferredActivityNotLocked(Intent intent, String resolvedType,
-            int flags, List<ResolveInfo> query, boolean always, boolean removeMatches,
-            boolean debug, int userId) {
-        return findPreferredActivityNotLocked(
-                intent, resolvedType, flags, query, always, removeMatches, debug, userId,
-                UserHandle.getAppId(Binder.getCallingUid()) >= Process.FIRST_APPLICATION_UID);
-    }
-
-    // TODO: handle preferred activities missing while user has amnesia
-    /** <b>must not hold {@link #mLock}</b> */
-    private ResolveInfo findPreferredActivityNotLocked(
-            Intent intent, String resolvedType, int flags, List<ResolveInfo> query, boolean always,
-            boolean removeMatches, boolean debug, int userId, boolean queryMayBeFiltered) {
-        if (Thread.holdsLock(mLock)) {
-            Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName()
-                    + " is holding mLock", new Throwable());
-        }
-        if (!mUserManager.exists(userId)) return null;
-
-        FindPreferredActivityBodyResult body = findPreferredActivityInternal(
-                intent, resolvedType, flags, query, always,
-                removeMatches, debug, userId, queryMayBeFiltered);
-        if (body.mChanged) {
-            if (DEBUG_PREFERRED) {
-                Slog.v(TAG, "Preferred activity bookkeeping changed; writing restrictions");
-            }
-            synchronized (mLock) {
-                scheduleWritePackageRestrictionsLocked(userId);
-            }
-        }
-        if ((DEBUG_PREFERRED || debug) && body.mPreferredResolveInfo == null) {
-            Slog.v(TAG, "No preferred activity to return");
-        }
-        return body.mPreferredResolveInfo;
     }
 
     /*
@@ -4651,17 +4401,17 @@ public class PackageManagerService extends IPackageManager.Stub
      * Returns the package name of the calling Uid if it's an instant app. If it isn't
      * instant, returns {@code null}.
      */
-    private String getInstantAppPackageName(int callingUid) {
+    String getInstantAppPackageName(int callingUid) {
         return mComputer.getInstantAppPackageName(callingUid);
     }
 
-    private @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
+    @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
             String resolvedType, int flags, int userId) {
         return mComputer.queryIntentActivitiesInternal(intent,
                 resolvedType, flags, userId);
     }
 
-    private @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
+    @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
             String resolvedType, int flags, @PrivateResolveFlags int privateResolveFlags,
             int filterCallingUid, int userId, boolean resolveForStart, boolean allowDynamicSplits) {
         return mComputer.queryIntentActivitiesInternal(intent,
@@ -4686,7 +4436,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * @param intent
      * @return A filtered list of resolved activities.
      */
-    private List<ResolveInfo> applyPostResolutionFilter(@NonNull List<ResolveInfo> resolveInfos,
+    List<ResolveInfo> applyPostResolutionFilter(@NonNull List<ResolveInfo> resolveInfos,
             String ephemeralPkgName, boolean allowDynamicSplits, int filterCallingUid,
             boolean resolveForStart, int userId, Intent intent) {
         return mComputer.applyPostResolutionFilter(resolveInfos,
@@ -4698,311 +4448,22 @@ public class PackageManagerService extends IPackageManager.Stub
     public @NonNull ParceledListSlice<ResolveInfo> queryIntentActivityOptions(ComponentName caller,
             Intent[] specifics, String[] specificTypes, Intent intent,
             String resolvedType, int flags, int userId) {
-        return new ParceledListSlice<>(queryIntentActivityOptionsInternal(caller, specifics,
-                specificTypes, intent, resolvedType, flags, userId));
-    }
-
-    private @NonNull List<ResolveInfo> queryIntentActivityOptionsInternal(ComponentName caller,
-            Intent[] specifics, String[] specificTypes, Intent intent,
-            String resolvedType, int flags, int userId) {
-        if (!mUserManager.exists(userId)) return Collections.emptyList();
-        final int callingUid = Binder.getCallingUid();
-        flags = updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/,
-                isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId, resolvedType,
-                        flags));
-        enforceCrossUserPermission(callingUid, userId, false /*requireFullPermission*/,
-                false /*checkShell*/, "query intent activity options");
-        final String resultsAction = intent.getAction();
-
-        final List<ResolveInfo> results = queryIntentActivitiesInternal(intent, resolvedType, flags
-                | PackageManager.GET_RESOLVED_FILTER, userId);
-
-        if (DEBUG_INTENT_MATCHING) {
-            Log.v(TAG, "Query " + intent + ": " + results);
-        }
-
-        int specificsPos = 0;
-        int N;
-
-        // todo: note that the algorithm used here is O(N^2).  This
-        // isn't a problem in our current environment, but if we start running
-        // into situations where we have more than 5 or 10 matches then this
-        // should probably be changed to something smarter...
-
-        // First we go through and resolve each of the specific items
-        // that were supplied, taking care of removing any corresponding
-        // duplicate items in the generic resolve list.
-        if (specifics != null) {
-            for (int i=0; i<specifics.length; i++) {
-                final Intent sintent = specifics[i];
-                if (sintent == null) {
-                    continue;
-                }
-
-                if (DEBUG_INTENT_MATCHING) {
-                    Log.v(TAG, "Specific #" + i + ": " + sintent);
-                }
-
-                String action = sintent.getAction();
-                if (resultsAction != null && resultsAction.equals(action)) {
-                    // If this action was explicitly requested, then don't
-                    // remove things that have it.
-                    action = null;
-                }
-
-                ResolveInfo ri = null;
-                ActivityInfo ai = null;
-
-                ComponentName comp = sintent.getComponent();
-                if (comp == null) {
-                    ri = resolveIntent(
-                        sintent,
-                        specificTypes != null ? specificTypes[i] : null,
-                            flags, userId);
-                    if (ri == null) {
-                        continue;
-                    }
-                    if (ri == mResolveInfo) {
-                        // ACK!  Must do something better with this.
-                    }
-                    ai = ri.activityInfo;
-                    comp = new ComponentName(ai.applicationInfo.packageName,
-                            ai.name);
-                } else {
-                    ai = getActivityInfo(comp, flags, userId);
-                    if (ai == null) {
-                        continue;
-                    }
-                }
-
-                // Look for any generic query activities that are duplicates
-                // of this specific one, and remove them from the results.
-                if (DEBUG_INTENT_MATCHING) Log.v(TAG, "Specific #" + i + ": " + ai);
-                N = results.size();
-                int j;
-                for (j=specificsPos; j<N; j++) {
-                    ResolveInfo sri = results.get(j);
-                    if ((sri.activityInfo.name.equals(comp.getClassName())
-                            && sri.activityInfo.applicationInfo.packageName.equals(
-                                    comp.getPackageName()))
-                        || (action != null && sri.filter.matchAction(action))) {
-                        results.remove(j);
-                        if (DEBUG_INTENT_MATCHING) Log.v(
-                            TAG, "Removing duplicate item from " + j
-                            + " due to specific " + specificsPos);
-                        if (ri == null) {
-                            ri = sri;
-                        }
-                        j--;
-                        N--;
-                    }
-                }
-
-                // Add this specific item to its proper place.
-                if (ri == null) {
-                    ri = new ResolveInfo();
-                    ri.activityInfo = ai;
-                }
-                results.add(specificsPos, ri);
-                ri.specificIndex = i;
-                specificsPos++;
-            }
-        }
-
-        // Now we go through the remaining generic results and remove any
-        // duplicate actions that are found here.
-        N = results.size();
-        for (int i=specificsPos; i<N-1; i++) {
-            final ResolveInfo rii = results.get(i);
-            if (rii.filter == null) {
-                continue;
-            }
-
-            // Iterate over all of the actions of this result's intent
-            // filter...  typically this should be just one.
-            final Iterator<String> it = rii.filter.actionsIterator();
-            if (it == null) {
-                continue;
-            }
-            while (it.hasNext()) {
-                final String action = it.next();
-                if (resultsAction != null && resultsAction.equals(action)) {
-                    // If this action was explicitly requested, then don't
-                    // remove things that have it.
-                    continue;
-                }
-                for (int j=i+1; j<N; j++) {
-                    final ResolveInfo rij = results.get(j);
-                    if (rij.filter != null && rij.filter.hasAction(action)) {
-                        results.remove(j);
-                        if (DEBUG_INTENT_MATCHING) Log.v(
-                            TAG, "Removing duplicate item from " + j
-                            + " due to action " + action + " at " + i);
-                        j--;
-                        N--;
-                    }
-                }
-            }
-
-            // If the caller didn't request filter information, drop it now
-            // so we don't have to marshall/unmarshall it.
-            if ((flags&PackageManager.GET_RESOLVED_FILTER) == 0) {
-                rii.filter = null;
-            }
-        }
-
-        // Filter out the caller activity if so requested.
-        if (caller != null) {
-            N = results.size();
-            for (int i=0; i<N; i++) {
-                ActivityInfo ainfo = results.get(i).activityInfo;
-                if (caller.getPackageName().equals(ainfo.applicationInfo.packageName)
-                        && caller.getClassName().equals(ainfo.name)) {
-                    results.remove(i);
-                    break;
-                }
-            }
-        }
-
-        // If the caller didn't request filter information,
-        // drop them now so we don't have to
-        // marshall/unmarshall it.
-        if ((flags&PackageManager.GET_RESOLVED_FILTER) == 0) {
-            N = results.size();
-            for (int i=0; i<N; i++) {
-                results.get(i).filter = null;
-            }
-        }
-
-        if (DEBUG_INTENT_MATCHING) Log.v(TAG, "Result: " + results);
-        return results;
+        return new ParceledListSlice<>(mResolveIntentHelper.queryIntentActivityOptionsInternal(
+                caller, specifics, specificTypes, intent, resolvedType, flags, userId));
     }
 
     @Override
     public @NonNull ParceledListSlice<ResolveInfo> queryIntentReceivers(Intent intent,
             String resolvedType, int flags, int userId) {
-        return new ParceledListSlice<>(queryIntentReceiversInternal(intent, resolvedType,
-                flags, userId, Binder.getCallingUid()));
-    }
-
-    // In this method, we have to know the actual calling UID, but in some cases Binder's
-    // call identity is removed, so the UID has to be passed in explicitly.
-    private @NonNull List<ResolveInfo> queryIntentReceiversInternal(Intent intent,
-            String resolvedType, int flags, int userId, int filterCallingUid) {
-        if (!mUserManager.exists(userId)) return Collections.emptyList();
-        enforceCrossUserPermission(filterCallingUid, userId, false /*requireFullPermission*/,
-                false /*checkShell*/, "query intent receivers");
-        final String instantAppPkgName = getInstantAppPackageName(filterCallingUid);
-        flags = updateFlagsForResolve(flags, userId, filterCallingUid, false /*includeInstantApps*/,
-                isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId, resolvedType,
-                        flags));
-        Intent originalIntent = null;
-        ComponentName comp = intent.getComponent();
-        if (comp == null) {
-            if (intent.getSelector() != null) {
-                originalIntent = intent;
-                intent = intent.getSelector();
-                comp = intent.getComponent();
-            }
-        }
-        List<ResolveInfo> list = Collections.emptyList();
-        if (comp != null) {
-            final ActivityInfo ai = getReceiverInfo(comp, flags, userId);
-            if (ai != null) {
-                // When specifying an explicit component, we prevent the activity from being
-                // used when either 1) the calling package is normal and the activity is within
-                // an instant application or 2) the calling package is ephemeral and the
-                // activity is not visible to instant applications.
-                final boolean matchInstantApp =
-                        (flags & PackageManager.MATCH_INSTANT) != 0;
-                final boolean matchVisibleToInstantAppOnly =
-                        (flags & PackageManager.MATCH_VISIBLE_TO_INSTANT_APP_ONLY) != 0;
-                final boolean matchExplicitlyVisibleOnly =
-                        (flags & PackageManager.MATCH_EXPLICITLY_VISIBLE_ONLY) != 0;
-                final boolean isCallerInstantApp =
-                        instantAppPkgName != null;
-                final boolean isTargetSameInstantApp =
-                        comp.getPackageName().equals(instantAppPkgName);
-                final boolean isTargetInstantApp =
-                        (ai.applicationInfo.privateFlags
-                                & ApplicationInfo.PRIVATE_FLAG_INSTANT) != 0;
-                final boolean isTargetVisibleToInstantApp =
-                        (ai.flags & ActivityInfo.FLAG_VISIBLE_TO_INSTANT_APP) != 0;
-                final boolean isTargetExplicitlyVisibleToInstantApp =
-                        isTargetVisibleToInstantApp
-                        && (ai.flags & ActivityInfo.FLAG_IMPLICITLY_VISIBLE_TO_INSTANT_APP) == 0;
-                final boolean isTargetHiddenFromInstantApp =
-                        !isTargetVisibleToInstantApp
-                        || (matchExplicitlyVisibleOnly && !isTargetExplicitlyVisibleToInstantApp);
-                final boolean blockResolution =
-                        !isTargetSameInstantApp
-                        && ((!matchInstantApp && !isCallerInstantApp && isTargetInstantApp)
-                                || (matchVisibleToInstantAppOnly && isCallerInstantApp
-                                        && isTargetHiddenFromInstantApp));
-                if (!blockResolution) {
-                    ResolveInfo ri = new ResolveInfo();
-                    ri.activityInfo = ai;
-                    list = new ArrayList<>(1);
-                    list.add(ri);
-                    PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
-                            mInjector.getCompatibility(), mComponentResolver,
-                            list, true, intent, resolvedType, filterCallingUid);
-                }
-            }
-        } else {
-            // reader
-            synchronized (mLock) {
-                String pkgName = intent.getPackage();
-                if (pkgName == null) {
-                    final List<ResolveInfo> result =
-                            mComponentResolver.queryReceivers(intent, resolvedType, flags, userId);
-                    if (result != null) {
-                        list = result;
-                    }
-                }
-                final AndroidPackage pkg = mPackages.get(pkgName);
-                if (pkg != null) {
-                    final List<ResolveInfo> result = mComponentResolver.queryReceivers(
-                            intent, resolvedType, flags, pkg.getReceivers(), userId);
-                    if (result != null) {
-                        list = result;
-                    }
-                }
-            }
-        }
-
-        if (originalIntent != null) {
-            // We also have to ensure all components match the original intent
-            PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
-                    mInjector.getCompatibility(), mComponentResolver,
-                    list, true, originalIntent, resolvedType, filterCallingUid);
-        }
-
-        return applyPostResolutionFilter(
-                list, instantAppPkgName, false, filterCallingUid, false, userId, intent);
+        return new ParceledListSlice<>(mResolveIntentHelper.queryIntentReceiversInternal(intent,
+                resolvedType, flags, userId, Binder.getCallingUid()));
     }
 
     @Override
     public ResolveInfo resolveService(Intent intent, String resolvedType, int flags, int userId) {
         final int callingUid = Binder.getCallingUid();
-        return resolveServiceInternal(intent, resolvedType, flags, userId, callingUid);
-    }
-
-    private ResolveInfo resolveServiceInternal(Intent intent, String resolvedType, int flags,
-            int userId, int callingUid) {
-        if (!mUserManager.exists(userId)) return null;
-        flags = updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/,
-                false /* isImplicitImageCaptureIntentAndNotSetByDpc */);
-        List<ResolveInfo> query = queryIntentServicesInternal(
-                intent, resolvedType, flags, userId, callingUid, false /*includeInstantApps*/);
-        if (query != null) {
-            if (query.size() >= 1) {
-                // If there is more than one service with the same priority,
-                // just arbitrarily pick the first one.
-                return query.get(0);
-            }
-        }
-        return null;
+        return mResolveIntentHelper.resolveServiceInternal(intent, resolvedType, flags, userId,
+                callingUid);
     }
 
     @Override
@@ -5013,7 +4474,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 intent, resolvedType, flags, userId, callingUid, false /*includeInstantApps*/));
     }
 
-    private @NonNull List<ResolveInfo> queryIntentServicesInternal(Intent intent,
+    @NonNull List<ResolveInfo> queryIntentServicesInternal(Intent intent,
             String resolvedType, int flags, int userId, int callingUid,
             boolean includeInstantApps) {
         return mComputer.queryIntentServicesInternal(intent,
@@ -5024,148 +4485,8 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public @NonNull ParceledListSlice<ResolveInfo> queryIntentContentProviders(Intent intent,
             String resolvedType, int flags, int userId) {
-        return new ParceledListSlice<>(
-                queryIntentContentProvidersInternal(intent, resolvedType, flags, userId));
-    }
-
-    private @NonNull List<ResolveInfo> queryIntentContentProvidersInternal(
-            Intent intent, String resolvedType, int flags, int userId) {
-        if (!mUserManager.exists(userId)) return Collections.emptyList();
-        final int callingUid = Binder.getCallingUid();
-        final String instantAppPkgName = getInstantAppPackageName(callingUid);
-        flags = updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/,
-                false /* isImplicitImageCaptureIntentAndNotSetByDpc */);
-        ComponentName comp = intent.getComponent();
-        if (comp == null) {
-            if (intent.getSelector() != null) {
-                intent = intent.getSelector();
-                comp = intent.getComponent();
-            }
-        }
-        if (comp != null) {
-            final List<ResolveInfo> list = new ArrayList<>(1);
-            final ProviderInfo pi = getProviderInfo(comp, flags, userId);
-            if (pi != null) {
-                // When specifying an explicit component, we prevent the provider from being
-                // used when either 1) the provider is in an instant application and the
-                // caller is not the same instant application or 2) the calling package is an
-                // instant application and the provider is not visible to instant applications.
-                final boolean matchInstantApp =
-                        (flags & PackageManager.MATCH_INSTANT) != 0;
-                final boolean matchVisibleToInstantAppOnly =
-                        (flags & PackageManager.MATCH_VISIBLE_TO_INSTANT_APP_ONLY) != 0;
-                final boolean isCallerInstantApp =
-                        instantAppPkgName != null;
-                final boolean isTargetSameInstantApp =
-                        comp.getPackageName().equals(instantAppPkgName);
-                final boolean isTargetInstantApp =
-                        (pi.applicationInfo.privateFlags
-                                & ApplicationInfo.PRIVATE_FLAG_INSTANT) != 0;
-                final boolean isTargetHiddenFromInstantApp =
-                        (pi.flags & ProviderInfo.FLAG_VISIBLE_TO_INSTANT_APP) == 0;
-                final boolean blockResolution =
-                        !isTargetSameInstantApp
-                        && ((!matchInstantApp && !isCallerInstantApp && isTargetInstantApp)
-                                || (matchVisibleToInstantAppOnly && isCallerInstantApp
-                                        && isTargetHiddenFromInstantApp));
-                final boolean blockNormalResolution = !isTargetInstantApp && !isCallerInstantApp
-                        && shouldFilterApplicationLocked(
-                        getPackageSettingInternal(pi.applicationInfo.packageName,
-                                Process.SYSTEM_UID), callingUid, userId);
-                if (!blockResolution && !blockNormalResolution) {
-                    final ResolveInfo ri = new ResolveInfo();
-                    ri.providerInfo = pi;
-                    list.add(ri);
-                }
-            }
-            return list;
-        }
-
-        // reader
-        synchronized (mLock) {
-            String pkgName = intent.getPackage();
-            if (pkgName == null) {
-                final List<ResolveInfo> resolveInfos = mComponentResolver.queryProviders(intent,
-                        resolvedType, flags, userId);
-                if (resolveInfos == null) {
-                    return Collections.emptyList();
-                }
-                return applyPostContentProviderResolutionFilter(
-                        resolveInfos, instantAppPkgName, userId, callingUid);
-            }
-            final AndroidPackage pkg = mPackages.get(pkgName);
-            if (pkg != null) {
-                final List<ResolveInfo> resolveInfos = mComponentResolver.queryProviders(intent,
-                        resolvedType, flags,
-                        pkg.getProviders(), userId);
-                if (resolveInfos == null) {
-                    return Collections.emptyList();
-                }
-                return applyPostContentProviderResolutionFilter(
-                        resolveInfos, instantAppPkgName, userId, callingUid);
-            }
-            return Collections.emptyList();
-        }
-    }
-
-    private List<ResolveInfo> applyPostContentProviderResolutionFilter(
-            List<ResolveInfo> resolveInfos, String instantAppPkgName,
-            @UserIdInt int userId, int callingUid) {
-        for (int i = resolveInfos.size() - 1; i >= 0; i--) {
-            final ResolveInfo info = resolveInfos.get(i);
-
-            if (instantAppPkgName == null) {
-                SettingBase callingSetting =
-                        mSettings.getSettingLPr(UserHandle.getAppId(callingUid));
-                PackageSetting resolvedSetting =
-                        getPackageSettingInternal(info.providerInfo.packageName, 0);
-                if (!mAppsFilter.shouldFilterApplication(
-                        callingUid, callingSetting, resolvedSetting, userId)) {
-                    continue;
-                }
-            }
-
-            final boolean isEphemeralApp = info.providerInfo.applicationInfo.isInstantApp();
-            // allow providers that are defined in the provided package
-            if (isEphemeralApp && instantAppPkgName.equals(info.providerInfo.packageName)) {
-                if (info.providerInfo.splitName != null
-                        && !ArrayUtils.contains(info.providerInfo.applicationInfo.splitNames,
-                                info.providerInfo.splitName)) {
-                    if (mInstantAppInstallerActivity == null) {
-                        if (DEBUG_INSTANT) {
-                            Slog.v(TAG, "No installer - not adding it to the ResolveInfo list");
-                        }
-                        resolveInfos.remove(i);
-                        continue;
-                    }
-                    // requested provider is defined in a split that hasn't been installed yet.
-                    // add the installer to the resolve list
-                    if (DEBUG_INSTANT) {
-                        Slog.v(TAG, "Adding ephemeral installer to the ResolveInfo list");
-                    }
-                    final ResolveInfo installerInfo = new ResolveInfo(
-                            mInstantAppInstallerInfo);
-                    installerInfo.auxiliaryInfo = new AuxiliaryResolveInfo(
-                            null /*failureActivity*/,
-                            info.providerInfo.packageName,
-                            info.providerInfo.applicationInfo.longVersionCode,
-                            info.providerInfo.splitName);
-                    // add a non-generic filter
-                    installerInfo.filter = new IntentFilter();
-                    // load resources from the correct package
-                    installerInfo.resolvePackageName = info.getComponentInfo().packageName;
-                    resolveInfos.set(i, installerInfo);
-                }
-                continue;
-            }
-            // allow providers that have been explicitly exposed to instant applications
-            if (!isEphemeralApp
-                    && ((info.providerInfo.flags & ProviderInfo.FLAG_VISIBLE_TO_INSTANT_APP) != 0)) {
-                continue;
-            }
-            resolveInfos.remove(i);
-        }
-        return resolveInfos;
+        return new ParceledListSlice<>(mResolveIntentHelper.queryIntentContentProvidersInternal(
+                intent, resolvedType, flags, userId));
     }
 
     @Override
@@ -5409,7 +4730,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private boolean isCallerSameApp(String packageName, int uid) {
+    boolean isCallerSameApp(String packageName, int uid) {
         return mComputer.isCallerSameApp(packageName, uid);
     }
 
@@ -7520,7 +6841,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final boolean isCallerOwner = isCallerDeviceOrProfileOwner(userId);
         final long callingId = Binder.clearCallingIdentity();
         try {
-            final String activeLauncherPackageName = mDefaultAppProvider.getDefaultHome(userId);
+            final String activeLauncherPackageName = getActiveLauncherPackageName(userId);
             final String dialerPackageName = mDefaultAppProvider.getDefaultDialer(userId);
             for (int i = 0; i < packageNames.length; i++) {
                 canSuspend[i] = false;
@@ -8243,10 +7564,6 @@ public class PackageManagerService extends IPackageManager.Stub
         return true;
     }
 
-    private void resetNetworkPolicies(int userId) {
-        mInjector.getLocalService(NetworkPolicyManagerInternal.class).resetUserState(userId);
-    }
-
     /**
      * Remove entries from the keystore daemon. Will only remove it if the
      * {@code appId} is valid.
@@ -8346,7 +7663,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @GuardedBy("mLock")
-    private int getUidTargetSdkVersionLockedLPr(int uid) {
+    int getUidTargetSdkVersionLockedLPr(int uid) {
         final int appId = UserHandle.getAppId(uid);
         final Object obj = mSettings.getSettingLPr(appId);
         if (obj instanceof SharedUserSetting) {
@@ -8382,55 +7699,9 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public void addPreferredActivity(IntentFilter filter, int match,
             ComponentName[] set, ComponentName activity, int userId, boolean removeExisting) {
-        addPreferredActivity(new WatchedIntentFilter(filter), match, set, activity, true, userId,
+        mPreferredActivityHelper.addPreferredActivity(
+                new WatchedIntentFilter(filter), match, set, activity, true, userId,
                 "Adding preferred", removeExisting);
-    }
-
-    /**
-     * Variant that takes a {@link WatchedIntentFilter}
-     */
-    public void addPreferredActivity(WatchedIntentFilter filter, int match,
-            ComponentName[] set, ComponentName activity, boolean always, int userId,
-            String opname, boolean removeExisting) {
-        // writer
-        int callingUid = Binder.getCallingUid();
-        enforceCrossUserPermission(callingUid, userId, true /* requireFullPermission */,
-                false /* checkShell */, "add preferred activity");
-        if (mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
-                != PackageManager.PERMISSION_GRANTED) {
-            synchronized (mLock) {
-                if (getUidTargetSdkVersionLockedLPr(callingUid)
-                        < Build.VERSION_CODES.FROYO) {
-                    Slog.w(TAG, "Ignoring addPreferredActivity() from uid "
-                            + callingUid);
-                    return;
-                }
-            }
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
-        }
-        if (filter.countActions() == 0) {
-            Slog.w(TAG, "Cannot set a preferred activity with no filter actions");
-            return;
-        }
-        if (DEBUG_PREFERRED) {
-            Slog.i(TAG, opname + " activity " + activity.flattenToShortString() + " for user "
-                    + userId + ":");
-            filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
-        }
-        synchronized (mLock) {
-            final PreferredIntentResolver pir = mSettings.editPreferredActivitiesLPw(userId);
-            final ArrayList<PreferredActivity> existing = pir.findFilters(filter);
-            if (removeExisting && existing != null) {
-                Settings.removeFilters(pir, filter, existing);
-            }
-            pir.addFilter(new PreferredActivity(filter, match, set, activity, always));
-            scheduleWritePackageRestrictionsLocked(userId);
-        }
-        if (!(isHomeFilter(filter) && updateDefaultHomeNotLocked(userId))) {
-            postPreferredActivityChangedBroadcast(userId);
-        }
     }
 
     void postPreferredActivityChangedBroadcast(int userId) {
@@ -8440,139 +7711,15 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public void replacePreferredActivity(IntentFilter filter, int match,
             ComponentName[] set, ComponentName activity, int userId) {
-        replacePreferredActivity(new WatchedIntentFilter(filter), match,
+        mPreferredActivityHelper.replacePreferredActivity(new WatchedIntentFilter(filter), match,
                                  set, activity, userId);
-    }
-
-    /**
-     * Variant that takes a {@link WatchedIntentFilter}
-     */
-    public void replacePreferredActivity(WatchedIntentFilter filter, int match,
-            ComponentName[] set, ComponentName activity, int userId) {
-        if (filter.countActions() != 1) {
-            throw new IllegalArgumentException(
-                    "replacePreferredActivity expects filter to have only 1 action.");
-        }
-        if (filter.countDataAuthorities() != 0
-                || filter.countDataPaths() != 0
-                || filter.countDataSchemes() > 1
-                || filter.countDataTypes() != 0) {
-            throw new IllegalArgumentException(
-                    "replacePreferredActivity expects filter to have no data authorities, " +
-                    "paths, or types; and at most one scheme.");
-        }
-
-        final int callingUid = Binder.getCallingUid();
-        enforceCrossUserPermission(callingUid, userId, true /* requireFullPermission */,
-                false /* checkShell */, "replace preferred activity");
-        if (mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
-                != PackageManager.PERMISSION_GRANTED) {
-            synchronized (mLock) {
-                if (getUidTargetSdkVersionLockedLPr(callingUid)
-                        < Build.VERSION_CODES.FROYO) {
-                    Slog.w(TAG, "Ignoring replacePreferredActivity() from uid "
-                            + Binder.getCallingUid());
-                    return;
-                }
-            }
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
-        }
-
-        synchronized (mLock) {
-            final PreferredIntentResolver pir = mSettings.getPreferredActivities(userId);
-            if (pir != null) {
-                // Get all of the existing entries that exactly match this filter.
-                final ArrayList<PreferredActivity> existing = pir.findFilters(filter);
-                if (existing != null && existing.size() == 1) {
-                    final PreferredActivity cur = existing.get(0);
-                    if (DEBUG_PREFERRED) {
-                        Slog.i(TAG, "Checking replace of preferred:");
-                        filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
-                        if (!cur.mPref.mAlways) {
-                            Slog.i(TAG, "  -- CUR; not mAlways!");
-                        } else {
-                            Slog.i(TAG, "  -- CUR: mMatch=" + cur.mPref.mMatch);
-                            Slog.i(TAG, "  -- CUR: mSet="
-                                    + Arrays.toString(cur.mPref.mSetComponents));
-                            Slog.i(TAG, "  -- CUR: mComponent=" + cur.mPref.mShortComponent);
-                            Slog.i(TAG, "  -- NEW: mMatch="
-                                    + (match&IntentFilter.MATCH_CATEGORY_MASK));
-                            Slog.i(TAG, "  -- CUR: mSet=" + Arrays.toString(set));
-                            Slog.i(TAG, "  -- CUR: mComponent=" + activity.flattenToShortString());
-                        }
-                    }
-                    if (cur.mPref.mAlways && cur.mPref.mComponent.equals(activity)
-                            && cur.mPref.mMatch == (match&IntentFilter.MATCH_CATEGORY_MASK)
-                            && cur.mPref.sameSet(set)) {
-                        // Setting the preferred activity to what it happens to be already
-                        if (DEBUG_PREFERRED) {
-                            Slog.i(TAG, "Replacing with same preferred activity "
-                                    + cur.mPref.mShortComponent + " for user "
-                                    + userId + ":");
-                            filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
-                        }
-                        return;
-                    }
-                }
-                if (existing != null) {
-                    Settings.removeFilters(pir, filter, existing);
-                }
-            }
-        }
-        addPreferredActivity(filter, match, set, activity, true, userId,
-                "Replacing preferred", false);
     }
 
     @Override
     public void clearPackagePreferredActivities(String packageName) {
-        final int callingUid = Binder.getCallingUid();
-        if (getInstantAppPackageName(callingUid) != null) {
-            return;
-        }
-        // writer
-        synchronized (mLock) {
-            AndroidPackage pkg = mPackages.get(packageName);
-            if (pkg == null || !isCallerSameApp(packageName, callingUid)) {
-                if (mContext.checkCallingOrSelfPermission(
-                        android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    if (getUidTargetSdkVersionLockedLPr(callingUid)
-                            < Build.VERSION_CODES.FROYO) {
-                        Slog.w(TAG, "Ignoring clearPackagePreferredActivities() from uid "
-                                + callingUid);
-                        return;
-                    }
-                    mContext.enforceCallingOrSelfPermission(
-                            android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
-                }
-            }
-            final PackageSetting ps = mSettings.getPackageLPr(packageName);
-            if (ps != null
-                    && shouldFilterApplicationLocked(
-                            ps, callingUid, UserHandle.getUserId(callingUid))) {
-                return;
-            }
-        }
-        int callingUserId = UserHandle.getCallingUserId();
-        clearPackagePreferredActivities(packageName, callingUserId);
+        mPreferredActivityHelper.clearPackagePreferredActivities(packageName);
     }
 
-    /** This method takes a specific user id as well as UserHandle.USER_ALL. */
-    void clearPackagePreferredActivities(String packageName, int userId) {
-        final SparseBooleanArray changedUsers = new SparseBooleanArray();
-        synchronized (mLock) {
-            clearPackagePreferredActivitiesLPw(packageName, changedUsers, userId);
-        }
-        if (changedUsers.size() > 0) {
-            updateDefaultHomeNotLocked(changedUsers);
-            postPreferredActivityChangedBroadcast(userId);
-            synchronized (mLock) {
-                scheduleWritePackageRestrictionsLocked(userId);
-            }
-        }
-    }
 
     /** This method takes a specific user id as well as UserHandle.USER_ALL. */
     @GuardedBy("mLock")
@@ -8589,185 +7736,31 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // Persistent preferred activity might have came into effect due to this
         // install.
-        updateDefaultHomeNotLocked(userId);
+        mPreferredActivityHelper.updateDefaultHomeNotLocked(userId);
     }
 
     @Override
     public void resetApplicationPreferences(int userId) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
-        final long identity = Binder.clearCallingIdentity();
-        // writer
-        try {
-            final SparseBooleanArray changedUsers = new SparseBooleanArray();
-            synchronized (mLock) {
-                clearPackagePreferredActivitiesLPw(null, changedUsers, userId);
-            }
-            if (changedUsers.size() > 0) {
-                postPreferredActivityChangedBroadcast(userId);
-            }
-            synchronized (mLock) {
-                mSettings.applyDefaultPreferredAppsLPw(userId);
-                mDomainVerificationManager.clearUser(userId);
-                final int numPackages = mPackages.size();
-                for (int i = 0; i < numPackages; i++) {
-                    final AndroidPackage pkg = mPackages.valueAt(i);
-                    mPermissionManager.resetRuntimePermissions(pkg, userId);
-                }
-            }
-            updateDefaultHomeNotLocked(userId);
-            resetNetworkPolicies(userId);
-            synchronized (mLock) {
-                scheduleWritePackageRestrictionsLocked(userId);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
+        mPreferredActivityHelper.resetApplicationPreferences(userId);
     }
 
     @Override
     public int getPreferredActivities(List<IntentFilter> outFilters,
             List<ComponentName> outActivities, String packageName) {
-        List<WatchedIntentFilter> temp =
-                WatchedIntentFilter.toWatchedIntentFilterList(outFilters);
-        final int result = getPreferredActivitiesInternal(
-                temp, outActivities, packageName);
-        outFilters.clear();
-        for (int i = 0; i < temp.size(); i++) {
-            outFilters.add(temp.get(i).getIntentFilter());
-        }
-        return result;
-    }
-
-    /**
-     * Variant that takes a {@link WatchedIntentFilter}
-     */
-    public int getPreferredActivitiesInternal(List<WatchedIntentFilter> outFilters,
-            List<ComponentName> outActivities, String packageName) {
-        final int callingUid = Binder.getCallingUid();
-        if (getInstantAppPackageName(callingUid) != null) {
-            return 0;
-        }
-        int num = 0;
-        final int userId = UserHandle.getCallingUserId();
-        // reader
-        synchronized (mLock) {
-            PreferredIntentResolver pir = mSettings.getPreferredActivities(userId);
-            if (pir != null) {
-                final Iterator<PreferredActivity> it = pir.filterIterator();
-                while (it.hasNext()) {
-                    final PreferredActivity pa = it.next();
-                    final String prefPackageName = pa.mPref.mComponent.getPackageName();
-                    if (packageName == null
-                            || (prefPackageName.equals(packageName) && pa.mPref.mAlways)) {
-                        if (shouldFilterApplicationLocked(
-                                mSettings.getPackageLPr(prefPackageName), callingUid, userId)) {
-                            continue;
-                        }
-                        if (outFilters != null) {
-                            outFilters.add(new WatchedIntentFilter(pa.getIntentFilter()));
-                        }
-                        if (outActivities != null) {
-                            outActivities.add(pa.mPref.mComponent);
-                        }
-                    }
-                }
-            }
-        }
-
-        return num;
+        return mPreferredActivityHelper.getPreferredActivities(outFilters, outActivities,
+                packageName);
     }
 
     @Override
     public void addPersistentPreferredActivity(IntentFilter filter, ComponentName activity,
             int userId) {
-        addPersistentPreferredActivity(new WatchedIntentFilter(filter), activity, userId);
-    }
-
-    /**
-     * Variant that takes a {@link WatchedIntentFilter}
-     */
-    public void addPersistentPreferredActivity(WatchedIntentFilter filter, ComponentName activity,
-            int userId) {
-        int callingUid = Binder.getCallingUid();
-        if (callingUid != Process.SYSTEM_UID) {
-            throw new SecurityException(
-                    "addPersistentPreferredActivity can only be run by the system");
-        }
-        if (filter.countActions() == 0) {
-            Slog.w(TAG, "Cannot set a preferred activity with no filter actions");
-            return;
-        }
-        if (DEBUG_PREFERRED) {
-            Slog.i(TAG, "Adding persistent preferred activity " + activity
-                    + " for user " + userId + ":");
-            filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
-        }
-        synchronized (mLock) {
-            mSettings.editPersistentPreferredActivitiesLPw(userId).addFilter(
-                    new PersistentPreferredActivity(filter, activity, true));
-            scheduleWritePackageRestrictionsLocked(userId);
-        }
-        if (isHomeFilter(filter)) {
-            updateDefaultHomeNotLocked(userId);
-        }
-        postPreferredActivityChangedBroadcast(userId);
+        mPreferredActivityHelper.addPersistentPreferredActivity(new WatchedIntentFilter(filter),
+                activity, userId);
     }
 
     @Override
     public void clearPackagePersistentPreferredActivities(String packageName, int userId) {
-        int callingUid = Binder.getCallingUid();
-        if (callingUid != Process.SYSTEM_UID) {
-            throw new SecurityException(
-                    "clearPackagePersistentPreferredActivities can only be run by the system");
-        }
-        boolean changed = false;
-        synchronized (mLock) {
-            changed = mSettings.clearPackagePersistentPreferredActivities(packageName, userId);
-        }
-        if (changed) {
-            updateDefaultHomeNotLocked(userId);
-            postPreferredActivityChangedBroadcast(userId);
-            synchronized (mLock) {
-                scheduleWritePackageRestrictionsLocked(userId);
-            }
-        }
-    }
-
-    /**
-     * Common machinery for picking apart a restored XML blob and passing
-     * it to a caller-supplied functor to be applied to the running system.
-     */
-    private void restoreFromXml(TypedXmlPullParser parser, int userId,
-            String expectedStartTag, BlobXmlRestorer functor)
-            throws IOException, XmlPullParserException {
-        int type;
-        while ((type = parser.next()) != XmlPullParser.START_TAG
-                && type != XmlPullParser.END_DOCUMENT) {
-        }
-        if (type != XmlPullParser.START_TAG) {
-            // oops didn't find a start tag?!
-            if (DEBUG_BACKUP) {
-                Slog.e(TAG, "Didn't find start tag during restore");
-            }
-            return;
-        }
-        // this is supposed to be TAG_PREFERRED_BACKUP
-        if (!expectedStartTag.equals(parser.getName())) {
-            if (DEBUG_BACKUP) {
-                Slog.e(TAG, "Found unexpected tag " + parser.getName());
-            }
-            return;
-        }
-
-        // skip interfering stuff, then we're aligned with the backing implementation
-        while ((type = parser.next()) == XmlPullParser.TEXT) { }
-        functor.apply(parser, userId);
-    }
-
-    private interface BlobXmlRestorer {
-        void apply(TypedXmlPullParser parser, int userId)
-                throws IOException, XmlPullParserException;
+        mPreferredActivityHelper.clearPackagePersistentPreferredActivities(packageName, userId);
     }
 
     /**
@@ -8777,55 +7770,12 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     @Override
     public byte[] getPreferredActivityBackup(int userId) {
-        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException("Only the system may call getPreferredActivityBackup()");
-        }
-
-        ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
-        try {
-            final TypedXmlSerializer serializer = Xml.newFastSerializer();
-            serializer.setOutput(dataStream, StandardCharsets.UTF_8.name());
-            serializer.startDocument(null, true);
-            serializer.startTag(null, TAG_PREFERRED_BACKUP);
-
-            synchronized (mLock) {
-                mSettings.writePreferredActivitiesLPr(serializer, userId, true);
-            }
-
-            serializer.endTag(null, TAG_PREFERRED_BACKUP);
-            serializer.endDocument();
-            serializer.flush();
-        } catch (Exception e) {
-            if (DEBUG_BACKUP) {
-                Slog.e(TAG, "Unable to write preferred activities for backup", e);
-            }
-            return null;
-        }
-
-        return dataStream.toByteArray();
+        return mPreferredActivityHelper.getPreferredActivityBackup(userId);
     }
 
     @Override
     public void restorePreferredActivities(byte[] backup, int userId) {
-        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException("Only the system may call restorePreferredActivities()");
-        }
-
-        try {
-            final TypedXmlPullParser parser = Xml.newFastPullParser();
-            parser.setInput(new ByteArrayInputStream(backup), StandardCharsets.UTF_8.name());
-            restoreFromXml(parser, userId, TAG_PREFERRED_BACKUP,
-                    (readParser, readUserId) -> {
-                        synchronized (mLock) {
-                            mSettings.readPreferredActivitiesLPw(readParser, readUserId);
-                        }
-                        updateDefaultHomeNotLocked(readUserId);
-                    });
-        } catch (Exception e) {
-            if (DEBUG_BACKUP) {
-                Slog.e(TAG, "Exception restoring preferred activities: " + e.getMessage());
-            }
-        }
+        mPreferredActivityHelper.restorePreferredActivities(backup, userId);
     }
 
     /**
@@ -8835,59 +7785,12 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     @Override
     public byte[] getDefaultAppsBackup(int userId) {
-        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException("Only the system may call getDefaultAppsBackup()");
-        }
-
-        ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
-        try {
-            final TypedXmlSerializer serializer = Xml.newFastSerializer();
-            serializer.setOutput(dataStream, StandardCharsets.UTF_8.name());
-            serializer.startDocument(null, true);
-            serializer.startTag(null, TAG_DEFAULT_APPS);
-
-            synchronized (mLock) {
-                mSettings.writeDefaultAppsLPr(serializer, userId);
-            }
-
-            serializer.endTag(null, TAG_DEFAULT_APPS);
-            serializer.endDocument();
-            serializer.flush();
-        } catch (Exception e) {
-            if (DEBUG_BACKUP) {
-                Slog.e(TAG, "Unable to write default apps for backup", e);
-            }
-            return null;
-        }
-
-        return dataStream.toByteArray();
+        return mPreferredActivityHelper.getDefaultAppsBackup(userId);
     }
 
     @Override
     public void restoreDefaultApps(byte[] backup, int userId) {
-        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException("Only the system may call restoreDefaultApps()");
-        }
-
-        try {
-            final TypedXmlPullParser parser = Xml.newFastPullParser();
-            parser.setInput(new ByteArrayInputStream(backup), StandardCharsets.UTF_8.name());
-            restoreFromXml(parser, userId, TAG_DEFAULT_APPS,
-                    (parser1, userId1) -> {
-                        final String defaultBrowser;
-                        synchronized (mLock) {
-                            mSettings.readDefaultAppsLPw(parser1, userId1);
-                            defaultBrowser = mSettings.removeDefaultBrowserPackageNameLPw(userId1);
-                        }
-                        if (defaultBrowser != null) {
-                            mDefaultAppProvider.setDefaultBrowser(defaultBrowser, false, userId1);
-                        }
-                    });
-        } catch (Exception e) {
-            if (DEBUG_BACKUP) {
-                Slog.e(TAG, "Exception restoring default apps: " + e.getMessage());
-            }
-        }
+        mPreferredActivityHelper.restoreDefaultApps(backup, userId);
     }
 
     @Override
@@ -9042,20 +7945,8 @@ public class PackageManagerService extends IPackageManager.Stub
         return mComputer.getDefaultHomeActivity(userId);
     }
 
-    private Intent getHomeIntent() {
+    Intent getHomeIntent() {
         return mComputer.getHomeIntent();
-    }
-
-    private WatchedIntentFilter getHomeFilter() {
-        WatchedIntentFilter filter = new WatchedIntentFilter(Intent.ACTION_MAIN);
-        filter.addCategory(Intent.CATEGORY_HOME);
-        filter.addCategory(Intent.CATEGORY_DEFAULT);
-        return filter;
-    }
-
-    private boolean isHomeFilter(@NonNull WatchedIntentFilter filter) {
-        return filter.hasAction(Intent.ACTION_MAIN) && filter.hasCategory(Intent.CATEGORY_HOME)
-                && filter.hasCategory(CATEGORY_DEFAULT);
     }
 
     ComponentName getHomeActivitiesAsUser(List<ResolveInfo> allHomeCandidates,
@@ -9064,92 +7955,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 userId);
     }
 
-    /** <b>must not hold {@link #mLock}</b> */
-    void updateDefaultHomeNotLocked(SparseBooleanArray userIds) {
-        if (Thread.holdsLock(mLock)) {
-            Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName()
-                    + " is holding mLock", new Throwable());
-        }
-        for (int i = userIds.size() - 1; i >= 0; --i) {
-            final int userId = userIds.keyAt(i);
-            updateDefaultHomeNotLocked(userId);
-        }
-    }
-
-    /**
-     * <b>must not hold {@link #mLock}</b>
-     *
-     * @return Whether the ACTION_PREFERRED_ACTIVITY_CHANGED broadcast has been scheduled.
-     */
-    private boolean updateDefaultHomeNotLocked(int userId) {
-        if (Thread.holdsLock(mLock)) {
-            Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName()
-                    + " is holding mLock", new Throwable());
-        }
-        if (!mSystemReady) {
-            // We might get called before system is ready because of package changes etc, but
-            // finding preferred activity depends on settings provider, so we ignore the update
-            // before that.
-            return false;
-        }
-        final Intent intent = getHomeIntent();
-        final List<ResolveInfo> resolveInfos = queryIntentActivitiesInternal(intent, null,
-                MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE, userId);
-        final ResolveInfo preferredResolveInfo = findPreferredActivityNotLocked(
-                intent, null, 0, resolveInfos, true, false, false, userId);
-        final String packageName = preferredResolveInfo != null
-                && preferredResolveInfo.activityInfo != null
-                ? preferredResolveInfo.activityInfo.packageName : null;
-        final String currentPackageName = mDefaultAppProvider.getDefaultHome(userId);
-        if (TextUtils.equals(currentPackageName, packageName)) {
-            return false;
-        }
-        final String[] callingPackages = getPackagesForUid(Binder.getCallingUid());
-        if (callingPackages != null && ArrayUtils.contains(callingPackages,
-                mRequiredPermissionControllerPackage)) {
-            // PermissionController manages default home directly.
-            return false;
-        }
-
-        if (packageName == null) {
-            // Keep the default home package in RoleManager.
-            return false;
-        }
-        return mDefaultAppProvider.setDefaultHome(packageName, userId, mContext.getMainExecutor(),
-                successful -> {
-                    if (successful) {
-                        postPreferredActivityChangedBroadcast(userId);
-                    }
-                });
-    }
-
     @Override
     public void setHomeActivity(ComponentName comp, int userId) {
-        if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
-            return;
-        }
-        ArrayList<ResolveInfo> homeActivities = new ArrayList<>();
-        getHomeActivitiesAsUser(homeActivities, userId);
-
-        boolean found = false;
-
-        final int size = homeActivities.size();
-        final ComponentName[] set = new ComponentName[size];
-        for (int i = 0; i < size; i++) {
-            final ResolveInfo candidate = homeActivities.get(i);
-            final ActivityInfo info = candidate.activityInfo;
-            final ComponentName activityName = new ComponentName(info.packageName, info.name);
-            set[i] = activityName;
-            if (!found && activityName.equals(comp)) {
-                found = true;
-            }
-        }
-        if (!found) {
-            throw new IllegalArgumentException("Component " + comp + " cannot be home on user "
-                    + userId);
-        }
-        replacePreferredActivity(getHomeFilter(), IntentFilter.MATCH_CATEGORY_EMPTY,
-                set, comp, userId);
+        mPreferredActivityHelper.setHomeActivity(comp, userId);
     }
 
     private @Nullable String getSetupWizardPackageNameImpl() {
@@ -10558,7 +9366,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return mArtManagerService;
     }
 
-    private boolean userNeedsBadging(int userId) {
+    boolean userNeedsBadging(int userId) {
         int index = mUserNeedsBadging.indexOfKey(userId);
         if (index < 0) {
             final UserInfo userInfo;
@@ -11338,8 +10146,8 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public List<ResolveInfo> queryIntentReceivers(Intent intent,
                 String resolvedType, int flags, int filterCallingUid, int userId) {
-            return PackageManagerService.this.queryIntentReceiversInternal(intent, resolvedType,
-                    flags, userId, filterCallingUid);
+            return PackageManagerService.this.mResolveIntentHelper.queryIntentReceiversInternal(
+                    intent, resolvedType, flags, userId, filterCallingUid);
         }
 
         @Override
@@ -11632,7 +10440,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public ResolveInfo resolveIntent(Intent intent, String resolvedType,
                 int flags, int privateResolveFlags, int userId, boolean resolveForStart,
                 int filterCallingUid) {
-            return resolveIntentInternal(
+            return mResolveIntentHelper.resolveIntentInternal(
                     intent, resolvedType, flags, privateResolveFlags, userId, resolveForStart,
                     filterCallingUid);
         }
@@ -11640,7 +10448,8 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public ResolveInfo resolveService(Intent intent, String resolvedType,
                 int flags, int userId, int callingUid) {
-            return resolveServiceInternal(intent, resolvedType, flags, userId, callingUid);
+            return mResolveIntentHelper.resolveServiceInternal(intent, resolvedType, flags, userId,
+                    callingUid);
         }
 
         @Override
@@ -12584,7 +11393,8 @@ public class PackageManagerService extends IPackageManager.Stub
     private void applyMimeGroupChanges(String packageName, String mimeGroup) {
         if (mComponentResolver.updateMimeGroup(packageName, mimeGroup)) {
             Binder.withCleanCallingIdentity(() ->
-                    clearPackagePreferredActivities(packageName, UserHandle.USER_ALL));
+                    mPreferredActivityHelper.clearPackagePreferredActivities(packageName,
+                            UserHandle.USER_ALL));
         }
 
         mPmInternal.writeSettings(false);
@@ -12825,51 +11635,8 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public IntentSender getLaunchIntentSenderForPackage(String packageName, String callingPackage,
             String featureId, int userId) throws RemoteException {
-        Objects.requireNonNull(packageName);
-        final int callingUid = Binder.getCallingUid();
-        enforceCrossUserPermission(callingUid, userId, false /* requireFullPermission */,
-                false /* checkShell */, "get launch intent sender for package");
-        final int packageUid = getPackageUid(callingPackage, 0 /* flags */, userId);
-        if (!UserHandle.isSameApp(callingUid, packageUid)) {
-            throw new SecurityException("getLaunchIntentSenderForPackage() from calling uid: "
-                    + callingUid + " does not own package: " + callingPackage);
-        }
-
-        // Using the same implementation with the #getLaunchIntentForPackage to get the ResolveInfo.
-        // Pass the resolveForStart as true in queryIntentActivities to skip the app filtering.
-        final Intent intentToResolve = new Intent(Intent.ACTION_MAIN);
-        intentToResolve.addCategory(Intent.CATEGORY_INFO);
-        intentToResolve.setPackage(packageName);
-        String resolvedType = intentToResolve.resolveTypeIfNeeded(mContext.getContentResolver());
-        List<ResolveInfo> ris = queryIntentActivitiesInternal(intentToResolve, resolvedType,
-                0 /* flags */, 0 /* privateResolveFlags */, callingUid, userId,
-                true /* resolveForStart */, false /* allowDynamicSplits */);
-        if (ris == null || ris.size() <= 0) {
-            intentToResolve.removeCategory(Intent.CATEGORY_INFO);
-            intentToResolve.addCategory(Intent.CATEGORY_LAUNCHER);
-            intentToResolve.setPackage(packageName);
-            resolvedType = intentToResolve.resolveTypeIfNeeded(mContext.getContentResolver());
-            ris = queryIntentActivitiesInternal(intentToResolve, resolvedType,
-                    0 /* flags */, 0 /* privateResolveFlags */, callingUid, userId,
-                    true /* resolveForStart */, false /* allowDynamicSplits */);
-        }
-
-        final Intent intent = new Intent(intentToResolve);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        // For the case of empty result, no component name is assigned into the intent. A
-        // non-launchable IntentSender which contains the failed intent is created. The
-        // SendIntentException is thrown if the IntentSender#sendIntent is invoked.
-        if (ris != null && !ris.isEmpty()) {
-            intent.setClassName(ris.get(0).activityInfo.packageName,
-                    ris.get(0).activityInfo.name);
-        }
-        final IIntentSender target = ActivityManager.getService().getIntentSenderWithFeature(
-                ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,
-                featureId, null /* token */, null /* resultWho */,
-                1 /* requestCode */, new Intent[] { intent },
-                resolvedType != null ? new String[] { resolvedType } : null,
-                PendingIntent.FLAG_IMMUTABLE, null /* bOptions */, userId);
-        return new IntentSender(target);
+        return mResolveIntentHelper.getLaunchIntentSenderForPackage(packageName, callingPackage,
+                featureId, userId);
     }
 
     @Override
@@ -13017,5 +11784,23 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         return systemPackageNames.toArray(new String[]{});
+    }
+
+    String getActiveLauncherPackageName(int userId) {
+        return mDefaultAppProvider.getDefaultHome(userId);
+    }
+
+    boolean setActiveLauncherPackage(@NonNull String packageName, @UserIdInt int userId,
+            @NonNull Consumer<Boolean> callback) {
+        return mDefaultAppProvider.setDefaultHome(packageName, userId, mContext.getMainExecutor(),
+                callback);
+    }
+
+    void setDefaultBrowser(@Nullable String packageName, boolean async, @UserIdInt int userId) {
+        mDefaultAppProvider.setDefaultBrowser(packageName, async, userId);
+    }
+
+    ResolveInfo getInstantAppInstallerInfo() {
+        return mInstantAppInstallerInfo;
     }
 }
