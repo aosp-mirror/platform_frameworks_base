@@ -100,7 +100,7 @@ public abstract class LocationPermissionsHelper {
             return false;
         }
 
-        return mAppOps.checkOpNoThrow(permissionLevel, identity);
+        return mAppOps.checkOpNoThrow(LocationPermissions.asAppOp(permissionLevel), identity);
     }
 
     protected abstract boolean hasPermission(String permission, CallerIdentity callerIdentity);
