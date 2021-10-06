@@ -839,6 +839,30 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
                 wpc.getConfiguration().getLocales());
     }
 
+    @Test
+    public void testPackageConfigUpdate_commitConfig_configSuccessfullyApplied() {
+        Configuration config = mAtm.getGlobalConfiguration();
+        config.setLocales(LocaleList.forLanguageTags("en-XC"));
+        mAtm.updateGlobalConfigurationLocked(config, true, true,
+                DEFAULT_USER_ID);
+        WindowProcessController wpc = createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+        mAtm.mProcessMap.put(Binder.getCallingPid(), wpc);
+        mAtm.mInternal.onProcessAdded(wpc);
+
+        ActivityTaskManagerInternal.PackageConfigurationUpdater packageConfigUpdater =
+                mAtm.mInternal.createPackageConfigurationUpdater(DEFAULT_PACKAGE_NAME,
+                        DEFAULT_USER_ID);
+        // committing new configuration returns true;
+        assertTrue(packageConfigUpdater.setLocales(LocaleList.forLanguageTags("en-XA,ar-XB"))
+                .commit());
+        // applying the same configuration returns false.
+        assertFalse(packageConfigUpdater.setLocales(LocaleList.forLanguageTags("en-XA,ar-XB"))
+                .commit());
+        assertTrue(packageConfigUpdater.setLocales(LocaleList.getEmptyLocaleList())
+                .setNightMode(Configuration.UI_MODE_NIGHT_UNDEFINED).commit());
+    }
+
     private WindowProcessController createWindowProcessController(String packageName,
             int userId) {
         WindowProcessListener mMockListener = Mockito.mock(WindowProcessListener.class);

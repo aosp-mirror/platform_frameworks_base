@@ -68,7 +68,7 @@ final class PackageConfigurationUpdaterImpl implements
     }
 
     @Override
-    public void commit() {
+    public boolean commit() {
         synchronized (this) {
             synchronized (mAtm.mGlobalLock) {
                 final long ident = Binder.clearCallingIdentity();
@@ -79,7 +79,7 @@ final class PackageConfigurationUpdaterImpl implements
                         if (wpc == null) {
                             Slog.w(TAG, "commit: Override application configuration failed: "
                                     + "cannot find pid " + mPid);
-                            return;
+                            return false;
                         }
                         uid = wpc.mUid;
                         mUserId = wpc.mUserId;
@@ -90,11 +90,12 @@ final class PackageConfigurationUpdaterImpl implements
                         if (uid < 0) {
                             Slog.w(TAG, "commit: update of application configuration failed: "
                                     + "userId or packageName not valid " + mUserId);
-                            return;
+                            return false;
                         }
                     }
                     updateConfig(uid, mPackageName);
-                    mAtm.mPackageConfigPersister.updateFromImpl(mPackageName, mUserId, this);
+                    return mAtm.mPackageConfigPersister
+                            .updateFromImpl(mPackageName, mUserId, this);
 
                 } finally {
                     Binder.restoreCallingIdentity(ident);
