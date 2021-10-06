@@ -208,8 +208,8 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
         }
         mPromptController.onDestroy();
         // Check if need to reset when MagnificationGestureHandler is the last magnifying service.
-        mFullScreenMagnificationController.resetAllIfNeeded(
-                AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
+        mFullScreenMagnificationController.resetIfNeeded(
+                mDisplayId, AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
         clearAndTransitionToStateDetecting();
     }
 

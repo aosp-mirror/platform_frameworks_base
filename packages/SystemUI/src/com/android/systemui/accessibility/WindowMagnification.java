@@ -243,12 +243,15 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
             mWindowMagnificationConnectionImpl = new WindowMagnificationConnectionImpl(this,
                     mHandler, mModeSwitchesController);
         }
+        mModeSwitchesController.setSwitchListenerDelegate(
+                mWindowMagnificationConnectionImpl::onChangeMagnificationMode);
         mAccessibilityManager.setWindowMagnificationConnection(
                 mWindowMagnificationConnectionImpl);
     }
 
     private void clearWindowMagnificationConnection() {
         mAccessibilityManager.setWindowMagnificationConnection(null);
+        mModeSwitchesController.setSwitchListenerDelegate(null);
         //TODO: destroy controllers.
     }
 }
