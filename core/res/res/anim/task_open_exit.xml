@@ -30,9 +30,4 @@
         android:startOffset="0"
         android:duration="500"/>
 
-    <!-- This is needed to keep the animation running while task_open_enter completes -->
-    <alpha
-        android:fromAlpha="1.0"
-        android:toAlpha="1.0"
-        android:duration="600"/>
 </set>
