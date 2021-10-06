@@ -28,16 +28,14 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.TaskInfo;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.Rect;
-import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.util.Slog;
 import android.util.SparseIntArray;
-import android.view.SurfaceControl;
 import android.window.StartingWindowInfo;
 import android.window.StartingWindowInfo.StartingWindowType;
+import android.window.StartingWindowRemovalInfo;
 import android.window.TaskOrganizer;
 import android.window.TaskSnapshot;
 
@@ -68,7 +66,7 @@ import com.android.wm.shell.common.TransactionPool;
 public class StartingWindowController implements RemoteCallable<StartingWindowController> {
     private static final String TAG = StartingWindowController.class.getSimpleName();
 
-    public static final boolean DEBUG_SPLASH_SCREEN = Build.isDebuggable();
+    public static final boolean DEBUG_SPLASH_SCREEN = false;
     public static final boolean DEBUG_TASK_SNAPSHOT = false;
 
     private static final long TASK_BG_COLOR_RETAIN_TIME_MS = 5000;
@@ -186,13 +184,12 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
     /**
      * Called when the content of a task is ready to show, starting window can be removed.
      */
-    public void removeStartingWindow(int taskId, SurfaceControl leash, Rect frame,
-            boolean playRevealAnimation) {
+    public void removeStartingWindow(StartingWindowRemovalInfo removalInfo) {
         mSplashScreenExecutor.execute(() -> mStartingSurfaceDrawer.removeStartingWindow(
-                taskId, leash, frame, playRevealAnimation));
+                removalInfo));
         mSplashScreenExecutor.executeDelayed(() -> {
             synchronized (mTaskBackgroundColors) {
-                mTaskBackgroundColors.delete(taskId);
+                mTaskBackgroundColors.delete(removalInfo.taskId);
             }
         }, TASK_BG_COLOR_RETAIN_TIME_MS);
     }
