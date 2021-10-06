@@ -26,21 +26,21 @@
     <string name="wifi_disconnected" msgid="7054450256284661757">"Terputus"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Nonaktif"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"Kegagalan Konfigurasi IP"</string>
-    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Tidak tersambung karena jaringan berkualitas rendah"</string>
+    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Tidak terhubung karena jaringan berkualitas rendah"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Kegagalan Sambungan Wi-Fi"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Masalah autentikasi"</string>
-    <string name="wifi_cant_connect" msgid="5718417542623056783">"Tidak dapat tersambung"</string>
-    <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"Tidak dapat tersambung ke \'<xliff:g id="AP_NAME">%1$s</xliff:g>\'"</string>
+    <string name="wifi_cant_connect" msgid="5718417542623056783">"Tidak dapat terhubung"</string>
+    <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"Tidak dapat terhubung ke \'<xliff:g id="AP_NAME">%1$s</xliff:g>\'"</string>
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Periksa sandi dan coba lagi"</string>
     <string name="wifi_not_in_range" msgid="1541760821805777772">"Tidak dalam jangkauan"</string>
-    <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Tidak akan tersambung otomatis"</string>
+    <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Tidak akan terhubung otomatis"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"Tidak ada akses internet"</string>
     <string name="saved_network" msgid="7143698034077223645">"Disimpan oleh <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_to_metered_access_point" msgid="9179693207918156341">"Terhubung ke jaringan berbayar"</string>
-    <string name="connected_via_network_scorer" msgid="7665725527352893558">"Tersambung otomatis melalui %1$s"</string>
-    <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Otomatis tersambung melalui penyedia rating jaringan"</string>
+    <string name="connected_via_network_scorer" msgid="7665725527352893558">"Terhubung otomatis melalui %1$s"</string>
+    <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Otomatis terhubung melalui penyedia rating jaringan"</string>
     <string name="connected_via_passpoint" msgid="7735442932429075684">"Terhubung melalui %1$s"</string>
-    <string name="connected_via_app" msgid="3532267661404276584">"Tersambung melalui <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="connected_via_app" msgid="3532267661404276584">"Terhubung melalui <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="available_via_passpoint" msgid="1716000261192603682">"Tersedia melalui %1$s"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"Ketuk untuk mendaftar"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"Tidak ada internet"</string>
@@ -49,10 +49,10 @@
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"Tidak ada internet"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"Perlu login"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"Titik akses penuh untuk sementara"</string>
-    <string name="connected_via_carrier" msgid="1968057009076191514">"Tersambung melalui %1$s"</string>
+    <string name="connected_via_carrier" msgid="1968057009076191514">"Terhubung melalui %1$s"</string>
     <string name="available_via_carrier" msgid="465598683092718294">"Tersedia melalui %1$s"</string>
     <string name="osu_opening_provider" msgid="4318105381295178285">"Membuka <xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g>"</string>
-    <string name="osu_connect_failed" msgid="9107873364807159193">"Tidak dapat tersambung"</string>
+    <string name="osu_connect_failed" msgid="9107873364807159193">"Tidak dapat terhubung"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"Menyelesaikan pendaftaran…"</string>
     <string name="osu_sign_up_failed" msgid="5605453599586001793">"Tidak dapat menyelesaikan pendaftaran. Ketuk untuk mencoba lagi."</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"Pendaftaran selesai. Menyambungkan…"</string>
@@ -66,7 +66,7 @@
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Sambungan terputus"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Memutus sambungan..."</string>
-    <string name="bluetooth_connecting" msgid="5871702668260192755">"Menyambung…"</string>
+    <string name="bluetooth_connecting" msgid="5871702668260192755">"Menghubungkan…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Terhubung<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_pairing" msgid="4269046942588193600">"Menyandingkan..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Terhubung (tanpa ponsel)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -96,12 +96,12 @@
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Audio HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Alat Bantu Dengar"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Terhubung ke Alat Bantu Dengar"</string>
-    <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Tersambung ke media audio"</string>
-    <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Tersambung ke audio ponsel"</string>
+    <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Terhubung ke media audio"</string>
+    <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Terhubung ke audio ponsel"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Sambungkan ke server transfer file"</string>
-    <string name="bluetooth_map_profile_summary_connected" msgid="4141725591784669181">"Tersambung ke peta"</string>
+    <string name="bluetooth_map_profile_summary_connected" msgid="4141725591784669181">"Terhubung ke peta"</string>
     <string name="bluetooth_sap_profile_summary_connected" msgid="1280297388033001037">"Terhubung ke SAP"</string>
-    <string name="bluetooth_opp_profile_summary_not_connected" msgid="3959741824627764954">"Tidak tersambung kepada server transfer file"</string>
+    <string name="bluetooth_opp_profile_summary_not_connected" msgid="3959741824627764954">"Tidak terhubung kepada server transfer file"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3923653977051684833">"Terhubung ke perangkat masukan"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="380469653827505727">"Terhubung ke perangkat untuk akses internet"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="3744773111299503493">"Berbagi koneksi internet lokal dengan perangkat"</string>
@@ -116,7 +116,7 @@
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Sambungkan"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"SAMBUNGKAN"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Batal"</string>
-    <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Penyandingan memberi akses ke kontak dan histori panggilan saat tersambung"</string>
+    <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Penyandingan memberi akses ke kontak dan histori panggilan saat terhubung"</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Tidak dapat menyambungkan ke <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Tidak dapat menyambungkan ke <xliff:g id="DEVICE_NAME">%1$s</xliff:g> karena PIN atau kode sandi salah."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Tidak dapat berkomunikasi dengan <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
@@ -133,7 +133,7 @@
     <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"Kiri - baterai <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"Kanan - baterai <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wi-Fi tidak aktif."</string>
-    <string name="accessibility_no_wifi" msgid="5297119459491085771">"Wi-Fi tidak tersambung."</string>
+    <string name="accessibility_no_wifi" msgid="5297119459491085771">"Wi-Fi tidak terhubung."</string>
     <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"Wi-Fi satu baris."</string>
     <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"Wi-Fi dua baris"</string>
     <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"Wi-Fi tiga baris."</string>
@@ -205,7 +205,7 @@
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Setelan Penambatan tidak tersedia untuk pengguna ini"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Setelan Nama Titik Akses tidak tersedia untuk pengguna ini"</string>
     <string name="enable_adb" msgid="8072776357237289039">"Debugging USB"</string>
-    <string name="enable_adb_summary" msgid="3711526030096574316">"Mode debug ketika USB tersambung"</string>
+    <string name="enable_adb_summary" msgid="3711526030096574316">"Mode debug ketika USB terhubung"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Cabut otorisasi debug USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Proses debug nirkabel"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Mode debug saat Wi-Fi terhubung"</string>
@@ -217,19 +217,19 @@
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Sambungkan perangkat dengan kode penyambungan"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Sambungkan perangkat baru menggunakan kode enam digit"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Perangkat disambungkan"</string>
-    <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Saat ini tersambung"</string>
+    <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Saat ini terhubung"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Detail perangkat"</string>
     <string name="adb_device_forget" msgid="193072400783068417">"Lupakan"</string>
     <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Sidik jari perangkat: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Sambungan gagal"</string>
-    <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Pastikan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> tersambung ke jaringan yang tepat"</string>
+    <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Pastikan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> terhubung ke jaringan yang tepat"</string>
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Sambungkan dengan perangkat"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Kode penyambungan Wi-Fi"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Penyambungan perangkat gagal"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Pastikan perangkat terhubung ke jaringan yang sama."</string>
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Sambungkan perangkat melalui Wi‑Fi dengan memindai Kode QR"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Menyambungkan perangkat…"</string>
-    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Gagal menyambungkan perangkat. Kode QR salah, atau perangkat tidak tersambung ke jaringan yang sama."</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Gagal menyambungkan perangkat. Kode QR salah, atau perangkat tidak terhubung ke jaringan yang sama."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Alamat IP &amp; Port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Memindai kode QR"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Sambungkan perangkat melalui Wi‑Fi dengan memindai Kode QR"</string>
@@ -335,7 +335,7 @@
     <string name="pointer_location" msgid="7516929526199520173">"Lokasi penunjuk"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Hamparan layar menampilkan data sentuhan saat ini"</string>
     <string name="show_touches" msgid="8437666942161289025">"Tampilkan ketukan"</string>
-    <string name="show_touches_summary" msgid="3692861665994502193">"Tampilkan masukan untuk ketukan"</string>
+    <string name="show_touches_summary" msgid="3692861665994502193">"Tampilkan efek visual untuk ketukan"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Lihat pembaruan permukaan"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Sorot seluruh permukaan jendela saat diperbarui"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Tampilkan update tampilan"</string>

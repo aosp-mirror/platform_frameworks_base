@@ -336,6 +336,13 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     }
 
     @Override
+    public void onImeDrawnOnTask(int taskId) {
+        if (mStartingWindow != null) {
+            mStartingWindow.onImeDrawnOnTask(taskId);
+        }
+    }
+
+    @Override
     public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) {
         synchronized (mLock) {
             onTaskAppeared(new TaskAppearedInfo(taskInfo, leash));
