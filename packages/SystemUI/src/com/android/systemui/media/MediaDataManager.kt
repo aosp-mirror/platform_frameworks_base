@@ -768,7 +768,7 @@ class MediaDataManager(
             val resumeAction = getResumeMediaAction(removed.resumeAction!!)
             val updated = removed.copy(token = null, actions = listOf(resumeAction),
                     actionsToShowInCompact = listOf(0), active = false, resumption = true,
-                    isClearable = true)
+                    isPlaying = false, isClearable = true)
             val pkg = removed.packageName
             val migrate = mediaEntries.put(pkg, updated) == null
             // Notify listeners of "new" controls when migrating or removed and update when not
