@@ -42,6 +42,7 @@ import android.util.SparseArray;
 import android.view.SurfaceControl;
 import android.window.ITaskOrganizerController;
 import android.window.StartingWindowInfo;
+import android.window.StartingWindowRemovalInfo;
 import android.window.TaskAppearedInfo;
 import android.window.TaskOrganizer;
 
@@ -322,10 +323,9 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     }
 
     @Override
-    public void removeStartingWindow(int taskId, SurfaceControl leash, Rect frame,
-            boolean playRevealAnimation) {
+    public void removeStartingWindow(StartingWindowRemovalInfo removalInfo) {
         if (mStartingWindow != null) {
-            mStartingWindow.removeStartingWindow(taskId, leash, frame, playRevealAnimation);
+            mStartingWindow.removeStartingWindow(removalInfo);
         }
     }
 

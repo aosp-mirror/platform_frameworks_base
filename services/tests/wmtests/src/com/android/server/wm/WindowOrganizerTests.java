@@ -80,6 +80,7 @@ import android.view.SurfaceControl;
 import android.window.ITaskOrganizer;
 import android.window.IWindowContainerTransactionCallback;
 import android.window.StartingWindowInfo;
+import android.window.StartingWindowRemovalInfo;
 import android.window.TaskAppearedInfo;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
@@ -779,8 +780,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         @Override
         public void addStartingWindow(StartingWindowInfo info, IBinder appToken) { }
         @Override
-        public void removeStartingWindow(int taskId, SurfaceControl leash, Rect frame,
-                boolean playRevealAnimation) { }
+        public void removeStartingWindow(StartingWindowRemovalInfo removalInfo) { }
         @Override
         public void copySplashScreenView(int taskId) { }
         @Override
