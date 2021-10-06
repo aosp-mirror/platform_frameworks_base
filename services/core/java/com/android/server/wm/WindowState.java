@@ -216,7 +216,6 @@ import android.os.Trace;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
 import android.util.Slog;
@@ -404,9 +403,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean mObscured;
 
     int mLayoutSeq = -1;
-
-    /** @see #addEmbeddedDisplayContent(DisplayContent dc) */
-    private final ArraySet<DisplayContent> mEmbeddedDisplayContents = new ArraySet<>();
 
     /**
      * Used to store last reported to client configuration and check if we have newer available.
@@ -667,12 +663,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private final Point mTmpPoint = new Point();
 
     private final Transaction mTmpTransaction;
-
-    /**
-     * If a window is on a display which has been re-parented to a view in another window,
-     * use this offset to indicate the correct location.
-     */
-    private final Point mLastReportedDisplayOffset = new Point();
 
     /**
      * Whether the window was resized by us while it was gone for layout.
@@ -2290,7 +2280,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mWmService.mAccessibilityController.hasCallbacks()) {
             mWmService.mAccessibilityController.onSomeWindowResizedOrMoved(getDisplayId());
         }
-        updateLocationInParentDisplayIfNeeded();
 
         try {
             mClient.moved(left, top);
@@ -2637,29 +2626,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mHasSurface = hasSurface;
     }
 
-    /**
-     * Checks whether one of the Windows in a Display embedded in this Window can be an IME target.
-     */
-    private boolean canWindowInEmbeddedDisplayBeImeTarget() {
-        final int embeddedDisplayContentsSize = mEmbeddedDisplayContents.size();
-        for (int i = embeddedDisplayContentsSize - 1; i >= 0; i--) {
-            final DisplayContent edc = mEmbeddedDisplayContents.valueAt(i);
-            if (edc.forAllWindows(WindowState::canBeImeTarget, true)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     boolean canBeImeTarget() {
-        // If any of the embedded windows can be the IME target, this window will be the final IME
-        // target. This is because embedded windows are on a different display in WM so it would
-        // cause confusion trying to set the IME to a window on a different display. Instead, just
-        // make the host window the IME target.
-        if (canWindowInEmbeddedDisplayBeImeTarget()) {
-            return true;
-        }
-
         if (mIsImWindow) {
             // IME windows can't be IME targets. IME targets are required to be below the IME
             // windows and that wouldn't be possible if the IME window is its own target...silly.
@@ -3945,7 +3912,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (mWmService.mAccessibilityController.hasCallbacks()) {
                 mWmService.mAccessibilityController.onSomeWindowResizedOrMoved(displayId);
             }
-            updateLocationInParentDisplayIfNeeded();
         } catch (RemoteException e) {
             // Cancel orientation change of this window to avoid blocking unfreeze display.
             setOrientationChanging(false);
@@ -3958,36 +3924,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     boolean isClientLocal() {
         return mClient instanceof IWindow.Stub;
-    }
-
-    void updateLocationInParentDisplayIfNeeded() {
-        final int embeddedDisplayContentsSize = mEmbeddedDisplayContents.size();
-        // If there is any embedded display which is re-parented to this window, we need to
-        // notify all windows in the embedded display about the location change.
-        if (embeddedDisplayContentsSize != 0) {
-            for (int i = embeddedDisplayContentsSize - 1; i >= 0; i--) {
-                final DisplayContent edc = mEmbeddedDisplayContents.valueAt(i);
-                edc.notifyLocationInParentDisplayChanged();
-            }
-        }
-        // If this window is in a embedded display which is re-parented to another window,
-        // we may need to update its correct on-screen location.
-        final DisplayContent dc = getDisplayContent();
-        if (dc.getParentWindow() == null) {
-            return;
-        }
-
-        final Point offset = dc.getLocationInParentDisplay();
-        if (mLastReportedDisplayOffset.equals(offset)) {
-            return;
-        }
-
-        mLastReportedDisplayOffset.set(offset.x, offset.y);
-        try {
-            mClient.locationInParentDisplayChanged(mLastReportedDisplayOffset);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to update offset from DisplayContent", e);
-        }
     }
 
     /**
@@ -4423,9 +4359,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         pw.println(prefix + "isOnScreen=" + isOnScreen());
         pw.println(prefix + "isVisible=" + isVisible());
-        if (!mEmbeddedDisplayContents.isEmpty()) {
-            pw.println(prefix + "mEmbeddedDisplayContents=" + mEmbeddedDisplayContents);
-        }
         if (dumpAll) {
             final String visibilityString = mRequestedVisibilities.toString();
             if (!visibilityString.isEmpty()) {
@@ -5251,28 +5184,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mLayoutSeq != -1;
     }
 
-    /**
-     * Add the DisplayContent of the embedded display which is re-parented to this window to
-     * the list of embedded displays.
-     *
-     * @param dc DisplayContent of the re-parented embedded display.
-     * @return {@code true} if the giving DisplayContent is added, {@code false} otherwise.
-     */
-    boolean addEmbeddedDisplayContent(DisplayContent dc) {
-        return mEmbeddedDisplayContents.add(dc);
-    }
-
-    /**
-     * Remove the DisplayContent of the embedded display which is re-parented to this window from
-     * the list of embedded displays.
-     *
-     * @param dc DisplayContent of the re-parented embedded display.
-     * @return {@code true} if the giving DisplayContent is removed, {@code false} otherwise.
-     */
-    boolean removeEmbeddedDisplayContent(DisplayContent dc) {
-        return mEmbeddedDisplayContents.remove(dc);
-    }
-
     /** Updates the last frames and relative frames to the current ones. */
     void updateLastFrames() {
         mWindowFrames.mLastFrame.set(mWindowFrames.mFrame);
@@ -5357,18 +5268,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         transformSurfaceInsetsPosition(mTmpPoint, mAttrs.surfaceInsets);
         int x = mSurfacePosition.x + mTmpPoint.x;
         int y = mSurfacePosition.y + mTmpPoint.y;
-
-        // We might be on a display which has been re-parented to a view in another window, so here
-        // computes the global location of our display.
-        DisplayContent dc = getDisplayContent();
-        while (dc != null && dc.getParentWindow() != null) {
-            final WindowState displayParent = dc.getParentWindow();
-            x += displayParent.mWindowFrames.mFrame.left
-                    + (dc.getLocationInParentWindow().x * displayParent.mGlobalScale + 0.5f);
-            y += displayParent.mWindowFrames.mFrame.top
-                    + (dc.getLocationInParentWindow().y * displayParent.mGlobalScale + 0.5f);
-            dc = displayParent.getDisplayContent();
-        }
 
         // If changed, also adjust transformFrameToSurfacePosition
         final WindowContainer parent = getParent();
@@ -5706,8 +5605,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
-     * Get IME target that should host IME when this window's display has a parent.
-     * Note: IME is never hosted by a display that has a parent.
+     * Get IME target that should host IME.
+     * Note: IME is never hosted by a display that doesn't support IME/system decorations.
      * When window calling
      * {@link android.view.inputmethod.InputMethodManager#showSoftInput(View, int)} is unknown,
      * use {@link DisplayContent#getImeControlTarget()} instead.
@@ -5716,11 +5615,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      *         When window is doesn't have a parent, it is returned as-is.
      */
     InsetsControlTarget getImeControlTarget() {
-        final DisplayContent dc = getDisplayContent();
-        final WindowState parentWindow = dc.getParentWindow();
-
-        // If target's display has a parent, IME is displayed in the parent display.
-        return dc.getImeHostOrFallback(parentWindow != null ? parentWindow : this);
+        return getDisplayContent().getImeHostOrFallback(this);
     }
 
     @Override

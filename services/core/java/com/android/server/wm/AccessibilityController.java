@@ -1838,34 +1838,9 @@ final class AccessibilityController {
                     tempWindowStatesList.add(w);
                 }
             }, false /* traverseTopToBottom */);
-            // Insert the re-parented windows in another display below their parents in
-            // default display.
-            mService.mRoot.forAllWindows(w -> {
-                final WindowState parentWindow = findRootDisplayParentWindow(w);
-                if (parentWindow == null) {
-                    return;
-                }
-
-                if (w.isVisible() && tempWindowStatesList.contains(parentWindow)) {
-                    tempWindowStatesList.add(tempWindowStatesList.lastIndexOf(parentWindow), w);
-                }
-            }, false /* traverseTopToBottom */);
             for (int i = 0; i < tempWindowStatesList.size(); i++) {
                 outWindows.put(i, tempWindowStatesList.get(i));
             }
-        }
-
-        private WindowState findRootDisplayParentWindow(WindowState win) {
-            WindowState displayParentWindow = win.getDisplayContent().getParentWindow();
-            if (displayParentWindow == null) {
-                return null;
-            }
-            WindowState candidate = displayParentWindow;
-            while (candidate != null) {
-                displayParentWindow = candidate;
-                candidate = displayParentWindow.getDisplayContent().getParentWindow();
-            }
-            return displayParentWindow;
         }
 
         private WindowState getTopFocusWindow() {

@@ -17,7 +17,6 @@
 package com.android.internal.view;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.graphics.Point;
 import android.hardware.input.InputManager;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
@@ -59,10 +58,6 @@ public class BaseIWindow extends IWindow.Stub {
             } catch (RemoteException e) {
             }
         }
-    }
-
-    @Override
-    public void locationInParentDisplayChanged(Point offset) {
     }
 
     @Override
