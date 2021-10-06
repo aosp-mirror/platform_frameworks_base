@@ -901,7 +901,8 @@ public class ResolverActivity extends Activity implements
         if (!isChangingConfigurations() && mPickOptionRequest != null) {
             mPickOptionRequest.cancel();
         }
-        if (mMultiProfilePagerAdapter.getActiveListAdapter() != null) {
+        if (mMultiProfilePagerAdapter != null
+                && mMultiProfilePagerAdapter.getActiveListAdapter() != null) {
             mMultiProfilePagerAdapter.getActiveListAdapter().onDestroy();
         }
     }
