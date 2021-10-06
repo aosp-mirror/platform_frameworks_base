@@ -261,8 +261,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             if (launchMode == WINDOWING_MODE_PINNED) {
                 if (DEBUG) appendLog("picture-in-picture");
             } else if (!root.isResizeable()) {
-                if (shouldLaunchUnresizableAppInFreeform(root, suggestedDisplayArea,
-                        options.getLaunchWindowingMode())) {
+                if (shouldLaunchUnresizableAppInFreeform(root, suggestedDisplayArea, options)) {
                     launchMode = WINDOWING_MODE_FREEFORM;
                     if (outParams.mBounds.isEmpty()) {
                         getTaskBounds(root, suggestedDisplayArea, layout, launchMode,
@@ -618,8 +617,8 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
     }
 
     private boolean shouldLaunchUnresizableAppInFreeform(ActivityRecord activity,
-            TaskDisplayArea displayArea, int launchWindowingMode) {
-        if (launchWindowingMode == WINDOWING_MODE_FULLSCREEN) {
+            TaskDisplayArea displayArea, @Nullable ActivityOptions options) {
+        if (options != null && options.getLaunchWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
             // Do not launch the activity in freeform if it explicitly requested fullscreen mode.
             return false;
         }
