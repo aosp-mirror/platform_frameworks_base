@@ -3776,7 +3776,7 @@ public final class Parcel {
 
             default:
                 int off = dataPosition() - 4;
-                throw new RuntimeException(
+                throw new BadParcelableException(
                     "Parcel " + this + ": Unmarshalling unknown type code " + type
                             + " at offset " + off);
         }
