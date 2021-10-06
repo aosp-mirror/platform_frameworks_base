@@ -32,7 +32,6 @@ import android.view.InputApplicationHandle;
 
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.CriticalEventLog;
-import com.android.server.wm.EmbeddedWindowController.EmbeddedWindow;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -82,21 +81,23 @@ class AnrController {
         final boolean aboveSystem;
         final ActivityRecord activity;
         synchronized (mService.mGlobalLock) {
-            WindowState windowState = mService.mInputToWindowMap.get(inputToken);
-            if (windowState != null) {
-                pid = windowState.mSession.mPid;
-                activity = windowState.mActivityRecord;
-                Slog.i(TAG_WM, "ANR in " + windowState.mAttrs.getTitle() + ". Reason:" + reason);
-            } else {
-                EmbeddedWindow embeddedWindow = mService.mEmbeddedWindowController.get(inputToken);
-                if (embeddedWindow == null) {
-                    Slog.e(TAG_WM, "Unknown token, dropping notifyConnectionUnresponsive request");
-                    return;
-                }
-                pid = embeddedWindow.mOwnerPid;
-                windowState = embeddedWindow.mHostWindowState;
-                activity = null; // Don't blame the host process, instead blame the embedded pid.
+            InputTarget target = mService.getInputTargetFromToken(inputToken);
+            if (target == null) {
+                Slog.e(TAG_WM, "Unknown token, dropping notifyConnectionUnresponsive request");
+                return;
             }
+
+            WindowState windowState = target.asWindowState();
+            pid = target.getPid();
+            if (windowState != null) {
+                activity = windowState.mActivityRecord;
+            } else {
+                // Don't blame the host process, instead blame the embedded pid.
+                activity = null;
+                // Use host WindowState for logging and z-order test.
+                windowState = target.asEmbeddedWindow().mHostWindowState;
+            }
+            Slog.i(TAG_WM, "ANR in " + target + ". Reason:" + reason);
             aboveSystem = isWindowAboveSystem(windowState);
             dumpAnrStateLocked(activity, windowState, reason);
         }
@@ -110,19 +111,12 @@ class AnrController {
     void notifyWindowResponsive(IBinder inputToken) {
         final int pid;
         synchronized (mService.mGlobalLock) {
-            WindowState windowState = mService.mInputToWindowMap.get(inputToken);
-            if (windowState != null) {
-                pid = windowState.mSession.mPid;
-            } else {
-                // Check if the token belongs to an embedded window.
-                EmbeddedWindow embeddedWindow = mService.mEmbeddedWindowController.get(inputToken);
-                if (embeddedWindow == null) {
-                    Slog.e(TAG_WM,
-                            "Unknown token, dropping notifyWindowConnectionResponsive request");
-                    return;
-                }
-                pid = embeddedWindow.mOwnerPid;
+            InputTarget target = mService.getInputTargetFromToken(inputToken);
+            if (target == null) {
+                Slog.e(TAG_WM, "Unknown token, dropping notifyWindowConnectionResponsive request");
+                return;
             }
+            pid = target.getPid();
         }
         mService.mAmInternal.inputDispatchingResumed(pid);
     }
