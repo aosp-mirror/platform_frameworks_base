@@ -328,7 +328,41 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
         // WHEN status bar expansion is 0 but udfps bouncer is requested
         mAltAuthInterceptor.showAlternateAuthBouncer();
 
-        // THEN alpha is 0
+        // THEN alpha is 255
+        verify(mView).setUnpausedAlpha(255);
+    }
+
+    @Test
+    public void testTransitionToFullShadeProgress() {
+        // GIVEN view is attached and status bar expansion is 1f
+        mController.onViewAttached();
+        captureExpansionListeners();
+        updateStatusBarExpansion(1f, true);
+        reset(mView);
+
+        // WHEN we're transitioning to the full shade
+        float transitionProgress = .6f;
+        mController.setTransitionToFullShadeProgress(transitionProgress);
+
+        // THEN alpha is between 0 and 255
+        verify(mView).setUnpausedAlpha((int) ((1f - transitionProgress) * 255));
+    }
+
+    @Test
+    public void testShowUdfpsBouncer_transitionToFullShadeProgress() {
+        // GIVEN view is attached and status bar expansion is 1f
+        mController.onViewAttached();
+        captureExpansionListeners();
+        captureKeyguardStateControllerCallback();
+        captureAltAuthInterceptor();
+        updateStatusBarExpansion(1f, true);
+        mAltAuthInterceptor.showAlternateAuthBouncer();
+        reset(mView);
+
+        // WHEN we're transitioning to the full shade
+        mController.setTransitionToFullShadeProgress(1.0f);
+
+        // THEN alpha is 255 (b/c udfps bouncer is requested)
         verify(mView).setUnpausedAlpha(255);
     }
 
