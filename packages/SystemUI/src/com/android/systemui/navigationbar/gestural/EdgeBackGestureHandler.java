@@ -39,7 +39,6 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Choreographer;
-import android.view.Display;
 import android.view.ISystemGestureExclusionListener;
 import android.view.IWindowManager;
 import android.view.InputDevice;
@@ -104,9 +103,6 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     // Temporary log until b/201642126 is resolved
     static final boolean DEBUG_MISSING_GESTURE = true;
     static final String DEBUG_MISSING_GESTURE_TAG = "NoBackGesture";
-
-    private static final boolean ENABLE_PER_WINDOW_INPUT_ROTATION =
-            SystemProperties.getBoolean("persist.debug.per_window_input_rotation", false);
 
     private ISystemGestureExclusionListener mGestureExclusionListener =
             new ISystemGestureExclusionListener.Stub() {
@@ -559,16 +555,6 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     private void onInputEvent(InputEvent ev) {
         if (!(ev instanceof MotionEvent)) return;
         MotionEvent event = (MotionEvent) ev;
-        if (ENABLE_PER_WINDOW_INPUT_ROTATION) {
-            final Display display = mContext.getDisplay();
-            int rotation = display.getRotation();
-            if (rotation != Surface.ROTATION_0) {
-                Point sz = new Point();
-                display.getRealSize(sz);
-                event = MotionEvent.obtain(event);
-                event.transform(MotionEvent.createRotateMatrix(rotation, sz.x, sz.y));
-            }
-        }
         onMotionEvent(event);
     }
 
