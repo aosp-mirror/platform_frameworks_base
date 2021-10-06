@@ -310,6 +310,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private KeyguardStatusViewController mKeyguardStatusViewController;
     private LockIconViewController mLockIconViewController;
     private NotificationsQuickSettingsContainer mNotificationContainerParent;
+    private NotificationsQSContainerController mNotificationsQSContainerController;
     private boolean mAnimateNextPositionUpdate;
     private float mQuickQsOffsetHeight;
     private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
@@ -650,6 +651,7 @@ public class NotificationPanelViewController extends PanelViewController {
             ConversationNotificationManager conversationNotificationManager,
             MediaHierarchyManager mediaHierarchyManager,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
+            NotificationsQSContainerController notificationsQSContainerController,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
             KeyguardStatusViewComponent.Factory keyguardStatusViewComponentFactory,
             KeyguardQsUserSwitchComponent.Factory keyguardQsUserSwitchComponentFactory,
@@ -705,6 +707,8 @@ public class NotificationPanelViewController extends PanelViewController {
         mFlingAnimationUtilsBuilder = flingAnimationUtilsBuilder;
         mMediaHierarchyManager = mediaHierarchyManager;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
+        mNotificationsQSContainerController = notificationsQSContainerController;
+        mNotificationsQSContainerController.init();
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
         mGroupManager = groupManager;
         mNotificationIconAreaController = notificationIconAreaController;
@@ -1002,7 +1006,7 @@ public class NotificationPanelViewController extends PanelViewController {
         constraintSet.setMargin(R.id.notification_stack_scroller, TOP, topMargin);
         constraintSet.setMargin(R.id.qs_frame, TOP, topMargin);
         constraintSet.applyTo(mNotificationContainerParent);
-        mNotificationContainerParent.setSplitShadeEnabled(mShouldUseSplitNotificationShade);
+        mNotificationsQSContainerController.setSplitShadeEnabled(mShouldUseSplitNotificationShade);
 
         updateKeyguardStatusViewAlignment(/* animate= */false);
 
@@ -2103,7 +2107,7 @@ public class NotificationPanelViewController extends PanelViewController {
             requestPanelHeightUpdate();
             mFalsingCollector.setQsExpanded(expanded);
             mStatusBar.setQsExpanded(expanded);
-            mNotificationContainerParent.setQsExpanded(expanded);
+            mNotificationsQSContainerController.setQsExpanded(expanded);
             mPulseExpansionHandler.setQsExpanded(expanded);
             mKeyguardBypassController.setQSExpanded(expanded);
             mStatusBarKeyguardViewManager.setQsExpanded(expanded);

@@ -35,13 +35,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.keyguard.ScreenLifecycle;
+import com.android.systemui.plugins.qs.QSContainerController;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSEditEvent;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.statusbar.phone.LightBarController;
-import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -233,8 +233,8 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
     }
 
     /** */
-    public void setContainer(NotificationsQuickSettingsContainer container) {
-        mView.setContainer(container);
+    public void setContainerController(QSContainerController controller) {
+        mView.setContainerController(controller);
     }
 
     public boolean isShown() {
