@@ -35,6 +35,8 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
     private lateinit var panelView: ViewGroup
     @Mock
     private lateinit var scrimController: ScrimController
+    @Mock
+    private lateinit var statusBar: StatusBar
 
     private lateinit var view: PhoneStatusBarView
 
@@ -48,6 +50,7 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
         view = PhoneStatusBarView(mContext, null)
         view.setPanel(panelViewController)
         view.setScrimController(scrimController)
+        view.setBar(statusBar)
     }
 
     @Test
@@ -72,7 +75,7 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
 
     @Test
     fun panelExpansionChanged_fracZero_stateChangeListenerNotified() {
-        val listener = TestStateChangedListener()
+        val listener = TestExpansionStateChangedListener()
         view.setPanelExpansionStateChangedListener(listener)
 
         view.panelExpansionChanged(0f, false)
@@ -82,7 +85,7 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
 
     @Test
     fun panelExpansionChanged_fracOne_stateChangeListenerNotified() {
-        val listener = TestStateChangedListener()
+        val listener = TestExpansionStateChangedListener()
         view.setPanelExpansionStateChangedListener(listener)
 
         view.panelExpansionChanged(1f, false)
@@ -92,7 +95,7 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
 
     @Test
     fun panelExpansionChanged_fracHalf_stateChangeListenerNotNotified() {
-        val listener = TestStateChangedListener()
+        val listener = TestExpansionStateChangedListener()
         view.setPanelExpansionStateChangedListener(listener)
 
         view.panelExpansionChanged(0.5f, false)
@@ -106,11 +109,59 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
         // No assert needed, just testing no crash
     }
 
-    private class TestStateChangedListener : PhoneStatusBarView.PanelExpansionStateChangedListener {
+    @Test
+    fun panelStateChanged_toStateOpening_listenerNotified() {
+        val listener = TestStateChangedListener()
+        view.setPanelStateChangeListener(listener)
+
+        view.panelExpansionChanged(0.5f, true)
+
+        assertThat(listener.state).isEqualTo(PanelBar.STATE_OPENING)
+    }
+
+    @Test
+    fun panelStateChanged_toStateOpen_listenerNotified() {
+        val listener = TestStateChangedListener()
+        view.setPanelStateChangeListener(listener)
+
+        view.panelExpansionChanged(1f, true)
+
+        assertThat(listener.state).isEqualTo(PanelBar.STATE_OPEN)
+    }
+
+    @Test
+    fun panelStateChanged_toStateClosed_listenerNotified() {
+        val listener = TestStateChangedListener()
+        view.setPanelStateChangeListener(listener)
+
+        // First, open the panel
+        view.panelExpansionChanged(1f, true)
+
+        // Then, close it again
+        view.panelExpansionChanged(0f, false)
+
+        assertThat(listener.state).isEqualTo(PanelBar.STATE_CLOSED)
+    }
+
+    @Test
+    fun panelStateChanged_noListener_noCrash() {
+        view.panelExpansionChanged(1f, true)
+        // No assert needed, just testing no crash
+    }
+
+    private class TestExpansionStateChangedListener
+        : PhoneStatusBarView.PanelExpansionStateChangedListener {
         var stateChangeCalled: Boolean = false
 
         override fun onPanelExpansionStateChanged() {
             stateChangeCalled = true
+        }
+    }
+
+    private class TestStateChangedListener : PanelBar.PanelStateChangeListener {
+        var state: Int = 0
+        override fun onStateChanged(state: Int) {
+            this.state = state
         }
     }
 }
