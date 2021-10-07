@@ -50,6 +50,7 @@ import com.android.internal.util.FrameworkStatsLog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A class that allows the app to get the frame metrics from HardwareRendererObserver.
@@ -103,6 +104,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
     private boolean mCancelled = false;
     private FrameTrackerListener mListener;
     private boolean mTracingStarted = false;
+    private Runnable mWaitForFinishTimedOut;
 
     private static class JankInfo {
         long frameVsyncId;
@@ -263,10 +265,16 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
             if (mListener != null) {
                 mListener.onCujEvents(mSession, ACTION_SESSION_END);
             }
+            // We don't remove observer here,
+            // will remove it when all the frame metrics in this duration are called back.
+            // See onFrameMetricsAvailable for the logic of removing the observer.
+            // Waiting at most 10 seconds for all callbacks to finish.
+            mWaitForFinishTimedOut = () -> {
+                Log.e(TAG, "force finish cuj because of time out:" + mSession.getName());
+                finish(mJankInfos.size() - 1);
+            };
+            mHandler.postDelayed(mWaitForFinishTimedOut, TimeUnit.SECONDS.toMillis(10));
         }
-        // We don't remove observer here,
-        // will remove it when all the frame metrics in this duration are called back.
-        // See onFrameMetricsAvailable for the logic of removing the observer.
     }
 
     /**
@@ -396,7 +404,8 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
     }
 
     private void finish(int indexOnOrAfterEnd) {
-
+        mHandler.removeCallbacks(mWaitForFinishTimedOut);
+        mWaitForFinishTimedOut = null;
         mMetricsFinalized = true;
 
         // The tracing has been ended, remove the observer, see if need to trigger perfetto.
@@ -481,7 +490,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
             }
         }
         if (DEBUG) {
-            Log.i(TAG, "FrameTracker: CUJ=" + mSession.getName()
+            Log.i(TAG, "finish: CUJ=" + mSession.getName()
                     + " (" + mBeginVsyncId + "," + mEndVsyncId + ")"
                     + " totalFrames=" + totalFramesCount
                     + " missedAppFrames=" + missedAppFramesCount

@@ -100,7 +100,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"స్క్రీన్ రికార్డింగ్ అవుతోంది"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"స్క్రీన్ రికార్డ్ సెషన్ కోసం ఆన్‌గోయింగ్ నోటిఫికేషన్"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"రికార్డింగ్‌ను ప్రారంభించాలా?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"రికార్డ్ చేస్తున్నప్పుడు, Android సిస్టమ్ మీ స్క్రీన్‌పై ప్రదర్శించబడిన లేదా మీ పరికరం నుండి ప్లే చేయబడిన ఏ సున్నితమైన సమాచారాన్నైనా క్యాప్చర్ చేయగలదు. ఈ సమాచారంలో, పాస్‌వర్డ్‌లు, పేమెంట్ వివరాలు, ఫోటోలు, మెసేజ్‌లు, ఆడియో ఉంటాయి."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"రికార్డ్ చేస్తున్నప్పుడు, Android సిస్టమ్ మీ స్క్రీన్‌పై ప్రదర్శించబడిన లేదా మీ పరికరం నుండి ప్లే చేయబడిన ఏ సున్నితమైన సమాచారాన్నయినా క్యాప్చర్ చేయగలదు. ఈ సమాచారంలో, పాస్‌వర్డ్‌లు, పేమెంట్ వివరాలు, ఫోటోలు, మెసేజ్‌లు, ఆడియో కూడా ఉంటాయి."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ఆడియోను రికార్డ్ చేయి"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"పరికరం ఆడియో"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"మీ పరికరం నుండి వచ్చే సంగీతం, కాల్స్‌, రింగ్‌టోన్‌ల వంటి ధ్వనులు"</string>
@@ -124,7 +124,7 @@
     <string name="screenrecord_start_error" msgid="2200660692479682368">"స్క్రీన్ రికార్డింగ్ ప్రారంభించడంలో ఎర్రర్ ఏర్పడింది"</string>
     <string name="usb_preference_title" msgid="1439924437558480718">"USB ఫైల్ బదిలీ ఎంపికలు"</string>
     <string name="use_mtp_button_title" msgid="5036082897886518086">"మీడియా ప్లేయర్‌గా (MTP) మౌంట్ చేయి"</string>
-    <string name="use_ptp_button_title" msgid="7676427598943446826">"కెమెరాగా (PTP) మౌంట్ చేయి"</string>
+    <string name="use_ptp_button_title" msgid="7676427598943446826">"ఒక కెమెరాగా (PTP) మౌంట్ చేయండి"</string>
     <string name="installer_cd_button_title" msgid="5499998592841984743">"Macకు Android ఫైల్ బదిలీ యాప్ ఇన్‌స్టాల్ చేయండి"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"వెనుకకు"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"హోమ్"</string>
@@ -146,7 +146,7 @@
     <string name="accessibility_manage_notification" msgid="582215815790143983">"నోటిఫికేషన్‌లను నిర్వహించండి"</string>
     <string name="phone_label" msgid="5715229948920451352">"ఫోన్‌ను తెరువు"</string>
     <string name="voice_assist_label" msgid="3725967093735929020">"వాయిస్ అసిస్టెంట్‌ను తెరువు"</string>
-    <string name="camera_label" msgid="8253821920931143699">"కెమెరాను తెరువు"</string>
+    <string name="camera_label" msgid="8253821920931143699">"కెమెరాను తెరవండి"</string>
     <string name="cancel" msgid="1089011503403416730">"రద్దు చేయి"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"నిర్ధారించు"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"మళ్లీ ప్రయత్నించు"</string>
@@ -276,8 +276,8 @@
     <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="1263282011749437549">"బ్లూటూత్ ఆన్ చేయబడింది."</string>
     <string name="accessibility_quick_settings_location_off" msgid="6122523378294740598">"లొకేషన్ రిపోర్టింగ్ ఆఫ్‌లో ఉంది."</string>
     <string name="accessibility_quick_settings_location_on" msgid="6869947200325467243">"లొకేషన్ రిపోర్టింగ్ ఆన్‌లో ఉంది."</string>
-    <string name="accessibility_quick_settings_location_changed_off" msgid="5132776369388699133">"స్థాన నివేదన ఆఫ్ చేయబడింది."</string>
-    <string name="accessibility_quick_settings_location_changed_on" msgid="7159115433070112154">"స్థాన నివేదన ఆన్ చేయబడింది."</string>
+    <string name="accessibility_quick_settings_location_changed_off" msgid="5132776369388699133">"లొకేషన్ రిపోర్టింగ్ ఆఫ్ చేయబడింది."</string>
+    <string name="accessibility_quick_settings_location_changed_on" msgid="7159115433070112154">"లొకేషన్ రిపోర్టింగ్ ఆన్ చేయబడింది."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"<xliff:g id="TIME">%s</xliff:g>కి అలారం సెట్ చేయబడింది."</string>
     <string name="accessibility_quick_settings_close" msgid="2974895537860082341">"ప్యానెల్‌ను మూసివేయి."</string>
     <string name="accessibility_quick_settings_more_time" msgid="7646479831704665284">"ఎక్కువ సమయం."</string>
@@ -307,7 +307,7 @@
     <string name="data_usage_disabled_dialog" msgid="7933201635215099780">"మీరు సెట్ చేసిన డేటా పరిమితిని చేరుకున్నారు. మీరు ఇప్పుడు మొబైల్ డేటాను ఉపయోగించడం లేదు.\n\nమీరు పునఃప్రారంభిస్తే, డేటా వినియోగానికి ఛార్జీలు చెల్లించాల్సి రావచ్చు."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="2796648546086408937">"పునఃప్రారంభించు"</string>
     <string name="gps_notification_searching_text" msgid="231304732649348313">"GPS కోసం శోధిస్తోంది"</string>
-    <string name="gps_notification_found_text" msgid="3145873880174658526">"స్థానం GPS ద్వారా సెట్ చేయబడింది"</string>
+    <string name="gps_notification_found_text" msgid="3145873880174658526">"లొకేషన్ GPS ద్వారా సెట్ చేయబడింది"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"లొకేషన్ రిక్వెస్ట్‌లు యాక్టివ్‌గా ఉన్నాయి"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"సెన్సార్‌లు ఆఫ్ యాక్టివ్‌లో ఉంది"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"అన్ని నోటిఫికేషన్‌లను క్లియర్ చేయండి."</string>
@@ -429,11 +429,11 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ప్రారంభించు"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ఆపు"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"పరికరం మైక్రోఫోన్‌ను అన్‌బ్లాక్ చేయమంటారా?"</string>
-    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"పరికరం కెమెరాను అన్‌బ్లాక్ చేయమంటారా?"</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"పరికరం కెమెరా, మైక్రోఫోన్‌ను అన్‌బ్లాక్ చేయమంటారా?"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"పరికరంలోని కెమెరాను అన్‌బ్లాక్ చేయమంటారా?"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"పరికరంలోని కెమెరా, మైక్రోఫోన్‌లను అన్‌బ్లాక్ చేయమంటారా?"</string>
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"మీ మైక్రోఫోన్‌ను ఉపయోగించడానికి అనుమతి పొందిన అన్ని యాప్‌లు, సర్వీస్‌లకు యాక్సెస్‌ను ఇది అన్‌బ్లాక్ చేస్తుంది."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"మీ కెమెరాను ఉపయోగించడానికి అనుమతి పొందిన అన్ని యాప్‌లు, సర్వీస్‌లకు యాక్సెస్‌ను ఇది అన్‌బ్లాక్ చేస్తుంది."</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"మీ కెమెరాను లేదా మైక్రోఫోన్‌ను ఉపయోగించడానికి అనుమతి పొందిన అన్ని యాప్‌లు, సర్వీస్‌లకు యాక్సెస్‌ను ఇది అన్‌బ్లాక్ చేస్తుంది."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"ఇది, మీ కెమెరాను ఉపయోగించడానికి అనుమతి పొందిన అన్ని యాప్‌లకు, సర్వీస్‌లకు యాక్సెస్‌ను అన్‌బ్లాక్ చేస్తుంది."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"ఇది, మీ కెమెరాను లేదా మైక్రోఫోన్‌ను ఉపయోగించడానికి అనుమతి పొందిన అన్ని యాప్‌లకు, సర్వీస్‌లకు యాక్సెస్‌ను అన్‌బ్లాక్ చేస్తుంది."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"పరికరం"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"స్థూలదృష్టిని టోగుల్ చేయి"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"ఛార్జ్ చేయబడింది"</string>
@@ -461,7 +461,7 @@
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"ఈ పరికరం <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>కు చెందినది"</string>
     <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"ఈ పరికరం <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ద్వారా అందించబడింది"</string>
     <string name="phone_hint" msgid="6682125338461375925">"ఫోన్ కోసం చిహ్నాన్ని స్వైప్ చేయండి"</string>
-    <string name="voice_hint" msgid="7476017460191291417">"వాయిస్ అసిస్టెంట్ చిహ్నం నుండి స్వైప్"</string>
+    <string name="voice_hint" msgid="7476017460191291417">"వాయిస్ అసిస్టెంట్ కోసం చిహ్నం నుండి స్వైప్ చేయండి"</string>
     <string name="camera_hint" msgid="4519495795000658637">"కెమెరా కోసం చిహ్నాన్ని స్వైప్ చేయండి"</string>
     <string name="interruption_level_none_with_warning" msgid="8394434073508145437">"మొత్తం నిశ్శబ్దం. దీని వలన స్క్రీన్ రీడర్‌లు కూడా నిశ్శబ్దమవుతాయి."</string>
     <string name="interruption_level_none" msgid="219484038314193379">"మొత్తం నిశ్శబ్దం"</string>
@@ -506,7 +506,7 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"బ్యాటరీ సేవర్ ఆన్‌లో ఉంది"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"పనితీరుని మరియు నేపథ్య డేటాను తగ్గిస్తుంది"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"బ్యాటరీ సేవర్‌ను ఆఫ్ చేయండి"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"రికార్డ్ చేస్తున్నప్పుడు లేదా ప్రసారం చేస్తున్నప్పుడు, మీ స్క్రీన్‌పై ప్రదర్శించబడిన లేదా మీ పరికరం నుండి ప్లే చేయబడిన సమాచారం మొత్తాన్ని, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> యాక్సెస్ చేయగలుగుతుంది. ఈ సమాచారంలో, పాస్‌వర్డ్‌లు, చెల్లింపు వివరాలు, ఫోటోలు, మెసేజ్‌లు, మీరు ప్లే చేసే ఆడియో వంటివి ఉంటాయి."</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"రికార్డ్ చేస్తున్నప్పుడు లేదా ప్రసారం చేస్తున్నప్పుడు, మీ స్క్రీన్‌పై ప్రదర్శించబడిన లేదా మీ పరికరం నుండి ప్లే చేయబడిన సమాచారం మొత్తాన్ని, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> యాక్సెస్ చేయగలుగుతుంది. ఈ సమాచారంలో, పాస్‌వర్డ్‌లు, పేమెంట్ వివరాలు, ఫోటోలు, మెసేజ్‌లు, మీరు ప్లే చేసే ఆడియో వంటివి ఉంటాయి."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"రికార్డ్ చేస్తున్నప్పుడు లేదా ప్రసారం చేస్తున్నప్పుడు మీ స్క్రీన్‌పై ప్రదర్శించబడిన లేదా మీ పరికరం నుండి ప్లే చేయబడిన సమాచారం మొత్తాన్ని, ఈ ఫంక్షన్‌ను అందిస్తున్న సర్వీస్ యాక్సెస్ చేయగలదు. ఈ సమాచారంలో, పాస్‌వర్డ్‌లు, పేమెంట్ వివరాలు, ఫోటోలు,  మెసేజ్‌లు, మీరు ప్లే చేసే ఆడియో వంటివి ఉంటాయి."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"రికార్డ్ చేయడం లేదా ప్రసారం చేయడం ప్రారంభించాలా?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>తో రికార్డ్ చేయడం లేదా ప్రసారం చేయడం ప్రారంభించాలా?"</string>
@@ -658,7 +658,7 @@
     <string name="system_ui_tuner" msgid="1471348823289954729">"సిస్టమ్ UI ట్యూనర్"</string>
     <string name="show_battery_percentage" msgid="6235377891802910455">"పొందుపరిచిన బ్యాటరీ శాతం చూపు"</string>
     <string name="show_battery_percentage_summary" msgid="9053024758304102915">"ఛార్జింగ్‌లో లేనప్పుడు స్థితి పట్టీ చిహ్నం లోపల బ్యాటరీ స్థాయి శాతం చూపుతుంది"</string>
-    <string name="quick_settings" msgid="6211774484997470203">"శీఘ్ర సెట్టింగ్‌లు"</string>
+    <string name="quick_settings" msgid="6211774484997470203">"క్విక్ సెట్టింగ్‌లు"</string>
     <string name="status_bar" msgid="4357390266055077437">"స్థితి పట్టీ"</string>
     <string name="overview" msgid="3522318590458536816">"ఓవర్‌వ్యూ"</string>
     <string name="demo_mode" msgid="263484519766901593">"సిస్టమ్ UI డెమో మోడ్"</string>
@@ -755,13 +755,13 @@
     <string name="notification_delegate_header" msgid="1264510071031479920">"ప్రాక్సీ చేయబడిన నోటిఫికేషన్"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"అన్ని <xliff:g id="APP_NAME">%1$s</xliff:g> నోటిఫికేషన్‌లు"</string>
     <string name="see_more_title" msgid="7409317011708185729">"మరిన్ని చూడండి"</string>
-    <string name="appops_camera" msgid="5215967620896725715">"ఈ యాప్ ఈ కెమెరాను ఉపయోగిస్తోంది."</string>
+    <string name="appops_camera" msgid="5215967620896725715">"ఈ యాప్, కెమెరాను ఉపయోగిస్తోంది."</string>
     <string name="appops_microphone" msgid="8805468338613070149">"ఈ యాప్ మైక్రోఫోన్‌ను ఉపయోగిస్తుంది."</string>
     <string name="appops_overlay" msgid="4822261562576558490">"ఈ యాప్ మీ స్క్రీన్‌లోని ఇతర యాప్‌లపై ప్రదర్శించబడుతోంది."</string>
-    <string name="appops_camera_mic" msgid="7032239823944420431">"ఈ యాప్ మైక్రోఫోన్ మరియు కెమెరాను ఉపయోగిస్తుంది."</string>
-    <string name="appops_camera_overlay" msgid="6466845606058816484">"ఈ యాప్ మీ స్క్రీన్‌లోని ఇతర యాప్‌లపై ప్రదర్శించబడుతోంది మరియు కెమెరాను ఉపయోగిస్తుంది."</string>
+    <string name="appops_camera_mic" msgid="7032239823944420431">"ఈ యాప్ మైక్రోఫోన్‌ను, కెమెరాను ఉపయోగిస్తోంది."</string>
+    <string name="appops_camera_overlay" msgid="6466845606058816484">"ఈ యాప్ మీ స్క్రీన్‌లోని ఇతర యాప్‌లపై ప్రదర్శించబడుతోంది, కెమెరాను ఉపయోగిస్తోంది."</string>
     <string name="appops_mic_overlay" msgid="4609326508944233061">"ఈ యాప్ మీ స్క్రీన్‌లోని ఇతర యాప్‌లపై ప్రదర్శించబడుతోంది మరియు మైక్రోఫోన్‌ను ఉపయోగిస్తుంది."</string>
-    <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"ఈ యాప్ మీ స్క్రీన్‌లోని ఇతర యాప్‌లపై ప్రదర్శించబడుతోంది మరియు మైక్రోఫోన్, కెమెరాను ఉపయోగిస్తుంది."</string>
+    <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"ఈ యాప్ మీ స్క్రీన్‌లోని ఇతర యాప్‌లపై ప్రదర్శించబడుతోంది, మైక్రోఫోన్, కెమెరాను ఉపయోగిస్తోంది."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"సెట్టింగ్‌లు"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"సరే"</string>
     <string name="feedback_alerted" msgid="5192459808484271208">"ఈ నోటిఫికేషన్, సిస్టమ్ ద్వారా దానంతట అదే &lt;b&gt;ఆటోమేటిక్‌గా ప్రమోట్ చేయబడింది&lt;/b&gt;."</string>
@@ -1144,7 +1144,7 @@
     <string name="status_before_loading" msgid="1500477307859631381">"కంటెంట్ త్వరలో కనిపిస్తుంది"</string>
     <string name="missed_call" msgid="4228016077700161689">"మిస్డ్ కాల్"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
-    <string name="people_tile_description" msgid="8154966188085545556">"ఇటీవలి మెసేజ్‌లు, మిస్డ్ కాల్స్‌, అలాగే స్టేటస్ అప్‌డేట్‌లను చూడండి"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"ఇటీవలి మెసేజ్‌లు, మిస్స్‌డ్‌ కాల్స్‌, అలాగే స్టేటస్ అప్‌డేట్‌లను చూడండి"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"సంభాషణ"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"అంతరాయం కలిగించవద్దు ద్వారా పాజ్ చేయబడింది"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> మెసేజ్‌ను పంపారు: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
