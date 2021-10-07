@@ -22,11 +22,20 @@ import static android.os.PowerManagerInternal.WAKEFULNESS_DOZING;
 import static android.os.PowerManagerInternal.WAKEFULNESS_DREAMING;
 import static android.os.PowerManagerInternal.isInteractive;
 
+import static com.android.server.power.PowerManagerService.USER_ACTIVITY_SCREEN_BRIGHT;
+import static com.android.server.power.PowerManagerService.WAKE_LOCK_DOZE;
+import static com.android.server.power.PowerManagerService.WAKE_LOCK_DRAW;
+import static com.android.server.power.PowerManagerService.WAKE_LOCK_SCREEN_BRIGHT;
+
+import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.os.PowerManager;
+import android.os.PowerSaveState;
 import android.os.Trace;
 import android.util.Slog;
 import android.view.Display;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 /**
  * Used to store power related requests to every display in a
@@ -40,8 +49,11 @@ public class PowerGroup {
     private static final String TAG = PowerGroup.class.getSimpleName();
     private static final boolean DEBUG = false;
 
-    private final DisplayPowerRequest mDisplayPowerRequest;
+    @VisibleForTesting
+    final DisplayPowerRequest mDisplayPowerRequest = new DisplayPowerRequest();
     private final PowerGroupListener mWakefulnessListener;
+    private final Notifier mNotifier;
+    private final DisplayManagerInternal mDisplayManagerInternal;
     private final boolean mSupportsSandman;
     private final int mGroupId;
     /** True if DisplayManagerService has applied all the latest display states that were requested
@@ -63,12 +75,13 @@ public class PowerGroup {
     /** Timestamp (milliseconds since boot) of the last time the power group was put to sleep. */
     private long mLastSleepTime;
 
-    PowerGroup(int groupId, PowerGroupListener wakefulnessListener,
-            DisplayPowerRequest displayPowerRequest, int wakefulness, boolean ready,
+    PowerGroup(int groupId, PowerGroupListener wakefulnessListener, Notifier notifier,
+            DisplayManagerInternal displayManagerInternal, int wakefulness, boolean ready,
             boolean supportsSandman, long eventTime) {
         mGroupId = groupId;
         mWakefulnessListener = wakefulnessListener;
-        mDisplayPowerRequest = displayPowerRequest;
+        mNotifier = notifier;
+        mDisplayManagerInternal = displayManagerInternal;
         mWakefulness = wakefulness;
         mReady = ready;
         mSupportsSandman = supportsSandman;
@@ -76,18 +89,17 @@ public class PowerGroup {
         mLastSleepTime = eventTime;
     }
 
-    PowerGroup(int wakefulness, PowerGroupListener wakefulnessListener, long eventTime) {
+    PowerGroup(int wakefulness, PowerGroupListener wakefulnessListener, Notifier notifier,
+            DisplayManagerInternal displayManagerInternal, long eventTime) {
         mGroupId = Display.DEFAULT_DISPLAY_GROUP;
         mWakefulnessListener = wakefulnessListener;
-        mDisplayPowerRequest = new DisplayPowerRequest();
+        mNotifier = notifier;
+        mDisplayManagerInternal = displayManagerInternal;
         mWakefulness = wakefulness;
         mReady = false;
         mSupportsSandman = true;
         mLastWakeTime = eventTime;
-        mLastSleepTime = eventTime;    }
-
-    DisplayPowerRequest getDisplayPowerRequestLocked() {
-        return mDisplayPowerRequest;
+        mLastSleepTime = eventTime;
     }
 
     long getLastWakeTimeLocked() {
@@ -261,6 +273,23 @@ public class PowerGroup {
         return mUserActivitySummary;
     }
 
+    public boolean isPolicyBrightLocked() {
+        return mDisplayPowerRequest.policy == DisplayPowerRequest.POLICY_BRIGHT;
+    }
+
+    public boolean isPolicyDimLocked() {
+        return mDisplayPowerRequest.policy == DisplayPowerRequest.POLICY_DIM;
+    }
+
+    public boolean isPolicyVrLocked() {
+        return mDisplayPowerRequest.isVr();
+
+    }
+
+    public boolean isBrightOrDimLocked() {
+        return mDisplayPowerRequest.isBrightOrDim();
+    }
+
     public void setUserActivitySummaryLocked(int summary) {
         mUserActivitySummary = summary;
     }
@@ -279,6 +308,108 @@ public class PowerGroup {
      */
     public boolean supportsSandmanLocked() {
         return mSupportsSandman;
+    }
+
+    /**
+     * Return true if we must keep a suspend blocker active on behalf of a power group.
+     * We do so if the screen is on or is in transition between states.
+     */
+    boolean needSuspendBlockerLocked(boolean proximityPositive,
+            boolean suspendWhenScreenOffDueToProximityConfig) {
+        if (isBrightOrDimLocked()) {
+            // If we asked for the screen to be on but it is off due to the proximity
+            // sensor then we may suspend but only if the configuration allows it.
+            // On some hardware it may not be safe to suspend because the proximity
+            // sensor may not be correctly configured as a wake-up source.
+            if (!mDisplayPowerRequest.useProximitySensor || !proximityPositive
+                    || !suspendWhenScreenOffDueToProximityConfig) {
+                return true;
+            }
+        }
+
+        if (mDisplayPowerRequest.policy == DisplayPowerRequest.POLICY_DOZE
+                && mDisplayPowerRequest.dozeScreenState == Display.STATE_ON) {
+            // Although we are in DOZE and would normally allow the device to suspend,
+            // the doze service has explicitly requested the display to remain in the ON
+            // state which means we should hold the display suspend blocker.
+            return true;
+        }
+        return false;
+    }
+
+    @VisibleForTesting
+    int getDesiredScreenPolicyLocked(boolean quiescent, boolean dozeAfterScreenOff,
+            boolean vrModeEnabled, boolean bootCompleted, boolean screenBrightnessBoostInProgress) {
+        final int wakefulness = getWakefulnessLocked();
+        final int wakeLockSummary = getWakeLockSummaryLocked();
+        if (wakefulness == WAKEFULNESS_ASLEEP || quiescent) {
+            return DisplayPowerRequest.POLICY_OFF;
+        } else if (wakefulness == WAKEFULNESS_DOZING) {
+            if ((wakeLockSummary & WAKE_LOCK_DOZE) != 0) {
+                return DisplayPowerRequest.POLICY_DOZE;
+            }
+            if (dozeAfterScreenOff) {
+                return DisplayPowerRequest.POLICY_OFF;
+            }
+            // Fall through and preserve the current screen policy if not configured to
+            // doze after screen off.  This causes the screen off transition to be skipped.
+        }
+
+        // It is important that POLICY_VR check happens after the wakefulness checks above so
+        // that VR-mode does not prevent displays from transitioning to the correct state when
+        // dozing or sleeping.
+        if (vrModeEnabled) {
+            return DisplayPowerRequest.POLICY_VR;
+        }
+
+        if ((wakeLockSummary & WAKE_LOCK_SCREEN_BRIGHT) != 0
+                || !bootCompleted
+                || (getUserActivitySummaryLocked() & USER_ACTIVITY_SCREEN_BRIGHT) != 0
+                || screenBrightnessBoostInProgress) {
+            return DisplayPowerRequest.POLICY_BRIGHT;
+        }
+
+        return DisplayPowerRequest.POLICY_DIM;
+    }
+
+    int getPolicyLocked() {
+        return mDisplayPowerRequest.policy;
+    }
+
+    boolean updateLocked(float screenBrightnessOverride, boolean autoBrightness,
+            boolean useProximitySensor, boolean boostScreenBrightness, int dozeScreenState,
+            float dozeScreenBrightness, boolean overrideDrawWakeLock,
+            PowerSaveState powerSaverState, boolean quiescent, boolean dozeAfterScreenOff,
+            boolean vrModeEnabled, boolean bootCompleted, boolean screenBrightnessBoostInProgress,
+            boolean waitForNegativeProximity) {
+        mDisplayPowerRequest.policy = getDesiredScreenPolicyLocked(quiescent, dozeAfterScreenOff,
+                vrModeEnabled, bootCompleted, screenBrightnessBoostInProgress);
+        mDisplayPowerRequest.screenBrightnessOverride = screenBrightnessOverride;
+        mDisplayPowerRequest.useAutoBrightness = autoBrightness;
+        mDisplayPowerRequest.useProximitySensor = useProximitySensor;
+        mDisplayPowerRequest.boostScreenBrightness = boostScreenBrightness;
+
+        if (mDisplayPowerRequest.policy == DisplayPowerRequest.POLICY_DOZE) {
+            mDisplayPowerRequest.dozeScreenState = dozeScreenState;
+            if ((getWakeLockSummaryLocked() & WAKE_LOCK_DRAW) != 0 && !overrideDrawWakeLock) {
+                if (mDisplayPowerRequest.dozeScreenState == Display.STATE_DOZE_SUSPEND) {
+                    mDisplayPowerRequest.dozeScreenState = Display.STATE_DOZE;
+                }
+                if (mDisplayPowerRequest.dozeScreenState == Display.STATE_ON_SUSPEND) {
+                    mDisplayPowerRequest.dozeScreenState = Display.STATE_ON;
+                }
+            }
+            mDisplayPowerRequest.dozeScreenBrightness = dozeScreenBrightness;
+        } else {
+            mDisplayPowerRequest.dozeScreenState = Display.STATE_UNKNOWN;
+            mDisplayPowerRequest.dozeScreenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+        }
+        mDisplayPowerRequest.lowPowerMode = powerSaverState.batterySaverEnabled;
+        mDisplayPowerRequest.screenLowPowerBrightnessFactor = powerSaverState.brightnessFactor;
+        boolean ready = mDisplayManagerInternal.requestPowerState(mGroupId, mDisplayPowerRequest,
+                waitForNegativeProximity);
+        mNotifier.onScreenPolicyUpdate(mGroupId, mDisplayPowerRequest.policy);
+        return ready;
     }
 
     protected interface PowerGroupListener {
