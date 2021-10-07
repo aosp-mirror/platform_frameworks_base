@@ -824,11 +824,29 @@ public abstract class AuthBiometricView extends LinearLayout {
         return new AuthDialog.LayoutParams(width, totalHeight);
     }
 
+    /**
+     * Simple heuristic which should return true displays that are larger than a normal phone.
+     * For example, tablet displays, or the unfolded display for foldables.
+     */
+    private boolean isLargeDisplay(int width, int height) {
+        return width > 1200 && height > 1200;
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int width = MeasureSpec.getSize(widthMeasureSpec);
         final int height = MeasureSpec.getSize(heightMeasureSpec);
-        final int newWidth = Math.min(width, height);
+
+        Log.d(TAG, "Width: " + width + ", height: " + height);
+
+        final int newWidth;
+        if (isLargeDisplay(width, height)) {
+            // TODO: Unless we can come up with a one-size-fits-all equation, we may want to
+            //  consider moving this to an overlay.
+            newWidth = 2 * Math.min(width, height) / 3;
+        } else {
+            newWidth = Math.min(width, height);
+        }
 
         // Use "newWidth" instead, so the landscape dialog width is the same as the portrait
         // width.
