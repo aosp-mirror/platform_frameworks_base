@@ -3103,11 +3103,18 @@ public class DevicePolicyManager {
         }
     }
 
-    /** @hide */
-    public void resetNewUserDisclaimer() {
+    /**
+     * Acknoledges that the new managed user disclaimer was viewed by the (human) user
+     * so that {@link #ACTION_SHOW_NEW_USER_DISCLAIMER broadcast} is not sent again the next time
+     * this user is switched to.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    public void acknowledgeNewUserDisclaimer() {
         if (mService != null) {
             try {
-                mService.resetNewUserDisclaimer();
+                mService.acknowledgeNewUserDisclaimer();
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -5673,7 +5680,7 @@ public class DevicePolicyManager {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_SHOW_NEW_USER_DISCLAIMER =
-            "android.app.action.ACTION_SHOW_NEW_USER_DISCLAIMER";
+            "android.app.action.SHOW_NEW_USER_DISCLAIMER";
 
     /**
      * Widgets are enabled in keyguard
