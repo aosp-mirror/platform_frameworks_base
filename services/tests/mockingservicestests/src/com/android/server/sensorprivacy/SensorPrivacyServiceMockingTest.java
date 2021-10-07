@@ -16,12 +16,18 @@
 
 package com.android.server.sensorprivacy;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.AppOpsManager;
+import android.app.AppOpsManagerInternal;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.os.Environment;
@@ -33,8 +39,10 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.server.LocalServices;
 import com.android.server.SensorPrivacyService;
+import com.android.server.SystemService;
 import com.android.server.pm.UserManagerInternal;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -44,6 +52,7 @@ import org.mockito.quality.Strictness;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.concurrent.CompletableFuture;
 
 @RunWith(AndroidTestingRunner.class)
 public class SensorPrivacyServiceMockingTest {
@@ -63,9 +72,20 @@ public class SensorPrivacyServiceMockingTest {
     public static final String PERSISTENCE_FILE6 =
             String.format(PERSISTENCE_FILE_PATHS_TEMPLATE, 6);
 
+    public static final String PERSISTENCE_FILE_MIC_MUTE_CAM_MUTE =
+            "SensorPrivacyServiceMockingTest/persisted_file_micMute_camMute.xml";
+    public static final String PERSISTENCE_FILE_MIC_MUTE_CAM_UNMUTE =
+            "SensorPrivacyServiceMockingTest/persisted_file_micMute_camUnmute.xml";
+    public static final String PERSISTENCE_FILE_MIC_UNMUTE_CAM_MUTE =
+            "SensorPrivacyServiceMockingTest/persisted_file_micUnmute_camMute.xml";
+    public static final String PERSISTENCE_FILE_MIC_UNMUTE_CAM_UNMUTE =
+            "SensorPrivacyServiceMockingTest/persisted_file_micUnmute_camUnmute.xml";
+
     private Context mContext;
     @Mock
     private AppOpsManager mMockedAppOpsManager;
+    @Mock
+    private AppOpsManagerInternal mMockedAppOpsManagerInternal;
     @Mock
     private UserManagerInternal mMockedUserManagerInternal;
     @Mock
@@ -134,13 +154,103 @@ public class SensorPrivacyServiceMockingTest {
         }
     }
 
+    @Test
+    public void testServiceInit_AppOpsRestricted_micMute_camMute() throws IOException {
+        testServiceInit_AppOpsRestricted(PERSISTENCE_FILE_MIC_MUTE_CAM_MUTE, true, true);
+    }
+
+    @Test
+    public void testServiceInit_AppOpsRestricted_micMute_camUnmute() throws IOException {
+        testServiceInit_AppOpsRestricted(PERSISTENCE_FILE_MIC_MUTE_CAM_UNMUTE, true, false);
+    }
+
+    @Test
+    public void testServiceInit_AppOpsRestricted_micUnmute_camMute() throws IOException {
+        testServiceInit_AppOpsRestricted(PERSISTENCE_FILE_MIC_UNMUTE_CAM_MUTE, false, true);
+    }
+
+    @Test
+    public void testServiceInit_AppOpsRestricted_micUnmute_camUnmute() throws IOException {
+        testServiceInit_AppOpsRestricted(PERSISTENCE_FILE_MIC_UNMUTE_CAM_UNMUTE, false, false);
+    }
+
+    private void testServiceInit_AppOpsRestricted(String persistenceFileMicMuteCamMute,
+            boolean expectedMicState, boolean expectedCamState)
+            throws IOException {
+        MockitoSession mockitoSession = ExtendedMockito.mockitoSession()
+                .initMocks(this)
+                .strictness(Strictness.WARN)
+                .spyStatic(LocalServices.class)
+                .spyStatic(Environment.class)
+                .startMocking();
+
+        try {
+            mContext = InstrumentationRegistry.getInstrumentation().getContext();
+            spyOn(mContext);
+
+            doReturn(mMockedAppOpsManager).when(mContext).getSystemService(AppOpsManager.class);
+            doReturn(mMockedAppOpsManagerInternal)
+                    .when(() -> LocalServices.getService(AppOpsManagerInternal.class));
+            doReturn(mMockedUserManagerInternal)
+                    .when(() -> LocalServices.getService(UserManagerInternal.class));
+            doReturn(mMockedActivityManager).when(mContext).getSystemService(ActivityManager.class);
+            doReturn(mMockedActivityTaskManager)
+                    .when(mContext).getSystemService(ActivityTaskManager.class);
+            doReturn(mMockedTelephonyManager).when(mContext).getSystemService(
+                    TelephonyManager.class);
+
+            String dataDir = mContext.getApplicationInfo().dataDir;
+            doReturn(new File(dataDir)).when(() -> Environment.getDataSystemDirectory());
+
+            File onDeviceFile = new File(dataDir, "sensor_privacy.xml");
+            onDeviceFile.delete();
+
+            doReturn(new int[]{0}).when(mMockedUserManagerInternal).getUserIds();
+            doReturn(ExtendedMockito.mock(UserInfo.class)).when(mMockedUserManagerInternal)
+                    .getUserInfo(0);
+
+            CompletableFuture<Boolean> micState = new CompletableFuture<>();
+            CompletableFuture<Boolean> camState = new CompletableFuture<>();
+            doAnswer(invocation -> {
+                int code = invocation.getArgument(0);
+                boolean restricted = invocation.getArgument(1);
+                if (code == AppOpsManager.OP_RECORD_AUDIO) {
+                    micState.complete(restricted);
+                } else if (code == AppOpsManager.OP_CAMERA) {
+                    camState.complete(restricted);
+                }
+                return null;
+            }).when(mMockedAppOpsManagerInternal).setGlobalRestriction(anyInt(), anyBoolean(),
+                    any());
+
+            initServiceWithPersistenceFile(onDeviceFile, persistenceFileMicMuteCamMute, 0);
+
+            Assert.assertTrue(micState.join() == expectedMicState);
+            Assert.assertTrue(camState.join() == expectedCamState);
+
+        } finally {
+            mockitoSession.finishMocking();
+        }
+    }
+
     private void initServiceWithPersistenceFile(File onDeviceFile,
             String persistenceFilePath) throws IOException {
+        initServiceWithPersistenceFile(onDeviceFile, persistenceFilePath, -1);
+    }
+
+    private void initServiceWithPersistenceFile(File onDeviceFile,
+            String persistenceFilePath, int startingUserId) throws IOException {
         if (persistenceFilePath != null) {
             Files.copy(mContext.getAssets().open(persistenceFilePath),
                     onDeviceFile.toPath());
         }
-        new SensorPrivacyService(mContext);
+        SensorPrivacyService service = new SensorPrivacyService(mContext);
+        if (startingUserId != -1) {
+            SystemService.TargetUser mockedTargetUser =
+                    ExtendedMockito.mock(SystemService.TargetUser.class);
+            doReturn(startingUserId).when(mockedTargetUser).getUserIdentifier();
+            service.onUserStarting(mockedTargetUser);
+        }
         onDeviceFile.delete();
     }
 }
