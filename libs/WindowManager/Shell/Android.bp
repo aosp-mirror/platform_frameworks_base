@@ -39,6 +39,14 @@ filegroup {
 }
 
 filegroup {
+    name: "wm_shell_util-sources",
+    srcs: [
+        "src/com/android/wm/shell/util/**/*.java",
+    ],
+    path: "src",
+}
+
+filegroup {
     name: "wm_shell-aidls",
     srcs: [
         "src/**/*.aidl",
