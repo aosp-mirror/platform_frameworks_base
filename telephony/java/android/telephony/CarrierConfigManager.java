@@ -27,6 +27,7 @@ import android.annotation.SystemService;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
+import android.net.NetworkCapabilities;
 import android.net.ipsec.ike.SaProposal;
 import android.os.Build;
 import android.os.PersistableBundle;
@@ -5013,6 +5014,38 @@ public class CarrierConfigManager {
      */
     public static final String KEY_TELEPHONY_NETWORK_CAPABILITY_PRIORITIES_STRING_ARRAY =
             "telephony_network_capability_priorities_string_array";
+
+    /**
+     * Defines the rules for data retry.
+     *
+     * The syntax of the retry rule:
+     * 1. Retry based on {@link NetworkCapabilities}
+     * "capabilities=[netCaps1|netCaps2|...], [retry_interval=x], [backoff=[true|false]],
+     *     [maximum_retries=y]"
+     *
+     * 2. Retry based on {@link DataFailCause}
+     * "fail_causes=[cause1|cause2|cause3|...], [retry_interval=x], [backoff=[true|false]],
+     *     [maximum_retries=y]"
+     *
+     * 3. Retry based on {@link NetworkCapabilities} and {@link DataFailCause}
+     * "capabilities=[netCaps1|netCaps2|...], fail_causes=[cause1|cause2|cause3|...],
+     *     [retry_interval=x], [backoff=[true|false]], [maximum_retries=y]"
+     *
+     * For example,
+     * "capabilities=eims, retry_interval=1000, maximum_retries=20" means if the attached
+     * network request is emergency, then retry data network setup every 1 second for up to 20
+     * times.
+     *
+     * "fail_causes=8|27|28|29|30|32|33|35|50|51|111|-5|-6|65537|65538|-3|2253|2254
+     * , maximum_retries=0" means for those fail causes, never retry with timers. Note that
+     * when environment changes, retry can still happens.
+     *
+     * // TODO: remove KEY_CARRIER_DATA_CALL_RETRY_CONFIG_STRINGS
+     * @hide
+     */
+    public static final String KEY_TELEPHONY_DATA_RETRY_RULES_STRING_ARRAY =
+            "telephony_data_retry_rules_string_array";
+
     /**
      * The patterns of missed incoming call sms. This is the regular expression used for
      * matching the missed incoming call's date, time, and caller id. The pattern should match
@@ -5788,6 +5821,15 @@ public class CarrierConfigManager {
                 KEY_TELEPHONY_NETWORK_CAPABILITY_PRIORITIES_STRING_ARRAY, new String[] {
                         "eims:90", "supl:80", "mms:70", "xcap:70", "cbs:50", "mcx:50", "fota:50",
                         "ims:40", "dun:30", "enterprise:20", "internet:20"
+                });
+        sDefaults.putStringArray(
+                KEY_TELEPHONY_DATA_RETRY_RULES_STRING_ARRAY, new String[] {
+                        "capabilities=eims, retry_interval=1000, maximum_retries=20",
+                        "fail_causes=8|27|28|29|30|32|33|35|50|51|111|-5|-6|65537|65538|-3|2253|"
+                                + "2254, maximum_retries=0", // No retry for those causes
+                        "capabilities=internet|enterprise|dun|ims|fota, retry_interval=2000, "
+                                + "backoff=true, maximum_retries=13",
+                        "capabilities=mms|supl|cbs, retry_interval=2000"
                 });
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY, new String[0]);
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
