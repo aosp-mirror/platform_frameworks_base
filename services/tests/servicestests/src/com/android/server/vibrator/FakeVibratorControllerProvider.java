@@ -51,6 +51,7 @@ final class FakeVibratorControllerProvider {
     private final FakeNativeWrapper mNativeWrapper;
 
     private boolean mIsAvailable = true;
+    private boolean mIsInfoLoadSuccessful = true;
     private long mLatency;
     private int mOffCount;
 
@@ -172,7 +173,7 @@ final class FakeVibratorControllerProvider {
             infoBuilder.setFrequencyMapping(new VibratorInfo.FrequencyMapping(mMinFrequency,
                     mResonantFrequency, mFrequencyResolution, suggestedFrequencyRange,
                     mMaxAmplitudes));
-            return true;
+            return mIsInfoLoadSuccessful;
         }
 
         private void applyLatency() {
@@ -210,6 +211,14 @@ final class FakeVibratorControllerProvider {
      */
     public void disableVibrators() {
         mIsAvailable = false;
+    }
+
+    /**
+     * Sets the result for the method that loads the {@link VibratorInfo}, for faking a vibrator
+     * that fails to load some of the hardware data.
+     */
+    public void setVibratorInfoLoadSuccessful(boolean successful) {
+        mIsInfoLoadSuccessful = successful;
     }
 
     /**
