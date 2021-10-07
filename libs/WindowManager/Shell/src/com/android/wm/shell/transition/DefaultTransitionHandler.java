@@ -41,6 +41,7 @@ import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
+import static android.window.TransitionInfo.isIndependent;
 
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_CLOSE;
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_INTRA_CLOSE;
@@ -70,6 +71,7 @@ import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.R;
@@ -82,6 +84,7 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.util.CounterRotator;
 
 import java.util.ArrayList;
 
@@ -269,8 +272,15 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         final ArrayList<Animator> animations = new ArrayList<>();
         mAnimations.put(transition, animations);
 
+        final ArrayMap<WindowContainerToken, CounterRotator> counterRotators = new ArrayMap<>();
+
         final Runnable onAnimFinish = () -> {
             if (!animations.isEmpty()) return;
+
+            for (int i = 0; i < counterRotators.size(); ++i) {
+                counterRotators.valueAt(i).cleanUp(info.getRootLeash());
+            }
+            counterRotators.clear();
 
             if (mRotationAnimation != null) {
                 mRotationAnimation.kill();
@@ -285,16 +295,44 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
 
-            if (info.getType() == TRANSIT_CHANGE && change.getMode() == TRANSIT_CHANGE
-                    && (change.getFlags() & FLAG_IS_DISPLAY) != 0) {
-                boolean isSeamless = isRotationSeamless(info, mDisplayController);
-                final int anim = getRotationAnimation(info);
-                if (!(isSeamless || anim == ROTATION_ANIMATION_JUMPCUT)) {
-                    mRotationAnimation = new ScreenRotationAnimation(mContext, mSurfaceSession,
-                            mTransactionPool, startTransaction, change, info.getRootLeash());
-                    mRotationAnimation.startAnimation(animations, onAnimFinish,
-                            mTransitionAnimationScaleSetting, mMainExecutor, mAnimExecutor);
-                    continue;
+            if (change.getMode() == TRANSIT_CHANGE && (change.getFlags() & FLAG_IS_DISPLAY) != 0) {
+                int rotateDelta = change.getEndRotation() - change.getStartRotation();
+                int displayW = change.getEndAbsBounds().width();
+                int displayH = change.getEndAbsBounds().height();
+                if (info.getType() == TRANSIT_CHANGE) {
+                    boolean isSeamless = isRotationSeamless(info, mDisplayController);
+                    final int anim = getRotationAnimation(info);
+                    if (!(isSeamless || anim == ROTATION_ANIMATION_JUMPCUT)) {
+                        mRotationAnimation = new ScreenRotationAnimation(mContext, mSurfaceSession,
+                                mTransactionPool, startTransaction, change, info.getRootLeash());
+                        mRotationAnimation.startAnimation(animations, onAnimFinish,
+                                mTransitionAnimationScaleSetting, mMainExecutor, mAnimExecutor);
+                        continue;
+                    }
+                } else {
+                    // opening/closing an app into a new orientation. Counter-rotate all
+                    // "going-away" things since they are still in the old orientation.
+                    for (int j = info.getChanges().size() - 1; j >= 0; --j) {
+                        final TransitionInfo.Change innerChange = info.getChanges().get(j);
+                        if (!Transitions.isClosingType(innerChange.getMode())
+                                || !isIndependent(innerChange, info)
+                                || innerChange.getParent() == null) {
+                            continue;
+                        }
+                        CounterRotator crot = counterRotators.get(innerChange.getParent());
+                        if (crot == null) {
+                            crot = new CounterRotator();
+                            crot.setup(startTransaction,
+                                    info.getChange(innerChange.getParent()).getLeash(),
+                                    rotateDelta, displayW, displayH);
+                            if (crot.getSurface() != null) {
+                                int layer = info.getChanges().size() - j;
+                                startTransaction.setLayer(crot.getSurface(), layer);
+                            }
+                            counterRotators.put(innerChange.getParent(), crot);
+                        }
+                        crot.addChild(startTransaction, innerChange.getLeash());
+                    }
                 }
             }
 
