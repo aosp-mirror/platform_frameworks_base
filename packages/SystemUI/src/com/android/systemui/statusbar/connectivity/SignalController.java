@@ -22,7 +22,6 @@ import android.content.Context;
 import android.util.Log;
 
 import com.android.settingslib.SignalIcon.IconGroup;
-import com.android.settingslib.SignalIcon.State;
 
 import java.io.PrintWriter;
 import java.util.BitSet;
@@ -34,7 +33,7 @@ import java.util.BitSet;
  * @param <T> State of the SysUI controller.
  * @param <I> Icon groups of the SysUI controller for a given State.
  */
-public abstract class SignalController<T extends State, I extends IconGroup> {
+public abstract class SignalController<T extends ConnectivityState, I extends IconGroup> {
     // Save the previous SignalController.States of all SignalControllers for dumps.
     static final boolean RECORD_HISTORY = true;
     // If RECORD_HISTORY how many to save, must be a power of 2.
@@ -56,7 +55,7 @@ public abstract class SignalController<T extends State, I extends IconGroup> {
     private final CallbackHandler mCallbackHandler;
 
     // Save the previous HISTORY_SIZE states for logging.
-    private final State[] mHistory;
+    private final ConnectivityState[] mHistory;
     // Where to copy the next state into.
     private int mHistoryIndex;
 
@@ -70,7 +69,7 @@ public abstract class SignalController<T extends State, I extends IconGroup> {
         mCurrentState = cleanState();
         mLastState = cleanState();
         if (RECORD_HISTORY) {
-            mHistory = new State[HISTORY_SIZE];
+            mHistory = new ConnectivityState[HISTORY_SIZE];
             for (int i = 0; i < HISTORY_SIZE; i++) {
                 mHistory[i] = cleanState();
             }

@@ -47,7 +47,6 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.AccessibilityContentDescriptions;
 import com.android.settingslib.SignalIcon.MobileIconGroup;
-import com.android.settingslib.SignalIcon.MobileState;
 import com.android.settingslib.Utils;
 import com.android.settingslib.graph.SignalDrawable;
 import com.android.settingslib.mobile.MobileMappings.Config;

@@ -20,13 +20,12 @@ import android.net.NetworkCapabilities;
 
 import com.android.settingslib.AccessibilityContentDescriptions;
 import com.android.settingslib.SignalIcon.IconGroup;
-import com.android.settingslib.SignalIcon.State;
 
 import java.util.BitSet;
 
 /** */
 public class EthernetSignalController extends
-        SignalController<State, IconGroup> {
+        SignalController<ConnectivityState, IconGroup> {
 
     public EthernetSignalController(Context context,
             CallbackHandler callbackHandler, NetworkControllerImpl networkController) {
@@ -66,7 +65,7 @@ public class EthernetSignalController extends
     }
 
     @Override
-    public State cleanState() {
-        return new State();
+    public ConnectivityState cleanState() {
+        return new ConnectivityState();
     }
 }

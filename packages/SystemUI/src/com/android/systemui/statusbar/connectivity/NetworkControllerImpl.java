@@ -1212,7 +1212,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     }
 
     private boolean mDemoInetCondition;
-    private WifiSignalController.WifiState mDemoWifiState;
+    private WifiState mDemoWifiState;
 
     @Override
     public void onDemoModeStarted() {
