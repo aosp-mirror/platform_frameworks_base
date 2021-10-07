@@ -244,6 +244,14 @@ static void AnimatedImageDrawable_nSetMirrored(JNIEnv* env, jobject /*clazz*/, j
     drawable->setStagingMirrored(mirrored);
 }
 
+static void AnimatedImageDrawable_nSetBounds(JNIEnv* env, jobject /*clazz*/, jlong nativePtr,
+                                             jobject jrect) {
+    auto* drawable = reinterpret_cast<AnimatedImageDrawable*>(nativePtr);
+    SkRect rect;
+    GraphicsJNI::jrect_to_rect(env, jrect, &rect);
+    drawable->setStagingBounds(rect);
+}
+
 static const JNINativeMethod gAnimatedImageDrawableMethods[] = {
     { "nCreate",             "(JLandroid/graphics/ImageDecoder;IIJZLandroid/graphics/Rect;)J",(void*) AnimatedImageDrawable_nCreate },
     { "nGetNativeFinalizer", "()J",                                                          (void*) AnimatedImageDrawable_nGetNativeFinalizer },
@@ -259,6 +267,7 @@ static const JNINativeMethod gAnimatedImageDrawableMethods[] = {
     { "nSetOnAnimationEndListener", "(JLandroid/graphics/drawable/AnimatedImageDrawable;)V", (void*) AnimatedImageDrawable_nSetOnAnimationEndListener },
     { "nNativeByteSize",     "(J)J",                                                         (void*) AnimatedImageDrawable_nNativeByteSize },
     { "nSetMirrored",        "(JZ)V",                                                        (void*) AnimatedImageDrawable_nSetMirrored },
+    { "nSetBounds",          "(JLandroid/graphics/Rect;)V",                                  (void*) AnimatedImageDrawable_nSetBounds },
 };
 
 int register_android_graphics_drawable_AnimatedImageDrawable(JNIEnv* env) {

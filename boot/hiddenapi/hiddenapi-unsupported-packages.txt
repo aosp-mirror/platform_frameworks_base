@@ -1,0 +1,15 @@
+gov.nist.core
+gov.nist.core.net
+gov.nist.javax.sip
+gov.nist.javax.sip.address
+gov.nist.javax.sip.clientauthutils
+gov.nist.javax.sip.header
+gov.nist.javax.sip.header.extensions
+gov.nist.javax.sip.header.ims
+gov.nist.javax.sip.message
+gov.nist.javax.sip.parser
+gov.nist.javax.sip.parser.extensions
+gov.nist.javax.sip.parser.ims
+gov.nist.javax.sip.stack
+org.ccil.cowan.tagsoup
+org.ccil.cowan.tagsoup.jaxp

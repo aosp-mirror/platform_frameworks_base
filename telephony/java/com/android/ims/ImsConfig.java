@@ -729,7 +729,8 @@ public class ImsConfig {
 
         // Expand the operator config items as needed here, need to change
         // PROVISIONED_CONFIG_END after that.
-        public static final int PROVISIONED_CONFIG_END = RTT_SETTING_ENABLED;
+        public static final int PROVISIONED_CONFIG_END =
+                ProvisioningManager.KEY_VOICE_OVER_WIFI_ENTITLEMENT_ID;
 
         // Expand the operator config items as needed here.
     }

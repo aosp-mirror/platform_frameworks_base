@@ -16,14 +16,18 @@
 
 package com.android.systemui.biometrics;
 
+import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
-import android.hardware.biometrics.BiometricPrompt;
-import android.os.Bundle;
+import android.content.pm.PackageManager;
+import android.hardware.biometrics.PromptInfo;
+import android.hardware.biometrics.SensorPropertiesInternal;
 import android.os.UserManager;
 import android.util.DisplayMetrics;
 import android.view.ViewGroup;
@@ -34,6 +38,7 @@ import com.android.internal.widget.LockPatternUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 
 public class Utils {
 
@@ -44,7 +49,6 @@ public class Utils {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({CREDENTIAL_PIN, CREDENTIAL_PATTERN, CREDENTIAL_PASSWORD})
     @interface CredentialType {}
-
 
     static float dpToPixels(Context context, float dp) {
         return dp * ((float) context.getResources().getDisplayMetrics().densityDpi
@@ -67,18 +71,14 @@ public class Utils {
         view.notifySubtreeAccessibilityStateChanged(view, view, CONTENT_CHANGE_TYPE_SUBTREE);
     }
 
-    static boolean isDeviceCredentialAllowed(Bundle biometricPromptBundle) {
-        final int authenticators = getAuthenticators(biometricPromptBundle);
+    static boolean isDeviceCredentialAllowed(PromptInfo promptInfo) {
+        @Authenticators.Types final int authenticators = promptInfo.getAuthenticators();
         return (authenticators & Authenticators.DEVICE_CREDENTIAL) != 0;
     }
 
-    static boolean isBiometricAllowed(Bundle biometricPromptBundle) {
-        final int authenticators = getAuthenticators(biometricPromptBundle);
+    static boolean isBiometricAllowed(PromptInfo promptInfo) {
+        @Authenticators.Types final int authenticators = promptInfo.getAuthenticators();
         return (authenticators & Authenticators.BIOMETRIC_WEAK) != 0;
-    }
-
-    static int getAuthenticators(Bundle biometricPromptBundle) {
-        return biometricPromptBundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED);
     }
 
     static @CredentialType int getCredentialType(Context context, int userId) {
@@ -102,5 +102,26 @@ public class Utils {
     static boolean isManagedProfile(Context context, int userId) {
         final UserManager userManager = context.getSystemService(UserManager.class);
         return userManager.isManagedProfile(userId);
+    }
+
+    static boolean containsSensorId(@Nullable List<? extends SensorPropertiesInternal> properties,
+            int sensorId) {
+        if (properties == null) {
+            return false;
+        }
+
+        for (SensorPropertiesInternal prop : properties) {
+            if (prop.sensorId == sensorId) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    static boolean isSystem(@NonNull Context context, @Nullable String clientPackage) {
+        final boolean hasPermission = context.checkCallingOrSelfPermission(USE_BIOMETRIC_INTERNAL)
+                == PackageManager.PERMISSION_GRANTED;
+        return hasPermission && "android".equals(clientPackage);
     }
 }

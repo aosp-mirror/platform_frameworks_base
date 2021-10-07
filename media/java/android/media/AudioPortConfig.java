@@ -17,6 +17,7 @@
 package android.media;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 
 /**
  * An AudioPortConfig contains a possible configuration of an audio port chosen
@@ -50,7 +51,7 @@ public class AudioPortConfig {
     static final int CHANNEL_MASK = 0x2;
     static final int FORMAT       = 0x4;
     static final int GAIN         = 0x8;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     int mConfigMask;
 
     @UnsupportedAppUsage

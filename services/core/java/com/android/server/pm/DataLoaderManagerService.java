@@ -27,6 +27,8 @@ import android.content.pm.IDataLoaderManager;
 import android.content.pm.IDataLoaderStatusListener;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -45,12 +47,20 @@ import java.util.List;
 public class DataLoaderManagerService extends SystemService {
     private static final String TAG = "DataLoaderManager";
     private final Context mContext;
+    private final HandlerThread mThread;
+    private final Handler mHandler;
     private final DataLoaderManagerBinderService mBinderService;
     private SparseArray<DataLoaderServiceConnection> mServiceConnections = new SparseArray<>();
 
     public DataLoaderManagerService(Context context) {
         super(context);
         mContext = context;
+
+        mThread = new HandlerThread(TAG);
+        mThread.start();
+
+        mHandler = new Handler(mThread.getLooper());
+
         mBinderService = new DataLoaderManagerBinderService();
     }
 
@@ -62,7 +72,7 @@ public class DataLoaderManagerService extends SystemService {
     final class DataLoaderManagerBinderService extends IDataLoaderManager.Stub {
         @Override
         public boolean bindToDataLoader(int dataLoaderId, DataLoaderParamsParcel params,
-                IDataLoaderStatusListener listener) {
+                long bindDelayMs, IDataLoaderStatusListener listener) {
             synchronized (mServiceConnections) {
                 if (mServiceConnections.get(dataLoaderId) != null) {
                     return true;
@@ -76,19 +86,21 @@ public class DataLoaderManagerService extends SystemService {
             }
 
             // Binds to the specific data loader service.
-            DataLoaderServiceConnection connection = new DataLoaderServiceConnection(dataLoaderId,
-                    listener);
+            final DataLoaderServiceConnection connection = new DataLoaderServiceConnection(
+                    dataLoaderId, listener);
 
-            Intent intent = new Intent();
+            final Intent intent = new Intent();
             intent.setComponent(dataLoaderComponent);
-            if (!mContext.bindServiceAsUser(intent, connection, Context.BIND_AUTO_CREATE,
-                    UserHandle.of(UserHandle.getCallingUserId()))) {
-                Slog.e(TAG,
-                        "Failed to bind to: " + dataLoaderComponent + " for ID=" + dataLoaderId);
-                mContext.unbindService(connection);
-                return false;
-            }
-            return true;
+
+            return mHandler.postDelayed(() -> {
+                if (!mContext.bindServiceAsUser(intent, connection, Context.BIND_AUTO_CREATE,
+                        mHandler, UserHandle.of(UserHandle.getCallingUserId()))) {
+                    Slog.e(TAG,
+                            "Failed to bind to: " + dataLoaderComponent + " for ID="
+                                    + dataLoaderId);
+                    mContext.unbindService(connection);
+                }
+            }, bindDelayMs);
         }
 
         /**
@@ -159,7 +171,7 @@ public class DataLoaderManagerService extends SystemService {
         }
     }
 
-    private class DataLoaderServiceConnection implements ServiceConnection {
+    private class DataLoaderServiceConnection implements ServiceConnection, IBinder.DeathRecipient {
         final int mId;
         final IDataLoaderStatusListener mListener;
         IDataLoader mDataLoader;
@@ -168,6 +180,8 @@ public class DataLoaderManagerService extends SystemService {
             mId = id;
             mListener = listener;
             mDataLoader = null;
+
+            callListener(IDataLoaderStatusListener.DATA_LOADER_BINDING);
         }
 
         @Override
@@ -182,32 +196,48 @@ public class DataLoaderManagerService extends SystemService {
                 mContext.unbindService(this);
                 return;
             }
+            try {
+                service.linkToDeath(this, /*flags=*/0);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to link to DataLoader's death: " + mId, e);
+                onBindingDied(className);
+                return;
+            }
             callListener(IDataLoaderStatusListener.DATA_LOADER_BOUND);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
             Slog.i(TAG, "DataLoader " + mId + " disconnected, but will try to recover");
-            callListener(IDataLoaderStatusListener.DATA_LOADER_DESTROYED);
-            destroy();
+            unbindAndReportDestroyed();
         }
 
         @Override
         public void onBindingDied(ComponentName name) {
             Slog.i(TAG, "DataLoader " + mId + " died");
-            callListener(IDataLoaderStatusListener.DATA_LOADER_DESTROYED);
-            destroy();
+            unbindAndReportDestroyed();
         }
 
         @Override
         public void onNullBinding(ComponentName name) {
             Slog.i(TAG, "DataLoader " + mId + " failed to start");
-            callListener(IDataLoaderStatusListener.DATA_LOADER_DESTROYED);
-            destroy();
+            unbindAndReportDestroyed();
+        }
+
+        @Override
+        public void binderDied() {
+            Slog.i(TAG, "DataLoader " + mId + " died");
+            unbindAndReportDestroyed();
         }
 
         IDataLoader getDataLoader() {
             return mDataLoader;
+        }
+
+        private void unbindAndReportDestroyed() {
+            if (unbind()) {
+                callListener(IDataLoaderStatusListener.DATA_LOADER_DESTROYED);
+            }
         }
 
         void destroy() {
@@ -218,11 +248,15 @@ public class DataLoaderManagerService extends SystemService {
                 }
                 mDataLoader = null;
             }
+            unbind();
+        }
+
+        boolean unbind() {
             try {
                 mContext.unbindService(this);
             } catch (Exception ignored) {
             }
-            remove();
+            return remove();
         }
 
         private boolean append() {
@@ -240,12 +274,14 @@ public class DataLoaderManagerService extends SystemService {
             }
         }
 
-        private void remove() {
+        private boolean remove() {
             synchronized (mServiceConnections) {
                 if (mServiceConnections.get(mId) == this) {
                     mServiceConnections.remove(mId);
+                    return true;
                 }
             }
+            return false;
         }
 
         private void callListener(int status) {

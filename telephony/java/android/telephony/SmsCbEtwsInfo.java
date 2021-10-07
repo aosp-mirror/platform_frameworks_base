@@ -27,6 +27,7 @@ import com.android.internal.telephony.uicc.IccUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Arrays;
@@ -173,7 +174,7 @@ public final class SmsCbEtwsInfo implements Parcelable {
     /**
      * Returns the Warning-Security-Information timestamp (GSM primary notifications only).
      * As of Release 10, 3GPP TS 23.041 states that the UE shall ignore this value if received.
-     * @return a UTC timestamp in System.currentTimeMillis() format, or 0 if not present
+     * @return a UTC timestamp in System.currentTimeMillis() format, or 0 if not present or invalid.
      */
     public long getPrimaryNotificationTimestamp() {
         if (mWarningSecurityInformation == null || mWarningSecurityInformation.length < 7) {
@@ -201,18 +202,23 @@ public final class SmsCbEtwsInfo implements Parcelable {
         // timezoneOffset is in quarter hours.
         int timeZoneOffsetSeconds = timezoneOffset * 15 * 60;
 
-        LocalDateTime localDateTime = LocalDateTime.of(
-                // We only need to support years above 2000.
-                year + 2000,
-                month /* 1-12 */,
-                day,
-                hour,
-                minute,
-                second);
+        try {
+            LocalDateTime localDateTime = LocalDateTime.of(
+                    // We only need to support years above 2000.
+                    year + 2000,
+                    month /* 1-12 */,
+                    day,
+                    hour,
+                    minute,
+                    second);
 
-        long epochSeconds = localDateTime.toEpochSecond(ZoneOffset.UTC) - timeZoneOffsetSeconds;
-        // Convert to milliseconds, ignore overflow.
-        return epochSeconds * 1000;
+            long epochSeconds = localDateTime.toEpochSecond(ZoneOffset.UTC) - timeZoneOffsetSeconds;
+            // Convert to milliseconds, ignore overflow.
+            return epochSeconds * 1000;
+        } catch (DateTimeException ex) {
+            // No-op
+        }
+        return 0;
     }
 
     /**

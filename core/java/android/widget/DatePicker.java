@@ -483,7 +483,7 @@ public class DatePicker extends FrameLayout {
     /**
      * Returns whether the spinners are shown.
      * <p>
-     * <strong>Note:</strong> his method returns {@code false} when the
+     * <strong>Note:</strong> this method returns {@code false} when the
      * {@link android.R.styleable#DatePicker_datePickerMode} attribute is set
      * to {@code calendar}.
      *

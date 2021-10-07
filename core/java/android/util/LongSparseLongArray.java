@@ -316,7 +316,7 @@ public class LongSparseLongArray implements Cloneable {
             array.mKeys = source.createLongArray();
             array.mValues = source.createLongArray();
 
-            // Make sure array is sane
+            // Make sure array is valid
             Preconditions.checkArgument(array.mKeys.length >= size);
             Preconditions.checkArgument(array.mValues.length >= size);
 

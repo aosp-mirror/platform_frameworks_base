@@ -52,7 +52,7 @@ public abstract class TextServicesManagerInternal {
             };
 
     /**
-     * @return Global instance if exists.  Otherwise, a dummy no-op instance.
+     * @return Global instance if exists.  Otherwise, a placeholder no-op instance.
      */
     @NonNull
     public static TextServicesManagerInternal get() {

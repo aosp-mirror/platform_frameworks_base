@@ -59,7 +59,7 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(mSpec.getKeystoreAlias());
         out.writeInt(mSpec.getPurposes());
-        out.writeInt(mSpec.getUid());
+        out.writeInt(mSpec.getNamespace());
         out.writeInt(mSpec.getKeySize());
 
         // Only needs to support RSAKeyGenParameterSpec and ECGenParameterSpec.
@@ -100,6 +100,8 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
         out.writeInt(mSpec.getUserAuthenticationType());
         out.writeBoolean(mSpec.isUserPresenceRequired());
         out.writeByteArray(mSpec.getAttestationChallenge());
+        out.writeBoolean(mSpec.isDevicePropertiesAttestationIncluded());
+        out.writeIntArray(mSpec.getAttestationIds());
         out.writeBoolean(mSpec.isUniqueIdIncluded());
         out.writeBoolean(mSpec.isUserAuthenticationValidWhileOnBody());
         out.writeBoolean(mSpec.isInvalidatedByBiometricEnrollment());
@@ -107,6 +109,8 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
         out.writeBoolean(mSpec.isUserConfirmationRequired());
         out.writeBoolean(mSpec.isUnlockedDeviceRequired());
         out.writeBoolean(mSpec.isCriticalToDeviceEncryption());
+        out.writeInt(mSpec.getMaxUsageCount());
+        out.writeString(mSpec.getAttestKeyAlias());
     }
 
     private static Date readDateOrNull(Parcel in) {
@@ -121,7 +125,7 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
     private ParcelableKeyGenParameterSpec(Parcel in) {
         final String keystoreAlias = in.readString();
         final int purposes = in.readInt();
-        final int uid = in.readInt();
+        final int namespace = in.readInt();
         final int keySize = in.readInt();
 
         final int keySpecType = in.readInt();
@@ -157,6 +161,8 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
         final int userAuthenticationTypes = in.readInt();
         final boolean userPresenceRequired = in.readBoolean();
         final byte[] attestationChallenge = in.createByteArray();
+        final boolean devicePropertiesAttestationIncluded = in.readBoolean();
+        final int[] attestationIds = in.createIntArray();
         final boolean uniqueIdIncluded = in.readBoolean();
         final boolean userAuthenticationValidWhileOnBody = in.readBoolean();
         final boolean invalidatedByBiometricEnrollment = in.readBoolean();
@@ -164,12 +170,14 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
         final boolean userConfirmationRequired = in.readBoolean();
         final boolean unlockedDeviceRequired = in.readBoolean();
         final boolean criticalToDeviceEncryption = in.readBoolean();
+        final int maxUsageCount = in.readInt();
+        final String attestKeyAlias = in.readString();
         // The KeyGenParameterSpec is intentionally not constructed using a Builder here:
         // The intention is for this class to break if new parameters are added to the
         // KeyGenParameterSpec constructor (whereas using a builder would silently drop them).
         mSpec = new KeyGenParameterSpec(
                 keystoreAlias,
-                uid,
+                namespace,
                 keySize,
                 algorithmSpec,
                 certificateSubject,
@@ -190,13 +198,17 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
                 userAuthenticationTypes,
                 userPresenceRequired,
                 attestationChallenge,
+                devicePropertiesAttestationIncluded,
+                attestationIds,
                 uniqueIdIncluded,
                 userAuthenticationValidWhileOnBody,
                 invalidatedByBiometricEnrollment,
                 isStrongBoxBacked,
                 userConfirmationRequired,
                 unlockedDeviceRequired,
-                criticalToDeviceEncryption);
+                criticalToDeviceEncryption,
+                maxUsageCount,
+                attestKeyAlias);
     }
 
     public static final @android.annotation.NonNull Creator<ParcelableKeyGenParameterSpec> CREATOR = new Creator<ParcelableKeyGenParameterSpec>() {

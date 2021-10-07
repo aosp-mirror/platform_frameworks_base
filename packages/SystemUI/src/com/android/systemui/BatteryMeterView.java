@@ -15,8 +15,6 @@
  */
 package com.android.systemui;
 
-import static android.app.StatusBarManager.DISABLE2_SYSTEM_ICONS;
-import static android.app.StatusBarManager.DISABLE_NONE;
 import static android.provider.Settings.System.SHOW_BATTERY_PERCENT;
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
@@ -33,6 +31,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.provider.Settings;
@@ -50,13 +49,12 @@ import android.widget.TextView;
 
 import androidx.annotation.StyleRes;
 
-import com.android.settingslib.Utils;
 import com.android.settingslib.graph.ThemedBatteryDrawable;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.settings.CurrentUserTracker;
-import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
@@ -64,7 +62,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
-import com.android.systemui.util.Utils.DisableStateTracker;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -95,20 +92,18 @@ public class BatteryMeterView extends LinearLayout implements
     private int mTextColor;
     private int mLevel;
     private int mShowPercentMode = MODE_DEFAULT;
-    private boolean mForceShowPercent;
     private boolean mShowPercentAvailable;
     // Some places may need to show the battery conditionally, and not obey the tuner
     private boolean mIgnoreTunerUpdates;
     private boolean mIsSubscribedForTunerUpdates;
     private boolean mCharging;
+    // Error state where we know nothing about the current battery state
+    private boolean mBatteryStateUnknown;
+    // Lazily-loaded since this is expected to be a rare-if-ever state
+    private Drawable mUnknownStateDrawable;
 
     private DualToneHandler mDualToneHandler;
     private int mUser;
-
-    /**
-     * Whether we should use colors that adapt based on wallpaper/the scrim behind quick settings.
-     */
-    private boolean mUseWallpaperTextColors;
 
     private int mNonAdaptedSingleToneColor;
     private int mNonAdaptedForegroundColor;
@@ -136,11 +131,6 @@ public class BatteryMeterView extends LinearLayout implements
         mSettingObserver = new SettingObserver(new Handler(context.getMainLooper()));
         mShowPercentAvailable = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_battery_percentage_setting_available);
-
-
-        addOnAttachStateChangeListener(
-                new DisableStateTracker(DISABLE_NONE, DISABLE2_SYSTEM_ICONS,
-                        Dependency.get(CommandQueue.class)));
 
         setupLayoutTransition();
 
@@ -205,6 +195,7 @@ public class BatteryMeterView extends LinearLayout implements
      * @param mode desired mode (none, on, off)
      */
     public void setPercentShowMode(@BatteryPercentMode int mode) {
+        if (mode == mShowPercentMode) return;
         mShowPercentMode = mode;
         updateShowPercent();
     }
@@ -234,7 +225,7 @@ public class BatteryMeterView extends LinearLayout implements
         }
 
         Dependency.get(TunerService.class)
-                .addTunable(this, StatusBarIconController.ICON_BLACKLIST);
+                .addTunable(this, StatusBarIconController.ICON_HIDE_LIST);
         mIsSubscribedForTunerUpdates = true;
     }
 
@@ -245,31 +236,6 @@ public class BatteryMeterView extends LinearLayout implements
 
         Dependency.get(TunerService.class).removeTunable(this);
         mIsSubscribedForTunerUpdates = false;
-    }
-
-    /**
-     * Sets whether the battery meter view uses the wallpaperTextColor. If we're not using it, we'll
-     * revert back to dark-mode-based/tinted colors.
-     *
-     * @param shouldUseWallpaperTextColor whether we should use wallpaperTextColor for all
-     *                                    components
-     */
-    public void useWallpaperTextColor(boolean shouldUseWallpaperTextColor) {
-        if (shouldUseWallpaperTextColor == mUseWallpaperTextColors) {
-            return;
-        }
-
-        mUseWallpaperTextColors = shouldUseWallpaperTextColor;
-
-        if (mUseWallpaperTextColors) {
-            updateColors(
-                    Utils.getColorAttrDefaultColor(mContext, R.attr.wallpaperTextColor),
-                    Utils.getColorAttrDefaultColor(mContext, R.attr.wallpaperTextColorSecondary),
-                    Utils.getColorAttrDefaultColor(mContext, R.attr.wallpaperTextColor));
-        } else {
-            updateColors(mNonAdaptedForegroundColor, mNonAdaptedBackgroundColor,
-                    mNonAdaptedSingleToneColor);
-        }
     }
 
     public void setColorsFromContext(Context context) {
@@ -287,8 +253,8 @@ public class BatteryMeterView extends LinearLayout implements
 
     @Override
     public void onTuningChanged(String key, String newValue) {
-        if (StatusBarIconController.ICON_BLACKLIST.equals(key)) {
-            ArraySet<String> icons = StatusBarIconController.getIconBlacklist(
+        if (StatusBarIconController.ICON_HIDE_LIST.equals(key)) {
+            ArraySet<String> icons = StatusBarIconController.getIconHideList(
                     getContext(), newValue);
             setVisibility(icons.contains(mSlotBattery) ? View.GONE : View.VISIBLE);
         }
@@ -350,6 +316,11 @@ public class BatteryMeterView extends LinearLayout implements
     }
 
     private void updatePercentText() {
+        if (mBatteryStateUnknown) {
+            setContentDescription(getContext().getString(R.string.accessibility_battery_unknown));
+            return;
+        }
+
         if (mBatteryController == null) {
             return;
         }
@@ -357,7 +328,10 @@ public class BatteryMeterView extends LinearLayout implements
         if (mBatteryPercentView != null) {
             if (mShowPercentMode == MODE_ESTIMATE && !mCharging) {
                 mBatteryController.getEstimatedTimeRemainingString((String estimate) -> {
-                    if (estimate != null) {
+                    if (mBatteryPercentView == null) {
+                        return;
+                    }
+                    if (estimate != null && mShowPercentMode == MODE_ESTIMATE) {
                         mBatteryPercentView.setText(estimate);
                         setContentDescription(getContext().getString(
                                 R.string.accessibility_battery_level_with_estimate,
@@ -377,6 +351,9 @@ public class BatteryMeterView extends LinearLayout implements
     }
 
     private void setPercentTextAtCurrentLevel() {
+        if (mBatteryPercentView == null) {
+            return;
+        }
         mBatteryPercentView.setText(
                 NumberFormat.getPercentInstance().format(mLevel / 100f));
         setContentDescription(
@@ -390,9 +367,13 @@ public class BatteryMeterView extends LinearLayout implements
         final boolean systemSetting = 0 != whitelistIpcs(() -> Settings.System
                 .getIntForUser(getContext().getContentResolver(),
                 SHOW_BATTERY_PERCENT, 0, mUser));
+        boolean shouldShow =
+                (mShowPercentAvailable && systemSetting && mShowPercentMode != MODE_OFF)
+                || mShowPercentMode == MODE_ON
+                || mShowPercentMode == MODE_ESTIMATE;
+        shouldShow = shouldShow && !mBatteryStateUnknown;
 
-        if ((mShowPercentAvailable && systemSetting && mShowPercentMode != MODE_OFF)
-                || mShowPercentMode == MODE_ON || mShowPercentMode == MODE_ESTIMATE) {
+        if (shouldShow) {
             if (!showing) {
                 mBatteryPercentView = loadPercentView();
                 if (mPercentageStyleId != 0) { // Only set if specified as attribute
@@ -416,6 +397,32 @@ public class BatteryMeterView extends LinearLayout implements
     @Override
     public void onDensityOrFontScaleChanged() {
         scaleBatteryMeterViews();
+    }
+
+    private Drawable getUnknownStateDrawable() {
+        if (mUnknownStateDrawable == null) {
+            mUnknownStateDrawable = mContext.getDrawable(R.drawable.ic_battery_unknown);
+            mUnknownStateDrawable.setTint(mTextColor);
+        }
+
+        return mUnknownStateDrawable;
+    }
+
+    @Override
+    public void onBatteryUnknownStateChanged(boolean isUnknown) {
+        if (mBatteryStateUnknown == isUnknown) {
+            return;
+        }
+
+        mBatteryStateUnknown = isUnknown;
+
+        if (mBatteryStateUnknown) {
+            mBatteryIconView.setImageDrawable(getUnknownStateDrawable());
+        } else {
+            mBatteryIconView.setImageDrawable(mDrawable);
+        }
+
+        updateShowPercent();
     }
 
     /**
@@ -446,17 +453,27 @@ public class BatteryMeterView extends LinearLayout implements
         mNonAdaptedForegroundColor = mDualToneHandler.getFillColor(intensity);
         mNonAdaptedBackgroundColor = mDualToneHandler.getBackgroundColor(intensity);
 
-        if (!mUseWallpaperTextColors) {
-            updateColors(mNonAdaptedForegroundColor, mNonAdaptedBackgroundColor,
-                    mNonAdaptedSingleToneColor);
-        }
+        updateColors(mNonAdaptedForegroundColor, mNonAdaptedBackgroundColor,
+                mNonAdaptedSingleToneColor);
     }
 
-    private void updateColors(int foregroundColor, int backgroundColor, int singleToneColor) {
+    /**
+     * Sets icon and text colors. This will be overridden by {@code onDarkChanged} events,
+     * if registered.
+     *
+     * @param foregroundColor
+     * @param backgroundColor
+     * @param singleToneColor
+     */
+    public void updateColors(int foregroundColor, int backgroundColor, int singleToneColor) {
         mDrawable.setColors(foregroundColor, backgroundColor, singleToneColor);
         mTextColor = singleToneColor;
         if (mBatteryPercentView != null) {
             mBatteryPercentView.setTextColor(singleToneColor);
+        }
+
+        if (mUnknownStateDrawable != null) {
+            mUnknownStateDrawable.setTint(singleToneColor);
         }
     }
 
@@ -467,8 +484,9 @@ public class BatteryMeterView extends LinearLayout implements
         pw.println("    mDrawable.getPowerSave: " + powerSave);
         pw.println("    mBatteryPercentView.getText(): " + percent);
         pw.println("    mTextColor: #" + Integer.toHexString(mTextColor));
+        pw.println("    mBatteryStateUnknown: " + mBatteryStateUnknown);
         pw.println("    mLevel: " + mLevel);
-        pw.println("    mForceShowPercent: " + mForceShowPercent);
+        pw.println("    mMode: " + mShowPercentMode);
     }
 
     private final class SettingObserver extends ContentObserver {

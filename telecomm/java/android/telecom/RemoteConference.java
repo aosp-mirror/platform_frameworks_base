@@ -16,13 +16,13 @@
 
 package android.telecom;
 
-import com.android.internal.telecom.IConnectionService;
-
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
+
+import com.android.internal.telecom.IConnectionService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -152,6 +152,14 @@ public final class RemoteConference {
     RemoteConference(String id, IConnectionService connectionService) {
         mId = id;
         mConnectionService = connectionService;
+    }
+
+    /** @hide */
+    RemoteConference(DisconnectCause disconnectCause) {
+        mId = "NULL";
+        mConnectionService = null;
+        mState = Connection.STATE_DISCONNECTED;
+        mDisconnectCause = disconnectCause;
     }
 
     /** @hide */
@@ -582,5 +590,17 @@ public final class RemoteConference {
                 }
             }
         }
+    }
+
+    /**
+     * Create a {@link RemoteConference} represents a failure, and which will
+     * be in {@link Connection#STATE_DISCONNECTED}.
+     *
+     * @param disconnectCause The disconnect cause.
+     * @return a failed {@link RemoteConference}
+     * @hide
+     */
+    public static RemoteConference failure(DisconnectCause disconnectCause) {
+        return new RemoteConference(disconnectCause);
     }
 }

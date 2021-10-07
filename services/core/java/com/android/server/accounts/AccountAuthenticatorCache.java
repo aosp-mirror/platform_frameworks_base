@@ -27,10 +27,10 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 
@@ -83,13 +83,13 @@ import java.io.IOException;
 
     private static class MySerializer implements XmlSerializerAndParser<AuthenticatorDescription> {
         @Override
-        public void writeAsXml(AuthenticatorDescription item, XmlSerializer out)
+        public void writeAsXml(AuthenticatorDescription item, TypedXmlSerializer out)
                 throws IOException {
             out.attribute(null, "type", item.type);
         }
 
         @Override
-        public AuthenticatorDescription createFromXml(XmlPullParser parser)
+        public AuthenticatorDescription createFromXml(TypedXmlPullParser parser)
                 throws IOException, XmlPullParserException {
             return AuthenticatorDescription.newKey(parser.getAttributeValue(null, "type"));
         }

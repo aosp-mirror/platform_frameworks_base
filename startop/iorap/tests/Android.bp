@@ -13,6 +13,15 @@
 // limitations under the License.
 
 // TODO: once b/80095087 is fixed, rewrite this back to android_test
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 java_library {
     name: "libiorap-java-test-lib",
     srcs: ["src/**/*.kt"],

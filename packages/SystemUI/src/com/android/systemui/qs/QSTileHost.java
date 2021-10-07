@@ -14,7 +14,6 @@
 
 package com.android.systemui.qs;
 
-import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -24,7 +23,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
@@ -37,6 +35,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
@@ -45,16 +44,21 @@ import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.external.CustomTile;
+import com.android.systemui.qs.external.CustomTileStatePersister;
 import com.android.systemui.qs.external.TileLifecycleManager;
+import com.android.systemui.qs.external.TileServiceKey;
 import com.android.systemui.qs.external.TileServices;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.leak.GarbageMonitor;
+import com.android.systemui.util.settings.SecureSettings;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -69,15 +73,15 @@ import java.util.function.Predicate;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import javax.inject.Singleton;
 
 /** Platform implementation of the quick settings tile host **/
-@Singleton
+@SysUISingleton
 public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, Dumpable {
     private static final String TAG = "QSTileHost";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final int MAX_QS_INSTANCE_ID = 1 << 20;
 
+    public static final int POSITION_AT_END = -1;
     public static final String TILES_SETTING = Secure.QS_TILES;
 
     private final Context mContext;
@@ -91,6 +95,8 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     private final QSLogger mQSLogger;
     private final UiEventLogger mUiEventLogger;
     private final InstanceIdSequence mInstanceIdSequence;
+    private final CustomTileStatePersister mCustomTileStatePersister;
+    private final FeatureFlags mFeatureFlags;
 
     private final List<Callback> mCallbacks = new ArrayList<>();
     private AutoTileManager mAutoTiles;
@@ -99,6 +105,8 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     private int mCurrentUser;
     private final Optional<StatusBar> mStatusBarOptional;
     private Context mUserContext;
+    private UserTracker mUserTracker;
+    private SecureSettings mSecureSettings;
 
     @Inject
     public QSTileHost(Context context,
@@ -113,7 +121,12 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
             BroadcastDispatcher broadcastDispatcher,
             Optional<StatusBar> statusBarOptional,
             QSLogger qsLogger,
-            UiEventLogger uiEventLogger) {
+            UiEventLogger uiEventLogger,
+            UserTracker userTracker,
+            SecureSettings secureSettings,
+            CustomTileStatePersister customTileStatePersister,
+            FeatureFlags featureFlags
+    ) {
         mIconController = iconController;
         mContext = context;
         mUserContext = context;
@@ -125,12 +138,16 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         mBroadcastDispatcher = broadcastDispatcher;
 
         mInstanceIdSequence = new InstanceIdSequence(MAX_QS_INSTANCE_ID);
-        mServices = new TileServices(this, bgLooper, mBroadcastDispatcher);
+        mServices = new TileServices(this, bgLooper, mBroadcastDispatcher, userTracker);
         mStatusBarOptional = statusBarOptional;
 
         mQsFactories.add(defaultFactory);
         pluginManager.addPluginListener(this, QSFactory.class, true);
         mDumpManager.registerDumpable(TAG, this);
+        mUserTracker = userTracker;
+        mSecureSettings = secureSettings;
+        mCustomTileStatePersister = customTileStatePersister;
+        mFeatureFlags = featureFlags;
 
         mainHandler.post(() -> {
             // This is technically a hack to avoid circular dependency of
@@ -177,10 +194,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         String value = mTunerService.getValue(TILES_SETTING);
         onTuningChanged(TILES_SETTING, "");
         onTuningChanged(TILES_SETTING, value);
-    }
-
-    public QSLogger getQSLogger() {
-        return mQSLogger;
     }
 
     @Override
@@ -234,6 +247,11 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     }
 
     @Override
+    public int getUserId() {
+        return mCurrentUser;
+    }
+
+    @Override
     public TileServices getTileServices() {
         return mServices;
     }
@@ -251,10 +269,10 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         if (newValue == null && UserManager.isDeviceInDemoMode(mContext)) {
             newValue = mContext.getResources().getString(R.string.quick_settings_tiles_retail_mode);
         }
-        final List<String> tileSpecs = loadTileSpecs(mContext, newValue);
-        int currentUser = ActivityManager.getCurrentUser();
+        final List<String> tileSpecs = loadTileSpecs(mContext, newValue, mFeatureFlags);
+        int currentUser = mUserTracker.getUserId();
         if (currentUser != mCurrentUser) {
-            mUserContext = mContext.createContextAsUser(UserHandle.of(currentUser), 0);
+            mUserContext = mUserTracker.getUserContext();
             if (mAutoTiles != null) {
                 mAutoTiles.changeUser(UserHandle.of(currentUser));
             }
@@ -320,7 +338,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         if (newTiles.isEmpty() && !tileSpecs.isEmpty()) {
             // If we didn't manage to create any tiles, set it to empty (default)
             Log.d(TAG, "No valid tiles on tuning changed. Setting to default.");
-            changeTiles(currentSpecs, loadTileSpecs(mContext, ""));
+            changeTiles(currentSpecs, loadTileSpecs(mContext, "", mFeatureFlags));
         } else {
             for (int i = 0; i < mCallbacks.size(); i++) {
                 mCallbacks.get(i).onTilesChanged();
@@ -338,20 +356,44 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         if (mAutoTiles != null) mAutoTiles.unmarkTileAsAutoAdded(spec);
     }
 
+    /**
+     * Add a tile to the end
+     *
+     * @param spec string matching a pre-defined tilespec
+     */
     public void addTile(String spec) {
-        changeTileSpecs(tileSpecs-> !tileSpecs.contains(spec) && tileSpecs.add(spec));
+        addTile(spec, POSITION_AT_END);
     }
 
-    private void saveTilesToSettings(List<String> tileSpecs) {
-        Settings.Secure.putStringForUser(mContext.getContentResolver(), TILES_SETTING,
-                TextUtils.join(",", tileSpecs), null /* tag */,
-                false /* default */, mCurrentUser, true /* overrideable by restore */);
+    /**
+     * Add a tile into the requested spot, or at the end if the position is greater than the number
+     * of tiles.
+     * @param spec string matching a pre-defined tilespec
+     * @param requestPosition -1 for end, 0 for beginning, or X for insertion at position X
+     */
+    public void addTile(String spec, int requestPosition) {
+        changeTileSpecs(tileSpecs -> {
+            if (tileSpecs.contains(spec)) return false;
+
+            int size = tileSpecs.size();
+            if (requestPosition == POSITION_AT_END || requestPosition >= size) {
+                tileSpecs.add(spec);
+            } else {
+                tileSpecs.add(requestPosition, spec);
+            }
+            return true;
+        });
+    }
+
+    void saveTilesToSettings(List<String> tileSpecs) {
+        mSecureSettings.putStringForUser(TILES_SETTING, TextUtils.join(",", tileSpecs),
+                null /* tag */, false /* default */, mCurrentUser,
+                true /* overrideable by restore */);
     }
 
     private void changeTileSpecs(Predicate<List<String>> changeFunction) {
-        final String setting = Settings.Secure.getStringForUser(mContext.getContentResolver(),
-                TILES_SETTING, mCurrentUser);
-        final List<String> tileSpecs = loadTileSpecs(mContext, setting);
+        final String setting = mSecureSettings.getStringForUser(TILES_SETTING, mCurrentUser);
+        final List<String> tileSpecs = loadTileSpecs(mContext, setting, mFeatureFlags);
         if (changeFunction.test(tileSpecs)) {
             saveTilesToSettings(tileSpecs);
         }
@@ -385,6 +427,11 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         changeTiles(mTileSpecs, newSpecs);
     }
 
+    /**
+     * Change the tiles triggered by the user editing.
+     * <p>
+     * This is not called on device start, or on user change.
+     */
     public void changeTiles(List<String> previousTiles, List<String> newTiles) {
         final List<String> copy = new ArrayList<>(previousTiles);
         final int NP = copy.size();
@@ -400,6 +447,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
                         mBroadcastDispatcher);
                 lifecycleManager.onStopListening();
                 lifecycleManager.onTileRemoved();
+                mCustomTileStatePersister.removeState(new TileServiceKey(component, mCurrentUser));
                 TileLifecycleManager.setTileAdded(mContext, component, false);
                 lifecycleManager.flushMessagesAndUnbind();
             }
@@ -418,9 +466,15 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         return null;
     }
 
-    public QSTileView createTileView(QSTile tile, boolean collapsedView) {
+    /**
+     * Create a view for a tile, iterating over all possible {@link QSFactory}.
+     *
+     * @see QSFactory#createTileView
+     */
+    public QSTileView createTileView(Context themedContext, QSTile tile, boolean collapsedView) {
         for (int i = 0; i < mQsFactories.size(); i++) {
-            QSTileView view = mQsFactories.get(i).createTileView(tile, collapsedView);
+            QSTileView view = mQsFactories.get(i)
+                    .createTileView(themedContext, tile, collapsedView);
             if (view != null) {
                 return view;
             }
@@ -428,7 +482,8 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         throw new RuntimeException("Default factory didn't create view for " + tile.getTileSpec());
     }
 
-    protected static List<String> loadTileSpecs(Context context, String tileList) {
+    protected static List<String> loadTileSpecs(
+            Context context, String tileList, FeatureFlags featureFlags) {
         final Resources res = context.getResources();
 
         if (TextUtils.isEmpty(tileList)) {
@@ -459,6 +514,21 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
                     tiles.add(tile);
                     addedSpecs.add(tile);
                 }
+            }
+        }
+        if (featureFlags.isProviderModelSettingEnabled()) {
+            if (!tiles.contains("internet")) {
+                if (tiles.contains("wifi")) {
+                    // Replace the WiFi with Internet, and remove the Cell
+                    tiles.set(tiles.indexOf("wifi"), "internet");
+                    tiles.remove("cell");
+                } else if (tiles.contains("cell")) {
+                    // Replace the Cell with Internet
+                    tiles.set(tiles.indexOf("cell"), "internet");
+                }
+            } else {
+                tiles.remove("wifi");
+                tiles.remove("cell");
             }
         }
         return tiles;

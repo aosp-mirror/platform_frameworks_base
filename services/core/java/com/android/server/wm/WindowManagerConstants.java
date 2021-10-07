@@ -23,7 +23,7 @@ import android.provider.AndroidDeviceConfig;
 import android.provider.DeviceConfig;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.wm.utils.DeviceConfigInterface;
+import com.android.server.utils.DeviceConfigInterface;
 
 import java.io.PrintWriter;
 import java.util.Objects;

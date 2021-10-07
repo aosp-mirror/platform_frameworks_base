@@ -1,3 +1,19 @@
+package {
+    default_applicable_licenses: ["frameworks_base_core_jni_license"],
+}
+
+// Added automatically by a large-scale-change
+// See: http://go/android-license-faq
+license {
+    name: "frameworks_base_core_jni_license",
+    visibility: [":__subpackages__"],
+    license_kinds: [
+        "SPDX-license-identifier-Apache-2.0",
+    ],
+    license_text: [
+        "NOTICE",
+    ],
+}
 
 cc_library_shared {
     name: "libandroid_runtime",
@@ -34,6 +50,7 @@ cc_library_shared {
         "android_util_XmlBlock.cpp",
         "android_util_jar_StrictJarFile.cpp",
         "com_android_internal_util_VirtualRefBasePtr.cpp",
+        ":deviceproductinfoconstants_aidl",
     ],
 
     include_dirs: [
@@ -50,9 +67,12 @@ cc_library_shared {
         "libhwui",
         "liblog",
         "libminikin",
-        "libnativehelper",
         "libz",
-        "libziparchive",
+    ],
+
+    static_libs: [
+        "libnativehelper_lazy",
+        "libziparchive_for_incfs",
     ],
 
     export_include_dirs: [
@@ -64,6 +84,7 @@ cc_library_shared {
         android: {
             srcs: [
                 "AndroidRuntime.cpp",
+                "com_android_internal_content_F2fsUtils.cpp",
                 "com_android_internal_content_NativeLibraryHelper.cpp",
                 "com_google_android_gles_jni_EGLImpl.cpp",
                 "com_google_android_gles_jni_GLImpl.cpp", // TODO: .arm
@@ -103,9 +124,12 @@ cc_library_shared {
                 "android_view_PointerIcon.cpp",
                 "android_view_Surface.cpp",
                 "android_view_SurfaceControl.cpp",
+                "android_view_SurfaceControlFpsListener.cpp",
+                "android_view_SurfaceControlHdrLayerInfoListener.cpp",
                 "android_graphics_BLASTBufferQueue.cpp",
                 "android_view_SurfaceSession.cpp",
                 "android_view_TextureView.cpp",
+                "android_view_TunnelModeEnabledListener.cpp",
                 "android_view_VelocityTracker.cpp",
                 "android_view_VerifiedKeyEvent.cpp",
                 "android_view_VerifiedMotionEvent.cpp",
@@ -122,6 +146,7 @@ cc_library_shared {
                 "android_os_MemoryFile.cpp",
                 "android_os_MessageQueue.cpp",
                 "android_os_Parcel.cpp",
+                "android_os_PerformanceHintManager.cpp",
                 "android_os_SELinux.cpp",
                 "android_os_ServiceManager.cpp",
                 "android_os_SharedMemory.cpp",
@@ -131,10 +156,10 @@ cc_library_shared {
                 "android_os_VintfRuntimeInfo.cpp",
                 "android_os_incremental_IncrementalManager.cpp",
                 "android_net_LocalSocketImpl.cpp",
-                "android_net_NetUtils.cpp",
                 "android_service_DataLoaderService.cpp",
                 "android_util_AssetManager.cpp",
                 "android_util_Binder.cpp",
+                "android_util_CharsetUtils.cpp",
                 "android_util_MemoryIntArray.cpp",
                 "android_util_Process.cpp",
                 "android_media_AudioDeviceAttributes.cpp",
@@ -155,9 +180,9 @@ cc_library_shared {
                 "android_media_ToneGenerator.cpp",
                 "android_hardware_Camera.cpp",
                 "android_hardware_camera2_CameraMetadata.cpp",
-                "android_hardware_camera2_legacy_LegacyCameraDevice.cpp",
-                "android_hardware_camera2_legacy_PerfMeasurement.cpp",
                 "android_hardware_camera2_DngCreator.cpp",
+                "android_hardware_camera2_impl_CameraExtensionJpegProcessor.cpp",
+                "android_hardware_camera2_utils_SurfaceUtils.cpp",
                 "android_hardware_display_DisplayManagerGlobal.cpp",
                 "android_hardware_display_DisplayViewport.cpp",
                 "android_hardware_HardwareBuffer.cpp",
@@ -182,12 +207,19 @@ cc_library_shared {
                 "android_content_res_Configuration.cpp",
                 "android_security_Scrypt.cpp",
                 "com_android_internal_content_om_OverlayConfig.cpp",
+                "com_android_internal_net_NetworkUtilsInternal.cpp",
                 "com_android_internal_os_ClassLoaderFactory.cpp",
+                "com_android_internal_os_DmabufInfoReader.cpp",
                 "com_android_internal_os_FuseAppLoop.cpp",
+                "com_android_internal_os_KernelCpuBpfTracking.cpp",
+                "com_android_internal_os_KernelCpuTotalBpfMapReader.cpp",
                 "com_android_internal_os_KernelCpuUidBpfMapReader.cpp",
+                "com_android_internal_os_KernelSingleProcessCpuThreadReader.cpp",
                 "com_android_internal_os_KernelSingleUidTimeReader.cpp",
                 "com_android_internal_os_Zygote.cpp",
+                "com_android_internal_os_ZygoteCommandBuffer.cpp",
                 "com_android_internal_os_ZygoteInit.cpp",
+                "com_android_internal_security_VerityUtils.cpp",
                 "hwbinder/EphemeralStorage.cpp",
                 "fd_utils.cpp",
                 "android_hardware_input_InputWindowHandle.cpp",
@@ -202,9 +234,14 @@ cc_library_shared {
                 "libseccomp_policy",
                 "libgrallocusage",
                 "libscrypt_static",
+                "libstatssocket_lazy",
             ],
 
             shared_libs: [
+                "audioclient-types-aidl-cpp",
+                "audioflinger-aidl-cpp",
+                "av-types-aidl-cpp",
+                "android.hardware.camera.device@3.2",
                 "libandroidicu",
                 "libbpf_android",
                 "libnetdbpf",
@@ -221,6 +258,7 @@ cc_library_shared {
                 "libgraphicsenv",
                 "libgui",
                 "libmediandk",
+                "libpermission",
                 "libsensor",
                 "libinput",
                 "libcamera_client",
@@ -234,6 +272,7 @@ cc_library_shared {
                 "libdataloader",
                 "libvulkan",
                 "libETC1",
+                "libjpeg",
                 "libhardware",
                 "libhardware_legacy",
                 "libselinux",
@@ -258,18 +297,16 @@ cc_library_shared {
                 "libnativewindow",
                 "libdl",
                 "libdl_android",
-                "libstatslog",
-                "libstatssocket",
                 "libtimeinstate",
                 "server_configurable_flags",
-                "libstatspull",
             ],
             export_shared_lib_headers: [
-                // AndroidRuntime.h depends on nativehelper/jni.h
-                "libnativehelper",
-
                 // our headers include libnativewindow's public headers
                 "libnativewindow",
+            ],
+            export_static_lib_headers: [
+                // AndroidRuntime.h depends on nativehelper/jni.h
+                "libnativehelper_lazy",
             ],
             header_libs: [
                 "bionic_libc_platform_headers",
@@ -286,8 +323,9 @@ cc_library_shared {
             ],
             include_dirs: [
                 "external/vulkan-headers/include",
+                "frameworks/native/libs/math/include",
                 "frameworks/native/libs/nativebase/include",
-                "frameworks/native/libs/nativewindow/include"
+                "frameworks/native/libs/nativewindow/include",
             ],
             shared_libs: [
                 "libicui18n",
@@ -303,10 +341,47 @@ cc_library_shared {
         linux_glibc: {
             srcs: [
                 "android_content_res_ApkAssets.cpp",
+                "android_database_CursorWindow.cpp",
+                "android_database_SQLiteCommon.cpp",
+                "android_database_SQLiteConnection.cpp",
+                "android_database_SQLiteGlobal.cpp",
+                "android_database_SQLiteDebug.cpp",
+                "android_hardware_input_InputApplicationHandle.cpp",
                 "android_os_MessageQueue.cpp",
+                "android_os_Parcel.cpp",
+
+                "android_view_KeyCharacterMap.cpp",
+                "android_view_KeyEvent.cpp",
+                "android_view_InputChannel.cpp",
+                "android_view_InputDevice.cpp",
+                "android_view_InputEventReceiver.cpp",
+                "android_view_InputEventSender.cpp",
+                "android_view_MotionEvent.cpp",
+                "android_view_VelocityTracker.cpp",
+                "android_view_VerifiedKeyEvent.cpp",
+                "android_view_VerifiedMotionEvent.cpp",
+
                 "android_util_AssetManager.cpp",
+                "android_util_Binder.cpp",
+
                 "android_util_FileObserver.cpp",
             ],
+            static_libs: [
+                "libinput",
+                "libbinderthreadstateutils",
+                "libsqlite",
+            ],
+            shared_libs: [
+                // libbinder needs to be shared since it has global state
+                // (e.g. gDefaultServiceManager)
+                "libbinder",
+                "libhidlbase", // libhwbinder is in here
+            ],
         },
+    },
+
+    // Workaround Clang LTO crash.
+    lto: {
+        never: true,
     },
 }

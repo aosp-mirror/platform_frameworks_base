@@ -17,6 +17,7 @@
 package android.timezone;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import java.util.Objects;
 
@@ -28,9 +29,9 @@ import java.util.Objects;
 public final class TelephonyNetwork {
 
     @NonNull
-    private final libcore.timezone.TelephonyNetwork mDelegate;
+    private final com.android.i18n.timezone.TelephonyNetwork mDelegate;
 
-    TelephonyNetwork(@NonNull libcore.timezone.TelephonyNetwork delegate) {
+    TelephonyNetwork(@NonNull com.android.i18n.timezone.TelephonyNetwork delegate) {
         mDelegate = Objects.requireNonNull(delegate);
     }
 
@@ -59,7 +60,7 @@ public final class TelephonyNetwork {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }

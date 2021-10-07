@@ -90,7 +90,7 @@ public class WifiMacAddressPreferenceControllerTest {
 
         assertWithMessage("Intent filter should contain expected intents")
                 .that(mController.getConnectivityIntents())
-                .asList().containsAllIn(expectedIntents);
+                .asList().containsAtLeastElementsIn(expectedIntents);
     }
 
     @Test

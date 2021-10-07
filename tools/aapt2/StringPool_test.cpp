@@ -223,11 +223,11 @@ TEST(StringPoolTest, FlattenOddCharactersUtf16) {
   std::unique_ptr<uint8_t[]> data = util::Copy(buffer);
   ResStringPool test;
   ASSERT_EQ(test.setTo(data.get(), buffer.size()), NO_ERROR);
-  size_t len = 0;
-  const char16_t* str = test.stringAt(0, &len);
-  EXPECT_THAT(len, Eq(1u));
-  EXPECT_THAT(str, Pointee(Eq(u'\u093f')));
-  EXPECT_THAT(str[1], Eq(0u));
+  auto str = test.stringAt(0);
+  ASSERT_TRUE(str.has_value());
+  EXPECT_THAT(str->size(), Eq(1u));
+  EXPECT_THAT(str->data(), Pointee(Eq(u'\u093f')));
+  EXPECT_THAT(str->data()[1], Eq(0u));
 }
 
 constexpr const char* sLongString =
@@ -278,14 +278,15 @@ TEST(StringPoolTest, Flatten) {
     EXPECT_THAT(util::GetString(test, 3), Eq(sLongString));
     EXPECT_THAT(util::GetString16(test, 3), Eq(util::Utf8ToUtf16(sLongString)));
 
-    size_t len;
-    EXPECT_TRUE(test.stringAt(4, &len) != nullptr || test.string8At(4, &len) != nullptr);
+    EXPECT_TRUE(test.stringAt(4).has_value() || test.string8At(4).has_value());
 
     EXPECT_THAT(util::GetString(test, 0), Eq("style"));
     EXPECT_THAT(util::GetString16(test, 0), Eq(u"style"));
 
-    const ResStringPool_span* span = test.styleAt(0);
-    ASSERT_THAT(span, NotNull());
+    auto span_result = test.styleAt(0);
+    ASSERT_TRUE(span_result.has_value());
+
+    const ResStringPool_span* span = span_result->unsafe_ptr();
     EXPECT_THAT(util::GetString(test, span->name.index), Eq("b"));
     EXPECT_THAT(util::GetString16(test, span->name.index), Eq(u"b"));
     EXPECT_THAT(span->firstChar, Eq(0u));
@@ -318,16 +319,17 @@ TEST(StringPoolTest, ModifiedUTF8) {
   // Check that the codepoints are encoded using two three-byte surrogate pairs
   ResStringPool test;
   ASSERT_EQ(test.setTo(data.get(), buffer.size()), NO_ERROR);
-  size_t len;
-  const char* str = test.string8At(0, &len);
-  ASSERT_THAT(str, NotNull());
-  EXPECT_THAT(std::string(str, len), Eq("\xED\xA0\x81\xED\xB0\x80"));
-  str = test.string8At(1, &len);
-  ASSERT_THAT(str, NotNull());
-  EXPECT_THAT(std::string(str, len), Eq("foo \xED\xA0\x81\xED\xB0\xB7 bar"));
-  str = test.string8At(2, &len);
-  ASSERT_THAT(str, NotNull());
-  EXPECT_THAT(std::string(str, len), Eq("\xED\xA0\x81\xED\xB0\x80\xED\xA0\x81\xED\xB0\xB7"));
+  auto str = test.string8At(0);
+  ASSERT_TRUE(str.has_value());
+  EXPECT_THAT(str->to_string(), Eq("\xED\xA0\x81\xED\xB0\x80"));
+
+  str = test.string8At(1);
+  ASSERT_TRUE(str.has_value());
+  EXPECT_THAT(str->to_string(), Eq("foo \xED\xA0\x81\xED\xB0\xB7 bar"));
+
+  str = test.string8At(2);
+  ASSERT_TRUE(str.has_value());
+  EXPECT_THAT(str->to_string(), Eq("\xED\xA0\x81\xED\xB0\x80\xED\xA0\x81\xED\xB0\xB7"));
 
   // Check that retrieving the strings returns the original UTF-8 character bytes
   EXPECT_THAT(util::GetString(test, 0), Eq("\xF0\x90\x90\x80"));

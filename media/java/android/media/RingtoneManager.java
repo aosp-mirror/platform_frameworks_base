@@ -34,7 +34,9 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
+import android.database.StaleDataException;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.IBinder;
@@ -492,7 +494,12 @@ public class RingtoneManager {
     public Uri getRingtoneUri(int position) {
         // use cursor directly instead of requerying it, which could easily
         // cause position to shuffle.
-        if (mCursor == null || !mCursor.moveToPosition(position)) {
+        try {
+            if (mCursor == null || !mCursor.moveToPosition(position)) {
+                return null;
+            }
+        } catch (StaleDataException | IllegalStateException e) {
+            Log.e(TAG, "Unexpected Exception has been catched.", e);
             return null;
         }
 
@@ -514,12 +521,12 @@ public class RingtoneManager {
     public int getRingtonePosition(Uri ringtoneUri) {
         try {
             if (ringtoneUri == null) return -1;
-            final long ringtoneId = ContentUris.parseId(ringtoneUri);
 
             final Cursor cursor = getCursor();
             cursor.moveToPosition(-1);
             while (cursor.moveToNext()) {
-                if (ringtoneId == cursor.getLong(ID_COLUMN_INDEX)) {
+                Uri uriFromCursor = getUriFromCursor(mContext, cursor);
+                if (ringtoneUri.equals(uriFromCursor)) {
                     return cursor.getPosition();
                 }
             }
@@ -579,7 +586,7 @@ public class RingtoneManager {
         return new ExternalRingtonesCursorWrapper(res, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private Cursor getMediaRingtones(Context context) {
         // MediaStore now returns ringtones on other storage devices, even when
         // we don't have storage or audio permissions
@@ -722,7 +729,7 @@ public class RingtoneManager {
      * @param volumeShaperConfig config for volume shaper of the ringtone if applied.
      * @see #getRingtone(Context, Uri)
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static Ringtone getRingtone(
             final Context context, Uri ringtoneUri, int streamType,
             @Nullable VolumeShaper.Configuration volumeShaperConfig) {
@@ -1075,18 +1082,21 @@ public class RingtoneManager {
      * @return true if the ringtone contains haptic channels.
      */
     public boolean hasHapticChannels(int position) {
-        return hasHapticChannels(getRingtoneUri(position));
+        return AudioManager.hasHapticChannels(mContext, getRingtoneUri(position));
     }
 
     /**
      * Returns if the {@link Ringtone} from a given sound URI contains
-     * haptic channels or not.
+     * haptic channels or not. As this function doesn't has a context
+     * to resolve the uri, the result may be wrong if the uri cannot be
+     * resolved correctly.
+     * Use {@link #hasHapticChannels(int)} instead when possible.
      *
      * @param ringtoneUri The {@link Uri} of a sound or ringtone.
      * @return true if the ringtone contains haptic channels.
      */
     public static boolean hasHapticChannels(@NonNull Uri ringtoneUri) {
-        return AudioManager.hasHapticChannels(ringtoneUri);
+        return AudioManager.hasHapticChannels(null, ringtoneUri);
     }
 
     /**
@@ -1130,11 +1140,13 @@ public class RingtoneManager {
 
             // Try finding the scanned ringtone
             final String filename = getDefaultRingtoneFilename(type);
+            final String whichAudio = getQueryStringForType(type);
+            final String where = MediaColumns.DISPLAY_NAME + "=? AND " + whichAudio + "=?";
             final Uri baseUri = MediaStore.Audio.Media.INTERNAL_CONTENT_URI;
             try (Cursor cursor = context.getContentResolver().query(baseUri,
                     new String[] { MediaColumns._ID },
-                    MediaColumns.DISPLAY_NAME + "=?",
-                    new String[] { filename }, null)) {
+                    where,
+                    new String[] { filename, "1" }, null)) {
                 if (cursor.moveToFirst()) {
                     final Uri ringtoneUri = context.getContentResolver().canonicalizeOrElse(
                             ContentUris.withAppendedId(baseUri, cursor.getLong(0)));
@@ -1159,6 +1171,15 @@ public class RingtoneManager {
             case TYPE_RINGTONE: return SystemProperties.get("ro.config.ringtone");
             case TYPE_NOTIFICATION: return SystemProperties.get("ro.config.notification_sound");
             case TYPE_ALARM: return SystemProperties.get("ro.config.alarm_alert");
+            default: throw new IllegalArgumentException();
+        }
+    }
+
+    private static String getQueryStringForType(int type) {
+        switch (type) {
+            case TYPE_RINGTONE: return MediaStore.Audio.AudioColumns.IS_RINGTONE;
+            case TYPE_NOTIFICATION: return MediaStore.Audio.AudioColumns.IS_NOTIFICATION;
+            case TYPE_ALARM: return MediaStore.Audio.AudioColumns.IS_ALARM;
             default: throw new IllegalArgumentException();
         }
     }

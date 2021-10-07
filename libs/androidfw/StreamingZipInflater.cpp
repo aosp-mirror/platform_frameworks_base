@@ -70,13 +70,13 @@ StreamingZipInflater::StreamingZipInflater(int fd, off64_t compDataStart,
 /*
  * Streaming access to compressed data held in an mmapped region of memory
  */
-StreamingZipInflater::StreamingZipInflater(FileMap* dataMap, size_t uncompSize) {
+StreamingZipInflater::StreamingZipInflater(const incfs::IncFsFileMap* dataMap, size_t uncompSize) {
     mFd = -1;
     mDataMap = dataMap;
     mOutTotalSize = uncompSize;
-    mInTotalSize = dataMap->getDataLength();
+    mInTotalSize = dataMap->length();
 
-    mInBuf = (uint8_t*) dataMap->getDataPtr();
+    mInBuf = (uint8_t*) dataMap->unsafe_data(); // IncFs safety handled in zlib.
     mInBufSize = mInTotalSize;
 
     mOutBufSize = StreamingZipInflater::OUTPUT_CHUNK_SIZE;

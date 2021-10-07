@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.icu.util.Calendar;
+import android.os.Build;
 import android.os.Parcelable;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -33,8 +34,6 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.DatePicker.AbstractDatePickerDelegate;
 import android.widget.NumberPicker.OnValueChangeListener;
-
-import libcore.icu.ICU;
 
 import java.text.DateFormatSymbols;
 import java.text.ParseException;
@@ -459,7 +458,7 @@ class DatePickerSpinnerDelegate extends AbstractDatePickerDelegate {
         // We use numeric spinners for year and day, but textual months. Ask icu4c what
         // order the user's locale uses for that combination. http://b/7207103.
         String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), "yyyyMMMdd");
-        char[] order = ICU.getDateFormatOrder(pattern);
+        char[] order = DateFormat.getDateFormatOrder(pattern);
         final int spinnerCount = order.length;
         for (int i = 0; i < spinnerCount; i++) {
             switch (order[i]) {
@@ -503,7 +502,7 @@ class DatePickerSpinnerDelegate extends AbstractDatePickerDelegate {
                 || mCurrentDate.get(Calendar.DAY_OF_MONTH) != dayOfMonth);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void setDate(int year, int month, int dayOfMonth) {
         mCurrentDate.set(year, month, dayOfMonth);
         resetAutofilledValue();
@@ -514,7 +513,7 @@ class DatePickerSpinnerDelegate extends AbstractDatePickerDelegate {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void updateSpinners() {
         // set the spinner ranges respecting the min and max dates
         if (mCurrentDate.equals(mMinDate)) {
@@ -567,7 +566,7 @@ class DatePickerSpinnerDelegate extends AbstractDatePickerDelegate {
     /**
      * Updates the calendar view with the current date.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void updateCalendarView() {
         mCalendarView.setDate(mCurrentDate.getTimeInMillis(), false, false);
     }
@@ -576,7 +575,7 @@ class DatePickerSpinnerDelegate extends AbstractDatePickerDelegate {
     /**
      * Notifies the listener, if such, for a change in the selected date.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void notifyDateChanged() {
         mDelegator.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
         if (mOnDateChangedListener != null) {
@@ -632,7 +631,7 @@ class DatePickerSpinnerDelegate extends AbstractDatePickerDelegate {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void updateInputState() {
         // Make sure that if the user changes the value and the IME is active
         // for one of the inputs if this widget, the IME is closed. If the user

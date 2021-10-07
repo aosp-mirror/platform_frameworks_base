@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4469836075319831821">"Çap Spuler"</string>
-    <string name="more_options_button" msgid="2243228396432556771">"Digər variantlar"</string>
+    <string name="more_options_button" msgid="2243228396432556771">"Digər seçimlər"</string>
     <string name="label_destination" msgid="9132510997381599275">"Hədəf"</string>
     <string name="label_copies" msgid="3634531042822968308">"Surətlər"</string>
     <string name="label_copies_summary" msgid="3861966063536529540">"Nüsxələr:"</string>
@@ -83,7 +83,7 @@
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> ləğv edilir"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Printer xətası <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"Printer <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> işini blokladı"</string>
-    <string name="cancel" msgid="4373674107267141885">"Ləğv et"</string>
+    <string name="cancel" msgid="4373674107267141885">"Ləğv edin"</string>
     <string name="restart" msgid="2472034227037808749">"Yenidən başlat"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Printerə heç bir bağlantı yoxdur"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"naməlum"</string>

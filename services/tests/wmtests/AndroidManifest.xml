@@ -24,7 +24,7 @@
 
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
-    <uses-permission android:name="android.permission.MANAGE_ACTIVITY_STACKS" />
+    <uses-permission android:name="android.permission.MANAGE_ACTIVITY_TASKS" />
     <uses-permission android:name="android.permission.GET_TOP_ACTIVITY_INFO" />
     <uses-permission android:name="android.permission.MANAGE_USERS" />
     <uses-permission android:name="android.permission.STORAGE_INTERNAL" />
@@ -38,6 +38,11 @@
     <uses-permission android:name="android.permission.REORDER_TASKS" />
     <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
     <uses-permission android:name="android.permission.STATUS_BAR" />
+    <uses-permission android:name="android.permission.CAPTURE_VIDEO_OUTPUT" />
+    <uses-permission android:name="android.permission.READ_COMPAT_CHANGE_CONFIG" />
+    <uses-permission android:name="android.permission.LOG_COMPAT_CHANGE" />
+    <uses-permission android:name="android.permission.CAPTURE_BLACKOUT_CONTENT"/>
+    <uses-permission android:name="android.permission.WRITE_DEVICE_CONFIG" />
 
     <!-- TODO: Remove largeHeap hack when memory leak is fixed (b/123984854) -->
     <application android:debuggable="true"
@@ -51,20 +56,28 @@
         <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityRequestedOrientationChange" />
         <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityTaskChangeCallbacks" />
         <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityTaskDescriptionChange" />
-        <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityViewTestActivity" />
-        <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityInActivityView"
+        <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityInVirtualDisplay"
                   android:resizeableActivity="true" />
-        <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityLaunchesNewActivityInActivityView"
-            android:resizeableActivity="true" />
         <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$LandscapeActivity"
                   android:screenOrientation="sensorLandscape"
                   android:showWhenLocked="true"
                   android:turnScreenOn="true" />
         <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ResumeWhilePausingActivity"
                   android:resumeWhilePausing="true"/>
-        <activity android:name="com.android.server.wm.ScreenDecorWindowTests$TestActivity"
-                  android:showWhenLocked="true" android:allowEmbedded="true"/>
         <activity android:name="com.android.server.wm.ActivityLeakTests$DetectLeakActivity" />
+        <!--
+            Simulate the common trampoline task that uses floating/translucent theme to avoid double
+            starting windows and animations of task open.
+        -->
+        <activity android:name="com.android.server.wm.ActivityOptionsTest$TrampolineActivity"
+                  android:taskAffinity="com.android.frameworks.wmtests.trampoline"
+                  android:theme="@android:style/Theme.Translucent.NoTitleBar"
+                  android:turnScreenOn="true"
+                  android:showWhenLocked="true" />
+        <activity android:name="com.android.server.wm.ActivityOptionsTest$MainActivity"
+                  android:turnScreenOn="true"
+                  android:showWhenLocked="true" />
+        <activity android:name="com.android.server.wm.ScreenshotTests$ScreenshotActivity" />
     </application>
 
     <instrumentation

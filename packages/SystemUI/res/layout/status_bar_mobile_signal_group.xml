@@ -85,6 +85,13 @@
                 android:contentDescription="@string/data_connection_roaming"
                 android:visibility="gone" />
         </FrameLayout>
+        <ImageView
+            android:id="@+id/mobile_roaming_large"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/stat_sys_roaming_large"
+            android:contentDescription="@string/data_connection_roaming"
+            android:visibility="gone" />
     </com.android.keyguard.AlphaOptimizedLinearLayout>
 </com.android.systemui.statusbar.StatusBarMobileView>
 

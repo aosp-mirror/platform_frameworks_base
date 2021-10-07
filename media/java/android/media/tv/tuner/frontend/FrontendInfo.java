@@ -22,6 +22,9 @@ import android.media.tv.tuner.frontend.FrontendSettings.Type;
 import android.media.tv.tuner.frontend.FrontendStatus.FrontendStatusType;
 import android.util.Range;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 /**
  * This class is used to specify meta information of a frontend.
  *
@@ -43,6 +46,10 @@ public class FrontendInfo {
             FrontendCapabilities frontendCap) {
         mId = id;
         mType = type;
+        // if max Frequency is negative, we set it as max value of the Integer.
+        if (maxFrequency < 0) {
+            maxFrequency = Integer.MAX_VALUE;
+        }
         mFrequencyRange = new Range<>(minFrequency, maxFrequency);
         mSymbolRateRange = new Range<>(minSymbolRate, maxSymbolRate);
         mAcquireRange = acquireRange;
@@ -53,6 +60,9 @@ public class FrontendInfo {
 
     /**
      * Gets frontend ID.
+     *
+     * @return the frontend ID or {@link android.media.tv.tuner.Tuner#INVALID_FRONTEND_ID}
+     *         if invalid
      */
     public int getId() {
         return mId;
@@ -114,5 +124,31 @@ public class FrontendInfo {
     @NonNull
     public FrontendCapabilities getFrontendCapabilities() {
         return mFrontendCap;
+    }
+
+
+    /** @hide */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !(o instanceof FrontendInfo)) {
+            return false;
+        }
+        // TODO: compare FrontendCapabilities
+        FrontendInfo info = (FrontendInfo) o;
+        return mId == info.getId() && mType == info.getType()
+                && Objects.equals(mFrequencyRange, info.getFrequencyRange())
+                && Objects.equals(mSymbolRateRange, info.getSymbolRateRange())
+                && mAcquireRange == info.getAcquireRange()
+                && mExclusiveGroupId == info.getExclusiveGroupId()
+                && Arrays.equals(mStatusCaps, info.getStatusCapabilities());
+    }
+
+    /** @hide */
+    @Override
+    public int hashCode() {
+        return mId;
     }
 }

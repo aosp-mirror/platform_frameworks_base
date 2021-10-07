@@ -16,10 +16,20 @@
 
 // Build the android.test.runner library
 // =====================================
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    //   SPDX-license-identifier-CPL-1.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 java_sdk_library {
     name: "android.test.runner",
 
-    srcs: ["src/**/*.java"],
+    srcs: [":android-test-runner-sources"],
 
     errorprone: {
         javacflags: ["-Xep:DepAnn:ERROR"],
@@ -41,6 +51,8 @@ java_sdk_library {
     ],
 
     compile_dex: true,
+    default_to_stubs: true,
+    dist_group: "android",
 }
 
 // Build the android.test.runner-minus-junit library
@@ -65,7 +77,7 @@ java_library {
 java_library_static {
     name: "repackaged.android.test.runner",
 
-    srcs: ["src/**/*.java"],
+    srcs: [":android-test-runner-sources"],
     exclude_srcs: [
         "src/android/test/ActivityUnitTestCase.java",
         "src/android/test/ApplicationTestCase.java",
@@ -96,4 +108,10 @@ filegroup {
     srcs: [
         "api/current.txt",
     ],
+}
+
+filegroup {
+    name: "android-test-runner-sources",
+    srcs: ["src/**/*.java"],
+    path: "src",
 }

@@ -5,16 +5,73 @@ per-file *Camera*,*camera* = shuzhenwang@google.com, yinchiayeh@google.com, zhij
 # Connectivity
 per-file android_net_* = codewiz@google.com, jchalard@google.com, lorenzo@google.com, reminv@google.com, satk@google.com
 
+# CPU
+per-file *Cpu* = file:/core/java/com/android/internal/os/CPU_OWNERS
+
 # Display
-per-file android_hardware_display_* = michaelwr@google.com, santoscordon@google.com
+per-file android_hardware_display_* = file:/services/core/java/com/android/server/display/OWNERS
 
 # Input
-per-file android_hardware_input* = michaelwr@google.com, svv@google.com
-per-file android_view_Input* = michaelwr@google.com, svv@google.com
-per-file android_view_KeyCharacterMap.* = michaelwr@google.com, svv@google.com
-per-file android_view_*KeyEvent.* = michaelwr@google.com, svv@google.com
-per-file android_view_*MotionEvent.* = michaelwr@google.com, svv@google.com
-per-file android_view_PointerIcon.* = michaelwr@google.com, svv@google.com
+per-file android_hardware_input* = file:/services/core/java/com/android/server/input/OWNERS
+per-file android_view_Input* = file:/services/core/java/com/android/server/input/OWNERS
+per-file android_view_KeyCharacterMap.* = file:/services/core/java/com/android/server/input/OWNERS
+per-file android_view_*KeyEvent.* = file:/services/core/java/com/android/server/input/OWNERS
+per-file android_view_*MotionEvent.* = file:/services/core/java/com/android/server/input/OWNERS
+per-file android_view_PointerIcon.* = file:/services/core/java/com/android/server/input/OWNERS
 
-# Zygote
-per-file com_android_internal_os_Zygote.*,fd_utils.* = chriswailes@google.com, ngeoffray@google.com, sehr@google.com, narayan@google.com, maco@google.com
+# WindowManager
+per-file android_graphics_BLASTBufferQueue.cpp = file:/services/core/java/com/android/server/wm/OWNERS
+per-file android_view_Surface* = file:/services/core/java/com/android/server/wm/OWNERS
+
+# Resources
+per-file android_content_res_* = file:/core/java/android/content/res/OWNERS
+per-file android_util_AssetManager* = file:/core/java/android/content/res/OWNERS
+per-file android_util_StringBlock* = file:/core/java/android/content/res/OWNERS
+per-file android_util_XmlBlock* = file:/core/java/android/content/res/OWNERS
+per-file com_android_internal_content_om_OverlayConfig* = file:/core/java/android/content/res/OWNERS
+
+# Binder related things
+per-file android_os_Parcel* = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file android_os_ServiceManager* = file:platform/frameworks/native:/libs/binder/OWNERS
+per-file android_util_Binder* = file:platform/frameworks/native:/libs/binder/OWNERS
+
+# HwBinder related things
+per-file android_os_HwBinder* = file:platform/system/libhwbinder:/OWNERS
+per-file android_os_HwBlob* = file:platform/system/libhwbinder:/OWNERS
+per-file android_os_HwParcel* = file:platform/system/libhwbinder:/OWNERS
+per-file android_os_HwRemoteBinder* = file:platform/system/libhwbinder:/OWNERS
+per-file EphemeralStorage* = file:platform/system/libhwbinder:/OWNERS
+
+# Sensor
+per-file android_hardware_SensorManager* = arthuri@google.com, bduddie@google.com, stange@google.com
+
+per-file *Zygote* = file:/ZYGOTE_OWNERS
+per-file fd_utils.* = file:/ZYGOTE_OWNERS
+per-file Android.bp = file:platform/build/soong:/OWNERS
+per-file android_animation_* = file:/core/java/android/animation/OWNERS
+per-file android_app_admin_* = file:/core/java/android/app/admin/OWNERS
+per-file android_hardware_Usb* = file:/services/usb/OWNERS
+per-file android_hardware_display_* = file:/core/java/android/hardware/display/OWNERS
+per-file android_hardware_input_* = file:/core/java/android/hardware/input/OWNERS
+per-file android_hardware_location_* = file:/core/java/android/hardware/location/OWNERS
+per-file android_media_* = file:/media/java/android/media/OWNERS
+per-file android_media_midi_* = file:/media/java/android/media/midi/OWNERS
+per-file android_opengl_* = file:/opengl/java/android/opengl/OWNERS
+per-file android_os_storage_* = file:/core/java/android/os/storage/OWNERS
+per-file android_se_* = file:/core/java/android/se/OWNERS
+per-file android_security_* = file:/core/java/android/security/OWNERS
+per-file android_view_* = file:/core/java/android/view/OWNERS
+per-file com_android_internal_net_* = file:/services/core/java/com/android/server/net/OWNERS
+
+### Graphics ###
+per-file android_graphics_* = file:/graphics/java/android/graphics/OWNERS
+# These are highly common-use files
+per-file Android.bp = file:/graphics/java/android/graphics/OWNERS
+per-file AndroidRuntime.cpp = file:/graphics/java/android/graphics/OWNERS
+per-file AndroidRuntime.cpp = calin@google.com, ngeoffray@google.com, oth@google.com
+# Although marked "view" this is mostly graphics stuff
+per-file android_view_* = file:/graphics/java/android/graphics/OWNERS
+
+# VINTF
+per-file android_os_VintfObject* = file:platform/system/libvintf:/OWNERS
+per-file android_os_VintfRuntimeInfo* = file:platform/system/libvintf:/OWNERS

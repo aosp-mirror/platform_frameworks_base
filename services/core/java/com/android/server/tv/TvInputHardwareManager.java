@@ -156,6 +156,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         synchronized (mLock) {
             Connection connection = new Connection(info);
             connection.updateConfigsLocked(configs);
+            connection.updateCableConnectionStatusLocked(info.getCableConnectionStatus());
             mConnections.put(info.getDeviceId(), connection);
             buildHardwareListLocked();
             mHandler.obtainMessage(
@@ -202,7 +203,8 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     }
 
     @Override
-    public void onStreamConfigurationChanged(int deviceId, TvStreamConfig[] configs) {
+    public void onStreamConfigurationChanged(int deviceId, TvStreamConfig[] configs,
+            int cableConnectionStatus) {
         synchronized (mLock) {
             Connection connection = mConnections.get(deviceId);
             if (connection == null) {
@@ -211,12 +213,22 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 return;
             }
             int previousConfigsLength = connection.getConfigsLengthLocked();
+            int previousCableConnectionStatus = connection.getInputStateLocked();
             connection.updateConfigsLocked(configs);
             String inputId = mHardwareInputIdMap.get(deviceId);
-            if (inputId != null
-                    && (previousConfigsLength == 0) != (connection.getConfigsLengthLocked() == 0)) {
-                mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
-                    connection.getInputStateLocked(), 0, inputId).sendToTarget();
+            if (inputId != null) {
+                if (connection.updateCableConnectionStatusLocked(cableConnectionStatus)) {
+                    if (previousCableConnectionStatus != connection.getInputStateLocked()) {
+                        mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
+                            connection.getInputStateLocked(), 0, inputId).sendToTarget();
+                    }
+                } else {
+                    if ((previousConfigsLength == 0)
+                            != (connection.getConfigsLengthLocked() == 0)) {
+                        mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
+                            connection.getInputStateLocked(), 0, inputId).sendToTarget();
+                    }
+                }
             }
             ITvInputHardwareCallback callback = connection.getCallbackLocked();
             if (callback != null) {
@@ -380,8 +392,9 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 return null;
             }
 
-            ResourceClientProfile profile =
-                    new ResourceClientProfile(tvInputSessionId, priorityHint);
+            ResourceClientProfile profile = new ResourceClientProfile();
+            profile.tvInputSessionId = tvInputSessionId;
+            profile.useCase = priorityHint;
             ResourceClientProfile holderProfile = connection.getResourceClientProfileLocked();
             if (holderProfile != null && trm != null
                     && !trm.isHigherPriority(profile, holderProfile)) {
@@ -624,7 +637,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     }
 
     private class Connection implements IBinder.DeathRecipient {
-        private final TvInputHardwareInfo mHardwareInfo;
+        private TvInputHardwareInfo mHardwareInfo;
         private TvInputInfo mInfo;
         private TvInputHardwareImpl mHardware = null;
         private ITvInputHardwareCallback mCallback;
@@ -633,6 +646,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         private Integer mResolvedUserId = null;
         private Runnable mOnFirstFrameCaptured;
         private ResourceClientProfile mResourceClientProfile = null;
+        private boolean mIsCableConnectionStatusUpdated = false;
 
         public Connection(TvInputHardwareInfo hardwareInfo) {
             mHardwareInfo = hardwareInfo;
@@ -735,6 +749,17 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     + " }";
         }
 
+        public boolean updateCableConnectionStatusLocked(int cableConnectionStatus) {
+            // Update connection status only if it's not default value
+            if (cableConnectionStatus != TvInputHardwareInfo.CABLE_CONNECTION_STATUS_UNKNOWN
+                    || mIsCableConnectionStatusUpdated) {
+                mIsCableConnectionStatusUpdated = true;
+                mHardwareInfo = mHardwareInfo.toBuilder()
+                    .cableConnectionStatus(cableConnectionStatus).build();
+            }
+            return mIsCableConnectionStatusUpdated;
+        }
+
         private int getConfigsLengthLocked() {
             return mConfigs == null ? 0 : mConfigs.length;
         }
@@ -742,7 +767,9 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         private int getInputStateLocked() {
             int configsLength = getConfigsLengthLocked();
             if (configsLength > 0) {
-                return INPUT_STATE_CONNECTED;
+                if (!mIsCableConnectionStatusUpdated) {
+                    return INPUT_STATE_CONNECTED;
+                }
             }
             switch (mHardwareInfo.getCableConnectionStatus()) {
                 case TvInputHardwareInfo.CABLE_CONNECTION_STATUS_CONNECTED:
@@ -950,7 +977,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             AudioPortConfig sourceConfig = mAudioSource.activeConfig();
             List<AudioPortConfig> sinkConfigs = new ArrayList<>();
             AudioPatch[] audioPatchArray = new AudioPatch[] { mAudioPatch };
-            boolean shouldRecreateAudioPatch = sourceUpdated || sinkUpdated;
+            boolean shouldRecreateAudioPatch = sourceUpdated || sinkUpdated || mAudioPatch == null;
 
             for (AudioDevicePort audioSink : mAudioSink) {
                 AudioPortConfig sinkConfig = audioSink.activeConfig();

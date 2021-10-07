@@ -59,7 +59,7 @@ public final class UserspaceRebootLogger {
      */
     public static void noteUserspaceRebootWasRequested() {
         if (!PowerManager.isRebootingUserspaceSupportedImpl()) {
-            Slog.wtf(TAG, "Userspace reboot is not supported.");
+            Slog.wtf(TAG, "noteUserspaceRebootWasRequested: Userspace reboot is not supported.");
             return;
         }
 
@@ -77,7 +77,7 @@ public final class UserspaceRebootLogger {
      */
     public static void noteUserspaceRebootSuccess() {
         if (!PowerManager.isRebootingUserspaceSupportedImpl()) {
-            Slog.wtf(TAG, "Userspace reboot is not supported.");
+            Slog.wtf(TAG, "noteUserspaceRebootSuccess: Userspace reboot is not supported.");
             return;
         }
 
@@ -88,11 +88,11 @@ public final class UserspaceRebootLogger {
     /**
      * Returns {@code true} if {@code UserspaceRebootReported} atom should be logged.
      *
-     * <p>This call should only be made on devices supporting userspace reboot.
+     * <p>On devices that do not support userspace reboot this method will always return {@code
+     * false}.
      */
     public static boolean shouldLogUserspaceRebootEvent() {
         if (!PowerManager.isRebootingUserspaceSupportedImpl()) {
-            Slog.wtf(TAG, "Userspace reboot is not supported.");
             return false;
         }
 
@@ -110,7 +110,7 @@ public final class UserspaceRebootLogger {
      */
     public static void logEventAsync(boolean userUnlocked, Executor executor) {
         if (!PowerManager.isRebootingUserspaceSupportedImpl()) {
-            Slog.wtf(TAG, "Userspace reboot is not supported.");
+            Slog.wtf(TAG, "logEventAsync: Userspace reboot is not supported.");
             return;
         }
 

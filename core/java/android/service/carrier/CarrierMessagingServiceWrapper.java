@@ -16,19 +16,25 @@
 
 package android.service.carrier;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.telephony.SmsMessage;
 
 import com.android.internal.util.Preconditions;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * Provides basic structure for platform to connect to the carrier messaging service.
@@ -42,16 +48,20 @@ import java.util.List;
  *   // Unable to bind: handle error.
  * }
  * </code>
- * <p> Upon completion {@link #disposeConnection} should be called to unbind the
+ * <p> Upon completion {@link #disconnect} should be called to unbind the
  * CarrierMessagingService.
  * @hide
  */
-public abstract class CarrierMessagingServiceWrapper {
+@SystemApi
+public final class CarrierMessagingServiceWrapper implements AutoCloseable {
     // Populated by bindToCarrierMessagingService. bindToCarrierMessagingService must complete
     // prior to calling disposeConnection so that mCarrierMessagingServiceConnection is initialized.
     private volatile CarrierMessagingServiceConnection mCarrierMessagingServiceConnection;
 
     private volatile ICarrierMessagingService mICarrierMessagingService;
+    private Runnable mOnServiceReadyCallback;
+    private Executor mServiceReadyCallbackExecutor;
+    private Context mContext;
 
     /**
      * Binds to the carrier messaging service under package {@code carrierPackageName}. This method
@@ -59,16 +69,28 @@ public abstract class CarrierMessagingServiceWrapper {
      *
      * @param context the context
      * @param carrierPackageName the carrier package name
+     * @param executor the executor to run the callback.
+     * @param onServiceReadyCallback the callback when service becomes ready.
      * @return true upon successfully binding to a carrier messaging service, false otherwise
      * @hide
      */
+    @SystemApi
     public boolean bindToCarrierMessagingService(@NonNull Context context,
-            @NonNull String carrierPackageName) {
+            @NonNull String carrierPackageName,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Runnable onServiceReadyCallback) {
         Preconditions.checkState(mCarrierMessagingServiceConnection == null);
+        Objects.requireNonNull(context);
+        Objects.requireNonNull(carrierPackageName);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(onServiceReadyCallback);
 
         Intent intent = new Intent(CarrierMessagingService.SERVICE_INTERFACE);
         intent.setPackage(carrierPackageName);
         mCarrierMessagingServiceConnection = new CarrierMessagingServiceConnection();
+        mOnServiceReadyCallback = onServiceReadyCallback;
+        mServiceReadyCallbackExecutor = executor;
+        mContext = context;
         return context.bindService(intent, mCarrierMessagingServiceConnection,
                 Context.BIND_AUTO_CREATE);
     }
@@ -76,20 +98,16 @@ public abstract class CarrierMessagingServiceWrapper {
     /**
      * Unbinds the carrier messaging service. This method should be called exactly once.
      *
-     * @param context the context
      * @hide
      */
-    public void disposeConnection(@NonNull Context context) {
+    @SystemApi
+    public void disconnect() {
         Preconditions.checkNotNull(mCarrierMessagingServiceConnection);
-        context.unbindService(mCarrierMessagingServiceConnection);
+        mContext.unbindService(mCarrierMessagingServiceConnection);
         mCarrierMessagingServiceConnection = null;
+        mOnServiceReadyCallback = null;
+        mServiceReadyCallbackExecutor = null;
     }
-
-    /**
-     * Implemented by subclasses to use the carrier messaging service once it is ready.
-     * @hide
-     */
-    public abstract void onServiceReady();
 
     /**
      * Called when connection with service is established.
@@ -98,26 +116,38 @@ public abstract class CarrierMessagingServiceWrapper {
      */
     private void onServiceReady(ICarrierMessagingService carrierMessagingService) {
         mICarrierMessagingService = carrierMessagingService;
-        onServiceReady();
+        if (mOnServiceReadyCallback != null && mServiceReadyCallbackExecutor != null) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mServiceReadyCallbackExecutor.execute(mOnServiceReadyCallback);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
     }
 
     /**
-     * Request filtering an incoming SMS message.
+     * Request the CarrierMessagingService to process an incoming SMS text or data message.
      * The service will call callback.onFilterComplete with the filtering result.
      *
      * @param pdu the PDUs of the message
-     * @param format the format of the PDUs, typically "3gpp" or "3gpp2"
+     * @param format the format of the PDUs, typically "3gpp" or "3gpp2".
+     *               See {@link SmsMessage#FORMAT_3GPP} and {@link SmsMessage#FORMAT_3GPP2} for
+     *               more details.
      * @param destPort the destination port of a data SMS. It will be -1 for text SMS
      * @param subId SMS subscription ID of the SIM
+     * @param executor the executor to run the callback.
      * @param callback the callback to notify upon completion
      * @hide
      */
-    public void filterSms(@NonNull MessagePdu pdu, @NonNull String format, int destPort,
-            int subId, @NonNull final CarrierMessagingCallbackWrapper callback) {
+    @SystemApi
+    public void receiveSms(@NonNull MessagePdu pdu, @NonNull @SmsMessage.Format String format,
+            int destPort, int subId, @NonNull @CallbackExecutor final Executor executor,
+            @NonNull final CarrierMessagingCallback callback) {
         if (mICarrierMessagingService != null) {
             try {
                 mICarrierMessagingService.filterSms(pdu, format, destPort, subId,
-                        new CarrierMessagingCallbackWrapperInternal(callback));
+                        new CarrierMessagingCallbackInternal(callback, executor));
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }
@@ -132,19 +162,23 @@ public abstract class CarrierMessagingServiceWrapper {
      * @param text the text to send
      * @param subId SMS subscription ID of the SIM
      * @param destAddress phone number of the recipient of the message
-     * @param sendSmsFlag flag for sending SMS
+     * @param sendSmsFlag Flag for sending SMS. Acceptable values are 0 and
+     *        {@link CarrierMessagingService#SEND_FLAG_REQUEST_DELIVERY_STATUS}.
+     * @param executor the executor to run the callback.
      * @param callback the callback to notify upon completion
      * @hide
      */
+    @SystemApi
     public void sendTextSms(@NonNull String text, int subId, @NonNull String destAddress,
-            int sendSmsFlag, @NonNull final CarrierMessagingCallbackWrapper callback) {
-        if (mICarrierMessagingService != null) {
-            try {
-                mICarrierMessagingService.sendTextSms(text, subId, destAddress, sendSmsFlag,
-                        new CarrierMessagingCallbackWrapperInternal(callback));
-            } catch (RemoteException e) {
-                throw new RuntimeException(e);
-            }
+            @CarrierMessagingService.SendRequest int sendSmsFlag,
+            @NonNull @CallbackExecutor final Executor executor,
+            @NonNull final CarrierMessagingCallback callback) {
+        Objects.requireNonNull(mICarrierMessagingService);
+        try {
+            mICarrierMessagingService.sendTextSms(text, subId, destAddress, sendSmsFlag,
+                    new CarrierMessagingCallbackInternal(callback, executor));
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -157,20 +191,24 @@ public abstract class CarrierMessagingServiceWrapper {
      * @param subId SMS subscription ID of the SIM
      * @param destAddress phone number of the recipient of the message
      * @param destPort port number of the recipient of the message
-     * @param sendSmsFlag flag for sending SMS
+     * @param sendSmsFlag Flag for sending SMS. Acceptable values are 0 and
+     *        {@link CarrierMessagingService#SEND_FLAG_REQUEST_DELIVERY_STATUS}.
+     * @param executor the executor to run the callback.
      * @param callback the callback to notify upon completion
      * @hide
      */
+    @SystemApi
     public void sendDataSms(@NonNull byte[] data, int subId, @NonNull String destAddress,
-            int destPort, int sendSmsFlag,
-            @NonNull final CarrierMessagingCallbackWrapper callback) {
-        if (mICarrierMessagingService != null) {
-            try {
-                mICarrierMessagingService.sendDataSms(data, subId, destAddress, destPort,
-                        sendSmsFlag, new CarrierMessagingCallbackWrapperInternal(callback));
-            } catch (RemoteException e) {
-                throw new RuntimeException(e);
-            }
+            int destPort, @CarrierMessagingService.SendRequest int sendSmsFlag,
+            @NonNull @CallbackExecutor final Executor executor,
+            @NonNull final CarrierMessagingCallback callback) {
+        Objects.requireNonNull(mICarrierMessagingService);
+        try {
+            mICarrierMessagingService.sendDataSms(data, subId, destAddress, destPort,
+                    sendSmsFlag, new CarrierMessagingCallbackInternal(
+                            callback, executor));
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -182,20 +220,24 @@ public abstract class CarrierMessagingServiceWrapper {
      * @param parts the parts of the multi-part text SMS to send
      * @param subId SMS subscription ID of the SIM
      * @param destAddress phone number of the recipient of the message
-     * @param sendSmsFlag flag for sending SMS
+     * @param sendSmsFlag Flag for sending SMS. Acceptable values are 0 and
+     *        {@link CarrierMessagingService#SEND_FLAG_REQUEST_DELIVERY_STATUS}.
+     * @param executor the executor to run the callback.
      * @param callback the callback to notify upon completion
      * @hide
      */
+    @SystemApi
     public void sendMultipartTextSms(@NonNull List<String> parts, int subId,
-            @NonNull String destAddress, int sendSmsFlag,
-            @NonNull final CarrierMessagingCallbackWrapper callback) {
-        if (mICarrierMessagingService != null) {
-            try {
-                mICarrierMessagingService.sendMultipartTextSms(parts, subId, destAddress,
-                        sendSmsFlag, new CarrierMessagingCallbackWrapperInternal(callback));
-            } catch (RemoteException e) {
-                throw new RuntimeException(e);
-            }
+            @NonNull String destAddress,
+            @CarrierMessagingService.SendRequest int sendSmsFlag,
+            @NonNull @CallbackExecutor final Executor executor,
+            @NonNull final CarrierMessagingCallback callback) {
+        Objects.requireNonNull(mICarrierMessagingService);
+        try {
+            mICarrierMessagingService.sendMultipartTextSms(parts, subId, destAddress,
+                    sendSmsFlag, new CarrierMessagingCallbackInternal(callback, executor));
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -208,18 +250,20 @@ public abstract class CarrierMessagingServiceWrapper {
      * @param subId SMS subscription ID of the SIM
      * @param location the optional URI to send this MMS PDU. If this is {code null},
      *        the PDU should be sent to the default MMSC URL.
+     * @param executor the executor to run the callback.
      * @param callback the callback to notify upon completion
      * @hide
      */
+    @SystemApi
     public void sendMms(@NonNull Uri pduUri, int subId, @NonNull Uri location,
-            @NonNull final CarrierMessagingCallbackWrapper callback) {
-        if (mICarrierMessagingService != null) {
-            try {
-                mICarrierMessagingService.sendMms(pduUri, subId, location,
-                        new CarrierMessagingCallbackWrapperInternal(callback));
-            } catch (RemoteException e) {
-                throw new RuntimeException(e);
-            }
+            @NonNull @CallbackExecutor final Executor executor,
+            @NonNull final CarrierMessagingCallback callback) {
+        Objects.requireNonNull(mICarrierMessagingService);
+        try {
+            mICarrierMessagingService.sendMms(pduUri, subId, location,
+                    new CarrierMessagingCallbackInternal(callback, executor));
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -231,19 +275,27 @@ public abstract class CarrierMessagingServiceWrapper {
      * @param pduUri the content provider URI of the PDU to be downloaded.
      * @param subId SMS subscription ID of the SIM
      * @param location the URI of the message to be downloaded.
+     * @param executor the executor to run the callback.
      * @param callback the callback to notify upon completion
      * @hide
      */
+    @SystemApi
     public void downloadMms(@NonNull Uri pduUri, int subId, @NonNull Uri location,
-            @NonNull final CarrierMessagingCallbackWrapper callback) {
-        if (mICarrierMessagingService != null) {
-            try {
-                mICarrierMessagingService.downloadMms(pduUri, subId, location,
-                        new CarrierMessagingCallbackWrapperInternal(callback));
-            } catch (RemoteException e) {
-                throw new RuntimeException(e);
-            }
+            @NonNull @CallbackExecutor final Executor executor,
+            @NonNull final CarrierMessagingCallback callback) {
+        Objects.requireNonNull(mICarrierMessagingService);
+        try {
+            mICarrierMessagingService.downloadMms(pduUri, subId, location,
+                    new CarrierMessagingCallbackInternal(callback, executor));
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
         }
+    }
+
+    /** @hide */
+    @Override
+    public void close() {
+        disconnect();
     }
 
     /**
@@ -265,19 +317,19 @@ public abstract class CarrierMessagingServiceWrapper {
      * {@link CarrierMessagingServiceWrapper}.
      * @hide
      */
-    public abstract static class CarrierMessagingCallbackWrapper {
-
+    @SystemApi
+    public interface CarrierMessagingCallback {
         /**
-         * Response callback for {@link CarrierMessagingServiceWrapper#filterSms}.
+         * Response callback for {@link CarrierMessagingServiceWrapper#receiveSms}.
          * @param result a bitmask integer to indicate how the incoming text SMS should be handled
          *               by the platform. Bits set can be
          *               {@link CarrierMessagingService#RECEIVE_OPTIONS_DROP} and
          *               {@link CarrierMessagingService#
          *               RECEIVE_OPTIONS_SKIP_NOTIFY_WHEN_CREDENTIAL_PROTECTED_STORAGE_UNAVAILABLE}.
-         *               {@see CarrierMessagingService#onReceiveTextSms}.
-         * @hide
+         *               {@link CarrierMessagingService#onReceiveTextSms}.
          */
-        public void onFilterComplete(int result) {
+        default void onReceiveSmsComplete(
+                @CarrierMessagingService.FilterCompleteResult int result) {
 
         }
 
@@ -289,10 +341,9 @@ public abstract class CarrierMessagingServiceWrapper {
          *               and {@link CarrierMessagingService#SEND_STATUS_ERROR}.
          * @param messageRef message reference of the just-sent message. This field is applicable
          *                   only if result is {@link CarrierMessagingService#SEND_STATUS_OK}.
-         * @hide
          */
-        public void onSendSmsComplete(int result, int messageRef) {
-
+        default void onSendSmsComplete(@CarrierMessagingService.SendResult
+                int result, int messageRef) {
         }
 
         /**
@@ -303,9 +354,9 @@ public abstract class CarrierMessagingServiceWrapper {
          * @param messageRefs an array of message references, one for each part of the
          *                    multipart SMS. This field is applicable only if result is
          *                    {@link CarrierMessagingService#SEND_STATUS_OK}.
-         * @hide
          */
-        public void onSendMultipartSmsComplete(int result, @Nullable int[] messageRefs) {
+        default void onSendMultipartSmsComplete(@CarrierMessagingService.SendResult
+                int result, @Nullable int[] messageRefs) {
 
         }
 
@@ -317,56 +368,62 @@ public abstract class CarrierMessagingServiceWrapper {
          * @param sendConfPdu a possibly {code null} SendConf PDU, which confirms that the message
          *                    was sent. sendConfPdu is ignored if the {@code result} is not
          *                    {@link CarrierMessagingService#SEND_STATUS_OK}.
-         * @hide
          */
-        public void onSendMmsComplete(int result, @Nullable byte[] sendConfPdu) {
+        default void onSendMmsComplete(@CarrierMessagingService.SendResult
+                int result, @Nullable byte[] sendConfPdu) {
 
         }
 
         /**
          * Response callback for {@link CarrierMessagingServiceWrapper#downloadMms}.
-         * @param result download status, one of {@link CarrierMessagingService#SEND_STATUS_OK},
-         *               {@link CarrierMessagingService#SEND_STATUS_RETRY_ON_CARRIER_NETWORK},
-         *               and {@link CarrierMessagingService#SEND_STATUS_ERROR}.
-         * @hide
+         * @param result download status, one of {@link CarrierMessagingService#DOWNLOAD_STATUS_OK},
+         *               {@link CarrierMessagingService#DOWNLOAD_STATUS_RETRY_ON_CARRIER_NETWORK},
+         *               and {@link CarrierMessagingService#DOWNLOAD_STATUS_ERROR}.
          */
-        public void onDownloadMmsComplete(int result) {
+        default void onDownloadMmsComplete(@CarrierMessagingService.DownloadResult
+                int result) {
 
         }
     }
 
-    private final class CarrierMessagingCallbackWrapperInternal
+    private final class CarrierMessagingCallbackInternal
             extends ICarrierMessagingCallback.Stub {
-        CarrierMessagingCallbackWrapper mCarrierMessagingCallbackWrapper;
+        final CarrierMessagingCallback mCarrierMessagingCallback;
+        final Executor mExecutor;
 
-        CarrierMessagingCallbackWrapperInternal(CarrierMessagingCallbackWrapper callback) {
-            mCarrierMessagingCallbackWrapper = callback;
+        CarrierMessagingCallbackInternal(CarrierMessagingCallback callback,
+                final Executor executor) {
+            mCarrierMessagingCallback = callback;
+            mExecutor = executor;
         }
 
         @Override
         public void onFilterComplete(int result) throws RemoteException {
-            mCarrierMessagingCallbackWrapper.onFilterComplete(result);
+            mExecutor.execute(() -> mCarrierMessagingCallback.onReceiveSmsComplete(result));
         }
 
         @Override
         public void onSendSmsComplete(int result, int messageRef) throws RemoteException {
-            mCarrierMessagingCallbackWrapper.onSendSmsComplete(result, messageRef);
+            mExecutor.execute(() -> mCarrierMessagingCallback.onSendSmsComplete(
+                    result, messageRef));
         }
 
         @Override
         public void onSendMultipartSmsComplete(int result, int[] messageRefs)
                 throws RemoteException {
-            mCarrierMessagingCallbackWrapper.onSendMultipartSmsComplete(result, messageRefs);
+            mExecutor.execute(() -> mCarrierMessagingCallback.onSendMultipartSmsComplete(
+                    result, messageRefs));
         }
 
         @Override
         public void onSendMmsComplete(int result, byte[] sendConfPdu) throws RemoteException {
-            mCarrierMessagingCallbackWrapper.onSendMmsComplete(result, sendConfPdu);
+            mExecutor.execute(() -> mCarrierMessagingCallback.onSendMmsComplete(
+                    result, sendConfPdu));
         }
 
         @Override
         public void onDownloadMmsComplete(int result) throws RemoteException {
-            mCarrierMessagingCallbackWrapper.onDownloadMmsComplete(result);
+            mExecutor.execute(() -> mCarrierMessagingCallback.onDownloadMmsComplete(result));
         }
     }
 }

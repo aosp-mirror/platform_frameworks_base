@@ -37,6 +37,9 @@
     <string name="toast_dynsystem_discarded">Discarded dynamic system</string>
     <!-- Toast when we fail to launch into Dynamic System [CHAR LIMIT=128] -->
     <string name="toast_failed_to_reboot_to_dynsystem">Can\u2019t restart or load dynamic system</string>
+    <!-- Toast when we fail to disable Dynamic System [CHAR LIMIT=128] -->
+    <string name="toast_failed_to_disable_dynsystem">Failed to disable dynamic system</string>
+
 
     <!-- URL of Dynamic System Key Revocation List [DO NOT TRANSLATE] -->
     <string name="key_revocation_list_url" translatable="false">https://dl.google.com/developers/android/gsi/gsi-keyblacklist.json</string>

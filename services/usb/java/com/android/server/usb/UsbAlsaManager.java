@@ -64,7 +64,7 @@ public final class UsbAlsaManager {
     private UsbAlsaDevice mSelectedDevice;
 
     //
-    // Device Blacklist
+    // Device Denylist
     //
     // This exists due to problems with Sony game controllers which present as an audio device
     // even if no headset is connected and have no way to set the volume on the unit.
@@ -73,31 +73,31 @@ public final class UsbAlsaManager {
     private static final int USB_PRODUCTID_PS4CONTROLLER_ZCT1 = 0x05C4;
     private static final int USB_PRODUCTID_PS4CONTROLLER_ZCT2 = 0x09CC;
 
-    private static final int USB_BLACKLIST_OUTPUT = 0x0001;
-    private static final int USB_BLACKLIST_INPUT  = 0x0002;
+    private static final int USB_DENYLIST_OUTPUT = 0x0001;
+    private static final int USB_DENYLIST_INPUT  = 0x0002;
 
-    private static class BlackListEntry {
+    private static class DenyListEntry {
         final int mVendorId;
         final int mProductId;
         final int mFlags;
 
-        BlackListEntry(int vendorId, int productId, int flags) {
+        DenyListEntry(int vendorId, int productId, int flags) {
             mVendorId = vendorId;
             mProductId = productId;
             mFlags = flags;
         }
     }
 
-    static final List<BlackListEntry> sDeviceBlacklist = Arrays.asList(
-            new BlackListEntry(USB_VENDORID_SONY,
+    static final List<DenyListEntry> sDeviceDenylist = Arrays.asList(
+            new DenyListEntry(USB_VENDORID_SONY,
                     USB_PRODUCTID_PS4CONTROLLER_ZCT1,
-                    USB_BLACKLIST_OUTPUT),
-            new BlackListEntry(USB_VENDORID_SONY,
+                    USB_DENYLIST_OUTPUT),
+            new DenyListEntry(USB_VENDORID_SONY,
                     USB_PRODUCTID_PS4CONTROLLER_ZCT2,
-                    USB_BLACKLIST_OUTPUT));
+                    USB_DENYLIST_OUTPUT));
 
-    private static boolean isDeviceBlacklisted(int vendorId, int productId, int flags) {
-        for (BlackListEntry entry : sDeviceBlacklist) {
+    private static boolean isDeviceDenylisted(int vendorId, int productId, int flags) {
+        for (DenyListEntry entry : sDeviceDenylist) {
             if (entry.mVendorId == vendorId && entry.mProductId == productId) {
                 // see if the type flag is set
                 return (entry.mFlags & flags) != 0;
@@ -226,11 +226,11 @@ public final class UsbAlsaManager {
 
         // Add it to the devices list
         boolean hasInput = parser.hasInput()
-                && !isDeviceBlacklisted(usbDevice.getVendorId(), usbDevice.getProductId(),
-                        USB_BLACKLIST_INPUT);
+                && !isDeviceDenylisted(usbDevice.getVendorId(), usbDevice.getProductId(),
+                        USB_DENYLIST_INPUT);
         boolean hasOutput = parser.hasOutput()
-                && !isDeviceBlacklisted(usbDevice.getVendorId(), usbDevice.getProductId(),
-                        USB_BLACKLIST_OUTPUT);
+                && !isDeviceDenylisted(usbDevice.getVendorId(), usbDevice.getProductId(),
+                        USB_DENYLIST_OUTPUT);
         if (DEBUG) {
             Slog.d(TAG, "hasInput: " + hasInput + " hasOutput:" + hasOutput);
         }

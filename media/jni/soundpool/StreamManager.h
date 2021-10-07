@@ -24,6 +24,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <string>
 #include <unordered_set>
 #include <vector>
 
@@ -386,7 +387,8 @@ class StreamManager : public StreamMap {
 public:
     // Note: the SoundPool pointer is only used for stream initialization.
     // It is not stored in StreamManager.
-    StreamManager(int32_t streams, size_t threads, const audio_attributes_t* attributes);
+    StreamManager(int32_t streams, size_t threads, const audio_attributes_t* attributes,
+            std::string opPackageName);
     ~StreamManager();
 
     // Returns positive streamID on success, 0 on failure.  This is locked.
@@ -399,6 +401,8 @@ public:
     // Called from soundpool::Stream
 
     const audio_attributes_t* getAttributes() const { return &mAttributes; }
+
+    const std::string& getOpPackageName() const { return mOpPackageName; }
 
     // Moves the stream to the restart queue (called upon BUFFER_END of the static track)
     // this is locked internally.
@@ -433,6 +437,14 @@ private:
     void sanityCheckQueue_l() const REQUIRES(mStreamManagerLock);
 
     const audio_attributes_t mAttributes;
+    const std::string mOpPackageName;
+
+   // For legacy compatibility, we lock the stream manager on stop when
+   // there is only one stream.  This allows a play to be called immediately
+   // after stopping, otherwise it is possible that the play might be discarded
+   // (returns 0) because that stream may be in the worker thread call to stop.
+    const bool mLockStreamManagerStop;
+
     std::unique_ptr<ThreadPool> mThreadPool;                  // locked internally
 
     // mStreamManagerLock is used to lock access for transitions between the

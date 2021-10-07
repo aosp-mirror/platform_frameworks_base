@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-#ifndef IDMAP2_INCLUDE_IDMAP2_POLICIES_H_
-#define IDMAP2_INCLUDE_IDMAP2_POLICIES_H_
+#ifndef IDMAP2_LIBIDMAP2_POLICIES_INCLUDE_IDMAP2_POLICIES_H_
+#define IDMAP2_LIBIDMAP2_POLICIES_INCLUDE_IDMAP2_POLICIES_H_
 
 #include <array>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "android-base/stringprintf.h"
@@ -37,16 +38,18 @@ constexpr const char* kPolicyOdm = "odm";
 constexpr const char* kPolicyOem = "oem";
 constexpr const char* kPolicyProduct = "product";
 constexpr const char* kPolicyPublic = "public";
+constexpr const char* kPolicyConfigSignature = "config_signature";
 constexpr const char* kPolicySignature = "signature";
 constexpr const char* kPolicySystem = "system";
 constexpr const char* kPolicyVendor = "vendor";
 
-inline static const std::array<std::pair<StringPiece, PolicyFlags>, 8> kPolicyStringToFlag = {
+inline static const std::array<std::pair<StringPiece, PolicyFlags>, 9> kPolicyStringToFlag = {
     std::pair{kPolicyActor, PolicyFlags::ACTOR_SIGNATURE},
     {kPolicyOdm, PolicyFlags::ODM_PARTITION},
     {kPolicyOem, PolicyFlags::OEM_PARTITION},
     {kPolicyProduct, PolicyFlags::PRODUCT_PARTITION},
     {kPolicyPublic, PolicyFlags::PUBLIC},
+    {kPolicyConfigSignature, PolicyFlags::CONFIG_SIGNATURE},
     {kPolicySignature, PolicyFlags::SIGNATURE},
     {kPolicySystem, PolicyFlags::SYSTEM_PARTITION},
     {kPolicyVendor, PolicyFlags::VENDOR_PARTITION},
@@ -76,4 +79,4 @@ inline static std::string PoliciesToDebugString(PolicyBitmask policies) {
 
 }  // namespace android::idmap2::policy
 
-#endif  // IDMAP2_INCLUDE_IDMAP2_POLICIES_H_
+#endif  // IDMAP2_LIBIDMAP2_POLICIES_INCLUDE_IDMAP2_POLICIES_H_

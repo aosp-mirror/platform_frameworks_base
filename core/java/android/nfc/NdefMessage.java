@@ -16,13 +16,13 @@
 
 package android.nfc;
 
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.proto.ProtoOutputStream;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-
 
 /**
  * Represents an immutable NDEF Message.
@@ -239,7 +239,7 @@ public final class NdefMessage implements Parcelable {
      * identical NDEF Records.
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;

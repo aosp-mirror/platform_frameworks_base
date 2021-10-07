@@ -51,7 +51,7 @@ public final class ViewTreeObserver {
 
     // Non-recursive listeners use CopyOnWriteArray
     // Any listener invoked from ViewRootImpl.performTraversals() should not be recursive
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private CopyOnWriteArray<OnGlobalLayoutListener> mOnGlobalLayoutListeners;
     @UnsupportedAppUsage
     private CopyOnWriteArray<OnComputeInternalInsetsListener> mOnComputeInternalInsetsListeners;
@@ -242,7 +242,7 @@ public final class ViewTreeObserver {
          * Only used when {@link #setTouchableInsets(int)} is called with
          * the option {@link #TOUCHABLE_INSETS_REGION}.
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public final Region touchableRegion = new Region();
 
         /**
@@ -267,7 +267,7 @@ public final class ViewTreeObserver {
          * Option for {@link #setTouchableInsets(int)}: the area inside of
          * the provided touchable region in {@link #touchableRegion} can be touched.
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static final int TOUCHABLE_INSETS_REGION = 3;
 
         /**
@@ -307,7 +307,7 @@ public final class ViewTreeObserver {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 

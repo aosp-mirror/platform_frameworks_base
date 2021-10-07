@@ -33,7 +33,7 @@ interface IOptionsService
      * @return StatusCode, status of the request placed.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     StatusCode getVersion(int optionsServiceHandle);
 
     /**
@@ -45,7 +45,7 @@ interface IOptionsService
      * The service will fill UceLong.mUceLong with optionsServiceListenerHdl
      * @return StatusCode, status of the request placed.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     StatusCode addListener(int optionsServiceHandle, IOptionsListener optionsListener,
                            inout UceLong optionsServiceListenerHdl);
 
@@ -56,7 +56,7 @@ interface IOptionsService
      * @param optionsServiceListenerHdl provided in createOptionsService() or Addlistener().
      * @return StatusCode, status of the request placed.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     StatusCode removeListener(int optionsServiceHandle, in UceLong optionsServiceListenerHdl);
 
     /**
@@ -69,7 +69,7 @@ interface IOptionsService
      *                  with original request.
      * @return StatusCode, status of the request placed.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     StatusCode setMyInfo(int optionsServiceHandle , in CapInfo capInfo, int reqUserData);
 
 
@@ -82,7 +82,7 @@ interface IOptionsService
      *                  with original request.
      * @return StatusCode, status of the request placed.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     StatusCode getMyInfo(int optionsServiceHandle , int reqUserdata);
 
     /**
@@ -95,7 +95,7 @@ interface IOptionsService
      *                  with original request.
      * @return StatusCode, status of the request placed.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     StatusCode getContactCap(int optionsServiceHandle , String remoteURI, int reqUserData);
 
 
@@ -109,7 +109,7 @@ interface IOptionsService
      *                  with original request.
      * @return StatusCode, status of the request placed.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     StatusCode getContactListCap(int optionsServiceHandle, in String[] remoteURIList,
                                  int reqUserData);
 
@@ -126,7 +126,7 @@ interface IOptionsService
      * @param bContactInBL, true if the contact is blacklisted, else false.
      * @return StatusCode, status of the request placed.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     StatusCode responseIncomingOptions(int optionsServiceHandle,  int tId, int sipResponseCode,
                                        String reasonPhrase, in OptionsCapInfo capInfo,
                                        in boolean bContactInBL);

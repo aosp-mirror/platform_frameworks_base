@@ -1,2 +1,6 @@
+# Bug component: 345010
+
+include /services/core/java/com/android/server/display/OWNERS
+
 michaelwr@google.com
 santoscordon@google.com

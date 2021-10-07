@@ -72,6 +72,14 @@ public interface ParseInput {
         public static final long RESOURCES_ARSC_COMPRESSED = 132742131;
 
         /**
+         * Missing `android:exported` flag. When an intent filter is defined, an explicit value
+         * for the android:exported flag is required.
+         */
+        @ChangeId
+        @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.R)
+        public static final long MISSING_EXPORTED_FLAG = 150232615;
+
+        /**
          * TODO(chiuwinson): This is required because PackageManager#getPackageArchiveInfo
          *   cannot read the targetSdk info from the changeId because it requires the
          *   READ_COMPAT_CHANGE_CONFIG which cannot be obtained automatically without entering the
@@ -85,6 +93,10 @@ public interface ParseInput {
                     || changeId == EMPTY_INTENT_ACTION_CATEGORY
                     || changeId == RESOURCES_ARSC_COMPRESSED) {
                 return Build.VERSION_CODES.Q;
+            }
+
+            if (changeId == MISSING_EXPORTED_FLAG) {
+                return Build.VERSION_CODES.R;
             }
 
             return -1;

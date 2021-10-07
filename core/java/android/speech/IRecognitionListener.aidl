@@ -83,6 +83,6 @@ oneway interface IRecognitionListener {
      * @param eventType the type of the occurred event
      * @param params a Bundle containing the passed parameters
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void onEvent(in int eventType, in Bundle params);
 }

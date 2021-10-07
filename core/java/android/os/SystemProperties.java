@@ -60,7 +60,7 @@ public class SystemProperties {
      * uses reflection to read this whenever text is selected (http://b/36095274).
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 172649311)
     public static final int PROP_NAME_MAX = Integer.MAX_VALUE;
 
     /** @hide */
@@ -256,7 +256,7 @@ public class SystemProperties {
      * @param callback The {@link Runnable} that should be removed.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static void removeChangeCallback(@NonNull Runnable callback) {
         synchronized (sChangeCallbacks) {
             if (sChangeCallbacks.contains(callback)) {

@@ -36,7 +36,7 @@ namespace android {
 // of the chunk.
 class Chunk {
  public:
-  explicit Chunk(const ResChunk_header* chunk) : device_chunk_(chunk) {}
+  explicit Chunk(incfs::verified_map_ptr<ResChunk_header> chunk) : device_chunk_(chunk) {}
 
   // Returns the type of the chunk. Caller need not worry about endianness.
   inline int type() const { return dtohs(device_chunk_->type); }
@@ -49,21 +49,18 @@ class Chunk {
   inline size_t header_size() const { return dtohs(device_chunk_->headerSize); }
 
   template <typename T, size_t MinSize = sizeof(T)>
-  inline const T* header() const {
-    if (header_size() >= MinSize) {
-      return reinterpret_cast<const T*>(device_chunk_);
-    }
-    return nullptr;
+  inline incfs::map_ptr<T> header() const {
+    return (header_size() >= MinSize) ? device_chunk_.convert<T>() : nullptr;
   }
 
-  inline const void* data_ptr() const {
-    return reinterpret_cast<const uint8_t*>(device_chunk_) + header_size();
+  inline incfs::map_ptr<void> data_ptr() const {
+    return device_chunk_.offset(header_size());
   }
 
   inline size_t data_size() const { return size() - header_size(); }
 
  private:
-  const ResChunk_header* device_chunk_;
+  const incfs::verified_map_ptr<ResChunk_header> device_chunk_;
 };
 
 // Provides a Java style iterator over an array of ResChunk_header's.
@@ -84,11 +81,11 @@ class Chunk {
 //
 class ChunkIterator {
  public:
-  ChunkIterator(const void* data, size_t len)
-      : next_chunk_(reinterpret_cast<const ResChunk_header*>(data)),
+  ChunkIterator(incfs::map_ptr<void> data, size_t len)
+      : next_chunk_(data.convert<ResChunk_header>()),
         len_(len),
         last_error_(nullptr) {
-    CHECK(next_chunk_ != nullptr) << "data can't be nullptr";
+    CHECK((bool) next_chunk_) << "data can't be null";
     if (len_ != 0) {
       VerifyNextChunk();
     }
@@ -113,7 +110,7 @@ class ChunkIterator {
   // Returns false if there was an error. For legacy purposes.
   bool VerifyNextChunkNonFatal();
 
-  const ResChunk_header* next_chunk_;
+  incfs::map_ptr<ResChunk_header> next_chunk_;
   size_t len_;
   const char* last_error_;
   bool last_error_was_fatal_ = true;

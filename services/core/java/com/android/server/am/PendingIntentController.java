@@ -36,6 +36,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerWhitelistManager;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -300,14 +301,26 @@ public class PendingIntentController {
         }
     }
 
-    void setPendingIntentWhitelistDuration(IIntentSender target, IBinder whitelistToken,
-            long duration) {
+    void setPendingIntentAllowlistDuration(IIntentSender target, IBinder allowlistToken,
+            long duration, int type, @PowerWhitelistManager.ReasonCode int reasonCode,
+            @Nullable String reason) {
         if (!(target instanceof PendingIntentRecord)) {
             Slog.w(TAG, "markAsSentFromNotification(): not a PendingIntentRecord: " + target);
             return;
         }
         synchronized (mLock) {
-            ((PendingIntentRecord) target).setWhitelistDurationLocked(whitelistToken, duration);
+            ((PendingIntentRecord) target).setAllowlistDurationLocked(allowlistToken, duration,
+                    type, reasonCode, reason);
+        }
+    }
+
+    int getPendingIntentFlags(IIntentSender target) {
+        if (!(target instanceof PendingIntentRecord)) {
+            Slog.w(TAG, "markAsSentFromNotification(): not a PendingIntentRecord: " + target);
+            return 0;
+        }
+        synchronized (mLock) {
+            return ((PendingIntentRecord) target).key.flags;
         }
     }
 

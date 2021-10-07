@@ -17,17 +17,14 @@
         package="com.android.frameworks.coretests.install_decl_perm">
 
     <permission android:name="com.android.frameworks.coretests.NORMAL"
-        android:permissionGroup="android.permission-group.COST_MONEY"
         android:protectionLevel="normal"
         android:label="test normal perm" />
         
     <permission android:name="com.android.frameworks.coretests.DANGEROUS"
-        android:permissionGroup="android.permission-group.COST_MONEY"
         android:protectionLevel="dangerous"
         android:label="test dangerous perm" />
         
     <permission android:name="com.android.frameworks.coretests.SIGNATURE"
-        android:permissionGroup="android.permission-group.COST_MONEY"
         android:protectionLevel="signature"
         android:label="test signature perm" />
         

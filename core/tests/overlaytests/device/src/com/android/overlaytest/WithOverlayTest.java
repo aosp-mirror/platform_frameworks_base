@@ -16,13 +16,13 @@
 
 package com.android.overlaytest;
 
+import android.content.om.OverlayIdentifier;
+
 import androidx.test.filters.MediumTest;
 
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-
-import java.util.concurrent.Executor;
 
 @RunWith(JUnit4.class)
 @MediumTest
@@ -32,10 +32,9 @@ public class WithOverlayTest extends OverlayBaseTest {
     }
 
     @BeforeClass
-    public static void enableOverlay() throws Exception {
-        Executor executor = (cmd) -> new Thread(cmd).start();
-        LocalOverlayManager.setEnabledAndWait(executor, APP_OVERLAY_ONE_PKG, true);
-        LocalOverlayManager.setEnabledAndWait(executor, APP_OVERLAY_TWO_PKG, false);
-        LocalOverlayManager.setEnabledAndWait(executor, FRAMEWORK_OVERLAY_PKG, true);
+    public static void enableOverlays() throws Exception {
+        LocalOverlayManager.toggleOverlaysAndWait(
+                new OverlayIdentifier[]{FRAMEWORK_OVERLAY_PKG, APP_OVERLAY_ONE_PKG},
+                new OverlayIdentifier[]{APP_OVERLAY_TWO_PKG});
     }
 }

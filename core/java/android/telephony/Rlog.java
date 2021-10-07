@@ -53,7 +53,7 @@ public final class Rlog {
         return Log.println_native(Log.LOG_ID_RADIO, Log.DEBUG, tag, msg);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static int d(String tag, String msg, Throwable tr) {
         return Log.println_native(Log.LOG_ID_RADIO, Log.DEBUG, tag,
                 msg + '\n' + Log.getStackTraceString(tr));

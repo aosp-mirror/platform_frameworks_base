@@ -23,7 +23,12 @@ package android.renderscript;
  * The input allocation should be supplied in a supported YUV format
  * as a YUV element Allocation. The output is RGBA; the alpha channel
  * will be set to 255.
+ *
+ * @deprecated Renderscript has been deprecated in API level 31. Please refer to the <a
+ * href="https://developer.android.com/guide/topics/renderscript/migration-guide">migration
+ * guide</a> for the proposed alternatives.
  */
+@Deprecated
 public final class ScriptIntrinsicYuvToRGB extends ScriptIntrinsic {
     private Allocation mInput;
 

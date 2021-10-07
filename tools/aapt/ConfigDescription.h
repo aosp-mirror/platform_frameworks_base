@@ -34,8 +34,8 @@ struct ConfigDescription : public android::ResTable_config {
         size = sizeof(android::ResTable_config);
     }
 
-    ConfigDescription(const ConfigDescription&o) {
-        *static_cast<android::ResTable_config*>(this) = o;
+    ConfigDescription(const ConfigDescription&o)
+        : android::ResTable_config(o) {
     }
 
     ConfigDescription& operator=(const android::ResTable_config& o) {

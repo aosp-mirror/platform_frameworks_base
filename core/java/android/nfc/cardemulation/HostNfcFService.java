@@ -256,7 +256,7 @@ public abstract class HostNfcFService extends Service {
      * from a remote device. A response packet can be provided directly
      * by returning a byte-array in this method. Note that in general
      * response packets must be sent as quickly as possible, given the fact
-     * that the user is likely holding his device over an NFC reader
+     * that the user is likely holding their device over an NFC reader
      * when this method is called.
      *
      * <p class="note">This method is running on the main thread of your application.

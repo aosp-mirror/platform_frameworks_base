@@ -16,64 +16,86 @@
 
 package com.android.systemui.toast;
 
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.annotation.MainThread;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.INotificationManager;
 import android.app.ITransientNotificationCallback;
 import android.content.Context;
-import android.content.res.Resources;
+import android.content.res.Configuration;
 import android.os.IBinder;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.Log;
-import android.view.View;
+import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
 import android.widget.ToastPresenter;
 
-import com.android.internal.R;
-import com.android.internal.annotations.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
+
 import com.android.systemui.SystemUI;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.CommandQueue;
 
 import java.util.Objects;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Controls display of text toasts.
  */
-@Singleton
+@SysUISingleton
 public class ToastUI extends SystemUI implements CommandQueue.Callbacks {
+    // values from NotificationManagerService#LONG_DELAY and NotificationManagerService#SHORT_DELAY
+    private static final int TOAST_LONG_TIME = 3500; // 3.5 seconds
+    private static final int TOAST_SHORT_TIME = 2000; // 2 seconds
+
     private static final String TAG = "ToastUI";
 
     private final CommandQueue mCommandQueue;
     private final INotificationManager mNotificationManager;
-    private final IAccessibilityManager mAccessibilityManager;
-    private final int mGravity;
-    private final int mY;
+    private final IAccessibilityManager mIAccessibilityManager;
+    private final AccessibilityManager mAccessibilityManager;
+    private final ToastFactory mToastFactory;
+    private final ToastLogger mToastLogger;
     @Nullable private ToastPresenter mPresenter;
     @Nullable private ITransientNotificationCallback mCallback;
+    private ToastOutAnimatorListener mToastOutAnimatorListener;
+
+    @VisibleForTesting SystemUIToast mToast;
+    private int mOrientation = ORIENTATION_PORTRAIT;
 
     @Inject
-    public ToastUI(Context context, CommandQueue commandQueue) {
+    public ToastUI(
+            Context context,
+            CommandQueue commandQueue,
+            ToastFactory toastFactory,
+            ToastLogger toastLogger) {
         this(context, commandQueue,
                 INotificationManager.Stub.asInterface(
                         ServiceManager.getService(Context.NOTIFICATION_SERVICE)),
                 IAccessibilityManager.Stub.asInterface(
-                        ServiceManager.getService(Context.ACCESSIBILITY_SERVICE)));
+                        ServiceManager.getService(Context.ACCESSIBILITY_SERVICE)),
+                toastFactory,
+                toastLogger);
     }
 
     @VisibleForTesting
     ToastUI(Context context, CommandQueue commandQueue, INotificationManager notificationManager,
-            @Nullable IAccessibilityManager accessibilityManager) {
+            @Nullable IAccessibilityManager accessibilityManager,
+            ToastFactory toastFactory, ToastLogger toastLogger
+    ) {
         super(context);
         mCommandQueue = commandQueue;
         mNotificationManager = notificationManager;
-        mAccessibilityManager = accessibilityManager;
-        Resources resources = mContext.getResources();
-        mGravity = resources.getInteger(R.integer.config_toastDefaultGravity);
-        mY = resources.getDimensionPixelSize(R.dimen.toast_y_offset);
+        mIAccessibilityManager = accessibilityManager;
+        mToastFactory = toastFactory;
+        mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
+        mToastLogger = toastLogger;
     }
 
     @Override
@@ -85,15 +107,38 @@ public class ToastUI extends SystemUI implements CommandQueue.Callbacks {
     @MainThread
     public void showToast(int uid, String packageName, IBinder token, CharSequence text,
             IBinder windowToken, int duration, @Nullable ITransientNotificationCallback callback) {
-        if (mPresenter != null) {
-            hideCurrentToast();
+        Runnable showToastRunnable = () -> {
+            UserHandle userHandle = UserHandle.getUserHandleForUid(uid);
+            Context context = mContext.createContextAsUser(userHandle, 0);
+            mToast = mToastFactory.createToast(mContext /* sysuiContext */, text, packageName,
+                    userHandle.getIdentifier(), mOrientation);
+
+            if (mToast.getInAnimation() != null) {
+                mToast.getInAnimation().start();
+            }
+
+            mCallback = callback;
+            mPresenter = new ToastPresenter(context, mIAccessibilityManager,
+                    mNotificationManager, packageName);
+            // Set as trusted overlay so touches can pass through toasts
+            mPresenter.getLayoutParams().setTrustedOverlay();
+            mToastLogger.logOnShowToast(uid, packageName, text.toString(), token.toString());
+            mPresenter.show(mToast.getView(), token, windowToken, duration, mToast.getGravity(),
+                    mToast.getXOffset(), mToast.getYOffset(), mToast.getHorizontalMargin(),
+                    mToast.getVerticalMargin(), mCallback, mToast.hasCustomAnimation());
+        };
+
+        if (mToastOutAnimatorListener != null) {
+            // if we're currently animating out a toast, show new toast after prev toast is hidden
+            mToastOutAnimatorListener.setShowNextToastRunnable(showToastRunnable);
+        } else if (mPresenter != null) {
+            // if there's a toast already showing that we haven't tried hiding yet, hide it and
+            // then show the next toast after its hidden animation is done
+            hideCurrentToast(showToastRunnable);
+        } else {
+            // else, show this next toast immediately
+            showToastRunnable.run();
         }
-        Context context = mContext.createContextAsUser(UserHandle.getUserHandleForUid(uid), 0);
-        View view = ToastPresenter.getTextToastView(context, text);
-        mCallback = callback;
-        mPresenter = new ToastPresenter(context, mAccessibilityManager, mNotificationManager,
-                packageName);
-        mPresenter.show(view, token, windowToken, duration, mGravity, 0, mY, 0, 0, mCallback);
     }
 
     @Override
@@ -104,12 +149,75 @@ public class ToastUI extends SystemUI implements CommandQueue.Callbacks {
             Log.w(TAG, "Attempt to hide non-current toast from package " + packageName);
             return;
         }
-        hideCurrentToast();
+        mToastLogger.logOnHideToast(packageName, token.toString());
+        hideCurrentToast(null);
     }
 
     @MainThread
-    private void hideCurrentToast() {
-        mPresenter.hide(mCallback);
+    private void hideCurrentToast(Runnable runnable) {
+        if (mToast.getOutAnimation() != null) {
+            Animator animator = mToast.getOutAnimation();
+            mToastOutAnimatorListener = new ToastOutAnimatorListener(mPresenter, mCallback,
+                    runnable);
+            animator.addListener(mToastOutAnimatorListener);
+            animator.start();
+        } else {
+            mPresenter.hide(mCallback);
+            if (runnable != null) {
+                runnable.run();
+            }
+        }
+        mToast = null;
         mPresenter = null;
+        mCallback = null;
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        if (newConfig.orientation != mOrientation) {
+            mOrientation = newConfig.orientation;
+            if (mToast != null) {
+                mToastLogger.logOrientationChange(mToast.mText.toString(),
+                        mOrientation == ORIENTATION_PORTRAIT);
+                mToast.onOrientationChange(mOrientation);
+                mPresenter.updateLayoutParams(
+                        mToast.getXOffset(),
+                        mToast.getYOffset(),
+                        mToast.getHorizontalMargin(),
+                        mToast.getVerticalMargin(),
+                        mToast.getGravity());
+            }
+        }
+    }
+
+    /**
+     * Once the out animation for a toast is finished, start showing the next toast.
+     */
+    class ToastOutAnimatorListener extends AnimatorListenerAdapter {
+        final ToastPresenter mPrevPresenter;
+        final ITransientNotificationCallback mPrevCallback;
+        @Nullable Runnable mShowNextToastRunnable;
+
+        ToastOutAnimatorListener(
+                @NonNull ToastPresenter presenter,
+                @NonNull ITransientNotificationCallback callback,
+                @Nullable Runnable runnable) {
+            mPrevPresenter = presenter;
+            mPrevCallback = callback;
+            mShowNextToastRunnable = runnable;
+        }
+
+        void setShowNextToastRunnable(Runnable runnable) {
+            mShowNextToastRunnable = runnable;
+        }
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            mPrevPresenter.hide(mPrevCallback);
+            if (mShowNextToastRunnable != null) {
+                mShowNextToastRunnable.run();
+            }
+            mToastOutAnimatorListener = null;
+        }
     }
 }

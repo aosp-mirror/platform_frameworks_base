@@ -35,6 +35,7 @@ import com.android.internal.statusbar.NotificationVisibility
 import com.android.internal.widget.MessagingGroup
 import com.android.settingslib.notification.ConversationIconFactory
 import com.android.systemui.R
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.NotificationPersonExtractorPlugin
@@ -48,7 +49,6 @@ import com.android.systemui.statusbar.policy.ExtensionController
 import java.util.ArrayDeque
 import java.util.concurrent.Executor
 import javax.inject.Inject
-import javax.inject.Singleton
 
 private const val MAX_STORED_INACTIVE_PEOPLE = 10
 
@@ -58,7 +58,7 @@ interface NotificationPersonExtractor {
     fun isPersonNotification(sbn: StatusBarNotification): Boolean
 }
 
-@Singleton
+@SysUISingleton
 class NotificationPersonExtractorPluginBoundary @Inject constructor(
     extensionController: ExtensionController
 ) : NotificationPersonExtractor {
@@ -87,7 +87,7 @@ class NotificationPersonExtractorPluginBoundary @Inject constructor(
             plugin?.isPersonNotification(sbn) ?: false
 }
 
-@Singleton
+@SysUISingleton
 class PeopleHubDataSourceImpl @Inject constructor(
     private val notificationEntryManager: NotificationEntryManager,
     private val extractor: NotificationPersonExtractor,
@@ -214,13 +214,13 @@ class PeopleHubDataSourceImpl @Inject constructor(
     }
 
     private fun NotificationEntry.extractPerson(): PersonModel? {
-        val type = peopleNotificationIdentifier.getPeopleNotificationType(sbn, ranking)
+        val type = peopleNotificationIdentifier.getPeopleNotificationType(this)
         if (type == TYPE_NON_PERSON) {
             return null
         }
         val clickRunnable = Runnable { notificationListener.unsnoozeNotification(key) }
         val extras = sbn.notification.extras
-        val name = ranking.shortcutInfo?.label
+        val name = ranking.conversationShortcutInfo?.label
                 ?: extras.getCharSequence(Notification.EXTRA_CONVERSATION_TITLE)
                 ?: extras.getCharSequence(Notification.EXTRA_TITLE)
                 ?: return null
@@ -238,9 +238,9 @@ class PeopleHubDataSourceImpl @Inject constructor(
         iconFactory: ConversationIconFactory,
         sbn: StatusBarNotification
     ): Drawable? =
-            shortcutInfo?.let { shortcutInfo ->
+            conversationShortcutInfo?.let { conversationShortcutInfo ->
                 iconFactory.getConversationDrawable(
-                        shortcutInfo,
+                        conversationShortcutInfo,
                         sbn.packageName,
                         sbn.uid,
                         channel.isImportantConversation
@@ -249,7 +249,7 @@ class PeopleHubDataSourceImpl @Inject constructor(
 
     private fun NotificationEntry.extractPersonKey(): PersonKey? {
         // TODO migrate to shortcut id when snoozing is conversation wide
-        val type = peopleNotificationIdentifier.getPeopleNotificationType(sbn, ranking)
+        val type = peopleNotificationIdentifier.getPeopleNotificationType(this)
         return if (type != TYPE_NON_PERSON) key else null
     }
 }

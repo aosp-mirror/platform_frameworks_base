@@ -19,6 +19,7 @@
     <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"سوئس جرمن"</string>
     <string name="keyboard_layout_belgian" msgid="2011984572838651558">"بیلجیئن"</string>
     <string name="keyboard_layout_bulgarian" msgid="8951224309972028398">"بلغاریائی"</string>
+    <string name="keyboard_layout_bulgarian_phonetic" msgid="7568914730360106653">"بلغاریائی، فونیٹک"</string>
     <string name="keyboard_layout_italian" msgid="6497079660449781213">"اطالوی"</string>
     <string name="keyboard_layout_danish" msgid="8036432066627127851">"ڈینش"</string>
     <string name="keyboard_layout_norwegian" msgid="9090097917011040937">"نارویجین"</string>
@@ -26,6 +27,7 @@
     <string name="keyboard_layout_finnish" msgid="5585659438924315466">"فنش"</string>
     <string name="keyboard_layout_croatian" msgid="4172229471079281138">"کروشیائی"</string>
     <string name="keyboard_layout_czech" msgid="1349256901452975343">"چیک"</string>
+    <string name="keyboard_layout_czech_qwerty" msgid="3331402534128515501">"‏Czech QWERTY طرز"</string>
     <string name="keyboard_layout_estonian" msgid="8775830985185665274">"اسٹونیائی"</string>
     <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"ہنگریائی"</string>
     <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"آئس لینڈک"</string>
@@ -34,6 +36,7 @@
     <string name="keyboard_layout_slovak" msgid="2469379934672837296">"سلوووک"</string>
     <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"سلووینیائی"</string>
     <string name="keyboard_layout_turkish" msgid="7736163250907964898">"ترکش"</string>
+    <string name="keyboard_layout_turkish_f" msgid="9130320856010776018">"‏ترکی-F"</string>
     <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"يُوکرينی"</string>
     <string name="keyboard_layout_arabic" msgid="5671970465174968712">"عربی"</string>
     <string name="keyboard_layout_greek" msgid="7289253560162386040">"يونانی"</string>
@@ -44,4 +47,7 @@
     <string name="keyboard_layout_persian" msgid="3920643161015888527">"فارسی"</string>
     <string name="keyboard_layout_azerbaijani" msgid="7315895417176467567">"آزربائیجانی"</string>
     <string name="keyboard_layout_polish" msgid="1121588624094925325">"پولش"</string>
+    <string name="keyboard_layout_belarusian" msgid="7619281752698687588">"بيلاروسی"</string>
+    <string name="keyboard_layout_mongolian" msgid="7678483495823936626">"منگؤلی"</string>
+    <string name="keyboard_layout_georgian" msgid="4596185456863747454">"جارجیائی"</string>
 </resources>

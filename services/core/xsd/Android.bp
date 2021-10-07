@@ -1,3 +1,12 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 xsd_config {
     name: "default-permissions",
     srcs: ["default-permissions.xsd"],
@@ -8,15 +17,36 @@ xsd_config {
 
 xsd_config {
     name: "platform-compat-config",
-    srcs: ["platform-compat-config.xsd"],
-    api_dir: "platform-compat-schema",
+    srcs: ["platform-compat/config/platform-compat-config.xsd"],
+    api_dir: "platform-compat/config/schema",
     package_name: "com.android.server.compat.config",
 }
 
+xsd_config {
+    name: "platform-compat-overrides",
+    srcs: ["platform-compat/overrides/platform-compat-overrides.xsd"],
+    api_dir: "platform-compat/overrides/schema",
+    package_name: "com.android.server.compat.overrides",
+    gen_writer: true,
+}
 
 xsd_config {
     name: "display-device-config",
     srcs: ["display-device-config/display-device-config.xsd"],
     api_dir: "display-device-config/schema",
     package_name: "com.android.server.display.config",
+}
+
+xsd_config {
+    name: "display-layout-config",
+    srcs: ["display-layout-config/display-layout-config.xsd"],
+    api_dir: "display-layout-config/schema",
+    package_name: "com.android.server.display.config.layout",
+}
+
+xsd_config {
+    name: "device-state-config",
+    srcs: ["device-state-config/device-state-config.xsd"],
+    api_dir: "device-state-config/schema",
+    package_name: "com.android.server.policy.devicestate.config",
 }

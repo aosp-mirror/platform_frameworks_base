@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.AccessNetworkConstants.TransportType;
@@ -217,6 +218,9 @@ public final class NetworkRegistrationInfo implements Parcelable {
     @NonNull
     private String mRplmn;
 
+    // Updated based on the accessNetworkTechnology
+    private boolean mIsUsingCarrierAggregation;
+
     /**
      * @param domain Network domain. Must be a {@link Domain}. For transport type
      * {@link AccessNetworkConstants#TRANSPORT_TYPE_WLAN}, this must set to {@link #DOMAIN_PS}.
@@ -250,7 +254,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
         mRegistrationState = registrationState;
         mRoamingType = (registrationState == REGISTRATION_STATE_ROAMING)
                 ? ServiceState.ROAMING_TYPE_UNKNOWN : ServiceState.ROAMING_TYPE_NOT_ROAMING;
-        mAccessNetworkTechnology = accessNetworkTechnology;
+        setAccessNetworkTechnology(accessNetworkTechnology);
         mRejectCause = rejectCause;
         mAvailableServices = (availableServices != null)
                 ? new ArrayList<>(availableServices) : new ArrayList<>();
@@ -289,13 +293,12 @@ public final class NetworkRegistrationInfo implements Parcelable {
                                    @Nullable CellIdentity cellIdentity, @Nullable String rplmn,
                                    int maxDataCalls, boolean isDcNrRestricted,
                                    boolean isNrAvailable, boolean isEndcAvailable,
-                                   LteVopsSupportInfo lteVopsSupportInfo,
-                                   boolean isUsingCarrierAggregation) {
+                                   @Nullable VopsSupportInfo vopsSupportInfo) {
         this(domain, transportType, registrationState, accessNetworkTechnology, rejectCause,
                 emergencyOnly, availableServices, cellIdentity, rplmn);
         mDataSpecificInfo = new DataSpecificRegistrationInfo(
-                maxDataCalls, isDcNrRestricted, isNrAvailable, isEndcAvailable, lteVopsSupportInfo,
-                isUsingCarrierAggregation);
+                maxDataCalls, isDcNrRestricted, isNrAvailable,
+                isEndcAvailable, vopsSupportInfo);
         updateNrState();
     }
 
@@ -316,6 +319,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
                 DataSpecificRegistrationInfo.class.getClassLoader());
         mNrState = source.readInt();
         mRplmn = source.readString();
+        mIsUsingCarrierAggregation = source.readBoolean();
     }
 
     /**
@@ -330,6 +334,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
         mRegistrationState = nri.mRegistrationState;
         mRoamingType = nri.mRoamingType;
         mAccessNetworkTechnology = nri.mAccessNetworkTechnology;
+        mIsUsingCarrierAggregation = nri.mIsUsingCarrierAggregation;
         mRejectCause = nri.mRejectCause;
         mEmergencyOnly = nri.mEmergencyOnly;
         mAvailableServices = new ArrayList<>(nri.mAvailableServices);
@@ -340,6 +345,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
             // TODO: Instead of doing this, we should create a formal way for cloning cell identity.
             // Cell identity is not an immutable object so we have to deep copy it.
             mCellIdentity = CellIdentity.CREATOR.createFromParcel(p);
+            p.recycle();
         }
 
         if (nri.mVoiceSpecificInfo != null) {
@@ -388,7 +394,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
     }
 
     /**
-     * @return {@code true} if registered on roaming network, {@code false} otherwise.
+     * @return {@code true} if registered on roaming or home network, {@code false} otherwise.
      */
     public boolean isRegistered() {
         return mRegistrationState == REGISTRATION_STATE_HOME
@@ -396,7 +402,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
     }
 
     /**
-     * @return {@code true} if registered on roaming network, {@code false} otherwise.
+     * @return {@code true} if searching for service, {@code false} otherwise.
      */
     public boolean isSearching() {
         return mRegistrationState == REGISTRATION_STATE_NOT_REGISTERED_SEARCHING;
@@ -483,9 +489,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
         if (tech == TelephonyManager.NETWORK_TYPE_LTE_CA) {
             // For old device backward compatibility support
             tech = TelephonyManager.NETWORK_TYPE_LTE;
-            if (mDataSpecificInfo != null) {
-                mDataSpecificInfo.setIsUsingCarrierAggregation(true);
-            }
+            mIsUsingCarrierAggregation = true;
         }
         mAccessNetworkTechnology = tech;
     }
@@ -502,11 +506,34 @@ public final class NetworkRegistrationInfo implements Parcelable {
     }
 
     /**
+     * Require {@link android.Manifest.permission#ACCESS_FINE_LOCATION}, otherwise return null.
+     *
      * @return The cell information.
      */
     @Nullable
     public CellIdentity getCellIdentity() {
         return mCellIdentity;
+    }
+
+    /**
+     * Set whether network has configured carrier aggregation or not.
+     *
+     * @param isUsingCarrierAggregation set whether or not carrier aggregation is used.
+     *
+     * @hide
+     */
+    public void setIsUsingCarrierAggregation(boolean isUsingCarrierAggregation) {
+        mIsUsingCarrierAggregation = isUsingCarrierAggregation;
+    }
+
+    /**
+     * Get whether network has configured carrier aggregation or not.
+     *
+     * @return {@code true} if using carrier aggregation.
+     * @hide
+     */
+    public boolean isUsingCarrierAggregation() {
+        return mIsUsingCarrierAggregation;
     }
 
     /**
@@ -571,7 +598,8 @@ public final class NetworkRegistrationInfo implements Parcelable {
         return "Unknown reg state " + registrationState;
     }
 
-    private static String nrStateToString(@NRState int nrState) {
+    /** @hide */
+    public static String nrStateToString(@NRState int nrState) {
         switch (nrState) {
             case NR_STATE_RESTRICTED:
                 return "RESTRICTED";
@@ -613,8 +641,10 @@ public final class NetworkRegistrationInfo implements Parcelable {
                 .append(" cellIdentity=").append(mCellIdentity)
                 .append(" voiceSpecificInfo=").append(mVoiceSpecificInfo)
                 .append(" dataSpecificInfo=").append(mDataSpecificInfo)
-                .append(" nrState=").append(nrStateToString(mNrState))
+                .append(" nrState=").append(Build.IS_DEBUGGABLE
+                        ? nrStateToString(mNrState) : "****")
                 .append(" rRplmn=").append(mRplmn)
+                .append(" isUsingCarrierAggregation=").append(mIsUsingCarrierAggregation)
                 .append("}").toString();
     }
 
@@ -622,7 +652,8 @@ public final class NetworkRegistrationInfo implements Parcelable {
     public int hashCode() {
         return Objects.hash(mDomain, mTransportType, mRegistrationState, mRoamingType,
                 mAccessNetworkTechnology, mRejectCause, mEmergencyOnly, mAvailableServices,
-                mCellIdentity, mVoiceSpecificInfo, mDataSpecificInfo, mNrState, mRplmn);
+                mCellIdentity, mVoiceSpecificInfo, mDataSpecificInfo, mNrState, mRplmn,
+                mIsUsingCarrierAggregation);
     }
 
     @Override
@@ -642,6 +673,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
                 && mRejectCause == other.mRejectCause
                 && mEmergencyOnly == other.mEmergencyOnly
                 && mAvailableServices.equals(other.mAvailableServices)
+                && mIsUsingCarrierAggregation == other.mIsUsingCarrierAggregation
                 && Objects.equals(mCellIdentity, other.mCellIdentity)
                 && Objects.equals(mVoiceSpecificInfo, other.mVoiceSpecificInfo)
                 && Objects.equals(mDataSpecificInfo, other.mDataSpecificInfo)
@@ -668,6 +700,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
         dest.writeParcelable(mDataSpecificInfo, 0);
         dest.writeInt(mNrState);
         dest.writeString(mRplmn);
+        dest.writeBoolean(mIsUsingCarrierAggregation);
     }
 
     /**

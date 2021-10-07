@@ -89,14 +89,14 @@ key 8 {
 key 9 {
     label:                              '9'
     base:                               '9'
-    shift:                              '('
+    shift:                              ')'
     shift+capslock:                     '\u05c2'
 }
 
 key 0 {
     label:                              '0'
     base:                               '0'
-    shift:                              ')'
+    shift:                              '('
     shift+capslock:                     '\u05c1'
 }
 
@@ -180,15 +180,15 @@ key P {
 }
 
 key LEFT_BRACKET {
-    label:                              '['
-    base, capslock:                     '['
-    shift:                              '{'
-}
-
-key RIGHT_BRACKET {
     label:                              ']'
     base, capslock:                     ']'
     shift:                              '}'
+}
+
+key RIGHT_BRACKET {
+    label:                              '['
+    base, capslock:                     '['
+    shift:                              '{'
 }
 
 ### ROW 3
@@ -322,14 +322,14 @@ key M {
 key COMMA {
     label:                              ','
     base:                               '\u05ea'
-    shift:                              '<'
+    shift:                              '>'
     capslock:                           ','
 }
 
 key PERIOD {
     label:                              '.'
     base:                               '\u05e5'
-    shift:                              '>'
+    shift:                              '<'
     capslock:                           '.'
 }
 

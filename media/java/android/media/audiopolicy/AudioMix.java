@@ -23,6 +23,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.media.AudioDeviceInfo;
 import android.media.AudioFormat;
 import android.media.AudioSystem;
+import android.os.Build;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -34,24 +35,24 @@ import java.util.Objects;
 @SystemApi
 public class AudioMix {
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private AudioMixingRule mRule;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private AudioFormat mFormat;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int mRouteFlags;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int mMixType = MIX_TYPE_INVALID;
 
     // written by AudioPolicy
     int mMixState = MIX_STATE_DISABLED;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     int mCallbackFlags;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     String mDeviceAddress;
 
     // initialized in constructor, read by AudioPolicyConfig
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     final int mDeviceSystemType; // an AudioSystem.DEVICE_* value, not AudioDeviceInfo.TYPE_*
 
     /**
@@ -217,7 +218,7 @@ public class AudioMix {
     /** @return an error string if the format would not allow Privileged playbackCapture
      *          null otherwise
      * @hide */
-    public static String canBeUsedForPrivilegedCapture(AudioFormat format) {
+    public static String canBeUsedForPrivilegedMediaCapture(AudioFormat format) {
         int sampleRate = format.getSampleRate();
         if (sampleRate > PRIVILEDGED_CAPTURE_MAX_SAMPLE_RATE || sampleRate <= 0) {
             return "Privileged audio capture sample rate " + sampleRate
@@ -447,8 +448,8 @@ public class AudioMix {
                     }
                 }
             }
-            if (mRule.allowPrivilegedPlaybackCapture()) {
-                String error = AudioMix.canBeUsedForPrivilegedCapture(mFormat);
+            if (mRule.allowPrivilegedMediaPlaybackCapture()) {
+                String error = AudioMix.canBeUsedForPrivilegedMediaCapture(mFormat);
                 if (error != null) {
                     throw new IllegalArgumentException(error);
                 }

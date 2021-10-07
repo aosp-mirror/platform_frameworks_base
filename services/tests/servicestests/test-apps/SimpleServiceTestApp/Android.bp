@@ -12,8 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 android_test_helper_app {
-    name: "SimpleServiceTestApp",
+    name: "SimpleServiceTestApp1",
 
     test_suites: ["device-tests"],
 
@@ -27,4 +36,47 @@ android_test_helper_app {
     optimize: {
         enabled: false,
     },
+    aaptflags: [
+        "--rename-manifest-package com.android.servicestests.apps.simpleservicetestapp1",
+    ],
+}
+
+android_test_helper_app {
+    name: "SimpleServiceTestApp2",
+
+    test_suites: ["device-tests"],
+
+    srcs: ["**/*.java"],
+
+    platform_apis: true,
+    certificate: "platform",
+    dex_preopt: {
+        enabled: false,
+    },
+    optimize: {
+        enabled: false,
+    },
+    aaptflags: [
+        "--rename-manifest-package com.android.servicestests.apps.simpleservicetestapp2",
+    ],
+}
+
+android_test_helper_app {
+    name: "SimpleServiceTestApp3",
+
+    test_suites: ["device-tests"],
+
+    srcs: ["**/*.java"],
+
+    platform_apis: true,
+    certificate: "platform",
+    dex_preopt: {
+        enabled: false,
+    },
+    optimize: {
+        enabled: false,
+    },
+    aaptflags: [
+        "--rename-manifest-package com.android.servicestests.apps.simpleservicetestapp3",
+    ],
 }

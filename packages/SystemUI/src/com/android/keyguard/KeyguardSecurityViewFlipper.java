@@ -18,7 +18,6 @@ package com.android.keyguard;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -31,7 +30,6 @@ import android.view.ViewHierarchyEncoder;
 import android.widget.FrameLayout;
 import android.widget.ViewFlipper;
 
-import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.R;
 
 /**
@@ -39,7 +37,7 @@ import com.android.systemui.R;
  * we can emulate {@link android.view.WindowManager.LayoutParams#FLAG_SLIPPERY} within a view
  * hierarchy.
  */
-public class KeyguardSecurityViewFlipper extends ViewFlipper implements KeyguardSecurityView {
+public class KeyguardSecurityViewFlipper extends ViewFlipper {
     private static final String TAG = "KeyguardSecurityViewFlipper";
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
 
@@ -69,115 +67,30 @@ public class KeyguardSecurityViewFlipper extends ViewFlipper implements Keyguard
         return result;
     }
 
-    KeyguardSecurityView getSecurityView() {
+    KeyguardInputView getSecurityView() {
         View child = getChildAt(getDisplayedChild());
-        if (child instanceof KeyguardSecurityView) {
-            return (KeyguardSecurityView) child;
+        if (child instanceof KeyguardInputView) {
+            return (KeyguardInputView) child;
         }
         return null;
     }
 
-    @Override
-    public void setKeyguardCallback(KeyguardSecurityCallback callback) {
-        KeyguardSecurityView ksv = getSecurityView();
-        if (ksv != null) {
-            ksv.setKeyguardCallback(callback);
-        }
-    }
-
-    @Override
-    public void setLockPatternUtils(LockPatternUtils utils) {
-        KeyguardSecurityView ksv = getSecurityView();
-        if (ksv != null) {
-            ksv.setLockPatternUtils(utils);
-        }
-    }
-
-    @Override
-    public void reset() {
-        KeyguardSecurityView ksv = getSecurityView();
-        if (ksv != null) {
-            ksv.reset();
-        }
-    }
-
-    @Override
-    public void onPause() {
-        KeyguardSecurityView ksv = getSecurityView();
-        if (ksv != null) {
-            ksv.onPause();
-        }
-    }
-
-    @Override
-    public void onResume(int reason) {
-        KeyguardSecurityView ksv = getSecurityView();
-        if (ksv != null) {
-            ksv.onResume(reason);
-        }
-    }
-
-    @Override
-    public boolean needsInput() {
-        KeyguardSecurityView ksv = getSecurityView();
-        return (ksv != null) ? ksv.needsInput() : false;
-    }
-
-    @Override
-    public KeyguardSecurityCallback getCallback() {
-        KeyguardSecurityView ksv = getSecurityView();
-        return (ksv != null) ? ksv.getCallback() : null;
-    }
-
-    @Override
-    public void showPromptReason(int reason) {
-        KeyguardSecurityView ksv = getSecurityView();
-        if (ksv != null) {
-            ksv.showPromptReason(reason);
-        }
-    }
-
-    @Override
-    public void showMessage(CharSequence message, ColorStateList colorState) {
-        KeyguardSecurityView ksv = getSecurityView();
-        if (ksv != null) {
-            ksv.showMessage(message, colorState);
-        }
-    }
-
-    @Override
-    public void showUsabilityHint() {
-        KeyguardSecurityView ksv = getSecurityView();
-        if (ksv != null) {
-            ksv.showUsabilityHint();
-        }
-    }
-
-    @Override
-    public void startAppearAnimation() {
-        KeyguardSecurityView ksv = getSecurityView();
-        if (ksv != null) {
-            ksv.startAppearAnimation();
-        }
-    }
-
-    @Override
-    public boolean startDisappearAnimation(Runnable finishRunnable) {
-        KeyguardSecurityView ksv = getSecurityView();
-        if (ksv != null) {
-            return ksv.startDisappearAnimation(finishRunnable);
-        } else {
-            return false;
-        }
-    }
-
-    @Override
     public CharSequence getTitle() {
-        KeyguardSecurityView ksv = getSecurityView();
+        KeyguardInputView ksv = getSecurityView();
         if (ksv != null) {
             return ksv.getTitle();
         }
         return "";
+    }
+
+    /**
+      * Translate the entire view, and optionally inform the wrapped view of the progress
+      * so it can animate with the parent.
+      */
+    public void animateForIme(int translationY, float interpolatedFraction, boolean appearingAnim) {
+        super.setTranslationY(translationY);
+        KeyguardInputView v = getSecurityView();
+        if (v != null) v.animateForIme(interpolatedFraction, appearingAnim);
     }
 
     @Override
@@ -215,6 +128,8 @@ public class KeyguardSecurityViewFlipper extends ViewFlipper implements Keyguard
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
+            if (child.getVisibility() != View.VISIBLE) continue;
+
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
 
             if (lp.maxWidth > 0 && lp.maxWidth < maxWidth) {

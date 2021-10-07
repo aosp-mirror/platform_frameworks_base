@@ -19,7 +19,12 @@ package android.renderscript;
 /**
  * Vector version of the basic long type.
  * Provides two long fields packed.
+ *
+ * @deprecated Renderscript has been deprecated in API level 31. Please refer to the <a
+ * href="https://developer.android.com/guide/topics/renderscript/migration-guide">migration
+ * guide</a> for the proposed alternatives.
  */
+@Deprecated
 public class Long2 {
     public long x;
     public long y;

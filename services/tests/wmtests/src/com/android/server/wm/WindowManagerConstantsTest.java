@@ -32,7 +32,7 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.server.wm.utils.FakeDeviceConfigInterface;
+import com.android.server.testutils.FakeDeviceConfigInterface;
 
 import org.junit.After;
 import org.junit.Before;

@@ -72,7 +72,7 @@ public class PduPersister {
     private static final boolean DEBUG = false;
     private static final boolean LOCAL_LOGV = false;
 
-    private static final long DUMMY_THREAD_ID = Long.MAX_VALUE;
+    private static final long PLACEHOLDER_THREAD_ID = Long.MAX_VALUE;
 
     /**
      * The uri of temporary drm objects.
@@ -1340,7 +1340,7 @@ public class PduPersister {
 
         // Save parts first to avoid inconsistent message is loaded
         // while saving the parts.
-        long dummyId = System.currentTimeMillis(); // Dummy ID of the msg.
+        long placeholderId = System.currentTimeMillis(); // Placeholder ID of the msg.
 
         // Figure out if this PDU is a text-only message
         boolean textOnly = true;
@@ -1364,7 +1364,7 @@ public class PduPersister {
                 for (int i = 0; i < partsNum; i++) {
                     PduPart part = body.getPart(i);
                     messageSize += part.getDataLength();
-                    persistPart(part, dummyId, preOpenedFiles);
+                    persistPart(part, placeholderId, preOpenedFiles);
 
                     // If we've got anything besides text/plain or SMIL part, then we've got
                     // an mms message with some other type of attachment.
@@ -1395,14 +1395,14 @@ public class PduPersister {
                 throw new MmsException("persist() failed: return null.");
             }
             // Get the real ID of the PDU and update all parts which were
-            // saved with the dummy ID.
+            // saved with the placeholder ID.
             msgId = ContentUris.parseId(res);
         }
 
         values = new ContentValues(1);
         values.put(Part.MSG_ID, msgId);
         SqliteWrapper.update(mContext, mContentResolver,
-                             Uri.parse("content://mms/" + dummyId + "/part"),
+                             Uri.parse("content://mms/" + placeholderId + "/part"),
                              values, null, null);
         // We should return the longest URI of the persisted PDU, for
         // example, if input URI is "content://mms/inbox" and the _ID of

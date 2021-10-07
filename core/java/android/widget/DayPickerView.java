@@ -33,10 +33,6 @@ import com.android.internal.R;
 import com.android.internal.widget.ViewPager;
 import com.android.internal.widget.ViewPager.OnPageChangeListener;
 
-import libcore.icu.LocaleData;
-
-import java.util.Locale;
-
 class DayPickerView extends ViewGroup {
     private static final int DEFAULT_LAYOUT = R.layout.day_picker_content_material;
     private static final int DEFAULT_START_YEAR = 1900;
@@ -86,7 +82,7 @@ class DayPickerView extends ViewGroup {
                 attrs, a, defStyleAttr, defStyleRes);
 
         final int firstDayOfWeek = a.getInt(R.styleable.CalendarView_firstDayOfWeek,
-                LocaleData.get(Locale.getDefault()).firstDayOfWeek);
+                Calendar.getInstance().getFirstDayOfWeek());
 
         final String minDate = a.getString(R.styleable.CalendarView_minDate);
         final String maxDate = a.getString(R.styleable.CalendarView_maxDate);

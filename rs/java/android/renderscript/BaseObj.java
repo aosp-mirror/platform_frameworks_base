@@ -27,7 +27,11 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * It is responsible for lifetime management and resource tracking. This class
  * should not be used by a user application.
  *
+ * @deprecated Renderscript has been deprecated in API level 31. Please refer to the <a
+ * href="https://developer.android.com/guide/topics/renderscript/migration-guide">migration
+ * guide</a> for the proposed alternatives.
  **/
+@Deprecated
 public class BaseObj {
     BaseObj(long id, RenderScript rs) {
         rs.validate();

@@ -138,23 +138,25 @@ import java.util.Set;
         // NOTE: Keep this in sync with installd expectations.
         File dexPathFile = new File(dexPath);
         File secondaryProfileDir = new File(dexPathFile.getParent(), "oat");
-        File secondaryProfile = new File(secondaryProfileDir, dexPathFile.getName() + ".cur.prof");
+        File secondaryCurProfile =
+                new File(secondaryProfileDir, dexPathFile.getName() + ".cur.prof");
+        File secondaryRefProfile = new File(secondaryProfileDir, dexPathFile.getName() + ".prof");
 
         // Create the profile if not already there.
         // Returns true if the file was created, false if the file already exists.
         // or throws exceptions in case of errors.
         if (!secondaryProfileDir.exists()) {
             if (!secondaryProfileDir.mkdir()) {
-                Slog.e(TAG, "Could not create the profile directory: " + secondaryProfile);
+                Slog.e(TAG, "Could not create the profile directory: " + secondaryCurProfile);
                 // Do not continue with registration if we could not create the oat dir.
                 return;
             }
         }
 
         try {
-            boolean created = secondaryProfile.createNewFile();
+            boolean created = secondaryCurProfile.createNewFile();
             if (DEBUG && created) {
-                Slog.i(TAG, "Created profile for secondary dex: " + secondaryProfile);
+                Slog.i(TAG, "Created profile for secondary dex: " + secondaryCurProfile);
             }
         } catch (IOException ex) {
             Slog.e(TAG, "Failed to create profile for secondary dex " + dexPath
@@ -165,7 +167,12 @@ import java.util.Set;
 
         // If we got here, the dex paths is a secondary dex and we were able to create the profile.
         // Register the path to the runtime.
-        VMRuntime.registerAppInfo(secondaryProfile.getPath(), new String[] { dexPath });
+        VMRuntime.registerAppInfo(
+                ActivityThread.currentPackageName(),
+                secondaryCurProfile.getPath(),
+                secondaryRefProfile.getPath(),
+                new String[] { dexPath },
+                VMRuntime.CODE_PATH_TYPE_SECONDARY_DEX);
     }
 
     // A dex file is a secondary dex file if it is in any of the registered app

@@ -66,7 +66,7 @@ public class ContentCaptureSessionTest {
 
     @Test
     public void testNewAutofillId_differentSessions() {
-        assertThat(mSession1.getId()).isNotEqualTo(mSession2.getId()); //sanity check
+        assertThat(mSession1.getId()).isNotEqualTo(mSession2.getId()); //validity check
         final AutofillId parentId = new AutofillId(42);
         final AutofillId childId1 = mSession1.newAutofillId(parentId, 108L);
         final AutofillId childId2 = mSession2.newAutofillId(parentId, 108L);
@@ -84,7 +84,7 @@ public class ContentCaptureSessionTest {
 
     @Test
     public void testNewViewStructure() {
-        assertThat(mMockView.getAutofillId()).isNotNull(); // sanity check
+        assertThat(mMockView.getAutofillId()).isNotNull(); // validity check
         final ViewStructure structure = mSession1.newViewStructure(mMockView);
         assertThat(structure).isNotNull();
         assertThat(structure.getAutofillId()).isEqualTo(mMockView.getAutofillId());

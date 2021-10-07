@@ -30,7 +30,7 @@ namespace android {
 
 class ANDROID_API MinikinFontSkia : public minikin::MinikinFont {
 public:
-    MinikinFontSkia(sk_sp<SkTypeface> typeface, const void* fontData, size_t fontSize,
+    MinikinFontSkia(sk_sp<SkTypeface> typeface, int sourceId, const void* fontData, size_t fontSize,
                     std::string_view filePath, int ttcIndex,
                     const std::vector<minikin::FontVariation>& axes);
 
@@ -49,6 +49,8 @@ public:
     void GetFontExtent(minikin::MinikinExtent* extent, const minikin::MinikinPaint& paint,
                        const minikin::FontFakery& fakery) const override;
 
+    const std::string& GetFontPath() const override { return mFilePath; }
+
     SkTypeface* GetSkTypeface() const;
     sk_sp<SkTypeface> RefSkTypeface() const;
 
@@ -60,6 +62,7 @@ public:
     const std::vector<minikin::FontVariation>& GetAxes() const;
     std::shared_ptr<minikin::MinikinFont> createFontWithVariation(
             const std::vector<minikin::FontVariation>&) const;
+    int GetSourceId() const override { return mSourceId; }
 
     static uint32_t packFontFlags(const SkFont&);
     static void unpackFontFlags(SkFont*, uint32_t fontFlags);
@@ -71,6 +74,7 @@ public:
 private:
     sk_sp<SkTypeface> mTypeface;
 
+    int mSourceId;
     // A raw pointer to the font data - it should be owned by some other object with
     // lifetime at least as long as this object.
     const void* mFontData;

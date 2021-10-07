@@ -76,11 +76,11 @@ class PlatformCompatCommandNotInstalledTest {
                 Params(enableDisable = null, targetSdk = 29, result = false),
                 Params(enableDisable = null, targetSdk = 30, result = true),
 
-                Params(enableDisable = true, targetSdk = 29, result = true),
+                Params(enableDisable = true, targetSdk = 29, result = false),
                 Params(enableDisable = true, targetSdk = 30, result = true),
 
                 Params(enableDisable = false, targetSdk = 29, result = false),
-                Params(enableDisable = false, targetSdk = 30, result = false)
+                Params(enableDisable = false, targetSdk = 30, result = true)
         )
     }
 
@@ -107,7 +107,10 @@ class PlatformCompatCommandNotInstalledTest {
     fun ParcelFileDescriptor.text() = FileReader(fileDescriptor).readText()
 
     @After
-    fun resetIdentity() = uiAutomation.dropShellPermissionIdentity()
+    fun resetChangeIdAndIdentity() {
+        command("am compat reset $TEST_CHANGE_ID $TEST_PKG")
+        uiAutomation.dropShellPermissionIdentity()
+    }
 
     @Test
     fun execute() {
@@ -128,6 +131,10 @@ class PlatformCompatCommandNotInstalledTest {
         assertThat(platformCompat.isChangeEnabled(TEST_CHANGE_ID, appInfo)).isEqualTo(params.result)
     }
 
-    private fun command(command: String) =
-            FileReader(uiAutomation.executeShellCommand(command).fileDescriptor).readText()
+    private fun command(command: String): String {
+        val fileDescriptor = uiAutomation.executeShellCommand(command)
+        return String(ParcelFileDescriptor.AutoCloseInputStream(fileDescriptor).use {
+            inputStream -> inputStream.readBytes()
+        })
+    }
 }

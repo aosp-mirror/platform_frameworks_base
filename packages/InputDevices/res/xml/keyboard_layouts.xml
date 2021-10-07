@@ -64,6 +64,10 @@
             android:label="@string/keyboard_layout_bulgarian"
             android:keyboardLayout="@raw/keyboard_layout_bulgarian" />
 
+    <keyboard-layout android:name="keyboard_layout_bulgarian_phonetic"
+            android:label="@string/keyboard_layout_bulgarian_phonetic"
+            android:keyboardLayout="@raw/keyboard_layout_bulgarian_phonetic" />
+
     <keyboard-layout android:name="keyboard_layout_italian"
             android:label="@string/keyboard_layout_italian"
             android:keyboardLayout="@raw/keyboard_layout_italian" />
@@ -91,6 +95,10 @@
     <keyboard-layout android:name="keyboard_layout_czech"
             android:label="@string/keyboard_layout_czech"
             android:keyboardLayout="@raw/keyboard_layout_czech" />
+
+    <keyboard-layout android:name="keyboard_layout_czech_qwerty"
+            android:label="@string/keyboard_layout_czech_qwerty"
+            android:keyboardLayout="@raw/keyboard_layout_czech_qwerty" />
 
     <keyboard-layout android:name="keyboard_layout_estonian"
             android:label="@string/keyboard_layout_estonian"
@@ -123,6 +131,10 @@
     <keyboard-layout android:name="keyboard_layout_turkish"
             android:label="@string/keyboard_layout_turkish"
             android:keyboardLayout="@raw/keyboard_layout_turkish" />
+
+    <keyboard-layout android:name="keyboard_layout_turkish_f"
+            android:label="@string/keyboard_layout_turkish_f"
+            android:keyboardLayout="@raw/keyboard_layout_turkish_f" />
 
     <keyboard-layout android:name="keyboard_layout_ukrainian"
             android:label="@string/keyboard_layout_ukrainian"
@@ -163,4 +175,16 @@
     <keyboard-layout android:name="keyboard_layout_polish"
             android:label="@string/keyboard_layout_polish"
             android:keyboardLayout="@raw/keyboard_layout_polish" />
+
+    <keyboard-layout android:name="keyboard_layout_belarusian"
+            android:label="@string/keyboard_layout_belarusian"
+            android:keyboardLayout="@raw/keyboard_layout_belarusian" />
+
+    <keyboard-layout android:name="keyboard_layout_mongolian"
+            android:label="@string/keyboard_layout_mongolian"
+            android:keyboardLayout="@raw/keyboard_layout_mongolian" />
+
+    <keyboard-layout android:name="keyboard_layout_georgian"
+            android:label="@string/keyboard_layout_georgian"
+            android:keyboardLayout="@raw/keyboard_layout_georgian" />
 </keyboard-layouts>

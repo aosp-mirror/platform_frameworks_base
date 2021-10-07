@@ -12,6 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 cc_defaults {
     name: "service.incremental-proto-defaults",
 
@@ -39,6 +48,7 @@ cc_defaults {
 cc_defaults {
     name: "service.incremental-defaults",
     defaults: ["service.incremental-proto-defaults"],
+    header_libs: ["jni_headers"],
     local_include_dirs: ["include/"],
     cflags: [
         "-Wall",
@@ -53,12 +63,12 @@ cc_defaults {
         "libdataloader_aidl-cpp",
         "libincremental_aidl-cpp",
         "libincremental_manager_aidl-cpp",
-        "libnativehelper",
         "libprotobuf-cpp-lite",
         "service.incremental.proto",
         "libutils",
         "libvold_binder",
         "libc++fs",
+        "libziparchive_for_incfs",
     ],
     shared_libs: [
         "libandroidfw",
@@ -67,8 +77,8 @@ cc_defaults {
         "libcutils",
         "libincfs",
         "liblog",
+        "libpermission",
         "libz",
-        "libziparchive",
     ],
 }
 
@@ -124,5 +134,8 @@ cc_test {
     ],
     static_libs: [
         "libgmock",
-    ]
+    ],
+    test_options: {
+        unit_test: true,
+    },
 }

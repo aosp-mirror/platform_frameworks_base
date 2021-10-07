@@ -39,7 +39,7 @@ import com.android.systemui.SysuiBaseFragmentTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-@RunWithLooper
+@RunWithLooper(setAsMainLooper = true)
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
 public class LifecycleFragmentTest extends SysuiBaseFragmentTest {

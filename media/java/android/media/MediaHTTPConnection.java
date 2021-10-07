@@ -19,7 +19,7 @@ package android.media;
 import static android.media.MediaPlayer.MEDIA_ERROR_UNSUPPORTED;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.net.NetworkUtils;
+import android.net.InetAddresses;
 import android.os.IBinder;
 import android.os.StrictMode;
 import android.util.Log;
@@ -214,7 +214,7 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
             if (host.equalsIgnoreCase("localhost")) {
                 return true;
             }
-            if (NetworkUtils.numericToInetAddress(host).isLoopbackAddress()) {
+            if (InetAddresses.parseNumericAddress(host).isLoopbackAddress()) {
                 return true;
             }
         } catch (IllegalArgumentException iex) {

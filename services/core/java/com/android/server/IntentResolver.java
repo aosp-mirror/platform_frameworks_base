@@ -839,6 +839,48 @@ public abstract class IntentResolver<F, R extends Object> {
         }
     };
 
+    // Method to take the snapshot of an F.
+    protected F snapshot(F f) {
+        return f;
+    }
+
+    // Helper method to copy some of the maps.
+    protected void copyInto(ArrayMap<String, F[]> l, ArrayMap<String, F[]> r) {
+        final int end = r.size();
+        l.clear();
+        l.ensureCapacity(end);
+        for (int i = 0; i < end; i++) {
+            final F[] val = r.valueAt(i);
+            final String key = r.keyAt(i);
+            final F[] newval = Arrays.copyOf(val, val.length);
+            for (int j = 0; j < newval.length; j++) {
+                newval[j] = snapshot(newval[j]);
+            }
+            l.put(key, newval);
+        }
+    }
+
+    protected void copyInto(ArraySet<F> l, ArraySet<F> r) {
+        l.clear();
+        final int end = r.size();
+        l.ensureCapacity(end);
+        for (int i = 0; i < end; i++) {
+            l.append(snapshot(r.valueAt(i)));
+        }
+    }
+
+    // Make <this> a copy of <orig>.  The presumption is that <this> is empty but all
+    // arrays are cleared out explicitly, just to be sure.
+    protected void copyFrom(IntentResolver orig) {
+        copyInto(mFilters, orig.mFilters);
+        copyInto(mTypeToFilter, orig.mTypeToFilter);
+        copyInto(mBaseTypeToFilter, orig.mBaseTypeToFilter);
+        copyInto(mWildTypeToFilter, orig.mWildTypeToFilter);
+        copyInto(mSchemeToFilter, orig.mSchemeToFilter);
+        copyInto(mActionToFilter, orig.mActionToFilter);
+        copyInto(mTypedActionToFilter, orig.mTypedActionToFilter);
+    }
+
     /**
      * All filters that have been registered.
      */

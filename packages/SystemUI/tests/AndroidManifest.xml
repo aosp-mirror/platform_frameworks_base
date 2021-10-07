@@ -46,7 +46,7 @@
     <uses-permission android:name="android.permission.DEVICE_POWER" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.STATUS_BAR" />
-    <uses-permission android:name="android.permission.MANAGE_ACTIVITY_STACKS" />
+    <uses-permission android:name="android.permission.MANAGE_ACTIVITY_TASKS" />
     <uses-permission android:name="android.permission.REAL_GET_TASKS" />
     <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW" />
     <uses-permission android:name="android.permission.NETWORK_SETTINGS" />
@@ -56,18 +56,26 @@
     <application android:debuggable="true" android:largeHeap="true">
         <uses-library android:name="android.test.runner" />
 
-        <receiver android:name="com.android.systemui.SliceBroadcastRelayHandlerTest$Receiver">
+        <receiver android:name="com.android.systemui.SliceBroadcastRelayHandlerTest$Receiver"
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.android.systemui.action.TEST_ACTION" />
             </intent-filter>
         </receiver>
 
-        <activity android:name="com.android.systemui.bubbles.BubblesTestActivity"
+        <activity android:name=".wmshell.BubblesTestActivity"
             android:allowEmbedded="true"
             android:documentLaunchMode="always"
             android:excludeFromRecents="true"
             android:exported="false"
             android:resizeableActivity="true" />
+
+        <activity android:name="com.android.systemui.emergency.EmergencyActivityTest"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="com.android.systemui.action.LAUNCH_EMERGENCY"/>
+            </intent-filter>
+        </activity>
 
         <activity
             android:name="com.android.systemui.globalactions.GlobalActionsImeTest$TestActivity"
@@ -78,6 +86,12 @@
                   android:exported="false"
                   android:excludeFromRecents="true"
                   />
+
+        <activity android:name="com.android.systemui.screenshot.ScrollViewActivity"
+                  android:exported="false" />
+
+        <activity android:name="com.android.systemui.screenshot.RecyclerViewActivity"
+                  android:exported="false" />
 
         <provider
             android:name="androidx.lifecycle.ProcessLifecycleOwnerInitializer"

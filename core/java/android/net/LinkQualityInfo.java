@@ -17,6 +17,7 @@
 package android.net;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -190,7 +191,7 @@ public class LinkQualityInfo implements Parcelable {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setPacketCount(long packetCount) {
         mPacketCount = packetCount;
     }
@@ -206,7 +207,7 @@ public class LinkQualityInfo implements Parcelable {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setPacketErrorCount(long packetErrorCount) {
         mPacketErrorCount = packetErrorCount;
     }
@@ -268,7 +269,7 @@ public class LinkQualityInfo implements Parcelable {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setLastDataSampleTime(long lastDataSampleTime) {
         mLastDataSampleTime = lastDataSampleTime;
     }
@@ -284,7 +285,7 @@ public class LinkQualityInfo implements Parcelable {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setDataSampleDuration(int dataSampleDuration) {
         mDataSampleDuration = dataSampleDuration;
     }

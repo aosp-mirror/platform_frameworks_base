@@ -1,0 +1,20 @@
+{
+  "imports": [
+    {
+      // Also includes cts/tests/tests/net
+      "path": "frameworks/base/tests/net"
+    },
+    {
+      "path": "packages/modules/NetworkStack"
+    },
+    {
+      "path": "packages/modules/CaptivePortalLogin"
+    },
+    {
+      "path": "frameworks/base/packages/Tethering"
+    },
+    {
+      "path": "frameworks/opt/net/wifi"
+    }
+  ]
+}

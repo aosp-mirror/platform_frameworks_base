@@ -35,10 +35,12 @@
         <permission name="android.permission.MANAGE_USERS"/>
         <permission name="android.permission.MASTER_CLEAR"/>
         <permission name="android.permission.MEDIA_CONTENT_CONTROL"/>
+        <permission name="android.permission.MODIFY_AUDIO_ROUTING" />
         <permission name="android.permission.MODIFY_DAY_NIGHT_MODE"/>
         <permission name="android.permission.MODIFY_PHONE_STATE"/>
         <permission name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
         <permission name="android.permission.OBSERVE_NETWORK_POLICY"/>
+        <permission name="android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS" />
         <permission name="android.permission.OVERRIDE_WIFI_CONFIG"/>
         <permission name="android.permission.PACKAGE_USAGE_STATS" />
         <permission name="android.permission.READ_DREAM_STATE"/>
@@ -65,5 +67,9 @@
         <permission name="android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS"/>
         <permission name="android.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS" />
         <permission name="android.permission.CAMERA_OPEN_CLOSE_LISTENER" />
+        <permission name="android.permission.READ_WIFI_CREDENTIAL" />
+        <permission name="android.permission.USE_BACKGROUND_BLUR" />
+        <permission name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS" />
+        <permission name="android.permission.FORCE_STOP_PACKAGES" />
     </privapp-permissions>
 </permissions>

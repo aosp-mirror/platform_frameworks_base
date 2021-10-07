@@ -53,7 +53,7 @@ class KeyguardLiftController constructor(
             // Not listening anymore since trigger events unregister themselves
             isListening = false
             updateListeningState()
-            keyguardUpdateMonitor.requestFaceAuth()
+            keyguardUpdateMonitor.requestFaceAuth(true)
         }
     }
 
@@ -84,7 +84,9 @@ class KeyguardLiftController constructor(
         val onKeyguard = keyguardUpdateMonitor.isKeyguardVisible &&
                 !statusBarStateController.isDozing
 
-        val shouldListen = onKeyguard || bouncerVisible
+        val userId = KeyguardUpdateMonitor.getCurrentUser()
+        val isFaceEnabled = keyguardUpdateMonitor.isFaceAuthEnabledForUser(userId)
+        val shouldListen = (onKeyguard || bouncerVisible) && isFaceEnabled
         if (shouldListen != isListening) {
             isListening = shouldListen
 

@@ -21,24 +21,8 @@ package com.android.internal.util;
  * @hide
  */
 public class TrafficStatsConstants {
-    // These tags are used by the network stack to do traffic for its own purposes. Traffic
-    // tagged with these will be counted toward the network stack and must stay inside the
-    // range defined by
-    // {@link android.net.TrafficStats#TAG_NETWORK_STACK_RANGE_START} and
-    // {@link android.net.TrafficStats#TAG_NETWORK_STACK_RANGE_END}.
-    public static final int TAG_SYSTEM_DHCP = 0xFFFFFE01;
-    public static final int TAG_SYSTEM_NEIGHBOR = 0xFFFFFE02;
-    public static final int TAG_SYSTEM_DHCP_SERVER = 0xFFFFFE03;
 
     public static final int TAG_SYSTEM_NTP = 0xFFFFFF41;
     public static final int TAG_SYSTEM_GPS = 0xFFFFFF44;
     public static final int TAG_SYSTEM_PAC = 0xFFFFFF45;
-
-    // These tags are used by the network stack to do traffic on behalf of apps. Traffic
-    // tagged with these will be counted toward the app on behalf of which the network
-    // stack is doing this traffic. These values must stay inside the range defined by
-    // {@link android.net.TrafficStats#TAG_NETWORK_STACK_IMPERSONATION_RANGE_START} and
-    // {@link android.net.TrafficStats#TAG_NETWORK_STACK_IMPERSONATION_RANGE_END}.
-    public static final int TAG_SYSTEM_PROBE = 0xFFFFFF81;
-    public static final int TAG_SYSTEM_DNS = 0xFFFFFF82;
 }

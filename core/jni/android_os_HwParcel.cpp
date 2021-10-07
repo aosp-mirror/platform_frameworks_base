@@ -122,10 +122,18 @@ void signalExceptionForError(JNIEnv *env, status_t err, bool canThrowRemoteExcep
             std::stringstream ss;
             ss << "HwBinder Error: (" << err << ")";
 
-            jniThrowException(
-                    env,
-                    canThrowRemoteException ? "android/os/RemoteException" : "java/lang/RuntimeException",
-                    ss.str().c_str());
+            const char* exception = nullptr;
+            if (canThrowRemoteException) {
+                if (err == DEAD_OBJECT) {
+                    exception = "android/os/DeadObjectException";
+                } else {
+                    exception = "android/os/RemoteException";
+                }
+            } else {
+                exception = "java/lang/RuntimeException";
+            }
+
+            jniThrowException(env, exception, ss.str().c_str());
 
             break;
         }
@@ -292,19 +300,11 @@ static void JHwParcel_native_enforceInterface(
         return;
     }
 
-    const jchar *interfaceName = env->GetStringCritical(interfaceNameObj, NULL);
+    const char *interfaceName = env->GetStringUTFChars(interfaceNameObj, NULL);
     if (interfaceName) {
-        String8 interfaceNameCopy = String8(String16(
-                reinterpret_cast<const char16_t *>(interfaceName),
-                env->GetStringLength(interfaceNameObj)));
-
-        env->ReleaseStringCritical(interfaceNameObj, interfaceName);
-        interfaceName = NULL;
-
         hardware::Parcel *parcel =
             JHwParcel::GetNativeContext(env, thiz)->getParcel();
-
-        bool valid = parcel->enforceInterface(interfaceNameCopy.string());
+        bool valid = parcel->enforceInterface(interfaceName);
 
         if (!valid) {
             jniThrowException(
@@ -312,6 +312,7 @@ static void JHwParcel_native_enforceInterface(
                     "java/lang/SecurityException",
                     "HWBinder invocation to an incorrect interface");
         }
+        env->ReleaseStringUTFChars(interfaceNameObj, interfaceName);
     }
 }
 
@@ -989,6 +990,8 @@ static jobject JHwParcel_native_readStrongBinder(JNIEnv *env, jobject thiz) {
     }
 
     if (!validateCanUseHwBinder(binder)) {
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                          "Local binder is not supported in Java");
         return nullptr;
     }
 

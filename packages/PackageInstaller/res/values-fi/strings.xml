@@ -18,14 +18,14 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"Paketin asentaja"</string>
     <string name="install" msgid="711829760615509273">"Asenna"</string>
+    <string name="update" msgid="3932142540719227615">"Päivitä"</string>
     <string name="done" msgid="6632441120016885253">"Valmis"</string>
-    <string name="cancel" msgid="1018267193425558088">"Peruuta"</string>
+    <string name="cancel" msgid="1018267193425558088">"Peru"</string>
     <string name="installing" msgid="4921993079741206516">"Asennetaan…"</string>
     <string name="installing_app" msgid="1165095864863849422">"Asennetaan <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"Sovellus on asennettu."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"Haluatko asentaa tämän sovelluksen?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"Haluatko asentaa päivityksen tähän asennettuun sovellukseen? Aiempi data ei katoa."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Haluatko asentaa päivityksen tähän valmiiksi asennettuun sovellukseen? Aiempi data ei katoa."</string>
+    <string name="install_confirm_question" msgid="7663733664476363311">"Haluatko asentaa tämän sovelluksen?"</string>
+    <string name="install_confirm_question_update" msgid="3348888852318388584">"Haluatko päivittää tämän sovelluksen?"</string>
     <string name="install_failed" msgid="5777824004474125469">"Sovellusta ei asennettu."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Paketin asennus estettiin."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Sovellusta ei asennettu, koska paketti on ristiriidassa nykyisen paketin kanssa."</string>
@@ -80,9 +80,9 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wear ei tue asennus- ja poistotoimintoja."</string>
     <string name="message_staging" msgid="8032722385658438567">"Valmistellaan sovellusta…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Tuntematon"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"Turvallisuussyistä tabletti ei voi asentaa tuntemattomia sovelluksia tästä lähteestä."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"Turvallisuussyistä televisiosi ei voi asentaa tuntemattomia sovelluksia tästä lähteestä."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"Turvallisuussyistä puhelin ei voi asentaa tuntemattomia sovelluksia tästä lähteestä."</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Turvallisuussyistä tablettisi ei tällä hetkellä voi asentaa tuntemattomia sovelluksia tästä lähteestä. Voit muuttaa tätä asetuksissa."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Turvallisuussyistä televisiosi ei tällä hetkellä voi asentaa tuntemattomia sovelluksia tästä lähteestä. Voit muuttaa tätä asetuksissa."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Turvallisuussyistä puhelimesi ei tällä hetkellä voi asentaa tuntemattomia sovelluksia tästä lähteestä. Voit muuttaa tätä asetuksissa."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Tuntemattomat sovellukset voivat helpommin kaapata puhelimesi ja henkilökohtaiset tietosi. Lataamalla sovelluksia tästä lähteestä hyväksyt, että olet itse vastuussa puhelimellesi aiheutuvista vahingoista tai tietojen menetyksestä, jotka voivat johtua sovellusten käytöstä."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Tuntemattomat sovellukset voivat helpommin kaapata tablettisi ja henkilökohtaiset tietosi. Lataamalla sovelluksia tästä lähteestä hyväksyt, että olet itse vastuussa tabletillesi aiheutuvista vahingoista tai tietojen menetyksestä, jotka voivat johtua sovellusten käytöstä."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Tuntemattomat sovellukset voivat helpommin kaapata televisiosi ja henkilökohtaiset tietosi. Lataamalla sovelluksen hyväksyt, että olet itse vastuussa mahdollisista televisiolle aiheutuvista vahingoista tai tietojen menetyksestä, jotka voivat johtua sovellusten käytöstä."</string>

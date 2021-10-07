@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
@@ -30,6 +31,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -38,7 +40,7 @@ import java.util.Set;
  * suitable for use as the key of a {@link java.util.Map}
  */
 public class Account implements Parcelable {
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static final String TAG = "Account";
 
     @GuardedBy("sAccessedAccounts")
@@ -47,10 +49,10 @@ public class Account implements Parcelable {
     public final String name;
     public final String type;
     private String mSafeName;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private final @Nullable String accessId;
 
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o == this) return true;
         if (!(o instanceof Account)) return false;
         final Account other = (Account)o;
@@ -84,6 +86,12 @@ public class Account implements Parcelable {
         }
         if (TextUtils.isEmpty(type)) {
             throw new IllegalArgumentException("the type must not be empty: " + type);
+        }
+        if (name.length() > 200) {
+            throw new IllegalArgumentException("account name is longer than 200 characters");
+        }
+        if (type.length() > 200) {
+            throw new IllegalArgumentException("account type is longer than 200 characters");
         }
         this.name = name;
         this.type = type;

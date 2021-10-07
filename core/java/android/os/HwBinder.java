@@ -94,6 +94,15 @@ public abstract class HwBinder implements IHwBinder {
         throws RemoteException, NoSuchElementException;
 
     /**
+     * This allows getService to bypass the VINTF manifest for testing only.
+     *
+     * Disabled on user builds.
+     * @hide
+     */
+    public static native final void setTrebleTestingOverride(
+            boolean testingOverride);
+
+    /**
      * Configures how many threads the process-wide hwbinder threadpool
      * has to process incoming requests.
      *
@@ -150,7 +159,7 @@ public abstract class HwBinder implements IHwBinder {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     public static void reportSyspropChanged() {
         native_report_sysprop_change();
     }

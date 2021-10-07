@@ -20,7 +20,7 @@ import android.database.Cursor;
 import android.net.Uri;
 
 /**
- * A dummy content provider for tests.  This provider runs in a different process from the test.
+ * A placeholder content provider for tests.  This provider runs in a different process from the test.
  */
 public class FakeProviderRemote extends ContentProvider {
 
@@ -65,5 +65,14 @@ public class FakeProviderRemote extends ContentProvider {
         }
         return new Uri.Builder().scheme(uri.getScheme()).authority(uri.getAuthority())
                 .appendPath("canonical").build();
+    }
+
+    @Override
+    public Uri uncanonicalize(Uri uri) {
+        if (uri.getPath() != null && uri.getPath().contains("error")) {
+            throw new IllegalArgumentException("Expected exception");
+        }
+        return new Uri.Builder().scheme(uri.getScheme()).authority(uri.getAuthority())
+                .appendPath("uncanonical").build();
     }
 }

@@ -451,12 +451,28 @@ public class PackageDexUsageTests {
                 "PCL[new_context.dex]");
         assertTrue(record(fooSecondary1User0NewContext));
 
-        // Not check that the context was switch to variable.
+        // Now check that the context was switch to variable.
         TestData expectedContext = mFooSecondary1User0.updateClassLoaderContext(
                 PackageDexUsage.VARIABLE_CLASS_LOADER_CONTEXT);
 
         assertPackageDexUsage(null, expectedContext);
         writeAndReadBack();
+        assertPackageDexUsage(null, expectedContext);
+    }
+
+    @Test
+    public void testRecordClassLoaderContextOverwritten() {
+        // Record a secondary dex file.
+        assertTrue(record(mFooSecondary1User0));
+        // Now update its context.
+        TestData fooSecondary1User0NewContext = mFooSecondary1User0.updateClassLoaderContext(
+                "PCL[new_context.dex]", true);
+        assertTrue(record(fooSecondary1User0NewContext));
+
+        // Now check that the context was overwritten.
+        TestData expectedContext = mFooSecondary1User0.updateClassLoaderContext(
+                "PCL[new_context.dex]", true);
+
         assertPackageDexUsage(null, expectedContext);
     }
 
@@ -642,8 +658,9 @@ public class PackageDexUsageTests {
 
     private boolean record(TestData testData) {
         return mPackageDexUsage.record(testData.mPackageName, testData.mDexFile,
-               testData.mOwnerUserId, testData.mLoaderIsa,
-               testData.mPrimaryOrSplit, testData.mUsedBy, testData.mClassLoaderContext);
+                testData.mOwnerUserId, testData.mLoaderIsa,
+                testData.mPrimaryOrSplit, testData.mUsedBy, testData.mClassLoaderContext,
+                testData.mOverwriteCLC);
     }
 
     private boolean record(PackageDexUsage packageDexUsage, TestData testData, Set<String> users) {
@@ -651,7 +668,8 @@ public class PackageDexUsageTests {
         for (String user : users) {
             result = result && packageDexUsage.record(testData.mPackageName, testData.mDexFile,
                     testData.mOwnerUserId, testData.mLoaderIsa,
-                    testData.mPrimaryOrSplit, user, testData.mClassLoaderContext);
+                    testData.mPrimaryOrSplit, user, testData.mClassLoaderContext,
+                    testData.mOverwriteCLC);
         }
         return result;
     }
@@ -682,15 +700,16 @@ public class PackageDexUsageTests {
         private final boolean mPrimaryOrSplit;
         private final String mUsedBy;
         private final String mClassLoaderContext;
+        private final boolean mOverwriteCLC;
 
         private TestData(String packageName, String dexFile, int ownerUserId,
                 String loaderIsa, boolean primaryOrSplit, String usedBy) {
             this(packageName, dexFile, ownerUserId, loaderIsa, primaryOrSplit,
-                    usedBy, "PCL[" + dexFile + "]");
+                    usedBy, "PCL[" + dexFile + "]", false);
         }
         private TestData(String packageName, String dexFile, int ownerUserId,
                 String loaderIsa, boolean primaryOrSplit, String usedBy,
-                String classLoaderContext) {
+                String classLoaderContext, boolean overwriteCLC) {
             mPackageName = packageName;
             mDexFile = dexFile;
             mOwnerUserId = ownerUserId;
@@ -698,16 +717,21 @@ public class PackageDexUsageTests {
             mPrimaryOrSplit = primaryOrSplit;
             mUsedBy = usedBy;
             mClassLoaderContext = classLoaderContext;
+            mOverwriteCLC = overwriteCLC;
         }
 
         private TestData updateClassLoaderContext(String newContext) {
+            return updateClassLoaderContext(newContext, mOverwriteCLC);
+        }
+
+        private TestData updateClassLoaderContext(String newContext, boolean overwriteCLC) {
             return new TestData(mPackageName, mDexFile, mOwnerUserId, mLoaderIsa,
-                    mPrimaryOrSplit, mUsedBy, newContext);
+                    mPrimaryOrSplit, mUsedBy, newContext, overwriteCLC);
         }
 
         private TestData updateUsedBy(String newUsedBy) {
             return new TestData(mPackageName, mDexFile, mOwnerUserId, mLoaderIsa,
-                mPrimaryOrSplit, newUsedBy, mClassLoaderContext);
+                mPrimaryOrSplit, newUsedBy, mClassLoaderContext, mOverwriteCLC);
         }
 
         private boolean isUsedByOtherApps() {

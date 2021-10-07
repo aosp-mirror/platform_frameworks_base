@@ -17,8 +17,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="ringtone_default" msgid="798836092118824500">"ਪੂਰਵ-ਨਿਰਧਾਰਤ ਰਿੰਗਟੋਨ"</string>
-    <string name="notification_sound_default" msgid="8133121186242636840">"ਪੂਰਵ-ਨਿਰਧਾਰਤ ਸੂਚਨਾ ਧੁਨੀ"</string>
-    <string name="alarm_sound_default" msgid="4787646764557462649">"ਪੂਰਵ-ਨਿਰਧਾਰਤ ਅਲਾਰਮ ਧੁਨੀ"</string>
+    <string name="notification_sound_default" msgid="8133121186242636840">"ਪੂਰਵ-ਨਿਰਧਾਰਿਤ ਸੂਚਨਾ ਧੁਨੀ"</string>
+    <string name="alarm_sound_default" msgid="4787646764557462649">"ਪੂਰਵ-ਨਿਰਧਾਰਿਤ ਅਲਾਰਮ ਧੁਨੀ"</string>
     <string name="add_ringtone_text" msgid="6642389991738337529">"ਰਿੰਗਟੋਨ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="add_alarm_text" msgid="3545497316166999225">"ਅਲਾਰਮ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="add_notification_text" msgid="4431129543300614788">"ਸੂਚਨਾ ਸ਼ਾਮਲ ਕਰੋ"</string>

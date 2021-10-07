@@ -1,0 +1,9 @@
+props {
+  module: "android.sysprop.LocalizationProperties"
+  prop {
+    api_name: "locale_filter"
+    type: String
+    scope: Internal
+    prop_name: "ro.localization.locale_filter"
+  }
+}

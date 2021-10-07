@@ -21,7 +21,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import android.security.keystore.AndroidKeyStoreSecretKey;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Pair;
@@ -117,7 +116,7 @@ public class WrappedKeyTest {
     @Test
     public void decryptWrappedKeys_decryptsWrappedKeys_nullMetadata() throws Exception {
         String alias = "karlin";
-        AndroidKeyStoreSecretKey platformKey = generateAndroidKeyStoreKey();
+        SecretKey platformKey = generateAndroidKeyStoreKey();
         SecretKey appKey = generateKey();
         WrappedKey wrappedKey = WrappedKey.fromSecretKey(
                 new PlatformEncryptionKey(GENERATION_ID, platformKey), appKey, NULL_METADATA);
@@ -136,7 +135,7 @@ public class WrappedKeyTest {
     @Test
     public void decryptWrappedKeys_decryptsWrappedKeys_nonNullMetadata() throws Exception {
         String alias = "karlin";
-        AndroidKeyStoreSecretKey platformKey = generateAndroidKeyStoreKey();
+        SecretKey platformKey = generateAndroidKeyStoreKey();
         SecretKey appKey = generateKey();
         WrappedKey wrappedKey = WrappedKey.fromSecretKey(
                 new PlatformEncryptionKey(GENERATION_ID, platformKey), appKey, NON_NULL_METADATA);
@@ -155,7 +154,7 @@ public class WrappedKeyTest {
     @Test
     public void decryptWrappedKeys_doesNotDieIfSomeKeysAreUnwrappable() throws Exception {
         String alias = "karlin";
-        AndroidKeyStoreSecretKey platformKey = generateAndroidKeyStoreKey();
+        SecretKey platformKey = generateAndroidKeyStoreKey();
         SecretKey appKey = generateKey();
         WrappedKey wrappedKey = WrappedKey.fromSecretKey(
                 new PlatformEncryptionKey(GENERATION_ID, platformKey), appKey, NULL_METADATA);
@@ -171,7 +170,7 @@ public class WrappedKeyTest {
 
     @Test
     public void decryptWrappedKeys_throwsIfPlatformKeyGenerationIdDoesNotMatch() throws Exception {
-        AndroidKeyStoreSecretKey platformKey = generateAndroidKeyStoreKey();
+        SecretKey platformKey = generateAndroidKeyStoreKey();
         WrappedKey wrappedKey = WrappedKey.fromSecretKey(
                 new PlatformEncryptionKey(GENERATION_ID, platformKey), generateKey(),
                 /*metadata=*/ null);
@@ -197,7 +196,7 @@ public class WrappedKeyTest {
         return keyGenerator.generateKey();
     }
 
-    private AndroidKeyStoreSecretKey generateAndroidKeyStoreKey() throws Exception {
+    private SecretKey generateAndroidKeyStoreKey() throws Exception {
         KeyGenerator keyGenerator = KeyGenerator.getInstance(
                 KEY_ALGORITHM,
                 ANDROID_KEY_STORE_PROVIDER);
@@ -207,6 +206,6 @@ public class WrappedKeyTest {
                 .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
                 .build());
-        return (AndroidKeyStoreSecretKey) keyGenerator.generateKey();
+        return keyGenerator.generateKey();
     }
 }

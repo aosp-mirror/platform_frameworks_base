@@ -32,10 +32,6 @@ ifneq ($(ANDROID_BUILD_EMBEDDED),true)
 # ============================================================
 include $(CLEAR_VARS)
 
-# This is used by ide.mk as the list of source files that are
-# always included.
-INTERNAL_SDK_SOURCE_DIRS := $(addprefix $(LOCAL_PATH)/,$(dirs_to_document))
-
 # sdk.atree needs to copy the whole dir: $(OUT_DOCS)/offline-sdk to the final zip.
 # So keep offline-sdk-timestamp target here, and unzip offline-sdk-docs.zip to
 # $(OUT_DOCS)/offline-sdk.
@@ -60,7 +56,7 @@ $(SDK_METADATA): .KATI_IMPLICIT_OUTPUTS := $(filter-out $(SDK_METADATA),$(SDK_ME
 $(SDK_METADATA): $(TARGET_OUT_COMMON_INTERMEDIATES)/PACKAGING/framework-doc-stubs-metadata.zip
 	rm -rf $(SDK_METADATA_DIR)
 	mkdir -p $(SDK_METADATA_DIR)
-	unzip -qo $< -d $(SDK_METADATA_DIR)
+	unzip -DDqo $< -d $(SDK_METADATA_DIR)
 
 .PHONY: framework-doc-stubs
 framework-doc-stubs: $(SDK_METADATA)

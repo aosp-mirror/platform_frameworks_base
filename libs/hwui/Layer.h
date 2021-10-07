@@ -21,6 +21,7 @@
 #include <SkBlendMode.h>
 #include <SkColorFilter.h>
 #include <SkColorSpace.h>
+#include <SkCanvas.h>
 #include <SkPaint.h>
 #include <SkImage.h>
 #include <SkMatrix.h>
@@ -86,6 +87,8 @@ public:
     inline void setImage(const sk_sp<SkImage>& image) { this->layerImage = image; }
 
     inline sk_sp<SkImage> getImage() const { return this->layerImage; }
+
+    void draw(SkCanvas* canvas);
 
 protected:
 

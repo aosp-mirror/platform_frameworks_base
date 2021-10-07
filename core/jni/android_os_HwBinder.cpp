@@ -20,6 +20,8 @@
 
 #include "android_os_HwBinder.h"
 
+#include "android_util_Binder.h" // for binder_report_exception
+
 #include "android_os_HwParcel.h"
 #include "android_os_HwRemoteBinder.h"
 
@@ -183,15 +185,7 @@ status_t JHwBinder::onTransact(
         env->ExceptionDescribe();
         env->ExceptionClear();
 
-        // It is illegal to call IsInstanceOf if there is a pending exception.
-        // Attempting to do so results in a JniAbort which crashes the entire process.
-        if (env->IsInstanceOf(excep, gErrorClass)) {
-            /* It's an error */
-            LOG(ERROR) << "Forcefully exiting";
-            _exit(1);
-        } else {
-            LOG(ERROR) << "Uncaught exception!";
-        }
+        binder_report_exception(env, excep, "Uncaught error or exception in hwbinder!");
 
         env->DeleteLocalRef(excep);
     }
@@ -339,6 +333,10 @@ static jobject JHwBinder_native_getService(
     return JHwRemoteBinder::NewObject(env, service);
 }
 
+void JHwBinder_native_setTrebleTestingOverride(JNIEnv*, jclass, jboolean testingOverride) {
+    hardware::details::setTrebleTestingOverride(testingOverride);
+}
+
 void JHwBinder_native_configureRpcThreadpool(JNIEnv *, jclass,
         jlong maxThreads, jboolean callerWillJoin) {
     CHECK(maxThreads > 0);
@@ -367,6 +365,9 @@ static JNINativeMethod gMethods[] = {
 
     { "getService", "(Ljava/lang/String;Ljava/lang/String;Z)L" PACKAGE_PATH "/IHwBinder;",
         (void *)JHwBinder_native_getService },
+
+    { "setTrebleTestingOverride", "(Z)V",
+        (void *)JHwBinder_native_setTrebleTestingOverride },
 
     { "configureRpcThreadpool", "(JZ)V",
         (void *)JHwBinder_native_configureRpcThreadpool },

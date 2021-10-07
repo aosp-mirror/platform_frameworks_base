@@ -24,6 +24,7 @@ import static android.os.Process.PROC_PARENS;
 import static android.os.Process.PROC_SPACE_TERM;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.CpuUsageProto;
 import android.os.Process;
 import android.os.StrictMode;
@@ -200,7 +201,7 @@ public class ProcessCpuTracker {
         public boolean interesting;
 
         public String baseName;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public String name;
         public int nameWidth;
 
@@ -216,7 +217,7 @@ public class ProcessCpuTracker {
         /**
          * Time in milliseconds.
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public long rel_uptime;
 
         /**
@@ -232,13 +233,13 @@ public class ProcessCpuTracker {
         /**
          * Time in milliseconds.
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public int rel_utime;
 
         /**
          * Time in milliseconds.
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public int rel_stime;
 
         public long base_minfaults;
@@ -732,13 +733,13 @@ public class ProcessCpuTracker {
         return statses;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     final public int countWorkingStats() {
         buildWorkingProcs();
         return mWorkingProcs.size();
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     final public Stats getWorkingStats(int index) {
         return mWorkingProcs.get(index);
     }
@@ -945,8 +946,11 @@ public class ProcessCpuTracker {
 
     private void getName(Stats st, String cmdlineFile) {
         String newName = st.name;
-        if (st.name == null || st.name.equals("app_process")
-                || st.name.equals("<pre-initialized>")) {
+        if (st.name == null
+                || st.name.equals("app_process")
+                || st.name.equals("<pre-initialized>")
+                || st.name.equals("usap32")
+                || st.name.equals("usap64")) {
             String cmdName = ProcStatsUtil.readTerminatedProcFile(cmdlineFile, (byte) '\0');
             if (cmdName != null && cmdName.length() > 1) {
                 newName = cmdName;

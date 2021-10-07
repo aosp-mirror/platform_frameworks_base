@@ -23,6 +23,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UserHandleAware;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -109,7 +110,7 @@ public final class UsageStatsManager {
 
 
     /**
-     * The app is whitelisted for some reason and the bucket cannot be changed.
+     * The app is exempted for some reason and the bucket cannot be changed.
      * {@hide}
      */
     @SystemApi
@@ -437,11 +438,12 @@ public final class UsageStatsManager {
      * @see #INTERVAL_YEARLY
      * @see #INTERVAL_BEST
      */
+    @UserHandleAware
     public List<UsageStats> queryUsageStats(int intervalType, long beginTime, long endTime) {
         try {
             @SuppressWarnings("unchecked")
             ParceledListSlice<UsageStats> slice = mService.queryUsageStats(intervalType, beginTime,
-                    endTime, mContext.getOpPackageName());
+                    endTime, mContext.getOpPackageName(), mContext.getUserId());
             if (slice != null) {
                 return slice.getList();
             }
@@ -980,6 +982,20 @@ public final class UsageStatsManager {
     }
 
     /**
+     * Reports user interaction with a given package in the given user.
+     *
+     * <p><em>This method is only for use by the system</em>
+     * @hide
+     */
+    public void reportUserInteraction(@NonNull String packageName, int userId) {
+        try {
+            mService.reportUserInteraction(packageName, userId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Report usage associated with a particular {@code token} has started. Tokens are app defined
      * strings used to represent usage of in-app features. Apps with the {@link
      * android.Manifest.permission#OBSERVE_APP_USAGE} permission can register time limit observers
@@ -1102,6 +1118,14 @@ public final class UsageStatsManager {
                 break;
             case REASON_MAIN_FORCED_BY_USER:
                 sb.append("f");
+                if (subReason > 0) {
+                    // Although not expected and shouldn't happen, this could potentially have a
+                    // sub-reason if the system tries to give a reason when applying the
+                    // FORCED_BY_USER reason. The sub-reason is undefined (though most likely a
+                    // REASON_SUB_FORCED_SYSTEM_FLAG_ sub-reason), but it's better to note it in the
+                    // log than to exclude it altogether.
+                    sb.append("-").append(Integer.toBinaryString(subReason));
+                }
                 break;
             case REASON_MAIN_PREDICTED:
                 sb.append("p");
@@ -1186,13 +1210,13 @@ public final class UsageStatsManager {
 
     /**
      * {@hide}
-     * Temporarily whitelist the specified app for a short duration. This is to allow an app
+     * Temporarily allowlist the specified app for a short duration. This is to allow an app
      * receiving a high priority message to be able to access the network and acquire wakelocks
      * even if the device is in power-save mode or the app is currently considered inactive.
-     * @param packageName The package name of the app to whitelist.
-     * @param duration Duration to whitelist the app for, in milliseconds. It is recommended that
+     * @param packageName The package name of the app to allowlist.
+     * @param duration Duration to allowlist the app for, in milliseconds. It is recommended that
      * this be limited to 10s of seconds. Requested duration will be clamped to a few minutes.
-     * @param user The user for whom the package should be whitelisted. Passing in a user that is
+     * @param user The user for whom the package should be allowlisted. Passing in a user that is
      * not the same as the caller's process will require the INTERACT_ACROSS_USERS permission.
      * @see #isAppInactive(String)
      *
@@ -1238,6 +1262,34 @@ public final class UsageStatsManager {
         try {
             mService.reportChooserSelection(packageName, userId, contentType, annotations, action);
         } catch (RemoteException re) {
+        }
+    }
+
+    /**
+     * Get the last time a package is used by any users including explicit user interaction and
+     * component usage, measured in milliseconds since the epoch and truncated to the boundary of
+     * last day before the exact time. For packages that are never used, the time will be the epoch.
+     * <p> Note that this usage stats is user-agnostic. </p>
+     * <p>
+     * Also note that component usage is only reported for component bindings (e.g. broadcast
+     * receiver, service, content provider) and only when such a binding would cause an app to leave
+     * the stopped state.
+     * See {@link UsageEvents.Event.USER_INTERACTION}, {@link UsageEvents.Event.APP_COMPONENT_USED}.
+     * </p>
+     *
+     * @param packageName The name of the package to be queried.
+     * @return last time the queried package is used since the epoch.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.INTERACT_ACROSS_USERS,
+            android.Manifest.permission.PACKAGE_USAGE_STATS})
+    public long getLastTimeAnyComponentUsed(@NonNull String packageName) {
+        try {
+            return mService.getLastTimeAnyComponentUsed(packageName, mContext.getOpPackageName());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
         }
     }
 }

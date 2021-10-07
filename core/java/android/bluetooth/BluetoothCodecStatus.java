@@ -56,7 +56,7 @@ public final class BluetoothCodecStatus implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o instanceof BluetoothCodecStatus) {
             BluetoothCodecStatus other = (BluetoothCodecStatus) o;
             return (Objects.equals(other.mCodecConfig, mCodecConfig)

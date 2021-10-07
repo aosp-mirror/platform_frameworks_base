@@ -23,6 +23,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.AlignmentSpan;
 import android.text.style.BackgroundColorSpan;
@@ -40,6 +41,8 @@ import android.text.style.SuperscriptSpan;
 import android.text.style.TypefaceSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
+
+import com.android.internal.util.XmlUtils;
 
 import org.ccil.cowan.tagsoup.HTMLSchema;
 import org.ccil.cowan.tagsoup.Parser;
@@ -549,7 +552,7 @@ public class Html {
                     out.append(((ImageSpan) style[j]).getSource());
                     out.append("\">");
 
-                    // Don't output the dummy character underlying the image.
+                    // Don't output the placeholder character underlying the image.
                     i = next;
                 }
                 if (style[j] instanceof AbsoluteSizeSpan) {
@@ -629,7 +632,7 @@ public class Html {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static void withinStyle(StringBuilder out, CharSequence text,
                                     int start, int end) {
         for (int i = start; i < end; i++) {
@@ -1188,7 +1191,25 @@ class HtmlToSpannedConverter implements ContentHandler {
                 return i;
             }
         }
-        return Color.getHtmlColor(color);
+
+        // If |color| is the name of a color, pass it to Color to convert it. Otherwise,
+        // it may start with "#", "0", "0x", "+", or a digit. All of these cases are
+        // handled below by XmlUtils. (Note that parseColor accepts colors starting
+        // with "#", but it treats them differently from XmlUtils.)
+        if (Character.isLetter(color.charAt(0))) {
+            try {
+                return Color.parseColor(color);
+            } catch (IllegalArgumentException e) {
+                return -1;
+            }
+        }
+
+        try {
+            return XmlUtils.convertValueToInt(color, -1);
+        } catch (NumberFormatException nfe) {
+            return -1;
+        }
+
     }
 
     public void setDocumentLocator(Locator locator) {

@@ -30,4 +30,7 @@ oneway interface IDataServiceCallback
     void onSetDataProfileComplete(int result);
     void onRequestDataCallListComplete(int result, in List<DataCallResponse> dataCallList);
     void onDataCallListChanged(in List<DataCallResponse> dataCallList);
+    void onHandoverStarted(int result);
+    void onHandoverCancelled(int result);
+    void onApnUnthrottled(in String apn);
 }

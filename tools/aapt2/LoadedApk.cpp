@@ -113,7 +113,7 @@ std::unique_ptr<LoadedApk> LoadedApk::LoadProtoApkFromFileCollection(
     }
 
     std::string error;
-    table = util::make_unique<ResourceTable>(/** validate_resources **/ false);
+    table = util::make_unique<ResourceTable>(ResourceTable::Validation::kDisabled);
     if (!DeserializeTableFromPb(pb_table, collection.get(), table.get(), &error)) {
       diag->Error(DiagMessage(source)
                   << "failed to deserialize " << kProtoResourceTablePath << ": " << error);
@@ -157,7 +157,7 @@ std::unique_ptr<LoadedApk> LoadedApk::LoadBinaryApkFromFileCollection(
 
   io::IFile* table_file = collection->FindFile(kApkResourceTablePath);
   if (table_file != nullptr) {
-    table = util::make_unique<ResourceTable>(/** validate_resources **/ false);
+    table = util::make_unique<ResourceTable>(ResourceTable::Validation::kDisabled);
     std::unique_ptr<io::IData> data = table_file->OpenAsData();
     if (data == nullptr) {
       diag->Error(DiagMessage(source) << "failed to open " << kApkResourceTablePath);
@@ -267,8 +267,14 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, ResourceTable* split_table
         return false;
       }
     } else if (format_ == ApkFormat::kProto && path == kProtoResourceTablePath) {
+      SerializeTableOptions proto_serialize_options;
+      proto_serialize_options.collapse_key_stringpool =
+          options.collapse_key_stringpool;
+      proto_serialize_options.name_collapse_exemptions =
+          options.name_collapse_exemptions;
       pb::ResourceTable pb_table;
-      SerializeTableToPb(*split_table, &pb_table, context->GetDiagnostics());
+      SerializeTableToPb(*split_table, &pb_table, context->GetDiagnostics(),
+                         proto_serialize_options);
       if (!io::CopyProtoToArchive(context,
                                   &pb_table,
                                   path,

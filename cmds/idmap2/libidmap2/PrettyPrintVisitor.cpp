@@ -18,6 +18,7 @@
 
 #include <istream>
 #include <string>
+#include <utility>
 
 #include "android-base/macros.h"
 #include "android-base/stringprintf.h"
@@ -27,8 +28,6 @@
 
 namespace android::idmap2 {
 
-#define RESID(pkg, type, entry) (((pkg) << 24) | ((type) << 16) | (entry))
-
 #define TAB "    "
 
 void PrettyPrintVisitor::visit(const Idmap& idmap ATTRIBUTE_UNUSED) {
@@ -36,8 +35,13 @@ void PrettyPrintVisitor::visit(const Idmap& idmap ATTRIBUTE_UNUSED) {
 
 void PrettyPrintVisitor::visit(const IdmapHeader& header) {
   stream_ << "Paths:" << std::endl
-          << TAB "target apk path  : " << header.GetTargetPath() << std::endl
-          << TAB "overlay apk path : " << header.GetOverlayPath() << std::endl;
+          << TAB "target path  : " << header.GetTargetPath() << std::endl
+          << TAB "overlay path : " << header.GetOverlayPath() << std::endl;
+
+  if (!header.GetOverlayName().empty()) {
+    stream_ << "Overlay name: " << header.GetOverlayName() << std::endl;
+  }
+
   const std::string& debug = header.GetDebugInfo();
   if (!debug.empty()) {
     std::istringstream debug_stream(debug);
@@ -48,10 +52,13 @@ void PrettyPrintVisitor::visit(const IdmapHeader& header) {
     }
   }
 
-  target_apk_ = ApkAssets::Load(header.GetTargetPath().to_string());
-  if (target_apk_) {
-    target_am_.SetApkAssets({target_apk_.get()});
+  if (auto target = TargetResourceContainer::FromPath(header.GetTargetPath())) {
+    target_ = std::move(*target);
   }
+  if (auto overlay = OverlayResourceContainer::FromPath(header.GetOverlayPath())) {
+    overlay_ = std::move(*overlay);
+  }
+
   stream_ << "Mapping:" << std::endl;
 }
 
@@ -59,34 +66,52 @@ void PrettyPrintVisitor::visit(const IdmapData::Header& header ATTRIBUTE_UNUSED)
 }
 
 void PrettyPrintVisitor::visit(const IdmapData& data) {
-  const bool target_package_loaded = !target_am_.GetApkAssets().empty();
-  const ResStringPool string_pool(data.GetStringPoolData(),
-                                  data.GetHeader()->GetStringPoolLength());
+  static constexpr const char* kUnknownResourceName = "???";
+
+  const ResStringPool string_pool(data.GetStringPoolData().data(), data.GetStringPoolData().size());
   const size_t string_pool_offset = data.GetHeader()->GetStringPoolIndexOffset();
 
-  for (auto& target_entry : data.GetTargetEntries()) {
-    stream_ << TAB << base::StringPrintf("0x%08x ->", target_entry.target_id);
-
-    if (target_entry.data_type != Res_value::TYPE_REFERENCE &&
-        target_entry.data_type != Res_value::TYPE_DYNAMIC_REFERENCE) {
-      stream_ << " " << utils::DataTypeToString(target_entry.data_type);
-    }
-
-    if (target_entry.data_type == Res_value::TYPE_STRING) {
-      stream_ << " \""
-              << string_pool.string8ObjectAt(target_entry.data_value - string_pool_offset).c_str()
-              << "\"";
-    } else {
-      stream_ << " " << base::StringPrintf("0x%08x", target_entry.data_value);
-    }
-
-    if (target_package_loaded) {
-      Result<std::string> name = utils::ResToTypeEntryName(target_am_, target_entry.target_id);
-      if (name) {
-        stream_ << " " << *name;
+  for (const auto& target_entry : data.GetTargetEntries()) {
+    std::string target_name = kUnknownResourceName;
+    if (target_ != nullptr) {
+      if (auto name = target_->GetResourceName(target_entry.target_id)) {
+        target_name = *name;
       }
     }
-    stream_ << std::endl;
+
+    std::string overlay_name = kUnknownResourceName;
+    if (overlay_ != nullptr) {
+      if (auto name = overlay_->GetResourceName(target_entry.overlay_id)) {
+        overlay_name = *name;
+      }
+    }
+
+    stream_ << TAB
+            << base::StringPrintf("0x%08x -> 0x%08x (%s -> %s)", target_entry.target_id,
+                                  target_entry.overlay_id, target_name.c_str(),
+                                  overlay_name.c_str())
+            << std::endl;
+  }
+
+  for (auto& target_entry : data.GetTargetInlineEntries()) {
+    stream_ << TAB << base::StringPrintf("0x%08x -> ", target_entry.target_id)
+            << utils::DataTypeToString(target_entry.value.data_type);
+
+    if (target_entry.value.data_type == Res_value::TYPE_STRING) {
+      auto str = string_pool.stringAt(target_entry.value.data_value - string_pool_offset);
+      stream_ << " \"" << str.value_or(StringPiece16(u"")) << "\"";
+    } else {
+      stream_ << " " << base::StringPrintf("0x%08x", target_entry.value.data_value);
+    }
+
+    std::string target_name = kUnknownResourceName;
+    if (target_ != nullptr) {
+      if (auto name = target_->GetResourceName(target_entry.target_id)) {
+        target_name = *name;
+      }
+    }
+
+    stream_ << " (" << target_name << ")" << std::endl;
   }
 }
 

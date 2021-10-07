@@ -16,11 +16,20 @@
 
 // Build the android.test.mock library
 // ===================================
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
 java_sdk_library {
     name: "android.test.mock",
 
     srcs: [
-        "src/**/*.java",
+        ":android-test-mock-sources",
         // Note: Below are NOT APIs of this library. We only take APIs under
         // the android.test.mock package. They however provide private APIs that
         // android.test.mock APIs references to.
@@ -29,6 +38,7 @@ java_sdk_library {
     ],
     libs: [
         "framework",
+        "framework-annotations-lib",
         "app-compat-annotations",
         "unsupportedappusage",
     ],
@@ -37,6 +47,8 @@ java_sdk_library {
         "android.test.mock",
     ],
     compile_dex: true,
+    default_to_stubs: true,
+    dist_group: "android",
 }
 
 // Make the current.txt available for use by the cts/tests/signature tests.
@@ -49,4 +61,10 @@ filegroup {
     srcs: [
         "api/current.txt",
     ],
+}
+
+filegroup {
+    name: "android-test-mock-sources",
+    srcs: ["src/**/*.java"],
+    path: "src",
 }

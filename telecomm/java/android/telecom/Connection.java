@@ -18,6 +18,7 @@ package android.telecom;
 
 import static android.Manifest.permission.MODIFY_PHONE_STATE;
 
+import android.Manifest;
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -28,6 +29,7 @@ import android.annotation.SystemApi;
 import android.app.Notification;
 import android.bluetooth.BluetoothDevice;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.hardware.camera2.CameraManager;
 import android.net.Uri;
@@ -37,9 +39,12 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.telephony.CallQuality;
 import android.telephony.ims.ImsStreamMediaProfile;
 import android.util.ArraySet;
 import android.view.Surface;
@@ -108,6 +113,20 @@ import java.util.concurrent.ConcurrentHashMap;
  * {@link Call#removeExtras(String...)} methods.
  */
 public abstract class Connection extends Conferenceable {
+
+    /**@hide*/
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "STATE_", value = {
+            STATE_INITIALIZING,
+            STATE_NEW,
+            STATE_RINGING,
+            STATE_DIALING,
+            STATE_ACTIVE,
+            STATE_HOLDING,
+            STATE_DISCONNECTED,
+            STATE_PULLING_CALL
+    })
+    public @interface ConnectionState {}
 
     /**
      * The connection is initializing. This is generally the first state for a {@code Connection}
@@ -380,15 +399,17 @@ public abstract class Connection extends Conferenceable {
 
     /**
      * When set, indicates that this {@link Connection} supports initiation of a conference call
-     * by directly adding participants using {@link #onAddConferenceParticipants(List)}.
-     * @hide
+     * by directly adding participants using {@link #onAddConferenceParticipants(List)}. When
+     * participants are added to a {@link Connection}, it will be replaced by a {@link Conference}
+     * instance with {@link #PROPERTY_IS_ADHOC_CONFERENCE} set to indicate that it is an adhoc
+     * conference call.
      */
     public static final int CAPABILITY_ADD_PARTICIPANT = 0x04000000;
 
     /**
      * Indicates that this {@code Connection} can be transferred to another
      * number.
-     * Connection supports the blind and assured call transfer feature.
+     * Connection supports the confirmed and unconfirmed call transfer feature.
      * @hide
      */
     public static final int CAPABILITY_TRANSFER = 0x08000000;
@@ -519,16 +540,23 @@ public abstract class Connection extends Conferenceable {
     public static final int PROPERTY_REMOTELY_HOSTED = 1 << 11;
 
     /**
-     * Set by the framework to indicate that it is an adhoc conference call.
+     * Set by the framework to indicate that a call is an adhoc conference call.
      * <p>
-     * This is used for Outgoing and incoming conference calls.
-     * @hide
+     * This is used for outgoing and incoming conference calls.
      */
     public static final int PROPERTY_IS_ADHOC_CONFERENCE = 1 << 12;
 
+    /**
+     * Connection is using cross sim technology.
+     * <p>
+     * Indicates that the {@link Connection} is using a cross sim technology which would
+     * register IMS over internet APN of default data subscription.
+     * <p>
+     */
+    public static final int PROPERTY_CROSS_SIM = 1 << 13;
 
     //**********************************************************************************************
-    // Next PROPERTY value: 1<<13
+    // Next PROPERTY value: 1<<14
     //**********************************************************************************************
 
     /**
@@ -643,6 +671,14 @@ public abstract class Connection extends Conferenceable {
     public @interface AudioCodec {}
 
     /**
+     * Contains the same value as {@link #getCallerNumberVerificationStatus()}, except will be
+     * present in the {@link #getExtras()} using this key.
+     * @hide
+     */
+    public static final String EXTRA_CALLER_NUMBER_VERIFICATION_STATUS =
+            "android.telecom.extra.CALLER_NUMBER_VERIFICATION_STATUS";
+
+    /**
      * Connection extra key used to store the last forwarded number associated with the current
      * connection.  Used to communicate to the user interface that the connection was forwarded via
      * the specified number.
@@ -739,6 +775,21 @@ public abstract class Connection extends Conferenceable {
             "android.telecom.extra.REMOTE_PHONE_ACCOUNT_HANDLE";
 
     /**
+     * The Telecom call ID of the conference an existing connection should be added to.  This is
+     * required when {@link com.android.services.telephony.TelephonyConnectionService} adds a
+     * {@link Conference} to Telecom using the
+     * {@link ConnectionService#addExistingConnection(PhoneAccountHandle, Connection, Conference)}
+     * API.  That API specifies a parent conference associated with the new existing connection
+     * being added, and there is no equivalent as part of the {@link RemoteConnectionService} API.
+     * This extra key is used to stack the ID of the conference to which the existing connection
+     * will be added so that Telecom can link it up correctly when the {@link RemoteConference}
+     * is added to Telecom by the connection manager.
+     * @hide
+     */
+    public static final String EXTRA_ADD_TO_CONFERENCE_ID =
+            "android.telecom.extra.ADD_TO_CONFERENCE_ID";
+
+    /**
      * Extra key set from a {@link ConnectionService} when using the remote connection APIs
      * (e.g. {@link RemoteConnectionService#createRemoteConnection(PhoneAccountHandle,
      * ConnectionRequest, boolean)}) to create a remote connection.  Provides the receiving
@@ -764,6 +815,28 @@ public abstract class Connection extends Conferenceable {
      */
     public static final @AudioCodec String EXTRA_AUDIO_CODEC =
             "android.telecom.extra.AUDIO_CODEC";
+
+    /**
+     * Float connection extra key used to store the audio codec bitrate in kbps for the current
+     * {@link Connection}.
+     */
+    public static final String EXTRA_AUDIO_CODEC_BITRATE_KBPS =
+            "android.telecom.extra.AUDIO_CODEC_BITRATE_KBPS";
+
+    /**
+     * Float connection extra key used to store the audio codec bandwidth in khz for the current
+     * {@link Connection}.
+     */
+    public static final String EXTRA_AUDIO_CODEC_BANDWIDTH_KHZ =
+            "android.telecom.extra.AUDIO_CODEC_BANDWIDTH_KHZ";
+
+    /**
+     * Boolean connection extra key used to indicate whether device to device communication is
+     * available for the current call.
+     * @hide
+     */
+    public static final String EXTRA_IS_DEVICE_TO_DEVICE_COMMUNICATION_AVAILABLE =
+            "android.telecom.extra.IS_DEVICE_TO_DEVICE_COMMUNICATION_AVAILABLE";
 
     /**
      * Connection event used to inform Telecom that it should play the on hold tone.  This is used
@@ -897,6 +970,63 @@ public abstract class Connection extends Conferenceable {
      */
     public static final String EVENT_RTT_AUDIO_INDICATION_CHANGED =
             "android.telecom.event.RTT_AUDIO_INDICATION_CHANGED";
+
+    /**
+     * Connection event used to signal between the telephony {@link ConnectionService} and Telecom
+     * when device to device messages are sent/received.
+     * <p>
+     * Device to device messages originating from the network are sent by telephony using
+     * {@link Connection#sendConnectionEvent(String, Bundle)} and are routed up to any active
+     * {@link CallDiagnosticService} implementation which is active.
+     * <p>
+     * Likewise, if a {@link CallDiagnosticService} sends a message using
+     * {@link CallDiagnostics#sendDeviceToDeviceMessage(int, int)}, it will be routed to telephony
+     * via {@link Connection#onCallEvent(String, Bundle)}.  The telephony stack will relay the
+     * message to the other device.
+     * @hide
+     */
+    @SystemApi
+    public static final String EVENT_DEVICE_TO_DEVICE_MESSAGE =
+            "android.telecom.event.DEVICE_TO_DEVICE_MESSAGE";
+
+    /**
+     * Sent along with {@link #EVENT_DEVICE_TO_DEVICE_MESSAGE} to indicate the device to device
+     * message type.
+     *
+     * See {@link CallDiagnostics} for more information.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_DEVICE_TO_DEVICE_MESSAGE_TYPE =
+            "android.telecom.extra.DEVICE_TO_DEVICE_MESSAGE_TYPE";
+
+    /**
+     * Sent along with {@link #EVENT_DEVICE_TO_DEVICE_MESSAGE} to indicate the device to device
+     * message value.
+     * <p>
+     * See {@link CallDiagnostics} for more information.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_DEVICE_TO_DEVICE_MESSAGE_VALUE =
+            "android.telecom.extra.DEVICE_TO_DEVICE_MESSAGE_VALUE";
+
+    /**
+     * Connection event used to communicate a {@link android.telephony.CallQuality} report from
+     * telephony to Telecom for relaying to
+     * {@link DiagnosticCall#onCallQualityReceived(CallQuality)}.
+     * @hide
+     */
+    public static final String EVENT_CALL_QUALITY_REPORT =
+            "android.telecom.event.CALL_QUALITY_REPORT";
+
+    /**
+     * Extra sent with {@link #EVENT_CALL_QUALITY_REPORT} containing the
+     * {@link android.telephony.CallQuality} data.
+     * @hide
+     */
+    public static final String EXTRA_CALL_QUALITY_REPORT =
+            "android.telecom.extra.CALL_QUALITY_REPORT";
 
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
@@ -1083,6 +1213,10 @@ public abstract class Connection extends Conferenceable {
 
         if ((properties & PROPERTY_IS_ADHOC_CONFERENCE) == PROPERTY_IS_ADHOC_CONFERENCE) {
             builder.append(isLong ? " PROPERTY_IS_ADHOC_CONFERENCE" : " adhoc_conf");
+        }
+
+        if ((properties & PROPERTY_IS_DOWNGRADED_CONFERENCE) == PROPERTY_IS_DOWNGRADED_CONFERENCE) {
+            builder.append(isLong ? " PROPERTY_IS_DOWNGRADED_CONFERENCE" : " dngrd_conf");
         }
 
         builder.append("]");
@@ -2977,6 +3111,26 @@ public abstract class Connection extends Conferenceable {
     public void onCallAudioStateChanged(CallAudioState state) {}
 
     /**
+     * Inform this Connection when it will or will not be tracked by an {@link InCallService} which
+     * can provide an InCall UI.
+     * This is primarily intended for use by Connections reported by self-managed
+     * {@link ConnectionService} which typically maintain their own UI.
+     *
+     * @param isUsingAlternativeUi Indicates whether an InCallService that can provide InCall UI is
+     *                             currently tracking the self-managed call.
+     */
+    public void onUsingAlternativeUi(boolean isUsingAlternativeUi) {}
+
+    /**
+     * Inform this Conenection when it will or will not be tracked by an non-UI
+     * {@link InCallService}.
+     *
+     * @param isTracked Indicates whether an non-UI InCallService is currently tracking the
+     *                 self-managed call.
+     */
+    public void onTrackedByNonUiService(boolean isTracked) {}
+
+    /**
      * Notifies this Connection of an internal state change. This method is called after the
      * state is changed.
      *
@@ -3019,7 +3173,6 @@ public abstract class Connection extends Conferenceable {
      * Supports initiation of a conference call by directly adding participants to an ongoing call.
      *
      * @param participants with which conference call will be formed.
-     * @hide
      */
     public void onAddConferenceParticipants(@NonNull List<Uri> participants) {}
 
@@ -3264,7 +3417,7 @@ public abstract class Connection extends Conferenceable {
      *     Intent intent = new Intent(Intent.ACTION_MAIN, null);
      *     intent.setFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION | Intent.FLAG_ACTIVITY_NEW_TASK);
      *     intent.setClass(context, YourIncomingCallActivity.class);
-     *     PendingIntent pendingIntent = PendingIntent.getActivity(context, 1, intent, 0);
+     *     PendingIntent pendingIntent = PendingIntent.getActivity(context, 1, intent, PendingIntent.FLAG_MUTABLE_UNAUDITED);
      *
      *     // Build the notification as an ongoing high priority item; this ensures it will show as
      *     // a heads up notification which slides down over top of the current content.
@@ -3321,6 +3474,137 @@ public abstract class Connection extends Conferenceable {
      *                      the in-call app.
      */
     public void handleRttUpgradeResponse(@Nullable RttTextStream rttTextStream) {}
+
+    /**
+     * Information provided to a {@link Connection} upon completion of call filtering in Telecom.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final class CallFilteringCompletionInfo implements Parcelable {
+        private final boolean mIsBlocked;
+        private final boolean mIsInContacts;
+        private final CallScreeningService.CallResponse mCallResponse;
+        private final ComponentName mCallScreeningComponent;
+
+        /**
+         * Constructor for {@link CallFilteringCompletionInfo}
+         *
+         * @param isBlocked Whether any part of the call filtering process indicated that this call
+         *                  should be blocked.
+         * @param isInContacts Whether the caller is in the user's contacts.
+         * @param callResponse The instance of {@link CallScreeningService.CallResponse} provided
+         *                     by the {@link CallScreeningService} that processed this call, or
+         *                     {@code null} if no call screening service ran.
+         * @param callScreeningComponent The component of the {@link CallScreeningService}
+         *                                 that processed this call, or {@link null} if no
+         *                                 call screening service ran.
+         */
+        public CallFilteringCompletionInfo(boolean isBlocked, boolean isInContacts,
+                @Nullable CallScreeningService.CallResponse callResponse,
+                @Nullable ComponentName callScreeningComponent) {
+            mIsBlocked = isBlocked;
+            mIsInContacts = isInContacts;
+            mCallResponse = callResponse;
+            mCallScreeningComponent = callScreeningComponent;
+        }
+
+        /** @hide */
+        protected CallFilteringCompletionInfo(Parcel in) {
+            mIsBlocked = in.readByte() != 0;
+            mIsInContacts = in.readByte() != 0;
+            CallScreeningService.ParcelableCallResponse response
+                    = in.readParcelable(CallScreeningService.class.getClassLoader());
+            mCallResponse = response == null ? null : response.toCallResponse();
+            mCallScreeningComponent = in.readParcelable(ComponentName.class.getClassLoader());
+        }
+
+        @NonNull
+        public static final Creator<CallFilteringCompletionInfo> CREATOR =
+                new Creator<CallFilteringCompletionInfo>() {
+                    @Override
+                    public CallFilteringCompletionInfo createFromParcel(Parcel in) {
+                        return new CallFilteringCompletionInfo(in);
+                    }
+
+                    @Override
+                    public CallFilteringCompletionInfo[] newArray(int size) {
+                        return new CallFilteringCompletionInfo[size];
+                    }
+                };
+
+        /**
+         * @return Whether any part of the call filtering process indicated that this call should be
+         *         blocked.
+         */
+        public boolean isBlocked() {
+            return mIsBlocked;
+        }
+
+        /**
+         * @return Whether the caller is in the user's contacts.
+         */
+        public boolean isInContacts() {
+            return mIsInContacts;
+        }
+
+        /**
+         * @return The instance of {@link CallScreeningService.CallResponse} provided
+         *         by the {@link CallScreeningService} that processed this
+         *         call, or {@code null} if no call screening service ran.
+         */
+        public @Nullable CallScreeningService.CallResponse getCallResponse() {
+            return mCallResponse;
+        }
+
+        /**
+         * @return The component of the {@link CallScreeningService}
+         *         that processed this call, or {@code null} if no call screening service ran.
+         */
+        public @Nullable ComponentName getCallScreeningComponent() {
+            return mCallScreeningComponent;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public String toString() {
+            return "CallFilteringCompletionInfo{" +
+                    "mIsBlocked=" + mIsBlocked +
+                    ", mIsInContacts=" + mIsInContacts +
+                    ", mCallResponse=" + mCallResponse +
+                    ", mCallScreeningPackageName='" + mCallScreeningComponent + '\'' +
+                    '}';
+        }
+
+        /** @hide */
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeByte((byte) (mIsBlocked ? 1 : 0));
+            dest.writeByte((byte) (mIsInContacts ? 1 : 0));
+            dest.writeParcelable(mCallResponse == null ? null : mCallResponse.toParcelable(), 0);
+            dest.writeParcelable(mCallScreeningComponent, 0);
+        }
+    }
+
+    /**
+     * Indicates that call filtering in Telecom is complete
+     *
+     * This method is called for a connection created via
+     * {@link ConnectionService#onCreateIncomingConnection} when call filtering completes in
+     * Telecom, including checking the blocked number db, per-contact settings, and custom call
+     * filtering apps.
+     *
+     * @param callFilteringCompletionInfo Info provided by Telecom on the results of call filtering.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.READ_CONTACTS)
+    public void onCallFilteringCompleted(
+            @NonNull CallFilteringCompletionInfo callFilteringCompletionInfo) { }
 
     static String toLogSafePhoneNumber(String number) {
         // For unknown number, log empty string.

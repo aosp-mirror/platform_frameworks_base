@@ -21,7 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
-import android.os.Parcelable;
+import android.telephony.AccessNetworkConstants.AccessNetworkType;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -32,7 +32,7 @@ import java.util.Objects;
  * @hide
  */
 @SystemApi
-public final class LteVopsSupportInfo implements Parcelable {
+public final class LteVopsSupportInfo extends VopsSupportInfo {
 
     /**@hide*/
     @Retention(RetentionPolicy.SOURCE)
@@ -42,7 +42,10 @@ public final class LteVopsSupportInfo implements Parcelable {
     public @interface LteVopsStatus {}
     /**
      * Indicates information not available from modem.
+     *
+     * @deprecated as no instance will be created in this case
      */
+    @Deprecated
     public static final int LTE_STATUS_NOT_AVAILABLE = 1;
 
     /**
@@ -82,13 +85,38 @@ public final class LteVopsSupportInfo implements Parcelable {
         return mEmcBearerSupport;
     }
 
+    /**
+     * Returns whether VoPS is supported by the network
+     */
+    @Override
+    public boolean isVopsSupported() {
+        return mVopsSupport == LTE_STATUS_SUPPORTED;
+    }
+
+    /**
+     * Returns whether emergency service is supported by the network
+     */
+    @Override
+    public boolean isEmergencyServiceSupported() {
+        return mEmcBearerSupport == LTE_STATUS_SUPPORTED;
+    }
+
+    /**
+     * Returns whether emergency service fallback is supported by the network
+     */
+    @Override
+    public boolean isEmergencyServiceFallbackSupported() {
+        return false;
+    }
+
     @Override
     public int describeContents() {
         return 0;
     }
 
     @Override
-    public void writeToParcel(Parcel out, int flags) {
+    public void writeToParcel(@NonNull Parcel out, int flags) {
+        super.writeToParcel(out, flags, AccessNetworkType.EUTRAN);
         out.writeInt(mVopsSupport);
         out.writeInt(mEmcBearerSupport);
     }
@@ -124,6 +152,8 @@ public final class LteVopsSupportInfo implements Parcelable {
             new Creator<LteVopsSupportInfo>() {
         @Override
         public LteVopsSupportInfo createFromParcel(Parcel in) {
+            // Skip the type info.
+            in.readInt();
             return new LteVopsSupportInfo(in);
         }
 
@@ -132,6 +162,11 @@ public final class LteVopsSupportInfo implements Parcelable {
             return new LteVopsSupportInfo[size];
         }
     };
+
+    /** @hide */
+    protected static LteVopsSupportInfo createFromParcelBody(Parcel in) {
+        return new LteVopsSupportInfo(in);
+    }
 
     private LteVopsSupportInfo(Parcel in) {
         mVopsSupport = in.readInt();
