@@ -77,7 +77,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -101,6 +100,7 @@ import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
 import android.window.ITransitionPlayer;
 import android.window.StartingWindowInfo;
+import android.window.StartingWindowRemovalInfo;
 import android.window.TaskFragmentOrganizer;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
@@ -1457,12 +1457,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
             }
         }
         @Override
-        public void removeStartingWindow(int taskId, SurfaceControl leash, Rect frame,
-                boolean playRevealAnimation) {
+        public void removeStartingWindow(StartingWindowRemovalInfo removalInfo) {
             synchronized (mWMService.mGlobalLock) {
-                final IBinder appToken = mTaskAppMap.get(taskId);
+                final IBinder appToken = mTaskAppMap.get(removalInfo.taskId);
                 if (appToken != null) {
-                    mTaskAppMap.remove(taskId);
+                    mTaskAppMap.remove(removalInfo.taskId);
                     final ActivityRecord activity = mWMService.mRoot.getActivityRecord(
                             appToken);
                     WindowState win = mAppWindowMap.remove(appToken);

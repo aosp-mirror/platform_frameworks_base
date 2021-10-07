@@ -19,7 +19,6 @@ package android.window;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.TaskInfo;
 import android.content.pm.ActivityInfo;
@@ -34,7 +33,6 @@ import android.view.WindowManager;
  * start in the system.
  * @hide
  */
-@TestApi
 public final class StartingWindowInfo implements Parcelable {
     /**
      * Prefer nothing or not care the type of starting window.
