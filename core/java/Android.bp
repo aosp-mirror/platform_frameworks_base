@@ -332,12 +332,7 @@ filegroup {
 filegroup {
     name: "framework-cellbroadcast-shared-srcs",
     srcs: [
-        "android/os/HandlerExecutor.java",
         "android/util/LocalLog.java",
-        "com/android/internal/util/IState.java",
-        "com/android/internal/util/Preconditions.java",
-        "com/android/internal/util/State.java",
-        "com/android/internal/util/StateMachine.java",
     ],
 }
 
