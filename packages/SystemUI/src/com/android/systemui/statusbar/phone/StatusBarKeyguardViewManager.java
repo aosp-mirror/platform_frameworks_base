@@ -120,7 +120,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         @Override
         public void onFullyShown() {
             updateStates();
-            mStatusBar.wakeUpIfDozing(SystemClock.uptimeMillis(), mContainer, "BOUNCER_VISIBLE");
+            mStatusBar.wakeUpIfDozing(SystemClock.uptimeMillis(),
+                    mStatusBar.getBouncerContainer(), "BOUNCER_VISIBLE");
         }
 
         @Override
@@ -174,7 +175,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private NotificationPanelViewController mNotificationPanelViewController;
     private BiometricUnlockController mBiometricUnlockController;
 
-    private ViewGroup mContainer;
     private View mNotificationContainer;
 
     protected KeyguardBouncer mBouncer;
@@ -270,14 +270,14 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     @Override
     public void registerStatusBar(StatusBar statusBar,
-            ViewGroup container,
             NotificationPanelViewController notificationPanelViewController,
             BiometricUnlockController biometricUnlockController,
             View notificationContainer,
             KeyguardBypassController bypassController) {
         mStatusBar = statusBar;
-        mContainer = container;
         mBiometricUnlockController = biometricUnlockController;
+
+        ViewGroup container = mStatusBar.getBouncerContainer();
         mBouncer = mKeyguardBouncerFactory.create(container, mExpansionCallback);
         mNotificationPanelViewController = notificationPanelViewController;
         notificationPanelViewController.addExpansionListener(this);
@@ -356,7 +356,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         } else if (mPulsing && expansion == KeyguardBouncer.EXPANSION_VISIBLE) {
             // Panel expanded while pulsing but didn't translate the bouncer (because we are
             // unlocked.) Let's simply wake-up to dismiss the lock screen.
-            mStatusBar.wakeUpIfDozing(SystemClock.uptimeMillis(), mContainer, "BOUNCER_VISIBLE");
+            mStatusBar.wakeUpIfDozing(SystemClock.uptimeMillis(), mStatusBar.getBouncerContainer(),
+                    "BOUNCER_VISIBLE");
         }
     }
 
@@ -833,7 +834,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     public void onKeyguardFadedAway() {
-        mContainer.postDelayed(() -> mNotificationShadeWindowController
+        mNotificationContainer.postDelayed(() -> mNotificationShadeWindowController
                         .setKeyguardFadingAway(false), 100);
         ViewGroupFadeHelper.reset(mNotificationPanelViewController.getView());
         mStatusBar.finishKeyguardFadingAway();
@@ -958,10 +959,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     };
 
     protected void updateStates() {
-        if (mContainer == null ) {
-            return;
-        }
-        int vis = mContainer.getSystemUiVisibility();
         boolean showing = mShowing;
         boolean occluded = mOccluded;
         boolean bouncerShowing = mBouncer.isShowing();
@@ -973,9 +970,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 (mLastBouncerDismissible || !mLastShowing || mLastRemoteInputActive)
                 || mFirstUpdate) {
             if (bouncerDismissible || !showing || remoteInputActive) {
-                mContainer.setSystemUiVisibility(vis & ~View.STATUS_BAR_DISABLE_BACK);
+                mBouncer.setBackButtonEnabled(true);
             } else {
-                mContainer.setSystemUiVisibility(vis | View.STATUS_BAR_DISABLE_BACK);
+                mBouncer.setBackButtonEnabled(false);
             }
         }
 
@@ -1042,11 +1039,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 if (delay == 0) {
                     mMakeNavigationBarVisibleRunnable.run();
                 } else {
-                    mContainer.postOnAnimationDelayed(mMakeNavigationBarVisibleRunnable,
+                    mNotificationContainer.postOnAnimationDelayed(mMakeNavigationBarVisibleRunnable,
                             delay);
                 }
             } else {
-                mContainer.removeCallbacks(mMakeNavigationBarVisibleRunnable);
+                mNotificationContainer.removeCallbacks(mMakeNavigationBarVisibleRunnable);
                 mStatusBar.getNotificationShadeWindowView().getWindowInsetsController()
                         .hide(navigationBars());
             }

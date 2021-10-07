@@ -459,7 +459,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mock(DumpManager.class),
                 mActivityLaunchAnimator,
                 mDialogLaunchAnimator);
-        when(mKeyguardViewMediator.registerStatusBar(any(StatusBar.class), any(ViewGroup.class),
+        when(mKeyguardViewMediator.registerStatusBar(any(StatusBar.class),
                 any(NotificationPanelViewController.class), any(BiometricUnlockController.class),
                 any(ViewGroup.class), any(KeyguardBypassController.class)))
                 .thenReturn(mStatusBarKeyguardViewManager);
