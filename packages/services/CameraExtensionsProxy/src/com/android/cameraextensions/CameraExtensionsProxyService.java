@@ -19,6 +19,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Camera;
 import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.hardware.camera2.CameraAccessException;
@@ -135,6 +136,7 @@ public class CameraExtensionsProxyService extends Service {
 
     private HashMap<String, CameraCharacteristics> mCharacteristicsHashMap = new HashMap<>();
     private HashMap<String, Long> mMetadataVendorIdMap = new HashMap<>();
+    private CameraManager mCameraManager;
 
     private static boolean checkForAdvancedAPI() {
         if (EXTENSIONS_PRESENT && EXTENSIONS_VERSION.startsWith(ADVANCED_VERSION_PREFIX)) {
@@ -460,12 +462,12 @@ public class CameraExtensionsProxyService extends Service {
         // This will setup the camera vendor tag descriptor in the service process
         // along with all camera characteristics.
         try {
-            CameraManager manager = getSystemService(CameraManager.class);
+            mCameraManager = getSystemService(CameraManager.class);
 
-            String [] cameraIds = manager.getCameraIdListNoLazy();
+            String [] cameraIds = mCameraManager.getCameraIdListNoLazy();
             if (cameraIds != null) {
                 for (String cameraId : cameraIds) {
-                    CameraCharacteristics chars = manager.getCameraCharacteristics(cameraId);
+                    CameraCharacteristics chars = mCameraManager.getCameraCharacteristics(cameraId);
                     mCharacteristicsHashMap.put(cameraId, chars);
                     Object thisClass = CameraCharacteristics.Key.class;
                     Class<CameraCharacteristics.Key<?>> keyClass =
@@ -1174,8 +1176,9 @@ public class CameraExtensionsProxyService extends Service {
         @Override
         public void onInit(String cameraId, CameraMetadataNative cameraCharacteristics) {
             mCameraId = cameraId;
-            mPreviewExtender.onInit(cameraId, new CameraCharacteristics(cameraCharacteristics),
-                    CameraExtensionsProxyService.this);
+            CameraCharacteristics chars = new CameraCharacteristics(cameraCharacteristics);
+            mCameraManager.registerDeviceStateListener(chars);
+            mPreviewExtender.onInit(cameraId, chars, CameraExtensionsProxyService.this);
         }
 
         @Override
@@ -1200,13 +1203,16 @@ public class CameraExtensionsProxyService extends Service {
 
         @Override
         public void init(String cameraId, CameraMetadataNative chars) {
-            mPreviewExtender.init(cameraId, new CameraCharacteristics(chars));
+            CameraCharacteristics c = new CameraCharacteristics(chars);
+            mCameraManager.registerDeviceStateListener(c);
+            mPreviewExtender.init(cameraId, c);
         }
 
         @Override
         public boolean isExtensionAvailable(String cameraId, CameraMetadataNative chars) {
-            return mPreviewExtender.isExtensionAvailable(cameraId,
-                    new CameraCharacteristics(chars));
+            CameraCharacteristics c = new CameraCharacteristics(chars);
+            mCameraManager.registerDeviceStateListener(c);
+            return mPreviewExtender.isExtensionAvailable(cameraId, c);
         }
 
         @Override
@@ -1283,8 +1289,9 @@ public class CameraExtensionsProxyService extends Service {
 
         @Override
         public void onInit(String cameraId, CameraMetadataNative cameraCharacteristics) {
-            mImageExtender.onInit(cameraId, new CameraCharacteristics(cameraCharacteristics),
-                    CameraExtensionsProxyService.this);
+            CameraCharacteristics chars = new CameraCharacteristics(cameraCharacteristics);
+            mCameraManager.registerDeviceStateListener(chars);
+            mImageExtender.onInit(cameraId, chars, CameraExtensionsProxyService.this);
             mCameraId = cameraId;
         }
 
@@ -1310,13 +1317,16 @@ public class CameraExtensionsProxyService extends Service {
 
         @Override
         public void init(String cameraId, CameraMetadataNative chars) {
-            mImageExtender.init(cameraId, new CameraCharacteristics(chars));
+            CameraCharacteristics c = new CameraCharacteristics(chars);
+            mCameraManager.registerDeviceStateListener(c);
+            mImageExtender.init(cameraId, c);
         }
 
         @Override
         public boolean isExtensionAvailable(String cameraId, CameraMetadataNative chars) {
-            return mImageExtender.isExtensionAvailable(cameraId,
-                    new CameraCharacteristics(chars));
+            CameraCharacteristics c = new CameraCharacteristics(chars);
+            mCameraManager.registerDeviceStateListener(c);
+            return mImageExtender.isExtensionAvailable(cameraId, c);
         }
 
         @Override
