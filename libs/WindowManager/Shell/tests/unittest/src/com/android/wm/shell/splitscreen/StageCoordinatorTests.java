@@ -18,9 +18,11 @@ package com.android.wm.shell.splitscreen;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.view.Display.DEFAULT_DISPLAY;
+
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__RETURN_HOME;
 import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_TOP_OR_LEFT;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
@@ -130,7 +132,7 @@ public class StageCoordinatorTests extends ShellTestCase {
         mStageCoordinator.setSideStagePosition(SPLIT_POSITION_TOP_OR_LEFT, null);
         clearInvocations(mMainUnfoldController, mSideUnfoldController);
 
-        mStageCoordinator.onLayoutChanged(mSplitLayout);
+        mStageCoordinator.onLayoutSizeChanged(mSplitLayout);
 
         verify(mMainUnfoldController).onLayoutChanged(mBounds2);
         verify(mSideUnfoldController).onLayoutChanged(mBounds1);
@@ -142,7 +144,7 @@ public class StageCoordinatorTests extends ShellTestCase {
         mStageCoordinator.setSideStagePosition(SPLIT_POSITION_BOTTOM_OR_RIGHT, null);
         clearInvocations(mMainUnfoldController, mSideUnfoldController);
 
-        mStageCoordinator.onLayoutChanged(mSplitLayout);
+        mStageCoordinator.onLayoutSizeChanged(mSplitLayout);
 
         verify(mMainUnfoldController).onLayoutChanged(mBounds1);
         verify(mSideUnfoldController).onLayoutChanged(mBounds2);
