@@ -14484,6 +14484,15 @@ public class ActivityManagerService extends IActivityManager.Stub
             return sticky;
         }
 
+        // SafetyNet logging for b/177931370. If any process other than system_server tries to
+        // listen to this broadcast action, then log it.
+        if (callingPid != Process.myPid()) {
+            if (filter.hasAction("com.android.server.net.action.SNOOZE_WARNING")
+                    || filter.hasAction("com.android.server.net.action.SNOOZE_RAPID")) {
+                EventLog.writeEvent(0x534e4554, "177931370", callingUid, "");
+            }
+        }
+
         synchronized (this) {
             if (callerApp != null && (callerApp.thread == null
                     || callerApp.thread.asBinder() != caller.asBinder())) {
@@ -18493,6 +18502,22 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             return false;
+        }
+
+        @Override
+        public boolean hasForegroundServiceNotification(String pkg, int userId,
+                String channelId) {
+            synchronized (ActivityManagerService.this) {
+                return mServices.hasForegroundServiceNotificationLocked(pkg, userId, channelId);
+            }
+        }
+
+        @Override
+        public void stopForegroundServicesForChannel(String pkg, int userId,
+                String channelId) {
+            synchronized (ActivityManagerService.this) {
+                mServices.stopForegroundServicesForChannelLocked(pkg, userId, channelId);
+            }
         }
 
         @Override

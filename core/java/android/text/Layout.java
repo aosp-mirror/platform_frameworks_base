@@ -2350,7 +2350,10 @@ public abstract class Layout {
         final int ellipsisStringLen = ellipsisString.length();
         // Use the ellipsis string only if there are that at least as many characters to replace.
         final boolean useEllipsisString = ellipsisCount >= ellipsisStringLen;
-        for (int i = 0; i < ellipsisCount; i++) {
+        final int min = Math.max(0, start - ellipsisStart - lineStart);
+        final int max = Math.min(ellipsisCount, end - ellipsisStart - lineStart);
+
+        for (int i = min; i < max; i++) {
             final char c;
             if (useEllipsisString && i < ellipsisStringLen) {
                 c = ellipsisString.charAt(i);
@@ -2359,9 +2362,7 @@ public abstract class Layout {
             }
 
             final int a = i + ellipsisStart + lineStart;
-            if (start <= a && a < end) {
-                dest[destoff + a - start] = c;
-            }
+            dest[destoff + a - start] = c;
         }
     }
 

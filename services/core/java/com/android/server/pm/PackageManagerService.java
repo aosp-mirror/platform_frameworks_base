@@ -6376,6 +6376,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public List<String> getAllPackages() {
+        enforceSystemOrRootOrShell("getAllPackages is limited to privileged callers");
         final int callingUid = Binder.getCallingUid();
         final int callingUserId = UserHandle.getUserId(callingUid);
         synchronized (mPackages) {
@@ -7782,13 +7783,6 @@ public class PackageManagerService extends IPackageManager.Stub
                             Slog.i(TAG, "  + always: " + info.activityInfo.packageName
                                     + " : linkgen=" + linkGeneration);
                         }
-
-                        if (!intent.hasCategory(CATEGORY_BROWSABLE)
-                                || !intent.hasCategory(CATEGORY_DEFAULT)) {
-                            undefinedList.add(info);
-                            continue;
-                        }
-
                         // Use link-enabled generation as preferredOrder, i.e.
                         // prefer newly-enabled over earlier-enabled.
                         info.preferredOrder = linkGeneration;
@@ -12375,6 +12369,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (hasOldPkg) {
                         mPermissionManager.revokeRuntimePermissionsIfGroupChanged(pkg, oldPkg,
                                 allPackageNames, mPermissionCallback);
+                        mPermissionManager.revokeStoragePermissionsIfScopeExpanded(pkg, oldPkg,
+                                mPermissionCallback);
                     }
                     if (hasPermissionDefinitionChanges) {
                         mPermissionManager.revokeRuntimePermissionsIfPermissionDefinitionChanged(

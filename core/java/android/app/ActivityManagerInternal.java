@@ -335,6 +335,21 @@ public abstract class ActivityManagerInternal {
     public abstract boolean hasRunningForegroundService(int uid, int foregroundServiceType);
 
     /**
+     * Returns {@code true} if the given notification channel currently has a
+     * notification associated with a foreground service.  This is an AMS check
+     * because that is the source of truth for the FGS state.
+     */
+    public abstract boolean hasForegroundServiceNotification(String pkg, int userId,
+            String channelId);
+
+    /**
+     * If the given app has any FGSs whose notifications are in the given channel,
+     * stop them.
+     */
+    public abstract void stopForegroundServicesForChannel(String pkg, int userId,
+            String channelId);
+
+    /**
      * Registers the specified {@code processObserver} to be notified of future changes to
      * process state.
      */

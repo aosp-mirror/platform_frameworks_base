@@ -631,13 +631,7 @@ public final class OutputConfiguration implements Parcelable {
             new Parcelable.Creator<OutputConfiguration>() {
         @Override
         public OutputConfiguration createFromParcel(Parcel source) {
-            try {
-                OutputConfiguration outputConfiguration = new OutputConfiguration(source);
-                return outputConfiguration;
-            } catch (Exception e) {
-                Log.e(TAG, "Exception creating OutputConfiguration from parcel", e);
-                return null;
-            }
+            return new OutputConfiguration(source);
         }
 
         @Override
