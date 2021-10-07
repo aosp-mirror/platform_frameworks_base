@@ -29520,12 +29520,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         boolean mHandlingPointerEvent;
 
         /**
-         * The offset of this view's window when it's on an embedded display that is re-parented
-         * to another window.
-         */
-        final Point mLocationInParentDisplay = new Point();
-
-        /**
          * The screen matrix of this view when it's on a {@link SurfaceControlViewHost} that is
          * embedded within a SurfaceView.
          */

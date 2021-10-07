@@ -4685,13 +4685,6 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    void updateLocationInParentDisplay(int x, int y) {
-        if (mAttachInfo != null
-                && !mAttachInfo.mLocationInParentDisplay.equals(x, y)) {
-            mAttachInfo.mLocationInParentDisplay.set(x, y);
-        }
-    }
-
     /**
      * Set the root-level system gesture exclusion rects. These are added to those provided by
      * the root's view hierarchy.
@@ -5203,7 +5196,6 @@ public final class ViewRootImpl implements ViewParent,
     private static final int MSG_INSETS_CHANGED = 30;
     private static final int MSG_INSETS_CONTROL_CHANGED = 31;
     private static final int MSG_SYSTEM_GESTURE_EXCLUSION_CHANGED = 32;
-    private static final int MSG_LOCATION_IN_PARENT_DISPLAY_CHANGED = 33;
     private static final int MSG_SHOW_INSETS = 34;
     private static final int MSG_HIDE_INSETS = 35;
     private static final int MSG_REQUEST_SCROLL_CAPTURE = 36;
@@ -5269,8 +5261,6 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_INSETS_CONTROL_CHANGED";
                 case MSG_SYSTEM_GESTURE_EXCLUSION_CHANGED:
                     return "MSG_SYSTEM_GESTURE_EXCLUSION_CHANGED";
-                case MSG_LOCATION_IN_PARENT_DISPLAY_CHANGED:
-                    return "MSG_LOCATION_IN_PARENT_DISPLAY_CHANGED";
                 case MSG_SHOW_INSETS:
                     return "MSG_SHOW_INSETS";
                 case MSG_HIDE_INSETS:
@@ -5495,9 +5485,6 @@ public final class ViewRootImpl implements ViewParent,
                 } break;
                 case MSG_SYSTEM_GESTURE_EXCLUSION_CHANGED: {
                     systemGestureExclusionChanged();
-                } break;
-                case MSG_LOCATION_IN_PARENT_DISPLAY_CHANGED: {
-                    updateLocationInParentDisplay(msg.arg1, msg.arg2);
                 } break;
                 case MSG_REQUEST_SCROLL_CAPTURE:
                     handleScrollCaptureRequest((IScrollCaptureResponseListener) msg.obj);
@@ -9030,17 +9017,6 @@ public final class ViewRootImpl implements ViewParent,
         mHandler.sendMessage(msg);
     }
 
-    /**
-     * Dispatch the offset changed.
-     *
-     * @param offset the offset of this view in the parent window.
-     */
-    public void dispatchLocationInParentDisplayChanged(Point offset) {
-        Message msg =
-                mHandler.obtainMessage(MSG_LOCATION_IN_PARENT_DISPLAY_CHANGED, offset.x, offset.y);
-        mHandler.sendMessage(msg);
-    }
-
     public void windowFocusChanged(boolean hasFocus, boolean inTouchMode) {
         synchronized (this) {
             mWindowFocusChanged = true;
@@ -9712,14 +9688,6 @@ public final class ViewRootImpl implements ViewParent,
             if (viewAncestor != null) {
                 viewAncestor.dispatchResized(frames, reportDraw, mergedConfiguration, forceLayout,
                         alwaysConsumeSystemBars, displayId);
-            }
-        }
-
-        @Override
-        public void locationInParentDisplayChanged(Point offset) {
-            final ViewRootImpl viewAncestor = mViewAncestor.get();
-            if (viewAncestor != null) {
-                viewAncestor.dispatchLocationInParentDisplayChanged(offset);
             }
         }
 

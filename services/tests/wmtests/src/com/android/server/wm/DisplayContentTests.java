@@ -73,7 +73,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.same;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 import static com.android.server.wm.DisplayContent.IME_TARGET_INPUT;
@@ -868,18 +867,6 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(
                 "Screen orientation must be defined by the window even on close-to-square display.",
                 window.mAttrs.screenOrientation, dc.getOrientation());
-    }
-
-    @Test
-    public void testDisableDisplayInfoOverrideFromWindowManager() {
-        final DisplayContent dc = createNewDisplay();
-
-        assertTrue(dc.mShouldOverrideDisplayConfiguration);
-        mWm.dontOverrideDisplayInfo(dc.getDisplayId());
-
-        assertFalse(dc.mShouldOverrideDisplayConfiguration);
-        verify(mWm.mDisplayManagerInternal, times(1))
-                .setDisplayInfoOverrideFromWindowManager(dc.getDisplayId(), null);
     }
 
     @Test

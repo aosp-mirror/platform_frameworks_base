@@ -332,10 +332,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ביצוע וניהול של שיחות טלפון"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"חיישנים גופניים"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"גישה אל נתוני חיישנים של הסימנים החיוניים שלך"</string>
-    <!-- no translation found for permgrouplab_notifications (5472972361980668884) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_notifications (4608679556801506580) -->
-    <skip />
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"התראות"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"הצגת התראות"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"אחזור תוכן של חלון"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"בדיקת התוכן של חלון שאיתו מתבצעת אינטראקציה."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"הפעלה של \'גילוי באמצעות מגע\'"</string>
@@ -559,10 +557,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"מאפשרת לאפליקציה להשבית את נעילת המקשים וכל אמצעי אבטחה משויך המבוסס על סיסמה. לדוגמה, הטלפון ישבית את נעילת המקשים במהלך שיחת טלפון נכנסת, ויפעיל מחדש את נעילת המקשים עם סיום השיחה."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"בקשת מידע לגבי מידת המורכבות של נעילת המסך"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"מאפשרת לאפליקציה ללמוד את רמת המורכבות של נעילת המסך (גבוהה, בינונית, נמוכה או לא מורכבת). הרמה הזו מציינת את הטווח האפשרי של אורך וסוג נעילת המסך. האפליקציה יכולה גם להציע למשתמשים לעדכן את נעילת המסך לרמה מסוימת, אבל המשתמשים יכולים להתעלם מההצעה ולנווט לפריט אחר. לתשומת ליבך, נעילת המסך לא מאוחסנת כטקסט פשוט, ולכן האפליקציה לא יודעת מה הסיסמה המדויקת."</string>
-    <!-- no translation found for permlab_postNotification (4875401198597803658) -->
-    <skip />
-    <!-- no translation found for permdesc_postNotification (5974977162462877075) -->
-    <skip />
+    <string name="permlab_postNotification" msgid="4875401198597803658">"הצגת התראות"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"מאפשרת לאפליקציה להציג התראות"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"שימוש בחומרה ביומטרית"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"מאפשרת לאפליקציה להשתמש בחומרה ביומטרית לצורך אימות"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"ניהול חומרה של טביעות אצבעות"</string>

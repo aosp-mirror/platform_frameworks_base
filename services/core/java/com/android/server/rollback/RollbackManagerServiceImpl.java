@@ -43,7 +43,6 @@ import android.content.rollback.IRollbackManager;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerExecutor;
@@ -86,6 +85,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -1284,14 +1284,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
     }
 
     private SparseIntArray getExtensionVersions() {
-        // This list must be updated whenever the current API level is increased, or should be
-        // replaced when we have another way of determining the relevant SDK versions.
-        final int[] relevantSdkVersions = { Build.VERSION_CODES.R, Build.VERSION_CODES.S };
-
-        SparseIntArray result = new SparseIntArray(relevantSdkVersions.length);
-        for (int i = 0; i < relevantSdkVersions.length; i++) {
-            result.put(relevantSdkVersions[i],
-                    SdkExtensions.getExtensionVersion(relevantSdkVersions[i]));
+        Map<Integer, Integer> allExtensionVersions = SdkExtensions.getAllExtensionVersions();
+        SparseIntArray result = new SparseIntArray(allExtensionVersions.size());
+        for (int extension : allExtensionVersions.keySet()) {
+            result.put(extension, allExtensionVersions.get(extension));
         }
         return result;
     }

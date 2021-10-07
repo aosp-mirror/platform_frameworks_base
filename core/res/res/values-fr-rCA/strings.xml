@@ -326,10 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"faire et gérer des appels téléphoniques"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Capteurs corporels"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"accéder aux données des capteurs sur vos signes vitaux"</string>
-    <!-- no translation found for permgrouplab_notifications (5472972361980668884) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_notifications (4608679556801506580) -->
-    <skip />
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"Notifications"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"afficher les notifications"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Récupérer le contenu d\'une fenêtre"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Inspecter le contenu d\'une fenêtre avec laquelle vous interagissez."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Activer la fonctionnalité Explorer au toucher"</string>
@@ -553,10 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Permet à l\'application de désactiver le verrouillage des touches et toute mesure de sécurité par mot de passe associée. Par exemple, votre téléphone désactive le verrouillage des touches lorsque vous recevez un appel, puis le réactive lorsque vous raccrochez."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"demander la complexité du verrouillage d\'écran"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Autorise l\'application à apprendre le niveau de complexité de l\'écran de verrouillage (élevé, moyen, faible ou aucun), qui indique la gamme possible de longueur et de type de verrouillage d\'écran. L\'application peut aussi suggérer aux utilisateurs de mettre à jour l\'écran de verrouillage afin d\'utiliser un certain niveau de complexité, mais ils peuvent ignorer la suggestion. Notez que le verrouillage d\'écran n\'est pas stocké en texte brut pour de manière à ce que l\'application n\'ait pas accès au mot de passe exact."</string>
-    <!-- no translation found for permlab_postNotification (4875401198597803658) -->
-    <skip />
-    <!-- no translation found for permdesc_postNotification (5974977162462877075) -->
-    <skip />
+    <string name="permlab_postNotification" msgid="4875401198597803658">"afficher les notifications"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"Permet à l\'application d\'afficher les notifications"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"utiliser le matériel biométrique"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Permet à l\'application d\'utiliser du matériel biométrique pour l\'authentification"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"gérer le matériel d\'empreinte digitale"</string>
