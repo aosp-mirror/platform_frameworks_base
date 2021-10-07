@@ -10696,7 +10696,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void resetNewUserDisclaimer() {
+    public void acknowledgeNewUserDisclaimer() {
         CallerIdentity callerIdentity = getCallerIdentity();
         canManageUsers(callerIdentity);
 
