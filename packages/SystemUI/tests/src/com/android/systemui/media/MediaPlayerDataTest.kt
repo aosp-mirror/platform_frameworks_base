@@ -127,7 +127,7 @@ public class MediaPlayerDataTest : SysuiTestCase() {
         val players = MediaPlayerData.players()
         assertThat(players).hasSize(6)
         assertThat(players).containsExactly(playerIsPlaying, playerIsPlayingAndRemote,
-            playerIsStoppedAndLocal, playerCanResume, playerIsStoppedAndRemote,
+            playerIsStoppedAndRemote, playerIsStoppedAndLocal, playerCanResume,
             playerUndetermined).inOrder()
     }
 
