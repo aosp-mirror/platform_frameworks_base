@@ -175,7 +175,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         }
         if (!mAdapter.isDragging() && !mAdapter.isAnimating()) {
             int currentActivePosition = mAdapter.getCurrentActivePosition();
-            if (currentActivePosition >= 0) {
+            if (currentActivePosition >= 0 && currentActivePosition < mAdapter.getItemCount()) {
                 mAdapter.notifyItemChanged(currentActivePosition);
             } else {
                 mAdapter.notifyDataSetChanged();
