@@ -18,7 +18,6 @@ package com.android.keyguard;
 
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -186,14 +185,12 @@ public interface KeyguardViewController {
     /**
      * Registers the StatusBar to which this Keyguard View is mounted.
      * @param statusBar
-     * @param container
      * @param notificationPanelViewController
      * @param biometricUnlockController
      * @param notificationContainer
      * @param bypassController
      */
     void registerStatusBar(StatusBar statusBar,
-            ViewGroup container,
             NotificationPanelViewController notificationPanelViewController,
             BiometricUnlockController biometricUnlockController,
             View notificationContainer,

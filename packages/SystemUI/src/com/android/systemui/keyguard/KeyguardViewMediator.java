@@ -77,7 +77,6 @@ import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationTarget;
 import android.view.SyncRtSurfaceTransactionApplier;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants;
 import android.view.animation.Animation;
@@ -2629,7 +2628,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
      * Registers the StatusBar to which the Keyguard View is mounted.
      *
      * @param statusBar
-     * @param container
      * @param panelView
      * @param biometricUnlockController
      * @param notificationContainer
@@ -2637,10 +2635,10 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
      * @return the View Controller for the Keyguard View this class is mediating.
      */
     public KeyguardViewController registerStatusBar(StatusBar statusBar,
-            ViewGroup container, NotificationPanelViewController panelView,
+            NotificationPanelViewController panelView,
             BiometricUnlockController biometricUnlockController,
             View notificationContainer, KeyguardBypassController bypassController) {
-        mKeyguardViewControllerLazy.get().registerStatusBar(statusBar, container, panelView,
+        mKeyguardViewControllerLazy.get().registerStatusBar(statusBar, panelView,
                 biometricUnlockController, notificationContainer, bypassController);
         return mKeyguardViewControllerLazy.get();
     }
