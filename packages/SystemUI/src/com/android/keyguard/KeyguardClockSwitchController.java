@@ -20,6 +20,7 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import android.app.WallpaperManager;
+import android.content.res.Resources;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -30,6 +31,7 @@ import com.android.keyguard.clock.ClockManager;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -65,6 +67,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final BatteryController mBatteryController;
     private final LockscreenSmartspaceController mSmartspaceController;
+    private final Resources mResources;
 
     /**
      * Clock for both small and large sizes
@@ -116,7 +119,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             KeyguardBypassController bypassController,
             LockscreenSmartspaceController smartspaceController,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
-            SmartspaceTransitionController smartspaceTransitionController) {
+            SmartspaceTransitionController smartspaceTransitionController,
+            @Main Resources resources) {
         super(keyguardClockSwitch);
         mStatusBarStateController = statusBarStateController;
         mColorExtractor = colorExtractor;
@@ -128,6 +132,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mBypassController = bypassController;
         mSmartspaceController = smartspaceController;
+        mResources = resources;
 
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mSmartspaceTransitionController = smartspaceTransitionController;
@@ -157,7 +162,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                         mBroadcastDispatcher,
                         mBatteryController,
                         mKeyguardUpdateMonitor,
-                        mBypassController);
+                        mBypassController,
+                        mResources);
         mClockViewController.init();
 
         mLargeClockViewController =
@@ -167,7 +173,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                         mBroadcastDispatcher,
                         mBatteryController,
                         mKeyguardUpdateMonitor,
-                        mBypassController);
+                        mBypassController,
+                        mResources);
         mLargeClockViewController.init();
     }
 

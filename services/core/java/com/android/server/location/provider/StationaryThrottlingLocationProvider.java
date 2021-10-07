@@ -154,6 +154,7 @@ public final class StationaryThrottlingLocationProvider extends DelegateLocation
                 mDeviceStationaryHelper.removeListener(this);
                 mDeviceStationary = false;
                 mDeviceStationaryRealtimeMs = Long.MIN_VALUE;
+                onThrottlingChangedLocked(false);
             }
         }
     }
