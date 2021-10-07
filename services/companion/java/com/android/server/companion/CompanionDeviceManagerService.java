@@ -20,6 +20,8 @@ package com.android.server.companion;
 import static android.Manifest.permission.BIND_COMPANION_DEVICE_SERVICE;
 import static android.bluetooth.le.ScanSettings.CALLBACK_TYPE_ALL_MATCHES;
 import static android.bluetooth.le.ScanSettings.SCAN_MODE_BALANCED;
+import static android.companion.AssociationRequest.DEVICE_PROFILE_APP_STREAMING;
+import static android.companion.AssociationRequest.DEVICE_PROFILE_WATCH;
 import static android.content.Context.BIND_IMPORTANT;
 import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
 import static android.content.pm.PackageManager.MATCH_ALL;
@@ -160,8 +162,9 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     private static final Map<String, String> DEVICE_PROFILE_TO_PERMISSION;
     static {
         final Map<String, String> map = new ArrayMap<>();
-        map.put(AssociationRequest.DEVICE_PROFILE_WATCH,
-                Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH);
+        map.put(DEVICE_PROFILE_WATCH, Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH);
+        map.put(DEVICE_PROFILE_APP_STREAMING,
+                Manifest.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING);
 
         DEVICE_PROFILE_TO_PERMISSION = Collections.unmodifiableMap(map);
     }
@@ -550,6 +553,12 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         private void validateDeviceProfileAndCheckPermission(@Nullable String deviceProfile) {
             // Device profile can be null.
             if (deviceProfile == null) return;
+
+            if (DEVICE_PROFILE_APP_STREAMING.equals(deviceProfile)) {
+                // TODO: remove, when properly supporting this profile.
+                throw new UnsupportedOperationException(
+                        "DEVICE_PROFILE_APP_STREAMING is not fully supported yet.");
+            }
 
             if (!DEVICE_PROFILE_TO_PERMISSION.containsKey(deviceProfile)) {
                 throw new IllegalArgumentException("Unsupported device profile: " + deviceProfile);
