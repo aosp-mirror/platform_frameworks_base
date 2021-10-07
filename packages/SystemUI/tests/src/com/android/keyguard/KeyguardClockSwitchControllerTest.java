@@ -142,7 +142,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
                 mBypassController,
                 mSmartspaceController,
                 mKeyguardUnlockAnimationController,
-                mSmartSpaceTransitionController
+                mSmartSpaceTransitionController,
+                mResources
         );
 
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);

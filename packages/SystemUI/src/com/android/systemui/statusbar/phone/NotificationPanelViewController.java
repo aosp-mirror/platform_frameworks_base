@@ -34,6 +34,9 @@ import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
+import static com.android.systemui.statusbar.phone.PanelBar.STATE_CLOSED;
+import static com.android.systemui.statusbar.phone.PanelBar.STATE_OPEN;
+import static com.android.systemui.statusbar.phone.PanelBar.STATE_OPENING;
 
 import static java.lang.Float.isNaN;
 
@@ -57,7 +60,6 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.Drawable;
-import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.SensorLocationInternal;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Bundle;
@@ -80,6 +82,7 @@ import android.view.ViewPropertyAnimator;
 import android.view.ViewStub;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
@@ -310,6 +313,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private KeyguardStatusViewController mKeyguardStatusViewController;
     private LockIconViewController mLockIconViewController;
     private NotificationsQuickSettingsContainer mNotificationContainerParent;
+    private NotificationsQSContainerController mNotificationsQSContainerController;
     private boolean mAnimateNextPositionUpdate;
     private float mQuickQsOffsetHeight;
     private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
@@ -653,6 +657,7 @@ public class NotificationPanelViewController extends PanelViewController {
             ConversationNotificationManager conversationNotificationManager,
             MediaHierarchyManager mediaHierarchyManager,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
+            NotificationsQSContainerController notificationsQSContainerController,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
             KeyguardStatusViewComponent.Factory keyguardStatusViewComponentFactory,
             KeyguardQsUserSwitchComponent.Factory keyguardQsUserSwitchComponentFactory,
@@ -708,6 +713,8 @@ public class NotificationPanelViewController extends PanelViewController {
         mFlingAnimationUtilsBuilder = flingAnimationUtilsBuilder;
         mMediaHierarchyManager = mediaHierarchyManager;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
+        mNotificationsQSContainerController = notificationsQSContainerController;
+        mNotificationsQSContainerController.init();
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
         mGroupManager = groupManager;
         mNotificationIconAreaController = notificationIconAreaController;
@@ -1005,7 +1012,7 @@ public class NotificationPanelViewController extends PanelViewController {
         constraintSet.setMargin(R.id.notification_stack_scroller, TOP, topMargin);
         constraintSet.setMargin(R.id.qs_frame, TOP, topMargin);
         constraintSet.applyTo(mNotificationContainerParent);
-        mNotificationContainerParent.setSplitShadeEnabled(mShouldUseSplitNotificationShade);
+        mNotificationsQSContainerController.setSplitShadeEnabled(mShouldUseSplitNotificationShade);
 
         updateKeyguardStatusViewAlignment(/* animate= */false);
 
@@ -1798,15 +1805,6 @@ public class NotificationPanelViewController extends PanelViewController {
         return !mQsTouchAboveFalsingThreshold;
     }
 
-    /**
-     * Percentage of panel expansion offset, caused by pulling down on a heads-up.
-     */
-    @Override
-    public void setMinFraction(float minFraction) {
-        mMinFraction = minFraction;
-        mDepthController.setPanelPullDownMinFraction(mMinFraction);
-    }
-
     private float computeQsExpansionFraction() {
         if (mQSAnimatingHiddenFromCollapsed) {
             // When hiding QS from collapsed state, the expansion can sometimes temporarily
@@ -2106,7 +2104,7 @@ public class NotificationPanelViewController extends PanelViewController {
             requestPanelHeightUpdate();
             mFalsingCollector.setQsExpanded(expanded);
             mStatusBar.setQsExpanded(expanded);
-            mNotificationContainerParent.setQsExpanded(expanded);
+            mNotificationsQSContainerController.setQsExpanded(expanded);
             mPulseExpansionHandler.setQsExpanded(expanded);
             mKeyguardBypassController.setQSExpanded(expanded);
             mStatusBarKeyguardViewManager.setQsExpanded(expanded);
@@ -2225,12 +2223,6 @@ public class NotificationPanelViewController extends PanelViewController {
     };
 
     private void onNotificationScrolled(int newScrollPosition) {
-        updateQSExpansionEnabledAmbient();
-    }
-
-    @Override
-    public void setIsShadeOpening(boolean opening) {
-        mAmbientState.setIsShadeOpening(opening);
         updateQSExpansionEnabledAmbient();
     }
 
@@ -3340,8 +3332,14 @@ public class NotificationPanelViewController extends PanelViewController {
         return mBarState == KEYGUARD;
     }
 
+    /**
+     * Sets the minimum fraction for the panel expansion offset. This may be non-zero in certain
+     * cases, such as if there's a heads-up notification.
+     */
     public void setPanelScrimMinFraction(float minFraction) {
         mBar.onPanelMinFractionChanged(minFraction);
+        mMinFraction = minFraction;
+        mDepthController.setPanelPullDownMinFraction(mMinFraction);
     }
 
     public void clearNotificationEffects() {
@@ -4628,5 +4626,27 @@ public class NotificationPanelViewController extends PanelViewController {
             updateMaxHeadsUpTranslation();
             return insets;
         }
+    }
+
+    private final PanelBar.PanelStateChangeListener mPanelStateChangeListener =
+            new PanelBar.PanelStateChangeListener() {
+
+                @PanelBar.PanelState
+                private int mCurrentState = STATE_CLOSED;
+
+                @Override
+                public void onStateChanged(@PanelBar.PanelState int state) {
+                    mAmbientState.setIsShadeOpening(state == STATE_OPENING);
+                    updateQSExpansionEnabledAmbient();
+
+                    if (state == STATE_OPEN && mCurrentState != state) {
+                        mView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+                    }
+                    mCurrentState = state;
+                }
+            };
+
+    public PanelBar.PanelStateChangeListener getPanelStateChangeListener() {
+        return mPanelStateChangeListener;
     }
 }

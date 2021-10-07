@@ -255,6 +255,7 @@ class MediaDataManagerTest : SysuiTestCase() {
             .onMediaDataLoaded(eq(PACKAGE_NAME), eq(KEY), capture(mediaDataCaptor), eq(true),
                     eq(false))
         assertThat(mediaDataCaptor.value.resumption).isTrue()
+        assertThat(mediaDataCaptor.value.isPlaying).isFalse()
     }
 
     @Test

@@ -37,10 +37,12 @@ import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
+import com.android.systemui.statusbar.phone.StatusBarWindowController
 import com.android.systemui.statusbar.policy.CallbackController
 import com.android.systemui.util.time.SystemClock
 import java.io.FileDescriptor
 import java.io.PrintWriter
+import java.util.Optional
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -57,6 +59,7 @@ class OngoingCallController @Inject constructor(
     private val iActivityManager: IActivityManager,
     private val logger: OngoingCallLogger,
     private val dumpManager: DumpManager,
+    private val statusBarWindowController: Optional<StatusBarWindowController>,
 ) : CallbackController<OngoingCallListener>, Dumpable {
 
     /** Non-null if there's an active call notification. */
@@ -201,7 +204,7 @@ class OngoingCallController @Inject constructor(
             }
 
             setUpUidObserver(currentCallNotificationInfo)
-
+            statusBarWindowController.ifPresent { it.setIsCallOngoing(true) }
             mListeners.forEach { l -> l.onOngoingCallStateChanged(animate = true) }
         } else {
             // If we failed to update the chip, don't store the call info. Then [hasOngoingCall]
@@ -268,6 +271,7 @@ class OngoingCallController @Inject constructor(
     private fun removeChip() {
         callNotificationInfo = null
         tearDownChipView()
+        statusBarWindowController.ifPresent { it.setIsCallOngoing(false) }
         mListeners.forEach { l -> l.onOngoingCallStateChanged(animate = true) }
         if (uidObserver != null) {
             iActivityManager.unregisterUidObserver(uidObserver)

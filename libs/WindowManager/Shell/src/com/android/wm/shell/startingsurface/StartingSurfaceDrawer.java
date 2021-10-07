@@ -37,7 +37,6 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.IBinder;
 import android.os.RemoteCallback;
@@ -48,7 +47,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Choreographer;
 import android.view.Display;
-import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
 import android.view.View;
 import android.view.WindowManager;
@@ -58,6 +56,7 @@ import android.window.SplashScreenView;
 import android.window.SplashScreenView.SplashScreenViewParcelable;
 import android.window.StartingWindowInfo;
 import android.window.StartingWindowInfo.StartingWindowType;
+import android.window.StartingWindowRemovalInfo;
 import android.window.TaskSnapshot;
 
 import com.android.internal.R;
@@ -118,6 +117,7 @@ public class StartingSurfaceDrawer {
     private Choreographer mChoreographer;
     private final WindowManagerGlobal mWindowManagerGlobal;
     private StartingSurface.SysuiProxy mSysuiProxy;
+    private final StartingWindowRemovalInfo mTmpRemovalInfo = new StartingWindowRemovalInfo();
 
     /**
      * @param splashScreenExecutor The thread used to control add and remove starting window.
@@ -458,12 +458,13 @@ public class StartingSurfaceDrawer {
     /**
      * Called when the content of a task is ready to show, starting window can be removed.
      */
-    public void removeStartingWindow(int taskId, SurfaceControl leash, Rect frame,
-            boolean playRevealAnimation) {
+    public void removeStartingWindow(StartingWindowRemovalInfo removalInfo) {
         if (DEBUG_SPLASH_SCREEN || DEBUG_TASK_SNAPSHOT) {
-            Slog.d(TAG, "Task start finish, remove starting surface for task " + taskId);
+            Slog.d(TAG, "Task start finish, remove starting surface for task "
+                    + removalInfo.taskId);
         }
-        removeWindowSynced(taskId, leash, frame, playRevealAnimation);
+        removeWindowSynced(removalInfo);
+
     }
 
     /**
@@ -556,7 +557,8 @@ public class StartingSurfaceDrawer {
     }
 
     private void removeWindowNoAnimate(int taskId) {
-        removeWindowSynced(taskId, null, null, false);
+        mTmpRemovalInfo.taskId = taskId;
+        removeWindowSynced(mTmpRemovalInfo);
     }
 
     void onImeDrawnOnTask(int taskId) {
@@ -568,8 +570,8 @@ public class StartingSurfaceDrawer {
         mStartingWindowRecords.remove(taskId);
     }
 
-    protected void removeWindowSynced(int taskId, SurfaceControl leash, Rect frame,
-            boolean playRevealAnimation) {
+    protected void removeWindowSynced(StartingWindowRemovalInfo removalInfo) {
+        final int taskId = removalInfo.taskId;
         final StartingWindowRecord record = mStartingWindowRecords.get(taskId);
         if (record != null) {
             if (record.mDecorView != null) {
@@ -580,9 +582,9 @@ public class StartingSurfaceDrawer {
                     if (record.mSuggestType == STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN) {
                         removeWindowInner(record.mDecorView, false);
                     } else {
-                        if (playRevealAnimation) {
+                        if (removalInfo.playRevealAnimation) {
                             mSplashscreenContentDrawer.applyExitAnimation(record.mContentView,
-                                    leash, frame,
+                                    removalInfo.windowAnimationLeash, removalInfo.mainFrame,
                                     () -> removeWindowInner(record.mDecorView, true));
                         } else {
                             // the SplashScreenView has been copied to client, hide the view to skip
@@ -602,7 +604,7 @@ public class StartingSurfaceDrawer {
                     Slog.v(TAG, "Removing task snapshot window for " + taskId);
                 }
                 record.mTaskSnapshotWindow.scheduleRemove(
-                        () -> mStartingWindowRecords.remove(taskId));
+                        () -> mStartingWindowRecords.remove(taskId), removalInfo.deferRemoveForIme);
             }
         }
     }

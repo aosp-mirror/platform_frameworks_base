@@ -86,6 +86,7 @@ class MediaDataFilterTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
+        MediaPlayerData.clear()
         mediaDataFilter = MediaDataFilter(context, broadcastDispatcher, mediaResumeListener,
                 lockscreenUserManager, executor, clock)
         mediaDataFilter.mediaDataManager = mediaDataManager

@@ -18,7 +18,6 @@ package com.android.systemui.biometrics
 
 import android.animation.ValueAnimator
 import android.content.Context
-import android.content.res.Configuration
 import android.graphics.PointF
 import android.hardware.biometrics.BiometricSourceType
 import android.util.DisplayMetrics
@@ -125,6 +124,7 @@ class AuthRippleController @Inject constructor(
             return
         }
 
+        updateSensorLocation()
         if (biometricSourceType == BiometricSourceType.FINGERPRINT &&
             fingerprintSensorLocation != null) {
             mView.setSensorLocation(fingerprintSensorLocation!!)
@@ -266,9 +266,6 @@ class AuthRippleController @Inject constructor(
 
     private val configurationChangedListener =
         object : ConfigurationController.ConfigurationListener {
-            override fun onConfigChanged(newConfig: Configuration?) {
-                updateSensorLocation()
-            }
             override fun onUiModeChanged() {
                 updateRippleColor()
             }
