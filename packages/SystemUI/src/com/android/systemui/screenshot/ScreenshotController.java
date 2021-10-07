@@ -422,11 +422,6 @@ public class ScreenshotController {
         } else {
             mScreenshotView.animateDismissal();
         }
-
-        if (mLastScrollCaptureResponse != null) {
-            mLastScrollCaptureResponse.close();
-            mLastScrollCaptureResponse = null;
-        }
     }
 
     boolean isPendingSharedTransition() {
@@ -456,6 +451,9 @@ public class ScreenshotController {
         mScreenshotView.init(mUiEventLogger, new ScreenshotView.ScreenshotViewCallback() {
             @Override
             public void onUserInteraction() {
+                if (DEBUG_INPUT) {
+                    Log.d(TAG, "onUserInteraction");
+                }
                 resetTimeout();
             }
 
@@ -670,58 +668,64 @@ public class ScreenshotController {
                 mScreenshotView.prepareScrollingTransition(response, mScreenBitmap, newScreenshot,
                         mScreenshotTakenInPortrait);
                 // delay starting scroll capture to make sure the scrim is up before the app moves
-                mScreenshotView.post(() -> {
-                    // Clear the reference to prevent close() in dismissScreenshot
-                    mLastScrollCaptureResponse = null;
-                    final ListenableFuture<ScrollCaptureController.LongScreenshot> future =
-                            mScrollCaptureController.run(response);
-                    future.addListener(() -> {
-                        ScrollCaptureController.LongScreenshot longScreenshot;
-
-                        try {
-                            longScreenshot = future.get();
-                        } catch (CancellationException
-                                | InterruptedException
-                                | ExecutionException e) {
-                            Log.e(TAG, "Exception", e);
-                            mScreenshotView.restoreNonScrollingUi();
-                            return;
-                        }
-
-                        if (longScreenshot.getHeight() == 0) {
-                            mScreenshotView.restoreNonScrollingUi();
-                            return;
-                        }
-
-                        mLongScreenshotHolder.setLongScreenshot(longScreenshot);
-                        mLongScreenshotHolder.setTransitionDestinationCallback(
-                                (transitionDestination, onTransitionEnd) ->
-                                        mScreenshotView.startLongScreenshotTransition(
-                                                transitionDestination, onTransitionEnd,
-                                                longScreenshot));
-
-                        final Intent intent = new Intent(mContext, LongScreenshotActivity.class);
-                        intent.setFlags(
-                                Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-                        mContext.startActivity(intent,
-                                ActivityOptions.makeCustomAnimation(mContext, 0, 0).toBundle());
-                        RemoteAnimationAdapter runner = new RemoteAnimationAdapter(
-                                SCREENSHOT_REMOTE_RUNNER, 0, 0);
-                        try {
-                            WindowManagerGlobal.getWindowManagerService()
-                                    .overridePendingAppTransitionRemote(runner, DEFAULT_DISPLAY);
-                        } catch (Exception e) {
-                            Log.e(TAG, "Error overriding screenshot app transition", e);
-                        }
-                    }, mMainExecutor);
-                });
+                mScreenshotView.post(() -> runBatchScrollCapture(response));
             });
         } catch (CancellationException e) {
             // Ignore
         } catch (InterruptedException | ExecutionException e) {
             Log.e(TAG, "requestScrollCapture failed", e);
         }
+    }
+    ListenableFuture<ScrollCaptureController.LongScreenshot> mLongScreenshotFuture;
+
+    private void runBatchScrollCapture(ScrollCaptureResponse response) {
+        // Clear the reference to prevent close() in dismissScreenshot
+        mLastScrollCaptureResponse = null;
+
+        if (mLongScreenshotFuture != null) {
+            mLongScreenshotFuture.cancel(true);
+        }
+        mLongScreenshotFuture = mScrollCaptureController.run(response);
+        mLongScreenshotFuture.addListener(() -> {
+            ScrollCaptureController.LongScreenshot longScreenshot;
+            try {
+                longScreenshot = mLongScreenshotFuture.get();
+            } catch (CancellationException e) {
+                Log.e(TAG, "Long screenshot cancelled");
+                return;
+            } catch (InterruptedException | ExecutionException e) {
+                Log.e(TAG, "Exception", e);
+                mScreenshotView.restoreNonScrollingUi();
+                return;
+            }
+
+            if (longScreenshot.getHeight() == 0) {
+                mScreenshotView.restoreNonScrollingUi();
+                return;
+            }
+
+            mLongScreenshotHolder.setLongScreenshot(longScreenshot);
+            mLongScreenshotHolder.setTransitionDestinationCallback(
+                    (transitionDestination, onTransitionEnd) ->
+                            mScreenshotView.startLongScreenshotTransition(
+                                    transitionDestination, onTransitionEnd,
+                                    longScreenshot));
+
+            final Intent intent = new Intent(mContext, LongScreenshotActivity.class);
+            intent.setFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+            mContext.startActivity(intent,
+                    ActivityOptions.makeCustomAnimation(mContext, 0, 0).toBundle());
+            RemoteAnimationAdapter runner = new RemoteAnimationAdapter(
+                    SCREENSHOT_REMOTE_RUNNER, 0, 0);
+            try {
+                WindowManagerGlobal.getWindowManagerService()
+                        .overridePendingAppTransitionRemote(runner, DEFAULT_DISPLAY);
+            } catch (Exception e) {
+                Log.e(TAG, "Error overriding screenshot app transition", e);
+            }
+        }, mMainExecutor);
     }
 
     private void withWindowAttached(Runnable action) {
@@ -824,16 +828,27 @@ public class ScreenshotController {
 
     /** Reset screenshot view and then call onCompleteRunnable */
     private void finishDismiss() {
-        if (DEBUG_UI) {
+        if (DEBUG_DISMISS) {
             Log.d(TAG, "finishDismiss");
         }
-        cancelTimeout();
-        removeWindow();
-        mScreenshotView.reset();
+        if (mLastScrollCaptureRequest != null) {
+            mLastScrollCaptureRequest.cancel(true);
+            mLastScrollCaptureRequest = null;
+        }
+        if (mLastScrollCaptureResponse != null) {
+            mLastScrollCaptureResponse.close();
+            mLastScrollCaptureResponse = null;
+        }
+        if (mLongScreenshotFuture != null) {
+            mLongScreenshotFuture.cancel(true);
+        }
         if (mCurrentRequestCallback != null) {
             mCurrentRequestCallback.onFinish();
             mCurrentRequestCallback = null;
         }
+        mScreenshotView.reset();
+        removeWindow();
+        cancelTimeout();
     }
 
     /**
@@ -861,6 +876,9 @@ public class ScreenshotController {
     }
 
     private void cancelTimeout() {
+        if (DEBUG_DISMISS) {
+            Log.d(TAG, "cancel timeout");
+        }
         mScreenshotHandler.removeMessages(MESSAGE_CORNER_TIMEOUT);
     }
 
@@ -876,7 +894,7 @@ public class ScreenshotController {
         mScreenshotHandler.sendMessageDelayed(
                 mScreenshotHandler.obtainMessage(MESSAGE_CORNER_TIMEOUT),
                 timeoutMs);
-        if (DEBUG_UI) {
+        if (DEBUG_DISMISS) {
             Log.d(TAG, "dismiss timeout: " + timeoutMs + " ms");
         }
 
