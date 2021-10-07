@@ -44,6 +44,7 @@ import com.android.internal.util.Preconditions;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.time.Duration;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -703,6 +704,21 @@ public final class PowerManager {
         public long wakeTime;
         public @WakeReason int wakeReason;
         public long sleepDuration;
+
+        @Override
+        public boolean equals(@Nullable Object o) {
+            if (o instanceof WakeData) {
+                final WakeData other = (WakeData) o;
+                return wakeTime == other.wakeTime && wakeReason == other.wakeReason
+                        && sleepDuration == other.sleepDuration;
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(wakeTime, wakeReason, sleepDuration);
+        }
     }
 
     /**
