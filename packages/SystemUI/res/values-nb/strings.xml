@@ -602,8 +602,8 @@
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Automatisk medieteksting"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Verktøytips for teksting"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Overlegg med teksting"</string>
-    <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"slå på"</string>
-    <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"slå av"</string>
+    <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"aktivér"</string>
+    <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"deaktiver"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Bytt enhet for lydutgang"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Appen er festet"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Gjør at den vises til du løsner den. Trykk og hold inne Tilbake og Oversikt for å løsne den."</string>
