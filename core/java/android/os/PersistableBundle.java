@@ -43,6 +43,9 @@ import java.util.ArrayList;
  * supported by this class is purposefully restricted to simple objects that can
  * safely be persisted to and restored from disk.
  *
+ * <p><b>Warning:</b> Note that {@link PersistableBundle} is a lazy container and as such it does
+ * NOT implement {@link #equals(Object)} or {@link #hashCode()}.
+ *
  * @see Bundle
  */
 public final class PersistableBundle extends BaseBundle implements Cloneable, Parcelable,
@@ -324,8 +327,12 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
         return new PersistableBundle();  // An empty mutable PersistableBundle
     }
 
+    /**
+     * Returns a string representation of the {@link PersistableBundle} that may be suitable for
+     * debugging. It won't print the internal map if its content hasn't been unparcelled.
+     */
     @Override
-    synchronized public String toString() {
+    public synchronized String toString() {
         if (mParcelledData != null) {
             if (isEmptyParcel()) {
                 return "PersistableBundle[EMPTY_PARCEL]";
