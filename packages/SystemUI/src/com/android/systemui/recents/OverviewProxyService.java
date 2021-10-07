@@ -248,6 +248,12 @@ public class OverviewProxyService extends CurrentUserTracker implements
                     onTaskbarStatusUpdated(visible, stashed));
         }
 
+        @Override
+        public void notifyTaskbarAutohideSuspend(boolean suspend) {
+            verifyCallerAndClearCallingIdentityPostMain("notifyTaskbarAutohideSuspend", () ->
+                    onTaskbarAutohideSuspend(suspend));
+        }
+
         private boolean sendEvent(int action, int code) {
             long when = SystemClock.uptimeMillis();
             final KeyEvent ev = new KeyEvent(when, when, action, code, 0 /* repeat */,
@@ -818,6 +824,12 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
     }
 
+    private void onTaskbarAutohideSuspend(boolean suspend) {
+        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
+            mConnectionCallbacks.get(i).onTaskbarAutohideSuspend(suspend);
+        }
+    }
+
     private void notifyConnectionChanged() {
         for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
             mConnectionCallbacks.get(i).onConnectionChanged(mOverviewProxy != null);
@@ -1000,6 +1012,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         default void onNavBarButtonAlphaChanged(float alpha, boolean animate) {}
         default void onHomeRotationEnabled(boolean enabled) {}
         default void onTaskbarStatusUpdated(boolean visible, boolean stashed) {}
+        default void onTaskbarAutohideSuspend(boolean suspend) {}
         default void onSystemUiStateChanged(int sysuiStateFlags) {}
         default void onAssistantProgress(@FloatRange(from = 0.0, to = 1.0) float progress) {}
         default void onAssistantGestureCompletion(float velocity) {}

@@ -19,6 +19,8 @@ package com.android.systemui.navigationbar;
 import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
+import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
+import static android.view.InsetsState.containsType;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
@@ -57,7 +59,9 @@ import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.phone.AutoHideController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -77,6 +81,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     private NavigationBarA11yHelper mNavigationBarA11yHelper;
     private NavigationModeController mNavigationModeController;
     private SysUiState mSysUiState;
+    private AutoHideController mAutoHideController;
     private int mDisplayId;
     private int mNavigationIconHints;
     private final NavigationBarA11yHelper.NavA11yEventListener mNavA11yEventListener =
@@ -87,6 +92,28 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     private final Context mContext;
     private final DisplayManager mDisplayManager;
     private Context mWindowContext;
+    /**
+     * Tracks the system calls for when taskbar should transiently show or hide so we can return
+     * this value in {@link AutoHideUiElement#isVisible()} below.
+     *
+     * This also gets set by {@link #onTaskbarAutohideSuspend(boolean)} to force show the transient
+     * taskbar if launcher has requested to suspend auto-hide behavior.
+     */
+    private boolean mTaskbarTransientShowing;
+    private final AutoHideUiElement mAutoHideUiElement = new AutoHideUiElement() {
+        @Override
+        public void synchronizeState() {
+        }
+
+        @Override
+        public boolean isVisible() {
+            return mTaskbarTransientShowing;
+        }
+
+        @Override
+        public void hide() {
+        }
+    };
 
     @Inject
     public TaskbarDelegate(Context context) {
@@ -96,11 +123,12 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
     }
 
-    public void setOverviewProxyService(CommandQueue commandQueue,
+    public void setDependencies(CommandQueue commandQueue,
             OverviewProxyService overviewProxyService,
             NavigationBarA11yHelper navigationBarA11yHelper,
             NavigationModeController navigationModeController,
-            SysUiState sysUiState, DumpManager dumpManager) {
+            SysUiState sysUiState, DumpManager dumpManager,
+            AutoHideController autoHideController) {
         // TODO: adding this in the ctor results in a dagger dependency cycle :(
         mCommandQueue = commandQueue;
         mOverviewProxyService = overviewProxyService;
@@ -108,18 +136,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mNavigationModeController = navigationModeController;
         mSysUiState = sysUiState;
         dumpManager.registerDumpable(this);
-    }
-
-    public void destroy() {
-        mCommandQueue.removeCallback(this);
-        mOverviewProxyService.removeCallback(this);
-        mNavigationModeController.removeListener(this);
-        mNavigationBarA11yHelper.removeA11yEventListener(mNavA11yEventListener);
-        mEdgeBackGestureHandler.onNavBarDetached();
-        if (mWindowContext != null) {
-            mWindowContext.unregisterComponentCallbacks(this);
-            mWindowContext = null;
-        }
+        mAutoHideController = autoHideController;
     }
 
     public void init(int displayId) {
@@ -136,6 +153,20 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mWindowContext.registerComponentCallbacks(this);
         // Set initial state for any listeners
         updateSysuiFlags();
+        mAutoHideController.setNavigationBar(mAutoHideUiElement);
+    }
+
+    public void destroy() {
+        mCommandQueue.removeCallback(this);
+        mOverviewProxyService.removeCallback(this);
+        mNavigationModeController.removeListener(this);
+        mNavigationBarA11yHelper.removeA11yEventListener(mNavA11yEventListener);
+        mEdgeBackGestureHandler.onNavBarDetached();
+        if (mWindowContext != null) {
+            mWindowContext.unregisterComponentCallbacks(this);
+            mWindowContext = null;
+        }
+        mAutoHideController.setNavigationBar(null);
     }
 
     private void updateSysuiFlags() {
@@ -209,6 +240,38 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     }
 
     @Override
+    public void showTransient(int displayId, int[] types) {
+        if (displayId != mDisplayId) {
+            return;
+        }
+        if (!containsType(types, ITYPE_NAVIGATION_BAR)) {
+            return;
+        }
+        mTaskbarTransientShowing = true;
+    }
+
+    @Override
+    public void abortTransient(int displayId, int[] types) {
+        if (displayId != mDisplayId) {
+            return;
+        }
+        if (!containsType(types, ITYPE_NAVIGATION_BAR)) {
+            return;
+        }
+        mTaskbarTransientShowing = false;
+    }
+
+    @Override
+    public void onTaskbarAutohideSuspend(boolean suspend) {
+        mTaskbarTransientShowing = suspend;
+        if (suspend) {
+            mAutoHideController.suspendAutoHide();
+        } else {
+            mAutoHideController.resumeSuspendedAutoHide();
+        }
+    }
+
+    @Override
     public void onNavigationModeChanged(int mode) {
         mEdgeBackGestureHandler.onNavigationModeChanged(mode);
     }
@@ -236,6 +299,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         pw.println("  mDisabledFlags=" + mDisabledFlags);
         pw.println("  mTaskBarWindowState=" + mTaskBarWindowState);
         pw.println("  mBehavior=" + mBehavior);
+        pw.println("  mTaskbarTransientShowing=" + mTaskbarTransientShowing);
         mEdgeBackGestureHandler.dump(pw);
     }
 }
