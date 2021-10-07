@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.Nullable;
 import android.app.usage.StorageStatsManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
@@ -186,7 +187,7 @@ public class PackageStats implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (!(obj instanceof PackageStats)) {
             return false;
         }

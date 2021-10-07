@@ -192,8 +192,7 @@ bool BinaryResourceParser::ParsePackage(const ResChunk_header* chunk) {
   std::u16string package_name = strcpy16_dtoh((const char16_t*)package_header->name,
                                               arraysize(package_header->name));
 
-  ResourceTablePackage* package =
-      table_->CreatePackage(util::Utf16ToUtf8(package_name), static_cast<uint8_t>(package_id));
+  ResourceTablePackage* package = table_->FindOrCreatePackage(util::Utf16ToUtf8(package_name));
   if (!package) {
     diag_->Error(DiagMessage(source_)
                  << "incompatible package '" << package_name << "' with ID " << package_id);
@@ -232,13 +231,13 @@ bool BinaryResourceParser::ParsePackage(const ResChunk_header* chunk) {
         break;
 
       case android::RES_TABLE_TYPE_SPEC_TYPE:
-        if (!ParseTypeSpec(package, parser.chunk())) {
+        if (!ParseTypeSpec(package, parser.chunk(), package_id)) {
           return false;
         }
         break;
 
       case android::RES_TABLE_TYPE_TYPE:
-        if (!ParseType(package, parser.chunk())) {
+        if (!ParseType(package, parser.chunk(), package_id)) {
           return false;
         }
         break;
@@ -251,6 +250,12 @@ bool BinaryResourceParser::ParsePackage(const ResChunk_header* chunk) {
 
       case android::RES_TABLE_OVERLAYABLE_TYPE:
         if (!ParseOverlayable(parser.chunk())) {
+          return false;
+        }
+        break;
+
+      case android::RES_TABLE_STAGED_ALIAS_TYPE:
+        if (!ParseStagedAliases(parser.chunk())) {
           return false;
         }
         break;
@@ -276,7 +281,7 @@ bool BinaryResourceParser::ParsePackage(const ResChunk_header* chunk) {
 }
 
 bool BinaryResourceParser::ParseTypeSpec(const ResourceTablePackage* package,
-                                         const ResChunk_header* chunk) {
+                                         const ResChunk_header* chunk, uint8_t package_id) {
   if (type_pool_.getError() != NO_ERROR) {
     diag_->Error(DiagMessage(source_) << "missing type string pool");
     return false;
@@ -317,14 +322,14 @@ bool BinaryResourceParser::ParseTypeSpec(const ResourceTablePackage* package,
   const uint32_t* type_spec_flags = reinterpret_cast<const uint32_t*>(
       reinterpret_cast<uintptr_t>(type_spec) + util::DeviceToHost16(type_spec->header.headerSize));
   for (size_t i = 0; i < entry_count; i++) {
-    ResourceId id(package->id.value_or_default(0x0), type_spec->id, static_cast<size_t>(i));
+    ResourceId id(package_id, type_spec->id, static_cast<size_t>(i));
     entry_type_spec_flags_[id] = util::DeviceToHost32(type_spec_flags[i]);
   }
   return true;
 }
 
 bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
-                                     const ResChunk_header* chunk) {
+                                     const ResChunk_header* chunk, uint8_t package_id) {
   if (type_pool_.getError() != NO_ERROR) {
     diag_->Error(DiagMessage(source_) << "missing type string pool");
     return false;
@@ -354,13 +359,9 @@ bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
   const std::string type_str = util::GetString(type_pool_, type->id - 1);
   const ResourceType* parsed_type = ParseResourceType(type_str);
   if (!parsed_type) {
-    // Be lenient on the name of the type if the table is lenient on resource validation.
-    bool log_error = table_->GetValidateResources();
-    if (log_error) {
-      diag_->Error(DiagMessage(source_) << "invalid type name '" << type_str
-                                        << "' for type with ID " << type->id);
-    }
-    return !log_error;
+    diag_->Warn(DiagMessage(source_)
+                << "invalid type name '" << type_str << "' for type with ID " << type->id);
+    return true;
   }
 
   TypeVariant tv(type);
@@ -372,7 +373,7 @@ bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
 
     const ResourceName name(package->name, *parsed_type,
                             util::GetString(key_pool_, util::DeviceToHost32(entry->key.index)));
-    const ResourceId res_id(package->id.value(), type->id, static_cast<uint16_t>(it.index()));
+    const ResourceId res_id(package_id, type->id, static_cast<uint16_t>(it.index()));
 
     std::unique_ptr<Value> resource_value;
     if (entry->flags & ResTable_entry::FLAG_COMPLEX) {
@@ -392,18 +393,21 @@ bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
       return false;
     }
 
-    if (!table_->AddResourceWithIdMangled(name, res_id, config, {}, std::move(resource_value),
-                                          diag_)) {
-      return false;
-    }
+    NewResourceBuilder res_builder(name);
+    res_builder.SetValue(std::move(resource_value), config)
+        .SetId(res_id, OnIdConflict::CREATE_ENTRY)
+        .SetAllowMangled(true);
 
     if (entry->flags & ResTable_entry::FLAG_PUBLIC) {
-      Visibility visibility;
-      visibility.level = Visibility::Level::kPublic;
-      if (!table_->SetVisibilityWithIdMangled(name, visibility, res_id, diag_)) {
-        return false;
+      Visibility visibility{Visibility::Level::kPublic};
+
+      auto spec_flags = entry_type_spec_flags_.find(res_id);
+      if (spec_flags != entry_type_spec_flags_.end() &&
+          spec_flags->second & ResTable_typeSpec::SPEC_STAGED_API) {
+        visibility.staged_api = true;
       }
 
+      res_builder.SetVisibility(visibility);
       // Erase the ID from the map once processed, so that we don't mark the same symbol more than
       // once.
       entry_type_spec_flags_.erase(res_id);
@@ -414,6 +418,10 @@ bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
     auto cache_iter = id_index_.find(res_id);
     if (cache_iter == id_index_.end()) {
       id_index_.insert({res_id, name});
+    }
+
+    if (!table_->AddResource(res_builder.Build(), diag_)) {
+      return false;
     }
   }
   return true;
@@ -472,13 +480,64 @@ bool BinaryResourceParser::ParseOverlayable(const ResChunk_header* chunk) {
 
         OverlayableItem overlayable_item(overlayable);
         overlayable_item.policies = policy_header->policy_flags;
-        if (!table_->SetOverlayable(iter->second, overlayable_item, diag_)) {
+        if (!table_->AddResource(NewResourceBuilder(iter->second)
+                                     .SetId(res_id, OnIdConflict::CREATE_ENTRY)
+                                     .SetOverlayable(std::move(overlayable_item))
+                                     .SetAllowMangled(true)
+                                     .Build(),
+                                 diag_)) {
           return false;
         }
       }
     }
   }
 
+  return true;
+}
+
+bool BinaryResourceParser::ParseStagedAliases(const ResChunk_header* chunk) {
+  auto header = ConvertTo<ResTable_staged_alias_header>(chunk);
+  if (!header) {
+    diag_->Error(DiagMessage(source_) << "corrupt ResTable_staged_alias_header chunk");
+    return false;
+  }
+
+  const auto ref_begin = reinterpret_cast<const ResTable_staged_alias_entry*>(
+      ((uint8_t*)header) + util::DeviceToHost32(header->header.headerSize));
+  const auto ref_end = ref_begin + util::DeviceToHost32(header->count);
+  for (auto ref_iter = ref_begin; ref_iter != ref_end; ++ref_iter) {
+    const auto staged_id = ResourceId(util::DeviceToHost32(ref_iter->stagedResId));
+    const auto finalized_id = ResourceId(util::DeviceToHost32(ref_iter->finalizedResId));
+
+    // If the staged alias chunk comes before the type chunks, the resource ids and resource name
+    // pairing will not exist at this point.
+    const auto iter = id_index_.find(finalized_id);
+    if (iter == id_index_.cend()) {
+      diag_->Error(DiagMessage(source_) << "failed to find resource name for finalized"
+                                        << " resource ID " << finalized_id);
+      return false;
+    }
+
+    // Set the staged id of the finalized resource.
+    const auto& resource_name = iter->second;
+    const StagedId staged_id_def{.id = staged_id};
+    if (!table_->AddResource(NewResourceBuilder(resource_name)
+                                 .SetId(finalized_id, OnIdConflict::CREATE_ENTRY)
+                                 .SetStagedId(staged_id_def)
+                                 .SetAllowMangled(true)
+                                 .Build(),
+                             diag_)) {
+      return false;
+    }
+
+    // Since a the finalized resource entry is cloned and added to the resource table under the
+    // staged resource id, remove the cloned resource entry from the table.
+    if (!table_->RemoveResource(resource_name, staged_id)) {
+      diag_->Error(DiagMessage(source_) << "failed to find resource entry for staged "
+                                        << " resource ID " << staged_id);
+      return false;
+    }
+  }
   return true;
 }
 

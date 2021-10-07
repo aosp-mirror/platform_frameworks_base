@@ -37,6 +37,7 @@ import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.IIntegerConsumer;
@@ -161,7 +162,7 @@ public class ImsMmTelManager implements RegistrationManager {
             public void onCapabilitiesStatusChanged(int config) {
                 if (mLocalCallback == null) return;
 
-                long callingIdentity = Binder.clearCallingIdentity();
+                final long callingIdentity = Binder.clearCallingIdentity();
                 try {
                     mExecutor.execute(() -> mLocalCallback.onCapabilitiesStatusChanged(
                             new MmTelFeature.MmTelCapabilities(config)));
@@ -452,8 +453,9 @@ public class ImsMmTelManager implements RegistrationManager {
                     }
                 }
             });
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+        } catch (ServiceSpecificException | RemoteException e) {
+            Log.w("ImsMmTelManager", "Error getting registration state: " + e);
+            executor.execute(() -> stateCallback.accept(REGISTRATION_STATE_NOT_REGISTERED));
         }
     }
 
@@ -498,8 +500,10 @@ public class ImsMmTelManager implements RegistrationManager {
                             }
                         }
                     });
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+        } catch (ServiceSpecificException | RemoteException e) {
+            Log.w("ImsMmTelManager", "Error getting transport type: " + e);
+            executor.execute(() -> transportTypeCallback.accept(
+                    AccessNetworkConstants.TRANSPORT_TYPE_INVALID));
         }
     }
 
@@ -723,6 +727,7 @@ public class ImsMmTelManager implements RegistrationManager {
      * @see android.telephony.CarrierConfigManager#KEY_CARRIER_VT_AVAILABLE_BOOL
      * @see android.telephony.CarrierConfigManager#KEY_CARRIER_IMS_GBA_REQUIRED_BOOL
      * @see #isAvailable(int, int)
+     *
      * @param imsRegTech The IMS registration technology.
      * @param capability The IMS MmTel capability to query.
      * @return {@code true} if the MmTel IMS capability is capable for this subscription, false
@@ -977,6 +982,105 @@ public class ImsMmTelManager implements RegistrationManager {
             }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * This configuration is meaningful only on dual sim device.
+     * If enabled, this will result in the device setting up IMS of all other
+     * active subscriptions over the INTERNET APN of the primary default data subscription
+     * when any of those subscriptions are roaming or out of service and if wifi is not available
+     * for VoWifi. This feature will be disabled if
+     * {@link CarrierConfigManager#KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL} is set to false.
+     * <p>Following are the conditions in which system will try to register IMS over
+     * cross sim
+     * <ul>
+     *     <li>Wifi is not available, one SIM is roaming and the default data
+     *     SIM is in home network. Then roaming SIM IMS will be registered over INTERNET APN of the
+     *     default data subscription </li>
+     *     <li>Wifi is not available, one SIM is out of service and the default data
+     *     SIM is in home network. Then out of service SIM IMS will be registered over INTERNET
+     *     APN of the default data subscription </li>
+     * </ul>
+     * <p>This API requires one of the following:
+     * <ul>
+     *     <li>The caller holds the READ_PRECISE_PHONE_STATE permission.</li>
+     *     <li>If the caller is the device or profile owner, the caller holds the
+     *     {@link Manifest.permission#READ_PRECISE_PHONE_STATE} permission.</li>
+     *     <li>The caller has carrier privileges (see
+     *     {@link android.telephony.TelephonyManager#hasCarrierPrivileges}) on any
+     *     active subscription.</li>
+     * </ul>
+     * <p>The profile owner is an app that owns a managed profile on the device; for more details
+     * see <a href="https://developer.android.com/work/managed-profiles">Work profiles</a>.
+     * Access by profile owners is deprecated and will be removed in a future release.
+     *
+     * @throws ImsException if the IMS service associated with this subscription is not available or
+     * the IMS service is not available.
+     * @return true if the user's setting for Voice over Cross SIM is enabled and false if it is not
+     */
+    @SuppressAutoDoc // No support for device / profile owner or carrier privileges (b/72967236).
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            android.Manifest.permission.READ_PRECISE_PHONE_STATE})
+    public boolean isCrossSimCallingEnabled() throws ImsException {
+        ITelephony iTelephony = getITelephony();
+        if (iTelephony == null) {
+            throw new ImsException("Could not find Telephony Service.",
+                    ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
+
+        try {
+            return iTelephony.isCrossSimCallingEnabledByUser(mSubId);
+        } catch (ServiceSpecificException sse) {
+            throw new ImsException(sse.getMessage(), sse.errorCode);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+        // Not reachable. Adding return to make compiler happy.
+        return false;
+    }
+
+    /**
+     * Sets the user's setting for whether or not Voice over Cross SIM is enabled.
+     * If enabled, this will result in the device setting up IMS of all other
+     * active subscriptions over the INTERNET APN of the primary default data subscription
+     * when any of those subscriptions are roaming or out of service and if wifi is not available
+     * for VoWifi. This feature will be disabled if
+     * {@link CarrierConfigManager#KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL} is set to false.
+     *
+     * <p>Following are the conditions in which system will try to register IMS over
+     * cross sim
+     * <ul>
+     *     <li>Wifi is not available, one SIM is roaming and the default data
+     *     SIM is in home network. Then roaming SIM IMS will be registered over INTERNET APN of the
+     *     default data subscription </li>
+     *     <li>Wifi is not available, one SIM is out of service and the default data
+     *     SIM is in home network. Then out of service SIM IMS will be registered over INTERNET
+     *     APN of the default data subscription </li>
+     * </ul>
+     * @throws ImsException if the IMS service associated with this subscription is not available or
+     * the IMS service is not available.
+     * @param isEnabled true if the user's setting for Voice over Cross SIM is enabled,
+     *                 false otherwise
+     * @see #isCrossSimCallingEnabled()
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    public void setCrossSimCallingEnabled(boolean isEnabled) throws ImsException {
+        ITelephony iTelephony = getITelephony();
+        if (iTelephony == null) {
+            throw new ImsException("Could not find Telephony Service.",
+                    ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
+
+        try {
+            iTelephony.setCrossSimCallingEnabled(mSubId, isEnabled);
+        } catch (ServiceSpecificException sse) {
+            throw new ImsException(sse.getMessage(), sse.errorCode);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
         }
     }
 

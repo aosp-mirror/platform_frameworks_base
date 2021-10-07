@@ -57,6 +57,7 @@ public class ImsRegistrationImplBase {
                     REGISTRATION_TECH_NONE,
                     REGISTRATION_TECH_LTE,
                     REGISTRATION_TECH_IWLAN,
+                    REGISTRATION_TECH_CROSS_SIM,
                     REGISTRATION_TECH_NR
             })
     @Retention(RetentionPolicy.SOURCE)
@@ -73,7 +74,12 @@ public class ImsRegistrationImplBase {
      * This ImsService is registered to IMS via IWLAN.
      */
     public static final int REGISTRATION_TECH_IWLAN = 1;
-    // REGISTRATION_TECH = 2 omitted purposefully.
+
+    /**
+     * This ImsService is registered to IMS via internet over second subscription.
+     */
+    public static final int REGISTRATION_TECH_CROSS_SIM = 2;
+
     /**
      * This ImsService is registered to IMS via NR.
      */
@@ -284,7 +290,8 @@ public class ImsRegistrationImplBase {
      * Notify the framework that the handover from the current radio technology to the technology
      * defined in {@code imsRadioTech} has failed.
      * @param imsRadioTech The technology that has failed to be changed. Valid values are
-     * {@link #REGISTRATION_TECH_LTE} and {@link #REGISTRATION_TECH_IWLAN}.
+     * {@link #REGISTRATION_TECH_LTE}, {@link #REGISTRATION_TECH_IWLAN} and
+     * {@link #REGISTRATION_TECH_CROSS_SIM}.
      * @param info The {@link ImsReasonInfo} for the failure to change technology.
      */
     public final void onTechnologyChangeFailed(@ImsRegistrationTech int imsRadioTech,

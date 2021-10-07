@@ -16,7 +16,13 @@
 
 package android.hardware.display;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.HdrCapabilities.HdrType;
+
 import android.Manifest;
+import android.annotation.FloatRange;
+import android.annotation.IntDef;
+import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -32,12 +38,16 @@ import android.media.projection.MediaProjection;
 import android.os.Build;
 import android.os.Handler;
 import android.util.Pair;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.Surface;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * Manages the properties of attached displays.
@@ -62,9 +72,6 @@ public final class DisplayManager {
      * {@link #EXTRA_WIFI_DISPLAY_STATUS} extra.
      * </p><p>
      * This broadcast is only sent to registered receivers and can only be sent by the system.
-     * </p><p>
-     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} permission is required to
-     * receive this broadcast.
      * </p>
      * @hide
      */
@@ -314,6 +321,7 @@ public final class DisplayManager {
      * @hide
      */
     // TODO (b/114338689): Remove the flag and use IWindowManager#setShouldShowSystemDecors
+    @TestApi
     public static final int VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 1 << 9;
 
     /**
@@ -324,7 +332,131 @@ public final class DisplayManager {
      * @see #VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
      * @hide
      */
+    @TestApi
     public static final int VIRTUAL_DISPLAY_FLAG_TRUSTED = 1 << 10;
+
+    /**
+     * Virtual display flags: Indicates that the display should not be a part of the default
+     * DisplayGroup and instead be part of a new DisplayGroup.
+     *
+     * @see #createVirtualDisplay
+     * @hide
+     */
+    public static final int VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP = 1 << 11;
+
+
+    /** @hide */
+    @IntDef(prefix = {"MATCH_CONTENT_FRAMERATE_"}, value = {
+            MATCH_CONTENT_FRAMERATE_UNKNOWN,
+            MATCH_CONTENT_FRAMERATE_NEVER,
+            MATCH_CONTENT_FRAMERATE_SEAMLESSS_ONLY,
+            MATCH_CONTENT_FRAMERATE_ALWAYS,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MatchContentFrameRateType {}
+
+    /**
+     * Match content frame rate user preference is unknown.
+     */
+    public static final int MATCH_CONTENT_FRAMERATE_UNKNOWN = -1;
+
+    /**
+     * No mode switching is allowed.
+     */
+    public static final int MATCH_CONTENT_FRAMERATE_NEVER = 0;
+
+    /**
+     * Only refresh rate switches without visual interruptions are allowed.
+     */
+    public static final int MATCH_CONTENT_FRAMERATE_SEAMLESSS_ONLY = 1;
+
+    /**
+     * Refresh rate switches between all refresh rates are allowed even if they have visual
+     * interruptions for the user.
+     */
+    public static final int MATCH_CONTENT_FRAMERATE_ALWAYS = 2;
+
+    /** @hide */
+    @IntDef(prefix = {"SWITCHING_TYPE_"}, value = {
+            SWITCHING_TYPE_NONE,
+            SWITCHING_TYPE_WITHIN_GROUPS,
+            SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SwitchingType {}
+
+    /**
+     * No mode switching will happen.
+     * @hide
+     */
+    @TestApi
+    public static final int SWITCHING_TYPE_NONE = 0;
+
+    /**
+     * Allow only refresh rate switching between modes in the same configuration group. This way
+     * only switches without visual interruptions for the user will be allowed.
+     * @hide
+     */
+    @TestApi
+    public static final int SWITCHING_TYPE_WITHIN_GROUPS = 1;
+
+    /**
+     * Allow refresh rate switching between all refresh rates even if the switch with have visual
+     * interruptions for the user.
+     * @hide
+     */
+    @TestApi
+    public static final int SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS = 2;
+
+    /**
+     * @hide
+     */
+    @LongDef(flag = true, prefix = {"EVENT_FLAG_"}, value = {
+            EVENT_FLAG_DISPLAY_ADDED,
+            EVENT_FLAG_DISPLAY_CHANGED,
+            EVENT_FLAG_DISPLAY_REMOVED,
+            EVENT_FLAG_DISPLAY_BRIGHTNESS
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EventsMask {}
+
+    /**
+     * Event type for when a new display is added.
+     *
+     * @see #registerDisplayListener(DisplayListener, Handler, long)
+     *
+     * @hide
+     */
+    public static final long EVENT_FLAG_DISPLAY_ADDED = 1L << 0;
+
+    /**
+     * Event type for when a display is removed.
+     *
+     * @see #registerDisplayListener(DisplayListener, Handler, long)
+     *
+     * @hide
+     */
+    public static final long EVENT_FLAG_DISPLAY_REMOVED = 1L << 1;
+
+    /**
+     * Event type for when a display is changed.
+     *
+     * @see #registerDisplayListener(DisplayListener, Handler, long)
+     *
+     * @hide
+     */
+    public static final long EVENT_FLAG_DISPLAY_CHANGED = 1L << 2;
+
+    /**
+     * Event flag to register for a display's brightness changes. This notification is sent
+     * through the {@link DisplayListener#onDisplayChanged} callback method. New brightness
+     * values can be retrieved via {@link android.view.Display#getBrightnessInfo()}.
+     *
+     * @see #registerDisplayListener(DisplayListener, Handler, long)
+     *
+     * @hide
+     */
+    public static final long EVENT_FLAG_DISPLAY_BRIGHTNESS = 1L << 3;
 
     /** @hide */
     public DisplayManager(Context context) {
@@ -383,6 +515,7 @@ public final class DisplayManager {
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_EXTERNAL);
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_OVERLAY);
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_VIRTUAL);
+                    addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_INTERNAL);
                 }
                 return mTempDisplays.toArray(new Display[mTempDisplays.size()]);
             } finally {
@@ -403,6 +536,9 @@ public final class DisplayManager {
     private void addPresentationDisplaysLocked(
             ArrayList<Display> displays, int[] displayIds, int matchType) {
         for (int i = 0; i < displayIds.length; i++) {
+            if (displayIds[i] == DEFAULT_DISPLAY) {
+                continue;
+            }
             Display display = getOrCreateDisplayLocked(displayIds[i], true /*assumeValid*/);
             if (display != null
                     && (display.getFlags() & Display.FLAG_PRESENTATION) != 0
@@ -431,7 +567,7 @@ public final class DisplayManager {
     }
 
     /**
-     * Registers an display listener to receive notifications about when
+     * Registers a display listener to receive notifications about when
      * displays are added, removed or changed.
      *
      * @param listener The listener to register.
@@ -441,7 +577,30 @@ public final class DisplayManager {
      * @see #unregisterDisplayListener
      */
     public void registerDisplayListener(DisplayListener listener, Handler handler) {
-        mGlobal.registerDisplayListener(listener, handler);
+        registerDisplayListener(listener, handler, EVENT_FLAG_DISPLAY_ADDED
+                | EVENT_FLAG_DISPLAY_CHANGED | EVENT_FLAG_DISPLAY_REMOVED);
+    }
+
+    /**
+     * Registers a display listener to receive notifications about given display event types.
+     *
+     * @param listener The listener to register.
+     * @param handler The handler on which the listener should be invoked, or null
+     * if the listener should be invoked on the calling thread's looper.
+     * @param eventsMask A bitmask of the event types for which this listener is subscribed.
+     *
+     * @see #EVENT_FLAG_DISPLAY_ADDED
+     * @see #EVENT_FLAG_DISPLAY_CHANGED
+     * @see #EVENT_FLAG_DISPLAY_REMOVED
+     * @see #EVENT_FLAG_DISPLAY_BRIGHTNESS
+     * @see #registerDisplayListener(DisplayListener, Handler)
+     * @see #unregisterDisplayListener
+     *
+     * @hide
+     */
+    public void registerDisplayListener(@NonNull DisplayListener listener,
+            @Nullable Handler handler, @EventsMask long eventsMask) {
+        mGlobal.registerDisplayListener(listener, handler, eventsMask);
     }
 
     /**
@@ -592,6 +751,55 @@ public final class DisplayManager {
         final ColorDisplayManager cdm = mContext.getSystemService(ColorDisplayManager.class);
         cdm.setSaturationLevel(Math.round(level * 100f));
     }
+
+    /**
+     * Sets the HDR types that have been disabled by user.
+     * @param userDisabledTypes the HDR types to disable.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void setUserDisabledHdrTypes(@NonNull @HdrType int[] userDisabledTypes) {
+        mGlobal.setUserDisabledHdrTypes(userDisabledTypes);
+    }
+
+    /**
+     * Sets whether or not the user disabled HDR types are returned from
+     * {@link Display#getHdrCapabilities}.
+     *
+     * @param areUserDisabledHdrTypesAllowed If true, the user-disabled types
+     * are ignored and returned, if the display supports them. If false, the
+     * user-disabled types are taken into consideration and are never returned,
+     * even if the display supports them.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void setAreUserDisabledHdrTypesAllowed(boolean areUserDisabledHdrTypesAllowed) {
+        mGlobal.setAreUserDisabledHdrTypesAllowed(areUserDisabledHdrTypesAllowed);
+    }
+
+    /**
+     * Returns whether or not the user-disabled HDR types are returned from
+     * {@link Display#getHdrCapabilities}.
+     *
+     * @hide
+     */
+    @TestApi
+    public boolean areUserDisabledHdrTypesAllowed() {
+        return mGlobal.areUserDisabledHdrTypesAllowed();
+    }
+
+    /**
+     * Returns the HDR formats disabled by the user.
+     *
+     * @hide
+     */
+    @TestApi
+    public @NonNull int[] getUserDisabledHdrTypes() {
+        return mGlobal.getUserDisabledHdrTypes();
+    }
+
 
     /**
      * Creates a virtual display.
@@ -802,9 +1010,46 @@ public final class DisplayManager {
      *
      * @hide Requires signature permission.
      */
-    public void setTemporaryBrightness(float brightness) {
-        mGlobal.setTemporaryBrightness(brightness);
+    public void setTemporaryBrightness(int displayId, float brightness) {
+        mGlobal.setTemporaryBrightness(displayId, brightness);
     }
+
+
+    /**
+     * Sets the brightness of the specified display.
+     * <p>
+     * Requires the {@link android.Manifest.permission#CONTROL_DISPLAY_BRIGHTNESS}
+     * permission.
+     * </p>
+     *
+     * @param displayId the logical display id
+     * @param brightness The brightness value from 0.0f to 1.0f.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
+    public void setBrightness(int displayId, @FloatRange(from = 0f, to = 1f) float brightness) {
+        mGlobal.setBrightness(displayId, brightness);
+    }
+
+
+    /**
+     * Gets the brightness of the specified display.
+     * <p>
+     * Requires the {@link android.Manifest.permission#CONTROL_DISPLAY_BRIGHTNESS}
+     * permission.
+     * </p>
+     *
+     * @param displayId The display of which brightness value to get from.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
+    @FloatRange(from = 0f, to = 1f)
+    public float getBrightness(int displayId) {
+        return mGlobal.getBrightness(displayId);
+    }
+
 
     /**
      * Temporarily sets the auto brightness adjustment factor.
@@ -834,6 +1079,75 @@ public final class DisplayManager {
     @SystemApi
     public Pair<float[], float[]> getMinimumBrightnessCurve() {
         return mGlobal.getMinimumBrightnessCurve();
+    }
+
+    /**
+     * When enabled the app requested mode is always selected regardless of user settings and
+     * policies for low brightness, low battery, etc.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS)
+    public void setShouldAlwaysRespectAppRequestedMode(boolean enabled) {
+        mGlobal.setShouldAlwaysRespectAppRequestedMode(enabled);
+    }
+
+    /**
+     * Returns whether we are running in a mode which always selects the app requested display mode
+     * and ignores user settings and policies for low brightness, low battery etc.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS)
+    public boolean shouldAlwaysRespectAppRequestedMode() {
+        return mGlobal.shouldAlwaysRespectAppRequestedMode();
+    }
+
+    /**
+     * Sets the refresh rate switching type.
+     * This matches {@link android.provider.Settings.Secure.MATCH_CONTENT_FRAME_RATE}
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.MODIFY_REFRESH_RATE_SWITCHING_TYPE)
+    public void setRefreshRateSwitchingType(@SwitchingType int newValue) {
+        mGlobal.setRefreshRateSwitchingType(newValue);
+    }
+
+    /**
+     * Returns the user preference for "Match content frame rate".
+     * <p>
+     * Never: Even if the app requests it, the device will never try to match its output to the
+     * original frame rate of the content.
+     * </p><p>
+     * Seamless: If the app requests it, the device will match its output to the original frame
+     * rate of the content, ONLY if the display can transition seamlessly.
+     * </p><p>
+     * Always: If the app requests it, the device will match its output to the original
+     * frame rate of the content. This may cause the screen to go blank for a
+     * second when exiting or entering a video playback.
+     * </p>
+     */
+    @MatchContentFrameRateType public int getMatchContentFrameRateUserPreference() {
+        return toMatchContentFrameRateSetting(mGlobal.getRefreshRateSwitchingType());
+    }
+
+    @MatchContentFrameRateType
+    private int toMatchContentFrameRateSetting(@SwitchingType int switchingType) {
+        switch (switchingType) {
+            case SWITCHING_TYPE_NONE:
+                return MATCH_CONTENT_FRAMERATE_NEVER;
+            case SWITCHING_TYPE_WITHIN_GROUPS:
+                return MATCH_CONTENT_FRAMERATE_SEAMLESSS_ONLY;
+            case SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS:
+                return MATCH_CONTENT_FRAMERATE_ALWAYS;
+            default:
+                Slog.e(TAG, switchingType + " is not a valid value of switching type.");
+                return MATCH_CONTENT_FRAMERATE_UNKNOWN;
+        }
     }
 
     /**
@@ -952,6 +1266,7 @@ public final class DisplayManager {
          */
         String KEY_PEAK_REFRESH_RATE_DEFAULT = "peak_refresh_rate_default";
 
+        // TODO(b/162536543): rename it once it is proved not harmful for users.
         /**
          * Key for controlling which packages are explicitly blocked from running at refresh rates
          * higher than 60hz. An app may be added to this list if they exhibit performance issues at

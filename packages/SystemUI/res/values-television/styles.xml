@@ -22,4 +22,40 @@
         <item name="android:windowEnterAnimation">@null</item>
         <item name="android:windowExitAnimation">@null</item>
     </style>
+
+    <style name="volume_dialog_theme" parent="Theme.SystemUI">
+        <item name="android:colorAccent">@color/tv_volume_dialog_accent</item>
+        <item name="android:textColorPrimaryInverse">@color/tv_volume_dialog_accent</item>
+        <item name="android:dialogCornerRadius">@dimen/volume_dialog_panel_width_half</item>
+    </style>
+
+    <style name="BottomSheet" parent="Theme.Leanback">
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowActivityTransitions">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:backgroundDimAmount">0.2</item>
+    </style>
+
+    <style name="BottomSheet.TitleText">
+        <item name="android:textSize">28sp</item>
+        <item name="android:textColor">@color/bottom_sheet_title_color</item>
+    </style>
+
+    <style name="BottomSheet.BodyText">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/bottom_sheet_body_color</item>
+    </style>
+
+    <style name="BottomSheet.ActionItem">
+        <item name="android:layout_width">@dimen/bottom_sheet_button_width</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">left|center_vertical</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/bottom_sheet_button_text_color</item>
+        <item name="android:background">@drawable/bottom_sheet_button_background</item>
+        <item name="android:paddingHorizontal">@dimen/bottom_sheet_button_padding_horizontal</item>
+        <item name="android:paddingVertical">@dimen/bottom_sheet_button_padding_vertical</item>
+        <item name="android:stateListAnimator">@anim/tv_bottom_sheet_button_state_list_animator</item>
+    </style>
 </resources>

@@ -539,7 +539,7 @@ import java.util.List;
             handler = new Handler(Looper.getMainLooper());
         }
         mSessionManager.addOnActiveSessionsChangedListener(mSessionListener, listenerComponent,
-                UserHandle.myUserId(), handler);
+                handler);
         mSessionListener.onActiveSessionsChanged(mSessionManager
                 .getActiveSessions(listenerComponent));
         if (DEBUG) {

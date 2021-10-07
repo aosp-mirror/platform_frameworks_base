@@ -15,22 +15,27 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.scoaudiotest">
-   
-   <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-   <uses-permission android:name="android.permission.RECORD_AUDIO" />
-   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-   <uses-permission android:name="android.permission.BROADCAST_STICKY" />
-   <uses-permission android:name="android.permission.BLUETOOTH" />
-        
+     package="com.android.scoaudiotest">
+
+   <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+   <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+   <uses-permission android:name="android.permission.BROADCAST_STICKY"/>
+   <uses-permission android:name="android.permission.BLUETOOTH"/>
+   <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+   <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE"/>
+   <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
+   <uses-permission android:name="android.permission.BLUETOOTH_SCAN"/>
+
    <application>    
         <activity android:label="@string/app_name"
-                android:name="ScoAudioTest">         
+             android:name="ScoAudioTest"
+             android:exported="true">         
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        
+
     </application>   
 </manifest>

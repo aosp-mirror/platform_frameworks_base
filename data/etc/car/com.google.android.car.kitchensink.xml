@@ -27,8 +27,10 @@
         <permission name="android.permission.INTERACT_ACROSS_USERS_FULL"/>
         <permission name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS"/>
         <permission name="android.permission.LOCATION_HARDWARE"/>
+        <permission name="android.permission.LOCK_DEVICE"/>
         <permission name="android.permission.MANAGE_USB"/>
         <permission name="android.permission.MANAGE_USERS"/>
+        <permission name="android.permission.MASTER_CLEAR"/>
         <!-- use for CarServiceTest -->
         <permission name="android.permission.MEDIA_CONTENT_CONTROL"/>
         <permission name="android.permission.MODIFY_AUDIO_ROUTING"/>
@@ -40,11 +42,54 @@
         <permission name="android.permission.REAL_GET_TASKS"/>
         <permission name="android.permission.READ_LOGS"/>
         <permission name="android.permission.REBOOT"/>
+        <permission name="android.permission.RESET_PASSWORD"/>
+        <permission name="android.permission.SEND_CATEGORY_CAR_NOTIFICATIONS"/>
         <!-- use for CarServiceTest -->
         <permission name="android.permission.SET_ACTIVITY_WATCHER"/>
+        <permission name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME"/>
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
 
         <!-- use for rotary fragment to enable/disable packages related to rotary -->
         <permission name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"/>
+
+        <!-- CarService permissions -->
+        <!-- TODO: Explain why so many permissions are required -->
+        <permission name="android.car.permission.ACCESS_CAR_PROJECTION_STATUS"/>
+        <permission name="android.car.permission.CAR_CONTROL_AUDIO_SETTINGS"/>
+        <permission name="android.car.permission.CAR_CONTROL_AUDIO_VOLUME"/>
+        <permission name="android.car.permission.CAR_DIAGNOSTICS"/>
+        <permission name="android.car.permission.CAR_DISPLAY_IN_CLUSTER"/>
+        <permission name="android.car.permission.CAR_DRIVING_STATE"/>
+        <permission name="android.car.permission.CAR_DYNAMICS_STATE"/>
+        <permission name="android.car.permission.CAR_EXTERIOR_LIGHTS"/>
+        <permission name="android.car.permission.CAR_IDENTIFICATION"/>
+        <permission name="android.car.permission.CAR_INSTRUMENT_CLUSTER_CONTROL"/>
+        <permission name="android.car.permission.CAR_MILEAGE"/>
+        <permission name="android.car.permission.CAR_MOCK_VEHICLE_HAL"/>
+        <permission name="android.car.permission.CAR_NAVIGATION_MANAGER"/>
+        <permission name="android.car.permission.CAR_POWER"/>
+        <permission name="android.car.permission.CAR_PROJECTION"/>
+        <permission name="android.car.permission.CAR_TIRES"/>
+        <permission name="android.car.permission.CAR_TEST_SERVICE"/>
+        <permission name="android.car.permission.CAR_UX_RESTRICTIONS_CONFIGURATION"/>
+        <permission name="android.car.permission.CAR_VENDOR_EXTENSION"/>
+        <permission name="android.car.permission.CONTROL_CAR_CLIMATE"/>
+        <permission name="android.car.permission.CONTROL_CAR_DOORS"/>
+        <permission name="android.car.permission.CONTROL_CAR_EXTERIOR_LIGHTS"/>
+        <permission name="android.car.permission.CONTROL_CAR_FEATURES"/>
+        <permission name="android.car.permission.CONTROL_CAR_MIRRORS"/>
+        <permission name="android.car.permission.CONTROL_CAR_SEATS"/>
+        <permission name="android.car.permission.CONTROL_CAR_WINDOWS"/>
+        <permission name="android.car.permission.GET_CAR_VENDOR_CATEGORY_INFO"/>
+        <permission name="android.car.permission.GET_CAR_VENDOR_CATEGORY_SEAT"/>
+        <permission name="android.car.permission.READ_CAR_STEERING"/>
+        <permission name="android.car.permission.SET_CAR_VENDOR_CATEGORY_INFO"/>
+        <permission name="android.car.permission.STORAGE_MONITORING"/>
+        <permission name="android.car.permission.VMS_PUBLISHER"/>
+        <permission name="android.car.permission.VMS_SUBSCRIBER"/>
+        <permission name="android.car.permission.REQUEST_CAR_EVS_ACTIVITY" />
+        <permission name="android.car.permission.CONTROL_CAR_EVS_ACTIVITY" />
+        <permission name="android.car.permission.USE_CAR_EVS_CAMERA" />
+        <permission name="android.car.permission.MONITOR_CAR_EVS_STATUS" />
     </privapp-permissions>
 </permissions>

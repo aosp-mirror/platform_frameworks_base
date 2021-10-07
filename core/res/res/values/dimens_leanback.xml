@@ -83,4 +83,12 @@
     <dimen name="leanback_setup_translation_backward_out_content_end_v4">@integer/leanback_setup_translation_content_cliff_v4</dimen>
     <integer name="leanback_setup_translation_backward_out_content_delay">0</integer>
     <integer name="leanback_setup_translation_backward_out_content_duration">@integer/leanback_setup_base_animation_duration</integer>
+
+    <!-- Button dimens -->
+    <dimen name="leanback_button_height">42dp</dimen>
+    <dimen name="leanback_button_radius">55dp</dimen>
+    <dimen name="leanback_button_padding_horizontal">22dp</dimen>
+    <dimen name="leanback_button_padding_vertical">11dp</dimen>
+
+    <dimen name="leanback_dialog_corner_radius">8dp</dimen>
 </resources>

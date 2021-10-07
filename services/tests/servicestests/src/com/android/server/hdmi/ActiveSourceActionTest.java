@@ -68,10 +68,12 @@ public class ActiveSourceActionTest {
 
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
 
-        PowerManager powerManager = new PowerManager(mContextSpy, mIPowerManagerMock,
-                mIThermalServiceMock, new Handler(mTestLooper.getLooper()));
-        when(mContextSpy.getSystemService(Context.POWER_SERVICE)).thenReturn(powerManager);
-        when(mContextSpy.getSystemService(PowerManager.class)).thenReturn(powerManager);
+        when(mContextSpy.getSystemService(Context.POWER_SERVICE)).thenAnswer(i ->
+                new PowerManager(mContextSpy, mIPowerManagerMock,
+                mIThermalServiceMock, new Handler(mTestLooper.getLooper())));
+        when(mContextSpy.getSystemService(PowerManager.class)).thenAnswer(i ->
+                new PowerManager(mContextSpy, mIPowerManagerMock,
+                mIThermalServiceMock, new Handler(mTestLooper.getLooper())));
         when(mIPowerManagerMock.isInteractive()).thenReturn(true);
 
         mHdmiControlService = new HdmiControlService(mContextSpy) {
@@ -96,25 +98,27 @@ public class ActiveSourceActionTest {
             }
 
             @Override
-            PowerManager getPowerManager() {
-                return powerManager;
+            protected PowerManager getPowerManager() {
+                return new PowerManager(mContextSpy, mIPowerManagerMock,
+                        mIThermalServiceMock, new Handler(mTestLooper.getLooper()));
             }
 
             @Override
-            void writeStringSystemProperty(String key, String value) {
+            protected void writeStringSystemProperty(String key, String value) {
                 // do nothing
             }
         };
 
         Looper looper = mTestLooper.getLooper();
         mHdmiControlService.setIoLooper(looper);
+        mHdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(mContextSpy));
         mNativeWrapper = new FakeNativeWrapper();
         HdmiCecController hdmiCecController = HdmiCecController.createWithNativeWrapper(
-                this.mHdmiControlService, mNativeWrapper);
+                this.mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(hdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
         mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
-        mHdmiControlService.initPortInfo();
+        mHdmiControlService.initService();
         mPhysicalAddress = 0x2000;
         mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
         mTestLooper.dispatchAll();
@@ -141,6 +145,26 @@ public class ActiveSourceActionTest {
 
         assertThat(mNativeWrapper.getResultMessages()).contains(activeSource);
         assertThat(mNativeWrapper.getResultMessages()).contains(menuStatus);
+    }
+
+    @Test
+    public void playbackDevice_updatesActiveSourceState() {
+        HdmiCecLocalDevicePlayback playbackDevice = new HdmiCecLocalDevicePlayback(
+                mHdmiControlService);
+        playbackDevice.init();
+        mLocalDevices.add(playbackDevice);
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+
+        HdmiCecFeatureAction action = new com.android.server.hdmi.ActiveSourceAction(
+                playbackDevice, ADDR_TV);
+        playbackDevice.addAndStartAction(action);
+        mTestLooper.dispatchAll();
+
+        assertThat(playbackDevice.getActiveSource().logicalAddress).isEqualTo(
+                playbackDevice.mAddress);
+        assertThat(playbackDevice.getActiveSource().physicalAddress).isEqualTo(mPhysicalAddress);
+        assertThat(playbackDevice.isActiveSource()).isTrue();
     }
 
     @Test

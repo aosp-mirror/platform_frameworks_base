@@ -16,8 +16,17 @@
 
 package android.app.backup;
 
+import static android.app.backup.BackupManager.OperationType;
+
+import android.annotation.Nullable;
+import android.annotation.StringDef;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
+import android.compat.annotation.Overridable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.XmlResourceParser;
 import android.os.Build;
@@ -31,6 +40,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -42,6 +52,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -88,29 +100,83 @@ public class FullBackup {
     public static final String FLAG_REQUIRED_DEVICE_TO_DEVICE_TRANSFER = "deviceToDeviceTransfer";
     public static final String FLAG_REQUIRED_FAKE_CLIENT_SIDE_ENCRYPTION =
             "fakeClientSideEncryption";
+    private static final String FLAG_DISABLE_IF_NO_ENCRYPTION_CAPABILITIES
+            = "disableIfNoEncryptionCapabilities";
+
+    /**
+     * When  this change is enabled, include / exclude rules specified via
+     * {@code android:fullBackupContent} are ignored during D2D transfers.
+     */
+    @ChangeId
+    @Overridable
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
+    private static final long IGNORE_FULL_BACKUP_CONTENT_IN_D2D = 180523564L;
+
+    @StringDef({
+        ConfigSection.CLOUD_BACKUP,
+        ConfigSection.DEVICE_TRANSFER
+    })
+    @interface ConfigSection {
+        String CLOUD_BACKUP = "cloud-backup";
+        String DEVICE_TRANSFER = "device-transfer";
+    }
+
+    /**
+     * Identify {@link BackupScheme} object by package and operation type
+     * (see {@link OperationType}) it corresponds to.
+     */
+    private static class BackupSchemeId {
+        final String mPackageName;
+        @OperationType final int mOperationType;
+
+        BackupSchemeId(String packageName, @OperationType int operationType) {
+            mPackageName = packageName;
+            mOperationType = operationType;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mPackageName, mOperationType);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object object) {
+            if (this == object) {
+                return true;
+            }
+            if (object == null || getClass() != object.getClass()) {
+                return false;
+            }
+            BackupSchemeId that = (BackupSchemeId) object;
+            return Objects.equals(mPackageName, that.mPackageName) &&
+                    Objects.equals(mOperationType, that.mOperationType);
+        }
+    }
 
     /**
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     static public native int backupToTar(String packageName, String domain,
             String linkdomain, String rootpath, String path, FullBackupDataOutput output);
 
-    private static final Map<String, BackupScheme> kPackageBackupSchemeMap =
-            new ArrayMap<String, BackupScheme>();
+    private static final Map<BackupSchemeId, BackupScheme> kPackageBackupSchemeMap =
+            new ArrayMap<>();
 
-    static synchronized BackupScheme getBackupScheme(Context context) {
+    static synchronized BackupScheme getBackupScheme(Context context,
+            @OperationType int operationType) {
+        BackupSchemeId backupSchemeId = new BackupSchemeId(context.getPackageName(), operationType);
         BackupScheme backupSchemeForPackage =
-                kPackageBackupSchemeMap.get(context.getPackageName());
+                kPackageBackupSchemeMap.get(backupSchemeId);
         if (backupSchemeForPackage == null) {
-            backupSchemeForPackage = new BackupScheme(context);
-            kPackageBackupSchemeMap.put(context.getPackageName(), backupSchemeForPackage);
+            backupSchemeForPackage = new BackupScheme(context, operationType);
+            kPackageBackupSchemeMap.put(backupSchemeId, backupSchemeForPackage);
         }
         return backupSchemeForPackage;
     }
 
     public static BackupScheme getBackupSchemeForTest(Context context) {
-        BackupScheme testing = new BackupScheme(context);
+        BackupScheme testing = new BackupScheme(context, OperationType.BACKUP);
         testing.mExcludes = new ArraySet();
         testing.mIncludes = new ArrayMap();
         return testing;
@@ -235,13 +301,19 @@ public class FullBackup {
         private final static String TAG_INCLUDE = "include";
         private final static String TAG_EXCLUDE = "exclude";
 
+        final int mDataExtractionRules;
         final int mFullBackupContent;
+        @OperationType final int mOperationType;
         final PackageManager mPackageManager;
         final StorageManager mStorageManager;
         final String mPackageName;
 
         // lazy initialized, only when needed
         private StorageVolume[] mVolumes = null;
+
+        // Properties the transport must have (e.g. encryption) for the operation to go ahead.
+        @Nullable private Integer mRequiredTransportFlags;
+        @Nullable private Boolean mIsUsingNewScheme;
 
         /**
          * Parse out the semantic domains into the correct physical location.
@@ -354,8 +426,12 @@ public class FullBackup {
          */
         ArraySet<PathWithRequiredFlags> mExcludes;
 
-        BackupScheme(Context context) {
-            mFullBackupContent = context.getApplicationInfo().fullBackupContent;
+        BackupScheme(Context context, @OperationType int operationType) {
+            ApplicationInfo applicationInfo = context.getApplicationInfo();
+
+            mDataExtractionRules = applicationInfo.dataExtractionRulesRes;
+            mFullBackupContent = applicationInfo.fullBackupContent;
+            mOperationType = operationType;
             mStorageManager = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
             mPackageManager = context.getPackageManager();
             mPackageName = context.getPackageName();
@@ -383,6 +459,35 @@ public class FullBackup {
             } else {
                 EXTERNAL_DIR = null;
             }
+        }
+
+        boolean isFullBackupEnabled(int transportFlags) {
+            try {
+                if (isUsingNewScheme()) {
+                    int requiredTransportFlags = getRequiredTransportFlags();
+                    // All bits that are set in requiredTransportFlags must be set in
+                    // transportFlags.
+                    return (transportFlags & requiredTransportFlags) == requiredTransportFlags;
+                }
+            } catch (IOException | XmlPullParserException e) {
+                Slog.w(TAG, "Failed to interpret the backup scheme: " + e);
+                return false;
+            }
+
+            return isFullBackupContentEnabled();
+        }
+
+        boolean isFullRestoreEnabled() {
+            try {
+                if (isUsingNewScheme()) {
+                    return true;
+                }
+            } catch (IOException | XmlPullParserException e) {
+                Slog.w(TAG, "Failed to interpret the backup scheme: " + e);
+                return false;
+            }
+
+            return isFullBackupContentEnabled();
         }
 
         boolean isFullBackupContentEnabled() {
@@ -423,35 +528,145 @@ public class FullBackup {
             return mExcludes;
         }
 
+        @VisibleForTesting
+        public synchronized int getRequiredTransportFlags()
+                throws IOException, XmlPullParserException {
+            if (mRequiredTransportFlags == null) {
+                maybeParseBackupSchemeLocked();
+            }
+
+            return mRequiredTransportFlags;
+        }
+
+        private synchronized boolean isUsingNewScheme()
+                throws IOException, XmlPullParserException {
+            if (mIsUsingNewScheme == null) {
+                maybeParseBackupSchemeLocked();
+            }
+
+            return mIsUsingNewScheme;
+        }
+
         private void maybeParseBackupSchemeLocked() throws IOException, XmlPullParserException {
             // This not being null is how we know that we've tried to parse the xml already.
             mIncludes = new ArrayMap<String, Set<PathWithRequiredFlags>>();
             mExcludes = new ArraySet<PathWithRequiredFlags>();
+            mRequiredTransportFlags = 0;
+            mIsUsingNewScheme = false;
 
-            if (mFullBackupContent == 0) {
-                // android:fullBackupContent="true" which means that we'll do everything.
+            if (mFullBackupContent == 0 && mDataExtractionRules == 0) {
+                // No scheme specified via either new or legacy config, will copy everything.
                 if (Log.isLoggable(FullBackup.TAG_XML_PARSER, Log.VERBOSE)) {
                     Log.v(FullBackup.TAG_XML_PARSER, "android:fullBackupContent - \"true\"");
                 }
             } else {
-                // android:fullBackupContent="@xml/some_resource".
+                // Scheme is present.
                 if (Log.isLoggable(FullBackup.TAG_XML_PARSER, Log.VERBOSE)) {
-                    Log.v(FullBackup.TAG_XML_PARSER,
-                            "android:fullBackupContent - found xml resource");
+                    Log.v(FullBackup.TAG_XML_PARSER, "Found xml scheme: "
+                            + "android:fullBackupContent=" + mFullBackupContent
+                            + "; android:dataExtractionRules=" + mDataExtractionRules);
                 }
-                XmlResourceParser parser = null;
+
                 try {
-                    parser = mPackageManager
-                            .getResourcesForApplication(mPackageName)
-                            .getXml(mFullBackupContent);
-                    parseBackupSchemeFromXmlLocked(parser, mExcludes, mIncludes);
+                    parseSchemeForOperationType(mOperationType);
                 } catch (PackageManager.NameNotFoundException e) {
                     // Throw it as an IOException
                     throw new IOException(e);
-                } finally {
-                    if (parser != null) {
-                        parser.close();
-                    }
+                }
+            }
+        }
+
+        private void parseSchemeForOperationType(@OperationType int operationType)
+                throws PackageManager.NameNotFoundException, IOException, XmlPullParserException {
+            String configSection = getConfigSectionForOperationType(operationType);
+            if (configSection == null) {
+                Slog.w(TAG, "Given operation type isn't supported by backup scheme: "
+                        + operationType);
+                return;
+            }
+
+            if (mDataExtractionRules != 0) {
+                // New config is present. Use it if it has configuration for this operation
+                // type.
+                boolean isSectionPresent;
+                try (XmlResourceParser parser = getParserForResource(mDataExtractionRules)) {
+                    isSectionPresent = parseNewBackupSchemeFromXmlLocked(parser, configSection,
+                            mExcludes, mIncludes);
+                }
+                if (isSectionPresent) {
+                    // Found the relevant section in the new config, we will use it.
+                    mIsUsingNewScheme = true;
+                    return;
+                }
+            }
+
+            if (operationType == OperationType.MIGRATION
+                    && CompatChanges.isChangeEnabled(IGNORE_FULL_BACKUP_CONTENT_IN_D2D)) {
+                mIsUsingNewScheme = true;
+                return;
+            }
+
+            if (mFullBackupContent != 0) {
+                // Fall back to the old config.
+                try (XmlResourceParser parser = getParserForResource(mFullBackupContent)) {
+                    parseBackupSchemeFromXmlLocked(parser, mExcludes, mIncludes);
+                }
+            }
+        }
+
+        @Nullable
+        private String getConfigSectionForOperationType(@OperationType int operationType)  {
+            switch (operationType) {
+                case OperationType.BACKUP:
+                    return ConfigSection.CLOUD_BACKUP;
+                case OperationType.MIGRATION:
+                    return ConfigSection.DEVICE_TRANSFER;
+                default:
+                    return null;
+            }
+        }
+
+        private XmlResourceParser getParserForResource(int resourceId)
+                throws PackageManager.NameNotFoundException {
+            return mPackageManager
+                    .getResourcesForApplication(mPackageName)
+                    .getXml(resourceId);
+        }
+
+        @VisibleForTesting
+        public boolean parseNewBackupSchemeFromXmlLocked(XmlPullParser parser,
+                @ConfigSection  String configSection,
+                Set<PathWithRequiredFlags> excludes,
+                Map<String, Set<PathWithRequiredFlags>> includes)
+                throws IOException, XmlPullParserException {
+            verifyTopLevelTag(parser, "data-extraction-rules");
+
+            boolean isSectionPresent = false;
+
+            int event;
+            while ((event = parser.next()) != XmlPullParser.END_DOCUMENT) {
+                if (event != XmlPullParser.START_TAG || !configSection.equals(parser.getName())) {
+                    continue;
+                }
+
+                isSectionPresent = true;
+
+                parseRequiredTransportFlags(parser, configSection);
+                parseRules(parser, excludes, includes, Optional.of(0), configSection);
+            }
+
+            logParsingResults(excludes, includes);
+
+            return isSectionPresent;
+        }
+
+        private void parseRequiredTransportFlags(XmlPullParser parser,
+                @ConfigSection String configSection) {
+            if (ConfigSection.CLOUD_BACKUP.equals(configSection)) {
+                String encryptionAttribute = parser.getAttributeValue(/* namespace */ null,
+                        FLAG_DISABLE_IF_NO_ENCRYPTION_CAPABILITIES);
+                if ("true".equals(encryptionAttribute)) {
+                    mRequiredTransportFlags = BackupAgent.FLAG_CLIENT_SIDE_ENCRYPTION_ENABLED;
                 }
             }
         }
@@ -461,25 +676,43 @@ public class FullBackup {
                                                    Set<PathWithRequiredFlags> excludes,
                                                    Map<String, Set<PathWithRequiredFlags>> includes)
                 throws IOException, XmlPullParserException {
+            verifyTopLevelTag(parser, "full-backup-content");
+
+            parseRules(parser, excludes, includes, Optional.empty(), "full-backup-content");
+
+            logParsingResults(excludes, includes);
+        }
+
+        private void verifyTopLevelTag(XmlPullParser parser, String tag)
+                throws XmlPullParserException, IOException {
             int event = parser.getEventType(); // START_DOCUMENT
             while (event != XmlPullParser.START_TAG) {
                 event = parser.next();
             }
 
-            if (!"full-backup-content".equals(parser.getName())) {
+            if (!tag.equals(parser.getName())) {
                 throw new XmlPullParserException("Xml file didn't start with correct tag" +
-                        " (<full-backup-content>). Found \"" + parser.getName() + "\"");
+                        " (" + tag + " ). Found \"" + parser.getName() + "\"");
             }
 
             if (Log.isLoggable(TAG_XML_PARSER, Log.VERBOSE)) {
                 Log.v(TAG_XML_PARSER, "\n");
                 Log.v(TAG_XML_PARSER, "====================================================");
-                Log.v(TAG_XML_PARSER, "Found valid fullBackupContent; parsing xml resource.");
+                Log.v(TAG_XML_PARSER, "Found valid " + tag + "; parsing xml resource.");
                 Log.v(TAG_XML_PARSER, "====================================================");
                 Log.v(TAG_XML_PARSER, "");
             }
+        }
 
-            while ((event = parser.next()) != XmlPullParser.END_DOCUMENT) {
+        private void parseRules(XmlPullParser parser,
+                Set<PathWithRequiredFlags> excludes,
+                Map<String, Set<PathWithRequiredFlags>> includes,
+                Optional<Integer> maybeRequiredFlags,
+                String endingTag)
+                throws IOException, XmlPullParserException {
+            int event;
+            while ((event = parser.next()) != XmlPullParser.END_DOCUMENT
+                    && !parser.getName().equals(endingTag)) {
                 switch (event) {
                     case XmlPullParser.START_TAG:
                         validateInnerTagContents(parser);
@@ -499,13 +732,7 @@ public class FullBackup {
                             break;
                         }
 
-                        int requiredFlags = 0; // no transport flags are required by default
-                        if (TAG_INCLUDE.equals(parser.getName())) {
-                            // requiredFlags are only supported for <include /> tag, for <exclude />
-                            // we should always leave them as the default = 0
-                            requiredFlags = getRequiredFlagsFromString(
-                                    parser.getAttributeValue(null, "requireFlags"));
-                        }
+                        int requiredFlags = getRequiredFlagsForRule(parser, maybeRequiredFlags);
 
                         // retrieve the include/exclude set we'll be adding this rule to
                         Set<PathWithRequiredFlags> activeSet = parseCurrentTagForDomain(
@@ -543,7 +770,7 @@ public class FullBackup {
 
                         // Special case for sharedpref files (not dirs) also add ".xml" suffix file.
                         if ("sharedpref".equals(domainFromXml) && !canonicalFile.isDirectory() &&
-                            !canonicalFile.getCanonicalPath().endsWith(".xml")) {
+                                !canonicalFile.getCanonicalPath().endsWith(".xml")) {
                             final String canonicalXmlPath =
                                     canonicalFile.getCanonicalPath() + ".xml";
                             activeSet.add(new PathWithRequiredFlags(canonicalXmlPath,
@@ -555,6 +782,10 @@ public class FullBackup {
                         }
                 }
             }
+        }
+
+        private void logParsingResults(Set<PathWithRequiredFlags> excludes,
+                Map<String, Set<PathWithRequiredFlags>> includes) {
             if (Log.isLoggable(TAG_XML_PARSER, Log.VERBOSE)) {
                 Log.v(TAG_XML_PARSER, "\n");
                 Log.v(TAG_XML_PARSER, "Xml resource parsing complete.");
@@ -612,6 +843,24 @@ public class FullBackup {
                 }
             }
             return flags;
+        }
+
+        private int getRequiredFlagsForRule(XmlPullParser parser,
+                Optional<Integer> maybeRequiredFlags) {
+            if (maybeRequiredFlags.isPresent()) {
+                // This is the new config format where required flags are specified for the whole
+                // section, not per rule.
+                return maybeRequiredFlags.get();
+            }
+
+            if (TAG_INCLUDE.equals(parser.getName())) {
+                // In the legacy config, requiredFlags are only supported for <include /> tag,
+                // for <exclude /> we should always leave them as the default = 0.
+                return getRequiredFlagsFromString(
+                        parser.getAttributeValue(null, "requireFlags"));
+            }
+
+            return 0;
         }
 
         private Set<PathWithRequiredFlags> parseCurrentTagForDomain(XmlPullParser parser,

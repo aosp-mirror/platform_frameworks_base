@@ -18,11 +18,20 @@ package com.android.server.audio;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.UserInfo;
 import android.media.AudioManager;
 import android.os.Binder;
 import android.os.UserHandle;
+import android.os.UserManager;
+
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.LocalServices;
 
 import java.util.Objects;
 
@@ -80,6 +89,60 @@ public class SystemServerAdapter {
             mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
         } finally {
             Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    /**
+     * Send sticky broadcast to current user's profile group (including current user)
+     */
+    @VisibleForTesting
+    public void broadcastStickyIntentToCurrentProfileGroup(Intent intent) {
+        int[] profileIds = LocalServices.getService(
+                ActivityManagerInternal.class).getCurrentProfileIds();
+        for (int userId : profileIds) {
+            ActivityManager.broadcastStickyIntent(intent, userId);
+        }
+    }
+
+    /**
+     * Broadcast sticky intents when a profile is started. This is needed because newly created
+     * profiles would not receive the intents until the next state change.
+     */
+    /*package*/ void registerUserStartedReceiver(Context context) {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_USER_STARTED);
+        context.registerReceiverAsUser(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (Intent.ACTION_USER_STARTED.equals(intent.getAction())) {
+                    final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
+                            UserHandle.USER_NULL);
+                    if (userId == UserHandle.USER_NULL) {
+                        return;
+                    }
+
+                    UserManager userManager = context.getSystemService(UserManager.class);
+                    final UserInfo profileParent = userManager.getProfileParent(userId);
+                    if (profileParent == null) {
+                        return;
+                    }
+
+                    // get sticky intents from parent and broadcast them to the started profile
+                    broadcastProfileParentStickyIntent(context, AudioManager.ACTION_HDMI_AUDIO_PLUG,
+                            userId, profileParent.id);
+                    broadcastProfileParentStickyIntent(context, AudioManager.ACTION_HEADSET_PLUG,
+                            userId, profileParent.id);
+                }
+            }
+        }, UserHandle.ALL, filter, null, null);
+    }
+
+    private void broadcastProfileParentStickyIntent(Context context, String intentAction,
+            int profileId, int parentId) {
+        Intent intent = context.registerReceiverAsUser(/*receiver*/ null, UserHandle.of(parentId),
+                new IntentFilter(intentAction), /*broadcastPermission*/ null, /*scheduler*/ null);
+        if (intent != null) {
+            ActivityManager.broadcastStickyIntent(intent, profileId);
         }
     }
 }

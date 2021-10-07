@@ -23,7 +23,7 @@
         android:pivotX="50%" android:pivotY="50%"
         android:fillEnabled="true"
         android:fillBefore="true" android:fillAfter="true"
-        android:interpolator="@interpolator/fast_out_slow_in"
+        android:interpolator="@interpolator/screen_rotation"
         android:duration="@android:integer/config_screen_rotation_total_180" />
     <alpha android:fromAlpha="0.0" android:toAlpha="1.0"
         android:fillEnabled="true"

@@ -1,0 +1,31 @@
+<!--
+    Copyright (C) 2020 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="24dp"
+        android:height="24dp"
+        android:viewportWidth="24.0"
+        android:viewportHeight="24.0">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M11.99,2C6.47,2 2,6.48 2,12s4.47,10 9.99,10c0.34,0 0.68,-0.02 1.01,-0.05V20h-1v-0.04c-0.83,-1.2 -1.48,-2.53 -1.91,-3.96H13v-2H9.66c-0.09,-0.66 -0.16,-1.32 -0.16,-2s0.07,-1.35 0.16,-2H21.8C20.87,5.44 16.83,2 11.99,2zM18.92,8h-2.95c-0.32,-1.25 -0.78,-2.45 -1.38,-3.56C16.43,5.07 17.96,6.35 18.92,8zM12,4.04c0.83,1.2 1.48,2.53 1.91,3.96h-3.82C10.52,6.57 11.17,5.24 12,4.04zM4.26,14C4.1,13.36 4,12.69 4,12s0.1,-1.36 0.26,-2h3.38c-0.08,0.66 -0.14,1.32 -0.14,2s0.06,1.34 0.14,2H4.26zM5.08,16h2.95c0.32,1.25 0.78,2.45 1.38,3.56C7.57,18.93 6.04,17.66 5.08,16zM8.03,8H5.08c0.96,-1.66 2.49,-2.93 4.33,-3.56C8.81,5.55 8.35,6.75 8.03,8z"
+        android:fillAlpha="0.3"/>
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M16,14.75c0,-1.93 1.57,-3.5 3.5,-3.5s3.5,1.57 3.5,3.5c0,1.12 -0.69,1.73 -1.36,2.32c-0.64,0.56 -1.26,1.1 -1.26,2.06h-1.75c0,-1.59 0.82,-2.22 1.54,-2.78c0.57,-0.44 1.08,-0.83 1.08,-1.6c0,-0.96 -0.79,-1.75 -1.75,-1.75s-1.75,0.79 -1.75,1.75H16z"/>
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M18.63,20.25h1.75V22h-1.75V20.25z"/>
+</vector>

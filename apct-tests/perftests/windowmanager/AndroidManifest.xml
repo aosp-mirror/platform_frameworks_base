@@ -20,7 +20,8 @@
 
     <application>
         <uses-library android:name="android.test.runner" />
-        <activity android:name="android.perftests.utils.PerfTestActivity">
+        <activity android:name="android.perftests.utils.PerfTestActivity"
+            android:exported="true">
           <intent-filter>
             <action android:name="com.android.perftests.core.PERFTEST" />
           </intent-filter>
@@ -28,5 +29,7 @@
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
-        android:targetPackage="com.android.perftests.wm"/>
+        android:targetPackage="com.android.perftests.wm">
+        <meta-data android:name="listener" android:value="android.wm.WmPerfRunListener" />
+    </instrumentation>
 </manifest>

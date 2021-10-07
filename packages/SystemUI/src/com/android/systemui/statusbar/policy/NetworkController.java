@@ -21,17 +21,15 @@ import android.content.Intent;
 import android.telephony.SubscriptionInfo;
 
 import com.android.settingslib.net.DataUsageController;
-import com.android.settingslib.wifi.AccessPoint;
-import com.android.systemui.DemoMode;
+import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
+import com.android.wifitrackerlib.WifiEntry;
 
 import java.util.List;
 
 public interface NetworkController extends CallbackController<SignalCallback>, DemoMode {
 
     boolean hasMobileDataFeature();
-    void addCallback(SignalCallback cb);
-    void removeCallback(SignalCallback cb);
     void setWifiEnabled(boolean enabled);
     AccessPointController getAccessPointController();
     DataUsageController getMobileDataController();
@@ -48,33 +46,117 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
 
     boolean isRadioOn();
 
+    /**
+     * Wrapper class for all the WiFi signals used for WiFi indicators.
+     */
+    final class WifiIndicators {
+        public boolean enabled;
+        public IconState statusIcon;
+        public IconState qsIcon;
+        public boolean activityIn;
+        public boolean activityOut;
+        public String description;
+        public boolean isTransient;
+        public String statusLabel;
+
+        public WifiIndicators(boolean enabled, IconState statusIcon, IconState qsIcon,
+                boolean activityIn, boolean activityOut, String description,
+                boolean isTransient, String statusLabel) {
+            this.enabled = enabled;
+            this.statusIcon = statusIcon;
+            this.qsIcon = qsIcon;
+            this.activityIn = activityIn;
+            this.activityOut = activityOut;
+            this.description = description;
+            this.isTransient = isTransient;
+            this.statusLabel = statusLabel;
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder("WifiIndicators[")
+                .append("enabled=").append(enabled)
+                .append(",statusIcon=").append(statusIcon == null ? "" : statusIcon.toString())
+                .append(",qsIcon=").append(qsIcon == null ? "" : qsIcon.toString())
+                .append(",activityIn=").append(activityIn)
+                .append(",activityOut=").append(activityOut)
+                .append(",description=").append(description)
+                .append(",isTransient=").append(isTransient)
+                .append(",statusLabel=").append(statusLabel)
+                .append(']').toString();
+        }
+    }
+
+    /**
+     * Wrapper class for all the mobile signals used for mobile data indicators.
+     */
+    final class MobileDataIndicators {
+        public IconState statusIcon;
+        public IconState qsIcon;
+        public int statusType;
+        public int qsType;
+        public boolean activityIn;
+        public boolean activityOut;
+        public CharSequence typeContentDescription;
+        public CharSequence typeContentDescriptionHtml;
+        public CharSequence description;
+        public boolean isWide;
+        public int subId;
+        public boolean roaming;
+        public boolean showTriangle;
+
+        public MobileDataIndicators(IconState statusIcon, IconState qsIcon, int statusType,
+                int qsType, boolean activityIn, boolean activityOut,
+                CharSequence typeContentDescription, CharSequence typeContentDescriptionHtml,
+                CharSequence description, boolean isWide, int subId, boolean roaming,
+                boolean showTriangle) {
+            this.statusIcon = statusIcon;
+            this.qsIcon = qsIcon;
+            this.statusType = statusType;
+            this.qsType = qsType;
+            this.activityIn = activityIn;
+            this.activityOut = activityOut;
+            this.typeContentDescription = typeContentDescription;
+            this.typeContentDescriptionHtml = typeContentDescriptionHtml;
+            this.description = description;
+            this.isWide = isWide;
+            this.subId = subId;
+            this.roaming = roaming;
+            this.showTriangle = showTriangle;
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder("MobileDataIndicators[")
+                .append("statusIcon=").append(statusIcon == null ? "" :  statusIcon.toString())
+                .append(",qsIcon=").append(qsIcon == null ? "" : qsIcon.toString())
+                .append(",statusType=").append(statusType)
+                .append(",qsType=").append(qsType)
+                .append(",activityIn=").append(activityIn)
+                .append(",activityOut=").append(activityOut)
+                .append(",typeContentDescription=").append(typeContentDescription)
+                .append(",typeContentDescriptionHtml=").append(typeContentDescriptionHtml)
+                .append(",description=").append(description)
+                .append(",isWide=").append(isWide)
+                .append(",subId=").append(subId)
+                .append(",roaming=").append(roaming)
+                .append(",showTriangle=").append(showTriangle)
+                .append(']').toString();
+        }
+    }
+
     public interface SignalCallback {
-        default void setWifiIndicators(boolean enabled, IconState statusIcon, IconState qsIcon,
-                boolean activityIn, boolean activityOut, String description, boolean isTransient,
-                String statusLabel) {}
+        /**
+         * Callback for listeners to be able to update the state of any UI tracking connectivity of
+         * WiFi networks.
+         */
+        default void setWifiIndicators(WifiIndicators wifiIndicators) {}
 
         /**
          * Callback for listeners to be able to update the state of any UI tracking connectivity
-         *  @param statusIcon the icon that should be shown in the status bar
-         * @param qsIcon the icon to show in Quick Settings
-         * @param statusType the resId of the data type icon (e.g. LTE) to show in the status bar
-         * @param qsType similar to above, the resId of the data type icon to show in Quick Settings
-         * @param activityIn indicates whether there is inbound activity
-         * @param activityOut indicates outbound activity
-         * @param typeContentDescription the contentDescription of the data type
-         * @param typeContentDescriptionHtml the (possibly HTML-styled) contentDescription of the
-         *                                   data type. Suitable for display
-         * @param description description of the network (usually just the network name)
-         * @param isWide //TODO: unused?
-         * @param subId subscription ID for which to update the UI
-         * @param roaming indicates roaming
+         * of Mobile networks.
          */
-        default void setMobileDataIndicators(IconState statusIcon, IconState qsIcon, int statusType,
-                int qsType, boolean activityIn, boolean activityOut,
-                CharSequence typeContentDescription,
-                CharSequence typeContentDescriptionHtml, CharSequence description,
-                boolean isWide, int subId, boolean roaming) {
-        }
+        default void setMobileDataIndicators(MobileDataIndicators mobileDataIndicators) {}
 
         default void setSubs(List<SubscriptionInfo> subs) {}
 
@@ -85,6 +167,22 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
         default void setIsAirplaneMode(IconState icon) {}
 
         default void setMobileDataEnabled(boolean enabled) {}
+
+        /**
+         * Callback for listeners to be able to update the connectivity status
+         * @param noDefaultNetwork whether there is any default network.
+         * @param noValidatedNetwork whether there is any validated network.
+         * @param noNetworksAvailable whether there is any WiFi networks available.
+         */
+        default void setConnectivityStatus(boolean noDefaultNetwork, boolean noValidatedNetwork,
+                boolean noNetworksAvailable) {}
+
+        /**
+         * Callback for listeners to be able to update the call indicator
+         * @param statusIcon the icon for the call indicator
+         * @param subId subscription ID for which to update the UI
+         */
+        default void setCallIndicator(IconState statusIcon, int subId) {}
     }
 
     public interface EmergencyListener {
@@ -106,6 +204,15 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
                 Context context) {
             this(visible, icon, context.getString(contentDescription));
         }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            return builder.append("[visible=").append(visible).append(',')
+                .append("icon=").append(icon).append(',')
+                .append("contentDescription=").append(contentDescription).append(']')
+                .toString();
+        }
     }
 
     /**
@@ -116,12 +223,12 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
         void addAccessPointCallback(AccessPointCallback callback);
         void removeAccessPointCallback(AccessPointCallback callback);
         void scanForAccessPoints();
-        int getIcon(AccessPoint ap);
-        boolean connect(AccessPoint ap);
+        int getIcon(WifiEntry ap);
+        boolean connect(WifiEntry ap);
         boolean canConfigWifi();
 
         public interface AccessPointCallback {
-            void onAccessPointsChanged(List<AccessPoint> accessPoints);
+            void onAccessPointsChanged(List<WifiEntry> accessPoints);
             void onSettingsActivityTriggered(Intent settingsIntent);
         }
     }

@@ -893,7 +893,6 @@ public final class ImsReasonInfo implements Parcelable {
     /**
      * Call failed because of network congestion, resource is not available,
      * or no circuit or channel available, etc.
-     * @hide
      */
     public static final int CODE_NETWORK_CONGESTION = 1624;
 
@@ -1276,6 +1275,7 @@ public final class ImsReasonInfo implements Parcelable {
         sImsCodeMap.put(CODE_REJECT_VT_AVPF_NOT_ALLOWED, "CODE_REJECT_VT_AVPF_NOT_ALLOWED");
         sImsCodeMap.put(CODE_REJECT_ONGOING_ENCRYPTED_CALL, "CODE_REJECT_ONGOING_ENCRYPTED_CALL");
         sImsCodeMap.put(CODE_REJECT_ONGOING_CS_CALL, "CODE_REJECT_ONGOING_CS_CALL");
+        sImsCodeMap.put(CODE_NETWORK_CONGESTION, "CODE_NETWORK_CONGESTION");
         sImsCodeMap.put(CODE_RETRY_ON_IMS_WITHOUT_RTT, "CODE_RETRY_ON_IMS_WITHOUT_RTT");
         sImsCodeMap.put(CODE_OEM_CAUSE_1, "CODE_OEM_CAUSE_1");
         sImsCodeMap.put(CODE_OEM_CAUSE_2, "CODE_OEM_CAUSE_2");

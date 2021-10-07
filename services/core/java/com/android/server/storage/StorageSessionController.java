@@ -27,11 +27,15 @@ import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.UserInfo;
 import android.os.IVold;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
+import android.os.UserManager;
+import android.os.storage.StorageManager;
+import android.os.storage.StorageVolume;
 import android.os.storage.VolumeInfo;
 import android.provider.MediaStore;
 import android.service.storage.ExternalStorageService;
@@ -51,18 +55,41 @@ public final class StorageSessionController {
 
     private final Object mLock = new Object();
     private final Context mContext;
+    private final UserManager mUserManager;
     @GuardedBy("mLock")
     private final SparseArray<StorageUserConnection> mConnections = new SparseArray<>();
-    private final boolean mIsFuseEnabled;
 
     private volatile ComponentName mExternalStorageServiceComponent;
     private volatile String mExternalStorageServicePackageName;
     private volatile int mExternalStorageServiceAppId;
     private volatile boolean mIsResetting;
 
-    public StorageSessionController(Context context, boolean isFuseEnabled) {
+    public StorageSessionController(Context context) {
         mContext = Objects.requireNonNull(context);
-        mIsFuseEnabled = isFuseEnabled;
+        mUserManager = mContext.getSystemService(UserManager.class);
+    }
+
+    /**
+     * Returns userId for the volume to be used in the StorageUserConnection.
+     * If the user is a clone profile, it will use the same connection
+     * as the parent user, and hence this method returns the parent's userId. Else, it returns the
+     * volume's mountUserId
+     * @param vol for which the storage session has to be started
+     * @return userId for connection for this volume
+     */
+    public int getConnectionUserIdForVolume(VolumeInfo vol) {
+        final Context volumeUserContext = mContext.createContextAsUser(
+                UserHandle.of(vol.mountUserId), 0);
+        boolean isMediaSharedWithParent = volumeUserContext.getSystemService(
+                UserManager.class).isMediaSharedWithParent();
+
+        UserInfo userInfo = mUserManager.getUserInfo(vol.mountUserId);
+        if (userInfo != null && isMediaSharedWithParent) {
+            // Clones use the same connection as their parent
+            return userInfo.profileGroupId;
+        } else {
+            return vol.mountUserId;
+        }
     }
 
     /**
@@ -88,7 +115,7 @@ public final class StorageSessionController {
         Slog.i(TAG, "On volume mount " + vol);
 
         String sessionId = vol.getId();
-        int userId = vol.getMountUserId();
+        int userId = getConnectionUserIdForVolume(vol);
 
         StorageUserConnection connection = null;
         synchronized (mLock) {
@@ -120,21 +147,62 @@ public final class StorageSessionController {
             return;
         }
         String sessionId = vol.getId();
-        int userId = vol.getMountUserId();
+        int connectionUserId = getConnectionUserIdForVolume(vol);
 
         StorageUserConnection connection = null;
         synchronized (mLock) {
-            connection = mConnections.get(userId);
+            connection = mConnections.get(connectionUserId);
             if (connection != null) {
                 Slog.i(TAG, "Notifying volume state changed for session with id: " + sessionId);
                 connection.notifyVolumeStateChanged(sessionId,
-                        vol.buildStorageVolume(mContext, userId, false));
+                        vol.buildStorageVolume(mContext, vol.getMountUserId(), false));
             } else {
-                Slog.w(TAG, "No available storage user connection for userId : " + userId);
+                Slog.w(TAG, "No available storage user connection for userId : "
+                        + connectionUserId);
             }
         }
     }
 
+    /**
+     * Frees any cache held by ExternalStorageService.
+     *
+     * <p> Blocks until the service frees the cache or fails in doing so.
+     *
+     * @param volumeUuid uuid of the {@link StorageVolume} from which cache needs to be freed
+     * @param bytes number of bytes which need to be freed
+     * @throws ExternalStorageServiceException if it fails to connect to ExternalStorageService
+     */
+    public void freeCache(String volumeUuid, long bytes)
+            throws ExternalStorageServiceException {
+        synchronized (mLock) {
+            int size = mConnections.size();
+            for (int i = 0; i < size; i++) {
+                int key = mConnections.keyAt(i);
+                StorageUserConnection connection = mConnections.get(key);
+                if (connection != null) {
+                    connection.freeCache(volumeUuid, bytes);
+                }
+            }
+        }
+    }
+
+    /**
+     * Called when {@code packageName} is about to ANR
+     *
+     * @return ANR dialog delay in milliseconds
+     */
+    public void notifyAnrDelayStarted(String packageName, int uid, int tid, int reason)
+            throws ExternalStorageServiceException {
+        final int userId = UserHandle.getUserId(uid);
+        final StorageUserConnection connection;
+        synchronized (mLock) {
+            connection = mConnections.get(userId);
+        }
+
+        if (connection != null) {
+            connection.notifyAnrDelayStarted(packageName, uid, tid, reason);
+        }
+    }
 
     /**
      * Removes and returns the {@link StorageUserConnection} for {@code vol}.
@@ -151,7 +219,7 @@ public final class StorageSessionController {
 
         Slog.i(TAG, "On volume remove " + vol);
         String sessionId = vol.getId();
-        int userId = vol.getMountUserId();
+        int userId = getConnectionUserIdForVolume(vol);
 
         synchronized (mLock) {
             StorageUserConnection connection = mConnections.get(userId);
@@ -327,6 +395,60 @@ public final class StorageSessionController {
         return mExternalStorageServiceComponent;
     }
 
+    /**
+     * Notify the controller that an app with {@code uid} and {@code tid} is blocked on an IO
+     * request on {@code volumeUuid} for {@code reason}.
+     *
+     * This blocked state can be queried with {@link #isAppIoBlocked}
+     *
+     * @hide
+     */
+    public void notifyAppIoBlocked(String volumeUuid, int uid, int tid,
+            @StorageManager.AppIoBlockedReason int reason) {
+        final int userId = UserHandle.getUserId(uid);
+        final StorageUserConnection connection;
+        synchronized (mLock) {
+            connection = mConnections.get(userId);
+        }
+
+        if (connection != null) {
+            connection.notifyAppIoBlocked(volumeUuid, uid, tid, reason);
+        }
+    }
+
+    /**
+     * Notify the controller that an app with {@code uid} and {@code tid} has resmed a previously
+     * blocked IO request on {@code volumeUuid} for {@code reason}.
+     *
+     * All app IO will be automatically marked as unblocked if {@code volumeUuid} is unmounted.
+     */
+    public void notifyAppIoResumed(String volumeUuid, int uid, int tid,
+            @StorageManager.AppIoBlockedReason int reason) {
+        final int userId = UserHandle.getUserId(uid);
+        final StorageUserConnection connection;
+        synchronized (mLock) {
+            connection = mConnections.get(userId);
+        }
+
+        if (connection != null) {
+            connection.notifyAppIoResumed(volumeUuid, uid, tid, reason);
+        }
+    }
+
+    /** Returns {@code true} if {@code uid} is blocked on IO, {@code false} otherwise */
+    public boolean isAppIoBlocked(int uid) {
+        final int userId = UserHandle.getUserId(uid);
+        final StorageUserConnection connection;
+        synchronized (mLock) {
+            connection = mConnections.get(userId);
+        }
+
+        if (connection != null) {
+            return connection.isAppIoBlocked(uid);
+        }
+        return false;
+    }
+
     private void killExternalStorageService(int userId) {
         IActivityManager am = ActivityManager.getService();
         try {
@@ -366,6 +488,6 @@ public final class StorageSessionController {
     }
 
     private boolean shouldHandle(@Nullable VolumeInfo vol) {
-        return mIsFuseEnabled && !mIsResetting && (vol == null || isSupportedVolume(vol));
+        return !mIsResetting && (vol == null || isSupportedVolume(vol));
     }
 }

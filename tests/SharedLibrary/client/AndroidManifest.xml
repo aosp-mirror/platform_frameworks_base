@@ -15,23 +15,26 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.google.android.test.lib_client">
-    <application android:label="@string/app_title" android:theme="@style/Theme">
-        <uses-library android:name="android.test.runner" />
-        <uses-library android:name="com.google.android.test.shared_library" />
-        <activity android:name="ActivityMain">
+     package="com.google.android.test.lib_client">
+    <application android:label="@string/app_title"
+         android:theme="@style/Theme">
+        <uses-library android:name="android.test.runner"/>
+        <uses-library android:name="com.google.android.test.shared_library"/>
+        <activity android:name="ActivityMain"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
-        <receiver android:name="DependentAppwidgetProvider">
+        <receiver android:name="DependentAppwidgetProvider"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
             </intent-filter>
             <meta-data android:name="android.appwidget.provider"
-                       android:resource="@xml/dependent_appwidget_info" />
+                 android:resource="@xml/dependent_appwidget_info"/>
         </receiver>
     </application>
 </manifest>

@@ -53,19 +53,19 @@ public class CanvasDrawTextTest {
         final String text = mTextUtil.nextRandomParagraph(
                 WORD_LENGTH, 4 * 1024 * 1024 /* 4mb text */).toString();
         final RenderNode node = RenderNode.create("benchmark", null);
-        final RenderNode child = RenderNode.create("child", null);
-        child.setLeftTopRightBottom(50, 50, 100, 100);
-
-        RecordingCanvas canvas = node.start(100, 100);
-        node.end(canvas);
-        canvas = child.start(50, 50);
-        child.end(canvas);
 
         final Random r = new Random(0);
-
         while (state.keepRunning()) {
+            state.pauseTiming();
+            RecordingCanvas canvas = node.beginRecording();
             int start = r.nextInt(text.length() - 100);
+            state.resumeTiming();
+
             canvas.drawText(text, start, start + 100, 0, 0, PAINT);
+
+            state.pauseTiming();
+            node.endRecording();
+            state.resumeTiming();
         }
     }
 }

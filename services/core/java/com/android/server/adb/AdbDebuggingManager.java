@@ -64,12 +64,13 @@ import android.service.adb.AdbDebuggingManagerProto;
 import android.util.AtomicFile;
 import android.util.Base64;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.dump.DualDumpOutputStream;
@@ -77,7 +78,6 @@ import com.android.server.FgThread;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -87,7 +87,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.AbstractMap;
@@ -1758,21 +1757,21 @@ public class AdbDebuggingManager {
             dump.write("user_keys", AdbDebuggingManagerProto.USER_KEYS,
                     FileUtils.readTextFile(new File("/data/misc/adb/adb_keys"), 0, null));
         } catch (IOException e) {
-            Slog.e(TAG, "Cannot read user keys", e);
+            Slog.i(TAG, "Cannot read user keys", e);
         }
 
         try {
             dump.write("system_keys", AdbDebuggingManagerProto.SYSTEM_KEYS,
                     FileUtils.readTextFile(new File("/adb_keys"), 0, null));
         } catch (IOException e) {
-            Slog.e(TAG, "Cannot read system keys", e);
+            Slog.i(TAG, "Cannot read system keys", e);
         }
 
         try {
             dump.write("keystore", AdbDebuggingManagerProto.KEYSTORE,
                     FileUtils.readTextFile(getAdbTempKeysFile(), 0, null));
         } catch (IOException e) {
-            Slog.e(TAG, "Cannot read keystore: ", e);
+            Slog.i(TAG, "Cannot read keystore: ", e);
         }
 
         dump.end(token);
@@ -1941,8 +1940,7 @@ public class AdbDebuggingManager {
                 return keyMap;
             }
             try (FileInputStream keyStream = mAtomicKeyFile.openRead()) {
-                XmlPullParser parser = Xml.newPullParser();
-                parser.setInput(keyStream, StandardCharsets.UTF_8.name());
+                TypedXmlPullParser parser = Xml.resolvePullParser(keyStream);
                 // Check for supported keystore version.
                 XmlUtils.beginDocument(parser, XML_KEYSTORE_START_TAG);
                 if (parser.next() != XmlPullParser.END_DOCUMENT) {
@@ -1952,8 +1950,7 @@ public class AdbDebuggingManager {
                                 + tagName);
                         return keyMap;
                     }
-                    int keystoreVersion = Integer.parseInt(
-                            parser.getAttributeValue(null, XML_ATTRIBUTE_VERSION));
+                    int keystoreVersion = parser.getAttributeInt(null, XML_ATTRIBUTE_VERSION);
                     if (keystoreVersion > MAX_SUPPORTED_KEYSTORE_VERSION) {
                         Slog.e(TAG, "Keystore version=" + keystoreVersion
                                 + " not supported (max_supported="
@@ -1972,9 +1969,9 @@ public class AdbDebuggingManager {
                     String key = parser.getAttributeValue(null, XML_ATTRIBUTE_KEY);
                     long connectionTime;
                     try {
-                        connectionTime = Long.valueOf(
-                                parser.getAttributeValue(null, XML_ATTRIBUTE_LAST_CONNECTION));
-                    } catch (NumberFormatException e) {
+                        connectionTime = parser.getAttributeLong(null,
+                                XML_ATTRIBUTE_LAST_CONNECTION);
+                    } catch (XmlPullParserException e) {
                         Slog.e(TAG,
                                 "Caught a NumberFormatException parsing the last connection time: "
                                         + e);
@@ -2013,8 +2010,7 @@ public class AdbDebuggingManager {
                 return keyMap;
             }
             try (FileInputStream keyStream = mAtomicKeyFile.openRead()) {
-                XmlPullParser parser = Xml.newPullParser();
-                parser.setInput(keyStream, StandardCharsets.UTF_8.name());
+                TypedXmlPullParser parser = Xml.resolvePullParser(keyStream);
                 XmlUtils.beginDocument(parser, XML_TAG_ADB_KEY);
                 while (parser.next() != XmlPullParser.END_DOCUMENT) {
                     String tagName = parser.getName();
@@ -2027,9 +2023,9 @@ public class AdbDebuggingManager {
                     String key = parser.getAttributeValue(null, XML_ATTRIBUTE_KEY);
                     long connectionTime;
                     try {
-                        connectionTime = Long.valueOf(
-                                parser.getAttributeValue(null, XML_ATTRIBUTE_LAST_CONNECTION));
-                    } catch (NumberFormatException e) {
+                        connectionTime = parser.getAttributeLong(null,
+                                XML_ATTRIBUTE_LAST_CONNECTION);
+                    } catch (XmlPullParserException e) {
                         Slog.e(TAG,
                                 "Caught a NumberFormatException parsing the last connection time: "
                                         + e);
@@ -2064,8 +2060,7 @@ public class AdbDebuggingManager {
                 return trustedNetworks;
             }
             try (FileInputStream keyStream = mAtomicKeyFile.openRead()) {
-                XmlPullParser parser = Xml.newPullParser();
-                parser.setInput(keyStream, StandardCharsets.UTF_8.name());
+                TypedXmlPullParser parser = Xml.resolvePullParser(keyStream);
                 // Check for supported keystore version.
                 XmlUtils.beginDocument(parser, XML_KEYSTORE_START_TAG);
                 if (parser.next() != XmlPullParser.END_DOCUMENT) {
@@ -2075,8 +2070,7 @@ public class AdbDebuggingManager {
                                 + tagName);
                         return trustedNetworks;
                     }
-                    int keystoreVersion = Integer.parseInt(
-                            parser.getAttributeValue(null, XML_ATTRIBUTE_VERSION));
+                    int keystoreVersion = parser.getAttributeInt(null, XML_ATTRIBUTE_VERSION);
                     if (keystoreVersion > MAX_SUPPORTED_KEYSTORE_VERSION) {
                         Slog.e(TAG, "Keystore version=" + keystoreVersion
                                 + " not supported (max_supported="
@@ -2150,18 +2144,17 @@ public class AdbDebuggingManager {
             }
             FileOutputStream keyStream = null;
             try {
-                XmlSerializer serializer = new FastXmlSerializer();
                 keyStream = mAtomicKeyFile.startWrite();
-                serializer.setOutput(keyStream, StandardCharsets.UTF_8.name());
+                TypedXmlSerializer serializer = Xml.resolveSerializer(keyStream);
                 serializer.startDocument(null, true);
 
                 serializer.startTag(null, XML_KEYSTORE_START_TAG);
-                serializer.attribute(null, XML_ATTRIBUTE_VERSION, String.valueOf(KEYSTORE_VERSION));
+                serializer.attributeInt(null, XML_ATTRIBUTE_VERSION, KEYSTORE_VERSION);
                 for (Map.Entry<String, Long> keyEntry : mKeyMap.entrySet()) {
                     serializer.startTag(null, XML_TAG_ADB_KEY);
                     serializer.attribute(null, XML_ATTRIBUTE_KEY, keyEntry.getKey());
-                    serializer.attribute(null, XML_ATTRIBUTE_LAST_CONNECTION,
-                            String.valueOf(keyEntry.getValue()));
+                    serializer.attributeLong(null, XML_ATTRIBUTE_LAST_CONNECTION,
+                            keyEntry.getValue());
                     serializer.endTag(null, XML_TAG_ADB_KEY);
                 }
                 for (String bssid : mTrustedNetworks) {

@@ -16,16 +16,36 @@
 
 package android.view.textservice;
 
+import android.annotation.IntDef;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.internal.util.ArrayUtils;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * This class contains a metadata of suggestions from the text service
  */
 public final class SuggestionsInfo implements Parcelable {
     private static final String[] EMPTY = ArrayUtils.emptyArray(String.class);
+
+    /**
+     * An internal annotation to indicate that one ore more combinations of
+     * <code>RESULT_ATTR_</code> flags are expected.
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "RESULT_ATTR_" }, value = {
+            RESULT_ATTR_IN_THE_DICTIONARY,
+            RESULT_ATTR_LOOKS_LIKE_TYPO,
+            RESULT_ATTR_HAS_RECOMMENDED_SUGGESTIONS,
+            RESULT_ATTR_LOOKS_LIKE_GRAMMAR_ERROR,
+            RESULT_ATTR_DONT_SHOW_UI_FOR_SUGGESTIONS,
+    })
+    public @interface ResultAttrs {}
 
     /**
      * Flag of the attributes of the suggestions that can be obtained by
@@ -45,7 +65,25 @@ public final class SuggestionsInfo implements Parcelable {
      * the result suggestions include highly recommended ones.
      */
     public static final int RESULT_ATTR_HAS_RECOMMENDED_SUGGESTIONS = 0x0004;
-    private final int mSuggestionsAttributes;
+
+    /**
+     * Flag of the attributes of the suggestions that can be obtained by
+     * {@link #getSuggestionsAttributes}: this tells that the text service thinks the requested
+     * sentence contains a grammar error.
+     */
+    public static final int RESULT_ATTR_LOOKS_LIKE_GRAMMAR_ERROR = 0x0008;
+
+    /**
+     * Flag of the attributes of the suggestions that can be obtained by
+     * {@link #getSuggestionsAttributes}: this tells that the text service has an alternative way to
+     * show UI for the list of correction suggestions to the user. When this flag is set, the
+     * receiver of the result suggestions should mark the erroneous part of the text with a text
+     * signifier (for example, underline), but should not show any UI for the list of correction
+     * suggestions to the user (for example, in a popup window).
+     */
+    public static final int RESULT_ATTR_DONT_SHOW_UI_FOR_SUGGESTIONS = 0x0010;
+
+    private final @ResultAttrs int mSuggestionsAttributes;
     private final String[] mSuggestions;
     private final boolean mSuggestionsAvailable;
     private int mCookie;
@@ -67,8 +105,8 @@ public final class SuggestionsInfo implements Parcelable {
      * @param cookie the cookie of the input TextInfo
      * @param sequence the cookie of the input TextInfo
      */
-    public SuggestionsInfo(
-            int suggestionsAttributes, String[] suggestions, int cookie, int sequence) {
+    public SuggestionsInfo(@ResultAttrs int suggestionsAttributes, String[] suggestions, int cookie,
+            int sequence) {
         if (suggestions == null) {
             mSuggestions = EMPTY;
             mSuggestionsAvailable = false;
@@ -134,7 +172,7 @@ public final class SuggestionsInfo implements Parcelable {
      * in its dictionary or not and whether the spell checker has confident suggestions for the
      * word or not.
      */
-    public int getSuggestionsAttributes() {
+    public @ResultAttrs int getSuggestionsAttributes() {
         return mSuggestionsAttributes;
     }
 

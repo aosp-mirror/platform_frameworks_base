@@ -1,0 +1,70 @@
+LIBHWUI {
+  global:
+    /* listing of all C APIs to be exposed by libhwui to consumers outside of the module */
+    ABitmap_getInfoFromJava;
+    ABitmap_acquireBitmapFromJava;
+    ABitmap_copy;
+    ABitmap_acquireRef;
+    ABitmap_releaseRef;
+    ABitmap_getInfo;
+    ABitmap_getDataSpace;
+    ABitmap_getPixels;
+    ABitmap_notifyPixelsChanged;
+    ABitmapConfig_getFormatFromConfig;
+    ABitmapConfig_getConfigFromFormat;
+    ABitmap_compress;
+    ABitmap_getHardwareBuffer;
+    ACanvas_isSupportedPixelFormat;
+    ACanvas_getNativeHandleFromJava;
+    ACanvas_createCanvas;
+    ACanvas_destroyCanvas;
+    ACanvas_setBuffer;
+    ACanvas_clipRect;
+    ACanvas_clipOutRect;
+    ACanvas_drawRect;
+    ACanvas_drawBitmap;
+    init_android_graphics;
+    register_android_graphics_classes;
+    register_android_graphics_GraphicsStatsService;
+    zygote_preload_graphics;
+    AMatrix_getContents;
+    APaint_createPaint;
+    APaint_destroyPaint;
+    APaint_setBlendMode;
+    ARegionIterator_acquireIterator;
+    ARegionIterator_releaseIterator;
+    ARegionIterator_isComplex;
+    ARegionIterator_isDone;
+    ARegionIterator_next;
+    ARegionIterator_getRect;
+    ARegionIterator_getTotalBounds;
+    ARenderThread_dumpGraphicsMemory;
+  local:
+    *;
+};
+
+LIBHWUI_PLATFORM {
+  global:
+    extern "C++" {
+      /* required by libwebviewchromium_plat_support */
+      android::uirenderer::ColorSpaceToADataSpace*;
+      android::uirenderer::WebViewFunctor_*;
+      GraphicsJNI::getNativeCanvas*;
+      SkCanvasStateUtils::ReleaseCanvasState*;
+      SkColorSpace::toXYZD50*;
+      SkColorSpace::transferFn*;
+      /* required by libjnigraphics */
+      android::ImageDecoder::*;
+      android::uirenderer::DataSpaceToColorSpace*;
+      android::uirenderer::ColorSpaceToADataSpace*;
+      getMimeType*;
+      SkAndroidCodec::*;
+      SkCodec::MakeFromStream*;
+      SkColorInfo::*;
+      SkFILEStream::SkFILEStream*;
+      SkImageInfo::*;
+      SkMemoryStream::SkMemoryStream*;
+    };
+  local:
+    *;
+};

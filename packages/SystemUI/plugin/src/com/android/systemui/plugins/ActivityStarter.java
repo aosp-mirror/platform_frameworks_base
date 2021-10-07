@@ -19,6 +19,7 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.view.View;
 
+import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 
 /**
@@ -44,17 +45,37 @@ public interface ActivityStarter {
      * specifies an associated view that should be used for the activity launch animation.
      */
     void startPendingIntentDismissingKeyguard(PendingIntent intent,
-            Runnable intentSentUiThreadCallback, View associatedView);
+            Runnable intentSentUiThreadCallback, @Nullable View associatedView);
+
+    /**
+     * Similar to {@link #startPendingIntentDismissingKeyguard(PendingIntent, Runnable)}, but also
+     * specifies an animation controller that should be used for the activity launch animation.
+     */
+    void startPendingIntentDismissingKeyguard(PendingIntent intent,
+            Runnable intentSentUiThreadCallback,
+            @Nullable ActivityLaunchAnimator.Controller animationController);
 
     /**
      * The intent flag can be specified in startActivity().
      */
     void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade, int flags);
     void startActivity(Intent intent, boolean dismissShade);
+    void startActivity(Intent intent, boolean dismissShade,
+            @Nullable ActivityLaunchAnimator.Controller animationController);
     void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade);
     void startActivity(Intent intent, boolean dismissShade, Callback callback);
     void postStartActivityDismissingKeyguard(Intent intent, int delay);
+    void postStartActivityDismissingKeyguard(Intent intent, int delay,
+            @Nullable ActivityLaunchAnimator.Controller animationController);
     void postStartActivityDismissingKeyguard(PendingIntent intent);
+
+    /**
+     * Similar to {@link #postStartActivityDismissingKeyguard(PendingIntent)}, but also specifies an
+     * animation controller that should be used for the activity launch animation.
+     */
+    void postStartActivityDismissingKeyguard(PendingIntent intent,
+            @Nullable ActivityLaunchAnimator.Controller animationController);
+
     void postQSRunnableDismissingKeyguard(Runnable runnable);
 
     void dismissKeyguardThenExecute(OnDismissAction action, @Nullable Runnable cancel,
@@ -66,8 +87,17 @@ public interface ActivityStarter {
 
     interface OnDismissAction {
         /**
-         * @return {@code true} if the dismiss should be deferred
+         * @return {@code true} if the dismiss should be deferred. When returning true, make sure to
+         *         call {@link com.android.keyguard.ViewMediatorCallback#readyForKeyguardDone()}
+         *         *after* returning to start hiding the keyguard.
          */
         boolean onDismiss();
+
+        /**
+         * Whether running this action when we are locked will start an animation on the keyguard.
+         */
+        default boolean willRunAnimationOnKeyguard() {
+            return false;
+        }
     }
 }

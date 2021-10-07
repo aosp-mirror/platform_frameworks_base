@@ -17,8 +17,8 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <stroke
-        android:width="4dp"
-        android:color="@color/accessibility_focus_highlight" />
+        android:width="@dimen/accessibility_focus_highlight_stroke_width"
+        android:color="@color/accessibility_focus_highlight_color" />
 
     <corners android:radius="2dp" />
 

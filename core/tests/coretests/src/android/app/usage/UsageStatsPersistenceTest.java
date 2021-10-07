@@ -46,7 +46,8 @@ public class UsageStatsPersistenceTest {
     private static final String[] USAGESTATS_PERSISTED_FIELDS = {"mBeginTimeStamp", "mEndTimeStamp",
             "mPackageName", "mPackageToken", "mLastEvent", "mAppLaunchCount", "mChooserCounts",
             "mLastTimeUsed", "mTotalTimeInForeground", "mLastTimeForegroundServiceUsed",
-            "mTotalTimeForegroundServiceUsed", "mLastTimeVisible", "mTotalTimeVisible"};
+            "mTotalTimeForegroundServiceUsed", "mLastTimeVisible", "mTotalTimeVisible",
+            "mLastTimeComponentUsed"};
     // All fields in this list are defined in UsageStats but not persisted
     private static final String[] USAGESTATS_IGNORED_FIELDS = {"CREATOR", "mActivities",
             "mForegroundServices", "mLaunchCount", "mChooserCountsObfuscated"};
@@ -78,15 +79,15 @@ public class UsageStatsPersistenceTest {
             "VALID_FLAG_BITS", "UNASSIGNED_TOKEN", "MAX_EVENT_TYPE"};
     // All fields in this list are final constants defining event types and not persisted
     private static final String[] EVENT_TYPES = {"NONE", "ACTIVITY_DESTROYED", "ACTIVITY_PAUSED",
-            "ACTIVITY_RESUMED", "ACTIVITY_STOPPED", "CHOOSER_ACTION", "CONFIGURATION_CHANGE",
-            "CONTINUE_PREVIOUS_DAY", "CONTINUING_FOREGROUND_SERVICE", "DEVICE_SHUTDOWN",
-            "DEVICE_STARTUP", "END_OF_DAY", "FLUSH_TO_DISK", "FOREGROUND_SERVICE_START",
-            "FOREGROUND_SERVICE_STOP", "KEYGUARD_HIDDEN", "KEYGUARD_SHOWN", "LOCUS_ID_SET",
-            "MOVE_TO_BACKGROUND", "MOVE_TO_FOREGROUND", "NOTIFICATION_INTERRUPTION",
-            "NOTIFICATION_SEEN", "ROLLOVER_FOREGROUND_SERVICE", "SCREEN_INTERACTIVE",
-            "SCREEN_NON_INTERACTIVE", "SHORTCUT_INVOCATION", "SLICE_PINNED", "SLICE_PINNED_PRIV",
-            "STANDBY_BUCKET_CHANGED", "SYSTEM_INTERACTION", "USER_INTERACTION", "USER_STOPPED",
-            "USER_UNLOCKED"};
+            "ACTIVITY_RESUMED", "ACTIVITY_STOPPED", "APP_COMPONENT_USED", "CHOOSER_ACTION",
+            "CONFIGURATION_CHANGE", "CONTINUE_PREVIOUS_DAY", "CONTINUING_FOREGROUND_SERVICE",
+            "DEVICE_SHUTDOWN", "DEVICE_STARTUP", "END_OF_DAY", "FLUSH_TO_DISK",
+            "FOREGROUND_SERVICE_START", "FOREGROUND_SERVICE_STOP", "KEYGUARD_HIDDEN",
+            "KEYGUARD_SHOWN", "LOCUS_ID_SET", "MOVE_TO_BACKGROUND", "MOVE_TO_FOREGROUND",
+            "NOTIFICATION_INTERRUPTION", "NOTIFICATION_SEEN", "ROLLOVER_FOREGROUND_SERVICE",
+            "SCREEN_INTERACTIVE", "SCREEN_NON_INTERACTIVE", "SHORTCUT_INVOCATION", "SLICE_PINNED",
+            "SLICE_PINNED_PRIV", "STANDBY_BUCKET_CHANGED", "SYSTEM_INTERACTION", "USER_INTERACTION",
+            "USER_STOPPED", "USER_UNLOCKED"};
 
     @Test
     public void testUsageEventsFields() {

@@ -18,12 +18,22 @@ package android.app;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.AppOpsManager.AttributionFlags;
+import android.content.AttributionSource;
+import android.os.IBinder;
+import android.os.UserHandle;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.app.IAppOpsCallback;
+import com.android.internal.util.function.DecFunction;
 import com.android.internal.util.function.HeptFunction;
+import com.android.internal.util.function.HexFunction;
 import com.android.internal.util.function.QuadFunction;
+import com.android.internal.util.function.QuintConsumer;
+import com.android.internal.util.function.QuintFunction;
+import com.android.internal.util.function.TriFunction;
+import com.android.internal.util.function.UndecFunction;
 
 /**
  * App ops service local interface.
@@ -39,12 +49,14 @@ public abstract class AppOpsManagerInternal {
          * @param code The op code to check.
          * @param uid The UID for which to check.
          * @param packageName The package for which to check.
-         * @param superImpl The super implementation.
+         * @param attributionTag The attribution tag for which to check.
          * @param raw Whether to check the raw op i.e. not interpret the mode based on UID state.
+         * @param superImpl The super implementation.
          * @return The app op check result.
          */
-        int checkOperation(int code, int uid, String packageName, boolean raw,
-                QuadFunction<Integer, Integer, String, Boolean, Integer> superImpl);
+        int checkOperation(int code, int uid, String packageName, @Nullable String attributionTag,
+                boolean raw, QuintFunction<Integer, Integer, String, String, Boolean, Integer>
+                superImpl);
 
         /**
          * Allows overriding check audio operation behavior.
@@ -71,11 +83,103 @@ public abstract class AppOpsManagerInternal {
          * @param superImpl The super implementation.
          * @return The app op note result.
          */
-        int noteOperation(int code, int uid, @Nullable String packageName,
+        SyncNotedAppOp noteOperation(int code, int uid, @Nullable String packageName,
                 @Nullable String featureId, boolean shouldCollectAsyncNotedOp,
                 @Nullable String message, boolean shouldCollectMessage,
                 @NonNull HeptFunction<Integer, Integer, String, String, Boolean, String, Boolean,
-                        Integer> superImpl);
+                        SyncNotedAppOp> superImpl);
+
+        /**
+         * Allows overriding note proxy operation behavior.
+         *
+         * @param code The op code to note.
+         * @param attributionSource The permission identity of the caller.
+         * @param shouldCollectAsyncNotedOp If an {@link AsyncNotedAppOp} should be collected
+         * @param message The message in the async noted op
+         * @param shouldCollectMessage whether to collect messages
+         * @param skipProxyOperation Whether to skip the proxy portion of the operation
+         * @param superImpl The super implementation.
+         * @return The app op note result.
+         */
+        SyncNotedAppOp noteProxyOperation(int code, @NonNull AttributionSource attributionSource,
+                boolean shouldCollectAsyncNotedOp, @Nullable String message,
+                boolean shouldCollectMessage, boolean skipProxyOperation,
+                @NonNull HexFunction<Integer, AttributionSource, Boolean, String, Boolean,
+                        Boolean, SyncNotedAppOp> superImpl);
+
+        /**
+         * Allows overriding start operation behavior.
+         *
+         * @param token The client state.
+         * @param code The op code to start.
+         * @param uid The UID for which to note.
+         * @param packageName The package for which to note. {@code null} for system package.
+         * @param attributionTag the attribution tag.
+         * @param startIfModeDefault Whether to start the op of the mode is default.
+         * @param shouldCollectAsyncNotedOp If an {@link AsyncNotedAppOp} should be collected
+         * @param message The message in the async noted op
+         * @param shouldCollectMessage whether to collect messages
+         * @param attributionFlags the attribution flags for this operation.
+         * @param attributionChainId the unique id of the attribution chain this op is a part of.
+         * @param superImpl The super implementation.
+         * @return The app op note result.
+         */
+        SyncNotedAppOp startOperation(IBinder token, int code, int uid,
+                @Nullable String packageName, @Nullable String attributionTag,
+                boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp,
+                @Nullable String message, boolean shouldCollectMessage,
+                @AttributionFlags int attributionFlags, int attributionChainId,
+                @NonNull UndecFunction<IBinder, Integer, Integer, String, String, Boolean,
+                        Boolean, String, Boolean, Integer, Integer, SyncNotedAppOp> superImpl);
+
+        /**
+         * Allows overriding start proxy operation behavior.
+         *
+         * @param code The op code to start.
+         * @param attributionSource The permission identity of the caller.
+         * @param startIfModeDefault Whether to start the op of the mode is default.
+         * @param shouldCollectAsyncNotedOp If an {@link AsyncNotedAppOp} should be collected
+         * @param message The message in the async noted op
+         * @param shouldCollectMessage whether to collect messages
+         * @param skipProxyOperation Whether to skip the proxy portion of the operation
+         * @param proxyAttributionFlags The attribution flags for the proxy.
+         * @param proxiedAttributionFlags The attribution flags for the proxied.
+         * @oaram attributionChainId The id of the attribution chain this operation is a part of.
+         * @param superImpl The super implementation.
+         * @return The app op note result.
+         */
+        SyncNotedAppOp startProxyOperation(int code, @NonNull AttributionSource attributionSource,
+                boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp, String message,
+                boolean shouldCollectMessage, boolean skipProxyOperation, @AttributionFlags
+                int proxyAttributionFlags, @AttributionFlags int proxiedAttributionFlags,
+                int attributionChainId, @NonNull DecFunction<Integer, AttributionSource, Boolean,
+                        Boolean, String, Boolean, Boolean, Integer, Integer, Integer,
+                        SyncNotedAppOp> superImpl);
+
+        /**
+         * Allows overriding finish op.
+         *
+         * @param clientId The client state.
+         * @param code The op code to finish.
+         * @param uid The UID for which the op was noted.
+         * @param packageName The package for which it was noted. {@code null} for system package.
+         * @param attributionTag the attribution tag.
+         */
+        default void finishOperation(IBinder clientId, int code, int uid, String packageName,
+                String attributionTag,
+                @NonNull QuintConsumer<IBinder, Integer, Integer, String, String> superImpl) {
+            superImpl.accept(clientId, code, uid, packageName, attributionTag);
+        }
+
+        /**
+         * Allows overriding finish proxy op.
+         *
+         * @param code The op code to finish.
+         * @param attributionSource The permission identity of the caller.
+         */
+        void finishProxyOperation(int code, @NonNull AttributionSource attributionSource,
+                boolean skipProxyOperation,
+                @NonNull TriFunction<Integer, AttributionSource, Boolean, Void> superImpl);
     }
 
     /**
@@ -106,4 +210,17 @@ public abstract class AppOpsManagerInternal {
      */
     public abstract void setModeFromPermissionPolicy(int code, int uid, @NonNull String packageName,
             int mode, @Nullable IAppOpsCallback callback);
+
+
+    /**
+     * Sets a global restriction on an op code.
+     */
+    public abstract void setGlobalRestriction(int code, boolean restricted, IBinder token);
+
+    /**
+     * Gets the number of tokens restricting the given appop for a user, package, and
+     * attributionTag.
+     */
+    public abstract int getOpRestrictionCount(int code, UserHandle user, String pkg,
+            String attributionTag);
 }

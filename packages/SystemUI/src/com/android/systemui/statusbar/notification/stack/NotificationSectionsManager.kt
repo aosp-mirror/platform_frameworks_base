@@ -18,23 +18,21 @@ package com.android.systemui.statusbar.notification.stack
 import android.annotation.ColorInt
 import android.annotation.IntDef
 import android.annotation.LayoutRes
-import android.content.Intent
-import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.R
 import com.android.systemui.media.KeyguardMediaController
-import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
-import com.android.systemui.statusbar.notification.people.DataListener
-import com.android.systemui.statusbar.notification.people.PeopleHubViewAdapter
-import com.android.systemui.statusbar.notification.people.PeopleHubViewBoundary
-import com.android.systemui.statusbar.notification.people.PersonViewModel
-import com.android.systemui.statusbar.notification.people.Subscription
+import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController
+import com.android.systemui.statusbar.notification.collection.render.ShadeViewManager
+import com.android.systemui.statusbar.notification.dagger.AlertingHeader
+import com.android.systemui.statusbar.notification.dagger.IncomingHeader
+import com.android.systemui.statusbar.notification.dagger.PeopleHeader
+import com.android.systemui.statusbar.notification.dagger.SilentHeader
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView
@@ -46,19 +44,25 @@ import com.android.systemui.util.takeUntil
 import javax.inject.Inject
 
 /**
- * Manages the boundaries of the two notification sections (high priority and low priority). Also
- * shows/hides the headers for those sections where appropriate.
+ * Manages the boundaries of the notification sections (incoming, conversations, high priority, and
+ * low priority).
+ *
+ * In the legacy notification pipeline, this is responsible for correctly positioning all section
+ * headers after the [NotificationStackScrollLayout] has had notifications added/removed/changed. In
+ * the new pipeline, this is handled as part of the [ShadeViewManager].
  *
  * TODO: Move remaining sections logic from NSSL into this class.
  */
 class NotificationSectionsManager @Inject internal constructor(
-    private val activityStarter: ActivityStarter,
     private val statusBarStateController: StatusBarStateController,
     private val configurationController: ConfigurationController,
-    private val peopleHubViewAdapter: PeopleHubViewAdapter,
     private val keyguardMediaController: KeyguardMediaController,
     private val sectionsFeatureManager: NotificationSectionsFeatureManager,
-    private val logger: NotificationSectionsLogger
+    private val logger: NotificationSectionsLogger,
+    @IncomingHeader private val incomingHeaderController: SectionHeaderController,
+    @PeopleHeader private val peopleHeaderController: SectionHeaderController,
+    @AlertingHeader private val alertingHeaderController: SectionHeaderController,
+    @SilentHeader private val silentHeaderController: SectionHeaderController
 ) : SectionProvider {
 
     private val configurationListener = object : ConfigurationController.ConfigurationListener {
@@ -67,46 +71,24 @@ class NotificationSectionsManager @Inject internal constructor(
         }
     }
 
-    private val peopleHubViewBoundary: PeopleHubViewBoundary = object : PeopleHubViewBoundary {
-        override fun setVisible(isVisible: Boolean) {
-            if (peopleHubVisible != isVisible) {
-                peopleHubVisible = isVisible
-                if (initialized) {
-                    updateSectionBoundaries("PeopleHub visibility changed")
-                }
-            }
-        }
-
-        override val associatedViewForClickAnimation: View
-            get() = peopleHeaderView!!
-
-        override val personViewAdapters: Sequence<DataListener<PersonViewModel?>>
-            get() = peopleHeaderView!!.personViewAdapters
-    }
-
     private lateinit var parent: NotificationStackScrollLayout
     private var initialized = false
-    private var onClearSilentNotifsClickListener: View.OnClickListener? = null
 
-    @get:VisibleForTesting
-    var silentHeaderView: SectionHeaderView? = null
-        private set
+    @VisibleForTesting
+    val silentHeaderView: SectionHeaderView?
+        get() = silentHeaderController.headerView
 
-    @get:VisibleForTesting
-    var alertingHeaderView: SectionHeaderView? = null
-        private set
+    @VisibleForTesting
+    val alertingHeaderView: SectionHeaderView?
+        get() = alertingHeaderController.headerView
 
-    @get:VisibleForTesting
-    var incomingHeaderView: SectionHeaderView? = null
-        private set
+    @VisibleForTesting
+    val incomingHeaderView: SectionHeaderView?
+        get() = incomingHeaderController.headerView
 
-    @get:VisibleForTesting
-    var peopleHeaderView: PeopleHubView? = null
-        private set
-
-    @set:VisibleForTesting
-    var peopleHubVisible = false
-    private var peopleHubSubscription: Subscription? = null
+    @VisibleForTesting
+    val peopleHeaderView: SectionHeaderView?
+        get() = peopleHeaderController.headerView
 
     @get:VisibleForTesting
     var mediaControlsView: MediaHeaderView? = null
@@ -150,37 +132,13 @@ class NotificationSectionsManager @Inject internal constructor(
      * Reinflates the entire notification header, including all decoration views.
      */
     fun reinflateViews(layoutInflater: LayoutInflater) {
-        silentHeaderView = reinflateView(
-                silentHeaderView, layoutInflater, R.layout.status_bar_notification_section_header
-        ).apply {
-            setHeaderText(R.string.notification_section_header_gentle)
-            setOnHeaderClickListener { onGentleHeaderClick() }
-            setOnClearAllClickListener { onClearGentleNotifsClick(it) }
-        }
-        alertingHeaderView = reinflateView(
-                alertingHeaderView, layoutInflater, R.layout.status_bar_notification_section_header
-        ).apply {
-            setHeaderText(R.string.notification_section_header_alerting)
-            setOnHeaderClickListener { onGentleHeaderClick() }
-        }
-        peopleHubSubscription?.unsubscribe()
-        peopleHubSubscription = null
-        peopleHeaderView = reinflateView(peopleHeaderView, layoutInflater, R.layout.people_strip)
-                .apply {
-                    setOnHeaderClickListener(View.OnClickListener { onPeopleHeaderClick() })
-                }
-        if (ENABLE_SNOOZED_CONVERSATION_HUB) {
-            peopleHubSubscription = peopleHubViewAdapter.bindView(peopleHubViewBoundary)
-        }
-        incomingHeaderView = reinflateView(
-                incomingHeaderView, layoutInflater, R.layout.status_bar_notification_section_header
-        ).apply {
-            setHeaderText(R.string.notification_section_header_incoming)
-            setOnHeaderClickListener { onGentleHeaderClick() }
-        }
+        silentHeaderController.reinflateView(parent)
+        alertingHeaderController.reinflateView(parent)
+        peopleHeaderController.reinflateView(parent)
+        incomingHeaderController.reinflateView(parent)
         mediaControlsView =
                 reinflateView(mediaControlsView, layoutInflater, R.layout.keyguard_media_header)
-                        .also(keyguardMediaController::attach)
+        keyguardMediaController.attachSinglePaneContainer(mediaControlsView)
     }
 
     override fun beginsSection(view: View, previous: View?): Boolean =
@@ -296,7 +254,6 @@ class NotificationSectionsManager @Inject internal constructor(
         // target, but won't be once they are moved / removed after the pass has completed.
 
         val showHeaders = statusBarStateController.state != StatusBarState.KEYGUARD
-        val usingPeopleFiltering = sectionsFeatureManager.isFilteringEnabled()
         val usingMediaControls = sectionsFeatureManager.isMediaControlsEnabled()
 
         val mediaState = mediaControlsView?.let(::expandableViewHeaderState)
@@ -319,7 +276,6 @@ class NotificationSectionsManager @Inject internal constructor(
         ).filterNotNull()
 
         var peopleNotifsPresent = false
-        var lastNotifIndex = 0
         var nextBucket: Int? = null
         var inIncomingSection = false
 
@@ -362,9 +318,6 @@ class NotificationSectionsManager @Inject internal constructor(
                     (child == null || row != null && nextBucket != row.entry.bucket)
             if (isSectionBoundary && showHeaders) {
                 when (nextBucket) {
-                    BUCKET_HEADS_UP -> incomingState?.targetPosition = i + 1
-                    BUCKET_PEOPLE -> peopleState?.targetPosition = i + 1
-                    BUCKET_ALERTING -> alertingState?.targetPosition = i + 1
                     BUCKET_SILENT -> gentleState?.targetPosition = i + 1
                 }
             }
@@ -373,28 +326,7 @@ class NotificationSectionsManager @Inject internal constructor(
 
             // Check if there are any people notifications
             peopleNotifsPresent = peopleNotifsPresent || row.entry.bucket == BUCKET_PEOPLE
-
-            if (nextBucket == null) {
-                lastNotifIndex = i
-            }
             nextBucket = row.entry.bucket
-        }
-
-        if (showHeaders && usingPeopleFiltering && peopleHubVisible) {
-            peopleState?.targetPosition = peopleState?.targetPosition
-                    // Insert the people header even if there are no people visible, in order to
-                    // show the hub. Put it directly above the next header.
-                    ?: alertingState?.targetPosition
-                    ?: gentleState?.targetPosition
-                    // Put it at the end of the list.
-                    ?: lastNotifIndex
-
-            // Offset the target to account for the current position of the people header.
-            peopleState?.targetPosition = peopleState?.currentPosition?.let { current ->
-                peopleState.targetPosition?.let { target ->
-                    if (current < target) target - 1 else target
-                }
-            }
         }
 
         mediaState?.targetPosition = if (usingMediaControls) 0 else null
@@ -419,14 +351,6 @@ class NotificationSectionsManager @Inject internal constructor(
             val hasActiveClearableNotifications = this@NotificationSectionsManager.parent
                     .hasActiveClearableNotifications(NotificationStackScrollLayout.ROWS_GENTLE)
             setAreThereDismissableGentleNotifs(hasActiveClearableNotifications)
-        }
-        peopleHeaderView?.run {
-            canSwipe = showHeaders && peopleHubVisible && !peopleNotifsPresent
-            peopleState?.targetPosition?.let { targetPosition ->
-                if (targetPosition != peopleState.currentPosition) {
-                    resetTranslation()
-                }
-            }
         }
     }
 
@@ -513,40 +437,8 @@ class NotificationSectionsManager @Inject internal constructor(
         }
     }
 
-    private fun onGentleHeaderClick() {
-        val intent = Intent(Settings.ACTION_NOTIFICATION_SETTINGS)
-        activityStarter.startActivity(
-                intent,
-                true,
-                true,
-                Intent.FLAG_ACTIVITY_SINGLE_TOP)
-    }
-
-    private fun onPeopleHeaderClick() {
-        val intent = Intent(Settings.ACTION_CONVERSATION_SETTINGS)
-        activityStarter.startActivity(
-                intent,
-                true,
-                true,
-                Intent.FLAG_ACTIVITY_SINGLE_TOP)
-    }
-
-    private fun onClearGentleNotifsClick(v: View) {
-        onClearSilentNotifsClickListener?.onClick(v)
-    }
-
-    /** Listener for when the "clear all" button is clicked on the gentle notification header. */
-    fun setOnClearSilentNotifsClickListener(listener: View.OnClickListener) {
-        onClearSilentNotifsClickListener = listener
-    }
-
-    fun hidePeopleRow() {
-        peopleHubVisible = false
-        updateSectionBoundaries("PeopleHub dismissed")
-    }
-
     fun setHeaderForegroundColor(@ColorInt color: Int) {
-        peopleHeaderView?.setTextColor(color)
+        peopleHeaderView?.setForegroundColor(color)
         silentHeaderView?.setForegroundColor(color)
         alertingHeaderView?.setForegroundColor(color)
     }
@@ -554,7 +446,6 @@ class NotificationSectionsManager @Inject internal constructor(
     companion object {
         private const val TAG = "NotifSectionsManager"
         private const val DEBUG = false
-        private const val ENABLE_SNOOZED_CONVERSATION_HUB = false
     }
 }
 

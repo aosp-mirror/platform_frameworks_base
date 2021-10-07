@@ -11,15 +11,37 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+// Include all test java files.
+filegroup {
+    name: "wmtests-sources",
+    srcs: [
+        "src/**/*.java",
+    ],
+}
+
+genrule {
+    name: "wmtests.protologsrc",
+    srcs: [
+        ":protolog-groups",
+        ":wmtests-sources",
+    ],
+    tools: ["protologtool"],
+    cmd: "$(location protologtool) transform-protolog-calls " +
+      "--protolog-class com.android.internal.protolog.common.ProtoLog " +
+      "--protolog-impl-class com.android.internal.protolog.ProtoLogImpl " +
+      "--protolog-cache-class 'com.android.server.wm.ProtoLogCache' " +
+      "--loggroups-class com.android.internal.protolog.ProtoLogGroup " +
+      "--loggroups-jar $(location :protolog-groups) " +
+      "--output-srcjar $(out) " +
+      "$(locations :wmtests-sources)",
+    out: ["wmtests.protolog.srcjar"],
+}
+
 android_test {
     name: "WmTests",
 
     // We only want this apk build for tests.
-
-    // Include all test java files.
-    srcs: [
-        "src/**/*.java",
-    ],
+    srcs: [":wmtests.protologsrc"],
 
     static_libs: [
         "frameworks-base-testutils",
@@ -34,10 +56,11 @@ android_test {
         "testables",
         "ub-uiautomator",
         "hamcrest-library",
-        "compatibility-device-util-axt",
+        "platform-compat-test-rules",
     ],
 
     libs: [
+        "android.hardware.power-V1-java",
         "android.test.mock",
         "android.test.base",
         "android.test.runner",

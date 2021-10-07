@@ -51,7 +51,7 @@ message JobSchedulerServiceDumpProto {
     message JobRestriction {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-        optional .android.app.job.StopReasonEnum reason = 1;
+        optional .android.app.job.InternalStopReasonEnum reason = 1;
         optional bool is_restricting = 2;
     }
 
@@ -313,7 +313,41 @@ message ConstantsProto {
         // The minimum amount of time between quota check alarms.
         optional int64 min_quota_check_delay_ms = 23;
 
-        // Next tag: 24
+        // The total expedited job session limit of the particular standby bucket. Apps in this
+        // standby bucket can only have expedited job sessions totalling EJ_LIMIT (without factoring
+        // in any rewards or free EJs).
+        optional int64 expedited_job_limit_active_ms = 24;
+        // The total expedited job session limit of the particular standby bucket. Apps in this
+        // standby bucket can only have expedited job sessions totalling EJ_LIMIT (without factoring
+        // in any rewards or free EJs).
+        optional int64 expedited_job_limit_working_ms = 25;
+        // The total expedited job session limit of the particular standby bucket. Apps in this
+        // standby bucket can only have expedited job sessions totalling EJ_LIMIT (without factoring
+        // in any rewards or free EJs).
+        optional int64 expedited_job_limit_frequent_ms = 26;
+        // The total expedited job session limit of the particular standby bucket. Apps in this
+        // standby bucket can only have expedited job sessions totalling EJ_LIMIT (without factoring
+        // in any rewards or free EJs).
+        optional int64 expedited_job_limit_rare_ms = 27;
+        // The total expedited job session limit of the particular standby bucket. Apps in this
+        // standby bucket can only have expedited job sessions totalling EJ_LIMIT (without factoring
+        // in any rewards or free EJs).
+        optional int64 expedited_job_limit_restricted_ms = 28;
+        // The period of time used to calculate expedited job sessions. Apps can only have expedited
+        // job sessions totalling EJ_LIMIT_<bucket>_MS within this period of time (without factoring
+        // in any rewards or free EJs).
+        optional int64 expedited_job_window_size_ms = 29;
+        // Length of time used to split an app's top time into chunks.
+        optional int64 expedited_job_top_app_time_chunk_size_ms = 30;
+        // How much EJ quota to give back to an app based on the number of top app time chunks
+        // it had.
+        optional int64 expedited_job_reward_top_app_ms = 31;
+        // How much EJ quota to give back to an app based on each non-top user interaction.
+        optional int64 expedited_job_reward_interaction_ms = 32;
+        // How much EJ quota to give back to an app based on each notification seen event.
+        optional int64 expedited_job_reward_notification_seen_ms = 33;
+
+        // Next tag: 34
     }
     optional QuotaController quota_controller = 24;
 
@@ -324,7 +358,7 @@ message ConstantsProto {
         // ready now.
         reserved 1; // skip_not_ready_jobs
         // Whether or not TimeController will use a non-wakeup alarm for delay constraints.
-        optional bool use_non_wakeup_alarm_for_delay = 2;
+        reserved 2; // use_non_wakeup_alarm_for_delay
     }
     optional TimeController time_controller = 25;
 
@@ -527,7 +561,8 @@ message StateControllerProto {
                 optional bool is_idle = 1;
                 optional bool is_screen_on = 2;
                 optional bool is_dock_idle = 3;
-                optional bool in_car_mode = 4;
+                reserved 4; // in_car_mode
+                optional bool projection_active = 5;
             }
 
             oneof active_tracker {
@@ -559,6 +594,11 @@ message StateControllerProto {
             // The amount of time that this job has remaining in its quota. This
             // can be negative if the job is out of quota.
             optional int64 remaining_quota_ms = 6;
+            // True if the app has requested that this be a foreground job.
+            optional bool is_requested_foreground_job = 7;
+            // True if this job is within the foreground quota bounds and is therefore allowed to
+            // run as a foreground job. Valid only if is_foreground_requested_job is true.
+            optional bool is_within_fg_job_quota = 8;
         }
         repeated TrackedJob tracked_jobs = 4;
 
@@ -664,6 +704,19 @@ message StateControllerProto {
             repeated JobStatusShortInfoProto running_jobs = 5;
         }
 
+        message TopAppTimer {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional Package pkg = 1;
+            // True if the Timer is actively tracking jobs.
+            optional bool is_active = 2;
+            // The time this timer last became active. Only valid if is_active is true.
+            optional int64 start_time_elapsed = 3;
+            // How many activities are currently in the RESUMED state. Valid only if is_active is
+            // true.
+            optional int32 activity_count = 4;
+        }
+
         message PackageStats {
             option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -676,6 +729,8 @@ message StateControllerProto {
             repeated ExecutionStats execution_stats = 4;
 
             reserved 5; // in_quota_alarm_listener
+
+            optional Timer fg_job_timer = 6;
         }
         repeated PackageStats package_stats = 5;
 
@@ -801,7 +856,7 @@ message DataSetProto {
         message StopReasonCount {
             option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-            optional .android.app.job.StopReasonEnum reason = 1;
+            optional .android.app.job.InternalStopReasonEnum reason = 1;
             optional int32 count = 2;
         }
         repeated StopReasonCount stop_reasons = 9;
@@ -852,7 +907,7 @@ message JobPackageHistoryProto {
         optional int32 job_id = 4;
         optional string tag = 5;
         // Only valid for STOP_JOB or STOP_PERIODIC_JOB Events.
-        optional .android.app.job.StopReasonEnum stop_reason = 6;
+        optional .android.app.job.InternalStopReasonEnum stop_reason = 6;
     }
     repeated HistoryEvent history_event = 1;
 }

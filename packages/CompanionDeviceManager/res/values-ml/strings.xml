@@ -17,6 +17,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"കമ്പാനിയൻ ഉപകരണ മാനേജർ"</string>
-    <string name="chooser_title" msgid="4958797271463138976">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ഉപയോഗിച്ച് ലിങ്ക് ചെയ്യുക"</string>
-    <string name="confirmation_title" msgid="5683126664999349196">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; with &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ലിങ്ക് ചെയ്യുക"</string>
+    <string name="chooser_title" msgid="2262294130493605839">"&lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; ഉപയോഗിച്ച് മാനേജ് ചെയ്യുന്നതിന് ഒരു <xliff:g id="PROFILE_NAME">%1$s</xliff:g> തിരഞ്ഞെടുക്കുക"</string>
+    <string name="profile_name_generic" msgid="6851028682723034988">"ഉപകരണം"</string>
+    <string name="profile_name_watch" msgid="576290739483672360">"വാച്ച്"</string>
+    <string name="confirmation_title" msgid="8455544820286920304">"നിങ്ങളുടെ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; മാനേജ് ചെയ്യാൻ, &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; എന്നതിനെ അനുവദിക്കുക"</string>
+    <string name="profile_summary" msgid="2059360676631420073">"നിങ്ങളുടെ <xliff:g id="PROFILE_NAME">%1$s</xliff:g> മാനേജ് ചെയ്യാൻ ഈ ആപ്പ് ആവശ്യമാണ്. <xliff:g id="PRIVILEGES_DISCPLAIMER">%2$s</xliff:g>"</string>
+    <string name="consent_yes" msgid="8344487259618762872">"അനുവദിക്കുക"</string>
+    <string name="consent_no" msgid="2640796915611404382">"അനുവദിക്കരുത്"</string>
 </resources>

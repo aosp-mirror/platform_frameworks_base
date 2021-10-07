@@ -16,19 +16,26 @@
 
 package com.android.server;
 
+import static android.os.PowerExemptionManager.REASON_SHELL;
+import static android.os.PowerExemptionManager.REASON_UNKNOWN;
+import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
+import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_NONE;
+import static android.os.Process.INVALID_UID;
+
 import android.Manifest;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.database.ContentObserver;
+import android.content.pm.PackageManagerInternal;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -52,6 +59,9 @@ import android.os.Handler;
 import android.os.IDeviceIdleController;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerExemptionManager;
+import android.os.PowerExemptionManager.ReasonCode;
+import android.os.PowerExemptionManager.TempAllowListType;
 import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
@@ -63,11 +73,10 @@ import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.provider.Settings;
+import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
-import android.util.KeyValueListParser;
 import android.util.MutableLong;
 import android.util.Pair;
 import android.util.Slog;
@@ -79,7 +88,7 @@ import android.util.Xml;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
-import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
@@ -277,6 +286,7 @@ public class DeviceIdleController extends SystemService
     private ActivityManagerInternal mLocalActivityManager;
     private ActivityTaskManagerInternal mLocalActivityTaskManager;
     private DeviceIdleInternal mLocalService;
+    private PackageManagerInternal mPackageManagerInternal;
     private PowerManagerInternal mLocalPowerManager;
     private PowerManager mPowerManager;
     private INetworkPolicyManager mNetworkPolicyManager;
@@ -287,7 +297,7 @@ public class DeviceIdleController extends SystemService
     private Intent mIdleIntent;
     private Intent mLightIdleIntent;
     private AnyMotionDetector mAnyMotionDetector;
-    private final AppStateTracker mAppStateTracker;
+    private final AppStateTrackerImpl mAppStateTracker;
     private boolean mLightEnabled;
     private boolean mDeepEnabled;
     private boolean mQuickDozeActivated;
@@ -432,6 +442,7 @@ public class DeviceIdleController extends SystemService
     private long mNextIdlePendingDelay;
     private long mNextIdleDelay;
     private long mNextLightIdleDelay;
+    private long mNextLightIdleDelayFlex;
     private long mNextLightAlarmTime;
     private long mNextSensingTimeoutAlarmTime;
 
@@ -537,7 +548,7 @@ public class DeviceIdleController extends SystemService
     private int[] mPowerSaveWhitelistUserAppIdArray = new int[0];
 
     /**
-     * List of end times for UIDs that are temporarily marked as being allowed to access
+     * List of end times for app-IDs that are temporarily marked as being allowed to access
      * the network and acquire wakelocks. Times are in milliseconds.
      */
     private final SparseArray<Pair<MutableLong, String>> mTempWhitelistAppIdEndTimes
@@ -558,6 +569,9 @@ public class DeviceIdleController extends SystemService
 
     private final ArraySet<DeviceIdleInternal.StationaryListener> mStationaryListeners =
             new ArraySet<>();
+
+    private final ArraySet<PowerAllowlistInternal.TempAllowlistChangeListener>
+            mTempAllowlistChangeListeners = new ArraySet<>();
 
     private static final int EVENT_NULL = 0;
     private static final int EVENT_NORMAL = 1;
@@ -742,6 +756,20 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    private void registerTempAllowlistChangeListener(
+            @NonNull PowerAllowlistInternal.TempAllowlistChangeListener listener) {
+        synchronized (this) {
+            mTempAllowlistChangeListeners.add(listener);
+        }
+    }
+
+    private void unregisterTempAllowlistChangeListener(
+            @NonNull PowerAllowlistInternal.TempAllowlistChangeListener listener) {
+        synchronized (this) {
+            mTempAllowlistChangeListeners.remove(listener);
+        }
+    }
+
     @VisibleForTesting
     final class MotionListener extends TriggerEventListener
             implements SensorEventListener {
@@ -857,18 +885,22 @@ public class DeviceIdleController extends SystemService
      * global Settings. Any access to this class or its fields should be done while
      * holding the DeviceIdleController lock.
      */
-    public final class Constants extends ContentObserver {
+    public final class Constants implements DeviceConfig.OnPropertiesChangedListener {
         // Key names stored in the settings value.
-        private static final String KEY_LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT
-                = "light_after_inactive_to";
+        private static final String KEY_FLEX_TIME_SHORT = "flex_time_short";
+        private static final String KEY_LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT =
+                "light_after_inactive_to";
         private static final String KEY_LIGHT_PRE_IDLE_TIMEOUT = "light_pre_idle_to";
         private static final String KEY_LIGHT_IDLE_TIMEOUT = "light_idle_to";
+        private static final String KEY_LIGHT_IDLE_TIMEOUT_INITIAL_FLEX =
+                "light_idle_to_initial_flex";
+        private static final String KEY_LIGHT_MAX_IDLE_TIMEOUT_FLEX = "light_max_idle_to_flex";
         private static final String KEY_LIGHT_IDLE_FACTOR = "light_idle_factor";
         private static final String KEY_LIGHT_MAX_IDLE_TIMEOUT = "light_max_idle_to";
-        private static final String KEY_LIGHT_IDLE_MAINTENANCE_MIN_BUDGET
-                = "light_idle_maintenance_min_budget";
-        private static final String KEY_LIGHT_IDLE_MAINTENANCE_MAX_BUDGET
-                = "light_idle_maintenance_max_budget";
+        private static final String KEY_LIGHT_IDLE_MAINTENANCE_MIN_BUDGET =
+                "light_idle_maintenance_min_budget";
+        private static final String KEY_LIGHT_IDLE_MAINTENANCE_MAX_BUDGET =
+                "light_idle_maintenance_max_budget";
         private static final String KEY_MIN_LIGHT_MAINTENANCE_TIME = "min_light_maintenance_time";
         private static final String KEY_MIN_DEEP_MAINTENANCE_TIME = "min_deep_maintenance_time";
         private static final String KEY_INACTIVE_TIMEOUT = "inactive_to";
@@ -876,6 +908,7 @@ public class DeviceIdleController extends SystemService
         private static final String KEY_LOCATING_TIMEOUT = "locating_to";
         private static final String KEY_LOCATION_ACCURACY = "location_accuracy";
         private static final String KEY_MOTION_INACTIVE_TIMEOUT = "motion_inactive_to";
+        private static final String KEY_MOTION_INACTIVE_TIMEOUT_FLEX = "motion_inactive_to_flex";
         private static final String KEY_IDLE_AFTER_INACTIVE_TIMEOUT = "idle_after_inactive_to";
         private static final String KEY_IDLE_PENDING_TIMEOUT = "idle_pending_to";
         private static final String KEY_MAX_IDLE_PENDING_TIMEOUT = "max_idle_pending_to";
@@ -885,15 +918,14 @@ public class DeviceIdleController extends SystemService
         private static final String KEY_MAX_IDLE_TIMEOUT = "max_idle_to";
         private static final String KEY_IDLE_FACTOR = "idle_factor";
         private static final String KEY_MIN_TIME_TO_ALARM = "min_time_to_alarm";
-        private static final String KEY_MAX_TEMP_APP_WHITELIST_DURATION =
-                "max_temp_app_whitelist_duration";
-        private static final String KEY_MMS_TEMP_APP_WHITELIST_DURATION =
-                "mms_temp_app_whitelist_duration";
-        private static final String KEY_SMS_TEMP_APP_WHITELIST_DURATION =
-                "sms_temp_app_whitelist_duration";
-        // TODO(b/124466289): update value to match the name
-        private static final String KEY_NOTIFICATION_ALLOWLIST_DURATION =
-                "notification_whitelist_duration";
+        private static final String KEY_MAX_TEMP_APP_ALLOWLIST_DURATION_MS =
+                "max_temp_app_allowlist_duration_ms";
+        private static final String KEY_MMS_TEMP_APP_ALLOWLIST_DURATION_MS =
+                "mms_temp_app_allowlist_duration_ms";
+        private static final String KEY_SMS_TEMP_APP_ALLOWLIST_DURATION_MS =
+                "sms_temp_app_allowlist_duration_ms";
+        private static final String KEY_NOTIFICATION_ALLOWLIST_DURATION_MS =
+                "notification_allowlist_duration_ms";
         /**
          * Whether to wait for the user to unlock the device before causing screen-on to
          * exit doze. Default = true
@@ -903,53 +935,139 @@ public class DeviceIdleController extends SystemService
                 "pre_idle_factor_long";
         private static final String KEY_PRE_IDLE_FACTOR_SHORT =
                 "pre_idle_factor_short";
+        private static final String KEY_USE_WINDOW_ALARMS = "use_window_alarms";
+
+        private static final long DEFAULT_FLEX_TIME_SHORT =
+                !COMPRESS_TIME ? 60 * 1000L : 5 * 1000L;
+        private static final long DEFAULT_LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT =
+                !COMPRESS_TIME ? 60 * 1000L : 15 * 1000L;
+        private static final long DEFAULT_LIGHT_PRE_IDLE_TIMEOUT =
+                !COMPRESS_TIME ? 3 * 60 * 1000L : 30 * 1000L;
+        private static final long DEFAULT_LIGHT_IDLE_TIMEOUT =
+                !COMPRESS_TIME ? 5 * 60 * 1000L : 15 * 1000L;
+        private static final long DEFAULT_LIGHT_IDLE_TIMEOUT_INITIAL_FLEX =
+                !COMPRESS_TIME ? 60 * 1000L : 5 * 1000L;
+        private static final long DEFAULT_LIGHT_MAX_IDLE_TIMEOUT_FLEX =
+                !COMPRESS_TIME ? 15 * 60 * 1000L : 60 * 1000L;
+        private static final float DEFAULT_LIGHT_IDLE_FACTOR = 2f;
+        private static final long DEFAULT_LIGHT_MAX_IDLE_TIMEOUT =
+                !COMPRESS_TIME ? 15 * 60 * 1000L : 60 * 1000L;
+        private static final long DEFAULT_LIGHT_IDLE_MAINTENANCE_MIN_BUDGET =
+                !COMPRESS_TIME ? 1 * 60 * 1000L : 15 * 1000L;
+        private static final long DEFAULT_LIGHT_IDLE_MAINTENANCE_MAX_BUDGET =
+                !COMPRESS_TIME ? 5 * 60 * 1000L : 30 * 1000L;
+        private static final long DEFAULT_MIN_LIGHT_MAINTENANCE_TIME =
+                !COMPRESS_TIME ? 5 * 1000L : 1 * 1000L;
+        private static final long DEFAULT_MIN_DEEP_MAINTENANCE_TIME =
+                !COMPRESS_TIME ? 30 * 1000L : 5 * 1000L;
+        private static final long DEFAULT_INACTIVE_TIMEOUT =
+                (30 * 60 * 1000L) / (!COMPRESS_TIME ? 1 : 10);
+        private static final long DEFAULT_INACTIVE_TIMEOUT_SMALL_BATTERY =
+                (15 * 60 * 1000L) / (!COMPRESS_TIME ? 1 : 10);
+        private static final long DEFAULT_SENSING_TIMEOUT =
+                !COMPRESS_TIME ? 4 * 60 * 1000L : 60 * 1000L;
+        private static final long DEFAULT_LOCATING_TIMEOUT =
+                !COMPRESS_TIME ? 30 * 1000L : 15 * 1000L;
+        private static final float DEFAULT_LOCATION_ACCURACY = 20f;
+        private static final long DEFAULT_MOTION_INACTIVE_TIMEOUT =
+                !COMPRESS_TIME ? 10 * 60 * 1000L : 60 * 1000L;
+        private static final long DEFAULT_MOTION_INACTIVE_TIMEOUT_FLEX =
+                !COMPRESS_TIME ? 60 * 1000L : 5 * 1000L;
+        private static final long DEFAULT_IDLE_AFTER_INACTIVE_TIMEOUT =
+                (30 * 60 * 1000L) / (!COMPRESS_TIME ? 1 : 10);
+        private static final long DEFAULT_IDLE_AFTER_INACTIVE_TIMEOUT_SMALL_BATTERY =
+                (15 * 60 * 1000L) / (!COMPRESS_TIME ? 1 : 10);
+        private static final long DEFAULT_IDLE_PENDING_TIMEOUT =
+                !COMPRESS_TIME ? 5 * 60 * 1000L : 30 * 1000L;
+        private static final long DEFAULT_MAX_IDLE_PENDING_TIMEOUT =
+                !COMPRESS_TIME ? 10 * 60 * 1000L : 60 * 1000L;
+        private static final float DEFAULT_IDLE_PENDING_FACTOR = 2f;
+        private static final long DEFAULT_QUICK_DOZE_DELAY_TIMEOUT =
+                !COMPRESS_TIME ? 60 * 1000L : 15 * 1000L;
+        private static final long DEFAULT_IDLE_TIMEOUT =
+                !COMPRESS_TIME ? 60 * 60 * 1000L : 6 * 60 * 1000L;
+        private static final long DEFAULT_MAX_IDLE_TIMEOUT =
+                !COMPRESS_TIME ? 6 * 60 * 60 * 1000L : 30 * 60 * 1000L;
+        private static final float DEFAULT_IDLE_FACTOR = 2f;
+        private static final long DEFAULT_MIN_TIME_TO_ALARM =
+                !COMPRESS_TIME ? 30 * 60 * 1000L : 6 * 60 * 1000L;
+        private static final long DEFAULT_MAX_TEMP_APP_ALLOWLIST_DURATION_MS = 5 * 60 * 1000L;
+        private static final long DEFAULT_MMS_TEMP_APP_ALLOWLIST_DURATION_MS = 60 * 1000L;
+        private static final long DEFAULT_SMS_TEMP_APP_ALLOWLIST_DURATION_MS = 20 * 1000L;
+        private static final long DEFAULT_NOTIFICATION_ALLOWLIST_DURATION_MS = 30 * 1000L;
+        private static final boolean DEFAULT_WAIT_FOR_UNLOCK = true;
+        private static final float DEFAULT_PRE_IDLE_FACTOR_LONG = 1.67f;
+        private static final float DEFAULT_PRE_IDLE_FACTOR_SHORT = .33f;
+        private static final boolean DEFAULT_USE_WINDOW_ALARMS = true;
+
+        /**
+         * A somewhat short alarm window size that we will tolerate for various alarm timings.
+         *
+         * @see #KEY_FLEX_TIME_SHORT
+         */
+        public long FLEX_TIME_SHORT = DEFAULT_FLEX_TIME_SHORT;
 
         /**
          * This is the time, after becoming inactive, that we go in to the first
          * light-weight idle mode.
-         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         *
          * @see #KEY_LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT
          */
-        public long LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT;
+        public long LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT = DEFAULT_LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT;
 
         /**
          * This is amount of time we will wait from the point where we decide we would
          * like to go idle until we actually do, while waiting for jobs and other current
          * activity to finish.
-         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         *
          * @see #KEY_LIGHT_PRE_IDLE_TIMEOUT
          */
-        public long LIGHT_PRE_IDLE_TIMEOUT;
+        public long LIGHT_PRE_IDLE_TIMEOUT = DEFAULT_LIGHT_PRE_IDLE_TIMEOUT;
 
         /**
-         * This is the initial time that we will run in idle maintenance mode.
-         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         * This is the initial time that we will run in light idle maintenance mode.
+         *
          * @see #KEY_LIGHT_IDLE_TIMEOUT
          */
-        public long LIGHT_IDLE_TIMEOUT;
+        public long LIGHT_IDLE_TIMEOUT = DEFAULT_LIGHT_IDLE_TIMEOUT;
+
+        /**
+         * This is the initial alarm window size that we will tolerate for light idle maintenance
+         * timing.
+         *
+         * @see #KEY_LIGHT_IDLE_TIMEOUT_INITIAL_FLEX
+         */
+        public long LIGHT_IDLE_TIMEOUT_INITIAL_FLEX = DEFAULT_LIGHT_IDLE_TIMEOUT_INITIAL_FLEX;
+
+        /**
+         * This is the maximum value that {@link #LIGHT_IDLE_TIMEOUT_INITIAL_FLEX} should take.
+         *
+         * @see #KEY_LIGHT_MAX_IDLE_TIMEOUT_FLEX
+         */
+        public long LIGHT_MAX_IDLE_TIMEOUT_FLEX = DEFAULT_LIGHT_MAX_IDLE_TIMEOUT_FLEX;
 
         /**
          * Scaling factor to apply to the light idle mode time each time we complete a cycle.
-         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         *
          * @see #KEY_LIGHT_IDLE_FACTOR
          */
-        public float LIGHT_IDLE_FACTOR;
+        public float LIGHT_IDLE_FACTOR = DEFAULT_LIGHT_IDLE_FACTOR;
 
         /**
-         * This is the maximum time we will run in idle maintenance mode.
-         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         * This is the maximum time we will stay in light idle mode.
+         *
          * @see #KEY_LIGHT_MAX_IDLE_TIMEOUT
          */
-        public long LIGHT_MAX_IDLE_TIMEOUT;
+        public long LIGHT_MAX_IDLE_TIMEOUT = DEFAULT_LIGHT_MAX_IDLE_TIMEOUT;
 
         /**
          * This is the minimum amount of time we want to make available for maintenance mode
          * when lightly idling.  That is, we will always have at least this amount of time
          * available maintenance before timing out and cutting off maintenance mode.
-         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         *
          * @see #KEY_LIGHT_IDLE_MAINTENANCE_MIN_BUDGET
          */
-        public long LIGHT_IDLE_MAINTENANCE_MIN_BUDGET;
+        public long LIGHT_IDLE_MAINTENANCE_MIN_BUDGET = DEFAULT_LIGHT_IDLE_MAINTENANCE_MIN_BUDGET;
 
         /**
          * This is the maximum amount of time we want to make available for maintenance mode
@@ -957,10 +1075,10 @@ public class DeviceIdleController extends SystemService
          * budget and this time is being added to the budget reserve, this is the maximum
          * reserve size we will allow to grow and thus the maximum amount of time we will
          * allow for the maintenance window.
-         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         *
          * @see #KEY_LIGHT_IDLE_MAINTENANCE_MAX_BUDGET
          */
-        public long LIGHT_IDLE_MAINTENANCE_MAX_BUDGET;
+        public long LIGHT_IDLE_MAINTENANCE_MAX_BUDGET = DEFAULT_LIGHT_IDLE_MAINTENANCE_MAX_BUDGET;
 
         /**
          * This is the minimum amount of time that we will stay in maintenance mode after
@@ -968,10 +1086,10 @@ public class DeviceIdleController extends SystemService
          * in to maintenance mode and scheduling their work -- otherwise we may
          * see there is nothing to do (no jobs pending) and go out of maintenance
          * mode immediately.
-         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         *
          * @see #KEY_MIN_LIGHT_MAINTENANCE_TIME
          */
-        public long MIN_LIGHT_MAINTENANCE_TIME;
+        public long MIN_LIGHT_MAINTENANCE_TIME = DEFAULT_MIN_LIGHT_MAINTENANCE_TIME;
 
         /**
          * This is the minimum amount of time that we will stay in maintenance mode after
@@ -979,271 +1097,365 @@ public class DeviceIdleController extends SystemService
          * in to maintenance mode and scheduling their work -- otherwise we may
          * see there is nothing to do (no jobs pending) and go out of maintenance
          * mode immediately.
-         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
          * @see #KEY_MIN_DEEP_MAINTENANCE_TIME
          */
-        public long MIN_DEEP_MAINTENANCE_TIME;
+        public long MIN_DEEP_MAINTENANCE_TIME = DEFAULT_MIN_DEEP_MAINTENANCE_TIME;
 
         /**
          * This is the time, after becoming inactive, at which we start looking at the
          * motion sensor to determine if the device is being left alone.  We don't do this
          * immediately after going inactive just because we don't want to be continually running
          * the motion sensor whenever the screen is off.
-         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
          * @see #KEY_INACTIVE_TIMEOUT
          */
-        public long INACTIVE_TIMEOUT;
+        public long INACTIVE_TIMEOUT = DEFAULT_INACTIVE_TIMEOUT;
 
         /**
          * If we don't receive a callback from AnyMotion in this amount of time +
          * {@link #LOCATING_TIMEOUT}, we will change from
          * STATE_SENSING to STATE_INACTIVE, and any AnyMotion callbacks while not in STATE_SENSING
          * will be ignored.
-         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
          * @see #KEY_SENSING_TIMEOUT
          */
-        public long SENSING_TIMEOUT;
+        public long SENSING_TIMEOUT = DEFAULT_SENSING_TIMEOUT;
 
         /**
          * This is how long we will wait to try to get a good location fix before going in to
          * idle mode.
-         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
          * @see #KEY_LOCATING_TIMEOUT
          */
-        public long LOCATING_TIMEOUT;
+        public long LOCATING_TIMEOUT = DEFAULT_LOCATING_TIMEOUT;
 
         /**
          * The desired maximum accuracy (in meters) we consider the location to be good enough to go
          * on to idle.  We will be trying to get an accuracy fix at least this good or until
          * {@link #LOCATING_TIMEOUT} expires.
-         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
          * @see #KEY_LOCATION_ACCURACY
          */
-        public float LOCATION_ACCURACY;
+        public float LOCATION_ACCURACY = DEFAULT_LOCATION_ACCURACY;
 
         /**
          * This is the time, after seeing motion, that we wait after becoming inactive from
          * that until we start looking for motion again.
-         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         *
          * @see #KEY_MOTION_INACTIVE_TIMEOUT
          */
-        public long MOTION_INACTIVE_TIMEOUT;
+        public long MOTION_INACTIVE_TIMEOUT = DEFAULT_MOTION_INACTIVE_TIMEOUT;
+
+        /**
+         * This is the alarm window size we will tolerate for motion detection timings.
+         *
+         * @see #KEY_MOTION_INACTIVE_TIMEOUT_FLEX
+         */
+        public long MOTION_INACTIVE_TIMEOUT_FLEX = DEFAULT_MOTION_INACTIVE_TIMEOUT_FLEX;
 
         /**
          * This is the time, after the inactive timeout elapses, that we will wait looking
          * for motion until we truly consider the device to be idle.
-         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         *
          * @see #KEY_IDLE_AFTER_INACTIVE_TIMEOUT
          */
-        public long IDLE_AFTER_INACTIVE_TIMEOUT;
+        public long IDLE_AFTER_INACTIVE_TIMEOUT = DEFAULT_IDLE_AFTER_INACTIVE_TIMEOUT;
 
         /**
          * This is the initial time, after being idle, that we will allow ourself to be back
          * in the IDLE_MAINTENANCE state allowing the system to run normally until we return to
          * idle.
-         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
          * @see #KEY_IDLE_PENDING_TIMEOUT
          */
-        public long IDLE_PENDING_TIMEOUT;
+        public long IDLE_PENDING_TIMEOUT = DEFAULT_IDLE_PENDING_TIMEOUT;
 
         /**
          * Maximum pending idle timeout (time spent running) we will be allowed to use.
-         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
          * @see #KEY_MAX_IDLE_PENDING_TIMEOUT
          */
-        public long MAX_IDLE_PENDING_TIMEOUT;
+        public long MAX_IDLE_PENDING_TIMEOUT = DEFAULT_MAX_IDLE_PENDING_TIMEOUT;
 
         /**
          * Scaling factor to apply to current pending idle timeout each time we cycle through
          * that state.
-         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
          * @see #KEY_IDLE_PENDING_FACTOR
          */
-        public float IDLE_PENDING_FACTOR;
+        public float IDLE_PENDING_FACTOR = DEFAULT_IDLE_PENDING_FACTOR;
 
         /**
          * This is amount of time we will wait from the point where we go into
          * STATE_QUICK_DOZE_DELAY until we actually go into STATE_IDLE, while waiting for jobs
          * and other current activity to finish.
-         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
          * @see #KEY_QUICK_DOZE_DELAY_TIMEOUT
          */
-        public long QUICK_DOZE_DELAY_TIMEOUT;
+        public long QUICK_DOZE_DELAY_TIMEOUT = DEFAULT_QUICK_DOZE_DELAY_TIMEOUT;
 
         /**
          * This is the initial time that we want to sit in the idle state before waking up
          * again to return to pending idle and allowing normal work to run.
-         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
          * @see #KEY_IDLE_TIMEOUT
          */
-        public long IDLE_TIMEOUT;
+        public long IDLE_TIMEOUT = DEFAULT_IDLE_TIMEOUT;
 
         /**
          * Maximum idle duration we will be allowed to use.
-         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
          * @see #KEY_MAX_IDLE_TIMEOUT
          */
-        public long MAX_IDLE_TIMEOUT;
+        public long MAX_IDLE_TIMEOUT = DEFAULT_MAX_IDLE_TIMEOUT;
 
         /**
          * Scaling factor to apply to current idle timeout each time we cycle through that state.
-          * @see Settings.Global#DEVICE_IDLE_CONSTANTS
          * @see #KEY_IDLE_FACTOR
          */
-        public float IDLE_FACTOR;
+        public float IDLE_FACTOR = DEFAULT_IDLE_FACTOR;
 
         /**
          * This is the minimum time we will allow until the next upcoming alarm for us to
          * actually go in to idle mode.
-         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
          * @see #KEY_MIN_TIME_TO_ALARM
          */
-        public long MIN_TIME_TO_ALARM;
+        public long MIN_TIME_TO_ALARM = DEFAULT_MIN_TIME_TO_ALARM;
 
         /**
          * Max amount of time to temporarily whitelist an app when it receives a high priority
          * tickle.
-         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
-         * @see #KEY_MAX_TEMP_APP_WHITELIST_DURATION
+         *
+         * @see #KEY_MAX_TEMP_APP_ALLOWLIST_DURATION_MS
          */
-        public long MAX_TEMP_APP_WHITELIST_DURATION;
+        public long MAX_TEMP_APP_ALLOWLIST_DURATION_MS = DEFAULT_MAX_TEMP_APP_ALLOWLIST_DURATION_MS;
 
         /**
          * Amount of time we would like to whitelist an app that is receiving an MMS.
-         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
-         * @see #KEY_MMS_TEMP_APP_WHITELIST_DURATION
+         * @see #KEY_MMS_TEMP_APP_ALLOWLIST_DURATION_MS
          */
-        public long MMS_TEMP_APP_WHITELIST_DURATION;
+        public long MMS_TEMP_APP_ALLOWLIST_DURATION_MS = DEFAULT_MMS_TEMP_APP_ALLOWLIST_DURATION_MS;
 
         /**
          * Amount of time we would like to whitelist an app that is receiving an SMS.
-         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
-         * @see #KEY_SMS_TEMP_APP_WHITELIST_DURATION
+         * @see #KEY_SMS_TEMP_APP_ALLOWLIST_DURATION_MS
          */
-        public long SMS_TEMP_APP_WHITELIST_DURATION;
+        public long SMS_TEMP_APP_ALLOWLIST_DURATION_MS = DEFAULT_SMS_TEMP_APP_ALLOWLIST_DURATION_MS;
 
         /**
          * Amount of time we would like to whitelist an app that is handling a
          * {@link android.app.PendingIntent} triggered by a {@link android.app.Notification}.
-         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
-         * @see #NOTIFICATION_ALLOWLIST_DURATION
+         * @see #KEY_NOTIFICATION_ALLOWLIST_DURATION_MS
          */
-        public long NOTIFICATION_ALLOWLIST_DURATION;
+        public long NOTIFICATION_ALLOWLIST_DURATION_MS = DEFAULT_NOTIFICATION_ALLOWLIST_DURATION_MS;
 
         /**
          * Pre idle time factor use to make idle delay longer
          */
-        public float PRE_IDLE_FACTOR_LONG;
+        public float PRE_IDLE_FACTOR_LONG = DEFAULT_PRE_IDLE_FACTOR_LONG;
 
         /**
          * Pre idle time factor use to make idle delay shorter
          */
-        public float PRE_IDLE_FACTOR_SHORT;
+        public float PRE_IDLE_FACTOR_SHORT = DEFAULT_PRE_IDLE_FACTOR_SHORT;
 
-        public boolean WAIT_FOR_UNLOCK;
+        public boolean WAIT_FOR_UNLOCK = DEFAULT_WAIT_FOR_UNLOCK;
 
-        private final ContentResolver mResolver;
+        /**
+         * Whether to use window alarms. True to use window alarms (call AlarmManager.setWindow()).
+         * False to use the legacy inexact alarms (call AlarmManager.set()).
+         */
+        public boolean USE_WINDOW_ALARMS = DEFAULT_USE_WINDOW_ALARMS;
+
         private final boolean mSmallBatteryDevice;
-        private final KeyValueListParser mParser = new KeyValueListParser(',');
 
-        public Constants(Handler handler, ContentResolver resolver) {
-            super(handler);
-            mResolver = resolver;
+        public Constants() {
             mSmallBatteryDevice = ActivityManager.isSmallBatteryDevice();
-            mResolver.registerContentObserver(
-                    Settings.Global.getUriFor(Settings.Global.DEVICE_IDLE_CONSTANTS),
-                    false, this);
-            updateConstants();
+            if (mSmallBatteryDevice) {
+                INACTIVE_TIMEOUT = DEFAULT_INACTIVE_TIMEOUT_SMALL_BATTERY;
+                IDLE_AFTER_INACTIVE_TIMEOUT = DEFAULT_IDLE_AFTER_INACTIVE_TIMEOUT_SMALL_BATTERY;
+            }
+            DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_DEVICE_IDLE,
+                    JobSchedulerBackgroundThread.getExecutor(), this);
+            // Load all the constants.
+            onPropertiesChanged(DeviceConfig.getProperties(DeviceConfig.NAMESPACE_DEVICE_IDLE));
         }
+
 
         @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            updateConstants();
-        }
-
-        private void updateConstants() {
+        public void onPropertiesChanged(DeviceConfig.Properties properties) {
             synchronized (DeviceIdleController.this) {
-                try {
-                    mParser.setString(Settings.Global.getString(mResolver,
-                            Settings.Global.DEVICE_IDLE_CONSTANTS));
-                } catch (IllegalArgumentException e) {
-                    // Failed to parse the settings string, log this and move on
-                    // with defaults.
-                    Slog.e(TAG, "Bad device idle settings", e);
+                for (String name : properties.getKeyset()) {
+                    if (name == null) {
+                        continue;
+                    }
+                    switch (name) {
+                        case KEY_FLEX_TIME_SHORT:
+                            FLEX_TIME_SHORT = properties.getLong(
+                                    KEY_FLEX_TIME_SHORT, DEFAULT_FLEX_TIME_SHORT);
+                            break;
+                        case KEY_LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT:
+                            LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT = properties.getLong(
+                                    KEY_LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT,
+                                    DEFAULT_LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT);
+                            break;
+                        case KEY_LIGHT_PRE_IDLE_TIMEOUT:
+                            LIGHT_PRE_IDLE_TIMEOUT = properties.getLong(
+                                    KEY_LIGHT_PRE_IDLE_TIMEOUT, DEFAULT_LIGHT_PRE_IDLE_TIMEOUT);
+                            break;
+                        case KEY_LIGHT_IDLE_TIMEOUT:
+                            LIGHT_IDLE_TIMEOUT = properties.getLong(
+                                    KEY_LIGHT_IDLE_TIMEOUT, DEFAULT_LIGHT_IDLE_TIMEOUT);
+                            break;
+                        case KEY_LIGHT_IDLE_TIMEOUT_INITIAL_FLEX:
+                            LIGHT_IDLE_TIMEOUT_INITIAL_FLEX = properties.getLong(
+                                    KEY_LIGHT_IDLE_TIMEOUT_INITIAL_FLEX,
+                                    DEFAULT_LIGHT_IDLE_TIMEOUT_INITIAL_FLEX);
+                            break;
+                        case KEY_LIGHT_MAX_IDLE_TIMEOUT_FLEX:
+                            LIGHT_MAX_IDLE_TIMEOUT_FLEX = properties.getLong(
+                                    KEY_LIGHT_MAX_IDLE_TIMEOUT_FLEX,
+                                    DEFAULT_LIGHT_MAX_IDLE_TIMEOUT_FLEX);
+                            break;
+                        case KEY_LIGHT_IDLE_FACTOR:
+                            LIGHT_IDLE_FACTOR = Math.max(1, properties.getFloat(
+                                    KEY_LIGHT_IDLE_FACTOR, DEFAULT_LIGHT_IDLE_FACTOR));
+                            break;
+                        case KEY_LIGHT_MAX_IDLE_TIMEOUT:
+                            LIGHT_MAX_IDLE_TIMEOUT = properties.getLong(
+                                    KEY_LIGHT_MAX_IDLE_TIMEOUT, DEFAULT_LIGHT_MAX_IDLE_TIMEOUT);
+                            break;
+                        case KEY_LIGHT_IDLE_MAINTENANCE_MIN_BUDGET:
+                            LIGHT_IDLE_MAINTENANCE_MIN_BUDGET = properties.getLong(
+                                    KEY_LIGHT_IDLE_MAINTENANCE_MIN_BUDGET,
+                                    DEFAULT_LIGHT_IDLE_MAINTENANCE_MIN_BUDGET);
+                            break;
+                        case KEY_LIGHT_IDLE_MAINTENANCE_MAX_BUDGET:
+                            LIGHT_IDLE_MAINTENANCE_MAX_BUDGET = properties.getLong(
+                                    KEY_LIGHT_IDLE_MAINTENANCE_MAX_BUDGET,
+                                    DEFAULT_LIGHT_IDLE_MAINTENANCE_MAX_BUDGET);
+                            break;
+                        case KEY_MIN_LIGHT_MAINTENANCE_TIME:
+                            MIN_LIGHT_MAINTENANCE_TIME = properties.getLong(
+                                    KEY_MIN_LIGHT_MAINTENANCE_TIME,
+                                    DEFAULT_MIN_LIGHT_MAINTENANCE_TIME);
+                            break;
+                        case KEY_MIN_DEEP_MAINTENANCE_TIME:
+                            MIN_DEEP_MAINTENANCE_TIME = properties.getLong(
+                                    KEY_MIN_DEEP_MAINTENANCE_TIME,
+                                    DEFAULT_MIN_DEEP_MAINTENANCE_TIME);
+                            break;
+                        case KEY_INACTIVE_TIMEOUT:
+                            final long defaultInactiveTimeout = mSmallBatteryDevice
+                                    ? DEFAULT_INACTIVE_TIMEOUT_SMALL_BATTERY
+                                    : DEFAULT_INACTIVE_TIMEOUT;
+                            INACTIVE_TIMEOUT = properties.getLong(
+                                    KEY_INACTIVE_TIMEOUT, defaultInactiveTimeout);
+                            break;
+                        case KEY_SENSING_TIMEOUT:
+                            SENSING_TIMEOUT = properties.getLong(
+                                    KEY_SENSING_TIMEOUT, DEFAULT_SENSING_TIMEOUT);
+                            break;
+                        case KEY_LOCATING_TIMEOUT:
+                            LOCATING_TIMEOUT = properties.getLong(
+                                    KEY_LOCATING_TIMEOUT, DEFAULT_LOCATING_TIMEOUT);
+                            break;
+                        case KEY_LOCATION_ACCURACY:
+                            LOCATION_ACCURACY = properties.getFloat(
+                                    KEY_LOCATION_ACCURACY, DEFAULT_LOCATION_ACCURACY);
+                            break;
+                        case KEY_MOTION_INACTIVE_TIMEOUT:
+                            MOTION_INACTIVE_TIMEOUT = properties.getLong(
+                                    KEY_MOTION_INACTIVE_TIMEOUT, DEFAULT_MOTION_INACTIVE_TIMEOUT);
+                            break;
+                        case KEY_MOTION_INACTIVE_TIMEOUT_FLEX:
+                            MOTION_INACTIVE_TIMEOUT_FLEX = properties.getLong(
+                                    KEY_MOTION_INACTIVE_TIMEOUT_FLEX,
+                                    DEFAULT_MOTION_INACTIVE_TIMEOUT_FLEX);
+                            break;
+                        case KEY_IDLE_AFTER_INACTIVE_TIMEOUT:
+                            final long defaultIdleAfterInactiveTimeout = mSmallBatteryDevice
+                                    ? DEFAULT_IDLE_AFTER_INACTIVE_TIMEOUT_SMALL_BATTERY
+                                    : DEFAULT_IDLE_AFTER_INACTIVE_TIMEOUT;
+                            IDLE_AFTER_INACTIVE_TIMEOUT = properties.getLong(
+                                    KEY_IDLE_AFTER_INACTIVE_TIMEOUT,
+                                    defaultIdleAfterInactiveTimeout);
+                            break;
+                        case KEY_IDLE_PENDING_TIMEOUT:
+                            IDLE_PENDING_TIMEOUT = properties.getLong(
+                                    KEY_IDLE_PENDING_TIMEOUT, DEFAULT_IDLE_PENDING_TIMEOUT);
+                            break;
+                        case KEY_MAX_IDLE_PENDING_TIMEOUT:
+                            MAX_IDLE_PENDING_TIMEOUT = properties.getLong(
+                                    KEY_MAX_IDLE_PENDING_TIMEOUT, DEFAULT_MAX_IDLE_PENDING_TIMEOUT);
+                            break;
+                        case KEY_IDLE_PENDING_FACTOR:
+                            IDLE_PENDING_FACTOR = properties.getFloat(
+                                    KEY_IDLE_PENDING_FACTOR, DEFAULT_IDLE_PENDING_FACTOR);
+                            break;
+                        case KEY_QUICK_DOZE_DELAY_TIMEOUT:
+                            QUICK_DOZE_DELAY_TIMEOUT = properties.getLong(
+                                    KEY_QUICK_DOZE_DELAY_TIMEOUT, DEFAULT_QUICK_DOZE_DELAY_TIMEOUT);
+                            break;
+                        case KEY_IDLE_TIMEOUT:
+                            IDLE_TIMEOUT = properties.getLong(
+                                    KEY_IDLE_TIMEOUT, DEFAULT_IDLE_TIMEOUT);
+                            break;
+                        case KEY_MAX_IDLE_TIMEOUT:
+                            MAX_IDLE_TIMEOUT = properties.getLong(
+                                    KEY_MAX_IDLE_TIMEOUT, DEFAULT_MAX_IDLE_TIMEOUT);
+                            break;
+                        case KEY_IDLE_FACTOR:
+                            IDLE_FACTOR = properties.getFloat(KEY_IDLE_FACTOR, DEFAULT_IDLE_FACTOR);
+                            break;
+                        case KEY_MIN_TIME_TO_ALARM:
+                            MIN_TIME_TO_ALARM = properties.getLong(
+                                    KEY_MIN_TIME_TO_ALARM, DEFAULT_MIN_TIME_TO_ALARM);
+                            break;
+                        case KEY_MAX_TEMP_APP_ALLOWLIST_DURATION_MS:
+                            MAX_TEMP_APP_ALLOWLIST_DURATION_MS = properties.getLong(
+                                    KEY_MAX_TEMP_APP_ALLOWLIST_DURATION_MS,
+                                    DEFAULT_MAX_TEMP_APP_ALLOWLIST_DURATION_MS);
+                            break;
+                        case KEY_MMS_TEMP_APP_ALLOWLIST_DURATION_MS:
+                            MMS_TEMP_APP_ALLOWLIST_DURATION_MS = properties.getLong(
+                                    KEY_MMS_TEMP_APP_ALLOWLIST_DURATION_MS,
+                                    DEFAULT_MMS_TEMP_APP_ALLOWLIST_DURATION_MS);
+                            break;
+                        case KEY_SMS_TEMP_APP_ALLOWLIST_DURATION_MS:
+                            SMS_TEMP_APP_ALLOWLIST_DURATION_MS = properties.getLong(
+                                    KEY_SMS_TEMP_APP_ALLOWLIST_DURATION_MS,
+                                    DEFAULT_SMS_TEMP_APP_ALLOWLIST_DURATION_MS);
+                            break;
+                        case KEY_NOTIFICATION_ALLOWLIST_DURATION_MS:
+                            NOTIFICATION_ALLOWLIST_DURATION_MS = properties.getLong(
+                                    KEY_NOTIFICATION_ALLOWLIST_DURATION_MS,
+                                    DEFAULT_NOTIFICATION_ALLOWLIST_DURATION_MS);
+                            break;
+                        case KEY_WAIT_FOR_UNLOCK:
+                            WAIT_FOR_UNLOCK = properties.getBoolean(
+                                    KEY_WAIT_FOR_UNLOCK, DEFAULT_WAIT_FOR_UNLOCK);
+                            break;
+                        case KEY_PRE_IDLE_FACTOR_LONG:
+                            PRE_IDLE_FACTOR_LONG = properties.getFloat(
+                                    KEY_PRE_IDLE_FACTOR_LONG, DEFAULT_PRE_IDLE_FACTOR_LONG);
+                            break;
+                        case KEY_PRE_IDLE_FACTOR_SHORT:
+                            PRE_IDLE_FACTOR_SHORT = properties.getFloat(
+                                    KEY_PRE_IDLE_FACTOR_SHORT, DEFAULT_PRE_IDLE_FACTOR_SHORT);
+                            break;
+                        case KEY_USE_WINDOW_ALARMS:
+                            USE_WINDOW_ALARMS = properties.getBoolean(
+                                    KEY_USE_WINDOW_ALARMS, DEFAULT_USE_WINDOW_ALARMS);
+                            break;
+                        default:
+                            Slog.e(TAG, "Unknown configuration key: " + name);
+                            break;
+                    }
                 }
-
-                LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT = mParser.getDurationMillis(
-                        KEY_LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT,
-                        !COMPRESS_TIME ? 3 * 60 * 1000L : 15 * 1000L);
-                LIGHT_PRE_IDLE_TIMEOUT = mParser.getDurationMillis(KEY_LIGHT_PRE_IDLE_TIMEOUT,
-                        !COMPRESS_TIME ? 3 * 60 * 1000L : 30 * 1000L);
-                LIGHT_IDLE_TIMEOUT = mParser.getDurationMillis(KEY_LIGHT_IDLE_TIMEOUT,
-                        !COMPRESS_TIME ? 5 * 60 * 1000L : 15 * 1000L);
-                LIGHT_IDLE_FACTOR = mParser.getFloat(KEY_LIGHT_IDLE_FACTOR,
-                        2f);
-                LIGHT_MAX_IDLE_TIMEOUT = mParser.getDurationMillis(KEY_LIGHT_MAX_IDLE_TIMEOUT,
-                        !COMPRESS_TIME ? 15 * 60 * 1000L : 60 * 1000L);
-                LIGHT_IDLE_MAINTENANCE_MIN_BUDGET = mParser.getDurationMillis(
-                        KEY_LIGHT_IDLE_MAINTENANCE_MIN_BUDGET,
-                        !COMPRESS_TIME ? 1 * 60 * 1000L : 15 * 1000L);
-                LIGHT_IDLE_MAINTENANCE_MAX_BUDGET = mParser.getDurationMillis(
-                        KEY_LIGHT_IDLE_MAINTENANCE_MAX_BUDGET,
-                        !COMPRESS_TIME ? 5 * 60 * 1000L : 30 * 1000L);
-                MIN_LIGHT_MAINTENANCE_TIME = mParser.getDurationMillis(
-                        KEY_MIN_LIGHT_MAINTENANCE_TIME,
-                        !COMPRESS_TIME ? 5 * 1000L : 1 * 1000L);
-                MIN_DEEP_MAINTENANCE_TIME = mParser.getDurationMillis(
-                        KEY_MIN_DEEP_MAINTENANCE_TIME,
-                        !COMPRESS_TIME ? 30 * 1000L : 5 * 1000L);
-                long inactiveTimeoutDefault = (mSmallBatteryDevice ? 15 : 30) * 60 * 1000L;
-                INACTIVE_TIMEOUT = mParser.getDurationMillis(KEY_INACTIVE_TIMEOUT,
-                        !COMPRESS_TIME ? inactiveTimeoutDefault : (inactiveTimeoutDefault / 10));
-                SENSING_TIMEOUT = mParser.getDurationMillis(KEY_SENSING_TIMEOUT,
-                        !COMPRESS_TIME ? 4 * 60 * 1000L : 60 * 1000L);
-                LOCATING_TIMEOUT = mParser.getDurationMillis(KEY_LOCATING_TIMEOUT,
-                        !COMPRESS_TIME ? 30 * 1000L : 15 * 1000L);
-                LOCATION_ACCURACY = mParser.getFloat(KEY_LOCATION_ACCURACY, 20);
-                MOTION_INACTIVE_TIMEOUT = mParser.getDurationMillis(KEY_MOTION_INACTIVE_TIMEOUT,
-                        !COMPRESS_TIME ? 10 * 60 * 1000L : 60 * 1000L);
-                long idleAfterInactiveTimeout = (mSmallBatteryDevice ? 15 : 30) * 60 * 1000L;
-                IDLE_AFTER_INACTIVE_TIMEOUT = mParser.getDurationMillis(
-                        KEY_IDLE_AFTER_INACTIVE_TIMEOUT,
-                        !COMPRESS_TIME ? idleAfterInactiveTimeout
-                                       : (idleAfterInactiveTimeout / 10));
-                IDLE_PENDING_TIMEOUT = mParser.getDurationMillis(KEY_IDLE_PENDING_TIMEOUT,
-                        !COMPRESS_TIME ? 5 * 60 * 1000L : 30 * 1000L);
-                MAX_IDLE_PENDING_TIMEOUT = mParser.getDurationMillis(KEY_MAX_IDLE_PENDING_TIMEOUT,
-                        !COMPRESS_TIME ? 10 * 60 * 1000L : 60 * 1000L);
-                IDLE_PENDING_FACTOR = mParser.getFloat(KEY_IDLE_PENDING_FACTOR,
-                        2f);
-                QUICK_DOZE_DELAY_TIMEOUT = mParser.getDurationMillis(
-                        KEY_QUICK_DOZE_DELAY_TIMEOUT, !COMPRESS_TIME ? 60 * 1000L : 15 * 1000L);
-                IDLE_TIMEOUT = mParser.getDurationMillis(KEY_IDLE_TIMEOUT,
-                        !COMPRESS_TIME ? 60 * 60 * 1000L : 6 * 60 * 1000L);
-                MAX_IDLE_TIMEOUT = mParser.getDurationMillis(KEY_MAX_IDLE_TIMEOUT,
-                        !COMPRESS_TIME ? 6 * 60 * 60 * 1000L : 30 * 60 * 1000L);
-                IDLE_FACTOR = mParser.getFloat(KEY_IDLE_FACTOR,
-                        2f);
-                MIN_TIME_TO_ALARM = mParser.getDurationMillis(KEY_MIN_TIME_TO_ALARM,
-                        !COMPRESS_TIME ? 30 * 60 * 1000L : 6 * 60 * 1000L);
-                MAX_TEMP_APP_WHITELIST_DURATION = mParser.getDurationMillis(
-                        KEY_MAX_TEMP_APP_WHITELIST_DURATION, 5 * 60 * 1000L);
-                MMS_TEMP_APP_WHITELIST_DURATION = mParser.getDurationMillis(
-                        KEY_MMS_TEMP_APP_WHITELIST_DURATION, 60 * 1000L);
-                SMS_TEMP_APP_WHITELIST_DURATION = mParser.getDurationMillis(
-                        KEY_SMS_TEMP_APP_WHITELIST_DURATION, 20 * 1000L);
-                NOTIFICATION_ALLOWLIST_DURATION = mParser.getDurationMillis(
-                        KEY_NOTIFICATION_ALLOWLIST_DURATION, 30 * 1000L);
-                WAIT_FOR_UNLOCK = mParser.getBoolean(KEY_WAIT_FOR_UNLOCK, true);
-                PRE_IDLE_FACTOR_LONG = mParser.getFloat(KEY_PRE_IDLE_FACTOR_LONG, 1.67f);
-                PRE_IDLE_FACTOR_SHORT = mParser.getFloat(KEY_PRE_IDLE_FACTOR_SHORT, 0.33f);
             }
         }
 
         void dump(PrintWriter pw) {
             pw.println("  Settings:");
 
-            pw.print("    "); pw.print(KEY_LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT); pw.print("=");
+            pw.print("    "); pw.print(KEY_FLEX_TIME_SHORT); pw.print("=");
+            TimeUtils.formatDuration(FLEX_TIME_SHORT, pw);
+            pw.println();
+
+            pw.print("    ");
+            pw.print(KEY_LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT);
+            pw.print("=");
             TimeUtils.formatDuration(LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT, pw);
             pw.println();
 
@@ -1253,6 +1465,14 @@ public class DeviceIdleController extends SystemService
 
             pw.print("    "); pw.print(KEY_LIGHT_IDLE_TIMEOUT); pw.print("=");
             TimeUtils.formatDuration(LIGHT_IDLE_TIMEOUT, pw);
+            pw.println();
+
+            pw.print("    "); pw.print(KEY_LIGHT_IDLE_TIMEOUT_INITIAL_FLEX); pw.print("=");
+            TimeUtils.formatDuration(LIGHT_IDLE_TIMEOUT_INITIAL_FLEX, pw);
+            pw.println();
+
+            pw.print("    "); pw.print(KEY_LIGHT_MAX_IDLE_TIMEOUT_FLEX); pw.print("=");
+            TimeUtils.formatDuration(LIGHT_MAX_IDLE_TIMEOUT_FLEX, pw);
             pw.println();
 
             pw.print("    "); pw.print(KEY_LIGHT_IDLE_FACTOR); pw.print("=");
@@ -1299,6 +1519,10 @@ public class DeviceIdleController extends SystemService
             TimeUtils.formatDuration(MOTION_INACTIVE_TIMEOUT, pw);
             pw.println();
 
+            pw.print("    "); pw.print(KEY_MOTION_INACTIVE_TIMEOUT_FLEX); pw.print("=");
+            TimeUtils.formatDuration(MOTION_INACTIVE_TIMEOUT_FLEX, pw);
+            pw.println();
+
             pw.print("    "); pw.print(KEY_IDLE_AFTER_INACTIVE_TIMEOUT); pw.print("=");
             TimeUtils.formatDuration(IDLE_AFTER_INACTIVE_TIMEOUT, pw);
             pw.println();
@@ -1333,20 +1557,20 @@ public class DeviceIdleController extends SystemService
             TimeUtils.formatDuration(MIN_TIME_TO_ALARM, pw);
             pw.println();
 
-            pw.print("    "); pw.print(KEY_MAX_TEMP_APP_WHITELIST_DURATION); pw.print("=");
-            TimeUtils.formatDuration(MAX_TEMP_APP_WHITELIST_DURATION, pw);
+            pw.print("    "); pw.print(KEY_MAX_TEMP_APP_ALLOWLIST_DURATION_MS); pw.print("=");
+            TimeUtils.formatDuration(MAX_TEMP_APP_ALLOWLIST_DURATION_MS, pw);
             pw.println();
 
-            pw.print("    "); pw.print(KEY_MMS_TEMP_APP_WHITELIST_DURATION); pw.print("=");
-            TimeUtils.formatDuration(MMS_TEMP_APP_WHITELIST_DURATION, pw);
+            pw.print("    "); pw.print(KEY_MMS_TEMP_APP_ALLOWLIST_DURATION_MS); pw.print("=");
+            TimeUtils.formatDuration(MMS_TEMP_APP_ALLOWLIST_DURATION_MS, pw);
             pw.println();
 
-            pw.print("    "); pw.print(KEY_SMS_TEMP_APP_WHITELIST_DURATION); pw.print("=");
-            TimeUtils.formatDuration(SMS_TEMP_APP_WHITELIST_DURATION, pw);
+            pw.print("    "); pw.print(KEY_SMS_TEMP_APP_ALLOWLIST_DURATION_MS); pw.print("=");
+            TimeUtils.formatDuration(SMS_TEMP_APP_ALLOWLIST_DURATION_MS, pw);
             pw.println();
 
-            pw.print("    "); pw.print(KEY_NOTIFICATION_ALLOWLIST_DURATION); pw.print("=");
-            TimeUtils.formatDuration(NOTIFICATION_ALLOWLIST_DURATION, pw);
+            pw.print("    "); pw.print(KEY_NOTIFICATION_ALLOWLIST_DURATION_MS); pw.print("=");
+            TimeUtils.formatDuration(NOTIFICATION_ALLOWLIST_DURATION_MS, pw);
             pw.println();
 
             pw.print("    "); pw.print(KEY_WAIT_FOR_UNLOCK); pw.print("=");
@@ -1357,6 +1581,9 @@ public class DeviceIdleController extends SystemService
 
             pw.print("    "); pw.print(KEY_PRE_IDLE_FACTOR_SHORT); pw.print("=");
             pw.println(PRE_IDLE_FACTOR_SHORT);
+
+            pw.print("    "); pw.print(KEY_USE_WINDOW_ALARMS); pw.print("=");
+            pw.println(USE_WINDOW_ALARMS);
         }
     }
 
@@ -1404,12 +1631,14 @@ public class DeviceIdleController extends SystemService
     @VisibleForTesting
     static final int MSG_REPORT_STATIONARY_STATUS = 7;
     private static final int MSG_FINISH_IDLE_OP = 8;
-    private static final int MSG_REPORT_TEMP_APP_WHITELIST_CHANGED = 9;
     private static final int MSG_SEND_CONSTRAINT_MONITORING = 10;
     @VisibleForTesting
     static final int MSG_UPDATE_PRE_IDLE_TIMEOUT_FACTOR = 11;
     @VisibleForTesting
     static final int MSG_RESET_PRE_IDLE_TIMEOUT_FACTOR = 12;
+    private static final int MSG_REPORT_TEMP_APP_WHITELIST_CHANGED = 13;
+    private static final int MSG_REPORT_TEMP_APP_WHITELIST_ADDED_TO_NPMS = 14;
+    private static final int MSG_REPORT_TEMP_APP_WHITELIST_REMOVED_TO_NPMS = 15;
 
     final class MyHandler extends Handler {
         MyHandler(Looper looper) {
@@ -1502,17 +1731,41 @@ public class DeviceIdleController extends SystemService
                 } break;
                 case MSG_TEMP_APP_WHITELIST_TIMEOUT: {
                     // TODO: What is keeping the device awake at this point? Does it need to be?
-                    int appId = msg.arg1;
-                    checkTempAppWhitelistTimeout(appId);
+                    int uid = msg.arg1;
+                    checkTempAppWhitelistTimeout(uid);
                 } break;
                 case MSG_FINISH_IDLE_OP: {
                     // mActiveIdleWakeLock is held at this point
                     decActiveIdleOps();
                 } break;
                 case MSG_REPORT_TEMP_APP_WHITELIST_CHANGED: {
-                    final int appId = msg.arg1;
+                    final int uid = msg.arg1;
                     final boolean added = (msg.arg2 == 1);
-                    mNetworkPolicyManagerInternal.onTempPowerSaveWhitelistChange(appId, added);
+                    PowerAllowlistInternal.TempAllowlistChangeListener[] listeners;
+                    synchronized (DeviceIdleController.this) {
+                        listeners = mTempAllowlistChangeListeners.toArray(
+                                new PowerAllowlistInternal.TempAllowlistChangeListener[
+                                        mTempAllowlistChangeListeners.size()]);
+                    }
+                    for (PowerAllowlistInternal.TempAllowlistChangeListener listener : listeners) {
+                        if (added) {
+                            listener.onAppAdded(uid);
+                        } else {
+                            listener.onAppRemoved(uid);
+                        }
+                    }
+                } break;
+                case MSG_REPORT_TEMP_APP_WHITELIST_ADDED_TO_NPMS: {
+                    final int appId = msg.arg1;
+                    final int reasonCode = msg.arg2;
+                    final String reason = (String) msg.obj;
+                    mNetworkPolicyManagerInternal.onTempPowerSaveWhitelistChange(appId, true,
+                            reasonCode, reason);
+                } break;
+                case MSG_REPORT_TEMP_APP_WHITELIST_REMOVED_TO_NPMS: {
+                    final int appId = msg.arg1;
+                    mNetworkPolicyManagerInternal.onTempPowerSaveWhitelistChange(appId, false,
+                            REASON_UNKNOWN, /* reason= */ null);
                 } break;
                 case MSG_SEND_CONSTRAINT_MONITORING: {
                     final IDeviceIdleConstraint constraint = (IDeviceIdleConstraint) msg.obj;
@@ -1580,7 +1833,7 @@ public class DeviceIdleController extends SystemService
             }
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 return addPowerSaveWhitelistAppsInternal(packageNames);
             } finally {
@@ -1594,9 +1847,12 @@ public class DeviceIdleController extends SystemService
             }
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
-                removePowerSaveWhitelistAppInternal(name);
+                if (!removePowerSaveWhitelistAppInternal(name)
+                        && mPowerSaveWhitelistAppsExceptIdle.containsKey(name)) {
+                    throw new UnsupportedOperationException("Cannot remove system whitelisted app");
+                }
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -1608,7 +1864,7 @@ public class DeviceIdleController extends SystemService
             }
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 removeSystemPowerWhitelistAppInternal(name);
             } finally {
@@ -1622,7 +1878,7 @@ public class DeviceIdleController extends SystemService
             }
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 restoreSystemPowerWhitelistAppInternal(name);
             } finally {
@@ -1631,27 +1887,33 @@ public class DeviceIdleController extends SystemService
         }
 
         public String[] getRemovedSystemPowerWhitelistApps() {
-            return getRemovedSystemPowerWhitelistAppsInternal();
+            return getRemovedSystemPowerWhitelistAppsInternal(
+                    Binder.getCallingUid(), UserHandle.getCallingUserId());
         }
 
         @Override public String[] getSystemPowerWhitelistExceptIdle() {
-            return getSystemPowerWhitelistExceptIdleInternal();
+            return getSystemPowerWhitelistExceptIdleInternal(
+                    Binder.getCallingUid(), UserHandle.getCallingUserId());
         }
 
         @Override public String[] getSystemPowerWhitelist() {
-            return getSystemPowerWhitelistInternal();
+            return getSystemPowerWhitelistInternal(
+                    Binder.getCallingUid(), UserHandle.getCallingUserId());
         }
 
         @Override public String[] getUserPowerWhitelist() {
-            return getUserPowerWhitelistInternal();
+            return getUserPowerWhitelistInternal(
+                    Binder.getCallingUid(), UserHandle.getCallingUserId());
         }
 
         @Override public String[] getFullPowerWhitelistExceptIdle() {
-            return getFullPowerWhitelistExceptIdleInternal();
+            return getFullPowerWhitelistExceptIdleInternal(
+                    Binder.getCallingUid(), UserHandle.getCallingUserId());
         }
 
         @Override public String[] getFullPowerWhitelist() {
-            return getFullPowerWhitelistInternal();
+            return getFullPowerWhitelistInternal(
+                    Binder.getCallingUid(), UserHandle.getCallingUserId());
         }
 
         @Override public int[] getAppIdWhitelistExceptIdle() {
@@ -1671,46 +1933,57 @@ public class DeviceIdleController extends SystemService
         }
 
         @Override public boolean isPowerSaveWhitelistExceptIdleApp(String name) {
+            if (mPackageManagerInternal
+                    .filterAppAccess(name, Binder.getCallingUid(), UserHandle.getCallingUserId())) {
+                return false;
+            }
             return isPowerSaveWhitelistExceptIdleAppInternal(name);
         }
 
         @Override public boolean isPowerSaveWhitelistApp(String name) {
+            if (mPackageManagerInternal
+                    .filterAppAccess(name, Binder.getCallingUid(), UserHandle.getCallingUserId())) {
+                return false;
+            }
             return isPowerSaveWhitelistAppInternal(name);
         }
 
         @Override
-        public long whitelistAppTemporarily(String packageName, int userId, String reason)
-                throws RemoteException {
+        public long whitelistAppTemporarily(String packageName, int userId,
+                @ReasonCode int reasonCode, @Nullable String reason) throws RemoteException {
             // At least 10 seconds.
-            long duration = Math.max(10_000L, mConstants.MAX_TEMP_APP_WHITELIST_DURATION / 2);
-            addPowerSaveTempWhitelistAppChecked(packageName, duration, userId, reason);
-            return duration;
+            long durationMs = Math.max(10_000L, mConstants.MAX_TEMP_APP_ALLOWLIST_DURATION_MS / 2);
+            addPowerSaveTempAllowlistAppChecked(packageName, durationMs, userId, reasonCode,
+                    reason);
+            return durationMs;
         }
 
         @Override
-        public void addPowerSaveTempWhitelistApp(String packageName, long duration,
-                int userId, String reason) throws RemoteException {
-            addPowerSaveTempWhitelistAppChecked(packageName, duration, userId, reason);
+        public void addPowerSaveTempWhitelistApp(String packageName, long duration, int userId,
+                @ReasonCode int reasonCode, @Nullable String reason) throws RemoteException {
+            addPowerSaveTempAllowlistAppChecked(packageName, duration, userId, reasonCode, reason);
         }
 
-        @Override public long addPowerSaveTempWhitelistAppForMms(String packageName,
-                int userId, String reason) throws RemoteException {
-            long duration = mConstants.MMS_TEMP_APP_WHITELIST_DURATION;
-            addPowerSaveTempWhitelistAppChecked(packageName, duration, userId, reason);
-            return duration;
+        @Override public long addPowerSaveTempWhitelistAppForMms(String packageName, int userId,
+                @ReasonCode int reasonCode, @Nullable String reason) throws RemoteException {
+            long durationMs = mConstants.MMS_TEMP_APP_ALLOWLIST_DURATION_MS;
+            addPowerSaveTempAllowlistAppChecked(packageName, durationMs, userId, reasonCode,
+                    reason);
+            return durationMs;
         }
 
-        @Override public long addPowerSaveTempWhitelistAppForSms(String packageName,
-                int userId, String reason) throws RemoteException {
-            long duration = mConstants.SMS_TEMP_APP_WHITELIST_DURATION;
-            addPowerSaveTempWhitelistAppChecked(packageName, duration, userId, reason);
-            return duration;
+        @Override public long addPowerSaveTempWhitelistAppForSms(String packageName, int userId,
+                @ReasonCode int reasonCode, @Nullable String reason) throws RemoteException {
+            long durationMs = mConstants.SMS_TEMP_APP_ALLOWLIST_DURATION_MS;
+            addPowerSaveTempAllowlistAppChecked(packageName, durationMs, userId, reasonCode,
+                    reason);
+            return durationMs;
         }
 
         @Override public void exitIdle(String reason) {
             getContext().enforceCallingOrSelfPermission(Manifest.permission.DEVICE_POWER,
                     null);
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 exitIdleInternal(reason);
             } finally {
@@ -1721,7 +1994,7 @@ public class DeviceIdleController extends SystemService
         @Override public int setPreIdleTimeoutMode(int mode) {
             getContext().enforceCallingOrSelfPermission(Manifest.permission.DEVICE_POWER,
                     null);
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 return DeviceIdleController.this.setPreIdleTimeoutMode(mode);
             } finally {
@@ -1732,7 +2005,7 @@ public class DeviceIdleController extends SystemService
         @Override public void resetPreIdleTimeoutMode() {
             getContext().enforceCallingOrSelfPermission(Manifest.permission.DEVICE_POWER,
                     null);
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 DeviceIdleController.this.resetPreIdleTimeoutMode();
             } finally {
@@ -1774,25 +2047,35 @@ public class DeviceIdleController extends SystemService
             exitIdleInternal(reason);
         }
 
-        // duration in milliseconds
         @Override
         public void addPowerSaveTempWhitelistApp(int callingUid, String packageName,
-                long duration, int userId, boolean sync, String reason) {
-            addPowerSaveTempWhitelistAppInternal(callingUid, packageName, duration,
-                    userId, sync, reason);
+                long durationMs, int userId, boolean sync, @ReasonCode int reasonCode,
+                @Nullable String reason) {
+            addPowerSaveTempAllowlistAppInternal(callingUid, packageName, durationMs,
+                    TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                    userId, sync, reasonCode, reason);
         }
 
-        // duration in milliseconds
         @Override
-        public void addPowerSaveTempWhitelistAppDirect(int uid, long duration, boolean sync,
-                String reason) {
-            addPowerSaveTempWhitelistAppDirectInternal(0, uid, duration, sync, reason);
+        public void addPowerSaveTempWhitelistApp(int callingUid, String packageName,
+                long durationMs, @TempAllowListType int tempAllowListType, int userId, boolean sync,
+                @ReasonCode int reasonCode, @Nullable String reason) {
+            addPowerSaveTempAllowlistAppInternal(callingUid, packageName, durationMs,
+                    tempAllowListType, userId, sync, reasonCode, reason);
+        }
+
+        @Override
+        public void addPowerSaveTempWhitelistAppDirect(int uid, long durationMs,
+                @TempAllowListType int tempAllowListType, boolean sync, @ReasonCode int reasonCode,
+                @Nullable String reason, int callingUid) {
+            addPowerSaveTempWhitelistAppDirectInternal(callingUid, uid, durationMs,
+                    tempAllowListType, sync, reasonCode, reason);
         }
 
         // duration in milliseconds
         @Override
         public long getNotificationAllowlistDuration() {
-            return mConstants.NOTIFICATION_ALLOWLIST_DURATION;
+            return mConstants.NOTIFICATION_ALLOWLIST_DURATION_MS;
         }
 
         @Override
@@ -1837,6 +2120,27 @@ public class DeviceIdleController extends SystemService
         public void unregisterStationaryListener(StationaryListener listener) {
             DeviceIdleController.this.unregisterStationaryListener(listener);
         }
+
+        @Override
+        public @TempAllowListType int getTempAllowListType(@ReasonCode int reasonCode,
+                @TempAllowListType int defaultType) {
+            return DeviceIdleController.this.getTempAllowListType(reasonCode, defaultType);
+        }
+    }
+
+    private class LocalPowerAllowlistService implements PowerAllowlistInternal {
+
+        @Override
+        public void registerTempAllowlistChangeListener(
+                @NonNull TempAllowlistChangeListener listener) {
+            DeviceIdleController.this.registerTempAllowlistChangeListener(listener);
+        }
+
+        @Override
+        public void unregisterTempAllowlistChangeListener(
+                @NonNull TempAllowlistChangeListener listener) {
+            DeviceIdleController.this.unregisterTempAllowlistChangeListener(listener);
+        }
     }
 
     static class Injector {
@@ -1858,8 +2162,8 @@ public class DeviceIdleController extends SystemService
             return new AnyMotionDetector(getPowerManager(), handler, sm, callback, angleThreshold);
         }
 
-        AppStateTracker getAppStateTracker(Context ctx, Looper looper) {
-            return new AppStateTracker(ctx, looper);
+        AppStateTrackerImpl getAppStateTracker(Context ctx, Looper looper) {
+            return new AppStateTrackerImpl(ctx, looper);
         }
 
         ConnectivityManager getConnectivityManager() {
@@ -1869,10 +2173,9 @@ public class DeviceIdleController extends SystemService
             return mConnectivityManager;
         }
 
-        Constants getConstants(DeviceIdleController controller, Handler handler,
-                ContentResolver resolver) {
+        Constants getConstants(DeviceIdleController controller) {
             if (mConstants == null) {
-                mConstants = controller.new Constants(handler, resolver);
+                mConstants = controller.new Constants();
             }
             return mConstants;
         }
@@ -1891,7 +2194,7 @@ public class DeviceIdleController extends SystemService
         }
 
         MyHandler getHandler(DeviceIdleController controller) {
-            return controller.new MyHandler(BackgroundThread.getHandler().getLooper());
+            return controller.new MyHandler(JobSchedulerBackgroundThread.getHandler().getLooper());
         }
 
         Sensor getMotionSensor() {
@@ -1958,7 +2261,8 @@ public class DeviceIdleController extends SystemService
         mInjector = injector;
         mConfigFile = new AtomicFile(new File(getSystemDir(), "deviceidle.xml"));
         mHandler = mInjector.getHandler(this);
-        mAppStateTracker = mInjector.getAppStateTracker(context, FgThread.get().getLooper());
+        mAppStateTracker = mInjector.getAppStateTracker(context,
+                JobSchedulerBackgroundThread.get().getLooper());
         LocalServices.addService(AppStateTracker.class, mAppStateTracker);
         mUseMotionSensor = mInjector.useMotionSensor();
     }
@@ -2020,7 +2324,7 @@ public class DeviceIdleController extends SystemService
                 }
             }
 
-            mConstants = mInjector.getConstants(this, mHandler, getContext().getContentResolver());
+            mConstants = mInjector.getConstants(this);
 
             readConfigFileLocked();
             updateWhitelistAppIdsLocked();
@@ -2043,6 +2347,7 @@ public class DeviceIdleController extends SystemService
         publishBinderService(Context.DEVICE_IDLE_CONTROLLER, mBinderService);
         mLocalService = new LocalService();
         publishLocalService(DeviceIdleInternal.class, mLocalService);
+        publishLocalService(PowerAllowlistInternal.class, new LocalPowerAllowlistService());
     }
 
     @Override
@@ -2054,6 +2359,7 @@ public class DeviceIdleController extends SystemService
                 mBatteryStats = BatteryStatsService.getService();
                 mLocalActivityManager = getLocalService(ActivityManagerInternal.class);
                 mLocalActivityTaskManager = getLocalService(ActivityTaskManagerInternal.class);
+                mPackageManagerInternal = getLocalService(PackageManagerInternal.class);
                 mLocalPowerManager = getLocalService(PowerManagerInternal.class);
                 mPowerManager = mInjector.getPowerManager();
                 mActiveIdleWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
@@ -2073,11 +2379,10 @@ public class DeviceIdleController extends SystemService
 
                 if (getContext().getResources().getBoolean(
                         com.android.internal.R.bool.config_autoPowerModePrefetchLocation)) {
-                    mLocationRequest = LocationRequest.create()
-                        .setQuality(LocationRequest.ACCURACY_FINE)
-                        .setInterval(0)
-                        .setFastestInterval(0)
-                        .setNumUpdates(1);
+                    mLocationRequest = new LocationRequest.Builder(/*intervalMillis=*/ 0)
+                        .setQuality(LocationRequest.QUALITY_HIGH_ACCURACY)
+                        .setMaxUpdates(1)
+                        .build();
                 }
 
                 mConstraintController = mInjector.getConstraintController(
@@ -2118,7 +2423,7 @@ public class DeviceIdleController extends SystemService
                 filter.addAction(Intent.ACTION_SCREEN_ON);
                 getContext().registerReceiver(mInteractivityReceiver, filter);
 
-                mLocalActivityManager.setDeviceIdleWhitelist(
+                mLocalActivityManager.setDeviceIdleAllowlist(
                         mPowerSaveWhitelistAllAppIdArray, mPowerSaveWhitelistExceptIdleAppIdArray);
                 mLocalPowerManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
 
@@ -2362,54 +2667,68 @@ public class DeviceIdleController extends SystemService
         }
     }
 
-    public String[] getSystemPowerWhitelistExceptIdleInternal() {
+    private String[] getSystemPowerWhitelistExceptIdleInternal(final int callingUid,
+            final int callingUserId) {
+        final String[] apps;
         synchronized (this) {
             int size = mPowerSaveWhitelistAppsExceptIdle.size();
-            String[] apps = new String[size];
+            apps = new String[size];
             for (int i = 0; i < size; i++) {
                 apps[i] = mPowerSaveWhitelistAppsExceptIdle.keyAt(i);
             }
-            return apps;
         }
+        return ArrayUtils.filter(apps, String[]::new,
+                (pkg) -> !mPackageManagerInternal.filterAppAccess(pkg, callingUid, callingUserId));
     }
 
-    public String[] getSystemPowerWhitelistInternal() {
+    private String[] getSystemPowerWhitelistInternal(final int callingUid,
+            final int callingUserId) {
+        final String[] apps;
         synchronized (this) {
             int size = mPowerSaveWhitelistApps.size();
-            String[] apps = new String[size];
+            apps = new String[size];
             for (int i = 0; i < size; i++) {
                 apps[i] = mPowerSaveWhitelistApps.keyAt(i);
             }
-            return apps;
         }
+        return ArrayUtils.filter(apps, String[]::new,
+                (pkg) -> !mPackageManagerInternal.filterAppAccess(pkg, callingUid, callingUserId));
     }
 
-    public String[] getRemovedSystemPowerWhitelistAppsInternal() {
+    private String[] getRemovedSystemPowerWhitelistAppsInternal(final int callingUid,
+            final int callingUserId) {
+        final String[] apps;
         synchronized (this) {
             int size = mRemovedFromSystemWhitelistApps.size();
-            final String[] apps = new String[size];
+            apps = new String[size];
             for (int i = 0; i < size; i++) {
                 apps[i] = mRemovedFromSystemWhitelistApps.keyAt(i);
             }
-            return apps;
         }
+        return ArrayUtils.filter(apps, String[]::new,
+                (pkg) -> !mPackageManagerInternal.filterAppAccess(pkg, callingUid, callingUserId));
     }
 
-    public String[] getUserPowerWhitelistInternal() {
+    private String[] getUserPowerWhitelistInternal(final int callingUid, final int callingUserId) {
+        final String[] apps;
         synchronized (this) {
             int size = mPowerSaveWhitelistUserApps.size();
-            String[] apps = new String[size];
+            apps = new String[size];
             for (int i = 0; i < mPowerSaveWhitelistUserApps.size(); i++) {
                 apps[i] = mPowerSaveWhitelistUserApps.keyAt(i);
             }
-            return apps;
         }
+        return ArrayUtils.filter(apps, String[]::new,
+                (pkg) -> !mPackageManagerInternal.filterAppAccess(pkg, callingUid, callingUserId));
     }
 
-    public String[] getFullPowerWhitelistExceptIdleInternal() {
+    private String[] getFullPowerWhitelistExceptIdleInternal(final int callingUid,
+            final int callingUserId) {
+        final String[] apps;
         synchronized (this) {
-            int size = mPowerSaveWhitelistAppsExceptIdle.size() + mPowerSaveWhitelistUserApps.size();
-            String[] apps = new String[size];
+            int size =
+                    mPowerSaveWhitelistAppsExceptIdle.size() + mPowerSaveWhitelistUserApps.size();
+            apps = new String[size];
             int cur = 0;
             for (int i = 0; i < mPowerSaveWhitelistAppsExceptIdle.size(); i++) {
                 apps[cur] = mPowerSaveWhitelistAppsExceptIdle.keyAt(i);
@@ -2419,14 +2738,16 @@ public class DeviceIdleController extends SystemService
                 apps[cur] = mPowerSaveWhitelistUserApps.keyAt(i);
                 cur++;
             }
-            return apps;
         }
+        return ArrayUtils.filter(apps, String[]::new,
+                (pkg) -> !mPackageManagerInternal.filterAppAccess(pkg, callingUid, callingUserId));
     }
 
-    public String[] getFullPowerWhitelistInternal() {
+    private String[] getFullPowerWhitelistInternal(final int callingUid, final int callingUserId) {
+        final String[] apps;
         synchronized (this) {
             int size = mPowerSaveWhitelistApps.size() + mPowerSaveWhitelistUserApps.size();
-            String[] apps = new String[size];
+            apps = new String[size];
             int cur = 0;
             for (int i = 0; i < mPowerSaveWhitelistApps.size(); i++) {
                 apps[cur] = mPowerSaveWhitelistApps.keyAt(i);
@@ -2436,8 +2757,9 @@ public class DeviceIdleController extends SystemService
                 apps[cur] = mPowerSaveWhitelistUserApps.keyAt(i);
                 cur++;
             }
-            return apps;
         }
+        return ArrayUtils.filter(apps, String[]::new,
+                (pkg) -> !mPackageManagerInternal.filterAppAccess(pkg, callingUid, callingUserId));
     }
 
     public boolean isPowerSaveWhitelistExceptIdleAppInternal(String packageName) {
@@ -2478,9 +2800,22 @@ public class DeviceIdleController extends SystemService
         }
     }
 
-    void addPowerSaveTempWhitelistAppChecked(String packageName, long duration,
-            int userId, String reason) throws RemoteException {
-        getContext().enforceCallingPermission(
+    private @TempAllowListType int getTempAllowListType(@ReasonCode int reasonCode,
+            @TempAllowListType int defaultType) {
+        switch (reasonCode) {
+            case PowerExemptionManager.REASON_PUSH_MESSAGING_OVER_QUOTA:
+                return mLocalActivityManager.getPushMessagingOverQuotaBehavior();
+            case PowerExemptionManager.REASON_DENIED:
+                return TEMPORARY_ALLOW_LIST_TYPE_NONE;
+            default:
+                return defaultType;
+        }
+    }
+
+    void addPowerSaveTempAllowlistAppChecked(String packageName, long duration,
+            int userId, @ReasonCode int reasonCode, @Nullable String reason)
+            throws RemoteException {
+        getContext().enforceCallingOrSelfPermission(
                 Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST,
                 "No permission to change device idle whitelist");
         final int callingUid = Binder.getCallingUid();
@@ -2493,16 +2828,20 @@ public class DeviceIdleController extends SystemService
                 "addPowerSaveTempWhitelistApp", null);
         final long token = Binder.clearCallingIdentity();
         try {
-            addPowerSaveTempWhitelistAppInternal(callingUid,
-                    packageName, duration, userId, true, reason);
+            @TempAllowListType int type = getTempAllowListType(reasonCode,
+                    TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED);
+            if (type != TEMPORARY_ALLOW_LIST_TYPE_NONE) {
+                addPowerSaveTempAllowlistAppInternal(callingUid,
+                        packageName, duration, type, userId, true, reasonCode, reason);
+            }
         } finally {
             Binder.restoreCallingIdentity(token);
         }
     }
 
-    void removePowerSaveTempWhitelistAppChecked(String packageName, int userId)
+    void removePowerSaveTempAllowlistAppChecked(String packageName, int userId)
             throws RemoteException {
-        getContext().enforceCallingPermission(
+        getContext().enforceCallingOrSelfPermission(
                 Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST,
                 "No permission to change device idle whitelist");
         final int callingUid = Binder.getCallingUid();
@@ -2515,7 +2854,7 @@ public class DeviceIdleController extends SystemService
                 "removePowerSaveTempWhitelistApp", null);
         final long token = Binder.clearCallingIdentity();
         try {
-            removePowerSaveTempWhitelistAppInternal(packageName, userId);
+            removePowerSaveTempAllowlistAppInternal(packageName, userId);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -2525,11 +2864,13 @@ public class DeviceIdleController extends SystemService
      * Adds an app to the temporary whitelist and resets the endTime for granting the
      * app an exemption to access network and acquire wakelocks.
      */
-    void addPowerSaveTempWhitelistAppInternal(int callingUid, String packageName,
-            long duration, int userId, boolean sync, String reason) {
+    void addPowerSaveTempAllowlistAppInternal(int callingUid, String packageName,
+            long durationMs, @TempAllowListType int tempAllowListType, int userId, boolean sync,
+            @ReasonCode int reasonCode, @Nullable String reason) {
         try {
             int uid = getContext().getPackageManager().getPackageUidAsUser(packageName, userId);
-            addPowerSaveTempWhitelistAppDirectInternal(callingUid, uid, duration, sync, reason);
+            addPowerSaveTempWhitelistAppDirectInternal(callingUid, uid, durationMs,
+                    tempAllowListType, sync, reasonCode, reason);
         } catch (NameNotFoundException e) {
         }
     }
@@ -2539,19 +2880,13 @@ public class DeviceIdleController extends SystemService
      * app an exemption to access network and acquire wakelocks.
      */
     void addPowerSaveTempWhitelistAppDirectInternal(int callingUid, int uid,
-            long duration, boolean sync, String reason) {
+            long duration, @TempAllowListType int tempAllowListType, boolean sync,
+            @ReasonCode int reasonCode, @Nullable String reason) {
         final long timeNow = SystemClock.elapsedRealtime();
         boolean informWhitelistChanged = false;
         int appId = UserHandle.getAppId(uid);
         synchronized (this) {
-            int callingAppId = UserHandle.getAppId(callingUid);
-            if (callingAppId >= Process.FIRST_APPLICATION_UID) {
-                if (!mPowerSaveWhitelistSystemAppIds.get(callingAppId)) {
-                    throw new SecurityException("Calling app " + UserHandle.formatUid(callingUid)
-                            + " is not on whitelist");
-                }
-            }
-            duration = Math.min(duration, mConstants.MAX_TEMP_APP_WHITELIST_DURATION);
+            duration = Math.min(duration, mConstants.MAX_TEMP_APP_ALLOWLIST_DURATION_MS);
             Pair<MutableLong, String> entry = mTempWhitelistAppIdEndTimes.get(appId);
             final boolean newEntry = entry == null;
             // Set the new end time
@@ -2570,36 +2905,41 @@ public class DeviceIdleController extends SystemService
                             reason, uid);
                 } catch (RemoteException e) {
                 }
-                postTempActiveTimeoutMessage(appId, duration);
-                updateTempWhitelistAppIdsLocked(appId, true);
+                postTempActiveTimeoutMessage(uid, duration);
+                updateTempWhitelistAppIdsLocked(uid, true, duration, tempAllowListType,
+                        reasonCode, reason, callingUid);
                 if (sync) {
                     informWhitelistChanged = true;
                 } else {
-                    mHandler.obtainMessage(MSG_REPORT_TEMP_APP_WHITELIST_CHANGED, appId, 1)
-                            .sendToTarget();
+                    // NPMS needs to update its state synchronously in certain situations so we
+                    // can't have it use the TempAllowlistChangeListener path right now.
+                    // TODO: see if there's a way to simplify/consolidate
+                    mHandler.obtainMessage(MSG_REPORT_TEMP_APP_WHITELIST_ADDED_TO_NPMS, appId,
+                            reasonCode, reason).sendToTarget();
                 }
-                reportTempWhitelistChangedLocked();
+                reportTempWhitelistChangedLocked(uid, true);
             }
         }
         if (informWhitelistChanged) {
-            mNetworkPolicyManagerInternal.onTempPowerSaveWhitelistChange(appId, true);
+            mNetworkPolicyManagerInternal.onTempPowerSaveWhitelistChange(appId, true,
+                    reasonCode, reason);
         }
     }
 
     /**
      * Removes an app from the temporary whitelist and notifies the observers.
      */
-    private void removePowerSaveTempWhitelistAppInternal(String packageName, int userId) {
+    private void removePowerSaveTempAllowlistAppInternal(String packageName, int userId) {
         try {
             final int uid = getContext().getPackageManager().getPackageUidAsUser(
                     packageName, userId);
-            final int appId = UserHandle.getAppId(uid);
-            removePowerSaveTempWhitelistAppDirectInternal(appId);
+            removePowerSaveTempWhitelistAppDirectInternal(uid);
         } catch (NameNotFoundException e) {
         }
     }
 
-    private void removePowerSaveTempWhitelistAppDirectInternal(int appId) {
+    private void removePowerSaveTempWhitelistAppDirectInternal(int uid) {
+        final int appId = UserHandle.getAppId(uid);
         synchronized (this) {
             final int idx = mTempWhitelistAppIdEndTimes.indexOfKey(appId);
             if (idx < 0) {
@@ -2608,51 +2948,55 @@ public class DeviceIdleController extends SystemService
             }
             final String reason = mTempWhitelistAppIdEndTimes.valueAt(idx).second;
             mTempWhitelistAppIdEndTimes.removeAt(idx);
-            onAppRemovedFromTempWhitelistLocked(appId, reason);
+            onAppRemovedFromTempWhitelistLocked(uid, reason);
         }
     }
 
-    private void postTempActiveTimeoutMessage(int appId, long delay) {
+    private void postTempActiveTimeoutMessage(int uid, long delay) {
         if (DEBUG) {
-            Slog.d(TAG, "postTempActiveTimeoutMessage: appId=" + appId + ", delay=" + delay);
+            Slog.d(TAG, "postTempActiveTimeoutMessage: uid=" + uid + ", delay=" + delay);
         }
         mHandler.sendMessageDelayed(
-                mHandler.obtainMessage(MSG_TEMP_APP_WHITELIST_TIMEOUT, appId, 0), delay);
+                mHandler.obtainMessage(MSG_TEMP_APP_WHITELIST_TIMEOUT, uid, 0), delay);
     }
 
-    void checkTempAppWhitelistTimeout(int appId) {
+    void checkTempAppWhitelistTimeout(int uid) {
         final long timeNow = SystemClock.elapsedRealtime();
+        final int appId = UserHandle.getAppId(uid);
         if (DEBUG) {
-            Slog.d(TAG, "checkTempAppWhitelistTimeout: appId=" + appId + ", timeNow=" + timeNow);
+            Slog.d(TAG, "checkTempAppWhitelistTimeout: uid=" + uid + ", timeNow=" + timeNow);
         }
         synchronized (this) {
-            Pair<MutableLong, String> entry = mTempWhitelistAppIdEndTimes.get(appId);
+            Pair<MutableLong, String> entry =
+                    mTempWhitelistAppIdEndTimes.get(appId);
             if (entry == null) {
                 // Nothing to do
                 return;
             }
             if (timeNow >= entry.first.value) {
                 mTempWhitelistAppIdEndTimes.delete(appId);
-                onAppRemovedFromTempWhitelistLocked(appId, entry.second);
+                onAppRemovedFromTempWhitelistLocked(uid, entry.second);
             } else {
                 // Need more time
                 if (DEBUG) {
-                    Slog.d(TAG, "Time to remove AppId " + appId + ": " + entry.first.value);
+                    Slog.d(TAG, "Time to remove uid " + uid + ": " + entry.first.value);
                 }
-                postTempActiveTimeoutMessage(appId, entry.first.value - timeNow);
+                postTempActiveTimeoutMessage(uid, entry.first.value - timeNow);
             }
         }
     }
 
     @GuardedBy("this")
-    private void onAppRemovedFromTempWhitelistLocked(int appId, String reason) {
+    private void onAppRemovedFromTempWhitelistLocked(int uid, @Nullable String reason) {
         if (DEBUG) {
-            Slog.d(TAG, "Removing appId " + appId + " from temp whitelist");
+            Slog.d(TAG, "Removing uid " + uid + " from temp whitelist");
         }
-        updateTempWhitelistAppIdsLocked(appId, false);
-        mHandler.obtainMessage(MSG_REPORT_TEMP_APP_WHITELIST_CHANGED, appId, 0)
-                .sendToTarget();
-        reportTempWhitelistChangedLocked();
+        final int appId = UserHandle.getAppId(uid);
+        updateTempWhitelistAppIdsLocked(uid, false, 0, 0, REASON_UNKNOWN,
+                reason, INVALID_UID);
+        mHandler.obtainMessage(MSG_REPORT_TEMP_APP_WHITELIST_REMOVED_TO_NPMS, appId,
+                /* unused= */ 0).sendToTarget();
+        reportTempWhitelistChangedLocked(uid, false);
         try {
             mBatteryStats.noteEvent(BatteryStats.HistoryItem.EVENT_TEMP_WHITELIST_FINISH,
                     reason, appId);
@@ -2950,7 +3294,8 @@ public class DeviceIdleController extends SystemService
             mLightState = LIGHT_STATE_INACTIVE;
             if (DEBUG) Slog.d(TAG, "Moved from LIGHT_STATE_ACTIVE to LIGHT_STATE_INACTIVE");
             resetLightIdleManagementLocked();
-            scheduleLightAlarmLocked(mConstants.LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT);
+            scheduleLightAlarmLocked(mConstants.LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT,
+                    mConstants.FLEX_TIME_SHORT);
             EventLogTags.writeDeviceIdleLight(mLightState, "no activity");
         }
     }
@@ -2970,6 +3315,7 @@ public class DeviceIdleController extends SystemService
 
     private void resetLightIdleManagementLocked() {
         mNextLightIdleDelay = 0;
+        mNextLightIdleDelayFlex = 0;
         mCurLightIdleBudget = 0;
         cancelLightAlarmLocked();
     }
@@ -3016,13 +3362,15 @@ public class DeviceIdleController extends SystemService
                 mCurLightIdleBudget = mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET;
                 // Reset the upcoming idle delays.
                 mNextLightIdleDelay = mConstants.LIGHT_IDLE_TIMEOUT;
+                mNextLightIdleDelayFlex = mConstants.LIGHT_IDLE_TIMEOUT_INITIAL_FLEX;
                 mMaintenanceStartTime = 0;
                 if (!isOpsInactiveLocked()) {
                     // We have some active ops going on...  give them a chance to finish
                     // before going in to our first idle.
                     mLightState = LIGHT_STATE_PRE_IDLE;
                     EventLogTags.writeDeviceIdleLight(mLightState, reason);
-                    scheduleLightAlarmLocked(mConstants.LIGHT_PRE_IDLE_TIMEOUT);
+                    scheduleLightAlarmLocked(mConstants.LIGHT_PRE_IDLE_TIMEOUT,
+                            mConstants.FLEX_TIME_SHORT);
                     break;
                 }
                 // Nothing active, fall through to immediately idle.
@@ -3041,12 +3389,11 @@ public class DeviceIdleController extends SystemService
                     }
                 }
                 mMaintenanceStartTime = 0;
-                scheduleLightAlarmLocked(mNextLightIdleDelay);
+                scheduleLightAlarmLocked(mNextLightIdleDelay, mNextLightIdleDelayFlex);
                 mNextLightIdleDelay = Math.min(mConstants.LIGHT_MAX_IDLE_TIMEOUT,
-                        (long)(mNextLightIdleDelay * mConstants.LIGHT_IDLE_FACTOR));
-                if (mNextLightIdleDelay < mConstants.LIGHT_IDLE_TIMEOUT) {
-                    mNextLightIdleDelay = mConstants.LIGHT_IDLE_TIMEOUT;
-                }
+                        (long) (mNextLightIdleDelay * mConstants.LIGHT_IDLE_FACTOR));
+                mNextLightIdleDelayFlex = Math.min(mConstants.LIGHT_MAX_IDLE_TIMEOUT_FLEX,
+                        (long) (mNextLightIdleDelayFlex * mConstants.LIGHT_IDLE_FACTOR));
                 if (DEBUG) Slog.d(TAG, "Moved to LIGHT_STATE_IDLE.");
                 mLightState = LIGHT_STATE_IDLE;
                 EventLogTags.writeDeviceIdleLight(mLightState, reason);
@@ -3066,7 +3413,7 @@ public class DeviceIdleController extends SystemService
                     } else if (mCurLightIdleBudget > mConstants.LIGHT_IDLE_MAINTENANCE_MAX_BUDGET) {
                         mCurLightIdleBudget = mConstants.LIGHT_IDLE_MAINTENANCE_MAX_BUDGET;
                     }
-                    scheduleLightAlarmLocked(mCurLightIdleBudget);
+                    scheduleLightAlarmLocked(mCurLightIdleBudget, mConstants.FLEX_TIME_SHORT);
                     if (DEBUG) Slog.d(TAG,
                             "Moved from LIGHT_STATE_IDLE to LIGHT_STATE_IDLE_MAINTENANCE.");
                     mLightState = LIGHT_STATE_IDLE_MAINTENANCE;
@@ -3077,7 +3424,7 @@ public class DeviceIdleController extends SystemService
                     // We'd like to do maintenance, but currently don't have network
                     // connectivity...  let's try to wait until the network comes back.
                     // We'll only wait for another full idle period, however, and then give up.
-                    scheduleLightAlarmLocked(mNextLightIdleDelay);
+                    scheduleLightAlarmLocked(mNextLightIdleDelay, mNextLightIdleDelayFlex / 2);
                     if (DEBUG) Slog.d(TAG, "Moved to LIGHT_WAITING_FOR_NETWORK.");
                     mLightState = LIGHT_STATE_WAITING_FOR_NETWORK;
                     EventLogTags.writeDeviceIdleLight(mLightState, reason);
@@ -3595,40 +3942,75 @@ public class DeviceIdleController extends SystemService
             mAlarmManager.setIdleUntil(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                     mNextAlarmTime, "DeviceIdleController.deep", mDeepAlarmListener, mHandler);
         } else {
-            mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    mNextAlarmTime, "DeviceIdleController.deep", mDeepAlarmListener, mHandler);
+            if (mConstants.USE_WINDOW_ALARMS) {
+                mAlarmManager.setWindow(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                        mNextAlarmTime, mConstants.FLEX_TIME_SHORT,
+                        "DeviceIdleController.deep", mDeepAlarmListener, mHandler);
+            } else {
+                mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                        mNextAlarmTime, "DeviceIdleController.deep", mDeepAlarmListener, mHandler);
+            }
         }
     }
 
-    void scheduleLightAlarmLocked(long delay) {
-        if (DEBUG) Slog.d(TAG, "scheduleLightAlarmLocked(" + delay + ")");
+    void scheduleLightAlarmLocked(long delay, long flex) {
+        if (DEBUG) {
+            Slog.d(TAG, "scheduleLightAlarmLocked(" + delay
+                    + (mConstants.USE_WINDOW_ALARMS ? "/" + flex : "") + ")");
+        }
         mNextLightAlarmTime = SystemClock.elapsedRealtime() + delay;
-        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                mNextLightAlarmTime, "DeviceIdleController.light", mLightAlarmListener, mHandler);
+        if (mConstants.USE_WINDOW_ALARMS) {
+            mAlarmManager.setWindow(AlarmManager.ELAPSED_REALTIME_WAKEUP, mNextLightAlarmTime, flex,
+                    "DeviceIdleController.light", mLightAlarmListener, mHandler);
+        } else {
+            mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, mNextLightAlarmTime,
+                    "DeviceIdleController.light", mLightAlarmListener, mHandler);
+        }
     }
 
     private void scheduleMotionRegistrationAlarmLocked() {
         if (DEBUG) Slog.d(TAG, "scheduleMotionRegistrationAlarmLocked");
         long nextMotionRegistrationAlarmTime =
                 mInjector.getElapsedRealtime() + mConstants.MOTION_INACTIVE_TIMEOUT / 2;
-        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, nextMotionRegistrationAlarmTime,
-                "DeviceIdleController.motion_registration", mMotionRegistrationAlarmListener,
-                mHandler);
+        if (mConstants.USE_WINDOW_ALARMS) {
+            mAlarmManager.setWindow(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    nextMotionRegistrationAlarmTime, mConstants.MOTION_INACTIVE_TIMEOUT_FLEX,
+                    "DeviceIdleController.motion_registration", mMotionRegistrationAlarmListener,
+                    mHandler);
+        } else {
+            mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, nextMotionRegistrationAlarmTime,
+                    "DeviceIdleController.motion_registration", mMotionRegistrationAlarmListener,
+                    mHandler);
+        }
     }
 
     private void scheduleMotionTimeoutAlarmLocked() {
         if (DEBUG) Slog.d(TAG, "scheduleMotionAlarmLocked");
         long nextMotionTimeoutAlarmTime =
                 mInjector.getElapsedRealtime() + mConstants.MOTION_INACTIVE_TIMEOUT;
-        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, nextMotionTimeoutAlarmTime,
-                "DeviceIdleController.motion", mMotionTimeoutAlarmListener, mHandler);
+        if (mConstants.USE_WINDOW_ALARMS) {
+            mAlarmManager.setWindow(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    nextMotionTimeoutAlarmTime,
+                    mConstants.MOTION_INACTIVE_TIMEOUT_FLEX,
+                    "DeviceIdleController.motion", mMotionTimeoutAlarmListener, mHandler);
+        } else {
+            mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, nextMotionTimeoutAlarmTime,
+                    "DeviceIdleController.motion", mMotionTimeoutAlarmListener, mHandler);
+        }
     }
 
     void scheduleSensingTimeoutAlarmLocked(long delay) {
         if (DEBUG) Slog.d(TAG, "scheduleSensingAlarmLocked(" + delay + ")");
         mNextSensingTimeoutAlarmTime = SystemClock.elapsedRealtime() + delay;
-        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, mNextSensingTimeoutAlarmTime,
-            "DeviceIdleController.sensing", mSensingTimeoutAlarmListener, mHandler);
+        if (mConstants.USE_WINDOW_ALARMS) {
+            mAlarmManager.setWindow(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    mNextSensingTimeoutAlarmTime,
+                    mConstants.FLEX_TIME_SHORT,
+                    "DeviceIdleController.sensing", mSensingTimeoutAlarmListener, mHandler);
+        } else {
+            mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, mNextSensingTimeoutAlarmTime,
+                    "DeviceIdleController.sensing", mSensingTimeoutAlarmListener, mHandler);
+        }
     }
 
     private static int[] buildAppIdArray(ArrayMap<String, Integer> systemApps,
@@ -3660,7 +4042,7 @@ public class DeviceIdleController extends SystemService
         mPowerSaveWhitelistUserAppIdArray = buildAppIdArray(null,
                 mPowerSaveWhitelistUserApps, mPowerSaveWhitelistUserAppIds);
         if (mLocalActivityManager != null) {
-            mLocalActivityManager.setDeviceIdleWhitelist(
+            mLocalActivityManager.setDeviceIdleAllowlist(
                     mPowerSaveWhitelistAllAppIdArray, mPowerSaveWhitelistExceptIdleAppIdArray);
         }
         if (mLocalPowerManager != null) {
@@ -3673,7 +4055,21 @@ public class DeviceIdleController extends SystemService
         passWhiteListsToForceAppStandbyTrackerLocked();
     }
 
-    private void updateTempWhitelistAppIdsLocked(int appId, boolean adding) {
+    /**
+     * update temp allowlist.
+     * @param uid uid to add or remove from temp allowlist.
+     * @param adding true to add to temp allowlist, false to remove from temp allowlist.
+     * @param durationMs duration in milliseconds to add to temp allowlist, only valid when
+     *                   param adding is true.
+     * @param type temp allowlist type defined at {@link TempAllowListType}
+     * @prama reasonCode one of {@Link ReasonCode}
+     * @param reason A human-readable reason for logging purposes.
+     * @param callingUid the callingUid that setup this temp-allowlist, only valid when param adding
+     *                   is true.
+     */
+    private void updateTempWhitelistAppIdsLocked(int uid, boolean adding, long durationMs,
+            @TempAllowListType int type, @ReasonCode int reasonCode, @Nullable String reason,
+            int callingUid) {
         final int size = mTempWhitelistAppIdEndTimes.size();
         if (mTempWhitelistAppIdArray.length != size) {
             mTempWhitelistAppIdArray = new int[size];
@@ -3686,8 +4082,8 @@ public class DeviceIdleController extends SystemService
                 Slog.d(TAG, "Setting activity manager temp whitelist to "
                         + Arrays.toString(mTempWhitelistAppIdArray));
             }
-            mLocalActivityManager.updateDeviceIdleTempWhitelist(mTempWhitelistAppIdArray, appId,
-                    adding);
+            mLocalActivityManager.updateDeviceIdleTempAllowlist(mTempWhitelistAppIdArray, uid,
+                    adding, durationMs, type, reasonCode, reason, callingUid);
         }
         if (mLocalPowerManager != null) {
             if (DEBUG) {
@@ -3705,14 +4101,16 @@ public class DeviceIdleController extends SystemService
         getContext().sendBroadcastAsUser(intent, UserHandle.SYSTEM);
     }
 
-    private void reportTempWhitelistChangedLocked() {
+    private void reportTempWhitelistChangedLocked(final int uid, final boolean added) {
+        mHandler.obtainMessage(MSG_REPORT_TEMP_APP_WHITELIST_CHANGED, uid, added ? 1 : 0)
+                .sendToTarget();
         Intent intent = new Intent(PowerManager.ACTION_POWER_SAVE_TEMP_WHITELIST_CHANGED);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         getContext().sendBroadcastAsUser(intent, UserHandle.SYSTEM);
     }
 
     private void passWhiteListsToForceAppStandbyTrackerLocked() {
-        mAppStateTracker.setPowerSaveWhitelistAppIds(
+        mAppStateTracker.setPowerSaveExemptionListAppIds(
                 mPowerSaveWhitelistExceptIdleAppIdArray,
                 mPowerSaveWhitelistUserAppIdArray,
                 mTempWhitelistAppIdArray);
@@ -3927,7 +4325,7 @@ public class DeviceIdleController extends SystemService
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
             synchronized (this) {
-                long token = Binder.clearCallingIdentity();
+                final long token = Binder.clearCallingIdentity();
                 String arg = shell.getNextArg();
                 try {
                     if (arg == null || "deep".equals(arg)) {
@@ -3948,7 +4346,7 @@ public class DeviceIdleController extends SystemService
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
             synchronized (this) {
-                long token = Binder.clearCallingIdentity();
+                final long token = Binder.clearCallingIdentity();
                 String arg = shell.getNextArg();
                 try {
                     if (arg == null || "deep".equals(arg)) {
@@ -3996,7 +4394,7 @@ public class DeviceIdleController extends SystemService
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
             synchronized (this) {
-                long token = Binder.clearCallingIdentity();
+                final long token = Binder.clearCallingIdentity();
                 try {
                     mForceIdle = true;
                     becomeInactiveIfAppropriateLocked();
@@ -4012,7 +4410,7 @@ public class DeviceIdleController extends SystemService
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
             synchronized (this) {
-                long token = Binder.clearCallingIdentity();
+                final long token = Binder.clearCallingIdentity();
                 try {
                     exitForceIdleLocked();
                     pw.print("Light state: ");
@@ -4029,7 +4427,7 @@ public class DeviceIdleController extends SystemService
             synchronized (this) {
                 String arg = shell.getNextArg();
                 if (arg != null) {
-                    long token = Binder.clearCallingIdentity();
+                    final long token = Binder.clearCallingIdentity();
                     try {
                         switch (arg) {
                             case "light": pw.println(lightStateToString(mLightState)); break;
@@ -4052,7 +4450,7 @@ public class DeviceIdleController extends SystemService
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
             synchronized (this) {
-                long token = Binder.clearCallingIdentity();
+                final long token = Binder.clearCallingIdentity();
                 String arg = shell.getNextArg();
                 try {
                     boolean becomeActive = false;
@@ -4089,7 +4487,7 @@ public class DeviceIdleController extends SystemService
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
             synchronized (this) {
-                long token = Binder.clearCallingIdentity();
+                final long token = Binder.clearCallingIdentity();
                 String arg = shell.getNextArg();
                 try {
                     boolean becomeInactive = false;
@@ -4138,7 +4536,7 @@ public class DeviceIdleController extends SystemService
             if (arg != null) {
                 getContext().enforceCallingOrSelfPermission(
                         android.Manifest.permission.DEVICE_POWER, null);
-                long token = Binder.clearCallingIdentity();
+                final long token = Binder.clearCallingIdentity();
                 try {
                     do {
                         if (arg.length() < 1 || (arg.charAt(0) != '-'
@@ -4215,9 +4613,10 @@ public class DeviceIdleController extends SystemService
             if (arg != null) {
                 try {
                     if (removePkg) {
-                        removePowerSaveTempWhitelistAppChecked(arg, shell.userId);
+                        removePowerSaveTempAllowlistAppChecked(arg, shell.userId);
                     } else {
-                        addPowerSaveTempWhitelistAppChecked(arg, duration, shell.userId, "shell");
+                        addPowerSaveTempAllowlistAppChecked(arg, duration, shell.userId,
+                                REASON_SHELL, "shell");
                     }
                 } catch (Exception e) {
                     pw.println("Failed: " + e);
@@ -4314,7 +4713,7 @@ public class DeviceIdleController extends SystemService
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
             synchronized (this) {
-                long token = Binder.clearCallingIdentity();
+                final long token = Binder.clearCallingIdentity();
                 try {
                     motionLocked();
                     pw.print("Light state: ");
@@ -4329,7 +4728,7 @@ public class DeviceIdleController extends SystemService
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
             synchronized (this) {
-                long token = Binder.clearCallingIdentity();
+                final long token = Binder.clearCallingIdentity();
                 int ret  = SET_IDLE_FACTOR_RESULT_UNINIT;
                 try {
                     String arg = shell.getNextArg();
@@ -4364,7 +4763,7 @@ public class DeviceIdleController extends SystemService
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
             synchronized (this) {
-                long token = Binder.clearCallingIdentity();
+                final long token = Binder.clearCallingIdentity();
                 try {
                     resetPreIdleTimeoutMode();
                 } finally {
@@ -4586,7 +4985,13 @@ public class DeviceIdleController extends SystemService
             if (mNextLightIdleDelay != 0) {
                 pw.print("  mNextIdleDelay=");
                 TimeUtils.formatDuration(mNextLightIdleDelay, pw);
-                pw.println();
+                if (mConstants.USE_WINDOW_ALARMS) {
+                    pw.print(" (flex=");
+                    TimeUtils.formatDuration(mNextLightIdleDelayFlex, pw);
+                    pw.println(")");
+                } else {
+                    pw.println();
+                }
             }
             if (mNextLightAlarmTime != 0) {
                 pw.print("  mNextLightAlarmTime=");

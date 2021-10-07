@@ -39,6 +39,9 @@ import java.io.PrintWriter;
  * broadcast to the specified component. The action of the intent will be
  * {@link Intent#ACTION_GLOBAL_BUTTON} and the KeyEvent will be included in the intent with
  * {@link Intent#EXTRA_KEY_EVENT}.
+ *
+ * Use {@link GlobalKeyIntent} to get detail information from received {@link Intent}, includes
+ * {@link KeyEvent} and the information about if the key is dispatched from non-interactive mode.
  */
 final class GlobalKeyManager {
 
@@ -49,13 +52,15 @@ final class GlobalKeyManager {
     private static final String TAG_KEY = "key";
     private static final String ATTR_KEY_CODE = "keyCode";
     private static final String ATTR_COMPONENT = "component";
+    private static final String ATTR_DISPATCH_WHEN_NON_INTERACTIVE = "dispatchWhenNonInteractive";
 
     private static final int GLOBAL_KEY_FILE_VERSION = 1;
 
-    private SparseArray<ComponentName> mKeyMapping;
+    private SparseArray<GlobalKeyAction> mKeyMapping;
+    private boolean mBeganFromNonInteractive = false;
 
     public GlobalKeyManager(Context context) {
-        mKeyMapping = new SparseArray<ComponentName>();
+        mKeyMapping = new SparseArray<>();
         loadGlobalKeys(context);
     }
 
@@ -69,13 +74,15 @@ final class GlobalKeyManager {
      */
     boolean handleGlobalKey(Context context, int keyCode, KeyEvent event) {
         if (mKeyMapping.size() > 0) {
-            ComponentName component = mKeyMapping.get(keyCode);
-            if (component != null) {
-                Intent intent = new Intent(Intent.ACTION_GLOBAL_BUTTON)
-                        .setComponent(component)
-                        .setFlags(Intent.FLAG_RECEIVER_FOREGROUND)
-                        .putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(event));
+            GlobalKeyAction action = mKeyMapping.get(keyCode);
+            if (action != null) {
+                final Intent intent = new GlobalKeyIntent(action.mComponentName, event,
+                        mBeganFromNonInteractive).getIntent();
                 context.sendBroadcastAsUser(intent, UserHandle.CURRENT, null);
+
+                if (event.getAction() == KeyEvent.ACTION_UP) {
+                    mBeganFromNonInteractive = false;
+                }
                 return true;
             }
         }
@@ -85,8 +92,33 @@ final class GlobalKeyManager {
     /**
      * Returns {@code true} if the key will be handled globally.
      */
-    boolean shouldHandleGlobalKey(int keyCode, KeyEvent event) {
+    boolean shouldHandleGlobalKey(int keyCode) {
         return mKeyMapping.get(keyCode) != null;
+    }
+
+    /**
+     * Returns {@code true} if the key will be handled globally.
+     */
+    boolean shouldDispatchFromNonInteractive(int keyCode) {
+        final GlobalKeyAction action = mKeyMapping.get(keyCode);
+        if (action == null) {
+            return false;
+        }
+
+        return action.mDispatchWhenNonInteractive;
+    }
+
+    void setBeganFromNonInteractive() {
+        mBeganFromNonInteractive = true;
+    }
+
+    class GlobalKeyAction {
+        private ComponentName mComponentName;
+        private boolean mDispatchWhenNonInteractive;
+        GlobalKeyAction(String componentName, String dispatchWhenNonInteractive) {
+            mComponentName = ComponentName.unflattenFromString(componentName);
+            mDispatchWhenNonInteractive = Boolean.valueOf(dispatchWhenNonInteractive);
+        }
     }
 
     private void loadGlobalKeys(Context context) {
@@ -105,10 +137,12 @@ final class GlobalKeyManager {
                     if (TAG_KEY.equals(element)) {
                         String keyCodeName = parser.getAttributeValue(null, ATTR_KEY_CODE);
                         String componentName = parser.getAttributeValue(null, ATTR_COMPONENT);
+                        String dispatchWhenNonInteractive =
+                                parser.getAttributeValue(null, ATTR_DISPATCH_WHEN_NON_INTERACTIVE);
                         int keyCode = KeyEvent.keyCodeFromString(keyCodeName);
                         if (keyCode != KeyEvent.KEYCODE_UNKNOWN) {
-                            mKeyMapping.put(keyCode, ComponentName.unflattenFromString(
-                                    componentName));
+                            mKeyMapping.put(keyCode, new GlobalKeyAction(
+                                    componentName, dispatchWhenNonInteractive));
                         }
                     }
                 }
@@ -138,7 +172,9 @@ final class GlobalKeyManager {
             pw.print(prefix);
             pw.print(KeyEvent.keyCodeToString(mKeyMapping.keyAt(i)));
             pw.print("=");
-            pw.println(mKeyMapping.valueAt(i).flattenToString());
+            pw.print(mKeyMapping.valueAt(i).mComponentName.flattenToString());
+            pw.print(",dispatchWhenNonInteractive=");
+            pw.println(mKeyMapping.valueAt(i).mDispatchWhenNonInteractive);
         }
         pw.print(prefix); pw.println("}");
     }

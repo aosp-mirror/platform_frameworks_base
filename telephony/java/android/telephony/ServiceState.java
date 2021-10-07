@@ -760,6 +760,11 @@ public class ServiceState implements Parcelable {
      * In GSM/UMTS, long format can be up to 16 characters long.
      * In CDMA, returns the ERI text, if set. Otherwise, returns the ONS.
      *
+     * Require at least {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}. Otherwise return null if the
+     * caller does not hold neither {@link android.Manifest.permission#ACCESS_FINE_LOCATION} nor
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
+     *
      * @return long name of operator, null if unregistered or unknown
      */
     public String getOperatorAlphaLong() {
@@ -768,6 +773,12 @@ public class ServiceState implements Parcelable {
 
     /**
      * Get current registered voice network operator name in long alphanumeric format.
+     *
+     * Require at least {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}. Otherwise return null if the
+     * caller does not hold neither {@link android.Manifest.permission#ACCESS_FINE_LOCATION} nor
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
+     *
      * @return long name of operator
      * @hide
      */
@@ -782,6 +793,11 @@ public class ServiceState implements Parcelable {
      *
      * In GSM/UMTS, short format can be up to 8 characters long.
      *
+     * Require at least {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}. Otherwise return null if the
+     * caller does not hold neither {@link android.Manifest.permission#ACCESS_FINE_LOCATION} nor
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
+     *
      * @return short name of operator, null if unregistered or unknown
      */
     public String getOperatorAlphaShort() {
@@ -790,6 +806,12 @@ public class ServiceState implements Parcelable {
 
     /**
      * Get current registered voice network operator name in short alphanumeric format.
+     *
+     * Require at least {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}. Otherwise return null if the
+     * caller does not have neither {@link android.Manifest.permission#ACCESS_FINE_LOCATION} nor
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
+     *
      * @return short name of operator, null if unregistered or unknown
      * @hide
      */
@@ -801,6 +823,12 @@ public class ServiceState implements Parcelable {
 
     /**
      * Get current registered data network operator name in short alphanumeric format.
+     *
+     * Require at least {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}. Otherwise return null if the
+     * caller does not have neither {@link android.Manifest.permission#ACCESS_FINE_LOCATION} nor
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
+     *
      * @return short name of operator, null if unregistered or unknown
      * @hide
      */
@@ -813,6 +841,11 @@ public class ServiceState implements Parcelable {
     /**
      * Get current registered operator name in long alphanumeric format if
      * available or short otherwise.
+     *
+     * Require at least {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}. Otherwise return null if the
+     * caller does not hold neither {@link android.Manifest.permission#ACCESS_FINE_LOCATION} nor
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
      *
      * @see #getOperatorAlphaLong
      * @see #getOperatorAlphaShort
@@ -834,6 +867,11 @@ public class ServiceState implements Parcelable {
      * In GSM/UMTS, numeric format is 3 digit country code plus 2 or 3 digit
      * network code.
      *
+     * Require at least {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}. Otherwise return null if the
+     * caller does not hold neither {@link android.Manifest.permission#ACCESS_FINE_LOCATION} nor
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
+     *
      * @return numeric format of operator, null if unregistered or unknown
      */
     /*
@@ -846,6 +884,12 @@ public class ServiceState implements Parcelable {
 
     /**
      * Get current registered voice network operator numeric id.
+     *
+     * Require at least {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}. Otherwise return null if the
+     * caller does not hold neither {@link android.Manifest.permission#ACCESS_FINE_LOCATION} nor
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
+     *
      * @return numeric format of operator, null if unregistered or unknown
      * @hide
      */
@@ -856,6 +900,12 @@ public class ServiceState implements Parcelable {
 
     /**
      * Get current registered data network operator numeric id.
+     *
+     * Require at least {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}. Otherwise return null if the
+     * caller does not hold neither {@link android.Manifest.permission#ACCESS_FINE_LOCATION} nor
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
+     *
      * @return numeric format of operator, null if unregistered or unknown
      * @hide
      */

@@ -139,10 +139,22 @@ public class RestrictedPreferenceHelper {
     }
 
     /**
+     * @return EnforcedAdmin if we have been passed the restriction in the xml.
+     */
+    public EnforcedAdmin checkRestrictionEnforced() {
+        if (mAttrUserRestriction == null) {
+            return null;
+        }
+        return RestrictedLockUtilsInternal.checkIfRestrictionEnforced(mContext,
+                mAttrUserRestriction, UserHandle.myUserId());
+    }
+
+    /**
      * Disable this preference based on the enforce admin.
      *
-     * @param EnforcedAdmin Details of the admin who enforced the restriction. If it
-     * is {@code null}, then this preference will be enabled. Otherwise, it will be disabled.
+     * @param admin details of the admin who enforced the restriction. If it is
+     * {@code null}, then this preference will be enabled. Otherwise, it will be disabled.
+     * Only gray out the preference which is not {@link RestrictedTopLevelPreference}.
      * @return true if the disabled state was changed.
      */
     public boolean setDisabledByAdmin(EnforcedAdmin admin) {
@@ -153,7 +165,11 @@ public class RestrictedPreferenceHelper {
             mDisabledByAdmin = disabled;
             changed = true;
         }
-        mPreference.setEnabled(!disabled);
+
+        if (!(mPreference instanceof RestrictedTopLevelPreference)) {
+            mPreference.setEnabled(!disabled);
+        }
+
         return changed;
     }
 

@@ -76,8 +76,8 @@ banner '...WAITING FOR APP INTERACTION...'
 # so we continue to show the "waiting for app interaction" message as long as the app still requires
 # interaction to draw more frames.
 adb_test_file_nonzero() {
-    # grab first byte of `du` output
-    X="$(adb shell "du \"$1\" 2> /dev/null | dd bs=1 count=1 2> /dev/null")"
+    # grab first byte of `wc -c` output
+    X="$(adb shell "wc -c \"$1\" 2> /dev/null | dd bs=1 count=1 2> /dev/null")"
     test "$X" && test "$X" -ne 0
 }
 timeout=$(( $(date +%s) + $phase1_timeout_seconds))

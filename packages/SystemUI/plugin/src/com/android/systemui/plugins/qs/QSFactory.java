@@ -14,6 +14,8 @@
 
 package com.android.systemui.plugins.qs;
 
+import android.content.Context;
+
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.annotations.DependsOn;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
@@ -28,9 +30,18 @@ import com.android.systemui.plugins.annotations.ProvidesInterface;
 public interface QSFactory extends Plugin {
 
     String ACTION = "com.android.systemui.action.PLUGIN_QS_FACTORY";
-    int VERSION = 1;
+    int VERSION = 2;
 
     QSTile createTile(String tileSpec);
-    QSTileView createTileView(QSTile tile, boolean collapsedView);
+
+    /**
+     * Create a view for a tile.
+     *
+     * @param context a themed context for inflating the view
+     * @param tile the tile for which the view is created
+     * @param collapsedView {@code true} if the view will live in QQS and {@code false} otherwise.
+     * @return a view for the tile
+     */
+    QSTileView createTileView(Context context, QSTile tile, boolean collapsedView);
 
 }

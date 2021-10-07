@@ -67,6 +67,7 @@ cc_defaults {
         "service.incremental.proto",
         "libvold_binder",
         "libc++fs",
+        "libziparchive_for_incfs",
     ],
     shared_libs: [
         "libandroidfw",
@@ -78,7 +79,6 @@ cc_defaults {
         "libpermission",
         "libutils",
         "libz",
-        "libziparchive",
     ],
 }
 
@@ -134,5 +134,8 @@ cc_test {
     ],
     static_libs: [
         "libgmock",
-    ]
+    ],
+    test_options: {
+        unit_test: true,
+    },
 }

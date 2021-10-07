@@ -22,5 +22,5 @@ import android.location.GnssAntennaInfo;
  * {@hide}
  */
 oneway interface IGnssAntennaInfoListener {
-    void onGnssAntennaInfoReceived(in List<GnssAntennaInfo> gnssAntennaInfo);
+    void onGnssAntennaInfoChanged(in List<GnssAntennaInfo> antennaInfos);
 }

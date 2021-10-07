@@ -19,6 +19,7 @@ package android.util.apk;
 import android.util.ArrayMap;
 import android.util.Pair;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -26,12 +27,23 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.DigestException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -39,7 +51,7 @@ import java.util.Map;
  *
  * @hide for internal use only.
  */
-final class ApkSigningBlockUtils {
+public final class ApkSigningBlockUtils {
 
     private ApkSigningBlockUtils() {
     }
@@ -51,9 +63,8 @@ final class ApkSigningBlockUtils {
      * @param blockId the ID value in the APK Signing Block's sequence of ID-value pairs
      *                identifying the appropriate block to find, e.g. the APK Signature Scheme v2
      *                block ID.
-     *
      * @throws SignatureNotFoundException if the APK is not signed using this scheme.
-     * @throws IOException if an I/O error occurs while reading the APK file.
+     * @throws IOException                if an I/O error occurs while reading the APK file.
      */
     static SignatureInfo findSignature(RandomAccessFile apk, int blockId)
             throws IOException, SignatureNotFoundException {
@@ -146,31 +157,6 @@ final class ApkSigningBlockUtils {
             Map<Integer, byte[]> expectedDigests,
             FileDescriptor apkFileDescriptor,
             SignatureInfo signatureInfo) throws SecurityException {
-        // We need to verify the integrity of the following three sections of the file:
-        // 1. Everything up to the start of the APK Signing Block.
-        // 2. ZIP Central Directory.
-        // 3. ZIP End of Central Directory (EoCD).
-        // Each of these sections is represented as a separate DataSource instance below.
-
-        // To handle large APKs, these sections are read in 1 MB chunks using memory-mapped I/O to
-        // avoid wasting physical memory. In most APK verification scenarios, the contents of the
-        // APK are already there in the OS's page cache and thus mmap does not use additional
-        // physical memory.
-        DataSource beforeApkSigningBlock =
-                new MemoryMappedFileDataSource(apkFileDescriptor, 0,
-                        signatureInfo.apkSigningBlockOffset);
-        DataSource centralDir =
-                new MemoryMappedFileDataSource(
-                        apkFileDescriptor, signatureInfo.centralDirOffset,
-                        signatureInfo.eocdOffset - signatureInfo.centralDirOffset);
-
-        // For the purposes of integrity verification, ZIP End of Central Directory's field Start of
-        // Central Directory must be considered to point to the offset of the APK Signing Block.
-        ByteBuffer eocdBuf = signatureInfo.eocd.duplicate();
-        eocdBuf.order(ByteOrder.LITTLE_ENDIAN);
-        ZipUtils.setZipEocdCentralDirectoryOffset(eocdBuf, signatureInfo.apkSigningBlockOffset);
-        DataSource eocd = new ByteBufferDataSource(eocdBuf);
-
         int[] digestAlgorithms = new int[expectedDigests.size()];
         int digestAlgorithmCount = 0;
         for (int digestAlgorithm : expectedDigests.keySet()) {
@@ -179,10 +165,8 @@ final class ApkSigningBlockUtils {
         }
         byte[][] actualDigests;
         try {
-            actualDigests =
-                    computeContentDigestsPer1MbChunk(
-                            digestAlgorithms,
-                            new DataSource[] {beforeApkSigningBlock, centralDir, eocd});
+            actualDigests = computeContentDigestsPer1MbChunk(digestAlgorithms, apkFileDescriptor,
+                    signatureInfo);
         } catch (DigestException e) {
             throw new SecurityException("Failed to compute digest(s) of contents", e);
         }
@@ -196,6 +180,41 @@ final class ApkSigningBlockUtils {
                                 + " digest of contents did not verify");
             }
         }
+    }
+
+    /**
+     * Calculate digests using digestAlgorithms for apkFileDescriptor.
+     * This will skip signature block described by signatureInfo.
+     */
+    public static byte[][] computeContentDigestsPer1MbChunk(int[] digestAlgorithms,
+            FileDescriptor apkFileDescriptor, SignatureInfo signatureInfo) throws DigestException {
+        // We need to verify the integrity of the following three sections of the file:
+        // 1. Everything up to the start of the APK Signing Block.
+        // 2. ZIP Central Directory.
+        // 3. ZIP End of Central Directory (EoCD).
+        // Each of these sections is represented as a separate DataSource instance below.
+
+        // To handle large APKs, these sections are read in 1 MB chunks using memory-mapped I/O to
+        // avoid wasting physical memory. In most APK verification scenarios, the contents of the
+        // APK are already there in the OS's page cache and thus mmap does not use additional
+        // physical memory.
+
+        DataSource beforeApkSigningBlock =
+                DataSource.create(apkFileDescriptor, 0, signatureInfo.apkSigningBlockOffset);
+        DataSource centralDir =
+                DataSource.create(
+                        apkFileDescriptor, signatureInfo.centralDirOffset,
+                        signatureInfo.eocdOffset - signatureInfo.centralDirOffset);
+
+        // For the purposes of integrity verification, ZIP End of Central Directory's field Start of
+        // Central Directory must be considered to point to the offset of the APK Signing Block.
+        ByteBuffer eocdBuf = signatureInfo.eocd.duplicate();
+        eocdBuf.order(ByteOrder.LITTLE_ENDIAN);
+        ZipUtils.setZipEocdCentralDirectoryOffset(eocdBuf, signatureInfo.apkSigningBlockOffset);
+        DataSource eocd = new ByteBufferDataSource(eocdBuf);
+
+        return computeContentDigestsPer1MbChunk(digestAlgorithms,
+                new DataSource[]{beforeApkSigningBlock, centralDir, eocd});
     }
 
     private static byte[][] computeContentDigestsPer1MbChunk(
@@ -368,7 +387,7 @@ final class ApkSigningBlockUtils {
     /**
      * Returns the ZIP End of Central Directory (EoCD) and its offset in the file.
      *
-     * @throws IOException if an I/O error occurs while reading the file.
+     * @throws IOException                if an I/O error occurs while reading the file.
      * @throws SignatureNotFoundException if the EoCD could not be found.
      */
     static Pair<ByteBuffer, Long> getEocd(RandomAccessFile apk)
@@ -389,13 +408,13 @@ final class ApkSigningBlockUtils {
         if (centralDirOffset > eocdOffset) {
             throw new SignatureNotFoundException(
                     "ZIP Central Directory offset out of range: " + centralDirOffset
-                    + ". ZIP End of Central Directory offset: " + eocdOffset);
+                            + ". ZIP End of Central Directory offset: " + eocdOffset);
         }
         long centralDirSize = ZipUtils.getZipEocdCentralDirectorySizeBytes(eocd);
         if (centralDirOffset + centralDirSize != eocdOffset) {
             throw new SignatureNotFoundException(
                     "ZIP Central Directory is not immediately followed by End of Central"
-                    + " Directory");
+                            + " Directory");
         }
         return centralDirOffset;
     }
@@ -417,14 +436,10 @@ final class ApkSigningBlockUtils {
     static final int SIGNATURE_VERITY_ECDSA_WITH_SHA256 = 0x0423;
     static final int SIGNATURE_VERITY_DSA_WITH_SHA256 = 0x0425;
 
-    static final int CONTENT_DIGEST_CHUNKED_SHA256 = 1;
-    static final int CONTENT_DIGEST_CHUNKED_SHA512 = 2;
-    static final int CONTENT_DIGEST_VERITY_CHUNKED_SHA256 = 3;
-    static final int CONTENT_DIGEST_SHA256 = 4;
-
-    private static final int[] V4_CONTENT_DIGEST_ALGORITHMS =
-            {CONTENT_DIGEST_CHUNKED_SHA512, CONTENT_DIGEST_VERITY_CHUNKED_SHA256,
-                    CONTENT_DIGEST_CHUNKED_SHA256};
+    public static final int CONTENT_DIGEST_CHUNKED_SHA256 = 1;
+    public static final int CONTENT_DIGEST_CHUNKED_SHA512 = 2;
+    public static final int CONTENT_DIGEST_VERITY_CHUNKED_SHA256 = 3;
+    public static final int CONTENT_DIGEST_SHA256 = 4;
 
     static int compareSignatureAlgorithm(int sigAlgorithm1, int sigAlgorithm2) {
         int digestAlgorithm1 = getSignatureAlgorithmContentDigestAlgorithm(sigAlgorithm1);
@@ -577,21 +592,6 @@ final class ApkSigningBlockUtils {
     }
 
     /**
-     * Returns the best digest from the map of available digests.
-     * similarly to compareContentDigestAlgorithm.
-     *
-     * Keep in sync with pickBestDigestForV4 in apksigner's ApkSigningBlockUtils.
-     */
-    static byte[] pickBestDigestForV4(Map<Integer, byte[]> contentDigests) {
-        for (int algo : V4_CONTENT_DIGEST_ALGORITHMS) {
-            if (contentDigests.containsKey(algo)) {
-                return contentDigests.get(algo);
-            }
-        }
-        return null;
-    }
-
-    /**
      * Returns new byte buffer whose content is a shared subsequence of this buffer's content
      * between the specified start (inclusive) and end (exclusive) positions. As opposed to
      * {@link ByteBuffer#slice()}, the returned buffer's byte order is the same as the source
@@ -697,7 +697,7 @@ final class ApkSigningBlockUtils {
 
     static Pair<ByteBuffer, Long> findApkSigningBlock(
             RandomAccessFile apk, long centralDirOffset)
-                    throws IOException, SignatureNotFoundException {
+            throws IOException, SignatureNotFoundException {
         // FORMAT:
         // OFFSET       DATA TYPE  DESCRIPTION
         // * @+0  bytes uint64:    size in bytes (excluding this field)
@@ -816,4 +816,108 @@ final class ApkSigningBlockUtils {
         }
     }
 
+    static VerifiedProofOfRotation verifyProofOfRotationStruct(
+            ByteBuffer porBuf,
+            CertificateFactory certFactory)
+            throws SecurityException, IOException {
+        int levelCount = 0;
+        int lastSigAlgorithm = -1;
+        X509Certificate lastCert = null;
+        List<X509Certificate> certs = new ArrayList<>();
+        List<Integer> flagsList = new ArrayList<>();
+
+        // Proof-of-rotation struct:
+        // A uint32 version code followed by basically a singly linked list of nodes, called levels
+        // here, each of which have the following structure:
+        // * length-prefix for the entire level
+        //     - length-prefixed signed data (if previous level exists)
+        //         * length-prefixed X509 Certificate
+        //         * uint32 signature algorithm ID describing how this signed data was signed
+        //     - uint32 flags describing how to treat the cert contained in this level
+        //     - uint32 signature algorithm ID to use to verify the signature of the next level. The
+        //         algorithm here must match the one in the signed data section of the next level.
+        //     - length-prefixed signature over the signed data in this level.  The signature here
+        //         is verified using the certificate from the previous level.
+        // The linking is provided by the certificate of each level signing the one of the next.
+
+        try {
+
+            // get the version code, but don't do anything with it: creator knew about all our flags
+            porBuf.getInt();
+            HashSet<X509Certificate> certHistorySet = new HashSet<>();
+            while (porBuf.hasRemaining()) {
+                levelCount++;
+                ByteBuffer level = getLengthPrefixedSlice(porBuf);
+                ByteBuffer signedData = getLengthPrefixedSlice(level);
+                int flags = level.getInt();
+                int sigAlgorithm = level.getInt();
+                byte[] signature = readLengthPrefixedByteArray(level);
+
+                if (lastCert != null) {
+                    // Use previous level cert to verify current level
+                    Pair<String, ? extends AlgorithmParameterSpec> sigAlgParams =
+                            getSignatureAlgorithmJcaSignatureAlgorithm(lastSigAlgorithm);
+                    PublicKey publicKey = lastCert.getPublicKey();
+                    Signature sig = Signature.getInstance(sigAlgParams.first);
+                    sig.initVerify(publicKey);
+                    if (sigAlgParams.second != null) {
+                        sig.setParameter(sigAlgParams.second);
+                    }
+                    sig.update(signedData);
+                    if (!sig.verify(signature)) {
+                        throw new SecurityException("Unable to verify signature of certificate #"
+                                + levelCount + " using " + sigAlgParams.first + " when verifying"
+                                + " Proof-of-rotation record");
+                    }
+                }
+
+                signedData.rewind();
+                byte[] encodedCert = readLengthPrefixedByteArray(signedData);
+                int signedSigAlgorithm = signedData.getInt();
+                if (lastCert != null && lastSigAlgorithm != signedSigAlgorithm) {
+                    throw new SecurityException("Signing algorithm ID mismatch for certificate #"
+                            + levelCount + " when verifying Proof-of-rotation record");
+                }
+                lastCert = (X509Certificate)
+                        certFactory.generateCertificate(new ByteArrayInputStream(encodedCert));
+                lastCert = new VerbatimX509Certificate(lastCert, encodedCert);
+
+                lastSigAlgorithm = sigAlgorithm;
+                if (certHistorySet.contains(lastCert)) {
+                    throw new SecurityException("Encountered duplicate entries in "
+                            + "Proof-of-rotation record at certificate #" + levelCount + ".  All "
+                            + "signing certificates should be unique");
+                }
+                certHistorySet.add(lastCert);
+                certs.add(lastCert);
+                flagsList.add(flags);
+            }
+        } catch (IOException | BufferUnderflowException e) {
+            throw new IOException("Failed to parse Proof-of-rotation record", e);
+        } catch (NoSuchAlgorithmException | InvalidKeyException
+                | InvalidAlgorithmParameterException | SignatureException e) {
+            throw new SecurityException(
+                    "Failed to verify signature over signed data for certificate #"
+                            + levelCount + " when verifying Proof-of-rotation record", e);
+        } catch (CertificateException e) {
+            throw new SecurityException("Failed to decode certificate #" + levelCount
+                    + " when verifying Proof-of-rotation record", e);
+        }
+        return new VerifiedProofOfRotation(certs, flagsList);
+    }
+
+    /**
+     * Verified processed proof of rotation.
+     *
+     * @hide for internal use only.
+     */
+    public static class VerifiedProofOfRotation {
+        public final List<X509Certificate> certs;
+        public final List<Integer> flagsList;
+
+        public VerifiedProofOfRotation(List<X509Certificate> certs, List<Integer> flagsList) {
+            this.certs = certs;
+            this.flagsList = flagsList;
+        }
+    }
 }

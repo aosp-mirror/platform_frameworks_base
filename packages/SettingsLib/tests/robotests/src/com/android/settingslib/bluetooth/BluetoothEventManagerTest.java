@@ -35,6 +35,8 @@ import android.content.IntentFilter;
 import android.os.UserHandle;
 import android.telephony.TelephonyManager;
 
+import com.android.settingslib.R;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,6 +50,8 @@ import java.util.List;
 
 @RunWith(RobolectricTestRunner.class)
 public class BluetoothEventManagerTest {
+
+    private static final String DEVICE_NAME = "test_device_name";
 
     @Mock
     private LocalBluetoothAdapter mLocalAdapter;
@@ -71,6 +75,8 @@ public class BluetoothEventManagerTest {
     private BluetoothDevice mDevice2;
     @Mock
     private LocalBluetoothProfileManager mLocalProfileManager;
+    @Mock
+    private BluetoothUtils.ErrorListener mErrorListener;
 
     private Context mContext;
     private Intent mIntent;
@@ -92,6 +98,7 @@ public class BluetoothEventManagerTest {
 
         mCachedDevice1 = new CachedBluetoothDevice(mContext, mLocalProfileManager, mDevice1);
         mCachedDevice2 = new CachedBluetoothDevice(mContext, mLocalProfileManager, mDevice2);
+        BluetoothUtils.setErrorListener(mErrorListener);
     }
 
     @Test
@@ -343,5 +350,66 @@ public class BluetoothEventManagerTest {
         assertThat(mCachedDevice2.isActiveDevice(BluetoothProfile.A2DP)).isFalse();
         assertThat(mCachedDevice2.isActiveDevice(BluetoothProfile.HEADSET)).isFalse();
         assertThat(mCachedDevice2.isActiveDevice(BluetoothProfile.HEARING_AID)).isFalse();
+    }
+
+    @Test
+    public void showUnbondMessage_reasonAuthTimeout_showCorrectedErrorCode() {
+        mIntent = new Intent(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
+        mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
+        mIntent.putExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.BOND_NONE);
+        mIntent.putExtra(BluetoothDevice.EXTRA_REASON, BluetoothDevice.UNBOND_REASON_AUTH_TIMEOUT);
+        when(mCachedDeviceManager.findDevice(mBluetoothDevice)).thenReturn(mCachedDevice1);
+        when(mCachedDevice1.getName()).thenReturn(DEVICE_NAME);
+
+        mContext.sendBroadcast(mIntent);
+
+        verify(mErrorListener).onShowError(any(Context.class), eq(DEVICE_NAME),
+                eq(R.string.bluetooth_pairing_error_message));
+    }
+
+    @Test
+    public void showUnbondMessage_reasonRemoteDeviceDown_showCorrectedErrorCode() {
+        mIntent = new Intent(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
+        mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
+        mIntent.putExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.BOND_NONE);
+        mIntent.putExtra(BluetoothDevice.EXTRA_REASON,
+                BluetoothDevice.UNBOND_REASON_REMOTE_DEVICE_DOWN);
+        when(mCachedDeviceManager.findDevice(mBluetoothDevice)).thenReturn(mCachedDevice1);
+        when(mCachedDevice1.getName()).thenReturn(DEVICE_NAME);
+
+        mContext.sendBroadcast(mIntent);
+
+        verify(mErrorListener).onShowError(any(Context.class), eq(DEVICE_NAME),
+                eq(R.string.bluetooth_pairing_device_down_error_message));
+    }
+
+    @Test
+    public void showUnbondMessage_reasonAuthRejected_showCorrectedErrorCode() {
+        mIntent = new Intent(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
+        mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
+        mIntent.putExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.BOND_NONE);
+        mIntent.putExtra(BluetoothDevice.EXTRA_REASON, BluetoothDevice.UNBOND_REASON_AUTH_REJECTED);
+        when(mCachedDeviceManager.findDevice(mBluetoothDevice)).thenReturn(mCachedDevice1);
+        when(mCachedDevice1.getName()).thenReturn(DEVICE_NAME);
+
+        mContext.sendBroadcast(mIntent);
+
+        verify(mErrorListener).onShowError(any(Context.class), eq(DEVICE_NAME),
+                eq(R.string.bluetooth_pairing_rejected_error_message));
+    }
+
+    @Test
+    public void showUnbondMessage_reasonAuthFailed_showCorrectedErrorCode() {
+        mIntent = new Intent(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
+        mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
+        mIntent.putExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.BOND_NONE);
+        mIntent.putExtra(BluetoothDevice.EXTRA_REASON, BluetoothDevice.UNBOND_REASON_AUTH_FAILED);
+        when(mCachedDeviceManager.findDevice(mBluetoothDevice)).thenReturn(mCachedDevice1);
+        when(mCachedDevice1.getName()).thenReturn(DEVICE_NAME);
+
+        mContext.sendBroadcast(mIntent);
+
+        verify(mErrorListener).onShowError(any(Context.class), eq(DEVICE_NAME),
+                eq(R.string.bluetooth_pairing_pin_error_message));
     }
 }

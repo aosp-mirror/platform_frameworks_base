@@ -22,11 +22,12 @@
 #include "Lighting.h"
 #include "SwapBehavior.h"
 #include "hwui/Bitmap.h"
+#include "ColorMode.h"
 
 #include <SkRect.h>
 #include <utils/RefBase.h>
 
-class GrContext;
+class GrDirectContext;
 
 struct ANativeWindow;
 
@@ -41,16 +42,6 @@ class TaskManager;
 namespace renderthread {
 
 enum class MakeCurrentResult { AlreadyCurrent, Failed, Succeeded };
-
-enum class ColorMode {
-    // SRGB means HWUI will produce buffer in SRGB color space.
-    SRGB,
-    // WideColorGamut means HWUI would support rendering scRGB non-linear into
-    // a signed buffer with enough range to support the wide color gamut of the
-    // display.
-    WideColorGamut,
-    // Hdr
-};
 
 class Frame;
 

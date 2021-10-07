@@ -16,16 +16,13 @@
 package android.accounts;
 
 import android.app.Activity;
-import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.Parcelable;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -74,15 +71,8 @@ public class ChooseAccountActivity extends Activity {
             return;
         }
 
-        try {
-            IBinder activityToken = getActivityToken();
-            mCallingUid = ActivityTaskManager.getService().getLaunchedFromUid(activityToken);
-            mCallingPackage = ActivityTaskManager.getService().getLaunchedFromPackage(
-                    activityToken);
-        } catch (RemoteException re) {
-            // Couldn't figure out caller details
-            Log.w(getClass().getSimpleName(), "Unable to get caller identity \n" + re);
-        }
+        mCallingUid = getLaunchedFromUid();
+        mCallingPackage = getLaunchedFromPackage();
 
         if (UserHandle.isSameApp(mCallingUid, Process.SYSTEM_UID) &&
             getIntent().getStringExtra(AccountManager.KEY_ANDROID_PACKAGE_NAME) != null) {

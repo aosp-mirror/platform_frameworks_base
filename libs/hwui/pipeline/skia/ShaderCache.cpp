@@ -15,7 +15,8 @@
  */
 
 #include "ShaderCache.h"
-#include <GrContext.h>
+#include <GrDirectContext.h>
+#include <gui/TraceUtils.h>
 #include <log/log.h>
 #include <openssl/sha.h>
 #include <algorithm>
@@ -23,7 +24,6 @@
 #include <thread>
 #include "FileBlobCache.h"
 #include "Properties.h"
-#include "utils/TraceUtils.h"
 
 namespace android {
 namespace uirenderer {
@@ -31,7 +31,7 @@ namespace skiapipeline {
 
 // Cache size limits.
 static const size_t maxKeySize = 1024;
-static const size_t maxValueSize = 512 * 1024;
+static const size_t maxValueSize = 2 * 1024 * 1024;
 static const size_t maxTotalSize = 1024 * 1024;
 
 ShaderCache::ShaderCache() {
@@ -206,7 +206,7 @@ void ShaderCache::store(const SkData& key, const SkData& data) {
     }
 }
 
-void ShaderCache::onVkFrameFlushed(GrContext* context) {
+void ShaderCache::onVkFrameFlushed(GrDirectContext* context) {
     {
         std::lock_guard<std::mutex> lock(mMutex);
 

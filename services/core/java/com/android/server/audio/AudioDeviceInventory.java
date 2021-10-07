@@ -16,7 +16,6 @@
 package com.android.server.audio;
 
 import android.annotation.NonNull;
-import android.app.ActivityManager;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -38,7 +37,6 @@ import android.media.MediaMetrics;
 import android.os.Binder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -704,6 +702,11 @@ public class AudioDeviceInventory {
 
     /*package*/ int removePreferredDevicesForStrategySync(int strategy) {
         final long identity = Binder.clearCallingIdentity();
+
+        AudioService.sDeviceLogger.log((new AudioEventLogger.StringEvent(
+                "removePreferredDevicesForStrategySync, strategy: "
+                + strategy)).printLog(TAG));
+
         final int status = mAudioSystem.removeDevicesRoleForStrategy(
                 strategy, AudioSystem.DEVICE_ROLE_PREFERRED);
         Binder.restoreCallingIdentity(identity);
@@ -1074,7 +1077,7 @@ public class AudioDeviceInventory {
         }
 
         // device to remove was visible by APM, update APM
-        mDeviceBroker.setAvrcpAbsoluteVolumeSupported(false);
+        mDeviceBroker.clearAvrcpAbsoluteVolumeSupported();
         final int res = mAudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                 AudioSystem.DEVICE_STATE_UNAVAILABLE, address, "", a2dpCodec);
 
@@ -1347,6 +1350,7 @@ public class AudioDeviceInventory {
                 break;
             case AudioSystem.DEVICE_OUT_HDMI:
             case AudioSystem.DEVICE_OUT_HDMI_ARC:
+            case AudioSystem.DEVICE_OUT_HDMI_EARC:
                 configureHdmiPlugIntent(intent, state);
                 break;
         }
@@ -1363,7 +1367,7 @@ public class AudioDeviceInventory {
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            ActivityManager.broadcastStickyIntent(intent, UserHandle.USER_CURRENT);
+            mDeviceBroker.broadcastStickyIntentToCurrentProfileGroup(intent);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -1382,6 +1386,7 @@ public class AudioDeviceInventory {
                 break;
             case AudioSystem.DEVICE_OUT_HDMI:
             case AudioSystem.DEVICE_OUT_HDMI_ARC:
+            case AudioSystem.DEVICE_OUT_HDMI_EARC:
                 connType = AudioRoutesInfo.MAIN_HDMI;
                 break;
             case AudioSystem.DEVICE_OUT_USB_DEVICE:
@@ -1426,7 +1431,8 @@ public class AudioDeviceInventory {
             }
             final AudioDevicePort devicePort = (AudioDevicePort) port;
             if (devicePort.type() != AudioManager.DEVICE_OUT_HDMI
-                    && devicePort.type() != AudioManager.DEVICE_OUT_HDMI_ARC) {
+                    && devicePort.type() != AudioManager.DEVICE_OUT_HDMI_ARC
+                    && devicePort.type() != AudioManager.DEVICE_OUT_HDMI_EARC) {
                 continue;
             }
             // found an HDMI port: format the list of supported encodings

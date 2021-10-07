@@ -16,13 +16,11 @@
 
 package com.android.server.media;
 
-import static com.android.server.media.SessionPolicyProvider.SESSION_POLICY_IGNORE_BUTTON_SESSION;
+import static com.android.server.media.MediaSessionPolicyProvider.SESSION_POLICY_IGNORE_BUTTON_SESSION;
 
 import android.media.Session2Token;
 import android.media.session.MediaSession;
-import android.os.Debug;
 import android.os.UserHandle;
-import android.util.IntArray;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -188,9 +186,10 @@ class MediaSessionStack {
      */
     public void updateMediaButtonSessionIfNeeded() {
         if (DEBUG) {
-            Log.d(TAG, "updateMediaButtonSessionIfNeeded, callers=" + Debug.getCallers(2));
+            Log.d(TAG, "updateMediaButtonSessionIfNeeded, callers=" + getCallers(2));
         }
-        IntArray audioPlaybackUids = mAudioPlayerStateMonitor.getSortedAudioPlaybackClientUids();
+        List<Integer> audioPlaybackUids =
+                mAudioPlayerStateMonitor.getSortedAudioPlaybackClientUids();
         for (int i = 0; i < audioPlaybackUids.size(); i++) {
             int audioPlaybackUid = audioPlaybackUids.get(i);
             MediaSessionRecordImpl mediaButtonSession = findMediaButtonSession(audioPlaybackUid);
@@ -326,7 +325,8 @@ class MediaSessionStack {
         int size = records.size();
         for (int i = 0; i < size; i++) {
             MediaSessionRecord record = records.get(i);
-            if (record.checkPlaybackActiveState(true)) {
+            // Do not send the volume key events to remote sessions.
+            if (record.checkPlaybackActiveState(true) && record.isPlaybackTypeLocal()) {
                 mCachedVolumeDefault = record;
                 return record;
             }
@@ -412,5 +412,25 @@ class MediaSessionStack {
         // mCachedActiveLists may also include the list of sessions for UserHandle.USER_ALL,
         // so they also need to be cleared.
         mCachedActiveLists.remove(UserHandle.USER_ALL);
+    }
+
+    // Code copied from android.os.Debug#getCallers(int)
+    private static String getCallers(final int depth) {
+        final StackTraceElement[] callStack = Thread.currentThread().getStackTrace();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < depth; i++) {
+            sb.append(getCaller(callStack, i)).append(" ");
+        }
+        return sb.toString();
+    }
+
+    // Code copied from android.os.Debug#getCaller(StackTraceElement[], int)
+    private static String getCaller(StackTraceElement[] callStack, int depth) {
+        // callStack[4] is the caller of the method that called getCallers()
+        if (4 + depth >= callStack.length) {
+            return "<bottom of call stack>";
+        }
+        StackTraceElement caller = callStack[4 + depth];
+        return caller.getClassName() + "." + caller.getMethodName() + ":" + caller.getLineNumber();
     }
 }
