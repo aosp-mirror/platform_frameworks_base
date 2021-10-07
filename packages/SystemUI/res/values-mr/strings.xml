@@ -247,7 +247,7 @@
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"सूचना डिसमिस केल्या."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"सूचना शेड."</string>
-    <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"द्रुत सेटिंग्ज."</string>
+    <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"क्विक सेटिंग्ज."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"लॉक स्क्रीन."</string>
     <string name="accessibility_desc_settings" msgid="6728577365389151969">"सेटिंग्ज"</string>
     <string name="accessibility_desc_recent_apps" msgid="1748675199348914194">"अवलोकन."</string>
@@ -658,7 +658,7 @@
     <string name="system_ui_tuner" msgid="1471348823289954729">"सिस्टम UI ट्युनर"</string>
     <string name="show_battery_percentage" msgid="6235377891802910455">"एम्बेडेड बॅटरी टक्केवारी दर्शवा"</string>
     <string name="show_battery_percentage_summary" msgid="9053024758304102915">"चार्ज होत नसताना स्टेटस बार चिन्हामध्‍ये बॅटरी पातळी टक्केवारी दर्शवा"</string>
-    <string name="quick_settings" msgid="6211774484997470203">"द्रुत सेटिंग्ज"</string>
+    <string name="quick_settings" msgid="6211774484997470203">"क्विक सेटिंग्ज"</string>
     <string name="status_bar" msgid="4357390266055077437">"स्टेटस बार"</string>
     <string name="overview" msgid="3522318590458536816">"अवलोकन"</string>
     <string name="demo_mode" msgid="263484519766901593">"सिस्टम UI डेमो मोड"</string>
@@ -687,7 +687,7 @@
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"हॉटस्पॉट"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"कार्य प्रोफाईल"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"सर्वांसाठी नाही तर काहींसाठी मजेदार असू शकते"</string>
-    <string name="tuner_warning" msgid="1861736288458481650">"सिस्टम UI ट्युनर आपल्‍याला Android वापरकर्ता इंटरफेस ट्विक आणि कस्टमाइझ करण्‍याचे अनेक प्रकार देते. ही प्रयोगात्मक वैशिष्‍ट्ये बदलू शकतात, खंडित होऊ शकतात किंवा भविष्‍यातील रिलीज मध्‍ये कदाचित दिसणार नाहीत. सावधगिरी बाळगून पुढे सुरू ठेवा."</string>
+    <string name="tuner_warning" msgid="1861736288458481650">"सिस्टम UI ट्युनर आपल्‍याला Android यूझर इंटरफेस ट्विक आणि कस्टमाइझ करण्‍याचे अनेक प्रकार देते. ही प्रयोगात्मक वैशिष्‍ट्ये बदलू शकतात, खंडित होऊ शकतात किंवा भविष्‍यातील रिलीज मध्‍ये कदाचित दिसणार नाहीत. सावधगिरी बाळगून पुढे सुरू ठेवा."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"ही प्रयोगात्मक वैशिष्‍ट्ये बदलू शकतात, खंडित होऊ शकतात किंवा भविष्‍यातील रिलीज मध्‍ये कदाचित दिसणार नाहीत."</string>
     <string name="got_it" msgid="477119182261892069">"समजले"</string>
     <string name="tuner_toast" msgid="3812684836514766951">"अभिनंदन! सिस्टम UI ट्युनर सेटिंग्जमध्‍ये जोडले गेले आहे"</string>

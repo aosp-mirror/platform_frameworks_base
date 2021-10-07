@@ -123,8 +123,8 @@
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"No se han podido obtener los permisos"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"No se ha podido empezar a grabar la pantalla"</string>
     <string name="usb_preference_title" msgid="1439924437558480718">"Opciones de transferencia de archivos por USB"</string>
-    <string name="use_mtp_button_title" msgid="5036082897886518086">"Activar como reproductor de medios (MTP)"</string>
-    <string name="use_ptp_button_title" msgid="7676427598943446826">"Activar como cámara (PTP)"</string>
+    <string name="use_mtp_button_title" msgid="5036082897886518086">"Montar como reproductor de medios (MTP)"</string>
+    <string name="use_ptp_button_title" msgid="7676427598943446826">"Montar como cámara (PTP)"</string>
     <string name="installer_cd_button_title" msgid="5499998592841984743">"Instalar Android File Transfer para Mac"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Atrás"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Inicio"</string>
@@ -682,7 +682,7 @@
     <string name="zen_alarm_warning_indef" msgid="5252866591716504287">"No oirás la próxima alarma (<xliff:g id="WHEN">%1$s</xliff:g>) a menos que desactives esta opción antes"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"No oirás la próxima alarma (<xliff:g id="WHEN">%1$s</xliff:g>)"</string>
     <string name="alarm_template" msgid="2234991538018805736">"a las <xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="alarm_template_far" msgid="3561752195856839456">"el <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"Ajustes rápidos, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Compartir Internet"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Perfil de trabajo"</string>

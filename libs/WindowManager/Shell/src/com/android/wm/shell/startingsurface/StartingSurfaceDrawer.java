@@ -545,6 +545,15 @@ public class StartingSurfaceDrawer {
         removeWindowSynced(taskId, null, null, false);
     }
 
+    void onImeDrawnOnTask(int taskId) {
+        final StartingWindowRecord record = mStartingWindowRecords.get(taskId);
+        if (record != null && record.mTaskSnapshotWindow != null
+                && record.mTaskSnapshotWindow.hasImeSurface()) {
+            record.mTaskSnapshotWindow.removeImmediately();
+        }
+        mStartingWindowRecords.remove(taskId);
+    }
+
     protected void removeWindowSynced(int taskId, SurfaceControl leash, Rect frame,
             boolean playRevealAnimation) {
         final StartingWindowRecord record = mStartingWindowRecords.get(taskId);
@@ -572,14 +581,15 @@ public class StartingSurfaceDrawer {
                     Slog.e(TAG, "Found empty splash screen, remove!");
                     removeWindowInner(record.mDecorView, false);
                 }
+                mStartingWindowRecords.remove(taskId);
             }
             if (record.mTaskSnapshotWindow != null) {
                 if (DEBUG_TASK_SNAPSHOT) {
                     Slog.v(TAG, "Removing task snapshot window for " + taskId);
                 }
-                record.mTaskSnapshotWindow.remove();
+                record.mTaskSnapshotWindow.scheduleRemove(
+                        () -> mStartingWindowRecords.remove(taskId));
             }
-            mStartingWindowRecords.remove(taskId);
         }
     }
 
