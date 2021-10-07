@@ -90,6 +90,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private int mLayoutDirection;
     private QSFooter mFooter;
     private float mLastQSExpansion = -1;
+    private float mLastPanelFraction;
     private boolean mQsDisabled;
     private ImageView mQsDragHandler;
 
@@ -121,7 +122,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
      * When true, QS will translate from outside the screen. It will be clipped with parallax
      * otherwise.
      */
-    private boolean mTranslateWhileExpanding;
+    private boolean mInSplitShade;
     private boolean mPulseExpanding;
 
     /**
@@ -135,6 +136,12 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private boolean mAnimateNextQsUpdate;
 
     private DumpManager mDumpManager;
+
+    /**
+     * Progress of pull down from the center of the lock screen.
+     * @see com.android.systemui.statusbar.LockscreenShadeTransitionController
+     */
+    private float mFullShadeProgress;
 
     @Inject
     public QSFragment(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
@@ -227,7 +234,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
                     boolean sizeChanged = (oldTop - oldBottom) != (top - bottom);
                     if (sizeChanged) {
-                        setQsExpansion(mLastQSExpansion, mLastHeaderTranslation);
+                        setQsExpansion(mLastQSExpansion, mLastPanelFraction,
+                                mLastHeaderTranslation);
                     }
                 });
         mQSPanelController.setUsingHorizontalLayoutChangeListener(
@@ -409,7 +417,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                 mQSAnimator.setShowCollapsedOnKeyguard(showCollapsed);
             }
             if (!showCollapsed && isKeyguardState()) {
-                setQsExpansion(mLastQSExpansion, 0);
+                setQsExpansion(mLastQSExpansion, mLastPanelFraction, 0);
             }
         }
     }
@@ -477,33 +485,30 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     }
 
     @Override
-    public void setTranslateWhileExpanding(boolean shouldTranslate) {
-        mTranslateWhileExpanding = shouldTranslate;
-        mQSAnimator.setTranslateWhileExpanding(shouldTranslate);
+    public void setInSplitShade(boolean inSplitShade) {
+        mInSplitShade = inSplitShade;
+        mQSAnimator.setTranslateWhileExpanding(inSplitShade);
     }
 
     @Override
-    public void setTransitionToFullShadeAmount(float pxAmount, boolean animated) {
+    public void setTransitionToFullShadeAmount(float pxAmount, float progress) {
         boolean isTransitioningToFullShade = pxAmount > 0;
         if (isTransitioningToFullShade != mTransitioningToFullShade) {
             mTransitioningToFullShade = isTransitioningToFullShade;
             updateShowCollapsedOnKeyguard();
-            setQsExpansion(mLastQSExpansion, mLastHeaderTranslation);
         }
+        mFullShadeProgress = progress;
+        setQsExpansion(mLastQSExpansion, mLastPanelFraction, mLastHeaderTranslation);
     }
 
     @Override
-    public void setQsExpansion(float expansion, float proposedTranslation) {
-        if (DEBUG) Log.d(TAG, "setQSExpansion " + expansion + " " + proposedTranslation);
+    public void setQsExpansion(float expansion, float panelExpansionFraction,
+            float proposedTranslation) {
         float headerTranslation = mTransitioningToFullShade ? 0 : proposedTranslation;
-        if (mQSAnimator != null) {
-            final boolean showQSOnLockscreen = expansion > 0;
-            final boolean showQSUnlocked = headerTranslation == 0 || !mTranslateWhileExpanding;
-            mQSAnimator.startAlphaAnimation(showQSOnLockscreen || showQSUnlocked
-                    || mTransitioningToFullShade);
-        }
+        float progress = mTransitioningToFullShade ? mFullShadeProgress : panelExpansionFraction;
+        setAlphaAnimationProgress(mInSplitShade ? progress : 1);
         mContainer.setExpansion(expansion);
-        final float translationScaleY = (mTranslateWhileExpanding
+        final float translationScaleY = (mInSplitShade
                 ? 1 : QSAnimator.SHORT_PARALLAX_AMOUNT) * (expansion - 1);
         boolean onKeyguardAndExpanded = isKeyguardState() && !mShowCollapsedOnKeyguard;
         if (!mHeaderAnimating && !headerWillBeAnimating()) {
@@ -520,6 +525,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             return;
         }
         mLastHeaderTranslation = headerTranslation;
+        mLastPanelFraction = panelExpansionFraction;
         mLastQSExpansion = expansion;
         mLastKeyguardAndExpanded = onKeyguardAndExpanded;
         mLastViewHeight = currentHeight;
@@ -559,6 +565,17 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             mQSAnimator.setPosition(expansion);
         }
         updateMediaPositions();
+    }
+
+    private void setAlphaAnimationProgress(float progress) {
+        final View view = getView();
+        if (progress == 0 && view.getVisibility() != View.INVISIBLE) {
+            view.setVisibility(View.INVISIBLE);
+        } else if (progress > 0 && view.getVisibility() != View.VISIBLE) {
+            view.setVisibility((View.VISIBLE));
+        }
+        float alpha = Interpolators.getNotificationScrimAlpha(progress, true /* uiContent */);
+        view.setAlpha(alpha);
     }
 
     private void updateQsBounds() {
