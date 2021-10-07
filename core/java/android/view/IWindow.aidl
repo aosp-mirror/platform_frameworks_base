@@ -58,12 +58,6 @@ oneway interface IWindow {
             boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId);
 
     /**
-     * Called when the window location in parent display has changed. The offset will only be a
-     * nonzero value if the window is on an embedded display that is re-parented to another window.
-     */
-    void locationInParentDisplayChanged(in Point offset);
-
-    /**
      * Called when the window insets configuration has changed.
      *
      * @param willMove The window frame will be moved soon.

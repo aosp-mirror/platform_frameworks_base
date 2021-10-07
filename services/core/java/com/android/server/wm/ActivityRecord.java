@@ -46,8 +46,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.activityTypeToString;
 import static android.app.WindowConfiguration.isSplitScreenWindowingMode;
-import static android.app.servertransaction.TransferSplashScreenViewStateItem.ATTACH_TO;
-import static android.app.servertransaction.TransferSplashScreenViewStateItem.HANDOVER_TO;
 import static android.content.Intent.ACTION_MAIN;
 import static android.content.Intent.CATEGORY_HOME;
 import static android.content.Intent.CATEGORY_LAUNCHER;
@@ -2326,7 +2324,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // unable to copy from shell, maybe it's not a splash screen. or something went wrong.
         // either way, abort and reset the sequence.
         if (parcelable == null
-                || mTransferringSplashScreenState != TRANSFER_SPLASH_SCREEN_COPYING) {
+                || mTransferringSplashScreenState != TRANSFER_SPLASH_SCREEN_COPYING
+                || mStartingWindow == null) {
             if (parcelable != null) {
                 parcelable.clearIfNeeded();
             }
@@ -2335,13 +2334,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
         // schedule attach splashScreen to client
+        final SurfaceControl windowAnimationLeash = TaskOrganizerController
+                .applyStartingWindowAnimation(mStartingWindow);
         try {
             mTransferringSplashScreenState = TRANSFER_SPLASH_SCREEN_ATTACH_TO_CLIENT;
             mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
-                    TransferSplashScreenViewStateItem.obtain(ATTACH_TO, parcelable));
+                    TransferSplashScreenViewStateItem.obtain(parcelable,
+                            windowAnimationLeash));
             scheduleTransferSplashScreenTimeout();
         } catch (Exception e) {
             Slog.w(TAG, "onCopySplashScreenComplete fail: " + this);
+            mStartingWindow.cancelAnimation();
             parcelable.clearIfNeeded();
             mTransferringSplashScreenState = TRANSFER_SPLASH_SCREEN_FINISH;
         }
@@ -2351,13 +2354,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         removeTransferSplashScreenTimeout();
         // Client has draw the splash screen, so we can remove the starting window.
         if (mStartingWindow != null) {
+            mStartingWindow.cancelAnimation();
             mStartingWindow.hide(false, false);
-        }
-        try {
-            mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
-                    TransferSplashScreenViewStateItem.obtain(HANDOVER_TO, null));
-        } catch (Exception e) {
-            Slog.w(TAG, "onSplashScreenAttachComplete fail: " + this);
         }
         // no matter what, remove the starting window.
         mTransferringSplashScreenState = TRANSFER_SPLASH_SCREEN_FINISH;
@@ -4940,7 +4938,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else {
             // If we are being set visible, and the starting window is not yet displayed,
             // then make sure it doesn't get displayed.
-            if (mStartingWindow != null && !mStartingWindow.isDrawn()) {
+            if (mStartingWindow != null && !mStartingWindow.isDrawn()
+                    && (firstWindowDrawn || allDrawn)) {
                 mStartingWindow.clearPolicyVisibilityFlag(LEGACY_POLICY_VISIBILITY);
                 mStartingWindow.mLegacyPolicyVisibilityAfterAnim = false;
             }

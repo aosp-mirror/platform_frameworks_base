@@ -73,7 +73,6 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.os.vibrator.StepSegment;
@@ -174,9 +173,6 @@ public class InputManagerService extends IInputManager.Stub
 
     /** TODO(b/169067926): Remove this. */
     private static final boolean UNTRUSTED_TOUCHES_TOAST = false;
-
-    public static final boolean ENABLE_PER_WINDOW_INPUT_ROTATION =
-            SystemProperties.getBoolean("persist.debug.per_window_input_rotation", false);
 
     // Pointer to native input manager service object.
     private final long mPtr;

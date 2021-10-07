@@ -138,7 +138,6 @@ import android.widget.AdapterView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 import android.window.SplashScreen;
-import android.window.SplashScreenView;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -955,7 +954,6 @@ public class Activity extends ContextThemeWrapper
     private UiTranslationController mUiTranslationController;
 
     private SplashScreen mSplashScreen;
-    private SplashScreenView mSplashScreenView;
 
     private final WindowControllerCallback mWindowControllerCallback =
             new WindowControllerCallback() {
@@ -1613,16 +1611,6 @@ public class Activity extends ContextThemeWrapper
             }
             return mSplashScreen;
         }
-    }
-
-    /** @hide */
-    public void setSplashScreenView(SplashScreenView v) {
-        mSplashScreenView = v;
-    }
-
-    /** @hide */
-    SplashScreenView getSplashScreenView() {
-        return mSplashScreenView;
     }
 
     /**

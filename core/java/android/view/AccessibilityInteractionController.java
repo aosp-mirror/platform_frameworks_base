@@ -878,21 +878,6 @@ public final class AccessibilityInteractionController {
         return false;
     }
 
-    private void adjustBoundsInScreenIfNeeded(AccessibilityNodeInfo info) {
-        if (info == null || shouldBypassAdjustBoundsInScreen()) {
-            return;
-        }
-        final Rect boundsInScreen = mTempRect;
-        info.getBoundsInScreen(boundsInScreen);
-        boundsInScreen.offset(mViewRootImpl.mAttachInfo.mLocationInParentDisplay.x,
-                mViewRootImpl.mAttachInfo.mLocationInParentDisplay.y);
-        info.setBoundsInScreen(boundsInScreen);
-    }
-
-    private boolean shouldBypassAdjustBoundsInScreen() {
-        return mViewRootImpl.mAttachInfo.mLocationInParentDisplay.equals(0, 0);
-    }
-
     private void applyScreenMatrixIfNeeded(List<AccessibilityNodeInfo> infos) {
         if (infos == null || shouldBypassApplyScreenMatrix()) {
             return;
@@ -1009,7 +994,6 @@ public final class AccessibilityInteractionController {
                                        Region interactiveRegion) {
         associateLeashedParentIfNeeded(info);
         applyScreenMatrixIfNeeded(info);
-        adjustBoundsInScreenIfNeeded(info);
         // To avoid applyAppScaleAndMagnificationSpecIfNeeded changing the bounds of node,
         // then impact the visibility result, we need to adjust visibility before apply scale.
         adjustIsVisibleToUserIfNeeded(info, interactiveRegion);

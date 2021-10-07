@@ -24,6 +24,7 @@ import static com.google.common.truth.Truth.assertThat;
 import android.content.Context;
 import android.os.Looper;
 import android.os.test.TestLooper;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -41,6 +42,7 @@ import java.util.Collections;
 import java.util.List;
 
 @SmallTest
+@Presubmit
 @RunWith(JUnit4.class)
 public class RequestSadActionTest {
 

@@ -110,7 +110,7 @@ public class EditText extends TextView {
             return null;
         }
         if (text instanceof Editable) {
-            return (Editable) super.getText();
+            return (Editable) text;
         }
         super.setText(text, BufferType.EDITABLE);
         return (Editable) super.getText();

@@ -133,6 +133,7 @@ import com.android.server.input.InputManagerService;
 import com.android.server.inputmethod.InputMethodManagerService;
 import com.android.server.integrity.AppIntegrityManagerService;
 import com.android.server.lights.LightsService;
+import com.android.server.locales.LocaleManagerService;
 import com.android.server.location.LocationManagerService;
 import com.android.server.media.MediaRouterService;
 import com.android.server.media.metrics.MediaMetricsManagerService;
@@ -1683,6 +1684,15 @@ public final class SystemServer implements Dumpable {
         t.traceBegin("StartUiModeManager");
         mSystemServiceManager.startService(UiModeManagerService.class);
         t.traceEnd();
+
+        t.traceBegin("StartLocaleManagerService");
+        try {
+            mSystemServiceManager.startService(LocaleManagerService.class);
+        } catch (Throwable e) {
+            reportWtf("starting LocaleManagerService service", e);
+        }
+        t.traceEnd();
+
 
         if (!mOnlyCore) {
             t.traceBegin("UpdatePackagesIfNeeded");

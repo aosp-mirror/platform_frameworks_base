@@ -21,7 +21,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.Point;
 import android.graphics.Region;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -333,9 +332,6 @@ public class SystemWindows {
         public void resized(ClientWindowFrames frames, boolean reportDraw,
                 MergedConfiguration newMergedConfiguration, boolean forceLayout,
                 boolean alwaysConsumeSystemBars, int displayId) {}
-
-        @Override
-        public void locationInParentDisplayChanged(Point offset) {}
 
         @Override
         public void insetsChanged(InsetsState insetsState, boolean willMove, boolean willResize) {}

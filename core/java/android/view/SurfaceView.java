@@ -1889,6 +1889,24 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
      * @param p The SurfacePackage to embed.
      */
     public void setChildSurfacePackage(@NonNull SurfaceControlViewHost.SurfacePackage p) {
+        setChildSurfacePackage(p, false /* applyTransactionOnDraw */);
+    }
+
+    /**
+     * Similar to setChildSurfacePackage, but using the BLAST queue so the transaction can be
+     * synchronized with the ViewRootImpl frame.
+     * @hide
+     */
+    public void setChildSurfacePackageOnDraw(
+            @NonNull SurfaceControlViewHost.SurfacePackage p) {
+        setChildSurfacePackage(p, true /* applyTransactionOnDraw */);
+    }
+
+    /**
+     * @param applyTransactionOnDraw Whether to apply transaction at onDraw or immediately.
+     */
+    private void setChildSurfacePackage(
+            @NonNull SurfaceControlViewHost.SurfacePackage p, boolean applyTransactionOnDraw) {
         final SurfaceControl lastSc = mSurfacePackage != null ?
                 mSurfacePackage.getSurfaceControl() : null;
         if (mSurfaceControl != null) {
@@ -1896,11 +1914,18 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 mTmpTransaction.reparent(lastSc, null);
                 mSurfacePackage.release();
             }
-
             reparentSurfacePackage(mTmpTransaction, p);
-            mTmpTransaction.apply();
+            applyTransaction(applyTransactionOnDraw);
         }
         mSurfacePackage = p;
+    }
+
+    private void applyTransaction(boolean applyTransactionOnDraw) {
+        if (applyTransactionOnDraw) {
+            getViewRootImpl().applyTransactionOnDraw(mTmpTransaction);
+        } else {
+            mTmpTransaction.apply();
+        }
     }
 
     private void reparentSurfacePackage(SurfaceControl.Transaction t,

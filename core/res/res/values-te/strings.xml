@@ -326,10 +326,8 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ఫోన్ కాల్స్‌ చేయడం మరియు నిర్వహించడం"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"శరీర సెన్సార్‌లు"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"మీ అత్యంత కీలకమైన గుర్తుల గురించి సెన్సార్ డేటాని యాక్సెస్ చేస్తుంది"</string>
-    <!-- no translation found for permgrouplab_notifications (5472972361980668884) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_notifications (4608679556801506580) -->
-    <skip />
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"నోటిఫికేషన్‌లు"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"నోటిఫికేషన్‌లను చూపండి"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"విండో కంటెంట్‍ను తిరిగి పొందుతుంది"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"మీరు పరస్పర చర్య చేస్తున్న విండో కంటెంట్‌‍ను పరిశీలిస్తుంది."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"తాకడం ద్వారా విశ్లేషణను ప్రారంభిస్తుంది"</string>
@@ -553,10 +551,8 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"కీలాక్ మరియు ఏదైనా అనుబంధించబడిన పాస్‌వర్డ్ భద్రతను నిలిపివేయడానికి యాప్‌ను అనుమతిస్తుంది. ఉదాహరణకు, ఇన్‌కమింగ్ ఫోన్ కాల్ వస్తున్నప్పుడు ఫోన్ కీలాక్‌ను నిలిపివేస్తుంది, ఆపై కాల్ ముగిసిన తర్వాత కీలాక్‌ను మళ్లీ ప్రారంభిస్తుంది."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"స్క్రీన్ లాక్ సంక్లిష్టత రిక్వెస్ట్‌"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"ఇది మీ స్క్రీన్ లాక్ పాస్‌వర్డ్‌ సంక్లిష్టత స్థాయి (తీవ్రంగా ఉండాలా, ఓ మోస్తరుగా ఉండాలా, తక్కువ తీవ్రంగా ఉండాలా లేదా అస్సలు తీవ్రత ఉండకూడదా) తెలుసుకోవడానికి యాప్‌ను అనుమతిస్తుంది, అంటే పొడుగు ఎంత ఉండాలి, ఏ రకమైన స్క్రీన్ లాక్ పధ్ధతి అనుసరించాలో సూచిస్తుంది. అలాగే, స్క్రీన్ లాక్‌ పాస్‌వర్డ్‌ సంక్లిష్టతను ఏ స్థాయికి సెట్ చేసుకుంటే బాగుంటుందో కూడా వినియోగదారులకు యాప్ సూచించగలదు, కానీ వినియోగదారులు నిరభ్యంతరంగా ఆ సూచనలను పట్టించుకోకుండా వారి ఇష్టం మేరకు చక్కగా సెట్ చేసుకోవచ్చు. ఇంకో ముఖ్య విషయం, స్క్రీన్ లాక్‌ అన్నది సాదా వచన రూపంలో నిల్వ చేయబడదు, కనుక ఖచ్చితమైన పాస్‌వర్డ్‌ ఏమిటనేది యాప్‌కు తెలియదు."</string>
-    <!-- no translation found for permlab_postNotification (4875401198597803658) -->
-    <skip />
-    <!-- no translation found for permdesc_postNotification (5974977162462877075) -->
-    <skip />
+    <string name="permlab_postNotification" msgid="4875401198597803658">"నోటిఫికేషన్‌లను చూపండి"</string>
+    <string name="permdesc_postNotification" msgid="5974977162462877075">"నోటిఫికేషన్‌లను చూపించడానికి యాప్‌ను అనుమతించండి"</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"బయోమెట్రిక్ హార్డ్‌వేర్‌ని ఉపయోగించు"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"ప్రమాణీకరణ కోసం బయోమెట్రిక్ హార్డ్‌వేర్‌ను ఉపయోగించడానికి యాప్‌ని అనుమతిస్తుంది"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"వేలిముద్ర హార్డ్‌వేర్‌ని నిర్వహించడానికి అనుమతి"</string>

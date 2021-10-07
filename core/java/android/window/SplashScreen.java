@@ -241,7 +241,6 @@ public interface SplashScreen {
 
         public void handOverSplashScreenView(@NonNull IBinder token,
                 @NonNull SplashScreenView splashScreenView) {
-            transferSurface(splashScreenView);
             dispatchOnExitAnimation(token, splashScreenView);
         }
 
@@ -264,10 +263,6 @@ public interface SplashScreen {
                 final SplashScreenImpl impl = findImpl(token);
                 return impl != null && impl.mExitAnimationListener != null;
             }
-        }
-
-        private void transferSurface(@NonNull SplashScreenView splashScreenView) {
-            splashScreenView.transferSurface();
         }
     }
 }

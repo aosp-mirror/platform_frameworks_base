@@ -620,11 +620,6 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public void updateDisplayContentLocation(IWindow window, int x, int y, int displayId) {
-        mService.updateDisplayContentLocation(window, x, y, displayId);
-    }
-
-    @Override
     public void updateTapExcludeRegion(IWindow window, Region region) {
         final long identity = Binder.clearCallingIdentity();
         try {
