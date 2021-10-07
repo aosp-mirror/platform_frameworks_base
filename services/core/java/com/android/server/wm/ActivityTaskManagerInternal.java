@@ -680,4 +680,12 @@ public abstract class ActivityTaskManagerInternal {
 
     /** Called when the device is waking up */
     public abstract void notifyWakingUp();
+
+    /**
+     * Registers a callback which can intercept activity starts.
+     * @throws IllegalArgumentException if duplicate ids are provided
+     */
+    public abstract void registerActivityStartInterceptor(
+            @ActivityInterceptorCallback.OrderedId int id,
+            ActivityInterceptorCallback callback);
 }
