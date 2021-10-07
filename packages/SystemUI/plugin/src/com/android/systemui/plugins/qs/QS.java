@@ -52,7 +52,16 @@ public interface QS extends FragmentBase {
     boolean isShowingDetail();
     void closeDetail();
     void animateHeaderSlidingOut();
-    void setQsExpansion(float qsExpansionFraction, float headerTranslation);
+
+    /**
+     * Asks QS to update its presentation, according to {@code NotificationPanelViewController}.
+     *
+     * @param qsExpansionFraction How much each UI element in QS should be expanded (QQS to QS.)
+     * @param panelExpansionFraction Whats the expansion of the whole shade.
+     * @param headerTranslation How much we should vertically translate QS.
+     */
+    void setQsExpansion(float qsExpansionFraction, float panelExpansionFraction,
+            float headerTranslation);
     void setHeaderListening(boolean listening);
     void notifyCustomizeChanged();
     void setContainerController(QSContainerController controller);
@@ -75,13 +84,13 @@ public interface QS extends FragmentBase {
     /**
      * If QS should translate as we pull it down, or if it should be static.
      */
-    void setTranslateWhileExpanding(boolean shouldTranslate);
+    void setInSplitShade(boolean shouldTranslate);
 
     /**
      * Set the amount of pixels we have currently dragged down if we're transitioning to the full
      * shade. 0.0f means we're not transitioning yet.
      */
-    default void setTransitionToFullShadeAmount(float pxAmount, boolean animated) {}
+    default void setTransitionToFullShadeAmount(float pxAmount, float progress) {}
 
     /**
      * A rounded corner clipping that makes QS feel as if it were behind everything.
