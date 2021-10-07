@@ -15,6 +15,8 @@
  */
 package android.net.sntp;
 
+import android.text.TextUtils;
+
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.time.Instant;
@@ -113,7 +115,7 @@ public final class Timestamp64 {
 
     @Override
     public String toString() {
-        return String.format("%08x.%08x", mEraSeconds, mFractionBits);
+        return TextUtils.formatSimple("%08x.%08x", mEraSeconds, mFractionBits);
     }
 
     /** Returns the instant represented by this value in the specified NTP era. */
