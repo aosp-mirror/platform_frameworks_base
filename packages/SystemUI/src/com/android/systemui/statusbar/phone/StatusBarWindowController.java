@@ -208,6 +208,12 @@ public class StatusBarWindowController {
         apply(mCurrentState);
     }
 
+    /** Sets whether there is currently an ongoing call. */
+    public void setIsCallOngoing(boolean isCallOngoing) {
+        mCurrentState.mIsCallOngoing = isCallOngoing;
+        apply(mCurrentState);
+    }
+
     /**
      * Return the container in which we should run launch animations started from the status bar and
      * expanding into the opening window.
@@ -248,10 +254,13 @@ public class StatusBarWindowController {
     private static class State {
         boolean mForceStatusBarVisible;
         boolean mIsLaunchAnimationRunning;
+        boolean mIsCallOngoing;
     }
 
     private void applyForceStatusBarVisibleFlag(State state) {
-        if (state.mForceStatusBarVisible || state.mIsLaunchAnimationRunning) {
+        if (state.mForceStatusBarVisible
+                || state.mIsLaunchAnimationRunning
+                || state.mIsCallOngoing) {
             mLpChanged.privateFlags |= PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
         } else {
             mLpChanged.privateFlags &= ~PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;

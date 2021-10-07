@@ -43,6 +43,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
+import com.android.systemui.plugins.qs.QSContainerController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSFragmentComponent;
@@ -50,7 +51,6 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.util.InjectionInflationController;
@@ -336,11 +336,9 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     }
 
     @Override
-    public void setContainer(ViewGroup container) {
-        if (container instanceof NotificationsQuickSettingsContainer) {
-            mQSCustomizerController.setContainer((NotificationsQuickSettingsContainer) container);
-            mQSDetail.setContainer((NotificationsQuickSettingsContainer) container);
-        }
+    public void setContainerController(QSContainerController controller) {
+        mQSCustomizerController.setContainerController(controller);
+        mQSDetail.setContainerController(controller);
     }
 
     @Override

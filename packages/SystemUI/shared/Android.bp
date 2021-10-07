@@ -43,6 +43,7 @@ android_library {
         "src/**/*.kt",
         "src/**/*.aidl",
         ":wm_shell-aidls",
+        ":wm_shell_util-sources",
     ],
 
     static_libs: [
@@ -50,5 +51,5 @@ android_library {
         "androidx.dynamicanimation_dynamicanimation",
     ],
     java_version: "1.8",
-    min_sdk_version: "26",
+    min_sdk_version: "current",
 }

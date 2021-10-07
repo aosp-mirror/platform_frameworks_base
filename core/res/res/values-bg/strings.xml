@@ -2097,7 +2097,7 @@
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Това известие бе класирано по-високо. Докоснете, за да изпратите отзиви."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Това известие бе класирано по-ниско. Докоснете, за да изпратите отзиви."</string>
     <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Подобрени известия"</string>
-    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Предложените действия и отговори вече се предоставят от функцията за подобрени известия. Адаптивните известия за Android вече не се поддържат."</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Предложените действия и отговори вече се предоставят от функцията за подо­брени известия. Адаптивните известия за Android вече не се поддържат."</string>
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Изключване"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Научете повече"</string>
