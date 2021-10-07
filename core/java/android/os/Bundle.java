@@ -33,6 +33,9 @@ import java.util.List;
 /**
  * A mapping from String keys to various {@link Parcelable} values.
  *
+ * <p><b>Warning:</b> Note that {@link Bundle} is a lazy container and as such it does NOT implement
+ * {@link #equals(Object)} or {@link #hashCode()}.
+ *
  * @see PersistableBundle
  */
 public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
@@ -1230,6 +1233,10 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         maybePrefillHasFds();
     }
 
+    /**
+     * Returns a string representation of the {@link Bundle} that may be suitable for debugging. It
+     * won't print the internal map if its content hasn't been unparcelled.
+     */
     @Override
     public synchronized String toString() {
         if (mParcelledData != null) {
