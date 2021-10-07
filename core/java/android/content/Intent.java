@@ -2306,6 +2306,47 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_REVIEW_ACCESSIBILITY_SERVICES =
             "android.intent.action.REVIEW_ACCESSIBILITY_SERVICES";
 
+    /**
+     * Activity action: Launch UI to manage the usage of a given permission group.
+     * This action would be handled by apps that want to show controls about the features
+     * which use the permission group.
+     *
+     * <p>
+     * Input: {@link #EXTRA_PERMISSION_GROUP_NAME} specifies the permission group for
+     * which the launched UI would be targeted.
+     * Input: {@link #EXTRA_ATTRIBUTION_TAGS} specifies the attribution tags for the usage entry.
+     * Input: {@link #EXTRA_START_TIME} specifies the start time of the period (epoch time in
+     * millis). If both start time and end time are present, start time must be <= end time.
+     * Input: {@link #EXTRA_END_TIME} specifies the end time of the period (epoch time in
+     * millis). If the end time is empty, that implies that the permission usage is still in use.
+     * If both start time and end time are present, start time must be <= end time.
+     * Input: {@link #EXTRA_SHOWING_ATTRIBUTION} specifies whether the subattribution was shown
+     * in the UI.
+     * </p>
+     * <p>
+     * Output: Nothing.
+     * </p>
+     * <p class="note">
+     * You must protect the activity that handles this action with the
+     * {@link android.Manifest.permission#START_VIEW_PERMISSION_USAGE} permission to ensure that
+     * only the system can launch this activity. The system will not launch activities
+     * that are not properly protected.
+     * </p>
+     *
+     * @see #EXTRA_PERMISSION_GROUP_NAME
+     * @see #EXTRA_ATTRIBUTION_TAGS
+     * @see #EXTRA_START_TIME
+     * @see #EXTRA_END_TIME
+     * @see #EXTRA_SHOWING_ATTRIBUTION
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.START_VIEW_PERMISSION_USAGE)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_PERMISSION_USAGE =
+            "android.intent.action.MANAGE_PERMISSION_USAGE";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent broadcast actions (see action variable).
