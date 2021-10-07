@@ -1657,41 +1657,49 @@ public class UserManager {
     public @interface UserSwitchabilityResult {}
 
     /**
-     * A response code from {@link #removeUserOrSetEphemeral(int)} indicating that the specified
-     * user has been successfully removed.
+     * A response code from {@link #removeUserWhenPossible(UserHandle, boolean)} indicating that
+     * the specified user has been successfully removed.
+     *
      * @hide
      */
+    @SystemApi
     public static final int REMOVE_RESULT_REMOVED = 0;
 
     /**
-     * A response code from {@link #removeUserOrSetEphemeral(int)} indicating that the specified
-     * user has had its {@link UserInfo#FLAG_EPHEMERAL} flag set to {@code true}, so that it will be
-     * removed when the user is stopped or on boot.
+     * A response code from {@link #removeUserWhenPossible(UserHandle, boolean)} indicating that
+     * the specified user is marked so that it will be removed when the user is stopped or on boot.
+     *
      * @hide
      */
-    public static final int REMOVE_RESULT_SET_EPHEMERAL = 1;
+    @SystemApi
+    public static final int REMOVE_RESULT_DEFERRED = 1;
 
     /**
-     * A response code from {@link #removeUserOrSetEphemeral(int)} indicating that the specified
-     * user is already in the process of being removed.
+     * A response code from {@link #removeUserWhenPossible(UserHandle, boolean)} indicating that
+     * the specified user is already in the process of being removed.
+     *
      * @hide
      */
+    @SystemApi
     public static final int REMOVE_RESULT_ALREADY_BEING_REMOVED = 2;
 
     /**
-     * A response code from {@link #removeUserOrSetEphemeral(int)} indicating that an error occurred
-     * that prevented the user from being removed or set as ephemeral.
+     * A response code from {@link #removeUserWhenPossible(UserHandle, boolean)} indicating that
+     * an error occurred that prevented the user from being removed or set as ephemeral.
+     *
      * @hide
      */
+    @SystemApi
     public static final int REMOVE_RESULT_ERROR = 3;
 
     /**
-     * Possible response codes from {@link #removeUserOrSetEphemeral(int)}.
+     * Possible response codes from {@link #removeUserWhenPossible(UserHandle, boolean)}.
+     *
      * @hide
      */
     @IntDef(prefix = { "REMOVE_RESULT_" }, value = {
             REMOVE_RESULT_REMOVED,
-            REMOVE_RESULT_SET_EPHEMERAL,
+            REMOVE_RESULT_DEFERRED,
             REMOVE_RESULT_ALREADY_BEING_REMOVED,
             REMOVE_RESULT_ERROR,
     })
@@ -4728,12 +4736,42 @@ public class UserManager {
      * the current user, then set the user as ephemeral so that it will be removed when it is
      * stopped.
      *
-     * @param evenWhenDisallowed when {@code true}, user is removed even if the caller user has the
+     * @param overrideDevicePolicy when {@code true}, user is removed even if the caller has
+     * the {@link #DISALLOW_REMOVE_USER} or {@link #DISALLOW_REMOVE_MANAGED_PROFILE} restriction
+     *
+     * @return the result code {@link #REMOVE_RESULT_REMOVED}, {@link #REMOVE_RESULT_DEFERRED},
+     * {@link #REMOVE_RESULT_ALREADY_BEING_REMOVED}, or {@link #REMOVE_RESULT_ERROR}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS})
+    public int removeUserWhenPossible(@NonNull UserHandle user,
+            boolean overrideDevicePolicy) {
+        try {
+            return mService.removeUserOrSetEphemeral(user.getIdentifier(), overrideDevicePolicy);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Immediately removes the user or, if the user cannot be removed, such as when the user is
+     * the current user, then set the user as ephemeral so that it will be removed when it is
+     * stopped.
+     *
+     * @param evenWhenDisallowed when {@code true}, user is removed even if the caller has the
      * {@link #DISALLOW_REMOVE_USER} or {@link #DISALLOW_REMOVE_MANAGED_PROFILE} restriction
      *
      * @return the {@link RemoveResult} code
+     *
+     * @deprecated  TODO(b/199446770): remove this call after converting all calls to
+     * removeUserWhenPossible(UserHandle, boolean)
+     *
      * @hide
      */
+    @Deprecated
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
     public @RemoveResult int removeUserOrSetEphemeral(@UserIdInt int userId,

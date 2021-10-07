@@ -4478,7 +4478,7 @@ public class UserManagerService extends IUserManager.Stub {
                 userData.info.flags |= UserInfo.FLAG_EPHEMERAL;
                 writeUserLP(userData);
 
-                return UserManager.REMOVE_RESULT_SET_EPHEMERAL;
+                return UserManager.REMOVE_RESULT_DEFERRED;
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
