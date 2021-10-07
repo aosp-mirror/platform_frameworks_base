@@ -280,11 +280,6 @@ public abstract class ActivityTaskManagerInternal {
     public abstract boolean isRecentsComponentHomeActivity(int userId);
 
     /**
-     * Cancels any currently running recents animation.
-     */
-    public abstract void cancelRecentsAnimation(boolean restoreHomeRootTaskPosition);
-
-    /**
      * Returns true if the app can close system dialogs. Otherwise it either throws a {@link
      * SecurityException} or returns false with a logcat message depending on whether the app
      * targets SDK level {@link android.os.Build.VERSION_CODES#S} or not.

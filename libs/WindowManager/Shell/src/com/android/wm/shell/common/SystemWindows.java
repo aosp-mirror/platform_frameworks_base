@@ -134,6 +134,18 @@ public class SystemWindows {
     }
 
     /**
+     * Sets the accessibility window for the given {@param shellRootLayer}.
+     */
+    public void setShellRootAccessibilityWindow(int displayId,
+            @WindowManager.ShellRootLayer int shellRootLayer, View view) {
+        PerDisplay pd = mPerDisplay.get(displayId);
+        if (pd == null) {
+            return;
+        }
+        pd.setShellRootAccessibilityWindow(shellRootLayer, view);
+    }
+
+    /**
      * Sets the touchable region of a view's window. This will be cropped to the window size.
      * @param view
      * @param region
@@ -202,15 +214,9 @@ public class SystemWindows {
             attrs.flags |= FLAG_HARDWARE_ACCELERATED;
             viewRoot.setView(view, attrs);
             mViewRoots.put(view, viewRoot);
-
-            try {
-                mWmService.setShellRootAccessibilityWindow(mDisplayId, shellRootLayer,
-                        viewRoot.getWindowToken());
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Error setting accessibility window for " + mDisplayId + ":"
-                        + shellRootLayer, e);
-            }
+            setShellRootAccessibilityWindow(shellRootLayer, view);
         }
+
         SysUiWindowManager addRoot(@WindowManager.ShellRootLayer int shellRootLayer) {
             SysUiWindowManager wwm = mWwms.get(shellRootLayer);
             if (wwm != null) {
@@ -238,6 +244,21 @@ public class SystemWindows {
                 return null;
             }
             return wwm.mContainerWindow;
+        }
+
+        void setShellRootAccessibilityWindow(@WindowManager.ShellRootLayer int shellRootLayer,
+                View view) {
+            SysUiWindowManager wwm = mWwms.get(shellRootLayer);
+            if (wwm == null) {
+                return;
+            }
+            try {
+                mWmService.setShellRootAccessibilityWindow(mDisplayId, shellRootLayer,
+                        view != null ? mViewRoots.get(view).getWindowToken() : null);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Error setting accessibility window for " + mDisplayId + ":"
+                        + shellRootLayer, e);
+            }
         }
 
         void updateConfiguration(Configuration configuration) {

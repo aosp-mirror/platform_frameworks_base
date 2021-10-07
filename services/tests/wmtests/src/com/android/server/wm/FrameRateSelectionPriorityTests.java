@@ -228,7 +228,7 @@ public class FrameRateSelectionPriorityTests extends WindowTestsBase {
     }
 
     @Test
-    public void testPreferredRefreshRate() {
+    public void testDenyListPreferredRefreshRate() {
         final WindowState appWindow = createWindow("appWindow");
         assertNotNull("Window state is created", appWindow);
         when(appWindow.getDisplayContent().getDisplayPolicy()).thenReturn(mDisplayPolicy);
@@ -280,5 +280,33 @@ public class FrameRateSelectionPriorityTests extends WindowTestsBase {
                 appWindow.getSurfaceControl(), RefreshRatePolicy.LAYER_PRIORITY_UNSET);
         verify(appWindow.getPendingTransaction(), never()).setFrameRate(
                 any(SurfaceControl.class), anyInt(), anyInt(), anyInt());
+    }
+
+    @Test
+    public void testAppPreferredRefreshRate() {
+        final WindowState appWindow = createWindow("appWindow");
+        assertNotNull("Window state is created", appWindow);
+        when(appWindow.getDisplayContent().getDisplayPolicy()).thenReturn(mDisplayPolicy);
+
+        appWindow.mAttrs.packageName = "com.android.test";
+        appWindow.mAttrs.preferredRefreshRate = 60;
+
+        assertEquals(0, mRefreshRatePolicy.getPreferredModeId(appWindow));
+        assertEquals(60, mRefreshRatePolicy.getPreferredRefreshRate(appWindow), FLOAT_TOLERANCE);
+
+        appWindow.updateFrameRateSelectionPriorityIfNeeded();
+        assertEquals(RefreshRatePolicy.LAYER_PRIORITY_UNSET, appWindow.mFrameRateSelectionPriority);
+        assertEquals(60, appWindow.mAppPreferredFrameRate, FLOAT_TOLERANCE);
+
+        // Call the function a few times.
+        appWindow.updateFrameRateSelectionPriorityIfNeeded();
+        appWindow.updateFrameRateSelectionPriorityIfNeeded();
+
+        // Since nothing changed in the priority state, the transaction should not be updating.
+        verify(appWindow.getPendingTransaction(), never()).setFrameRateSelectionPriority(
+                any(SurfaceControl.class), anyInt());
+        verify(appWindow.getPendingTransaction(), times(1)).setFrameRate(
+                appWindow.getSurfaceControl(), 60,
+                Surface.FRAME_RATE_COMPATIBILITY_EXACT, Surface.CHANGE_FRAME_RATE_ALWAYS);
     }
 }

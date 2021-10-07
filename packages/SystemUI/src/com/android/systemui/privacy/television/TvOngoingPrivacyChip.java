@@ -25,9 +25,10 @@ import android.annotation.IntDef;
 import android.annotation.UiThread;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -38,15 +39,21 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
+
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.privacy.PrivacyChipBuilder;
 import com.android.systemui.privacy.PrivacyItem;
 import com.android.systemui.privacy.PrivacyItemController;
+import com.android.systemui.privacy.PrivacyType;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -56,9 +63,10 @@ import javax.inject.Inject;
  * recording audio, accessing the camera or accessing the location.
  */
 @SysUISingleton
-public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemController.Callback {
+public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemController.Callback,
+        PrivacyChipDrawable.PrivacyChipDrawableListener {
     private static final String TAG = "TvOngoingPrivacyChip";
-    static final boolean DEBUG = false;
+    private static final boolean DEBUG = false;
 
     // This title is used in CameraMicIndicatorsPermissionTest and
     // RecognitionServiceMicIndicatorTest.
@@ -68,7 +76,8 @@ public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemControl
     @IntDef(prefix = {"STATE_"}, value = {
             STATE_NOT_SHOWN,
             STATE_APPEARING,
-            STATE_SHOWN,
+            STATE_EXPANDED,
+            STATE_COLLAPSED,
             STATE_DISAPPEARING
     })
     public @interface State {
@@ -76,25 +85,40 @@ public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemControl
 
     private static final int STATE_NOT_SHOWN = 0;
     private static final int STATE_APPEARING = 1;
-    private static final int STATE_SHOWN = 2;
-    private static final int STATE_DISAPPEARING = 3;
+    private static final int STATE_EXPANDED = 2;
+    private static final int STATE_COLLAPSED = 3;
+    private static final int STATE_DISAPPEARING = 4;
 
-    private static final int ANIMATION_DURATION_MS = 200;
+    // Avoid multiple messages after rapid changes such as starting/stopping both camera and mic.
+    private static final int ACCESSIBILITY_ANNOUNCEMENT_DELAY_MS = 500;
+
+    private static final int EXPANDED_DURATION_MS = 4000;
+    public final int mAnimationDurationMs;
 
     private final Context mContext;
     private final PrivacyItemController mPrivacyItemController;
 
-    private View mIndicatorView;
+    private ViewGroup mIndicatorView;
     private boolean mViewAndWindowAdded;
     private ObjectAnimator mAnimator;
 
     private boolean mMicCameraIndicatorFlagEnabled;
-    private boolean mLocationIndicatorEnabled;
-    private List<PrivacyItem> mPrivacyItems;
+    private boolean mAllIndicatorsEnabled;
+
+    @NonNull
+    private List<PrivacyItem> mPrivacyItems = Collections.emptyList();
 
     private LinearLayout mIconsContainer;
     private final int mIconSize;
     private final int mIconMarginStart;
+
+    private PrivacyChipDrawable mChipDrawable;
+
+    private final Handler mUiThreadHandler = new Handler(Looper.getMainLooper());
+    private final Runnable mCollapseRunnable = this::collapseChip;
+
+    private final Runnable mAccessibilityRunnable = this::makeAccessibilityAnnouncement;
+    private final List<PrivacyItem> mItemsBeforeLastAnnouncement = new LinkedList<>();
 
     @State
     private int mState = STATE_NOT_SHOWN;
@@ -102,20 +126,23 @@ public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemControl
     @Inject
     public TvOngoingPrivacyChip(Context context, PrivacyItemController privacyItemController) {
         super(context);
-        Log.d(TAG, "Privacy chip running without id");
+        if (DEBUG) Log.d(TAG, "Privacy chip running");
         mContext = context;
         mPrivacyItemController = privacyItemController;
 
         Resources res = mContext.getResources();
-        mIconMarginStart = Math.round(res.getDimension(R.dimen.privacy_chip_icon_margin));
+        mIconMarginStart = Math.round(
+                res.getDimension(R.dimen.privacy_chip_icon_margin_in_between));
         mIconSize = res.getDimensionPixelSize(R.dimen.privacy_chip_icon_size);
 
+        mAnimationDurationMs = res.getInteger(R.integer.privacy_chip_animation_millis);
+
         mMicCameraIndicatorFlagEnabled = privacyItemController.getMicCameraAvailable();
-        mLocationIndicatorEnabled = privacyItemController.getLocationAvailable();
+        mAllIndicatorsEnabled = privacyItemController.getAllIndicatorsAvailable();
 
         if (DEBUG) {
             Log.d(TAG, "micCameraIndicators: " + mMicCameraIndicatorFlagEnabled);
-            Log.d(TAG, "locationIndicators: " + mLocationIndicatorEnabled);
+            Log.d(TAG, "allIndicators: " + mAllIndicatorsEnabled);
         }
     }
 
@@ -125,69 +152,147 @@ public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemControl
     }
 
     @Override
-    public void onPrivacyItemsChanged(List<PrivacyItem> privacyItems) {
+    public void onPrivacyItemsChanged(@NonNull List<PrivacyItem> privacyItems) {
         if (DEBUG) Log.d(TAG, "PrivacyItemsChanged");
-        mPrivacyItems = privacyItems;
-        updateUI();
+
+        List<PrivacyItem> updatedPrivacyItems = new ArrayList<>(privacyItems);
+        // Never show the location indicator on tv.
+        if (updatedPrivacyItems.removeIf(
+                privacyItem -> privacyItem.getPrivacyType() == PrivacyType.TYPE_LOCATION)) {
+            if (DEBUG) Log.v(TAG, "Removed the location item");
+        }
+
+        if (isChipDisabled()) {
+            fadeOutIndicator();
+            mPrivacyItems = updatedPrivacyItems;
+            return;
+        }
+
+        // Do they have the same elements? (order doesn't matter)
+        if (updatedPrivacyItems.size() == mPrivacyItems.size()
+                && mPrivacyItems.containsAll(updatedPrivacyItems)) {
+            if (DEBUG) Log.d(TAG, "List wasn't updated");
+            return;
+        }
+
+        mPrivacyItems = updatedPrivacyItems;
+
+        postAccessibilityAnnouncement();
+        updateChip();
+    }
+
+    private void updateChip() {
+        if (DEBUG) Log.d(TAG, mPrivacyItems.size() + " privacy items");
+
+        if (mPrivacyItems.isEmpty()) {
+            if (DEBUG) Log.d(TAG, "removing indicator (state: " + stateToString(mState) + ")");
+            fadeOutIndicator();
+            return;
+        }
+
+        if (DEBUG) Log.d(TAG, "Current state: " + stateToString(mState));
+        switch (mState) {
+            case STATE_NOT_SHOWN:
+                createAndShowIndicator();
+                break;
+            case STATE_APPEARING:
+            case STATE_EXPANDED:
+                updateIcons();
+                collapseLater();
+                break;
+            case STATE_COLLAPSED:
+            case STATE_DISAPPEARING:
+                mState = STATE_EXPANDED;
+                updateIcons();
+                animateIconAppearance();
+                break;
+        }
+    }
+
+    /**
+     * Collapse the chip EXPANDED_DURATION_MS from now.
+     */
+    private void collapseLater() {
+        mUiThreadHandler.removeCallbacks(mCollapseRunnable);
+        if (DEBUG) Log.d(TAG, "chip will collapse in " + EXPANDED_DURATION_MS + "ms");
+        mUiThreadHandler.postDelayed(mCollapseRunnable, EXPANDED_DURATION_MS);
+    }
+
+    private void collapseChip() {
+        if (DEBUG) Log.d(TAG, "collapseChip");
+
+        if (mState != STATE_EXPANDED) {
+            return;
+        }
+        mState = STATE_COLLAPSED;
+
+        if (mChipDrawable != null) {
+            mChipDrawable.collapse();
+        }
+        animateIconDisappearance();
     }
 
     @Override
     public void onFlagMicCameraChanged(boolean flag) {
         if (DEBUG) Log.d(TAG, "mic/camera indicators enabled: " + flag);
         mMicCameraIndicatorFlagEnabled = flag;
+        updateChipOnFlagChanged();
     }
 
     @Override
-    public void onFlagLocationChanged(boolean flag) {
-        if (DEBUG) Log.d(TAG, "location indicators enabled: " + flag);
-        mLocationIndicatorEnabled = flag;
+    public void onFlagAllChanged(boolean flag) {
+        if (DEBUG) Log.d(TAG, "all indicators enabled: " + flag);
+        mAllIndicatorsEnabled = flag;
+        updateChipOnFlagChanged();
     }
 
-    private void updateUI() {
-        if (DEBUG) Log.d(TAG, mPrivacyItems.size() + " privacy items");
+    private boolean isChipDisabled() {
+        return !(mMicCameraIndicatorFlagEnabled || mAllIndicatorsEnabled);
+    }
 
-        if ((mMicCameraIndicatorFlagEnabled || mLocationIndicatorEnabled)
-                && !mPrivacyItems.isEmpty()) {
-            if (mState == STATE_NOT_SHOWN || mState == STATE_DISAPPEARING) {
-                showIndicator();
-            } else {
-                if (DEBUG) Log.d(TAG, "only updating icons");
-                PrivacyChipBuilder builder = new PrivacyChipBuilder(mContext, mPrivacyItems);
-                setIcons(builder.generateIcons(), mIconsContainer);
-                mIconsContainer.requestLayout();
-            }
+    private void updateChipOnFlagChanged() {
+        if (isChipDisabled()) {
+            fadeOutIndicator();
         } else {
-            hideIndicatorIfNeeded();
+            updateChip();
         }
     }
 
     @UiThread
-    private void hideIndicatorIfNeeded() {
+    private void fadeOutIndicator() {
         if (mState == STATE_NOT_SHOWN || mState == STATE_DISAPPEARING) return;
+
+        mUiThreadHandler.removeCallbacks(mCollapseRunnable);
 
         if (mViewAndWindowAdded) {
             mState = STATE_DISAPPEARING;
-            animateDisappearance();
+            animateIconDisappearance();
         } else {
             // Appearing animation has not started yet, as we were still waiting for the View to be
             // laid out.
             mState = STATE_NOT_SHOWN;
             removeIndicatorView();
         }
+        if (mChipDrawable != null) {
+            mChipDrawable.updateIcons(0);
+        }
     }
 
     @UiThread
-    private void showIndicator() {
+    private void createAndShowIndicator() {
         mState = STATE_APPEARING;
 
+        if (mIndicatorView != null || mViewAndWindowAdded) {
+            removeIndicatorView();
+        }
+
         // Inflate the indicator view
-        mIndicatorView = LayoutInflater.from(mContext).inflate(
+        mIndicatorView = (ViewGroup) LayoutInflater.from(mContext).inflate(
                 R.layout.tv_ongoing_privacy_chip, null);
 
-        // 1. Set alpha to 0.
+        // 1. Set icon alpha to 0.
         // 2. Wait until the window is shown and the view is laid out.
         // 3. Start a "fade in" (alpha) animation.
-        mIndicatorView.setAlpha(0f);
         mIndicatorView
                 .getViewTreeObserver()
                 .addOnGlobalLayoutListener(
@@ -196,20 +301,36 @@ public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemControl
                             public void onGlobalLayout() {
                                 // State could have changed to NOT_SHOWN (if all the recorders are
                                 // already gone)
-                                if (mState != STATE_APPEARING) return;
+                                if (mState != STATE_APPEARING) {
+                                    return;
+                                }
 
                                 mViewAndWindowAdded = true;
                                 // Remove the observer
                                 mIndicatorView.getViewTreeObserver().removeOnGlobalLayoutListener(
                                         this);
 
-                                animateAppearance();
+                                postAccessibilityAnnouncement();
+                                animateIconAppearance();
+                                mChipDrawable.startInitialFadeIn();
                             }
                         });
 
+        final boolean isRtl = mContext.getResources().getConfiguration().getLayoutDirection()
+                == View.LAYOUT_DIRECTION_RTL;
+        if (DEBUG) Log.d(TAG, "is RTL: " + isRtl);
+
+        mChipDrawable = new PrivacyChipDrawable(mContext);
+        mChipDrawable.setListener(this);
+        mChipDrawable.setRtl(isRtl);
+        ImageView chipBackground = mIndicatorView.findViewById(R.id.chip_drawable);
+        if (chipBackground != null) {
+            chipBackground.setImageDrawable(mChipDrawable);
+        }
+
         mIconsContainer = mIndicatorView.findViewById(R.id.icons_container);
-        PrivacyChipBuilder builder = new PrivacyChipBuilder(mContext, mPrivacyItems);
-        setIcons(builder.generateIcons(), mIconsContainer);
+        mIconsContainer.setAlpha(0f);
+        updateIcons();
 
         final WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
                 WRAP_CONTENT,
@@ -217,19 +338,19 @@ public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemControl
                 WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
-        layoutParams.gravity = Gravity.TOP | Gravity.END;
+        layoutParams.gravity = Gravity.TOP | (isRtl ? Gravity.LEFT : Gravity.RIGHT);
         layoutParams.setTitle(LAYOUT_PARAMS_TITLE);
         layoutParams.packageName = mContext.getPackageName();
         final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
         windowManager.addView(mIndicatorView, layoutParams);
-
     }
 
-    private void setIcons(List<Drawable> icons, ViewGroup iconsContainer) {
-        iconsContainer.removeAllViews();
+    private void updateIcons() {
+        List<Drawable> icons = new PrivacyChipBuilder(mContext, mPrivacyItems).generateIcons();
+        mIconsContainer.removeAllViews();
         for (int i = 0; i < icons.size(); i++) {
             Drawable icon = icons.get(i);
-            icon.mutate().setTint(Color.WHITE);
+            icon.mutate().setTint(mContext.getColor(R.color.privacy_icon_tint));
             ImageView imageView = new ImageView(mContext);
             imageView.setImageDrawable(icon);
             imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
@@ -241,22 +362,25 @@ public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemControl
                 imageView.setLayoutParams(layoutParams);
             }
         }
+        if (mChipDrawable != null) {
+            mChipDrawable.updateIcons(icons.size());
+        }
     }
 
-    private void animateAppearance() {
-        animateAlphaTo(1f);
+    private void animateIconAppearance() {
+        animateIconAlphaTo(1f);
     }
 
-    private void animateDisappearance() {
-        animateAlphaTo(0f);
+    private void animateIconDisappearance() {
+        animateIconAlphaTo(0f);
     }
 
-    private void animateAlphaTo(final float endValue) {
+    private void animateIconAlphaTo(float endValue) {
         if (mAnimator == null) {
             if (DEBUG) Log.d(TAG, "set up animator");
 
             mAnimator = new ObjectAnimator();
-            mAnimator.setTarget(mIndicatorView);
+            mAnimator.setTarget(mIconsContainer);
             mAnimator.setProperty(View.ALPHA);
             mAnimator.addListener(new AnimatorListenerAdapter() {
                 boolean mCancelled;
@@ -280,7 +404,7 @@ public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemControl
                     // and then onAnimationEnd(...). We, however, only want to proceed here if the
                     // animation ended "naturally".
                     if (!mCancelled) {
-                        onAnimationFinished();
+                        onIconAnimationFinished();
                     }
                 }
             });
@@ -289,19 +413,37 @@ public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemControl
             mAnimator.cancel();
         }
 
-        final float currentValue = mIndicatorView.getAlpha();
+        final float currentValue = mIconsContainer.getAlpha();
+        if (currentValue == endValue) {
+            if (DEBUG) Log.d(TAG, "alpha not changing");
+            return;
+        }
         if (DEBUG) Log.d(TAG, "animate alpha to " + endValue + " from " + currentValue);
 
-        mAnimator.setDuration((int) (Math.abs(currentValue - endValue) * ANIMATION_DURATION_MS));
+        mAnimator.setDuration(mAnimationDurationMs);
         mAnimator.setFloatValues(endValue);
         mAnimator.start();
     }
 
-    private void onAnimationFinished() {
-        if (DEBUG) Log.d(TAG, "onAnimationFinished");
+    @Override
+    public void onFadeOutFinished() {
+        if (DEBUG) Log.d(TAG, "drawable fade-out finished");
+
+        if (mState == STATE_DISAPPEARING) {
+            removeIndicatorView();
+            mState = STATE_NOT_SHOWN;
+        }
+    }
+
+    private void onIconAnimationFinished() {
+        if (DEBUG) Log.d(TAG, "onAnimationFinished (icon fade)");
+
+        if (mState == STATE_APPEARING || mState == STATE_EXPANDED) {
+            collapseLater();
+        }
 
         if (mState == STATE_APPEARING) {
-            mState = STATE_SHOWN;
+            mState = STATE_EXPANDED;
         } else if (mState == STATE_DISAPPEARING) {
             removeIndicatorView();
             mState = STATE_NOT_SHOWN;
@@ -312,14 +454,116 @@ public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemControl
         if (DEBUG) Log.d(TAG, "removeIndicatorView");
 
         final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
-        if (windowManager != null) {
+        if (windowManager != null && mIndicatorView != null) {
             windowManager.removeView(mIndicatorView);
         }
 
         mIndicatorView = null;
         mAnimator = null;
 
+        if (mChipDrawable != null) {
+            mChipDrawable.setListener(null);
+            mChipDrawable = null;
+        }
+
         mViewAndWindowAdded = false;
+    }
+
+    /**
+     * Schedules the accessibility announcement to be made after {@code
+     * ACCESSIBILITY_ANNOUNCEMENT_DELAY_MS} (if possible). This is so that only one announcement is
+     * made instead of two separate ones if both the camera and the mic are started/stopped.
+     */
+    private void postAccessibilityAnnouncement() {
+        mUiThreadHandler.removeCallbacks(mAccessibilityRunnable);
+
+        if (mPrivacyItems.size() == 0) {
+            // Announce immediately since announcement cannot be made once the chip is gone.
+            makeAccessibilityAnnouncement();
+        } else {
+            mUiThreadHandler.postDelayed(mAccessibilityRunnable,
+                    ACCESSIBILITY_ANNOUNCEMENT_DELAY_MS);
+        }
+    }
+
+    private void makeAccessibilityAnnouncement() {
+        if (mIndicatorView == null) {
+            return;
+        }
+
+        boolean cameraWasRecording = listContainsPrivacyType(mItemsBeforeLastAnnouncement,
+                PrivacyType.TYPE_CAMERA);
+        boolean cameraIsRecording = listContainsPrivacyType(mPrivacyItems,
+                PrivacyType.TYPE_CAMERA);
+        boolean micWasRecording = listContainsPrivacyType(mItemsBeforeLastAnnouncement,
+                PrivacyType.TYPE_MICROPHONE);
+        boolean micIsRecording = listContainsPrivacyType(mPrivacyItems,
+                PrivacyType.TYPE_MICROPHONE);
+
+        int announcement = 0;
+        if (!cameraWasRecording && cameraIsRecording && !micWasRecording && micIsRecording) {
+            // Both started
+            announcement = R.string.mic_and_camera_recording_announcement;
+        } else if (cameraWasRecording && !cameraIsRecording && micWasRecording && !micIsRecording) {
+            // Both stopped
+            announcement = R.string.mic_camera_stopped_recording_announcement;
+        } else {
+            // Did the camera start or stop?
+            if (cameraWasRecording && !cameraIsRecording) {
+                announcement = R.string.camera_stopped_recording_announcement;
+            } else if (!cameraWasRecording && cameraIsRecording) {
+                announcement = R.string.camera_recording_announcement;
+            }
+
+            // Announce camera changes now since we might need a second announcement about the mic.
+            if (announcement != 0) {
+                mIndicatorView.announceForAccessibility(mContext.getString(announcement));
+                announcement = 0;
+            }
+
+            // Did the mic start or stop?
+            if (micWasRecording && !micIsRecording) {
+                announcement = R.string.mic_stopped_recording_announcement;
+            } else if (!micWasRecording && micIsRecording) {
+                announcement = R.string.mic_recording_announcement;
+            }
+        }
+
+        if (announcement != 0) {
+            mIndicatorView.announceForAccessibility(mContext.getString(announcement));
+        }
+
+        mItemsBeforeLastAnnouncement.clear();
+        mItemsBeforeLastAnnouncement.addAll(mPrivacyItems);
+    }
+
+    private boolean listContainsPrivacyType(List<PrivacyItem> list, PrivacyType privacyType) {
+        for (PrivacyItem item : list) {
+            if (item.getPrivacyType() == privacyType) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Used in debug logs.
+     */
+    private String stateToString(@State int state) {
+        switch (state) {
+            case STATE_NOT_SHOWN:
+                return "NOT_SHOWN";
+            case STATE_APPEARING:
+                return "APPEARING";
+            case STATE_EXPANDED:
+                return "EXPANDED";
+            case STATE_COLLAPSED:
+                return "COLLAPSED";
+            case STATE_DISAPPEARING:
+                return "DISAPPEARING";
+            default:
+                return "INVALID";
+        }
     }
 
 }

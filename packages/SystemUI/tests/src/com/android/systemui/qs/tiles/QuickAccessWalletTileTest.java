@@ -43,6 +43,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Handler;
 import android.service.quickaccesswallet.GetWalletCardsError;
@@ -93,6 +94,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     private static final Icon CARD_IMAGE =
             Icon.createWithBitmap(Bitmap.createBitmap(70, 50, Bitmap.Config.ARGB_8888));
 
+    private final Drawable mTileIcon = mContext.getDrawable(R.drawable.ic_qs_wallet);
     private final Intent mWalletIntent = new Intent(QuickAccessWalletService.ACTION_VIEW_WALLET)
             .setComponent(new ComponentName(mContext.getPackageName(), "WalletActivity"));
 
@@ -137,6 +139,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
         when(mHost.getContext()).thenReturn(mSpiedContext);
         when(mHost.getUiEventLogger()).thenReturn(mUiEventLogger);
         when(mQuickAccessWalletClient.getServiceLabel()).thenReturn(LABEL);
+        when(mQuickAccessWalletClient.getTileIcon()).thenReturn(mTileIcon);
         when(mQuickAccessWalletClient.isWalletFeatureAvailable()).thenReturn(true);
         when(mQuickAccessWalletClient.isWalletServiceAvailable()).thenReturn(true);
         when(mQuickAccessWalletClient.isWalletFeatureAvailableWhenDeviceLocked()).thenReturn(true);
@@ -168,6 +171,15 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     @Test
     public void testWalletServiceUnavailable_recreateWalletClient() {
         when(mQuickAccessWalletClient.isWalletServiceAvailable()).thenReturn(false);
+
+        mTile.handleSetListening(true);
+
+        verify(mController, times(1)).reCreateWalletClient();
+    }
+
+    @Test
+    public void testWalletFeatureUnavailable_recreateWalletClient() {
+        when(mQuickAccessWalletClient.isWalletFeatureAvailable()).thenReturn(false);
 
         mTile.handleSetListening(true);
 
@@ -246,6 +258,18 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     @Test
     public void testHandleUpdateState_updateLabelAndIcon() {
         QSTile.State state = new QSTile.State();
+
+        mTile.handleUpdateState(state, null);
+
+        assertEquals(LABEL, state.label.toString());
+        assertTrue(state.label.toString().contentEquals(state.contentDescription));
+        assertEquals(mTileIcon, state.icon.getDrawable(mContext));
+    }
+
+    @Test
+    public void testHandleUpdateState_updateLabelAndIcon_noIconFromApi() {
+        when(mQuickAccessWalletClient.getTileIcon()).thenReturn(null);
+        QSTile.State state = new QSTile.State();
         QSTile.Icon icon = QSTileImpl.ResourceIcon.get(R.drawable.ic_wallet_lockscreen);
 
         mTile.handleUpdateState(state, null);
@@ -264,6 +288,41 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     public void testGetTileLabel_serviceLabelDoesNotExist() {
         when(mQuickAccessWalletClient.getServiceLabel()).thenReturn(null);
         assertEquals(mContext.getString(R.string.wallet_title), mTile.getTileLabel().toString());
+    }
+
+    @Test
+    public void testHandleUpdateState_walletIsUpdating() {
+        when(mKeyguardStateController.isUnlocked()).thenReturn(true);
+        QSTile.State state = new QSTile.State();
+        GetWalletCardsResponse response =
+                new GetWalletCardsResponse(
+                        Collections.singletonList(createWalletCard(mContext)), 0);
+
+        mTile.handleSetListening(true);
+
+        verify(mController).queryWalletCards(mCallbackCaptor.capture());
+
+        // Wallet cards fetching on its way; wallet updating.
+        mTile.handleUpdateState(state, null);
+
+        assertEquals(Tile.STATE_INACTIVE, state.state);
+        assertEquals(
+                mContext.getString(R.string.wallet_secondary_label_updating), state.secondaryLabel);
+        assertNotNull(state.stateDescription);
+        assertNull(state.sideViewCustomDrawable);
+
+        // Wallet cards fetching completed.
+        mCallbackCaptor.getValue().onWalletCardsRetrieved(response);
+        mTestableLooper.processAllMessages();
+
+        mTile.handleUpdateState(state, null);
+
+        assertEquals(Tile.STATE_ACTIVE, state.state);
+        assertEquals(
+                "•••• 1234",
+                state.secondaryLabel);
+        assertNotNull(state.stateDescription);
+        assertNotNull(state.sideViewCustomDrawable);
     }
 
     @Test
@@ -315,8 +374,20 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     }
 
     @Test
-    public void testHandleUpdateState_qawFeatureUnavailable_tileUnavailable() {
+    public void testHandleUpdateState_qawServiceUnavailable_tileUnavailable() {
         when(mQuickAccessWalletClient.isWalletServiceAvailable()).thenReturn(false);
+        QSTile.State state = new QSTile.State();
+
+        mTile.handleUpdateState(state, null);
+
+        assertEquals(Tile.STATE_UNAVAILABLE, state.state);
+        assertNull(state.stateDescription);
+        assertNull(state.sideViewCustomDrawable);
+    }
+
+    @Test
+    public void testHandleUpdateState_qawFeatureUnavailable_tileUnavailable() {
+        when(mQuickAccessWalletClient.isWalletFeatureAvailable()).thenReturn(false);
         QSTile.State state = new QSTile.State();
 
         mTile.handleUpdateState(state, null);

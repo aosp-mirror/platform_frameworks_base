@@ -32,9 +32,12 @@ import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dock.DockManager;
+import com.android.systemui.dock.DockManagerFake;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.sensors.ProximitySensor;
@@ -67,6 +70,9 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
     private SysuiStatusBarStateController mStatusBarStateController;
     @Mock
     private KeyguardStateController mKeyguardStateController;
+    @Mock
+    private BatteryController mBatteryController;
+    private final DockManagerFake mDockManager = new DockManagerFake();
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private final FakeExecutor mFakeExecutor = new FakeExecutor(mFakeSystemClock);
 
@@ -79,8 +85,8 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
 
         mFalsingCollector = new FalsingCollectorImpl(mFalsingDataProvider, mFalsingManager,
                 mKeyguardUpdateMonitor, mHistoryTracker, mProximitySensor,
-                mStatusBarStateController, mKeyguardStateController, mFakeExecutor,
-                mFakeSystemClock);
+                mStatusBarStateController, mKeyguardStateController, mBatteryController,
+                mDockManager, mFakeExecutor, mFakeSystemClock);
     }
 
     @Test
@@ -91,9 +97,32 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
 
     @Test
     public void testNoProximityWhenWirelessCharging() {
-        when(mFalsingDataProvider.isWirelessCharging()).thenReturn(true);
-        mFalsingCollector.onScreenTurningOn();
-        verify(mProximitySensor, never()).register(any(ThresholdSensor.Listener.class));
+        ArgumentCaptor<BatteryController.BatteryStateChangeCallback> batteryCallbackCaptor =
+                ArgumentCaptor.forClass(BatteryController.BatteryStateChangeCallback.class);
+        verify(mBatteryController).addCallback(batteryCallbackCaptor.capture());
+        batteryCallbackCaptor.getValue().onWirelessChargingChanged(true);
+        verify(mProximitySensor).pause();
+    }
+
+    @Test
+    public void testProximityWhenOffWirelessCharging() {
+        ArgumentCaptor<BatteryController.BatteryStateChangeCallback> batteryCallbackCaptor =
+                ArgumentCaptor.forClass(BatteryController.BatteryStateChangeCallback.class);
+        verify(mBatteryController).addCallback(batteryCallbackCaptor.capture());
+        batteryCallbackCaptor.getValue().onWirelessChargingChanged(false);
+        verify(mProximitySensor).resume();
+    }
+
+    @Test
+    public void testNoProximityWhenDocked() {
+        mDockManager.setDockEvent(DockManager.STATE_DOCKED);
+        verify(mProximitySensor).pause();
+    }
+
+    @Test
+    public void testProximityWhenUndocked() {
+        mDockManager.setDockEvent(DockManager.STATE_NONE);
+        verify(mProximitySensor).resume();
     }
 
     @Test

@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"Isevisi ye-GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Isevisi Yesaziso Senzwa"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Isevisi Yangovivi"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Isitholi Sezoni Yesikhathi (Akukho ukuxhumana)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Isevisi Ebuyekeziwe Yesikhathi se-GNSS"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Isevisi Yomphathi Wokuthola Umculo"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Idivayisi yakho izosulwa"</string>
@@ -585,6 +584,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Zama ezinye izigxivizo zeminwe"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Kukhanya kakhulu"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Zama ukulungisa"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Shintsha indawo yomunwe wakho kancane isikhathi ngasinye"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Izigxivizo zeminwe zigunyaziwe"</string>
@@ -601,8 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Azikho izigxivizo zeminwe ezibhalisiwe."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Le divayisi ayinayo inzwa yezigxivizo zeminwe."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Inzwa ikhutshazwe okwesikhashana."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Ayikwazi ukusebenzisa inzwa yesigxivizo somunwe. Vakashela umhlinzeki wokulungisa"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Umunwe ongu-<xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Sebenzisa izigxivizo zeminwe"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Sebenzisa izigxivizo zeminwe noma ukukhiya isikrini"</string>
@@ -612,12 +611,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Isithonjana sezigxivizo zeminwe"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Ukuvula ubuso"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Phinda ubhalise ubuso bakho"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Ukuze uthuthukise ukubonwa, sicela uphinde ubhalise ubuso bakho"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Inkinga Ngokuvula ngobuso"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Thepha ukuze usule imodeli yakho yobuso, bese wengeza futhi ubuso"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Setha Ukuvula ngobuso"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Vula ifoni yakho ngokuyibheka"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Setha izindlela eziningi zokuvula"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Thepha ukuze ungeze izigxivizo zomunwe"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Ukuvula ngesigxivizo somunwe"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Ayikwazi ukusebenzisa inzwa yesigxivizo somunwe"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Vakashela umhlinzeki wokulungisa."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Ayikwazanga ukuthwebula idatha enembile yobuso. Zama futhi."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Kukhanya kakhulu. Zama ukukhanya okuthambile."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Kumnyama kakhulu Zama ukukhanyisa okukhanyayo."</string>
@@ -1480,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"Yala"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Imvume Iceliwe"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Imvume Iceliwe \n ye-akhawunti <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Imvume ecelwe yi-<xliff:g id="APP">%1$s</xliff:g>\nye-akhawunti ye-<xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Usebenzisa lolu hlelo lokusebenza ngaphandle kwephrofayela yakho yomsebenzi"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Usebenzisa lolu hlelo lokusebenza kuphrofayela yakho yomsebenzi"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Indlela yokufakwayo"</string>

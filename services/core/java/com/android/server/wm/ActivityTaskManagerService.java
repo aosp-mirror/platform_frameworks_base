@@ -302,6 +302,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     // started or finished.
     static final long ACTIVITY_BG_START_GRACE_PERIOD_MS = 10 * 1000;
 
+    /**
+     * The duration to keep a process in animating state (top scheduling group) when the
+     * wakefulness is changing from awake to doze or sleep.
+     */
+    private static final long DOZE_ANIMATING_STATE_RETAIN_TIME_MS = 2000;
+
     /** Used to indicate that an app transition should be animated. */
     static final boolean ANIMATE = true;
 
@@ -580,19 +586,28 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      *     windowing modes.
      *  0: If it is a small screen (smallest width < {@link #mLargeScreenSmallestScreenWidthDp}),
      *     the device compares the activity min width/height with the min multi windowing modes
-     *     dimensions {@link #mMinPercentageMultiWindowSupportWidth} the device supports to
+     *     dimensions {@link #mMinPercentageMultiWindowSupportHeight} the device supports to
      *     determine whether the activity can be shown in multi windowing modes
      *  1: The device always compare the activity min width/height with the min multi windowing
-     *     modes dimensions {@link #mMinPercentageMultiWindowSupportWidth} the device supports to
+     *     modes dimensions {@link #mMinPercentageMultiWindowSupportHeight} the device supports to
      *     determine whether it can be shown in multi windowing modes.
      */
     int mRespectsActivityMinWidthHeightMultiWindow;
 
     /**
-     * This value is only used when the device checks activity min width/height to determine if it
+     * This value is only used when the device checks activity min height to determine if it
      * can be shown in multi windowing modes.
-     * If the activity min width/height is greater than this percentage of the display smallest
-     * width, it will not be allowed to be shown in multi windowing modes.
+     * If the activity min height is greater than this percentage of the display height in portrait,
+     * it will not be allowed to be shown in multi windowing modes.
+     * The value should be between [0 - 1].
+     */
+    float mMinPercentageMultiWindowSupportHeight;
+
+    /**
+     * This value is only used when the device checks activity min width to determine if it
+     * can be shown in multi windowing modes.
+     * If the activity min width is greater than this percentage of the display width in landscape,
+     * it will not be allowed to be shown in multi windowing modes.
      * The value should be between [0 - 1].
      */
     float mMinPercentageMultiWindowSupportWidth;
@@ -840,6 +855,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 com.android.internal.R.integer.config_supportsNonResizableMultiWindow);
         final int respectsActivityMinWidthHeightMultiWindow = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_respectsActivityMinWidthHeightMultiWindow);
+        final float minPercentageMultiWindowSupportHeight = mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_minPercentageMultiWindowSupportHeight);
         final float minPercentageMultiWindowSupportWidth = mContext.getResources().getFloat(
                 com.android.internal.R.dimen.config_minPercentageMultiWindowSupportWidth);
         final int largeScreenSmallestScreenWidthDp = mContext.getResources().getInteger(
@@ -860,6 +877,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mDevEnableNonResizableMultiWindow = devEnableNonResizableMultiWindow;
             mSupportsNonResizableMultiWindow = supportsNonResizableMultiWindow;
             mRespectsActivityMinWidthHeightMultiWindow = respectsActivityMinWidthHeightMultiWindow;
+            mMinPercentageMultiWindowSupportHeight = minPercentageMultiWindowSupportHeight;
             mMinPercentageMultiWindowSupportWidth = minPercentageMultiWindowSupportWidth;
             mLargeScreenSmallestScreenWidthDp = largeScreenSmallestScreenWidthDp;
             final boolean multiWindowFormEnabled = freeformWindowManagement
@@ -2621,10 +2639,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
                 final ActivityInfo ainfo = AppGlobals.getPackageManager().getActivityInfo(comp,
                         STOCK_PM_FLAGS, UserHandle.getUserId(callingUid));
-                if (ainfo.applicationInfo.uid != callingUid) {
-                    throw new SecurityException(
-                            "Can't add task for another application: target uid="
-                                    + ainfo.applicationInfo.uid + ", calling uid=" + callingUid);
+                if (ainfo == null || ainfo.applicationInfo.uid != callingUid) {
+                    Slog.e(TAG, "Can't add task for another application: target uid="
+                            + (ainfo == null ? Process.INVALID_UID : ainfo.applicationInfo.uid)
+                            + ", calling uid=" + callingUid);
+                    return INVALID_TASK_ID;
                 }
 
                 final Task rootTask = r.getRootTask();
@@ -2745,12 +2764,35 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         });
     }
 
+    // The caller MUST NOT hold the global lock.
     public void onScreenAwakeChanged(boolean isAwake) {
         mH.post(() -> {
             for (int i = mScreenObservers.size() - 1; i >= 0; i--) {
                 mScreenObservers.get(i).onAwakeStateChanged(isAwake);
             }
         });
+
+        if (isAwake) {
+            return;
+        }
+        // If the device is going to sleep, keep a higher priority temporarily for potential
+        // animation of system UI. Even if AOD is not enabled, it should be no harm.
+        final WindowProcessController proc;
+        synchronized (mGlobalLockWithoutBoost) {
+            final WindowState notificationShade = mRootWindowContainer.getDefaultDisplay()
+                    .getDisplayPolicy().getNotificationShade();
+            proc = notificationShade != null
+                    ? mProcessMap.getProcess(notificationShade.mSession.mPid) : null;
+        }
+        if (proc == null) {
+            return;
+        }
+        // Set to activity manager directly to make sure the state can be seen by the subsequent
+        // update of scheduling group.
+        proc.setRunningAnimationUnsafe();
+        mH.removeMessages(H.UPDATE_PROCESS_ANIMATING_STATE, proc);
+        mH.sendMessageDelayed(mH.obtainMessage(H.UPDATE_PROCESS_ANIMATING_STATE, proc),
+                DOZE_ANIMATING_STATE_RETAIN_TIME_MS);
     }
 
     @Override
@@ -4146,21 +4188,21 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     /**
      * Update the asset configuration and increase the assets sequence number.
-     * @param processes the processes that needs to update the asset configuration, if none
-     *                  updates the global configuration for all processes.
+     * @param processes the processes that needs to update the asset configuration
      */
-    public void updateAssetConfiguration(List<WindowProcessController> processes) {
+    public void updateAssetConfiguration(List<WindowProcessController> processes,
+            boolean updateFrameworkRes) {
         synchronized (mGlobalLock) {
             final int assetSeq = increaseAssetConfigurationSeq();
 
-            // Update the global configuration if the no target processes
-            if (processes == null) {
+            if (updateFrameworkRes) {
                 Configuration newConfig = new Configuration();
                 newConfig.assetsSeq = assetSeq;
                 updateConfiguration(newConfig);
-                return;
             }
 
+            // Always update the override of every process so the asset sequence of the process is
+            // always greater than or equal to the global configuration.
             for (int i = processes.size() - 1; i >= 0; i--) {
                 final WindowProcessController wpc = processes.get(i);
                 wpc.updateAssetConfiguration(assetSeq);
@@ -5015,7 +5057,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     final class H extends Handler {
         static final int REPORT_TIME_TRACKER_MSG = 1;
-
+        static final int UPDATE_PROCESS_ANIMATING_STATE = 2;
 
         static final int FIRST_ACTIVITY_TASK_MSG = 100;
         static final int FIRST_SUPERVISOR_TASK_MSG = 200;
@@ -5030,6 +5072,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 case REPORT_TIME_TRACKER_MSG: {
                     AppTimeTracker tracker = (AppTimeTracker) msg.obj;
                     tracker.deliverResult(mContext);
+                }
+                break;
+                case UPDATE_PROCESS_ANIMATING_STATE: {
+                    final WindowProcessController proc = (WindowProcessController) msg.obj;
+                    synchronized (mGlobalLock) {
+                        proc.updateRunningRemoteOrRecentsAnimation();
+                    }
                 }
                 break;
             }
@@ -5253,11 +5302,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public boolean isRecentsComponentHomeActivity(int userId) {
             return getRecentTasks().isRecentsComponentHomeActivity(userId);
-        }
-
-        @Override
-        public void cancelRecentsAnimation(boolean restoreHomeRootTaskPosition) {
-            ActivityTaskManagerService.this.cancelRecentsAnimation(restoreHomeRootTaskPosition);
         }
 
         @Override
@@ -5560,7 +5604,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public ActivityTokens getTopActivityForTask(int taskId) {
             synchronized (mGlobalLock) {
-                final Task task = mRootWindowContainer.anyTaskForId(taskId);
+                final Task task = mRootWindowContainer.anyTaskForId(taskId,
+                        MATCH_ATTACHED_TASK_ONLY);
                 if (task == null) {
                     Slog.w(TAG, "getApplicationThreadForTopActivity failed:"
                             + " Requested task not found");
@@ -6427,12 +6472,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         Slog.w(TAG, "Override application configuration: cannot find pid " + mPid);
                         return;
                     }
-                    if (wpc.getNightMode() == mNightMode) {
-                        return;
-                    }
-                    if (!wpc.setOverrideNightMode(mNightMode)) {
-                        return;
-                    }
+                    wpc.setOverrideNightMode(mNightMode);
                     wpc.updateNightModeForAllActivities(mNightMode);
                     mPackageConfigPersister.updateFromImpl(wpc.mName, wpc.mUserId, this);
                 } finally {

@@ -73,14 +73,14 @@ public final class CrossWindowBlurListeners {
         return instance;
     }
 
-    boolean isCrossWindowBlurEnabled() {
+    public boolean isCrossWindowBlurEnabled() {
         synchronized (sLock) {
             attachInternalListenerIfNeededLocked();
             return mCrossWindowBlurEnabled;
         }
     }
 
-    void addListener(@NonNull @CallbackExecutor Executor executor,
+    public void addListener(@NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<Boolean> listener) {
         Preconditions.checkNotNull(listener, "listener cannot be null");
         Preconditions.checkNotNull(executor, "executor cannot be null");
@@ -94,7 +94,7 @@ public final class CrossWindowBlurListeners {
     }
 
 
-    void removeListener(Consumer<Boolean> listener) {
+    public void removeListener(Consumer<Boolean> listener) {
         Preconditions.checkNotNull(listener, "listener cannot be null");
 
         synchronized (sLock) {

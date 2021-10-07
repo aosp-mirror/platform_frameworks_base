@@ -20,7 +20,6 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.hardware.display.DisplayManager;
-import android.os.IBinder;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
@@ -45,6 +44,13 @@ import java.util.function.Consumer;
  */
 public class SizeCompatUIController implements DisplayController.OnDisplaysChangedListener,
         DisplayImeController.ImePositionProcessor {
+
+    /** Callback for size compat UI interaction. */
+    public interface SizeCompatUICallback {
+        /** Called when the size compat restart button is clicked. */
+        void onSizeCompatRestartButtonClicked(int taskId);
+    }
+
     private static final String TAG = "SizeCompatUIController";
 
     /** Whether the IME is shown on display id. */
@@ -61,6 +67,8 @@ public class SizeCompatUIController implements DisplayController.OnDisplaysChang
     private final DisplayImeController mImeController;
     private final SyncTransactionQueue mSyncQueue;
 
+    private SizeCompatUICallback mCallback;
+
     /** Only show once automatically in the process life. */
     private boolean mHasShownHint;
 
@@ -76,29 +84,31 @@ public class SizeCompatUIController implements DisplayController.OnDisplaysChang
         mImeController.addPositionProcessor(this);
     }
 
+    /** Sets the callback for UI interactions. */
+    public void setSizeCompatUICallback(SizeCompatUICallback callback) {
+        mCallback = callback;
+    }
+
     /**
      * Called when the Task info changed. Creates and updates the size compat UI if there is an
      * activity in size compat, or removes the UI if there is no size compat activity.
-     *
      * @param displayId display the task and activity are in.
      * @param taskId task the activity is in.
      * @param taskConfig task config to place the size compat UI with.
-     * @param sizeCompatActivity the size compat activity in the task. Can be {@code null} if the
-     *                           top activity in this Task is not in size compat.
      * @param taskListener listener to handle the Task Surface placement.
      */
     public void onSizeCompatInfoChanged(int displayId, int taskId,
-            @Nullable Configuration taskConfig, @Nullable IBinder sizeCompatActivity,
+            @Nullable Configuration taskConfig,
             @Nullable ShellTaskOrganizer.TaskListener taskListener) {
-        if (taskConfig == null || sizeCompatActivity == null || taskListener == null) {
+        if (taskConfig == null || taskListener == null) {
             // Null token means the current foreground activity is not in size compatibility mode.
             removeLayout(taskId);
         } else if (mActiveLayouts.contains(taskId)) {
             // UI already exists, update the UI layout.
-            updateLayout(taskId, taskConfig, sizeCompatActivity, taskListener);
+            updateLayout(taskId, taskConfig, taskListener);
         } else {
             // Create a new size compat UI.
-            createLayout(displayId, taskId, taskConfig, sizeCompatActivity, taskListener);
+            createLayout(displayId, taskId, taskConfig, taskListener);
         }
     }
 
@@ -137,7 +147,7 @@ public class SizeCompatUIController implements DisplayController.OnDisplaysChang
     }
 
     private void createLayout(int displayId, int taskId, Configuration taskConfig,
-            IBinder activityToken, ShellTaskOrganizer.TaskListener taskListener) {
+            ShellTaskOrganizer.TaskListener taskListener) {
         final Context context = getOrCreateDisplayContext(displayId);
         if (context == null) {
             Log.e(TAG, "Cannot get context for display " + displayId);
@@ -145,17 +155,16 @@ public class SizeCompatUIController implements DisplayController.OnDisplaysChang
         }
 
         final SizeCompatUILayout layout = createLayout(context, displayId, taskId, taskConfig,
-                activityToken, taskListener);
+                taskListener);
         mActiveLayouts.put(taskId, layout);
         layout.createSizeCompatButton(isImeShowingOnDisplay(displayId));
     }
 
     @VisibleForTesting
     SizeCompatUILayout createLayout(Context context, int displayId, int taskId,
-            Configuration taskConfig, IBinder activityToken,
-            ShellTaskOrganizer.TaskListener taskListener) {
-        final SizeCompatUILayout layout = new SizeCompatUILayout(mSyncQueue, context, taskConfig,
-                taskId, activityToken, taskListener, mDisplayController.getDisplayLayout(displayId),
+            Configuration taskConfig, ShellTaskOrganizer.TaskListener taskListener) {
+        final SizeCompatUILayout layout = new SizeCompatUILayout(mSyncQueue, mCallback, context,
+                taskConfig, taskId, taskListener, mDisplayController.getDisplayLayout(displayId),
                 mHasShownHint);
         // Only show hint for the first time.
         mHasShownHint = true;
@@ -163,13 +172,12 @@ public class SizeCompatUIController implements DisplayController.OnDisplaysChang
     }
 
     private void updateLayout(int taskId, Configuration taskConfig,
-            IBinder sizeCompatActivity,
             ShellTaskOrganizer.TaskListener taskListener) {
         final SizeCompatUILayout layout = mActiveLayouts.get(taskId);
         if (layout == null) {
             return;
         }
-        layout.updateSizeCompatInfo(taskConfig, sizeCompatActivity, taskListener,
+        layout.updateSizeCompatInfo(taskConfig, taskListener,
                 isImeShowingOnDisplay(layout.getDisplayId()));
     }
 

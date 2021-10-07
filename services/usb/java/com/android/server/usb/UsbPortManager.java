@@ -385,29 +385,16 @@ public class UsbPortManager {
      * @param none
      */
     private void updateUsbHalVersion() {
-        android.hardware.usb.V1_3.IUsb usbProxy_V1_3 =
-                android.hardware.usb.V1_3.IUsb.castFrom(mProxy);
-        if (usbProxy_V1_3 != null) {
+        if (android.hardware.usb.V1_3.IUsb.castFrom(mProxy) != null) {
             mCurrentUsbHalVersion = UsbManager.USB_HAL_V1_3;
-            return;
-        }
-
-        android.hardware.usb.V1_2.IUsb usbProxy_V1_2 =
-                android.hardware.usb.V1_2.IUsb.castFrom(mProxy);
-        if (usbProxy_V1_2 != null) {
+        } else if (android.hardware.usb.V1_2.IUsb.castFrom(mProxy) != null) {
             mCurrentUsbHalVersion = UsbManager.USB_HAL_V1_2;
-            return;
-        }
-
-        android.hardware.usb.V1_1.IUsb usbProxy_V1_1 =
-                android.hardware.usb.V1_1.IUsb.castFrom(mProxy);
-        if (usbProxy_V1_1 != null) {
+        } else if (android.hardware.usb.V1_1.IUsb.castFrom(mProxy) != null) {
             mCurrentUsbHalVersion = UsbManager.USB_HAL_V1_1;
-            return;
+        } else {
+            mCurrentUsbHalVersion = UsbManager.USB_HAL_V1_0;
         }
-
-        mCurrentUsbHalVersion = UsbManager.USB_HAL_V1_0;
-        return;
+        logAndPrint(Log.INFO, null, "USB HAL version: " + mCurrentUsbHalVersion);
     }
 
     public void setPortRoles(String portId, int newPowerRole, int newDataRole,
@@ -850,7 +837,7 @@ public class UsbPortManager {
                 mProxy.linkToDeath(new DeathRecipient(pw), USB_HAL_DEATH_COOKIE);
                 mProxy.setCallback(mHALCallback);
                 mProxy.queryPortStatus();
-                mCurrentUsbHalVersion = UsbManager.USB_HAL_V1_0;
+                updateUsbHalVersion();
             } catch (NoSuchElementException e) {
                 logAndPrintException(pw, "connectToProxy: usb hal service not found."
                         + " Did the service fail to start?", e);
@@ -1183,7 +1170,6 @@ public class UsbPortManager {
                 case MSG_SYSTEM_READY: {
                     mNotificationManager = (NotificationManager)
                             mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-                    updateUsbHalVersion();
                     break;
                 }
             }

@@ -514,8 +514,16 @@ public class AlarmManagerServiceTest {
     }
 
     private void setAllowWhileIdleAlarm(int type, long triggerTime, PendingIntent pi,
-            boolean unrestricted) {
-        final int flags = unrestricted ? FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED : FLAG_ALLOW_WHILE_IDLE;
+            boolean unrestricted, boolean compat) {
+        assertFalse("Alarm cannot be compat and unrestricted", unrestricted && compat);
+        final int flags;
+        if (unrestricted) {
+            flags = FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED;
+        } else if (compat) {
+            flags = FLAG_ALLOW_WHILE_IDLE_COMPAT;
+        } else {
+            flags = FLAG_ALLOW_WHILE_IDLE;
+        }
         setTestAlarm(type, triggerTime, pi, 0, flags, TEST_CALLING_UID);
     }
 
@@ -1600,13 +1608,13 @@ public class AlarmManagerServiceTest {
         final long firstTrigger = mNowElapsedTest + 10;
         for (int i = 0; i < quota; i++) {
             setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, firstTrigger + i,
-                    getNewMockPendingIntent(), false);
+                    getNewMockPendingIntent(), false, false);
             mNowElapsedTest = mTestTimer.getElapsed();
             mTestTimer.expire();
         }
         // This one should get deferred on set.
         setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, firstTrigger + quota,
-                getNewMockPendingIntent(), false);
+                getNewMockPendingIntent(), false, false);
         final long expectedNextTrigger = firstTrigger + mAllowWhileIdleWindow;
         assertEquals("Incorrect trigger when no quota left", expectedNextTrigger,
                 mTestTimer.getElapsed());
@@ -1616,6 +1624,108 @@ public class AlarmManagerServiceTest {
                 getNewMockPendingIntent());
         assertEquals(expectedNextTrigger - 50, mService.mPendingIdleUntil.getWhenElapsed());
         assertEquals(expectedNextTrigger - 50, mTestTimer.getElapsed());
+    }
+
+    @Test
+    public void allowWhileIdleCompatAlarmsWhileDeviceIdle() throws Exception {
+        setDeviceConfigLong(KEY_MAX_DEVICE_IDLE_FUZZ, 0);
+
+        final long window = mService.mConstants.ALLOW_WHILE_IDLE_COMPAT_WINDOW;
+        setIdleUntilAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + window + 1000,
+                getNewMockPendingIntent());
+        assertNotNull(mService.mPendingIdleUntil);
+
+        final int quota = mService.mConstants.ALLOW_WHILE_IDLE_COMPAT_QUOTA;
+        final long firstTrigger = mNowElapsedTest + 10;
+        for (int i = 0; i < quota; i++) {
+            setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, firstTrigger + i,
+                    getNewMockPendingIntent(), false, true);
+            mNowElapsedTest = mTestTimer.getElapsed();
+            mTestTimer.expire();
+        }
+        // This one should get deferred on set.
+        setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, firstTrigger + quota,
+                getNewMockPendingIntent(), false, true);
+        final long expectedNextTrigger = firstTrigger + window;
+        assertEquals("Incorrect trigger when no quota left", expectedNextTrigger,
+                mTestTimer.getElapsed());
+
+        // Bring the idle until alarm back.
+        setIdleUntilAlarm(ELAPSED_REALTIME_WAKEUP, expectedNextTrigger - 50,
+                getNewMockPendingIntent());
+        assertEquals(expectedNextTrigger - 50, mService.mPendingIdleUntil.getWhenElapsed());
+        assertEquals(expectedNextTrigger - 50, mTestTimer.getElapsed());
+    }
+
+    @Test
+    public void allowWhileIdleCompatHistorySeparate() throws Exception {
+        when(mAppStateTracker.areAlarmsRestrictedByBatterySaver(TEST_CALLING_UID,
+                TEST_CALLING_PACKAGE)).thenReturn(true);
+        when(mAppStateTracker.isForceAllAppsStandbyEnabled()).thenReturn(true);
+
+        final int fullQuota = mService.mConstants.ALLOW_WHILE_IDLE_QUOTA;
+        final int compatQuota = mService.mConstants.ALLOW_WHILE_IDLE_COMPAT_QUOTA;
+
+        final long fullWindow = mAllowWhileIdleWindow;
+        final long compatWindow = mService.mConstants.ALLOW_WHILE_IDLE_COMPAT_WINDOW;
+
+        final long firstFullTrigger = mNowElapsedTest + 10;
+        for (int i = 0; i < fullQuota; i++) {
+            setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, firstFullTrigger + i,
+                    getNewMockPendingIntent(), false, false);
+            mNowElapsedTest = mTestTimer.getElapsed();
+            mTestTimer.expire();
+        }
+        // This one should get deferred on set, as full quota is not available.
+        setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, firstFullTrigger + fullQuota,
+                getNewMockPendingIntent(), false, false);
+        final long expectedNextFullTrigger = firstFullTrigger + fullWindow;
+        assertEquals("Incorrect trigger when no quota left", expectedNextFullTrigger,
+                mTestTimer.getElapsed());
+        mService.removeLocked(TEST_CALLING_UID, REMOVE_REASON_UNDEFINED);
+
+        // The following should be allowed, as compat quota should be free.
+        for (int i = 0; i < compatQuota; i++) {
+            final long trigger = mNowElapsedTest + 1;
+            setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, trigger, getNewMockPendingIntent(),
+                    false, true);
+            assertEquals(trigger, mTestTimer.getElapsed());
+            mNowElapsedTest = mTestTimer.getElapsed();
+            mTestTimer.expire();
+        }
+
+        // Refresh the state
+        mService.removeLocked(TEST_CALLING_UID, REMOVE_REASON_UNDEFINED);
+        mService.mAllowWhileIdleHistory.removeForPackage(TEST_CALLING_PACKAGE, TEST_CALLING_USER);
+        mService.mAllowWhileIdleCompatHistory.removeForPackage(TEST_CALLING_PACKAGE,
+                TEST_CALLING_USER);
+
+        // Now test with flipped order
+
+        final long firstCompatTrigger = mNowElapsedTest + 10;
+        for (int i = 0; i < compatQuota; i++) {
+            setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, firstCompatTrigger + i,
+                    getNewMockPendingIntent(), false, true);
+            mNowElapsedTest = mTestTimer.getElapsed();
+            mTestTimer.expire();
+        }
+        // This one should get deferred on set, as full quota is not available.
+        setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, firstCompatTrigger + compatQuota,
+                getNewMockPendingIntent(), false, true);
+        final long expectedNextCompatTrigger = firstCompatTrigger + compatWindow;
+        assertEquals("Incorrect trigger when no quota left", expectedNextCompatTrigger,
+                mTestTimer.getElapsed());
+        mService.removeLocked(TEST_CALLING_UID, REMOVE_REASON_UNDEFINED);
+
+        // The following should be allowed, as full quota should be free.
+        for (int i = 0; i < fullQuota; i++) {
+            final long trigger = mNowElapsedTest + 1;
+            setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, trigger, getNewMockPendingIntent(),
+                    false, false);
+            assertEquals(trigger, mTestTimer.getElapsed());
+            mNowElapsedTest = mTestTimer.getElapsed();
+            mTestTimer.expire();
+        }
     }
 
     @Test
@@ -1634,7 +1744,7 @@ public class AlarmManagerServiceTest {
         final long firstTrigger = mNowElapsedTest + 10;
         for (int i = 0; i < numAlarms; i++) {
             setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, firstTrigger + i,
-                    getNewMockPendingIntent(), true);
+                    getNewMockPendingIntent(), true, false);
         }
         // All of them should fire as expected.
         for (int i = 0; i < numAlarms; i++) {
@@ -1736,7 +1846,7 @@ public class AlarmManagerServiceTest {
         final int quota = mService.mConstants.ALLOW_WHILE_IDLE_QUOTA;
 
         testQuotasDeferralOnSet(trigger -> setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, trigger,
-                getNewMockPendingIntent(), false), quota, mAllowWhileIdleWindow);
+                getNewMockPendingIntent(), false, false), quota, mAllowWhileIdleWindow);
 
         // Refresh the state
         mService.removeLocked(TEST_CALLING_UID,
@@ -1744,7 +1854,7 @@ public class AlarmManagerServiceTest {
         mService.mAllowWhileIdleHistory.removeForPackage(TEST_CALLING_PACKAGE, TEST_CALLING_USER);
 
         testQuotasDeferralOnExpiration(trigger -> setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP,
-                trigger, getNewMockPendingIntent(), false), quota, mAllowWhileIdleWindow);
+                trigger, getNewMockPendingIntent(), false, false), quota, mAllowWhileIdleWindow);
 
         // Refresh the state
         mService.removeLocked(TEST_CALLING_UID,
@@ -1752,7 +1862,36 @@ public class AlarmManagerServiceTest {
         mService.mAllowWhileIdleHistory.removeForPackage(TEST_CALLING_PACKAGE, TEST_CALLING_USER);
 
         testQuotasNoDeferral(trigger -> setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, trigger,
-                getNewMockPendingIntent(), false), quota, mAllowWhileIdleWindow);
+                getNewMockPendingIntent(), false, false), quota, mAllowWhileIdleWindow);
+    }
+
+    @Test
+    public void allowWhileIdleCompatAlarmsInBatterySaver() throws Exception {
+        when(mAppStateTracker.areAlarmsRestrictedByBatterySaver(TEST_CALLING_UID,
+                TEST_CALLING_PACKAGE)).thenReturn(true);
+        when(mAppStateTracker.isForceAllAppsStandbyEnabled()).thenReturn(true);
+
+        final int quota = mService.mConstants.ALLOW_WHILE_IDLE_COMPAT_QUOTA;
+        final long window = mService.mConstants.ALLOW_WHILE_IDLE_COMPAT_WINDOW;
+
+        testQuotasDeferralOnSet(trigger -> setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, trigger,
+                getNewMockPendingIntent(), false, true), quota, window);
+
+        // Refresh the state
+        mService.removeLocked(TEST_CALLING_UID, REMOVE_REASON_UNDEFINED);
+        mService.mAllowWhileIdleCompatHistory.removeForPackage(TEST_CALLING_PACKAGE,
+                TEST_CALLING_USER);
+
+        testQuotasDeferralOnExpiration(trigger -> setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP,
+                trigger, getNewMockPendingIntent(), false, true), quota, window);
+
+        // Refresh the state
+        mService.removeLocked(TEST_CALLING_UID, REMOVE_REASON_UNDEFINED);
+        mService.mAllowWhileIdleCompatHistory.removeForPackage(TEST_CALLING_PACKAGE,
+                TEST_CALLING_USER);
+
+        testQuotasNoDeferral(trigger -> setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, trigger,
+                getNewMockPendingIntent(), false, true), quota, window);
     }
 
     @Test
@@ -1910,17 +2049,6 @@ public class AlarmManagerServiceTest {
         assertTrue(mBinder.hasScheduleExactAlarm(TEST_CALLING_PACKAGE, TEST_CALLING_USER));
     }
 
-    @Test
-    public void hasScheduleExactAlarmBinderCallChangeDisabled() throws RemoteException {
-        mockChangeEnabled(AlarmManager.REQUIRE_EXACT_ALARM_PERMISSION, false);
-
-        mockExactAlarmPermissionGrant(false, true, MODE_DEFAULT);
-        assertTrue(mBinder.hasScheduleExactAlarm(TEST_CALLING_PACKAGE, TEST_CALLING_USER));
-
-        mockExactAlarmPermissionGrant(true, false, MODE_ERRORED);
-        assertTrue(mBinder.hasScheduleExactAlarm(TEST_CALLING_PACKAGE, TEST_CALLING_USER));
-    }
-
     private void mockChangeEnabled(long changeId, boolean enabled) {
         doReturn(enabled).when(() -> CompatChanges.isChangeEnabled(eq(changeId), anyString(),
                 any(UserHandle.class)));
@@ -1938,6 +2066,53 @@ public class AlarmManagerServiceTest {
 
         mockExactAlarmPermissionGrant(false, true, MODE_ALLOWED);
         assertFalse(mBinder.hasScheduleExactAlarm(TEST_CALLING_PACKAGE, TEST_CALLING_USER));
+    }
+
+    @Test
+    public void canScheduleExactAlarmsBinderCallChangeDisabled() throws RemoteException {
+        mockChangeEnabled(AlarmManager.REQUIRE_EXACT_ALARM_PERMISSION, false);
+
+        mockExactAlarmPermissionGrant(false, true, MODE_DEFAULT);
+        assertTrue(mBinder.canScheduleExactAlarms(TEST_CALLING_PACKAGE));
+
+        mockExactAlarmPermissionGrant(true, false, MODE_ERRORED);
+        assertTrue(mBinder.canScheduleExactAlarms(TEST_CALLING_PACKAGE));
+    }
+
+    @Test
+    public void canScheduleExactAlarmsBinderCall() throws RemoteException {
+        mockChangeEnabled(AlarmManager.REQUIRE_EXACT_ALARM_PERMISSION, true);
+
+        // No permission, no exemption.
+        mockExactAlarmPermissionGrant(true, true, MODE_DEFAULT);
+        assertFalse(mBinder.canScheduleExactAlarms(TEST_CALLING_PACKAGE));
+
+        // No permission, no exemption.
+        mockExactAlarmPermissionGrant(true, false, MODE_ERRORED);
+        assertFalse(mBinder.canScheduleExactAlarms(TEST_CALLING_PACKAGE));
+
+        // Permission, no exemption.
+        mockExactAlarmPermissionGrant(true, false, MODE_DEFAULT);
+        assertTrue(mBinder.canScheduleExactAlarms(TEST_CALLING_PACKAGE));
+
+        // Permission, no exemption.
+        mockExactAlarmPermissionGrant(true, true, MODE_ALLOWED);
+        assertTrue(mBinder.canScheduleExactAlarms(TEST_CALLING_PACKAGE));
+
+        // No permission, exemption.
+        mockExactAlarmPermissionGrant(true, false, MODE_ERRORED);
+        when(mDeviceIdleInternal.isAppOnWhitelist(TEST_CALLING_UID)).thenReturn(true);
+        assertTrue(mBinder.canScheduleExactAlarms(TEST_CALLING_PACKAGE));
+
+        // No permission, exemption.
+        mockExactAlarmPermissionGrant(true, false, MODE_ERRORED);
+        when(mDeviceIdleInternal.isAppOnWhitelist(TEST_CALLING_UID)).thenReturn(false);
+        doReturn(true).when(() -> UserHandle.isCore(TEST_CALLING_UID));
+        assertTrue(mBinder.canScheduleExactAlarms(TEST_CALLING_PACKAGE));
+
+        // Both permission and exemption.
+        mockExactAlarmPermissionGrant(true, false, MODE_ALLOWED);
+        assertTrue(mBinder.canScheduleExactAlarms(TEST_CALLING_PACKAGE));
     }
 
     @Test
@@ -2086,14 +2261,17 @@ public class AlarmManagerServiceTest {
 
         final PendingIntent alarmPi = getNewMockPendingIntent();
         final AlarmManager.AlarmClockInfo alarmClock = mock(AlarmManager.AlarmClockInfo.class);
-        try {
-            mBinder.set(TEST_CALLING_PACKAGE, RTC_WAKEUP, 1234, WINDOW_EXACT, 0, 0,
-                    alarmPi, null, null, null, alarmClock);
-            fail("alarm clock binder call succeeded without permission");
-        } catch (SecurityException se) {
-            // Expected.
-        }
-        verify(mDeviceIdleInternal, never()).isAppOnWhitelist(anyInt());
+        mBinder.set(TEST_CALLING_PACKAGE, RTC_WAKEUP, 1234, WINDOW_EXACT, 0, 0,
+                alarmPi, null, null, null, alarmClock);
+
+        // Correct permission checks are invoked.
+        verify(mService).hasScheduleExactAlarmInternal(TEST_CALLING_PACKAGE, TEST_CALLING_UID);
+        verify(mDeviceIdleInternal).isAppOnWhitelist(UserHandle.getAppId(TEST_CALLING_UID));
+
+        verify(mService).setImpl(eq(RTC_WAKEUP), eq(1234L), eq(WINDOW_EXACT), eq(0L),
+                eq(alarmPi), isNull(), isNull(), eq(FLAG_STANDALONE | FLAG_WAKE_FROM_IDLE),
+                isNull(), eq(alarmClock), eq(TEST_CALLING_UID), eq(TEST_CALLING_PACKAGE),
+                isNull(), eq(EXACT_ALLOW_REASON_ALLOW_LIST));
     }
 
     @Test
@@ -2824,7 +3002,8 @@ public class AlarmManagerServiceTest {
             final PendingIntent pi = getNewMockPendingIntent();
             setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + i, pi);
 
-            verify(() -> MetricsHelper.pushAlarmScheduled(argThat(a -> a.matches(pi, null))));
+            verify(() -> MetricsHelper.pushAlarmScheduled(argThat(a -> a.matches(pi, null)),
+                    anyInt()));
         }
     }
 

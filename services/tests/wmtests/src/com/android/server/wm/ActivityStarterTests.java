@@ -348,6 +348,7 @@ public class ActivityStarterTests extends WindowTestsBase {
                 invocation -> {
                     throw new RuntimeException("Not stubbed");
                 });
+        doReturn(null).when(mMockPackageManager).getDefaultHomeActivity(anyInt());
         doReturn(mMockPackageManager).when(mAtm).getPackageManagerInternalLocked();
         doReturn(false).when(mMockPackageManager).isInstantAppInstallerComponent(any());
         doReturn(null).when(mMockPackageManager).resolveIntent(any(), any(), anyInt(), anyInt(),

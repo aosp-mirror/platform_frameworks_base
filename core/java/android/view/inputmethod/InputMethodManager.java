@@ -88,10 +88,8 @@ import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.autofill.AutofillManager;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.inputmethod.Completable;
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.inputmethod.InputMethodPrivilegedOperationsRegistry;
-import com.android.internal.inputmethod.ResultCallbacks;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.inputmethod.StartInputReason;
@@ -264,14 +262,6 @@ public final class InputMethodManager {
     static final String PENDING_EVENT_COUNTER = "aq:imm";
 
     private static final int NOT_A_SUBTYPE_ID = -1;
-
-    /**
-     * {@code true} to try to avoid blocking apps' UI thread by sending
-     * {@link StartInputReason#WINDOW_FOCUS_GAIN_REPORT_WITH_CONNECTION} and
-     * {@link StartInputReason#WINDOW_FOCUS_GAIN_REPORT_WITHOUT_CONNECTION} in a truly asynchronous
-     * way. {@code false} to go back to the previous synchronous semantics.
-     */
-    private static final boolean USE_REPORT_WINDOW_GAINED_FOCUS_ASYNC = true;
 
     /**
      * A constant that represents Voice IME.
@@ -686,28 +676,18 @@ public final class InputMethodManager {
                                 + ", nextFocusIsServedView=" + nextFocusHasConnection);
                     }
 
-                    if (USE_REPORT_WINDOW_GAINED_FOCUS_ASYNC) {
-                        mService.reportWindowGainedFocusAsync(
-                                nextFocusHasConnection, mClient, focusedView.getWindowToken(),
-                                startInputFlags, softInputMode, windowFlags,
-                                mCurRootView.mContext.getApplicationInfo().targetSdkVersion);
-                    } else {
-                        final int startInputReason = nextFocusHasConnection
-                                ? WINDOW_FOCUS_GAIN_REPORT_WITH_CONNECTION
-                                : WINDOW_FOCUS_GAIN_REPORT_WITHOUT_CONNECTION;
-                        final Completable.InputBindResult value =
-                                Completable.createInputBindResult();
-                        mService.startInputOrWindowGainedFocus(
-                                startInputReason, mClient,
-                                focusedView.getWindowToken(), startInputFlags, softInputMode,
-                                windowFlags,
-                                null,
-                                null,
-                                0 /* missingMethodFlags */,
-                                mCurRootView.mContext.getApplicationInfo().targetSdkVersion,
-                                ResultCallbacks.of(value));
-                        Completable.getResult(value); // ignore the result
-                    }
+                    final int startInputReason = nextFocusHasConnection
+                            ? WINDOW_FOCUS_GAIN_REPORT_WITH_CONNECTION
+                            : WINDOW_FOCUS_GAIN_REPORT_WITHOUT_CONNECTION;
+                    // ignore the result
+                    mService.startInputOrWindowGainedFocus(
+                            startInputReason, mClient,
+                            focusedView.getWindowToken(), startInputFlags, softInputMode,
+                            windowFlags,
+                            null,
+                            null,
+                            0 /* missingMethodFlags */,
+                            mCurRootView.mContext.getApplicationInfo().targetSdkVersion);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 }
@@ -1249,9 +1229,7 @@ public final class InputMethodManager {
             // We intentionally do not use UserHandle.getCallingUserId() here because for system
             // services InputMethodManagerInternal.getInputMethodListAsUser() should be used
             // instead.
-            final Completable.InputMethodInfoList value = Completable.createInputMethodInfoList();
-            mService.getInputMethodList(UserHandle.myUserId(), ResultCallbacks.of(value));
-            return Completable.getResult(value);
+            return mService.getInputMethodList(UserHandle.myUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1269,9 +1247,7 @@ public final class InputMethodManager {
     @NonNull
     public List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId) {
         try {
-            final Completable.InputMethodInfoList value = Completable.createInputMethodInfoList();
-            mService.getInputMethodList(userId,  ResultCallbacks.of(value));
-            return Completable.getResult(value);
+            return mService.getInputMethodList(userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1289,9 +1265,7 @@ public final class InputMethodManager {
             // We intentionally do not use UserHandle.getCallingUserId() here because for system
             // services InputMethodManagerInternal.getEnabledInputMethodListAsUser() should be used
             // instead.
-            final Completable.InputMethodInfoList value = Completable.createInputMethodInfoList();
-            mService.getEnabledInputMethodList(UserHandle.myUserId(), ResultCallbacks.of(value));
-            return Completable.getResult(value);
+            return mService.getEnabledInputMethodList(UserHandle.myUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1307,9 +1281,7 @@ public final class InputMethodManager {
     @RequiresPermission(INTERACT_ACROSS_USERS_FULL)
     public List<InputMethodInfo> getEnabledInputMethodListAsUser(@UserIdInt int userId) {
         try {
-            final Completable.InputMethodInfoList value = Completable.createInputMethodInfoList();
-            mService.getEnabledInputMethodList(userId, ResultCallbacks.of(value));
-            return Completable.getResult(value);
+            return mService.getEnabledInputMethodList(userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1328,13 +1300,9 @@ public final class InputMethodManager {
     public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(InputMethodInfo imi,
             boolean allowsImplicitlySelectedSubtypes) {
         try {
-            final Completable.InputMethodSubtypeList value =
-                    Completable.createInputMethodSubtypeList();
-            mService.getEnabledInputMethodSubtypeList(
+            return mService.getEnabledInputMethodSubtypeList(
                     imi == null ? null : imi.getId(),
-                    allowsImplicitlySelectedSubtypes,
-                    ResultCallbacks.of(value));
-            return Completable.getResult(value);
+                    allowsImplicitlySelectedSubtypes);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1669,15 +1637,12 @@ public final class InputMethodManager {
             try {
                 Log.d(TAG, "showSoftInput() view=" + view + " flags=" + flags + " reason="
                         + InputMethodDebug.softInputDisplayReasonToString(reason));
-                final Completable.Boolean value = Completable.createBoolean();
-                mService.showSoftInput(
+                return mService.showSoftInput(
                         mClient,
                         view.getWindowToken(),
                         flags,
                         resultReceiver,
-                        reason,
-                        ResultCallbacks.of(value));
-                return Completable.getResult(value);
+                        reason);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1704,15 +1669,12 @@ public final class InputMethodManager {
                     Log.w(TAG, "No current root view, ignoring showSoftInputUnchecked()");
                     return;
                 }
-                final Completable.Boolean value = Completable.createBoolean();
                 mService.showSoftInput(
                         mClient,
                         mCurRootView.getView().getWindowToken(),
                         flags,
                         resultReceiver,
-                        SoftInputShowHideReason.SHOW_SOFT_INPUT,
-                        ResultCallbacks.of(value));
-                Completable.getResult(value); // ignore the result
+                        SoftInputShowHideReason.SHOW_SOFT_INPUT);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1791,10 +1753,7 @@ public final class InputMethodManager {
             }
 
             try {
-                final Completable.Boolean value = Completable.createBoolean();
-                mService.hideSoftInput(mClient, windowToken, flags, resultReceiver, reason,
-                        ResultCallbacks.of(value));
-                return Completable.getResult(value);
+                return mService.hideSoftInput(mClient, windowToken, flags, resultReceiver, reason);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -2030,13 +1989,10 @@ public final class InputMethodManager {
                         + InputMethodDebug.startInputFlagsToString(startInputFlags));
             }
             try {
-                final Completable.InputBindResult value = Completable.createInputBindResult();
-                mService.startInputOrWindowGainedFocus(
+                res = mService.startInputOrWindowGainedFocus(
                         startInputReason, mClient, windowGainingFocus, startInputFlags,
                         softInputMode, windowFlags, tba, servedContext, missingMethodFlags,
-                        view.getContext().getApplicationInfo().targetSdkVersion,
-                        ResultCallbacks.of(value));
-                res = Completable.getResult(value);
+                        view.getContext().getApplicationInfo().targetSdkVersion);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -2144,15 +2100,12 @@ public final class InputMethodManager {
                 return;
             }
             try {
-                final Completable.Boolean value = Completable.createBoolean();
                 mService.hideSoftInput(
                         mClient,
                         mCurRootView.getView().getWindowToken(),
                         HIDE_NOT_ALWAYS,
                         null,
-                        SoftInputShowHideReason.HIDE_SOFT_INPUT,
-                        ResultCallbacks.of(value));
-                Completable.getResult(value); // ignore the result
+                        SoftInputShowHideReason.HIDE_SOFT_INPUT);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -2832,10 +2785,7 @@ public final class InputMethodManager {
                 ? SHOW_IM_PICKER_MODE_INCLUDE_AUXILIARY_SUBTYPES
                 : SHOW_IM_PICKER_MODE_EXCLUDE_AUXILIARY_SUBTYPES;
         try {
-            final Completable.Void value = Completable.createVoid();
-            mService.showInputMethodPickerFromSystem(
-                    mClient, mode, displayId, ResultCallbacks.of(value));
-            Completable.getResult(value);
+            mService.showInputMethodPickerFromSystem(mClient, mode, displayId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2843,10 +2793,7 @@ public final class InputMethodManager {
 
     private void showInputMethodPickerLocked() {
         try {
-            final Completable.Void value = Completable.createVoid();
-            mService.showInputMethodPickerFromClient(
-                    mClient, SHOW_IM_PICKER_MODE_AUTO, ResultCallbacks.of(value));
-            Completable.getResult(value);
+            mService.showInputMethodPickerFromClient(mClient, SHOW_IM_PICKER_MODE_AUTO);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2866,9 +2813,7 @@ public final class InputMethodManager {
     @TestApi
     public boolean isInputMethodPickerShown() {
         try {
-            final Completable.Boolean value = Completable.createBoolean();
-            mService.isInputMethodPickerShownForTest(ResultCallbacks.of(value));
-            return Completable.getResult(value);
+            return mService.isInputMethodPickerShownForTest();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2882,10 +2827,7 @@ public final class InputMethodManager {
      */
     public void showInputMethodAndSubtypeEnabler(String imiId) {
         try {
-            final Completable.Void value = Completable.createVoid();
-            mService.showInputMethodAndSubtypeEnablerFromClient(
-                    mClient, imiId, ResultCallbacks.of(value));
-            Completable.getResult(value);
+            mService.showInputMethodAndSubtypeEnablerFromClient(mClient, imiId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2898,9 +2840,7 @@ public final class InputMethodManager {
      */
     public InputMethodSubtype getCurrentInputMethodSubtype() {
         try {
-            final Completable.InputMethodSubtype value = Completable.createInputMethodSubtype();
-            mService.getCurrentInputMethodSubtype(ResultCallbacks.of(value));
-            return Completable.getResult(value);
+            return mService.getCurrentInputMethodSubtype();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2949,11 +2889,7 @@ public final class InputMethodManager {
         }
         final List<InputMethodSubtype> enabledSubtypes;
         try {
-            final Completable.InputMethodSubtypeList value =
-                    Completable.createInputMethodSubtypeList();
-            mService.getEnabledInputMethodSubtypeList(
-                    imeId, true, ResultCallbacks.of(value));
-            enabledSubtypes = Completable.getResult(value);
+            enabledSubtypes = mService.getEnabledInputMethodSubtypeList(imeId, true);
         } catch (RemoteException e) {
             return false;
         }
@@ -3021,9 +2957,7 @@ public final class InputMethodManager {
     @UnsupportedAppUsage
     public int getInputMethodWindowVisibleHeight() {
         try {
-            final Completable.Int value = Completable.createInt();
-            mService.getInputMethodWindowVisibleHeight(ResultCallbacks.of(value));
-            return Completable.getIntResult(value);
+            return mService.getInputMethodWindowVisibleHeight();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3118,9 +3052,7 @@ public final class InputMethodManager {
     @Deprecated
     public void setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes) {
         try {
-            final Completable.Void value = Completable.createVoid();
-            mService.setAdditionalInputMethodSubtypes(imiId, subtypes, ResultCallbacks.of(value));
-            Completable.getResult(value);
+            mService.setAdditionalInputMethodSubtypes(imiId, subtypes);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3128,9 +3060,7 @@ public final class InputMethodManager {
 
     public InputMethodSubtype getLastInputMethodSubtype() {
         try {
-            final Completable.InputMethodSubtype value = Completable.createInputMethodSubtype();
-            mService.getLastInputMethodSubtype(ResultCallbacks.of(value));
-            return Completable.getResult(value);
+            return mService.getLastInputMethodSubtype();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

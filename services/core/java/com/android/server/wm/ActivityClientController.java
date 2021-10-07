@@ -1069,8 +1069,7 @@ class ActivityClientController extends IActivityClientController.Stub {
         }
     }
 
-    @Override
-    public void restartActivityProcessIfVisible(IBinder token) {
+    void restartActivityProcessIfVisible(IBinder token) {
         ActivityTaskManagerService.enforceTaskPermission("restartActivityProcess");
         final long callingId = Binder.clearCallingIdentity();
         try {

@@ -31,6 +31,7 @@ import com.android.systemui.R;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarMobileView;
 import com.android.systemui.statusbar.StatusBarWifiView;
@@ -48,16 +49,22 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
     private final LinearLayout mStatusIcons;
     private final ArrayList<StatusBarMobileView> mMobileViews = new ArrayList<>();
     private final int mIconSize;
+    private final FeatureFlags mFeatureFlags;
 
     private StatusBarWifiView mWifiView;
     private boolean mDemoMode;
     private int mColor;
 
-    public DemoStatusIcons(LinearLayout statusIcons, int iconSize) {
+    public DemoStatusIcons(
+            LinearLayout statusIcons,
+            int iconSize,
+            FeatureFlags featureFlags
+    ) {
         super(statusIcons.getContext());
         mStatusIcons = statusIcons;
         mIconSize = iconSize;
         mColor = DarkIconDispatcher.DEFAULT_ICON_TINT;
+        mFeatureFlags = featureFlags;
 
         if (statusIcons instanceof StatusIconContainer) {
             setShouldRestrictIcons(((StatusIconContainer) statusIcons).isRestrictingIcons());
@@ -247,7 +254,8 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
 
     public void addMobileView(MobileIconState state) {
         Log.d(TAG, "addMobileView: ");
-        StatusBarMobileView view = StatusBarMobileView.fromContext(mContext, state.slot);
+        StatusBarMobileView view = StatusBarMobileView.fromContext(
+                mContext, state.slot, mFeatureFlags.isCombinedStatusBarSignalIconsEnabled());
 
         view.applyMobileState(state);
         view.setStaticDrawableColor(mColor);

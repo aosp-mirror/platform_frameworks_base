@@ -55,7 +55,7 @@
         android:clipChildren="false"
         android:clipToPadding="false"
         android:focusable="true"
-        android:paddingBottom="10dp"
+        android:paddingBottom="24dp"
         android:importantForAccessibility="yes" />
     </RelativeLayout>
 

@@ -45,6 +45,7 @@ import android.view.Choreographer;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
+import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -205,6 +206,7 @@ public class BubbleStackView extends FrameLayout
      * between bubble activities without needing both to be alive at the same time.
      */
     private SurfaceView mAnimatingOutSurfaceView;
+    private boolean mAnimatingOutSurfaceReady;
 
     /** Container for the animating-out SurfaceView. */
     private FrameLayout mAnimatingOutSurfaceContainer;
@@ -811,6 +813,20 @@ public class BubbleStackView extends FrameLayout
         mAnimatingOutSurfaceView.setZOrderOnTop(true);
         mAnimatingOutSurfaceView.setCornerRadius(mCornerRadius);
         mAnimatingOutSurfaceView.setLayoutParams(new ViewGroup.LayoutParams(0, 0));
+        mAnimatingOutSurfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
+            @Override
+            public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {}
+
+            @Override
+            public void surfaceCreated(SurfaceHolder surfaceHolder) {
+                mAnimatingOutSurfaceReady = true;
+            }
+
+            @Override
+            public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+                mAnimatingOutSurfaceReady = false;
+            }
+        });
         mAnimatingOutSurfaceContainer.addView(mAnimatingOutSurfaceView);
 
         mAnimatingOutSurfaceContainer.setPadding(
@@ -2653,7 +2669,7 @@ public class BubbleStackView extends FrameLayout
                 return;
             }
 
-            if (!mIsExpanded) {
+            if (!mIsExpanded || !mAnimatingOutSurfaceReady) {
                 onComplete.accept(false);
                 return;
             }

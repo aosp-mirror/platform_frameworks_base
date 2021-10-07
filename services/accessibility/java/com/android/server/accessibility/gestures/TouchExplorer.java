@@ -258,7 +258,12 @@ public class TouchExplorer extends BaseEventStreamTransformation
             super.onMotionEvent(event, rawEvent, policyFlags);
             return;
         }
-
+        try {
+            checkForMalformedEvent(event);
+        } catch (IllegalArgumentException e) {
+            Slog.e(LOG_TAG, "Ignoring malformed event: " + event.toString(), e);
+            return;
+        }
         if (DEBUG) {
             Slog.d(LOG_TAG, "Received event: " + event + ", policyFlags=0x"
                     + Integer.toHexString(policyFlags));
@@ -1219,6 +1224,32 @@ public class TouchExplorer extends BaseEventStreamTransformation
             // Announce the end of gesture recognition.
             mDispatcher.sendAccessibilityEvent(TYPE_GESTURE_DETECTION_END);
             clear();
+        }
+    }
+
+    /**
+     * Checks to see whether an event is consistent with itself.
+     *
+     * @throws IllegalArgumentException in the case of a malformed event.
+     */
+    private static void checkForMalformedEvent(MotionEvent event) {
+        if (event.getPointerCount() < 0) {
+            throw new IllegalArgumentException("Invalid pointer count: " + event.getPointerCount());
+        }
+        for (int i = 0; i < event.getPointerCount(); ++i) {
+            try {
+                int pointerId = event.getPointerId(i);
+                float x = event.getX(i);
+                float y = event.getY(i);
+                if (Float.isNaN(x) || Float.isNaN(y) || x < 0.0f || y < 0.0f) {
+                    throw new IllegalArgumentException(
+                            "Invalid coordinates: (" + x + ", " + y + ")");
+                }
+            } catch (Exception e) {
+                throw new IllegalArgumentException(
+                        "Encountered exception getting details of pointer " + i + " / "
+                                + event.getPointerCount(), e);
+            }
         }
     }
 

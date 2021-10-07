@@ -569,6 +569,9 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"Ukloni gosta"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Resetuj sesiju gosta"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Gost"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Želite li da resetujete sesiju gosta?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Resetuj"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"Sesija gosta se resetuje…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Slikaj"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Odaberi sliku"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Izaberite sliku"</string>

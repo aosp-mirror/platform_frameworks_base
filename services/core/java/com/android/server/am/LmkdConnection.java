@@ -50,7 +50,7 @@ public class LmkdConnection {
      * Used to hold the data for the statsd atoms logging
      * Must be in sync with statslog.h
      */
-    private static final int LMKD_REPLY_MAX_SIZE = 214;
+    private static final int LMKD_REPLY_MAX_SIZE = 222;
 
     // connection listener interface
     interface LmkdConnectionListener {

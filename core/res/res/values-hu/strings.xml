@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"GNSS-szolgáltatás"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Szenzoros értesítési szolgáltatás"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight szolgáltatás"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Időzóna-felismerő (Offline)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS időfrissítési szolgáltatás"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Zenefelismerést kezelő szolgáltatás"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"A rendszer törölni fogja eszközét"</string>
@@ -585,6 +584,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Próbálkozzon másik ujjlenyomattal"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Túl világos"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Próbálja beállítani"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Módosítsa minden alkalommal kis mértékben ujja helyzetét."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Ujjlenyomat hitelesítve"</string>
@@ -601,8 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nincsenek regisztrált ujjlenyomatok."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Ez az eszköz nem rendelkezik ujjlenyomat-érzékelővel."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Az érzékelő átmenetileg le van tiltva."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Nem lehet használni az ujjlenyomat-érzékelőt. Keresse fel a szervizt."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g>. ujj"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Ujjlenyomat használata"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"A folytatás ujjlenyomattal vagy képernyőzárral lehetséges"</string>
@@ -612,12 +611,15 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ujjlenyomat ikon"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Arcalapú feloldás"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Rögzítsen újra képet az arcáról"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"A felismerés javítása érdekében rögzítsen újra az arcáról készített képet"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Arcalapú feloldással kapcsolatos problémák"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Koppintson arcmodellje törléséhez, majd készítsen újat"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Az Arcalapú feloldás beállítása"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Feloldhatja a zárolást úgy, hogy ránéz a telefonra"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"További feloldási módszerek beállítása"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Koppintson ide ujjlenyomat hozzáadásához"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Feloldás ujjlenyomattal"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Nem lehet használni az ujjlenyomat-érzékelőt"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Keresse fel a szervizt."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Sikertelen az arc pontos rögzítése. Próbálja újra."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Túl világos. Próbálja kevésbé erős világítással."</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Túl sötét. Próbálja jobb megvilágítás mellett."</string>
@@ -1480,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"Elutasítás"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Az engedélykérés megtörtént"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Az engedélykérés megtörtént\na(z) <xliff:g id="ACCOUNT">%s</xliff:g> fiók számára."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"A(z) <xliff:g id="APP">%1$s</xliff:g> alkalmazás által kért engedély\na következő fiók számára: <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Ezt az alkalmazást munkaprofilján kívül használja"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Munkaprofiljában már használja az alkalmazást"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Beviteli mód"</string>

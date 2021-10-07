@@ -56,6 +56,8 @@ final class VoiceInteractionManagerServiceShellCommand extends ShellCommand {
                 return requestDisable(pw);
             case "restart-detection":
                 return requestRestartDetection(pw);
+            case "set-debug-hotword-logging":
+                return setDebugHotwordLogging(pw);
             default:
                 return handleDefaultCommands(cmd);
         }
@@ -76,8 +78,13 @@ final class VoiceInteractionManagerServiceShellCommand extends ShellCommand {
             pw.println("");
             pw.println("  disable [true|false]");
             pw.println("    Temporarily disable (when true) service");
+            pw.println("");
             pw.println("  restart-detection");
             pw.println("    Force a restart of a hotword detection service");
+            pw.println("");
+            pw.println("  set-debug-hotword-logging [true|false]");
+            pw.println("    Temporarily enable or disable debug logging for hotword result.");
+            pw.println("    The debug logging will be reset after one hour from last enable.");
             pw.println("");
         }
     }
@@ -153,6 +160,17 @@ final class VoiceInteractionManagerServiceShellCommand extends ShellCommand {
             mService.forceRestartHotwordDetector();
         } catch (Exception e) {
             return handleError(pw, "requestRestartDetection()", e);
+        }
+        return 0;
+    }
+
+    private int setDebugHotwordLogging(PrintWriter pw) {
+        boolean logging = Boolean.parseBoolean(getNextArgRequired());
+        Slog.i(TAG, "setDebugHotwordLogging(): " + logging);
+        try {
+            mService.setDebugHotwordLogging(logging);
+        } catch (Exception e) {
+            return handleError(pw, "setDebugHotwordLogging()", e);
         }
         return 0;
     }

@@ -112,6 +112,8 @@ filegroup {
     srcs: [
         "android/os/Temperature.aidl",
         "android/os/CoolingDevice.aidl",
+        "android/os/IHintManager.aidl",
+        "android/os/IHintSession.aidl",
         "android/os/IThermalEventListener.aidl",
         "android/os/IThermalStatusListener.aidl",
         "android/os/IThermalService.aidl",
@@ -354,6 +356,27 @@ filegroup {
         "com/android/internal/util/IState.java",
         "com/android/internal/util/State.java",
         "com/android/internal/util/StateMachine.java",
+    ],
+}
+
+java_library {
+    name: "modules-utils-statemachine",
+    srcs: [
+        "com/android/internal/util/IState.java",
+        "com/android/internal/util/State.java",
+        "com/android/internal/util/StateMachine.java",
+    ],
+    libs: [
+        "framework-annotations-lib",
+        "unsupportedappusage",
+    ],
+    sdk_version: "module_current",
+    min_sdk_version: "29",
+
+    visibility: ["//visibility:public"],
+    apex_available: [
+        "//apex_available:anyapex",
+        "//apex_available:platform",
     ],
 }
 

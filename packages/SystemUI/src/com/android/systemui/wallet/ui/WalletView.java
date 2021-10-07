@@ -22,6 +22,7 @@ import static com.android.systemui.wallet.ui.WalletCardCarousel.CARD_ANIM_ALPHA_
 import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -39,6 +40,7 @@ import android.widget.TextView;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
+import com.android.systemui.classifier.FalsingCollector;
 
 import java.util.List;
 
@@ -54,6 +56,8 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
     private final TextView mCardLabel;
     // Displays at the bottom of the screen, allow user to enter the default wallet app.
     private final Button mAppButton;
+    // Displays on the top right of the screen, allow user to enter the default wallet app.
+    private final Button mToolbarAppButton;
     // Displays underneath the carousel, allow user to unlock device, verify card, etc.
     private final Button mActionButton;
     private final Interpolator mOutInterpolator;
@@ -61,10 +65,11 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
     private final ViewGroup mCardCarouselContainer;
     private final TextView mErrorView;
     private final ViewGroup mEmptyStateView;
-    private CharSequence mCenterCardText;
     private boolean mIsDeviceLocked = false;
     private boolean mIsUdfpsEnabled = false;
     private OnClickListener mDeviceLockedActionOnClickListener;
+    private OnClickListener mShowWalletAppOnClickListener;
+    private FalsingCollector mFalsingCollector;
 
     public WalletView(Context context) {
         this(context, null);
@@ -79,6 +84,7 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
         mIcon = requireViewById(R.id.icon);
         mCardLabel = requireViewById(R.id.label);
         mAppButton = requireViewById(R.id.wallet_app_button);
+        mToolbarAppButton = requireViewById(R.id.wallet_toolbar_app_button);
         mActionButton = requireViewById(R.id.wallet_action_button);
         mErrorView = requireViewById(R.id.error_view);
         mEmptyStateView = requireViewById(R.id.wallet_empty_state);
@@ -91,6 +97,43 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         mCardCarousel.setExpectedViewWidth(getWidth());
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        updateViewForOrientation(newConfig.orientation);
+    }
+
+    private void updateViewForOrientation(@Configuration.Orientation int orientation) {
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            renderViewPortrait();
+        } else if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            renderViewLandscape();
+        }
+        ViewGroup.LayoutParams params = mCardCarouselContainer.getLayoutParams();
+        if (params instanceof MarginLayoutParams) {
+            ((MarginLayoutParams) params).topMargin =
+                    getResources().getDimensionPixelSize(
+                            R.dimen.wallet_card_carousel_container_top_margin);
+        }
+    }
+
+    private void renderViewPortrait() {
+        mAppButton.setVisibility(VISIBLE);
+        mToolbarAppButton.setVisibility(GONE);
+        mCardLabel.setVisibility(VISIBLE);
+        requireViewById(R.id.dynamic_placeholder).setVisibility(VISIBLE);
+
+        mAppButton.setOnClickListener(mShowWalletAppOnClickListener);
+    }
+
+    private void renderViewLandscape() {
+        mToolbarAppButton.setVisibility(VISIBLE);
+        mAppButton.setVisibility(GONE);
+        mCardLabel.setVisibility(GONE);
+        requireViewById(R.id.dynamic_placeholder).setVisibility(GONE);
+
+        mToolbarAppButton.setOnClickListener(mShowWalletAppOnClickListener);
     }
 
     @Override
@@ -137,10 +180,12 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
         mIsDeviceLocked = isDeviceLocked;
         mIsUdfpsEnabled = isUdfpsEnabled;
         mCardCarouselContainer.setVisibility(VISIBLE);
+        mCardCarousel.setVisibility(VISIBLE);
         mErrorView.setVisibility(GONE);
         mEmptyStateView.setVisibility(GONE);
         mIcon.setImageDrawable(getHeaderIcon(mContext, data.get(selectedIndex)));
         mCardLabel.setText(getLabelText(data.get(selectedIndex)));
+        updateViewForOrientation(getResources().getConfiguration().orientation);
         renderActionButton(data.get(selectedIndex), isDeviceLocked, mIsUdfpsEnabled);
         if (shouldAnimate) {
             animateViewsShown(mIcon, mCardLabel, mActionButton);
@@ -190,6 +235,10 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
         mDeviceLockedActionOnClickListener = onClickListener;
     }
 
+    void setShowWalletAppOnClickListener(OnClickListener onClickListener) {
+        mShowWalletAppOnClickListener = onClickListener;
+    }
+
     void hide() {
         setVisibility(GONE);
     }
@@ -204,10 +253,6 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
 
     WalletCardCarousel getCardCarousel() {
         return mCardCarousel;
-    }
-
-    Button getAppButton() {
-        return mAppButton;
     }
 
     Button getActionButton() {
@@ -285,5 +330,24 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
     private static CharSequence getActionButtonText(WalletCardViewInfo card) {
         String[] rawLabel = card.getLabel().toString().split("\\n");
         return rawLabel.length == 2 ? rawLabel[1] : null;
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (mFalsingCollector != null) {
+            mFalsingCollector.onTouchEvent(ev);
+        }
+
+        boolean result = super.dispatchTouchEvent(ev);
+
+        if (mFalsingCollector != null) {
+            mFalsingCollector.onMotionEventComplete();
+        }
+
+        return result;
+    }
+
+    public void setFalsingCollector(FalsingCollector falsingCollector) {
+        mFalsingCollector = falsingCollector;
     }
 }

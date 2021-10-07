@@ -27,13 +27,16 @@ import android.app.RemoteAction;
 import android.content.ComponentName;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
+import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.RotationUtils;
 import android.util.Slog;
 import android.view.IPinnedTaskListener;
+import android.view.Surface;
 import android.view.SurfaceControl;
 import android.window.PictureInPictureSurfaceTransaction;
 
@@ -237,7 +240,8 @@ class PinnedTaskController {
      * rotation of display. The final surface matrix will be replaced by PiPTaskOrganizer after it
      * receives the callback of fixed rotation completion.
      */
-    void startSeamlessRotationIfNeeded(SurfaceControl.Transaction t) {
+    void startSeamlessRotationIfNeeded(SurfaceControl.Transaction t,
+            int oldRotation, int newRotation) {
         final Rect bounds = mDestRotatedBounds;
         final PictureInPictureSurfaceTransaction pipTx = mPipTransaction;
         if (bounds == null && pipTx == null) {
@@ -280,6 +284,16 @@ class PinnedTaskController {
                 ? params.getSourceRectHint()
                 : null;
         Slog.i(TAG, "Seamless rotation PiP bounds=" + bounds + " hintRect=" + sourceHintRect);
+        final int rotationDelta = RotationUtils.deltaRotation(oldRotation, newRotation);
+        // Adjust for display cutout if applicable.
+        if (sourceHintRect != null && rotationDelta == Surface.ROTATION_270) {
+            if (pinnedTask.getDisplayCutoutInsets() != null) {
+                final int rotationBackDelta = RotationUtils.deltaRotation(newRotation, oldRotation);
+                final Rect displayCutoutInsets = RotationUtils.rotateInsets(
+                        Insets.of(pinnedTask.getDisplayCutoutInsets()), rotationBackDelta).toRect();
+                sourceHintRect.offset(displayCutoutInsets.left, displayCutoutInsets.top);
+            }
+        }
         final Rect contentBounds = sourceHintRect != null && areaBounds.contains(sourceHintRect)
                 ? sourceHintRect : areaBounds;
         final int w = contentBounds.width();

@@ -159,6 +159,10 @@ interface IAudioService {
 
     oneway void reloadAudioSettings();
 
+    Map getSurroundFormats();
+
+    List getReportedSurroundFormats();
+
     boolean setSurroundFormatEnabled(int audioFormat, boolean enabled);
 
     boolean isSurroundFormatEnabled(int audioFormat);

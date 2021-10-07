@@ -116,8 +116,10 @@ public abstract class InputMethodManagerInternal {
      *
      * @param windowToken the window token that is now in control, or {@code null} if no client
      *                   window is in control of the IME.
+     * @param imeParentChanged {@code true} when the window manager thoughts the IME surface parent
+     *                         will end up to change later, or {@code false} otherwise.
      */
-    public abstract void reportImeControl(@Nullable IBinder windowToken);
+    public abstract void reportImeControl(@Nullable IBinder windowToken, boolean imeParentChanged);
 
     /**
      * Destroys the IME surface.
@@ -176,7 +178,8 @@ public abstract class InputMethodManagerInternal {
                 }
 
                 @Override
-                public void reportImeControl(@Nullable IBinder windowToken) {
+                public void reportImeControl(@Nullable IBinder windowToken,
+                        boolean imeParentChanged) {
                 }
 
                 @Override

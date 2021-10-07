@@ -62,7 +62,7 @@ public class AuthBiometricFaceViewTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mFaceView = new TestableFaceView(mContext);
-        mFaceView.mIconController = mock(TestableFaceView.TestableIconController.class);
+        mFaceView.mFaceIconController = mock(TestableFaceView.TestableIconController.class);
         mFaceView.setCallback(mCallback);
 
         mFaceView.mNegativeButton = mNegativeButton;
@@ -78,18 +78,18 @@ public class AuthBiometricFaceViewTest extends SysuiTestCase {
     @Test
     public void testStateUpdated_whenDialogAnimatedIn() {
         mFaceView.onDialogAnimatedIn();
-        verify(mFaceView.mIconController)
+        verify(mFaceView.mFaceIconController)
                 .updateState(anyInt(), eq(AuthBiometricFaceView.STATE_AUTHENTICATING));
     }
 
     @Test
     public void testIconUpdatesState_whenDialogStateUpdated() {
         mFaceView.updateState(AuthBiometricFaceView.STATE_AUTHENTICATING);
-        verify(mFaceView.mIconController)
+        verify(mFaceView.mFaceIconController)
                 .updateState(anyInt(), eq(AuthBiometricFaceView.STATE_AUTHENTICATING));
 
         mFaceView.updateState(AuthBiometricFaceView.STATE_AUTHENTICATED);
-        verify(mFaceView.mIconController).updateState(
+        verify(mFaceView.mFaceIconController).updateState(
                 eq(AuthBiometricFaceView.STATE_AUTHENTICATING),
                 eq(AuthBiometricFaceView.STATE_AUTHENTICATED));
     }

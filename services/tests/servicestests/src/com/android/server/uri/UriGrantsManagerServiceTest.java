@@ -292,23 +292,29 @@ public class UriGrantsManagerServiceTest {
         intent.setClipData(clip);
 
         {
-            // When granting towards primary, persistable can't be honored so
-            // the entire grant fails
-            try {
-                mService.checkGrantUriPermissionFromIntent(
-                        intent, UID_PRIMARY_CAMERA, PKG_SOCIAL, USER_PRIMARY);
-                fail();
-            } catch (SecurityException expected) {
+            // The camera package shouldn't be able to see other packages or their providers,
+            // so make sure the grant only succeeds for the camera's URIs.
+            final NeededUriGrants nug = mService.checkGrantUriPermissionFromIntent(
+                    intent, UID_PRIMARY_CAMERA, PKG_SOCIAL, USER_PRIMARY);
+            if (nug != null && nug.uris != null) {
+                for (GrantUri gu : nug.uris) {
+                    if (!gu.uri.getAuthority().equals(PKG_CAMERA)) {
+                        fail();
+                    }
+                }
             }
         }
         {
-            // When granting towards secondary, persistable can't be honored so
-            // the entire grant fails
-            try {
-                mService.checkGrantUriPermissionFromIntent(
-                        intent, UID_PRIMARY_CAMERA, PKG_SOCIAL, USER_SECONDARY);
-                fail();
-            } catch (SecurityException expected) {
+            // The camera package shouldn't be able to see other packages or their providers,
+            // so make sure the grant only succeeds for the camera's URIs.
+            final NeededUriGrants nug = mService.checkGrantUriPermissionFromIntent(
+                    intent, UID_PRIMARY_CAMERA, PKG_SOCIAL, USER_SECONDARY);
+            if (nug != null && nug.uris != null) {
+                for (GrantUri gu : nug.uris) {
+                    if (!gu.uri.getAuthority().equals(PKG_CAMERA)) {
+                        fail();
+                    }
+                }
             }
         }
     }

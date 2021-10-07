@@ -19,6 +19,8 @@ package com.android.systemui.qs;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import static com.android.systemui.qs.dagger.QSFragmentModule.QS_USING_MEDIA_PLAYER;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.res.Configuration;
 import android.metrics.LogMaker;
@@ -42,6 +44,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.inject.Named;
@@ -68,6 +71,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
     private boolean mShouldUseSplitNotificationShade;
 
+    @Nullable
+    private Consumer<Boolean> mMediaVisibilityChangedListener;
     private int mLastOrientation;
     private String mCachedSpecs = "";
     private QSTileRevealController mQsTileRevealController;
@@ -89,12 +94,17 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             };
 
     private final Function1<Boolean, Unit> mMediaHostVisibilityListener = (visible) -> {
-        mView.onMediaVisibilityChanged(visible);
+        if (mMediaVisibilityChangedListener != null) {
+            mMediaVisibilityChangedListener.accept(visible);
+        }
         switchTileLayout(false);
         return null;
     };
 
     private boolean mUsingHorizontalLayout;
+
+    @Nullable
+    private Runnable mUsingHorizontalLayoutChangedListener;
 
     protected QSPanelControllerBase(
             T view,
@@ -128,6 +138,13 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mQSLogger.logAllTilesChangeListening(mView.isListening(), mView.getDumpableTag(), "");
     }
 
+    /**
+     * @return the media host for this panel
+     */
+    public MediaHost getMediaHost() {
+        return mMediaHost;
+    }
+
     @Override
     protected void onViewAttached() {
         mQsTileRevealController = createTileRevealController();
@@ -136,7 +153,6 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         }
 
         mMediaHost.addVisibilityChangeListener(mMediaHostVisibilityListener);
-        mView.onMediaVisibilityChanged(mMediaHost.getVisible());
         mView.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
         mHost.addCallback(mQSHostCallback);
         setTiles();
@@ -291,20 +307,15 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     }
 
     boolean switchTileLayout(boolean force) {
-        /** Whether or not the QuickQSPanel currently contains a media player. */
+        /* Whether or not the panel currently contains a media player. */
         boolean horizontal = shouldUseHorizontalLayout();
         if (horizontal != mUsingHorizontalLayout || force) {
             mUsingHorizontalLayout = horizontal;
-            for (QSPanelControllerBase.TileRecord record : mRecords) {
-                mView.removeTile(record);
-                record.tile.removeCallback(record.callback);
-            }
-            mView.setUsingHorizontalLayout(mUsingHorizontalLayout, mMediaHost.getHostView(), force,
-                    mUiEventLogger);
+            mView.setUsingHorizontalLayout(mUsingHorizontalLayout, mMediaHost.getHostView(), force);
             updateMediaDisappearParameters();
-
-            setTiles();
-
+            if (mUsingHorizontalLayoutChangedListener != null) {
+                mUsingHorizontalLayoutChangedListener.run();
+            }
             return true;
         }
         return false;
@@ -379,6 +390,20 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     public QSPanel.QSTileLayout getTileLayout() {
         return mView.getTileLayout();
+    }
+
+    /**
+     * Add a listener for when the media visibility changes.
+     */
+    public void setMediaVisibilityChangedListener(@NonNull Consumer<Boolean> listener) {
+        mMediaVisibilityChangedListener = listener;
+    }
+
+    /**
+     * Add a listener when the horizontal layout changes
+     */
+    public void setUsingHorizontalLayoutChangeListener(Runnable listener) {
+        mUsingHorizontalLayoutChangedListener = listener;
     }
 
     /** */

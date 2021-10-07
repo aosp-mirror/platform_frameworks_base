@@ -104,7 +104,6 @@
     <uses-permission android:name="android.permission.PERSISTENT_ACTIVITY" />
     <uses-permission android:name="android.permission.GET_PACKAGE_SIZE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
     <uses-permission android:name="android.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
@@ -162,6 +161,7 @@
     <uses-permission android:name="android.permission.READ_INPUT_STATE" />
     <uses-permission android:name="android.permission.SET_ORIENTATION" />
     <uses-permission android:name="android.permission.INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.INSTALL_PACKAGE_UPDATES" />
     <uses-permission android:name="com.android.permission.USE_INSTALLER_V2" />
     <uses-permission android:name="android.permission.INSTALL_TEST_ONLY_PACKAGE" />
     <uses-permission android:name="com.android.permission.USE_SYSTEM_DATA_LOADERS" />
@@ -419,6 +419,9 @@
     <!-- Permission required for running networking unit tests -->
     <uses-permission android:name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS" />
 
+    <!-- Permission required for CTS test - CtsHostsideNetworkTests -->
+    <uses-permission android:name="android.permission.OBSERVE_NETWORK_POLICY" />
+
     <!-- Permissions required for CTS test - TunerTest -->
     <uses-permission android:name="android.permission.ACCESS_TV_DESCRAMBLER" />
     <uses-permission android:name="android.permission.ACCESS_TV_TUNER" />
@@ -433,6 +436,8 @@
     <!-- Permissions required for CTS test - TVInputManagerTest -->
     <uses-permission android:name="android.permission.ACCESS_TUNED_INFO" />
     <uses-permission android:name="android.permission.TV_INPUT_HARDWARE" />
+    <uses-permission android:name="com.android.providers.tv.permission.ACCESS_WATCHED_PROGRAMS" />
+    <uses-permission android:name="com.android.providers.tv.permission.WRITE_EPG_DATA"/>
 
     <!-- Permission needed for CTS test - PrivilegedLocationPermissionTest -->
     <uses-permission android:name="android.permission.LOCATION_HARDWARE" />
@@ -562,6 +567,9 @@
 
     <!-- Permission required for CTS test - GlobalSearchSessionPlatformCtsTests -->
     <uses-permission android:name="android.permission.READ_GLOBAL_APP_SEARCH_DATA" />
+
+    <!-- Permission required for GTS test - PendingSystemUpdateTest -->
+    <uses-permission android:name="android.permission.NOTIFY_PENDING_SYSTEM_UPDATE" />
 
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"

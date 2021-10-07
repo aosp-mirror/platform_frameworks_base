@@ -28,6 +28,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -357,6 +359,15 @@ public class WindowProcessControllerTests extends WindowTestsBase {
 
     private ActivityRecord createActivityRecord(WindowProcessController wpc) {
         return new ActivityBuilder(mAtm).setCreateTask(true).setUseProcess(wpc).build();
+    }
+
+    @Test
+    public void testTopActivityUiModeChangeScheduleConfigChange() {
+        final ActivityRecord activity = createActivityRecord(mWpc);
+        activity.mVisibleRequested = true;
+        doReturn(true).when(activity).setOverrideNightMode(anyInt());
+        mWpc.updateNightModeForAllActivities(Configuration.UI_MODE_NIGHT_YES);
+        verify(activity).ensureActivityConfiguration(anyInt(), anyBoolean());
     }
 
     @Test

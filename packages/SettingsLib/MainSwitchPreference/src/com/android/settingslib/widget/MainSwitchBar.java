@@ -152,9 +152,6 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
     public void setTitle(CharSequence text) {
         if (mTextView != null) {
             mTextView.setText(text);
-            if (mSwitch != null) {
-                mSwitch.setContentDescription(mTextView.getText());
-            }
         }
     }
 

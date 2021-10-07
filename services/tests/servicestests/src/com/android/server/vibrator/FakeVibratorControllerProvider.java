@@ -46,6 +46,7 @@ final class FakeVibratorControllerProvider {
     private final List<VibrationEffectSegment> mEffectSegments = new ArrayList<>();
     private final List<Integer> mBraking = new ArrayList<>();
     private final List<Float> mAmplitudes = new ArrayList<>();
+    private final List<Boolean> mExternalControlStates = new ArrayList<>();
     private final Handler mHandler;
     private final FakeNativeWrapper mNativeWrapper;
 
@@ -139,6 +140,7 @@ final class FakeVibratorControllerProvider {
 
         @Override
         public void setExternalControl(boolean enabled) {
+            mExternalControlStates.add(enabled);
         }
 
         @Override
@@ -299,6 +301,11 @@ final class FakeVibratorControllerProvider {
     /** Return list of {@link VibrationEffectSegment} played by this controller, in order. */
     public List<VibrationEffectSegment> getEffectSegments() {
         return new ArrayList<>(mEffectSegments);
+    }
+
+    /** Return list of states set for external control to the fake vibrator hardware. */
+    public List<Boolean> getExternalControlStates() {
+        return mExternalControlStates;
     }
 
     /**

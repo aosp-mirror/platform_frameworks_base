@@ -26,7 +26,7 @@
     <!-- Needed for pushing the trace config file -->
     <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer"/>
     <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
-        <option name="push-file" key="trace_config_detailed.textproto" value="/data/misc/perfetto-traces/trace_config.textproto" />
+        <option name="push-file" key="trace_config_multi_user.textproto" value="/data/misc/perfetto-traces/trace_config.textproto" />
         <!--Install the content provider automatically when we push some file in sdcard folder.-->
         <!--Needed to avoid the installation during the test suite.-->
         <option name="push-file" key="trace_config_detailed.textproto" value="/sdcard/sample.textproto" />

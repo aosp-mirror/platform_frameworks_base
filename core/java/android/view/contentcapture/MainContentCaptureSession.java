@@ -323,9 +323,11 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         if (!hasStarted() && eventType != ContentCaptureEvent.TYPE_SESSION_STARTED
                 && eventType != ContentCaptureEvent.TYPE_CONTEXT_UPDATED) {
             // TODO(b/120494182): comment when this could happen (dialogs?)
-            Log.v(TAG, "handleSendEvent(" + getDebugState() + ", "
-                    + ContentCaptureEvent.getTypeAsString(eventType)
-                    + "): dropping because session not started yet");
+            if (sVerbose) {
+                Log.v(TAG, "handleSendEvent(" + getDebugState() + ", "
+                        + ContentCaptureEvent.getTypeAsString(eventType)
+                        + "): dropping because session not started yet");
+            }
             return;
         }
         if (mDisabled.get()) {
@@ -368,7 +370,10 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                     final CharSequence lastText = lastEvent.getText();
                     final boolean bothNonEmpty = !TextUtils.isEmpty(lastText)
                             && !TextUtils.isEmpty(text);
-                    boolean equalContent = TextUtils.equals(lastText, text);
+                    boolean equalContent =
+                            TextUtils.equals(lastText, text)
+                            && lastEvent.hasSameComposingSpan(event)
+                            && lastEvent.hasSameSelectionSpan(event);
                     if (equalContent) {
                         addEvent = false;
                     } else if (bothNonEmpty) {
@@ -768,7 +773,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
     void notifyContextUpdated(int sessionId, @Nullable ContentCaptureContext context) {
         mHandler.post(() -> sendEvent(new ContentCaptureEvent(sessionId, TYPE_CONTEXT_UPDATED)
-                .setClientContext(context)));
+                .setClientContext(context), FORCE_FLUSH));
     }
 
     @Override

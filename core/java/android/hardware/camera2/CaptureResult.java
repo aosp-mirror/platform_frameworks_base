@@ -2567,6 +2567,16 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} is not 1.0, and {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} is set to be
      * windowboxing, the camera framework will override the {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} to be
      * the active array.</p>
+     * <p>In the capture request, if the application sets {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} to a
+     * value != 1.0, the {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} tag in the capture result reflects the
+     * effective zoom ratio achieved by the camera device, and the {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}
+     * adjusts for additional crops that are not zoom related. Otherwise, if the application
+     * sets {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} to 1.0, or does not set it at all, the
+     * {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} tag in the result metadata will also be 1.0.</p>
+     * <p>When the application requests a physical stream for a logical multi-camera, the
+     * {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} in the physical camera result metadata will be 1.0, and
+     * the {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} tag reflects the amount of zoom and crop done by the
+     * physical camera device.</p>
      * <p><b>Range of valid values:</b><br>
      * {@link CameraCharacteristics#CONTROL_ZOOM_RATIO_RANGE android.control.zoomRatioRange}</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>

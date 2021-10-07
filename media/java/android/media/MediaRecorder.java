@@ -840,7 +840,7 @@ public class MediaRecorder implements AudioRouting,
         setVideoSize(profile.getWidth(), profile.getHeight());
         setVideoEncodingBitRate(profile.getBitrate());
         setVideoEncoder(profile.getCodec());
-        if (profile.getProfile() > 0) {
+        if (profile.getProfile() >= 0) {
             setVideoEncodingProfileLevel(profile.getProfile(), 0 /* level */);
         }
     }
@@ -1096,6 +1096,13 @@ public class MediaRecorder implements AudioRouting,
      * clipped internally to ensure the video recording can proceed smoothly based on
      * the capabilities of the platform.
      *
+     * <p>
+     * NB: the actual bitrate and other encoding characteristics may be affected by
+     * the minimum quality floor behavior introduced in
+     * {@link android.os.Build.VERSION_CODES#S}. More detail on how and where this
+     * impacts video encoding can be found in the
+     * {@link MediaCodec} page and looking for "quality floor" (near the top of the page).
+     *
      * @param bitRate the video encoding bit rate in bits per second.
      */
     public void setVideoEncodingBitRate(int bitRate) {
@@ -1121,10 +1128,10 @@ public class MediaRecorder implements AudioRouting,
      * @throws IllegalArgumentException when an invalid profile or level value is used.
      */
     public void setVideoEncodingProfileLevel(int profile, int level) {
-        if (profile <= 0)  {
+        if (profile < 0)  {
             throw new IllegalArgumentException("Video encoding profile is not positive");
         }
-        if (level <= 0)  {
+        if (level < 0)  {
             throw new IllegalArgumentException("Video encoding level is not positive");
         }
         setParameter("video-param-encoder-profile=" + profile);

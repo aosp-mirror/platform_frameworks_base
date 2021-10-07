@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Tvár sa nedá rozpoznať. Použite odtlačok prsta."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Pokračujte nasnímaním odtlačku prsta"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Odtlačok prsta sa nedá rozpoznať. Použite radšej zámku obrazovky."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Hľadáme vás…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Ikona tváre"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Tlačidlo úpravy veľkosti z dôvodu kompatibility."</string>
@@ -437,8 +439,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Táto akcia odblokuje prístup všetkým aplikáciám a službám, ktoré majú povolené používať fotoaparát."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Táto akcia odblokuje prístup všetkým aplikáciám a službám, ktoré majú povolené používať fotoaparát alebo mikrofón."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Zariadenie"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Potiahnutím nahor prepnete aplikácie"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Presunutím doprava rýchlo prepnete aplikácie"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Prepnúť prehľad"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Nabitá"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Nabíja sa"</string>
@@ -458,6 +458,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Upozornenie otvoríte opätovným klepnutím"</string>
     <string name="tap_again" msgid="1315420114387908655">"Klepnite znova"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Otvorte potiahnutím prstom nahor"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Stlačením otvoríte"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Potiahnutím nahor to skúste znova"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Ak chcete použiť NFC, odomknite"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Toto zariadenie patrí vašej organizácii"</string>
@@ -484,12 +485,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"Pridať používateľa"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Nový používateľ"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Odstrániť hosťa?"</string>
-    <!-- no translation found for guest_reset_guest_dialog_title (8904781614074479690) -->
-    <skip />
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Všetky aplikácie a údaje v tejto relácii budú odstránené."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Odstrániť"</string>
-    <!-- no translation found for guest_reset_guest_dialog_remove (4359825585658228699) -->
-    <skip />
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Hosť, vitajte späť!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Chcete v relácii pokračovať?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Začať odznova"</string>
@@ -679,7 +676,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Nastavte si všetko potrebné na rýchlejšie a bezpečnejšie nákupy telefónom"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Zobraziť všetko"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Odomknúť a zaplatiť"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Nenastavené"</string>
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Pridať kartu"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Aktualizuje sa"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Odomknúť a použiť"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Pri načítavaní kariet sa vyskytol problém. Skúste to neskôr."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Nastavenia uzamknutej obrazovky"</string>
@@ -1057,7 +1055,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Presunúť k okraju a skryť"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Presunúť z okraja a zobraziť"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"prepínač"</string>
-    <string name="quick_controls_title" msgid="7095074621086860062">"Ovládanie domácnosti"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Ovládanie zariadení"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Vyberte aplikáciu, ktorej ovládače si chcete pridať"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="few">Boli pridané <xliff:g id="NUMBER_1">%s</xliff:g> ovládacie prvky.</item>
@@ -1131,7 +1129,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Otvorená konverzácia"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Miniaplikácie konverzácií"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Klepnite na konverzáciu a pridajte ju tak na plochu"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Vráťte sa sem, až dostanete nejaké správy"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"Vaše nedávne konverzácie sa zobrazia tu"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Prioritné konverzácie"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Nedávne konverzácie"</string>
     <string name="okay" msgid="6490552955618608554">"OK"</string>
@@ -1160,8 +1158,11 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Pozrite si nedávne správy, zmeškané hovory a aktualizácie stavu"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Konverzácia"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"<xliff:g id="NAME">%1$s</xliff:g> poslal(a) správu"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Pozastavené režimom bez vyrušení"</string>
+    <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> poslal(a) správu: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> poslal(a) obrázok"</string>
+    <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> má aktualizáciu statusu: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
+    <string name="person_available" msgid="2318599327472755472">"K dispozícii"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Pri čítaní meradla batérie sa vyskytol problém"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Klepnutím si zobrazíte ďalšie informácie"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Žiadny budík"</string>

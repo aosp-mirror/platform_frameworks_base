@@ -970,6 +970,12 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
         final long token = Binder.clearCallingIdentity();
         try {
             CompressedApexInfoList apexInfoList = getCompressedApexInfoList(packageFile);
+            if (apexInfoList == null) {
+                Log.i(TAG, "apex_info.pb not present in OTA package. "
+                            + "Assuming device doesn't support compressed"
+                            + "APEX, continueing without allocating space.");
+                return true;
+            }
             ApexManager apexManager = ApexManager.getInstance();
             apexManager.reserveSpaceForCompressedApex(apexInfoList);
             return true;

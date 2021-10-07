@@ -1084,6 +1084,12 @@ public class Location implements Parcelable {
         mExtras = (extras == null) ? null : new Bundle(extras);
     }
 
+    /**
+     * Location equality is provided primarily for test purposes. Comparing locations for equality
+     * in production may indicate incorrect assumptions, and should be avoided whenever possible.
+     *
+     * <p>{@inheritDoc}
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -1121,7 +1127,17 @@ public class Location implements Parcelable {
                 && (!hasBearingAccuracy() || Float.compare(location.mBearingAccuracyDegrees,
                 mBearingAccuracyDegrees) == 0)
                 && Objects.equals(mProvider, location.mProvider)
-                && Objects.equals(mExtras, location.mExtras);
+                && areExtrasEqual(mExtras, location.mExtras);
+    }
+
+    private static boolean areExtrasEqual(@Nullable Bundle extras1, @Nullable Bundle extras2) {
+        if ((extras1 == null || extras1.isEmpty()) && (extras2 == null || extras2.isEmpty())) {
+            return true;
+        } else if (extras1 == null || extras2 == null) {
+            return false;
+        } else {
+            return extras1.kindofEquals(extras2);
+        }
     }
 
     @Override

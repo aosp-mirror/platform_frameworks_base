@@ -64,7 +64,7 @@ import javax.inject.Inject;
  */
 @SysUISingleton
 public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsController,
-        AppOpsManager.OnOpActiveChangedInternalListener,
+        AppOpsManager.OnOpActiveChangedListener,
         AppOpsManager.OnOpNotedListener, IndividualSensorPrivacyController.Callback,
         Dumpable {
 
@@ -359,11 +359,29 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
         mBGHandler.post(() -> notifySuscribersWorker(code, uid, packageName, active));
     }
 
+    /**
+     * Required to override, delegate to other. Should not be called.
+     */
+    public void onOpActiveChanged(String op, int uid, String packageName, boolean active) {
+        onOpActiveChanged(op, uid, packageName, null, active,
+                AppOpsManager.ATTRIBUTION_FLAGS_NONE, AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE);
+    }
+
+    // Get active app ops, and check if their attributions are trusted
     @Override
-    public void onOpActiveChanged(int code, int uid, String packageName, boolean active) {
+    public void onOpActiveChanged(String op, int uid, String packageName, String attributionTag,
+            boolean active, int attributionFlags, int attributionChainId) {
+        int code = AppOpsManager.strOpToOp(op);
         if (DEBUG) {
-            Log.w(TAG, String.format("onActiveChanged(%d,%d,%s,%s", code, uid, packageName,
-                    Boolean.toString(active)));
+            Log.w(TAG, String.format("onActiveChanged(%d,%d,%s,%s,%d,%d)", code, uid, packageName,
+                    Boolean.toString(active), attributionChainId, attributionFlags));
+        }
+        if (attributionChainId != AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE
+                && attributionFlags != AppOpsManager.ATTRIBUTION_FLAGS_NONE
+                && (attributionFlags & AppOpsManager.ATTRIBUTION_FLAG_ACCESSOR) == 0
+                && (attributionFlags & AppOpsManager.ATTRIBUTION_FLAG_TRUSTED) == 0) {
+            // if this attribution chain isn't trusted, and this isn't the accessor, do not show it.
+            return;
         }
         boolean activeChanged = updateActives(code, uid, packageName, active);
         if (!activeChanged) return; // early return

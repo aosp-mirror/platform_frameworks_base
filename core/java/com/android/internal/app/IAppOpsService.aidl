@@ -97,6 +97,7 @@ interface IAppOpsService {
 
     void setUserRestrictions(in Bundle restrictions, IBinder token, int userHandle);
     void setUserRestriction(int code, boolean restricted, IBinder token, int userHandle, in PackageTagsList excludedPackageTags);
+
     void removeUser(int userHandle);
 
     void startWatchingActive(in int[] ops, IAppOpsActiveCallback callback);

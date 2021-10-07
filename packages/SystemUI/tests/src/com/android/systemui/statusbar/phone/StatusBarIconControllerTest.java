@@ -31,6 +31,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.plugins.DarkIconDispatcher;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarMobileView;
 import com.android.systemui.statusbar.StatusBarWifiView;
@@ -66,7 +67,7 @@ public class StatusBarIconControllerTest extends LeakCheckedTest {
     @Test
     public void testSetCalledOnAdd_DarkIconManager() {
         LinearLayout layout = new LinearLayout(mContext);
-        TestDarkIconManager manager = new TestDarkIconManager(layout);
+        TestDarkIconManager manager = new TestDarkIconManager(layout, mock(FeatureFlags.class));
         testCallOnAdd_forManager(manager);
     }
 
@@ -103,8 +104,8 @@ public class StatusBarIconControllerTest extends LeakCheckedTest {
     private static class TestDarkIconManager extends DarkIconManager
             implements TestableIconManager {
 
-        TestDarkIconManager(LinearLayout group) {
-            super(group);
+        TestDarkIconManager(LinearLayout group, FeatureFlags featureFlags) {
+            super(group, featureFlags);
         }
 
         @Override
@@ -139,7 +140,7 @@ public class StatusBarIconControllerTest extends LeakCheckedTest {
 
     private static class TestIconManager extends IconManager implements TestableIconManager {
         TestIconManager(ViewGroup group) {
-            super(group);
+            super(group, mock(FeatureFlags.class));
         }
 
         @Override

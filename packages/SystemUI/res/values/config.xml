@@ -107,7 +107,7 @@
 
     <!-- Tiles native to System UI. Order should match "quick_settings_tiles_default" -->
     <string name="quick_settings_tiles_stock" translatable="false">
-        internet,wifi,cell,bt,flashlight,dnd,alarm,airplane,controls,wallet,rotation,battery,cast,screenrecord,mictoggle,cameratoggle,location,hotspot,inversion,saver,dark,work,night,reverse,reduce_brightness
+        internet,bt,flashlight,dnd,alarm,airplane,controls,wallet,rotation,battery,cast,screenrecord,mictoggle,cameratoggle,location,hotspot,inversion,saver,dark,work,night,reverse,reduce_brightness
     </string>
 
     <!-- The tiles to display in QuickSettings -->
@@ -442,9 +442,6 @@
      vibrator is capable of subtle vibrations -->
     <bool name="config_vibrateOnIconAnimation">false</bool>
 
-    <!-- Adjust the theme on fully custom and decorated custom view notifications -->
-    <bool name="config_adjustThemeOnNotificationCustomViews">false</bool>
-
     <!-- Notifications are sized to match the width of two (of 4) qs tiles in landscape. -->
     <bool name="config_skinnyNotifsInLandscape">true</bool>
 
@@ -523,8 +520,12 @@
      -->
     <string name="config_rounded_mask" translatable="false">"M8,0C3.6,0,0,3.6,0,8"</string>
 
-    <!-- Preferred refresh rate at keyguard, if supported by the display -->
+    <!-- Preferred refresh rate at keyguard, if supported by the display. Overrides
+         keyguardMaxRefreshRate. -->
     <integer name="config_keyguardRefreshRate">-1</integer>
+
+    <!-- Preferred max refresh rate at keyguard, if supported by the display. -->
+    <integer name="config_keyguardMaxRefreshRate">-1</integer>
 
     <!-- Whether or not to add a "people" notifications section -->
     <bool name="config_usePeopleFiltering">false</bool>
@@ -537,6 +538,11 @@
         <item>@*android:string/status_bar_rotate</item>
         <item>@*android:string/status_bar_headset</item>
     </string-array>
+
+
+    <!-- Whether to show estimate in QS header. Default to false in case there's not enough
+     space -->
+    <bool name="config_showBatteryEstimateQSBH">false</bool>
 
     <!-- A path similar to frameworks/base/core/res/res/values/config.xml
       config_mainBuiltInDisplayCutout that describes a path larger than the exact path of a display
@@ -657,13 +663,6 @@
         <!-- sensorLocationX -->
         <!-- sensorLocationY -->
         <!--sensorRadius -->
-    </integer-array>
-
-    <!-- The properties of the lock icon in pixels. -->
-    <integer-array name="config_lock_icon_props">
-        <!-- X -->
-        <!-- Y -->
-        <!-- radius -->
     </integer-array>
 
     <!-- Overrides the behavior of the face unlock keyguard bypass setting:

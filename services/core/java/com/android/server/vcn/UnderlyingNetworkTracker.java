@@ -409,7 +409,7 @@ public class UnderlyingNetworkTracker {
     }
 
     private void reevaluateNetworks() {
-        if (mRouteSelectionCallback == null) {
+        if (mIsQuitting || mRouteSelectionCallback == null) {
             return; // UnderlyingNetworkTracker has quit.
         }
 
@@ -459,6 +459,10 @@ public class UnderlyingNetworkTracker {
     class UnderlyingNetworkListener extends NetworkCallback {
         private final Map<Network, UnderlyingNetworkRecord.Builder>
                 mUnderlyingNetworkRecordBuilders = new ArrayMap<>();
+
+        UnderlyingNetworkListener() {
+            super(NetworkCallback.FLAG_INCLUDE_LOCATION_INFO);
+        }
 
         private TreeSet<UnderlyingNetworkRecord> getSortedUnderlyingNetworks() {
             TreeSet<UnderlyingNetworkRecord> sorted =

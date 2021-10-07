@@ -17,15 +17,19 @@
 package com.android.keyguard;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
+import android.widget.LinearLayout;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.settingslib.animation.AppearAnimationUtils;
 import com.android.settingslib.animation.DisappearAnimationUtils;
 import com.android.systemui.R;
+
+import java.util.List;
 
 /**
  * Displays a PIN pad for unlocking.
@@ -64,12 +68,44 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
     }
 
     @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        updateMargins();
+    }
+
+    @Override
     protected void resetState() {
     }
 
     @Override
     protected int getPasswordTextViewId() {
         return R.id.pinEntry;
+    }
+
+    private void updateMargins() {
+        int bottomMargin = mContext.getResources().getDimensionPixelSize(
+                R.dimen.num_pad_row_margin_bottom);
+
+        for (ViewGroup vg : List.of(mRow1, mRow2, mRow3)) {
+            ((LinearLayout.LayoutParams) vg.getLayoutParams()).setMargins(0, 0, 0, bottomMargin);
+        }
+
+        bottomMargin = mContext.getResources().getDimensionPixelSize(
+                R.dimen.num_pad_entry_row_margin_bottom);
+        ((LinearLayout.LayoutParams) mRow0.getLayoutParams()).setMargins(0, 0, 0, bottomMargin);
+
+        if (mEcaView != null) {
+            int ecaTopMargin = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.keyguard_eca_top_margin);
+            int ecaBottomMargin = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.keyguard_eca_bottom_margin);
+            ((LinearLayout.LayoutParams) mEcaView.getLayoutParams()).setMargins(0, ecaTopMargin,
+                    0, ecaBottomMargin);
+        }
+
+        View entryView = findViewById(R.id.pinEntry);
+        ViewGroup.LayoutParams lp = entryView.getLayoutParams();
+        lp.height = mContext.getResources().getDimensionPixelSize(R.dimen.keyguard_password_height);
+        entryView.setLayoutParams(lp);
     }
 
     @Override

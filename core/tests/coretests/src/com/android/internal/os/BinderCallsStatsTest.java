@@ -19,6 +19,7 @@ package com.android.internal.os;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -969,9 +970,59 @@ public class BinderCallsStatsTest {
     }
 
     @Test
+    public void testLatencyCollectionActiveEvenWithoutDeviceState() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats(null);
+        bcs.setCollectLatencyData(true);
+
+        Binder binder = new Binder();
+        CallSession callSession = bcs.callStarted(binder, 1, WORKSOURCE_UID);
+        assertNotEquals(null, callSession);
+
+        bcs.time += 10;
+        bcs.elapsedTime += 20;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
+
+        assertEquals(1, bcs.getLatencyObserver().getLatencyHistograms().size());
+    }
+
+    @Test
     public void testLatencyCollectionEnabledByDefault() {
         TestBinderCallsStats bcs = new TestBinderCallsStats();
         assertEquals(true, bcs.getCollectLatencyData());
+    }
+
+    @Test
+    public void testProcessSource() {
+        BinderCallsStats defaultCallsStats = new BinderCallsStats(
+                new BinderCallsStats.Injector());
+
+        BinderCallsStats systemServerCallsStats = new BinderCallsStats(
+                new BinderCallsStats.Injector(),
+                com.android.internal.os.BinderLatencyProto.Dims.SYSTEM_SERVER);
+
+        BinderCallsStats telephonyCallsStats = new BinderCallsStats(
+                new BinderCallsStats.Injector(),
+                com.android.internal.os.BinderLatencyProto.Dims.TELEPHONY);
+
+        BinderCallsStats bluetoothCallsStats = new BinderCallsStats(
+                new BinderCallsStats.Injector(),
+                com.android.internal.os.BinderLatencyProto.Dims.BLUETOOTH);
+
+        assertEquals(
+                com.android.internal.os.BinderLatencyProto.Dims.SYSTEM_SERVER,
+                defaultCallsStats.getLatencyObserver().getProcessSource());
+
+        assertEquals(
+                com.android.internal.os.BinderLatencyProto.Dims.SYSTEM_SERVER,
+                systemServerCallsStats.getLatencyObserver().getProcessSource());
+
+        assertEquals(
+                com.android.internal.os.BinderLatencyProto.Dims.TELEPHONY,
+                telephonyCallsStats.getLatencyObserver().getProcessSource());
+
+        assertEquals(
+                com.android.internal.os.BinderLatencyProto.Dims.BLUETOOTH,
+                bluetoothCallsStats.getLatencyObserver().getProcessSource());
     }
 
     private static class TestHandler extends Handler {

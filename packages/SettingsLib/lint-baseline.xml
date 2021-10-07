@@ -892,4 +892,26 @@
             column="59"/>
     </issue>
 
+    <issue
+        id="NewApi"
+        message="Call requires API level S (current min is 29): `android.os.UserManager#isUserForeground`"
+        errorLine1="                .getSystemService(UserManager.class).isUserForeground();"
+        errorLine2="                                                     ~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/enterprise/ManagedDeviceActionDisabledByAdminController.java"
+            line="120"
+            column="54"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 31 (current min is 29): `android.os.UserManager#isUserForeground`"
+        errorLine1="                .getSystemService(UserManager.class).isUserForeground();"
+        errorLine2="                                                     ~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SettingsLib/src/com/android/settingslib/enterprise/ManagedDeviceActionDisabledByAdminController.java"
+            line="120"
+            column="54"/>
+    </issue>
+
 </issues>

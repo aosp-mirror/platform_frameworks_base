@@ -155,7 +155,7 @@ class DistanceClassifier extends FalsingClassifier {
                 || interactionType == SHADE_DRAG
                 || interactionType == QS_COLLAPSE
                 || interactionType == Classifier.UDFPS_AUTHENTICATION
-                || interactionType == Classifier.DISABLED_UDFPS_AFFORDANCE
+                || interactionType == Classifier.LOCK_ICON
                 || interactionType == Classifier.QS_SWIPE) {
             return Result.passed(0);
         }

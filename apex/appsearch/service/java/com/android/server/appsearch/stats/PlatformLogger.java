@@ -22,7 +22,6 @@ import android.app.appsearch.exceptions.AppSearchException;
 import android.content.Context;
 import android.os.Process;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseIntArray;
@@ -33,6 +32,7 @@ import com.android.server.appsearch.AppSearchConfig;
 import com.android.server.appsearch.external.localstorage.AppSearchLogger;
 import com.android.server.appsearch.external.localstorage.stats.CallStats;
 import com.android.server.appsearch.external.localstorage.stats.InitializeStats;
+import com.android.server.appsearch.external.localstorage.stats.OptimizeStats;
 import com.android.server.appsearch.external.localstorage.stats.PutDocumentStats;
 import com.android.server.appsearch.external.localstorage.stats.RemoveStats;
 import com.android.server.appsearch.external.localstorage.stats.SearchStats;
@@ -46,7 +46,7 @@ import java.util.Objects;
 import java.util.Random;
 
 /**
- * Logger Implementation using Westworld.
+ * Logger Implementation for pushed atoms.
  *
  * <p>This class is thread-safe.
  *
@@ -55,11 +55,8 @@ import java.util.Random;
 public final class PlatformLogger implements AppSearchLogger {
     private static final String TAG = "AppSearchPlatformLogger";
 
-    // Context of the system service.
-    private final Context mContext;
-
-    // User we're logging for.
-    private final UserHandle mUserHandle;
+    // Context of the user we're logging for.
+    private final Context mUserContext;
 
     // Manager holding the configuration flags
     private final AppSearchConfig mConfig;
@@ -99,7 +96,7 @@ public final class PlatformLogger implements AppSearchLogger {
     private long mLastPushTimeMillisLocked = 0;
 
     /**
-     * Helper class to hold platform specific stats for Westworld.
+     * Helper class to hold platform specific stats for statsd.
      */
     static final class ExtraStats {
         // UID for the calling package of the stats.
@@ -117,13 +114,12 @@ public final class PlatformLogger implements AppSearchLogger {
     }
 
     /**
-     * Westworld constructor
+     * Constructor
      */
     public PlatformLogger(
-            @NonNull Context context, @NonNull UserHandle userHandle,
+            @NonNull Context userContext,
             @NonNull AppSearchConfig config) {
-        mContext = Objects.requireNonNull(context);
-        mUserHandle = Objects.requireNonNull(userHandle);
+        mUserContext = Objects.requireNonNull(userContext);
         mConfig = Objects.requireNonNull(config);
     }
 
@@ -150,7 +146,7 @@ public final class PlatformLogger implements AppSearchLogger {
     }
 
     @Override
-    public void logStats(@NonNull InitializeStats stats) throws AppSearchException {
+    public void logStats(@NonNull InitializeStats stats) {
         Objects.requireNonNull(stats);
         synchronized (mLock) {
             if (shouldLogForTypeLocked(CallStats.CALL_TYPE_INITIALIZE)) {
@@ -160,7 +156,7 @@ public final class PlatformLogger implements AppSearchLogger {
     }
 
     @Override
-    public void logStats(@NonNull SearchStats stats) throws AppSearchException {
+    public void logStats(@NonNull SearchStats stats) {
         Objects.requireNonNull(stats);
         synchronized (mLock) {
             if (shouldLogForTypeLocked(CallStats.CALL_TYPE_SEARCH)) {
@@ -170,8 +166,18 @@ public final class PlatformLogger implements AppSearchLogger {
     }
 
     @Override
-    public void logStats(@NonNull RemoveStats stats) throws AppSearchException {
+    public void logStats(@NonNull RemoveStats stats) {
         // TODO(b/173532925): Log stats
+    }
+
+    @Override
+    public void logStats(@NonNull OptimizeStats stats) {
+        Objects.requireNonNull(stats);
+        synchronized (mLock) {
+            if (shouldLogForTypeLocked(CallStats.CALL_TYPE_OPTIMIZE)) {
+                logStatsImplLocked(stats);
+            }
+        }
     }
 
     /**
@@ -208,7 +214,7 @@ public final class PlatformLogger implements AppSearchLogger {
                     stats.getNumOperationsSucceeded(),
                     stats.getNumOperationsFailed());
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-            // TODO(b/184204720) report hashing error to Westworld
+            // TODO(b/184204720) report hashing error to statsd
             //  We need to set a special value(e.g. 0xFFFFFFFF) for the hashing of the database,
             //  so in the dashboard we know there is some error for hashing.
             //
@@ -245,7 +251,7 @@ public final class PlatformLogger implements AppSearchLogger {
                     stats.getNativeNumTokensIndexed(),
                     stats.getNativeExceededMaxNumTokens());
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-            // TODO(b/184204720) report hashing error to Westworld
+            // TODO(b/184204720) report hashing error to statsd
             //  We need to set a special value(e.g. 0xFFFFFFFF) for the hashing of the database,
             //  so in the dashboard we know there is some error for hashing.
             //
@@ -291,7 +297,7 @@ public final class PlatformLogger implements AppSearchLogger {
                     stats.getDocumentRetrievingLatencyMillis(),
                     stats.getResultWithSnippetsCount());
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-            // TODO(b/184204720) report hashing error to Westworld
+            // TODO(b/184204720) report hashing error to statsd
             //  We need to set a special value(e.g. 0xFFFFFFFF) for the hashing of the database,
             //  so in the dashboard we know there is some error for hashing.
             //
@@ -331,6 +337,27 @@ public final class PlatformLogger implements AppSearchLogger {
                 stats.getResetStatusCode());
     }
 
+    @GuardedBy("mLock")
+    private void logStatsImplLocked(@NonNull OptimizeStats stats) {
+        mLastPushTimeMillisLocked = SystemClock.elapsedRealtime();
+        ExtraStats extraStats = createExtraStatsLocked(/*packageName=*/ null,
+                CallStats.CALL_TYPE_OPTIMIZE);
+        AppSearchStatsLog.write(AppSearchStatsLog.APP_SEARCH_OPTIMIZE_STATS_REPORTED,
+                extraStats.mSamplingInterval,
+                extraStats.mSkippedSampleCount,
+                stats.getStatusCode(),
+                stats.getTotalLatencyMillis(),
+                stats.getNativeLatencyMillis(),
+                stats.getDocumentStoreOptimizeLatencyMillis(),
+                stats.getIndexRestorationLatencyMillis(),
+                stats.getOriginalDocumentCount(),
+                stats.getDeletedDocumentCount(),
+                stats.getExpiredDocumentCount(),
+                stats.getStorageSizeBeforeBytes(),
+                stats.getStorageSizeAfterBytes(),
+                stats.getTimeSinceLastOptimizeMillis());
+    }
+
     /**
      * Calculate the hash code as an integer by returning the last four bytes of its MD5.
      *
@@ -368,7 +395,7 @@ public final class PlatformLogger implements AppSearchLogger {
     /**
      * Creates {@link ExtraStats} to hold additional information generated for logging.
      *
-     * <p>This method is called by most of logToWestworldLocked functions to reduce code
+     * <p>This method is called by most of logStatsImplLocked functions to reduce code
      * duplication.
      */
     // TODO(b/173532925) Once we add CTS test for logging atoms and can inspect the result, we can
@@ -451,7 +478,7 @@ public final class PlatformLogger implements AppSearchLogger {
     private int getPackageUidAsUserLocked(@NonNull String packageName) {
         Integer packageUid = mPackageUidCacheLocked.get(packageName);
         if (packageUid == null) {
-            packageUid = PackageUtil.getPackageUidAsUser(mContext, packageName, mUserHandle);
+            packageUid = PackageUtil.getPackageUid(mUserContext, packageName);
             if (packageUid != Process.INVALID_UID) {
                 mPackageUidCacheLocked.put(packageName, packageUid);
             }
@@ -469,15 +496,19 @@ public final class PlatformLogger implements AppSearchLogger {
                 return mConfig.getCachedSamplingIntervalForBatchCallStats();
             case CallStats.CALL_TYPE_PUT_DOCUMENT:
                 return mConfig.getCachedSamplingIntervalForPutDocumentStats();
-            case CallStats.CALL_TYPE_UNKNOWN:
             case CallStats.CALL_TYPE_INITIALIZE:
+                return mConfig.getCachedSamplingIntervalForInitializeStats();
+            case CallStats.CALL_TYPE_SEARCH:
+                return mConfig.getCachedSamplingIntervalForSearchStats();
+            case CallStats.CALL_TYPE_GLOBAL_SEARCH:
+                return mConfig.getCachedSamplingIntervalForGlobalSearchStats();
+            case CallStats.CALL_TYPE_OPTIMIZE:
+                return mConfig.getCachedSamplingIntervalForOptimizeStats();
+            case CallStats.CALL_TYPE_UNKNOWN:
             case CallStats.CALL_TYPE_SET_SCHEMA:
             case CallStats.CALL_TYPE_GET_DOCUMENT:
             case CallStats.CALL_TYPE_REMOVE_DOCUMENT_BY_ID:
-            case CallStats.CALL_TYPE_SEARCH:
-            case CallStats.CALL_TYPE_OPTIMIZE:
             case CallStats.CALL_TYPE_FLUSH:
-            case CallStats.CALL_TYPE_GLOBAL_SEARCH:
             case CallStats.CALL_TYPE_REMOVE_DOCUMENT_BY_SEARCH:
                 // TODO(b/173532925) Some of them above will have dedicated sampling ratio config
             default:

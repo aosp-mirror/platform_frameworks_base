@@ -23,9 +23,11 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.PixelFormat;
+import android.hardware.display.DisplayManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.ISidefpsController;
+import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -41,6 +43,8 @@ import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import javax.inject.Inject;
 
+import kotlin.Unit;
+
 /**
  * Shows and hides the side fingerprint sensor (side-fps) overlay and handles side fps touch events.
  */
@@ -52,6 +56,8 @@ public class SidefpsController {
     private final FingerprintManager mFingerprintManager;
     private final WindowManager mWindowManager;
     private final DelayableExecutor mFgExecutor;
+    @VisibleForTesting @NonNull final BiometricOrientationEventListener mOrientationListener;
+
     // TODO: update mDisplayHeight and mDisplayWidth for multi-display devices
     private final int mDisplayHeight;
     private final int mDisplayWidth;
@@ -89,12 +95,22 @@ public class SidefpsController {
             @NonNull LayoutInflater inflater,
             @Nullable FingerprintManager fingerprintManager,
             @NonNull WindowManager windowManager,
-            @Main DelayableExecutor fgExecutor) {
+            @Main DelayableExecutor fgExecutor,
+            @NonNull DisplayManager displayManager,
+            @Main Handler handler) {
         mContext = context;
         mInflater = inflater;
         mFingerprintManager = checkNotNull(fingerprintManager);
         mWindowManager = windowManager;
         mFgExecutor = fgExecutor;
+        mOrientationListener = new BiometricOrientationEventListener(
+                context,
+                () -> {
+                    onOrientationChanged();
+                    return Unit.INSTANCE;
+                },
+                displayManager,
+                handler);
 
         mSensorProps = findFirstSidefps();
         checkArgument(mSensorProps != null);
@@ -119,14 +135,15 @@ public class SidefpsController {
         mFingerprintManager.setSidefpsController(mSidefpsControllerImpl);
     }
 
-    void show() {
+    private void show() {
         mView = (SidefpsView) mInflater.inflate(R.layout.sidefps_view, null, false);
         mView.setSensorProperties(mSensorProps);
         mWindowManager.addView(mView, computeLayoutParams());
 
+        mOrientationListener.enable();
     }
 
-    void hide() {
+    private void hide() {
         if (mView != null) {
             mWindowManager.removeView(mView);
             mView.setOnTouchListener(null);
@@ -135,14 +152,16 @@ public class SidefpsController {
         } else {
             Log.v(TAG, "hideUdfpsOverlay | the overlay is already hidden");
         }
+
+        mOrientationListener.disable();
     }
 
-
-    void onConfigurationChanged() {
+    private void onOrientationChanged() {
         // If mView is null or if view is hidden, then return.
         if (mView == null || !mIsVisible) {
             return;
         }
+
         // If the overlay needs to be displayed with a new configuration, destroy the current
         // overlay, and re-create and show the overlay with the updated LayoutParams.
         hide();

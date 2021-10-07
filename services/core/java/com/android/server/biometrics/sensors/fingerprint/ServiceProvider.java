@@ -85,9 +85,12 @@ public interface ServiceProvider {
     void scheduleRevokeChallenge(int sensorId, int userId, @NonNull IBinder token,
             @NonNull String opPackageName, long challenge);
 
-    void scheduleEnroll(int sensorId, @NonNull IBinder token, byte[] hardwareAuthToken, int userId,
-            @NonNull IFingerprintServiceReceiver receiver, @NonNull String opPackageName,
-            @FingerprintManager.EnrollReason int enrollReason,
+    /**
+     * Schedules fingerprint enrollment.
+     */
+    void scheduleEnroll(int sensorId, @NonNull IBinder token, @NonNull byte[] hardwareAuthToken,
+            int userId, @NonNull IFingerprintServiceReceiver receiver,
+            @NonNull String opPackageName, @FingerprintManager.EnrollReason int enrollReason,
             @NonNull FingerprintStateCallback fingerprintStateCallback);
 
     void cancelEnrollment(int sensorId, @NonNull IBinder token);

@@ -2599,11 +2599,11 @@ public final class Debug
     public static native long getIonPoolsSizeKb();
 
     /**
-     * Return GPU DMA buffer usage in kB or -1 on error.
+     * Returns the global total GPU-private memory in kB or -1 on error.
      *
      * @hide
      */
-    public static native long getGpuDmaBufUsageKb();
+    public static native long getGpuPrivateMemoryKb();
 
     /**
      * Return DMA-BUF memory mapped by processes in kB.

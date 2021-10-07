@@ -77,6 +77,7 @@ import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.phone.ShadeController;
@@ -227,11 +228,13 @@ public class DependencyProvider {
             Lazy<StatusBar> statusBarLazy,
             ShadeController shadeController,
             NotificationRemoteInputManager notificationRemoteInputManager,
+            NotificationShadeDepthController notificationShadeDepthController,
             SystemActions systemActions,
             @Main Handler mainHandler,
             UiEventLogger uiEventLogger,
             NavigationBarOverlayController navBarOverlayController,
-            ConfigurationController configurationController) {
+            ConfigurationController configurationController,
+            UserTracker userTracker) {
         return new NavigationBarController(context,
                 windowManager,
                 assistManagerLazy,
@@ -252,11 +255,13 @@ public class DependencyProvider {
                 statusBarLazy,
                 shadeController,
                 notificationRemoteInputManager,
+                notificationShadeDepthController,
                 systemActions,
                 mainHandler,
                 uiEventLogger,
                 navBarOverlayController,
-                configurationController);
+                configurationController,
+                userTracker);
     }
 
     /** */

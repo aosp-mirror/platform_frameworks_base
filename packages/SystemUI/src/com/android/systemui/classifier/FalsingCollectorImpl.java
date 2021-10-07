@@ -16,6 +16,8 @@
 
 package com.android.systemui.classifier;
 
+import static com.android.systemui.dock.DockManager.DockEventListener;
+
 import android.hardware.SensorManager;
 import android.hardware.biometrics.BiometricSourceType;
 import android.util.Log;
@@ -25,9 +27,12 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.sensors.ProximitySensor;
@@ -53,6 +58,8 @@ class FalsingCollectorImpl implements FalsingCollector {
     private final ProximitySensor mProximitySensor;
     private final StatusBarStateController mStatusBarStateController;
     private final KeyguardStateController mKeyguardStateController;
+    private final BatteryController mBatteryController;
+    private final DockManager mDockManager;
     private final DelayableExecutor mMainExecutor;
     private final SystemClock mSystemClock;
 
@@ -89,12 +96,46 @@ class FalsingCollectorImpl implements FalsingCollector {
                 }
             };
 
+
+    private final BatteryStateChangeCallback mBatteryListener = new BatteryStateChangeCallback() {
+        @Override
+        public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
+        }
+
+        @Override
+        public void onWirelessChargingChanged(boolean isWirelessCharging) {
+            if (isWirelessCharging || mDockManager.isDocked()) {
+                mProximitySensor.pause();
+            } else {
+                mProximitySensor.resume();
+            }
+        }
+    };
+
+    private final DockEventListener mDockEventListener = new DockEventListener() {
+        @Override
+        public void onEvent(int event) {
+            if (event == DockManager.STATE_NONE && !mBatteryController.isWirelessCharging()) {
+                mProximitySensor.resume();
+            } else {
+                mProximitySensor.pause();
+            }
+        }
+    };
+
     @Inject
-    FalsingCollectorImpl(FalsingDataProvider falsingDataProvider, FalsingManager falsingManager,
-            KeyguardUpdateMonitor keyguardUpdateMonitor, HistoryTracker historyTracker,
-            ProximitySensor proximitySensor, StatusBarStateController statusBarStateController,
+    FalsingCollectorImpl(
+            FalsingDataProvider falsingDataProvider,
+            FalsingManager falsingManager,
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
+            HistoryTracker historyTracker,
+            ProximitySensor proximitySensor,
+            StatusBarStateController statusBarStateController,
             KeyguardStateController keyguardStateController,
-            @Main DelayableExecutor mainExecutor, SystemClock systemClock) {
+            BatteryController batteryController,
+            DockManager dockManager,
+            @Main DelayableExecutor mainExecutor,
+            SystemClock systemClock) {
         mFalsingDataProvider = falsingDataProvider;
         mFalsingManager = falsingManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -102,9 +143,10 @@ class FalsingCollectorImpl implements FalsingCollector {
         mProximitySensor = proximitySensor;
         mStatusBarStateController = statusBarStateController;
         mKeyguardStateController = keyguardStateController;
+        mBatteryController = batteryController;
+        mDockManager = dockManager;
         mMainExecutor = mainExecutor;
         mSystemClock = systemClock;
-
 
         mProximitySensor.setTag(PROXIMITY_SENSOR_TAG);
         mProximitySensor.setDelay(SensorManager.SENSOR_DELAY_GAME);
@@ -113,6 +155,9 @@ class FalsingCollectorImpl implements FalsingCollector {
         mState = mStatusBarStateController.getState();
 
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateCallback);
+
+        mBatteryController.addCallback(mBatteryListener);
+        mDockManager.addListener(mDockEventListener);
     }
 
     @Override
@@ -312,6 +357,8 @@ class FalsingCollectorImpl implements FalsingCollector {
         unregisterSensors();
         mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateCallback);
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
+        mBatteryController.removeCallback(mBatteryListener);
+        mDockManager.removeListener(mDockEventListener);
     }
 
     @Override
@@ -351,9 +398,7 @@ class FalsingCollectorImpl implements FalsingCollector {
     }
 
     private void registerSensors() {
-        if (!mFalsingDataProvider.isWirelessCharging()) {
-            mProximitySensor.register(mSensorEventListener);
-        }
+        mProximitySensor.register(mSensorEventListener);
     }
 
     private void unregisterSensors() {

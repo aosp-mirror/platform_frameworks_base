@@ -444,7 +444,7 @@
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Carica residua: meno di <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Carica residua: meno di <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Tempo residuo: più di <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Tempo residuo: più di <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Tempo rimanente: più di <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Il telefono potrebbe spegnersi a breve"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Il tablet potrebbe spegnersi a breve"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Il dispositivo potrebbe spegnersi a breve"</string>
@@ -568,6 +568,9 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"Rimuovi ospite"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Reimposta sessione Ospite"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Ospite"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Reimpostare sessione Ospite?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Reimposta"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"Reimpostazione sessione Ospite in corso…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Scatta una foto"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Scegli un\'immagine"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Seleziona la foto"</string>

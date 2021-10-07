@@ -41,6 +41,11 @@ class SnapshotStartingData extends StartingData {
     }
 
     @Override
+    boolean needRevealAnimation() {
+        return false;
+    }
+
+    @Override
     boolean hasImeSurface() {
         return mSnapshot.hasImeSurface();
     }

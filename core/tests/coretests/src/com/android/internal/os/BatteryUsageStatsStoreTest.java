@@ -59,6 +59,7 @@ public class BatteryUsageStatsStoreTest {
         mBatteryStats = new MockBatteryStatsImpl(mMockClocks);
         mBatteryStats.setNoAutoReset(true);
         mBatteryStats.setPowerProfile(mock(PowerProfile.class));
+        mBatteryStats.onSystemReady();
 
         Context context = InstrumentationRegistry.getContext();
 
@@ -67,6 +68,7 @@ public class BatteryUsageStatsStoreTest {
 
         mBatteryUsageStatsStore = new BatteryUsageStatsStore(context, mBatteryStats,
                 mStoreDirectory, new TestHandler(), MAX_BATTERY_STATS_SNAPSHOT_STORAGE_BYTES);
+        mBatteryUsageStatsStore.onSystemReady();
 
         mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context, mBatteryStats);
     }

@@ -18,9 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.view.DisplayCutout;
 import android.view.View;
-import android.view.WindowInsets;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.ViewClippingUtil;
@@ -61,7 +59,6 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
     private final NotificationPanelViewController mNotificationPanelViewController;
     private final Consumer<ExpandableNotificationRow>
             mSetTrackingHeadsUp = this::setTrackingHeadsUp;
-    private final Runnable mUpdatePanelTranslation = this::updatePanelTranslation;
     private final BiConsumer<Float, Float> mSetExpandedHeight = this::setAppearFraction;
     private final KeyguardBypassController mBypassController;
     private final StatusBarStateController mStatusBarStateController;
@@ -75,9 +72,6 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
     float mAppearFraction;
     private ExpandableNotificationRow mTrackedChild;
     private boolean mShown;
-    private final View.OnLayoutChangeListener mStackScrollLayoutChangeListener =
-            (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom)
-                    -> updatePanelTranslation();
     private final ViewClippingUtil.ClippingParameters mParentClippingParams =
             new ViewClippingUtil.ClippingParameters() {
                 @Override
@@ -134,10 +128,8 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
         mStackScrollerController = stackScrollerController;
         mNotificationPanelViewController = notificationPanelViewController;
         notificationPanelViewController.addTrackingHeadsUpListener(mSetTrackingHeadsUp);
-        notificationPanelViewController.setVerticalTranslationListener(mUpdatePanelTranslation);
         notificationPanelViewController.setHeadsUpAppearanceController(this);
         mStackScrollerController.addOnExpandedHeightChangedListener(mSetExpandedHeight);
-        mStackScrollerController.addOnLayoutChangeListener(mStackScrollLayoutChangeListener);
         mStackScrollerController.setHeadsUpAppearanceController(this);
         mClockView = clockView;
         mOperatorNameView = operatorNameView;
@@ -174,7 +166,6 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
         mNotificationPanelViewController.setVerticalTranslationListener(null);
         mNotificationPanelViewController.setHeadsUpAppearanceController(null);
         mStackScrollerController.removeOnExpandedHeightChangedListener(mSetExpandedHeight);
-        mStackScrollerController.removeOnLayoutChangeListener(mStackScrollLayoutChangeListener);
         mDarkIconDispatcher.removeDarkReceiver(this);
     }
 
@@ -187,63 +178,6 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
     public void onHeadsUpPinned(NotificationEntry entry) {
         updateTopEntry();
         updateHeader(entry);
-    }
-
-    /** To count the distance from the window right boundary to scroller right boundary. The
-     * distance formula is the following:
-     *     Y = screenSize - (SystemWindow's width + Scroller.getRight())
-     * There are four modes MUST to be considered in Cut Out of RTL.
-     * No Cut Out:
-     *   Scroller + NB
-     *   NB + Scroller
-     *     => SystemWindow = NavigationBar's width
-     *     => Y = screenSize - (SystemWindow's width + Scroller.getRight())
-     * Corner Cut Out or Tall Cut Out:
-     *   cut out + Scroller + NB
-     *   NB + Scroller + cut out
-     *     => SystemWindow = NavigationBar's width
-     *     => Y = screenSize - (SystemWindow's width + Scroller.getRight())
-     * Double Cut Out:
-     *   cut out left + Scroller + (NB + cut out right)
-     *     SystemWindow = NavigationBar's width + cut out right width
-     *     => Y = screenSize - (SystemWindow's width + Scroller.getRight())
-     *   (cut out left + NB) + Scroller + cut out right
-     *     SystemWindow = NavigationBar's width + cut out left width
-     *     => Y = screenSize - (SystemWindow's width + Scroller.getRight())
-     * @return the translation X value for RTL. In theory, it should be negative. i.e. -Y
-     */
-    private int getRtlTranslation() {
-        if (mPoint == null) {
-            mPoint = new Point();
-        }
-
-        int realDisplaySize = 0;
-        if (mStackScrollerController.getDisplay() != null) {
-            mStackScrollerController.getDisplay().getRealSize(mPoint);
-            realDisplaySize = mPoint.x;
-        }
-
-        WindowInsets windowInset = mStackScrollerController.getRootWindowInsets();
-        DisplayCutout cutout = (windowInset != null) ? windowInset.getDisplayCutout() : null;
-        int sysWinLeft = (windowInset != null) ? windowInset.getStableInsetLeft() : 0;
-        int sysWinRight = (windowInset != null) ? windowInset.getStableInsetRight() : 0;
-        int cutoutLeft = (cutout != null) ? cutout.getSafeInsetLeft() : 0;
-        int cutoutRight = (cutout != null) ? cutout.getSafeInsetRight() : 0;
-        int leftInset = Math.max(sysWinLeft, cutoutLeft);
-        int rightInset = Math.max(sysWinRight, cutoutRight);
-
-        return leftInset + mStackScrollerController.getRight() + rightInset - realDisplaySize;
-    }
-
-    public void updatePanelTranslation() {
-        float newTranslation;
-        if (mStackScrollerController.isLayoutRtl()) {
-            newTranslation = getRtlTranslation();
-        } else {
-            newTranslation = mStackScrollerController.getLeft();
-        }
-        newTranslation += mStackScrollerController.getTranslationX();
-        mHeadsUpStatusBarView.setPanelTranslation(newTranslation);
     }
 
     private void updateTopEntry() {

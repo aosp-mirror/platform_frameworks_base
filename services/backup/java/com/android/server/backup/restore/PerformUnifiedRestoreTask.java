@@ -381,7 +381,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
         // If we're starting a full-system restore, set up to begin widget ID remapping
         if (mIsSystemRestore) {
-            AppWidgetBackupBridge.restoreStarting(mUserId);
+            AppWidgetBackupBridge.systemRestoreStarting(mUserId);
         }
 
         try {
@@ -1133,8 +1133,10 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                     restoreAgentTimeoutMillis);
         }
 
-        // Kick off any work that may be needed regarding app widget restores
-        AppWidgetBackupBridge.restoreFinished(mUserId);
+        if (mIsSystemRestore) {
+            // Kick off any work that may be needed regarding app widget restores
+            AppWidgetBackupBridge.systemRestoreFinished(mUserId);
+        }
 
         // If this was a full-system restore, record the ancestral
         // dataset information

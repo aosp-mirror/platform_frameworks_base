@@ -48,6 +48,7 @@ import android.view.SurfaceControl;
 import android.window.ITaskOrganizer;
 import android.window.ITaskOrganizerController;
 import android.window.TaskAppearedInfo;
+import android.window.WindowContainerToken;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -289,7 +290,6 @@ public class ShellTaskOrganizerTests {
     public void testOnSizeCompatActivityChanged() {
         final RunningTaskInfo taskInfo1 = createTaskInfo(12, WINDOWING_MODE_FULLSCREEN);
         taskInfo1.displayId = DEFAULT_DISPLAY;
-        taskInfo1.topActivityToken = mock(IBinder.class);
         taskInfo1.topActivityInSizeCompat = false;
         final TrackingTaskListener taskListener = new TrackingTaskListener();
         mOrganizer.addListenerForType(taskListener, TASK_LISTENER_TYPE_FULLSCREEN);
@@ -297,23 +297,34 @@ public class ShellTaskOrganizerTests {
 
         // sizeCompatActivity is null if top activity is not in size compat.
         verify(mSizeCompatUI).onSizeCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
-                null /* taskConfig */, null /* sizeCompatActivity*/, null /* taskListener */);
+                null /* taskConfig */, null /* taskListener */);
 
         // sizeCompatActivity is non-null if top activity is in size compat.
         clearInvocations(mSizeCompatUI);
         final RunningTaskInfo taskInfo2 =
                 createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
         taskInfo2.displayId = taskInfo1.displayId;
-        taskInfo2.topActivityToken = taskInfo1.topActivityToken;
         taskInfo2.topActivityInSizeCompat = true;
+        taskInfo2.isVisible = true;
         mOrganizer.onTaskInfoChanged(taskInfo2);
         verify(mSizeCompatUI).onSizeCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
-                taskInfo1.configuration, taskInfo1.topActivityToken, taskListener);
+                taskInfo1.configuration, taskListener);
+
+        // Not show size compat UI if task is not visible.
+        clearInvocations(mSizeCompatUI);
+        final RunningTaskInfo taskInfo3 =
+                createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
+        taskInfo3.displayId = taskInfo1.displayId;
+        taskInfo3.topActivityInSizeCompat = true;
+        taskInfo3.isVisible = false;
+        mOrganizer.onTaskInfoChanged(taskInfo3);
+        verify(mSizeCompatUI).onSizeCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
+                null /* taskConfig */, null /* taskListener */);
 
         clearInvocations(mSizeCompatUI);
         mOrganizer.onTaskVanished(taskInfo1);
         verify(mSizeCompatUI).onSizeCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
-                null /* taskConfig */, null /* sizeCompatActivity*/, null /* taskListener */);
+                null /* taskConfig */, null /* taskListener */);
     }
 
     @Test
@@ -431,6 +442,18 @@ public class ShellTaskOrganizerTests {
         mOrganizer.onTaskVanished(task1);
         assertEquals(listener.visibleLocusTasks.size(), 0);
         assertEquals(listener.invisibleLocusTasks.size(), 0);
+    }
+
+    @Test
+    public void testOnSizeCompatRestartButtonClicked() throws RemoteException {
+        RunningTaskInfo task1 = createTaskInfo(1, WINDOWING_MODE_MULTI_WINDOW);
+        task1.token = mock(WindowContainerToken.class);
+
+        mOrganizer.onTaskAppeared(task1, null);
+
+        mOrganizer.onSizeCompatRestartButtonClicked(task1.taskId);
+
+        verify(mTaskOrganizerController).restartTaskTopActivityProcessIfVisible(task1.token);
     }
 
     private static RunningTaskInfo createTaskInfo(int taskId, int windowingMode) {

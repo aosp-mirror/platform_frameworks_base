@@ -35,7 +35,7 @@
         <!-- TODO(b/189308264): fix the crash in Android R if set the attributes:
              <item name="colorAccent">@*android:color/accent_device_default_light</item>
              <item name="android:colorBackground">@color/settingslib_dialog_background</item>
-             <item name="dialogCornerRadius">@*android:dimen/config_dialogCornerRadius</item>
+             <item name="dialogCornerRadius">@dimen/settingslib_dialogCornerRadius</item>
         -->
         <item name="android:windowSoftInputMode">adjustResize</item>
         <item name="android:clipToPadding">true</item>

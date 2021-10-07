@@ -152,7 +152,7 @@ public class LaunchConversationActivity extends Activity {
                 launcherApps.startShortcut(
                         packageName, tileId, null, null, userHandle);
             } catch (Exception e) {
-                Log.e(TAG, "Exception:" + e);
+                Log.e(TAG, "Exception launching shortcut:" + e);
             }
         } else {
             if (DEBUG) Log.d(TAG, "Trying to launch conversation with null shortcutInfo.");

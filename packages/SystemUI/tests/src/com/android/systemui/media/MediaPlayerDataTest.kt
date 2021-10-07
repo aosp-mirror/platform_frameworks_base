@@ -19,16 +19,27 @@ package com.android.systemui.media
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
-import org.junit.Ignore
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
 import org.mockito.Mockito.mock
+import org.mockito.junit.MockitoJUnit
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 public class MediaPlayerDataTest : SysuiTestCase() {
+
+    @Mock
+    private lateinit var playerIsPlaying: MediaControlPanel
+    private var systemClock: FakeSystemClock = FakeSystemClock()
+
+    @JvmField
+    @Rule
+    val mockito = MockitoJUnit.rule()
 
     companion object {
         val LOCAL = true
@@ -44,14 +55,13 @@ public class MediaPlayerDataTest : SysuiTestCase() {
 
     @Test
     fun addPlayingThenRemote() {
-        val playerIsPlaying = mock(MediaControlPanel::class.java)
         val dataIsPlaying = createMediaData("app1", PLAYING, LOCAL, !RESUMPTION)
 
         val playerIsRemote = mock(MediaControlPanel::class.java)
         val dataIsRemote = createMediaData("app2", PLAYING, !LOCAL, !RESUMPTION)
 
-        MediaPlayerData.addMediaPlayer("2", dataIsRemote, playerIsRemote)
-        MediaPlayerData.addMediaPlayer("1", dataIsPlaying, playerIsPlaying)
+        MediaPlayerData.addMediaPlayer("2", dataIsRemote, playerIsRemote, systemClock)
+        MediaPlayerData.addMediaPlayer("1", dataIsPlaying, playerIsPlaying, systemClock)
 
         val players = MediaPlayerData.players()
         assertThat(players).hasSize(2)
@@ -59,7 +69,6 @@ public class MediaPlayerDataTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("Flaky")
     fun switchPlayersPlaying() {
         val playerIsPlaying1 = mock(MediaControlPanel::class.java)
         var dataIsPlaying1 = createMediaData("app1", PLAYING, LOCAL, !RESUMPTION)
@@ -67,14 +76,19 @@ public class MediaPlayerDataTest : SysuiTestCase() {
         val playerIsPlaying2 = mock(MediaControlPanel::class.java)
         var dataIsPlaying2 = createMediaData("app2", !PLAYING, LOCAL, !RESUMPTION)
 
-        MediaPlayerData.addMediaPlayer("1", dataIsPlaying1, playerIsPlaying1)
-        MediaPlayerData.addMediaPlayer("2", dataIsPlaying2, playerIsPlaying2)
+        MediaPlayerData.addMediaPlayer("1", dataIsPlaying1, playerIsPlaying1, systemClock)
+        systemClock.advanceTime(1)
+        MediaPlayerData.addMediaPlayer("2", dataIsPlaying2, playerIsPlaying2, systemClock)
+        systemClock.advanceTime(1)
 
         dataIsPlaying1 = createMediaData("app1", !PLAYING, LOCAL, !RESUMPTION)
         dataIsPlaying2 = createMediaData("app2", PLAYING, LOCAL, !RESUMPTION)
 
-        MediaPlayerData.addMediaPlayer("1", dataIsPlaying1, playerIsPlaying1)
-        MediaPlayerData.addMediaPlayer("2", dataIsPlaying2, playerIsPlaying2)
+        MediaPlayerData.addMediaPlayer("1", dataIsPlaying1, playerIsPlaying1, systemClock)
+        systemClock.advanceTime(1)
+
+        MediaPlayerData.addMediaPlayer("2", dataIsPlaying2, playerIsPlaying2, systemClock)
+        systemClock.advanceTime(1)
 
         val players = MediaPlayerData.players()
         assertThat(players).hasSize(2)
@@ -83,7 +97,6 @@ public class MediaPlayerDataTest : SysuiTestCase() {
 
     @Test
     fun fullOrderTest() {
-        val playerIsPlaying = mock(MediaControlPanel::class.java)
         val dataIsPlaying = createMediaData("app1", PLAYING, LOCAL, !RESUMPTION)
 
         val playerIsPlayingAndRemote = mock(MediaControlPanel::class.java)
@@ -101,18 +114,47 @@ public class MediaPlayerDataTest : SysuiTestCase() {
         val playerUndetermined = mock(MediaControlPanel::class.java)
         val dataUndetermined = createMediaData("app6", UNDETERMINED, LOCAL, RESUMPTION)
 
-        MediaPlayerData.addMediaPlayer("3", dataIsStoppedAndLocal, playerIsStoppedAndLocal)
-        MediaPlayerData.addMediaPlayer("5", dataIsStoppedAndRemote, playerIsStoppedAndRemote)
-        MediaPlayerData.addMediaPlayer("4", dataCanResume, playerCanResume)
-        MediaPlayerData.addMediaPlayer("1", dataIsPlaying, playerIsPlaying)
-        MediaPlayerData.addMediaPlayer("2", dataIsPlayingAndRemote, playerIsPlayingAndRemote)
-        MediaPlayerData.addMediaPlayer("6", dataUndetermined, playerUndetermined)
+        MediaPlayerData.addMediaPlayer(
+                "3", dataIsStoppedAndLocal, playerIsStoppedAndLocal, systemClock)
+        MediaPlayerData.addMediaPlayer(
+                "5", dataIsStoppedAndRemote, playerIsStoppedAndRemote, systemClock)
+        MediaPlayerData.addMediaPlayer("4", dataCanResume, playerCanResume, systemClock)
+        MediaPlayerData.addMediaPlayer("1", dataIsPlaying, playerIsPlaying, systemClock)
+        MediaPlayerData.addMediaPlayer(
+                "2", dataIsPlayingAndRemote, playerIsPlayingAndRemote, systemClock)
+        MediaPlayerData.addMediaPlayer("6", dataUndetermined, playerUndetermined, systemClock)
 
         val players = MediaPlayerData.players()
         assertThat(players).hasSize(6)
         assertThat(players).containsExactly(playerIsPlaying, playerIsPlayingAndRemote,
             playerIsStoppedAndLocal, playerCanResume, playerIsStoppedAndRemote,
             playerUndetermined).inOrder()
+    }
+
+    @Test
+    fun testMoveMediaKeysAround() {
+        val keyA = "a"
+        val keyB = "b"
+
+        val data = createMediaData("app1", PLAYING, LOCAL, !RESUMPTION)
+
+        assertThat(MediaPlayerData.players()).hasSize(0)
+
+        MediaPlayerData.addMediaPlayer(keyA, data, playerIsPlaying, systemClock)
+        systemClock.advanceTime(1)
+
+        assertThat(MediaPlayerData.players()).hasSize(1)
+        MediaPlayerData.addMediaPlayer(keyB, data, playerIsPlaying, systemClock)
+        systemClock.advanceTime(1)
+
+        assertThat(MediaPlayerData.players()).hasSize(2)
+
+        MediaPlayerData.moveIfExists(keyA, keyB)
+
+        assertThat(MediaPlayerData.players()).hasSize(1)
+
+        assertThat(MediaPlayerData.getMediaPlayer(keyA)).isNull()
+        assertThat(MediaPlayerData.getMediaPlayer(keyB)).isNotNull()
     }
 
     private fun createMediaData(

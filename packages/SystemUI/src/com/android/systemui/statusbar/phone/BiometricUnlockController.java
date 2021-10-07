@@ -39,6 +39,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.KeyguardViewController;
 import com.android.systemui.Dumpable;
+import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
@@ -115,7 +116,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
 
     /**
      * Mode in which fingerprint unlocks the device or passive auth (ie face auth) unlocks the
-     * device while being requested when keyguard is occluded.
+     * device while being requested when keyguard is occluded or showing.
      */
     public static final int MODE_UNLOCK_COLLAPSING = 5;
 
@@ -165,6 +166,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     private BiometricModeListener mBiometricModeListener;
 
     private final MetricsLogger mMetricsLogger;
+    private final AuthController mAuthController;
 
     private static final class PendingAuthenticated {
         public final int userId;
@@ -254,7 +256,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             PowerManager powerManager,
             NotificationMediaManager notificationMediaManager,
             WakefulnessLifecycle wakefulnessLifecycle,
-            ScreenLifecycle screenLifecycle) {
+            ScreenLifecycle screenLifecycle,
+            AuthController authController) {
         mContext = context;
         mPowerManager = powerManager;
         mShadeController = shadeController;
@@ -275,6 +278,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mKeyguardBypassController = keyguardBypassController;
         mKeyguardBypassController.setUnlockController(this);
         mMetricsLogger = metricsLogger;
+        mAuthController = authController;
         dumpManager.registerDumpable(getClass().getName(), this);
     }
 
@@ -421,6 +425,11 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                 if (!wasDeviceInteractive) {
                     mPendingShowBouncer = true;
                 } else {
+                    mShadeController.animateCollapsePanels(
+                            CommandQueue.FLAG_EXCLUDE_NONE,
+                            true /* force */,
+                            false /* delayed */,
+                            BIOMETRIC_COLLAPSE_SPEEDUP_FACTOR);
                     mPendingShowBouncer = false;
                     mKeyguardViewController.notifyKeyguardAuthenticated(
                             false /* strongAuth */);
@@ -560,8 +569,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         boolean unlockingAllowed =
                 mUpdateMonitor.isUnlockingWithBiometricAllowed(isStrongBiometric);
         boolean deviceDreaming = mUpdateMonitor.isDreaming();
-        boolean bypass = mKeyguardBypassController.getBypassEnabled();
-
+        boolean bypass = mKeyguardBypassController.getBypassEnabled()
+                || mKeyguardBypassController.getUserHasDeviceEntryIntent();
         if (!mUpdateMonitor.isDeviceInteractive()) {
             if (!mKeyguardViewController.isShowing()) {
                 return bypass ? MODE_WAKE_AND_UNLOCK : MODE_ONLY_WAKE;
@@ -588,14 +597,16 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             return MODE_UNLOCK_COLLAPSING;
         }
         if (mKeyguardViewController.isShowing()) {
-            if (mKeyguardViewController.bouncerIsOrWillBeShowing() && unlockingAllowed) {
+            if ((mKeyguardViewController.bouncerIsOrWillBeShowing()
+                    || mKeyguardBypassController.getAltBouncerShowing()) && unlockingAllowed) {
                 if (bypass && mKeyguardBypassController.canPlaySubtleWindowAnimations()) {
                     return MODE_UNLOCK_FADING;
                 } else {
                     return MODE_DISMISS_BOUNCER;
                 }
             } else if (unlockingAllowed) {
-                return bypass ? MODE_UNLOCK_FADING : MODE_NONE;
+                return bypass || mAuthController.isUdfpsFingerDown()
+                        ? MODE_UNLOCK_FADING : MODE_NONE;
             } else {
                 return bypass ? MODE_SHOW_BOUNCER : MODE_NONE;
             }

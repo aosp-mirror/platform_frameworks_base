@@ -398,6 +398,16 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         registerStatsCallbacks();
     }
 
+    /**
+     * Notifies BatteryStatsService that the system server is ready.
+     */
+    public void onSystemReady() {
+        mStats.onSystemReady();
+        if (BATTERY_USAGE_STORE_ENABLED) {
+            mBatteryUsageStatsStore.onSystemReady();
+        }
+    }
+
     private final class LocalService extends BatteryStatsInternal {
         @Override
         public String[] getWifiIfaces() {
@@ -784,6 +794,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     bus = getBatteryUsageStats(List.of(powerProfileQuery)).get(0);
                     break;
                 case FrameworkStatsLog.BATTERY_USAGE_STATS_BEFORE_RESET:
+                    if (!BATTERY_USAGE_STORE_ENABLED) {
+                        return StatsManager.PULL_SKIP;
+                    }
+
                     final long sessionStart = mBatteryUsageStatsStore
                             .getLastBatteryUsageStatsBeforeResetAtomPullTimestamp();
                     final long sessionEnd = mStats.getStartClockTime();
@@ -827,6 +841,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     public void noteEvent(final int code, final String name, final int uid) {
         enforceCallingPermission();
+        if (name == null) {
+            // TODO(b/194733136): Replace with an IllegalArgumentException throw.
+            Slog.wtfStack(TAG, "noteEvent called with null name. code = " + code);
+            return;
+        }
+
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();

@@ -25,12 +25,16 @@ import android.text.TextUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /** Class that encapsulates fields identifying a Conversation. */
 public class PeopleTileKey {
     private String mShortcutId;
     private int mUserId;
     private String mPackageName;
+
+    private static final Pattern KEY_PATTERN = Pattern.compile("(.+)/(-?\\d+)/(\\p{L}.*)");
 
     public PeopleTileKey(String shortcutId, int userId, String packageName) {
         mShortcutId = shortcutId;
@@ -66,8 +70,12 @@ public class PeopleTileKey {
         return mPackageName;
     }
 
+    public void setUserId(int userId) {
+        mUserId = userId;
+    }
+
     /** Returns whether PeopleTileKey is valid/well-formed. */
-    public boolean isValid() {
+    private boolean validate() {
         return !TextUtils.isEmpty(mShortcutId) && !TextUtils.isEmpty(mPackageName) && mUserId >= 0;
     }
 
@@ -88,8 +96,29 @@ public class PeopleTileKey {
      */
     @Override
     public String toString() {
-        if (!isValid()) return EMPTY_STRING;
         return mShortcutId + "/" + mUserId + "/" + mPackageName;
+    }
+
+    /** Parses {@code key} into a {@link PeopleTileKey}. */
+    public static PeopleTileKey fromString(String key) {
+        if (key == null) {
+            return null;
+        }
+        Matcher m = KEY_PATTERN.matcher(key);
+        if (m.find()) {
+            try {
+                int userId = Integer.parseInt(m.group(2));
+                return new PeopleTileKey(m.group(1), userId, m.group(3));
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    /** Returns whether {@code key} is a valid {@link PeopleTileKey}. */
+    public static boolean isValid(PeopleTileKey key) {
+        return key != null && key.validate();
     }
 
     @Override

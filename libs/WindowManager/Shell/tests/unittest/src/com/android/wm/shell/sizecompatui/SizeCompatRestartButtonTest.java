@@ -22,7 +22,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 
 import android.content.res.Configuration;
-import android.os.IBinder;
 import android.testing.AndroidTestingRunner;
 import android.view.LayoutInflater;
 import android.widget.ImageButton;
@@ -51,8 +50,10 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 public class SizeCompatRestartButtonTest extends ShellTestCase {
 
+    private static final int TASK_ID = 1;
+
     @Mock private SyncTransactionQueue mSyncTransactionQueue;
-    @Mock private IBinder mActivityToken;
+    @Mock private SizeCompatUIController.SizeCompatUICallback mCallback;
     @Mock private ShellTaskOrganizer.TaskListener mTaskListener;
     @Mock private DisplayLayout mDisplayLayout;
 
@@ -63,9 +64,9 @@ public class SizeCompatRestartButtonTest extends ShellTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        final int taskId = 1;
-        mLayout = new SizeCompatUILayout(mSyncTransactionQueue, mContext, new Configuration(),
-                taskId, mActivityToken, mTaskListener, mDisplayLayout, false /* hasShownHint*/);
+        mLayout = new SizeCompatUILayout(mSyncTransactionQueue, mCallback, mContext,
+                new Configuration(), TASK_ID, mTaskListener, mDisplayLayout,
+                false /* hasShownHint */);
         mButton = (SizeCompatRestartButton)
                 LayoutInflater.from(mContext).inflate(R.layout.size_compat_ui, null);
         mButton.inject(mLayout);
@@ -75,12 +76,11 @@ public class SizeCompatRestartButtonTest extends ShellTestCase {
 
     @Test
     public void testOnClick() {
-        doNothing().when(mLayout).onRestartButtonClicked();
-
         final ImageButton button = mButton.findViewById(R.id.size_compat_restart_button);
         button.performClick();
 
         verify(mLayout).onRestartButtonClicked();
+        verify(mCallback).onSizeCompatRestartButtonClicked(TASK_ID);
     }
 
     @Test

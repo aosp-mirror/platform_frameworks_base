@@ -19,6 +19,7 @@ package android.app;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager.ProcessCapability;
 import android.content.ComponentName;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
@@ -485,7 +486,7 @@ public abstract class ActivityManagerInternal {
      * not associated with an FGS; ensure display; or only update if already displayed.
      */
     public abstract ServiceNotificationPolicy applyForegroundServiceNotification(
-            Notification notification, int id, String pkg, @UserIdInt int userId);
+            Notification notification, String tag, int id, String pkg, @UserIdInt int userId);
 
     /**
      * Callback from the notification subsystem that the given FGS notification has
@@ -634,4 +635,15 @@ public abstract class ActivityManagerInternal {
      * Return the temp allowlist type when server push messaging is over the quota.
      */
     public abstract @TempAllowListType int getPushMessagingOverQuotaBehavior();
+
+    /**
+     * Returns the capability of the given uid
+     */
+    public abstract @ProcessCapability int getUidCapability(int uid);
+
+    /**
+     * @return The PID list of the isolated process with packages matching the given uid.
+     */
+    @Nullable
+    public abstract List<Integer> getIsolatedProcesses(int uid);
 }

@@ -28,7 +28,7 @@ import java.util.List;
 public interface WidgetBackupProvider {
     public List<String> getWidgetParticipants(int userId);
     public byte[] getWidgetState(String packageName, int userId);
-    public void restoreStarting(int userId);
+    public void systemRestoreStarting(int userId);
     public void restoreWidgetState(String packageName, byte[] restoredState, int userId);
-    public void restoreFinished(int userId);
+    public void systemRestoreFinished(int userId);
 }

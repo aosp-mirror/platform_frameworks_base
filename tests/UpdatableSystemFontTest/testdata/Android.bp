@@ -21,6 +21,13 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+// An existing module name is reused to avoid merge conflicts.
+// TODO: fix the font and module name.
+filegroup {
+    name: "NotoColorEmojiTtf",
+    srcs: ["NotoColorEmoji.ttf"],
+}
+
 filegroup {
     name: "UpdatableSystemFontTestKeyPem",
     srcs: ["UpdatableSystemFontTestKey.pem"],

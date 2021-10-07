@@ -1524,7 +1524,9 @@ public class LockPatternView extends View {
             if (virtualViewId != ExploreByTouchHelper.INVALID_ID) {
                 int row = (virtualViewId - VIRTUAL_BASE_VIEW_ID) / 3;
                 int col = (virtualViewId - VIRTUAL_BASE_VIEW_ID) % 3;
-                return !mPatternDrawLookup[row][col];
+                if (row < 3) {
+                    return !mPatternDrawLookup[row][col];
+                }
             }
             return false;
         }
@@ -1570,7 +1572,6 @@ public class LockPatternView extends View {
             final Rect bounds = mTempRect;
             final int row = ordinal / 3;
             final int col = ordinal % 3;
-            final CellState cell = mCellStates[row][col];
             float centerX = getCenterXForColumn(col);
             float centerY = getCenterYForRow(row);
             float cellheight = mSquareHeight * mHitFactor * 0.5f;

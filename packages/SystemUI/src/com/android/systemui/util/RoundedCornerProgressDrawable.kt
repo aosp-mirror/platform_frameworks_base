@@ -16,6 +16,7 @@
 
 package com.android.systemui.util
 
+import android.content.pm.ActivityInfo
 import android.content.res.Resources
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
@@ -62,6 +63,10 @@ class RoundedCornerProgressDrawable @JvmOverloads constructor(
     override fun getConstantState(): ConstantState {
         // This should not be null as it was created with a state in the constructor.
         return RoundedCornerState(super.getConstantState()!!)
+    }
+
+    override fun getChangingConfigurations(): Int {
+        return super.getChangingConfigurations() or ActivityInfo.CONFIG_DENSITY
     }
 
     private class RoundedCornerState(private val wrappedState: ConstantState) : ConstantState() {

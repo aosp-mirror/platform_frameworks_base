@@ -57,6 +57,7 @@ cc_library_shared {
         "net.c",
         "obb.cpp",
         "permission_manager.cpp",
+        "performance_hint.cpp",
         "sensor.cpp",
         "sharedmem.cpp",
         "storage_manager.cpp",

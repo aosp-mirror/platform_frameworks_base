@@ -82,7 +82,11 @@ public final class BackgroundJobsController extends StateController {
 
     @Override
     public void evaluateStateLocked(JobStatus jobStatus) {
-        updateSingleJobRestrictionLocked(jobStatus, sElapsedRealtimeClock.millis(), UNKNOWN);
+        if (jobStatus.isRequestedExpeditedJob()) {
+            // Only requested-EJs could have their run-in-bg constraint change outside of something
+            // coming through the ForceAppStandbyListener.
+            updateSingleJobRestrictionLocked(jobStatus, sElapsedRealtimeClock.millis(), UNKNOWN);
+        }
     }
 
     @Override

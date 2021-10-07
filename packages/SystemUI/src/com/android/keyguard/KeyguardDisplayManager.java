@@ -332,6 +332,7 @@ public class KeyguardDisplayManager {
                     .build(findViewById(R.id.clock))
                     .getKeyguardClockSwitchController();
 
+            mKeyguardClockSwitchController.setOnlyClock(true);
             mKeyguardClockSwitchController.init();
         }
 

@@ -17,7 +17,6 @@
 package android.view;
 
 import static android.os.IInputConstants.POLICY_FLAG_INJECTED_FROM_ACCESSIBILITY;
-import static android.os.IInputConstants.POLICY_FLAG_INPUTFILTER_TRUSTED;
 
 import android.annotation.IntDef;
 import android.os.PowerManager;
@@ -35,7 +34,6 @@ public interface WindowManagerPolicyConstants {
     int FLAG_WAKE = 0x00000001;
     int FLAG_VIRTUAL = 0x00000002;
 
-    int FLAG_INPUTFILTER_TRUSTED = POLICY_FLAG_INPUTFILTER_TRUSTED;
     int FLAG_INJECTED_FROM_ACCESSIBILITY = POLICY_FLAG_INJECTED_FROM_ACCESSIBILITY;
     int FLAG_INJECTED = 0x01000000;
     int FLAG_TRUSTED = 0x02000000;

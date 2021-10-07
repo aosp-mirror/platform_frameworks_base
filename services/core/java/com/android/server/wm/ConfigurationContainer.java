@@ -545,8 +545,8 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      * @return true if the nightMode has been changed.
      */
     public boolean setOverrideNightMode(int nightMode) {
-        final int currentUiMode = mFullConfiguration.uiMode;
-        final int currentNightMode = getNightMode();
+        final int currentUiMode = mRequestedOverrideConfiguration.uiMode;
+        final int currentNightMode = currentUiMode & Configuration.UI_MODE_NIGHT_MASK;
         final int validNightMode = nightMode & Configuration.UI_MODE_NIGHT_MASK;
         if (currentNightMode == validNightMode) {
             return false;
@@ -556,10 +556,6 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
                 | (currentUiMode & ~Configuration.UI_MODE_NIGHT_MASK);
         onRequestedOverrideConfigurationChanged(mRequestsTmpConfig);
         return true;
-    }
-
-    int getNightMode() {
-        return mFullConfiguration.uiMode & Configuration.UI_MODE_NIGHT_MASK;
     }
 
     public boolean isActivityTypeDream() {

@@ -211,7 +211,7 @@
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi‑Fi\'га туташканда, мүчүлүштүктөрдү аныктоо режими иштейт оңдоо режими"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Ката"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Мүчүлүштүктөрдү Wi-Fi аркылуу аныктоо"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Жеткиликтүү түзмөктөрдү көрүү үчүн, мүчүлүштүктөрдү Wi-Fi аркылуу аныктоону күйгүзүңүз"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Жеткиликтүү түзмөктөрдү көрүү үчүн мүчүлүштүктөрдү Wi-Fi аркылуу аныктоону күйгүзүңүз"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Түзмөктү QR коду аркылуу жупташтыруу"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR кодунун сканерин колдонуп, жаңы түзмөктөрдү жупташтырыңыз"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Түзмөктү атайын код аркылуу жупташтыруу"</string>
@@ -309,7 +309,7 @@
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Бул орнотуулар өндүрүүчүлөр үчүн гана берилген. Булар түзмөгүңүздүн колдонмолорун бузулушуна же туура эмес иштешине алып келиши мүмкүн."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Орнотулуучу колдонмону текшерүү"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ADB/ADT аркылуу орнотулган колдонмолордун коопсуздугу текшерилет."</string>
-    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Аталышсыз Bluetooth түзмөктөрү (MAC даректери менен гана) көрсөтүлөт"</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Аталышсыз Bluetooth түзмөктөрү (MAC даректери менен гана) көрүнөт"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Алыскы түзмөктөр өтө катуу добуш чыгарып же көзөмөлдөнбөй жатса Bluetooth \"Үндүн абсолюттук деңгээли\" функциясын өчүрөт."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Bluetooth Gabeldorsche функциясынын топтомун иштетет."</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Жакшыртылган туташуу функциясын иштетет."</string>
@@ -507,7 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Ойготкучтар жана эстеткичтер"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Ойготкуч жана эстеткичтерди коюуга уруксат берүү"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Ойготкучтар жана эстеткичтер"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Бул колдонмого ойготкучтарды коюуга жана башка аракеттерди графикке киргизүүгө уруксат берүү. Ушуну менен колдонмо фондо иштеп, батареяны көбүрөөк сарпташы мүмкүн.\n\nЭгер бул уруксат өчүрүлсө, колдонмодогу ойготкучтар жана графикке киргизилген башка аракеттер иштебейт."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Бул колдонмого ойготкучтарды коюуга жана башка аракеттерди графикке киргизүүгө уруксат бересиз. Ушуну менен колдонмо фондо иштеп, батареяны көбүрөөк сарпташы мүмкүн.\n\nЭгер бул уруксат өчүрүлсө, колдонмодогу ойготкучтар жана графикке киргизилген башка аракеттер иштебейт."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"график, ойготкуч, эстеткич, саат"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Күйгүзүү"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\"Тынчымды алба\" режимин күйгүзүү"</string>
@@ -566,9 +566,11 @@
     <string name="user_nickname" msgid="262624187455825083">"Ылакап аты"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Конок кошуу"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Конокту өчүрүү"</string>
-    <!-- no translation found for guest_reset_guest (6110013010356013758) -->
-    <skip />
+    <string name="guest_reset_guest" msgid="6110013010356013758">"Конок сеансын баштапкы абалга келтирүү"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Конок"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Конок сеансын баштапкы абалга келтиресизби?"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Баштапкы абалга келтирүү"</string>
+    <string name="guest_resetting" msgid="7822120170191509566">"Конок сеансы баштапкы абалга келтирилүүдө…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Сүрөткө тартуу"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Сүрөт тандаңыз"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Сүрөт тандаңыз"</string>

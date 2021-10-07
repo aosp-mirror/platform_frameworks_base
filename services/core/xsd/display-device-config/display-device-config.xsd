@@ -81,6 +81,16 @@
                 <xs:annotation name="nullable"/>
                 <xs:annotation name="final"/>
             </xs:element>
+            <!-- The highest (most severe) thermal status at which high-brightness-mode is allowed
+                 to operate. -->
+            <xs:element name="thermalStatusLimit" type="thermalStatus" minOccurs="0" maxOccurs="1">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element name="allowInLowPowerMode" type="xs:boolean" minOccurs="0" maxOccurs="1">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
         </xs:all>
         <xs:attribute name="enabled" type="xs:boolean" use="optional"/>
     </xs:complexType>
@@ -101,6 +111,19 @@
             </xs:element>
         </xs:all>
     </xs:complexType>
+
+    <!-- Maps to PowerManager.THERMAL_STATUS_* values. -->
+    <xs:simpleType name="thermalStatus">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="none"/>
+            <xs:enumeration value="light"/>
+            <xs:enumeration value="moderate"/>
+            <xs:enumeration value="severe"/>
+            <xs:enumeration value="critical"/>
+            <xs:enumeration value="emergency"/>
+            <xs:enumeration value="shutdown"/>
+        </xs:restriction>
+    </xs:simpleType>
 
     <xs:complexType name="nitsMap">
         <xs:sequence>

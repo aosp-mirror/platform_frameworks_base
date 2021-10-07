@@ -260,23 +260,7 @@ public class SpeechRecognizer {
         ComponentName componentName =
                 ComponentName.unflattenFromString(
                         context.getString(R.string.config_defaultOnDeviceSpeechRecognitionService));
-        if (componentName == null) {
-            return false;
-        }
-
-        List<ResolveInfo> resolveInfos =
-                context.getPackageManager().queryIntentServices(
-                        new Intent(RecognitionService.SERVICE_INTERFACE), 0);
-        if (resolveInfos == null) {
-            return false;
-        }
-
-        for (ResolveInfo ri : resolveInfos) {
-            if (ri.serviceInfo != null && componentName.equals(ri.serviceInfo.getComponentName())) {
-                return true;
-            }
-        }
-        return false;
+        return componentName != null;
     }
 
     /**
@@ -354,20 +338,41 @@ public class SpeechRecognizer {
      * notifications will be received.
      *
      * @param context in which to create {@code SpeechRecognizer}
-     * @throws UnsupportedOperationException iff {@link #isOnDeviceRecognitionAvailable(Context)}
-     * is false
      * @return a new on-device {@code SpeechRecognizer}.
+     * @throws UnsupportedOperationException iff {@link #isOnDeviceRecognitionAvailable(Context)}
+     *                                       is false
      */
     @NonNull
     @MainThread
     public static SpeechRecognizer createOnDeviceSpeechRecognizer(@NonNull final Context context) {
+        if (!isOnDeviceRecognitionAvailable(context)) {
+            throw new UnsupportedOperationException("On-device recognition is not available");
+        }
+        return lenientlyCreateOnDeviceSpeechRecognizer(context);
+    }
+
+    /**
+     * Helper method to create on-device SpeechRecognizer in tests even when the device does not
+     * support on-device speech recognition.
+     *
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    @MainThread
+    public static SpeechRecognizer createOnDeviceTestingSpeechRecognizer(
+            @NonNull final Context context) {
+        return lenientlyCreateOnDeviceSpeechRecognizer(context);
+    }
+
+    @NonNull
+    @MainThread
+    private static SpeechRecognizer lenientlyCreateOnDeviceSpeechRecognizer(
+            @NonNull final Context context) {
         if (context == null) {
             throw new IllegalArgumentException("Context cannot be null");
         }
         checkIsCalledFromMainThread();
-        if (!isOnDeviceRecognitionAvailable(context)) {
-            throw new UnsupportedOperationException("On-device recognition is not available");
-        }
         return new SpeechRecognizer(context, /* onDevice */ true);
     }
 

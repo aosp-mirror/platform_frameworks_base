@@ -102,9 +102,6 @@ public final class VibratorHelper {
      * @param insistent {@code true} if the vibration should loop until it is cancelled.
      */
     public VibrationEffect createFallbackVibration(boolean insistent) {
-        if (mVibrator.hasFrequencyControl()) {
-            return createChirpVibration(insistent);
-        }
         return createWaveformVibration(mFallbackPattern, insistent);
     }
 
@@ -114,28 +111,7 @@ public final class VibratorHelper {
      * @param insistent {@code true} if the vibration should loop until it is cancelled.
      */
     public VibrationEffect createDefaultVibration(boolean insistent) {
-        if (mVibrator.hasFrequencyControl()) {
-            return createChirpVibration(insistent);
-        }
         return createWaveformVibration(mDefaultPattern, insistent);
-    }
-
-    private static VibrationEffect createChirpVibration(boolean insistent) {
-        VibrationEffect.WaveformBuilder waveformBuilder = VibrationEffect.startWaveform()
-                .addStep(/* amplitude= */ 0, /* frequency= */ -0.85f, /* duration= */ 0)
-                .addRamp(/* amplitude= */ 1, /* frequency= */ -0.25f, /* duration= */ 100)
-                .addStep(/* amplitude= */ 1, /* duration= */ 150)
-                .addRamp(/* amplitude= */ 0, /* frequency= */ -0.85f, /* duration= */ 250);
-
-        if (insistent) {
-            return waveformBuilder.build(/* repeat= */ 0);
-        }
-
-        VibrationEffect singleBeat = waveformBuilder.build();
-        return VibrationEffect.startComposition()
-                .addEffect(singleBeat)
-                .addEffect(singleBeat)
-                .compose();
     }
 
     private static long[] getLongArray(Resources resources, int resId, int maxLength, long[] def) {

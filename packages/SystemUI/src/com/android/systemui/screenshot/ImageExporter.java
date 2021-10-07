@@ -111,30 +111,21 @@ class ImageExporter {
     }
 
     /**
-     * Stores the given Bitmap to a temp file.
+     * Writes the given Bitmap to outputFile.
      */
-    ListenableFuture<File> exportAsTempFile(Executor executor, Bitmap bitmap) {
+    ListenableFuture<File> exportToRawFile(Executor executor, Bitmap bitmap,
+            final File outputFile) {
         return CallbackToFutureAdapter.getFuture(
                 (completer) -> {
                     executor.execute(() -> {
-                        File cachePath;
-                        try {
-                            cachePath = File.createTempFile("long_screenshot_cache_", ".tmp");
-                            try (FileOutputStream stream = new FileOutputStream(cachePath)) {
-                                bitmap.compress(mCompressFormat, mQuality, stream);
-                            } catch (IOException e) {
-                                if (cachePath.exists()) {
-                                    //noinspection ResultOfMethodCallIgnored
-                                    cachePath.delete();
-                                    cachePath = null;
-                                }
-                                completer.setException(e);
-                            }
-                            if (cachePath != null) {
-                                completer.set(cachePath);
-                            }
+                        try (FileOutputStream stream = new FileOutputStream(outputFile)) {
+                            bitmap.compress(mCompressFormat, mQuality, stream);
+                            completer.set(outputFile);
                         } catch (IOException e) {
-                            // Failed to create a new file
+                            if (outputFile.exists()) {
+                                //noinspection ResultOfMethodCallIgnored
+                                outputFile.delete();
+                            }
                             completer.setException(e);
                         }
                     });

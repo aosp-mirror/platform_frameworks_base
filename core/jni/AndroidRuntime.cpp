@@ -143,6 +143,7 @@ extern int register_android_os_NativeHandle(JNIEnv *env);
 extern int register_android_os_ServiceManager(JNIEnv *env);
 extern int register_android_os_MessageQueue(JNIEnv* env);
 extern int register_android_os_Parcel(JNIEnv* env);
+extern int register_android_os_PerformanceHintManager(JNIEnv* env);
 extern int register_android_os_SELinux(JNIEnv* env);
 extern int register_android_os_VintfObject(JNIEnv *env);
 extern int register_android_os_VintfRuntimeInfo(JNIEnv *env);
@@ -690,6 +691,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     char methodTraceFileBuf[sizeof("-Xmethod-trace-file:") + PROPERTY_VALUE_MAX];
     char methodTraceFileSizeBuf[sizeof("-Xmethod-trace-file-size:") + PROPERTY_VALUE_MAX];
     std::string fingerprintBuf;
+    char javaZygoteForkLoopBuf[sizeof("-XX:ForceJavaZygoteForkLoop=") + PROPERTY_VALUE_MAX];
     char jdwpProviderBuf[sizeof("-XjdwpProvider:") - 1 + PROPERTY_VALUE_MAX];
     char opaqueJniIds[sizeof("-Xopaque-jni-ids:") - 1 + PROPERTY_VALUE_MAX];
     char bootImageBuf[sizeof("-Ximage:") - 1 + PROPERTY_VALUE_MAX];
@@ -750,6 +752,11 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
 
         /* with -Xcheck:jni, this provides a JNI function call trace */
         //addOption("-verbose:jni");
+    }
+
+    const bool odsignVerificationSuccess = GetBoolProperty("odsign.verification.success", false);
+    if (!odsignVerificationSuccess) {
+        addOption("-Xdeny-art-apex-data-files");
     }
 
     property_get("dalvik.vm.execution-mode", propBuf, "");
@@ -906,6 +913,13 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     }
 
     parseRuntimeOption("dalvik.vm.backgroundgctype", backgroundgcOptsBuf, "-XX:BackgroundGC=");
+
+    /*
+     * Enable/disable zygote native fork loop.
+     */
+    parseRuntimeOption("dalvik.vm.force-java-zygote-fork-loop",
+                       javaZygoteForkLoopBuf,
+                       "-XX:ForceJavaZygoteForkLoop=");
 
     /*
      * Enable debugging only for apps forked from zygote.
@@ -1505,6 +1519,7 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_os_SystemProperties),
         REG_JNI(register_android_os_Binder),
         REG_JNI(register_android_os_Parcel),
+        REG_JNI(register_android_os_PerformanceHintManager),
         REG_JNI(register_android_os_HidlMemory),
         REG_JNI(register_android_os_HidlSupport),
         REG_JNI(register_android_os_HwBinder),

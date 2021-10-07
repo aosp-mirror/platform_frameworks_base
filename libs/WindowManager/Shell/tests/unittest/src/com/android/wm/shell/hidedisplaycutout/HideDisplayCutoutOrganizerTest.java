@@ -50,6 +50,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 
 import org.junit.Before;
@@ -82,6 +83,8 @@ public class HideDisplayCutoutOrganizerTest {
     @Mock
     private Display mDisplay;
     @Mock
+    private DisplayLayout mDisplayLayout;
+    @Mock
     private IWindowContainerToken mMockRealToken;
     private WindowContainerToken mToken;
 
@@ -95,6 +98,7 @@ public class HideDisplayCutoutOrganizerTest {
         MockitoAnnotations.initMocks(this);
 
         when(mMockDisplayController.getDisplay(anyInt())).thenReturn(mDisplay);
+        when(mMockDisplayController.getDisplayLayout(anyInt())).thenReturn(mDisplayLayout);
 
         HideDisplayCutoutOrganizer organizer = new HideDisplayCutoutOrganizer(
                 mContext, mMockDisplayController, mMockMainExecutor);
@@ -152,7 +156,7 @@ public class HideDisplayCutoutOrganizerTest {
                 .getDisplayCutoutInsetsOfNaturalOrientation();
         mContext.getOrCreateTestableResources().addOverride(
                 R.dimen.status_bar_height_portrait, mFakeStatusBarHeightPortrait);
-        doReturn(Surface.ROTATION_0).when(mDisplay).getRotation();
+        doReturn(Surface.ROTATION_0).when(mDisplayLayout).rotation();
         mOrganizer.enableHideDisplayCutout();
 
         verify(mOrganizer).registerOrganizer(DisplayAreaOrganizer.FEATURE_HIDE_DISPLAY_CUTOUT);
@@ -171,7 +175,7 @@ public class HideDisplayCutoutOrganizerTest {
                 .getDisplayCutoutInsetsOfNaturalOrientation();
         mContext.getOrCreateTestableResources().addOverride(
                 R.dimen.status_bar_height_landscape, mFakeStatusBarHeightLandscape);
-        doReturn(Surface.ROTATION_90).when(mDisplay).getRotation();
+        doReturn(Surface.ROTATION_90).when(mDisplayLayout).rotation();
         mOrganizer.enableHideDisplayCutout();
 
         verify(mOrganizer).registerOrganizer(DisplayAreaOrganizer.FEATURE_HIDE_DISPLAY_CUTOUT);
@@ -190,7 +194,7 @@ public class HideDisplayCutoutOrganizerTest {
                 .getDisplayCutoutInsetsOfNaturalOrientation();
         mContext.getOrCreateTestableResources().addOverride(
                 R.dimen.status_bar_height_landscape, mFakeStatusBarHeightLandscape);
-        doReturn(Surface.ROTATION_270).when(mDisplay).getRotation();
+        doReturn(Surface.ROTATION_270).when(mDisplayLayout).rotation();
         mOrganizer.enableHideDisplayCutout();
 
         verify(mOrganizer).registerOrganizer(DisplayAreaOrganizer.FEATURE_HIDE_DISPLAY_CUTOUT);
@@ -218,5 +222,23 @@ public class HideDisplayCutoutOrganizerTest {
         assertThat(mOrganizer.mCurrentDisplayBounds).isEqualTo(new Rect(0, 0, 0, 0));
         assertThat(mOrganizer.mOffsetX).isEqualTo(0);
         assertThat(mOrganizer.mOffsetY).isEqualTo(0);
+    }
+
+    @Test
+    public void testDisplaySizeChange() {
+        doReturn(100).when(mDisplayLayout).width();
+        doReturn(200).when(mDisplayLayout).height();
+        doReturn(mFakeDefaultCutoutInsets).when(mOrganizer)
+                .getDisplayCutoutInsetsOfNaturalOrientation();
+        mContext.getOrCreateTestableResources().addOverride(
+                R.dimen.status_bar_height_portrait, mFakeStatusBarHeightPortrait);
+        doReturn(Surface.ROTATION_0).when(mDisplayLayout).rotation();
+        mOrganizer.enableHideDisplayCutout();
+        assertThat(mOrganizer.mCurrentDisplayBounds).isEqualTo(new Rect(0, 15, 100, 200));
+
+        doReturn(200).when(mDisplayLayout).width();
+        doReturn(400).when(mDisplayLayout).height();
+        mOrganizer.updateBoundsAndOffsets(true);
+        assertThat(mOrganizer.mCurrentDisplayBounds).isEqualTo(new Rect(0, 15, 200, 400));
     }
 }

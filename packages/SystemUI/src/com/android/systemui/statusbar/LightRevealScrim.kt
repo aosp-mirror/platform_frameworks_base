@@ -14,6 +14,7 @@ import android.graphics.Shader
 import android.util.AttributeSet
 import android.view.View
 import com.android.systemui.animation.Interpolators
+import java.util.function.Consumer
 
 /**
  * Provides methods to modify the various properties of a [LightRevealScrim] to reveal between 0% to
@@ -51,7 +52,7 @@ object LiftReveal : LightRevealEffect {
     private const val OVAL_INITIAL_WIDTH_PERCENT = 0.5f
 
     /** The initial top value of the light oval, in percent of scrim height. */
-    private const val OVAL_INITIAL_TOP_PERCENT = 1.05f
+    private const val OVAL_INITIAL_TOP_PERCENT = 1.1f
 
     /** The initial bottom value of the light oval, in percent of scrim height. */
     private const val OVAL_INITIAL_BOTTOM_PERCENT = 1.2f
@@ -148,6 +149,8 @@ class PowerButtonReveal(
  */
 class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
 
+    lateinit var revealAmountListener: Consumer<Float>
+
     /**
      * How much of the underlying views are revealed, in percent. 0 means they will be completely
      * obscured and 1 means they'll be fully visible.
@@ -158,6 +161,7 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
                 field = value
 
                 revealEffect.setRevealAmountOnScrim(value, this)
+                revealAmountListener.accept(value)
                 invalidate()
             }
         }

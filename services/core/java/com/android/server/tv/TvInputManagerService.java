@@ -209,10 +209,11 @@ public final class TvInputManagerService extends SystemService {
     private void registerBroadcastReceivers() {
         PackageMonitor monitor = new PackageMonitor() {
             private void buildTvInputList(String[] packages) {
+                int userId = getChangingUserId();
                 synchronized (mLock) {
-                    if (mCurrentUserId == getChangingUserId()) {
-                        buildTvInputListLocked(mCurrentUserId, packages);
-                        buildTvContentRatingSystemListLocked(mCurrentUserId);
+                    if (mCurrentUserId == userId || mRunningProfiles.contains(userId)) {
+                        buildTvInputListLocked(userId, packages);
+                        buildTvContentRatingSystemListLocked(userId);
                     }
                 }
             }
@@ -467,9 +468,9 @@ public final class TvInputManagerService extends SystemService {
     }
 
     private void startProfileLocked(int userId) {
+        mRunningProfiles.add(userId);
         buildTvInputListLocked(userId, null);
         buildTvContentRatingSystemListLocked(userId);
-        mRunningProfiles.add(userId);
     }
 
     private void switchUser(int userId) {
@@ -2303,10 +2304,9 @@ public final class TvInputManagerService extends SystemService {
         public void requestChannelBrowsable(Uri channelUri, int userId)
                 throws RemoteException {
             final String callingPackageName = getCallingPackageName();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, "requestChannelBrowsable");
             final long identity = Binder.clearCallingIdentity();
-            final int callingUid = Binder.getCallingUid();
-            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
-                userId, "requestChannelBrowsable");
             try {
                 Intent intent = new Intent(TvContract.ACTION_CHANNEL_BROWSABLE_REQUESTED);
                 List<ResolveInfo> list = getContext().getPackageManager()

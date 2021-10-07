@@ -202,7 +202,6 @@
     <string name="gnss_service" msgid="8907781262179951385">"Huduma ya GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Huduma ya Arifa ya Kitambuzi"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight Service"</string>
-    <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Kitambua Saa za Eneo (Hakuna muunganisho)"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Huduma ya Kusasisha Saa za GNSS"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Huduma ya Kidhibiti cha Utambuzi wa Muziki"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Data iliyomo kwenye kifaa chako itafutwa"</string>
@@ -585,6 +584,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Jaribu alama nyingine ya kidole"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Inang\'aa mno"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Jaribu kurekebisha"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Badilisha mkao wa kidole chako kiasi kila wakati"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Imethibitisha alama ya kidole"</string>
@@ -601,8 +601,7 @@
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Hakuna alama za vidole zilizojumuishwa."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Kifaa hiki hakina kitambua alama ya kidole."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Kitambuzi kimezimwa kwa muda."</string>
-    <!-- no translation found for fingerprint_error_bad_calibration (374406495079531135) -->
-    <skip />
+    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Imeshindwa kutumia kitambua alama ya kidole. Tembelea mtoa huduma za urekebishaji"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Kidole cha <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Tumia alama ya kidole"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Tumia alama ya kidole au mbinu ya kufunga skrini"</string>
@@ -611,13 +610,16 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Aikoni ya alama ya kidole"</string>
-    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Kufungua kwa uso"</string>
-    <string name="face_recalibrate_notification_title" msgid="5944930528030496897">"Sajili uso wako tena"</string>
-    <string name="face_recalibrate_notification_content" msgid="892757485125249962">"Ili kuimarisha utambuzi, tafadhali sajili uso wako tena"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Weka mipangilio ya Kufungua kwa uso"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Kufungua kwa Uso"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Hitilafu imetokea kwenye kipengele cha Kufungua kwa Uso"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Gusa ili ufute muundo wa uso wako, kisha uweke uso wako tena"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Weka mipangilio ya Kufungua kwa Uso"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Fungua simu yako kwa kuiangalia"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Weka mipangilio ya mbinu zaidi za kufungua"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Gusa ili uweke alama ya kidole"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Kufungua kwa Alama ya Kidole"</string>
+    <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Imeshindwa kutumia kitambua alama ya kidole"</string>
+    <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Tembelea mtoa huduma za urekebishaji."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Imeshindwa kunasa data sahihi ya uso. Jaribu tena."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Inang\'aa mno. Jaribu mwangaza hafifu"</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Hakuna mwangaza wa kutosha. Jaribu kuongeza mwangaza."</string>
@@ -641,19 +643,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Imeshindwa kuthibitisha uso. Maunzi hayapatikani."</string>
-    <string name="face_error_timeout" msgid="2598544068593889762">"Jaribu Kufungua kwa uso tena"</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"Jaribu Kufungua kwa Uso tena"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Imeshindwa kuhifadhi data ya uso mpya. Futa wa kale kwanza."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Utendaji wa kitambulisho umeghairiwa."</string>
-    <string name="face_error_user_canceled" msgid="5766472033202928373">"Hatua ya Kufungua kwa uso imeghairiwa na mtumiaji"</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"Hatua ya Kufungua kwa Uso imeghairiwa na mtumiaji"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Umejaribu mara nyingi mno. Jaribu tena baadaye."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Umejaribu mara nyingi mno. Umezima kipengele cha Kufungua kwa uso."</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Umejaribu mara nyingi mno. Umezima kipengele cha Kufungua kwa Uso."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Umejaribu mara nyingi mno. Weka mbinu ya kufunga skrini badala yake."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Imeshindwa kuthibitisha uso. Jaribu tena."</string>
-    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Hujaweka mipangilio ya kipengele cha Kufungua kwa uso"</string>
-    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Kipengele cha Kufungua kwa uso hakitumiki kwenye kifaa hiki"</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Hujaweka mipangilio ya kipengele cha Kufungua kwa Uso"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Kipengele cha Kufungua kwa Uso hakitumiki kwenye kifaa hiki"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Kitambuzi kimezimwa kwa muda."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Uso wa <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="5854024256907828015">"Tumia kipengele cha Kufungua kwa uso"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"Tumia kipengele cha Kufungua kwa Uso"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Tumia uso au mbinu ya kufunga skrini"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Tumia uso wako ili uendelee"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Tumia uso au mbinu yako ya kufunga skrini ili uendelee"</string>
@@ -956,7 +958,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Panua eneo la kufungua."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Kufungua slaidi."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Kufungua kwa ruwaza."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Kufungua kwa uso."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Kufungua kwa Uso."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Kufungua kwa PIN."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Kufungua Pin ya Sim."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Kufungua Puk ya Sim."</string>
@@ -1480,6 +1482,7 @@
     <string name="deny" msgid="6632259981847676572">"Kataza"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Idhini imeitishwa"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Idhini imeombwa\nya akaunti<xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="APP">%1$s</xliff:g> imeombwa ruhusa\nkwenye akaunti ya <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Unatumia programu hii nje ya wasifu wako wa kazini"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Unatumia programu hii kwenye wasifu wako wa kazini"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Mbinu ya uingizaji"</string>

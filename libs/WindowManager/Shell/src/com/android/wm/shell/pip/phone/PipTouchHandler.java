@@ -63,7 +63,6 @@ import java.io.PrintWriter;
  * the PIP.
  */
 public class PipTouchHandler {
-    @VisibleForTesting static final float MINIMUM_SIZE_PERCENT = 0.4f;
 
     private static final String TAG = "PipTouchHandler";
     private static final float DEFAULT_STASH_VELOCITY_THRESHOLD = 18000.f;
@@ -115,6 +114,7 @@ public class PipTouchHandler {
     private float mSavedSnapFraction = -1f;
     private boolean mSendingHoverAccessibilityEvents;
     private boolean mMovementWithinDismiss;
+    private float mMinimumSizePercent;
 
     // Touch state
     private final PipTouchState mTouchState;
@@ -252,6 +252,7 @@ public class PipTouchHandler {
         mExpandedShortestEdgeSize = res.getDimensionPixelSize(
                 R.dimen.pip_expanded_shortest_edge_size);
         mImeOffset = res.getDimensionPixelSize(R.dimen.pip_ime_offset);
+        mMinimumSizePercent = res.getFraction(R.fraction.config_pipShortestEdgePercent, 1, 1);
         mPipDismissTargetHandler.updateMagneticTargetSize();
     }
 
@@ -481,12 +482,12 @@ public class PipTouchHandler {
                 + (mPipBoundsState.getDisplayBounds().height() - insetBounds.bottom);
         final int minWidth, minHeight, maxWidth, maxHeight;
         if (aspectRatio > 1f) {
-            minWidth = (int) Math.min(normalBounds.width(), shorterLength * MINIMUM_SIZE_PERCENT);
+            minWidth = (int) Math.min(normalBounds.width(), shorterLength * mMinimumSizePercent);
             minHeight = (int) (minWidth / aspectRatio);
             maxWidth = (int) Math.max(normalBounds.width(), shorterLength - totalHorizontalPadding);
             maxHeight = (int) (maxWidth / aspectRatio);
         } else {
-            minHeight = (int) Math.min(normalBounds.height(), shorterLength * MINIMUM_SIZE_PERCENT);
+            minHeight = (int) Math.min(normalBounds.height(), shorterLength * mMinimumSizePercent);
             minWidth = (int) (minHeight * aspectRatio);
             maxHeight = (int) Math.max(normalBounds.height(), shorterLength - totalVerticalPadding);
             maxWidth = (int) (maxHeight * aspectRatio);
@@ -726,12 +727,17 @@ public class PipTouchHandler {
     }
 
     private void animateToNormalSize(Runnable callback) {
+        // Save the current bounds as the user-resize bounds.
         mPipResizeGestureHandler.setUserResizeBounds(mPipBoundsState.getBounds());
-        final Rect normalBounds = new Rect(mPipBoundsState.getNormalBounds());
+
+        final Size minMenuSize = mMenuController.getEstimatedMinMenuSize();
+        final Rect normalBounds = mPipBoundsState.getNormalBounds();
+        final Rect destBounds = mPipBoundsAlgorithm.adjustNormalBoundsToFitMenu(normalBounds,
+                minMenuSize);
         Rect restoredMovementBounds = new Rect();
-        mPipBoundsAlgorithm.getMovementBounds(normalBounds,
+        mPipBoundsAlgorithm.getMovementBounds(destBounds,
                 mInsetBounds, restoredMovementBounds, mIsImeShowing ? mImeHeight : 0);
-        mSavedSnapFraction = mMotionHelper.animateToExpandedState(normalBounds,
+        mSavedSnapFraction = mMotionHelper.animateToExpandedState(destBounds,
                 mPipBoundsState.getMovementBounds(), restoredMovementBounds, callback);
     }
 

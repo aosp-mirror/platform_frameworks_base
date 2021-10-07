@@ -50,10 +50,6 @@ public final class ServerFlags {
     /**
      * An annotation used to indicate when a {@link DeviceConfig#NAMESPACE_SYSTEM_TIME} key is
      * required.
-     *
-     * <p>Note that the com.android.geotz module deployment of the Offline LocationTimeZoneProvider
-     * also shares the {@link DeviceConfig#NAMESPACE_SYSTEM_TIME}, and uses the
-     * prefix "geotz_" on all of its key strings.
      */
     @StringDef(prefix = "KEY_", value = {
             KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED,

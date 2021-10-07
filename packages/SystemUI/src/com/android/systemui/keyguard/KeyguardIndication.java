@@ -40,18 +40,22 @@ public class KeyguardIndication {
     private final View.OnClickListener mOnClickListener;
     @Nullable
     private final Drawable mBackground;
+    @Nullable
+    private final Long mMinVisibilityMillis; // in milliseconds
 
     private KeyguardIndication(
             CharSequence message,
             ColorStateList textColor,
             Drawable icon,
             View.OnClickListener onClickListener,
-            Drawable background) {
+            Drawable background,
+            Long minVisibilityMillis) {
         mMessage = message;
         mTextColor = textColor;
         mIcon = icon;
         mOnClickListener = onClickListener;
         mBackground = background;
+        mMinVisibilityMillis = minVisibilityMillis;
     }
 
     /**
@@ -89,6 +93,14 @@ public class KeyguardIndication {
         return mBackground;
     }
 
+    /**
+     * Minimum time to show text in milliseconds.
+     * @return null if unspecified
+     */
+    public @Nullable Long getMinVisibilityMillis() {
+        return mMinVisibilityMillis;
+    }
+
     @Override
     public String toString() {
         String str = "KeyguardIndication{";
@@ -96,6 +108,7 @@ public class KeyguardIndication {
         if (mIcon != null) str += " mIcon=" + mIcon;
         if (mOnClickListener != null) str += " mOnClickListener=" + mOnClickListener;
         if (mBackground != null) str += " mBackground=" + mBackground;
+        if (mMinVisibilityMillis != null) str += " mMinVisibilityMillis=" + mMinVisibilityMillis;
         str += "}";
         return str;
     }
@@ -109,6 +122,7 @@ public class KeyguardIndication {
         private View.OnClickListener mOnClickListener;
         private ColorStateList mTextColor;
         private Drawable mBackground;
+        private Long mMinVisibilityMillis;
 
         public Builder() { }
 
@@ -155,6 +169,15 @@ public class KeyguardIndication {
         }
 
         /**
+         * Optional. Set a required minimum visibility time in milliseconds for the text
+         * to show.
+         */
+        public Builder setMinVisibilityMillis(Long minVisibilityMillis) {
+            this.mMinVisibilityMillis = minVisibilityMillis;
+            return this;
+        }
+
+        /**
          * Build the KeyguardIndication.
          */
         public KeyguardIndication build() {
@@ -166,7 +189,8 @@ public class KeyguardIndication {
             }
 
             return new KeyguardIndication(
-                    mMessage, mTextColor, mIcon, mOnClickListener, mBackground);
+                    mMessage, mTextColor, mIcon, mOnClickListener, mBackground,
+                    mMinVisibilityMillis);
         }
     }
 }

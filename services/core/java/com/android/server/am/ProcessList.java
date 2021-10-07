@@ -56,6 +56,7 @@ import static com.android.server.am.ActivityManagerService.TAG_UID_OBSERVERS;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.ProcessCapability;
 import android.app.ActivityThread;
@@ -125,7 +126,6 @@ import com.android.internal.os.Zygote;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.MemInfoReader;
-import com.android.server.AppStateTracker;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
@@ -2370,12 +2370,6 @@ public final class ProcessList {
                 allowlistedAppDataInfoMap = null;
             }
 
-            AppStateTracker ast = LocalServices.getService(AppStateTracker.class);
-            if (ast != null) {
-                app.mState.setForcedAppStandby(ast.isAppInForcedAppStandby(
-                        app.info.uid, app.info.packageName));
-            }
-
             final Process.ProcessStartResult startResult;
             boolean regularZygote = false;
             if (hostingRecord.usesWebviewZygote()) {
@@ -2993,6 +2987,22 @@ public final class ProcessList {
             return mAppIsolatedUidRangeAllocator.getOrCreateIsolatedUidRangeLocked(
                     info.processName, hostingRecord.getDefiningUid());
         }
+    }
+
+    @Nullable
+    @GuardedBy("mService")
+    List<Integer> getIsolatedProcessesLocked(int uid) {
+        List<Integer> ret = null;
+        for (int i = 0, size = mIsolatedProcesses.size(); i < size; i++) {
+            final ProcessRecord app = mIsolatedProcesses.valueAt(i);
+            if (app.info.uid == uid) {
+                if (ret == null) {
+                    ret = new ArrayList<>();
+                }
+                ret.add(app.getPid());
+            }
+        }
+        return ret;
     }
 
     @GuardedBy("mService")
@@ -4698,10 +4708,10 @@ public final class ProcessList {
                         final ApplicationInfo ai = AppGlobals.getPackageManager()
                                 .getApplicationInfo(packageName, STOCK_PM_FLAGS, app.userId);
                         if (ai != null) {
-                            app.getThread().scheduleApplicationInfoChanged(ai);
                             if (ai.packageName.equals(app.info.packageName)) {
                                 app.info = ai;
                             }
+                            app.getThread().scheduleApplicationInfoChanged(ai);
                             targetProcesses.add(app.getWindowProcessController());
                         }
                     } catch (RemoteException e) {
@@ -4712,8 +4722,7 @@ public final class ProcessList {
             });
         }
 
-        mService.mActivityTaskManager.updateAssetConfiguration(
-                updateFrameworkRes ? null : targetProcesses);
+        mService.mActivityTaskManager.updateAssetConfiguration(targetProcesses, updateFrameworkRes);
     }
 
     @GuardedBy("mService")
@@ -5006,55 +5015,6 @@ public final class ProcessList {
             }
         }
         return true;
-    }
-
-    @GuardedBy("mService")
-    void updateForceAppStandbyForUidPackageLocked(int uid, String packageName, boolean standby) {
-        final UidRecord uidRec = getUidRecordLOSP(uid);
-        if (uidRec != null) {
-            uidRec.forEachProcess(app -> {
-                if (TextUtils.equals(app.info.packageName, packageName)) {
-                    app.mState.setForcedAppStandby(standby);
-                    killAppIfForceStandbyAndCachedIdleLocked(app);
-                }
-            });
-        }
-    }
-
-    @GuardedBy("mService")
-    void updateForcedAppStandbyForAllAppsLocked() {
-        if (!mService.mConstants.mKillForceAppStandByAndCachedIdle) {
-            return;
-        }
-        final AppStateTracker ast = LocalServices.getService(AppStateTracker.class);
-        for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
-            final ProcessRecord app = mLruProcesses.get(i);
-            final boolean standby = ast.isAppInForcedAppStandby(
-                    app.info.uid, app.info.packageName);
-            app.mState.setForcedAppStandby(standby);
-            if (standby) {
-                killAppIfForceStandbyAndCachedIdleLocked(app);
-            }
-        }
-    }
-
-    @GuardedBy("mService")
-    void killAppIfForceStandbyAndCachedIdleLocked(ProcessRecord app) {
-        final UidRecord uidRec = app.getUidRecord();
-        if (mService.mConstants.mKillForceAppStandByAndCachedIdle
-                && uidRec != null && uidRec.isIdle()
-                && !app.mState.shouldNotKillOnForcedAppStandbyAndIdle()
-                && app.isCached() && app.mState.isForcedAppStandby()) {
-            app.killLocked("cached idle & forced-app-standby",
-                    ApplicationExitInfo.REASON_OTHER,
-                    ApplicationExitInfo.SUBREASON_CACHED_IDLE_FORCED_APP_STANDBY,
-                    true);
-        }
-    }
-
-    @GuardedBy("mService")
-    void killAppIfForceStandbyAndCachedIdleLocked(UidRecord uidRec) {
-        uidRec.forEachProcess(app -> killAppIfForceStandbyAndCachedIdleLocked(app));
     }
 
     /**

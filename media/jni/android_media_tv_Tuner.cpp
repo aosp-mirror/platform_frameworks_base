@@ -339,6 +339,12 @@ MediaEvent::~MediaEvent() {
     if (pC2Buffer != NULL) {
         pC2Buffer->unregisterOnDestroyNotify(&DestroyCallback, this);
     }
+
+    if (mLinearBlockObj != NULL) {
+        env->DeleteWeakGlobalRef(mLinearBlockObj);
+        mLinearBlockObj = NULL;
+    }
+
     mFilterClient = NULL;
 }
 
@@ -2450,7 +2456,10 @@ static sp<JTuner> setTuner(JNIEnv *env, jobject thiz, const sp<JTuner> &tuner) {
     if (old != NULL) {
         old->decStrong(thiz);
     }
-    env->SetLongField(thiz, gFields.tunerContext, (jlong)tuner.get());
+
+    if (tuner != NULL) {
+        env->SetLongField(thiz, gFields.tunerContext, (jlong)tuner.get());
+    }
 
     return old;
 }
@@ -4042,6 +4051,7 @@ static jint android_media_tv_Tuner_open_demux(JNIEnv* env, jobject thiz, jint ha
 
 static jint android_media_tv_Tuner_close_tuner(JNIEnv* env, jobject thiz) {
     sp<JTuner> tuner = getTuner(env, thiz);
+    setTuner(env, thiz, NULL);
     return (jint) tuner->close();
 }
 

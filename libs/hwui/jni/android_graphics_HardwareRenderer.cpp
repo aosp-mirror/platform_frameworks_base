@@ -44,8 +44,6 @@
 #include <utils/StrongPointer.h>
 #include <utils/Timers.h>
 
-#include <pthread.h>
-
 #include <algorithm>
 #include <atomic>
 #include <vector>
@@ -60,10 +58,6 @@ using namespace android::uirenderer::renderthread;
 struct {
     jclass clazz;
     jmethodID invokePictureCapturedCallback;
-    jmethodID createHintSession;
-    jmethodID updateTargetWorkDuration;
-    jmethodID reportActualWorkDuration;
-    jmethodID closeHintSession;
 } gHardwareRenderer;
 
 struct {
@@ -88,14 +82,6 @@ static JNIEnv* getenv(JavaVM* vm) {
         LOG_ALWAYS_FATAL("Failed to get JNIEnv for JavaVM: %p", vm);
     }
     return env;
-}
-
-static bool hasExceptionAndClear(JNIEnv* env) {
-    if (GraphicsJNI::hasException(env)) {
-        env->ExceptionClear();
-        return true;
-    }
-    return false;
 }
 
 typedef ANativeWindow* (*ANW_fromSurface)(JNIEnv* env, jobject surface);
@@ -147,67 +133,6 @@ private:
     }
 };
 
-class HintSessionWrapper : public LightRefBase<HintSessionWrapper> {
-public:
-    static sp<HintSessionWrapper> create(JNIEnv* env, RenderProxy* proxy) {
-        if (!Properties::useHintManager) return nullptr;
-
-        // Include UI thread (self), render thread, and thread pool.
-        std::vector<int> tids = CommonPool::getThreadIds();
-        tids.push_back(proxy->getRenderThreadTid());
-        tids.push_back(pthread_gettid_np(pthread_self()));
-
-        jintArray tidsArray = env->NewIntArray(tids.size());
-        if (hasExceptionAndClear(env)) return nullptr;
-        env->SetIntArrayRegion(tidsArray, 0, tids.size(), reinterpret_cast<jint*>(tids.data()));
-        if (hasExceptionAndClear(env)) return nullptr;
-        jobject session = env->CallStaticObjectMethod(
-                gHardwareRenderer.clazz, gHardwareRenderer.createHintSession, tidsArray);
-        if (hasExceptionAndClear(env) || !session) return nullptr;
-        return new HintSessionWrapper(env, session);
-    }
-
-    ~HintSessionWrapper() {
-        if (!mSession) return;
-        JNIEnv* env = getenv(mVm);
-        env->CallStaticVoidMethod(gHardwareRenderer.clazz, gHardwareRenderer.closeHintSession,
-                                  mSession);
-        hasExceptionAndClear(env);
-        env->DeleteGlobalRef(mSession);
-        mSession = nullptr;
-    }
-
-    void updateTargetWorkDuration(long targetDurationNanos) {
-        if (!mSession) return;
-        JNIEnv* env = getenv(mVm);
-        env->CallStaticVoidMethod(gHardwareRenderer.clazz,
-                                  gHardwareRenderer.updateTargetWorkDuration, mSession,
-                                  static_cast<jlong>(targetDurationNanos));
-        hasExceptionAndClear(env);
-    }
-
-    void reportActualWorkDuration(long actualDurationNanos) {
-        if (!mSession) return;
-        JNIEnv* env = getenv(mVm);
-        env->CallStaticVoidMethod(gHardwareRenderer.clazz,
-                                  gHardwareRenderer.reportActualWorkDuration, mSession,
-                                  static_cast<jlong>(actualDurationNanos));
-        hasExceptionAndClear(env);
-    }
-
-private:
-    HintSessionWrapper(JNIEnv* env, jobject jobject) {
-        env->GetJavaVM(&mVm);
-        if (jobject) {
-            mSession = env->NewGlobalRef(jobject);
-            LOG_ALWAYS_FATAL_IF(!mSession, "Failed to make global ref");
-        }
-    }
-
-    JavaVM* mVm = nullptr;
-    jobject mSession = nullptr;
-};
-
 static void android_view_ThreadedRenderer_rotateProcessStatsBuffer(JNIEnv* env, jobject clazz) {
     RenderProxy::rotateProcessStatsBuffer();
 }
@@ -235,12 +160,6 @@ static jlong android_view_ThreadedRenderer_createProxy(JNIEnv* env, jobject claz
     RootRenderNode* rootRenderNode = reinterpret_cast<RootRenderNode*>(rootRenderNodePtr);
     ContextFactoryImpl factory(rootRenderNode);
     RenderProxy* proxy = new RenderProxy(translucent, rootRenderNode, &factory);
-    sp<HintSessionWrapper> wrapper = HintSessionWrapper::create(env, proxy);
-    if (wrapper) {
-        proxy->setHintSessionCallbacks(
-                [wrapper](int64_t nanos) { wrapper->updateTargetWorkDuration(nanos); },
-                [wrapper](int64_t nanos) { wrapper->reportActualWorkDuration(nanos); });
-    }
     return (jlong) proxy;
 }
 
@@ -662,16 +581,18 @@ static void android_view_ThreadedRenderer_setASurfaceTransactionCallback(
         auto globalCallbackRef =
                 std::make_shared<JWeakGlobalRefHolder>(vm, aSurfaceTransactionCallback);
         proxy->setASurfaceTransactionCallback(
-                [globalCallbackRef](int64_t transObj, int64_t scObj, int64_t frameNr) {
+                [globalCallbackRef](int64_t transObj, int64_t scObj, int64_t frameNr) -> bool {
                     JNIEnv* env = getenv(globalCallbackRef->vm());
                     jobject localref = env->NewLocalRef(globalCallbackRef->ref());
                     if (CC_UNLIKELY(!localref)) {
-                        return;
+                        return false;
                     }
-                    env->CallVoidMethod(localref, gASurfaceTransactionCallback.onMergeTransaction,
-                                        static_cast<jlong>(transObj), static_cast<jlong>(scObj),
-                                        static_cast<jlong>(frameNr));
+                    jboolean ret = env->CallBooleanMethod(
+                            localref, gASurfaceTransactionCallback.onMergeTransaction,
+                            static_cast<jlong>(transObj), static_cast<jlong>(scObj),
+                            static_cast<jlong>(frameNr));
                     env->DeleteLocalRef(localref);
+                    return ret;
                 });
     }
 }
@@ -760,9 +681,11 @@ static jobject android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode(
 
     // Create an ImageReader wired up to a BufferItemConsumer
     AImageReader* rawReader;
+    constexpr auto usage = AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE |
+                           AHARDWAREBUFFER_USAGE_GPU_FRAMEBUFFER |
+                           AHARDWAREBUFFER_USAGE_COMPOSER_OVERLAY;
     media_status_t result =
-            AImageReader_newWithUsage(width, height, AIMAGE_FORMAT_RGBA_8888,
-                                      AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE, 2, &rawReader);
+            AImageReader_newWithUsage(width, height, AIMAGE_FORMAT_RGBA_8888, usage, 2, &rawReader);
     std::unique_ptr<AImageReader, decltype(&AImageReader_delete)> reader(rawReader,
                                                                          AImageReader_delete);
 
@@ -931,6 +854,11 @@ static void android_view_ThreadedRenderer_setupShadersDiskCache(JNIEnv* env, job
     env->ReleaseStringUTFChars(skiaDiskCachePath, skiaCacheArray);
 }
 
+static jboolean android_view_ThreadedRenderer_isWebViewOverlaysEnabled(JNIEnv* env, jobject clazz) {
+    // this value is valid only after loadSystemProperties() is called
+    return Properties::enableWebViewOverlays;
+}
+
 // ----------------------------------------------------------------------------
 // JNI Glue
 // ----------------------------------------------------------------------------
@@ -1023,6 +951,8 @@ static const JNINativeMethod gMethods[] = {
          (void*)android_view_ThreadedRenderer_setDisplayDensityDpi},
         {"nInitDisplayInfo", "(IIFIJJ)V", (void*)android_view_ThreadedRenderer_initDisplayInfo},
         {"preload", "()V", (void*)android_view_ThreadedRenderer_preload},
+        {"isWebViewOverlaysEnabled", "()Z",
+         (void*)android_view_ThreadedRenderer_isWebViewOverlaysEnabled},
 };
 
 static JavaVM* mJvm = nullptr;
@@ -1048,23 +978,11 @@ int register_android_view_ThreadedRenderer(JNIEnv* env) {
     gHardwareRenderer.invokePictureCapturedCallback = GetStaticMethodIDOrDie(env, hardwareRenderer,
             "invokePictureCapturedCallback",
             "(JLandroid/graphics/HardwareRenderer$PictureCapturedCallback;)V");
-    gHardwareRenderer.createHintSession =
-            GetStaticMethodIDOrDie(env, hardwareRenderer, "createHintSession",
-                                   "([I)Landroid/os/PerformanceHintManager$Session;");
-    gHardwareRenderer.updateTargetWorkDuration =
-            GetStaticMethodIDOrDie(env, hardwareRenderer, "updateTargetWorkDuration",
-                                   "(Landroid/os/PerformanceHintManager$Session;J)V");
-    gHardwareRenderer.reportActualWorkDuration =
-            GetStaticMethodIDOrDie(env, hardwareRenderer, "reportActualWorkDuration",
-                                   "(Landroid/os/PerformanceHintManager$Session;J)V");
-    gHardwareRenderer.closeHintSession =
-            GetStaticMethodIDOrDie(env, hardwareRenderer, "closeHintSession",
-                                   "(Landroid/os/PerformanceHintManager$Session;)V");
 
     jclass aSurfaceTransactionCallbackClass =
             FindClassOrDie(env, "android/graphics/HardwareRenderer$ASurfaceTransactionCallback");
     gASurfaceTransactionCallback.onMergeTransaction =
-            GetMethodIDOrDie(env, aSurfaceTransactionCallbackClass, "onMergeTransaction", "(JJJ)V");
+            GetMethodIDOrDie(env, aSurfaceTransactionCallbackClass, "onMergeTransaction", "(JJJ)Z");
 
     jclass prepareSurfaceControlForWebviewCallbackClass = FindClassOrDie(
             env, "android/graphics/HardwareRenderer$PrepareSurfaceControlForWebviewCallback");

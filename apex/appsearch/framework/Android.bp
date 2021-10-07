@@ -57,13 +57,12 @@ java_sdk_library {
         // This list must be kept in sync with jarjar.txt
         "modules-utils-preconditions",
     ],
-    libs: ["unsupportedappusage"], // TODO(b/181887768) should be removed
     defaults: ["framework-module-defaults"],
     permitted_packages: ["android.app.appsearch"],
-    aidl: {
-        include_dirs: ["frameworks/base/core/java"], // TODO(b/146218515) should be removed
-    },
     jarjar_rules: "jarjar-rules.txt",
     apex_available: ["com.android.appsearch"],
+    impl_library_visibility: [
+        "//frameworks/base/apex/appsearch/service",
+    ],
     unsafe_ignore_missing_latest_api: true, // TODO(b/146218515) should be removed
 }

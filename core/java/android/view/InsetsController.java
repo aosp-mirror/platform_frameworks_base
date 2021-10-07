@@ -128,6 +128,10 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
          */
         @Appearance int getSystemBarsAppearance();
 
+        default boolean isSystemBarsAppearanceControlled() {
+            return false;
+        }
+
         /**
          * @see WindowInsetsController#setSystemBarsBehavior
          */
@@ -137,6 +141,10 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
          * @see WindowInsetsController#getSystemBarsBehavior
          */
         @Behavior int getSystemBarsBehavior();
+
+        default boolean isSystemBarsBehaviorControlled() {
+            return false;
+        }
 
         /**
          * Releases a surface and ensure that this is done after {@link #applySurfaceParams} has
@@ -1520,6 +1528,10 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @Override
     public @Appearance int getSystemBarsAppearance() {
+        if (!mHost.isSystemBarsAppearanceControlled()) {
+            // We only return the requested appearance, not the implied one.
+            return 0;
+        }
         return mHost.getSystemBarsAppearance();
     }
 
@@ -1544,6 +1556,10 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @Override
     public @Behavior int getSystemBarsBehavior() {
+        if (!mHost.isSystemBarsBehaviorControlled()) {
+            // We only return the requested behavior, not the implied one.
+            return 0;
+        }
         return mHost.getSystemBarsBehavior();
     }
 

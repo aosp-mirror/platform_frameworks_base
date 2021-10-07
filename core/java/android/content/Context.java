@@ -46,7 +46,6 @@ import android.app.time.TimeManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.ApplicationInfoFlags;
 import android.content.res.AssetManager;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
@@ -3196,7 +3195,7 @@ public abstract class Context {
      * apps targeting SDK Version {@link android.os.Build.VERSION_CODES#O}
      * or higher are not allowed to start background services from the background.
      * See
-     * <a href="{@docRoot}/about/versions/oreo/background">
+     * <a href="/about/versions/oreo/background">
      * Background Execution Limits</a>
      * for more details.
      *
@@ -3205,7 +3204,7 @@ public abstract class Context {
      * apps targeting SDK Version {@link android.os.Build.VERSION_CODES#S}
      * or higher are not allowed to start foreground services from the background.
      * See
-     * <a href="{@docRoot}/about/versions/12/behavior-changes-12">
+     * <a href="/about/versions/12/behavior-changes-12">
      * Behavior changes: Apps targeting Android 12
      * </a>
      * for more details.
@@ -3259,7 +3258,7 @@ public abstract class Context {
      * apps targeting SDK Version {@link android.os.Build.VERSION_CODES#S}
      * or higher are not allowed to start foreground services from the background.
      * See
-     * <a href="{@docRoot}/about/versions/12/behavior-changes-12">
+     * <a href="/about/versions/12/behavior-changes-12">
      * Behavior changes: Apps targeting Android 12
      * </a>
      * for more details.
@@ -4465,11 +4464,11 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link
-     * android.media.MediaTranscodeManager} for transcoding media.
+     * android.media.MediaTranscodingManager} for transcoding media.
      *
      * @hide
      * @see #getSystemService(String)
-     * @see android.media.MediaTranscodeManager
+     * @see android.media.MediaTranscodingManager
      */
     @SystemApi
     public static final String MEDIA_TRANSCODING_SERVICE = "media_transcoding";
@@ -6269,23 +6268,6 @@ public abstract class Context {
     }
 
     /**
-     * Similar to {@link #createPackageContextAsUser(String, int, UserHandle)}, but also allows
-     * specifying the flags used to retrieve the {@link ApplicationInfo} of the package.
-     *
-     * @hide
-     */
-    @NonNull
-    public Context createPackageContextAsUser(
-            @NonNull String packageName, @CreatePackageOptions int flags, @NonNull UserHandle user,
-            @ApplicationInfoFlags int packageFlags)
-            throws PackageManager.NameNotFoundException {
-        if (Build.IS_ENG) {
-            throw new IllegalStateException("createPackageContextAsUser not overridden!");
-        }
-        return this;
-    }
-
-    /**
      * Similar to {@link #createPackageContext(String, int)}, but for the own package with a
      * different {@link UserHandle}. For example, {@link #getContentResolver()}
      * will open any {@link Uri} as the given user.
@@ -6304,18 +6286,10 @@ public abstract class Context {
     /**
      * Creates a context given an {@link android.content.pm.ApplicationInfo}.
      *
-     * @deprecated use {@link #createPackageContextAsUser(String, int, UserHandle, int)}
-     *             If an application caches an ApplicationInfo and uses it to call this method,
-     *             the app will not get the most recent version of Runtime Resource Overlays for
-     *             that application. To make things worse, the LoadedApk stored in
-     *             {@code ActivityThread#mResourcePackages} is updated using the old ApplicationInfo
-     *             causing further uses of the cached LoadedApk to return outdated information.
-     *
      * @hide
      */
     @SuppressWarnings("HiddenAbstractMethod")
     @UnsupportedAppUsage
-    @Deprecated
     public abstract Context createApplicationContext(ApplicationInfo application,
             @CreatePackageOptions int flags) throws PackageManager.NameNotFoundException;
 

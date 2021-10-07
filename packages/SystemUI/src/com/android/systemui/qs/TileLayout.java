@@ -167,6 +167,8 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         }
 
         int height = (mCellHeight + mCellMarginVertical) * mRows;
+        height -= mCellMarginVertical;
+
         if (height < 0) height = 0;
 
         setMeasuredDimension(width, height);

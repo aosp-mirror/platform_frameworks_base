@@ -191,6 +191,11 @@ public class BatteryStatsImpl extends BatteryStats {
     @VisibleForTesting
     public static final int WAKE_LOCK_WEIGHT = 50;
 
+    public static final int RESET_REASON_CORRUPT_FILE = 1;
+    public static final int RESET_REASON_ADB_COMMAND = 2;
+    public static final int RESET_REASON_FULL_CHARGE = 3;
+    public static final int RESET_REASON_MEASURED_ENERGY_BUCKETS_CHANGE = 4;
+
     protected Clocks mClocks;
 
     private final AtomicFile mStatsFile;
@@ -270,7 +275,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private int mNumAllUidCpuTimeReads;
 
     /** Container for Resource Power Manager stats. Updated by updateRpmStatsLocked. */
-    private final RpmStats mTmpRpmStats = new RpmStats();
+    private RpmStats mTmpRpmStats = null;
     /** The soonest the RPM stats can be updated after it was last updated. */
     private static final long RPM_STATS_UPDATE_FREQ_MS = 1000;
     /** Last time that RPM stats were updated by updateRpmStatsLocked. */
@@ -348,8 +353,9 @@ public class BatteryStatsImpl extends BatteryStats {
 
         /**
          * Callback invoked immediately prior to resetting battery stats.
+         * @param resetReason One of the RESET_REASON_* constants.
          */
-        void prepareForBatteryStatsReset();
+        void prepareForBatteryStatsReset(int resetReason);
     }
 
     private BatteryResetListener mBatteryResetListener;
@@ -747,6 +753,7 @@ public class BatteryStatsImpl extends BatteryStats {
     // CPU update, even if we aren't currently running wake locks.
     boolean mDistributeWakelockCpu;
 
+    private boolean mSystemReady;
     boolean mShuttingDown;
 
     final HistoryEventTracker mActiveEvents = new HistoryEventTracker();
@@ -1099,8 +1106,9 @@ public class BatteryStatsImpl extends BatteryStats {
     @VisibleForTesting
     protected PowerProfile mPowerProfile;
 
+    @VisibleForTesting
     @GuardedBy("this")
-    final Constants mConstants;
+    protected final Constants mConstants;
 
     /*
      * Holds a SamplingTimer associated with each Resource Power Manager state and voter,
@@ -11210,7 +11218,7 @@ public class BatteryStatsImpl extends BatteryStats {
         long uptimeUs = mSecUptime * 1000;
         long mSecRealtime = mClocks.elapsedRealtime();
         long realtimeUs = mSecRealtime * 1000;
-        resetAllStatsLocked(mSecUptime, mSecRealtime);
+        resetAllStatsLocked(mSecUptime, mSecRealtime, RESET_REASON_ADB_COMMAND);
         mDischargeStartLevel = mHistoryCur.batteryLevel;
         pullPendingStateUpdatesLocked();
         addHistoryRecordLocked(mSecRealtime, mSecUptime);
@@ -11239,9 +11247,10 @@ public class BatteryStatsImpl extends BatteryStats {
         initActiveHistoryEventsLocked(mSecRealtime, mSecUptime);
     }
 
-    private void resetAllStatsLocked(long uptimeMillis, long elapsedRealtimeMillis) {
+    private void resetAllStatsLocked(long uptimeMillis, long elapsedRealtimeMillis,
+            int resetReason) {
         if (mBatteryResetListener != null) {
-            mBatteryResetListener.prepareForBatteryStatsReset();
+            mBatteryResetListener.prepareForBatteryStatsReset(resetReason);
         }
 
         final long uptimeUs = uptimeMillis * 1000;
@@ -12379,19 +12388,34 @@ public class BatteryStatsImpl extends BatteryStats {
 
         mLastBluetoothActivityInfo.set(info);
     }
-
     /**
-     * Read and record Resource Power Manager (RPM) state and voter times.
+     * Read Resource Power Manager (RPM) state and voter times.
      * If RPM stats were fetched more recently than RPM_STATS_UPDATE_FREQ_MS ago, uses the old data
      * instead of fetching it anew.
+     *
+     * Note: This should be called without synchronizing this BatteryStatsImpl object
      */
-    public void updateRpmStatsLocked(long elapsedRealtimeUs) {
+    public void fillLowPowerStats() {
         if (mPlatformIdleStateCallback == null) return;
+
+        RpmStats rpmStats = new RpmStats();
         long now = SystemClock.elapsedRealtime();
         if (now - mLastRpmStatsUpdateTimeMs >= RPM_STATS_UPDATE_FREQ_MS) {
-            mPlatformIdleStateCallback.fillLowPowerStats(mTmpRpmStats);
-            mLastRpmStatsUpdateTimeMs = now;
+            mPlatformIdleStateCallback.fillLowPowerStats(rpmStats);
+            synchronized (this) {
+                mTmpRpmStats = rpmStats;
+                mLastRpmStatsUpdateTimeMs = now;
+            }
         }
+    }
+
+    /**
+     * Record Resource Power Manager (RPM) state and voter times.
+     * TODO(b/185252376): Remove this logging. PowerStatsService logs the same data more
+     * efficiently.
+     */
+    public void updateRpmStatsLocked(long elapsedRealtimeUs) {
+        if (mTmpRpmStats == null) return;
 
         for (Map.Entry<String, RpmStats.PowerStatePlatformSleepState> pstate
                 : mTmpRpmStats.mPlatformLowPowerStats.entrySet()) {
@@ -13477,6 +13501,13 @@ public class BatteryStatsImpl extends BatteryStats {
         return false;
     }
 
+    /**
+     * Notifies BatteryStatsImpl that the system server is ready.
+     */
+    public void onSystemReady() {
+        mSystemReady = true;
+    }
+
     @GuardedBy("this")
     protected void setOnBatteryLocked(final long mSecRealtime, final long mSecUptime,
             final boolean onBattery, final int oldStatus, final int level, final int chargeUah) {
@@ -13493,10 +13524,17 @@ public class BatteryStatsImpl extends BatteryStats {
             // battery was last full, or the level is at 100, or
             // we have gone through a significant charge (from a very low
             // level to a now very high level).
+            // Also, we will reset the stats if battery got partially charged
+            // and discharged repeatedly without ever reaching the full charge.
+            // This reset is done in order to prevent stats sessions from going on forever.
+            // Exceedingly long battery sessions would lead to an overflow of
+            // data structures such as mWakeupReasonStats.
             boolean reset = false;
-            if (!mNoAutoReset && (oldStatus == BatteryManager.BATTERY_STATUS_FULL
+            if (!mNoAutoReset && mSystemReady
+                    && (oldStatus == BatteryManager.BATTERY_STATUS_FULL
                     || level >= 90
-                    || (mDischargeCurrentLevel < 20 && level >= 80))) {
+                    || (mDischargeCurrentLevel < 20 && level >= 80)
+                    || getHighDischargeAmountSinceCharge() >= 200)) {
                 Slog.i(TAG, "Resetting battery stats: level=" + level + " status=" + oldStatus
                         + " dischargeLevel=" + mDischargeCurrentLevel
                         + " lowAmount=" + getLowDischargeAmountSinceCharge()
@@ -13534,7 +13572,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     });
                 }
                 doWrite = true;
-                resetAllStatsLocked(mSecUptime, mSecRealtime);
+                resetAllStatsLocked(mSecUptime, mSecRealtime, RESET_REASON_FULL_CHARGE);
                 if (chargeUah > 0 && level > 0) {
                     // Only use the reported coulomb charge value if it is supported and reported.
                     mEstimatedBatteryCapacityMah = (int) ((chargeUah / 1000) / (level / 100.0));
@@ -14502,7 +14540,8 @@ public class BatteryStatsImpl extends BatteryStats {
                     ? null : new MeasuredEnergyStats(supportedStandardBuckets, customBucketNames);
             // Supported power buckets changed since last boot.
             // Existing data is no longer reliable.
-            resetAllStatsLocked(SystemClock.uptimeMillis(), SystemClock.elapsedRealtime());
+            resetAllStatsLocked(SystemClock.uptimeMillis(), SystemClock.elapsedRealtime(),
+                    RESET_REASON_MEASURED_ENERGY_BUCKETS_CHANGE);
         }
     }
 
@@ -14949,7 +14988,8 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         } catch (Exception e) {
             Slog.e(TAG, "Error reading battery statistics", e);
-            resetAllStatsLocked(SystemClock.uptimeMillis(), SystemClock.elapsedRealtime());
+            resetAllStatsLocked(SystemClock.uptimeMillis(), SystemClock.elapsedRealtime(),
+                    RESET_REASON_CORRUPT_FILE);
         } finally {
             stats.recycle();
         }

@@ -26,8 +26,8 @@ import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.face.IFaceServiceReceiver;
 import android.os.IBinder;
-import android.os.NativeHandle;
 import android.util.proto.ProtoOutputStream;
+import android.view.Surface;
 
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
@@ -75,8 +75,8 @@ public interface ServiceProvider {
     int getLockoutModeForUser(int sensorId, int userId);
 
     /**
-     * Requests for the authenticatorId (whose source of truth is in the TEE or equivalent) to
-     * be invalidated. See {@link com.android.server.biometrics.sensors.InvalidationRequesterClient}
+     * Requests for the authenticatorId (whose source of truth is in the TEE or equivalent) to be
+     * invalidated. See {@link com.android.server.biometrics.sensors.InvalidationRequesterClient}
      */
     default void scheduleInvalidateAuthenticatorId(int sensorId, int userId,
             @NonNull IInvalidationCallback callback) {
@@ -96,7 +96,7 @@ public interface ServiceProvider {
 
     void scheduleEnroll(int sensorId, @NonNull IBinder token, @NonNull byte[] hardwareAuthToken,
             int userId, @NonNull IFaceServiceReceiver receiver, @NonNull String opPackageName,
-            @NonNull int[] disabledFeatures, @Nullable NativeHandle surfaceHandle,
+            @NonNull int[] disabledFeatures, @Nullable Surface previewSurface,
             boolean debugConsent);
 
     void cancelEnrollment(int sensorId, @NonNull IBinder token);
@@ -110,7 +110,7 @@ public interface ServiceProvider {
     void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId, int userId,
             int cookie, @NonNull ClientMonitorCallbackConverter callback,
             @NonNull String opPackageName, boolean restricted, int statsClient,
-            boolean allowBackgroundAuthentication);
+            boolean allowBackgroundAuthentication, boolean isKeyguardBypassEnabled);
 
     void cancelAuthentication(int sensorId, @NonNull IBinder token);
 

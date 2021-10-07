@@ -73,7 +73,9 @@ import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
+import android.util.SparseLongArray;
 import android.util.SparseSetArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -686,26 +688,90 @@ public class JobSchedulerService extends com.android.server.SystemService
     final Constants mConstants;
     final ConstantsObserver mConstantsObserver;
 
-    private static final Comparator<JobStatus> sPendingJobComparator = (o1, o2) -> {
-        // Jobs with an override state set (via adb) should be put first as tests/developers
-        // expect the jobs to run immediately.
-        if (o1.overrideState != o2.overrideState) {
-            // Higher override state (OVERRIDE_FULL) should be before lower state (OVERRIDE_SOFT)
-            return o2.overrideState - o1.overrideState;
-        }
-        if (o1.getSourceUid() == o2.getSourceUid()) {
-            final boolean o1FGJ = o1.isRequestedExpeditedJob();
-            if (o1FGJ != o2.isRequestedExpeditedJob()) {
-                // Attempt to run requested expedited jobs ahead of regular jobs, regardless of
-                // expedited job quota.
-                return o1FGJ ? -1 : 1;
+    @VisibleForTesting
+    class PendingJobComparator implements Comparator<JobStatus> {
+        private final SparseLongArray mEarliestRegEnqueueTimeCache = new SparseLongArray();
+
+        /**
+         * Refresh sorting determinants based on the current state of {@link #mPendingJobs}.
+         */
+        @GuardedBy("mLock")
+        @VisibleForTesting
+        void refreshLocked() {
+            mEarliestRegEnqueueTimeCache.clear();
+            for (int i = 0; i < mPendingJobs.size(); ++i) {
+                final JobStatus job = mPendingJobs.get(i);
+                final int uid = job.getSourceUid();
+                if (!job.isRequestedExpeditedJob()) {
+                    final long earliestEnqueueTime =
+                            mEarliestRegEnqueueTimeCache.get(uid, Long.MAX_VALUE);
+                    mEarliestRegEnqueueTimeCache.put(uid,
+                            Math.min(earliestEnqueueTime, job.enqueueTime));
+                }
             }
         }
-        if (o1.enqueueTime < o2.enqueueTime) {
-            return -1;
+
+        @Override
+        public int compare(JobStatus o1, JobStatus o2) {
+            if (o1 == o2) {
+                return 0;
+            }
+            // Jobs with an override state set (via adb) should be put first as tests/developers
+            // expect the jobs to run immediately.
+            if (o1.overrideState != o2.overrideState) {
+                // Higher override state (OVERRIDE_FULL) should be before lower state
+                // (OVERRIDE_SOFT)
+                return o2.overrideState - o1.overrideState;
+            }
+            final boolean o1EJ = o1.isRequestedExpeditedJob();
+            final boolean o2EJ = o2.isRequestedExpeditedJob();
+            if (o1.getSourceUid() == o2.getSourceUid()) {
+                if (o1EJ != o2EJ) {
+                    // Attempt to run requested expedited jobs ahead of regular jobs, regardless of
+                    // expedited job quota.
+                    return o1EJ ? -1 : 1;
+                }
+            }
+            if (o1EJ || o2EJ) {
+                // We MUST prioritize EJs ahead of regular jobs within a single app. Since we do
+                // that, in order to satisfy the transitivity constraint of the comparator, if
+                // any UID has an EJ, we must ensure that the EJ is ordered ahead of the regular
+                // job of a different app IF the app with an EJ had another job that came before
+                // the differing app. For example, if app A has regJob1 at t1 and eJob3 at t3 and
+                // app B has regJob2 at t2, eJob3 must be ordered before regJob2 because it will be
+                // ordered before regJob1.
+                // Regular jobs don't need to jump the line.
+
+                final long uid1EarliestRegEnqueueTime = Math.min(o1.enqueueTime,
+                        mEarliestRegEnqueueTimeCache.get(o1.getSourceUid(), Long.MAX_VALUE));
+                final long uid2EarliestRegEnqueueTime = Math.min(o2.enqueueTime,
+                        mEarliestRegEnqueueTimeCache.get(o2.getSourceUid(), Long.MAX_VALUE));
+
+                if (o1EJ && o2EJ) {
+                    if (uid1EarliestRegEnqueueTime < uid2EarliestRegEnqueueTime) {
+                        return -1;
+                    } else if (uid1EarliestRegEnqueueTime > uid2EarliestRegEnqueueTime) {
+                        return 1;
+                    }
+                } else if (o1EJ && uid1EarliestRegEnqueueTime <= o2.enqueueTime) {
+                    // Include = to ensure that if we sorted an EJ ahead of a regular job at time X
+                    // then we make sure to sort it ahead of all regular jobs at time X.
+                    return -1;
+                } else if (o2EJ && uid2EarliestRegEnqueueTime <= o1.enqueueTime) {
+                    // Include = to ensure that if we sorted an EJ ahead of a regular job at time X
+                    // then we make sure to sort it ahead of all regular jobs at time X.
+                    return 1;
+                }
+            }
+            if (o1.enqueueTime < o2.enqueueTime) {
+                return -1;
+            }
+            return o1.enqueueTime > o2.enqueueTime ? 1 : 0;
         }
-        return o1.enqueueTime > o2.enqueueTime ? 1 : 0;
-    };
+    }
+
+    @VisibleForTesting
+    final PendingJobComparator mPendingJobComparator = new PendingJobComparator();
 
     static <T> void addOrderedItem(ArrayList<T> array, T newItem, Comparator<T> comparator) {
         int where = Collections.binarySearch(array, newItem, comparator);
@@ -1115,7 +1181,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 // This is a new job, we can just immediately put it on the pending
                 // list and try to run it.
                 mJobPackageTracker.notePending(jobStatus);
-                addOrderedItem(mPendingJobs, jobStatus, sPendingJobComparator);
+                addOrderedItem(mPendingJobs, jobStatus, mPendingJobComparator);
                 maybeRunPendingJobsLocked();
             } else {
                 evaluateControllerStatesLocked(jobStatus);
@@ -1919,7 +1985,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                         if (js != null) {
                             if (isReadyToBeExecutedLocked(js)) {
                                 mJobPackageTracker.notePending(js);
-                                addOrderedItem(mPendingJobs, js, sPendingJobComparator);
+                                addOrderedItem(mPendingJobs, js, mPendingJobComparator);
                             }
                         } else {
                             Slog.e(TAG, "Given null job to check individually");
@@ -2064,6 +2130,7 @@ public class JobSchedulerService extends com.android.server.SystemService
      * Run through list of jobs and execute all possible - at least one is expired so we do
      * as many as we can.
      */
+    @GuardedBy("mLock")
     private void queueReadyJobsForExecutionLocked() {
         // This method will check and capture all ready jobs, so we don't need to keep any messages
         // in the queue.
@@ -2079,7 +2146,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         mPendingJobs.clear();
         stopNonReadyActiveJobsLocked();
         mJobs.forEachJob(mReadyQueueFunctor);
-        mReadyQueueFunctor.postProcess();
+        mReadyQueueFunctor.postProcessLocked();
 
         if (DEBUG) {
             final int queuedJobs = mPendingJobs.size();
@@ -2106,16 +2173,19 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
         }
 
-        public void postProcess() {
+        @GuardedBy("mLock")
+        private void postProcessLocked() {
             noteJobsPending(newReadyJobs);
             mPendingJobs.addAll(newReadyJobs);
             if (mPendingJobs.size() > 1) {
-                mPendingJobs.sort(sPendingJobComparator);
+                mPendingJobComparator.refreshLocked();
+                mPendingJobs.sort(mPendingJobComparator);
             }
 
             newReadyJobs.clear();
         }
     }
+
     private final ReadyJobQueueFunctor mReadyQueueFunctor = new ReadyJobQueueFunctor();
 
     /**
@@ -2180,7 +2250,9 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
         }
 
-        public void postProcess() {
+        @GuardedBy("mLock")
+        @VisibleForTesting
+        void postProcessLocked() {
             if (unbatchedCount > 0
                     || forceBatchedCount >= mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT) {
                 if (DEBUG) {
@@ -2189,7 +2261,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                 noteJobsPending(runnableJobs);
                 mPendingJobs.addAll(runnableJobs);
                 if (mPendingJobs.size() > 1) {
-                    mPendingJobs.sort(sPendingJobComparator);
+                    mPendingJobComparator.refreshLocked();
+                    mPendingJobs.sort(mPendingJobComparator);
                 }
             } else {
                 if (DEBUG) {
@@ -2210,6 +2283,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
     private final MaybeReadyJobQueueFunctor mMaybeQueueFunctor = new MaybeReadyJobQueueFunctor();
 
+    @GuardedBy("mLock")
     private void maybeQueueReadyJobsForExecutionLocked() {
         if (DEBUG) Slog.d(TAG, "Maybe queuing ready jobs...");
 
@@ -2217,7 +2291,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         mPendingJobs.clear();
         stopNonReadyActiveJobsLocked();
         mJobs.forEachJob(mMaybeQueueFunctor);
-        mMaybeQueueFunctor.postProcess();
+        mMaybeQueueFunctor.postProcessLocked();
     }
 
     /** Returns true if both the calling and source users for the job are started. */

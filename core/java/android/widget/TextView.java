@@ -129,7 +129,6 @@ import android.text.method.TextKeyListener;
 import android.text.method.TimeKeyListener;
 import android.text.method.TransformationMethod;
 import android.text.method.TransformationMethod2;
-import android.text.method.TranslationTransformationMethod;
 import android.text.method.WordIterator;
 import android.text.style.CharacterStyle;
 import android.text.style.ClickableSpan;
@@ -199,7 +198,6 @@ import android.view.translation.TranslationSpec;
 import android.view.translation.UiTranslationController;
 import android.view.translation.ViewTranslationCallback;
 import android.view.translation.ViewTranslationRequest;
-import android.view.translation.ViewTranslationResponse;
 import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -10832,11 +10830,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
+        notifyContentCaptureTextChanged();
+    }
+
+    /**
+     * Notifies the ContentCapture service that the text of the view has changed (only if
+     * ContentCapture has been notified of this view's existence already).
+     *
+     * @hide
+     */
+    public void notifyContentCaptureTextChanged() {
         // TODO(b/121045053): should use a flag / boolean to keep status of SHOWN / HIDDEN instead
         // of using isLaidout(), so it's not called in cases where it's laid out but a
         // notifyAppeared was not sent.
-
-        // ContentCapture
         if (isLaidOut() && isImportantForContentCapture() && getNotifiedContentCaptureAppeared()) {
             final ContentCaptureManager cm = mContext.getSystemService(ContentCaptureManager.class);
             if (cm != null && cm.isContentCaptureEnabled()) {
@@ -11848,23 +11854,37 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 // Get the text and trim it to the range we are reporting.
                 CharSequence text = getText();
-                if (expandedTopChar > 0 || expandedBottomChar < text.length()) {
-                    text = text.subSequence(expandedTopChar, expandedBottomChar);
-                }
 
-                if (viewFor == VIEW_STRUCTURE_FOR_AUTOFILL) {
-                    structure.setText(text);
-                } else {
-                    structure.setText(text, selStart - expandedTopChar, selEnd - expandedTopChar);
-
-                    final int[] lineOffsets = new int[bottomLine - topLine + 1];
-                    final int[] lineBaselines = new int[bottomLine - topLine + 1];
-                    final int baselineOffset = getBaselineOffset();
-                    for (int i = topLine; i <= bottomLine; i++) {
-                        lineOffsets[i - topLine] = layout.getLineStart(i);
-                        lineBaselines[i - topLine] = layout.getLineBaseline(i) + baselineOffset;
+                if (text != null) {
+                    if (expandedTopChar > 0 || expandedBottomChar < text.length()) {
+                        // Cap the offsets to avoid an OOB exception. That can happen if the
+                        // displayed/layout text, on which these offsets are calculated, is longer
+                        // than the original text (such as when the view is translated by the
+                        // platform intelligence).
+                        // TODO(b/196433694): Figure out how to better handle the offset
+                        // calculations for this case (so we don't unnecessarily cutoff the original
+                        // text, for example).
+                        expandedTopChar = Math.min(expandedTopChar, text.length());
+                        expandedBottomChar = Math.min(expandedBottomChar, text.length());
+                        text = text.subSequence(expandedTopChar, expandedBottomChar);
                     }
-                    structure.setTextLines(lineOffsets, lineBaselines);
+
+                    if (viewFor == VIEW_STRUCTURE_FOR_AUTOFILL) {
+                        structure.setText(text);
+                    } else {
+                        structure.setText(text,
+                                selStart - expandedTopChar,
+                                selEnd - expandedTopChar);
+
+                        final int[] lineOffsets = new int[bottomLine - topLine + 1];
+                        final int[] lineBaselines = new int[bottomLine - topLine + 1];
+                        final int baselineOffset = getBaselineOffset();
+                        for (int i = topLine; i <= bottomLine; i++) {
+                            lineOffsets[i - topLine] = layout.getLineStart(i);
+                            lineBaselines[i - topLine] = layout.getLineBaseline(i) + baselineOffset;
+                        }
+                        structure.setTextLines(lineOffsets, lineBaselines);
+                    }
                 }
             }
 
@@ -13895,7 +13915,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void onCreateViewTranslationRequest(@NonNull int[] supportedFormats,
             @NonNull Consumer<ViewTranslationRequest> requestsCollector) {
         if (supportedFormats == null || supportedFormats.length == 0) {
-            // TODO(b/182433547): remove before S release
             if (UiTranslationController.DEBUG) {
                 Log.w(LOG_TAG, "Do not provide the support translation formats.");
             }
@@ -13906,7 +13925,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // Support Text translation
         if (ArrayUtils.contains(supportedFormats, TranslationSpec.DATA_FORMAT_TEXT)) {
             if (mText == null || mText.length() == 0) {
-                // TODO(b/182433547): remove before S release
                 if (UiTranslationController.DEBUG) {
                     Log.w(LOG_TAG, "Cannot create translation request for the empty text.");
                 }
@@ -13920,13 +13938,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             //  it, it needs broader changes to text APIs, we only allow to translate non selectable
             //  and editable text in S.
             if (isTextEditable() || isPassword || isTextSelectable()) {
-                // TODO(b/182433547): remove before S release
                 if (UiTranslationController.DEBUG) {
                     Log.w(LOG_TAG, "Cannot create translation request. editable = "
                             + isTextEditable() + ", isPassword = " + isPassword + ", selectable = "
                             + isTextSelectable());
-                    return;
                 }
+                return;
             }
             // TODO(b/176488462): apply the view's important for translation
             requestBuilder.setValue(ViewTranslationRequest.ID_TEXT,
@@ -13937,34 +13954,5 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
         requestsCollector.accept(requestBuilder.build());
-    }
-
-    /**
-     *
-     * Called when the content from {@link #onCreateViewTranslationRequest} had been translated by
-     * the TranslationService. The default implementation will replace the current
-     * {@link TransformationMethod} to transform the original text to the translated text display.
-     *
-     * @param response a {@link ViewTranslationResponse} that contains the translated information
-     * which can be shown in the view.
-     */
-    @Override
-    public void onViewTranslationResponse(@NonNull ViewTranslationResponse response) {
-        // set ViewTranslationResponse
-        super.onViewTranslationResponse(response);
-        // TODO(b/178353965): move to ViewTranslationCallback.onShow()
-        ViewTranslationCallback callback = getViewTranslationCallback();
-        if (callback instanceof TextViewTranslationCallback) {
-            TextViewTranslationCallback textViewDefaultCallback =
-                    (TextViewTranslationCallback) callback;
-            TranslationTransformationMethod oldTranslationMethod =
-                    textViewDefaultCallback.getTranslationTransformation();
-            TransformationMethod originalTranslationMethod = oldTranslationMethod != null
-                    ? oldTranslationMethod.getOriginalTransformationMethod() : mTransformation;
-            TranslationTransformationMethod newTranslationMethod =
-                    new TranslationTransformationMethod(response, originalTranslationMethod);
-            // TODO(b/178353965): well-handle setTransformationMethod.
-            textViewDefaultCallback.setTranslationTransformation(newTranslationMethod);
-        }
     }
 }

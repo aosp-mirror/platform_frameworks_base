@@ -83,17 +83,9 @@ public class AppsFilterTest {
     private static final int DUMMY_OVERLAY_APPID = 10756;
     private static final int SYSTEM_USER = 0;
     private static final int SECONDARY_USER = 10;
-    private static final int ADDED_USER = 11;
     private static final int[] USER_ARRAY = {SYSTEM_USER, SECONDARY_USER};
-    private static final int[] USER_ARRAY_WITH_ADDED = {SYSTEM_USER, SECONDARY_USER, ADDED_USER};
-    private static final UserInfo[] USER_INFO_LIST = toUserInfos(USER_ARRAY);
-    private static final UserInfo[] USER_INFO_LIST_WITH_ADDED = toUserInfos(USER_ARRAY_WITH_ADDED);
-
-    private static UserInfo[] toUserInfos(int[] userIds) {
-        return Arrays.stream(userIds)
-                .mapToObj(id -> new UserInfo(id, Integer.toString(id), 0))
-                .toArray(UserInfo[]::new);
-    }
+    private static final UserInfo[] USER_INFO_LIST = Arrays.stream(USER_ARRAY).mapToObj(
+            id -> new UserInfo(id, Integer.toString(id), 0)).toArray(UserInfo[]::new);
 
     @Mock
     AppsFilter.FeatureConfig mFeatureConfigMock;
@@ -324,47 +316,6 @@ public class AppsFilterTest {
         assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_APPID, calling, target,
                 SYSTEM_USER));
         watcher.verifyNoChangeReported("shouldFilterApplication");
-    }
-
-    @Test
-    public void testOnUserCreated_FilterMatches() throws Exception {
-        final AppsFilter appsFilter =
-                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
-                        mMockExecutor);
-        simulateAddBasicAndroid(appsFilter);
-
-        appsFilter.onSystemReady();
-
-        PackageSetting target = simulateAddPackage(appsFilter,
-                pkgWithProvider("com.some.package", "com.some.authority"), DUMMY_TARGET_APPID);
-        PackageSetting calling = simulateAddPackage(appsFilter,
-                pkgQueriesProvider("com.some.other.package", "com.some.authority"),
-                DUMMY_CALLING_APPID);
-
-        for (int subjectUserId : USER_ARRAY) {
-            for (int otherUserId : USER_ARRAY) {
-                assertFalse(appsFilter.shouldFilterApplication(
-                        UserHandle.getUid(DUMMY_CALLING_APPID, subjectUserId), calling, target,
-                        otherUserId));
-            }
-        }
-
-        // adds new user
-        doAnswer(invocation -> {
-            ((AppsFilter.StateProvider.CurrentStateCallback) invocation.getArgument(0))
-                    .currentState(mExisting, USER_INFO_LIST_WITH_ADDED);
-            return new Object();
-        }).when(mStateProvider)
-                .runWithState(any(AppsFilter.StateProvider.CurrentStateCallback.class));
-        appsFilter.onUserCreated(ADDED_USER);
-
-        for (int subjectUserId : USER_ARRAY_WITH_ADDED) {
-            for (int otherUserId : USER_ARRAY_WITH_ADDED) {
-                assertFalse(appsFilter.shouldFilterApplication(
-                        UserHandle.getUid(DUMMY_CALLING_APPID, subjectUserId), calling, target,
-                        otherUserId));
-            }
-        }
     }
 
     @Test

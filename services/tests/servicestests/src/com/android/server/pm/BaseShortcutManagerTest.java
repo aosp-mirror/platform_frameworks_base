@@ -785,7 +785,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
-        public void getNextPage(long nextPageToken, UserHandle userHandle,
+        public void getNextPage(String packageName, long nextPageToken, UserHandle userHandle,
                 IAppSearchResultCallback callback) throws RemoteException {
             final Bundle page = new Bundle();
             page.putLong(SearchResultPage.NEXT_PAGE_TOKEN_FIELD, 1);
@@ -795,8 +795,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
-        public void invalidateNextPageToken(long nextPageToken, UserHandle userHandle)
-                throws RemoteException {
+        public void invalidateNextPageToken(String packageName, long nextPageToken,
+                UserHandle userHandle) throws RemoteException {
         }
 
         @Override
@@ -875,13 +875,13 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
-        public void persistToDisk(UserHandle userHandle, long binderCallStartTimeMillis)
-                throws RemoteException {
+        public void persistToDisk(String packageName, UserHandle userHandle,
+                long binderCallStartTimeMillis) throws RemoteException {
         }
 
         @Override
-        public void initialize(UserHandle userHandle, long binderCallStartTimeMillis,
-                IAppSearchResultCallback callback)
+        public void initialize(String packageName, UserHandle userHandle,
+                long binderCallStartTimeMillis, IAppSearchResultCallback callback)
                 throws RemoteException {
             ignore(callback);
         }

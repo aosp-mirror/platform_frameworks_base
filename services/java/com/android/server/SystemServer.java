@@ -552,6 +552,7 @@ public final class SystemServer implements Dumpable {
                 if (maxFd > enableThreshold) {
                     // Do a manual GC to clean up fds that are hanging around as garbage.
                     System.gc();
+                    System.runFinalization();
                     maxFd = getMaxFd();
                 }
 

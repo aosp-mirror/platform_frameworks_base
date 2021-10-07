@@ -75,7 +75,7 @@ public class PeopleSpaceWidgetPinnedReceiver extends BroadcastReceiver {
         String packageName = intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME);
         int userId = intent.getIntExtra(Intent.EXTRA_USER_ID, INVALID_USER_ID);
         PeopleTileKey key = new PeopleTileKey(shortcutId, userId, packageName);
-        if (!key.isValid()) {
+        if (!PeopleTileKey.isValid(key)) {
             if (DEBUG) Log.w(TAG, "Skipping: key is not valid: " + key.toString());
             return;
         }

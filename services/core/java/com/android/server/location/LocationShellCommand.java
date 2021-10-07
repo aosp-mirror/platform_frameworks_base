@@ -17,6 +17,7 @@
 package com.android.server.location;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.provider.ProviderProperties;
@@ -58,6 +59,14 @@ class LocationShellCommand extends BasicShellCommandHandler {
             }
             case "set-location-enabled": {
                 handleSetLocationEnabled();
+                return 0;
+            }
+            case "is-adas-gnss-location-enabled": {
+                handleIsAdasGnssLocationEnabled();
+                return 0;
+            }
+            case "set-adas-gnss-location-enabled": {
+                handleSetAdasGnssLocationEnabled();
                 return 0;
             }
             case "providers": {
@@ -132,6 +141,52 @@ class LocationShellCommand extends BasicShellCommandHandler {
         } while (true);
 
         mService.setLocationEnabledForUser(enabled, userId);
+    }
+
+    private void handleIsAdasGnssLocationEnabled() {
+        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
+            throw new IllegalStateException("command only recognized on automotive devices");
+        }
+
+        int userId = UserHandle.USER_CURRENT_OR_SELF;
+
+        do {
+            String option = getNextOption();
+            if (option == null) {
+                break;
+            }
+            if ("--user".equals(option)) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+            } else {
+                throw new IllegalArgumentException("Unknown option: " + option);
+            }
+        } while (true);
+
+        getOutPrintWriter().println(mService.isAdasGnssLocationEnabledForUser(userId));
+    }
+
+    private void handleSetAdasGnssLocationEnabled() {
+        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
+            throw new IllegalStateException("command only recognized on automotive devices");
+        }
+
+        boolean enabled = Boolean.parseBoolean(getNextArgRequired());
+
+        int userId = UserHandle.USER_CURRENT_OR_SELF;
+
+        do {
+            String option = getNextOption();
+            if (option == null) {
+                break;
+            }
+            if ("--user".equals(option)) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+            } else {
+                throw new IllegalArgumentException("Unknown option: " + option);
+            }
+        } while (true);
+
+        mService.setAdasGnssLocationEnabledForUser(enabled, userId);
     }
 
     private void handleAddTestProvider() {
@@ -297,6 +352,14 @@ class LocationShellCommand extends BasicShellCommandHandler {
         pw.println("  set-location-enabled true|false [--user <USER_ID>]");
         pw.println("    Sets the master location switch enabled state. If no user is specified,");
         pw.println("    the current user is assumed.");
+        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
+            pw.println("  is-adas-gnss-location-enabled [--user <USER_ID>]");
+            pw.println("    Gets the ADAS GNSS location enabled state. If no user is specified,");
+            pw.println("    the current user is assumed.");
+            pw.println("  set-adas-gnss-location-enabled true|false [--user <USER_ID>]");
+            pw.println("    Sets the ADAS GNSS location enabled state. If no user is specified,");
+            pw.println("    the current user is assumed.");
+        }
         pw.println("  providers");
         pw.println("    The providers command is followed by a subcommand, as listed below:");
         pw.println();
@@ -323,9 +386,8 @@ class LocationShellCommand extends BasicShellCommandHandler {
         pw.println("      Common commands that may be supported by the gps provider, depending on");
         pw.println("      hardware and software configurations:");
         pw.println("        delete_aiding_data - requests deletion of any predictive aiding data");
-        pw.println("        force_time_injection - requests NTP time injection to chipset");
-        pw.println("        force_psds_injection - "
-                + "requests predictive aiding data injection to chipset");
-        pw.println("        request_power_stats - requests GNSS power stats update from chipset");
+        pw.println("        force_time_injection - requests NTP time injection");
+        pw.println("        force_psds_injection - requests predictive aiding data injection");
+        pw.println("        request_power_stats - requests GNSS power stats update");
     }
 }

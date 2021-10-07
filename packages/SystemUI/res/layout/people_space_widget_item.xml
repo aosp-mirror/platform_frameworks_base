@@ -21,7 +21,8 @@
     android:orientation="vertical">
     <LinearLayout
         android:background="@drawable/people_space_tile_view_card"
-        android:id="@+id/item"
+        android:clipToOutline="true"
+        android:id="@android:id/background"
         android:orientation="vertical"
         android:padding="4dp"
         android:layout_marginBottom="2dp"

@@ -1460,17 +1460,17 @@ public final class FileUtils {
     /** {@hide} */
     @VisibleForTesting
     public static ParcelFileDescriptor convertToModernFd(FileDescriptor fd) {
-        try {
-            Context context = AppGlobals.getInitialApplication();
-            if (UserHandle.getAppId(Process.myUid()) == getMediaProviderAppId(context)) {
-                // Never convert modern fd for MediaProvider, because this requires
-                // MediaStore#scanFile and can cause infinite loops when MediaProvider scans
-                return null;
-            }
-            return MediaStore.getOriginalMediaFormatFileDescriptor(context,
-                    ParcelFileDescriptor.dup(fd));
+        Context context = AppGlobals.getInitialApplication();
+        if (UserHandle.getAppId(Process.myUid()) == getMediaProviderAppId(context)) {
+            // Never convert modern fd for MediaProvider, because this requires
+            // MediaStore#scanFile and can cause infinite loops when MediaProvider scans
+            return null;
+        }
+
+        try (ParcelFileDescriptor dupFd = ParcelFileDescriptor.dup(fd)) {
+            return MediaStore.getOriginalMediaFormatFileDescriptor(context, dupFd);
         } catch (Exception e) {
-            Log.d(TAG, "Failed to convert to modern format file descriptor", e);
+            // Ignore error
             return null;
         }
     }

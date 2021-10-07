@@ -1003,8 +1003,6 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(1)).updateJobsForUidPackage(eq(UID_10_2), eq(PACKAGE_2), anyBoolean());
-        verify(l, times(1)).updateForceAppStandbyForUidPackage(eq(UID_10_2), eq(PACKAGE_2),
-                eq(true));
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(anyInt());
@@ -1019,8 +1017,6 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(1)).updateJobsForUidPackage(eq(UID_10_2), eq(PACKAGE_2), anyBoolean());
-        verify(l, times(1)).updateForceAppStandbyForUidPackage(eq(UID_10_2), eq(PACKAGE_2),
-                eq(false));
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(anyInt());
@@ -1034,7 +1030,6 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateForceAppStandbyForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(anyInt());
@@ -1052,8 +1047,6 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(1)).updateJobsForUidPackage(eq(UID_10_2), eq(PACKAGE_2), anyBoolean());
-        verify(l, times(1)).updateForceAppStandbyForUidPackage(eq(UID_10_2), eq(PACKAGE_2),
-                eq(true));
 
         verify(l, times(1)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(anyInt());
@@ -1070,7 +1063,6 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateForceAppStandbyForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(1)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(anyInt());
@@ -1089,7 +1081,6 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateForceAppStandbyForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(1)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(anyInt());
@@ -1104,7 +1095,6 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateForceAppStandbyForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(1)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(anyInt());
@@ -1121,7 +1111,6 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateForceAppStandbyForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(anyInt());
@@ -1137,7 +1126,6 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateForceAppStandbyForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(anyInt());
@@ -1154,7 +1142,6 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateForceAppStandbyForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(1)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(anyInt());
@@ -1171,7 +1158,6 @@ public class AppStateTrackerTest {
         verify(l, times(2)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateForceAppStandbyForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(1)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(anyInt());
@@ -1186,7 +1172,6 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateForceAppStandbyForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(1)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(anyInt());
@@ -1203,7 +1188,6 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateForceAppStandbyForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(anyInt());
@@ -1219,7 +1203,6 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt(), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateForceAppStandbyForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(anyInt());
@@ -1242,7 +1225,6 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateAllJobs();
         verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateForceAppStandbyForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(1)).updateAlarmsForUid(eq(UID_10_1));
@@ -1258,7 +1240,6 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateAllJobs();
         verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateForceAppStandbyForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(1)).updateAlarmsForUid(eq(UID_10_1));
@@ -1274,7 +1255,6 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateAllJobs();
         verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateForceAppStandbyForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(1)).updateAlarmsForUid(eq(UID_10_1));
@@ -1290,7 +1270,6 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateAllJobs();
         verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateForceAppStandbyForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(1)).updateAlarmsForUid(eq(UID_10_1));
@@ -1307,7 +1286,6 @@ public class AppStateTrackerTest {
         verify(l, times(1)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(eq(UID_10_1), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateForceAppStandbyForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(1)).updateAllAlarms();
         verify(l, times(0)).updateAlarmsForUid(eq(UID_10_1));
@@ -1323,7 +1301,6 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateAllJobs();
         verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateForceAppStandbyForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(1)).updateAlarmsForUid(eq(UID_10_1));
@@ -1339,7 +1316,6 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateAllJobs();
         verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateForceAppStandbyForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(1)).updateAlarmsForUid(eq(UID_10_1));
@@ -1355,7 +1331,6 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateAllJobs();
         verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateForceAppStandbyForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(1)).updateAlarmsForUid(eq(UID_10_1));
@@ -1371,7 +1346,6 @@ public class AppStateTrackerTest {
         verify(l, times(0)).updateAllJobs();
         verify(l, times(1)).updateJobsForUid(eq(UID_10_1), anyBoolean());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString(), anyBoolean());
-        verify(l, times(0)).updateForceAppStandbyForUidPackage(anyInt(), anyString(), anyBoolean());
 
         verify(l, times(0)).updateAllAlarms();
         verify(l, times(1)).updateAlarmsForUid(eq(UID_10_1));

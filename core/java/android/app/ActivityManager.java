@@ -406,6 +406,12 @@ public class ActivityManager {
     public static final int BROADCAST_FAILED_USER_STOPPED = -2;
 
     /**
+     * Type for IActivityManaqer.getIntentSender: this PendingIntent type is unknown.
+     * @hide
+     */
+    public static final int INTENT_SENDER_UNKNOWN = 0;
+
+    /**
      * Type for IActivityManaqer.getIntentSender: this PendingIntent is
      * for a sendBroadcast operation.
      * @hide
@@ -4860,12 +4866,12 @@ public class ActivityManager {
      */
     public static final class PendingIntentInfo implements Parcelable {
 
-        private final String mCreatorPackage;
+        @Nullable private final String mCreatorPackage;
         private final int mCreatorUid;
         private final boolean mImmutable;
         private final int mIntentSenderType;
 
-        public PendingIntentInfo(String creatorPackage, int creatorUid, boolean immutable,
+        public PendingIntentInfo(@Nullable String creatorPackage, int creatorUid, boolean immutable,
                 int intentSenderType) {
             mCreatorPackage = creatorPackage;
             mCreatorUid = creatorUid;
@@ -4873,6 +4879,7 @@ public class ActivityManager {
             mIntentSenderType = intentSenderType;
         }
 
+        @Nullable
         public String getCreatorPackage() {
             return mCreatorPackage;
         }

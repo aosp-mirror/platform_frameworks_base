@@ -3023,6 +3023,14 @@ public interface WindowManager extends ViewManager {
         public int preferredDisplayModeId;
 
         /**
+         * The min display refresh rate while the window is in focus.
+         *
+         * This value is ignored if {@link #preferredDisplayModeId} is set.
+         * @hide
+         */
+        public float preferredMinDisplayRefreshRate;
+
+        /**
          * The max display refresh rate while the window is in focus.
          *
          * This value is ignored if {@link #preferredDisplayModeId} is set.
@@ -3781,6 +3789,8 @@ public interface WindowManager extends ViewManager {
             out.writeInt(screenOrientation);
             out.writeFloat(preferredRefreshRate);
             out.writeInt(preferredDisplayModeId);
+            out.writeFloat(preferredMinDisplayRefreshRate);
+            out.writeFloat(preferredMaxDisplayRefreshRate);
             out.writeInt(systemUiVisibility);
             out.writeInt(subtreeSystemUiVisibility);
             out.writeBoolean(hasSystemUiListeners);
@@ -3851,6 +3861,8 @@ public interface WindowManager extends ViewManager {
             screenOrientation = in.readInt();
             preferredRefreshRate = in.readFloat();
             preferredDisplayModeId = in.readInt();
+            preferredMinDisplayRefreshRate = in.readFloat();
+            preferredMaxDisplayRefreshRate = in.readFloat();
             systemUiVisibility = in.readInt();
             subtreeSystemUiVisibility = in.readInt();
             hasSystemUiListeners = in.readBoolean();
@@ -3928,6 +3940,10 @@ public interface WindowManager extends ViewManager {
         public static final int MINIMAL_POST_PROCESSING_PREFERENCE_CHANGED = 1 << 28;
         /** {@hide} */
         public static final int BLUR_BEHIND_RADIUS_CHANGED = 1 << 29;
+        /** {@hide} */
+        public static final int PREFERRED_MIN_DISPLAY_REFRESH_RATE = 1 << 30;
+        /** {@hide} */
+        public static final int PREFERRED_MAX_DISPLAY_REFRESH_RATE = 1 << 31;
 
         // internal buffer to backup/restore parameters under compatibility mode.
         private int[] mCompatibilityParamsBackup = null;
@@ -4057,6 +4073,16 @@ public interface WindowManager extends ViewManager {
             if (preferredDisplayModeId != o.preferredDisplayModeId) {
                 preferredDisplayModeId = o.preferredDisplayModeId;
                 changes |= PREFERRED_DISPLAY_MODE_ID;
+            }
+
+            if (preferredMinDisplayRefreshRate != o.preferredMinDisplayRefreshRate) {
+                preferredMinDisplayRefreshRate = o.preferredMinDisplayRefreshRate;
+                changes |= PREFERRED_MIN_DISPLAY_REFRESH_RATE;
+            }
+
+            if (preferredMaxDisplayRefreshRate != o.preferredMaxDisplayRefreshRate) {
+                preferredMaxDisplayRefreshRate = o.preferredMaxDisplayRefreshRate;
+                changes |= PREFERRED_MAX_DISPLAY_REFRESH_RATE;
             }
 
             if (systemUiVisibility != o.systemUiVisibility
@@ -4262,6 +4288,14 @@ public interface WindowManager extends ViewManager {
             if (preferredDisplayModeId != 0) {
                 sb.append(" preferredDisplayMode=");
                 sb.append(preferredDisplayModeId);
+            }
+            if (preferredMinDisplayRefreshRate != 0) {
+                sb.append(" preferredMinDisplayRefreshRate=");
+                sb.append(preferredMinDisplayRefreshRate);
+            }
+            if (preferredMaxDisplayRefreshRate != 0) {
+                sb.append(" preferredMaxDisplayRefreshRate=");
+                sb.append(preferredMaxDisplayRefreshRate);
             }
             if (hasSystemUiListeners) {
                 sb.append(" sysuil=");

@@ -72,9 +72,6 @@ public final class DisplayManager {
      * {@link #EXTRA_WIFI_DISPLAY_STATUS} extra.
      * </p><p>
      * This broadcast is only sent to registered receivers and can only be sent by the system.
-     * </p><p>
-     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} permission is required to
-     * receive this broadcast.
      * </p>
      * @hide
      */
@@ -1260,6 +1257,23 @@ public final class DisplayManager {
          */
         String KEY_FIXED_REFRESH_RATE_HIGH_AMBIENT_BRIGHTNESS_THRESHOLDS =
                 "fixed_refresh_rate_high_ambient_brightness_thresholds";
+
+        /**
+         * Key for refresh rate when the device is in high brightness mode for sunlight visility.
+         *
+         * @see android.provider.DeviceConfig#NAMESPACE_DISPLAY_MANAGER
+         * @see android.R.integer#config_defaultRefreshRateInHbmSunlight
+         */
+        String KEY_REFRESH_RATE_IN_HBM_SUNLIGHT = "refresh_rate_in_hbm_sunlight";
+
+        /**
+         * Key for refresh rate when the device is in high brightness mode for HDR.
+         *
+         * @see android.provider.DeviceConfig#NAMESPACE_DISPLAY_MANAGER
+         * @see android.R.integer#config_defaultRefreshRateInHbmHdr
+         */
+        String KEY_REFRESH_RATE_IN_HBM_HDR = "refresh_rate_in_hbm_hdr";
+
         /**
          * Key for default peak refresh rate
          *

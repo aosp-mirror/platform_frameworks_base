@@ -1969,7 +1969,17 @@ public class ZenModeConfig implements Parcelable {
         }
 
         public boolean isAutomaticActive() {
-            return enabled && !snoozing && pkg != null && isTrueOrUnknown();
+            return enabled && !snoozing && getPkg() != null && isTrueOrUnknown();
+        }
+
+        public String getPkg() {
+            return !TextUtils.isEmpty(pkg)
+                    ? pkg
+                    : (component != null)
+                            ? component.getPackageName()
+                            : (configurationActivity != null)
+                                    ? configurationActivity.getPackageName()
+                                    : null;
         }
 
         public boolean isTrueOrUnknown() {

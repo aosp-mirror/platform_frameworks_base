@@ -299,11 +299,18 @@ public class ImsRcsManager {
             imsRcsController.getImsRcsRegistrationState(mSubId, new IIntegerConsumer.Stub() {
                 @Override
                 public void accept(int result) {
-                    executor.execute(() -> stateCallback.accept(result));
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(() -> stateCallback.accept(result));
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
                 }
             });
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+        } catch (ServiceSpecificException | RemoteException e) {
+            Log.w(TAG, "Get registration state error: " + e);
+            executor.execute(() -> stateCallback.accept(
+                    RegistrationManager.REGISTRATION_STATE_NOT_REGISTERED));
         }
     }
 
@@ -343,11 +350,18 @@ public class ImsRcsManager {
                     new IIntegerConsumer.Stub() {
                         @Override
                         public void accept(int result) {
-                            executor.execute(() -> transportTypeCallback.accept(result));
+                            final long identity = Binder.clearCallingIdentity();
+                            try {
+                                executor.execute(() -> transportTypeCallback.accept(result));
+                            } finally {
+                                Binder.restoreCallingIdentity(identity);
+                            }
                         }
                     });
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+        } catch (ServiceSpecificException | RemoteException e) {
+            Log.w(TAG, "Get registration transport type error: " + e);
+            executor.execute(() -> transportTypeCallback.accept(
+                    AccessNetworkConstants.TRANSPORT_TYPE_INVALID));
         }
     }
 

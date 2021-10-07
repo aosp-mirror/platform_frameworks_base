@@ -184,6 +184,8 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Hindi makilala ang mukha. Gumamit ng fingerprint."</string>
     <string name="fingerprint_dialog_use_fingerprint" msgid="923777032861374285">"Gamitin ang iyong fingerprint para magpatuloy"</string>
     <string name="fingerprint_dialog_cant_recognize_fp_use_screenlock" msgid="4805522676254378353">"Hindi makilala ang fingerprint. Gamitin na lang ang lock ng screen."</string>
+    <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
+    <skip />
     <string name="face_dialog_looking_for_face" msgid="2656848512116189509">"Hinahanap ka…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="8335095612223716768">"Face icon"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="5845799798708790509">"Button ng zoom ng pagiging tugma."</string>
@@ -433,8 +435,6 @@
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Ina-unblock nito ang access para sa lahat ng app at serbisyong pinapayagang gumamit ng iyong camera."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Ina-unblock nito ang access para sa lahat ng app at serbisyong pinapayagang gumamit ng iyong camera o mikropono."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Device"</string>
-    <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Mag-swipe pataas upang lumipat ng app"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"I-drag pakanan para mabilisang magpalipat-lipat ng app"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"I-toggle ang Overview"</string>
     <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Tapos nang mag-charge"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Nagcha-charge"</string>
@@ -454,6 +454,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"I-tap ulit upang buksan"</string>
     <string name="tap_again" msgid="1315420114387908655">"I-tap ulit"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Mag-swipe pataas para buksan"</string>
+    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Pindutin para buksan"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Mag-swipe pataas para subukan ulit"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"I-unlock para magamit ang NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Pagmamay-ari ng iyong organisasyon ang device na ito"</string>
@@ -480,10 +481,8 @@
     <string name="user_add_user" msgid="4336657383006913022">"Magdagdag ng user"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Bagong user"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Alisin ang bisita?"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8904781614074479690">"I-reset ang session ng bisita?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Ide-delete ang lahat ng app at data sa session na ito."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Alisin"</string>
-    <string name="guest_reset_guest_dialog_remove" msgid="4359825585658228699">"I-reset"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Welcome ulit, bisita!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Gusto mo bang ipagpatuloy ang iyong session?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Magsimulang muli"</string>
@@ -671,7 +670,8 @@
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"I-set up para makapagsagawa ng mas mabibilis, mas secure na pagbili gamit ang telepono mo"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Ipakita lahat"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"I-unlock para magbayad"</string>
-    <string name="wallet_secondary_label_no_card" msgid="1282609666895946317">"Hindi naka-set up"</string>
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Magdagdag ng card"</string>
+    <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Ina-update"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"I-unlock para magamit"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Nagkaproblema sa pagkuha ng iyong mga card, pakisubukan ulit sa ibang pagkakataon"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Mga setting ng lock screen"</string>
@@ -1045,7 +1045,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Ilipat sa sulok at itago"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Alisin sa sulok at ipakita"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"i-toggle"</string>
-    <string name="quick_controls_title" msgid="7095074621086860062">"Mga Home control"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Mga kontrol ng device"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Pumili ng app para magdagdag ng mga kontrol"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> kontrol ang naidagdag.</item>
@@ -1117,7 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Buksan ang pag-uusap"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Mga widget ng pag-uusap"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Mag-tap sa isang pag-uusap para idagdag ito sa iyong Home screen"</string>
-    <string name="no_conversations_text" msgid="7362374212649891057">"Bumalik dito kapag nakakuha ka na ng ilang mensahe"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"Lalabas dito ang mga kamakailan mong pag-uusap"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Mga priyoridad na pag-uusap"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Mga kamakailang pag-uusap"</string>
     <string name="okay" msgid="6490552955618608554">"Okay"</string>
@@ -1146,8 +1146,11 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Tingnan ang mga kamakailang mensahe, hindi nasagot na tawag, at update sa status"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Pag-uusap"</string>
-    <string name="new_notification_text_content_description" msgid="5574393603145263727">"Nagpadala si <xliff:g id="NAME">%1$s</xliff:g> ng mensahe"</string>
+    <string name="paused_by_dnd" msgid="7856941866433556428">"Na-pause ng Huwag Istorbohin"</string>
+    <string name="new_notification_text_content_description" msgid="2915029960094389291">"Nagpadala si <xliff:g id="NAME">%1$s</xliff:g> ng mensahe: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"Nagpadala si <xliff:g id="NAME">%1$s</xliff:g> ng larawan"</string>
+    <string name="new_status_content_description" msgid="6046637888641308327">"May update sa status si <xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
+    <string name="person_available" msgid="2318599327472755472">"Available"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Nagkaproblema sa pagbabasa ng iyong battery meter"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"I-tap para sa higit pang impormasyon"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Walang alarm"</string>

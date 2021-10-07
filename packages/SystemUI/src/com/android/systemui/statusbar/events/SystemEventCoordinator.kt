@@ -16,9 +16,12 @@
 
 package com.android.systemui.statusbar.events
 
+import android.content.Context
 import android.provider.DeviceConfig
 import android.provider.DeviceConfig.NAMESPACE_PRIVACY
+import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.privacy.PrivacyChipBuilder
 import com.android.systemui.privacy.PrivacyItem
 import com.android.systemui.privacy.PrivacyItemController
 import com.android.systemui.statusbar.policy.BatteryController
@@ -33,7 +36,8 @@ import javax.inject.Inject
 class SystemEventCoordinator @Inject constructor(
     private val systemClock: SystemClock,
     private val batteryController: BatteryController,
-    private val privacyController: PrivacyItemController
+    private val privacyController: PrivacyItemController,
+    private val context: Context
 ) {
     private lateinit var scheduler: SystemStatusAnimationScheduler
 
@@ -66,6 +70,11 @@ class SystemEventCoordinator @Inject constructor(
     fun notifyPrivacyItemsChanged(showAnimation: Boolean = true) {
         val event = PrivacyEvent(showAnimation)
         event.privacyItems = privacyStateListener.currentPrivacyItems
+        event.contentDescription = {
+            val items = PrivacyChipBuilder(context, event.privacyItems).joinTypes()
+            context.getString(
+                    R.string.ongoing_privacy_chip_content_multiple_apps, items)
+        }()
         scheduler.onStatusEvent(event)
     }
 

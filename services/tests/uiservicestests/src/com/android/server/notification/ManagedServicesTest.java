@@ -279,6 +279,36 @@ public class ManagedServicesTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testReadXml_noLongerMigrateFromSettings() throws Exception {
+        for (int approvalLevel : new int[] {APPROVAL_BY_COMPONENT, APPROVAL_BY_PACKAGE}) {
+            ManagedServices service = new TestManagedServicesNoSettings(getContext(), mLock,
+                    mUserProfiles, mIpm, approvalLevel);
+
+            // approved services aren't in xml
+            TypedXmlPullParser parser = Xml.newFastPullParser();
+            parser.setInput(new BufferedInputStream(new ByteArrayInputStream(new byte[]{})),
+                    null);
+            writeExpectedValuesToSettings(approvalLevel);
+
+            service.migrateToXml();
+            // No crash? success
+
+            ArrayMap<Integer, String> verifyMap = approvalLevel == APPROVAL_BY_COMPONENT
+                    ? mExpectedPrimary.get(service.mApprovalLevel)
+                    : mExpectedSecondary.get(service.mApprovalLevel);
+            for (int userId : verifyMap.keySet()) {
+                for (String verifyValue : verifyMap.get(userId).split(":")) {
+                    if (!TextUtils.isEmpty(verifyValue)) {
+                        assertFalse("service type " + service.mApprovalLevel + ":"
+                                        + verifyValue + " is allowed for user " + userId,
+                                service.isPackageOrComponentAllowed(verifyValue, userId));
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
     public void testReadXml() throws Exception {
         for (int approvalLevel : new int[] {APPROVAL_BY_COMPONENT, APPROVAL_BY_PACKAGE}) {
             ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles,
@@ -1764,6 +1794,27 @@ public class ManagedServicesTest extends UiServiceTestCase {
         @Override
         public boolean shouldReflectToSettings() {
             return true;
+        }
+    }
+
+    class TestManagedServicesNoSettings extends TestManagedServices {
+
+        public TestManagedServicesNoSettings(Context context, Object mutex, UserProfiles userProfiles,
+                IPackageManager pm, int approvedServiceType) {
+            super(context, mutex, userProfiles, pm, approvedServiceType);
+        }
+
+        @Override
+        protected Config getConfig() {
+            Config c = super.getConfig();
+            c.secureSettingName = null;
+            c.secondarySettingName = null;
+            return c;
+        }
+
+        @Override
+        public boolean shouldReflectToSettings() {
+            return false;
         }
     }
 }

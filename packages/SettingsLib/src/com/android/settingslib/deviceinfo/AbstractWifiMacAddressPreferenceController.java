@@ -19,6 +19,7 @@ package com.android.settingslib.deviceinfo;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.text.TextUtils;
 
@@ -89,7 +90,7 @@ public abstract class AbstractWifiMacAddressPreferenceController
             macAddress = macAddresses[0];
         }
 
-        if (TextUtils.isEmpty(macAddress)) {
+        if (TextUtils.isEmpty(macAddress) || macAddress.equals(WifiInfo.DEFAULT_MAC_ADDRESS)) {
             mWifiMacAddress.setSummary(R.string.status_unavailable);
         } else {
             mWifiMacAddress.setSummary(macAddress);

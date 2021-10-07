@@ -62,7 +62,6 @@ status_t CursorWindow::create(const String8 &name, size_t inflatedSize, CursorWi
     window->clear();
     window->updateSlotsData();
 
-    LOG(DEBUG) << "Created: " << window->toString();
     *outWindow = window;
     return OK;
 

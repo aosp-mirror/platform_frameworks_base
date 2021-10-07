@@ -31,6 +31,6 @@ android_test {
     ],
     platform_apis: true,
     test_suites: ["device-tests"],
-    data: [":perfetto_artifacts"],
+    data: ["trace_configs/*"],
     certificate: "platform",
 }

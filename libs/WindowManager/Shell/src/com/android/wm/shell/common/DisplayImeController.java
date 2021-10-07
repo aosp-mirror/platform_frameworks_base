@@ -42,8 +42,6 @@ import android.view.animation.PathInterpolator;
 import androidx.annotation.BinderThread;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.internal.inputmethod.Completable;
-import com.android.internal.inputmethod.ResultCallbacks;
 import com.android.internal.view.IInputMethodManager;
 
 import java.util.ArrayList;
@@ -159,6 +157,14 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         }
     }
 
+    private void dispatchImeControlTargetChanged(int displayId, boolean controlling) {
+        synchronized (mPositionProcessors) {
+            for (ImePositionProcessor pp : mPositionProcessors) {
+                pp.onImeControlTargetChanged(displayId, controlling);
+            }
+        }
+    }
+
     private void dispatchVisibilityChanged(int displayId, boolean isShowing) {
         synchronized (mPositionProcessors) {
             for (ImePositionProcessor pp : mPositionProcessors) {
@@ -237,38 +243,52 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         protected void insetsControlChanged(InsetsState insetsState,
                 InsetsSourceControl[] activeControls) {
             insetsChanged(insetsState);
+            InsetsSourceControl imeSourceControl = null;
             if (activeControls != null) {
                 for (InsetsSourceControl activeControl : activeControls) {
                     if (activeControl == null) {
                         continue;
                     }
                     if (activeControl.getType() == InsetsState.ITYPE_IME) {
-                        final Point lastSurfacePosition = mImeSourceControl != null
-                                ? mImeSourceControl.getSurfacePosition() : null;
-                        final boolean positionChanged =
-                                !activeControl.getSurfacePosition().equals(lastSurfacePosition);
-                        final boolean leashChanged =
-                                !haveSameLeash(mImeSourceControl, activeControl);
-                        mImeSourceControl = activeControl;
-                        if (mAnimation != null) {
-                            if (positionChanged) {
-                                startAnimation(mImeShowing, true /* forceRestart */);
-                            }
-                        } else {
-                            if (leashChanged) {
-                                applyVisibilityToLeash();
-                            }
-                            if (!mImeShowing) {
-                                removeImeSurface();
-                            }
-                        }
+                        imeSourceControl = activeControl;
                     }
                 }
             }
+
+            final boolean hadImeSourceControl = mImeSourceControl != null;
+            final boolean hasImeSourceControl = imeSourceControl != null;
+            if (hadImeSourceControl != hasImeSourceControl) {
+                dispatchImeControlTargetChanged(mDisplayId, hasImeSourceControl);
+            }
+
+            if (hasImeSourceControl) {
+                final Point lastSurfacePosition = mImeSourceControl != null
+                        ? mImeSourceControl.getSurfacePosition() : null;
+                final boolean positionChanged =
+                        !imeSourceControl.getSurfacePosition().equals(lastSurfacePosition);
+                final boolean leashChanged =
+                        !haveSameLeash(mImeSourceControl, imeSourceControl);
+                if (mAnimation != null) {
+                    if (positionChanged) {
+                        startAnimation(mImeShowing, true /* forceRestart */);
+                    }
+                } else {
+                    if (leashChanged) {
+                        applyVisibilityToLeash(imeSourceControl);
+                    }
+                    if (!mImeShowing) {
+                        removeImeSurface();
+                    }
+                }
+                if (mImeSourceControl != null) {
+                    mImeSourceControl.release(SurfaceControl::release);
+                }
+                mImeSourceControl = imeSourceControl;
+            }
         }
 
-        private void applyVisibilityToLeash() {
-            SurfaceControl leash = mImeSourceControl.getLeash();
+        private void applyVisibilityToLeash(InsetsSourceControl imeSourceControl) {
+            SurfaceControl leash = imeSourceControl.getLeash();
             if (leash != null) {
                 SurfaceControl.Transaction t = mTransactionPool.acquire();
                 if (mImeShowing) {
@@ -518,9 +538,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             try {
                 // Remove the IME surface to make the insets invisible for
                 // non-client controlled insets.
-                final Completable.Void value = Completable.createVoid();
-                imms.removeImeSurface(ResultCallbacks.of(value));
-                Completable.getResult(value);
+                imms.removeImeSurface();
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to remove IME surface.", e);
             }
@@ -577,6 +595,15 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
          */
         default void onImeEndPositioning(int displayId, boolean cancel,
                 SurfaceControl.Transaction t) {
+        }
+
+        /**
+         * Called when the IME control target changed. So that the processor can restore its
+         * adjusted layout when the IME insets is not controlling by the current controller anymore.
+         *
+         * @param controlling indicates whether the current controller is controlling IME insets.
+         */
+        default void onImeControlTargetChanged(int displayId, boolean controlling) {
         }
 
         /**

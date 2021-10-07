@@ -72,10 +72,10 @@ import java.util.function.IntConsumer;
 @SystemApi
 public abstract class HotwordDetectionService extends Service {
     private static final String TAG = "HotwordDetectionService";
-    // TODO (b/177502877): Set the Debug flag to false before shipping.
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
 
     private static final long UPDATE_TIMEOUT_MILLIS = 5000;
+
     /** @hide */
     public static final String KEY_INITIALIZATION_STATUS = "initialization_status";
 
@@ -150,9 +150,7 @@ public abstract class HotwordDetectionService extends Service {
         @Override
         public void updateState(PersistableBundle options, SharedMemory sharedMemory,
                 IRemoteCallback callback) throws RemoteException {
-            if (DBG) {
-                Log.d(TAG, "#updateState");
-            }
+            Log.v(TAG, "#updateState" + (callback != null ? " with callback" : ""));
             HotwordDetectionService.this.onUpdateStateInternal(
                     options,
                     sharedMemory,
@@ -197,6 +195,11 @@ public abstract class HotwordDetectionService extends Service {
                 ContentCaptureOptions options) {
             mContentCaptureManager = new ContentCaptureManager(
                     HotwordDetectionService.this, manager, options);
+        }
+
+        @Override
+        public void ping(IRemoteCallback callback) throws RemoteException {
+            callback.sendResult(null);
         }
 
         @Override
@@ -388,6 +391,14 @@ public abstract class HotwordDetectionService extends Service {
          */
         public void onDetected(@NonNull HotwordDetectedResult result) {
             requireNonNull(result);
+            final PersistableBundle persistableBundle = result.getExtras();
+            if (!persistableBundle.isEmpty() && HotwordDetectedResult.getParcelableSize(
+                    persistableBundle) > HotwordDetectedResult.getMaxBundleSize()) {
+                throw new IllegalArgumentException(
+                        "The bundle size of result is larger than max bundle size ("
+                                + HotwordDetectedResult.getMaxBundleSize()
+                                + ") of HotwordDetectedResult");
+            }
             try {
                 mRemoteCallback.onDetected(result);
             } catch (RemoteException e) {

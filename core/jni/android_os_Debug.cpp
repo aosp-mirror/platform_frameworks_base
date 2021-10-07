@@ -33,7 +33,6 @@
 #include <string>
 #include <vector>
 
-#include <aidl/android/hardware/memtrack/DeviceInfo.h>
 #include <android-base/logging.h>
 #include <bionic/malloc.h>
 #include <debuggerd/client.h>
@@ -46,7 +45,6 @@
 #include "jni.h"
 #include <dmabufinfo/dmabuf_sysfs_stats.h>
 #include <dmabufinfo/dmabufinfo.h>
-#include <dmabufinfo/dmabuf_sysfs_stats.h>
 #include <meminfo/procmeminfo.h>
 #include <meminfo/sysmeminfo.h>
 #include <memtrack/memtrack.h>
@@ -861,29 +859,24 @@ static jlong android_os_Debug_getDmabufHeapPoolsSizeKb(JNIEnv* env, jobject claz
     return poolsSizeKb;
 }
 
-static jlong android_os_Debug_getGpuDmaBufUsageKb(JNIEnv* env, jobject clazz) {
-    std::vector<aidl::android::hardware::memtrack::DeviceInfo> gpu_device_info;
-    if (!memtrack_gpu_device_info(&gpu_device_info)) {
+static jlong android_os_Debug_getGpuPrivateMemoryKb(JNIEnv* env, jobject clazz) {
+    struct memtrack_proc* p = memtrack_proc_new();
+    if (p == nullptr) {
+        LOG(ERROR) << "getGpuPrivateMemoryKb: Failed to create memtrack_proc";
         return -1;
     }
 
-    dmabufinfo::DmabufSysfsStats stats;
-    if (!GetDmabufSysfsStats(&stats)) {
+    // Memtrack hal defines PID 0 as global total for GPU-private (GL) memory.
+    if (memtrack_proc_get(p, 0) != 0) {
+        // The memtrack HAL may not be available, avoid flooding the log.
+        memtrack_proc_destroy(p);
         return -1;
     }
 
-    jlong sizeKb = 0;
-    const auto& importer_stats = stats.importer_info();
-    for (const auto& dev_info : gpu_device_info) {
-        const auto& importer_info = importer_stats.find(dev_info.name);
-        if (importer_info == importer_stats.end()) {
-            continue;
-        }
+    ssize_t gpuPrivateMem = memtrack_proc_gl_pss(p);
 
-        sizeKb += importer_info->second.size;
-    }
-
-    return sizeKb;
+    memtrack_proc_destroy(p);
+    return gpuPrivateMem / 1024;
 }
 
 static jlong android_os_Debug_getDmabufMappedSizeKb(JNIEnv* env, jobject clazz) {
@@ -994,8 +987,8 @@ static const JNINativeMethod gMethods[] = {
             (void*)android_os_Debug_getIonHeapsSizeKb },
     { "getDmabufTotalExportedKb", "()J",
             (void*)android_os_Debug_getDmabufTotalExportedKb },
-    { "getGpuDmaBufUsageKb", "()J",
-            (void*)android_os_Debug_getGpuDmaBufUsageKb },
+    { "getGpuPrivateMemoryKb", "()J",
+            (void*)android_os_Debug_getGpuPrivateMemoryKb },
     { "getDmabufHeapTotalExportedKb", "()J",
             (void*)android_os_Debug_getDmabufHeapTotalExportedKb },
     { "getIonPoolsSizeKb", "()J",

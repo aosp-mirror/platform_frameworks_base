@@ -75,8 +75,8 @@ public class MediaFrameworkInitializer {
     public static void registerServiceWrappers() {
         SystemServiceRegistry.registerContextAwareService(
                 Context.MEDIA_TRANSCODING_SERVICE,
-                MediaTranscodeManager.class,
-                context -> new MediaTranscodeManager(context)
+                MediaTranscodingManager.class,
+                context -> new MediaTranscodingManager(context)
         );
         if (SdkLevel.isAtLeastS()) {
             SystemServiceRegistry.registerContextAwareService(

@@ -38,6 +38,7 @@ public final class ContentProviderConnection extends Binder {
     public final String clientPackage;
     public AssociationState.SourceState association;
     public final long createTime;
+    private Object mProcStatsLock;  // Internal lock for accessing AssociationState
 
     /**
      * Internal lock that guards access to the two counters.
@@ -87,23 +88,29 @@ public final class ContentProviderConnection extends Binder {
                 Slog.wtf(TAG_AM, "Inactive holder in referenced provider "
                         + provider.name.toShortString() + ": proc=" + provider.proc);
             } else {
-                association = holder.pkg.getAssociationStateLocked(holder.state,
-                        provider.name.getClassName()).startSource(client.uid, client.processName,
-                        clientPackage);
-
+                mProcStatsLock = provider.proc.mService.mProcessStats.mLock;
+                synchronized (mProcStatsLock) {
+                    association = holder.pkg.getAssociationStateLocked(holder.state,
+                            provider.name.getClassName()).startSource(client.uid,
+                            client.processName, clientPackage);
+                }
             }
         }
     }
 
     public void trackProcState(int procState, int seq, long now) {
         if (association != null) {
-            association.trackProcState(procState, seq, now);
+            synchronized (mProcStatsLock) {
+                association.trackProcState(procState, seq, now);
+            }
         }
     }
 
     public void stopAssociation() {
         if (association != null) {
-            association.stop();
+            synchronized (mProcStatsLock) {
+                association.stop();
+            }
             association = null;
         }
     }

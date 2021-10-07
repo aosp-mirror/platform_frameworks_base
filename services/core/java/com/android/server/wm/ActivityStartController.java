@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityManager.START_CANCELED;
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -390,15 +391,18 @@ public class ActivityStartController {
                         0 /* startFlags */, null /* profilerInfo */, userId, filterCallingUid);
                 aInfo = mService.mAmInternal.getActivityInfoForUser(aInfo, userId);
 
-                // Carefully collect grants without holding lock
                 if (aInfo != null) {
-                    intentGrants = mSupervisor.mService.mUgmInternal
-                            .checkGrantUriPermissionFromIntent(intent, filterCallingUid,
-                                    aInfo.applicationInfo.packageName,
-                                    UserHandle.getUserId(aInfo.applicationInfo.uid));
-                }
+                    try {
+                        // Carefully collect grants without holding lock
+                        intentGrants = mSupervisor.mService.mUgmInternal
+                                .checkGrantUriPermissionFromIntent(intent, filterCallingUid,
+                                        aInfo.applicationInfo.packageName,
+                                        UserHandle.getUserId(aInfo.applicationInfo.uid));
+                    } catch (SecurityException e) {
+                        Slog.d(TAG, "Not allowed to start activity since no uri permission.");
+                        return START_CANCELED;
+                    }
 
-                if (aInfo != null) {
                     if ((aInfo.applicationInfo.privateFlags
                             & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0) {
                         throw new IllegalArgumentException(

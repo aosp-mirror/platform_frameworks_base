@@ -120,7 +120,7 @@ filegroup {
     srcs: [
         "java/android/media/ApplicationMediaCapabilities.java",
         "java/android/media/MediaFeature.java",
-        "java/android/media/MediaTranscodeManager.java",
+        "java/android/media/MediaTranscodingManager.java",
     ],
     path: "java",
 }

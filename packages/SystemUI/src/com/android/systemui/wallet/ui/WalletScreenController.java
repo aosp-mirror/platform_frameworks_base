@@ -39,6 +39,7 @@ import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
@@ -74,6 +75,7 @@ public class WalletScreenController implements
     private final WalletView mWalletView;
     private final WalletCardCarousel mCardCarousel;
     private final FalsingManager mFalsingManager;
+    private final UiEventLogger mUiEventLogger;
 
     @VisibleForTesting String mSelectedCardId;
     @VisibleForTesting boolean mIsDismissed;
@@ -88,7 +90,8 @@ public class WalletScreenController implements
             UserTracker userTracker,
             FalsingManager falsingManager,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            KeyguardStateController keyguardStateController) {
+            KeyguardStateController keyguardStateController,
+            UiEventLogger uiEventLogger) {
         mContext = context;
         mWalletClient = walletClient;
         mActivityStarter = activityStarter;
@@ -97,6 +100,7 @@ public class WalletScreenController implements
         mFalsingManager = falsingManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mKeyguardStateController = keyguardStateController;
+        mUiEventLogger = uiEventLogger;
         mPrefs = userTracker.getUserContext().getSharedPreferences(TAG, Context.MODE_PRIVATE);
         mWalletView = walletView;
         mWalletView.setMinimumHeight(getExpectedMinHeight());
@@ -147,6 +151,7 @@ public class WalletScreenController implements
                             isUdfpsEnabled);
                 }
             }
+            mUiEventLogger.log(WalletUiEvent.QAW_IMPRESSION);
             removeMinHeightAndRecordHeightOnLayout();
         });
     }
@@ -180,6 +185,9 @@ public class WalletScreenController implements
         if (mIsDismissed) {
             return;
         }
+        if (mSelectedCardId != null && !mSelectedCardId.equals(card.getCardId())) {
+            mUiEventLogger.log(WalletUiEvent.QAW_CHANGE_CARD);
+        }
         mSelectedCardId = card.getCardId();
         selectCard();
     }
@@ -209,6 +217,12 @@ public class WalletScreenController implements
                 || ((QAWalletCardViewInfo) cardInfo).mWalletCard.getPendingIntent() == null) {
             return;
         }
+
+        if (!mKeyguardStateController.isUnlocked()) {
+            mUiEventLogger.log(WalletUiEvent.QAW_UNLOCK_FROM_CARD_CLICK);
+        }
+        mUiEventLogger.log(WalletUiEvent.QAW_CLICK_CARD);
+
         mActivityStarter.startActivity(
                 ((QAWalletCardViewInfo) cardInfo).mWalletCard.getPendingIntent().getIntent(), true);
     }

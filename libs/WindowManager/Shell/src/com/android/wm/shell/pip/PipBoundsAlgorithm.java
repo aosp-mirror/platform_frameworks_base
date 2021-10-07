@@ -19,6 +19,7 @@ package com.android.wm.shell.pip;
 import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.PictureInPictureParams;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -451,6 +452,56 @@ public class PipBoundsAlgorithm {
             width = Math.round(height * aspectRatio);
         }
         return new Size(width, height);
+    }
+
+    /**
+     * @return the normal bounds adjusted so that they fit the menu actions.
+     */
+    public Rect adjustNormalBoundsToFitMenu(@NonNull Rect normalBounds,
+            @Nullable Size minMenuSize) {
+        if (minMenuSize == null) {
+            return normalBounds;
+        }
+        if (normalBounds.width() >= minMenuSize.getWidth()
+                && normalBounds.height() >= minMenuSize.getHeight()) {
+            // The normal bounds can fit the menu as is, no need to adjust the bounds.
+            return normalBounds;
+        }
+        final Rect adjustedNormalBounds = new Rect();
+        final boolean needsWidthAdj = minMenuSize.getWidth() > normalBounds.width();
+        final boolean needsHeightAdj = minMenuSize.getHeight() > normalBounds.height();
+        final int adjWidth;
+        final int adjHeight;
+        if (needsWidthAdj && needsHeightAdj) {
+            // Both the width and the height are too small - find the edge that needs the larger
+            // adjustment and scale that edge. The other edge will scale beyond the minMenuSize
+            // when the aspect ratio is applied.
+            final float widthScaleFactor =
+                    ((float) (minMenuSize.getWidth())) / ((float) (normalBounds.width()));
+            final float heightScaleFactor =
+                    ((float) (minMenuSize.getHeight())) / ((float) (normalBounds.height()));
+            if (widthScaleFactor > heightScaleFactor) {
+                adjWidth = minMenuSize.getWidth();
+                adjHeight = Math.round(adjWidth / mPipBoundsState.getAspectRatio());
+            } else {
+                adjHeight = minMenuSize.getHeight();
+                adjWidth = Math.round(adjHeight * mPipBoundsState.getAspectRatio());
+            }
+        } else if (needsWidthAdj) {
+            // Width is too small - use the min menu size width instead.
+            adjWidth = minMenuSize.getWidth();
+            adjHeight = Math.round(adjWidth / mPipBoundsState.getAspectRatio());
+        } else {
+            // Height is too small - use the min menu size height instead.
+            adjHeight = minMenuSize.getHeight();
+            adjWidth = Math.round(adjHeight * mPipBoundsState.getAspectRatio());
+        }
+        adjustedNormalBounds.set(0, 0, adjWidth, adjHeight);
+        // Make sure the bounds conform to the aspect ratio and min edge size.
+        transformBoundsToAspectRatio(adjustedNormalBounds,
+                mPipBoundsState.getAspectRatio(), true /* useCurrentMinEdgeSize */,
+                true /* useCurrentSize */);
+        return adjustedNormalBounds;
     }
 
     /**

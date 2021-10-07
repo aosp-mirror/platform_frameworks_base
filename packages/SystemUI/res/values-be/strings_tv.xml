@@ -26,4 +26,10 @@
     <string name="notification_disclosure_vpn_text" msgid="3873532735584866236">"Праз <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="tv_notification_panel_title" msgid="5311050946506276154">"Апавяшчэнні"</string>
     <string name="tv_notification_panel_no_notifications" msgid="9115191912267270678">"Апавяшчэнняў няма"</string>
+    <string name="mic_recording_announcement" msgid="7587123608060316575">"Ідзе запіс з выкарыстаннем мікрафона"</string>
+    <string name="camera_recording_announcement" msgid="7240177719403759112">"Ідзе запіс з выкарыстаннем камеры"</string>
+    <string name="mic_and_camera_recording_announcement" msgid="8599231390508812667">"Ідзе запіс з выкарыстаннем камеры і мікрафона"</string>
+    <string name="mic_stopped_recording_announcement" msgid="7301537004900721242">"Запіс з выкарыстаннем мікрафона спынены"</string>
+    <string name="camera_stopped_recording_announcement" msgid="8540496432367032801">"Запіс з выкарыстаннем камеры спынены"</string>
+    <string name="mic_camera_stopped_recording_announcement" msgid="8708524579599977412">"Запіс з выкарыстаннем камеры і мікрафона спынены"</string>
 </resources>

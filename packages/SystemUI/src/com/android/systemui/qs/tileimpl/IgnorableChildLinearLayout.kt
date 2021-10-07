@@ -23,7 +23,7 @@ import android.widget.LinearLayout
 /**
  * [LinearLayout] that can ignore the last child for measuring.
  *
- * The view is measured as regularlt, then if [ignoreLastView] is true:
+ * The view is measured as regularly, then if [ignoreLastView] is true:
  * * In [LinearLayout.VERTICAL] orientation, the height of the last view is subtracted from the
  * final measured height.
  * * In [LinearLayout.HORIZONTAL] orientation, the width of the last view is subtracted from the
@@ -41,8 +41,21 @@ class IgnorableChildLinearLayout @JvmOverloads constructor(
 
     var ignoreLastView = false
 
+    /**
+     * Forces [MeasureSpec.UNSPECIFIED] in the direction of layout
+     */
+    var forceUnspecifiedMeasure = false
+
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        val actualWidthSpec = if (forceUnspecifiedMeasure && orientation == HORIZONTAL) {
+            MeasureSpec.makeMeasureSpec(widthMeasureSpec, MeasureSpec.UNSPECIFIED)
+        } else widthMeasureSpec
+
+        val actualHeightSpec = if (forceUnspecifiedMeasure && orientation == VERTICAL) {
+            MeasureSpec.makeMeasureSpec(heightMeasureSpec, MeasureSpec.UNSPECIFIED)
+        } else heightMeasureSpec
+
+        super.onMeasure(actualWidthSpec, actualHeightSpec)
         if (ignoreLastView && childCount > 0) {
             val lastView = getChildAt(childCount - 1)
             if (lastView.visibility != GONE) {

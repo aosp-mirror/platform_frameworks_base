@@ -37,6 +37,7 @@ import android.apex.ApexSessionInfo;
 import android.apex.ApexSessionParams;
 import android.apex.IApexService;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
@@ -286,9 +287,11 @@ public class ApexManagerTest {
         mApexManager.scanApexPackagesTraced(mPackageParser2,
                 ParallelPackageParser.makeExecutorService());
 
-        assertThat(mApexManager.isApkInApexInstallSuccess(activeApex.apexModuleName)).isTrue();
-        mApexManager.reportErrorWithApkInApex(activeApex.apexDirectory.getAbsolutePath());
-        assertThat(mApexManager.isApkInApexInstallSuccess(activeApex.apexModuleName)).isFalse();
+        assertThat(mApexManager.getApkInApexInstallError(activeApex.apexModuleName)).isNull();
+        mApexManager.reportErrorWithApkInApex(activeApex.apexDirectory.getAbsolutePath(),
+                "Some random error");
+        assertThat(mApexManager.getApkInApexInstallError(activeApex.apexModuleName))
+            .isEqualTo("Some random error");
     }
 
     /**
@@ -347,9 +350,9 @@ public class ApexManagerTest {
     }
 
     @Test
-    public void testInstallPackage() throws Exception {
+    public void testInstallPackage_activeOnSystem() throws Exception {
         ApexInfo activeApexInfo = createApexInfo("test.apex_rebootless", 1, /* isActive= */ true,
-                /* isFactory= */ false, extractResource("test.apex_rebootless_v1",
+                /* isFactory= */ true, extractResource("test.apex_rebootless_v1",
                   "test.rebootless_apex_v1.apex"));
         when(mApexService.getAllPackages()).thenReturn(new ApexInfo[]{activeApexInfo});
         mApexManager.scanApexPackagesTraced(mPackageParser2,
@@ -367,6 +370,55 @@ public class ApexManagerTest {
                 ApexManager.MATCH_ACTIVE_PACKAGE);
         assertThat(newInfo.applicationInfo.sourceDir).isEqualTo(finalApex.getAbsolutePath());
         assertThat(newInfo.applicationInfo.longVersionCode).isEqualTo(2);
+        assertThat(newInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM).isEqualTo(0);
+        assertThat(newInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED)
+            .isEqualTo(ApplicationInfo.FLAG_INSTALLED);
+
+        PackageInfo factoryInfo = mApexManager.getPackageInfo("test.apex.rebootless",
+                ApexManager.MATCH_FACTORY_PACKAGE);
+        assertThat(factoryInfo.applicationInfo.sourceDir).isEqualTo(activeApexInfo.modulePath);
+        assertThat(factoryInfo.applicationInfo.longVersionCode).isEqualTo(1);
+        assertThat(factoryInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM)
+            .isEqualTo(ApplicationInfo.FLAG_SYSTEM);
+        assertThat(factoryInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED).isEqualTo(0);
+    }
+
+    @Test
+    public void testInstallPackage_activeOnData() throws Exception {
+        ApexInfo factoryApexInfo = createApexInfo("test.apex_rebootless", 1, /* isActive= */ false,
+                /* isFactory= */ true, extractResource("test.apex_rebootless_v1",
+                  "test.rebootless_apex_v1.apex"));
+        ApexInfo activeApexInfo = createApexInfo("test.apex_rebootless", 1, /* isActive= */ true,
+                /* isFactory= */ false, extractResource("test.apex.rebootless@1",
+                  "test.rebootless_apex_v1.apex"));
+        when(mApexService.getAllPackages())
+                .thenReturn(new ApexInfo[]{factoryApexInfo, activeApexInfo});
+        mApexManager.scanApexPackagesTraced(mPackageParser2,
+                ParallelPackageParser.makeExecutorService());
+
+        File finalApex = extractResource("test.rebootles_apex_v2", "test.rebootless_apex_v2.apex");
+        ApexInfo newApexInfo = createApexInfo("test.apex_rebootless", 2, /* isActive= */ true,
+                /* isFactory= */ false, finalApex);
+        when(mApexService.installAndActivatePackage(anyString())).thenReturn(newApexInfo);
+
+        File installedApex = extractResource("installed", "test.rebootless_apex_v2.apex");
+        mApexManager.installPackage(installedApex, mPackageParser2);
+
+        PackageInfo newInfo = mApexManager.getPackageInfo("test.apex.rebootless",
+                ApexManager.MATCH_ACTIVE_PACKAGE);
+        assertThat(newInfo.applicationInfo.sourceDir).isEqualTo(finalApex.getAbsolutePath());
+        assertThat(newInfo.applicationInfo.longVersionCode).isEqualTo(2);
+        assertThat(newInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM).isEqualTo(0);
+        assertThat(newInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED)
+            .isEqualTo(ApplicationInfo.FLAG_INSTALLED);
+
+        PackageInfo factoryInfo = mApexManager.getPackageInfo("test.apex.rebootless",
+                ApexManager.MATCH_FACTORY_PACKAGE);
+        assertThat(factoryInfo.applicationInfo.sourceDir).isEqualTo(factoryApexInfo.modulePath);
+        assertThat(factoryInfo.applicationInfo.longVersionCode).isEqualTo(1);
+        assertThat(factoryInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM)
+            .isEqualTo(ApplicationInfo.FLAG_SYSTEM);
+        assertThat(factoryInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED).isEqualTo(0);
     }
 
     @Test

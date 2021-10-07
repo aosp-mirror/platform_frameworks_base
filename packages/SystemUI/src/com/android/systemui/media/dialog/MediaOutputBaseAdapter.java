@@ -64,10 +64,12 @@ public abstract class MediaOutputBaseAdapter extends
     Context mContext;
     View mHolderView;
     boolean mIsDragging;
+    int mCurrentActivePosition;
 
     public MediaOutputBaseAdapter(MediaOutputController controller) {
         mController = controller;
         mIsDragging = false;
+        mCurrentActivePosition = -1;
     }
 
     @Override
@@ -97,6 +99,10 @@ public abstract class MediaOutputBaseAdapter extends
 
     boolean isAnimating() {
         return mIsAnimating;
+    }
+
+    int getCurrentActivePosition() {
+        return mCurrentActivePosition;
     }
 
     /**
@@ -136,7 +142,7 @@ public abstract class MediaOutputBaseAdapter extends
             mCheckBox = view.requireViewById(R.id.check_box);
         }
 
-        void onBind(MediaDevice device, boolean topMargin, boolean bottomMargin) {
+        void onBind(MediaDevice device, boolean topMargin, boolean bottomMargin, int position) {
             mDeviceId = device.getId();
             ThreadUtils.postOnBackgroundThread(() -> {
                 Icon icon = mController.getDeviceIconCompat(device).toIcon(mContext);
@@ -214,6 +220,9 @@ public abstract class MediaOutputBaseAdapter extends
         }
 
         void initSeekbar(MediaDevice device) {
+            if (!mController.isVolumeControlEnabled(device)) {
+                disableSeekBar();
+            }
             mSeekBar.setMax(device.getMaxVolume());
             mSeekBar.setMin(0);
             final int currentVolume = device.getCurrentVolume();
@@ -242,6 +251,7 @@ public abstract class MediaOutputBaseAdapter extends
         }
 
         void initSessionSeekbar() {
+            disableSeekBar();
             mSeekBar.setMax(mController.getSessionVolumeMax());
             mSeekBar.setMin(0);
             final int currentVolume = mController.getSessionVolume();
@@ -329,6 +339,11 @@ public abstract class MediaOutputBaseAdapter extends
             drawable.setColorFilter(new PorterDuffColorFilter(list.getDefaultColor(),
                     PorterDuff.Mode.SRC_IN));
             return BluetoothUtils.buildAdvancedDrawable(mContext, drawable);
+        }
+
+        private void disableSeekBar() {
+            mSeekBar.setEnabled(false);
+            mSeekBar.setOnTouchListener((v, event) -> true);
         }
     }
 }

@@ -848,8 +848,10 @@ public final class Sensor {
     /**
      * Get the highest supported direct report mode rate level of the sensor.
      *
-     * @return Highest direct report rate level of this sensor. If the sensor does not support
-     * direct report mode, this returns {@link SensorDirectChannel#RATE_STOP}.
+     * @return Highest direct report rate level of this sensor. Note that if the app does not have
+     * the {@link android.Manifest.permission#HIGH_SAMPLING_RATE_SENSORS} permission, the highest
+     * direct report rate level is {@link SensorDirectChannel#RATE_NORMAL}. If the sensor
+     * does not support direct report mode, this returns {@link SensorDirectChannel#RATE_STOP}.
      * @see SensorDirectChannel#RATE_STOP
      * @see SensorDirectChannel#RATE_NORMAL
      * @see SensorDirectChannel#RATE_FAST
@@ -1002,9 +1004,11 @@ public final class Sensor {
     }
 
     /**
-     * @return the minimum delay allowed between two events in microsecond
+     * @return the minimum delay allowed between two events in microseconds
      * or zero if this sensor only returns a value when the data it's measuring
-     * changes.
+     * changes. Note that if the app does not have the
+     * {@link android.Manifest.permission#HIGH_SAMPLING_RATE_SENSORS} permission, the
+     * minimum delay is capped at 5000 microseconds (200 Hz).
      */
     public int getMinDelay() {
         return mMinDelay;

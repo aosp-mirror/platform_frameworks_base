@@ -1329,7 +1329,10 @@ public final class BluetoothDevice implements Parcelable, Attributable {
             if (alias == null) {
                 return getName();
             }
-            return alias;
+            return alias
+                    .replace('\t', ' ')
+                    .replace('\n', ' ')
+                    .replace('\r', ' ');
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
@@ -1775,7 +1778,8 @@ public final class BluetoothDevice implements Parcelable, Attributable {
      * in getting the SDP records or if the process takes a long time, or the device is bonding and
      * we have its UUIDs cached, {@link #ACTION_UUID} intent is sent with the UUIDs that is
      * currently present in the cache. Clients should use the {@link #getUuids} to get UUIDs
-     * if service discovery is not to be performed.
+     * if service discovery is not to be performed. If there is an ongoing bonding process,
+     * service discovery or device inquiry, the request will be queued.
      *
      * @return False if the check fails, True if the process of initiating an ACL connection
      * to the remote device was started or cached UUIDs will be broadcast.
