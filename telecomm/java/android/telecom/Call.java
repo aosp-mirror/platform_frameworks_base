@@ -543,8 +543,14 @@ public final class Call {
          */
         public static final int CAPABILITY_TRANSFER_CONSULTATIVE = 0x08000000;
 
+        /**
+         * Indicates whether the remote party supports RTT or not to the UI.
+         */
+
+        public static final int CAPABILITY_REMOTE_PARTY_SUPPORTS_RTT = 0x10000000;
+
         //******************************************************************************************
-        // Next CAPABILITY value: 0x10000000
+        // Next CAPABILITY value: 0x20000000
         //******************************************************************************************
 
         /**
@@ -785,6 +791,9 @@ public final class Call {
             }
             if (can(capabilities, CAPABILITY_TRANSFER_CONSULTATIVE)) {
                 builder.append(" CAPABILITY_TRANSFER_CONSULTATIVE");
+            }
+            if (can(capabilities, CAPABILITY_REMOTE_PARTY_SUPPORTS_RTT)) {
+                builder.append(" CAPABILITY_REMOTE_PARTY_SUPPORTS_RTT");
             }
             builder.append("]");
             return builder.toString();
