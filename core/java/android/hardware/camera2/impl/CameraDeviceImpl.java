@@ -1867,7 +1867,7 @@ public class CameraDeviceImpl extends CameraDevice
             final CaptureFailure failure = new CaptureFailure(
                 request,
                 reason,
-                /*dropped*/ mayHaveBuffers,
+                mayHaveBuffers,
                 requestId,
                 frameNumber,
                 errorPhysicalCameraId);
