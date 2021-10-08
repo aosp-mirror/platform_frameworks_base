@@ -402,7 +402,7 @@ genrule {
 }
 
 genrule {
-    name: "services-system-server-current.txt",
+    name: "frameworks-base-api-system-server-current.txt",
     srcs: [
         ":service-permission{.system-server.api.txt}",
         ":non-updatable-system-server-current.txt",
@@ -428,7 +428,7 @@ genrule {
 }
 
 genrule {
-    name: "services-system-server-removed.txt",
+    name: "frameworks-base-api-system-server-removed.txt",
     srcs: [
         ":service-permission{.system-server.removed-api.txt}",
         ":non-updatable-system-server-removed.txt",
