@@ -70,6 +70,7 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.window.TransitionInfo;
+import android.window.TransitionMetrics;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
@@ -362,6 +363,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             }
         }
         startTransaction.apply();
+        TransitionMetrics.getInstance().reportAnimationStart(transition);
         // run finish now in-case there are no animations
         onAnimFinish.run();
         return true;

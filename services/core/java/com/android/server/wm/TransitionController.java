@@ -30,10 +30,12 @@ import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.WindowManager;
 import android.window.IRemoteTransition;
+import android.window.ITransitionMetricsReporter;
 import android.window.ITransitionPlayer;
 import android.window.RemoteTransition;
 import android.window.TransitionInfo;
@@ -45,6 +47,7 @@ import com.android.server.LocalServices;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.util.ArrayList;
+import java.util.function.LongConsumer;
 
 /**
  * Handles all the aspects of recording and synchronizing transitions.
@@ -58,6 +61,8 @@ class TransitionController {
     private static final int LEGACY_STATE_RUNNING = 2;
 
     private ITransitionPlayer mTransitionPlayer;
+    final TransitionMetricsReporter mTransitionMetricsReporter = new TransitionMetricsReporter();
+
     final ActivityTaskManagerService mAtm;
     final TaskSnapshotController mTaskSnapshotController;
 
@@ -324,6 +329,8 @@ class TransitionController {
 
     /** @see Transition#finishTransition */
     void finishTransition(@NonNull IBinder token) {
+        // It is usually a no-op but make sure that the metric consumer is removed.
+        mTransitionMetricsReporter.reportAnimationStart(token, 0 /* startTime */);
         final Transition record = Transition.fromBinder(token);
         if (record == null || !mPlayingTransitions.contains(record)) {
             Slog.e(TAG, "Trying to finish a non-playing transition " + token);
@@ -417,6 +424,28 @@ class TransitionController {
         }
         proto.write(AppTransitionProto.APP_TRANSITION_STATE, state);
         proto.end(token);
+    }
+
+    static class TransitionMetricsReporter extends ITransitionMetricsReporter.Stub {
+        private final ArrayMap<IBinder, LongConsumer> mMetricConsumers = new ArrayMap<>();
+
+        void associate(IBinder transitionToken, LongConsumer consumer) {
+            synchronized (mMetricConsumers) {
+                mMetricConsumers.put(transitionToken, consumer);
+            }
+        }
+
+        @Override
+        public void reportAnimationStart(IBinder transitionToken, long startTime) {
+            final LongConsumer c;
+            synchronized (mMetricConsumers) {
+                if (mMetricConsumers.isEmpty()) return;
+                c = mMetricConsumers.remove(transitionToken);
+            }
+            if (c != null) {
+                c.accept(startTime);
+            }
+        }
     }
 
     class Lock {
