@@ -2847,8 +2847,9 @@ public class NotificationPanelViewController extends PanelViewController {
      * @return Whether we should intercept a gesture to open Quick Settings.
      */
     private boolean shouldQuickSettingsIntercept(float x, float y, float yDiff) {
-        if (!isQsExpansionEnabled() || mCollapsedOnDown || (mKeyguardShowing
-                && mKeyguardBypassController.getBypassEnabled())) {
+        if (!isQsExpansionEnabled() || mCollapsedOnDown
+                || (mKeyguardShowing && mKeyguardBypassController.getBypassEnabled())
+                || (mKeyguardShowing && mShouldUseSplitNotificationShade)) {
             return false;
         }
         View header = mKeyguardShowing || mQs == null ? mKeyguardStatusBar : mQs.getHeader();
