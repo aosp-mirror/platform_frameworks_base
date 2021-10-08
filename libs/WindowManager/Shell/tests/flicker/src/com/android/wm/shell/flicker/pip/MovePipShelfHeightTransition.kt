@@ -20,8 +20,6 @@ import android.platform.test.annotations.Presubmit
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.traces.RegionSubject
-import com.android.server.wm.traces.parser.toLayerName
-import com.android.server.wm.traces.parser.toWindowName
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
 import org.junit.Test
 

@@ -23,6 +23,7 @@ import static android.graphics.Matrix.MSKEW_Y;
 import static android.graphics.Matrix.MTRANS_X;
 import static android.graphics.Matrix.MTRANS_Y;
 import static android.view.SurfaceControlProto.HASH_CODE;
+import static android.view.SurfaceControlProto.LAYER_ID;
 import static android.view.SurfaceControlProto.NAME;
 
 import android.annotation.FloatRange;
@@ -242,6 +243,7 @@ public final class SurfaceControl implements Parcelable {
     private static native int nativeGetGPUContextPriority();
     private static native void nativeSetTransformHint(long nativeObject, int transformHint);
     private static native int nativeGetTransformHint(long nativeObject);
+    private static native int nativeGetLayerId(long nativeObject);
 
     @Nullable
     @GuardedBy("mLock")
@@ -356,8 +358,6 @@ public final class SurfaceControl implements Parcelable {
     private int mWidth;
     @GuardedBy("mLock")
     private int mHeight;
-
-    private int mTransformHint;
 
     private WeakReference<View> mLocalOwnerView;
 
@@ -1541,6 +1541,7 @@ public final class SurfaceControl implements Parcelable {
         final long token = proto.start(fieldId);
         proto.write(HASH_CODE, System.identityHashCode(this));
         proto.write(NAME, mName);
+        proto.write(LAYER_ID, getLayerId());
         proto.end(token);
     }
 
@@ -3674,5 +3675,16 @@ public final class SurfaceControl implements Parcelable {
      */
     public void setTransformHint(@Surface.Rotation int transformHint) {
         nativeSetTransformHint(mNativeObject, transformHint);
+    }
+
+    /**
+     * @hide
+     */
+    public int getLayerId() {
+        if (mNativeObject != 0) {
+            return nativeGetLayerId(mNativeObject);
+        }
+
+        return -1;
     }
 }

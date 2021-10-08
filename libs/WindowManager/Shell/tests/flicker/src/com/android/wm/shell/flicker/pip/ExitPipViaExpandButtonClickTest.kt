@@ -23,7 +23,6 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.traces.parser.toWindowName
 import org.junit.FixMethodOrder
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters

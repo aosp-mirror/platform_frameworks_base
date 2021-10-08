@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+@file:JvmName("CommonAssertions")
 package com.android.wm.shell.flicker
 
-import android.content.ComponentName
 import android.graphics.Region
 import android.view.Surface
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.helpers.WindowUtils
+import com.android.server.wm.traces.common.FlickerComponentName
 
 fun FlickerTestParameter.appPairsDividerIsVisibleAtEnd() {
     assertLayersEnd {
@@ -72,7 +73,7 @@ fun FlickerTestParameter.dockedStackDividerNotExistsAtEnd() {
 
 fun FlickerTestParameter.appPairsPrimaryBoundsIsVisibleAtEnd(
     rotation: Int,
-    primaryComponent: ComponentName
+    primaryComponent: FlickerComponentName
 ) {
     assertLayersEnd {
         val dividerRegion = layer(APP_PAIR_SPLIT_DIVIDER_COMPONENT).visibleRegion.region
@@ -83,7 +84,7 @@ fun FlickerTestParameter.appPairsPrimaryBoundsIsVisibleAtEnd(
 
 fun FlickerTestParameter.dockedStackPrimaryBoundsIsVisibleAtEnd(
     rotation: Int,
-    primaryComponent: ComponentName
+    primaryComponent: FlickerComponentName
 ) {
     assertLayersEnd {
         val dividerRegion = layer(DOCKED_STACK_DIVIDER_COMPONENT).visibleRegion.region
@@ -94,7 +95,7 @@ fun FlickerTestParameter.dockedStackPrimaryBoundsIsVisibleAtEnd(
 
 fun FlickerTestParameter.appPairsSecondaryBoundsIsVisibleAtEnd(
     rotation: Int,
-    secondaryComponent: ComponentName
+    secondaryComponent: FlickerComponentName
 ) {
     assertLayersEnd {
         val dividerRegion = layer(APP_PAIR_SPLIT_DIVIDER_COMPONENT).visibleRegion.region
@@ -105,7 +106,7 @@ fun FlickerTestParameter.appPairsSecondaryBoundsIsVisibleAtEnd(
 
 fun FlickerTestParameter.dockedStackSecondaryBoundsIsVisibleAtEnd(
     rotation: Int,
-    secondaryComponent: ComponentName
+    secondaryComponent: FlickerComponentName
 ) {
     assertLayersEnd {
         val dividerRegion = layer(DOCKED_STACK_DIVIDER_COMPONENT).visibleRegion.region

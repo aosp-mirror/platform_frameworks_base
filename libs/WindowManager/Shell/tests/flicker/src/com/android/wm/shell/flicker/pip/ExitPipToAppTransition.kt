@@ -18,7 +18,6 @@ package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
 import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.traces.parser.toLayerName
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
 import org.junit.Test
 
@@ -63,7 +62,7 @@ abstract class ExitPipToAppTransition(testSpec: FlickerTestParameter) : PipTrans
             // when the activity is STOPPING, sometimes it becomes invisible in an entry before
             // the window, sometimes in the same entry. This occurs because we log 1x per frame
             // thus we ignore activity here
-            isAppWindowVisible(testApp.component, ignoreActivity = true)
+            isAppWindowVisible(testApp.component)
                     .isAppWindowOnTop(pipApp.component)
                     .then()
                     .isAppWindowInvisible(testApp.component)
