@@ -249,6 +249,9 @@ public class ColorScheme(@ColorInt seed: Int, val darkTheme: Boolean) {
                 val population = populationByColor[entry.key]!!
                 val cam = camByColor[entry.key]!!
                 val hue = cam.hue.roundToInt() % 360
+                if (cam.chroma <= MIN_CHROMA) {
+                    continue
+                }
                 huePopulation[hue] = huePopulation[hue] + population
             }
 
