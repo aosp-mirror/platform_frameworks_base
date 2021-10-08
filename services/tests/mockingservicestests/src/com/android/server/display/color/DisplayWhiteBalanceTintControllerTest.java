@@ -38,7 +38,6 @@ import com.android.internal.R;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -191,7 +190,6 @@ public class DisplayWhiteBalanceTintControllerTest {
      * Matrix should match the precalculated one for given cct and display primaries.
      */
     @Test
-    @Ignore
     public void displayWhiteBalance_validateTransformMatrix() {
         DisplayPrimaries displayPrimaries = new DisplayPrimaries();
         displayPrimaries.red = new CieXyz();
@@ -226,12 +224,12 @@ public class DisplayWhiteBalanceTintControllerTest {
 
         float[] matrixDwb = mDisplayWhiteBalanceTintController.getMatrix();
         final float[] expectedMatrixDwb = {
-            0.962880f,  -0.001780f, -0.000158f, 0.0f,
-            0.035765f,   0.929988f,  0.000858f, 0.0f,
-            0.001354f,  -0.000470f,  0.948327f, 0.0f,
-            0.0f,        0.0f,       0.0f,      1.0f
+            0.971848f,   -0.001421f,  0.000491f, 0.0f,
+            0.028193f,    0.945798f,  0.003207f, 0.0f,
+            -0.000042f,  -0.000989f,  0.988659f, 0.0f,
+            0.0f,         0.0f,       0.0f,      1.0f
         };
-        assertArrayEquals("Unexpected DWB matrix", matrixDwb, expectedMatrixDwb,
+        assertArrayEquals("Unexpected DWB matrix", expectedMatrixDwb, matrixDwb,
             1e-6f /* tolerance */);
     }
 
