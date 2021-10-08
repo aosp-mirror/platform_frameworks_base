@@ -2897,6 +2897,10 @@
     <!-- Make the IME killable by the lowmemorykiller by raising its oom_score_adj. -->
     <bool name="config_killableInputMethods">false</bool>
 
+    <!-- Prevent the InputMethodManagerService from starting up the IME unless
+     the currently focused view is a text editor. -->
+    <bool name="config_preventImeStartupUnlessTextEditor">false</bool>
+
     <!-- The list of classes that should be added to the notification ranking pipeline.
      See {@link com.android.server.notification.NotificationSignalExtractor}
       If you add a new extractor to this list make sure to update

@@ -3311,6 +3311,8 @@
   <staging-public-group type="bool" first-id="0x01cf0000">
     <!-- @hide @SystemApi -->
     <public name="config_systemCaptionsServiceCallsEnabled" />
+    <!-- @hide @TestApi -->
+    <public name="config_preventImeStartupUnlessTextEditor" />
   </staging-public-group>
 
   <staging-public-group type="fraction" first-id="0x01ce0000">

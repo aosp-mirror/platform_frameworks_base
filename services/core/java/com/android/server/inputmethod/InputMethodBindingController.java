@@ -496,8 +496,17 @@ final class InputMethodBindingController {
             return;
         }
 
+        // No IME is currently connected. Reestablish the main connection.
+        if (!mHasConnection) {
+            if (DEBUG) {
+                Slog.d(TAG, "Cannot show input: no IME bound. Rebinding.");
+            }
+            bindCurrentMethodLocked();
+            return;
+        }
+
         long bindingDuration = SystemClock.uptimeMillis() - mLastBindTime;
-        if (mHasConnection && bindingDuration >= TIME_TO_RECONNECT) {
+        if (bindingDuration >= TIME_TO_RECONNECT) {
             // The client has asked to have the input method shown, but
             // we have been sitting here too long with a connection to the
             // service and no interface received, so let's disconnect/connect
