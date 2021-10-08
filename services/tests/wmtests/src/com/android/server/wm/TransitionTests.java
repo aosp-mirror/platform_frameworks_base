@@ -34,8 +34,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
@@ -448,7 +451,8 @@ public class TransitionTests extends WindowTestsBase {
 
     @Test
     public void testIntermediateVisibility() {
-        final TransitionController controller = new TransitionController(mAtm);
+        final TaskSnapshotController snapshotController = mock(TaskSnapshotController.class);
+        final TransitionController controller = new TransitionController(mAtm, snapshotController);
         final ITransitionPlayer player = new ITransitionPlayer.Default();
         controller.registerTransitionPlayer(player);
         ITaskOrganizer mockOrg = mock(ITaskOrganizer.class);
@@ -509,6 +513,71 @@ public class TransitionTests extends WindowTestsBase {
 
         assertFalse(activity1.isVisible());
         assertTrue(activity2.isVisible());
+    }
+
+    @Test
+    public void testTransientLaunch() {
+        final TaskSnapshotController snapshotController = mock(TaskSnapshotController.class);
+        final TransitionController controller = new TransitionController(mAtm, snapshotController);
+        final ITransitionPlayer player = new ITransitionPlayer.Default();
+        controller.registerTransitionPlayer(player);
+        ITaskOrganizer mockOrg = mock(ITaskOrganizer.class);
+        final Transition openTransition = controller.createTransition(TRANSIT_OPEN);
+
+        // Start out with task2 visible and set up a transition that closes task2 and opens task1
+        final Task task1 = createTask(mDisplayContent);
+        task1.mTaskOrganizer = mockOrg;
+        final ActivityRecord activity1 = createActivityRecord(task1);
+        activity1.mVisibleRequested = false;
+        activity1.setVisible(false);
+        final Task task2 = createTask(mDisplayContent);
+        task2.mTaskOrganizer = mockOrg;
+        final ActivityRecord activity2 = createActivityRecord(task2);
+        activity2.mVisibleRequested = true;
+        activity2.setVisible(true);
+
+        openTransition.collectExistenceChange(task1);
+        openTransition.collectExistenceChange(activity1);
+        openTransition.collectExistenceChange(task2);
+        openTransition.collectExistenceChange(activity2);
+
+        activity1.mVisibleRequested = true;
+        activity1.setVisible(true);
+        activity2.mVisibleRequested = false;
+
+        // Using abort to force-finish the sync (since we can't wait for drawing in unit test).
+        // We didn't call abort on the transition itself, so it will still run onTransactionReady
+        // normally.
+        mWm.mSyncEngine.abort(openTransition.getSyncId());
+
+        verify(snapshotController, times(1)).recordTaskSnapshot(eq(task2), eq(false));
+
+        openTransition.finishTransition();
+
+        // We are now going to simulate closing task1 to return back to (open) task2.
+        final Transition closeTransition = controller.createTransition(TRANSIT_CLOSE);
+
+        closeTransition.collectExistenceChange(task1);
+        closeTransition.collectExistenceChange(activity1);
+        closeTransition.collectExistenceChange(task2);
+        closeTransition.collectExistenceChange(activity2);
+        closeTransition.setTransientLaunch(activity2);
+
+        activity1.mVisibleRequested = false;
+        activity2.mVisibleRequested = true;
+
+        // Using abort to force-finish the sync (since we obviously can't wait for drawing).
+        // We didn't call abort on the actual transition, so it will still run onTransactionReady
+        // normally.
+        mWm.mSyncEngine.abort(closeTransition.getSyncId());
+
+        // Make sure we haven't called recordSnapshot (since we are transient, it shouldn't be
+        // called until finish).
+        verify(snapshotController, times(0)).recordTaskSnapshot(eq(task1), eq(false));
+
+        closeTransition.finishTransition();
+
+        verify(snapshotController, times(1)).recordTaskSnapshot(eq(task1), eq(false));
     }
 
     /** Fill the change map with all the parents of top. Change maps are usually fully populated */
