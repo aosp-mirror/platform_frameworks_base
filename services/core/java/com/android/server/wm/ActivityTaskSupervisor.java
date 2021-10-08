@@ -44,7 +44,6 @@ import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
 import static android.os.Process.INVALID_UID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
@@ -1562,19 +1561,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             // Prevent recursion.
             return;
         }
-        if (task.isVisible()) {
-            if (task.mTransitionController.isCollecting()) {
-                // We don't want the finishing to change the transition ready state since there will
-                // not be corresponding setReady for finishing.
-                task.mTransitionController.collectExistenceChange(task);
-            } else {
-                task.mTransitionController.requestTransitionIfNeeded(TRANSIT_CLOSE, task);
-            }
-        } else {
-            // Removing a non-visible task doesn't require a transition, but if there is one
-            // collecting, this should be a member just in case.
-            task.mTransitionController.collect(task);
-        }
+        task.mTransitionController.requestCloseTransitionIfNeeded(task);
         task.mInRemoveTask = true;
         try {
             task.performClearTask(reason);

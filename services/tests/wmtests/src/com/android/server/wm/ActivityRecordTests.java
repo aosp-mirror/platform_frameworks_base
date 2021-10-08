@@ -166,6 +166,8 @@ public class ActivityRecordTests extends WindowTestsBase {
     @Before
     public void setUp() throws Exception {
         setBooted(mAtm);
+        // Because the booted state is set, avoid starting real home if there is no task.
+        doReturn(false).when(mRootWindowContainer).resumeHomeActivity(any(), anyString(), any());
     }
 
     private TestStartingWindowOrganizer registerTestStartingWindowOrganizer() {
@@ -1083,6 +1085,7 @@ public class ActivityRecordTests extends WindowTestsBase {
      */
     @Test
     public void testFinishActivityIfPossible_nonVisibleNoAppTransition() {
+        registerTestTransitionPlayer();
         final ActivityRecord activity = createActivityWithTask();
         // Put an activity on top of test activity to make it invisible and prevent us from
         // accidentally resuming the topmost one again.
@@ -1093,6 +1096,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity.finishIfPossible("test", false /* oomAdj */);
 
         verify(activity.mDisplayContent, never()).prepareAppTransition(eq(TRANSIT_CLOSE));
+        assertFalse(activity.inTransition());
     }
 
     /**
@@ -1101,11 +1105,7 @@ public class ActivityRecordTests extends WindowTestsBase {
      */
     @Test
     public void testFinishActivityIfPossible_lastInTaskRequestsTransitionWithTrigger() {
-        // Set-up mock shell transitions
-        final TestTransitionPlayer testPlayer = new TestTransitionPlayer(
-                mAtm.getTransitionController(), mAtm.mWindowOrganizerController);
-        mAtm.getTransitionController().registerTransitionPlayer(testPlayer);
-
+        final TestTransitionPlayer testPlayer = registerTestTransitionPlayer();
         final ActivityRecord activity = createActivityWithTask();
         activity.finishing = false;
         activity.mVisibleRequested = true;
@@ -1114,6 +1114,29 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         verify(activity).setVisibility(eq(false));
         assertEquals(activity.getTask().mTaskId, testPlayer.mLastRequest.getTriggerTask().taskId);
+    }
+
+    /**
+     * Verify that when collecting activity to the existing close transition, it should not affect
+     * ready state.
+     */
+    @Test
+    public void testFinishActivityIfPossible_collectToExistingTransition() {
+        final TestTransitionPlayer testPlayer = registerTestTransitionPlayer();
+        final ActivityRecord activity = createActivityWithTask();
+        activity.setState(PAUSED, "test");
+        activity.finishIfPossible("test", false /* oomAdj */);
+        final Transition lastTransition = testPlayer.mLastTransit;
+        assertTrue(lastTransition.allReady());
+        assertTrue(activity.inTransition());
+
+        // Collect another activity to the existing transition without changing ready state.
+        final ActivityRecord activity2 = createActivityRecord(activity.getTask());
+        activity2.setState(PAUSING, "test");
+        activity2.finishIfPossible("test", false /* oomAdj */);
+        assertTrue(activity2.inTransition());
+        assertEquals(lastTransition, testPlayer.mLastTransit);
+        assertTrue(lastTransition.allReady());
     }
 
     /**

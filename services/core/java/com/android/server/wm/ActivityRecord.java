@@ -3080,9 +3080,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         mAtmService.deferWindowLayout();
         try {
-            final Transition newTransition = (!mTransitionController.isCollecting()
-                    && mTransitionController.getTransitionPlayer() != null)
-                    ? mTransitionController.createTransition(TRANSIT_CLOSE) : null;
             mTaskSupervisor.mNoHistoryActivities.remove(this);
             makeFinishingLocked();
             // Make a local reference to its task since this.task could be set to null once this
@@ -3114,10 +3111,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             final boolean endTask = task.getTopNonFinishingActivity() == null
                     && !task.isClearingToReuseTask();
-            if (newTransition != null) {
-                mTransitionController.requestStartTransition(newTransition,
-                        endTask ? task : null, null /* remote */);
-            }
+            mTransitionController.requestCloseTransitionIfNeeded(endTask ? task : this);
             if (isState(RESUMED)) {
                 if (endTask) {
                     mAtmService.getTaskChangeNotificationController().notifyTaskRemovalStarted(
@@ -3543,13 +3537,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (stopped) {
             abortAndClearOptionsAnimation();
         }
-        if (mTransitionController.isCollecting()) {
-            // We don't want the finishing to change the transition ready state since there will not
-            // be corresponding setReady for finishing.
-            mTransitionController.collectExistenceChange(this);
-        } else {
-            mTransitionController.requestTransitionIfNeeded(TRANSIT_CLOSE, this);
-        }
     }
 
     /**
@@ -3731,6 +3718,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // to the restarted activity.
             nowVisible = mVisibleRequested;
         }
+        mTransitionController.requestCloseTransitionIfNeeded(this);
         cleanUp(true /* cleanServices */, true /* setState */);
         if (remove) {
             if (mStartingData != null && mVisible && task != null) {
