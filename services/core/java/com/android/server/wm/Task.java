@@ -2972,11 +2972,6 @@ class Task extends TaskFragment {
         return super.makeAnimationLeash().setMetadata(METADATA_TASK_ID, mTaskId);
     }
 
-    @Override
-    void resetSurfacePositionForAnimationLeash(SurfaceControl.Transaction t) {
-        super.resetSurfacePositionForAnimationLeash(t);
-    }
-
     boolean shouldAnimate() {
         /**
          * Animations are handled by the TaskOrganizer implementation.
