@@ -542,7 +542,7 @@
     <string name="delete_blob_text" msgid="2819192607255625697">"Ортақ деректерді жою"</string>
     <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Осы ортақ деректерді шынымен жойғыңыз келе ме?"</string>
     <string name="user_add_user_item_summary" msgid="5748424612724703400">"Пайдаланушылардың өздерінің қолданбалары мен мазмұны болады"</string>
-    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Өз есептік жазбаңыздан қолданбалар мен мазмұнға қол жетімділікті шектеуіңізге болады"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Өз аккаунтыңыздан қолданбалар мен мазмұнға қол жетімділікті шектеуіңізге болады"</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Пайдаланушы"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Шектелген профайл"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Жаңа пайдаланушы қосылсын ба?"</string>
