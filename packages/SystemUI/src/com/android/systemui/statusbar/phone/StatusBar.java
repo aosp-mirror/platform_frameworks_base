@@ -628,6 +628,7 @@ public class StatusBar extends SystemUI implements
     private final Executor mUiBgExecutor;
 
     protected boolean mDozing;
+    private boolean mIsFullscreen;
 
     private final NotificationMediaManager mMediaManager;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
@@ -908,6 +909,9 @@ public class StatusBar extends SystemUI implements
         mActivityIntentHelper = new ActivityIntentHelper(mContext);
         mActivityLaunchAnimator = activityLaunchAnimator;
         mDialogLaunchAnimator = dialogLaunchAnimator;
+
+        // The status bar background may need updating when the ongoing call status changes.
+        mOngoingCallController.addCallback((animate) -> maybeUpdateBarMode());
 
         // TODO(b/190746471): Find a better home for this.
         DateTimeView.setReceiverHandler(timeTickHandler);
@@ -2243,7 +2247,7 @@ public class StatusBar extends SystemUI implements
         if (!mTransientShown) {
             mTransientShown = true;
             mNoAnimationOnNextBarModeChange = true;
-            handleTransientChanged();
+            maybeUpdateBarMode();
         }
     }
 
@@ -2251,11 +2255,11 @@ public class StatusBar extends SystemUI implements
     void clearTransient() {
         if (mTransientShown) {
             mTransientShown = false;
-            handleTransientChanged();
+            maybeUpdateBarMode();
         }
     }
 
-    private void handleTransientChanged() {
+    private void maybeUpdateBarMode() {
         final int barMode = barMode(mTransientShown, mAppearance);
         if (updateBarMode(barMode)) {
             mLightBarController.onStatusBarModeChanged(barMode);
@@ -2273,9 +2277,11 @@ public class StatusBar extends SystemUI implements
         return false;
     }
 
-    private static @TransitionMode int barMode(boolean isTransient, int appearance) {
+    private @TransitionMode int barMode(boolean isTransient, int appearance) {
         final int lightsOutOpaque = APPEARANCE_LOW_PROFILE_BARS | APPEARANCE_OPAQUE_STATUS_BARS;
-        if (isTransient) {
+        if (mOngoingCallController.hasOngoingCall() && mIsFullscreen) {
+            return MODE_SEMI_TRANSPARENT;
+        } else if (isTransient) {
             return MODE_SEMI_TRANSPARENT;
         } else if ((appearance & lightsOutOpaque) == lightsOutOpaque) {
             return MODE_LIGHTS_OUT;
@@ -4476,6 +4482,12 @@ public class StatusBar extends SystemUI implements
                     updateScrimController();
                     updateReportRejectedTouchVisibility();
                     Trace.endSection();
+                }
+
+                @Override
+                public void onFullscreenStateChanged(boolean isFullscreen) {
+                    mIsFullscreen = isFullscreen;
+                    maybeUpdateBarMode();
                 }
             };
 
