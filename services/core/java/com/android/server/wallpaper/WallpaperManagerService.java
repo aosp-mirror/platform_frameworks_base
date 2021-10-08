@@ -2260,8 +2260,17 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             IWallpaperManagerCallback cb, final int which, Bundle outParams, int wallpaperUserId) {
         final boolean hasPrivilege = hasPermission(READ_WALLPAPER_INTERNAL);
         if (!hasPrivilege) {
-            mContext.getSystemService(StorageManager.class).checkPermissionReadImages(true,
-                    Binder.getCallingPid(), Binder.getCallingUid(), callingPkg, callingFeatureId);
+            try {
+                mContext.getSystemService(StorageManager.class).checkPermissionReadImages(true,
+                        Binder.getCallingPid(), Binder.getCallingUid(), callingPkg,
+                        callingFeatureId);
+            } catch (Exception e) {
+                // If the calling package name does not match a package installed on the system,
+                // an exception is thrown. Don't allow that exception to be thrown, otherwise,
+                // there is a difference in control flow that allows calling apps to determine
+                // if a package is installed on the device.
+                return null;
+            }
         }
 
         wallpaperUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
