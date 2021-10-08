@@ -2206,7 +2206,8 @@ public class StatusBar extends SystemUI implements
         }
     }
 
-    public boolean interceptTouchEvent(MotionEvent event) {
+    /** Called when a touch event occurred on {@link PhoneStatusBarView}. */
+    public void onTouchEvent(MotionEvent event) {
         if (DEBUG_GESTURES) {
             if (event.getActionMasked() != MotionEvent.ACTION_MOVE) {
                 EventLog.writeEvent(EventLogTags.SYSUI_STATUSBAR_TOUCH,
@@ -2238,7 +2239,6 @@ public class StatusBar extends SystemUI implements
                     event.getAction() == MotionEvent.ACTION_CANCEL;
             setInteracting(StatusBarManager.WINDOW_STATUS_BAR, !upOrCancel || mExpandedVisible);
         }
-        return false;
     }
 
     boolean isSameStatusBarState(int state) {

@@ -200,17 +200,16 @@ public class PhoneStatusBarView extends PanelBar {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        boolean barConsumedEvent = mBar.interceptTouchEvent(event);
+        mBar.onTouchEvent(event);
 
         if (DEBUG_GESTURES) {
             if (event.getActionMasked() != MotionEvent.ACTION_MOVE) {
                 EventLog.writeEvent(EventLogTags.SYSUI_PANELBAR_TOUCH,
-                        event.getActionMasked(), (int) event.getX(), (int) event.getY(),
-                        barConsumedEvent ? 1 : 0);
+                        event.getActionMasked(), (int) event.getX(), (int) event.getY());
             }
         }
 
-        return barConsumedEvent || super.onTouchEvent(event);
+        return super.onTouchEvent(event);
     }
 
     @Override
@@ -240,7 +239,8 @@ public class PhoneStatusBarView extends PanelBar {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        return mBar.interceptTouchEvent(event) || super.onInterceptTouchEvent(event);
+        mBar.onTouchEvent(event);
+        return super.onInterceptTouchEvent(event);
     }
 
     @Override
