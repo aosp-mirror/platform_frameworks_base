@@ -40,7 +40,6 @@ import com.android.systemui.util.concurrency.DelayableExecutor;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
-
 /**
  * Class that coordinates non-HBM animations during keyguard authentication.
  */
@@ -265,7 +264,9 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                 : (int) MathUtils.constrain(
                     MathUtils.map(.5f, .9f, 0f, 255f, expansion),
                     0f, 255f);
-        alpha *= (1.0f - mTransitionToFullShadeProgress);
+        if (!mShowingUdfpsBouncer) {
+            alpha *= (1.0f - mTransitionToFullShadeProgress);
+        }
         mView.setUnpausedAlpha(alpha);
     }
 

@@ -891,6 +891,40 @@ public class WindowStateTests extends WindowTestsBase {
         assertTrue(mAppWindow.getInsetsState().getSourceOrDefaultVisibility(ITYPE_NAVIGATION_BAR));
     }
 
+    @Test
+    public void testAdjustImeInsetsVisibilityWhenSwitchingApps() {
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        final WindowState app2 = createWindow(null, TYPE_APPLICATION, "app2");
+        final WindowState imeWindow = createWindow(null, TYPE_APPLICATION, "imeWindow");
+        spyOn(imeWindow);
+        doReturn(true).when(imeWindow).isVisible();
+        mDisplayContent.mInputMethodWindow = imeWindow;
+
+        final InsetsStateController controller = mDisplayContent.getInsetsStateController();
+        controller.getImeSourceProvider().setWindow(imeWindow, null, null);
+
+        // Simulate app requests IME with updating all windows Insets State when IME is above app.
+        mDisplayContent.setImeLayeringTarget(app);
+        mDisplayContent.setImeInputTarget(app);
+        assertTrue(mDisplayContent.shouldImeAttachedToApp());
+        controller.getImeSourceProvider().scheduleShowImePostLayout(app);
+        controller.getImeSourceProvider().getSource().setVisible(true);
+        controller.updateAboveInsetsState(imeWindow, false);
+
+        // Expect all app windows behind IME can receive IME insets visible.
+        assertTrue(app.getInsetsState().getSource(ITYPE_IME).isVisible());
+        assertTrue(app2.getInsetsState().getSource(ITYPE_IME).isVisible());
+
+        // Simulate app plays closing transition to app2.
+        app.mActivityRecord.commitVisibility(false, false);
+        assertTrue(app.mActivityRecord.mLastImeShown);
+        assertTrue(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
+
+        // Verify the IME insets is visible on app, but not for app2 during app task switching.
+        assertTrue(app.getInsetsState().getSource(ITYPE_IME).isVisible());
+        assertFalse(app2.getInsetsState().getSource(ITYPE_IME).isVisible());
+    }
+
     @UseTestDisplay(addWindows = { W_ACTIVITY })
     @Test
     public void testUpdateImeControlTargetWhenLeavingMultiWindow() {
