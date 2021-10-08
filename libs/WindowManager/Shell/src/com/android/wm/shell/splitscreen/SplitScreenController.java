@@ -68,7 +68,10 @@ import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.concurrent.Executor;
+
+import javax.inject.Provider;
 
 /**
  * Class manages split-screen multitasking mode and implements the main interface
@@ -91,6 +94,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     private final Transitions mTransitions;
     private final TransactionPool mTransactionPool;
     private final SplitscreenEventLogger mLogger;
+    private final Provider<Optional<StageTaskUnfoldController>> mUnfoldControllerProvider;
 
     private StageCoordinator mStageCoordinator;
 
@@ -99,7 +103,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             RootTaskDisplayAreaOrganizer rootTDAOrganizer,
             ShellExecutor mainExecutor, DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController,
-            Transitions transitions, TransactionPool transactionPool) {
+            Transitions transitions, TransactionPool transactionPool,
+            Provider<Optional<StageTaskUnfoldController>> unfoldControllerProvider) {
         mTaskOrganizer = shellTaskOrganizer;
         mSyncQueue = syncQueue;
         mContext = context;
@@ -109,6 +114,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mDisplayInsetsController = displayInsetsController;
         mTransitions = transitions;
         mTransactionPool = transactionPool;
+        mUnfoldControllerProvider = unfoldControllerProvider;
         mLogger = new SplitscreenEventLogger();
     }
 
@@ -131,7 +137,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             // TODO: Multi-display
             mStageCoordinator = new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
                     mRootTDAOrganizer, mTaskOrganizer, mDisplayImeController,
-                    mDisplayInsetsController, mTransitions, mTransactionPool, mLogger);
+                    mDisplayInsetsController, mTransitions, mTransactionPool, mLogger,
+                    mUnfoldControllerProvider);
         }
     }
 
