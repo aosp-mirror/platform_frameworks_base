@@ -273,7 +273,7 @@ import java.util.function.Predicate;
 
 /** A window in the window manager. */
 class WindowState extends WindowContainer<WindowState> implements WindowManagerPolicy.WindowState,
-        InsetsControlTarget {
+        InsetsControlTarget, InputTarget {
     static final String TAG = TAG_WITH_CLASS_NAME ? "WindowState" : TAG_WM;
 
     // The minimal size of a window within the usable area of the freeform root task.
@@ -1727,12 +1727,28 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return state;
     }
 
-    int getDisplayId() {
+    @Override
+    public int getDisplayId() {
         final DisplayContent displayContent = getDisplayContent();
         if (displayContent == null) {
             return Display.INVALID_DISPLAY;
         }
         return displayContent.getDisplayId();
+    }
+
+    @Override
+    public WindowState getWindowState() {
+        return this;
+    }
+
+    @Override
+    public IWindow getIWindow() {
+        return mClient;
+    }
+
+    @Override
+    public int getPid() {
+        return mSession.mPid;
     }
 
     Task getTask() {
