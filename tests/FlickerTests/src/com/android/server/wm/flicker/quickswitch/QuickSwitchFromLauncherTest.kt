@@ -27,7 +27,7 @@ import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.LAUNCHER_COMPONENT
-import com.android.server.wm.flicker.annotation.Group1
+import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
@@ -38,7 +38,7 @@ import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.SNAPSHOT_COMPONENT
+import com.android.server.wm.traces.common.FlickerComponentName
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -60,7 +60,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group1
+@Group4
 class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val testApp = SimpleAppHelper(instrumentation)
@@ -145,7 +145,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun startsWithHomeActivityFlaggedVisible() {
         testSpec.assertWmStart {
-            this.isHomeActivityVisible(true)
+            this.isHomeActivityVisible()
         }
     }
 
@@ -192,7 +192,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun endsWithHomeActivityFlaggedInvisible() {
         testSpec.assertWmEnd {
-            this.isHomeActivityVisible(false)
+            this.isHomeActivityInvisible()
         }
     }
 
@@ -204,9 +204,9 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun appWindowBecomesAndStaysVisible() {
         testSpec.assertWm {
-            this.isAppWindowInvisible(testApp.component, ignoreActivity = true)
+            this.isAppWindowInvisible(testApp.component)
                     .then()
-                    .isAppWindowVisible(testApp.component, ignoreActivity = true)
+                    .isAppWindowVisible(testApp.component)
         }
     }
 
@@ -232,9 +232,9 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun launcherWindowBecomesAndStaysInvisible() {
         testSpec.assertWm {
-            this.isAppWindowVisible(LAUNCHER_COMPONENT)
+            this.isAppWindowOnTop(LAUNCHER_COMPONENT)
                     .then()
-                    .isAppWindowInvisible(LAUNCHER_COMPONENT)
+                    .isAppWindowNotOnTop(LAUNCHER_COMPONENT)
         }
     }
 
@@ -260,9 +260,9 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun appWindowIsVisibleOnceLauncherWindowIsInvisible() {
         testSpec.assertWm {
-            this.isAppWindowVisible(LAUNCHER_COMPONENT)
+            this.isAppWindowOnTop(LAUNCHER_COMPONENT)
                     .then()
-                    .isAppWindowVisible(SNAPSHOT_COMPONENT)
+                    .isAppWindowVisible(FlickerComponentName.SNAPSHOT)
                     .then()
                     .isAppWindowVisible(testApp.component)
         }
@@ -278,7 +278,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
         testSpec.assertLayers {
             this.isVisible(LAUNCHER_COMPONENT)
                     .then()
-                    .isVisible(SNAPSHOT_COMPONENT)
+                    .isVisible(FlickerComponentName.SNAPSHOT)
                     .then()
                     .isVisible(testApp.component)
         }

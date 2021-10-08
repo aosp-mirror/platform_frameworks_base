@@ -17,14 +17,15 @@
 package com.android.wm.shell.flicker.helpers
 
 import android.app.Instrumentation
-import android.content.ComponentName
 import android.content.res.Resources
+import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.wm.shell.flicker.testapp.Components
 
 class SplitScreenHelper(
     instrumentation: Instrumentation,
     activityLabel: String,
-    componentsInfo: ComponentName
+    componentsInfo: FlickerComponentName
 ) : BaseAppHelper(instrumentation, activityLabel, componentsInfo) {
 
     companion object {
@@ -39,16 +40,16 @@ class SplitScreenHelper(
         fun getPrimary(instrumentation: Instrumentation): SplitScreenHelper =
             SplitScreenHelper(instrumentation,
                 Components.SplitScreenActivity.LABEL,
-                Components.SplitScreenActivity.COMPONENT)
+                Components.SplitScreenActivity.COMPONENT.toFlickerComponent())
 
         fun getSecondary(instrumentation: Instrumentation): SplitScreenHelper =
             SplitScreenHelper(instrumentation,
                 Components.SplitScreenSecondaryActivity.LABEL,
-                Components.SplitScreenSecondaryActivity.COMPONENT)
+                Components.SplitScreenSecondaryActivity.COMPONENT.toFlickerComponent())
 
         fun getNonResizeable(instrumentation: Instrumentation): SplitScreenHelper =
             SplitScreenHelper(instrumentation,
                 Components.NonResizeableActivity.LABEL,
-                Components.NonResizeableActivity.COMPONENT)
+                Components.NonResizeableActivity.COMPONENT.toFlickerComponent())
     }
 }
