@@ -250,6 +250,17 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      */
     public static final int GROUP_STATUS_INACTIVE = IBluetoothLeAudio.GROUP_STATUS_INACTIVE;
 
+    /**
+     * Indicating that node has been added to the group.
+     * @hide
+     */
+    public static final int GROUP_NODE_ADDED = IBluetoothLeAudio.GROUP_NODE_ADDED;
+
+    /**
+     * Indicating that node has been removed from the group.
+     * @hide
+     */
+    public static final int GROUP_NODE_REMOVED = IBluetoothLeAudio.GROUP_NODE_REMOVED;
 
     private final BluetoothProfileConnector<IBluetoothLeAudio> mProfileConnector =
             new BluetoothProfileConnector(this, BluetoothProfile.LE_AUDIO, "BluetoothLeAudio",
@@ -542,6 +553,61 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
         } catch (RemoteException e) {
             Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
             return;
+        }
+    }
+
+    /**
+     * Add device to the given group.
+     * @param group_id group ID the device is being added to
+     * @param device the active device
+     * @return true on success, otherwise false
+     * @hide
+     */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED
+    })
+    public boolean groupAddNode(int group_id, @NonNull BluetoothDevice device) {
+        if (VDBG) log("groupAddNode()");
+        final IBluetoothLeAudio service = getService();
+        try {
+            if (service != null && mAdapter.isEnabled()) {
+                return service.groupAddNode(group_id, device, mAttributionSource);
+            }
+            if (service == null) Log.w(TAG, "Proxy not attached to service");
+            return false;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+            return false;
+        }
+    }
+
+    /**
+     * Remove device from a given group.
+     * @param group_id group ID the device is being removed from
+     * @param device the active device
+     * @return true on success, otherwise false
+     *
+     * @hide
+     */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED
+    })
+    public boolean groupRemoveNode(int group_id, @NonNull BluetoothDevice device) {
+        if (VDBG) log("groupRemoveNode()");
+        final IBluetoothLeAudio service = getService();
+        try {
+            if (service != null && mAdapter.isEnabled()) {
+                return service.groupRemoveNode(group_id, device, mAttributionSource);
+            }
+            if (service == null) Log.w(TAG, "Proxy not attached to service");
+            return false;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+            return false;
         }
     }
 
