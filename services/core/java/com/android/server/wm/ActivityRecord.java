@@ -4888,8 +4888,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * @param visible {@code true} if this {@link ActivityRecord} should become visible, otherwise
      *                this should become invisible.
      * @param performLayout if {@code true}, perform surface placement after committing visibility.
+     * @param fromTransition {@code true} if this is part of finishing a transition.
      */
-    void commitVisibility(boolean visible, boolean performLayout) {
+    void commitVisibility(boolean visible, boolean performLayout, boolean fromTransition) {
         // Reset the state of mVisibleSetFromTransferredStartingWindow since visibility is actually
         // been set by the app now.
         mVisibleSetFromTransferredStartingWindow = false;
@@ -4939,7 +4940,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         displayContent.getInputMonitor().updateInputWindowsLw(false /*force*/);
         mUseTransferredAnimation = false;
 
-        postApplyAnimation(visible);
+        postApplyAnimation(visible, fromTransition);
+    }
+
+    void commitVisibility(boolean visible, boolean performLayout) {
+        commitVisibility(visible, performLayout, false /* fromTransition */);
     }
 
     /**
@@ -4950,8 +4955,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *
      * @param visible {@code true} if this {@link ActivityRecord} has become visible, otherwise
      *                this has become invisible.
+     * @param fromTransition {@code true} if this call is part of finishing a transition. This is
+     *                       needed because the shell transition is no-longer active by the time
+     *                       commitVisibility is called.
      */
-    private void postApplyAnimation(boolean visible) {
+    private void postApplyAnimation(boolean visible, boolean fromTransition) {
         final boolean usingShellTransitions = mTransitionController.isShellTransitionsEnabled();
         final boolean delayed = isAnimating(TRANSITION | PARENTS | CHILDREN,
                 ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_WINDOW_ANIMATION
@@ -4992,7 +5000,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final DisplayContent displayContent = getDisplayContent();
         if (!displayContent.mClosingApps.contains(this)
-                && !displayContent.mOpeningApps.contains(this)) {
+                && !displayContent.mOpeningApps.contains(this)
+                && !fromTransition) {
             // Take the screenshot before possibly hiding the WSA, otherwise the screenshot
             // will not be taken.
             mWmService.mTaskSnapshotController.notifyAppVisibilityChanged(this, visible);
