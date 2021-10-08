@@ -144,64 +144,6 @@ public class SignalStrength implements Parcelable {
         mTimestampMillis = SystemClock.elapsedRealtime();
     }
 
-    /**
-     * Constructor for Radio HAL V1.0
-     *
-     * @hide
-     */
-    public SignalStrength(android.hardware.radio.V1_0.SignalStrength signalStrength) {
-        this(new CellSignalStrengthCdma(signalStrength.cdma, signalStrength.evdo),
-                new CellSignalStrengthGsm(signalStrength.gw),
-                new CellSignalStrengthWcdma(),
-                new CellSignalStrengthTdscdma(signalStrength.tdScdma),
-                new CellSignalStrengthLte(signalStrength.lte),
-                new CellSignalStrengthNr());
-    }
-
-    /**
-     * Constructor for Radio HAL V1.2
-     *
-     * @hide
-     */
-    public SignalStrength(android.hardware.radio.V1_2.SignalStrength signalStrength) {
-        this(new CellSignalStrengthCdma(signalStrength.cdma, signalStrength.evdo),
-                new CellSignalStrengthGsm(signalStrength.gsm),
-                new CellSignalStrengthWcdma(signalStrength.wcdma),
-                new CellSignalStrengthTdscdma(signalStrength.tdScdma),
-                new CellSignalStrengthLte(signalStrength.lte),
-                new CellSignalStrengthNr());
-    }
-
-    /**
-     * Constructor for Radio HAL V1.4.
-     *
-     * @param signalStrength signal strength reported from modem.
-     * @hide
-     */
-    public SignalStrength(android.hardware.radio.V1_4.SignalStrength signalStrength) {
-        this(new CellSignalStrengthCdma(signalStrength.cdma, signalStrength.evdo),
-                new CellSignalStrengthGsm(signalStrength.gsm),
-                new CellSignalStrengthWcdma(signalStrength.wcdma),
-                new CellSignalStrengthTdscdma(signalStrength.tdscdma),
-                new CellSignalStrengthLte(signalStrength.lte),
-                new CellSignalStrengthNr(signalStrength.nr));
-    }
-
-    /**
-     * Constructor for Radio HAL V1.6.
-     *
-     * @param signalStrength signal strength reported from modem.
-     * @hide
-     */
-    public SignalStrength(android.hardware.radio.V1_6.SignalStrength signalStrength) {
-        this(new CellSignalStrengthCdma(signalStrength.cdma, signalStrength.evdo),
-                new CellSignalStrengthGsm(signalStrength.gsm),
-                new CellSignalStrengthWcdma(signalStrength.wcdma),
-                new CellSignalStrengthTdscdma(signalStrength.tdscdma),
-                new CellSignalStrengthLte(signalStrength.lte),
-                new CellSignalStrengthNr(signalStrength.nr));
-    }
-
     private CellSignalStrength getPrimary() {
         // This behavior is intended to replicate the legacy behavior of getLevel() by prioritizing
         // newer faster RATs for default/for display purposes.
