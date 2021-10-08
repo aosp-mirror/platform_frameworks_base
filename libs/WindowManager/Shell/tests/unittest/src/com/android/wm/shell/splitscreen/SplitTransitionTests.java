@@ -74,6 +74,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
+import java.util.Optional;
+
 /** Tests for {@link StageCoordinator} */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -106,16 +108,16 @@ public class SplitTransitionTests extends ShellTestCase {
         doReturn(mock(SurfaceControl.Transaction.class)).when(mTransactionPool).acquire();
         mSplitLayout = SplitTestUtils.createMockSplitLayout();
         mMainStage = new MainStage(mTaskOrganizer, DEFAULT_DISPLAY, mock(
-                StageTaskListener.StageListenerCallbacks.class), mSyncQueue, mSurfaceSession);
+                StageTaskListener.StageListenerCallbacks.class), mSyncQueue, mSurfaceSession, null);
         mMainStage.onTaskAppeared(new TestRunningTaskInfoBuilder().build(), createMockSurface());
         mSideStage = new SideStage(mContext, mTaskOrganizer, DEFAULT_DISPLAY, mock(
-                StageTaskListener.StageListenerCallbacks.class), mSyncQueue, mSurfaceSession);
+                StageTaskListener.StageListenerCallbacks.class), mSyncQueue, mSurfaceSession, null);
         mSideStage.onTaskAppeared(new TestRunningTaskInfoBuilder().build(), createMockSurface());
         mStageCoordinator = new SplitTestUtils.TestStageCoordinator(mContext, DEFAULT_DISPLAY,
                 mSyncQueue, mRootTDAOrganizer, mTaskOrganizer, mMainStage, mSideStage,
                 mDisplayImeController, mDisplayInsetsController, mSplitLayout, mTransitions,
                 mTransactionPool,
-                mLogger);
+                mLogger, Optional::empty);
         mSplitScreenTransitions = mStageCoordinator.getSplitTransitions();
         doAnswer((Answer<IBinder>) invocation -> mock(IBinder.class))
                 .when(mTransitions).startTransition(anyInt(), any(), any());
