@@ -515,6 +515,9 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mSideStage.removeAllTasks(wct, childrenToTop == mSideStage);
         mMainStage.deactivate(wct, childrenToTop == mMainStage);
         mTaskOrganizer.applyTransaction(wct);
+        mSyncQueue.runInSync(t -> t
+                .setWindowCrop(mMainStage.mRootLeash, null)
+                .setWindowCrop(mSideStage.mRootLeash, null));
         // Hide divider and reset its position.
         setDividerVisibility(false);
         mSplitLayout.resetDividerPosition();
