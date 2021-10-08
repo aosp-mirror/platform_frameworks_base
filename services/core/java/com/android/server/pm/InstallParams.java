@@ -1840,6 +1840,7 @@ final class InstallParams extends HandlerParams {
      */
     private void executePostCommitSteps(CommitRequest commitRequest) {
         final ArraySet<IncrementalStorage> incrementalStorages = new ArraySet<>();
+        final AppDataHelper appDataHelper = new AppDataHelper(mPm);
         for (ReconciledPackage reconciledPkg : commitRequest.mReconciledPackages.values()) {
             final boolean instantApp = ((reconciledPkg.mScanResult.mRequest.mScanFlags
                     & SCAN_AS_INSTANT_APP) != 0);
@@ -1856,10 +1857,11 @@ final class InstallParams extends HandlerParams {
                 }
                 incrementalStorages.add(storage);
             }
-            mPm.prepareAppDataAfterInstallLIF(pkg);
+            appDataHelper.prepareAppDataAfterInstallLIF(pkg);
             if (reconciledPkg.mPrepareResult.mClearCodeCache) {
-                mPm.clearAppDataLIF(pkg, UserHandle.USER_ALL, FLAG_STORAGE_DE | FLAG_STORAGE_CE
-                        | FLAG_STORAGE_EXTERNAL | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
+                appDataHelper.clearAppDataLIF(pkg, UserHandle.USER_ALL,
+                        FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL
+                                | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
             }
             if (reconciledPkg.mPrepareResult.mReplace) {
                 mPm.getDexManager().notifyPackageUpdated(pkg.getPackageName(),

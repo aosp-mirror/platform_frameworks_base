@@ -1125,7 +1125,8 @@ public final class ScanPackageHelper {
             return;
         }
 
-        mPm.clearAppProfilesLIF(pkg);
+        final AppDataHelper appDataHelper = new AppDataHelper(mPm);
+        appDataHelper.clearAppProfilesLIF(pkg);
         if (DEBUG_INSTALL) {
             Slog.d(TAG, originalPkgSetting.getPackageName()
                     + " clear profile due to version change "

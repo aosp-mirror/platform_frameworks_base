@@ -1251,4 +1251,9 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
      * @return the number of freed bytes or -1 if there was an error in the process.
      */
     public abstract long deleteOatArtifactsOfPackage(String packageName);
+
+    /**
+     * Reconcile all app data for the given user.
+     */
+    public abstract void reconcileAppsData(int userId, int flags, boolean migrateAppsData);
 }

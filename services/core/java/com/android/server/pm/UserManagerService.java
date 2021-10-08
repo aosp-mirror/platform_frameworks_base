@@ -4816,7 +4816,8 @@ public class UserManagerService extends IUserManager.Stub {
         mUserDataPreparer.prepareUserData(userId, userSerial, StorageManager.FLAG_STORAGE_DE);
         t.traceEnd();
         t.traceBegin("reconcileAppsData");
-        mPm.reconcileAppsData(userId, StorageManager.FLAG_STORAGE_DE, migrateAppsData);
+        getPackageManagerInternal().reconcileAppsData(userId, StorageManager.FLAG_STORAGE_DE,
+                migrateAppsData);
         t.traceEnd();
 
         if (userId != UserHandle.USER_SYSTEM) {
@@ -4851,7 +4852,8 @@ public class UserManagerService extends IUserManager.Stub {
         smInternal.markCeStoragePrepared(userId);
 
         t.traceBegin("reconcileAppsData-" + userId);
-        mPm.reconcileAppsData(userId, StorageManager.FLAG_STORAGE_CE, migrateAppsData);
+        getPackageManagerInternal().reconcileAppsData(userId, StorageManager.FLAG_STORAGE_CE,
+                migrateAppsData);
         t.traceEnd();
     }
 
