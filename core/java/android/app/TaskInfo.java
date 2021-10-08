@@ -265,6 +265,13 @@ public class TaskInfo {
     }
 
     /**
+     * Whether this task is visible.
+     */
+    public boolean isVisible() {
+        return isVisible;
+    }
+
+    /**
      * @param isLowResolution
      * @return
      * @hide
