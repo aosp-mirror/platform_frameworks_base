@@ -1449,6 +1449,7 @@
     <string name="deny" msgid="2081879885755434506">"Refuser"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Autorisation demandée"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Autorisation demandée\npour le compte \"<xliff:g id="ACCOUNT">%s</xliff:g>\""</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Autorisation demandée par <xliff:g id="APP">%1$s</xliff:g>\npour le compte <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"Vous utilisez cette application en dehors de votre profil professionnel."</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"Vous utilisez cette application dans votre profil professionnel."</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Mode de saisie"</string>

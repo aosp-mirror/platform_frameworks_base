@@ -1450,6 +1450,7 @@
     <string name="deny" msgid="2081879885755434506">"નકારો"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"પરવાનગીની વિનંતી કરી"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"એકાઉન્ટ <xliff:g id="ACCOUNT">%s</xliff:g> માટે\nપરવાનગીની વિનંતી કરી."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"<xliff:g id="ACCOUNT">%2$s</xliff:g> એકાઉન્ટ માટે\n<xliff:g id="APP">%1$s</xliff:g> દ્વારા પરવાનગીની વિનંતી કરવામાં આવી."</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"તમે તમારી કાર્ય પ્રોફાઇલની બહાર આ એપ્લિકેશનનો ઉપયોગ કરી રહ્યાં છો"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"તમે તમારી કાર્ય પ્રોફાઇલમાં આ એપ્લિકેશનનો ઉપયોગ કરી રહ્યાં છો"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"ઇનપુટ પદ્ધતિ"</string>

@@ -1493,6 +1493,7 @@
     <string name="deny" msgid="2081879885755434506">"Odmów"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Prośba o pozwolenie"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Prośba o pozwolenie\ndotyczące konta <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Aplikacja <xliff:g id="APP">%1$s</xliff:g> prosi o uprawnienia\ndotyczące konta <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"Używasz tej aplikacji poza profilem do pracy"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"Używasz tej aplikacji w swoim profilu do pracy"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Sposób wprowadzania tekstu"</string>
