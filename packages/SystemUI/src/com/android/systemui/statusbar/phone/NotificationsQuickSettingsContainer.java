@@ -33,6 +33,7 @@ import com.android.systemui.statusbar.notification.AboveShelfObserver;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.function.Consumer;
 
 /**
  * The container with notification stack scroller and quick settings inside.
@@ -43,17 +44,15 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
     private View mQsFrame;
     private View mStackScroller;
     private View mKeyguardStatusBar;
-    private boolean mQsExpanded;
-    private boolean mCustomizerAnimating;
-    private boolean mCustomizing;
-    private boolean mDetailShowing;
 
-    private int mBottomPadding;
     private int mStackScrollerMargin;
     private ArrayList<View> mDrawingOrderedChildren = new ArrayList<>();
     private ArrayList<View> mLayoutDrawingOrder = new ArrayList<>();
     private final Comparator<View> mIndexComparator = Comparator.comparingInt(this::indexOfChild);
-    private boolean mSplitShadeEnabled;
+    private Consumer<WindowInsets> mInsetsChangedListener = insets -> {};
+    private Consumer<QS> mQSFragmentAttachedListener = qs -> {};
+    private QS mQs;
+    private View mQSScrollView;
 
     public NotificationsQuickSettingsContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -66,6 +65,59 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
         mStackScroller = findViewById(R.id.notification_stack_scroller);
         mStackScrollerMargin = ((LayoutParams) mStackScroller.getLayoutParams()).bottomMargin;
         mKeyguardStatusBar = findViewById(R.id.keyguard_header);
+    }
+
+    @Override
+    public void onFragmentViewCreated(String tag, Fragment fragment) {
+        mQs = (QS) fragment;
+        mQSFragmentAttachedListener.accept(mQs);
+        mQSScrollView = mQs.getView().findViewById(R.id.expanded_qs_scroll_view);
+    }
+
+    @Override
+    public void onHasViewsAboveShelfChanged(boolean hasViewsAboveShelf) {
+        invalidate();
+    }
+
+    public void setNotificationsMarginBottom(int margin) {
+        LayoutParams params = (LayoutParams) mStackScroller.getLayoutParams();
+        params.bottomMargin = margin;
+        mStackScroller.setLayoutParams(params);
+    }
+
+    public void setQSScrollPaddingBottom(int paddingBottom) {
+        if (mQSScrollView != null) {
+            mQSScrollView.setPaddingRelative(
+                    mQSScrollView.getPaddingLeft(),
+                    mQSScrollView.getPaddingTop(),
+                    mQSScrollView.getPaddingRight(),
+                    paddingBottom
+            );
+        }
+    }
+
+    public int getDefaultNotificationsMarginBottom() {
+        return mStackScrollerMargin;
+    }
+
+    public void setInsetsChangedListener(Consumer<WindowInsets> onInsetsChangedListener) {
+        mInsetsChangedListener = onInsetsChangedListener;
+    }
+
+    public void removeOnInsetsChangedListener() {
+        mInsetsChangedListener = insets -> {};
+    }
+
+    public void setQSFragmentAttachedListener(Consumer<QS> qsFragmentAttachedListener) {
+        mQSFragmentAttachedListener = qsFragmentAttachedListener;
+        // listener might be attached after fragment is attached
+        if (mQs != null) {
+            mQSFragmentAttachedListener.accept(mQs);
+        }
+    }
+
+    public void removeQSFragmentAttachedListener() {
+        mQSFragmentAttachedListener = qs -> {};
     }
 
     @Override
@@ -82,8 +134,7 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-        mBottomPadding = insets.getStableInsetBottom();
-        setPadding(0, 0, 0, mBottomPadding);
+        mInsetsChangedListener.accept(insets);
         return insets;
     }
 
@@ -119,66 +170,4 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
         }
     }
 
-    @Override
-    public void onFragmentViewCreated(String tag, Fragment fragment) {
-        QS container = (QS) fragment;
-        container.setContainer(this);
-    }
-
-    public void setQsExpanded(boolean expanded) {
-        if (mQsExpanded != expanded) {
-            mQsExpanded = expanded;
-            invalidate();
-        }
-    }
-
-    public void setCustomizerAnimating(boolean isAnimating) {
-        if (mCustomizerAnimating != isAnimating) {
-            mCustomizerAnimating = isAnimating;
-            invalidate();
-        }
-    }
-
-    public void setCustomizerShowing(boolean isShowing) {
-        mCustomizing = isShowing;
-        updateBottomMargin();
-    }
-
-    public void setDetailShowing(boolean isShowing) {
-        mDetailShowing = isShowing;
-        updateBottomMargin();
-    }
-
-    /**
-     * Sets if split shade is enabled and adjusts margins/paddings depending on QS details and
-     * customizer state
-     */
-    public void setSplitShadeEnabled(boolean splitShadeEnabled) {
-        mSplitShadeEnabled = splitShadeEnabled;
-        // in case device was rotated while showing QS details/customizer
-        updateBottomMargin();
-    }
-
-    private void updateBottomMargin() {
-        // in split shade, QS state changes should not influence notifications panel
-        if (!mSplitShadeEnabled && (mCustomizing || mDetailShowing)) {
-            // Clear out bottom paddings/margins so the qs customization can be full height.
-            setPadding(0, 0, 0, 0);
-            setBottomMargin(mStackScroller, 0);
-        } else {
-            setPadding(0, 0, 0, mBottomPadding);
-            setBottomMargin(mStackScroller, mStackScrollerMargin);
-        }
-    }
-
-    private void setBottomMargin(View v, int bottomMargin) {
-        LayoutParams params = (LayoutParams) v.getLayoutParams();
-        params.bottomMargin = bottomMargin;
-        v.setLayoutParams(params);
-    }
-
-    @Override
-    public void onHasViewsAboveShelfChanged(boolean hasViewsAboveShelf) {
-        invalidate();
-    }
 }

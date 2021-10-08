@@ -381,8 +381,8 @@ public class UsageStatsService extends SystemService implements
             UsageStatsIdleService.scheduleUpdateMappingsJob(getContext());
         }
         synchronized (mLock) {
-            // This should be safe to add this early. Other than reportEventOrAddToQueue, every
-            // other user grabs the lock before accessing
+            // This should be safe to add this early. Other than reportEventOrAddToQueue and
+            // getBackupPayload, every other user grabs the lock before accessing
             // mUserUnlockedStates. reportEventOrAddToQueue does not depend on anything other than
             // mUserUnlockedStates, and the lock will protect the handler.
             mUserUnlockedStates.add(userId);
@@ -1438,8 +1438,8 @@ public class UsageStatsService extends SystemService implements
                     }
                 } else if ("mappings".equals(arg)) {
                     final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
-                    final int userId = parseUserIdFromArgs(args, i, ipw);
                     synchronized (mLock) {
+                        final int userId = parseUserIdFromArgs(args, i, ipw);
                         if (userId != UserHandle.USER_NULL) {
                             mUserState.get(userId).dumpMappings(ipw);
                         }

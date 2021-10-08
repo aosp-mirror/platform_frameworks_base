@@ -57,12 +57,12 @@ import android.view.Display;
 import android.view.IWindowSession;
 import android.view.InsetsState;
 import android.view.Surface;
-import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.WindowMetrics;
 import android.window.StartingWindowInfo;
+import android.window.StartingWindowRemovalInfo;
 import android.window.TaskSnapshot;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -119,10 +119,9 @@ public class StartingSurfaceDrawerTests {
         }
 
         @Override
-        protected void removeWindowSynced(int taskId, SurfaceControl leash, Rect frame,
-                boolean playRevealAnimation) {
+        protected void removeWindowSynced(StartingWindowRemovalInfo removalInfo) {
             // listen for removeView
-            if (mAddWindowForTask == taskId) {
+            if (mAddWindowForTask == removalInfo.taskId) {
                 mAddWindowForTask = 0;
             }
         }
@@ -172,9 +171,11 @@ public class StartingSurfaceDrawerTests {
                 eq(STARTING_WINDOW_TYPE_SPLASH_SCREEN));
         assertEquals(mStartingSurfaceDrawer.mAddWindowForTask, taskId);
 
-        mStartingSurfaceDrawer.removeStartingWindow(windowInfo.taskInfo.taskId, null, null, false);
+        StartingWindowRemovalInfo removalInfo = new StartingWindowRemovalInfo();
+        removalInfo.taskId = windowInfo.taskInfo.taskId;
+        mStartingSurfaceDrawer.removeStartingWindow(removalInfo);
         waitHandlerIdle(mTestHandler);
-        verify(mStartingSurfaceDrawer).removeWindowSynced(eq(taskId), any(), any(), eq(false));
+        verify(mStartingSurfaceDrawer).removeWindowSynced(any());
         assertEquals(mStartingSurfaceDrawer.mAddWindowForTask, 0);
     }
 

@@ -1649,7 +1649,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     /** Returns {@code true} if the IME is possible to show on the launching activity. */
-    private boolean mayImeShowOnLaunchingActivity(@NonNull ActivityRecord r) {
+    boolean mayImeShowOnLaunchingActivity(@NonNull ActivityRecord r) {
         final WindowState win = r.findMainWindow();
         if (win == null) {
             return false;
@@ -3784,7 +3784,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     boolean shouldImeAttachedToApp() {
-        return isImeControlledByApp()
+        // Force attaching IME to the display when magnifying, or it would be magnified with
+        // target app together.
+        final boolean allowAttachToApp = (mMagnificationSpec == null);
+
+        return allowAttachToApp && isImeControlledByApp()
                 && mImeLayeringTarget != null
                 && mImeLayeringTarget.mActivityRecord != null
                 && mImeLayeringTarget.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
@@ -4122,14 +4126,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     @VisibleForTesting
     SurfaceControl computeImeParent() {
-        // Force attaching IME to the display when magnifying, or it would be magnified with
-        // target app together.
-        final boolean allowAttachToApp = (mMagnificationSpec == null);
-
         // Attach it to app if the target is part of an app and such app is covering the entire
         // screen. If it's not covering the entire screen the IME might extend beyond the apps
         // bounds.
-        if (allowAttachToApp && shouldImeAttachedToApp()) {
+        if (shouldImeAttachedToApp()) {
             if (mImeLayeringTarget.mActivityRecord != mImeInputTarget.mActivityRecord) {
                 // Do not change parent if the window hasn't requested IME.
                 return null;

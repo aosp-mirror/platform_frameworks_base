@@ -211,10 +211,10 @@ public final class BluetoothMidiDevice {
         }
 
         @Override
-        public void writePacket(byte[] buffer, int count) {
+        public boolean writePacket(byte[] buffer, int count) {
             if (mCharacteristic == null) {
                 Log.w(TAG, "not ready to send packet yet");
-                return;
+                return false;
             }
 
             // Cache the previous buffer for writePacket so buffers aren't
@@ -223,12 +223,22 @@ public final class BluetoothMidiDevice {
                 mCachedBuffer = new byte[count];
             }
             System.arraycopy(buffer, 0, mCachedBuffer, 0, count);
-            mCharacteristic.setValue(mCachedBuffer);
+            if (!mCharacteristic.setValue(mCachedBuffer)) {
+                Log.w(TAG, "could not set characteristic value");
+                return false;
+            }
+
             if (DEBUG) {
                 logByteArray("Sent ", mCharacteristic.getValue(), 0,
                        mCharacteristic.getValue().length);
             }
-            mBluetoothGatt.writeCharacteristic(mCharacteristic);
+
+            if (!mBluetoothGatt.writeCharacteristic(mCharacteristic)) {
+                Log.w(TAG, "could not write characteristic to Bluetooth GATT");
+                return false;
+            }
+
+            return true;
         }
     }
 

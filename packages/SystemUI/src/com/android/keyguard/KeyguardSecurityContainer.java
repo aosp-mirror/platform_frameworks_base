@@ -21,6 +21,8 @@ import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
 
 import static java.lang.Integer.max;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -35,7 +37,6 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.ViewPropertyAnimator;
 import android.view.WindowInsets;
 import android.view.WindowInsetsAnimation;
 import android.view.WindowManager;
@@ -43,6 +44,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringAnimation;
@@ -111,7 +113,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
 
     private boolean mIsSecurityViewLeftAligned = true;
     private boolean mOneHandedMode = false;
-    private ViewPropertyAnimator mRunningOneHandedAnimator;
+    @Nullable private ValueAnimator mRunningOneHandedAnimator;
 
     private final WindowInsetsAnimation.Callback mWindowInsetsAnimationCallback =
             new WindowInsetsAnimation.Callback(DISPATCH_MODE_STOP) {
@@ -347,9 +349,9 @@ public class KeyguardSecurityContainer extends FrameLayout {
             Interpolator fadeOutInterpolator = Interpolators.FAST_OUT_LINEAR_IN;
             Interpolator fadeInInterpolator = Interpolators.LINEAR_OUT_SLOW_IN;
 
-            ValueAnimator anim = ValueAnimator.ofFloat(0.0f, 1.0f);
-            anim.setDuration(BOUNCER_HANDEDNESS_ANIMATION_DURATION_MS);
-            anim.setInterpolator(Interpolators.LINEAR);
+            mRunningOneHandedAnimator = ValueAnimator.ofFloat(0.0f, 1.0f);
+            mRunningOneHandedAnimator.setDuration(BOUNCER_HANDEDNESS_ANIMATION_DURATION_MS);
+            mRunningOneHandedAnimator.setInterpolator(Interpolators.LINEAR);
 
             int initialTranslation = (int) mSecurityViewFlipper.getTranslationX();
             int totalTranslation = (int) getResources().getDimension(
@@ -361,7 +363,15 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 mSecurityViewFlipper.setLayerType(View.LAYER_TYPE_HARDWARE, /* paint= */null);
             }
 
-            anim.addUpdateListener(animation -> {
+            float initialAlpha = mSecurityViewFlipper.getAlpha();
+
+            mRunningOneHandedAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mRunningOneHandedAnimator = null;
+                }
+            });
+            mRunningOneHandedAnimator.addUpdateListener(animation -> {
                 float switchPoint = BOUNCER_HANDEDNESS_ANIMATION_FADE_OUT_PROPORTION;
                 boolean isFadingOut = animation.getAnimatedFraction() < switchPoint;
 
@@ -378,13 +388,16 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 if (isFadingOut) {
                     // The bouncer fades out over the first X%.
                     float fadeOutFraction = MathUtils.constrainedMap(
-                            /* rangeMin= */0.0f,
-                            /* rangeMax= */1.0f,
+                            /* rangeMin= */1.0f,
+                            /* rangeMax= */0.0f,
                             /* valueMin= */0.0f,
                             /* valueMax= */switchPoint,
                             animation.getAnimatedFraction());
                     float opacity = fadeOutInterpolator.getInterpolation(fadeOutFraction);
-                    mSecurityViewFlipper.setAlpha(1f - opacity);
+
+                    // When fading out, the alpha needs to start from the initial opacity of the
+                    // view flipper, otherwise we get a weird bit of jank as it ramps back to 100%.
+                    mSecurityViewFlipper.setAlpha(opacity * initialAlpha);
 
                     // Animate away from the source.
                     mSecurityViewFlipper.setTranslationX(initialTranslation + currentTranslation);
@@ -409,7 +422,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 }
             });
 
-            anim.start();
+            mRunningOneHandedAnimator.start();
         } else {
             mSecurityViewFlipper.setTranslationX(targetTranslation);
         }

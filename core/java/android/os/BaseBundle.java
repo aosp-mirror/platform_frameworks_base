@@ -43,18 +43,22 @@ public class BaseBundle {
     protected static final String TAG = "Bundle";
     static final boolean DEBUG = false;
 
-    // Keep them in sync with frameworks/native/libs/binder/PersistableBundle.cpp.
-    private static final int BUNDLE_MAGIC = 0x4C444E42; // 'B' 'N' 'D' 'L'
+    /**
+     * Keep them in sync with frameworks/native/libs/binder/PersistableBundle.cpp.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    static final int BUNDLE_MAGIC = 0x4C444E42; // 'B' 'N' 'D' 'L'
     private static final int BUNDLE_MAGIC_NATIVE = 0x4C444E44; // 'B' 'N' 'D' 'N'
 
     /**
-     * Flag indicating that this Bundle is okay to "defuse." That is, it's okay
-     * for system processes to ignore any {@link BadParcelableException}
-     * encountered when unparceling it, leaving an empty bundle in its place.
+     * Flag indicating that this Bundle is okay to "defuse", see {@link #setShouldDefuse(boolean)}
+     * for more details.
      * <p>
-     * This should <em>only</em> be set when the Bundle reaches its final
-     * destination, otherwise a system process may clobber contents that were
-     * destined for an app that could have unparceled them.
+     * This should <em>only</em> be set when the Bundle reaches its final destination, otherwise a
+     * system process may clobber contents that were destined for an app that could have unparceled
+     * them.
      */
     static final int FLAG_DEFUSABLE = 1 << 0;
 
@@ -63,10 +67,15 @@ public class BaseBundle {
     private static volatile boolean sShouldDefuse = false;
 
     /**
-     * Set global variable indicating that any Bundles parsed in this process
-     * should be "defused." That is, any {@link BadParcelableException}
-     * encountered will be suppressed and logged, leaving an empty Bundle
-     * instead of crashing.
+     * Set global variable indicating that any Bundles parsed in this process should be "defused".
+     * That is, any {@link BadParcelableException} encountered will be suppressed and logged. Also:
+     * <ul>
+     *   <li>If it was the deserialization of a custom item (eg. {@link Parcelable}) that caused the
+     *   exception, {@code null} will be returned but the item will be held in the map in its
+     *   serialized form (lazy value).
+     *   <li>If the exception happened during partial deserialization, that is, during the read of
+     *   the map and its basic types (while skipping custom types), the map will be left empty.
+     * </ul>
      *
      * @hide
      */
@@ -249,6 +258,12 @@ public class BaseBundle {
                 }
             }
             if (itemwise) {
+                if (LOG_DEFUSABLE && sShouldDefuse && (mFlags & FLAG_DEFUSABLE) == 0) {
+                    Slog.wtf(TAG,
+                            "Attempting to unparcel all items in a Bundle while in transit; this "
+                                    + "may remove elements intended for the final desitination.",
+                            new Throwable());
+                }
                 for (int i = 0, n = mMap.size(); i < n; i++) {
                     // Triggers deserialization of i-th item, if needed
                     getValueAt(i);
@@ -281,7 +296,16 @@ public class BaseBundle {
     final Object getValueAt(int i) {
         Object object = mMap.valueAt(i);
         if (object instanceof Supplier<?>) {
-            object = ((Supplier<?>) object).get();
+            try {
+                object = ((Supplier<?>) object).get();
+            } catch (BadParcelableException e) {
+                if (sShouldDefuse) {
+                    Log.w(TAG, "Failed to parse item " + mMap.keyAt(i) + ", returning null.", e);
+                    return null;
+                } else {
+                    throw e;
+                }
+            }
             mMap.setValueAt(i, object);
         }
         return object;
@@ -289,11 +313,6 @@ public class BaseBundle {
 
     private void initializeFromParcelLocked(@NonNull Parcel parcelledData, boolean recycleParcel,
             boolean parcelledByNative) {
-        if (LOG_DEFUSABLE && sShouldDefuse && (mFlags & FLAG_DEFUSABLE) == 0) {
-            Slog.wtf(TAG, "Attempting to unparcel a Bundle while in transit; this may "
-                    + "clobber all data inside!", new Throwable());
-        }
-
         if (isEmptyParcel(parcelledData)) {
             if (DEBUG) {
                 Log.d(TAG, "unparcel "
@@ -376,8 +395,16 @@ public class BaseBundle {
         }
     }
 
-    /** @hide */
-    ArrayMap<String, Object> getMap() {
+    /**
+     * Returns the backing map of this bundle after deserializing every item.
+     *
+     * <p><b>Warning:</b> This method will deserialize every item on the bundle, including custom
+     * types such as {@link Parcelable} and {@link Serializable}, so only use this when you trust
+     * the source. Specifically don't use this method on app-provided bundles.
+     *
+     * @hide
+     */
+    ArrayMap<String, Object> getItemwiseMap() {
         unparcel(/* itemwise */ true);
         return mMap;
     }
@@ -500,7 +527,7 @@ public class BaseBundle {
                     final int N = fromMap.size();
                     mMap = new ArrayMap<>(N);
                     for (int i = 0; i < N; i++) {
-                        mMap.append(fromMap.keyAt(i), deepCopyValue(from.getValueAt(i)));
+                        mMap.append(fromMap.keyAt(i), deepCopyValue(fromMap.valueAt(i)));
                     }
                 }
             } else {
@@ -1772,7 +1799,7 @@ public class BaseBundle {
             pw.println("[null]");
             return;
         }
-        final ArrayMap<String, Object> map = bundle.getMap();
+        final ArrayMap<String, Object> map = bundle.getItemwiseMap();
         for (int i = 0; i < map.size(); i++) {
             dumpStats(pw, map.keyAt(i), map.valueAt(i));
         }
