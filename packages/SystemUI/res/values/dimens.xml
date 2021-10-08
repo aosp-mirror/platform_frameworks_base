@@ -1639,4 +1639,9 @@
     <item name="communal_source_height_percentage" format="float" type="dimen">0.80</item>
 
     <dimen name="drag_and_drop_icon_size">70dp</dimen>
+
+    <dimen name="qs_dialog_button_horizontal_padding">16dp</dimen>
+    <dimen name="qs_dialog_button_vertical_padding">8dp</dimen>
+    <!-- The button will be 48dp tall, but the background needs to be 36dp tall -->
+    <dimen name="qs_dialog_button_vertical_inset">6dp</dimen>
 </resources>
