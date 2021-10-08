@@ -5014,16 +5014,17 @@ public class WindowManagerService extends IWindowManager.Stub
             ProtoLog.i(WM_DEBUG_FOCUS_LIGHT, "Focus changing: %s -> %s", lastTarget, newTarget);
         }
 
-        if (newTarget != null && newTarget.asWindowState() != null) {
-            WindowState newFocus = newTarget.asWindowState();
-            mAnrController.onFocusChanged(newFocus);
-            newFocus.reportFocusChangedSerialized(true);
+        // Call WindowState focus change observers
+        WindowState newFocusedWindow = newTarget != null ? newTarget.getWindowState() : null;
+        if (newFocusedWindow != null && newFocusedWindow.mInputChannelToken == newToken) {
+            mAnrController.onFocusChanged(newFocusedWindow);
+            newFocusedWindow.reportFocusChangedSerialized(true);
             notifyFocusChanged();
         }
 
-        if (lastTarget != null && lastTarget.asWindowState() != null) {
-            WindowState lastFocus = lastTarget.asWindowState();
-            lastFocus.reportFocusChangedSerialized(false);
+        WindowState lastFocusedWindow = lastTarget != null ? lastTarget.getWindowState() : null;
+        if (lastFocusedWindow != null && lastFocusedWindow.mInputChannelToken == oldToken) {
+            lastFocusedWindow.reportFocusChangedSerialized(false);
         }
     }
 

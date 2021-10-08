@@ -25,13 +25,8 @@ import android.view.IWindow;
  * of both targets.
  */
 interface InputTarget {
-    default WindowState asWindowState() {
-        return null;
-    }
-
-    default EmbeddedWindowController.EmbeddedWindow asEmbeddedWindow() {
-        return null;
-    }
+    /* Get the WindowState associated with the target. */
+    WindowState getWindowState();
 
     /* Display id of the target. */
     int getDisplayId();

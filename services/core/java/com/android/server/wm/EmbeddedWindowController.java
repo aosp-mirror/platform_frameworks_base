@@ -198,8 +198,8 @@ class EmbeddedWindowController {
         }
 
         @Override
-        public EmbeddedWindow asEmbeddedWindow() {
-            return this;
+        public WindowState getWindowState() {
+            return mHostWindowState;
         }
 
         @Override
