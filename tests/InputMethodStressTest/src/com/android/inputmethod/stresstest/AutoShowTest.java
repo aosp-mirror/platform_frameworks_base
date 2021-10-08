@@ -18,9 +18,10 @@ package com.android.inputmethod.stresstest;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED;
 
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.waitOnMainUntil;
-import static com.android.inputmethod.stresstest.ImeStressTestUtil.waitOnMainUntilImeIsHidden;
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.waitOnMainUntilImeIsShown;
 
 import android.app.Activity;
@@ -28,7 +29,6 @@ import android.app.Instrumentation;
 import android.content.Intent;
 import android.os.Bundle;
 import android.platform.test.annotations.RootPermissionTest;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
@@ -41,12 +41,10 @@ import org.junit.runner.RunWith;
 
 @RootPermissionTest
 @RunWith(AndroidJUnit4.class)
-public final class ImeOpenCloseStressTest {
-
-    private static final int NUM_TEST_ITERATIONS = 100;
+public final class AutoShowTest {
 
     @Test
-    public void test() {
+    public void autoShow() {
         Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
         Intent intent = new Intent()
                 .setAction(Intent.ACTION_MAIN)
@@ -56,41 +54,30 @@ public final class ImeOpenCloseStressTest {
         TestActivity activity = (TestActivity) instrumentation.startActivitySync(intent);
         EditText editText = activity.getEditText();
         waitOnMainUntil("activity should gain focus", editText::hasWindowFocus);
-        for (int i = 0; i < NUM_TEST_ITERATIONS; i++) {
-            instrumentation.runOnMainSync(activity::showIme);
-            waitOnMainUntilImeIsShown(editText);
-            instrumentation.runOnMainSync(activity::hideIme);
-            waitOnMainUntilImeIsHidden(editText);
-        }
+        waitOnMainUntilImeIsShown(editText);
     }
 
     public static class TestActivity extends Activity {
-
         private EditText mEditText;
 
         @Override
         protected void onCreate(@Nullable Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+            // IME will be auto-shown if the following conditions are met:
+            // 1. SoftInputMode state is SOFT_INPUT_STATE_UNSPECIFIED.
+            // 2. SoftInputMode adjust is SOFT_INPUT_ADJUST_RESIZE.
+            getWindow().setSoftInputMode(SOFT_INPUT_STATE_UNSPECIFIED | SOFT_INPUT_ADJUST_RESIZE);
             LinearLayout rootView = new LinearLayout(this);
             rootView.setOrientation(LinearLayout.VERTICAL);
             mEditText = new EditText(this);
             rootView.addView(mEditText, new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
             setContentView(rootView);
+            // 3. The focused view is a text editor (View#onCheckIsTextEditor() returns true).
+            mEditText.requestFocus();
         }
 
         public EditText getEditText() {
             return mEditText;
-        }
-
-        public void showIme() {
-            mEditText.requestFocus();
-            InputMethodManager imm = getSystemService(InputMethodManager.class);
-            imm.showSoftInput(mEditText, 0);
-        }
-
-        public void hideIme() {
-            InputMethodManager imm = getSystemService(InputMethodManager.class);
-            imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
         }
     }
 }
