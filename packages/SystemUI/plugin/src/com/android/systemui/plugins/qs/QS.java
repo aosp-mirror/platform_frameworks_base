@@ -16,7 +16,6 @@ package com.android.systemui.plugins.qs;
 
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 
 import com.android.systemui.plugins.FragmentBase;
 import com.android.systemui.plugins.annotations.DependsOn;
@@ -56,7 +55,7 @@ public interface QS extends FragmentBase {
     void setQsExpansion(float qsExpansionFraction, float headerTranslation);
     void setHeaderListening(boolean listening);
     void notifyCustomizeChanged();
-    void setContainer(ViewGroup container);
+    void setContainerController(QSContainerController controller);
     void setExpandClickListener(OnClickListener onClickListener);
 
     View getHeader();

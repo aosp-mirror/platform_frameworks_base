@@ -17,11 +17,14 @@
 package com.android.bluetoothmidiservice;
 
 import android.media.midi.MidiReceiver;
+import android.util.Log;
 
 import com.android.internal.midi.MidiConstants;
 import com.android.internal.midi.MidiFramer;
 
 import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.Queue;
 
 /**
  * This class accumulates MIDI messages to form a MIDI packet.
@@ -52,6 +55,8 @@ public class BluetoothPacketEncoder extends PacketEncoder {
 
     private final Object mLock = new Object();
 
+    private Queue<byte[]> mFailedToSendQueue = new ArrayDeque<byte[]>();
+
     // This receives normalized data from mMidiFramer and accumulates it into a packet buffer
     private final MidiReceiver mFramedDataReceiver = new MidiReceiver() {
         @Override
@@ -59,6 +64,8 @@ public class BluetoothPacketEncoder extends PacketEncoder {
                 throws IOException {
 
             synchronized (mLock) {
+                flushFailedToSendQueueLocked();
+
                 int milliTimestamp = (int)(timestamp / MILLISECOND_NANOS) & MILLISECOND_MASK;
                 byte status = msg[offset];
                 boolean isSysExStart = (status == MidiConstants.STATUS_SYSTEM_EXCLUSIVE);
@@ -227,11 +234,44 @@ public class BluetoothPacketEncoder extends PacketEncoder {
         }
 
         if (mAccumulatedBytes > 0) {
-            mPacketReceiver.writePacket(mAccumulationBuffer, mAccumulatedBytes);
+            boolean wasSendSuccessful = mPacketReceiver.writePacket(mAccumulationBuffer,
+                    mAccumulatedBytes);
+
+            if (!wasSendSuccessful) {
+                byte[] failedBuffer = new byte[mAccumulatedBytes];
+                System.arraycopy(mAccumulationBuffer, 0, failedBuffer, 0, mAccumulatedBytes);
+                mFailedToSendQueue.add(failedBuffer);
+                Log.d(TAG, "Enqueued data into failed queue.");
+            }
+
             mAccumulatedBytes = 0;
             mPacketTimestamp = 0;
             mRunningStatus = 0;
-            mWritePending = true;
+            mWritePending = wasSendSuccessful;
+        }
+    }
+
+    private void flushFailedToSendQueueLocked() {
+        while (!mFailedToSendQueue.isEmpty()) {
+            while (mWritePending) {
+                try {
+                    mLock.wait();
+                } catch (InterruptedException e) {
+                    // try again
+                    continue;
+                }
+            }
+            byte[] currentBuffer = mFailedToSendQueue.element();
+
+            boolean wasSendSuccessful = mPacketReceiver.writePacket(currentBuffer,
+                    currentBuffer.length);
+            mWritePending = wasSendSuccessful;
+            if (wasSendSuccessful) {
+                mFailedToSendQueue.remove();
+                Log.d(TAG, "Dequeued data from failed queue.");
+            } else {
+                return;
+            }
         }
     }
 }

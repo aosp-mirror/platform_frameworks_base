@@ -29,9 +29,9 @@ import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
+import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
 import com.android.systemui.statusbar.phone.TapAgainView;
 import com.android.systemui.util.InjectionInflationController;
 
@@ -67,8 +67,8 @@ public abstract class StatusBarViewModule {
     @Provides
     @StatusBarComponent.StatusBarScope
     public static NotificationStackScrollLayout providesNotificationStackScrollLayout(
-            NotificationStackScrollLayoutController notificationStackScrollLayoutController) {
-        return notificationStackScrollLayoutController.getView();
+            NotificationShadeWindowView notificationShadeWindowView) {
+        return notificationShadeWindowView.findViewById(R.id.notification_stack_scroller);
     }
 
     /** */
@@ -148,5 +148,13 @@ public abstract class StatusBarViewModule {
     @StatusBarComponent.StatusBarScope
     public static TapAgainView getTapAgainView(NotificationPanelView npv) {
         return npv.getTapAgainView();
+    }
+
+    /** */
+    @Provides
+    @StatusBarComponent.StatusBarScope
+    public static NotificationsQuickSettingsContainer getNotificationsQuickSettingsContainer(
+            NotificationShadeWindowView notificationShadeWindowView) {
+        return notificationShadeWindowView.findViewById(R.id.notification_container_parent);
     }
 }

@@ -56,7 +56,6 @@ public class PhoneStatusBarView extends PanelBar {
 
     StatusBar mBar;
 
-    boolean mIsFullyOpenedPanel = false;
     private ScrimController mScrimController;
     private float mMinFraction;
     private Runnable mHideExpandedRunnable = new Runnable() {
@@ -216,20 +215,10 @@ public class PhoneStatusBarView extends PanelBar {
         super.onPanelCollapsed();
         // Close the status bar in the next frame so we can show the end of the animation.
         post(mHideExpandedRunnable);
-        mIsFullyOpenedPanel = false;
     }
 
     public void removePendingHideExpandedRunnables() {
         removeCallbacks(mHideExpandedRunnable);
-    }
-
-    @Override
-    public void onPanelFullyOpened() {
-        super.onPanelFullyOpened();
-        if (!mIsFullyOpenedPanel) {
-            mPanel.getView().sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
-        }
-        mIsFullyOpenedPanel = true;
     }
 
     @Override
@@ -283,7 +272,6 @@ public class PhoneStatusBarView extends PanelBar {
         if (isNaN(minFraction)) {
             throw new IllegalArgumentException("minFraction cannot be NaN");
         }
-        super.onPanelMinFractionChanged(minFraction);
         if (mMinFraction != minFraction) {
             mMinFraction = minFraction;
             updateScrimFraction();

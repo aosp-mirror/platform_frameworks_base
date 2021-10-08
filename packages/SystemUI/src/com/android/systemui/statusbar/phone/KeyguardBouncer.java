@@ -126,6 +126,19 @@ public class KeyguardBouncer {
         mExpansionCallbacks.add(expansionCallback);
     }
 
+    /**
+     * Enable/disable only the back button
+     */
+    public void setBackButtonEnabled(boolean enabled) {
+        int vis = mContainer.getSystemUiVisibility();
+        if (enabled) {
+            vis &= ~View.STATUS_BAR_DISABLE_BACK;
+        } else {
+            vis |= View.STATUS_BAR_DISABLE_BACK;
+        }
+        mContainer.setSystemUiVisibility(vis);
+    }
+
     public void show(boolean resetSecuritySelection) {
         show(resetSecuritySelection, true /* scrimmed */);
     }

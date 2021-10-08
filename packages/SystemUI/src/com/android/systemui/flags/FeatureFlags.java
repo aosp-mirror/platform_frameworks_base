@@ -123,6 +123,11 @@ public class FeatureFlags {
         return mFlagReader.isEnabled(R.bool.flag_ongoing_call_status_bar_chip);
     }
 
+    public boolean isOngoingCallInImmersiveEnabled() {
+        return isOngoingCallStatusBarChipEnabled()
+                && mFlagReader.isEnabled(R.bool.flag_ongoing_call_in_immersive);
+    }
+
     public boolean isSmartspaceEnabled() {
         return mFlagReader.isEnabled(R.bool.flag_smartspace);
     }

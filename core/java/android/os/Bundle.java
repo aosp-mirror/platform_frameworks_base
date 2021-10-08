@@ -33,6 +33,9 @@ import java.util.List;
 /**
  * A mapping from String keys to various {@link Parcelable} values.
  *
+ * <p><b>Warning:</b> Note that {@link Bundle} is a lazy container and as such it does NOT implement
+ * {@link #equals(Object)} or {@link #hashCode()}.
+ *
  * @see PersistableBundle
  */
 public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
@@ -346,56 +349,6 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
             mFlags |= FLAG_HAS_FDS_KNOWN;
         }
         return (mFlags & FLAG_HAS_FDS) != 0;
-    }
-
-    /**
-     * Filter values in Bundle to only basic types.
-     * @hide
-     */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public Bundle filterValues() {
-        unparcel(/* itemwise */ true);
-        Bundle bundle = this;
-        if (mMap != null) {
-            ArrayMap<String, Object> map = mMap;
-            for (int i = map.size() - 1; i >= 0; i--) {
-                Object value = map.valueAt(i);
-                if (PersistableBundle.isValidType(value)) {
-                    continue;
-                }
-                if (value instanceof Bundle) {
-                    Bundle newBundle = ((Bundle)value).filterValues();
-                    if (newBundle != value) {
-                        if (map == mMap) {
-                            // The filter had to generate a new bundle, but we have not yet
-                            // created a new one here.  Do that now.
-                            bundle = new Bundle(this);
-                            // Note the ArrayMap<> constructor is guaranteed to generate
-                            // a new object with items in the same order as the original.
-                            map = bundle.mMap;
-                        }
-                        // Replace this current entry with the new child bundle.
-                        map.setValueAt(i, newBundle);
-                    }
-                    continue;
-                }
-                if (value.getClass().getName().startsWith("android.")) {
-                    continue;
-                }
-                if (map == mMap) {
-                    // This is the first time we have had to remove something, that means we
-                    // need to switch to a new Bundle.
-                    bundle = new Bundle(this);
-                    // Note the ArrayMap<> constructor is guaranteed to generate
-                    // a new object with items in the same order as the original.
-                    map = bundle.mMap;
-                }
-                map.removeAt(i);
-            }
-        }
-        mFlags |= FLAG_HAS_FDS_KNOWN;
-        mFlags &= ~FLAG_HAS_FDS;
-        return bundle;
     }
 
     /** {@hide} */
@@ -1280,6 +1233,10 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         maybePrefillHasFds();
     }
 
+    /**
+     * Returns a string representation of the {@link Bundle} that may be suitable for debugging. It
+     * won't print the internal map if its content hasn't been unparcelled.
+     */
     @Override
     public synchronized String toString() {
         if (mParcelledData != null) {

@@ -1161,6 +1161,8 @@ public class StatusBar extends SystemUI implements
                     mStatusBarView = (PhoneStatusBarView) statusBarFragment.getView();
                     mStatusBarView.setBar(this);
                     mStatusBarView.setPanel(mNotificationPanelViewController);
+                    mStatusBarView.setPanelStateChangeListener(
+                            mNotificationPanelViewController.getPanelStateChangeListener());
                     mStatusBarView.setScrimController(mScrimController);
                     mStatusBarView.setExpansionChangedListeners(mExpansionChangedListeners);
                     for (ExpansionChangedListener listener : mExpansionChangedListeners) {
@@ -1550,6 +1552,9 @@ public class StatusBar extends SystemUI implements
                     time, PowerManager.WAKE_REASON_GESTURE, "com.android.systemui:" + why);
             mWakeUpComingFromTouch = true;
             where.getLocationInWindow(mTmpInt2);
+
+            // NOTE, the incoming view can sometimes be the entire container... unsure if
+            // this location is valuable enough
             mWakeUpTouchLocation = new PointF(mTmpInt2[0] + where.getWidth() / 2,
                     mTmpInt2[1] + where.getHeight() / 2);
             mFalsingCollector.onScreenOnFromTouch();
@@ -1643,7 +1648,7 @@ public class StatusBar extends SystemUI implements
                     }
                 });
         mStatusBarKeyguardViewManager.registerStatusBar(
-                /* statusBar= */ this, getBouncerContainer(),
+                /* statusBar= */ this,
                 mNotificationPanelViewController, mBiometricUnlockController,
                 mStackScroller, mKeyguardBypassController);
         mKeyguardIndicationController
@@ -1678,8 +1683,8 @@ public class StatusBar extends SystemUI implements
         return mNotificationPanelViewController;
     }
 
-    protected ViewGroup getBouncerContainer() {
-        return mNotificationShadeWindowView.findViewById(R.id.keyboard_bouncer_container);
+    public ViewGroup getBouncerContainer() {
+        return mNotificationShadeWindowViewController.getBouncerContainer();
     }
 
     public int getStatusBarHeight() {

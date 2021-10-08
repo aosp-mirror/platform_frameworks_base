@@ -46,8 +46,8 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.DetailAdapter;
+import com.android.systemui.plugins.qs.QSContainerController;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
 
 public class QSDetail extends LinearLayout {
 
@@ -86,7 +86,7 @@ public class QSDetail extends LinearLayout {
     private boolean mSwitchState;
     private QSFooter mFooter;
 
-    private NotificationsQuickSettingsContainer mContainer;
+    private QSContainerController mQsContainerController;
 
     public QSDetail(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -120,8 +120,8 @@ public class QSDetail extends LinearLayout {
         mClipper = new QSDetailClipper(this);
     }
 
-    public void setContainer(NotificationsQuickSettingsContainer container) {
-        mContainer = container;
+    public void setContainerController(QSContainerController controller) {
+        mQsContainerController = controller;
     }
 
     /** */
@@ -262,8 +262,8 @@ public class QSDetail extends LinearLayout {
         }
         sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
         animateDetailVisibleDiff(x, y, visibleDiff, listener);
-        if (mContainer != null) {
-            mContainer.setDetailShowing(showingDetail);
+        if (mQsContainerController != null) {
+            mQsContainerController.setDetailShowing(showingDetail);
         }
     }
 

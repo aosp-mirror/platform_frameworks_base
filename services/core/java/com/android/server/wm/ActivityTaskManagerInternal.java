@@ -37,6 +37,7 @@ import android.util.IntArray;
 import android.util.proto.ProtoOutputStream;
 import android.window.TaskSnapshot;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.am.UserState;
@@ -631,7 +632,8 @@ public abstract class ActivityTaskManagerInternal {
         @Nullable
         public final LocaleList mLocales;
 
-        PackageConfig(Integer nightMode, LocaleList locales) {
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        public PackageConfig(Integer nightMode, LocaleList locales) {
             mNightMode = nightMode;
             mLocales = locales;
         }
@@ -678,4 +680,12 @@ public abstract class ActivityTaskManagerInternal {
 
     /** Called when the device is waking up */
     public abstract void notifyWakingUp();
+
+    /**
+     * Registers a callback which can intercept activity starts.
+     * @throws IllegalArgumentException if duplicate ids are provided
+     */
+    public abstract void registerActivityStartInterceptor(
+            @ActivityInterceptorCallback.OrderedId int id,
+            ActivityInterceptorCallback callback);
 }

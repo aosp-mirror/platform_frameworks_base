@@ -5000,12 +5000,15 @@ public final class ActiveServices {
                 // Since we kicked off all its pending restarts, there could be some open slots
                 // in the pending restarts list, schedule a check on it. We are posting to the same
                 // handler, so by the time of the check, those immediate restarts should be done.
-                mAm.mHandler.post(() ->
+                mAm.mHandler.post(() -> {
+                    final long now = SystemClock.uptimeMillis();
+                    synchronized (mAm) {
                         rescheduleServiceRestartIfPossibleLocked(
                                 getExtraRestartTimeInBetweenLocked(),
                                 mAm.mConstants.SERVICE_MIN_RESTART_TIME_BETWEEN,
-                                "other", SystemClock.uptimeMillis())
-                );
+                                "other", now);
+                    }
+                });
             }
         }
         return didSomething;

@@ -16,15 +16,12 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -119,7 +116,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 any(ViewGroup.class),
                 any(KeyguardBouncer.BouncerExpansionCallback.class)))
                 .thenReturn(mBouncer);
-
+        when(mStatusBar.getBouncerContainer()).thenReturn(mContainer);
         when(mContainer.findViewById(anyInt())).thenReturn(mKeyguardMessageArea);
         mWakefulnessLifecycle = new WakefulnessLifecycle(
                 getContext(),
@@ -143,7 +140,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 mUnlockedScreenOffAnimationController,
                 mKeyguardMessageAreaFactory,
                 mShadeController);
-        mStatusBarKeyguardViewManager.registerStatusBar(mStatusBar, mContainer,
+        mStatusBarKeyguardViewManager.registerStatusBar(mStatusBar,
                 mNotificationPanelView, mBiometrucUnlockController,
                 mNotificationContainer, mBypassController);
         mStatusBarKeyguardViewManager.show(null);

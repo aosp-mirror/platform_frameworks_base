@@ -83,8 +83,7 @@ public class TaskSnapshotWindowTest {
                 createTaskDescription(Color.WHITE, Color.RED, Color.BLUE),
                 0 /* appearance */, windowFlags /* windowFlags */, 0 /* privateWindowFlags */,
                 taskBounds, ORIENTATION_PORTRAIT, ACTIVITY_TYPE_STANDARD,
-                100 /* delayRemovalTime */, new InsetsState(),
-                null /* clearWindow */, new TestShellExecutor());
+                new InsetsState(), null /* clearWindow */, new TestShellExecutor());
     }
 
     private TaskSnapshot createTaskSnapshot(int width, int height, Point taskSize,
