@@ -23,7 +23,6 @@ import static android.system.OsConstants.O_RDWR;
 
 import static com.android.server.pm.PackageManagerService.COMPRESSED_EXTENSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
-import static com.android.server.pm.PackageManagerService.DEBUG_DEXOPT;
 import static com.android.server.pm.PackageManagerService.DEBUG_INTENT_MATCHING;
 import static com.android.server.pm.PackageManagerService.DEBUG_PREFERRED;
 import static com.android.server.pm.PackageManagerService.RANDOM_DIR_PREFIX;
@@ -33,7 +32,6 @@ import static com.android.server.pm.PackageManagerService.TAG;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.AppGlobals;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.content.Context;
@@ -45,7 +43,6 @@ import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.pm.SharedLibraryInfo;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.ApkLiteParseUtils;
@@ -53,14 +50,13 @@ import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.component.ParsedMainComponent;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Debug;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.SystemProperties;
-import android.os.UserHandle;
 import android.os.incremental.IncrementalManager;
 import android.os.incremental.V4Signature;
 import android.os.incremental.V4Signature.HashingInfo;
@@ -86,11 +82,9 @@ import com.android.internal.util.HexDump;
 import com.android.server.EventLogTags;
 import com.android.server.IntentResolver;
 import com.android.server.compat.PlatformCompat;
-import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
-import com.android.server.utils.WatchedLongSparseArray;
 
 import dalvik.system.VMRuntime;
 
@@ -112,14 +106,10 @@ import java.security.SecureRandom;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.zip.GZIPInputStream;
@@ -130,7 +120,6 @@ import java.util.zip.GZIPInputStream;
  * {@hide}
  */
 public class PackageManagerServiceUtils {
-    private static final long SEVEN_DAYS_IN_MILLISECONDS = 7 * 24 * 60 * 60 * 1000;
     private static final long MAX_CRITICAL_INFO_DUMP_SIZE = 3 * 1000 * 1000; // 3MB
 
     public final static Predicate<PackageSetting> REMOVE_IF_NULL_PKG =
@@ -150,151 +139,18 @@ public class PackageManagerServiceUtils {
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.S)
     private static final long ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS = 161252188;
 
-    private static ArraySet<String> getPackageNamesForIntent(Intent intent, int userId) {
-        List<ResolveInfo> ris = null;
-        try {
-            ris = AppGlobals.getPackageManager().queryIntentReceivers(intent, null, 0, userId)
-                    .getList();
-        } catch (RemoteException e) {
-        }
-        ArraySet<String> pkgNames = new ArraySet<String>();
-        if (ris != null) {
-            for (ResolveInfo ri : ris) {
-                pkgNames.add(ri.activityInfo.packageName);
-            }
-        }
-        return pkgNames;
-    }
+    /**
+     * The initial enabled state of the cache before other checks are done.
+     */
+    private static final boolean DEFAULT_PACKAGE_PARSER_CACHE_ENABLED = true;
 
-    // Sort a list of apps by their last usage, most recently used apps first. The order of
-    // packages without usage data is undefined (but they will be sorted after the packages
-    // that do have usage data).
-    public static void sortPackagesByUsageDate(List<PackageSetting> pkgSettings,
-            PackageManagerService packageManagerService) {
-        if (!packageManagerService.isHistoricalPackageUsageAvailable()) {
-            return;
-        }
-
-        Collections.sort(pkgSettings, (pkgSetting1, pkgSetting2) ->
-                Long.compare(
-                        pkgSetting2.getPkgState().getLatestForegroundPackageUseTimeInMills(),
-                        pkgSetting1.getPkgState().getLatestForegroundPackageUseTimeInMills())
-        );
-    }
-
-    // Apply the given {@code filter} to all packages in {@code packages}. If tested positive, the
-    // package will be removed from {@code packages} and added to {@code result} with its
-    // dependencies. If usage data is available, the positive packages will be sorted by usage
-    // data (with {@code sortTemp} as temporary storage).
-    private static void applyPackageFilter(
-            Predicate<PackageSetting> filter,
-            Collection<PackageSetting> result,
-            Collection<PackageSetting> packages,
-            @NonNull List<PackageSetting> sortTemp,
-            PackageManagerService packageManagerService) {
-        for (PackageSetting pkgSetting : packages) {
-            if (filter.test(pkgSetting)) {
-                sortTemp.add(pkgSetting);
-            }
-        }
-
-        sortPackagesByUsageDate(sortTemp, packageManagerService);
-        packages.removeAll(sortTemp);
-
-        for (PackageSetting pkgSetting : sortTemp) {
-            result.add(pkgSetting);
-
-            List<PackageSetting> deps =
-                    packageManagerService.findSharedNonSystemLibraries(pkgSetting);
-            if (!deps.isEmpty()) {
-                deps.removeAll(result);
-                result.addAll(deps);
-                packages.removeAll(deps);
-            }
-        }
-
-        sortTemp.clear();
-    }
-
-    // Sort apps by importance for dexopt ordering. Important apps are given
-    // more priority in case the device runs out of space.
-    public static List<PackageSetting> getPackagesForDexopt(
-            Collection<PackageSetting> packages,
-            PackageManagerService packageManagerService) {
-        return getPackagesForDexopt(packages, packageManagerService, DEBUG_DEXOPT);
-    }
-
-    public static List<PackageSetting> getPackagesForDexopt(
-            Collection<PackageSetting> pkgSettings,
-            PackageManagerService packageManagerService,
-            boolean debug) {
-        List<PackageSetting> result = new LinkedList<>();
-        ArrayList<PackageSetting> remainingPkgSettings = new ArrayList<>(pkgSettings);
-
-        // First, remove all settings without available packages
-        remainingPkgSettings.removeIf(REMOVE_IF_NULL_PKG);
-
-        ArrayList<PackageSetting> sortTemp = new ArrayList<>(remainingPkgSettings.size());
-
-        // Give priority to core apps.
-        applyPackageFilter(pkgSetting -> pkgSetting.getPkg().isCoreApp(), result,
-                remainingPkgSettings, sortTemp, packageManagerService);
-
-        // Give priority to system apps that listen for pre boot complete.
-        Intent intent = new Intent(Intent.ACTION_PRE_BOOT_COMPLETED);
-        final ArraySet<String> pkgNames = getPackageNamesForIntent(intent, UserHandle.USER_SYSTEM);
-        applyPackageFilter(pkgSetting -> pkgNames.contains(pkgSetting.getPackageName()), result,
-                remainingPkgSettings, sortTemp, packageManagerService);
-
-        // Give priority to apps used by other apps.
-        DexManager dexManager = packageManagerService.getDexManager();
-        applyPackageFilter(pkgSetting ->
-                dexManager.getPackageUseInfoOrDefault(pkgSetting.getPackageName())
-                        .isAnyCodePathUsedByOtherApps(),
-                result, remainingPkgSettings, sortTemp, packageManagerService);
-
-        // Filter out packages that aren't recently used, add all remaining apps.
-        // TODO: add a property to control this?
-        Predicate<PackageSetting> remainingPredicate;
-        if (!remainingPkgSettings.isEmpty() && packageManagerService.isHistoricalPackageUsageAvailable()) {
-            if (debug) {
-                Log.i(TAG, "Looking at historical package use");
-            }
-            // Get the package that was used last.
-            PackageSetting lastUsed = Collections.max(remainingPkgSettings,
-                    (pkgSetting1, pkgSetting2) -> Long.compare(
-                            pkgSetting1.getPkgState().getLatestForegroundPackageUseTimeInMills(),
-                            pkgSetting2.getPkgState().getLatestForegroundPackageUseTimeInMills()));
-            if (debug) {
-                Log.i(TAG, "Taking package " + lastUsed.getPackageName()
-                        + " as reference in time use");
-            }
-            long estimatedPreviousSystemUseTime = lastUsed.getPkgState()
-                    .getLatestForegroundPackageUseTimeInMills();
-            // Be defensive if for some reason package usage has bogus data.
-            if (estimatedPreviousSystemUseTime != 0) {
-                final long cutoffTime = estimatedPreviousSystemUseTime - SEVEN_DAYS_IN_MILLISECONDS;
-                remainingPredicate = pkgSetting -> pkgSetting.getPkgState()
-                        .getLatestForegroundPackageUseTimeInMills() >= cutoffTime;
-            } else {
-                // No meaningful historical info. Take all.
-                remainingPredicate = pkgSetting -> true;
-            }
-            sortPackagesByUsageDate(remainingPkgSettings, packageManagerService);
-        } else {
-            // No historical info. Take all.
-            remainingPredicate = pkgSetting -> true;
-        }
-        applyPackageFilter(remainingPredicate, result, remainingPkgSettings, sortTemp,
-                packageManagerService);
-
-        if (debug) {
-            Log.i(TAG, "Packages to be dexopted: " + packagesToString(result));
-            Log.i(TAG, "Packages skipped from dexopt: " + packagesToString(remainingPkgSettings));
-        }
-
-        return result;
-    }
+    /**
+     * Whether to skip all other checks and force the cache to be enabled.
+     *
+     * Setting this to true will cause the cache to be named "debug" to avoid eviction from
+     * build fingerprint changes.
+     */
+    private static final boolean FORCE_PACKAGE_PARSED_CACHE_ENABLED = false;
 
     /**
      * Checks if the package was inactive during since <code>thresholdTimeinMillis</code>.
@@ -341,17 +197,6 @@ public class PackageManagerServiceUtils {
         } catch (ErrnoException ee) {
             throw ee.rethrowAsIOException();
         }
-    }
-
-    public static String packagesToString(List<PackageSetting> pkgSettings) {
-        StringBuilder sb = new StringBuilder();
-        for (int index = 0; index < pkgSettings.size(); index++) {
-            if (sb.length() > 0) {
-                sb.append(", ");
-            }
-            sb.append(pkgSettings.get(index).getPackageName());
-        }
-        return sb.toString();
     }
 
     /**
@@ -1275,5 +1120,108 @@ public class PackageManagerServiceUtils {
             }
         }
         return StorageEnums.UNKNOWN;
+    }
+
+    /**
+     * Enforces that only the system UID or root's UID or shell's UID can call
+     * a method exposed via Binder.
+     *
+     * @param message used as message if SecurityException is thrown
+     * @throws SecurityException if the caller is not system or shell
+     */
+    public static void enforceSystemOrRootOrShell(String message) {
+        final int uid = Binder.getCallingUid();
+        if (uid != Process.SYSTEM_UID && uid != Process.ROOT_UID && uid != Process.SHELL_UID) {
+            throw new SecurityException(message);
+        }
+    }
+
+    /**
+     * Enforces that only the system UID or root's UID can call a method exposed
+     * via Binder.
+     *
+     * @param message used as message if SecurityException is thrown
+     * @throws SecurityException if the caller is not system or root
+     */
+    public static void enforceSystemOrRoot(String message) {
+        final int uid = Binder.getCallingUid();
+        if (uid != Process.SYSTEM_UID && uid != Process.ROOT_UID) {
+            throw new SecurityException(message);
+        }
+    }
+
+    public static @Nullable File preparePackageParserCache(boolean forEngBuild,
+            boolean isUserDebugBuild, String incrementalVersion) {
+        if (!FORCE_PACKAGE_PARSED_CACHE_ENABLED) {
+            if (!DEFAULT_PACKAGE_PARSER_CACHE_ENABLED) {
+                return null;
+            }
+
+            // Disable package parsing on eng builds to allow for faster incremental development.
+            if (forEngBuild) {
+                return null;
+            }
+
+            if (SystemProperties.getBoolean("pm.boot.disable_package_cache", false)) {
+                Slog.i(TAG, "Disabling package parser cache due to system property.");
+                return null;
+            }
+        }
+
+        // The base directory for the package parser cache lives under /data/system/.
+        final File cacheBaseDir = Environment.getPackageCacheDirectory();
+        if (!FileUtils.createDir(cacheBaseDir)) {
+            return null;
+        }
+
+        // There are several items that need to be combined together to safely
+        // identify cached items. In particular, changing the value of certain
+        // feature flags should cause us to invalidate any caches.
+        final String cacheName = FORCE_PACKAGE_PARSED_CACHE_ENABLED ? "debug"
+                : SystemProperties.digestOf("ro.build.fingerprint");
+
+        // Reconcile cache directories, keeping only what we'd actually use.
+        for (File cacheDir : FileUtils.listFilesOrEmpty(cacheBaseDir)) {
+            if (Objects.equals(cacheName, cacheDir.getName())) {
+                Slog.d(TAG, "Keeping known cache " + cacheDir.getName());
+            } else {
+                Slog.d(TAG, "Destroying unknown cache " + cacheDir.getName());
+                FileUtils.deleteContentsAndDir(cacheDir);
+            }
+        }
+
+        // Return the versioned package cache directory.
+        File cacheDir = FileUtils.createDir(cacheBaseDir, cacheName);
+
+        if (cacheDir == null) {
+            // Something went wrong. Attempt to delete everything and return.
+            Slog.wtf(TAG, "Cache directory cannot be created - wiping base dir " + cacheBaseDir);
+            FileUtils.deleteContentsAndDir(cacheBaseDir);
+            return null;
+        }
+
+        // The following is a workaround to aid development on non-numbered userdebug
+        // builds or cases where "adb sync" is used on userdebug builds. If we detect that
+        // the system partition is newer.
+        //
+        // NOTE: When no BUILD_NUMBER is set by the build system, it defaults to a build
+        // that starts with "eng." to signify that this is an engineering build and not
+        // destined for release.
+        if (isUserDebugBuild && incrementalVersion.startsWith("eng.")) {
+            Slog.w(TAG, "Wiping cache directory because the system partition changed.");
+
+            // Heuristic: If the /system directory has been modified recently due to an "adb sync"
+            // or a regular make, then blow away the cache. Note that mtimes are *NOT* reliable
+            // in general and should not be used for production changes. In this specific case,
+            // we know that they will work.
+            File frameworkDir =
+                    new File(Environment.getRootDirectory(), "framework");
+            if (cacheDir.lastModified() < frameworkDir.lastModified()) {
+                FileUtils.deleteContents(cacheBaseDir);
+                cacheDir = FileUtils.createDir(cacheBaseDir, cacheName);
+            }
+        }
+
+        return cacheDir;
     }
 }

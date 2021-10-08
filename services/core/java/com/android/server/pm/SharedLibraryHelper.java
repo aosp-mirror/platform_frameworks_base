@@ -41,8 +41,10 @@ import libcore.util.HexEncoding;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 final class SharedLibraryHelper {
     private static final boolean DEBUG_SHARED_LIBRARIES = false;
@@ -323,4 +325,32 @@ final class SharedLibraryHelper {
         }
         return versionedLib.get(version);
     }
+
+    public static List<SharedLibraryInfo> findSharedLibraries(PackageSetting pkgSetting) {
+        if (!pkgSetting.getPkgState().getUsesLibraryInfos().isEmpty()) {
+            ArrayList<SharedLibraryInfo> retValue = new ArrayList<>();
+            Set<String> collectedNames = new HashSet<>();
+            for (SharedLibraryInfo info : pkgSetting.getPkgState().getUsesLibraryInfos()) {
+                findSharedLibrariesRecursive(info, retValue, collectedNames);
+            }
+            return retValue;
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    private static void findSharedLibrariesRecursive(SharedLibraryInfo info,
+            ArrayList<SharedLibraryInfo> collected, Set<String> collectedNames) {
+        if (!collectedNames.contains(info.getName())) {
+            collectedNames.add(info.getName());
+            collected.add(info);
+
+            if (info.getDependencies() != null) {
+                for (SharedLibraryInfo dep : info.getDependencies()) {
+                    findSharedLibrariesRecursive(dep, collected, collectedNames);
+                }
+            }
+        }
+    }
+
 }

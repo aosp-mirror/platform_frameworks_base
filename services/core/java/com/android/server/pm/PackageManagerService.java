@@ -48,10 +48,8 @@ import static android.provider.DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility;
 import static com.android.internal.util.FrameworkStatsLog.BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_INIT_TIME;
-import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSet;
 import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
-import static com.android.server.pm.PackageManagerServiceCompilerMapping.getDefaultCompilerFilter;
 import static com.android.server.pm.PackageManagerServiceUtils.compareSignatures;
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 
@@ -100,10 +98,8 @@ import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageLoadingProgressCallback;
 import android.content.pm.IPackageManager;
-import android.content.pm.IPackageManagerNative;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
-import android.content.pm.IStagedApexObserver;
 import android.content.pm.IncrementalStatesInfo;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.InstantAppInfo;
@@ -137,13 +133,11 @@ import android.content.pm.SharedLibraryInfo;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
 import android.content.pm.SigningInfo;
-import android.content.pm.StagedApexInfo;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.TestUtilityService;
 import android.content.pm.UserInfo;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VersionedPackage;
-import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.IArtManager;
 import android.content.pm.overlay.OverlayPaths;
 import android.content.pm.parsing.ParsingPackageUtils;
@@ -217,7 +211,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.F2fsUtils;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.content.om.OverlayConfig;
-import com.android.internal.logging.MetricsLogger;
 import com.android.internal.telephony.CarrierAppUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
@@ -236,7 +229,6 @@ import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
 import com.android.server.apphibernation.AppHibernationManagerInternal;
-import com.android.server.apphibernation.AppHibernationService;
 import com.android.server.compat.CompatChange;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.Installer.InstallerException;
@@ -244,7 +236,6 @@ import com.android.server.pm.Settings.VersionInfo;
 import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.ArtUtils;
 import com.android.server.pm.dex.DexManager;
-import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.dex.ViewCompiler;
 import com.android.server.pm.parsing.PackageCacher;
@@ -298,7 +289,6 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -312,7 +302,6 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
@@ -385,9 +374,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     static final boolean DEBUG_ABI_SELECTION = false;
     public static final boolean DEBUG_INSTANT = Build.IS_DEBUGGABLE;
-
-    /** REMOVE. According to Svet, this was only used to reset permissions during development. */
-    static final boolean CLEAR_RUNTIME_PERMISSIONS_ON_UPGRADE = false;
 
     static final boolean HIDE_EPHEMERAL_APIS = false;
 
@@ -583,19 +569,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     public static final int REASON_LAST = REASON_SHARED;
 
-    /**
-     * The initial enabled state of the cache before other checks are done.
-     */
-    private static final boolean DEFAULT_PACKAGE_PARSER_CACHE_ENABLED = true;
-
-    /**
-     * Whether to skip all other checks and force the cache to be enabled.
-     *
-     * Setting this to true will cause the cache to be named "debug" to avoid eviction from
-     * build fingerprint changes.
-     */
-    private static final boolean FORCE_PACKAGE_PARSED_CACHE_ENABLED = false;
-
     static final String RANDOM_DIR_PREFIX = "~~";
 
     final Handler mHandler;
@@ -615,9 +588,6 @@ public class PackageManagerService extends IPackageManager.Stub
     final boolean mIsPreNUpgrade;
     final boolean mIsPreNMR1Upgrade;
     final boolean mIsPreQUpgrade;
-
-    @GuardedBy("mLock")
-    private boolean mDexOptDialogShown;
 
     // Used for privilege escalation. MUST NOT BE CALLED WITH mPackages
     // LOCK HELD.  Can be called with mInstallLock held.
@@ -768,7 +738,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final OverlayConfig mOverlayConfig;
 
     @GuardedBy("itself")
-    final private ArrayList<IPackageChangeObserver> mPackageChangeObservers =
+    final ArrayList<IPackageChangeObserver> mPackageChangeObservers =
         new ArrayList<>();
 
     // Cached parsed flag value. Invalidated on each flag change.
@@ -1009,6 +979,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private final AppDataHelper mAppDataHelper;
     private final PreferredActivityHelper mPreferredActivityHelper;
     private final ResolveIntentHelper mResolveIntentHelper;
+    private final DexOptHelper mDexOptHelper;
 
     /**
      * Invalidate the package info cache, which includes updating the cached computer.
@@ -1538,7 +1509,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         m.installAllowlistedSystemPackages();
         ServiceManager.addService("package", m);
-        final PackageManagerNative pmn = m.new PackageManagerNative();
+        final PackageManagerNative pmn = new PackageManagerNative(m);
         ServiceManager.addService("package_native", pmn);
         return m;
     }
@@ -1552,39 +1523,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 scheduleWritePackageRestrictionsLocked(UserHandle.USER_ALL);
                 scheduleWriteSettingsLocked();
             }
-        }
-    }
-
-    /**
-     * Requests that files preopted on a secondary system partition be copied to the data partition
-     * if possible.  Note that the actual copying of the files is accomplished by init for security
-     * reasons. This simply requests that the copy takes place and awaits confirmation of its
-     * completion. See platform/system/extras/cppreopt/ for the implementation of the actual copy.
-     */
-    private static void requestCopyPreoptedFiles() {
-        final int WAIT_TIME_MS = 100;
-        final String CP_PREOPT_PROPERTY = "sys.cppreopt";
-        if (SystemProperties.getInt("ro.cp_system_other_odex", 0) == 1) {
-            SystemProperties.set(CP_PREOPT_PROPERTY, "requested");
-            // We will wait for up to 100 seconds.
-            final long timeStart = SystemClock.uptimeMillis();
-            final long timeEnd = timeStart + 100 * 1000;
-            long timeNow = timeStart;
-            while (!SystemProperties.get(CP_PREOPT_PROPERTY).equals("finished")) {
-                try {
-                    Thread.sleep(WAIT_TIME_MS);
-                } catch (InterruptedException e) {
-                    // Do nothing
-                }
-                timeNow = SystemClock.uptimeMillis();
-                if (timeNow > timeEnd) {
-                    SystemProperties.set(CP_PREOPT_PROPERTY, "timed-out");
-                    Slog.wtf(TAG, "cppreopt did not finish!");
-                    break;
-                }
-            }
-
-            Slog.i(TAG, "cppreopts took " + (timeNow - timeStart) + " ms");
         }
     }
 
@@ -1707,6 +1645,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 mInitAndSystemPackageHelper, mAppDataHelper);
         mPreferredActivityHelper = new PreferredActivityHelper(this);
         mResolveIntentHelper = new ResolveIntentHelper(this, mPreferredActivityHelper);
+        mDexOptHelper = new DexOptHelper(this);
 
         invalidatePackageInfoCache();
     }
@@ -1861,6 +1800,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 mInitAndSystemPackageHelper, mAppDataHelper);
         mPreferredActivityHelper = new PreferredActivityHelper(this);
         mResolveIntentHelper = new ResolveIntentHelper(this, mPreferredActivityHelper);
+        mDexOptHelper = new DexOptHelper(this);
 
         synchronized (mLock) {
             // Create the computer as soon as the state objects have been installed.  The
@@ -1925,7 +1865,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mPermissionManager.readLegacyPermissionStateTEMP();
 
             if (!mOnlyCore && mFirstBoot) {
-                requestCopyPreoptedFiles();
+                DexOptHelper.requestCopyPreoptedFiles();
             }
 
             String customResolverActivityName = Resources.getSystem().getString(
@@ -1982,7 +1922,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            mCacheDir = preparePackageParserCache(mIsEngBuild);
+            mCacheDir = PackageManagerServiceUtils.preparePackageParserCache(
+                    mIsEngBuild, mIsUserDebugBuild, mIncrementalVersion);
 
             // Set flag to monitor and not change apk file paths when
             // scanning install directories.
@@ -2272,80 +2213,6 @@ public class PackageManagerService extends IPackageManager.Stub
             return;
         }
         setUpInstantAppInstallerActivityLP(getInstantAppInstallerLPr());
-    }
-
-    private @Nullable File preparePackageParserCache(boolean forEngBuild) {
-        if (!FORCE_PACKAGE_PARSED_CACHE_ENABLED) {
-            if (!DEFAULT_PACKAGE_PARSER_CACHE_ENABLED) {
-                return null;
-            }
-
-            // Disable package parsing on eng builds to allow for faster incremental development.
-            if (forEngBuild) {
-                return null;
-            }
-
-            if (SystemProperties.getBoolean("pm.boot.disable_package_cache", false)) {
-                Slog.i(TAG, "Disabling package parser cache due to system property.");
-                return null;
-            }
-        }
-
-        // The base directory for the package parser cache lives under /data/system/.
-        final File cacheBaseDir = Environment.getPackageCacheDirectory();
-        if (!FileUtils.createDir(cacheBaseDir)) {
-            return null;
-        }
-
-        // There are several items that need to be combined together to safely
-        // identify cached items. In particular, changing the value of certain
-        // feature flags should cause us to invalidate any caches.
-        final String cacheName = FORCE_PACKAGE_PARSED_CACHE_ENABLED ? "debug"
-                : SystemProperties.digestOf("ro.build.fingerprint");
-
-        // Reconcile cache directories, keeping only what we'd actually use.
-        for (File cacheDir : FileUtils.listFilesOrEmpty(cacheBaseDir)) {
-            if (Objects.equals(cacheName, cacheDir.getName())) {
-                Slog.d(TAG, "Keeping known cache " + cacheDir.getName());
-            } else {
-                Slog.d(TAG, "Destroying unknown cache " + cacheDir.getName());
-                FileUtils.deleteContentsAndDir(cacheDir);
-            }
-        }
-
-        // Return the versioned package cache directory.
-        File cacheDir = FileUtils.createDir(cacheBaseDir, cacheName);
-
-        if (cacheDir == null) {
-            // Something went wrong. Attempt to delete everything and return.
-            Slog.wtf(TAG, "Cache directory cannot be created - wiping base dir " + cacheBaseDir);
-            FileUtils.deleteContentsAndDir(cacheBaseDir);
-            return null;
-        }
-
-        // The following is a workaround to aid development on non-numbered userdebug
-        // builds or cases where "adb sync" is used on userdebug builds. If we detect that
-        // the system partition is newer.
-        //
-        // NOTE: When no BUILD_NUMBER is set by the build system, it defaults to a build
-        // that starts with "eng." to signify that this is an engineering build and not
-        // destined for release.
-        if (mIsUserDebugBuild && mIncrementalVersion.startsWith("eng.")) {
-            Slog.w(TAG, "Wiping cache directory because the system partition changed.");
-
-            // Heuristic: If the /system directory has been modified recently due to an "adb sync"
-            // or a regular make, then blow away the cache. Note that mtimes are *NOT* reliable
-            // in general and should not be used for production changes. In this specific case,
-            // we know that they will work.
-            File frameworkDir =
-                    new File(Environment.getRootDirectory(), "framework");
-            if (cacheDir.lastModified() < frameworkDir.lastModified()) {
-                FileUtils.deleteContents(cacheBaseDir);
-                cacheDir = FileUtils.createDir(cacheBaseDir, cacheName);
-            }
-        }
-
-        return cacheDir;
     }
 
     @Override
@@ -2965,7 +2832,6 @@ public class PackageManagerService extends IPackageManager.Stub
         return mComputer.getApplicationInfoInternal(packageName, flags,
                 filterCallingUid, userId);
     }
-
 
     @Override
     public void deletePreloadsFileCache() {
@@ -4002,7 +3868,8 @@ public class PackageManagerService extends IPackageManager.Stub
     public List<String> getAllPackages() {
         // Allow iorapd to call this method.
         if (Binder.getCallingUid() != Process.IORAPD_UID) {
-            enforceSystemOrRootOrShell("getAllPackages is limited to privileged callers");
+            PackageManagerServiceUtils.enforceSystemOrRootOrShell(
+                    "getAllPackages is limited to privileged callers");
         }
         final int callingUid = Binder.getCallingUid();
         final int callingUserId = UserHandle.getUserId(callingUid);
@@ -4969,34 +4836,6 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /**
-     * Enforces that only the system UID or root's UID can call a method exposed
-     * via Binder.
-     *
-     * @param message used as message if SecurityException is thrown
-     * @throws SecurityException if the caller is not system or root
-     */
-    private static void enforceSystemOrRoot(String message) {
-        final int uid = Binder.getCallingUid();
-        if (uid != Process.SYSTEM_UID && uid != Process.ROOT_UID) {
-            throw new SecurityException(message);
-        }
-    }
-
-    /**
-     * Enforces that only the system UID or root's UID or shell's UID can call
-     * a method exposed via Binder.
-     *
-     * @param message used as message if SecurityException is thrown
-     * @throws SecurityException if the caller is not system or shell
-     */
-    private static void enforceSystemOrRootOrShell(String message) {
-        final int uid = Binder.getCallingUid();
-        if (uid != Process.SYSTEM_UID && uid != Process.ROOT_UID && uid != Process.SHELL_UID) {
-            throw new SecurityException(message);
-        }
-    }
-
-    /**
      * Enforces the request is from the system or an app that has INTERACT_ACROSS_USERS
      * or INTERACT_ACROSS_USERS_FULL permissions, if the {@code userId} is not for the caller.
      *
@@ -5031,7 +4870,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void performFstrimIfNeeded() {
-        enforceSystemOrRoot("Only the system can request fstrim");
+        PackageManagerServiceUtils.enforceSystemOrRoot("Only the system can request fstrim");
 
         // Before everything else, see whether we need to fstrim.
         try {
@@ -5053,7 +4892,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (doTrim) {
                     final boolean dexOptDialogShown;
                     synchronized (mLock) {
-                        dexOptDialogShown = mDexOptDialogShown;
+                        dexOptDialogShown = mDexOptHelper.isDexOptDialogShown();
                     }
                     if (!isFirstBoot() && dexOptDialogShown) {
                         try {
@@ -5075,208 +4914,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void updatePackagesIfNeeded() {
-        enforceSystemOrRoot("Only the system can request package update");
-
-        // We need to re-extract after an OTA.
-        boolean causeUpgrade = isDeviceUpgrading();
-
-        // First boot or factory reset.
-        // Note: we also handle devices that are upgrading to N right now as if it is their
-        //       first boot, as they do not have profile data.
-        boolean causeFirstBoot = isFirstBoot() || mIsPreNUpgrade;
-
-        if (!causeUpgrade && !causeFirstBoot) {
-            return;
-        }
-
-        List<PackageSetting> pkgSettings;
-        synchronized (mLock) {
-            pkgSettings = PackageManagerServiceUtils.getPackagesForDexopt(
-                    mSettings.getPackagesLocked().values(), this);
-        }
-
-        List<AndroidPackage> pkgs = new ArrayList<>(pkgSettings.size());
-        for (int index = 0; index < pkgSettings.size(); index++) {
-            pkgs.add(pkgSettings.get(index).getPkg());
-        }
-
-        final long startTime = System.nanoTime();
-        final int[] stats = performDexOptUpgrade(pkgs, mIsPreNUpgrade /* showDialog */,
-                    causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT_AFTER_OTA,
-                    false /* bootComplete */);
-
-        final int elapsedTimeSeconds =
-                (int) TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - startTime);
-
-        MetricsLogger.histogram(mContext, "opt_dialog_num_dexopted", stats[0]);
-        MetricsLogger.histogram(mContext, "opt_dialog_num_skipped", stats[1]);
-        MetricsLogger.histogram(mContext, "opt_dialog_num_failed", stats[2]);
-        MetricsLogger.histogram(mContext, "opt_dialog_num_total", getOptimizablePackages().size());
-        MetricsLogger.histogram(mContext, "opt_dialog_time_s", elapsedTimeSeconds);
-    }
-
-    /*
-     * Return the prebuilt profile path given a package base code path.
-     */
-    private static String getPrebuildProfilePath(AndroidPackage pkg) {
-        return pkg.getBaseApkPath() + ".prof";
-    }
-
-    /**
-     * Performs dexopt on the set of packages in {@code packages} and returns an int array
-     * containing statistics about the invocation. The array consists of three elements,
-     * which are (in order) {@code numberOfPackagesOptimized}, {@code numberOfPackagesSkipped}
-     * and {@code numberOfPackagesFailed}.
-     */
-    private int[] performDexOptUpgrade(List<AndroidPackage> pkgs, boolean showDialog,
-            final int compilationReason, boolean bootComplete) {
-
-        int numberOfPackagesVisited = 0;
-        int numberOfPackagesOptimized = 0;
-        int numberOfPackagesSkipped = 0;
-        int numberOfPackagesFailed = 0;
-        final int numberOfPackagesToDexopt = pkgs.size();
-
-        for (AndroidPackage pkg : pkgs) {
-            numberOfPackagesVisited++;
-
-            boolean useProfileForDexopt = false;
-
-            if ((isFirstBoot() || isDeviceUpgrading()) && pkg.isSystem()) {
-                // Copy over initial preopt profiles since we won't get any JIT samples for methods
-                // that are already compiled.
-                File profileFile = new File(getPrebuildProfilePath(pkg));
-                // Copy profile if it exists.
-                if (profileFile.exists()) {
-                    try {
-                        // We could also do this lazily before calling dexopt in
-                        // PackageDexOptimizer to prevent this happening on first boot. The issue
-                        // is that we don't have a good way to say "do this only once".
-                        if (!mInstaller.copySystemProfile(profileFile.getAbsolutePath(),
-                                pkg.getUid(), pkg.getPackageName(),
-                                ArtManager.getProfileName(null))) {
-                            Log.e(TAG, "Installer failed to copy system profile!");
-                        } else {
-                            // Disabled as this causes speed-profile compilation during first boot
-                            // even if things are already compiled.
-                            // useProfileForDexopt = true;
-                        }
-                    } catch (Exception e) {
-                        Log.e(TAG, "Failed to copy profile " + profileFile.getAbsolutePath() + " ",
-                                e);
-                    }
-                } else {
-                    PackageSetting disabledPs = mSettings.getDisabledSystemPkgLPr(
-                            pkg.getPackageName());
-                    // Handle compressed APKs in this path. Only do this for stubs with profiles to
-                    // minimize the number off apps being speed-profile compiled during first boot.
-                    // The other paths will not change the filter.
-                    if (disabledPs != null && disabledPs.getPkg().isStub()) {
-                        // The package is the stub one, remove the stub suffix to get the normal
-                        // package and APK names.
-                        String systemProfilePath = getPrebuildProfilePath(disabledPs.getPkg())
-                                .replace(STUB_SUFFIX, "");
-                        profileFile = new File(systemProfilePath);
-                        // If we have a profile for a compressed APK, copy it to the reference
-                        // location.
-                        // Note that copying the profile here will cause it to override the
-                        // reference profile every OTA even though the existing reference profile
-                        // may have more data. We can't copy during decompression since the
-                        // directories are not set up at that point.
-                        if (profileFile.exists()) {
-                            try {
-                                // We could also do this lazily before calling dexopt in
-                                // PackageDexOptimizer to prevent this happening on first boot. The
-                                // issue is that we don't have a good way to say "do this only
-                                // once".
-                                if (!mInstaller.copySystemProfile(profileFile.getAbsolutePath(),
-                                        pkg.getUid(), pkg.getPackageName(),
-                                        ArtManager.getProfileName(null))) {
-                                    Log.e(TAG, "Failed to copy system profile for stub package!");
-                                } else {
-                                    useProfileForDexopt = true;
-                                }
-                            } catch (Exception e) {
-                                Log.e(TAG, "Failed to copy profile " +
-                                        profileFile.getAbsolutePath() + " ", e);
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (!PackageDexOptimizer.canOptimizePackage(pkg)) {
-                if (DEBUG_DEXOPT) {
-                    Log.i(TAG, "Skipping update of non-optimizable app " + pkg.getPackageName());
-                }
-                numberOfPackagesSkipped++;
-                continue;
-            }
-
-            if (DEBUG_DEXOPT) {
-                Log.i(TAG, "Updating app " + numberOfPackagesVisited + " of " +
-                        numberOfPackagesToDexopt + ": " + pkg.getPackageName());
-            }
-
-            if (showDialog) {
-                try {
-                    ActivityManager.getService().showBootMessage(
-                            mContext.getResources().getString(R.string.android_upgrading_apk,
-                                    numberOfPackagesVisited, numberOfPackagesToDexopt), true);
-                } catch (RemoteException e) {
-                }
-                synchronized (mLock) {
-                    mDexOptDialogShown = true;
-                }
-            }
-
-            int pkgCompilationReason = compilationReason;
-            if (useProfileForDexopt) {
-                // Use background dexopt mode to try and use the profile. Note that this does not
-                // guarantee usage of the profile.
-                pkgCompilationReason = PackageManagerService.REASON_BACKGROUND_DEXOPT;
-            }
-
-            if (SystemProperties.getBoolean(PRECOMPILE_LAYOUTS, false)) {
-                mArtManagerService.compileLayouts(pkg);
-            }
-
-            // checkProfiles is false to avoid merging profiles during boot which
-            // might interfere with background compilation (b/28612421).
-            // Unfortunately this will also means that "pm.dexopt.boot=speed-profile" will
-            // behave differently than "pm.dexopt.bg-dexopt=speed-profile" but that's a
-            // trade-off worth doing to save boot time work.
-            int dexoptFlags = bootComplete ? DexoptOptions.DEXOPT_BOOT_COMPLETE : 0;
-            if (compilationReason == REASON_FIRST_BOOT) {
-                // TODO: This doesn't cover the upgrade case, we should check for this too.
-                dexoptFlags |= DexoptOptions.DEXOPT_INSTALL_WITH_DEX_METADATA_FILE;
-            }
-            int primaryDexOptStaus = performDexOptTraced(new DexoptOptions(
-                    pkg.getPackageName(),
-                    pkgCompilationReason,
-                    dexoptFlags));
-
-            switch (primaryDexOptStaus) {
-                case PackageDexOptimizer.DEX_OPT_PERFORMED:
-                    numberOfPackagesOptimized++;
-                    break;
-                case PackageDexOptimizer.DEX_OPT_SKIPPED:
-                    numberOfPackagesSkipped++;
-                    break;
-                case PackageDexOptimizer.DEX_OPT_CANCELLED:
-                    // ignore this case
-                    break;
-                case PackageDexOptimizer.DEX_OPT_FAILED:
-                    numberOfPackagesFailed++;
-                    break;
-                default:
-                    Log.e(TAG, "Unexpected dexopt return code " + primaryDexOptStaus);
-                    break;
-            }
-        }
-
-        return new int[] { numberOfPackagesOptimized, numberOfPackagesSkipped,
-                numberOfPackagesFailed };
+        mDexOptHelper.performPackageDexOptUpgradeIfNeeded();
     }
 
     @Override
@@ -5370,13 +5008,8 @@ public class PackageManagerService extends IPackageManager.Stub
     public boolean performDexOptMode(String packageName,
             boolean checkProfiles, String targetCompilerFilter, boolean force,
             boolean bootComplete, String splitName) {
-        enforceSystemOrRootOrShell("performDexOptMode");
-
-        int flags = (checkProfiles ? DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES : 0) |
-                (force ? DexoptOptions.DEXOPT_FORCE : 0) |
-                (bootComplete ? DexoptOptions.DEXOPT_BOOT_COMPLETE : 0);
-        return performDexOpt(new DexoptOptions(packageName, REASON_CMDLINE,
-                targetCompilerFilter, splitName, flags));
+        return mDexOptHelper.performDexOptMode(packageName, checkProfiles, targetCompilerFilter,
+                force, bootComplete, splitName);
     }
 
     /**
@@ -5389,147 +5022,7 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public boolean performDexOptSecondary(String packageName, String compilerFilter,
             boolean force) {
-        int flags = DexoptOptions.DEXOPT_ONLY_SECONDARY_DEX |
-                DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES |
-                DexoptOptions.DEXOPT_BOOT_COMPLETE |
-                (force ? DexoptOptions.DEXOPT_FORCE : 0);
-        return performDexOpt(new DexoptOptions(packageName, compilerFilter, flags));
-    }
-
-    /*package*/ boolean performDexOpt(DexoptOptions options) {
-        if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
-            return false;
-        } else if (isInstantApp(options.getPackageName(), UserHandle.getCallingUserId())) {
-            return false;
-        }
-
-        if (options.isDexoptOnlySecondaryDex()) {
-            return mDexManager.dexoptSecondaryDex(options);
-        } else {
-            int dexoptStatus = performDexOptWithStatus(options);
-            return dexoptStatus != PackageDexOptimizer.DEX_OPT_FAILED;
-        }
-    }
-
-    /*package*/ void controlDexOptBlocking(boolean block) {
-        mPackageDexOptimizer.controlDexOptBlocking(block);
-    }
-
-    /**
-     * Perform dexopt on the given package and return one of following result:
-     *  {@link PackageDexOptimizer#DEX_OPT_SKIPPED}
-     *  {@link PackageDexOptimizer#DEX_OPT_PERFORMED}
-     *  {@link PackageDexOptimizer#DEX_OPT_CANCELLED}
-     *  {@link PackageDexOptimizer#DEX_OPT_FAILED}
-     */
-    @PackageDexOptimizer.DexOptResult
-    /* package */ int performDexOptWithStatus(DexoptOptions options) {
-        return performDexOptTraced(options);
-    }
-
-    private int performDexOptTraced(DexoptOptions options) {
-        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
-        try {
-            return performDexOptInternal(options);
-        } finally {
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-        }
-    }
-
-    // Run dexopt on a given package. Returns true if dexopt did not fail, i.e.
-    // if the package can now be considered up to date for the given filter.
-    private int performDexOptInternal(DexoptOptions options) {
-        AndroidPackage p;
-        PackageSetting pkgSetting;
-        synchronized (mLock) {
-            p = mPackages.get(options.getPackageName());
-            pkgSetting = mSettings.getPackageLPr(options.getPackageName());
-            if (p == null || pkgSetting == null) {
-                // Package could not be found. Report failure.
-                return PackageDexOptimizer.DEX_OPT_FAILED;
-            }
-            mPackageUsage.maybeWriteAsync(mSettings.getPackagesLocked());
-            mCompilerStats.maybeWriteAsync();
-        }
-        final long callingId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mInstallLock) {
-                return performDexOptInternalWithDependenciesLI(p, pkgSetting, options);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(callingId);
-        }
-    }
-
-    public ArraySet<String> getOptimizablePackages() {
-        ArraySet<String> pkgs = new ArraySet<>();
-        synchronized (mLock) {
-            for (AndroidPackage p : mPackages.values()) {
-                if (PackageDexOptimizer.canOptimizePackage(p)) {
-                    pkgs.add(p.getPackageName());
-                }
-            }
-        }
-        if (AppHibernationService.isAppHibernationEnabled()) {
-            AppHibernationManagerInternal appHibernationManager =
-                    mInjector.getLocalService(AppHibernationManagerInternal.class);
-            pkgs.removeIf(pkgName -> appHibernationManager.isHibernatingGlobally(pkgName));
-        }
-        return pkgs;
-    }
-
-    private int performDexOptInternalWithDependenciesLI(AndroidPackage p,
-            @NonNull PackageSetting pkgSetting, DexoptOptions options) {
-        // System server gets a special path.
-        if (PLATFORM_PACKAGE_NAME.equals(p.getPackageName())) {
-            return mDexManager.dexoptSystemServer(options);
-        }
-
-        // Select the dex optimizer based on the force parameter.
-        // Note: The force option is rarely used (cmdline input for testing, mostly), so it's OK to
-        //       allocate an object here.
-        PackageDexOptimizer pdo = options.isForce()
-                ? new PackageDexOptimizer.ForcedUpdatePackageDexOptimizer(mPackageDexOptimizer)
-                : mPackageDexOptimizer;
-
-        // Dexopt all dependencies first. Note: we ignore the return value and march on
-        // on errors.
-        // Note that we are going to call performDexOpt on those libraries as many times as
-        // they are referenced in packages. When we do a batch of performDexOpt (for example
-        // at boot, or background job), the passed 'targetCompilerFilter' stays the same,
-        // and the first package that uses the library will dexopt it. The
-        // others will see that the compiled code for the library is up to date.
-        Collection<SharedLibraryInfo> deps = findSharedLibraries(pkgSetting);
-        final String[] instructionSets = getAppDexInstructionSets(
-                AndroidPackageUtils.getPrimaryCpuAbi(p, pkgSetting),
-                AndroidPackageUtils.getSecondaryCpuAbi(p, pkgSetting));
-        if (!deps.isEmpty()) {
-            DexoptOptions libraryOptions = new DexoptOptions(options.getPackageName(),
-                    options.getCompilationReason(), options.getCompilerFilter(),
-                    options.getSplitName(),
-                    options.getFlags() | DexoptOptions.DEXOPT_AS_SHARED_LIBRARY);
-            for (SharedLibraryInfo info : deps) {
-                AndroidPackage depPackage = null;
-                PackageSetting depPackageSetting = null;
-                synchronized (mLock) {
-                    depPackage = mPackages.get(info.getPackageName());
-                    depPackageSetting = mSettings.getPackageLPr(info.getPackageName());
-                }
-                if (depPackage != null && depPackageSetting != null) {
-                    // TODO: Analyze and investigate if we (should) profile libraries.
-                    pdo.performDexOpt(depPackage, depPackageSetting, instructionSets,
-                            getOrCreateCompilerPackageStats(depPackage),
-                            mDexManager.getPackageUseInfoOrDefault(depPackage.getPackageName()),
-                            libraryOptions);
-                } else {
-                    // TODO(ngeoffray): Support dexopting system shared libraries.
-                }
-            }
-        }
-
-        return pdo.performDexOpt(p, pkgSetting, instructionSets,
-                getOrCreateCompilerPackageStats(p),
-                mDexManager.getPackageUseInfoOrDefault(p.getPackageName()), options);
+        return mDexOptHelper.performDexOptSecondary(packageName, compilerFilter, force);
     }
 
     /**
@@ -5551,35 +5044,8 @@ public class PackageManagerService extends IPackageManager.Stub
         return mDexManager;
     }
 
-    private static List<SharedLibraryInfo> findSharedLibraries(PackageSetting pkgSetting) {
-        if (!pkgSetting.getPkgState().getUsesLibraryInfos().isEmpty()) {
-            ArrayList<SharedLibraryInfo> retValue = new ArrayList<>();
-            Set<String> collectedNames = new HashSet<>();
-            for (SharedLibraryInfo info : pkgSetting.getPkgState().getUsesLibraryInfos()) {
-                findSharedLibrariesRecursive(info, retValue, collectedNames);
-            }
-            return retValue;
-        } else {
-            return Collections.emptyList();
-        }
-    }
-
-    private static void findSharedLibrariesRecursive(SharedLibraryInfo info,
-            ArrayList<SharedLibraryInfo> collected, Set<String> collectedNames) {
-        if (!collectedNames.contains(info.getName())) {
-            collectedNames.add(info.getName());
-            collected.add(info);
-
-            if (info.getDependencies() != null) {
-                for (SharedLibraryInfo dep : info.getDependencies()) {
-                    findSharedLibrariesRecursive(dep, collected, collectedNames);
-                }
-            }
-        }
-    }
-
     List<PackageSetting> findSharedNonSystemLibraries(PackageSetting pkgSetting) {
-        List<SharedLibraryInfo> deps = findSharedLibraries(pkgSetting);
+        List<SharedLibraryInfo> deps = SharedLibraryHelper.findSharedLibraries(pkgSetting);
         if (!deps.isEmpty()) {
             List<PackageSetting> retValue = new ArrayList<>();
             synchronized (mLock) {
@@ -5683,33 +5149,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void forceDexOpt(String packageName) {
-        enforceSystemOrRoot("forceDexOpt");
-
-        AndroidPackage pkg;
-        PackageSetting pkgSetting;
-        synchronized (mLock) {
-            pkg = mPackages.get(packageName);
-            pkgSetting = mSettings.getPackageLPr(packageName);
-            if (pkg == null || pkgSetting == null) {
-                throw new IllegalArgumentException("Unknown package: " + packageName);
-            }
-        }
-
-        synchronized (mInstallLock) {
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
-
-            // Whoever is calling forceDexOpt wants a compiled package.
-            // Don't use profiles since that may cause compilation to be skipped.
-            final int res = performDexOptInternalWithDependenciesLI(pkg, pkgSetting,
-                    new DexoptOptions(packageName,
-                            getDefaultCompilerFilter(),
-                            DexoptOptions.DEXOPT_FORCE | DexoptOptions.DEXOPT_BOOT_COMPLETE));
-
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-            if (res != PackageDexOptimizer.DEX_OPT_PERFORMED) {
-                throw new IllegalStateException("Failed to dexopt: " + res);
-            }
-        }
+        mDexOptHelper.forceDexOpt(packageName);
     }
 
     int[] resolveUserIds(int userId) {
@@ -6968,7 +6408,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void finishPackageInstall(int token, boolean didLaunch) {
-        enforceSystemOrRoot("Only the system is allowed to finish installs");
+        PackageManagerServiceUtils.enforceSystemOrRoot(
+                "Only the system is allowed to finish installs");
 
         if (DEBUG_INSTALL) {
             Slog.v(TAG, "BM finishing package install for " + token);
@@ -7423,7 +6864,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public boolean setRequiredForSystemUser(String packageName, boolean systemUserApp) {
-        enforceSystemOrRoot("setRequiredForSystemUser can only be run by the system or root");
+        PackageManagerServiceUtils.enforceSystemOrRoot(
+                "setRequiredForSystemUser can only be run by the system or root");
         synchronized (mLock) {
             PackageSetting ps = mSettings.getPackageLPr(packageName);
             if (ps == null) {
@@ -7442,7 +6884,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void clearApplicationProfileData(String packageName) {
-        enforceSystemOrRoot("Only the system can clear all profile data");
+        PackageManagerServiceUtils.enforceSystemOrRoot(
+                "Only the system can clear all profile data");
 
         final AndroidPackage pkg;
         synchronized (mLock) {
@@ -8897,7 +8340,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void enterSafeMode() {
-        enforceSystemOrRoot("Only the system can request entering safe mode");
+        PackageManagerServiceUtils.enforceSystemOrRoot(
+                "Only the system can request entering safe mode");
 
         if (!mSystemReady) {
             mSafeMode = true;
@@ -8906,7 +8350,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void systemReady() {
-        enforceSystemOrRoot("Only the system can claim the system is ready");
+        PackageManagerServiceUtils.enforceSystemOrRoot(
+                "Only the system can claim the system is ready");
 
         final ContentResolver resolver = mContext.getContentResolver();
         if (mReleaseOnSystemReady != null) {
@@ -9065,6 +8510,9 @@ public class PackageManagerService extends IPackageManager.Stub
         mBackgroundDexOptService.systemReady();
     }
 
+    /**
+     * Used by SystemServer
+     */
     public void waitForAppDataPrepared() {
         if (mPrepareAppDataFuture == null) {
             return;
@@ -9493,200 +8941,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     packageName, PackageManager.VERSION_CODE_HIGHEST,
                     0, PackageManager.DELETE_ALL_USERS, true /*removedBySystem*/));
         }
-    }
-
-    private final class PackageChangeObserverDeathRecipient implements IBinder.DeathRecipient {
-        private final IPackageChangeObserver mObserver;
-
-        PackageChangeObserverDeathRecipient(IPackageChangeObserver observer) {
-            mObserver = observer;
-        }
-
-        @Override
-        public void binderDied() {
-            synchronized (mPackageChangeObservers) {
-                mPackageChangeObservers.remove(mObserver);
-                Log.d(TAG, "Size of mPackageChangeObservers after removing dead observer is "
-                    + mPackageChangeObservers.size());
-            }
-        }
-    }
-
-    private class PackageManagerNative extends IPackageManagerNative.Stub {
-        @Override
-        public void registerPackageChangeObserver(@NonNull IPackageChangeObserver observer) {
-          synchronized (mPackageChangeObservers) {
-            try {
-                observer.asBinder().linkToDeath(
-                    new PackageChangeObserverDeathRecipient(observer), 0);
-            } catch (RemoteException e) {
-              Log.e(TAG, e.getMessage());
-            }
-            mPackageChangeObservers.add(observer);
-            Log.d(TAG, "Size of mPackageChangeObservers after registry is "
-                + mPackageChangeObservers.size());
-          }
-        }
-
-        @Override
-        public void unregisterPackageChangeObserver(@NonNull IPackageChangeObserver observer) {
-          synchronized (mPackageChangeObservers) {
-            mPackageChangeObservers.remove(observer);
-            Log.d(TAG, "Size of mPackageChangeObservers after unregistry is "
-                + mPackageChangeObservers.size());
-          }
-        }
-
-        @Override
-        public String[] getAllPackages() {
-            return PackageManagerService.this.getAllPackages().toArray(new String[0]);
-        }
-
-        @Override
-        public String[] getNamesForUids(int[] uids) throws RemoteException {
-            String[] names = null;
-            String[] results = null;
-            try {
-                if (uids == null || uids.length == 0) {
-                    return null;
-                }
-                names = PackageManagerService.this.getNamesForUids(uids);
-                results = (names != null) ? names : new String[uids.length];
-                // massage results so they can be parsed by the native binder
-                for (int i = results.length - 1; i >= 0; --i) {
-                    if (results[i] == null) {
-                        results[i] = "";
-                    }
-                }
-                return results;
-            } catch (Throwable t) {
-                // STOPSHIP(186558987): revert addition of try/catch/log
-                Slog.e(TAG, "uids: " + Arrays.toString(uids));
-                Slog.e(TAG, "names: " + Arrays.toString(names));
-                Slog.e(TAG, "results: " + Arrays.toString(results));
-                Slog.e(TAG, "throwing exception", t);
-                throw t;
-            }
-        }
-
-        // NB: this differentiates between preloads and sideloads
-        @Override
-        public String getInstallerForPackage(String packageName) throws RemoteException {
-            final String installerName = getInstallerPackageName(packageName);
-            if (!TextUtils.isEmpty(installerName)) {
-                return installerName;
-            }
-            // differentiate between preload and sideload
-            int callingUser = UserHandle.getUserId(Binder.getCallingUid());
-            ApplicationInfo appInfo = getApplicationInfo(packageName,
-                                    /*flags*/ 0,
-                                    /*userId*/ callingUser);
-            if (appInfo != null && (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                return "preload";
-            }
-            return "";
-        }
-
-        @Override
-        public long getVersionCodeForPackage(String packageName) throws RemoteException {
-            try {
-                int callingUser = UserHandle.getUserId(Binder.getCallingUid());
-                PackageInfo pInfo = getPackageInfo(packageName, 0, callingUser);
-                if (pInfo != null) {
-                    return pInfo.getLongVersionCode();
-                }
-            } catch (Exception e) {
-            }
-            return 0;
-        }
-
-        @Override
-        public int getTargetSdkVersionForPackage(String packageName) throws RemoteException {
-            int targetSdk = getTargetSdkVersion(packageName);
-            if (targetSdk != -1) {
-                return targetSdk;
-            }
-
-            throw new RemoteException("Couldn't get targetSdkVersion for package " + packageName);
-        }
-
-        @Override
-        public boolean isPackageDebuggable(String packageName) throws RemoteException {
-            int callingUser = UserHandle.getCallingUserId();
-            ApplicationInfo appInfo = getApplicationInfo(packageName, 0, callingUser);
-            if (appInfo != null) {
-                return (0 != (appInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE));
-            }
-
-            throw new RemoteException("Couldn't get debug flag for package " + packageName);
-        }
-
-        @Override
-        public boolean[] isAudioPlaybackCaptureAllowed(String[] packageNames)
-                throws RemoteException {
-            int callingUser = UserHandle.getUserId(Binder.getCallingUid());
-            boolean[] results = new boolean[packageNames.length];
-            for (int i = results.length - 1; i >= 0; --i) {
-                ApplicationInfo appInfo = getApplicationInfo(packageNames[i], 0, callingUser);
-                results[i] = appInfo != null && appInfo.isAudioPlaybackCaptureAllowed();
-            }
-            return results;
-        }
-
-        @Override
-        public int getLocationFlags(String packageName) throws RemoteException {
-            int callingUser = UserHandle.getUserId(Binder.getCallingUid());
-            ApplicationInfo appInfo = getApplicationInfo(packageName,
-                    /*flags*/ 0,
-                    /*userId*/ callingUser);
-            if (appInfo == null) {
-                throw new RemoteException(
-                        "Couldn't get ApplicationInfo for package " + packageName);
-            }
-            return ((appInfo.isSystemApp() ? IPackageManagerNative.LOCATION_SYSTEM : 0)
-                    | (appInfo.isVendor() ? IPackageManagerNative.LOCATION_VENDOR : 0)
-                    | (appInfo.isProduct() ? IPackageManagerNative.LOCATION_PRODUCT : 0));
-        }
-
-        @Override
-        public String getModuleMetadataPackageName() throws RemoteException {
-            return PackageManagerService.this.mModuleInfoProvider.getPackageName();
-        }
-
-        @Override
-        public boolean hasSha256SigningCertificate(String packageName, byte[] certificate)
-                throws RemoteException {
-            return PackageManagerService.this.hasSigningCertificate(
-                packageName, certificate, CERT_INPUT_SHA256);
-        }
-
-        @Override
-        public boolean hasSystemFeature(String featureName, int version) {
-            return PackageManagerService.this.hasSystemFeature(featureName, version);
-        }
-
-        @Override
-        public void registerStagedApexObserver(IStagedApexObserver observer) {
-            mInstallerService.getStagingManager().registerStagedApexObserver(observer);
-        }
-
-        @Override
-        public void unregisterStagedApexObserver(IStagedApexObserver observer) {
-            mInstallerService.getStagingManager().unregisterStagedApexObserver(observer);
-        }
-
-        @Override
-        public String[] getStagedApexModuleNames() {
-            return mInstallerService.getStagingManager()
-                    .getStagedApexModuleNames().toArray(new String[0]);
-        }
-
-        @Override
-        @Nullable
-        public StagedApexInfo getStagedApexInfo(String moduleName) {
-            return mInstallerService.getStagingManager().getStagedApexInfo(moduleName);
-        }
-
     }
 
     private AndroidPackage getPackage(String packageName) {
@@ -10182,17 +9436,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 SparseArray<String> profileOwnerPackages) {
             mProtectedPackages.setDeviceAndProfileOwnerPackages(
                     deviceOwnerUserId, deviceOwnerPackage, profileOwnerPackages);
-
-            final ArraySet<Integer> usersWithPoOrDo = new ArraySet<>();
-            if (deviceOwnerPackage != null) {
-                usersWithPoOrDo.add(deviceOwnerUserId);
-            }
-            final int sz = profileOwnerPackages.size();
-            for (int i = 0; i < sz; i++) {
-                if (profileOwnerPackages.valueAt(i) != null) {
-                    usersWithPoOrDo.add(profileOwnerPackages.keyAt(i));
-                }
-            }
         }
 
         @Override
@@ -11445,7 +10688,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * Temporary method that wraps mSettings.writeLPr() and calls mPermissionManager's
      * writeLegacyPermissionsTEMP() beforehand.
      *
-     * TODO(zhanghai): This should be removed once we finish migration of permission storage.
+     * TODO(b/182523293): This should be removed once we finish migration of permission storage.
      */
     void writeSettingsLPrTEMP() {
         mPermissionManager.writeLegacyPermissionsTEMP(mSettings.mPermissions);
@@ -11802,5 +11045,13 @@ public class PackageManagerService extends IPackageManager.Stub
 
     ResolveInfo getInstantAppInstallerInfo() {
         return mInstantAppInstallerInfo;
+    }
+
+    PackageUsage getPackageUsage() {
+        return mPackageUsage;
+    }
+
+    String getModuleMetadataPackageName() {
+        return mModuleInfoProvider.getPackageName();
     }
 }
