@@ -558,6 +558,8 @@ public class BubbleData {
         }
         Bubble bubbleToRemove = mBubbles.get(indexToRemove);
         bubbleToRemove.stopInflation();
+        overflowBubble(reason, bubbleToRemove);
+
         if (mBubbles.size() == 1) {
             if (hasOverflowBubbles() && (mPositioner.showingInTaskbar() || isExpanded())) {
                 // No more active bubbles but we have stuff in the overflow -- select that view
@@ -580,8 +582,6 @@ public class BubbleData {
         if (!isExpanded()) {
             mStateChange.orderChanged |= repackAll();
         }
-
-        overflowBubble(reason, bubbleToRemove);
 
         // Note: If mBubbles.isEmpty(), then mSelectedBubble is now null.
         if (Objects.equals(mSelectedBubble, bubbleToRemove)) {
