@@ -37,7 +37,7 @@ import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+import com.android.server.wm.traces.common.FlickerComponentName
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -95,9 +95,9 @@ class CloseImeWindowToHomeTest(private val testSpec: FlickerTestParameter) {
     fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
         testSpec.assertWm {
             this.visibleWindowsShownMoreThanOneConsecutiveEntry(listOf(
-                WindowManagerStateHelper.IME_COMPONENT,
-                WindowManagerStateHelper.SPLASH_SCREEN_COMPONENT,
-                WindowManagerStateHelper.SNAPSHOT_COMPONENT))
+                FlickerComponentName.IME,
+                FlickerComponentName.SPLASH_SCREEN,
+                FlickerComponentName.SNAPSHOT))
         }
     }
 
@@ -157,8 +157,8 @@ class CloseImeWindowToHomeTest(private val testSpec: FlickerTestParameter) {
     fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         testSpec.assertLayers {
             this.visibleLayersShownMoreThanOneConsecutiveEntry(listOf(
-                    WindowManagerStateHelper.IME_COMPONENT,
-                    WindowManagerStateHelper.SPLASH_SCREEN_COMPONENT))
+                FlickerComponentName.IME,
+                FlickerComponentName.SPLASH_SCREEN))
         }
     }
 

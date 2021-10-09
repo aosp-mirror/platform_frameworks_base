@@ -17,22 +17,29 @@
 @file:JvmName("CommonAssertions")
 package com.android.server.wm.flicker
 
-import android.content.ComponentName
 import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+import com.android.server.wm.traces.common.FlickerComponentName
 
-val LAUNCHER_COMPONENT = ComponentName("com.google.android.apps.nexuslauncher",
+val LAUNCHER_COMPONENT = FlickerComponentName("com.google.android.apps.nexuslauncher",
         "com.google.android.apps.nexuslauncher.NexusLauncherActivity")
 
+/**
+ * Checks that [FlickerComponentName.STATUS_BAR] window is visible and above the app windows in
+ * all WM trace entries
+ */
 fun FlickerTestParameter.statusBarWindowIsVisible() {
     assertWm {
-        this.isAboveAppWindowVisible(WindowManagerStateHelper.STATUS_BAR_COMPONENT)
+        this.isAboveAppWindowVisible(FlickerComponentName.STATUS_BAR)
     }
 }
 
+/**
+ * Checks that [FlickerComponentName.NAV_BAR] window is visible and above the app windows in
+ * all WM trace entries
+ */
 fun FlickerTestParameter.navBarWindowIsVisible() {
     assertWm {
-        this.isAboveAppWindowVisible(WindowManagerStateHelper.NAV_BAR_COMPONENT)
+        this.isAboveAppWindowVisible(FlickerComponentName.NAV_BAR)
     }
 }
 
@@ -69,21 +76,29 @@ fun FlickerTestParameter.entireScreenCovered(allStates: Boolean = true) {
     }
 }
 
+/**
+ * Checks that [FlickerComponentName.NAV_BAR] layer is visible at the start and end of the SF
+ * trace
+ */
 fun FlickerTestParameter.navBarLayerIsVisible() {
     assertLayersStart {
-        this.isVisible(WindowManagerStateHelper.NAV_BAR_COMPONENT)
+        this.isVisible(FlickerComponentName.NAV_BAR)
     }
     assertLayersEnd {
-        this.isVisible(WindowManagerStateHelper.NAV_BAR_COMPONENT)
+        this.isVisible(FlickerComponentName.NAV_BAR)
     }
 }
 
+/**
+ * Checks that [FlickerComponentName.STATUS_BAR] layer is visible at the start and end of the SF
+ * trace
+ */
 fun FlickerTestParameter.statusBarLayerIsVisible() {
     assertLayersStart {
-        this.isVisible(WindowManagerStateHelper.STATUS_BAR_COMPONENT)
+        this.isVisible(FlickerComponentName.STATUS_BAR)
     }
     assertLayersEnd {
-        this.isVisible(WindowManagerStateHelper.STATUS_BAR_COMPONENT)
+        this.isVisible(FlickerComponentName.STATUS_BAR)
     }
 }
 
@@ -96,10 +111,10 @@ fun FlickerTestParameter.navBarLayerRotatesAndScales(
     val endingPos = WindowUtils.getNavigationBarPosition(endRotation)
 
     assertLayersStart {
-        this.visibleRegion(WindowManagerStateHelper.NAV_BAR_COMPONENT).coversExactly(startingPos)
+        this.visibleRegion(FlickerComponentName.NAV_BAR).coversExactly(startingPos)
     }
     assertLayersEnd {
-        this.visibleRegion(WindowManagerStateHelper.NAV_BAR_COMPONENT).coversExactly(endingPos)
+        this.visibleRegion(FlickerComponentName.NAV_BAR).coversExactly(endingPos)
     }
 }
 
@@ -112,10 +127,10 @@ fun FlickerTestParameter.statusBarLayerRotatesScales(
     val endingPos = WindowUtils.getStatusBarPosition(endRotation)
 
     assertLayersStart {
-        this.visibleRegion(WindowManagerStateHelper.STATUS_BAR_COMPONENT).coversExactly(startingPos)
+        this.visibleRegion(FlickerComponentName.STATUS_BAR).coversExactly(startingPos)
     }
     assertLayersEnd {
-        this.visibleRegion(WindowManagerStateHelper.STATUS_BAR_COMPONENT).coversExactly(endingPos)
+        this.visibleRegion(FlickerComponentName.STATUS_BAR).coversExactly(endingPos)
     }
 }
 
@@ -132,15 +147,15 @@ fun FlickerTestParameter.statusBarLayerRotatesScales(
  *     (useful mostly for app launch)
  */
 fun FlickerTestParameter.replacesLayer(
-    originalLayer: ComponentName,
-    newLayer: ComponentName,
+    originalLayer: FlickerComponentName,
+    newLayer: FlickerComponentName,
     ignoreSnapshot: Boolean = false
 ) {
     assertLayers {
         val assertion = this.isVisible(originalLayer)
         if (ignoreSnapshot) {
             assertion.then()
-                    .isVisible(WindowManagerStateHelper.SNAPSHOT_COMPONENT, isOptional = true)
+                    .isVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
         }
         assertion.then().isVisible(newLayer)
     }

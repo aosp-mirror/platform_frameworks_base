@@ -39,7 +39,7 @@ import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.SNAPSHOT_COMPONENT
+import com.android.server.wm.traces.common.FlickerComponentName
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -189,9 +189,9 @@ class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestParamet
         testSpec.assertWm {
             this.isAppWindowInvisible(testApp1.component)
                     .then()
-                    .isAppWindowVisible(SNAPSHOT_COMPONENT, isOptional = true)
+                    .isAppWindowVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
                     .then()
-                    .isAppWindowVisible(testApp1.component, ignoreActivity = true)
+                    .isAppWindowVisible(testApp1.component)
         }
     }
 
@@ -217,7 +217,7 @@ class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestParamet
     @Test
     fun app2WindowBecomesAndStaysInvisible() {
         testSpec.assertWm {
-            this.isAppWindowVisible(testApp2.component, ignoreActivity = true)
+            this.isAppWindowVisible(testApp2.component)
                     .then()
                     .isAppWindowInvisible(testApp2.component)
         }
@@ -251,7 +251,7 @@ class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestParamet
                     // TODO: Do we actually want to test this? Seems too implementation specific...
                     .isAppWindowVisible(LAUNCHER_COMPONENT, isOptional = true)
                     .then()
-                    .isAppWindowVisible(SNAPSHOT_COMPONENT, isOptional = true)
+                    .isAppWindowVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
                     .then()
                     .isAppWindowVisible(testApp1.component)
         }
@@ -270,7 +270,7 @@ class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestParamet
                     .then()
                     .isVisible(LAUNCHER_COMPONENT, isOptional = true)
                     .then()
-                    .isVisible(SNAPSHOT_COMPONENT, isOptional = true)
+                    .isVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
                     .then()
                     .isVisible(testApp1.component)
         }

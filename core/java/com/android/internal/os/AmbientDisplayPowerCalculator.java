@@ -16,6 +16,8 @@
 
 package com.android.internal.os;
 
+import static com.android.internal.os.PowerProfile.POWER_GROUP_DISPLAY_AMBIENT;
+
 import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
@@ -32,8 +34,9 @@ public class AmbientDisplayPowerCalculator extends PowerCalculator {
     private final UsageBasedPowerEstimator mPowerEstimator;
 
     public AmbientDisplayPowerCalculator(PowerProfile powerProfile) {
+        // TODO(b/200239964): update to support multidisplay.
         mPowerEstimator = new UsageBasedPowerEstimator(
-                powerProfile.getAveragePower(PowerProfile.POWER_AMBIENT_DISPLAY));
+                powerProfile.getAveragePowerForOrdinal(POWER_GROUP_DISPLAY_AMBIENT, 0));
     }
 
     /**

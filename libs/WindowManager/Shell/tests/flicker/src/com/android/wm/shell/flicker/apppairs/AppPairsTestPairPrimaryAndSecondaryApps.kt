@@ -77,8 +77,8 @@ class AppPairsTestPairPrimaryAndSecondaryApps(
     @Test
     fun bothAppWindowsVisible() {
         testSpec.assertWmEnd {
-            isVisible(primaryApp.component)
-            isVisible(secondaryApp.component)
+            isAppWindowVisible(primaryApp.component)
+            isAppWindowVisible(secondaryApp.component)
         }
     }
 

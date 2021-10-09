@@ -3026,4 +3026,7 @@
     <string name="see_all_networks">See all</string>
     <!-- Summary for warning to disconnect ethernet first then switch to other networks. [CHAR LIMIT=60] -->
     <string name="to_switch_networks_disconnect_ethernet">To switch networks, disconnect ethernet</string>
+
+    <!-- Title for User Switch dialog. [CHAR LIMIT=20] -->
+    <string name="qs_user_switch_dialog_title">Select user</string>
 </resources>

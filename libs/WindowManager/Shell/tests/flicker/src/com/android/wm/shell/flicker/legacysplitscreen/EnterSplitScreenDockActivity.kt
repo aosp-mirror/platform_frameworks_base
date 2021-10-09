@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
-import android.content.ComponentName
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
@@ -25,13 +24,13 @@ import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.annotation.Group1
+import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+import com.android.server.wm.traces.common.FlickerComponentName
 import com.android.wm.shell.flicker.dockedStackDividerBecomesVisible
 import com.android.wm.shell.flicker.dockedStackPrimaryBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
@@ -50,7 +49,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group1
+@Group4
 class EnterSplitScreenDockActivity(
     testSpec: FlickerTestParameter
 ) : LegacySplitScreenTransition(testSpec) {
@@ -62,10 +61,10 @@ class EnterSplitScreenDockActivity(
             }
         }
 
-    override val ignoredWindows: List<ComponentName>
+    override val ignoredWindows: List<FlickerComponentName>
         get() = listOf(LAUNCHER_COMPONENT, LIVE_WALLPAPER_COMPONENT,
-            splitScreenApp.component, WindowManagerStateHelper.SPLASH_SCREEN_COMPONENT,
-            WindowManagerStateHelper.SNAPSHOT_COMPONENT, LAUNCHER_COMPONENT)
+            splitScreenApp.component, FlickerComponentName.SPLASH_SCREEN,
+                FlickerComponentName.SNAPSHOT, LAUNCHER_COMPONENT)
 
     @Presubmit
     @Test
@@ -89,7 +88,7 @@ class EnterSplitScreenDockActivity(
     @Test
     fun appWindowIsVisible() {
         testSpec.assertWmEnd {
-            isVisible(splitScreenApp.component)
+            isAppWindowVisible(splitScreenApp.component)
         }
     }
 
