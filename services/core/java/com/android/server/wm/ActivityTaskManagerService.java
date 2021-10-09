@@ -991,6 +991,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             mWindowManager = wm;
             mRootWindowContainer = wm.mRoot;
+            mWindowOrganizerController.setWindowManager(wm);
             mTempConfig.setToDefaults();
             mTempConfig.setLocales(LocaleList.getDefault());
             mConfigurationSeq = mTempConfig.seq = 1;

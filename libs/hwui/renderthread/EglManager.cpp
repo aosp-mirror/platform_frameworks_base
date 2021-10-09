@@ -28,6 +28,7 @@
 
 #include "Frame.h"
 #include "Properties.h"
+#include "RenderEffectCapabilityQuery.h"
 #include "utils/Color.h"
 #include "utils/StringUtils.h"
 
@@ -148,7 +149,11 @@ void EglManager::initialize() {
     mHasWideColorGamutSupport = EglExtensions.glColorSpace && hasWideColorSpaceExtension;
 
     auto* vendor = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
-    Properties::enableRenderEffectCache = (strcmp(vendor, "Qualcomm") != 0);
+    auto* version = reinterpret_cast<const char*>(glGetString(GL_VERSION));
+    Properties::enableRenderEffectCache = supportsRenderEffectCache(
+        vendor, version);
+    ALOGV("RenderEffectCache supported %d on driver version %s",
+          Properties::enableRenderEffectCache, version);
 }
 
 EGLConfig EglManager::load8BitsConfig(EGLDisplay display, EglManager::SwapBehavior swapBehavior) {
