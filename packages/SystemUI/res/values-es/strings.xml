@@ -123,8 +123,8 @@
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"No se han podido obtener los permisos"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"No se ha podido empezar a grabar la pantalla"</string>
     <string name="usb_preference_title" msgid="1439924437558480718">"Opciones de transferencia de archivos por USB"</string>
-    <string name="use_mtp_button_title" msgid="5036082897886518086">"Activar como reproductor de medios (MTP)"</string>
-    <string name="use_ptp_button_title" msgid="7676427598943446826">"Activar como cámara (PTP)"</string>
+    <string name="use_mtp_button_title" msgid="5036082897886518086">"Montar como reproductor de medios (MTP)"</string>
+    <string name="use_ptp_button_title" msgid="7676427598943446826">"Montar como cámara (PTP)"</string>
     <string name="installer_cd_button_title" msgid="5499998592841984743">"Instalar Android File Transfer para Mac"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Atrás"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Inicio"</string>
