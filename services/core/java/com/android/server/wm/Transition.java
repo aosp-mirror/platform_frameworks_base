@@ -415,7 +415,16 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                     if (commitVisibility) {
                         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                                 "  Commit activity becoming invisible: %s", ar);
-                        ar.commitVisibility(false /* visible */, false /* performLayout */);
+                        final Task task = ar.getTask();
+                        if (task != null && !task.isVisibleRequested()
+                                && mTransientLaunches != null) {
+                            // If transition is transient, then snapshots are taken at end of
+                            // transition.
+                            mController.mTaskSnapshotController.recordTaskSnapshot(
+                                    task, false /* allowSnapshotHome */);
+                        }
+                        ar.commitVisibility(false /* visible */, false /* performLayout */,
+                                true /* fromTransition */);
                         activitiesWentInvisible = true;
                     }
                 }
@@ -556,6 +565,19 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             final WindowContainer wc = mParticipants.valueAt(i);
             if (wc.asWindowToken() == null || !wc.isVisibleRequested()) continue;
             mVisibleAtTransitionEndTokens.add(wc.asWindowToken());
+        }
+
+        // Take task snapshots before the animation so that we can capture IME before it gets
+        // transferred. If transition is transient, IME won't be moved during the transition and
+        // the tasks are still live, so we take the snapshot at the end of the transition instead.
+        if (mTransientLaunches == null) {
+            for (int i = mParticipants.size() - 1; i >= 0; --i) {
+                final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
+                if (ar == null || ar.isVisibleRequested() || ar.getTask() == null
+                        || ar.getTask().isVisibleRequested()) continue;
+                mController.mTaskSnapshotController.recordTaskSnapshot(
+                        ar.getTask(), false /* allowSnapshotHome */);
+            }
         }
 
         mStartTransaction = transaction;

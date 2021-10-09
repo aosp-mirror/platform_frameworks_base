@@ -50,6 +50,7 @@ import android.accessibilityservice.AccessibilityTrace;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
@@ -134,6 +135,8 @@ final class AccessibilityController {
     private SparseArray<DisplayMagnifier> mDisplayMagnifiers = new SparseArray<>();
     private SparseArray<WindowsForAccessibilityObserver> mWindowsForAccessibilityObserver =
             new SparseArray<>();
+    private SparseArray<IBinder> mFocusedWindow = new SparseArray<>();
+    private int mFocusedDisplay = -1;
 
     // Set to true if initializing window population complete.
     private boolean mAllObserversInitialized = true;
@@ -601,6 +604,29 @@ final class AccessibilityController {
         final Display display = dc.getDisplay();
 
         return display.getType() == Display.TYPE_VIRTUAL && dc.getParentWindow() != null;
+    }
+
+    void onFocusChanged(InputTarget lastTarget, InputTarget newTarget) {
+        if (lastTarget != null) {
+            mFocusedWindow.remove(lastTarget.getDisplayId());
+        }
+        if (newTarget != null) {
+            int displayId = newTarget.getDisplayId();
+            IBinder clientBinder = newTarget.getIWindow().asBinder();
+            mFocusedWindow.put(displayId, clientBinder);
+        }
+    }
+
+    public void onDisplayRemoved(int displayId) {
+        mFocusedWindow.remove(displayId);
+    }
+
+    public void setFocusedDisplay(int focusedDisplayId) {
+        mFocusedDisplay = focusedDisplayId;
+    }
+
+    @Nullable IBinder getFocusedWindowToken() {
+        return mFocusedWindow.get(mFocusedDisplay);
     }
 
     /**
