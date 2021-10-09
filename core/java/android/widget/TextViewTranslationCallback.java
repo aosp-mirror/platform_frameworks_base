@@ -64,6 +64,12 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
      */
     @Override
     public boolean onShowTranslation(@NonNull View view) {
+        if (mIsShowingTranslation) {
+            if (DEBUG) {
+                Log.d(TAG, view + " is already showing translated text.");
+            }
+            return false;
+        }
         ViewTranslationResponse response = view.getViewTranslationResponse();
         if (response == null) {
             Log.e(TAG, "onShowTranslation() shouldn't be called before "
@@ -152,7 +158,7 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
         return true;
     }
 
-    boolean isShowingTranslation() {
+    public boolean isShowingTranslation() {
         return mIsShowingTranslation;
     }
 
