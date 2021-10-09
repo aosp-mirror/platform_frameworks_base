@@ -426,15 +426,19 @@ public class UiTranslationController {
                     continue;
                 }
                 mActivity.runOnUiThread(() -> {
+                    ViewTranslationCallback callback = view.getViewTranslationCallback();
                     if (view.getViewTranslationResponse() != null
                             && view.getViewTranslationResponse().equals(response)) {
-                        if (DEBUG) {
-                            Log.d(TAG, "Duplicate ViewTranslationResponse for " + autofillId
-                                    + ". Ignoring.");
+                        if (callback instanceof TextViewTranslationCallback) {
+                            if (((TextViewTranslationCallback) callback).isShowingTranslation()) {
+                                if (DEBUG) {
+                                    Log.d(TAG, "Duplicate ViewTranslationResponse for " + autofillId
+                                            + ". Ignoring.");
+                                }
+                                return;
+                            }
                         }
-                        return;
                     }
-                    ViewTranslationCallback callback = view.getViewTranslationCallback();
                     if (callback == null) {
                         if (view instanceof TextView) {
                             // developer doesn't provide their override, we set the default TextView
