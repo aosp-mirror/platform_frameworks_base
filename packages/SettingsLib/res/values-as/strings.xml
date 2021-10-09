@@ -558,7 +558,7 @@
     <string name="user_new_profile_name" msgid="2405500423304678841">"নতুন প্ৰ\'ফাইল"</string>
     <string name="user_info_settings_title" msgid="6351390762733279907">"ব্যৱহাৰকাৰীৰ তথ্য"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"প্ৰ\'ফাইলৰ তথ্য"</string>
-    <string name="user_need_lock_message" msgid="4311424336209509301">"আপুনি সীমিত প্ৰ\'ফাইল এটা সৃষ্টি কৰাৰ আগেয়ে, আপোনাৰ ব্যক্তিগত ডেটা আৰু এপবিলাকক সুৰক্ষিত কৰিবলৈ স্ক্ৰীণ লক এটা নিৰ্ধাৰণ কৰিব লাগিব।"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"আপুনি সীমিত প্ৰ’ফাইল এটা সৃষ্টি কৰাৰ আগেয়ে, আপোনাৰ ব্যক্তিগত ডেটা আৰু এপ্বিলাকক সুৰক্ষিত কৰিবলৈ স্ক্ৰীন লক এটা নিৰ্ধাৰণ কৰিব লাগিব।"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"লক ছেট কৰক"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g>লৈ সলনি কৰক"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"নতুন ব্যৱহাৰকাৰী সৃষ্টি কৰি থকা হৈছে…"</string>
