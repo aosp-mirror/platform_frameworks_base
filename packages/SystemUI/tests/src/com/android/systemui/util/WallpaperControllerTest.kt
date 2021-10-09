@@ -138,7 +138,7 @@ class WallpaperControllerTest : SysuiTestCase() {
 
     private fun createWallpaperInfo(useDefaultTransition: Boolean = true): WallpaperInfo {
         val info = mock(WallpaperInfo::class.java)
-        whenever(info.shouldUseDefaultDisplayStateChangeTransition())
+        whenever(info.shouldUseDefaultUnfoldTransition())
             .thenReturn(useDefaultTransition)
         return info
     }

@@ -399,10 +399,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private static final int STARTING_WINDOW_TYPE_SNAPSHOT = 1;
     private static final int STARTING_WINDOW_TYPE_SPLASH_SCREEN = 2;
 
-    /**
-     * Value to increment the z-layer when boosting a layer during animations. BOOST in l33tsp34k.
-     */
-    @VisibleForTesting static final int Z_BOOST_BASE = 800570000;
     static final int INVALID_PID = -1;
 
     // How long we wait until giving up on the last activity to pause.  This
@@ -4242,20 +4238,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return callback.test(this) ? this : null;
     }
 
-    @Override
-    protected void setLayer(Transaction t, int layer) {
-        if (!mSurfaceAnimator.hasLeash()) {
-            t.setLayer(mSurfaceControl, layer);
-        }
-    }
-
-    @Override
-    protected void setRelativeLayer(Transaction t, SurfaceControl relativeTo, int layer) {
-        if (!mSurfaceAnimator.hasLeash()) {
-            t.setRelativeLayer(mSurfaceControl, relativeTo, layer);
-        }
-    }
-
     void logStartActivity(int tag, Task task) {
         final Uri data = intent.getData();
         final String strData = data != null ? data.toSafeString() : null;
@@ -4906,8 +4888,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * @param visible {@code true} if this {@link ActivityRecord} should become visible, otherwise
      *                this should become invisible.
      * @param performLayout if {@code true}, perform surface placement after committing visibility.
+     * @param fromTransition {@code true} if this is part of finishing a transition.
      */
-    void commitVisibility(boolean visible, boolean performLayout) {
+    void commitVisibility(boolean visible, boolean performLayout, boolean fromTransition) {
         // Reset the state of mVisibleSetFromTransferredStartingWindow since visibility is actually
         // been set by the app now.
         mVisibleSetFromTransferredStartingWindow = false;
@@ -4957,7 +4940,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         displayContent.getInputMonitor().updateInputWindowsLw(false /*force*/);
         mUseTransferredAnimation = false;
 
-        postApplyAnimation(visible);
+        postApplyAnimation(visible, fromTransition);
+    }
+
+    void commitVisibility(boolean visible, boolean performLayout) {
+        commitVisibility(visible, performLayout, false /* fromTransition */);
     }
 
     /**
@@ -4968,8 +4955,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *
      * @param visible {@code true} if this {@link ActivityRecord} has become visible, otherwise
      *                this has become invisible.
+     * @param fromTransition {@code true} if this call is part of finishing a transition. This is
+     *                       needed because the shell transition is no-longer active by the time
+     *                       commitVisibility is called.
      */
-    private void postApplyAnimation(boolean visible) {
+    private void postApplyAnimation(boolean visible, boolean fromTransition) {
         final boolean usingShellTransitions = mTransitionController.isShellTransitionsEnabled();
         final boolean delayed = isAnimating(TRANSITION | PARENTS | CHILDREN,
                 ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_WINDOW_ANIMATION
@@ -5010,7 +5000,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final DisplayContent displayContent = getDisplayContent();
         if (!displayContent.mClosingApps.contains(this)
-                && !displayContent.mOpeningApps.contains(this)) {
+                && !displayContent.mOpeningApps.contains(this)
+                && !fromTransition) {
             // Take the screenshot before possibly hiding the WSA, otherwise the screenshot
             // will not be taken.
             mWmService.mTaskSnapshotController.notifyAppVisibilityChanged(this, visible);
@@ -6785,12 +6776,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return candidate;
     }
 
-    SurfaceControl getAppAnimationLayer() {
-        return getAppAnimationLayer(isActivityTypeHome() ? ANIMATION_LAYER_HOME
-                : needsZBoost() ? ANIMATION_LAYER_BOOSTED
-                        : ANIMATION_LAYER_STANDARD);
-    }
-
     @Override
     boolean needsZBoost() {
         return mNeedsZBoost || super.needsZBoost();
@@ -6851,29 +6836,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 || mDisplayContent.isNextTransitionForward();
     }
 
-    private int getAnimationLayer() {
-        // The leash is parented to the animation layer. We need to preserve the z-order by using
-        // the prefix order index, but we boost if necessary.
-        int layer;
-        if (!inPinnedWindowingMode()) {
-            layer = getPrefixOrderIndex();
-        } else {
-            // Root pinned tasks have animations take place within themselves rather than an
-            // animation layer so we need to preserve the order relative to the root task (e.g.
-            // the order of our task/parent).
-            layer = getParent().getPrefixOrderIndex();
-        }
-
-        if (mNeedsZBoost) {
-            layer += Z_BOOST_BASE;
-        }
-        return layer;
-    }
-
     @Override
-    public void onAnimationLeashCreated(Transaction t, SurfaceControl leash) {
-        t.setLayer(leash, getAnimationLayer());
-        getDisplayContent().assignRootTaskOrdering();
+    void resetSurfacePositionForAnimationLeash(SurfaceControl.Transaction t) {
+        // Noop as Activity may be offset for letterbox
     }
 
     @Override
@@ -6902,7 +6867,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             // Crop to root task bounds.
             t.setLayer(leash, 0);
-            t.setLayer(mAnimationBoundsLayer, getAnimationLayer());
+            t.setLayer(mAnimationBoundsLayer, getLastLayer());
 
             // Reparent leash to animation bounds layer.
             t.reparent(leash, mAnimationBoundsLayer);

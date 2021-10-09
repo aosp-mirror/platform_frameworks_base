@@ -105,15 +105,20 @@ public final class StationaryThrottlingLocationProvider extends DelegateLocation
 
         synchronized (mLock) {
             mDeviceIdleHelper.addListener(this);
-            onDeviceIdleChanged(mDeviceIdleHelper.isDeviceIdle());
+            mDeviceIdle = mDeviceIdleHelper.isDeviceIdle();
+            mDeviceStationaryHelper.addListener(this);
+            mDeviceStationary = false;
+            mDeviceStationaryRealtimeMs = Long.MIN_VALUE;
+
+            onThrottlingChangedLocked(false);
         }
     }
 
     @Override
     protected void onStop() {
         synchronized (mLock) {
+            mDeviceStationaryHelper.removeListener(this);
             mDeviceIdleHelper.removeListener(this);
-            onDeviceIdleChanged(false);
 
             mIncomingRequest = ProviderRequest.EMPTY_REQUEST;
             mOutgoingRequest = ProviderRequest.EMPTY_REQUEST;
@@ -146,27 +151,13 @@ public final class StationaryThrottlingLocationProvider extends DelegateLocation
             }
 
             mDeviceIdle = deviceIdle;
-
-            if (deviceIdle) {
-                // device stationary helper will deliver an immediate listener update
-                mDeviceStationaryHelper.addListener(this);
-            } else {
-                mDeviceStationaryHelper.removeListener(this);
-                mDeviceStationary = false;
-                mDeviceStationaryRealtimeMs = Long.MIN_VALUE;
-                onThrottlingChangedLocked(false);
-            }
+            onThrottlingChangedLocked(false);
         }
     }
 
     @Override
     public void onDeviceStationaryChanged(boolean deviceStationary) {
         synchronized (mLock) {
-            if (!mDeviceIdle) {
-                // stationary detection is only registered while idle - ignore late notifications
-                return;
-            }
-
             if (mDeviceStationary == deviceStationary) {
                 return;
             }

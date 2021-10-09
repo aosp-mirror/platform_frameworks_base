@@ -446,7 +446,7 @@ public class StatusBarStateControllerImpl implements
             mIsFullscreen = isFullscreen;
             synchronized (mListeners) {
                 for (RankedListener rl : new ArrayList<>(mListeners)) {
-                    rl.mListener.onFullscreenStateChanged(isFullscreen, true /* isImmersive */);
+                    rl.mListener.onFullscreenStateChanged(isFullscreen);
                 }
             }
         }

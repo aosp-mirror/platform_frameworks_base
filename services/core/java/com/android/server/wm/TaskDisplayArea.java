@@ -99,13 +99,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     private int mColorLayerCounter = 0;
 
     /**
-     * A control placed at the appropriate level for transitions to occur.
-     */
-    private SurfaceControl mAppAnimationLayer;
-    private SurfaceControl mBoostedAppAnimationLayer;
-    private SurfaceControl mHomeAppAnimationLayer;
-
-    /**
      * Given that the split-screen divider does not have an AppWindowToken, it
      * will have to live inside of a "NonAppWindowContainer". However, in visual Z order
      * it will need to be interleaved with some of our children, appearing on top of
@@ -132,7 +125,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     private final ArrayList<WindowContainer> mTmpNormalChildren = new ArrayList<>();
     private final ArrayList<WindowContainer> mTmpHomeChildren = new ArrayList<>();
     private final IntArray mTmpNeedsZBoostIndexes = new IntArray();
-    private int mTmpLayerForAnimationLayer;
 
     private ArrayList<Task> mTmpTasks = new ArrayList<>();
 
@@ -871,33 +863,13 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
 
         int layer = 0;
         // Place root home tasks to the bottom.
-        layer = adjustRootTaskLayer(t, mTmpHomeChildren, layer, false /* normalRootTasks */);
-        // The home animation layer is between the root home tasks and the normal root tasks.
-        final int layerForHomeAnimationLayer = layer++;
-        mTmpLayerForAnimationLayer = layer++;
-        layer = adjustRootTaskLayer(t, mTmpNormalChildren, layer, true /* normalRootTasks */);
+        layer = adjustRootTaskLayer(t, mTmpHomeChildren, layer);
+        adjustRootTaskLayer(t, mTmpNormalChildren, layer);
 
-        // The boosted animation layer is between the normal root tasks and the always on top
-        // root tasks.
-        final int layerForBoostedAnimationLayer = layer++;
         // Always on top tasks layer should higher than split divider layer so set it as start.
-        layer = SPLIT_DIVIDER_LAYER + 1;
-        adjustRootTaskLayer(t, mTmpAlwaysOnTopChildren, layer, false /* normalRootTasks */);
-
-        t.setLayer(mHomeAppAnimationLayer, layerForHomeAnimationLayer);
-        t.setLayer(mAppAnimationLayer, mTmpLayerForAnimationLayer);
         t.setLayer(mSplitScreenDividerAnchor, SPLIT_DIVIDER_LAYER);
-        t.setLayer(mBoostedAppAnimationLayer, layerForBoostedAnimationLayer);
-    }
-
-    private int adjustNormalRootTaskLayer(WindowContainer child, int layer) {
-        if ((child.asTask() != null && child.asTask().isAnimatingByRecents())
-                || child.isAppTransitioning()) {
-            // The animation layer is located above the highest animating root task and no
-            // higher.
-            mTmpLayerForAnimationLayer = layer++;
-        }
-        return layer;
+        layer = SPLIT_DIVIDER_LAYER + 1;
+        adjustRootTaskLayer(t, mTmpAlwaysOnTopChildren, layer);
     }
 
     /**
@@ -906,11 +878,10 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      * normal rootTasks.
      *
      * @param startLayer   The beginning layer of this group of rootTasks.
-     * @param normalRootTasks Set {@code true} if this group is neither home nor always on top.
      * @return The adjusted layer value.
      */
     private int adjustRootTaskLayer(SurfaceControl.Transaction t,
-            ArrayList<WindowContainer> children, int startLayer, boolean normalRootTasks) {
+            ArrayList<WindowContainer> children, int startLayer) {
         mTmpNeedsZBoostIndexes.clear();
         final int childCount = children.size();
         for (int i = 0; i < childCount; i++) {
@@ -923,9 +894,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
 
             if (!childNeedsZBoost) {
                 child.assignLayer(t, startLayer++);
-                if (normalRootTasks) {
-                    startLayer = adjustNormalRootTaskLayer(child, startLayer);
-                }
             } else {
                 mTmpNeedsZBoostIndexes.add(i);
             }
@@ -935,9 +903,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         for (int i = 0; i < zBoostSize; i++) {
             final WindowContainer child = children.get(mTmpNeedsZBoostIndexes.get(i));
             child.assignLayer(t, startLayer++);
-            if (normalRootTasks) {
-                startLayer = adjustNormalRootTaskLayer(child, startLayer);
-            }
         }
         return startLayer;
     }
@@ -948,19 +913,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             needsZBoost[0] |= task.needsZBoost();
         });
         return needsZBoost[0];
-    }
-
-    @Override
-    SurfaceControl getAppAnimationLayer(@AnimationLayer int animationLayer) {
-        switch (animationLayer) {
-            case ANIMATION_LAYER_BOOSTED:
-                return mBoostedAppAnimationLayer;
-            case ANIMATION_LAYER_HOME:
-                return mHomeAppAnimationLayer;
-            case ANIMATION_LAYER_STANDARD:
-            default:
-                return mAppAnimationLayer;
-        }
     }
 
     @Override
@@ -983,42 +935,21 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                         .setName("colorBackgroundLayer")
                         .setCallsite("TaskDisplayArea.onParentChanged")
                         .build();
-                mAppAnimationLayer = makeChildSurface(null)
-                        .setName("animationLayer")
-                        .setCallsite("TaskDisplayArea.onParentChanged")
-                        .build();
-                mBoostedAppAnimationLayer = makeChildSurface(null)
-                        .setName("boostedAnimationLayer")
-                        .setCallsite("TaskDisplayArea.onParentChanged")
-                        .build();
-                mHomeAppAnimationLayer = makeChildSurface(null)
-                        .setName("homeAnimationLayer")
-                        .setCallsite("TaskDisplayArea.onParentChanged")
-                        .build();
                 mSplitScreenDividerAnchor = makeChildSurface(null)
                         .setName("splitScreenDividerAnchor")
                         .setCallsite("TaskDisplayArea.onParentChanged")
                         .build();
 
                 getSyncTransaction()
-                        .show(mAppAnimationLayer)
-                        .show(mBoostedAppAnimationLayer)
-                        .show(mHomeAppAnimationLayer)
                         .show(mSplitScreenDividerAnchor);
             });
         } else {
             super.onParentChanged(newParent, oldParent);
             mWmService.mTransactionFactory.get()
                     .remove(mColorBackgroundLayer)
-                    .remove(mAppAnimationLayer)
-                    .remove(mBoostedAppAnimationLayer)
-                    .remove(mHomeAppAnimationLayer)
                     .remove(mSplitScreenDividerAnchor)
                     .apply();
             mColorBackgroundLayer = null;
-            mAppAnimationLayer = null;
-            mBoostedAppAnimationLayer = null;
-            mHomeAppAnimationLayer = null;
             mSplitScreenDividerAnchor = null;
         }
     }
@@ -1059,15 +990,12 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     @Override
     void migrateToNewSurfaceControl(SurfaceControl.Transaction t) {
         super.migrateToNewSurfaceControl(t);
-        if (mAppAnimationLayer == null) {
+        if (mColorBackgroundLayer == null) {
             return;
         }
 
         // As TaskDisplayArea is getting a new surface, reparent and reorder the child surfaces.
         t.reparent(mColorBackgroundLayer, mSurfaceControl);
-        t.reparent(mAppAnimationLayer, mSurfaceControl);
-        t.reparent(mBoostedAppAnimationLayer, mSurfaceControl);
-        t.reparent(mHomeAppAnimationLayer, mSurfaceControl);
         t.reparent(mSplitScreenDividerAnchor, mSurfaceControl);
         reassignLayer(t);
         scheduleAnimation();

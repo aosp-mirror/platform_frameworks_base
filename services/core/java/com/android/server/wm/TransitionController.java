@@ -59,6 +59,7 @@ class TransitionController {
 
     private ITransitionPlayer mTransitionPlayer;
     final ActivityTaskManagerService mAtm;
+    final TaskSnapshotController mTaskSnapshotController;
 
     private final ArrayList<WindowManagerInternal.AppTransitionListener> mLegacyListeners =
             new ArrayList<>();
@@ -79,9 +80,11 @@ class TransitionController {
     // TODO(b/188595497): remove when not needed.
     final StatusBarManagerInternal mStatusBar;
 
-    TransitionController(ActivityTaskManagerService atm) {
+    TransitionController(ActivityTaskManagerService atm,
+            TaskSnapshotController taskSnapshotController) {
         mAtm = atm;
         mStatusBar = LocalServices.getService(StatusBarManagerInternal.class);
+        mTaskSnapshotController = taskSnapshotController;
         mTransitionPlayerDeath = () -> {
             synchronized (mAtm.mGlobalLock) {
                 // Clean-up/finish any playing transitions.

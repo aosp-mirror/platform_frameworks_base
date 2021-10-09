@@ -295,7 +295,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             ShellExecutor mainExecutor
     ) {
         // Ensure that we are the primary user's SystemUI.
-        final int processUser = UserManager.get(context).getUserHandle();
+        final int processUser = UserManager.get(context).getProcessUserId();
         if (processUser != UserHandle.USER_SYSTEM) {
             throw new IllegalStateException("Non-primary Pip component not currently supported.");
         }

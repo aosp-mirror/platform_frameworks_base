@@ -129,6 +129,7 @@ public final class StorageEventHelper extends StorageEventListener {
             return;
         }
 
+        final AppDataHelper appDataHelper = new AppDataHelper(mPm);
         final ArrayList<PackageFreezer> freezers = new ArrayList<>();
         final ArrayList<AndroidPackage> loaded = new ArrayList<>();
         final int parseFlags = mPm.mDefParseFlags | ParsingPackageUtils.PARSE_EXTERNAL_STORAGE;
@@ -155,7 +156,7 @@ public final class StorageEventHelper extends StorageEventListener {
                 }
 
                 if (!Build.FINGERPRINT.equals(ver.fingerprint)) {
-                    mPm.clearAppDataLIF(
+                    appDataHelper.clearAppDataLIF(
                             ps.getPkg(), UserHandle.USER_ALL, FLAG_STORAGE_DE | FLAG_STORAGE_CE
                             | FLAG_STORAGE_EXTERNAL | Installer.FLAG_CLEAR_CODE_CACHE_ONLY
                             | Installer.FLAG_CLEAR_APP_DATA_KEEP_ART_PROFILES);
@@ -182,7 +183,8 @@ public final class StorageEventHelper extends StorageEventListener {
             try {
                 sm.prepareUserStorage(volumeUuid, user.id, user.serialNumber, flags);
                 synchronized (mPm.mInstallLock) {
-                    mPm.reconcileAppsDataLI(volumeUuid, user.id, flags, true /* migrateAppData */);
+                    appDataHelper.reconcileAppsDataLI(volumeUuid, user.id, flags,
+                            true /* migrateAppData */);
                 }
             } catch (IllegalStateException e) {
                 // Device was probably ejected, and we'll process that event momentarily

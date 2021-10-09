@@ -16,9 +16,6 @@
 
 package com.android.wm.shell.fullscreen;
 
-import static android.graphics.Color.blue;
-import static android.graphics.Color.green;
-import static android.graphics.Color.red;
 import static android.util.MathUtils.lerp;
 import static android.view.Display.DEFAULT_DISPLAY;
 
@@ -36,12 +33,11 @@ import android.view.InsetsState;
 import android.view.SurfaceControl;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
-import com.android.wm.shell.R;
-import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayInsetsController.OnInsetsChangedListener;
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider;
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider.UnfoldListener;
+import com.android.wm.shell.unfold.UnfoldBackgroundController;
 
 import java.util.concurrent.Executor;
 
@@ -59,21 +55,17 @@ public final class FullscreenUnfoldController implements UnfoldListener,
     private static final float VERTICAL_START_MARGIN = 0.03f;
     private static final float END_SCALE = 1f;
     private static final float START_SCALE = END_SCALE - VERTICAL_START_MARGIN * 2;
-    private static final int BACKGROUND_LAYER_Z_INDEX = -1;
 
-    private final Context mContext;
     private final Executor mExecutor;
     private final ShellUnfoldProgressProvider mProgressProvider;
-    private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
     private final DisplayInsetsController mDisplayInsetsController;
 
     private final SparseArray<AnimationContext> mAnimationContextByTaskId = new SparseArray<>();
+    private final UnfoldBackgroundController mBackgroundController;
 
-    private SurfaceControl mBackgroundLayer;
     private InsetsSource mTaskbarInsetsSource;
 
     private final float mWindowCornerRadiusPx;
-    private final float[] mBackgroundColor;
     private final float mExpandedTaskBarHeight;
 
     private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
@@ -81,19 +73,17 @@ public final class FullscreenUnfoldController implements UnfoldListener,
     public FullscreenUnfoldController(
             @NonNull Context context,
             @NonNull Executor executor,
+            @NonNull UnfoldBackgroundController backgroundController,
             @NonNull ShellUnfoldProgressProvider progressProvider,
-            @NonNull RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             @NonNull DisplayInsetsController displayInsetsController
     ) {
-        mContext = context;
         mExecutor = executor;
-        mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
         mProgressProvider = progressProvider;
         mDisplayInsetsController = displayInsetsController;
         mWindowCornerRadiusPx = ScreenDecorationsUtils.getWindowCornerRadius(context);
         mExpandedTaskBarHeight = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.taskbar_frame_height);
-        mBackgroundColor = getBackgroundColor();
+        mBackgroundController = backgroundController;
     }
 
     /**
@@ -108,7 +98,7 @@ public final class FullscreenUnfoldController implements UnfoldListener,
     public void onStateChangeProgress(float progress) {
         if (mAnimationContextByTaskId.size() == 0) return;
 
-        ensureBackground();
+        mBackgroundController.ensureBackground(mTransaction);
 
         for (int i = mAnimationContextByTaskId.size() - 1; i >= 0; i--) {
             final AnimationContext context = mAnimationContextByTaskId.valueAt(i);
@@ -135,7 +125,7 @@ public final class FullscreenUnfoldController implements UnfoldListener,
             resetSurface(context);
         }
 
-        removeBackground();
+        mBackgroundController.removeBackground(mTransaction);
         mTransaction.apply();
     }
 
@@ -178,7 +168,7 @@ public final class FullscreenUnfoldController implements UnfoldListener,
         }
 
         if (mAnimationContextByTaskId.size() == 0) {
-            removeBackground();
+            mBackgroundController.removeBackground(mTransaction);
         }
 
         mTransaction.apply();
@@ -192,39 +182,6 @@ public final class FullscreenUnfoldController implements UnfoldListener,
                 .setPosition(context.mLeash,
                         (float) context.mTaskInfo.positionInParent.x,
                         (float) context.mTaskInfo.positionInParent.y);
-    }
-
-    private void ensureBackground() {
-        if (mBackgroundLayer != null) return;
-
-        SurfaceControl.Builder colorLayerBuilder = new SurfaceControl.Builder()
-                .setName("app-unfold-background")
-                .setCallsite("AppUnfoldTransitionController")
-                .setColorLayer();
-        mRootTaskDisplayAreaOrganizer.attachToDisplayArea(DEFAULT_DISPLAY, colorLayerBuilder);
-        mBackgroundLayer = colorLayerBuilder.build();
-
-        mTransaction
-                .setColor(mBackgroundLayer, mBackgroundColor)
-                .show(mBackgroundLayer)
-                .setLayer(mBackgroundLayer, BACKGROUND_LAYER_Z_INDEX);
-    }
-
-    private void removeBackground() {
-        if (mBackgroundLayer == null) return;
-        if (mBackgroundLayer.isValid()) {
-            mTransaction.remove(mBackgroundLayer);
-        }
-        mBackgroundLayer = null;
-    }
-
-    private float[] getBackgroundColor() {
-        int colorInt = mContext.getResources().getColor(R.color.unfold_transition_background);
-        return new float[]{
-                (float) red(colorInt) / 255.0F,
-                (float) green(colorInt) / 255.0F,
-                (float) blue(colorInt) / 255.0F
-        };
     }
 
     private class AnimationContext {
