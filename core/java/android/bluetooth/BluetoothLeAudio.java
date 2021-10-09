@@ -433,7 +433,7 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      * <p> This API returns false in scenarios like the profile on the
      * device is not connected or Bluetooth is not turned on.
      * When this API returns true, it is guaranteed that the
-     * {@link #ACTION_LEAUDIO_ACTIVE_DEVICE_CHANGED} intent will be broadcasted
+     * {@link #ACTION_LE_AUDIO_ACTIVE_DEVICE_CHANGED} intent will be broadcasted
      * with the active device.
      *
      *
