@@ -180,43 +180,46 @@ class TaskSnapshotController {
         snapshotTasks(tasks, false /* allowSnapshotHome */);
     }
 
+    void recordTaskSnapshot(Task task, boolean allowSnapshotHome) {
+        final TaskSnapshot snapshot;
+        final boolean snapshotHome = allowSnapshotHome && task.isActivityTypeHome();
+        if (snapshotHome) {
+            snapshot = snapshotTask(task);
+        } else {
+            switch (getSnapshotMode(task)) {
+                case SNAPSHOT_MODE_NONE:
+                    return;
+                case SNAPSHOT_MODE_APP_THEME:
+                    snapshot = drawAppThemeSnapshot(task);
+                    break;
+                case SNAPSHOT_MODE_REAL:
+                    snapshot = snapshotTask(task);
+                    break;
+                default:
+                    snapshot = null;
+                    break;
+            }
+        }
+        if (snapshot != null) {
+            final HardwareBuffer buffer = snapshot.getHardwareBuffer();
+            if (buffer.getWidth() == 0 || buffer.getHeight() == 0) {
+                buffer.close();
+                Slog.e(TAG, "Invalid task snapshot dimensions " + buffer.getWidth() + "x"
+                        + buffer.getHeight());
+            } else {
+                mCache.putSnapshot(task, snapshot);
+                // Don't persist or notify the change for the temporal snapshot.
+                if (!snapshotHome) {
+                    mPersister.persistSnapshot(task.mTaskId, task.mUserId, snapshot);
+                    task.onSnapshotChanged(snapshot);
+                }
+            }
+        }
+    }
+
     private void snapshotTasks(ArraySet<Task> tasks, boolean allowSnapshotHome) {
         for (int i = tasks.size() - 1; i >= 0; i--) {
-            final Task task = tasks.valueAt(i);
-            final TaskSnapshot snapshot;
-            final boolean snapshotHome = allowSnapshotHome && task.isActivityTypeHome();
-            if (snapshotHome) {
-                snapshot = snapshotTask(task);
-            } else {
-                switch (getSnapshotMode(task)) {
-                    case SNAPSHOT_MODE_NONE:
-                        continue;
-                    case SNAPSHOT_MODE_APP_THEME:
-                        snapshot = drawAppThemeSnapshot(task);
-                        break;
-                    case SNAPSHOT_MODE_REAL:
-                        snapshot = snapshotTask(task);
-                        break;
-                    default:
-                        snapshot = null;
-                        break;
-                }
-            }
-            if (snapshot != null) {
-                final HardwareBuffer buffer = snapshot.getHardwareBuffer();
-                if (buffer.getWidth() == 0 || buffer.getHeight() == 0) {
-                    buffer.close();
-                    Slog.e(TAG, "Invalid task snapshot dimensions " + buffer.getWidth() + "x"
-                            + buffer.getHeight());
-                } else {
-                    mCache.putSnapshot(task, snapshot);
-                    // Don't persist or notify the change for the temporal snapshot.
-                    if (!snapshotHome) {
-                        mPersister.persistSnapshot(task.mTaskId, task.mUserId, snapshot);
-                        task.onSnapshotChanged(snapshot);
-                    }
-                }
-            }
+            recordTaskSnapshot(tasks.valueAt(i), allowSnapshotHome);
         }
     }
 

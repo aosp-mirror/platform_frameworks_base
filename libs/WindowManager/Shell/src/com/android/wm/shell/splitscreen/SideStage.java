@@ -46,8 +46,10 @@ class SideStage extends StageTaskListener implements
 
     SideStage(Context context, ShellTaskOrganizer taskOrganizer, int displayId,
             StageListenerCallbacks callbacks, SyncTransactionQueue syncQueue,
-            SurfaceSession surfaceSession) {
-        super(taskOrganizer, displayId, callbacks, syncQueue, surfaceSession);
+            SurfaceSession surfaceSession,
+            @Nullable StageTaskUnfoldController stageTaskUnfoldController) {
+        super(taskOrganizer, displayId, callbacks, syncQueue, surfaceSession,
+                stageTaskUnfoldController);
         mContext = context;
     }
 

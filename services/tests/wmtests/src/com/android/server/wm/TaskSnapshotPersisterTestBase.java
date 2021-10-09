@@ -91,7 +91,7 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
     @Before
     public void setUp() {
         final UserManager um = UserManager.get(getInstrumentation().getTargetContext());
-        mTestUserId = um.getUserHandle();
+        mTestUserId = um.getProcessUserId();
 
         final UserManagerInternal userManagerInternal =
                 LocalServices.getService(UserManagerInternal.class);

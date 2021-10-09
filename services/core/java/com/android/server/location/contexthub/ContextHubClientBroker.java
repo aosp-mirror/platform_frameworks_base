@@ -207,6 +207,12 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      */
     private AtomicBoolean mIsPendingIntentCancelled = new AtomicBoolean(false);
 
+    /**
+     * True if a permissions query has been issued and is being processed. Used to prevent too many
+     * queries from being issued by a single client at once.
+     */
+    private AtomicBoolean mIsPermQueryIssued = new AtomicBoolean(false);
+
     /*
      * Map containing all nanoapps this client has a messaging channel with and whether it is
      * allowed to communicate over that channel. A channel is defined to have been opened if the
@@ -233,11 +239,11 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     private final IContextHubTransactionCallback mQueryPermsCallback =
             new IContextHubTransactionCallback.Stub() {
             @Override
-            public void onTransactionComplete(int result) {
-            }
+            public void onTransactionComplete(int result) {}
 
             @Override
             public void onQueryResponse(int result, List<NanoAppState> nanoAppStateList) {
+                mIsPermQueryIssued.set(false);
                 if (result != ContextHubTransaction.RESULT_SUCCESS && nanoAppStateList != null) {
                     Log.e(TAG, "Permissions query failed, but still received nanoapp state");
                 } else if (nanoAppStateList != null) {
@@ -650,9 +656,11 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * communicated with in the past.
      */
     private void checkNanoappPermsAsync() {
-        ContextHubServiceTransaction transaction = mTransactionManager.createQueryTransaction(
-                mAttachedContextHubInfo.getId(), mQueryPermsCallback, mPackage);
-        mTransactionManager.addTransaction(transaction);
+        if (!mIsPermQueryIssued.getAndSet(true)) {
+            ContextHubServiceTransaction transaction = mTransactionManager.createQueryTransaction(
+                    mAttachedContextHubInfo.getId(), mQueryPermsCallback, mPackage);
+            mTransactionManager.addTransaction(transaction);
+        }
     }
 
     private int updateNanoAppAuthState(

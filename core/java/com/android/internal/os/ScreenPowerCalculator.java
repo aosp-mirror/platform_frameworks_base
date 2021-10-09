@@ -16,6 +16,9 @@
 
 package com.android.internal.os;
 
+import static com.android.internal.os.PowerProfile.POWER_GROUP_DISPLAY_SCREEN_FULL;
+import static com.android.internal.os.PowerProfile.POWER_GROUP_DISPLAY_SCREEN_ON;
+
 import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
@@ -50,10 +53,11 @@ public class ScreenPowerCalculator extends PowerCalculator {
     }
 
     public ScreenPowerCalculator(PowerProfile powerProfile) {
+        // TODO(b/200239964): update to support multidisplay.
         mScreenOnPowerEstimator = new UsageBasedPowerEstimator(
-                powerProfile.getAveragePower(PowerProfile.POWER_SCREEN_ON));
+                powerProfile.getAveragePowerForOrdinal(POWER_GROUP_DISPLAY_SCREEN_ON, 0));
         mScreenFullPowerEstimator = new UsageBasedPowerEstimator(
-                powerProfile.getAveragePower(PowerProfile.POWER_SCREEN_FULL));
+                powerProfile.getAveragePowerForOrdinal(POWER_GROUP_DISPLAY_SCREEN_FULL, 0));
     }
 
     @Override

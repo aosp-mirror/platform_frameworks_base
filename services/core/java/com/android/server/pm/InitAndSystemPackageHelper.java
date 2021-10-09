@@ -88,11 +88,14 @@ import java.util.concurrent.ExecutorService;
 final class InitAndSystemPackageHelper {
     private final PackageManagerService mPm;
     private final RemovePackageHelper mRemovePackageHelper;
+    private final AppDataHelper mAppDataHelper;
 
     // TODO(b/198166813): remove PMS dependency
-    InitAndSystemPackageHelper(PackageManagerService pm, RemovePackageHelper removePackageHelper) {
+    InitAndSystemPackageHelper(PackageManagerService pm, RemovePackageHelper removePackageHelper,
+            AppDataHelper appDataHelper) {
         mPm = pm;
         mRemovePackageHelper = removePackageHelper;
+        mAppDataHelper = appDataHelper;
     }
 
     /**
@@ -571,7 +574,7 @@ final class InitAndSystemPackageHelper {
                          mPm.freezePackage(stubPkg.getPackageName(), "setEnabledSetting")) {
                 pkg = installStubPackageLI(stubPkg, parseFlags, 0 /*scanFlags*/);
                 synchronized (mPm.mLock) {
-                    mPm.prepareAppDataAfterInstallLIF(pkg);
+                    mAppDataHelper.prepareAppDataAfterInstallLIF(pkg);
                     try {
                         mPm.updateSharedLibrariesLocked(pkg, stubPkgSetting, null, null,
                                 Collections.unmodifiableMap(mPm.mPackages));
@@ -615,8 +618,9 @@ final class InitAndSystemPackageHelper {
                 }
                 return false;
             }
-            mPm.clearAppDataLIF(pkg, UserHandle.USER_ALL, FLAG_STORAGE_DE | FLAG_STORAGE_CE
-                    | FLAG_STORAGE_EXTERNAL | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
+            mAppDataHelper.clearAppDataLIF(pkg, UserHandle.USER_ALL,
+                    FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL
+                            | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
             mPm.getDexManager().notifyPackageUpdated(pkg.getPackageName(),
                     pkg.getBaseApkPath(), pkg.getSplitCodePaths());
         }
@@ -839,7 +843,7 @@ final class InitAndSystemPackageHelper {
             Slog.e(TAG, "updateAllSharedLibrariesLPw failed: " + e.getMessage());
         }
 
-        mPm.prepareAppDataAfterInstallLIF(pkg);
+        mAppDataHelper.prepareAppDataAfterInstallLIF(pkg);
 
         // writer
         synchronized (mPm.mLock) {

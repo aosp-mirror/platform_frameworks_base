@@ -57,14 +57,20 @@ final class RemovePackageHelper {
     private final Installer mInstaller;
     private final UserManagerInternal mUserManagerInternal;
     private final PermissionManagerServiceInternal mPermissionManager;
+    private final AppDataHelper mAppDataHelper;
 
     // TODO(b/198166813): remove PMS dependency
-    RemovePackageHelper(PackageManagerService pm) {
+    RemovePackageHelper(PackageManagerService pm, AppDataHelper appDataHelper) {
         mPm = pm;
         mIncrementalManager = mPm.mInjector.getIncrementalManager();
         mInstaller = mPm.mInjector.getInstaller();
         mUserManagerInternal = mPm.mInjector.getUserManagerInternal();
         mPermissionManager = mPm.mInjector.getPermissionManagerServiceInternal();
+        mAppDataHelper = appDataHelper;
+    }
+
+    RemovePackageHelper(PackageManagerService pm) {
+        this(pm, new AppDataHelper(pm));
     }
 
     @GuardedBy("mPm.mInstallLock")
@@ -231,9 +237,9 @@ final class RemovePackageHelper {
                 resolvedPkg = PackageImpl.buildFakeForDeletion(deletedPs.getPackageName(),
                         deletedPs.getVolumeUuid());
             }
-            destroyAppDataLIF(resolvedPkg, UserHandle.USER_ALL,
+            mAppDataHelper.destroyAppDataLIF(resolvedPkg, UserHandle.USER_ALL,
                     FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL);
-            destroyAppProfilesLIF(resolvedPkg);
+            mAppDataHelper.destroyAppProfilesLIF(resolvedPkg);
             if (outInfo != null) {
                 outInfo.mDataRemoved = true;
             }
@@ -313,47 +319,6 @@ final class RemovePackageHelper {
             // from KeyStore.
             mPm.removeKeystoreDataIfNeeded(
                     mUserManagerInternal, UserHandle.USER_ALL, removedAppId);
-        }
-    }
-
-    public void destroyAppDataLIF(AndroidPackage pkg, int userId, int flags) {
-        if (pkg == null) {
-            Slog.wtf(TAG, "Package was null!", new Throwable());
-            return;
-        }
-        destroyAppDataLeafLIF(pkg, userId, flags);
-    }
-
-    public void destroyAppDataLeafLIF(AndroidPackage pkg, int userId, int flags) {
-        final PackageSetting ps;
-        synchronized (mPm.mLock) {
-            ps = mPm.mSettings.getPackageLPr(pkg.getPackageName());
-        }
-        for (int realUserId : mPm.resolveUserIds(userId)) {
-            final long ceDataInode = (ps != null) ? ps.getCeDataInode(realUserId) : 0;
-            try {
-                mInstaller.destroyAppData(pkg.getVolumeUuid(), pkg.getPackageName(), realUserId,
-                        flags, ceDataInode);
-            } catch (Installer.InstallerException e) {
-                Slog.w(TAG, String.valueOf(e));
-            }
-            mPm.getDexManager().notifyPackageDataDestroyed(pkg.getPackageName(), userId);
-        }
-    }
-
-    public void destroyAppProfilesLIF(AndroidPackage pkg) {
-        if (pkg == null) {
-            Slog.wtf(TAG, "Package was null!", new Throwable());
-            return;
-        }
-        destroyAppProfilesLeafLIF(pkg);
-    }
-
-    private void destroyAppProfilesLeafLIF(AndroidPackage pkg) {
-        try {
-            mInstaller.destroyAppProfiles(pkg.getPackageName());
-        } catch (Installer.InstallerException e) {
-            Slog.w(TAG, String.valueOf(e));
         }
     }
 }

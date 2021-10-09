@@ -22,15 +22,18 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.PublicKey;
 import android.hardware.camera2.impl.SyntheticKey;
+import android.hardware.camera2.params.DeviceStateOrientationMap;
 import android.hardware.camera2.params.RecommendedStreamConfigurationMap;
 import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.utils.TypeReference;
 import android.os.Build;
+import android.util.Log;
 import android.util.Rational;
+
+import com.android.internal.annotations.GuardedBy;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -202,8 +205,25 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     private List<CaptureResult.Key<?>> mAvailableResultKeys;
     private ArrayList<RecommendedStreamConfigurationMap> mRecommendedConfigurations;
 
+    private final Object mLock = new Object();
+    @GuardedBy("mLock")
+    private boolean mFoldedDeviceState;
+
+    private final CameraManager.DeviceStateListener mFoldStateListener =
+            new CameraManager.DeviceStateListener() {
+                @Override
+                public final void onDeviceStateChanged(boolean folded) {
+                    synchronized (mLock) {
+                        mFoldedDeviceState = folded;
+                    }
+                }};
+
+    private static final String TAG = "CameraCharacteristics";
+
     /**
      * Takes ownership of the passed-in properties object
+     *
+     * @param properties Camera properties.
      * @hide
      */
     public CameraCharacteristics(CameraMetadataNative properties) {
@@ -217,6 +237,41 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     public CameraMetadataNative getNativeCopy() {
         return new CameraMetadataNative(mProperties);
+    }
+
+    /**
+     * Return the device state listener for this Camera characteristics instance
+     */
+    CameraManager.DeviceStateListener getDeviceStateListener() { return mFoldStateListener; }
+
+    /**
+     * Overrides the property value
+     *
+     * <p>Check whether a given property value needs to be overridden in some specific
+     * case.</p>
+     *
+     * @param key The characteristics field to override.
+     * @return The value of overridden property, or {@code null} if the property doesn't need an
+     * override.
+     */
+    @Nullable
+    private <T> T overrideProperty(Key<T> key) {
+        if (CameraCharacteristics.SENSOR_ORIENTATION.equals(key) && (mFoldStateListener != null) &&
+                (mProperties.get(CameraCharacteristics.INFO_DEVICE_STATE_ORIENTATIONS) != null)) {
+            DeviceStateOrientationMap deviceStateOrientationMap =
+                    mProperties.get(CameraCharacteristics.INFO_DEVICE_STATE_ORIENTATION_MAP);
+            synchronized (mLock) {
+                Integer ret = deviceStateOrientationMap.getSensorOrientation(mFoldedDeviceState ?
+                        DeviceStateOrientationMap.FOLDED : DeviceStateOrientationMap.NORMAL);
+                if (ret >= 0) {
+                    return (T) ret;
+                } else {
+                    Log.w(TAG, "No valid device state to orientation mapping! Using default!");
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -235,7 +290,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     @Nullable
     public <T> T get(Key<T> key) {
-        return mProperties.get(key);
+        T propertyOverride = overrideProperty(key);
+        return (propertyOverride != null) ? propertyOverride : mProperties.get(key);
     }
 
     /**
@@ -3993,11 +4049,26 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * upright on the device screen in its native orientation.</p>
      * <p>Also defines the direction of rolling shutter readout, which is from top to bottom in
      * the sensor's coordinate system.</p>
+     * <p>Starting with Android API level 32, camera clients that query the orientation via
+     * {@link android.hardware.camera2.CameraCharacteristics#get } on foldable devices which
+     * include logical cameras can receive a value that can dynamically change depending on the
+     * device/fold state.
+     * Clients are advised to not cache or store the orientation value of such logical sensors.
+     * In case repeated queries to CameraCharacteristics are not preferred, then clients can
+     * also access the entire mapping from device state to sensor orientation in
+     * {@link android.hardware.camera2.params.DeviceStateOrientationMap }.
+     * Do note that a dynamically changing sensor orientation value in camera characteristics
+     * will not be the best way to establish the orientation per frame. Clients that want to
+     * know the sensor orientation of a particular captured frame should query the
+     * {@link CaptureResult#LOGICAL_MULTI_CAMERA_ACTIVE_PHYSICAL_ID android.logicalMultiCamera.activePhysicalId} from the corresponding capture result and
+     * check the respective physical camera orientation.</p>
      * <p><b>Units</b>: Degrees of clockwise rotation; always a multiple of
      * 90</p>
      * <p><b>Range of valid values:</b><br>
      * 0, 90, 180, 270</p>
      * <p>This key is available on all devices.</p>
+     *
+     * @see CaptureResult#LOGICAL_MULTI_CAMERA_ACTIVE_PHYSICAL_ID
      */
     @PublicKey
     @NonNull
@@ -4305,6 +4376,46 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @NonNull
     public static final Key<String> INFO_VERSION =
             new Key<String>("android.info.version", String.class);
+
+    /**
+     * <p>This lists the mapping between a device folding state and
+     * specific camera sensor orientation for logical cameras on a foldable device.</p>
+     * <p>Logical cameras on foldable devices can support sensors with different orientation
+     * values. The orientation value may need to change depending on the specific folding
+     * state. Information about the mapping between the device folding state and the
+     * sensor orientation can be obtained in
+     * {@link android.hardware.camera2.params.DeviceStateOrientationMap }.
+     * Device state orientation maps are optional and maybe present on devices that support
+     * {@link CaptureRequest#SCALER_ROTATE_AND_CROP android.scaler.rotateAndCrop}.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see CaptureRequest#SCALER_ROTATE_AND_CROP
+     */
+    @PublicKey
+    @NonNull
+    @SyntheticKey
+    public static final Key<android.hardware.camera2.params.DeviceStateOrientationMap> INFO_DEVICE_STATE_ORIENTATION_MAP =
+            new Key<android.hardware.camera2.params.DeviceStateOrientationMap>("android.info.deviceStateOrientationMap", android.hardware.camera2.params.DeviceStateOrientationMap.class);
+
+    /**
+     * <p>HAL must populate the array with
+     * (hardware::camera::provider::V2_5::DeviceState, sensorOrientation) pairs for each
+     * supported device state bitwise combination.</p>
+     * <p><b>Units</b>: (device fold state, sensor orientation) x n</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @hide
+     */
+    public static final Key<long[]> INFO_DEVICE_STATE_ORIENTATIONS =
+            new Key<long[]>("android.info.deviceStateOrientations", long[].class);
 
     /**
      * <p>The maximum number of frames that can occur after a request

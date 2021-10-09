@@ -673,11 +673,13 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
 
             // Inform mStats about each applicable measured energy (unless addressed elsewhere).
             if (measuredEnergyDeltas != null) {
-                final long displayChargeUC = measuredEnergyDeltas.displayChargeUC;
-                if (displayChargeUC != MeasuredEnergySnapshot.UNAVAILABLE) {
+                final long[] displayChargeUC = measuredEnergyDeltas.displayChargeUC;
+                if (displayChargeUC != null && displayChargeUC.length > 0) {
+                    // TODO (b/194107383): pass all display ordinals to mStats.
+                    final long primaryDisplayChargeUC = displayChargeUC[0];
                     // If updating, pass in what BatteryExternalStatsWorker thinks screenState is.
-                    mStats.updateDisplayMeasuredEnergyStatsLocked(displayChargeUC, screenState,
-                            elapsedRealtime);
+                    mStats.updateDisplayMeasuredEnergyStatsLocked(primaryDisplayChargeUC,
+                            screenState, elapsedRealtime);
                 }
 
                 final long gnssChargeUC = measuredEnergyDeltas.gnssChargeUC;
@@ -962,6 +964,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 switch (consumer.type) {
                     case EnergyConsumerType.OTHER:
                     case EnergyConsumerType.CPU_CLUSTER:
+                    case EnergyConsumerType.DISPLAY:
                         break;
                     default:
                         Slog.w(TAG, "EnergyConsumer '" + consumer.name + "' has unexpected ordinal "

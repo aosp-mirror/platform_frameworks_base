@@ -1742,7 +1742,7 @@ public class CallLog {
             Uri result = null;
 
             final UserManager userManager = context.getSystemService(UserManager.class);
-            final int currentUserId = userManager.getUserHandle();
+            final int currentUserId = userManager.getProcessUserId();
 
             if (params.mAddForAllUsers) {
                 if (userManager.isUserUnlocked(UserHandle.SYSTEM)) {

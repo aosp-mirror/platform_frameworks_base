@@ -990,6 +990,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             mWindowManager = wm;
             mRootWindowContainer = wm.mRoot;
+            mWindowOrganizerController.setWindowManager(wm);
             mTempConfig.setToDefaults();
             mTempConfig.setLocales(LocaleList.getDefault());
             mConfigurationSeq = mTempConfig.seq = 1;
@@ -3422,9 +3423,15 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 final List<RemoteAction> actions = r.pictureInPictureArgs.getActions();
                 mRootWindowContainer.moveActivityToPinnedRootTask(
                         r, "enterPictureInPictureMode");
-                final Task rootTask = r.getRootTask();
-                rootTask.setPictureInPictureAspectRatio(aspectRatio);
-                rootTask.setPictureInPictureActions(actions);
+                final Task task = r.getTask();
+                task.setPictureInPictureAspectRatio(aspectRatio);
+                task.setPictureInPictureActions(actions);
+
+                // Continue the pausing process after entering pip.
+                if (task.getPausingActivity() == r) {
+                    task.schedulePauseActivity(r, false /* userLeaving */,
+                            false /* pauseImmediately */, "auto-pip");
+                }
             }
         };
 

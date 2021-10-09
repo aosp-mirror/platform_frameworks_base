@@ -56,7 +56,7 @@ public class MainStageTests {
         MockitoAnnotations.initMocks(this);
         mRootTaskInfo = new TestRunningTaskInfoBuilder().build();
         mMainStage = new MainStage(mTaskOrganizer, DEFAULT_DISPLAY, mCallbacks, mSyncQueue,
-                mSurfaceSession);
+                mSurfaceSession, null);
         mMainStage.onTaskAppeared(mRootTaskInfo, mRootLeash);
     }
 

@@ -143,6 +143,17 @@ filegroup {
     path: "tests/src",
 }
 
+java_library {
+    name: "SystemUI-tests-concurrency",
+    srcs: [
+        "src/com/android/systemui/util/concurrency/DelayableExecutor.java",
+        "src/com/android/systemui/util/time/SystemClock.java",
+        "tests/src/com/android/systemui/util/concurrency/FakeExecutor.java",
+        "tests/src/com/android/systemui/util/time/FakeSystemClock.java",
+    ],
+    jarjar_rules: ":jarjar-rules-shared",
+}
+
 android_library {
     name: "SystemUI-tests",
     manifest: "tests/AndroidManifest-base.xml",

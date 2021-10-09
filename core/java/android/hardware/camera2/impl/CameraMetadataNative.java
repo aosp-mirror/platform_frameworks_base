@@ -50,6 +50,7 @@ import android.hardware.camera2.marshal.impl.MarshalQueryableStreamConfiguration
 import android.hardware.camera2.marshal.impl.MarshalQueryableStreamConfigurationDuration;
 import android.hardware.camera2.marshal.impl.MarshalQueryableString;
 import android.hardware.camera2.params.Capability;
+import android.hardware.camera2.params.DeviceStateOrientationMap;
 import android.hardware.camera2.params.Face;
 import android.hardware.camera2.params.HighSpeedVideoConfiguration;
 import android.hardware.camera2.params.LensShadingMap;
@@ -754,11 +755,20 @@ public class CameraMetadataNative implements Parcelable {
                 });
         sGetCommandMap.put(
                 CaptureResult.STATISTICS_LENS_SHADING_CORRECTION_MAP.getNativeKey(),
-                        new GetCommand() {
+                new GetCommand() {
                     @Override
                     @SuppressWarnings("unchecked")
                     public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
                         return (T) metadata.getLensShadingMap();
+                    }
+                });
+        sGetCommandMap.put(
+                CameraCharacteristics.INFO_DEVICE_STATE_ORIENTATION_MAP.getNativeKey(),
+                        new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getDeviceStateOrientationMap();
                     }
                 });
         sGetCommandMap.put(
@@ -991,6 +1001,18 @@ public class CameraMetadataNative implements Parcelable {
         }
 
         LensShadingMap map = new LensShadingMap(lsmArray, s.getHeight(), s.getWidth());
+        return map;
+    }
+
+    private DeviceStateOrientationMap getDeviceStateOrientationMap() {
+        long[] mapArray = getBase(CameraCharacteristics.INFO_DEVICE_STATE_ORIENTATIONS);
+
+        // Do not warn if map is null while s is not. This is valid.
+        if (mapArray == null) {
+            return null;
+        }
+
+        DeviceStateOrientationMap map = new DeviceStateOrientationMap(mapArray);
         return map;
     }
 

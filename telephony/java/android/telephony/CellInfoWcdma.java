@@ -49,43 +49,11 @@ public final class CellInfoWcdma extends CellInfo implements Parcelable {
     }
 
     /** @hide */
-    public CellInfoWcdma(android.hardware.radio.V1_0.CellInfo ci) {
-        super(ci);
-        final android.hardware.radio.V1_0.CellInfoWcdma ciw = ci.wcdma.get(0);
-        mCellIdentityWcdma = new CellIdentityWcdma(ciw.cellIdentityWcdma);
-        mCellSignalStrengthWcdma = new CellSignalStrengthWcdma(ciw.signalStrengthWcdma);
-    }
-
-    /** @hide */
-    public CellInfoWcdma(android.hardware.radio.V1_2.CellInfo ci) {
-        super(ci);
-        final android.hardware.radio.V1_2.CellInfoWcdma ciw = ci.wcdma.get(0);
-        mCellIdentityWcdma = new CellIdentityWcdma(ciw.cellIdentityWcdma);
-        mCellSignalStrengthWcdma = new CellSignalStrengthWcdma(ciw.signalStrengthWcdma);
-    }
-
-    /** @hide */
-    public CellInfoWcdma(android.hardware.radio.V1_4.CellInfo ci, long timeStamp) {
-        super(ci, timeStamp);
-        final android.hardware.radio.V1_2.CellInfoWcdma ciw = ci.info.wcdma();
-        mCellIdentityWcdma = new CellIdentityWcdma(ciw.cellIdentityWcdma);
-        mCellSignalStrengthWcdma = new CellSignalStrengthWcdma(ciw.signalStrengthWcdma);
-    }
-
-    /** @hide */
-    public CellInfoWcdma(android.hardware.radio.V1_5.CellInfo ci, long timeStamp) {
-        super(ci, timeStamp);
-        final android.hardware.radio.V1_5.CellInfoWcdma ciw = ci.ratSpecificInfo.wcdma();
-        mCellIdentityWcdma = new CellIdentityWcdma(ciw.cellIdentityWcdma);
-        mCellSignalStrengthWcdma = new CellSignalStrengthWcdma(ciw.signalStrengthWcdma);
-    }
-
-    /** @hide */
-    public CellInfoWcdma(android.hardware.radio.V1_6.CellInfo ci, long timeStamp) {
-        super(ci, timeStamp);
-        final android.hardware.radio.V1_5.CellInfoWcdma ciw = ci.ratSpecificInfo.wcdma();
-        mCellIdentityWcdma = new CellIdentityWcdma(ciw.cellIdentityWcdma);
-        mCellSignalStrengthWcdma = new CellSignalStrengthWcdma(ciw.signalStrengthWcdma);
+    public CellInfoWcdma(int connectionStatus, boolean registered, long timeStamp,
+            CellIdentityWcdma cellIdentityWcdma, CellSignalStrengthWcdma cellSignalStrengthWcdma) {
+        super(connectionStatus, registered, timeStamp);
+        mCellIdentityWcdma = cellIdentityWcdma;
+        mCellSignalStrengthWcdma = cellSignalStrengthWcdma;
     }
 
     /**
