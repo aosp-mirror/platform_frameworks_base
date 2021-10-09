@@ -77,6 +77,7 @@
         <attr name="numColumns" format="integer" />
         <attr name="verticalSpacing" format="dimension" />
         <attr name="horizontalSpacing" format="dimension" />
+        <attr name="fixedChildWidth" format="dimension" />
     </declare-styleable>
 
     <!-- Theme for icons in the status/nav bar (light/dark). background/fillColor is used for dual

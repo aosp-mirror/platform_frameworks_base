@@ -16,6 +16,9 @@
 
 package com.android.internal.os;
 
+import static com.android.internal.os.PowerProfile.POWER_GROUP_DISPLAY_SCREEN_FULL;
+import static com.android.internal.os.PowerProfile.POWER_GROUP_DISPLAY_SCREEN_ON;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import android.app.ActivityManager;
@@ -42,8 +45,8 @@ public class ScreenPowerCalculatorTest {
 
     @Rule
     public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule()
-            .setAveragePower(PowerProfile.POWER_SCREEN_ON, 36.0)
-            .setAveragePower(PowerProfile.POWER_SCREEN_FULL, 48.0);
+            .setAveragePowerForOrdinal(POWER_GROUP_DISPLAY_SCREEN_ON, 0, 36.0)
+            .setAveragePowerForOrdinal(POWER_GROUP_DISPLAY_SCREEN_FULL, 0, 48.0);
 
     @Test
     public void testMeasuredEnergyBasedModel() {

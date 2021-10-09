@@ -57,6 +57,7 @@ import static com.android.server.wm.WindowContainerProto.CONFIGURATION_CONTAINER
 import static com.android.server.wm.WindowContainerProto.IDENTIFIER;
 import static com.android.server.wm.WindowContainerProto.ORIENTATION;
 import static com.android.server.wm.WindowContainerProto.SURFACE_ANIMATOR;
+import static com.android.server.wm.WindowContainerProto.SURFACE_CONTROL;
 import static com.android.server.wm.WindowContainerProto.VISIBLE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -70,7 +71,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
-import android.app.WindowConfiguration;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -126,26 +126,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         implements Comparable<WindowContainer>, Animatable, SurfaceFreezer.Freezable {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "WindowContainer" : TAG_WM;
-
-    /** Animation layer that happens above all animating {@link Task}s. */
-    static final int ANIMATION_LAYER_STANDARD = 0;
-
-    /** Animation layer that happens above all {@link Task}s. */
-    static final int ANIMATION_LAYER_BOOSTED = 1;
-
-    /**
-     * Animation layer that is reserved for {@link WindowConfiguration#ACTIVITY_TYPE_HOME}
-     * activities and all activities that are being controlled by the recents animation. This
-     * layer is generally below all {@link Task}s.
-     */
-    static final int ANIMATION_LAYER_HOME = 2;
-
-    @IntDef(prefix = { "ANIMATION_LAYER_" }, value = {
-            ANIMATION_LAYER_STANDARD,
-            ANIMATION_LAYER_BOOSTED,
-            ANIMATION_LAYER_HOME,
-    })
-    @interface AnimationLayer {}
 
     static final int POSITION_TOP = Integer.MAX_VALUE;
     static final int POSITION_BOTTOM = Integer.MIN_VALUE;
@@ -2429,6 +2409,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (mSurfaceAnimator.isAnimating()) {
             mSurfaceAnimator.dumpDebug(proto, SURFACE_ANIMATOR);
         }
+        if (mSurfaceControl != null) {
+            mSurfaceControl.dumpDebug(proto, SURFACE_CONTROL);
+        }
 
         // add children to proto
         for (int i = 0; i < getChildCount(); i++) {
@@ -2666,17 +2649,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     @Override
     public SurfaceControl getAnimationLeashParent() {
         return getParentSurfaceControl();
-    }
-
-    /**
-     * @return The layer on which all app animations are happening.
-     */
-    SurfaceControl getAppAnimationLayer(@AnimationLayer int animationLayer) {
-        final WindowContainer parent = getParent();
-        if (parent != null) {
-            return parent.getAppAnimationLayer(animationLayer);
-        }
-        return null;
     }
 
     // TODO: Remove this and use #getBounds() instead once we set an app transition animation

@@ -16,6 +16,8 @@
 
 package com.android.internal.os;
 
+import static com.android.internal.os.PowerProfile.POWER_GROUP_DISPLAY_AMBIENT;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import android.os.BatteryConsumer;
@@ -36,7 +38,7 @@ public class AmbientDisplayPowerCalculatorTest {
 
     @Rule
     public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule()
-            .setAveragePower(PowerProfile.POWER_AMBIENT_DISPLAY, 10.0);
+            .setAveragePowerForOrdinal(POWER_GROUP_DISPLAY_AMBIENT, 0, 10.0);
 
     @Test
     public void testMeasuredEnergyBasedModel() {

@@ -100,8 +100,8 @@ class AppPairsTestCannotPairNonResizeableApps(
             "Non resizeable app not initialized"
         }
         testSpec.assertWmEnd {
-            isVisible(nonResizeableApp.component)
-            isInvisible(primaryApp.component)
+            isAppWindowVisible(nonResizeableApp.component)
+            isAppWindowInvisible(primaryApp.component)
         }
     }
 

@@ -18,8 +18,7 @@ package com.android.systemui.util.sensors;
 
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
@@ -42,9 +41,9 @@ class PostureDependentProximitySensor extends ProximitySensorImpl {
     PostureDependentProximitySensor(
             @PrimaryProxSensor ThresholdSensor[] postureToPrimaryProxSensorMap,
             @SecondaryProxSensor ThresholdSensor[] postureToSecondaryProxSensorMap,
-            @NonNull DelayableExecutor delayableExecutor,
-            @NonNull Execution execution,
-            @NonNull DevicePostureController devicePostureController
+            @Main DelayableExecutor delayableExecutor,
+            Execution execution,
+            DevicePostureController devicePostureController
     ) {
         super(
                 postureToPrimaryProxSensorMap[0],
