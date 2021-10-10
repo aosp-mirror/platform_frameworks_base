@@ -18,14 +18,14 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"पॅकेज इंस्टॉलर"</string>
     <string name="install" msgid="711829760615509273">"इंस्टॉल करा"</string>
+    <string name="update" msgid="3932142540719227615">"अपडेट करा"</string>
     <string name="done" msgid="6632441120016885253">"पूर्ण झाले"</string>
     <string name="cancel" msgid="1018267193425558088">"रद्द करा"</string>
     <string name="installing" msgid="4921993079741206516">"इंस्‍टॉल होत आहे…"</string>
     <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> इंस्टॉल होत आहे…"</string>
     <string name="install_done" msgid="5987363587661783896">"अ‍ॅप इंस्टॉल झाले."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"तुम्हाला हे ॲप्लिकेशन इंस्टॉल करायचे आहे का?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"तुम्हाच्या विद्यमान ॲप्लिकेशनवर अपडेट इंस्टॉल करायचे आहे का? तुमचा विद्यमान डेटा गमावणार नाही."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"तुम्हाला या बिल्ट-इन ॲप्लिकेशनवर अपडेट इंस्टॉल करायचे आहे का? तुमचा विद्यमान डेटा गमावणार नाही."</string>
+    <string name="install_confirm_question" msgid="7663733664476363311">"तुम्हाला हे ॲप इंस्टॉल करायचे आहे का?"</string>
+    <string name="install_confirm_question_update" msgid="3348888852318388584">"तुम्हाला हे ॲप अपडेट करायचे आहे का?"</string>
     <string name="install_failed" msgid="5777824004474125469">"अ‍ॅप इंस्टॉल झाले नाही."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"पॅकेज इंस्टॉल होण्यापासून ब्लॉक केले होते."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"पॅकेजचा विद्यमान पॅकेजशी विरोध असल्याने अ‍ॅप इंस्टॉल झाले नाही."</string>
@@ -80,9 +80,9 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"इंस्टॉल करा/अनइंस्टॉल करा क्रिया Wear वर सपोर्ट करत नाहीत."</string>
     <string name="message_staging" msgid="8032722385658438567">"अ‍ॅप सुरुवातीच्या स्थितीत आहे…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"अज्ञात"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"तुमच्या सुरक्षिततेसाठी, तुमच्या टॅबलेटला या स्रोताकडील अज्ञात अ‍ॅप्स इंस्टॉल करण्याची अनुमती नाही."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"तुमच्या सुरक्षिततेसाठी, तुमच्या टीव्हीला या स्रोताकडील अज्ञात अ‍ॅप्स इंस्टॉल करण्याची अनुमती नाही."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"तुमच्या सुरक्षिततेसाठी, तुमच्या फोनला या स्रोताकडील अज्ञात अ‍ॅप्स इंस्टॉल करण्याची अनुमती नाही."</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"तुमच्या सुरक्षिततेसाठी, तुमच्या टॅबलेटला सध्या या स्रोतावरील अज्ञात अ‍ॅप्स इंस्टॉल करण्याची अनुमती नाही. तुम्ही हे सेटिंग्‍ज मध्‍ये बदलू शकता."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"तुमच्या सुरक्षिततेसाठी, तुमच्या टीव्हीला सध्या या स्रोतावरील अज्ञात अ‍ॅप्स इंस्टॉल करण्याची अनुमती नाही. तुम्ही हे सेटिंग्‍ज मध्‍ये बदलू शकता."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"तुमच्या सुरक्षिततेसाठी, तुमच्या फोनला सध्या या स्रोतावरील अज्ञात अ‍ॅप्स इंस्टॉल करण्याची अनुमती नाही. तुम्ही हे सेटिंग्‍ज मध्‍ये बदलू शकता."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"तुमचा फोन आणि वैयक्तिक डेटा अज्ञात अ‍ॅप्‍सकडून होणार्‍या अटॅकमुळे अधिक असुरक्षित आहे. हे अ‍ॅप इंस्टॉल करून, तुम्‍ही सहमती देता की ते वापरल्‍याने होणार्‍या तुमच्‍या फोनचे कोणत्‍याही प्रकारे होणारे नुकसान किंवा डेटा हानीसाठी तुम्‍ही जबाबदार आहात."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"तुमचा टॅबलेट आणि वैयक्तिक डेटा अज्ञात अ‍ॅप्‍सकडून होणार्‍या अटॅकमुळे अधिक असुरक्षित आहे. हे अ‍ॅप इंस्टॉल करून, तुम्‍ही सहमती देता की ते वापरल्‍याने तुमच्‍या टॅबलेटचे कोणत्‍याही प्रकारे होणारे नुकसान किंवा डेटा हानीसाठी तुम्‍ही जबाबदार आहात."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"तुमचा टीव्‍ही आणि वैयक्तिक डेटा अज्ञात अ‍ॅप्‍सकडून होणार्‍या अटॅकमुळे अधिक असुरक्षित आहे. हे अ‍ॅप इंस्टॉल करून, तुम्ही सहमती देता की ते वापरल्‍याने तुमच्‍या टीव्‍हीचे कोणत्‍याही प्रकारे होणारे नुकसान किंवा डेटा हानीसाठी तुम्‍ही जबाबदार आहात."</string>

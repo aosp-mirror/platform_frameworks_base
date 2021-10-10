@@ -15,15 +15,16 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.google.android.test.shared_library"
-    android:versionCode="2">
+     package="com.google.android.test.shared_library"
+     android:versionCode="2">
     <application android:label="SharedLibrary">
-        <library android:name="com.google.android.test.shared_library" />
+        <library android:name="com.google.android.test.shared_library"/>
         <activity android:name="ActivityMain"
-                  android:icon="@drawable/size_48x48">
+             android:icon="@drawable/size_48x48"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
     </application>

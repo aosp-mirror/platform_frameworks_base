@@ -22,18 +22,18 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Controller which handles all the doze animations of the scrims.
  */
-@Singleton
+@SysUISingleton
 public class DozeScrimController implements StateListener {
     private static final String TAG = "DozeScrimController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);

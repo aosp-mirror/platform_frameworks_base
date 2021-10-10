@@ -16,6 +16,8 @@
 
 package com.android.systemui.power;
 
+import static android.app.PendingIntent.FLAG_IMMUTABLE;
+
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -59,6 +61,7 @@ import com.android.settingslib.utils.PowerUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.util.NotificationChannels;
@@ -70,11 +73,10 @@ import java.util.Locale;
 import java.util.Objects;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  */
-@Singleton
+@SysUISingleton
 public class PowerNotificationWarnings implements PowerUI.WarningsUI {
 
     private static final String TAG = PowerUI.TAG + ".Notification";
@@ -334,10 +336,14 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     }
 
     private PendingIntent pendingBroadcast(String action) {
-        return PendingIntent.getBroadcastAsUser(mContext, 0,
-                new Intent(action).setPackage(mContext.getPackageName())
-                    .setFlags(Intent.FLAG_RECEIVER_FOREGROUND),
-                0, UserHandle.CURRENT);
+        return PendingIntent.getBroadcastAsUser(
+                mContext,
+                0 /* request code */,
+                new Intent(action)
+                        .setPackage(mContext.getPackageName())
+                        .setFlags(Intent.FLAG_RECEIVER_FOREGROUND),
+                FLAG_IMMUTABLE /* flags */,
+                UserHandle.CURRENT);
     }
 
     private static Intent settings(String action) {

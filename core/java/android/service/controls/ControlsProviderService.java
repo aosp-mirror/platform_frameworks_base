@@ -206,8 +206,8 @@ public abstract class ControlsProviderService extends Service {
 
                 case MSG_SUBSCRIBE: {
                     final SubscribeMessage sMsg = (SubscribeMessage) msg.obj;
-                    final SubscriberProxy proxy = new SubscriberProxy(false, mToken,
-                            sMsg.mSubscriber);
+                    final SubscriberProxy proxy = new SubscriberProxy(
+                            ControlsProviderService.this, false, mToken, sMsg.mSubscriber);
 
                     ControlsProviderService.this.createPublisherFor(sMsg.mControlIds)
                             .subscribe(proxy);
@@ -251,11 +251,18 @@ public abstract class ControlsProviderService extends Service {
         private IBinder mToken;
         private IControlsSubscriber mCs;
         private boolean mEnforceStateless;
+        private Context mContext;
 
         SubscriberProxy(boolean enforceStateless, IBinder token, IControlsSubscriber cs) {
             mEnforceStateless = enforceStateless;
             mToken = token;
             mCs = cs;
+        }
+
+        SubscriberProxy(Context context, boolean enforceStateless, IBinder token,
+                IControlsSubscriber cs) {
+            this(enforceStateless, token, cs);
+            mContext = context;
         }
 
         public void onSubscribe(Subscription subscription) {
@@ -272,6 +279,9 @@ public abstract class ControlsProviderService extends Service {
                     Log.w(TAG, "onNext(): control is not stateless. Use the "
                             + "Control.StatelessBuilder() to build the control.");
                     control = new Control.StatelessBuilder(control).build();
+                }
+                if (mContext != null) {
+                    control.getControlTemplate().prepareTemplateForBinder(mContext);
                 }
                 mCs.onNext(mToken, control);
             } catch (RemoteException ex) {

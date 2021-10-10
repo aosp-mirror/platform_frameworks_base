@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * The mapping from URI to alias, which determines the alias to use when the user visits a URI.
@@ -134,5 +135,22 @@ public final class UrisToAliases implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeMap(mUrisToAliases);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof UrisToAliases)) {
+            return false;
+        }
+        UrisToAliases other = (UrisToAliases) obj;
+        return Objects.equals(mUrisToAliases, other.mUrisToAliases);
+    }
+
+    @Override
+    public int hashCode() {
+        return mUrisToAliases.hashCode();
     }
 }

@@ -17,17 +17,22 @@
 package android.window;
 
 import android.annotation.BinderThread;
+import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.app.ActivityManager;
+import android.graphics.Rect;
+import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.Singleton;
 import android.view.SurfaceControl;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Interface for ActivityTaskManager/WindowManager to delegate control of tasks.
@@ -36,28 +41,89 @@ import java.util.List;
 @TestApi
 public class TaskOrganizer extends WindowOrganizer {
 
+    private final ITaskOrganizerController mTaskOrganizerController;
+    // Callbacks WM Core are posted on this executor if it isn't null, otherwise direct calls are
+    // made on the incoming binder call.
+    private final Executor mExecutor;
+
+    public TaskOrganizer() {
+        this(null /*taskOrganizerController*/, null /*executor*/);
+    }
+
+    /** @hide */
+    @VisibleForTesting
+    public TaskOrganizer(ITaskOrganizerController taskOrganizerController, Executor executor) {
+        mExecutor = executor != null ? executor : Runnable::run;
+        mTaskOrganizerController = taskOrganizerController != null
+                ? taskOrganizerController : getController();
+    }
+
     /**
-     * Register a TaskOrganizer to manage tasks as they enter the given windowing mode.
-     * If there was already a TaskOrganizer for this windowing mode it will be evicted
-     * and receive taskVanished callbacks in the process.
+     * Register a TaskOrganizer to manage tasks as they enter a supported windowing mode.
+     *
+     * @return a list of the tasks that should be managed by the organizer, not including tasks
+     *         created via {@link #createRootTask}.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
-    public final void registerOrganizer(int windowingMode) {
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
+    @CallSuper
+    @NonNull
+    public List<TaskAppearedInfo> registerOrganizer() {
         try {
-            getController().registerTaskOrganizer(mInterface, windowingMode);
+            return mTaskOrganizerController.registerTaskOrganizer(mInterface).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /** Unregisters a previously registered task organizer. */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
-    public final void unregisterOrganizer() {
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
+    @CallSuper
+    public void unregisterOrganizer() {
         try {
-            getController().unregisterTaskOrganizer(mInterface);
+            mTaskOrganizerController.unregisterTaskOrganizer(mInterface);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Called when a Task is starting and the system would like to show a UI to indicate that an
+     * application is starting. The client is responsible to add/remove the starting window if it
+     * has create a starting window for the Task.
+     *
+     * @param info The information about the Task that's available
+     * @param appToken Token of the application being started.
+     *        context to for resources
+     */
+    @BinderThread
+    public void addStartingWindow(@NonNull StartingWindowInfo info,
+            @NonNull IBinder appToken) {}
+
+    /**
+     * Called when the Task want to remove the starting window.
+     * @param leash A persistent leash for the top window in this task. Release it once exit
+     *              animation has finished.
+     * @param frame Window frame of the top window.
+     * @param playRevealAnimation Play vanish animation.
+     */
+    @BinderThread
+    public void removeStartingWindow(int taskId, @Nullable SurfaceControl leash,
+            @Nullable Rect frame, boolean playRevealAnimation) {}
+
+    /**
+     * Called when the Task want to copy the splash screen.
+     */
+    @BinderThread
+    public void copySplashScreenView(int taskId) {}
+
+    /**
+     * Notify the shell ({@link com.android.wm.shell.ShellTaskOrganizer} that the client has
+     * removed the splash screen view.
+     * @see com.android.wm.shell.ShellTaskOrganizer#onAppSplashScreenViewRemoved(int)
+     * @see SplashScreenView#remove()
+     */
+    @BinderThread
+    public void onAppSplashScreenViewRemoved(int taskId) {
     }
 
     /**
@@ -78,72 +144,65 @@ public class TaskOrganizer extends WindowOrganizer {
     @BinderThread
     public void onBackPressedOnTaskRoot(@NonNull ActivityManager.RunningTaskInfo taskInfo) {}
 
-    /** Creates a persistent root task in WM for a particular windowing-mode. */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    /**
+     * Creates a persistent root task in WM for a particular windowing-mode.
+     * @param displayId The display to create the root task on.
+     * @param windowingMode Windowing mode to put the root task in.
+     * @param launchCookie Launch cookie to associate with the task so that is can be identified
+     *                     when the {@link ITaskOrganizer#onTaskAppeared} callback is called.
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     @Nullable
-    public static ActivityManager.RunningTaskInfo createRootTask(int displayId, int windowingMode) {
+    public void createRootTask(int displayId, int windowingMode, @Nullable IBinder launchCookie) {
         try {
-            return getController().createRootTask(displayId, windowingMode);
+            mTaskOrganizerController.createRootTask(displayId, windowingMode, launchCookie);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /** Deletes a persistent root task in WM */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
-    public static boolean deleteRootTask(@NonNull WindowContainerToken task) {
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
+    public boolean deleteRootTask(@NonNull WindowContainerToken task) {
         try {
-            return getController().deleteRootTask(task);
+            return mTaskOrganizerController.deleteRootTask(task);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /** Gets direct child tasks (ordered from top-to-bottom) */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     @Nullable
     @SuppressLint("NullableCollection")
-    public static List<ActivityManager.RunningTaskInfo> getChildTasks(
+    public List<ActivityManager.RunningTaskInfo> getChildTasks(
             @NonNull WindowContainerToken parent, @NonNull int[] activityTypes) {
         try {
-            return getController().getChildTasks(parent, activityTypes);
+            return mTaskOrganizerController.getChildTasks(parent, activityTypes);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /** Gets all root tasks on a display (ordered from top-to-bottom) */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     @Nullable
     @SuppressLint("NullableCollection")
-    public static List<ActivityManager.RunningTaskInfo> getRootTasks(
+    public List<ActivityManager.RunningTaskInfo> getRootTasks(
             int displayId, @NonNull int[] activityTypes) {
         try {
-            return getController().getRootTasks(displayId, activityTypes);
+            return mTaskOrganizerController.getRootTasks(displayId, activityTypes);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /** Get the root task which contains the current ime target */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     @Nullable
-    public static WindowContainerToken getImeTarget(int display) {
+    public WindowContainerToken getImeTarget(int display) {
         try {
-            return getController().getImeTarget(display);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Set's the root task to launch new tasks into on a display. {@code null} means no launch
-     * root and thus new tasks just end up directly on the display.
-     */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
-    public static void setLaunchRoot(int displayId, @NonNull WindowContainerToken root) {
-        try {
-            getController().setLaunchRoot(displayId, root);
+            return mTaskOrganizerController.getImeTarget(display);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -153,51 +212,88 @@ public class TaskOrganizer extends WindowOrganizer {
      * Requests that the given task organizer is notified when back is pressed on the root activity
      * of one of its controlled tasks.
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
-    public void setInterceptBackPressedOnTaskRoot(boolean interceptBackPressed) {
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
+    public void setInterceptBackPressedOnTaskRoot(@NonNull WindowContainerToken task,
+            boolean interceptBackPressed) {
         try {
-            getController().setInterceptBackPressedOnTaskRoot(mInterface, interceptBackPressed);
+            mTaskOrganizerController.setInterceptBackPressedOnTaskRoot(task, interceptBackPressed);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
+    /**
+     * Restarts the top activity in the given task by killing its process if it is visible.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
+    public void restartTaskTopActivityProcessIfVisible(@NonNull WindowContainerToken task) {
+        try {
+            mTaskOrganizerController.restartTaskTopActivityProcessIfVisible(task);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the executor to run callbacks on.
+     * @hide
+     */
+    @NonNull
+    public Executor getExecutor() {
+        return mExecutor;
+    }
+
     private final ITaskOrganizer mInterface = new ITaskOrganizer.Stub() {
+        @Override
+        public void addStartingWindow(StartingWindowInfo windowInfo,
+                IBinder appToken) {
+            mExecutor.execute(() -> TaskOrganizer.this.addStartingWindow(windowInfo, appToken));
+        }
+
+        @Override
+        public void removeStartingWindow(int taskId, SurfaceControl leash, Rect frame,
+                boolean playRevealAnimation) {
+            mExecutor.execute(() -> TaskOrganizer.this.removeStartingWindow(taskId, leash, frame,
+                    playRevealAnimation));
+        }
+
+        @Override
+        public void copySplashScreenView(int taskId)  {
+            mExecutor.execute(() -> TaskOrganizer.this.copySplashScreenView(taskId));
+        }
+
+        @Override
+        public void onAppSplashScreenViewRemoved(int taskId) {
+            mExecutor.execute(() -> TaskOrganizer.this.onAppSplashScreenViewRemoved(taskId));
+        }
 
         @Override
         public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
-            TaskOrganizer.this.onTaskAppeared(taskInfo, leash);
+            mExecutor.execute(() -> TaskOrganizer.this.onTaskAppeared(taskInfo, leash));
         }
 
         @Override
         public void onTaskVanished(ActivityManager.RunningTaskInfo taskInfo) {
-            TaskOrganizer.this.onTaskVanished(taskInfo);
+            mExecutor.execute(() -> TaskOrganizer.this.onTaskVanished(taskInfo));
         }
 
         @Override
         public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
-            TaskOrganizer.this.onTaskInfoChanged(info);
+            mExecutor.execute(() -> TaskOrganizer.this.onTaskInfoChanged(info));
         }
 
         @Override
         public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo info) {
-            TaskOrganizer.this.onBackPressedOnTaskRoot(info);
+            mExecutor.execute(() -> TaskOrganizer.this.onBackPressedOnTaskRoot(info));
         }
     };
 
-    private static ITaskOrganizerController getController() {
-        return ITaskOrganizerControllerSingleton.get();
+    private ITaskOrganizerController getController() {
+        try {
+            return getWindowOrganizerController().getTaskOrganizerController();
+        } catch (RemoteException e) {
+            return null;
+        }
     }
-
-    private static final Singleton<ITaskOrganizerController> ITaskOrganizerControllerSingleton =
-            new Singleton<ITaskOrganizerController>() {
-                @Override
-                protected ITaskOrganizerController create() {
-                    try {
-                        return getWindowOrganizerController().getTaskOrganizerController();
-                    } catch (RemoteException e) {
-                        return null;
-                    }
-                }
-            };
 }

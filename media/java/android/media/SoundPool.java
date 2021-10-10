@@ -36,12 +36,19 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * The SoundPool class manages and plays audio resources for applications.
  *
- * <p>A SoundPool is a collection of samples that can be loaded into memory
+ * <p>A SoundPool is a collection of sound samples that can be loaded into memory
  * from a resource inside the APK or from a file in the file system. The
- * SoundPool library uses the MediaPlayer service to decode the audio
- * into a raw 16-bit PCM mono or stereo stream. This allows applications
+ * SoundPool library uses the MediaCodec service to decode the audio
+ * into raw 16-bit PCM. This allows applications
  * to ship with compressed streams without having to suffer the CPU load
  * and latency of decompressing during playback.</p>
+ *
+ * <p>Soundpool sounds are expected to be short as they are
+ * predecoded into memory. Each decoded sound is internally limited to one
+ * megabyte storage, which represents approximately 5.6 seconds at 44.1kHz stereo
+ * (the duration is proportionally longer at lower sample rates or
+ * a channel mask of mono). A decoded audio sound will be truncated if it would
+ * exceed the per-sound one megabyte storage space.</p>
  *
  * <p>In addition to low-latency playback, SoundPool can also manage the number
  * of audio streams being rendered at once. When the SoundPool object is
@@ -155,7 +162,8 @@ public class SoundPool extends PlayerBase {
         }
         mAttributes = attributes;
 
-        baseRegisterPlayer();
+        // FIXME: b/174876164 implement session id for soundpool
+        baseRegisterPlayer(AudioSystem.AUDIO_SESSION_ALLOCATE);
     }
 
     /**
@@ -303,7 +311,8 @@ public class SoundPool extends PlayerBase {
      */
     public final int play(int soundID, float leftVolume, float rightVolume,
             int priority, int loop, float rate) {
-        baseStart();
+        // FIXME: b/174876164 implement device id for soundpool
+        baseStart(0);
         return _play(soundID, leftVolume, rightVolume, priority, loop, rate);
     }
 

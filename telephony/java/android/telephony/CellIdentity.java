@@ -70,8 +70,7 @@ public abstract class CellIdentity implements Parcelable {
     /** @hide */
     protected String mAlphaShort;
 
-    // For GSM, WCDMA, TDSCDMA, LTE and NR, Cell Global ID is defined in 3GPP TS 23.003.
-    // For CDMA, its defined as System Id + Network Id + Basestation Id.
+    // Cell Global, 3GPP TS 23.003
     /** @hide */
     protected String mGlobalCellId;
 
@@ -206,7 +205,6 @@ public abstract class CellIdentity implements Parcelable {
     public boolean isSameCell(@Nullable CellIdentity ci) {
         if (ci == null) return false;
         if (this.getClass() != ci.getClass()) return false;
-        if (this.getGlobalCellId() == null || ci.getGlobalCellId() == null) return false;
         return TextUtils.equals(this.getGlobalCellId(), ci.getGlobalCellId());
     }
 

@@ -16,16 +16,23 @@
 
 package android.view.textservice;
 
+import android.annotation.BinderThread;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.inputmethod.InputMethodManager;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.textservice.ISpellCheckerSession;
 import com.android.internal.textservice.ISpellCheckerSessionListener;
 import com.android.internal.textservice.ITextServicesSessionListener;
@@ -33,7 +40,9 @@ import com.android.internal.textservice.ITextServicesSessionListener;
 import dalvik.system.CloseGuard;
 
 import java.util.LinkedList;
+import java.util.Locale;
 import java.util.Queue;
+import java.util.concurrent.Executor;
 
 /**
  * The SpellCheckerSession interface provides the per client functionality of SpellCheckerService.
@@ -101,38 +110,26 @@ public class SpellCheckerSession {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private final SpellCheckerSessionListener mSpellCheckerSessionListener;
     private final SpellCheckerSessionListenerImpl mSpellCheckerSessionListenerImpl;
+    private final Executor mExecutor;
 
     private final CloseGuard mGuard = CloseGuard.get();
-
-    /** Handler that will execute the main tasks */
-    private final Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_ON_GET_SUGGESTION_MULTIPLE:
-                    handleOnGetSuggestionsMultiple((SuggestionsInfo[]) msg.obj);
-                    break;
-                case MSG_ON_GET_SUGGESTION_MULTIPLE_FOR_SENTENCE:
-                    handleOnGetSentenceSuggestionsMultiple((SentenceSuggestionsInfo[]) msg.obj);
-                    break;
-            }
-        }
-    };
 
     /**
      * Constructor
      * @hide
      */
     public SpellCheckerSession(
-            SpellCheckerInfo info, TextServicesManager tsm, SpellCheckerSessionListener listener) {
+            SpellCheckerInfo info, TextServicesManager tsm, SpellCheckerSessionListener listener,
+            Executor executor) {
         if (info == null || listener == null || tsm == null) {
             throw new NullPointerException();
         }
         mSpellCheckerInfo = info;
-        mSpellCheckerSessionListenerImpl = new SpellCheckerSessionListenerImpl(mHandler);
+        mSpellCheckerSessionListenerImpl = new SpellCheckerSessionListenerImpl(this);
         mInternalListener = new InternalListener(mSpellCheckerSessionListenerImpl);
         mTextServicesManager = tsm;
         mSpellCheckerSessionListener = listener;
+        mExecutor = executor;
 
         mGuard.open("finishSession");
     }
@@ -176,6 +173,11 @@ public class SpellCheckerSession {
      * @param suggestionsLimit the maximum number of suggestions that will be returned
      */
     public void getSentenceSuggestions(TextInfo[] textInfos, int suggestionsLimit) {
+        final InputMethodManager imm = mTextServicesManager.getInputMethodManager();
+        if (imm != null && imm.isInputMethodSuppressingSpellChecker()) {
+            handleOnGetSentenceSuggestionsMultiple(new SentenceSuggestionsInfo[0]);
+            return;
+        }
         mSpellCheckerSessionListenerImpl.getSentenceSuggestionsMultiple(
                 textInfos, suggestionsLimit);
     }
@@ -204,16 +206,22 @@ public class SpellCheckerSession {
         if (DBG) {
             Log.w(TAG, "getSuggestions from " + mSpellCheckerInfo.getId());
         }
+        final InputMethodManager imm = mTextServicesManager.getInputMethodManager();
+        if (imm != null && imm.isInputMethodSuppressingSpellChecker()) {
+            handleOnGetSuggestionsMultiple(new SuggestionsInfo[0]);
+            return;
+        }
         mSpellCheckerSessionListenerImpl.getSuggestionsMultiple(
                 textInfos, suggestionsLimit, sequentialWords);
     }
 
-    private void handleOnGetSuggestionsMultiple(SuggestionsInfo[] suggestionInfos) {
-        mSpellCheckerSessionListener.onGetSuggestions(suggestionInfos);
+    void handleOnGetSuggestionsMultiple(SuggestionsInfo[] suggestionsInfos) {
+        mExecutor.execute(() -> mSpellCheckerSessionListener.onGetSuggestions(suggestionsInfos));
     }
 
-    private void handleOnGetSentenceSuggestionsMultiple(SentenceSuggestionsInfo[] suggestionInfos) {
-        mSpellCheckerSessionListener.onGetSentenceSuggestions(suggestionInfos);
+    void handleOnGetSentenceSuggestionsMultiple(SentenceSuggestionsInfo[] suggestionsInfos) {
+        mExecutor.execute(() ->
+                mSpellCheckerSessionListener.onGetSentenceSuggestions(suggestionsInfos));
     }
 
     private static final class SpellCheckerSessionListenerImpl
@@ -238,7 +246,8 @@ public class SpellCheckerSession {
         }
 
         private final Queue<SpellCheckerParams> mPendingTasks = new LinkedList<>();
-        private Handler mHandler;
+        @GuardedBy("SpellCheckerSessionListenerImpl.this")
+        private SpellCheckerSession mSpellCheckerSession;
 
         private static final int STATE_WAIT_CONNECTION = 0;
         private static final int STATE_CONNECTED = 1;
@@ -259,8 +268,8 @@ public class SpellCheckerSession {
         private HandlerThread mThread;
         private Handler mAsyncHandler;
 
-        public SpellCheckerSessionListenerImpl(Handler handler) {
-            mHandler = handler;
+        SpellCheckerSessionListenerImpl(SpellCheckerSession spellCheckerSession) {
+            mSpellCheckerSession = spellCheckerSession;
         }
 
         private static class SpellCheckerParams {
@@ -338,6 +347,7 @@ public class SpellCheckerSession {
             }
         }
 
+        @GuardedBy("SpellCheckerSessionListenerImpl.this")
         private void processCloseLocked() {
             if (DBG) Log.d(TAG, "entering processCloseLocked:"
                     + " session" + (mISpellCheckerSession != null ? ".hashCode()=#"
@@ -347,7 +357,7 @@ public class SpellCheckerSession {
             if (mThread != null) {
                 mThread.quit();
             }
-            mHandler = null;
+            mSpellCheckerSession = null;
             mPendingTasks.clear();
             mThread = null;
             mAsyncHandler = null;
@@ -491,23 +501,185 @@ public class SpellCheckerSession {
             processTask(session, scp, false);
         }
 
+        @BinderThread
         @Override
         public void onGetSuggestions(SuggestionsInfo[] results) {
-            synchronized (this) {
-                if (mHandler != null) {
-                    mHandler.sendMessage(Message.obtain(mHandler,
-                            MSG_ON_GET_SUGGESTION_MULTIPLE, results));
-                }
+            SpellCheckerSession session = getSpellCheckerSession();
+            if (session != null) {
+                // Lock should not be held when calling callback, in order to avoid deadlock.
+                session.handleOnGetSuggestionsMultiple(results);
             }
         }
 
+        @BinderThread
         @Override
         public void onGetSentenceSuggestions(SentenceSuggestionsInfo[] results) {
-            synchronized (this) {
-                if (mHandler != null) {
-                    mHandler.sendMessage(Message.obtain(mHandler,
-                            MSG_ON_GET_SUGGESTION_MULTIPLE_FOR_SENTENCE, results));
+            SpellCheckerSession session = getSpellCheckerSession();
+            if (session != null) {
+                // Lock should not be held when calling callback, in order to avoid deadlock.
+                session.handleOnGetSentenceSuggestionsMultiple(results);
+            }
+        }
+
+        @Nullable
+        private SpellCheckerSession getSpellCheckerSession() {
+            synchronized (SpellCheckerSessionListenerImpl.this) {
+                return mSpellCheckerSession;
+            }
+        }
+    }
+
+    /** Parameters used to create a {@link SpellCheckerSession}. */
+    public static class SpellCheckerSessionParams {
+        @Nullable
+        private final Locale mLocale;
+        private final boolean mShouldReferToSpellCheckerLanguageSettings;
+        private final @SuggestionsInfo.ResultAttrs int mSupportedAttributes;
+        private final Bundle mExtras;
+
+        private SpellCheckerSessionParams(Locale locale,
+                boolean referToSpellCheckerLanguageSettings, int supportedAttributes,
+                Bundle extras) {
+            mLocale = locale;
+            mShouldReferToSpellCheckerLanguageSettings = referToSpellCheckerLanguageSettings;
+            mSupportedAttributes = supportedAttributes;
+            mExtras = extras;
+        }
+
+        /**
+         * Returns the locale in which the spell checker should operate.
+         *
+         * @see android.service.textservice.SpellCheckerService.Session#getLocale()
+         */
+        @SuppressLint("UseIcu")
+        @Nullable
+        public Locale getLocale() {
+            return mLocale;
+        }
+
+        /**
+         * Returns true if the user's spell checker language settings should be used to determine
+         * the spell checker locale.
+         */
+        public boolean shouldReferToSpellCheckerLanguageSettings() {
+            return mShouldReferToSpellCheckerLanguageSettings;
+        }
+
+        /**
+         * Returns a bitmask of {@link SuggestionsInfo} attributes that the spell checker can set
+         * in {@link SuggestionsInfo} it returns.
+         *
+         * @see android.service.textservice.SpellCheckerService.Session#getSupportedAttributes()
+         */
+        public @SuggestionsInfo.ResultAttrs int getSupportedAttributes() {
+            return mSupportedAttributes;
+        }
+
+        /**
+         * Returns a bundle containing extra parameters for the spell checker.
+         *
+         * <p>This bundle can be used to pass implementation-specific parameters to the
+         * {@link android.service.textservice.SpellCheckerService} implementation.
+         *
+         * @see android.service.textservice.SpellCheckerService.Session#getBundle()
+         */
+        @NonNull
+        public Bundle getExtras() {
+            return mExtras;
+        }
+
+        /** Builder of {@link SpellCheckerSessionParams}. */
+        public static final class Builder {
+            @Nullable
+            private Locale mLocale;
+            private boolean mShouldReferToSpellCheckerLanguageSettings = false;
+            private @SuggestionsInfo.ResultAttrs int mSupportedAttributes = 0;
+            private Bundle mExtras = Bundle.EMPTY;
+
+            /** Constructs a {@code Builder}. */
+            public Builder() {
+            }
+
+            /**
+             * Returns constructed {@link SpellCheckerSession} instance.
+             *
+             * <p>Before calling this method, either {@link #setLocale(Locale)} should be called
+             * with a non-null locale or
+             * {@link #setShouldReferToSpellCheckerLanguageSettings(boolean)} should be called with
+             * {@code true}.
+             */
+            @NonNull
+            public SpellCheckerSessionParams build() {
+                if (mLocale == null && !mShouldReferToSpellCheckerLanguageSettings) {
+                    throw new IllegalArgumentException("mLocale should not be null if "
+                            + " mShouldReferToSpellCheckerLanguageSettings is false.");
                 }
+                return new SpellCheckerSessionParams(mLocale,
+                        mShouldReferToSpellCheckerLanguageSettings, mSupportedAttributes, mExtras);
+            }
+
+            /**
+             * Sets the locale in which the spell checker should operate.
+             *
+             * @see android.service.textservice.SpellCheckerService.Session#getLocale()
+             */
+            @NonNull
+            public Builder setLocale(@SuppressLint("UseIcu") @Nullable Locale locale) {
+                mLocale = locale;
+                return this;
+            }
+
+            /**
+             * Sets whether or not the user's spell checker language settings should be used to
+             * determine spell checker locale.
+             *
+             * <p>If {@code shouldReferToSpellCheckerLanguageSettings} is true, the exact way of
+             * determining spell checker locale differs based on {@code locale} specified in
+             * {@link #setLocale(Locale)}.
+             * If {@code shouldReferToSpellCheckerLanguageSettings} is true and {@code locale} is
+             * null, the locale specified in Settings will be used. If
+             * {@code shouldReferToSpellCheckerLanguageSettings} is true and {@code locale} is not
+             * null, {@link SpellCheckerSession} can be created only when the locale specified in
+             * Settings is the same as {@code locale}. Exceptionally, if
+             * {@code shouldReferToSpellCheckerLanguageSettings} is true and {@code locale} is
+             * language only (e.g. "en"), the specified locale in Settings (e.g. "en_US") will be
+             * used.
+             *
+             * @see #setLocale(Locale)
+             */
+            @NonNull
+            public Builder setShouldReferToSpellCheckerLanguageSettings(
+                    boolean shouldReferToSpellCheckerLanguageSettings) {
+                mShouldReferToSpellCheckerLanguageSettings =
+                        shouldReferToSpellCheckerLanguageSettings;
+                return this;
+            }
+
+            /**
+             * Sets a bitmask of {@link SuggestionsInfo} attributes that the spell checker can set
+             * in {@link SuggestionsInfo} it returns.
+             *
+             * @see android.service.textservice.SpellCheckerService.Session#getSupportedAttributes()
+             */
+            @NonNull
+            public Builder setSupportedAttributes(
+                    @SuggestionsInfo.ResultAttrs int supportedAttributes) {
+                mSupportedAttributes = supportedAttributes;
+                return this;
+            }
+
+            /**
+             * Sets a bundle containing extra parameters for the spell checker.
+             *
+             * <p>This bundle can be used to pass implementation-specific parameters to the
+             * {@link android.service.textservice.SpellCheckerService} implementation.
+             *
+             * @see android.service.textservice.SpellCheckerService.Session#getBundle()
+             */
+            @NonNull
+            public Builder setExtras(@NonNull Bundle extras) {
+                mExtras = extras;
+                return this;
             }
         }
     }

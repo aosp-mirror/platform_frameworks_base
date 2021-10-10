@@ -44,6 +44,7 @@ public class BinderLatencyObserver {
 
     // Latency observer parameters.
     public static final int PERIODIC_SAMPLING_INTERVAL_DEFAULT = 10;
+    public static final int SHARDING_MODULO_DEFAULT = 1;
     public static final int STATSD_PUSH_INTERVAL_MINUTES_DEFAULT = 360;
 
     // Histogram buckets parameters.
@@ -58,6 +59,11 @@ public class BinderLatencyObserver {
     // Sampling period to control how often to track CPU usage. 1 means all calls, 100 means ~1 out
     // of 100 requests.
     private int mPeriodicSamplingInterval = PERIODIC_SAMPLING_INTERVAL_DEFAULT;
+    // Controls how many APIs will be collected per device. 1 means all APIs, 10 means every 10th
+    // API will be collected.
+    private int mShardingModulo = SHARDING_MODULO_DEFAULT;
+    // Controls which shards will be collected on this device.
+    private int mShardingOffset;
 
     private int mBucketCount = BUCKET_COUNT_DEFAULT;
     private int mFirstBucketSize = FIRST_BUCKET_SIZE_DEFAULT;
@@ -156,7 +162,7 @@ public class BinderLatencyObserver {
                 FrameworkStatsLog.BINDER_LATENCY_REPORTED,
                 atom.getBytes(),
                 mPeriodicSamplingInterval,
-                1,
+                mShardingModulo,
                 mBucketCount,
                 mFirstBucketSize,
                 mBucketScaleFactor);
@@ -185,6 +191,7 @@ public class BinderLatencyObserver {
         mLatencyBuckets = new BinderLatencyBuckets(
             mBucketCount, mFirstBucketSize, mBucketScaleFactor);
         mProcessSource = processSource;
+        mShardingOffset = mRandom.nextInt(mShardingModulo);
         noteLatencyDelayed();
     }
 
@@ -194,7 +201,12 @@ public class BinderLatencyObserver {
             return;
         }
 
-        LatencyDims dims = new LatencyDims(s.binderClass, s.transactionCode);
+        LatencyDims dims = LatencyDims.create(s.binderClass, s.transactionCode);
+
+        if (!shouldCollect(dims)) {
+            return;
+        }
+
         long elapsedTimeMicro = getElapsedRealtimeMicro();
         long callDuration = elapsedTimeMicro - s.timeStarted;
 
@@ -220,6 +232,10 @@ public class BinderLatencyObserver {
         return SystemClock.elapsedRealtimeNanos() / 1000;
     }
 
+    protected boolean shouldCollect(LatencyDims dims) {
+        return (dims.hashCode() + mShardingOffset) % mShardingModulo == 0;
+    }
+
     protected boolean shouldKeepSample() {
         return mRandom.nextInt() % mPeriodicSamplingInterval == 0;
     }
@@ -235,6 +251,23 @@ public class BinderLatencyObserver {
         synchronized (mLock) {
             if (samplingInterval != mPeriodicSamplingInterval) {
                 mPeriodicSamplingInterval = samplingInterval;
+                reset();
+            }
+        }
+    }
+
+    /** Updates the sharding modulo. */
+    public void setShardingModulo(int shardingModulo) {
+        if (shardingModulo <= 0) {
+            Slog.w(TAG, "Ignored invalid sharding modulo (value must be positive): "
+                    + shardingModulo);
+            return;
+        }
+
+        synchronized (mLock) {
+            if (shardingModulo != mShardingModulo) {
+                mShardingModulo = shardingModulo;
+                mShardingOffset = mRandom.nextInt(shardingModulo);
                 reset();
             }
         }
@@ -289,7 +322,12 @@ public class BinderLatencyObserver {
         // Cached hash code, 0 if not set yet.
         private int mHashCode = 0;
 
-        public LatencyDims(Class<? extends Binder> binderClass, int transactionCode) {
+        /** Creates a new instance of LatencyDims. */
+        public static LatencyDims create(Class<? extends Binder> binderClass, int transactionCode) {
+            return new LatencyDims(binderClass, transactionCode);
+        }
+
+        private LatencyDims(Class<? extends Binder> binderClass, int transactionCode) {
             this.mBinderClass = binderClass;
             this.mTransactionCode = transactionCode;
         }
@@ -317,7 +355,7 @@ public class BinderLatencyObserver {
                 return mHashCode;
             }
             int hash = mTransactionCode;
-            hash = 31 * hash + mBinderClass.hashCode();
+            hash = 31 * hash + mBinderClass.getName().hashCode();
             mHashCode = hash;
             return hash;
         }

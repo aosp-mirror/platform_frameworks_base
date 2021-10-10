@@ -15,7 +15,9 @@
   limitations under the License.
   -->
 
-<resources>
+<resources
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:targetApi="28">
 
     <style name="SettingsBarChart">
         <item name="android:layout_marginStart">10dp</item>

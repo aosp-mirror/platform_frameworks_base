@@ -1,5 +1,5 @@
 {
-    "presubmit-devicepolicy": [
+    "presubmit-large": [
         {
             "name": "CtsDevicePolicyManagerTestCases",
             "options": [
@@ -10,7 +10,9 @@
                     "exclude-annotation": "android.platform.test.annotations.FlakyTest"
                 }
             ]
-        },
+        }
+    ],
+    "presubmit": [
         {
             "name": "FrameworksServicesTests",
             "options": [

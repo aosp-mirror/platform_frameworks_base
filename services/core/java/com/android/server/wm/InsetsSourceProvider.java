@@ -21,17 +21,28 @@ import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_IME;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
-import static android.view.ViewRootImpl.sNewInsetsMode;
 
-import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_IME;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IME;
+import static com.android.server.wm.InsetsSourceProviderProto.CAPTURED_LEASH;
+import static com.android.server.wm.InsetsSourceProviderProto.CLIENT_VISIBLE;
+import static com.android.server.wm.InsetsSourceProviderProto.CONTROL;
+import static com.android.server.wm.InsetsSourceProviderProto.CONTROLLABLE;
+import static com.android.server.wm.InsetsSourceProviderProto.CONTROL_TARGET;
+import static com.android.server.wm.InsetsSourceProviderProto.FAKE_CONTROL;
+import static com.android.server.wm.InsetsSourceProviderProto.FAKE_CONTROL_TARGET;
+import static com.android.server.wm.InsetsSourceProviderProto.FRAME;
+import static com.android.server.wm.InsetsSourceProviderProto.IME_OVERRIDDEN_FRAME;
+import static com.android.server.wm.InsetsSourceProviderProto.IS_LEASH_READY_FOR_DISPATCHING;
+import static com.android.server.wm.InsetsSourceProviderProto.PENDING_CONTROL_TARGET;
+import static com.android.server.wm.InsetsSourceProviderProto.SEAMLESS_ROTATING;
+import static com.android.server.wm.InsetsSourceProviderProto.SERVER_VISIBLE;
+import static com.android.server.wm.InsetsSourceProviderProto.SOURCE;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_INSETS_CONTROL;
 import static com.android.server.wm.WindowManagerService.H.LAYOUT_AND_ASSIGN_WINDOW_LAYERS_IF_NEEDED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
@@ -42,16 +53,17 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.function.TriConsumer;
-import com.android.server.protolog.common.ProtoLog;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
 import java.io.PrintWriter;
+import java.util.function.Consumer;
 
 /**
  * Controller for a specific inset source on the server. It's called provider as it provides the
- * {@link InsetsSource} to the client that uses it in {@link InsetsSourceConsumer}.
+ * {@link InsetsSource} to the client that uses it in {@link android.view.InsetsSourceConsumer}.
  */
 class InsetsSourceProvider {
 
@@ -72,6 +84,17 @@ class InsetsSourceProvider {
     private TriConsumer<DisplayFrames, WindowState, Rect> mImeFrameProvider;
     private final Rect mImeOverrideFrame = new Rect();
     private boolean mIsLeashReadyForDispatching;
+    private final Rect mLastSourceFrame = new Rect();
+
+    private final Consumer<Transaction> mSetLeashPositionConsumer = t -> {
+        if (mControl != null) {
+            final SurfaceControl leash = mControl.getLeash();
+            if (leash != null) {
+                final Point position = mControl.getSurfacePosition();
+                t.setPosition(leash, position.x, position.y);
+            }
+        }
+    };
 
     /** The visibility override from the current controlling window. */
     private boolean mClientVisible;
@@ -82,7 +105,6 @@ class InsetsSourceProvider {
     private boolean mServerVisible;
 
     private boolean mSeamlessRotating;
-    private long mFinishSeamlessRotateFrameNumber = -1;
 
     private final boolean mControllable;
 
@@ -92,17 +114,19 @@ class InsetsSourceProvider {
         mSource = source;
         mDisplayContent = displayContent;
         mStateController = stateController;
-        mFakeControl = new InsetsSourceControl(source.getType(), null /* leash */,
-                new Point());
+        mFakeControl = new InsetsSourceControl(
+                source.getType(), null /* leash */, new Point(), Insets.NONE);
 
-        final int type = source.getType();
-        if (type == ITYPE_STATUS_BAR || type == ITYPE_NAVIGATION_BAR || type == ITYPE_CLIMATE_BAR
-                || type == ITYPE_EXTRA_NAVIGATION_BAR) {
-            mControllable = sNewInsetsMode == NEW_INSETS_MODE_FULL;
-        } else if (type == ITYPE_IME) {
-            mControllable = sNewInsetsMode >= NEW_INSETS_MODE_IME;
-        } else {
-            mControllable = false;
+        switch (source.getType()) {
+            case ITYPE_STATUS_BAR:
+            case ITYPE_NAVIGATION_BAR:
+            case ITYPE_IME:
+            case ITYPE_CLIMATE_BAR:
+            case ITYPE_EXTRA_NAVIGATION_BAR:
+                mControllable = true;
+                break;
+            default:
+                mControllable = false;
         }
     }
 
@@ -138,6 +162,7 @@ class InsetsSourceProvider {
             // TODO: Ideally, we should wait for the animation to finish so previous window can
             // animate-out as new one animates-in.
             mWin.cancelAnimation();
+            mWin.mProvidedInsetsSources.remove(mSource.getType());
         }
         ProtoLog.d(WM_DEBUG_IME, "InsetsSource setWin %s", win);
         mWin = win;
@@ -147,11 +172,14 @@ class InsetsSourceProvider {
             setServerVisible(false);
             mSource.setFrame(new Rect());
             mSource.setVisibleFrame(null);
-        } else if (mControllable) {
-            mWin.setControllableInsetProvider(this);
-            if (mPendingControlTarget != null) {
-                updateControlForTarget(mPendingControlTarget, true /* force */);
-                mPendingControlTarget = null;
+        } else {
+            mWin.mProvidedInsetsSources.put(mSource.getType(), mSource);
+            if (mControllable) {
+                mWin.setControllableInsetProvider(this);
+                if (mPendingControlTarget != null) {
+                    updateControlForTarget(mPendingControlTarget, true /* force */);
+                    mPendingControlTarget = null;
+                }
             }
         }
     }
@@ -168,7 +196,9 @@ class InsetsSourceProvider {
      * window gets laid out.
      */
     void updateSourceFrame() {
-        if (mWin == null) {
+        if (mWin == null || mWin.mGivenInsetsPending) {
+            // If the given insets are pending, they are not reliable for now. The source frame
+            // should be updated after the new given insets are sent to window manager.
             return;
         }
 
@@ -176,7 +206,7 @@ class InsetsSourceProvider {
         // frame may not yet determined that server side doesn't think the window is ready to
         // visible. (i.e. No surface, pending insets that were given during layout, etc..)
         if (mServerVisible) {
-            mTmpRect.set(mWin.getFrameLw());
+            mTmpRect.set(mWin.getFrame());
             if (mFrameProvider != null) {
                 mFrameProvider.accept(mWin.getDisplayContent().mDisplayFrames, mWin, mTmpRect);
             } else {
@@ -188,14 +218,14 @@ class InsetsSourceProvider {
         mSource.setFrame(mTmpRect);
 
         if (mImeFrameProvider != null) {
-            mImeOverrideFrame.set(mWin.getFrameLw());
+            mImeOverrideFrame.set(mWin.getFrame());
             mImeFrameProvider.accept(mWin.getDisplayContent().mDisplayFrames, mWin,
                     mImeOverrideFrame);
         }
 
         if (mWin.mGivenVisibleInsets.left != 0 || mWin.mGivenVisibleInsets.top != 0
                 || mWin.mGivenVisibleInsets.right != 0 || mWin.mGivenVisibleInsets.bottom != 0) {
-            mTmpRect.set(mWin.getFrameLw());
+            mTmpRect.set(mWin.getFrame());
             mTmpRect.inset(mWin.mGivenVisibleInsets);
             mSource.setVisibleFrame(mTmpRect);
         } else {
@@ -225,17 +255,40 @@ class InsetsSourceProvider {
             return;
         }
 
-        setServerVisible(mWin.wouldBeVisibleIfPolicyIgnored() && mWin.isVisibleByPolicy()
-                && !mWin.mGivenInsetsPending);
+        setServerVisible(mWin.wouldBeVisibleIfPolicyIgnored() && mWin.isVisibleByPolicy());
         updateSourceFrame();
         if (mControl != null) {
-            final Rect frame = mWin.getWindowFrames().mFrame;
-            if (mControl.setSurfacePosition(frame.left, frame.top) && mControlTarget != null) {
-                // The leash has been stale, we need to create a new one for the client.
-                updateControlForTarget(mControlTarget, true /* force */);
+            boolean changed = false;
+            final Point position = getWindowFrameSurfacePosition();
+            if (mControl.setSurfacePosition(position.x, position.y) && mControlTarget != null) {
+                changed = true;
+                if (mWin.getWindowFrames().didFrameSizeChange() && mWin.mWinAnimator.getShown()
+                        && mWin.okToDisplay()) {
+                    mWin.applyWithNextDraw(mSetLeashPositionConsumer);
+                } else {
+                    mSetLeashPositionConsumer.accept(mWin.getPendingTransaction());
+                }
+            }
+            if (mServerVisible && !mLastSourceFrame.equals(mSource.getFrame())) {
+                final Insets insetsHint = mSource.calculateInsets(
+                        mWin.getBounds(), true /* ignoreVisibility */);
+                if (!insetsHint.equals(mControl.getInsetsHint())) {
+                    changed = true;
+                    mControl.setInsetsHint(insetsHint);
+                }
+                mLastSourceFrame.set(mSource.getFrame());
+            }
+            if (changed) {
                 mStateController.notifyControlChanged(mControlTarget);
             }
         }
+    }
+
+    private Point getWindowFrameSurfacePosition() {
+        final Rect frame = mWin.getFrame();
+        final Point position = new Point();
+        mWin.transformFrameToSurfacePosition(frame.left, frame.top, position);
+        return position;
     }
 
     /**
@@ -277,9 +330,10 @@ class InsetsSourceProvider {
             setClientVisible(InsetsState.getDefaultVisibility(mSource.getType()));
             return;
         }
-        mAdapter = new ControlAdapter();
+        final Point surfacePosition = getWindowFrameSurfacePosition();
+        mAdapter = new ControlAdapter(surfacePosition);
         if (getSource().getType() == ITYPE_IME) {
-            setClientVisible(target.getImeRequestedVisibility(mSource.getType()));
+            setClientVisible(target.getRequestedVisibility(mSource.getType()));
         }
         final Transaction t = mDisplayContent.getPendingTransaction();
         mWin.startAnimation(t, mAdapter, !mClientVisible /* hidden */,
@@ -290,46 +344,31 @@ class InsetsSourceProvider {
         mIsLeashReadyForDispatching = false;
 
         final SurfaceControl leash = mAdapter.mCapturedLeash;
-        final long frameNumber = mFinishSeamlessRotateFrameNumber;
-        mFinishSeamlessRotateFrameNumber = -1;
-        if (frameNumber >= 0 && mWin.mHasSurface && leash != null) {
-            // We just finished the seamless rotation. We don't want to change the position or the
-            // window crop of the surface controls (including the leash) until the client finishes
-            // drawing the new frame of the new orientation. Although we cannot defer the reparent
-            // operation, it is fine, because reparent won't cause any visual effect.
-            final SurfaceControl barrier = mWin.getClientViewRootSurface();
-            t.deferTransactionUntil(mWin.getSurfaceControl(), barrier, frameNumber);
-            t.deferTransactionUntil(leash, barrier, frameNumber);
-        }
         mControlTarget = target;
         updateVisibility();
-        mControl = new InsetsSourceControl(mSource.getType(), leash,
-                new Point(mWin.getWindowFrames().mFrame.left, mWin.getWindowFrames().mFrame.top));
+        mControl = new InsetsSourceControl(mSource.getType(), leash, surfacePosition,
+                mSource.calculateInsets(mWin.getBounds(), true /* ignoreVisibility */));
         ProtoLog.d(WM_DEBUG_IME,
                 "InsetsSource Control %s for target %s", mControl, mControlTarget);
     }
 
     void startSeamlessRotation() {
-        if (!mSeamlessRotating) {
-            mSeamlessRotating = true;
-
-            // This will revoke the leash and clear the control target.
-            mWin.cancelAnimation();
-        }
+      if (!mSeamlessRotating) {
+          mSeamlessRotating = true;
+          mWin.cancelAnimation();
+      }
     }
 
-    void finishSeamlessRotation(boolean timeout) {
-        if (mSeamlessRotating) {
-            mSeamlessRotating = false;
-            mFinishSeamlessRotateFrameNumber = timeout ? -1 : mWin.getFrameNumber();
-        }
+    void finishSeamlessRotation() {
+        mSeamlessRotating = false;
     }
 
-    boolean onInsetsModified(InsetsControlTarget caller, InsetsSource modifiedSource) {
-        if (mControlTarget != caller || modifiedSource.isVisible() == mClientVisible) {
+    boolean updateClientVisibility(InsetsControlTarget caller) {
+        final boolean requestedVisible = caller.getRequestedVisibility(mSource.getType());
+        if (caller != mControlTarget || requestedVisible == mClientVisible) {
             return false;
         }
-        setClientVisible(modifiedSource.isVisible());
+        setClientVisible(requestedVisible);
         return true;
     }
 
@@ -337,7 +376,7 @@ class InsetsSourceProvider {
         mIsLeashReadyForDispatching = true;
     }
 
-    private void setClientVisible(boolean clientVisible) {
+    void setClientVisible(boolean clientVisible) {
         if (mClientVisible == clientVisible) {
             return;
         }
@@ -353,7 +392,7 @@ class InsetsSourceProvider {
         updateVisibility();
     }
 
-    private void updateVisibility() {
+    protected void updateVisibility() {
         mSource.setVisible(mServerVisible && (isMirroredSource() || mClientVisible));
         ProtoLog.d(WM_DEBUG_IME,
                 "InsetsSource updateVisibility serverVisible: %s clientVisible: %s",
@@ -383,7 +422,7 @@ class InsetsSourceProvider {
                 // to the client in case that the client applies its transaction sooner than ours
                 // that we could unexpectedly overwrite the surface state.
                 return new InsetsSourceControl(mControl.getType(), null /* leash */,
-                        mControl.getSurfacePosition());
+                        mControl.getSurfacePosition(), mControl.getInsetsHint());
             }
             return mControl;
         }
@@ -398,7 +437,7 @@ class InsetsSourceProvider {
     }
 
     boolean isClientVisible() {
-        return sNewInsetsMode == NEW_INSETS_MODE_NONE || mClientVisible;
+        return mClientVisible;
     }
 
     /**
@@ -417,46 +456,76 @@ class InsetsSourceProvider {
     }
 
     public void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + "InsetsSourceProvider");
-        pw.print(prefix + " mSource="); mSource.dump(prefix + "  ", pw);
+        pw.println(prefix + getClass().getSimpleName());
+        prefix = prefix + "  ";
+        pw.print(prefix + "mSource="); mSource.dump("", pw);
         if (mControl != null) {
-            pw.print(prefix + " mControl=");
-            mControl.dump(prefix + "  ", pw);
+            pw.print(prefix + "mControl=");
+            mControl.dump("", pw);
         }
-        pw.print(prefix + " mFakeControl="); mFakeControl.dump(prefix + "  ", pw);
-        pw.print(" mIsLeashReadyForDispatching="); pw.print(mIsLeashReadyForDispatching);
-        pw.print(" mImeOverrideFrame="); pw.print(mImeOverrideFrame.toString());
+        pw.print(prefix);
+        pw.print("mIsLeashReadyForDispatching="); pw.print(mIsLeashReadyForDispatching);
+        pw.print(" mImeOverrideFrame="); pw.print(mImeOverrideFrame.toShortString());
+        pw.println();
         if (mWin != null) {
-            pw.print(prefix + " mWin=");
-            mWin.dump(pw, prefix + "  ", false /* dumpAll */);
+            pw.print(prefix + "mWin=");
+            pw.println(mWin);
         }
         if (mAdapter != null) {
-            pw.print(prefix + " mAdapter=");
-            mAdapter.dump(pw, prefix + "  ");
+            pw.print(prefix + "mAdapter=");
+            mAdapter.dump(pw, "");
         }
         if (mControlTarget != null) {
-            pw.print(prefix + " mControlTarget=");
-            if (mControlTarget.getWindow() != null) {
-                mControlTarget.getWindow().dump(pw, prefix + "  ", false /* dumpAll */);
-            }
+            pw.print(prefix + "mControlTarget=");
+            pw.println(mControlTarget.getWindow());
         }
         if (mPendingControlTarget != null) {
-            pw.print(prefix + " mPendingControlTarget=");
-            if (mPendingControlTarget.getWindow() != null) {
-                mPendingControlTarget.getWindow().dump(pw, prefix + "  ", false /* dumpAll */);
-            }
+            pw.print(prefix + "mPendingControlTarget=");
+            pw.println(mPendingControlTarget.getWindow());
         }
         if (mFakeControlTarget != null) {
-            pw.print(prefix + " mFakeControlTarget=");
-            if (mFakeControlTarget.getWindow() != null) {
-                mFakeControlTarget.getWindow().dump(pw, prefix + "  ", false /* dumpAll */);
-            }
+            pw.print(prefix + "mFakeControlTarget=");
+            pw.println(mFakeControlTarget.getWindow());
         }
+    }
+
+    void dumpDebug(ProtoOutputStream proto, long fieldId, @WindowTraceLogLevel int logLevel) {
+        final long token = proto.start(fieldId);
+        mSource.dumpDebug(proto, SOURCE);
+        mTmpRect.dumpDebug(proto, FRAME);
+        mFakeControl.dumpDebug(proto, FAKE_CONTROL);
+        if (mControl != null) {
+            mControl.dumpDebug(proto, CONTROL);
+        }
+        if (mControlTarget != null && mControlTarget.getWindow() != null) {
+            mControlTarget.getWindow().dumpDebug(proto, CONTROL_TARGET, logLevel);
+        }
+        if (mPendingControlTarget != null && mPendingControlTarget.getWindow() != null) {
+            mPendingControlTarget.getWindow().dumpDebug(proto, PENDING_CONTROL_TARGET, logLevel);
+        }
+        if (mFakeControlTarget != null && mFakeControlTarget.getWindow() != null) {
+            mFakeControlTarget.getWindow().dumpDebug(proto, FAKE_CONTROL_TARGET, logLevel);
+        }
+        if (mAdapter != null && mAdapter.mCapturedLeash != null) {
+            mAdapter.mCapturedLeash.dumpDebug(proto, CAPTURED_LEASH);
+        }
+        mImeOverrideFrame.dumpDebug(proto, IME_OVERRIDDEN_FRAME);
+        proto.write(IS_LEASH_READY_FOR_DISPATCHING, mIsLeashReadyForDispatching);
+        proto.write(CLIENT_VISIBLE, mClientVisible);
+        proto.write(SERVER_VISIBLE, mServerVisible);
+        proto.write(SEAMLESS_ROTATING, mSeamlessRotating);
+        proto.write(CONTROLLABLE, mControllable);
+        proto.end(token);
     }
 
     private class ControlAdapter implements AnimationAdapter {
 
+        private final Point mSurfacePosition;
         private SurfaceControl mCapturedLeash;
+
+        ControlAdapter(Point surfacePosition) {
+            mSurfacePosition = surfacePosition;
+        }
 
         @Override
         public boolean getShowWallpaper() {
@@ -466,8 +535,7 @@ class InsetsSourceProvider {
         @Override
         public void startAnimation(SurfaceControl animationLeash, Transaction t,
                 @AnimationType int type, OnAnimationFinishedCallback finishCallback) {
-            // TODO(b/118118435): We can remove the type check when implementing the transient bar
-            //                    animation.
+            // TODO(b/166736352): Check if we still need to control the IME visibility here.
             if (mSource.getType() == ITYPE_IME) {
                 // TODO: use 0 alpha and remove t.hide() once b/138459974 is fixed.
                 t.setAlpha(animationLeash, 1 /* alpha */);
@@ -478,8 +546,7 @@ class InsetsSourceProvider {
                     mControlTarget);
 
             mCapturedLeash = animationLeash;
-            final Rect frame = mWin.getWindowFrames().mFrame;
-            t.setPosition(mCapturedLeash, frame.left, frame.top);
+            t.setPosition(mCapturedLeash, mSurfacePosition.x, mSurfacePosition.y);
         }
 
         @Override
@@ -508,8 +575,9 @@ class InsetsSourceProvider {
 
         @Override
         public void dump(PrintWriter pw, String prefix) {
-            pw.println(prefix + "ControlAdapter");
-            pw.print(prefix + " mCapturedLeash="); pw.print(mCapturedLeash);
+            pw.print(prefix + "ControlAdapter mCapturedLeash=");
+            pw.print(mCapturedLeash);
+            pw.println();
         }
 
         @Override

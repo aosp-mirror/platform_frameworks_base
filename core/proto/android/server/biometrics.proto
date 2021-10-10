@@ -1,0 +1,210 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package com.android.server.biometrics;
+
+import "frameworks/base/core/proto/android/privacy.proto";
+
+option java_multiple_files = true;
+option java_outer_classname = "BiometricsProto";
+
+// Overall state of BiometricService (and not <Biometric>Service), including any
+// <Biomteric>Service(s), for example FingerprintService or FaceService.
+message BiometricServiceStateProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    enum AuthSessionState {
+        /**
+         * Authentication either just called and we have not transitioned to the CALLED state, or
+         * authentication terminated (success or error).
+         */
+        STATE_AUTH_IDLE = 0;
+
+        /**
+         * Authentication was called and we are waiting for the <Biometric>Services to return their
+         * cookies before starting the hardware and showing the BiometricPrompt.
+         */
+        STATE_AUTH_CALLED = 1;
+
+        /**
+         * Authentication started, BiometricPrompt is showing and the hardware is authenticating.
+         */
+        STATE_AUTH_STARTED = 2;
+
+        /**
+         * Same as {@link #STATE_AUTH_STARTED}, except the BiometricPrompt UI is done animating in.
+         */
+        STATE_AUTH_STARTED_UI_SHOWING = 3;
+
+        /**
+         * Authentication is paused, waiting for the user to press "try again" button. Only
+         * passive modalities such as Face or Iris should have this state. Note that for passive
+         * modalities, the HAL enters the idle state after onAuthenticated(false) which differs from
+         * fingerprint.
+         */
+        STATE_AUTH_PAUSED = 4;
+
+        /**
+         * Paused, but "try again" was pressed. Sensors have new cookies and we're now waiting for
+         * all cookies to be returned.
+         */
+        STATE_AUTH_PAUSED_RESUMING = 5;
+
+        /**
+         * Authentication is successful, but we're waiting for the user to press "confirm" button.
+         */
+        STATE_AUTH_PENDING_CONFIRM = 6;
+
+        /**
+         * Biometric authenticated, waiting for SysUI to finish animation
+         */
+        STATE_AUTHENTICATED_PENDING_SYSUI = 7;
+
+        /**
+         * Biometric error, waiting for SysUI to finish animation
+         */
+        STATE_ERROR_PENDING_SYSUI = 8;
+
+        /**
+         * Device credential in AuthController is showing
+         */
+        STATE_SHOWING_DEVICE_CREDENTIAL = 9;
+
+        /**
+         * The client binder died, and sensors were authenticating at the time. Cancel has been
+         * requested and we're waiting for the HAL(s) to send ERROR_CANCELED.
+         */
+        STATE_CLIENT_DIED_CANCELLING = 10;
+    }
+
+    enum MultiSensorState {
+        // Initializing or not yet started.
+        MULTI_SENSOR_STATE_UNKNOWN = 0;
+        // Sensors are in the process of being transitioned and there is no active sensor.
+        MULTI_SENSOR_STATE_SWITCHING = 1;
+        // Face sensor is being used as the primary input.
+        MULTI_SENSOR_STATE_FACE_SCANNING = 2;
+        // Fingerprint sensor is being used as the primary input.
+        MULTI_SENSOR_STATE_FP_SCANNING = 3;
+    }
+
+    repeated SensorServiceStateProto sensor_service_states = 1;
+
+    optional AuthSessionState auth_session_state = 2;
+
+    // Additional session state information, when the device has multiple sensors.
+    optional MultiSensorState auth_session_multi_sensor_state = 3;
+}
+
+// Overall state for an instance of a <Biometric>Service, for example FingerprintService or
+// FaceService. Note that a single service may provide multiple sensors.
+message SensorServiceStateProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    repeated SensorStateProto sensor_states = 1;
+}
+
+// State of a single sensor.
+message SensorStateProto {
+    enum Modality {
+        UNKNOWN = 0;
+        FINGERPRINT = 1;
+        FACE = 2;
+        IRIS = 3;
+    }
+
+    enum ModalityFlag {
+        FINGERPRINT_UDFPS = 0;
+    }
+
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Unique sensorId
+    optional int32 sensor_id = 1;
+
+    // The type of the sensor.
+    optional Modality modality = 2;
+
+    // The current strength (see {@link BiometricManager.Authenticators}) of this sensor, taking any
+    // downgraded strengths into effect. It may be different from the sensor's original strength but
+    // can never be stronger than that.
+    optional int32 current_strength = 3;
+
+    // State of the sensor's scheduler.
+    optional BiometricSchedulerProto scheduler = 4;
+
+    // User states for this sensor.
+    repeated UserStateProto user_states = 5;
+
+    // True if resetLockout requires a HAT to be verified in the TEE or equivalent.
+    optional bool reset_lockout_requires_hardware_auth_token = 6;
+
+    // True if a HAT is required (field above) AND a challenge needs to be generated by the
+    // biometric TEE (or equivalent), and wrapped within the HAT.
+    optional bool reset_lockout_requires_challenge = 7;
+
+    // Detailed information about the sensor's modality, if available.
+    repeated ModalityFlag modality_flags = 8;
+}
+
+// State of a specific user for a specific sensor.
+message UserStateProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Android user ID
+    optional int32 user_id = 1;
+
+    // Number of fingerprints enrolled
+    optional int32 num_enrolled = 2;
+}
+
+// BiometricScheduler dump
+message BiometricSchedulerProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Operation currently being handled by the BiometricScheduler
+    optional ClientMonitorEnum current_operation = 1;
+
+    // Total number of operations that have been handled, not including the current one if one
+    // exists. Kept in FIFO order (most recent at the end of the array)
+    optional int32 total_operations = 2;
+
+    // A list of recent past operations in the order which they were handled
+    repeated ClientMonitorEnum recent_operations = 3;
+}
+
+// BaseClientMonitor subtypes
+enum ClientMonitorEnum {
+    CM_NONE = 0;
+    CM_UPDATE_ACTIVE_USER = 1;
+    CM_ENROLL = 2;
+    CM_AUTHENTICATE = 3;
+    CM_REMOVE = 4;
+    CM_GET_AUTHENTICATOR_ID = 5;
+    CM_ENUMERATE = 6;
+    CM_INTERNAL_CLEANUP = 7;
+    CM_SET_FEATURE = 8;
+    CM_GET_FEATURE = 9;
+    CM_GENERATE_CHALLENGE = 10;
+    CM_REVOKE_CHALLENGE = 11;
+    CM_RESET_LOCKOUT = 12;
+    CM_DETECT_INTERACTION = 13;
+    CM_INVALIDATION_REQUESTER = 14;
+    CM_INVALIDATE = 15;
+    CM_STOP_USER = 16;
+    CM_START_USER = 17;
+}

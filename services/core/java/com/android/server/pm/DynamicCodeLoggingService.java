@@ -234,7 +234,7 @@ public class DynamicCodeLoggingService extends JobService {
 
                 List<EventLog.Event> events = new ArrayList<>();
                 EventLog.readEvents(tags, events);
-
+                Matcher matcher = EXECUTE_NATIVE_AUDIT_PATTERN.matcher("");
                 for (int i = 0; i < events.size(); ++i) {
                     if (mAuditWatchingStopRequested) {
                         Log.w(TAG, "Stopping AuditWatchingJob run at scheduler request");
@@ -259,7 +259,9 @@ public class DynamicCodeLoggingService extends JobService {
 
                     // And then use a regular expression to verify it's one of the messages we're
                     // interested in and to extract the path of the file being loaded.
-                    Matcher matcher = EXECUTE_NATIVE_AUDIT_PATTERN.matcher(message);
+                    // Reuse the Matcher to avoid unnecessary string garbage caused by libcore's
+                    // regex matching.
+                    matcher.reset(message);
                     if (!matcher.matches()) {
                         continue;
                     }

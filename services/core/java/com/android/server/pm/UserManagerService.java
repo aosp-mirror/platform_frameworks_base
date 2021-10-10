@@ -41,13 +41,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
-import android.content.pm.CrossProfileAppsInternal;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.UserInfo;
 import android.content.pm.UserInfo.UserInfoFlag;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.os.Binder;
@@ -79,21 +79,24 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManager.EnforcingUser;
 import android.os.UserManager.QuietModeFlag;
-import android.os.UserManagerInternal;
-import android.os.UserManagerInternal.UserRestrictionsListener;
 import android.os.storage.StorageManager;
+import android.provider.Settings;
 import android.security.GateKeeper;
 import android.service.gatekeeper.IGateKeeperService;
 import android.stats.devicepolicy.DevicePolicyEnums;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.IndentingPrintWriter;
 import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
+import android.util.TypedValue;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -102,26 +105,26 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.BundleUtils;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.SystemService;
 import com.android.server.am.UserState;
+import com.android.server.pm.UserManagerInternal.UserLifecycleListener;
+import com.android.server.pm.UserManagerInternal.UserRestrictionsListener;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 import com.android.server.utils.TimingsTraceAndSlog;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -131,7 +134,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -140,6 +142,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Service for {@link UserManager}.
@@ -176,6 +180,7 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String ATTR_CONVERTED_FROM_PRE_CREATED = "convertedFromPreCreated";
     private static final String ATTR_GUEST_TO_REMOVE = "guestToRemove";
     private static final String ATTR_USER_VERSION = "version";
+    private static final String ATTR_USER_TYPE_VERSION = "userTypeConfigVersion";
     private static final String ATTR_PROFILE_GROUP_ID = "profileGroupId";
     private static final String ATTR_PROFILE_BADGE = "profileBadge";
     private static final String ATTR_RESTRICTED_PROFILE_PARENT_ID = "restrictedProfileParentId";
@@ -219,10 +224,12 @@ public class UserManagerService extends IUserManager.Stub {
 
     private static final int ALLOWED_FLAGS_FOR_CREATE_USERS_PERMISSION =
             UserInfo.FLAG_MANAGED_PROFILE
+            | UserInfo.FLAG_PROFILE
             | UserInfo.FLAG_EPHEMERAL
             | UserInfo.FLAG_RESTRICTED
             | UserInfo.FLAG_GUEST
-            | UserInfo.FLAG_DEMO;
+            | UserInfo.FLAG_DEMO
+            | UserInfo.FLAG_FULL;
 
     @VisibleForTesting
     static final int MIN_USER_ID = UserHandle.MIN_SECONDARY_USER_ID;
@@ -249,9 +256,17 @@ public class UserManagerService extends IUserManager.Stub {
 
     private final Context mContext;
     private final PackageManagerService mPm;
+
+    /**
+     * Lock for packages. If using with {@link #mUsersLock}, {@link #mPackagesLock} should be
+     * acquired first.
+     */
     private final Object mPackagesLock;
     private final UserDataPreparer mUserDataPreparer;
-    // Short-term lock for internal state, when interaction/sync with PM is not required
+    /**
+     * Short-term lock for internal state, when interaction/sync with PM is not required. If using
+     * with {@link #mPackagesLock}, {@link #mPackagesLock} should be acquired first.
+     */
     private final Object mUsersLock = LockGuard.installNewLock(LockGuard.INDEX_USER);
     private final Object mRestrictionsLock = new Object();
     // Used for serializing access to app restriction files
@@ -268,7 +283,6 @@ public class UserManagerService extends IUserManager.Stub {
     private final UserSystemPackageInstaller mSystemPackageInstaller;
 
     private PackageManagerInternal mPmInternal;
-    private CrossProfileAppsInternal mCrossProfileAppsInternal;
     private DevicePolicyManagerInternal mDevicePolicyManagerInternal;
 
     /**
@@ -414,6 +428,7 @@ public class UserManagerService extends IUserManager.Stub {
     @GuardedBy("mPackagesLock")
     private int mNextSerialNumber;
     private int mUserVersion = 0;
+    private int mUserTypeVersion = 0;
 
     private IAppOpsService mAppOpsService;
 
@@ -428,6 +443,9 @@ public class UserManagerService extends IUserManager.Stub {
     @GuardedBy("mUserRestrictionsListeners")
     private final ArrayList<UserRestrictionsListener> mUserRestrictionsListeners =
             new ArrayList<>();
+
+    @GuardedBy("mUserRemovedListeners")
+    private final ArrayList<UserLifecycleListener> mUserLifecycleListeners = new ArrayList<>();
 
     private final LockPatternUtils mLockPatternUtils;
 
@@ -447,6 +465,31 @@ public class UserManagerService extends IUserManager.Stub {
                     setQuietModeEnabled(userId, false, target, /* callingPackage */ null));
         }
     };
+
+    /**
+     * Cache the owner name string, since it could be read repeatedly on a critical code path
+     * but hit by slow IO. This could be eliminated once we have the cached UserInfo in place.
+     */
+    private final AtomicReference<String> mOwnerName = new AtomicReference<>();
+
+    private final TypedValue mOwnerNameTypedValue = new TypedValue();
+
+    private final Configuration mLastConfiguration = new Configuration();
+
+    private final BroadcastReceiver mConfigurationChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (!Intent.ACTION_CONFIGURATION_CHANGED.equals(intent.getAction())) {
+                return;
+            }
+            invalidateOwnerNameIfNecessary(context.getResources(), false /* forceUpdate */);
+        }
+    };
+
+    // TODO(b/161915546): remove once userWithName() is fixed / removed
+    // Use to debug / dump when user 0 is allocated at userWithName()
+    public static final boolean DBG_ALLOCATION = false; // DO NOT SUBMIT WITH TRUE
+    public final AtomicInteger mUser0Allocations;
 
     /**
      * Start an {@link IntentSender} when user is unlocked after disabling quiet mode.
@@ -498,19 +541,22 @@ public class UserManagerService extends IUserManager.Stub {
             states = new SparseIntArray();
             invalidateIsUserUnlockedCache();
         }
-        public int get(int userId) {
+        public int get(@UserIdInt int userId) {
             return states.get(userId);
         }
-        public int get(int userId, int fallback) {
+        public int get(@UserIdInt int userId, int fallback) {
             return states.indexOfKey(userId) >= 0 ? states.get(userId) : fallback;
         }
-        public void put(int userId, int state) {
+        public void put(@UserIdInt int userId, int state) {
             states.put(userId, state);
             invalidateIsUserUnlockedCache();
         }
-        public void delete(int userId) {
+        public void delete(@UserIdInt int userId) {
             states.delete(userId);
             invalidateIsUserUnlockedCache();
+        }
+        public boolean has(@UserIdInt int userId) {
+            return states.get(userId, UserHandle.USER_NULL) != UserHandle.USER_NULL;
         }
         @Override
         public String toString() {
@@ -560,9 +606,9 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         @Override
-        public void onStartUser(@UserIdInt int userId) {
+        public void onUserStarting(@NonNull TargetUser targetUser) {
             synchronized (mUms.mUsersLock) {
-                final UserData user = mUms.getUserDataLU(userId);
+                final UserData user = mUms.getUserDataLU(targetUser.getUserIdentifier());
                 if (user != null) {
                     user.startRealtime = SystemClock.elapsedRealtime();
                 }
@@ -570,9 +616,9 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         @Override
-        public void onUnlockUser(@UserIdInt int userId) {
+        public void onUserUnlocking(@NonNull TargetUser targetUser) {
             synchronized (mUms.mUsersLock) {
-                final UserData user = mUms.getUserDataLU(userId);
+                final UserData user = mUms.getUserDataLU(targetUser.getUserIdentifier());
                 if (user != null) {
                     user.unlockRealtime = SystemClock.elapsedRealtime();
                 }
@@ -580,9 +626,9 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         @Override
-        public void onStopUser(@UserIdInt int userId) {
+        public void onUserStopping(@NonNull TargetUser targetUser) {
             synchronized (mUms.mUsersLock) {
-                final UserData user = mUms.getUserDataLU(userId);
+                final UserData user = mUms.getUserDataLU(targetUser.getUserIdentifier());
                 if (user != null) {
                     user.startRealtime = 0;
                     user.unlockRealtime = 0;
@@ -615,6 +661,7 @@ public class UserManagerService extends IUserManager.Stub {
         mHandler = new MainHandler();
         mUserDataPreparer = userDataPreparer;
         mUserTypes = UserTypeFactory.getUserTypes();
+        invalidateOwnerNameIfNecessary(context.getResources(), true /* forceUpdate */);
         synchronized (mPackagesLock) {
             mUsersDir = new File(dataDir, USER_INFO_DIR);
             mUsersDir.mkdirs();
@@ -634,6 +681,7 @@ public class UserManagerService extends IUserManager.Stub {
         LocalServices.addService(UserManagerInternal.class, mLocalService);
         mLockPatternUtils = new LockPatternUtils(mContext);
         mUserStates.put(UserHandle.USER_SYSTEM, UserState.STATE_BOOTING);
+        mUser0Allocations = DBG_ALLOCATION ? new AtomicInteger() : null;
     }
 
     void systemReady() {
@@ -647,6 +695,12 @@ public class UserManagerService extends IUserManager.Stub {
         mContext.registerReceiver(mDisableQuietModeCallback,
                 new IntentFilter(ACTION_DISABLE_QUIET_MODE_AFTER_UNLOCK),
                 null, mHandler);
+
+        mContext.registerReceiver(mConfigurationChangeReceiver,
+                new IntentFilter(Intent.ACTION_CONFIGURATION_CHANGED),
+                null, mHandler);
+
+        markEphemeralUsersForRemoval();
     }
 
     /**
@@ -657,17 +711,33 @@ public class UserManagerService extends IUserManager.Stub {
         return mLocalService;
     }
 
+    /** Marks all ephemeral users as slated for deletion. **/
+    private void markEphemeralUsersForRemoval() {
+        synchronized (mUsersLock) {
+            final int userSize = mUsers.size();
+            for (int i = 0; i < userSize; i++) {
+                final UserInfo ui = mUsers.valueAt(i).info;
+                if (ui.isEphemeral() && !ui.preCreated && ui.id != UserHandle.USER_SYSTEM) {
+                    addRemovingUserIdLocked(ui.id);
+                    ui.partial = true;
+                    ui.flags |= UserInfo.FLAG_DISABLED;
+                }
+            }
+        }
+    }
+
+    /* Prunes out any partially created or partially removed users. */
     void cleanupPartialUsers() {
-        // Prune out any partially created, partially removed and ephemeral users.
         ArrayList<UserInfo> partials = new ArrayList<>();
         synchronized (mUsersLock) {
             final int userSize = mUsers.size();
             for (int i = 0; i < userSize; i++) {
                 UserInfo ui = mUsers.valueAt(i).info;
-                if ((ui.partial || ui.guestToRemove || (ui.isEphemeral() && !ui.preCreated))
-                        && i != 0) {
+                if ((ui.partial || ui.guestToRemove) && ui.id != UserHandle.USER_SYSTEM) {
                     partials.add(ui);
-                    addRemovingUserIdLocked(ui.id);
+                    if (!mRemovingUserIds.get(ui.id)) {
+                        addRemovingUserIdLocked(ui.id);
+                    }
                     ui.partial = true;
                 }
             }
@@ -931,7 +1001,11 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public UserInfo getProfileParent(@UserIdInt int userId) {
-        checkManageUsersPermission("get the profile parent");
+        if (!hasManageUsersOrPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)) {
+            throw new SecurityException(
+                    "You need MANAGE_USERS or INTERACT_ACROSS_USERS permission to get the "
+                            + "profile parent");
+        }
         synchronized (mUsersLock) {
             return getProfileParentLU(userId);
         }
@@ -1315,6 +1389,10 @@ public class UserManagerService extends IUserManager.Stub {
      */
     private UserInfo userWithName(UserInfo orig) {
         if (orig != null && orig.name == null && orig.id == UserHandle.USER_SYSTEM) {
+            if (DBG_ALLOCATION) {
+                final int number = mUser0Allocations.incrementAndGet();
+                Slog.w(LOG_TAG, "System user instantiated at least " + number + " times");
+            }
             UserInfo withName = new UserInfo(orig);
             withName.name = getOwnerName();
             return withName;
@@ -1447,6 +1525,26 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
+    public boolean isCloneProfile(@UserIdInt int userId) {
+        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId, "isCloneProfile");
+        synchronized (mUsersLock) {
+            UserInfo userInfo = getUserInfoLU(userId);
+            return userInfo != null && userInfo.isCloneProfile();
+        }
+    }
+
+    @Override
+    public boolean isMediaSharedWithParent(@UserIdInt int userId) {
+        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId,
+                "isMediaSharedWithParent");
+        synchronized (mUsersLock) {
+            UserTypeDetails userTypeDetails = getUserTypeDetailsNoChecks(userId);
+            return userTypeDetails != null ? userTypeDetails.isProfile()
+                    && userTypeDetails.isMediaSharedWithParent() : false;
+        }
+    }
+
+    @Override
     public boolean isUserUnlockingOrUnlocked(@UserIdInt int userId) {
         checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId,
                 "isUserUnlockingOrUnlocked");
@@ -1466,12 +1564,30 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public String getUserName() {
-        if (!hasManageUsersOrPermission(android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED)) {
-            throw new SecurityException("You need MANAGE_USERS or GET_ACCOUNTS_PRIVILEGED "
-                    + "permissions to: get user name");
+    public boolean isUserForeground(@UserIdInt int userId) {
+        final int callingUserId = UserHandle.getCallingUserId();
+        if (callingUserId != userId
+                && !hasManageUsersOrPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)) {
+            throw new SecurityException("Caller from user " + callingUserId + " needs MANAGE_USERS "
+                    + "or INTERACT_ACROSS_USERS permission to check if another user (" + userId
+                    + ") is running in the foreground");
         }
-        final int userId = UserHandle.getUserId(Binder.getCallingUid());
+
+        int currentUser = Binder.withCleanCallingIdentity(() -> ActivityManager.getCurrentUser());
+        // TODO(b/179163496): should return true for profile users of the current user as well
+        return currentUser == userId;
+    }
+
+    @Override
+    public String getUserName() {
+        final int callingUid = Binder.getCallingUid();
+        if (!hasManageOrCreateUsersPermission()
+                && !hasPermissionGranted(
+                        android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED, callingUid)) {
+            throw new SecurityException("You need MANAGE_USERS or CREATE_USERS or "
+                    + "GET_ACCOUNTS_PRIVILEGED permissions to: get user name");
+        }
+        final int userId = UserHandle.getUserId(callingUid);
         synchronized (mUsersLock) {
             UserInfo userInfo = userWithName(getUserInfoLU(userId));
             return userInfo == null ? "" : userInfo.name;
@@ -1644,7 +1760,7 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
         if (changed) {
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 sendUserInfoChangedBroadcast(userId);
             } finally {
@@ -1713,6 +1829,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     public void makeInitialized(@UserIdInt int userId) {
+        if (DBG) Slog.d(LOG_TAG, "makeInitialized(" + userId + ")");
         checkManageUsersPermission("makeInitialized");
         boolean scheduleWriteUser = false;
         UserData userData;
@@ -1905,11 +2022,11 @@ public class UserManagerService extends IUserManager.Stub {
         final Bundle global = mDevicePolicyGlobalUserRestrictions.mergeAll();
         final RestrictionsSet local = getDevicePolicyLocalRestrictionsForTargetUserLR(userId);
 
-        if (UserRestrictionsUtils.isEmpty(global) && local.isEmpty()) {
+        if (BundleUtils.isEmpty(global) && local.isEmpty()) {
             // Common case first.
             return baseRestrictions;
         }
-        final Bundle effective = UserRestrictionsUtils.clone(baseRestrictions);
+        final Bundle effective = BundleUtils.clone(baseRestrictions);
         UserRestrictionsUtils.merge(effective, global);
         UserRestrictionsUtils.merge(effective, local.mergeAll());
 
@@ -2050,7 +2167,7 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public Bundle getUserRestrictions(@UserIdInt int userId) {
         checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId, "getUserRestrictions");
-        return UserRestrictionsUtils.clone(getEffectiveUserRestrictions(userId));
+        return BundleUtils.clone(getEffectiveUserRestrictions(userId));
     }
 
     @Override
@@ -2074,7 +2191,7 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mRestrictionsLock) {
             // Note we can't modify Bundles stored in mBaseUserRestrictions directly, so create
             // a copy.
-            final Bundle newRestrictions = UserRestrictionsUtils.clone(
+            final Bundle newRestrictions = BundleUtils.clone(
                     mBaseUserRestrictions.getRestrictions(userId));
             newRestrictions.putBoolean(key, value);
 
@@ -2524,8 +2641,7 @@ public class UserManagerService extends IUserManager.Stub {
         AtomicFile userListFile = new AtomicFile(mUserListFile);
         try {
             fis = userListFile.openRead();
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(fis, StandardCharsets.UTF_8.name());
+            final TypedXmlPullParser parser = Xml.resolvePullParser(fis);
             int type;
             while ((type = parser.next()) != XmlPullParser.START_TAG
                     && type != XmlPullParser.END_DOCUMENT) {
@@ -2540,14 +2656,12 @@ public class UserManagerService extends IUserManager.Stub {
 
             mNextSerialNumber = -1;
             if (parser.getName().equals(TAG_USERS)) {
-                String lastSerialNumber = parser.getAttributeValue(null, ATTR_NEXT_SERIAL_NO);
-                if (lastSerialNumber != null) {
-                    mNextSerialNumber = Integer.parseInt(lastSerialNumber);
-                }
-                String versionNumber = parser.getAttributeValue(null, ATTR_USER_VERSION);
-                if (versionNumber != null) {
-                    mUserVersion = Integer.parseInt(versionNumber);
-                }
+                mNextSerialNumber =
+                        parser.getAttributeInt(null, ATTR_NEXT_SERIAL_NO, mNextSerialNumber);
+                mUserVersion =
+                        parser.getAttributeInt(null, ATTR_USER_VERSION, mUserVersion);
+                mUserTypeVersion =
+                        parser.getAttributeInt(null, ATTR_USER_TYPE_VERSION, mUserTypeVersion);
             }
 
             // Pre-O global user restriction were stored as a single bundle (as opposed to per-user
@@ -2558,9 +2672,7 @@ public class UserManagerService extends IUserManager.Stub {
                 if (type == XmlPullParser.START_TAG) {
                     final String name = parser.getName();
                     if (name.equals(TAG_USER)) {
-                        String id = parser.getAttributeValue(null, ATTR_ID);
-
-                        UserData userData = readUserLP(Integer.parseInt(id));
+                        UserData userData = readUserLP(parser.getAttributeInt(null, ATTR_ID));
 
                         if (userData != null) {
                             synchronized (mUsersLock) {
@@ -2587,10 +2699,8 @@ public class UserManagerService extends IUserManager.Stub {
                     } else if (name.equals(TAG_DEVICE_OWNER_USER_ID)
                             // Legacy name, should only be encountered when upgrading from pre-O.
                             || name.equals(TAG_GLOBAL_RESTRICTION_OWNER_ID)) {
-                        String ownerUserId = parser.getAttributeValue(null, ATTR_ID);
-                        if (ownerUserId != null) {
-                            mDeviceOwnerUserId = Integer.parseInt(ownerUserId);
-                        }
+                        mDeviceOwnerUserId =
+                                parser.getAttributeInt(null, ATTR_ID, mDeviceOwnerUserId);
                     } else if (name.equals(TAG_DEVICE_POLICY_RESTRICTIONS)) {
                         // Should only happen when upgrading from pre-O (version < 7).
                         oldDevicePolicyGlobalUserRestrictions =
@@ -2614,7 +2724,7 @@ public class UserManagerService extends IUserManager.Stub {
      */
     @GuardedBy({"mRestrictionsLock", "mPackagesLock"})
     private void upgradeIfNecessaryLP(Bundle oldGlobalUserRestrictions) {
-        upgradeIfNecessaryLP(oldGlobalUserRestrictions, mUserVersion);
+        upgradeIfNecessaryLP(oldGlobalUserRestrictions, mUserVersion, mUserTypeVersion);
     }
 
     /**
@@ -2623,9 +2733,11 @@ public class UserManagerService extends IUserManager.Stub {
      */
     @GuardedBy({"mRestrictionsLock", "mPackagesLock"})
     @VisibleForTesting
-    void upgradeIfNecessaryLP(Bundle oldGlobalUserRestrictions, int userVersion) {
+    void upgradeIfNecessaryLP(Bundle oldGlobalUserRestrictions, int userVersion,
+            int userTypeVersion) {
         Set<Integer> userIdsToWrite = new ArraySet<>();
         final int originalVersion = mUserVersion;
+        final int originalUserTypeVersion = mUserTypeVersion;
         if (userVersion < 1) {
             // Assign a proper name for the owner, if not initialized correctly before
             UserData userData = getUserDataNoChecks(UserHandle.USER_SYSTEM);
@@ -2677,7 +2789,7 @@ public class UserManagerService extends IUserManager.Stub {
         if (userVersion < 7) {
             // Previously only one user could enforce global restrictions, now it is per-user.
             synchronized (mRestrictionsLock) {
-                if (!UserRestrictionsUtils.isEmpty(oldGlobalUserRestrictions)
+                if (!BundleUtils.isEmpty(oldGlobalUserRestrictions)
                         && mDeviceOwnerUserId != UserHandle.USER_NULL) {
                     mDevicePolicyGlobalUserRestrictions.updateRestrictions(
                             mDeviceOwnerUserId, oldGlobalUserRestrictions);
@@ -2758,13 +2870,24 @@ public class UserManagerService extends IUserManager.Stub {
             userVersion = 9;
         }
 
+        // Done with userVersion changes, moving on to deal with userTypeVersion upgrades
+        // Upgrade from previous user type to a new user type
+        final int newUserTypeVersion = UserTypeFactory.getUserTypeVersion();
+        if (newUserTypeVersion > userTypeVersion) {
+            synchronized (mUsersLock) {
+                upgradeUserTypesLU(UserTypeFactory.getUserTypeUpgrades(), mUserTypes,
+                        userTypeVersion, userIdsToWrite);
+            }
+        }
+
         if (userVersion < USER_VERSION) {
             Slog.w(LOG_TAG, "User version " + mUserVersion + " didn't upgrade as expected to "
                     + USER_VERSION);
         } else {
             mUserVersion = userVersion;
+            mUserTypeVersion = newUserTypeVersion;
 
-            if (originalVersion < mUserVersion) {
+            if (originalVersion < mUserVersion || originalUserTypeVersion < mUserTypeVersion) {
                 for (int userId : userIdsToWrite) {
                     UserData userData = getUserDataNoChecks(userId);
                     if (userData != null) {
@@ -2774,6 +2897,100 @@ public class UserManagerService extends IUserManager.Stub {
                 writeUserListLP();
             }
         }
+    }
+
+    @GuardedBy("mUsersLock")
+    @VisibleForTesting
+    void upgradeUserTypesLU(@NonNull List<UserTypeFactory.UserTypeUpgrade> upgradeOps,
+            @NonNull ArrayMap<String, UserTypeDetails> userTypes,
+            final int formerUserTypeVersion,
+            @NonNull Set<Integer> userIdsToWrite) {
+        for (UserTypeFactory.UserTypeUpgrade userTypeUpgrade : upgradeOps) {
+            if (DBG) {
+                Slog.i(LOG_TAG, "Upgrade: " + userTypeUpgrade.getFromType() + " to: "
+                        + userTypeUpgrade.getToType() + " maxVersion: "
+                        + userTypeUpgrade.getUpToVersion());
+            }
+
+            // upgrade user type if version up to getUpToVersion()
+            if (formerUserTypeVersion <= userTypeUpgrade.getUpToVersion()) {
+                for (int i = 0; i < mUsers.size(); i++) {
+                    UserData userData = mUsers.valueAt(i);
+                    if (userTypeUpgrade.getFromType().equals(userData.info.userType)) {
+                        final UserTypeDetails newUserType = userTypes.get(
+                                userTypeUpgrade.getToType());
+
+                        if (newUserType == null) {
+                            throw new IllegalStateException(
+                                    "Upgrade destination user type not defined: "
+                                            + userTypeUpgrade.getToType());
+                        }
+
+                        upgradeProfileToTypeLU(userData.info, newUserType);
+                        userIdsToWrite.add(userData.info.id);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Changes the user type of a profile to a new user type.
+     * @param userInfo    The user to be updated.
+     * @param newUserType The new user type.
+     */
+    @GuardedBy("mUsersLock")
+    @VisibleForTesting
+    void upgradeProfileToTypeLU(@NonNull UserInfo userInfo, @NonNull UserTypeDetails newUserType) {
+        Slog.i(LOG_TAG, "Upgrading user " + userInfo.id
+                + " from " + userInfo.userType
+                + " to " + newUserType.getName());
+
+        if (!userInfo.isProfile()) {
+            throw new IllegalStateException(
+                    "Can only upgrade profile types. " + userInfo.userType
+                            + " is not a profile type.");
+        }
+
+        // Exceeded maximum profiles for parent user: log error, but allow upgrade
+        if (!canAddMoreProfilesToUser(newUserType.getName(), userInfo.profileGroupId, false)) {
+            Slog.w(LOG_TAG,
+                    "Exceeded maximum profiles of type " + newUserType.getName() + " for user "
+                            + userInfo.id + ". Maximum allowed= "
+                            + newUserType.getMaxAllowedPerParent());
+        }
+
+        final UserTypeDetails oldUserType = mUserTypes.get(userInfo.userType);
+        final int oldFlags;
+        if (oldUserType != null) {
+            oldFlags = oldUserType.getDefaultUserInfoFlags();
+        } else {
+            // if oldUserType is missing from config_user_types.xml -> can only assume FLAG_PROFILE
+            oldFlags = UserInfo.FLAG_PROFILE;
+        }
+
+        //convert userData to newUserType
+        userInfo.userType = newUserType.getName();
+        // remove old default flags and add newUserType's default flags
+        userInfo.flags = newUserType.getDefaultUserInfoFlags() | (userInfo.flags ^ oldFlags);
+
+        // merge existing base restrictions with the new type's default restrictions
+        synchronized (mRestrictionsLock) {
+            if (!BundleUtils.isEmpty(newUserType.getDefaultRestrictions())) {
+                final Bundle newRestrictions = BundleUtils.clone(
+                        mBaseUserRestrictions.getRestrictions(userInfo.id));
+                UserRestrictionsUtils.merge(newRestrictions,
+                        newUserType.getDefaultRestrictions());
+                updateUserRestrictionsInternalLR(newRestrictions, userInfo.id);
+                if (DBG) {
+                    Slog.i(LOG_TAG, "Updated user " + userInfo.id
+                            + " restrictions to " + newRestrictions);
+                }
+            }
+        }
+
+        // re-compute badge index
+        userInfo.profileBadge = getFreeProfileBadgeLU(userInfo.profileGroupId, userInfo.userType);
     }
 
     @GuardedBy({"mPackagesLock", "mRestrictionsLock"})
@@ -2788,6 +3005,7 @@ public class UserManagerService extends IUserManager.Stub {
         UserData userData = putUserInfo(system);
         mNextSerialNumber = MIN_USER_ID;
         mUserVersion = USER_VERSION;
+        mUserTypeVersion = UserTypeFactory.getUserTypeVersion();
 
         Bundle restrictions = new Bundle();
         try {
@@ -2817,7 +3035,16 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     private String getOwnerName() {
-        return mContext.getResources().getString(com.android.internal.R.string.owner_name);
+        return mOwnerName.get();
+    }
+
+    private void invalidateOwnerNameIfNecessary(@NonNull Resources res, boolean forceUpdate) {
+        final int configChanges = mLastConfiguration.updateFrom(res.getConfiguration());
+        if (forceUpdate || (configChanges & mOwnerNameTypedValue.changingConfigurations) != 0) {
+            res.getValue(com.android.internal.R.string.owner_name, mOwnerNameTypedValue, true);
+            final CharSequence ownerName = mOwnerNameTypedValue.coerceToString();
+            mOwnerName.set(ownerName != null ? ownerName.toString() : null);
+        }
     }
 
     private void scheduleWriteUser(UserData userData) {
@@ -2850,8 +3077,7 @@ public class UserManagerService extends IUserManager.Stub {
         AtomicFile userFile = new AtomicFile(new File(mUsersDir, userData.info.id + XML_SUFFIX));
         try {
             fos = userFile.startWrite();
-            final BufferedOutputStream bos = new BufferedOutputStream(fos);
-            writeUserLP(userData, bos);
+            writeUserLP(userData, fos);
             userFile.finishWrite(fos);
         } catch (Exception ioe) {
             Slog.e(LOG_TAG, "Error writing user info " + userData.info.id, ioe);
@@ -2869,21 +3095,18 @@ public class UserManagerService extends IUserManager.Stub {
     @VisibleForTesting
     void writeUserLP(UserData userData, OutputStream os)
             throws IOException, XmlPullParserException {
-        // XmlSerializer serializer = XmlUtils.serializerInstance();
-        final XmlSerializer serializer = new FastXmlSerializer();
-        serializer.setOutput(os, StandardCharsets.UTF_8.name());
+        final TypedXmlSerializer serializer = Xml.resolveSerializer(os);
         serializer.startDocument(null, true);
         serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
         final UserInfo userInfo = userData.info;
         serializer.startTag(null, TAG_USER);
-        serializer.attribute(null, ATTR_ID, Integer.toString(userInfo.id));
-        serializer.attribute(null, ATTR_SERIAL_NO, Integer.toString(userInfo.serialNumber));
-        serializer.attribute(null, ATTR_FLAGS, Integer.toString(userInfo.flags));
+        serializer.attributeInt(null, ATTR_ID, userInfo.id);
+        serializer.attributeInt(null, ATTR_SERIAL_NO, userInfo.serialNumber);
+        serializer.attributeInt(null, ATTR_FLAGS, userInfo.flags);
         serializer.attribute(null, ATTR_TYPE, userInfo.userType);
-        serializer.attribute(null, ATTR_CREATION_TIME, Long.toString(userInfo.creationTime));
-        serializer.attribute(null, ATTR_LAST_LOGGED_IN_TIME,
-                Long.toString(userInfo.lastLoggedInTime));
+        serializer.attributeLong(null, ATTR_CREATION_TIME, userInfo.creationTime);
+        serializer.attributeLong(null, ATTR_LAST_LOGGED_IN_TIME, userInfo.lastLoggedInTime);
         if (userInfo.lastLoggedInFingerprint != null) {
             serializer.attribute(null, ATTR_LAST_LOGGED_IN_FINGERPRINT,
                     userInfo.lastLoggedInFingerprint);
@@ -2892,26 +3115,24 @@ public class UserManagerService extends IUserManager.Stub {
             serializer.attribute(null,  ATTR_ICON_PATH, userInfo.iconPath);
         }
         if (userInfo.partial) {
-            serializer.attribute(null, ATTR_PARTIAL, "true");
+            serializer.attributeBoolean(null, ATTR_PARTIAL, true);
         }
         if (userInfo.preCreated) {
-            serializer.attribute(null, ATTR_PRE_CREATED, "true");
+            serializer.attributeBoolean(null, ATTR_PRE_CREATED, true);
         }
         if (userInfo.convertedFromPreCreated) {
-            serializer.attribute(null, ATTR_CONVERTED_FROM_PRE_CREATED, "true");
+            serializer.attributeBoolean(null, ATTR_CONVERTED_FROM_PRE_CREATED, true);
         }
         if (userInfo.guestToRemove) {
-            serializer.attribute(null, ATTR_GUEST_TO_REMOVE, "true");
+            serializer.attributeBoolean(null, ATTR_GUEST_TO_REMOVE, true);
         }
         if (userInfo.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID) {
-            serializer.attribute(null, ATTR_PROFILE_GROUP_ID,
-                    Integer.toString(userInfo.profileGroupId));
+            serializer.attributeInt(null, ATTR_PROFILE_GROUP_ID, userInfo.profileGroupId);
         }
-        serializer.attribute(null, ATTR_PROFILE_BADGE,
-                Integer.toString(userInfo.profileBadge));
+        serializer.attributeInt(null, ATTR_PROFILE_BADGE, userInfo.profileBadge);
         if (userInfo.restrictedProfileParentId != UserInfo.NO_PROFILE_GROUP_ID) {
-            serializer.attribute(null, ATTR_RESTRICTED_PROFILE_PARENT_ID,
-                    Integer.toString(userInfo.restrictedProfileParentId));
+            serializer.attributeInt(null, ATTR_RESTRICTED_PROFILE_PARENT_ID,
+                    userInfo.restrictedProfileParentId);
         }
         // Write seed data
         if (userData.persistSeedData) {
@@ -2977,17 +3198,14 @@ public class UserManagerService extends IUserManager.Stub {
         AtomicFile userListFile = new AtomicFile(mUserListFile);
         try {
             fos = userListFile.startWrite();
-            final BufferedOutputStream bos = new BufferedOutputStream(fos);
-
-            // XmlSerializer serializer = XmlUtils.serializerInstance();
-            final XmlSerializer serializer = new FastXmlSerializer();
-            serializer.setOutput(bos, StandardCharsets.UTF_8.name());
+            final TypedXmlSerializer serializer = Xml.resolveSerializer(fos);
             serializer.startDocument(null, true);
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
             serializer.startTag(null, TAG_USERS);
-            serializer.attribute(null, ATTR_NEXT_SERIAL_NO, Integer.toString(mNextSerialNumber));
-            serializer.attribute(null, ATTR_USER_VERSION, Integer.toString(mUserVersion));
+            serializer.attributeInt(null, ATTR_NEXT_SERIAL_NO, mNextSerialNumber);
+            serializer.attributeInt(null, ATTR_USER_VERSION, mUserVersion);
+            serializer.attributeInt(null, ATTR_USER_TYPE_VERSION, mUserTypeVersion);
 
             serializer.startTag(null, TAG_GUEST_RESTRICTIONS);
             synchronized (mGuestRestrictions) {
@@ -2996,7 +3214,7 @@ public class UserManagerService extends IUserManager.Stub {
             }
             serializer.endTag(null, TAG_GUEST_RESTRICTIONS);
             serializer.startTag(null, TAG_DEVICE_OWNER_USER_ID);
-            serializer.attribute(null, ATTR_ID, Integer.toString(mDeviceOwnerUserId));
+            serializer.attributeInt(null, ATTR_ID, mDeviceOwnerUserId);
             serializer.endTag(null, TAG_DEVICE_OWNER_USER_ID);
             int[] userIdsToWrite;
             synchronized (mUsersLock) {
@@ -3008,7 +3226,7 @@ public class UserManagerService extends IUserManager.Stub {
             }
             for (int id : userIdsToWrite) {
                 serializer.startTag(null, TAG_USER);
-                serializer.attribute(null, ATTR_ID, Integer.toString(id));
+                serializer.attributeInt(null, ATTR_ID, id);
                 serializer.endTag(null, TAG_USER);
             }
 
@@ -3068,8 +3286,7 @@ public class UserManagerService extends IUserManager.Stub {
         RestrictionsSet localRestrictions = null;
         Bundle globalRestrictions = null;
 
-        XmlPullParser parser = Xml.newPullParser();
-        parser.setInput(is, StandardCharsets.UTF_8.name());
+        final TypedXmlPullParser parser = Xml.resolvePullParser(is);
         int type;
         while ((type = parser.next()) != XmlPullParser.START_TAG
                 && type != XmlPullParser.END_DOCUMENT) {
@@ -3082,41 +3299,29 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         if (type == XmlPullParser.START_TAG && parser.getName().equals(TAG_USER)) {
-            int storedId = readIntAttribute(parser, ATTR_ID, -1);
+            int storedId = parser.getAttributeInt(null, ATTR_ID, -1);
             if (storedId != id) {
                 Slog.e(LOG_TAG, "User id does not match the file name");
                 return null;
             }
-            serialNumber = readIntAttribute(parser, ATTR_SERIAL_NO, id);
-            flags = readIntAttribute(parser, ATTR_FLAGS, 0);
+            serialNumber = parser.getAttributeInt(null, ATTR_SERIAL_NO, id);
+            flags = parser.getAttributeInt(null, ATTR_FLAGS, 0);
             userType = parser.getAttributeValue(null, ATTR_TYPE);
             userType = userType != null ? userType.intern() : null;
             iconPath = parser.getAttributeValue(null, ATTR_ICON_PATH);
-            creationTime = readLongAttribute(parser, ATTR_CREATION_TIME, 0);
-            lastLoggedInTime = readLongAttribute(parser, ATTR_LAST_LOGGED_IN_TIME, 0);
+            creationTime = parser.getAttributeLong(null, ATTR_CREATION_TIME, 0);
+            lastLoggedInTime = parser.getAttributeLong(null, ATTR_LAST_LOGGED_IN_TIME, 0);
             lastLoggedInFingerprint = parser.getAttributeValue(null,
                     ATTR_LAST_LOGGED_IN_FINGERPRINT);
-            profileGroupId = readIntAttribute(parser, ATTR_PROFILE_GROUP_ID,
+            profileGroupId = parser.getAttributeInt(null, ATTR_PROFILE_GROUP_ID,
                     UserInfo.NO_PROFILE_GROUP_ID);
-            profileBadge = readIntAttribute(parser, ATTR_PROFILE_BADGE, 0);
-            restrictedProfileParentId = readIntAttribute(parser,
+            profileBadge = parser.getAttributeInt(null, ATTR_PROFILE_BADGE, 0);
+            restrictedProfileParentId = parser.getAttributeInt(null,
                     ATTR_RESTRICTED_PROFILE_PARENT_ID, UserInfo.NO_PROFILE_GROUP_ID);
-            String valueString = parser.getAttributeValue(null, ATTR_PARTIAL);
-            if ("true".equals(valueString)) {
-                partial = true;
-            }
-            valueString = parser.getAttributeValue(null, ATTR_PRE_CREATED);
-            if ("true".equals(valueString)) {
-                preCreated = true;
-            }
-            valueString = parser.getAttributeValue(null, ATTR_CONVERTED_FROM_PRE_CREATED);
-            if ("true".equals(valueString)) {
-                converted = true;
-            }
-            valueString = parser.getAttributeValue(null, ATTR_GUEST_TO_REMOVE);
-            if ("true".equals(valueString)) {
-                guestToRemove = true;
-            }
+            partial = parser.getAttributeBoolean(null, ATTR_PARTIAL, false);
+            preCreated = parser.getAttributeBoolean(null, ATTR_PRE_CREATED, false);
+            converted = parser.getAttributeBoolean(null, ATTR_CONVERTED_FROM_PRE_CREATED, false);
+            guestToRemove = parser.getAttributeBoolean(null, ATTR_GUEST_TO_REMOVE, false);
 
             seedAccountName = parser.getAttributeValue(null, ATTR_SEED_ACCOUNT_NAME);
             seedAccountType = parser.getAttributeValue(null, ATTR_SEED_ACCOUNT_TYPE);
@@ -3207,26 +3412,6 @@ public class UserManagerService extends IUserManager.Stub {
         return userData;
     }
 
-    private int readIntAttribute(XmlPullParser parser, String attr, int defaultValue) {
-        String valueString = parser.getAttributeValue(null, attr);
-        if (valueString == null) return defaultValue;
-        try {
-            return Integer.parseInt(valueString);
-        } catch (NumberFormatException nfe) {
-            return defaultValue;
-        }
-    }
-
-    private long readLongAttribute(XmlPullParser parser, String attr, long defaultValue) {
-        String valueString = parser.getAttributeValue(null, attr);
-        if (valueString == null) return defaultValue;
-        try {
-            return Long.parseLong(valueString);
-        } catch (NumberFormatException nfe) {
-            return defaultValue;
-        }
-    }
-
     /**
      * Removes the app restrictions file for a specific package and user id, if it exists.
      *
@@ -3248,7 +3433,7 @@ public class UserManagerService extends IUserManager.Stub {
      * as well as for {@link UserManager#USER_TYPE_FULL_RESTRICTED}.
      */
     @Override
-    public UserInfo createProfileForUserWithThrow(String name, @NonNull String userType,
+    public UserInfo createProfileForUserWithThrow(@Nullable String name, @NonNull String userType,
             @UserInfoFlag int flags, @UserIdInt int userId, @Nullable String[] disallowedPackages)
             throws ServiceSpecificException {
         checkManageOrCreateUsersPermission(flags);
@@ -3270,7 +3455,7 @@ public class UserManagerService extends IUserManager.Stub {
         checkManageOrCreateUsersPermission(flags);
         try {
             return createUserInternalUnchecked(name, userType, flags, userId,
-                    /* preCreate= */ false, disallowedPackages);
+                    /* preCreate= */ false, disallowedPackages, /* token= */ null);
         } catch (UserManager.CheckedUserOperationException e) {
             throw e.toServiceSpecificException();
         }
@@ -3303,7 +3488,7 @@ public class UserManagerService extends IUserManager.Stub {
         try {
             return createUserInternalUnchecked(/* name= */ null, userType, flags,
                     /* parentId= */ UserHandle.USER_NULL, /* preCreate= */ true,
-                    /* disallowedPackages= */ null);
+                    /* disallowedPackages= */ null, /* token= */ null);
         } catch (UserManager.CheckedUserOperationException e) {
             throw e.toServiceSpecificException();
         }
@@ -3319,12 +3504,13 @@ public class UserManagerService extends IUserManager.Stub {
         enforceUserRestriction(restriction, UserHandle.getCallingUserId(),
                 "Cannot add user");
         return createUserInternalUnchecked(name, userType, flags, parentId,
-                /* preCreate= */ false, disallowedPackages);
+                /* preCreate= */ false, disallowedPackages, /* token= */ null);
     }
 
     private UserInfo createUserInternalUnchecked(@Nullable String name,
             @NonNull String userType, @UserInfoFlag int flags, @UserIdInt int parentId,
-            boolean preCreate, @Nullable String[] disallowedPackages)
+            boolean preCreate, @Nullable String[] disallowedPackages,
+            @Nullable Object token)
             throws UserManager.CheckedUserOperationException {
         final int nextProbableUserId = getNextAvailableId();
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
@@ -3333,7 +3519,7 @@ public class UserManagerService extends IUserManager.Stub {
         UserInfo newUser = null;
         try {
             newUser = createUserInternalUncheckedNoTracing(name, userType, flags, parentId,
-                        preCreate, disallowedPackages, t);
+                        preCreate, disallowedPackages, t, token);
             return newUser;
         } finally {
             logUserCreateJourneyFinish(sessionId, nextProbableUserId, newUser != null);
@@ -3341,31 +3527,11 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    private long logUserCreateJourneyBegin(@UserIdInt int userId, String userType,
-            @UserInfoFlag int flags) {
-        final long sessionId = ThreadLocalRandom.current().nextLong(1, Long.MAX_VALUE);
-        // log the journey atom with the user metadata
-        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED, sessionId,
-                FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_CREATE,
-                /* origin_user= */ -1, userId, UserManager.getUserTypeForStatsd(userType), flags);
-        // log the event atom to indicate the event start
-        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED, sessionId, userId,
-                FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__CREATE_USER,
-                FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__BEGIN);
-        return sessionId;
-    }
-
-    private void logUserCreateJourneyFinish(long sessionId, @UserIdInt int userId, boolean finish) {
-        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED, sessionId, userId,
-                FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__CREATE_USER,
-                finish ? FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__FINISH
-                       : FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__NONE);
-    }
-
     private UserInfo createUserInternalUncheckedNoTracing(@Nullable String name,
             @NonNull String userType, @UserInfoFlag int flags, @UserIdInt int parentId,
             boolean preCreate, @Nullable String[] disallowedPackages,
-            @NonNull TimingsTraceAndSlog t) throws UserManager.CheckedUserOperationException {
+            @NonNull TimingsTraceAndSlog t, @Nullable Object token)
+                    throws UserManager.CheckedUserOperationException {
         final UserTypeDetails userTypeDetails = mUserTypes.get(userType);
         if (userTypeDetails == null) {
             Slog.e(LOG_TAG, "Cannot create user of invalid user type: " + userType);
@@ -3391,7 +3557,8 @@ public class UserManagerService extends IUserManager.Stub {
 
         // Try to use a pre-created user (if available).
         if (!preCreate && parentId < 0 && isUserTypeEligibleForPreCreation(userTypeDetails)) {
-            final UserInfo preCreatedUser = convertPreCreatedUserIfPossible(userType, flags, name);
+            final UserInfo preCreatedUser = convertPreCreatedUserIfPossible(userType, flags, name,
+                    token);
             if (preCreatedUser != null) {
                 return preCreatedUser;
             }
@@ -3468,6 +3635,7 @@ public class UserManagerService extends IUserManager.Stub {
                 }
 
                 userId = getNextAvailableId();
+                Slog.i(LOG_TAG, "Creating user " + userId + " of type " + userType);
                 Environment.getUserSystemDirectory(userId).mkdirs();
 
                 synchronized (mUsersLock) {
@@ -3551,14 +3719,16 @@ public class UserManagerService extends IUserManager.Stub {
             }
 
             t.traceBegin("PM.onNewUserCreated-" + userId);
-            mPm.onNewUserCreated(userId);
+            mPm.onNewUserCreated(userId, /* convertedFromPreCreated= */ false);
             t.traceEnd();
+            applyDefaultUserSettings(userTypeDetails, userId);
+            setDefaultCrossProfileIntentFilters(userId, userTypeDetails, restrictions, parentId);
+
             if (preCreate) {
                 // Must start user (which will be stopped right away, through
                 // UserController.finishUserUnlockedCompleted) so services can properly
                 // intialize it.
-                // TODO(b/143092698): in the long-term, it might be better to add a onCreateUser()
-                // callback on SystemService instead.
+                // NOTE: user will be stopped on UserController.finishUserUnlockedCompleted().
                 Slog.i(LOG_TAG, "starting pre-created user " + userInfo.toFullString());
                 final IActivityManager am = ActivityManager.getService();
                 try {
@@ -3567,7 +3737,7 @@ public class UserManagerService extends IUserManager.Stub {
                     Slog.w(LOG_TAG, "could not start pre-created user " + userId, e);
                 }
             } else {
-                dispatchUserAdded(userInfo);
+                dispatchUserAdded(userInfo, token);
             }
 
         } finally {
@@ -3589,19 +3759,98 @@ public class UserManagerService extends IUserManager.Stub {
         return userInfo;
     }
 
+    private void applyDefaultUserSettings(UserTypeDetails userTypeDetails, @UserIdInt int userId) {
+        final Bundle systemSettings = userTypeDetails.getDefaultSystemSettings();
+        final Bundle secureSettings = userTypeDetails.getDefaultSecureSettings();
+        if (systemSettings.isEmpty() && secureSettings.isEmpty()) {
+            return;
+        }
+
+        final int systemSettingsSize = systemSettings.size();
+        final String[] systemSettingsArray = systemSettings.keySet().toArray(
+                new String[systemSettingsSize]);
+        for (int i = 0; i < systemSettingsSize; i++) {
+            final String setting = systemSettingsArray[i];
+            if (!Settings.System.putStringForUser(
+                    mContext.getContentResolver(), setting, systemSettings.getString(setting),
+                    userId)) {
+                Slog.e(LOG_TAG, "Failed to insert default system setting: " + setting);
+            }
+        }
+
+        final int secureSettingsSize = secureSettings.size();
+        final String[] secureSettingsArray = secureSettings.keySet().toArray(
+                new String[secureSettingsSize]);
+        for (int i = 0; i < secureSettingsSize; i++) {
+            final String setting = secureSettingsArray[i];
+            if (!Settings.Secure.putStringForUser(
+                    mContext.getContentResolver(), setting, secureSettings.getString(setting),
+                    userId)) {
+                Slog.e(LOG_TAG, "Failed to insert default secure setting: " + setting);
+            }
+        }
+    }
+
+    /**
+     * Sets all default cross profile intent filters between {@code parentUserId} and
+     * {@code profileUserId}, does nothing if {@code userType} is not a profile.
+     */
+    private void setDefaultCrossProfileIntentFilters(
+            @UserIdInt int profileUserId, UserTypeDetails profileDetails,
+            Bundle profileRestrictions, @UserIdInt int parentUserId) {
+        if (profileDetails == null || !profileDetails.isProfile()) {
+            return;
+        }
+        final List<DefaultCrossProfileIntentFilter> filters =
+                profileDetails.getDefaultCrossProfileIntentFilters();
+        if (filters.isEmpty()) {
+            return;
+        }
+
+        // Skip filters that allow data to be shared into the profile, if admin has disabled it.
+        final boolean disallowSharingIntoProfile =
+                profileRestrictions.getBoolean(
+                        UserManager.DISALLOW_SHARE_INTO_MANAGED_PROFILE,
+                        /* defaultValue = */ false);
+        final int size = profileDetails.getDefaultCrossProfileIntentFilters().size();
+        for (int i = 0; i < size; i++) {
+            final DefaultCrossProfileIntentFilter filter =
+                    profileDetails.getDefaultCrossProfileIntentFilters().get(i);
+            if (disallowSharingIntoProfile && filter.letsPersonalDataIntoProfile) {
+                continue;
+            }
+            if (filter.direction == DefaultCrossProfileIntentFilter.Direction.TO_PARENT) {
+                mPm.addCrossProfileIntentFilter(
+                        filter.filter, mContext.getOpPackageName(), profileUserId, parentUserId,
+                        filter.flags);
+            } else {
+                mPm.addCrossProfileIntentFilter(
+                        filter.filter, mContext.getOpPackageName(), parentUserId, profileUserId,
+                        filter.flags);
+            }
+        }
+    }
+
     /**
      * Finds and converts a previously pre-created user into a regular user, if possible.
      *
      * @return the converted user, or {@code null} if no pre-created user could be converted.
      */
     private @Nullable UserInfo convertPreCreatedUserIfPossible(String userType,
-            @UserInfoFlag int flags, String name) {
+            @UserInfoFlag int flags, String name, @Nullable Object token) {
         final UserData preCreatedUserData;
         synchronized (mUsersLock) {
             preCreatedUserData = getPreCreatedUserLU(userType);
         }
         if (preCreatedUserData == null) {
             return null;
+        }
+        synchronized (mUserStates) {
+            if (mUserStates.has(preCreatedUserData.info.id)) {
+                Slog.w(LOG_TAG, "Cannot reuse pre-created user "
+                        + preCreatedUserData.info.id + " because it didn't stop yet");
+                return null;
+            }
         }
         final UserInfo preCreatedUser = preCreatedUserData.info;
         final int newFlags = preCreatedUser.flags | flags;
@@ -3625,11 +3874,8 @@ public class UserManagerService extends IUserManager.Stub {
             writeUserListLP();
         }
         updateUserIds();
-        if (!mPm.readPermissionStateForUser(preCreatedUser.id)) {
-            // Could not read the existing permissions, re-grant them.
-            mPm.onNewUserCreated(preCreatedUser.id);
-        }
-        dispatchUserAdded(preCreatedUser);
+        mPm.onNewUserCreated(preCreatedUser.id, /* convertedFromPreCreated= */ true);
+        dispatchUserAdded(preCreatedUser, token);
         return preCreatedUser;
     }
 
@@ -3656,13 +3902,33 @@ public class UserManagerService extends IUserManager.Stub {
                 isFirstBoot, isUpgrade, existingPackages);
     }
 
+    @Override
+    public String[] getPreInstallableSystemPackages(@NonNull String userType) {
+        checkManageOrCreateUsersPermission("getPreInstallableSystemPackages");
+        final Set<String> installableSystemPackages =
+                mSystemPackageInstaller.getInstallablePackagesForUserType(userType);
+        if (installableSystemPackages == null) {
+            return null;
+        }
+        return installableSystemPackages.toArray(new String[installableSystemPackages.size()]);
+    }
+
     private long getCreationTime() {
         final long now = System.currentTimeMillis();
         return (now > EPOCH_PLUS_30_YEARS) ? now : 0;
     }
 
-    private void dispatchUserAdded(@NonNull UserInfo userInfo) {
+    private void dispatchUserAdded(@NonNull UserInfo userInfo, @Nullable Object token) {
+        // Notify internal listeners first...
+        synchronized (mUserLifecycleListeners) {
+            for (int i = 0; i < mUserLifecycleListeners.size(); i++) {
+                mUserLifecycleListeners.get(i).onUserCreated(userInfo, token);
+            }
+        }
+
+        //...then external ones
         Intent addedIntent = new Intent(Intent.ACTION_USER_ADDED);
+        addedIntent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
         addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userInfo.id);
         // Also, add the UserHandle for mainline modules which can't use the @hide
         // EXTRA_USER_HANDLE.
@@ -3720,6 +3986,27 @@ public class UserManagerService extends IUserManager.Stub {
                 && !userTypeDetails.getName().equals(UserManager.USER_TYPE_FULL_RESTRICTED);
     }
 
+    private long logUserCreateJourneyBegin(@UserIdInt int userId, String userType,
+            @UserInfoFlag int flags) {
+        final long sessionId = ThreadLocalRandom.current().nextLong(1, Long.MAX_VALUE);
+        // log the journey atom with the user metadata
+        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED, sessionId,
+                FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_CREATE,
+                /* origin_user= */ -1, userId, UserManager.getUserTypeForStatsd(userType), flags);
+        // log the event atom to indicate the event start
+        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED, sessionId, userId,
+                FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__CREATE_USER,
+                FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__BEGIN);
+        return sessionId;
+    }
+
+    private void logUserCreateJourneyFinish(long sessionId, @UserIdInt int userId, boolean finish) {
+        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED, sessionId, userId,
+                FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__CREATE_USER,
+                finish ? FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__FINISH
+                        : FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__NONE);
+    }
+
     @VisibleForTesting
     UserData putUserInfo(UserInfo userInfo) {
         final UserData userData = new UserData();
@@ -3741,14 +4028,14 @@ public class UserManagerService extends IUserManager.Stub {
      * @hide
      */
     @Override
-    public UserInfo createRestrictedProfileWithThrow(String name, int parentUserId) {
+    public UserInfo createRestrictedProfileWithThrow(@Nullable String name, int parentUserId) {
         checkManageOrCreateUsersPermission("setupRestrictedProfile");
         final UserInfo user = createProfileForUserWithThrow(
                 name, UserManager.USER_TYPE_FULL_RESTRICTED, 0, parentUserId, null);
         if (user == null) {
             return null;
         }
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         try {
             setUserRestriction(UserManager.DISALLOW_MODIFY_ACCOUNTS, true, user.id);
             // Change the setting before applying the DISALLOW_SHARE_LOCATION restriction, otherwise
@@ -3801,7 +4088,7 @@ public class UserManagerService extends IUserManager.Stub {
             return false;
         }
 
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             final UserData userData;
             synchronized (mPackagesLock) {
@@ -3841,13 +4128,7 @@ public class UserManagerService extends IUserManager.Stub {
         Slog.i(LOG_TAG, "removeUser u" + userId);
         checkManageOrCreateUsersPermission("Only the system can remove users");
 
-        final boolean isManagedProfile;
-        synchronized (mUsersLock) {
-            UserInfo userInfo = getUserInfoLU(userId);
-            isManagedProfile = userInfo != null && userInfo.isManagedProfile();
-        }
-        String restriction = isManagedProfile
-                ? UserManager.DISALLOW_REMOVE_MANAGED_PROFILE : UserManager.DISALLOW_REMOVE_USER;
+        final String restriction = getUserRemovalRestriction(userId);
         if (getUserRestrictions(UserHandle.getCallingUserId()).getBoolean(restriction, false)) {
             Slog.w(LOG_TAG, "Cannot remove user. " + restriction + " is enabled.");
             return false;
@@ -3861,8 +4142,23 @@ public class UserManagerService extends IUserManager.Stub {
         return removeUserUnchecked(userId);
     }
 
+    /**
+     * Returns the string name of the restriction to check for user removal. The restriction name
+     * varies depending on whether the user is a managed profile.
+     */
+    private String getUserRemovalRestriction(@UserIdInt int userId) {
+        final boolean isManagedProfile;
+        final UserInfo userInfo;
+        synchronized (mUsersLock) {
+            userInfo = getUserInfoLU(userId);
+        }
+        isManagedProfile = userInfo != null && userInfo.isManagedProfile();
+        return isManagedProfile
+                ? UserManager.DISALLOW_REMOVE_MANAGED_PROFILE : UserManager.DISALLOW_REMOVE_USER;
+    }
+
     private boolean removeUserUnchecked(@UserIdInt int userId) {
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             final UserData userData;
             int currentUser = ActivityManager.getCurrentUser();
@@ -3953,13 +4249,92 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    @Override
+    public @UserManager.RemoveResult int removeUserOrSetEphemeral(@UserIdInt int userId,
+            boolean evenWhenDisallowed) {
+        checkManageOrCreateUsersPermission("Only the system can remove users");
+
+        if (!evenWhenDisallowed) {
+            final String restriction = getUserRemovalRestriction(userId);
+            if (getUserRestrictions(UserHandle.getCallingUserId()).getBoolean(restriction, false)) {
+                Slog.w(LOG_TAG, "Cannot remove user. " + restriction + " is enabled.");
+                return UserManager.REMOVE_RESULT_ERROR;
+            }
+        }
+        if (userId == UserHandle.USER_SYSTEM) {
+            Slog.e(LOG_TAG, "System user cannot be removed.");
+            return UserManager.REMOVE_RESULT_ERROR;
+        }
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            final UserData userData;
+            synchronized (mPackagesLock) {
+                synchronized (mUsersLock) {
+                    userData = mUsers.get(userId);
+                    if (userData == null) {
+                        Slog.e(LOG_TAG,
+                                "Cannot remove user " + userId + ", invalid user id provided.");
+                        return UserManager.REMOVE_RESULT_ERROR;
+                    }
+
+                    if (mRemovingUserIds.get(userId)) {
+                        Slog.e(LOG_TAG, "User " + userId + " is already scheduled for removal.");
+                        return UserManager.REMOVE_RESULT_ALREADY_BEING_REMOVED;
+                    }
+                }
+
+                // Attempt to immediately remove a non-current user
+                final int currentUser = ActivityManager.getCurrentUser();
+                if (currentUser != userId) {
+                    // Attempt to remove the user. This will fail if the user is the current user
+                    if (removeUserUnchecked(userId)) {
+                        return UserManager.REMOVE_RESULT_REMOVED;
+                    }
+                }
+                // If the user was not immediately removed, make sure it is marked as ephemeral.
+                // Don't mark as disabled since, per UserInfo.FLAG_DISABLED documentation, an
+                // ephemeral user should only be marked as disabled when its removal is in progress.
+                Slog.i(LOG_TAG, "Unable to immediately remove user " + userId + " (current user is "
+                        + currentUser + "). User is set as ephemeral and will be removed on user "
+                        + "switch or reboot.");
+                userData.info.flags |= UserInfo.FLAG_EPHEMERAL;
+                writeUserLP(userData);
+
+                return UserManager.REMOVE_RESULT_SET_EPHEMERAL;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
     void finishRemoveUser(final @UserIdInt int userId) {
         if (DBG) Slog.i(LOG_TAG, "finishRemoveUser " + userId);
+
+        UserInfo user;
+        synchronized (mUsersLock) {
+            user = getUserInfoLU(userId);
+        }
+        if (user != null && user.preCreated) {
+            Slog.i(LOG_TAG, "Removing a pre-created user with user id: " + userId);
+            // Don't want to fire ACTION_USER_REMOVED, so cleanup the state and exit early.
+            LocalServices.getService(ActivityTaskManagerInternal.class).onUserStopped(userId);
+            removeUserState(userId);
+            return;
+        }
+
+        synchronized (mUserLifecycleListeners) {
+            for (int i = 0; i < mUserLifecycleListeners.size(); i++) {
+                mUserLifecycleListeners.get(i).onUserRemoved(user);
+            }
+        }
+
         // Let other services shutdown any activity and clean up their state before completely
         // wiping the user's system directory and removing from the user list
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             Intent removedIntent = new Intent(Intent.ACTION_USER_REMOVED);
+            removedIntent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
             removedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
             // Also, add the UserHandle for mainline modules which can't use the @hide
             // EXTRA_USER_HANDLE.
@@ -4119,7 +4494,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     private int getUidForPackage(String packageName) {
-        long ident = Binder.clearCallingIdentity();
+        final long ident = Binder.clearCallingIdentity();
         try {
             return mContext.getPackageManager().getApplicationInfo(packageName,
                     PackageManager.MATCH_ANY_USER).uid;
@@ -4151,8 +4526,7 @@ public class UserManagerService extends IUserManager.Stub {
         FileInputStream fis = null;
         try {
             fis = restrictionsFile.openRead();
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(fis, StandardCharsets.UTF_8.name());
+            final TypedXmlPullParser parser = Xml.resolvePullParser(fis);
             XmlUtils.nextElement(parser);
             if (parser.getEventType() != XmlPullParser.START_TAG) {
                 Slog.e(LOG_TAG, "Unable to read restrictions file "
@@ -4171,15 +4545,14 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     private static void readEntry(Bundle restrictions, ArrayList<String> values,
-            XmlPullParser parser) throws XmlPullParserException, IOException {
+            TypedXmlPullParser parser) throws XmlPullParserException, IOException {
         int type = parser.getEventType();
         if (type == XmlPullParser.START_TAG && parser.getName().equals(TAG_ENTRY)) {
             String key = parser.getAttributeValue(null, ATTR_KEY);
             String valType = parser.getAttributeValue(null, ATTR_VALUE_TYPE);
-            String multiple = parser.getAttributeValue(null, ATTR_MULTIPLE);
-            if (multiple != null) {
+            int count = parser.getAttributeInt(null, ATTR_MULTIPLE, -1);
+            if (count != -1) {
                 values.clear();
-                int count = Integer.parseInt(multiple);
                 while (count > 0 && (type = parser.next()) != XmlPullParser.END_DOCUMENT) {
                     if (type == XmlPullParser.START_TAG
                             && parser.getName().equals(TAG_VALUE)) {
@@ -4214,7 +4587,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    private static Bundle readBundleEntry(XmlPullParser parser, ArrayList<String> values)
+    private static Bundle readBundleEntry(TypedXmlPullParser parser, ArrayList<String> values)
             throws IOException, XmlPullParserException {
         Bundle childBundle = new Bundle();
         final int outerDepth = parser.getDepth();
@@ -4239,10 +4612,7 @@ public class UserManagerService extends IUserManager.Stub {
         FileOutputStream fos = null;
         try {
             fos = restrictionsFile.startWrite();
-            final BufferedOutputStream bos = new BufferedOutputStream(fos);
-
-            final XmlSerializer serializer = new FastXmlSerializer();
-            serializer.setOutput(bos, StandardCharsets.UTF_8.name());
+            final TypedXmlSerializer serializer = Xml.resolveSerializer(fos);
             serializer.startDocument(null, true);
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
@@ -4258,7 +4628,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    private static void writeBundle(Bundle restrictions, XmlSerializer serializer)
+    private static void writeBundle(Bundle restrictions, TypedXmlSerializer serializer)
             throws IOException {
         for (String key : restrictions.keySet()) {
             Object value = restrictions.get(key);
@@ -4292,7 +4662,7 @@ public class UserManagerService extends IUserManager.Stub {
             } else {
                 serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_STRING_ARRAY);
                 String[] values = (String[]) value;
-                serializer.attribute(null, ATTR_MULTIPLE, Integer.toString(values.length));
+                serializer.attributeInt(null, ATTR_MULTIPLE, values.length);
                 for (String choice : values) {
                     serializer.startTag(null, TAG_VALUE);
                     serializer.text(choice != null ? choice : "");
@@ -4350,7 +4720,7 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
         if (userInfo == null) {
-            throw new SecurityException("userId can only be the calling user or a managed "
+            throw new SecurityException("userId can only be the calling user or a "
                     + "profile associated with this user");
         }
         return userInfo.creationTime;
@@ -4674,13 +5044,35 @@ public class UserManagerService extends IUserManager.Stub {
                 final UserInfo user = users.get(i);
                 final boolean running = am.isUserRunning(user.id, 0);
                 final boolean current = user.id == currentUser;
+                final boolean hasParent = user.profileGroupId != user.id
+                        && user.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID;
                 if (verbose) {
-                    pw.printf("%d: id=%d, name=%s, flags=%s%s%s%s%s\n", i, user.id, user.name,
+                    final DevicePolicyManagerInternal dpm = getDevicePolicyManagerInternal();
+                    String deviceOwner = "";
+                    String profileOwner = "";
+                    if (dpm != null) {
+                        final long ident = Binder.clearCallingIdentity();
+                        // NOTE: dpm methods below CANNOT be called while holding the mUsersLock
+                        try {
+                            if (dpm.getDeviceOwnerUserId() == user.id) {
+                                deviceOwner = " (device-owner)";
+                            }
+                            if (dpm.getProfileOwnerAsUser(user.id) != null) {
+                                profileOwner = " (profile-owner)";
+                            }
+                        } finally {
+                            Binder.restoreCallingIdentity(ident);
+                        }
+                    }
+                    pw.printf("%d: id=%d, name=%s, flags=%s%s%s%s%s%s%s%s%s\n", i, user.id,
+                            user.name,
                             UserInfo.flagsToString(user.flags),
+                            hasParent ? " (parentId=" + user.profileGroupId + ")" : "",
                             running ? " (running)" : "",
                             user.partial ? " (partial)" : "",
                             user.preCreated ? " (pre-created)" : "",
                             user.convertedFromPreCreated ? " (converted)" : "",
+                            deviceOwner, profileOwner,
                             current ? " (current)" : "");
                 } else {
                     // NOTE: the standard "list users" command is used by integration tests and
@@ -4742,6 +5134,7 @@ public class UserManagerService extends IUserManager.Stub {
             pw.println("N/A");
         }
 
+        pw.println();
         StringBuilder sb = new StringBuilder();
         synchronized (mPackagesLock) {
             synchronized (mUsersLock) {
@@ -4756,6 +5149,11 @@ public class UserManagerService extends IUserManager.Stub {
                     pw.print("  "); pw.print(userInfo);
                     pw.print(" serialNo="); pw.print(userInfo.serialNumber);
                     pw.print(" isPrimary="); pw.print(userInfo.isPrimary());
+                    if (userInfo.profileGroupId != userInfo.id
+                            &&  userInfo.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID) {
+                        pw.print(" parentId="); pw.print(userInfo.profileGroupId);
+                    }
+
                     if (mRemovingUserIds.get(userId)) {
                         pw.print(" <removing> ");
                     }
@@ -4831,7 +5229,9 @@ public class UserManagerService extends IUserManager.Stub {
                     }
                 }
             }
+
             pw.println();
+            pw.println("Device properties:");
             pw.println("  Device owner id:" + mDeviceOwnerUserId);
             pw.println();
             pw.println("  Guest restrictions:");
@@ -4847,7 +5247,17 @@ public class UserManagerService extends IUserManager.Stub {
                 }
             }
             synchronized (mUserStates) {
-                pw.println("  Started users state: " + mUserStates);
+                pw.print("  Started users state: [");
+                final int size = mUserStates.states.size();
+                for (int i = 0; i < size; i++) {
+                    final int userId = mUserStates.states.keyAt(i);
+                    final int state = mUserStates.states.valueAt(i);
+                    pw.print(userId);
+                    pw.print('=');
+                    pw.print(UserState.stateToString(state));
+                    if (i != size - 1) pw.print(", ");
+                }
+                pw.println(']');
             }
             synchronized (mUsersLock) {
                 pw.print("  Cached user IDs: ");
@@ -4869,18 +5279,40 @@ public class UserManagerService extends IUserManager.Stub {
         pw.println("  Is split-system user: " + UserManager.isSplitSystemUser());
         pw.println("  Is headless-system mode: " + UserManager.isHeadlessSystemUserMode());
         pw.println("  User version: " + mUserVersion);
+        pw.println("  Owner name: " + getOwnerName());
+        if (DBG_ALLOCATION) {
+            pw.println("  System user allocations: " + mUser0Allocations.get());
+        }
+
+        pw.println();
+        pw.println("Number of listeners for");
+        synchronized (mUserRestrictionsListeners) {
+            pw.println("  restrictions: " + mUserRestrictionsListeners.size());
+        }
+        synchronized (mUserLifecycleListeners) {
+            pw.println("  user lifecycle events: " + mUserLifecycleListeners.size());
+        }
 
         // Dump UserTypes
         pw.println();
-        pw.println("  User types (" + mUserTypes.size() + " types):");
+        pw.println("User types version: " + mUserTypeVersion);
+        pw.println("User types (" + mUserTypes.size() + " types):");
         for (int i = 0; i < mUserTypes.size(); i++) {
             pw.println("    " + mUserTypes.keyAt(i) + ": ");
-            mUserTypes.valueAt(i).dump(pw);
+            mUserTypes.valueAt(i).dump(pw, "        ");
         }
 
-        // Dump package whitelist
-        pw.println();
-        mSystemPackageInstaller.dump(pw);
+        // TODO: create IndentingPrintWriter at the beginning of dump() and use the proper
+        // indentation methods instead of explicit printing "  "
+        try (IndentingPrintWriter ipw = new IndentingPrintWriter(pw)) {
+
+            // Dump SystemPackageInstaller info
+            ipw.println();
+            mSystemPackageInstaller.dump(ipw);
+
+            // NOTE: pw's not available after this point as it's auto-closed by ipw, so new dump
+            // statements should use ipw below
+        }
     }
 
     private static void dumpTimeAgo(PrintWriter pw, StringBuilder sb, long nowTime, long time) {
@@ -4906,6 +5338,9 @@ public class UserManagerService extends IUserManager.Stub {
                         UserData userData = getUserDataNoChecks(userId);
                         if (userData != null) {
                             writeUserLP(userData);
+                        } else {
+                            Slog.i(LOG_TAG, "handle(WRITE_USER_MSG): no data for user " + userId
+                                    + ", it was probably removed before handler could handle it");
                         }
                     }
             }
@@ -4976,6 +5411,20 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         @Override
+        public void addUserLifecycleListener(UserLifecycleListener listener) {
+            synchronized (mUserLifecycleListeners) {
+                mUserLifecycleListeners.add(listener);
+            }
+        }
+
+        @Override
+        public void removeUserLifecycleListener(UserLifecycleListener listener) {
+            synchronized (mUserLifecycleListeners) {
+                mUserLifecycleListeners.remove(listener);
+            }
+        }
+
+        @Override
         public void setDeviceManaged(boolean isManaged) {
             synchronized (mUsersLock) {
                 mIsDeviceManaged = isManaged;
@@ -5005,7 +5454,7 @@ public class UserManagerService extends IUserManager.Stub {
 
         @Override
         public void setUserIcon(@UserIdInt int userId, Bitmap bitmap) {
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 synchronized (mPackagesLock) {
                     UserData userData = getUserDataNoChecks(userId);
@@ -5078,10 +5527,10 @@ public class UserManagerService extends IUserManager.Stub {
 
         @Override
         public UserInfo createUserEvenWhenDisallowed(String name, @NonNull String userType,
-                @UserInfoFlag int flags, String[] disallowedPackages)
+                @UserInfoFlag int flags, String[] disallowedPackages, @Nullable Object token)
                 throws UserManager.CheckedUserOperationException {
             return createUserInternalUnchecked(name, userType, flags,
-                    UserHandle.USER_NULL, /* preCreated= */ false, disallowedPackages);
+                    UserHandle.USER_NULL, /* preCreated= */ false, disallowedPackages, token);
         }
 
         @Override
@@ -5247,6 +5696,7 @@ public class UserManagerService extends IUserManager.Stub {
             return userData == null ? null : userData.info;
         }
 
+        @Override
         public @NonNull UserInfo[] getUserInfos() {
             synchronized (mUsersLock) {
                 int userSize = mUsers.size();
@@ -5256,6 +5706,15 @@ public class UserManagerService extends IUserManager.Stub {
                 }
                 return allInfos;
             }
+        }
+
+        @Override
+        public void setDefaultCrossProfileIntentFilters(
+                @UserIdInt int parentUserId, @UserIdInt int profileUserId) {
+            final UserTypeDetails userTypeDetails = getUserTypeDetailsNoChecks(profileUserId);
+            final Bundle restrictions = getEffectiveUserRestrictions(profileUserId);
+            UserManagerService.this.setDefaultCrossProfileIntentFilters(
+                    profileUserId, userTypeDetails, restrictions, parentUserId);
         }
     }
 
@@ -5353,6 +5812,9 @@ public class UserManagerService extends IUserManager.Stub {
      * Returns the maximum number of users allowed for the given userTypeDetails per parent user.
      * This is applicable for user types that are {@link UserTypeDetails#isProfile()}.
      * If there is no maximum, {@link UserTypeDetails#UNLIMITED_NUMBER_OF_USERS} is returned.
+     * Under certain circumstances (such as after a change-user-type) the max value can actually
+     * be exceeded: this is allowed in order to keep the device in a usable state.
+     * An error is logged in {@link UserManagerService#upgradeProfileToTypeLU}
      */
     private static int getMaxUsersOfTypePerParent(UserTypeDetails userTypeDetails) {
         final int defaultMax = userTypeDetails.getMaxAllowedPerParent();
@@ -5430,14 +5892,6 @@ public class UserManagerService extends IUserManager.Stub {
             mPmInternal = LocalServices.getService(PackageManagerInternal.class);
         }
         return mPmInternal;
-    }
-
-    /** Retrieve the internal cross profile apps interface. */
-    private CrossProfileAppsInternal getCrossProfileAppsInternal() {
-        if (mCrossProfileAppsInternal == null) {
-            mCrossProfileAppsInternal = LocalServices.getService(CrossProfileAppsInternal.class);
-        }
-        return mCrossProfileAppsInternal;
     }
 
     /** Returns the internal device policy manager interface. */

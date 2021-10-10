@@ -16,13 +16,10 @@
 
 package android.view;
 
+import static android.view.InsetsStateProto.DISPLAY_CUTOUT;
+import static android.view.InsetsStateProto.DISPLAY_FRAME;
+import static android.view.InsetsStateProto.SOURCES;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_IME;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
-import static android.view.ViewRootImpl.sNewInsetsMode;
-import static android.view.WindowInsets.Type.MANDATORY_SYSTEM_GESTURES;
-import static android.view.WindowInsets.Type.SYSTEM_GESTURES;
 import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.indexOf;
@@ -30,17 +27,23 @@ import static android.view.WindowInsets.Type.isVisibleInsetsType;
 import static android.view.WindowInsets.Type.statusBars;
 import static android.view.WindowInsets.Type.systemBars;
 import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
+import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
+import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.WindowConfiguration;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
 import android.util.SparseIntArray;
+import android.util.proto.ProtoOutputStream;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
@@ -59,8 +62,6 @@ import java.util.StringJoiner;
  * @hide
  */
 public class InsetsState implements Parcelable {
-
-    public static final InsetsState EMPTY = new InsetsState();
 
     /**
      * Internal representation of inset source types. This is different from the public API in
@@ -109,26 +110,27 @@ public class InsetsState implements Parcelable {
     public static final int ITYPE_LEFT_GESTURES = 5;
     public static final int ITYPE_RIGHT_GESTURES = 6;
 
-    /** Additional gesture inset types that map into {@link Type.MANDATORY_SYSTEM_GESTURES}. */
     public static final int ITYPE_TOP_MANDATORY_GESTURES = 7;
     public static final int ITYPE_BOTTOM_MANDATORY_GESTURES = 8;
     public static final int ITYPE_LEFT_MANDATORY_GESTURES = 9;
     public static final int ITYPE_RIGHT_MANDATORY_GESTURES = 10;
 
-    public static final int ITYPE_TOP_TAPPABLE_ELEMENT = 11;
-    public static final int ITYPE_BOTTOM_TAPPABLE_ELEMENT = 12;
+    public static final int ITYPE_LEFT_DISPLAY_CUTOUT = 11;
+    public static final int ITYPE_TOP_DISPLAY_CUTOUT = 12;
+    public static final int ITYPE_RIGHT_DISPLAY_CUTOUT = 13;
+    public static final int ITYPE_BOTTOM_DISPLAY_CUTOUT = 14;
 
-    public static final int ITYPE_LEFT_DISPLAY_CUTOUT = 13;
-    public static final int ITYPE_TOP_DISPLAY_CUTOUT = 14;
-    public static final int ITYPE_RIGHT_DISPLAY_CUTOUT = 15;
-    public static final int ITYPE_BOTTOM_DISPLAY_CUTOUT = 16;
+    public static final int ITYPE_LEFT_TAPPABLE_ELEMENT = 15;
+    public static final int ITYPE_TOP_TAPPABLE_ELEMENT = 16;
+    public static final int ITYPE_RIGHT_TAPPABLE_ELEMENT = 17;
+    public static final int ITYPE_BOTTOM_TAPPABLE_ELEMENT = 18;
 
     /** Input method window. */
-    public static final int ITYPE_IME = 17;
+    public static final int ITYPE_IME = 19;
 
     /** Additional system decorations inset type. */
-    public static final int ITYPE_CLIMATE_BAR = 18;
-    public static final int ITYPE_EXTRA_NAVIGATION_BAR = 19;
+    public static final int ITYPE_CLIMATE_BAR = 20;
+    public static final int ITYPE_EXTRA_NAVIGATION_BAR = 21;
 
     static final int LAST_TYPE = ITYPE_EXTRA_NAVIGATION_BAR;
     public static final int SIZE = LAST_TYPE + 1;
@@ -155,12 +157,23 @@ public class InsetsState implements Parcelable {
     static final int ISIDE_FLOATING = 4;
     static final int ISIDE_UNKNOWN = 5;
 
-    private InsetsSource[] mSources = new InsetsSource[SIZE];
+    private final InsetsSource[] mSources = new InsetsSource[SIZE];
 
     /**
      * The frame of the display these sources are relative to.
      */
     private final Rect mDisplayFrame = new Rect();
+
+    /** The area cut from the display. */
+    private final DisplayCutout.ParcelableWrapper mDisplayCutout =
+            new DisplayCutout.ParcelableWrapper();
+
+    /** The rounded corners on the display */
+    private RoundedCorners mRoundedCorners = RoundedCorners.NO_ROUNDED_CORNERS;
+
+    /** The bounds of the Privacy Indicator */
+    private PrivacyIndicatorBounds mPrivacyIndicatorBounds =
+            new PrivacyIndicatorBounds();
 
     public InsetsState() {
     }
@@ -183,8 +196,9 @@ public class InsetsState implements Parcelable {
      * @return The calculated insets.
      */
     public WindowInsets calculateInsets(Rect frame, @Nullable InsetsState ignoringVisibilityState,
-            boolean isScreenRound, boolean alwaysConsumeSystemBars, DisplayCutout cutout,
+            boolean isScreenRound, boolean alwaysConsumeSystemBars,
             int legacySoftInputMode, int legacyWindowFlags, int legacySystemUiFlags,
+            int windowType, @WindowConfiguration.WindowingMode int windowingMode,
             @Nullable @InternalInsetsSide SparseIntArray typeSideMap) {
         Insets[] typeInsetsMap = new Insets[Type.SIZE];
         Insets[] typeMaxInsetsMap = new Insets[Type.SIZE];
@@ -198,18 +212,6 @@ public class InsetsState implements Parcelable {
                 if (typeInsetsMap[index] == null) {
                     typeInsetsMap[index] = Insets.NONE;
                 }
-                continue;
-            }
-
-            boolean skipNonImeInImeMode = ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_IME
-                    && source.getType() != ITYPE_IME;
-            boolean skipSystemBars = ViewRootImpl.sNewInsetsMode != NEW_INSETS_MODE_FULL
-                    && (type == ITYPE_STATUS_BAR || type == ITYPE_NAVIGATION_BAR);
-            boolean skipLegacyTypes = ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_NONE
-                    && (type == ITYPE_STATUS_BAR || type == ITYPE_NAVIGATION_BAR
-                            || type == ITYPE_IME);
-            if (skipSystemBars || skipLegacyTypes || skipNonImeInImeMode) {
-                typeVisibilityMap[indexOf(toPublicType(type))] = source.isVisible();
                 continue;
             }
 
@@ -239,11 +241,80 @@ public class InsetsState implements Parcelable {
         if ((legacyWindowFlags & FLAG_FULLSCREEN) != 0) {
             compatInsetsTypes &= ~statusBars();
         }
+        if (clearCompatInsets(windowType, legacyWindowFlags, windowingMode)) {
+            compatInsetsTypes = 0;
+        }
 
         return new WindowInsets(typeInsetsMap, typeMaxInsetsMap, typeVisibilityMap, isScreenRound,
-                alwaysConsumeSystemBars, cutout, compatInsetsTypes,
-                sNewInsetsMode == NEW_INSETS_MODE_FULL
-                        && (legacySystemUiFlags & SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0);
+                alwaysConsumeSystemBars, calculateRelativeCutout(frame),
+                calculateRelativeRoundedCorners(frame),
+                calculateRelativePrivacyIndicatorBounds(frame),
+                compatInsetsTypes, (legacySystemUiFlags & SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0);
+    }
+
+    private DisplayCutout calculateRelativeCutout(Rect frame) {
+        final DisplayCutout raw = mDisplayCutout.get();
+        if (mDisplayFrame.equals(frame)) {
+            return raw;
+        }
+        if (frame == null) {
+            return DisplayCutout.NO_CUTOUT;
+        }
+        final int insetLeft = frame.left - mDisplayFrame.left;
+        final int insetTop = frame.top - mDisplayFrame.top;
+        final int insetRight = mDisplayFrame.right - frame.right;
+        final int insetBottom = mDisplayFrame.bottom - frame.bottom;
+        if (insetLeft >= raw.getSafeInsetLeft()
+                && insetTop >= raw.getSafeInsetTop()
+                && insetRight >= raw.getSafeInsetRight()
+                && insetBottom >= raw.getSafeInsetBottom()) {
+            return DisplayCutout.NO_CUTOUT;
+        }
+        return raw.inset(insetLeft, insetTop, insetRight, insetBottom);
+    }
+
+    private RoundedCorners calculateRelativeRoundedCorners(Rect frame) {
+        if (mDisplayFrame.equals(frame)) {
+            return mRoundedCorners;
+        }
+        if (frame == null) {
+            return RoundedCorners.NO_ROUNDED_CORNERS;
+        }
+        final int insetLeft = frame.left - mDisplayFrame.left;
+        final int insetTop = frame.top - mDisplayFrame.top;
+        final int insetRight = mDisplayFrame.right - frame.right;
+        final int insetBottom = mDisplayFrame.bottom - frame.bottom;
+        return mRoundedCorners.inset(insetLeft, insetTop, insetRight, insetBottom);
+    }
+
+    private PrivacyIndicatorBounds calculateRelativePrivacyIndicatorBounds(Rect frame) {
+        if (mDisplayFrame.equals(frame)) {
+            return mPrivacyIndicatorBounds;
+        }
+        if (frame == null) {
+            return null;
+        }
+        final int insetLeft = frame.left - mDisplayFrame.left;
+        final int insetTop = frame.top - mDisplayFrame.top;
+        final int insetRight = mDisplayFrame.right - frame.right;
+        final int insetBottom = mDisplayFrame.bottom - frame.bottom;
+        return mPrivacyIndicatorBounds.inset(insetLeft, insetTop, insetRight, insetBottom);
+    }
+
+    public Rect calculateInsets(Rect frame, @InsetsType int types, boolean ignoreVisibility) {
+        Insets insets = Insets.NONE;
+        for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
+            InsetsSource source = mSources[type];
+            if (source == null) {
+                continue;
+            }
+            int publicType = InsetsState.toPublicType(type);
+            if ((publicType & types) == 0) {
+                continue;
+            }
+            insets = Insets.max(source.calculateInsets(frame, ignoreVisibility), insets);
+        }
+        return insets.toRect();
     }
 
     public Rect calculateVisibleInsets(Rect frame, @SoftInputModeFlags int softInputMode) {
@@ -251,9 +322,6 @@ public class InsetsState implements Parcelable {
         for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
             InsetsSource source = mSources[type];
             if (source == null) {
-                continue;
-            }
-            if (sNewInsetsMode != NEW_INSETS_MODE_FULL && type != ITYPE_IME) {
                 continue;
             }
 
@@ -314,14 +382,14 @@ public class InsetsState implements Parcelable {
         processSourceAsPublicType(source, typeInsetsMap, typeSideMap, typeVisibilityMap,
                 insets, type);
 
-        if (type == MANDATORY_SYSTEM_GESTURES) {
+        if (type == Type.MANDATORY_SYSTEM_GESTURES) {
             // Mandatory system gestures are also system gestures.
             // TODO: find a way to express this more generally. One option would be to define
             //       Type.systemGestureInsets() as NORMAL | MANDATORY, but then we lose the
             //       ability to set systemGestureInsets() independently from
             //       mandatorySystemGestureInsets() in the Builder.
             processSourceAsPublicType(source, typeInsetsMap, typeSideMap, typeVisibilityMap,
-                    insets, SYSTEM_GESTURES);
+                    insets, Type.SYSTEM_GESTURES);
         }
     }
 
@@ -352,7 +420,7 @@ public class InsetsState implements Parcelable {
      * Retrieves the side for a certain {@code insets}. It is required that only one field l/t/r/b
      * is set in order that this method returns a meaningful result.
      */
-    private @InternalInsetsSide int getInsetSide(Insets insets) {
+    static @InternalInsetsSide int getInsetSide(Insets insets) {
         if (Insets.NONE.equals(insets)) {
             return ISIDE_FLOATING;
         }
@@ -385,15 +453,6 @@ public class InsetsState implements Parcelable {
         return mSources[type];
     }
 
-    public boolean hasSources() {
-        for (int i = 0; i < SIZE; i++) {
-            if (mSources[i] != null) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     /**
      * Returns the source visibility or the default visibility if the source doesn't exist. This is
      * useful if when treating this object as a request.
@@ -415,14 +474,43 @@ public class InsetsState implements Parcelable {
         return mDisplayFrame;
     }
 
+    public void setDisplayCutout(DisplayCutout cutout) {
+        mDisplayCutout.set(cutout);
+    }
+
+    public DisplayCutout getDisplayCutout() {
+        return mDisplayCutout.get();
+    }
+
+    public void setRoundedCorners(RoundedCorners roundedCorners) {
+        mRoundedCorners = roundedCorners;
+    }
+
+    public RoundedCorners getRoundedCorners() {
+        return mRoundedCorners;
+    }
+
+    public void setPrivacyIndicatorBounds(PrivacyIndicatorBounds bounds) {
+        mPrivacyIndicatorBounds = bounds;
+    }
+
+    public PrivacyIndicatorBounds getPrivacyIndicatorBounds() {
+        return mPrivacyIndicatorBounds;
+    }
+
     /**
      * Modifies the state of this class to exclude a certain type to make it ready for dispatching
      * to the client.
      *
      * @param type The {@link InternalInsetsType} of the source to remove
+     * @return {@code true} if this InsetsState was modified; {@code false} otherwise.
      */
-    public void removeSource(@InternalInsetsType int type) {
+    public boolean removeSource(@InternalInsetsType int type) {
+        if (mSources[type] == null) {
+            return false;
+        }
         mSources[type] = null;
+        return true;
     }
 
     /**
@@ -438,12 +526,37 @@ public class InsetsState implements Parcelable {
         }
     }
 
+    /**
+     * Scales the frame and the visible frame (if there is one) of each source.
+     *
+     * @param scale the scale to be applied
+     */
+    public void scale(float scale) {
+        mDisplayFrame.scale(scale);
+        mDisplayCutout.scale(scale);
+        mRoundedCorners = mRoundedCorners.scale(scale);
+        mPrivacyIndicatorBounds = mPrivacyIndicatorBounds.scale(scale);
+        for (int i = 0; i < SIZE; i++) {
+            final InsetsSource source = mSources[i];
+            if (source != null) {
+                source.getFrame().scale(scale);
+                final Rect visibleFrame = source.getVisibleFrame();
+                if (visibleFrame != null) {
+                    visibleFrame.scale(scale);
+                }
+            }
+        }
+    }
+
     public void set(InsetsState other) {
         set(other, false /* copySources */);
     }
 
     public void set(InsetsState other, boolean copySources) {
         mDisplayFrame.set(other.mDisplayFrame);
+        mDisplayCutout.set(other.mDisplayCutout);
+        mRoundedCorners = other.getRoundedCorners();
+        mPrivacyIndicatorBounds = other.getPrivacyIndicatorBounds();
         if (copySources) {
             for (int i = 0; i < SIZE; i++) {
                 InsetsSource source = other.mSources[i];
@@ -456,8 +569,33 @@ public class InsetsState implements Parcelable {
         }
     }
 
+    /**
+     * Sets the values from the other InsetsState. But for sources, only specific types of source
+     * would be set.
+     *
+     * @param other the other InsetsState.
+     * @param types the only types of sources would be set.
+     */
+    public void set(InsetsState other, @InsetsType int types) {
+        mDisplayFrame.set(other.mDisplayFrame);
+        mDisplayCutout.set(other.mDisplayCutout);
+        mRoundedCorners = other.getRoundedCorners();
+        mPrivacyIndicatorBounds = other.getPrivacyIndicatorBounds();
+        final ArraySet<Integer> t = toInternalType(types);
+        for (int i = t.size() - 1; i >= 0; i--) {
+            final int type = t.valueAt(i);
+            mSources[type] = other.mSources[type];
+        }
+    }
+
     public void addSource(InsetsSource source) {
         mSources[source.getType()] = source;
+    }
+
+    public static boolean clearCompatInsets(int windowType, int windowFlags, int windowingMode) {
+        return (windowFlags & FLAG_LAYOUT_NO_LIMITS) != 0
+                && windowType != TYPE_WALLPAPER && windowType != TYPE_SYSTEM_ERROR
+                && !WindowConfiguration.inMultiWindowMode(windowingMode);
     }
 
     public static @InternalInsetsType ArraySet<Integer> toInternalType(@InsetsType int types) {
@@ -472,6 +610,18 @@ public class InsetsState implements Parcelable {
         }
         if ((types & Type.CAPTION_BAR) != 0) {
             result.add(ITYPE_CAPTION_BAR);
+        }
+        if ((types & Type.SYSTEM_GESTURES) != 0) {
+            result.add(ITYPE_LEFT_GESTURES);
+            result.add(ITYPE_TOP_GESTURES);
+            result.add(ITYPE_RIGHT_GESTURES);
+            result.add(ITYPE_BOTTOM_GESTURES);
+        }
+        if ((types & Type.MANDATORY_SYSTEM_GESTURES) != 0) {
+            result.add(ITYPE_LEFT_MANDATORY_GESTURES);
+            result.add(ITYPE_TOP_MANDATORY_GESTURES);
+            result.add(ITYPE_RIGHT_MANDATORY_GESTURES);
+            result.add(ITYPE_BOTTOM_MANDATORY_GESTURES);
         }
         if ((types & Type.DISPLAY_CUTOUT) != 0) {
             result.add(ITYPE_LEFT_DISPLAY_CUTOUT);
@@ -502,17 +652,19 @@ public class InsetsState implements Parcelable {
                 return Type.CAPTION_BAR;
             case ITYPE_IME:
                 return Type.IME;
-            case ITYPE_TOP_GESTURES:
-            case ITYPE_BOTTOM_GESTURES:
             case ITYPE_TOP_MANDATORY_GESTURES:
             case ITYPE_BOTTOM_MANDATORY_GESTURES:
             case ITYPE_LEFT_MANDATORY_GESTURES:
             case ITYPE_RIGHT_MANDATORY_GESTURES:
                 return Type.MANDATORY_SYSTEM_GESTURES;
+            case ITYPE_TOP_GESTURES:
+            case ITYPE_BOTTOM_GESTURES:
             case ITYPE_LEFT_GESTURES:
             case ITYPE_RIGHT_GESTURES:
                 return Type.SYSTEM_GESTURES;
+            case ITYPE_LEFT_TAPPABLE_ELEMENT:
             case ITYPE_TOP_TAPPABLE_ELEMENT:
+            case ITYPE_RIGHT_TAPPABLE_ELEMENT:
             case ITYPE_BOTTOM_TAPPABLE_ELEMENT:
                 return Type.TAPPABLE_ELEMENT;
             case ITYPE_LEFT_DISPLAY_CUTOUT:
@@ -543,12 +695,28 @@ public class InsetsState implements Parcelable {
     }
 
     public void dump(String prefix, PrintWriter pw) {
+        final String newPrefix = prefix + "  ";
         pw.println(prefix + "InsetsState");
+        pw.println(newPrefix + "mDisplayFrame=" + mDisplayFrame);
+        pw.println(newPrefix + "mDisplayCutout=" + mDisplayCutout.get());
+        pw.println(newPrefix + "mRoundedCorners=" + mRoundedCorners);
+        pw.println(newPrefix + "mPrivacyIndicatorBounds=" + mPrivacyIndicatorBounds);
         for (int i = 0; i < SIZE; i++) {
             InsetsSource source = mSources[i];
             if (source == null) continue;
-            source.dump(prefix + "  ", pw);
+            source.dump(newPrefix + "  ", pw);
         }
+    }
+
+    void dumpDebug(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        InsetsSource source = mSources[ITYPE_IME];
+        if (source != null) {
+            source.dumpDebug(proto, SOURCES);
+        }
+        mDisplayFrame.dumpDebug(proto, DISPLAY_FRAME);
+        mDisplayCutout.get().dumpDebug(proto, DISPLAY_CUTOUT);
+        proto.end(token);
     }
 
     public static String typeToString(@InternalInsetsType int type) {
@@ -575,8 +743,12 @@ public class InsetsState implements Parcelable {
                 return "ITYPE_LEFT_MANDATORY_GESTURES";
             case ITYPE_RIGHT_MANDATORY_GESTURES:
                 return "ITYPE_RIGHT_MANDATORY_GESTURES";
+            case ITYPE_LEFT_TAPPABLE_ELEMENT:
+                return "ITYPE_LEFT_TAPPABLE_ELEMENT";
             case ITYPE_TOP_TAPPABLE_ELEMENT:
                 return "ITYPE_TOP_TAPPABLE_ELEMENT";
+            case ITYPE_RIGHT_TAPPABLE_ELEMENT:
+                return "ITYPE_RIGHT_TAPPABLE_ELEMENT";
             case ITYPE_BOTTOM_TAPPABLE_ELEMENT:
                 return "ITYPE_BOTTOM_TAPPABLE_ELEMENT";
             case ITYPE_LEFT_DISPLAY_CUTOUT:
@@ -599,7 +771,7 @@ public class InsetsState implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         return equals(o, false, false);
     }
 
@@ -614,14 +786,17 @@ public class InsetsState implements Parcelable {
      * @return {@code true} if the two InsetsState objects are equal, {@code false} otherwise.
      */
     @VisibleForTesting
-    public boolean equals(Object o, boolean excludingCaptionInsets,
+    public boolean equals(@Nullable Object o, boolean excludingCaptionInsets,
             boolean excludeInvisibleImeFrames) {
         if (this == o) { return true; }
         if (o == null || getClass() != o.getClass()) { return false; }
 
         InsetsState state = (InsetsState) o;
 
-        if (!mDisplayFrame.equals(state.mDisplayFrame)) {
+        if (!mDisplayFrame.equals(state.mDisplayFrame)
+                || !mDisplayCutout.equals(state.mDisplayCutout)
+                || !mRoundedCorners.equals(state.mRoundedCorners)
+                || !mPrivacyIndicatorBounds.equals(state.mPrivacyIndicatorBounds)) {
             return false;
         }
         for (int i = 0; i < SIZE; i++) {
@@ -633,7 +808,7 @@ public class InsetsState implements Parcelable {
             if (source == null && otherSource == null) {
                 continue;
             }
-            if (source != null && otherSource == null || source == null && otherSource != null) {
+            if (source == null || otherSource == null) {
                 return false;
             }
             if (!otherSource.equals(source, excludeInvisibleImeFrames)) {
@@ -645,7 +820,8 @@ public class InsetsState implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mDisplayFrame, Arrays.hashCode(mSources));
+        return Objects.hash(mDisplayFrame, mDisplayCutout, Arrays.hashCode(mSources),
+                mRoundedCorners, mPrivacyIndicatorBounds);
     }
 
     public InsetsState(Parcel in) {
@@ -659,11 +835,14 @@ public class InsetsState implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeParcelable(mDisplayFrame, flags);
-        dest.writeParcelableArray(mSources, 0);
+        mDisplayFrame.writeToParcel(dest, flags);
+        mDisplayCutout.writeToParcel(dest, flags);
+        dest.writeTypedArray(mSources, 0 /* parcelableFlags */);
+        dest.writeTypedObject(mRoundedCorners, flags);
+        dest.writeTypedObject(mPrivacyIndicatorBounds, flags);
     }
 
-    public static final @android.annotation.NonNull Creator<InsetsState> CREATOR = new Creator<InsetsState>() {
+    public static final @NonNull Creator<InsetsState> CREATOR = new Creator<InsetsState>() {
 
         public InsetsState createFromParcel(Parcel in) {
             return new InsetsState(in);
@@ -675,8 +854,11 @@ public class InsetsState implements Parcelable {
     };
 
     public void readFromParcel(Parcel in) {
-        mDisplayFrame.set(in.readParcelable(null /* loader */));
-        mSources = in.readParcelableArray(null, InsetsSource.class);
+        mDisplayFrame.readFromParcel(in);
+        mDisplayCutout.readFromParcel(in);
+        in.readTypedArray(mSources, InsetsSource.CREATOR);
+        mRoundedCorners = in.readTypedObject(RoundedCorners.CREATOR);
+        mPrivacyIndicatorBounds = in.readTypedObject(PrivacyIndicatorBounds.CREATOR);
     }
 
     @Override
@@ -690,8 +872,22 @@ public class InsetsState implements Parcelable {
         }
         return "InsetsState: {"
                 + "mDisplayFrame=" + mDisplayFrame
+                + ", mDisplayCutout=" + mDisplayCutout
+                + ", mRoundedCorners=" + mRoundedCorners
+                + ", mPrivacyIndicatorBounds=" + mPrivacyIndicatorBounds
                 + ", mSources= { " + joiner
                 + " }";
+    }
+
+    public @NonNull String toSourceVisibilityString() {
+        StringJoiner joiner = new StringJoiner(", ");
+        for (int i = 0; i < SIZE; i++) {
+            InsetsSource source = mSources[i];
+            if (source != null) {
+                joiner.add(typeToString(i) + ": " + (source.isVisible() ? "visible" : "invisible"));
+            }
+        }
+        return joiner.toString();
     }
 }
 

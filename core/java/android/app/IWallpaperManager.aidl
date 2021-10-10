@@ -17,9 +17,11 @@
 package android.app;
 
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.app.IWallpaperManagerCallback;
+import android.app.ILocalWallpaperColorConsumer;
 import android.app.WallpaperInfo;
 import android.content.ComponentName;
 import android.app.WallpaperColors;
@@ -162,6 +164,19 @@ interface IWallpaperManager {
     WallpaperColors getWallpaperColors(int which, int userId, int displayId);
 
     /**
+    * @hide
+    */
+    void removeOnLocalColorsChangedListener(
+            in ILocalWallpaperColorConsumer callback, in List<RectF> area,
+            int which, int userId, int displayId);
+
+    /**
+    * @hide
+    */
+    void addOnLocalColorsChangedListener(in ILocalWallpaperColorConsumer callback,
+                                    in List<RectF> regions, int which, int userId, int displayId);
+
+    /**
      * Register a callback to receive color updates from a display
      */
     void registerWallpaperColorsCallback(IWallpaperManagerCallback cb, int userId, int displayId);
@@ -175,4 +190,18 @@ interface IWallpaperManager {
      * Called from SystemUI when it shows the AoD UI.
      */
     oneway void setInAmbientMode(boolean inAmbientMode, long animationDuration);
+
+    /**
+     * Called from SystemUI when the device is waking up.
+     *
+     * @hide
+     */
+    oneway void notifyWakingUp(int x, int y, in Bundle extras);
+
+    /**
+     * Called from SystemUI when the device is going to sleep.
+     *
+     * @hide
+     */
+    void notifyGoingToSleep(int x, int y, in Bundle extras);
 }

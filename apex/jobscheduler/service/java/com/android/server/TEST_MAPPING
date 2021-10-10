@@ -10,6 +10,15 @@
         {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
         {"exclude-annotation": "androidx.test.filters.FlakyTest"}
       ]
+    },
+    {
+      "name": "FrameworksMockingServicesTests",
+      "file_patterns": ["AppStateTrackerImpl\\.java"],
+      "options": [
+        {"include-filter": "com.android.server.AppStateTrackerTest"},
+        {"include-annotation": "android.platform.test.annotations.Presubmit"},
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"}
+      ]
     }
   ],
   "postsubmit": [

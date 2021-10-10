@@ -46,7 +46,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private ViewGroup mConnectedItem;
-    private boolean mInclueDynamicGroup;
+    private boolean mIncludeDynamicGroup;
 
     public MediaOutputAdapter(MediaOutputController controller) {
         super(controller);
@@ -56,7 +56,6 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
     public MediaDeviceBaseViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup,
             int viewType) {
         super.onCreateViewHolder(viewGroup, viewType);
-
         return new MediaDeviceViewHolder(mHolderView);
     }
 
@@ -66,7 +65,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         if (position == size && mController.isZeroMode()) {
             viewHolder.onBind(CUSTOMIZED_ITEM_PAIR_NEW, false /* topMargin */,
                     true /* bottomMargin */);
-        } else if (mInclueDynamicGroup) {
+        } else if (mIncludeDynamicGroup) {
             if (position == 0) {
                 viewHolder.onBind(CUSTOMIZED_ITEM_DYNAMIC_GROUP, true /* topMargin */,
                         false /* bottomMargin */);
@@ -76,11 +75,12 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 // from "position - 1".
                 viewHolder.onBind(((List<MediaDevice>) (mController.getMediaDevices()))
                                 .get(position - 1),
-                        false /* topMargin */, position == size /* bottomMargin */);
+                        false /* topMargin */, position == size /* bottomMargin */, position);
             }
         } else if (position < size) {
             viewHolder.onBind(((List<MediaDevice>) (mController.getMediaDevices())).get(position),
-                    position == 0 /* topMargin */, position == (size - 1) /* bottomMargin */);
+                    position == 0 /* topMargin */, position == (size - 1) /* bottomMargin */,
+                    position);
         } else if (DEBUG) {
             Log.d(TAG, "Incorrect position: " + position);
         }
@@ -88,8 +88,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
 
     @Override
     public int getItemCount() {
-        mInclueDynamicGroup = mController.getSelectedMediaDevice().size() > 1;
-        if (mController.isZeroMode() || mInclueDynamicGroup) {
+        mIncludeDynamicGroup = mController.getSelectedMediaDevice().size() > 1;
+        if (mController.isZeroMode() || mIncludeDynamicGroup) {
             // Add extra one for "pair new" or dynamic group
             return mController.getMediaDevices().size() + 1;
         }
@@ -120,15 +120,17 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         }
 
         @Override
-        void onBind(MediaDevice device, boolean topMargin, boolean bottomMargin) {
-            super.onBind(device, topMargin, bottomMargin);
-            final boolean currentlyConnected = !mInclueDynamicGroup && isCurrentlyConnected(device);
+        void onBind(MediaDevice device, boolean topMargin, boolean bottomMargin, int position) {
+            super.onBind(device, topMargin, bottomMargin, position);
+            final boolean currentlyConnected = !mIncludeDynamicGroup
+                    && isCurrentlyConnected(device);
             if (currentlyConnected) {
                 mConnectedItem = mContainerLayout;
             }
             mBottomDivider.setVisibility(View.GONE);
             mCheckBox.setVisibility(View.GONE);
-            if (currentlyConnected && mController.isActiveRemoteDevice(device)) {
+            if (currentlyConnected && mController.isActiveRemoteDevice(device)
+                    && mController.getSelectableMediaDevice().size() > 0) {
                 // Init active device layout
                 mDivider.setVisibility(View.VISIBLE);
                 mDivider.setTransitionAlpha(1);
@@ -139,6 +141,9 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 // Init non-active device layout
                 mDivider.setVisibility(View.GONE);
                 mAddIcon.setVisibility(View.GONE);
+            }
+            if (mCurrentActivePosition == position) {
+                mCurrentActivePosition = -1;
             }
             if (mController.isTransferring()) {
                 if (device.getState() == MediaDeviceState.STATE_CONNECTING
@@ -160,6 +165,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     setTwoLineLayout(device, true /* bFocused */, true /* showSeekBar */,
                             false /* showProgressBar */, false /* showSubtitle */);
                     initSeekbar(device);
+                    mCurrentActivePosition = position;
                 } else {
                     setSingleLineLayout(getItemTitle(device), false /* bFocused */);
                     mContainerLayout.setOnClickListener(v -> onItemClick(v, device));
@@ -186,11 +192,16 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 mConnectedItem = mContainerLayout;
                 mBottomDivider.setVisibility(View.GONE);
                 mCheckBox.setVisibility(View.GONE);
-                mDivider.setVisibility(View.VISIBLE);
-                mDivider.setTransitionAlpha(1);
-                mAddIcon.setVisibility(View.VISIBLE);
-                mAddIcon.setTransitionAlpha(1);
-                mAddIcon.setOnClickListener(v -> onEndItemClick());
+                if (mController.getSelectableMediaDevice().size() > 0) {
+                    mDivider.setVisibility(View.VISIBLE);
+                    mDivider.setTransitionAlpha(1);
+                    mAddIcon.setVisibility(View.VISIBLE);
+                    mAddIcon.setTransitionAlpha(1);
+                    mAddIcon.setOnClickListener(v -> onEndItemClick());
+                } else {
+                    mDivider.setVisibility(View.GONE);
+                    mAddIcon.setVisibility(View.GONE);
+                }
                 mTitleIcon.setImageDrawable(getSpeakerDrawable());
                 final CharSequence sessionName = mController.getSessionName();
                 final CharSequence title = TextUtils.isEmpty(sessionName)
@@ -206,6 +217,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 return;
             }
 
+            mCurrentActivePosition = -1;
             playSwitchingAnim(mConnectedItem, view);
             mController.connectDevice(device);
             device.setState(MediaDeviceState.STATE_CONNECTING);

@@ -1,21 +1,6 @@
 {
     "presubmit": [
         {
-            "name": "FrameworksMockingServicesTests",
-            "file_patterns": ["AlarmManagerService\\.java"],
-            "options": [
-                {
-                  "include-filter": "com.android.server."
-                },
-                {
-                  "include-annotation": "android.platform.test.annotations.Presubmit"
-                },
-                {
-                  "exclude-annotation": "androidx.test.filters.FlakyTest"
-                }
-            ]
-        },
-        {
             "name": "CtsLocationFineTestCases"
         },
         {
@@ -36,11 +21,43 @@
                 }
             ],
             "file_patterns": ["NotificationManagerService\\.java"]
+        },
+        {
+            "name": "CtsContentTestCases",
+            "options": [
+                {
+                    "include-filter": "android.content.cts.ClipboardManagerTest"
+                },
+                {
+                    "include-filter": "android.content.cts.ClipDataTest"
+                },
+                {
+                    "include-filter": "android.content.cts.ClipDescriptionTest"
+                }
+            ],
+            "file_patterns": ["ClipboardService\\.java"]
+        },
+        {
+            "name": "FrameworksMockingServicesTests",
+            "options": [
+                {
+                    "include-filter": "com.android.server.sensorprivacy"
+                }
+            ],
+            "file_patterns": ["SensorPrivacyService\\.java"]
         }
     ],
     "presubmit-large": [
         {
+            "name": "CtsScopedStorageCoreHostTest",
+            "file_patterns": ["StorageManagerService\\.java"]
+        },
+        {
             "name": "CtsScopedStorageHostTest",
+            "file_patterns": ["StorageManagerService\\.java"]
+        },
+        {
+            "name": "CtsScopedStorageDeviceOnlyTest",
             "file_patterns": ["StorageManagerService\\.java"]
         }
     ]

@@ -115,6 +115,21 @@ public class Paint {
         Align.LEFT, Align.CENTER, Align.RIGHT
     };
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, value = {
+            ANTI_ALIAS_FLAG,
+            FILTER_BITMAP_FLAG,
+            DITHER_FLAG,
+            UNDERLINE_TEXT_FLAG,
+            STRIKE_THRU_TEXT_FLAG,
+            FAKE_BOLD_TEXT_FLAG,
+            LINEAR_TEXT_FLAG,
+            SUBPIXEL_TEXT_FLAG,
+            EMBEDDED_BITMAP_TEXT_FLAG
+    })
+    public @interface PaintFlag{}
+
     /**
      * Paint flag that enables antialiasing when drawing.
      *
@@ -138,6 +153,13 @@ public class Paint {
      * resource bitmaps often are) the filtering will already have been
      * done.</p>
      *
+     * <p>On devices running {@link Build.VERSION_CODES#O} and below, hardware
+     * accelerated drawing always uses bilinear sampling on scaled bitmaps,
+     * regardless of this flag. On devices running {@link Build.VERSION_CODES#Q}
+     * and above, this flag defaults to being set on a new {@code Paint}. It can
+     * be cleared with {@link #setFlags} or {@link #setFilterBitmap}.</p>
+     *
+     * @see #Paint()
      * @see #Paint(int)
      * @see #setFlags(int)
      */
@@ -543,14 +565,30 @@ public class Paint {
 
     /**
      * Create a new paint with default settings.
+     *
+     * <p>On devices running {@link Build.VERSION_CODES#O} and below, hardware
+     * accelerated drawing always acts as if {@link #FILTER_BITMAP_FLAG} is set.
+     * On devices running {@link Build.VERSION_CODES#Q} and above,
+     * {@code FILTER_BITMAP_FLAG} is set by this constructor, and it can be
+     * cleared with {@link #setFlags} or {@link #setFilterBitmap}.
+     * On devices running {@link Build.VERSION_CODES#S} and above, {@code ANTI_ALIAS_FLAG}
+     * is set by this constructor, and it can be cleared with {@link #setFlags} or
+     * {@link #setAntiAlias}.</p>
      */
     public Paint() {
-        this(0);
+        this(ANTI_ALIAS_FLAG);
     }
 
     /**
      * Create a new paint with the specified flags. Use setFlags() to change
      * these after the paint is created.
+     *
+     * <p>On devices running {@link Build.VERSION_CODES#O} and below, hardware
+     * accelerated drawing always acts as if {@link #FILTER_BITMAP_FLAG} is set.
+     * On devices running {@link Build.VERSION_CODES#Q} and above,
+     * {@code FILTER_BITMAP_FLAG} is always set by this constructor, regardless
+     * of the value of {@code flags}. It can be cleared with {@link #setFlags} or
+     * {@link #setFilterBitmap}.</p>
      *
      * @param flags initial flag bits, as if they were passed via setFlags().
      */
@@ -583,7 +621,7 @@ public class Paint {
     /** Restores the paint to its default settings. */
     public void reset() {
         nReset(mNativePaint);
-        setFlags(HIDDEN_DEFAULT_PAINT_FLAGS);
+        setFlags(HIDDEN_DEFAULT_PAINT_FLAGS | ANTI_ALIAS_FLAG);
 
         // TODO: Turning off hinting has undesirable side effects, we need to
         //       revisit hinting once we add support for subpixel positioning
@@ -674,11 +712,17 @@ public class Paint {
      * Return the pointer to the native object while ensuring that any
      * mutable objects that are attached to the paint are also up-to-date.
      *
+     * Note: Although this method is |synchronized|, this is simply so it
+     * is not thread-hostile to multiple threads calling this method. It
+     * is still unsafe to attempt to change the Shader/ColorFilter while
+     * another thread attempts to access the native object.
+     *
      * @hide
      */
     @UnsupportedAppUsage
-    public long getNativeInstance() {
-        long newNativeShader = mShader == null ? 0 : mShader.getNativeInstance();
+    public synchronized long getNativeInstance() {
+        boolean filter = isFilterBitmap();
+        long newNativeShader = mShader == null ? 0 : mShader.getNativeInstance(filter);
         if (newNativeShader != mNativeShader) {
             mNativeShader = newNativeShader;
             nSetShader(mNativePaint, mNativeShader);
@@ -719,7 +763,7 @@ public class Paint {
      *
      * @return the paint's flags (see enums ending in _Flag for bit masks)
      */
-    public int getFlags() {
+    public @PaintFlag int getFlags() {
         return nGetFlags(mNativePaint);
     }
 
@@ -728,7 +772,7 @@ public class Paint {
      *
      * @param flags The new flag bits for the paint
      */
-    public void setFlags(int flags) {
+    public void setFlags(@PaintFlag int flags) {
         nSetFlags(mNativePaint, flags);
     }
 
@@ -970,6 +1014,7 @@ public class Paint {
      * device pixels. That is dependent on dithering and xfermodes.
      *
      * @see #setFilterBitmap(boolean) setFilterBitmap()
+     * @see #FILTER_BITMAP_FLAG
      */
     public final boolean isFilterBitmap() {
         return (getFlags() & FILTER_BITMAP_FLAG) != 0;
@@ -983,6 +1028,7 @@ public class Paint {
      *
      * @param filter true to set the FILTER_BITMAP_FLAG bit in the paint's
      *               flags, false to clear it.
+     * @see #FILTER_BITMAP_FLAG
      */
     public void setFilterBitmap(boolean filter) {
         nSetFilterBitmap(mNativePaint, filter);

@@ -17,6 +17,7 @@
 package android.hardware.usb;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.service.usb.UsbDeviceFilterProto;
 import android.util.Slog;
 
@@ -238,7 +239,7 @@ public class DeviceFilter {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         // can't compare if we have wildcard strings
         if (mVendorId == -1 || mProductId == -1 ||
                 mClass == -1 || mSubclass == -1 || mProtocol == -1) {

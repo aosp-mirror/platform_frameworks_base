@@ -135,6 +135,24 @@ public final class WidgetFlags {
     public static final int INSERTION_HANDLE_OPACITY_DEFAULT = 50;
 
     /**
+     * The flag of line slop ratio applies to cursor movement.
+     * Note: the actual slop value is bound: lineHeight + slop within the range of {8dp..45dp}.
+     */
+    public static final String LINE_SLOP_RATIO =
+            "CursorControlFeature__line_slop_ratio";
+
+    /**
+     * The key name used in app core settings for {@link #LINE_SLOP_RATIO}.
+     */
+    public static final String KEY_LINE_SLOP_RATIO =
+            "widget__line_slop_ratio";
+
+    /**
+     * Default value for the flag {@link #LINE_SLOP_RATIO}.
+     */
+    public static final float LINE_SLOP_RATIO_DEFAULT = .5f;
+
+    /**
      * The flag of enabling the new magnifier.
      */
     public static final String ENABLE_NEW_MAGNIFIER = "CursorControlFeature__enable_new_magnifier";
@@ -180,6 +198,14 @@ public final class WidgetFlags {
      * Default value for the flag {@link #MAGNIFIER_ASPECT_RATIO}.
      */
     public static final float MAGNIFIER_ASPECT_RATIO_DEFAULT = 5.5f;
+
+    /** The flag of the fps of the analog clock seconds hand. */
+    public static final String ANALOG_CLOCK_SECONDS_HAND_FPS =
+            "AnalogClockFeature__analog_clock_seconds_hand_fps";
+
+    /** The key name used in app core settings for {@link #ANALOG_CLOCK_SECONDS_HAND_FPS}. */
+    public static final String KEY_ANALOG_CLOCK_SECONDS_HAND_FPS =
+            "widget__analog_clock_seconds_hand_fps";
 
     private WidgetFlags() {
     }

@@ -8,41 +8,49 @@ package {
 }
 
 android_test_helper_app {
+    name: "FrameworksServicesTests_install_uses_sdk_q0",
+    defaults: ["FrameworksServicesTests_apks_defaults"],
+    manifest: "AndroidManifest-q0.xml",
+}
+
+android_test_helper_app {
+    name: "FrameworksServicesTests_install_uses_sdk_q0_r0",
+    defaults: ["FrameworksServicesTests_apks_defaults"],
+    manifest: "AndroidManifest-q0-r0.xml",
+}
+
+android_test_helper_app {
+    name: "FrameworksServicesTests_install_uses_sdk_r_none",
+    defaults: ["FrameworksServicesTests_apks_defaults"],
+    manifest: "AndroidManifest-r-none.xml",
+}
+
+android_test_helper_app {
     name: "FrameworksServicesTests_install_uses_sdk_r0",
     defaults: ["FrameworksServicesTests_apks_defaults"],
     manifest: "AndroidManifest-r0.xml",
-
-    srcs: ["**/*.java"],
 }
 
 android_test_helper_app {
     name: "FrameworksServicesTests_install_uses_sdk_r5",
     defaults: ["FrameworksServicesTests_apks_defaults"],
     manifest: "AndroidManifest-r5.xml",
-
-    srcs: ["**/*.java"],
 }
 
 android_test_helper_app {
-    name: "FrameworksServicesTests_install_uses_sdk_q0",
+    name: "FrameworksServicesTests_install_uses_sdk_r0_s0",
     defaults: ["FrameworksServicesTests_apks_defaults"],
-    manifest: "AndroidManifest-q0.xml",
-
-    srcs: ["**/*.java"],
+    manifest: "AndroidManifest-r0-s0.xml",
 }
 
 android_test_helper_app {
-    name: "FrameworksServicesTests_install_uses_sdk_r",
+    name: "FrameworksServicesTests_install_uses_sdk_r0_s5",
     defaults: ["FrameworksServicesTests_apks_defaults"],
-    manifest: "AndroidManifest-r.xml",
-
-    srcs: ["**/*.java"],
+    manifest: "AndroidManifest-r0-s5.xml",
 }
 
 android_test_helper_app {
     name: "FrameworksServicesTests_install_uses_sdk_0",
     defaults: ["FrameworksServicesTests_apks_defaults"],
     manifest: "AndroidManifest-0.xml",
-
-    srcs: ["**/*.java"],
 }

@@ -20,10 +20,14 @@
 #include <android/content/pm/DataLoaderParamsParcel.h>
 #include <android/content/pm/FileSystemControlParcel.h>
 #include <android/content/pm/IDataLoaderStatusListener.h>
+#include <android/os/incremental/BnIncrementalService.h>
 #include <android/os/incremental/BnIncrementalServiceConnector.h>
 #include <android/os/incremental/BnStorageHealthListener.h>
+#include <android/os/incremental/BnStorageLoadingProgressListener.h>
+#include <android/os/incremental/PerUidReadTimeouts.h>
 #include <android/os/incremental/StorageHealthCheckParams.h>
 #include <binder/IAppOpsCallback.h>
+#include <binder/PersistableBundle.h>
 #include <utils/String16.h>
 #include <utils/StrongPointer.h>
 #include <ziparchive/zip_archive.h>
@@ -65,6 +69,21 @@ using DataLoaderStatusListener = ::android::sp<IDataLoaderStatusListener>;
 using StorageHealthCheckParams = ::android::os::incremental::StorageHealthCheckParams;
 using IStorageHealthListener = ::android::os::incremental::IStorageHealthListener;
 using StorageHealthListener = ::android::sp<IStorageHealthListener>;
+using IStorageLoadingProgressListener = ::android::os::incremental::IStorageLoadingProgressListener;
+using StorageLoadingProgressListener = ::android::sp<IStorageLoadingProgressListener>;
+
+using PerUidReadTimeouts = ::android::os::incremental::PerUidReadTimeouts;
+
+struct IfsState {
+    // If mount is fully loaded.
+    bool fullyLoaded = false;
+    // If read logs are enabled on this mount. Populated only if fullyLoaded == true.
+    bool readLogsEnabled = false;
+    // If there was an error fetching any of the above.
+    bool error = false;
+};
+// Returns true if wants to be called again.
+using IfsStateCallback = std::function<bool(StorageId, IfsState)>;
 
 class IncrementalService final {
 public:
@@ -76,7 +95,8 @@ public:
 #pragma GCC diagnostic pop
 
     static constexpr StorageId kInvalidStorageId = -1;
-    static constexpr StorageId kMaxStorageId = std::numeric_limits<int>::max();
+    static constexpr StorageId kMaxStorageId = std::numeric_limits<int>::max() - 1;
+    static constexpr StorageId kAllStoragesId = kMaxStorageId + 1;
 
     static constexpr BootClockTsUs kMaxBootClockTsUs = std::numeric_limits<BootClockTsUs>::max();
 
@@ -95,7 +115,31 @@ public:
     };
 
     enum StorageFlags {
-        ReadLogsEnabled = 1,
+        ReadLogsAllowed = 1 << 0,
+        ReadLogsEnabled = 1 << 1,
+        ReadLogsRequested = 1 << 2,
+
+        ReadTimeoutsEnabled = 1 << 3,
+        ReadTimeoutsRequested = 1 << 4,
+    };
+
+    struct LoadingProgress {
+        ssize_t filledBlocks;
+        ssize_t totalBlocks;
+
+        bool isError() const { return totalBlocks < 0; }
+        bool started() const { return totalBlocks > 0; }
+        bool fullyLoaded() const { return !isError() && (totalBlocks == filledBlocks); }
+
+        int blocksRemainingOrError() const {
+            return totalBlocks <= 0 ? totalBlocks : totalBlocks - filledBlocks;
+        }
+
+        float getProgress() const {
+            return totalBlocks < 0
+                    ? totalBlocks
+                    : totalBlocks > 0 ? double(filledBlocks) / double(totalBlocks) : 1.f;
+        }
     };
 
     static FileId idFromMetadata(std::span<const uint8_t> metadata);
@@ -108,23 +152,28 @@ public:
     void onSystemReady();
 
     StorageId createStorage(std::string_view mountPoint,
-                            content::pm::DataLoaderParamsParcel&& dataLoaderParams,
-                            CreateOptions options, const DataLoaderStatusListener& statusListener,
-                            StorageHealthCheckParams&& healthCheckParams,
-                            const StorageHealthListener& healthListener);
+                            content::pm::DataLoaderParamsParcel dataLoaderParams,
+                            CreateOptions options);
     StorageId createLinkedStorage(std::string_view mountPoint, StorageId linkedStorage,
                                   CreateOptions options = CreateOptions::Default);
     StorageId openStorage(std::string_view path);
+
+    bool startLoading(StorageId storage, content::pm::DataLoaderParamsParcel dataLoaderParams,
+                      DataLoaderStatusListener statusListener,
+                      const StorageHealthCheckParams& healthCheckParams,
+                      StorageHealthListener healthListener,
+                      std::vector<PerUidReadTimeouts> perUidReadTimeouts);
+    void onInstallationComplete(StorageId storage);
 
     int bind(StorageId storage, std::string_view source, std::string_view target, BindKind kind);
     int unbind(StorageId storage, std::string_view target);
     void deleteStorage(StorageId storage);
 
-    void disableReadLogs(StorageId storage);
+    void disallowReadLogs(StorageId storage);
     int setStorageParams(StorageId storage, bool enableReadLogs);
 
     int makeFile(StorageId storage, std::string_view path, int mode, FileId id,
-                 incfs::NewFileParams params);
+                 incfs::NewFileParams params, std::span<const uint8_t> data);
     int makeDir(StorageId storage, std::string_view path, int mode = 0755);
     int makeDirs(StorageId storage, std::string_view path, int mode = 0755);
 
@@ -132,19 +181,24 @@ public:
              std::string_view newPath);
     int unlink(StorageId storage, std::string_view path);
 
-    bool isRangeLoaded(StorageId storage, FileId file, std::pair<BlockIndex, BlockIndex> range) {
-        return false;
-    }
+    incfs::LoadingState isFileFullyLoaded(StorageId storage, std::string_view filePath) const;
+    incfs::LoadingState isMountFullyLoaded(StorageId storage) const;
+
+    LoadingProgress getLoadingProgress(StorageId storage) const;
+
+    bool registerLoadingProgressListener(StorageId storage,
+                                         StorageLoadingProgressListener progressListener);
+    bool unregisterLoadingProgressListener(StorageId storage);
 
     RawMetadata getMetadata(StorageId storage, std::string_view path) const;
     RawMetadata getMetadata(StorageId storage, FileId node) const;
-
-    bool startLoading(StorageId storage) const;
 
     bool configureNativeBinaries(StorageId storage, std::string_view apkFullPath,
                                  std::string_view libDirRelativePath, std::string_view abi,
                                  bool extractNativeLibs);
     bool waitForNativeBinariesExtraction(StorageId storage);
+
+    void getMetrics(int32_t storageId, android::os::PersistableBundle* _aidl_return);
 
     class AppOpsListener : public android::BnAppOpsCallback {
     public:
@@ -176,9 +230,9 @@ private:
         DataLoaderStub(IncrementalService& service, MountId id,
                        content::pm::DataLoaderParamsParcel&& params,
                        content::pm::FileSystemControlParcel&& control,
-                       const DataLoaderStatusListener* statusListener,
-                       StorageHealthCheckParams&& healthCheckParams,
-                       const StorageHealthListener* healthListener, std::string&& healthPath);
+                       DataLoaderStatusListener&& statusListener,
+                       const StorageHealthCheckParams& healthCheckParams,
+                       StorageHealthListener&& healthListener, std::string&& healthPath);
         ~DataLoaderStub();
         // Cleans up the internal state and invalidates DataLoaderStub. Any subsequent calls will
         // result in an error.
@@ -192,9 +246,16 @@ private:
 
         MountId id() const { return mId.load(std::memory_order_relaxed); }
         const content::pm::DataLoaderParamsParcel& params() const { return mParams; }
+        bool isSystemDataLoader() const;
+        void setHealthListener(const StorageHealthCheckParams& healthCheckParams,
+                               StorageHealthListener&& healthListener);
+        void getMetrics(android::os::PersistableBundle* _aidl_return);
 
     private:
         binder::Status onStatusChanged(MountId mount, int newStatus) final;
+
+        void setCurrentStatus(int newStatus);
+        void compareAndSetCurrentStatus(int expectedStatus, int newStatus);
 
         sp<content::pm::IDataLoader> getDataLoader();
 
@@ -207,9 +268,8 @@ private:
         void setTargetStatusLocked(int status);
 
         bool fsmStep();
-        bool fsmStep(int currentStatus, int targetStatus);
 
-        void onHealthStatus(StorageHealthListener healthListener, int healthStatus);
+        void onHealthStatus(const StorageHealthListener& healthListener, int healthStatus);
         void updateHealthStatus(bool baseline = false);
 
         bool isValid() const { return id() != kInvalidStorageId; }
@@ -220,6 +280,14 @@ private:
         void resetHealthControl();
 
         BootClockTsUs getOldestPendingReadTs();
+        BootClockTsUs getOldestTsFromLastPendingReads();
+        Milliseconds elapsedMsSinceKernelTs(TimePoint now, BootClockTsUs kernelTsUs);
+        long elapsedMsSinceOldestPendingRead();
+
+        // If the stub has to bind to the DL.
+        // Returns {} if bind operation is already in progress.
+        // Or bind delay in ms.
+        std::optional<Milliseconds> needToBind();
 
         void registerForPendingReads();
         void unregisterFromPendingReads();
@@ -232,11 +300,16 @@ private:
         content::pm::FileSystemControlParcel mControl;
         DataLoaderStatusListener mStatusListener;
         StorageHealthListener mHealthListener;
+        std::atomic<int> mHealthStatus = IStorageHealthListener::HEALTH_STATUS_OK;
 
         std::condition_variable mStatusCondition;
         int mCurrentStatus = content::pm::IDataLoaderStatusListener::DATA_LOADER_DESTROYED;
+        TimePoint mCurrentStatusTs = {};
         int mTargetStatus = content::pm::IDataLoaderStatusListener::DATA_LOADER_DESTROYED;
         TimePoint mTargetStatusTs = {};
+
+        TimePoint mPreviousBindTs = {};
+        Milliseconds mPreviousBindDelay = {};
 
         std::string mHealthPath;
         incfs::UniqueControl mHealthControl;
@@ -245,6 +318,7 @@ private:
             BootClockTsUs kernelTsUs;
         } mHealthBase = {TimePoint::max(), kMaxBootClockTsUs};
         StorageHealthCheckParams mHealthCheckParams;
+        std::vector<incfs::ReadInfoWithUid> mLastPendingReads;
     };
     using DataLoaderStubPtr = sp<DataLoaderStub>;
 
@@ -267,18 +341,21 @@ private:
 
         mutable std::mutex lock;
         const std::string root;
+        const std::string metricsKey;
         Control control;
         /*const*/ MountId mountId;
-        int32_t flags = StorageFlags::ReadLogsEnabled;
+        int32_t flags = StorageFlags::ReadLogsAllowed;
         StorageMap storages;
         BindMap bindPoints;
         DataLoaderStubPtr dataLoaderStub;
+        TimePoint startLoadingTs = {};
         std::atomic<int> nextStorageDirNo{0};
         const IncrementalService& incrementalService;
 
-        IncFsMount(std::string root, MountId mountId, Control control,
+        IncFsMount(std::string root, std::string metricsKey, MountId mountId, Control control,
                    const IncrementalService& incrementalService)
               : root(std::move(root)),
+                metricsKey(std::move(metricsKey)),
                 control(std::move(control)),
                 mountId(mountId),
                 incrementalService(incrementalService) {}
@@ -288,10 +365,35 @@ private:
 
         StorageMap::iterator makeStorage(StorageId id);
 
-        void disableReadLogs() { flags &= ~StorageFlags::ReadLogsEnabled; }
+        void disallowReadLogs() { flags &= ~StorageFlags::ReadLogsAllowed; }
+        int32_t readLogsAllowed() const { return (flags & StorageFlags::ReadLogsAllowed); }
+
+        void setReadLogsEnabled(bool value) {
+            return setFlag(StorageFlags::ReadLogsEnabled, value);
+        }
         int32_t readLogsEnabled() const { return (flags & StorageFlags::ReadLogsEnabled); }
 
+        void setReadLogsRequested(bool value) {
+            return setFlag(StorageFlags::ReadLogsRequested, value);
+        }
+        int32_t readLogsRequested() const { return (flags & StorageFlags::ReadLogsRequested); }
+
+        void setReadTimeoutsEnabled(bool value) {
+            return setFlag(StorageFlags::ReadTimeoutsEnabled, value);
+        }
+        int32_t readTimeoutsEnabled() const { return (flags & StorageFlags::ReadTimeoutsEnabled); }
+
+        void setReadTimeoutsRequested(bool value) {
+            return setFlag(StorageFlags::ReadTimeoutsRequested, value);
+        }
+        int32_t readTimeoutsRequested() const {
+            return (flags & StorageFlags::ReadTimeoutsRequested);
+        }
+
         static void cleanupFilesystem(std::string_view root);
+
+    private:
+        void setFlag(StorageFlags flag, bool value);
     };
 
     using IfsMountPtr = std::shared_ptr<IncFsMount>;
@@ -299,6 +401,11 @@ private:
     using BindPathMap = std::map<std::string, IncFsMount::BindMap::iterator, path::PathLess>;
 
     static bool perfLoggingEnabled();
+
+    void setUidReadTimeouts(StorageId storage,
+                            std::vector<PerUidReadTimeouts>&& perUidReadTimeouts);
+    void clearUidReadTimeouts(StorageId storage);
+    bool checkUidReadTimeouts(StorageId storage, IfsState state, Clock::time_point timeLimit);
 
     std::unordered_set<std::string_view> adoptMountedInstances();
     void mountExistingImages(const std::unordered_set<std::string_view>& mountedRootNames);
@@ -317,15 +424,12 @@ private:
     void addBindMountRecordLocked(IncFsMount& ifs, StorageId storage, std::string&& metadataName,
                                   std::string&& source, std::string&& target, BindKind kind);
 
-    DataLoaderStubPtr prepareDataLoader(IncFsMount& ifs,
-                                        content::pm::DataLoaderParamsParcel&& params,
-                                        const DataLoaderStatusListener* statusListener = nullptr,
-                                        StorageHealthCheckParams&& healthCheckParams = {},
-                                        const StorageHealthListener* healthListener = nullptr);
+    bool needStartDataLoaderLocked(IncFsMount& ifs);
+
     void prepareDataLoaderLocked(IncFsMount& ifs, content::pm::DataLoaderParamsParcel&& params,
-                                 const DataLoaderStatusListener* statusListener = nullptr,
-                                 StorageHealthCheckParams&& healthCheckParams = {},
-                                 const StorageHealthListener* healthListener = nullptr);
+                                 DataLoaderStatusListener&& statusListener = {},
+                                 const StorageHealthCheckParams& healthCheckParams = {},
+                                 StorageHealthListener&& healthListener = {});
 
     BindPathMap::const_iterator findStorageLocked(std::string_view path) const;
     StorageId findStorageId(std::string_view path) const;
@@ -339,7 +443,14 @@ private:
                                              IncFsMount::StorageMap::const_iterator storageIt,
                                              std::string_view path) const;
     int makeDirs(const IncFsMount& ifs, StorageId storageId, std::string_view path, int mode);
-    binder::Status applyStorageParams(IncFsMount& ifs, bool enableReadLogs);
+
+    int disableReadLogsLocked(IncFsMount& ifs);
+    int applyStorageParamsLocked(IncFsMount& ifs);
+
+    LoadingProgress getLoadingProgressFromPath(const IncFsMount& ifs, std::string_view path) const;
+
+    int setFileContent(const IfsMountPtr& ifs, const incfs::FileId& fileId,
+                       std::string_view debugFilePath, std::span<const uint8_t> data) const;
 
     void registerAppOpsCallback(const std::string& packageName);
     bool unregisterAppOpsCallback(const std::string& packageName);
@@ -347,13 +458,24 @@ private:
 
     void runJobProcessing();
     void extractZipFile(const IfsMountPtr& ifs, ZipArchiveHandle zipFile, ZipEntry& entry,
-                        const incfs::FileId& libFileId, std::string_view targetLibPath,
+                        const incfs::FileId& libFileId, std::string_view debugLibPath,
                         Clock::time_point scheduledTs);
 
     void runCmdLooper();
 
-    void addTimedJob(MountId id, Milliseconds after, Job what);
-    void removeTimedJobs(MountId id);
+    bool addTimedJob(TimedQueueWrapper& timedQueue, MountId id, Milliseconds after, Job what);
+    bool removeTimedJobs(TimedQueueWrapper& timedQueue, MountId id);
+
+    void addIfsStateCallback(StorageId storageId, IfsStateCallback callback);
+    void removeIfsStateCallbacks(StorageId storageId);
+    void processIfsStateCallbacks();
+    void processIfsStateCallbacks(StorageId storageId, std::vector<IfsStateCallback>& callbacks);
+
+    bool updateLoadingProgress(int32_t storageId,
+                               StorageLoadingProgressListener&& progressListener);
+
+    void trimReservedSpaceV1(const IncFsMount& ifs);
+    int64_t elapsedUsSinceMonoTs(uint64_t monoTsUs);
 
 private:
     const std::unique_ptr<VoldServiceWrapper> mVold;
@@ -363,6 +485,9 @@ private:
     const std::unique_ptr<JniWrapper> mJni;
     const std::unique_ptr<LooperWrapper> mLooper;
     const std::unique_ptr<TimedQueueWrapper> mTimedQueue;
+    const std::unique_ptr<TimedQueueWrapper> mProgressUpdateJobQueue;
+    const std::unique_ptr<FsWrapper> mFs;
+    const std::unique_ptr<ClockWrapper> mClock;
     const std::string mIncrementalDir;
 
     mutable std::mutex mLock;
@@ -371,7 +496,11 @@ private:
     BindPathMap mBindsByPath;
 
     std::mutex mCallbacksLock;
-    std::map<std::string, sp<AppOpsListener>> mCallbackRegistered;
+    std::unordered_map<std::string, sp<AppOpsListener>> mCallbackRegistered;
+
+    using IfsStateCallbacks = std::map<StorageId, std::vector<IfsStateCallback>>;
+    std::mutex mIfsStateCallbacksLock;
+    IfsStateCallbacks mIfsStateCallbacks;
 
     std::atomic_bool mSystemReady = false;
     StorageId mNextId = 0;

@@ -16,10 +16,14 @@
 
 package android.hardware.camera2.utils;
 
+import static android.system.OsConstants.EINVAL;
+
+import static com.android.internal.util.Preconditions.checkNotNull;
+
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.ImageFormat;
-import android.hardware.camera2.legacy.LegacyCameraDevice;
-import android.hardware.camera2.legacy.LegacyExceptionUtils.BufferQueueAbandonedException;
+import android.graphics.PixelFormat;
+import android.hardware.HardwareBuffer;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.util.Range;
 import android.util.Size;
@@ -35,6 +39,15 @@ import java.util.List;
  */
 public class SurfaceUtils {
 
+    // Usage flags not yet included in HardwareBuffer
+    private static final int USAGE_RENDERSCRIPT = 0x00100000;
+    private static final int USAGE_HW_COMPOSER = 0x00000800;
+
+    // Image formats not yet included in PixelFormat
+    private static final int BGRA_8888 = 0x5;
+
+    private static final int BAD_VALUE = -EINVAL;
+
     /**
      * Check if a surface is for preview consumer based on consumer end point Gralloc usage flags.
      *
@@ -42,7 +55,17 @@ public class SurfaceUtils {
      * @return true if the surface is for preview consumer, false otherwise.
      */
     public static boolean isSurfaceForPreview(Surface surface) {
-        return LegacyCameraDevice.isPreviewConsumer(surface);
+        checkNotNull(surface);
+        long usageFlags = nativeDetectSurfaceUsageFlags(surface);
+        long disallowedFlags = HardwareBuffer.USAGE_VIDEO_ENCODE | USAGE_RENDERSCRIPT
+                | HardwareBuffer.USAGE_CPU_READ_OFTEN;
+        long allowedFlags = HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE | USAGE_HW_COMPOSER
+                | HardwareBuffer.USAGE_GPU_COLOR_OUTPUT;
+        boolean previewConsumer = ((usageFlags & disallowedFlags) == 0
+                && (usageFlags & allowedFlags) != 0);
+        int surfaceFormat = getSurfaceFormat(surface);
+
+        return previewConsumer;
     }
 
     /**
@@ -53,7 +76,17 @@ public class SurfaceUtils {
      * @return true if the surface is for hardware video encoder consumer, false otherwise.
      */
     public static boolean isSurfaceForHwVideoEncoder(Surface surface) {
-        return LegacyCameraDevice.isVideoEncoderConsumer(surface);
+        checkNotNull(surface);
+        long usageFlags = nativeDetectSurfaceUsageFlags(surface);
+        long disallowedFlags = HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE | USAGE_HW_COMPOSER
+                | USAGE_RENDERSCRIPT | HardwareBuffer.USAGE_CPU_READ_OFTEN;
+        long allowedFlags = HardwareBuffer.USAGE_VIDEO_ENCODE;
+        boolean videoEncoderConsumer = ((usageFlags & disallowedFlags) == 0
+                && (usageFlags & allowedFlags) != 0);
+
+        int surfaceFormat = getSurfaceFormat(surface);
+
+        return videoEncoderConsumer;
     }
 
     /**
@@ -63,13 +96,28 @@ public class SurfaceUtils {
      * @return the native object id of the surface, 0 if surface is not backed by a native object.
      */
     public static long getSurfaceId(Surface surface) {
+        checkNotNull(surface);
         try {
-            return LegacyCameraDevice.getSurfaceId(surface);
-        } catch (BufferQueueAbandonedException e) {
+            return nativeGetSurfaceId(surface);
+        } catch (IllegalArgumentException e) {
             return 0;
         }
     }
 
+    /**
+     * Get the surface usage bits.
+     *
+     * @param surface The surface to be queried for usage.
+     * @return the native object id of the surface, 0 if surface is not backed by a native object.
+     */
+    public static long getSurfaceUsage(Surface surface) {
+        checkNotNull(surface);
+        try {
+            return nativeDetectSurfaceUsageFlags(surface);
+        } catch (IllegalArgumentException e) {
+            return 0;
+        }
+    }
     /**
      * Get the Surface size.
      *
@@ -80,11 +128,13 @@ public class SurfaceUtils {
      */
     @UnsupportedAppUsage
     public static Size getSurfaceSize(Surface surface) {
-        try {
-            return LegacyCameraDevice.getSurfaceSize(surface);
-        } catch (BufferQueueAbandonedException e) {
-            throw new IllegalArgumentException("Surface was abandoned", e);
-        }
+        checkNotNull(surface);
+
+        int[] dimens = new int[2];
+        int errorFlag =  nativeDetectSurfaceDimens(surface, /*out*/dimens);
+        if (errorFlag == BAD_VALUE) throw new IllegalArgumentException("Surface was abandoned");
+
+        return new Size(dimens[0], dimens[1]);
     }
 
     /**
@@ -96,11 +146,34 @@ public class SurfaceUtils {
      * @throws IllegalArgumentException if the surface is already abandoned.
      */
     public static int getSurfaceFormat(Surface surface) {
-        try {
-            return LegacyCameraDevice.detectSurfaceType(surface);
-        } catch (BufferQueueAbandonedException e) {
-            throw new IllegalArgumentException("Surface was abandoned", e);
+        checkNotNull(surface);
+        int surfaceType = nativeDetectSurfaceType(surface);
+        if (surfaceType == BAD_VALUE) throw new IllegalArgumentException("Surface was abandoned");
+
+        // TODO: remove this override since the default format should be
+        // ImageFormat.PRIVATE. b/9487482
+        if ((surfaceType >= PixelFormat.RGBA_8888
+                && surfaceType <= BGRA_8888)) {
+            surfaceType = ImageFormat.PRIVATE;
         }
+        return surfaceType;
+    }
+
+    /**
+     * Detect and retrieve the Surface format without any
+     * additional overrides.
+     *
+     * @param surface The surface to be queried for format.
+     * @return format of the surface.
+     *
+     * @throws IllegalArgumentException if the surface is already abandoned.
+     */
+    public static int detectSurfaceFormat(Surface surface) {
+        checkNotNull(surface);
+        int surfaceType = nativeDetectSurfaceType(surface);
+        if (surfaceType == BAD_VALUE) throw new IllegalArgumentException("Surface was abandoned");
+
+        return surfaceType;
     }
 
     /**
@@ -112,11 +185,10 @@ public class SurfaceUtils {
      * @throws IllegalArgumentException if the surface is already abandoned.
      */
     public static int getSurfaceDataspace(Surface surface) {
-        try {
-            return LegacyCameraDevice.detectSurfaceDataspace(surface);
-        } catch (BufferQueueAbandonedException e) {
-            throw new IllegalArgumentException("Surface was abandoned", e);
-        }
+        checkNotNull(surface);
+        int dataSpace = nativeDetectSurfaceDataspace(surface);
+        if (dataSpace == BAD_VALUE) throw new IllegalArgumentException("Surface was abandoned");
+        return dataSpace;
     }
 
     /**
@@ -125,8 +197,20 @@ public class SurfaceUtils {
      *
      */
     public static boolean isFlexibleConsumer(Surface output) {
-        return LegacyCameraDevice.isFlexibleConsumer(output);
+        checkNotNull(output);
+        long usageFlags = nativeDetectSurfaceUsageFlags(output);
+
+        // Keep up to date with allowed consumer types in
+        // frameworks/av/services/camera/libcameraservice/api2/CameraDeviceClient.cpp
+        long disallowedFlags = HardwareBuffer.USAGE_VIDEO_ENCODE | USAGE_RENDERSCRIPT;
+        long allowedFlags = HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE
+                | HardwareBuffer.USAGE_CPU_READ_OFTEN
+                | USAGE_HW_COMPOSER;
+        boolean flexibleConsumer = ((usageFlags & disallowedFlags) == 0
+                && (usageFlags & allowedFlags) != 0);
+        return flexibleConsumer;
     }
+
 
     /**
      * A high speed output surface can only be preview or hardware encoder surface.
@@ -209,4 +293,14 @@ public class SurfaceUtils {
         }
     }
 
+    private static native int nativeDetectSurfaceType(Surface surface);
+
+    private static native int nativeDetectSurfaceDataspace(Surface surface);
+
+    private static native long nativeDetectSurfaceUsageFlags(Surface surface);
+
+    private static native int nativeDetectSurfaceDimens(Surface surface,
+            /*out*/int[/*2*/] dimens);
+
+    private static native long nativeGetSurfaceId(Surface surface);
 }

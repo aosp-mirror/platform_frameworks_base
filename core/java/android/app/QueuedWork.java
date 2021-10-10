@@ -81,7 +81,7 @@ public class QueuedWork {
 
     /** Work queued via {@link #queue} */
     @GuardedBy("sLock")
-    private static final LinkedList<Runnable> sWork = new LinkedList<>();
+    private static LinkedList<Runnable> sWork = new LinkedList<>();
 
     /** If new work can be delayed or not */
     @GuardedBy("sLock")
@@ -253,8 +253,8 @@ public class QueuedWork {
             LinkedList<Runnable> work;
 
             synchronized (sLock) {
-                work = (LinkedList<Runnable>) sWork.clone();
-                sWork.clear();
+                work = sWork;
+                sWork = new LinkedList<>();
 
                 // Remove all msg-s as all work will be processed now
                 getHandler().removeMessages(QueuedWorkHandler.MSG_RUN);

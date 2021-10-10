@@ -24,11 +24,14 @@ import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.statusbar.policy.BatteryController
+import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.util.settings.SecureSettings
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -60,6 +63,7 @@ class BatterySaverTileTest : SysuiTestCase() {
     private lateinit var qsLogger: QSLogger
     @Mock
     private lateinit var batteryController: BatteryController
+    private lateinit var secureSettings: SecureSettings
     private lateinit var testableLooper: TestableLooper
     private lateinit var tile: BatterySaverTile
 
@@ -70,15 +74,22 @@ class BatterySaverTileTest : SysuiTestCase() {
         `when`(qsHost.userContext).thenReturn(userContext)
         `when`(userContext.userId).thenReturn(USER)
 
+        secureSettings = FakeSettings()
+
         tile = BatterySaverTile(
                 qsHost,
                 testableLooper.looper,
                 Handler(testableLooper.looper),
+                FalsingManagerFake(),
                 metricsLogger,
                 statusBarStateController,
                 activityStarter,
                 qsLogger,
-                batteryController)
+                batteryController,
+                secureSettings)
+
+        tile.initialize()
+        testableLooper.processAllMessages()
     }
 
     @Test

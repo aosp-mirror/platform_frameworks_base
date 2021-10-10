@@ -19,6 +19,8 @@ package com.android.internal.app;
 import com.android.internal.os.BatteryStatsImpl;
 
 import android.bluetooth.BluetoothActivityEnergyInfo;
+import android.os.BatteryUsageStats;
+import android.os.BatteryUsageStatsQuery;
 import android.os.ParcelFileDescriptor;
 import android.os.WorkSource;
 import android.os.connectivity.CellularBatteryStats;
@@ -49,10 +51,13 @@ interface IBatteryStats {
     void noteResetFlashlight();
 
     // Remaining methods are only used in Java.
+
+    List<BatteryUsageStats> getBatteryUsageStats(in List<BatteryUsageStatsQuery> queries);
+
     @UnsupportedAppUsage
     byte[] getStatistics();
 
-    ParcelFileDescriptor getStatisticsStream();
+    ParcelFileDescriptor getStatisticsStream(boolean updateAll);
 
     // Return true if we see the battery as currently charging.
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
@@ -161,4 +166,15 @@ interface IBatteryStats {
 
     /** {@hide} */
     boolean setChargingStateUpdateDelayMillis(int delay);
+
+    /** Exposed as a test API. */
+    void setChargerAcOnline(boolean online, boolean forceUpdate);
+    /** Exposed as a test API. */
+    void setBatteryLevel(int level, boolean forceUpdate);
+    /** Exposed as a test API. */
+    void unplugBattery(boolean forceUpdate);
+    /** Exposed as a test API. */
+    void resetBattery(boolean forceUpdate);
+    /** Exposed as a test API. */
+    void suspendBatteryInput();
 }

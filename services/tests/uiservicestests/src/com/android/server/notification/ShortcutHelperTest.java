@@ -27,10 +27,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
+import android.app.Person;
 import android.content.pm.LauncherApps;
+import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.ShortcutInfo;
+import android.content.pm.ShortcutQueryWrapper;
 import android.content.pm.ShortcutServiceInternal;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.service.notification.StatusBarNotification;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.TestableLooper;
@@ -44,6 +48,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -60,11 +65,14 @@ public class ShortcutHelperTest extends UiServiceTestCase {
     private static final String SHORTCUT_ID = "shortcut";
     private static final String PKG = "pkg";
     private static final String KEY = "key";
+    private static final Person PERSON = mock(Person.class);
 
     @Mock
     LauncherApps mLauncherApps;
     @Mock
     ShortcutHelper.ShortcutListener mShortcutListener;
+    @Mock
+    UserManager mUserManager;
     @Mock
     ShortcutServiceInternal mShortcutServiceInternal;
     @Mock
@@ -78,6 +86,8 @@ public class ShortcutHelperTest extends UiServiceTestCase {
     @Mock
     ShortcutInfo mShortcutInfo;
 
+    @Captor private ArgumentCaptor<ShortcutQuery> mShortcutQueryCaptor;
+
     ShortcutHelper mShortcutHelper;
 
     @Before
@@ -85,11 +95,12 @@ public class ShortcutHelperTest extends UiServiceTestCase {
         MockitoAnnotations.initMocks(this);
 
         mShortcutHelper = new ShortcutHelper(
-                mLauncherApps, mShortcutListener, mShortcutServiceInternal);
+                mLauncherApps, mShortcutListener, mShortcutServiceInternal, mUserManager);
         when(mSbn.getPackageName()).thenReturn(PKG);
         when(mShortcutInfo.getId()).thenReturn(SHORTCUT_ID);
         when(mNotif.getBubbleMetadata()).thenReturn(mBubbleMetadata);
         when(mBubbleMetadata.getShortcutId()).thenReturn(SHORTCUT_ID);
+        when(mUserManager.isUserUnlocked(any(UserHandle.class))).thenReturn(true);
 
         setUpMockNotificationRecord(mNr, KEY);
     }
@@ -298,6 +309,7 @@ public class ShortcutHelperTest extends UiServiceTestCase {
         when(si.getUserId()).thenReturn(UserHandle.USER_SYSTEM);
         when(si.isLongLived()).thenReturn(true);
         when(si.isEnabled()).thenReturn(true);
+        when(si.getPersons()).thenReturn(new Person[]{PERSON});
         ArrayList<ShortcutInfo> shortcuts = new ArrayList<>();
         shortcuts.add(si);
         when(mLauncherApps.getShortcuts(any(), any())).thenReturn(shortcuts);
@@ -307,5 +319,43 @@ public class ShortcutHelperTest extends UiServiceTestCase {
 
         assertThat(mShortcutHelper.getValidShortcutInfo("a", "p", UserHandle.SYSTEM))
                 .isSameInstanceAs(si);
+    }
+
+
+    @Test
+    public void testGetValidShortcutInfo_isValidButUserLocked() {
+        ShortcutInfo si = mock(ShortcutInfo.class);
+        when(si.getPackage()).thenReturn(PKG);
+        when(si.getId()).thenReturn(SHORTCUT_ID);
+        when(si.getUserId()).thenReturn(UserHandle.USER_SYSTEM);
+        when(si.isLongLived()).thenReturn(true);
+        when(si.isEnabled()).thenReturn(true);
+        when(si.getPersons()).thenReturn(new Person[]{PERSON});
+        ArrayList<ShortcutInfo> shortcuts = new ArrayList<>();
+        shortcuts.add(si);
+        when(mLauncherApps.getShortcuts(any(), any())).thenReturn(shortcuts);
+        when(mUserManager.isUserUnlocked(any(UserHandle.class))).thenReturn(false);
+
+        assertThat(mShortcutHelper.getValidShortcutInfo("a", "p", UserHandle.SYSTEM))
+                .isNull();
+    }
+
+    @Test
+    public void testGetValidShortcutInfo_hasGetPersonsDataFlag() {
+
+        ShortcutInfo info = mShortcutHelper.getValidShortcutInfo(
+                "a", "p", UserHandle.SYSTEM);
+        verify(mLauncherApps).getShortcuts(mShortcutQueryCaptor.capture(), any());
+        ShortcutQueryWrapper shortcutQuery =
+                new ShortcutQueryWrapper(mShortcutQueryCaptor.getValue());
+        assertThat(hasFlag(shortcutQuery.getQueryFlags(), ShortcutQuery.FLAG_GET_PERSONS_DATA))
+                .isTrue();
+    }
+
+    /**
+     * Returns {@code true} iff {@link ShortcutQuery}'s {@code queryFlags} has {@code flag} set.
+    */
+    private static boolean hasFlag(int queryFlags, int flag) {
+        return (queryFlags & flag) != 0;
     }
 }

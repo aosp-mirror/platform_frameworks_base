@@ -17,7 +17,6 @@ package com.android.systemui.recents;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.Rect;
 
 import java.io.PrintWriter;
 
@@ -35,11 +34,6 @@ public interface RecentsImplementation {
     default void showRecentApps(boolean triggeredFromAltTab) {}
     default void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {}
     default void toggleRecentApps() {}
-    default void growRecents() {}
-    default boolean splitPrimaryTask(int stackCreateMode, Rect initialBounds,
-            int metricsDockAction) {
-        return false;
-    }
 
     default void dump(PrintWriter pw) {}
 }

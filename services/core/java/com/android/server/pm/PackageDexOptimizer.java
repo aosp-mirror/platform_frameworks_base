@@ -177,8 +177,10 @@ public class PackageDexOptimizer {
     private int performDexOptLI(AndroidPackage pkg, @NonNull PackageSetting pkgSetting,
             String[] targetInstructionSets, CompilerStats.PackageStats packageStats,
             PackageDexUsage.PackageUseInfo packageUseInfo, DexoptOptions options) {
+        // ClassLoader only refers non-native (jar) shared libraries and must ignore
+        // native (so) shared libraries. See also LoadedApk#createSharedLibraryLoader().
         final List<SharedLibraryInfo> sharedLibraries = pkgSetting.getPkgState()
-                .getUsesLibraryInfos();
+                .getNonNativeUsesLibraryInfos();
         final String[] instructionSets = targetInstructionSets != null ?
                 targetInstructionSets : getAppDexInstructionSets(
                 AndroidPackageUtils.getPrimaryCpuAbi(pkg, pkgSetting),
@@ -210,7 +212,7 @@ public class PackageDexOptimizer {
             throw new IllegalStateException("Inconsistent information "
                 + "between PackageParser.Package and its ApplicationInfo. "
                 + "pkg.getAllCodePaths=" + paths
-                + " pkg.getBaseCodePath=" + pkg.getBaseCodePath()
+                + " pkg.getBaseCodePath=" + pkg.getBaseApkPath()
                 + " pkg.getSplitCodePaths="
                 + (splitCodePaths == null ? "null" : Arrays.toString(splitCodePaths)));
         }
@@ -282,7 +284,8 @@ public class PackageDexOptimizer {
                                 dexMetadataPath,
                                 options.getCompilationReason(),
                                 newResult,
-                                ArtStatsLogUtils.getApkType(path),
+                                ArtStatsLogUtils.getApkType(path, pkg.getBaseApkPath(),
+                                        pkg.getSplitCodePaths()),
                                 dexCodeIsa,
                                 path);
                     } finally {
@@ -832,7 +835,7 @@ public class PackageDexOptimizer {
         if (!AndroidPackageUtils.canHaveOatDir(pkg, isUpdatedSystemApp)) {
             return null;
         }
-        File codePath = new File(pkg.getCodePath());
+        File codePath = new File(pkg.getPath());
         if (!codePath.isDirectory()) {
             return null;
         }

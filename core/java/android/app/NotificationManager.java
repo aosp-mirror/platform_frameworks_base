@@ -19,7 +19,9 @@ package android.app;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -32,6 +34,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -128,6 +131,73 @@ public class NotificationManager {
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED =
             "android.app.action.NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED";
+
+    /**
+     * Activity action: Toggle notification panel of the specified handler.
+     *
+     * <p><strong>Important:</strong>You must protect the activity that handles this action with
+     * the {@link android.Manifest.permission#STATUS_BAR_SERVICE} permission to ensure that only
+     * the SystemUI can launch this activity. Activities that are not properly protected will not
+     * be launched.
+     *
+     * <p class="note">This is currently only used on TV to allow a system app to handle the
+     * notification panel. The package handling the notification panel has to be specified by
+     * config_notificationHandlerPackage in values/config.xml.
+     *
+     * Input: nothing
+     * Output: nothing
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.STATUS_BAR_SERVICE)
+    @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_TOGGLE_NOTIFICATION_HANDLER_PANEL =
+            "android.app.action.TOGGLE_NOTIFICATION_HANDLER_PANEL";
+
+    /**
+     * Activity action: Open notification panel of the specified handler.
+     *
+     * <p><strong>Important:</strong>You must protect the activity that handles this action with
+     * the {@link android.Manifest.permission#STATUS_BAR_SERVICE} permission to ensure that only
+     * the SystemUI can launch this activity. Activities that are not properly protected will
+     * not be launched.
+     *
+     * <p class="note"> This is currently only used on TV to allow a system app to handle the
+     * notification panel. The package handling the notification panel has to be specified by
+     * config_notificationHandlerPackage in values/config.xml.
+     *
+     * Input: nothing
+     * Output: nothing
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.STATUS_BAR_SERVICE)
+    @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_OPEN_NOTIFICATION_HANDLER_PANEL =
+            "android.app.action.OPEN_NOTIFICATION_HANDLER_PANEL";
+
+    /**
+     * Intent that is broadcast when the notification panel of the specified handler is to be
+     * closed.
+     *
+     * <p><strong>Important:</strong>You should protect the receiver that handles this action with
+     * the {@link android.Manifest.permission#STATUS_BAR_SERVICE} permission to ensure that only
+     * the SystemUI can send this broadcast to the notification handler.
+     *
+     * <p class="note"> This is currently only used on TV to allow a system app to handle the
+     * notification panel. The package handling the notification panel has to be specified by
+     * config_notificationHandlerPackage in values/config.xml. This is a protected intent that can
+     * only be sent by the system.
+     *
+     * Input: nothing.
+     * Output: nothing.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.STATUS_BAR_SERVICE)
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_CLOSE_NOTIFICATION_HANDLER_PANEL =
+            "android.app.action.CLOSE_NOTIFICATION_HANDLER_PANEL";
 
     /**
      * Extra for {@link #ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED} containing the id of the
@@ -281,6 +351,16 @@ public class NotificationManager {
             = "android.app.action.INTERRUPTION_FILTER_CHANGED";
 
     /**
+     * Intent that is broadcast when the state of
+     * {@link #hasEnabledNotificationListener(String, UserHandle)} changes.
+     * @hide
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final String ACTION_NOTIFICATION_LISTENER_ENABLED_CHANGED =
+            "android.app.action.NOTIFICATION_LISTENER_ENABLED_CHANGED";
+
+    /**
      * Intent that is broadcast when the state of getCurrentInterruptionFilter() changes.
      * @hide
      */
@@ -338,6 +418,14 @@ public class NotificationManager {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Importance {}
+
+    /** @hide */
+    @IntDef(prefix = { "BUBBLE_PREFERENCE_" }, value = {
+            BUBBLE_PREFERENCE_NONE, BUBBLE_PREFERENCE_SELECTED,
+            BUBBLE_PREFERENCE_ALL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface BubblePreference {}
 
     /**
      * Activity Action: Launch an Automatic Zen Rule configuration screen
@@ -453,15 +541,23 @@ public class NotificationManager {
     public static final int IMPORTANCE_MAX = 5;
 
     /**
-     * @hide
+     * Indicates that the no bubbles are allowed from the app. If the app sends bubbles, only the
+     * notification will appear. The notification will have an affordance allowing the user to
+     * bubble it. If the user selects this affordance, that notification is approved to bubble
+     * and the apps' bubble preference will be upgraded to {@link #BUBBLE_PREFERENCE_SELECTED}.
      */
     public static final int BUBBLE_PREFERENCE_NONE = 0;
+
     /**
-     * @hide
+     * Indicates that all bubbles are allowed from the app. If the app sends bubbles, the bubble
+     * will appear along with the notification.
      */
     public static final int BUBBLE_PREFERENCE_ALL = 1;
+
     /**
-     * @hide
+     * Indicates that only notifications selected by the user will appear as bubbles. If
+     * the app sends bubbles that haven't been selected, only the notification appear. If the
+     * bubble has been approved by the user, it will appear along with the notification.
      */
     public static final int BUBBLE_PREFERENCE_SELECTED = 2;
 
@@ -957,6 +1053,20 @@ public class NotificationManager {
      * @hide
      */
     @TestApi
+    public void updateNotificationChannel(@NonNull String pkg, int uid,
+            @NonNull NotificationChannel channel) {
+        INotificationManager service = getService();
+        try {
+            service.updateNotificationChannelForPackage(pkg, uid, channel);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
     public ComponentName getEffectsSuppressor() {
         INotificationManager service = getService();
         try {
@@ -1072,10 +1182,12 @@ public class NotificationManager {
             List<ZenModeConfig.ZenRule> rules = service.getZenRules();
             Map<String, AutomaticZenRule> ruleMap = new HashMap<>();
             for (ZenModeConfig.ZenRule rule : rules) {
-                ruleMap.put(rule.id, new AutomaticZenRule(rule.name, rule.component,
+                AutomaticZenRule azr = new AutomaticZenRule(rule.name, rule.component,
                         rule.configurationActivity, rule.conditionId, rule.zenPolicy,
                         zenModeToInterruptionFilter(rule.zenMode), rule.enabled,
-                        rule.creationTime));
+                        rule.creationTime);
+                azr.setPackageName(rule.pkg);
+                ruleMap.put(rule.id, azr);
             }
             return ruleMap;
         } catch (RemoteException e) {
@@ -1116,7 +1228,7 @@ public class NotificationManager {
     public String addAutomaticZenRule(AutomaticZenRule automaticZenRule) {
         INotificationManager service = getService();
         try {
-            return service.addAutomaticZenRule(automaticZenRule);
+            return service.addAutomaticZenRule(automaticZenRule, mContext.getPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1224,20 +1336,64 @@ public class NotificationManager {
         }
     }
 
-
     /**
      * Gets whether all notifications posted by this app can appear outside of the
      * notification shade, floating over other apps' content.
      *
      * <p>This value will be ignored for notifications that are posted to channels that do not
-     * allow bubbles ({@link NotificationChannel#canBubble()}.
+     * allow bubbles ({@link NotificationChannel#canBubble()}).
      *
      * @see Notification#getBubbleMetadata()
+     * @deprecated use {@link #getBubblePreference()} instead.
      */
+    @Deprecated
     public boolean areBubblesAllowed() {
         INotificationManager service = getService();
         try {
             return service.areBubblesAllowed(mContext.getPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns whether bubbles are enabled at the feature level for the current user. When enabled,
+     * notifications able to bubble will display an affordance allowing the user to bubble them.
+     *
+     * @see Notification.Builder#setBubbleMetadata(Notification.BubbleMetadata)
+     */
+    public boolean areBubblesEnabled() {
+        INotificationManager service = getService();
+        try {
+            return service.areBubblesEnabled(mContext.getUser());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the bubble preference for the app. This preference only applies to notifications that
+     * have been properly configured to bubble.
+     *
+     * <p>
+     * If {@link #BUBBLE_PREFERENCE_ALL}, then any bubble notification will appear as a bubble, as
+     * long as the user hasn't excluded it ({@link NotificationChannel#canBubble()}).
+     *
+     * <p>
+     * If {@link #BUBBLE_PREFERENCE_SELECTED}, then any bubble notification will appear as a bubble,
+     * as long as the user has selected it.
+     *
+     * <p>
+     * If {@link #BUBBLE_PREFERENCE_NONE}, then no notification may appear as a bubble from the app.
+     *
+     * @see Notification#getBubbleMetadata()
+     * @return the users' bubble preference for the app.
+     */
+    public @BubblePreference int getBubblePreference() {
+        INotificationManager service = getService();
+        try {
+            return service.getBubblePreferenceForPackage(mContext.getPackageName(),
+                    Binder.getCallingUid());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1408,7 +1564,8 @@ public class NotificationManager {
     }
 
     /** @hide */
-    public boolean isNotificationPolicyAccessGrantedForPackage(String pkg) {
+    @TestApi
+    public boolean isNotificationPolicyAccessGrantedForPackage(@NonNull String pkg) {
         INotificationManager service = getService();
         try {
             return service.isNotificationPolicyAccessGrantedForPackage(pkg);
@@ -1473,10 +1630,29 @@ public class NotificationManager {
     }
 
     /** @hide */
-    public void setNotificationListenerAccessGranted(ComponentName listener, boolean granted) {
+    public void setNotificationListenerAccessGranted(
+            @NonNull ComponentName listener, boolean granted) {
+        setNotificationListenerAccessGranted(listener, granted, true);
+    }
+
+    /**
+     * Grants/revokes Notification Listener access to the given component for current user.
+     * To grant access for a particular user, obtain this service by using the {@link Context}
+     * provided by {@link Context#createPackageContextAsUser}
+     *
+     * @param listener Name of component to grant/revoke access
+     * @param granted Grant/revoke access
+     * @param userSet Whether the action was triggered explicitly by user
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_NOTIFICATION_LISTENERS)
+    public void setNotificationListenerAccessGranted(
+            @NonNull ComponentName listener, boolean granted, boolean userSet) {
         INotificationManager service = getService();
         try {
-            service.setNotificationListenerAccessGranted(listener, granted);
+            service.setNotificationListenerAccessGranted(listener, granted, userSet);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1487,7 +1663,7 @@ public class NotificationManager {
             boolean granted) {
         INotificationManager service = getService();
         try {
-            service.setNotificationListenerAccessGrantedForUser(listener, userId, granted);
+            service.setNotificationListenerAccessGrantedForUser(listener, userId, granted, true);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1514,6 +1690,20 @@ public class NotificationManager {
         }
     }
 
+    /**
+     * Gets the list of enabled notification listener components for current user.
+     * To query for a particular user, obtain this service by using the {@link Context}
+     * provided by {@link Context#createPackageContextAsUser}
+     *
+     * @return the list of {@link ComponentName}s of the notification listeners
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_NOTIFICATION_LISTENERS)
+    public @NonNull List<ComponentName> getEnabledNotificationListeners() {
+        return getEnabledNotificationListeners(mContext.getUserId());
+    }
+
     /** @hide */
     public List<ComponentName> getEnabledNotificationListeners(int userId) {
         INotificationManager service = getService();
@@ -1535,12 +1725,48 @@ public class NotificationManager {
         }
     }
 
+    /**
+     * Whether the given user has an enabled
+     * {@link android.service.notification.NotificationListenerService} with the given package name.
+     *
+     * @param packageName the package name of the NotificationListenerService class
+     * @param userHandle the handle of the user that set the listener
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SuppressLint("UserHandle")
+    public boolean hasEnabledNotificationListener(@NonNull String packageName,
+            @NonNull UserHandle userHandle) {
+        INotificationManager service = getService();
+        try {
+            return service.hasEnabledNotificationListener(packageName, userHandle.getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 
     private Context mContext;
 
     private static void checkRequired(String name, Object value) {
         if (value == null) {
             throw new IllegalArgumentException(name + " is required");
+        }
+    }
+
+    /**
+     * Controls whether toast rate limiting is enabled for the calling uid.
+     *
+     * @param enable true to enable toast rate limiting, false to disable it
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_TOAST_RATE_LIMITING)
+    public void setToastRateLimitingEnabled(boolean enable) {
+        INotificationManager service = getService();
+        try {
+            service.setToastRateLimitingEnabled(enable);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1884,7 +2110,7 @@ public class NotificationManager {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (!(o instanceof Policy)) return false;
             if (o == this) return true;
             final Policy other = (Policy) o;

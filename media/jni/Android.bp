@@ -39,7 +39,6 @@ cc_library_shared {
         "android_media_MediaProfiles.cpp",
         "android_media_MediaRecorder.cpp",
         "android_media_MediaSync.cpp",
-        "android_media_MediaTranscodeManager.cpp",
         "android_media_ResampleInputStream.cpp",
         "android_media_Streams.cpp",
         "android_media_SyncParams.cpp",
@@ -50,6 +49,9 @@ cc_library_shared {
     ],
 
     shared_libs: [
+        "audioclient-types-aidl-cpp",
+        "av-types-aidl-cpp",
+        "framework-permission-aidl-cpp",
         "libandroid_runtime",
         "libaudioclient",
         "libnativehelper",
@@ -81,6 +83,7 @@ cc_library_shared {
         "android.hardware.cas@1.0",
         "android.hardware.cas.native@1.0",
         "android.hardware.drm@1.3",
+        "android.hardware.drm@1.4",
         "android.hidl.memory@1.0",
         "android.hidl.token@1.0-utils",
     ],
@@ -154,13 +157,24 @@ cc_library_shared {
 
 cc_library_shared {
     name: "libmedia_tv_tuner",
+
     srcs: [
         "android_media_tv_Tuner.cpp",
+        "tuner/DemuxClient.cpp",
+        "tuner/DescramblerClient.cpp",
+        "tuner/DvrClient.cpp",
+        "tuner/FilterClient.cpp",
+        "tuner/FrontendClient.cpp",
+        "tuner/LnbClient.cpp",
+        "tuner/TimeFilterClient.cpp",
+        "tuner/TunerClient.cpp",
     ],
 
     shared_libs: [
         "android.hardware.graphics.bufferqueue@2.0",
         "android.hardware.tv.tuner@1.0",
+        "android.hardware.tv.tuner@1.1",
+        "libbinder_ndk",
         "libandroid_runtime",
         "libcutils",
         "libfmq",
@@ -169,7 +183,14 @@ cc_library_shared {
         "libmedia",
         "libnativehelper",
         "libutils",
+        "tv_tuner_aidl_interface-ndk_platform",
+        "tv_tuner_resource_manager_aidl_interface-ndk_platform",
     ],
+
+    static_libs: [
+        "libaidlcommonsupport",
+    ],
+
     defaults: [
         "libcodec2-impl-defaults",
     ],
@@ -178,6 +199,10 @@ cc_library_shared {
         "libcodec2_internal",
         "libstagefright_foundation_headers",
     ],
+
+    // TunerService is a system service required for Tuner feature.
+    // TunerJNI is a client of TunerService so we build the dependency here.
+    required: ["mediatuner"],
 
     export_include_dirs: ["."],
 

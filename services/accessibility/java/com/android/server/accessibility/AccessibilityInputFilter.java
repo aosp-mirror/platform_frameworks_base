@@ -16,9 +16,14 @@
 
 package com.android.server.accessibility;
 
+import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
+
+import android.annotation.MainThread;
 import android.content.Context;
 import android.graphics.Region;
 import android.os.PowerManager;
+import android.provider.Settings;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -32,7 +37,10 @@ import android.view.accessibility.AccessibilityEvent;
 
 import com.android.server.LocalServices;
 import com.android.server.accessibility.gestures.TouchExplorer;
+import com.android.server.accessibility.magnification.FullScreenMagnificationGestureHandler;
 import com.android.server.accessibility.magnification.MagnificationGestureHandler;
+import com.android.server.accessibility.magnification.WindowMagnificationGestureHandler;
+import com.android.server.accessibility.magnification.WindowMagnificationPromptController;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.util.ArrayList;
@@ -115,11 +123,18 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     static final int FLAG_REQUEST_MULTI_FINGER_GESTURES = 0x00000100;
 
     /**
-     * Flag for enabling multi-finger gestures.
+     * Flag for enabling two-finger passthrough when multi-finger gestures are enabled.
      *
      * @see #setUserAndEnabledFeatures(int, int)
      */
     static final int FLAG_REQUEST_2_FINGER_PASSTHROUGH = 0x00000200;
+
+    /**
+     * Flag for including motion events when dispatching a gesture.
+     *
+     * @see #setUserAndEnabledFeatures(int, int)
+     */
+    static final int FLAG_SEND_MOTION_EVENTS = 0x00000400;
 
     static final int FEATURES_AFFECTING_MOTION_EVENTS =
             FLAG_FEATURE_INJECT_MOTION_EVENTS
@@ -428,6 +443,9 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
                 if ((mEnabledFeatures & FLAG_REQUEST_2_FINGER_PASSTHROUGH) != 0) {
                     explorer.setTwoFingerPassthroughEnabled(true);
                 }
+                if ((mEnabledFeatures & FLAG_SEND_MOTION_EVENTS) != 0) {
+                    explorer.setSendMotionEventsEnabled(true);
+                }
                 addFirstEventHandler(displayId, explorer);
                 mTouchExplorer.put(displayId, explorer);
             }
@@ -435,14 +453,9 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             if ((mEnabledFeatures & FLAG_FEATURE_CONTROL_SCREEN_MAGNIFIER) != 0
                     || ((mEnabledFeatures & FLAG_FEATURE_SCREEN_MAGNIFIER) != 0)
                     || ((mEnabledFeatures & FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER) != 0)) {
-                final boolean detectControlGestures = (mEnabledFeatures
-                        & FLAG_FEATURE_SCREEN_MAGNIFIER) != 0;
-                final boolean triggerable = (mEnabledFeatures
-                        & FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER) != 0;
-                MagnificationGestureHandler magnificationGestureHandler =
-                        new FullScreenMagnificationGestureHandler(displayContext,
-                                mAms.getMagnificationController(),
-                                detectControlGestures, triggerable, displayId);
+                final MagnificationGestureHandler magnificationGestureHandler =
+                        createMagnificationGestureHandler(displayId,
+                                displayContext);
                 addFirstEventHandler(displayId, magnificationGestureHandler);
                 mMagnificationGestureHandler.put(displayId, magnificationGestureHandler);
             }
@@ -538,6 +551,32 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         resetStreamState();
     }
 
+    private MagnificationGestureHandler createMagnificationGestureHandler(
+            int displayId, Context displayContext) {
+        final boolean detectControlGestures = (mEnabledFeatures
+                & FLAG_FEATURE_SCREEN_MAGNIFIER) != 0;
+        final boolean triggerable = (mEnabledFeatures
+                & FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER) != 0;
+        MagnificationGestureHandler magnificationGestureHandler;
+        if (mAms.getMagnificationMode(displayId)
+                == Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW) {
+            final Context uiContext = displayContext.createWindowContext(
+                    TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY, null /* options */);
+            magnificationGestureHandler = new WindowMagnificationGestureHandler(uiContext,
+                    mAms.getWindowMagnificationMgr(), mAms.getMagnificationController(),
+                    detectControlGestures, triggerable,
+                    displayId);
+        } else {
+            final Context uiContext = displayContext.createWindowContext(
+                    TYPE_MAGNIFICATION_OVERLAY, null /* options */);
+            magnificationGestureHandler = new FullScreenMagnificationGestureHandler(uiContext,
+                    mAms.getFullScreenMagnificationController(), mAms.getMagnificationController(),
+                    detectControlGestures, triggerable,
+                    new WindowMagnificationPromptController(displayContext, mUserId), displayId);
+        }
+        return magnificationGestureHandler;
+    }
+
     void resetStreamState() {
         if (mTouchScreenStreamState != null) {
             mTouchScreenStreamState.reset();
@@ -553,6 +592,56 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     @Override
     public void onDestroy() {
         /* ignore */
+    }
+
+    /**
+     * Called to refresh the magnification mode on the given display.
+     * It's responsible for changing {@link MagnificationGestureHandler} based on the current mode.
+     *
+     * @param display The logical display
+     */
+    @MainThread
+    public void refreshMagnificationMode(Display display) {
+        final int displayId = display.getDisplayId();
+        final MagnificationGestureHandler magnificationGestureHandler =
+                mMagnificationGestureHandler.get(displayId);
+        if (magnificationGestureHandler == null) {
+            return;
+        }
+        if (magnificationGestureHandler.getMode() == mAms.getMagnificationMode(displayId)) {
+            return;
+        }
+        magnificationGestureHandler.onDestroy();
+        final MagnificationGestureHandler currentMagnificationGestureHandler =
+                createMagnificationGestureHandler(displayId,
+                        mContext.createDisplayContext(display));
+        switchEventStreamTransformation(displayId, magnificationGestureHandler,
+                currentMagnificationGestureHandler);
+        mMagnificationGestureHandler.put(displayId, currentMagnificationGestureHandler);
+    }
+
+    @MainThread
+    private void switchEventStreamTransformation(int displayId,
+            EventStreamTransformation oldStreamTransformation,
+            EventStreamTransformation currentStreamTransformation) {
+        EventStreamTransformation eventStreamTransformation = mEventHandler.get(displayId);
+        if (eventStreamTransformation == null) {
+            return;
+        }
+        if (eventStreamTransformation == oldStreamTransformation) {
+            currentStreamTransformation.setNext(oldStreamTransformation.getNext());
+            mEventHandler.put(displayId, currentStreamTransformation);
+        } else {
+            while (eventStreamTransformation != null) {
+                if (eventStreamTransformation.getNext() == oldStreamTransformation) {
+                    eventStreamTransformation.setNext(currentStreamTransformation);
+                    currentStreamTransformation.setNext(oldStreamTransformation.getNext());
+                    return;
+                } else {
+                    eventStreamTransformation = eventStreamTransformation.getNext();
+                }
+            }
+        }
     }
 
     /**

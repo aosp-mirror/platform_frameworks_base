@@ -19,6 +19,8 @@ package android.util.apk;
 import android.annotation.Nullable;
 
 import java.security.cert.Certificate;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A class encapsulating the result from the source stamp verifier
@@ -32,12 +34,15 @@ public final class SourceStampVerificationResult {
     private final boolean mPresent;
     private final boolean mVerified;
     private final Certificate mCertificate;
+    private final List<? extends Certificate> mCertificateLineage;
 
     private SourceStampVerificationResult(
-            boolean present, boolean verified, @Nullable Certificate certificate) {
+            boolean present, boolean verified, @Nullable Certificate certificate,
+            List<? extends Certificate> certificateLineage) {
         this.mPresent = present;
         this.mVerified = verified;
         this.mCertificate = certificate;
+        this.mCertificateLineage = certificateLineage;
     }
 
     public boolean isPresent() {
@@ -52,6 +57,10 @@ public final class SourceStampVerificationResult {
         return mCertificate;
     }
 
+    public List<? extends Certificate> getCertificateLineage() {
+        return mCertificateLineage;
+    }
+
     /**
      * Create a non-present source stamp outcome.
      *
@@ -59,18 +68,21 @@ public final class SourceStampVerificationResult {
      */
     public static SourceStampVerificationResult notPresent() {
         return new SourceStampVerificationResult(
-                /* present= */ false, /* verified= */ false, /* certificate= */ null);
+                /* present= */ false, /* verified= */ false, /* certificate= */
+                null, /* certificateLineage= */ Collections.emptyList());
     }
 
     /**
      * Create a verified source stamp outcome.
      *
-     * @param certificate The source stamp certificate.
+     * @param certificate        The source stamp certificate.
+     * @param certificateLineage The proof-of-rotation lineage for the source stamp.
      * @return A verified source stamp result, and the source stamp certificate.
      */
-    public static SourceStampVerificationResult verified(Certificate certificate) {
+    public static SourceStampVerificationResult verified(Certificate certificate,
+            List<? extends Certificate> certificateLineage) {
         return new SourceStampVerificationResult(
-                /* present= */ true, /* verified= */ true, certificate);
+                /* present= */ true, /* verified= */ true, certificate, certificateLineage);
     }
 
     /**
@@ -80,6 +92,7 @@ public final class SourceStampVerificationResult {
      */
     public static SourceStampVerificationResult notVerified() {
         return new SourceStampVerificationResult(
-                /* present= */ true, /* verified= */ false, /* certificate= */ null);
+                /* present= */ true, /* verified= */ false, /* certificate= */
+                null, /* certificateLineage= */ Collections.emptyList());
     }
 }

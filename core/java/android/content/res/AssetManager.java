@@ -43,6 +43,7 @@ import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.Reference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -550,7 +551,9 @@ public final class AssetManager implements AutoCloseable {
                     outValue.changingConfigurations);
 
             if (outValue.type == TypedValue.TYPE_STRING) {
-                outValue.string = getPooledStringForCookie(cookie, outValue.data);
+                if ((outValue.string = getPooledStringForCookie(cookie, outValue.data)) == null) {
+                    return false;
+                }
             }
             return true;
         }
@@ -731,7 +734,9 @@ public final class AssetManager implements AutoCloseable {
                     outValue.changingConfigurations);
 
             if (outValue.type == TypedValue.TYPE_STRING) {
-                outValue.string = getPooledStringForCookie(cookie, outValue.data);
+                if ((outValue.string = getPooledStringForCookie(cookie, outValue.data)) == null) {
+                    return false;
+                }
             }
             return true;
         }
@@ -833,6 +838,7 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
+    @Nullable
     CharSequence getPooledStringForCookie(int cookie, int id) {
         // Cookies map to ApkAssets starting at 1.
         return getApkAssets()[cookie - 1].getStringFromPool(id);
@@ -1173,9 +1179,12 @@ public final class AssetManager implements AutoCloseable {
 
     void releaseTheme(long themePtr) {
         synchronized (this) {
-            nativeThemeDestroy(themePtr);
             decRefsLocked(themePtr);
         }
+    }
+
+    static long getThemeFreeFunction() {
+        return nativeGetThemeFreeFunction();
     }
 
     void applyStyleToTheme(long themePtr, @StyleRes int resId, boolean force) {
@@ -1185,6 +1194,31 @@ public final class AssetManager implements AutoCloseable {
             ensureValidLocked();
             nativeThemeApplyStyle(mObject, themePtr, resId, force);
         }
+    }
+
+    AssetManager rebaseTheme(long themePtr, @NonNull AssetManager newAssetManager,
+            @StyleRes int[] styleIds, @StyleRes boolean[] force, int count) {
+        // Exchange ownership of the theme with the new asset manager.
+        if (this != newAssetManager) {
+            synchronized (this) {
+                ensureValidLocked();
+                decRefsLocked(themePtr);
+            }
+            synchronized (newAssetManager) {
+                newAssetManager.ensureValidLocked();
+                newAssetManager.incRefsLocked(themePtr);
+            }
+        }
+
+        try {
+            synchronized (newAssetManager) {
+                newAssetManager.ensureValidLocked();
+                nativeThemeRebase(newAssetManager.mObject, themePtr, styleIds, force, count);
+            }
+        } finally {
+            Reference.reachabilityFence(newAssetManager);
+        }
+        return newAssetManager;
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -1554,12 +1588,13 @@ public final class AssetManager implements AutoCloseable {
 
     // Theme related native methods
     private static native long nativeThemeCreate(long ptr);
-    private static native void nativeThemeDestroy(long themePtr);
+    private static native long nativeGetThemeFreeFunction();
     private static native void nativeThemeApplyStyle(long ptr, long themePtr, @StyleRes int resId,
             boolean force);
+    private static native void nativeThemeRebase(long ptr, long themePtr, @NonNull int[] styleIds,
+            @NonNull boolean[] force, int styleSize);
     private static native void nativeThemeCopy(long dstAssetManagerPtr, long dstThemePtr,
             long srcAssetManagerPtr, long srcThemePtr);
-    static native void nativeThemeClear(long themePtr);
     private static native int nativeThemeGetAttributeValue(long ptr, long themePtr,
             @AttrRes int resId, @NonNull TypedValue outValue, boolean resolve);
     private static native void nativeThemeDump(long ptr, long themePtr, int priority, String tag,

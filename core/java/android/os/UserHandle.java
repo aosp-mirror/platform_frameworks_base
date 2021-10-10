@@ -18,12 +18,15 @@ package android.os;
 
 import android.annotation.AppIdInt;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.compat.annotation.UnsupportedAppUsage;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Representation of a user on the device.
@@ -259,6 +262,26 @@ public final class UserHandle implements Parcelable {
     /** @hide */
     public static @AppIdInt int getCallingAppId() {
         return getAppId(Binder.getCallingUid());
+    }
+
+    /** @hide */
+    @NonNull
+    public static int[] fromUserHandles(@NonNull List<UserHandle> users) {
+        int[] userIds = new int[users.size()];
+        for (int i = 0; i < userIds.length; ++i) {
+            userIds[i] = users.get(i).getIdentifier();
+        }
+        return userIds;
+    }
+
+    /** @hide */
+    @NonNull
+    public static List<UserHandle> toUserHandles(@NonNull int[] userIds) {
+        List<UserHandle> users = new ArrayList<>(userIds.length);
+        for (int i = 0; i < userIds.length; ++i) {
+            users.add(UserHandle.of(userIds[i]));
+        }
+        return users;
     }
 
     /** @hide */
@@ -523,13 +546,13 @@ public final class UserHandle implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         try {
             if (obj != null) {
                 UserHandle other = (UserHandle)obj;
                 return mHandle == other.mHandle;
             }
-        } catch (ClassCastException e) {
+        } catch (ClassCastException ignore) {
         }
         return false;
     }

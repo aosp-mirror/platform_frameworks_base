@@ -31,6 +31,7 @@ import android.view.ViewStructure;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
+import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.R;
 
@@ -59,6 +60,7 @@ import com.android.internal.R;
  * @see RadioButton
  *
  */
+@RemoteView
 public class RadioGroup extends LinearLayout {
     private static final String LOG_TAG = RadioGroup.class.getSimpleName();
 

@@ -16,20 +16,33 @@
 
 package android.hardware.biometrics;
 
+import static android.Manifest.permission.TEST_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.Manifest.permission.WRITE_DEVICE_CONFIG;
 
+import static com.android.internal.util.FrameworkStatsLog.AUTH_DEPRECATED_APIUSED__DEPRECATED_API__API_BIOMETRIC_MANAGER_CAN_AUTHENTICATE;
+
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.Context;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Slog;
+
+import com.android.internal.util.FrameworkStatsLog;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A class that contains biometric utilities. For authentication, see {@link BiometricPrompt}.
@@ -72,12 +85,37 @@ public class BiometricManager {
     public static final int BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED =
             BiometricConstants.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED;
 
+    /**
+     * @hide
+     */
     @IntDef({BIOMETRIC_SUCCESS,
             BIOMETRIC_ERROR_HW_UNAVAILABLE,
             BIOMETRIC_ERROR_NONE_ENROLLED,
             BIOMETRIC_ERROR_NO_HARDWARE,
             BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED})
-    @interface BiometricError {}
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface BiometricError {}
+
+    /**
+     * Single sensor or unspecified multi-sensor behavior (prefer an explicit choice if the
+     * device is multi-sensor).
+     * @hide
+     */
+    public static final int BIOMETRIC_MULTI_SENSOR_DEFAULT = 0;
+
+    /**
+     * Prefer the face sensor and fall back to fingerprint when needed.
+     * @hide
+     */
+    public static final int BIOMETRIC_MULTI_SENSOR_FACE_THEN_FINGERPRINT = 1;
+
+    /**
+     * @hide
+     */
+    @IntDef({BIOMETRIC_MULTI_SENSOR_DEFAULT,
+            BIOMETRIC_MULTI_SENSOR_FACE_THEN_FINGERPRINT})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface BiometricMultiSensorMode {}
 
     /**
      * Types of authenticators, defined at a level of granularity supported by
@@ -97,6 +135,7 @@ public class BiometricManager {
         @IntDef(flag = true, value = {
                 BIOMETRIC_STRONG,
                 BIOMETRIC_WEAK,
+                BIOMETRIC_CONVENIENCE,
                 DEVICE_CREDENTIAL,
         })
         @interface Types {}
@@ -127,7 +166,7 @@ public class BiometricManager {
          *
          * <p>This corresponds to {@link KeyProperties#AUTH_BIOMETRIC_STRONG} during key generation.
          *
-         * @see KeyGenParameterSpec.Builder#setUserAuthenticationParameters(int, int)
+         * @see android.security.keystore.KeyGenParameterSpec.Builder
          */
         int BIOMETRIC_STRONG = 0x000F;
 
@@ -170,22 +209,196 @@ public class BiometricManager {
          * <p>This corresponds to {@link KeyProperties#AUTH_DEVICE_CREDENTIAL} during key
          * generation.
          *
-         * @see KeyGenParameterSpec.Builder#setUserAuthenticationParameters(int, int)
+         * @see android.security.keystore.KeyGenParameterSpec.Builder
          */
         int DEVICE_CREDENTIAL = 1 << 15;
     }
 
-    private final Context mContext;
-    private final IAuthService mService;
+    /**
+     * Provides localized strings for an application that uses {@link BiometricPrompt} to
+     * authenticate the user.
+     */
+    public static class Strings {
+        @NonNull private final Context mContext;
+        @NonNull private final IAuthService mService;
+        @Authenticators.Types int mAuthenticators;
+
+        private Strings(@NonNull Context context, @NonNull IAuthService service,
+                @Authenticators.Types int authenticators) {
+            mContext = context;
+            mService = service;
+            mAuthenticators = authenticators;
+        }
+
+        /**
+         * Provides a localized string that can be used as the label for a button that invokes
+         * {@link BiometricPrompt}.
+         *
+         * <p>When possible, this method should use the given authenticator requirements to more
+         * precisely specify the authentication type that will be used. For example, if
+         * <strong>Class 3</strong> biometric authentication is requested on a device with a
+         * <strong>Class 3</strong> fingerprint sensor and a <strong>Class 2</strong> face sensor,
+         * the returned string should indicate that fingerprint authentication will be used.
+         *
+         * <p>This method should also try to specify which authentication method(s) will be used in
+         * practice when multiple authenticators meet the given requirements. For example, if
+         * biometric authentication is requested on a device with both face and fingerprint sensors
+         * but the user has selected face as their preferred method, the returned string should
+         * indicate that face authentication will be used.
+         *
+         * <p>This method may return {@code null} if none of the requested authenticator types are
+         * available, but this should <em>not</em> be relied upon for checking the status of
+         * authenticators. Instead, use {@link #canAuthenticate(int)}.
+         *
+         * @return The label for a button that invokes {@link BiometricPrompt} for authentication.
+         */
+        @RequiresPermission(USE_BIOMETRIC)
+        @Nullable
+        public CharSequence getButtonLabel() {
+            final int userId = mContext.getUserId();
+            final String opPackageName = mContext.getOpPackageName();
+            try {
+                return mService.getButtonLabel(userId, opPackageName, mAuthenticators);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Provides a localized string that can be shown while the user is authenticating with
+         * {@link BiometricPrompt}.
+         *
+         * <p>When possible, this method should use the given authenticator requirements to more
+         * precisely specify the authentication type that will be used. For example, if
+         * <strong>Class 3</strong> biometric authentication is requested on a device with a
+         * <strong>Class 3</strong> fingerprint sensor and a <strong>Class 2</strong> face sensor,
+         * the returned string should indicate that fingerprint authentication will be used.
+         *
+         * <p>This method should also try to specify which authentication method(s) will be used in
+         * practice when multiple authenticators meet the given requirements. For example, if
+         * biometric authentication is requested on a device with both face and fingerprint sensors
+         * but the user has selected face as their preferred method, the returned string should
+         * indicate that face authentication will be used.
+         *
+         * <p>This method may return {@code null} if none of the requested authenticator types are
+         * available, but this should <em>not</em> be relied upon for checking the status of
+         * authenticators. Instead, use {@link #canAuthenticate(int)}.
+         *
+         * @return The label for a button that invokes {@link BiometricPrompt} for authentication.
+         */
+        @RequiresPermission(USE_BIOMETRIC)
+        @Nullable
+        public CharSequence getPromptMessage() {
+            final int userId = mContext.getUserId();
+            final String opPackageName = mContext.getOpPackageName();
+            try {
+                return mService.getPromptMessage(userId, opPackageName, mAuthenticators);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Provides a localized string that can be shown as the title for an app setting that
+         * enables authentication with {@link BiometricPrompt}.
+         *
+         * <p>When possible, this method should use the given authenticator requirements to more
+         * precisely specify the authentication type that will be used. For example, if
+         * <strong>Class 3</strong> biometric authentication is requested on a device with a
+         * <strong>Class 3</strong> fingerprint sensor and a <strong>Class 2</strong> face sensor,
+         * the returned string should indicate that fingerprint authentication will be used.
+         *
+         * <p>This method should <em>not</em> try to specify which authentication method(s) will be
+         * used in practice when multiple authenticators meet the given requirements. For example,
+         * if biometric authentication is requested on a device with both face and fingerprint
+         * sensors, the returned string should indicate that either face or fingerprint
+         * authentication may be used, regardless of whether the user has enrolled or selected
+         * either as their preferred method.
+         *
+         * <p>This method may return {@code null} if none of the requested authenticator types are
+         * supported by the system, but this should <em>not</em> be relied upon for checking the
+         * status of authenticators. Instead, use {@link #canAuthenticate(int)} or
+         * {@link android.content.pm.PackageManager#hasSystemFeature(String)}.
+         *
+         * @return The label for a button that invokes {@link BiometricPrompt} for authentication.
+         */
+        @RequiresPermission(USE_BIOMETRIC)
+        @Nullable
+        public CharSequence getSettingName() {
+            final int userId = mContext.getUserId();
+            final String opPackageName = mContext.getOpPackageName();
+            try {
+                return mService.getSettingName(userId, opPackageName, mAuthenticators);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    @NonNull private final Context mContext;
+    @NonNull private final IAuthService mService;
 
     /**
      * @hide
      * @param context
      * @param service
      */
-    public BiometricManager(Context context, IAuthService service) {
+    public BiometricManager(@NonNull Context context, @NonNull IAuthService service) {
         mContext = context;
         mService = service;
+    }
+
+    /**
+     * @return A list of {@link SensorProperties}
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    @RequiresPermission(TEST_BIOMETRIC)
+    public List<SensorProperties> getSensorProperties() {
+        try {
+            final List<SensorPropertiesInternal> internalProperties =
+                    mService.getSensorProperties(mContext.getOpPackageName());
+            final List<SensorProperties> properties = new ArrayList<>();
+            for (SensorPropertiesInternal internalProp : internalProperties) {
+                properties.add(SensorProperties.from(internalProp));
+            }
+            return properties;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Retrieves a test session for BiometricManager/BiometricPrompt.
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    @RequiresPermission(TEST_BIOMETRIC)
+    public BiometricTestSession createTestSession(int sensorId) {
+        try {
+            return new BiometricTestSession(mContext, sensorId,
+                    (context, sensorId1, callback) -> mService
+                            .createTestSession(sensorId1, callback, context.getOpPackageName()));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Retrieves the package where BiometricPrompt's UI is implemented.
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    @RequiresPermission(TEST_BIOMETRIC)
+    public String getUiPackage() {
+        try {
+            return mService.getUiPackage();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -203,8 +416,19 @@ public class BiometricManager {
      */
     @Deprecated
     @RequiresPermission(USE_BIOMETRIC)
-    public @BiometricError int canAuthenticate() {
-        return canAuthenticate(Authenticators.BIOMETRIC_WEAK);
+    @BiometricError
+    public int canAuthenticate() {
+        @BiometricError final int result = canAuthenticate(mContext.getUserId(),
+                Authenticators.BIOMETRIC_WEAK);
+
+        FrameworkStatsLog.write(FrameworkStatsLog.AUTH_MANAGER_CAN_AUTHENTICATE_INVOKED,
+                false /* isAllowedAuthenticatorsSet */, Authenticators.EMPTY_SET, result);
+        FrameworkStatsLog.write(FrameworkStatsLog.AUTH_DEPRECATED_API_USED,
+                AUTH_DEPRECATED_APIUSED__DEPRECATED_API__API_BIOMETRIC_MANAGER_CAN_AUTHENTICATE,
+                mContext.getApplicationInfo().uid,
+                mContext.getApplicationInfo().targetSdkVersion);
+
+        return result;
     }
 
     /**
@@ -233,16 +457,22 @@ public class BiometricManager {
      *     authenticators can currently be used (enrolled and available).
      */
     @RequiresPermission(USE_BIOMETRIC)
-    public @BiometricError int canAuthenticate(@Authenticators.Types int authenticators) {
-        return canAuthenticate(mContext.getUserId(), authenticators);
+    @BiometricError
+    public int canAuthenticate(@Authenticators.Types int authenticators) {
+        @BiometricError final int result = canAuthenticate(mContext.getUserId(), authenticators);
+
+        FrameworkStatsLog.write(FrameworkStatsLog.AUTH_MANAGER_CAN_AUTHENTICATE_INVOKED,
+                true /* isAllowedAuthenticatorsSet */, authenticators, result);
+
+        return result;
     }
 
     /**
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    public @BiometricError int canAuthenticate(int userId,
-            @Authenticators.Types int authenticators) {
+    @BiometricError
+    public int canAuthenticate(int userId, @Authenticators.Types int authenticators) {
         if (mService != null) {
             try {
                 final String opPackageName = mContext.getOpPackageName();
@@ -251,9 +481,23 @@ public class BiometricManager {
                 throw e.rethrowFromSystemServer();
             }
         } else {
-            Slog.w(TAG, "hasEnrolledBiometrics(): Service not connected");
+            Slog.w(TAG, "canAuthenticate(): Service not connected");
             return BIOMETRIC_ERROR_HW_UNAVAILABLE;
         }
+    }
+
+    /**
+     * Produces an instance of the {@link Strings} class, which provides localized strings for an
+     * application, given a set of allowed authenticator types.
+     *
+     * @param authenticators A bit field representing the types of {@link Authenticators} that may
+     *                       be used for authentication.
+     * @return A {@link Strings} collection for the given allowed authenticator types.
+     */
+    @RequiresPermission(USE_BIOMETRIC)
+    @NonNull
+    public Strings getStrings(@Authenticators.Types int authenticators) {
+        return new Strings(mContext, mService, authenticators);
     }
 
     /**
@@ -294,38 +538,23 @@ public class BiometricManager {
     }
 
     /**
-     * Sets the active user.
-     * @hide
-     */
-    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    public void setActiveUser(int userId) {
-        if (mService != null) {
-            try {
-                mService.setActiveUser(userId);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        } else {
-            Slog.w(TAG, "setActiveUser(): Service not connected");
-        }
-    }
-
-    /**
-     * Reset the lockout when user authenticates with strong auth (e.g. PIN, pattern or password)
+     * Requests all {@link Authenticators.Types#BIOMETRIC_STRONG} sensors to have their
+     * authenticatorId invalidated for the specified user. This happens when enrollments have been
+     * added on devices with multiple biometric sensors.
      *
-     * @param token an opaque token returned by password confirmation.
+     * @param userId userId that the authenticatorId should be invalidated for
+     * @param fromSensorId sensor that triggered the invalidation request
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    public void resetLockout(byte[] token) {
+    public void invalidateAuthenticatorIds(int userId, int fromSensorId,
+            @NonNull IInvalidationCallback callback) {
         if (mService != null) {
             try {
-                mService.resetLockout(token);
+                mService.invalidateAuthenticatorIds(userId, fromSensorId, callback);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
-        } else {
-            Slog.w(TAG, "resetLockout(): Service not connected");
         }
     }
 
@@ -358,6 +587,36 @@ public class BiometricManager {
         } else {
             Slog.w(TAG, "getAuthenticatorIds(): Service not connected");
             return new long[0];
+        }
+    }
+
+    /**
+     * Requests all other biometric sensors to resetLockout. Note that this is a "time bound"
+     * See the {@link android.hardware.biometrics.fingerprint.ISession#resetLockout(int,
+     * HardwareAuthToken)} and {@link android.hardware.biometrics.face.ISession#resetLockout(int,
+     * HardwareAuthToken)} documentation for complete details.
+     *
+     * @param token A binder from the caller, for the service to linkToDeath
+     * @param opPackageName Caller's package name
+     * @param fromSensorId The originating sensor that just authenticated. Note that this MUST
+     *                     be a sensor that meets {@link Authenticators#BIOMETRIC_STRONG} strength.
+     *                     The strength will also be enforced on the BiometricService side.
+     * @param userId The user that authentication succeeded for, and also the user that resetLockout
+     *               should be applied to.
+     * @param hardwareAuthToken A valid HAT generated upon successful biometric authentication. Note
+     *                          that it is not necessary for the HAT to contain a challenge.
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void resetLockoutTimeBound(IBinder token, String opPackageName, int fromSensorId,
+            int userId, byte[] hardwareAuthToken) {
+        if (mService != null) {
+            try {
+                mService.resetLockoutTimeBound(token, opPackageName, fromSensorId, userId,
+                        hardwareAuthToken);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
     }
 }

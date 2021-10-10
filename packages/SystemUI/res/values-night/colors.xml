@@ -17,21 +17,12 @@
   NOTE: You might also want to edit: core/res/res/values-night/*.xml
   -->
 <resources>
-    <!-- The color of the material notification background -->
-    <color name="notification_material_background_color">@*android:color/notification_material_background_color</color>
-
     <!-- The color of the legacy notifications with customs backgrounds (gingerbread and lollipop.)
     It's fine to override this color since at that point the shade was dark. -->
-    <color name="notification_legacy_background_color">@*android:color/notification_material_background_color</color>
+    <color name="notification_legacy_background_color">@color/GM2_grey_900</color>
 
-    <!-- The color of the material notification background when dimmed -->
-    <color name="notification_material_background_dimmed_color">#aa000000</color>
-
-    <!-- The color of the dividing line between grouped notifications while . -->
-    <color name="notification_divider_color">#212121</color>
-
-    <!-- The background color of the notification shade -->
-    <color name="notification_shade_background_color">@color/GM2_grey_900</color>
+    <!-- The color of the dividing line between grouped notifications. -->
+    <color name="notification_divider_color">@*android:color/background_device_default_dark</color>
 
     <!-- The color of the gear shown behind a notification -->
     <color name="notification_gear_color">@color/GM2_grey_500</color>
@@ -41,6 +32,8 @@
 
     <!-- The color of the text inside a notification -->
     <color name="notification_primary_text_color">@*android:color/notification_primary_text_color_dark</color>
+
+    <color name="notif_pill_text">@android:color/system_neutral1_50</color>
 
     <color name="notification_guts_link_icon_tint">@color/GM2_grey_500</color>
     <color name="notification_guts_sub_text_color">@color/GM2_grey_300</color>
@@ -52,12 +45,6 @@
     <color name="notification_section_header_label_color">@color/GM2_grey_200</color>
     <color name="notification_section_clear_all_btn_color">@color/GM2_grey_500</color>
     <color name="notification_channel_dialog_separator">@color/GM2_grey_700</color>
-
-    <!-- The color of the background in the top part of QSCustomizer -->
-    <color name="qs_customize_background">@color/GM2_grey_900</color>
-
-    <!-- The color of the background in the bottom part of QSCustomizer -->
-    <color name="qs_customize_decoration">@color/GM2_grey_800</color>
 
     <!-- The color of the background in the separated list of the Global Actions menu -->
     <color name="global_actions_separated_background">@color/GM2_grey_900</color>
@@ -85,9 +72,12 @@
     <color name="media_divider">#85ffffff</color>
 
     <!-- Biometric dialog colors -->
-    <color name="biometric_dialog_gray">#ff888888</color>
-    <color name="biometric_dialog_accent">#ff80cbc4</color> <!-- light teal -->
+    <color name="biometric_dialog_gray">#ffcccccc</color>
+    <color name="biometric_dialog_accent">@android:color/system_accent1_300</color>
     <color name="biometric_dialog_error">#fff28b82</color> <!-- red 300 -->
+
+    <!-- UDFPS colors -->
+    <color name="udfps_enroll_icon">#ffffff</color> <!-- 100% white -->
 
     <color name="GM2_green_500">#FF41Af6A</color>
     <color name="GM2_blue_500">#5195EA</color>
@@ -105,4 +95,8 @@
     <!-- Color of background circle of user avatars in quick settings user switcher -->
     <color name="qs_user_switcher_avatar_background">#3C4043</color>
 
+    <!-- Accessibility floating menu -->
+    <color name="accessibility_floating_menu_background">#B3000000</color> <!-- 70% -->
+
+    <color name="people_tile_background">@android:color/system_accent2_800</color>
 </resources>

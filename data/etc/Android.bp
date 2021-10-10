@@ -111,6 +111,14 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
+    name: "privapp_whitelist_com.android.imsserviceentitlement",
+    product_specific: true,
+    sub_dir: "permissions",
+    src: "com.android.imsserviceentitlement.xml",
+    filename_from_src: true,
+}
+
+prebuilt_etc {
     name: "privapp_whitelist_com.android.launcher3",
     system_ext_specific: true,
     sub_dir: "permissions",

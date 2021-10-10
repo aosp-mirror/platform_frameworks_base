@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.usage.UsageEvents;
-import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 import android.util.Pair;
 import android.util.Range;
@@ -28,14 +27,12 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ChooserActivity;
-import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.server.people.data.AppUsageStatsData;
 import com.android.server.people.data.DataManager;
 import com.android.server.people.data.Event;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +46,6 @@ class SharesheetModelScorer {
     private static final String TAG = "SharesheetModelScorer";
     private static final boolean DEBUG = false;
     private static final Integer RECENCY_SCORE_COUNT = 6;
-    private static final Integer NATIVE_RANK_COUNT = 2;
     private static final float RECENCY_INITIAL_BASE_SCORE = 0.4F;
     private static final float RECENCY_SCORE_INITIAL_DECAY = 0.05F;
     private static final float RECENCY_SCORE_SUBSEQUENT_DECAY = 0.02F;
@@ -176,77 +172,6 @@ class SharesheetModelScorer {
             @UserIdInt int callingUserId) {
         computeScore(shareTargets, shareEventType, now);
         postProcess(shareTargets, targetsLimit, dataManager, callingUserId);
-    }
-
-    /**
-     * Computes ranking score for direct sharing. Update
-     * {@link ShareTargetPredictor.ShareTargetScore}.
-     */
-    static void computeScoreForDirectShare(List<ShareTargetPredictor.ShareTarget> shareTargets,
-            int shareEventType, long now) {
-        computeScore(shareTargets, shareEventType, now);
-        promoteTopNativeRankedShortcuts(shareTargets);
-    }
-
-    /**
-     * Promotes top (NATIVE_RANK_COUNT) shortcuts for each package and class, as per shortcut native
-     * ranking provided by apps.
-     */
-    private static void promoteTopNativeRankedShortcuts(
-            List<ShareTargetPredictor.ShareTarget> shareTargets) {
-        float topShortcutBonus = DeviceConfig.getFloat(
-                DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.TOP_NATIVE_RANKED_SHARING_SHORTCUTS_BOOSTER,
-                0f);
-        float secondTopShortcutBonus = DeviceConfig.getFloat(
-                DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.NON_TOP_NATIVE_RANKED_SHARING_SHORTCUTS_BOOSTER,
-                0f);
-        // Populates a map which key is a packageName and className pair, value is a max heap
-        // containing top (NATIVE_RANK_COUNT) shortcuts as per shortcut native ranking provided
-        // by apps.
-        Map<Pair<String, String>, PriorityQueue<ShareTargetPredictor.ShareTarget>>
-                topNativeRankedShareTargetMap = new ArrayMap<>();
-        for (ShareTargetPredictor.ShareTarget shareTarget : shareTargets) {
-            Pair<String, String> key = new Pair<>(shareTarget.getAppTarget().getPackageName(),
-                    shareTarget.getAppTarget().getClassName());
-            if (!topNativeRankedShareTargetMap.containsKey(key)) {
-                topNativeRankedShareTargetMap.put(key,
-                        new PriorityQueue<>(NATIVE_RANK_COUNT,
-                                Collections.reverseOrder(Comparator.comparingInt(
-                                        p -> p.getAppTarget().getRank()))));
-            }
-            PriorityQueue<ShareTargetPredictor.ShareTarget> rankMaxHeap =
-                    topNativeRankedShareTargetMap.get(key);
-            if (rankMaxHeap.isEmpty() || shareTarget.getAppTarget().getRank()
-                    < rankMaxHeap.peek().getAppTarget().getRank()) {
-                if (rankMaxHeap.size() == NATIVE_RANK_COUNT) {
-                    rankMaxHeap.poll();
-                }
-                rankMaxHeap.offer(shareTarget);
-            }
-        }
-        for (PriorityQueue<ShareTargetPredictor.ShareTarget> maxHeap :
-                topNativeRankedShareTargetMap.values()) {
-            while (!maxHeap.isEmpty()) {
-                ShareTargetPredictor.ShareTarget target = maxHeap.poll();
-                float bonus = maxHeap.isEmpty() ? topShortcutBonus : secondTopShortcutBonus;
-                target.setScore(probOR(target.getScore(), bonus));
-
-                if (DEBUG) {
-                    Slog.d(TAG, String.format(
-                            "SharesheetModel: promote top shortcut as per native ranking,"
-                                    + "packageName: %s, className: %s, shortcutId: %s, bonus:%.2f,"
-                                    + "total:%.2f",
-                            target.getAppTarget().getPackageName(),
-                            target.getAppTarget().getClassName(),
-                            target.getAppTarget().getShortcutInfo() != null
-                                    ? target.getAppTarget().getShortcutInfo().getId() : null,
-                            bonus,
-                            target.getScore()));
-                }
-            }
-        }
     }
 
     private static void postProcess(List<ShareTargetPredictor.ShareTarget> shareTargets,

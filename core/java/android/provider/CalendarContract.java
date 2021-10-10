@@ -2624,7 +2624,8 @@ public final class CalendarContract {
             // Disable strict mode VM policy violations temporarily for intents that contain a
             // content URI but don't have FLAG_GRANT_READ_URI_PERMISSION.
             StrictMode.VmPolicy oldVmPolicy = StrictMode.allowVmViolations();
-            PendingIntent pi = PendingIntent.getBroadcast(context, 0, intent, 0);
+            PendingIntent pi = PendingIntent.getBroadcast(context, 0, intent,
+                    PendingIntent.FLAG_IMMUTABLE);
             StrictMode.setVmPolicy(oldVmPolicy);
 
             manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmTime, pi);

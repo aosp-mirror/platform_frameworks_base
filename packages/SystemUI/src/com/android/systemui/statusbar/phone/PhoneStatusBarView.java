@@ -23,6 +23,7 @@ import static java.lang.Float.isNaN;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.EventLog;
@@ -44,6 +45,7 @@ import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.util.leak.RotationUtils;
 
+import java.util.List;
 import java.util.Objects;
 
 public class PhoneStatusBarView extends PanelBar {
@@ -51,6 +53,7 @@ public class PhoneStatusBarView extends PanelBar {
     private static final boolean DEBUG = StatusBar.DEBUG;
     private static final boolean DEBUG_GESTURES = false;
     private final CommandQueue mCommandQueue;
+    private final StatusBarContentInsetsProvider mContentInsetsProvider;
 
     StatusBar mBar;
 
@@ -66,6 +69,7 @@ public class PhoneStatusBarView extends PanelBar {
         }
     };
     private DarkReceiver mBattery;
+    private DarkReceiver mClock;
     private int mRotationOrientation = -1;
     @Nullable
     private View mCenterIconSpace;
@@ -74,6 +78,8 @@ public class PhoneStatusBarView extends PanelBar {
     @Nullable
     private DisplayCutout mDisplayCutout;
     private int mStatusBarHeight;
+    @Nullable
+    private List<StatusBar.ExpansionChangedListener> mExpansionChangedListeners;
 
     /**
      * Draw this many pixels into the left/right side of the cutout to optimally use the space
@@ -81,15 +87,19 @@ public class PhoneStatusBarView extends PanelBar {
     private int mCutoutSideNudge = 0;
     private boolean mHeadsUpVisible;
 
-    private int mRoundedCornerPadding = 0;
-
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mCommandQueue = Dependency.get(CommandQueue.class);
+        mContentInsetsProvider = Dependency.get(StatusBarContentInsetsProvider.class);
     }
 
     public void setBar(StatusBar bar) {
         mBar = bar;
+    }
+
+    public void setExpansionChangedListeners(
+            @Nullable List<StatusBar.ExpansionChangedListener> listeners) {
+        mExpansionChangedListeners = listeners;
     }
 
     public void setScrimController(ScrimController scrimController) {
@@ -99,6 +109,7 @@ public class PhoneStatusBarView extends PanelBar {
     @Override
     public void onFinishInflate() {
         mBattery = findViewById(R.id.battery);
+        mClock = findViewById(R.id.clock);
         mCutoutSpace = findViewById(R.id.cutout_space_view);
         mCenterIconSpace = findViewById(R.id.centered_icon_area);
 
@@ -110,6 +121,7 @@ public class PhoneStatusBarView extends PanelBar {
         super.onAttachedToWindow();
         // Always have Battery meters in the status bar observe the dark/light modes.
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mBattery);
+        Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mClock);
         if (updateOrientationAndCutout()) {
             updateLayoutForCutout();
         }
@@ -119,6 +131,7 @@ public class PhoneStatusBarView extends PanelBar {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(mBattery);
+        Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(mClock);
         mDisplayCutout = null;
     }
 
@@ -273,6 +286,12 @@ public class PhoneStatusBarView extends PanelBar {
         if ((frac == 0 || frac == 1) && mBar.getNavigationBarView() != null) {
             mBar.getNavigationBarView().onStatusBarPanelStateChanged();
         }
+
+        if (mExpansionChangedListeners != null) {
+            for (StatusBar.ExpansionChangedListener listener : mExpansionChangedListeners) {
+                listener.onExpansionChanged(frac, expanded);
+            }
+        }
     }
 
     private void updateScrimFraction() {
@@ -287,8 +306,6 @@ public class PhoneStatusBarView extends PanelBar {
     public void updateResources() {
         mCutoutSideNudge = getResources().getDimensionPixelSize(
                 R.dimen.display_cutout_margin_consumption);
-        mRoundedCornerPadding = getResources().getDimensionPixelSize(
-                R.dimen.rounded_corner_content_padding);
 
         updateStatusBarHeight();
     }
@@ -323,8 +340,7 @@ public class PhoneStatusBarView extends PanelBar {
     private void updateLayoutForCutout() {
         updateStatusBarHeight();
         updateCutoutLocation(StatusBarWindowView.cornerCutoutMargins(mDisplayCutout, getDisplay()));
-        updateSafeInsets(StatusBarWindowView.statusBarCornerCutoutMargins(mDisplayCutout,
-                getDisplay(), mRotationOrientation, mStatusBarHeight));
+        updateSafeInsets();
     }
 
     private void updateCutoutLocation(Pair<Integer, Integer> cornerCutoutMargins) {
@@ -352,15 +368,18 @@ public class PhoneStatusBarView extends PanelBar {
         lp.height = bounds.height();
     }
 
-    private void updateSafeInsets(Pair<Integer, Integer> cornerCutoutMargins) {
-        // Depending on our rotation, we may have to work around a cutout in the middle of the view,
-        // or letterboxing from the right or left sides.
+    private void updateSafeInsets() {
+        Rect contentRect = mContentInsetsProvider
+                .getStatusBarContentInsetsForRotation(RotationUtils.getExactRotation(getContext()));
 
-        Pair<Integer, Integer> padding =
-                StatusBarWindowView.paddingNeededForCutoutAndRoundedCorner(
-                        mDisplayCutout, cornerCutoutMargins, mRoundedCornerPadding);
+        Point size = new Point();
+        getDisplay().getRealSize(size);
 
-        setPadding(padding.first, getPaddingTop(), padding.second, getPaddingBottom());
+        setPadding(
+                contentRect.left,
+                getPaddingTop(),
+                size.x - contentRect.right,
+                getPaddingBottom());
     }
 
     public void setHeadsUpVisible(boolean headsUpVisible) {

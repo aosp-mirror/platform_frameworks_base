@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.keyguard;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.RippleDrawable;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -26,9 +28,13 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.widget.LockPatternUtils;
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
 public class NumPadKey extends ViewGroup {
@@ -43,6 +49,10 @@ public class NumPadKey extends ViewGroup {
     private int mDigit = -1;
     private int mTextViewResId;
     private PasswordTextView mTextView;
+
+    @Nullable
+    private NumPadAnimator mAnimator;
+    private int mOrientation;
 
     private View.OnClickListener mListener = new View.OnClickListener() {
         @Override
@@ -69,7 +79,7 @@ public class NumPadKey extends ViewGroup {
     }
 
     public NumPadKey(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+        this(context, attrs, R.attr.numPadKeyStyle);
     }
 
     public NumPadKey(Context context, AttributeSet attrs, int defStyle) {
@@ -80,7 +90,8 @@ public class NumPadKey extends ViewGroup {
         super(context, attrs, defStyle);
         setFocusable(true);
 
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.NumPadKey);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.NumPadKey, defStyle,
+                contentResource);
 
         try {
             mDigit = a.getInt(R.styleable.NumPadKey_digit, mDigit);
@@ -90,7 +101,8 @@ public class NumPadKey extends ViewGroup {
         }
 
         setOnClickListener(mListener);
-        setOnHoverListener(new LiftToActivateListener(context));
+        setOnHoverListener(new LiftToActivateListener(
+                (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE)));
 
         mLockPatternUtils = new LockPatternUtils(context);
         mPM = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
@@ -111,25 +123,49 @@ public class NumPadKey extends ViewGroup {
                 final int len = klondike.length();
                 if (len > 0) {
                     mKlondikeText.setText(klondike);
-                } else {
+                } else if (mKlondikeText.getVisibility() != View.GONE) {
                     mKlondikeText.setVisibility(View.INVISIBLE);
                 }
             }
         }
 
-        a = context.obtainStyledAttributes(attrs, android.R.styleable.View);
-        if (!a.hasValueOrEmpty(android.R.styleable.View_background)) {
-            setBackground(mContext.getDrawable(R.drawable.ripple_drawable_pin));
-        }
-        a.recycle();
         setContentDescription(mDigitText.getText().toString());
+
+        Drawable background = getBackground();
+        if (background instanceof RippleDrawable) {
+            mAnimator = new NumPadAnimator(context, (RippleDrawable) background,
+                    R.style.NumPadKey);
+        } else {
+            mAnimator = null;
+        }
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        mOrientation = newConfig.orientation;
+    }
+
+    /**
+     * Reload colors from resources.
+     **/
+    public void reloadColors() {
+        int textColor = Utils.getColorAttr(getContext(), android.R.attr.textColorPrimary)
+                .getDefaultColor();
+        int klondikeColor = Utils.getColorAttr(getContext(), android.R.attr.textColorSecondary)
+                .getDefaultColor();
+        mDigitText.setTextColor(textColor);
+        mKlondikeText.setTextColor(klondikeColor);
+
+        if (mAnimator != null) mAnimator.reloadColors(getContext());
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
             doHapticKeyClick();
+            if (mAnimator != null) mAnimator.start();
         }
+
         return super.onTouchEvent(event);
     }
 
@@ -137,6 +173,16 @@ public class NumPadKey extends ViewGroup {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         measureChildren(widthMeasureSpec, heightMeasureSpec);
+
+        // Set width/height to the same value to ensure a smooth circle for the bg, but shrink
+        // the height to match the old pin bouncer
+        int width = getMeasuredWidth();
+
+        boolean shortenHeight = mAnimator == null
+                || mOrientation == Configuration.ORIENTATION_LANDSCAPE;
+        int height = shortenHeight ? (int) (width * .66f) : width;
+
+        setMeasuredDimension(getMeasuredWidth(), height);
     }
 
     @Override
@@ -154,6 +200,8 @@ public class NumPadKey extends ViewGroup {
 
         left = centerX - mKlondikeText.getMeasuredWidth() / 2;
         mKlondikeText.layout(left, top, left + mKlondikeText.getMeasuredWidth(), bottom);
+
+        if (mAnimator != null) mAnimator.onLayout(b - t);
     }
 
     @Override

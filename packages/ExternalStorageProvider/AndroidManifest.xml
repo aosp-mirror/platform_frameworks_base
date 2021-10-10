@@ -24,7 +24,8 @@
                 android:permission="android.permission.WRITE_MEDIA_STORAGE" />
         </provider>
 
-        <receiver android:name=".MountReceiver">
+        <receiver android:name=".MountReceiver"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.os.storage.action.VOLUME_STATE_CHANGED" />
             </intent-filter>

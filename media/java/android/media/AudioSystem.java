@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
 import android.bluetooth.BluetoothCodecConfig;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -26,9 +27,13 @@ import android.content.pm.PackageManager;
 import android.media.audiofx.AudioEffect;
 import android.media.audiopolicy.AudioMix;
 import android.os.Build;
+import android.os.IBinder;
+import android.os.Vibrator;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.Pair;
+
+import com.android.internal.annotations.GuardedBy;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -738,6 +743,40 @@ public class AudioSystem
         }
     }
 
+    /**
+     * @hide
+     * Handles events from the audio policy manager about routing events
+     */
+    public interface RoutingUpdateCallback {
+        /**
+         * Callback to notify a routing update event occurred
+         */
+        void onRoutingUpdated();
+    }
+
+    @GuardedBy("AudioSystem.class")
+    private static RoutingUpdateCallback sRoutingUpdateCallback;
+
+    /** @hide */
+    public static void setRoutingCallback(RoutingUpdateCallback cb) {
+        synchronized (AudioSystem.class) {
+            sRoutingUpdateCallback = cb;
+            native_register_routing_callback();
+        }
+    }
+
+    private static void routingCallbackFromNative() {
+        final RoutingUpdateCallback cb;
+        synchronized (AudioSystem.class) {
+            cb = sRoutingUpdateCallback;
+        }
+        if (cb == null) {
+            Log.e(TAG, "routing update from APM was not captured");
+            return;
+        }
+        cb.onRoutingUpdated();
+    }
+
     /*
      * Error codes used by public APIs (AudioTrack, AudioRecord, AudioManager ...)
      * Must be kept in sync with frameworks/base/core/jni/android_media_AudioErrors.h
@@ -877,6 +916,8 @@ public class AudioSystem
     /** @hide */
     public static final int DEVICE_OUT_HDMI_ARC = 0x40000;
     /** @hide */
+    public static final int DEVICE_OUT_HDMI_EARC = 0x40001;
+    /** @hide */
     public static final int DEVICE_OUT_SPDIF = 0x80000;
     /** @hide */
     @UnsupportedAppUsage
@@ -895,6 +936,8 @@ public class AudioSystem
     public static final int DEVICE_OUT_USB_HEADSET = 0x4000000;
     /** @hide */
     public static final int DEVICE_OUT_HEARING_AID = 0x8000000;
+    /** @hide */
+    public static final int DEVICE_OUT_ECHO_CANCELLER = 0x10000000;
     /** @hide */
     public static final int DEVICE_OUT_BLE_HEADSET = 0x20000000;
     /** @hide */
@@ -946,6 +989,7 @@ public class AudioSystem
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_TELEPHONY_TX);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_LINE);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_HDMI_ARC);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_HDMI_EARC);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_SPDIF);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_FM);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_AUX_LINE);
@@ -955,6 +999,7 @@ public class AudioSystem
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_PROXY);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_USB_HEADSET);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_HEARING_AID);
+        DEVICE_OUT_ALL_SET.add(DEVICE_OUT_ECHO_CANCELLER);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_BLE_HEADSET);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_BLE_SPEAKER);
         DEVICE_OUT_ALL_SET.add(DEVICE_OUT_DEFAULT);
@@ -977,6 +1022,7 @@ public class AudioSystem
         DEVICE_OUT_ALL_HDMI_SYSTEM_AUDIO_SET = new HashSet<>();
         DEVICE_OUT_ALL_HDMI_SYSTEM_AUDIO_SET.add(DEVICE_OUT_AUX_LINE);
         DEVICE_OUT_ALL_HDMI_SYSTEM_AUDIO_SET.add(DEVICE_OUT_HDMI_ARC);
+        DEVICE_OUT_ALL_HDMI_SYSTEM_AUDIO_SET.add(DEVICE_OUT_HDMI_EARC);
         DEVICE_OUT_ALL_HDMI_SYSTEM_AUDIO_SET.add(DEVICE_OUT_SPDIF);
 
         DEVICE_ALL_HDMI_SYSTEM_AUDIO_AND_SPEAKER_SET = new HashSet<>();
@@ -1058,6 +1104,8 @@ public class AudioSystem
     /** @hide */
     public static final int DEVICE_IN_HDMI_ARC = DEVICE_BIT_IN | 0x8000000;
     /** @hide */
+    public static final int DEVICE_IN_HDMI_EARC = DEVICE_BIT_IN | 0x8000001;
+    /** @hide */
     public static final int DEVICE_IN_ECHO_REFERENCE = DEVICE_BIT_IN | 0x10000000;
     /** @hide */
     public static final int DEVICE_IN_BLE_HEADSET = DEVICE_BIT_IN | 0x20000000;
@@ -1098,6 +1146,7 @@ public class AudioSystem
         DEVICE_IN_ALL_SET.add(DEVICE_IN_USB_HEADSET);
         DEVICE_IN_ALL_SET.add(DEVICE_IN_BLUETOOTH_BLE);
         DEVICE_IN_ALL_SET.add(DEVICE_IN_HDMI_ARC);
+        DEVICE_IN_ALL_SET.add(DEVICE_IN_HDMI_EARC);
         DEVICE_IN_ALL_SET.add(DEVICE_IN_ECHO_REFERENCE);
         DEVICE_IN_ALL_SET.add(DEVICE_IN_BLE_HEADSET);
         DEVICE_IN_ALL_SET.add(DEVICE_IN_DEFAULT);
@@ -1153,6 +1202,7 @@ public class AudioSystem
     /** @hide */ public static final String DEVICE_OUT_TELEPHONY_TX_NAME = "telephony_tx";
     /** @hide */ public static final String DEVICE_OUT_LINE_NAME = "line";
     /** @hide */ public static final String DEVICE_OUT_HDMI_ARC_NAME = "hmdi_arc";
+    /** @hide */ public static final String DEVICE_OUT_HDMI_EARC_NAME = "hmdi_earc";
     /** @hide */ public static final String DEVICE_OUT_SPDIF_NAME = "spdif";
     /** @hide */ public static final String DEVICE_OUT_FM_NAME = "fm_transmitter";
     /** @hide */ public static final String DEVICE_OUT_AUX_LINE_NAME = "aux_line";
@@ -1162,6 +1212,7 @@ public class AudioSystem
     /** @hide */ public static final String DEVICE_OUT_PROXY_NAME = "proxy";
     /** @hide */ public static final String DEVICE_OUT_USB_HEADSET_NAME = "usb_headset";
     /** @hide */ public static final String DEVICE_OUT_HEARING_AID_NAME = "hearing_aid_out";
+    /** @hide */ public static final String DEVICE_OUT_ECHO_CANCELLER_NAME = "echo_canceller";
     /** @hide */ public static final String DEVICE_OUT_BLE_HEADSET_NAME = "ble_headset";
     /** @hide */ public static final String DEVICE_OUT_BLE_SPEAKER_NAME = "ble_speaker";
 
@@ -1191,6 +1242,7 @@ public class AudioSystem
     /** @hide */ public static final String DEVICE_IN_BLUETOOTH_BLE_NAME = "bt_ble";
     /** @hide */ public static final String DEVICE_IN_ECHO_REFERENCE_NAME = "echo_reference";
     /** @hide */ public static final String DEVICE_IN_HDMI_ARC_NAME = "hdmi_arc";
+    /** @hide */ public static final String DEVICE_IN_HDMI_EARC_NAME = "hdmi_earc";
     /** @hide */ public static final String DEVICE_IN_BLE_HEADSET_NAME = "ble_headset";
 
     /** @hide */
@@ -1236,6 +1288,8 @@ public class AudioSystem
             return DEVICE_OUT_LINE_NAME;
         case DEVICE_OUT_HDMI_ARC:
             return DEVICE_OUT_HDMI_ARC_NAME;
+        case DEVICE_OUT_HDMI_EARC:
+            return DEVICE_OUT_HDMI_EARC_NAME;
         case DEVICE_OUT_SPDIF:
             return DEVICE_OUT_SPDIF_NAME;
         case DEVICE_OUT_FM:
@@ -1254,6 +1308,8 @@ public class AudioSystem
             return DEVICE_OUT_USB_HEADSET_NAME;
         case DEVICE_OUT_HEARING_AID:
             return DEVICE_OUT_HEARING_AID_NAME;
+        case DEVICE_OUT_ECHO_CANCELLER:
+            return DEVICE_OUT_ECHO_CANCELLER_NAME;
         case DEVICE_OUT_BLE_HEADSET:
             return DEVICE_OUT_BLE_HEADSET_NAME;
         case DEVICE_OUT_BLE_SPEAKER:
@@ -1320,6 +1376,8 @@ public class AudioSystem
             return DEVICE_IN_ECHO_REFERENCE_NAME;
         case DEVICE_IN_HDMI_ARC:
             return DEVICE_IN_HDMI_ARC_NAME;
+        case DEVICE_IN_HDMI_EARC:
+            return DEVICE_IN_HDMI_EARC_NAME;
         case DEVICE_IN_BLE_HEADSET:
             return DEVICE_IN_BLE_HEADSET_NAME;
         case DEVICE_IN_DEFAULT:
@@ -1432,6 +1490,10 @@ public class AudioSystem
     // usage for AudioRecord.startRecordingSync(), must match AudioSystem::sync_event_t
     /** @hide */ public static final int SYNC_EVENT_NONE = 0;
     /** @hide */ public static final int SYNC_EVENT_PRESENTATION_COMPLETE = 1;
+    /** @hide
+     *  Not used by native implementation.
+     *  See {@link AudioRecord.Builder#setSharedAudioEvent(MediaSyncEvent) */
+    public static final int SYNC_EVENT_SHARE_AUDIO_HISTORY = 100;
 
     /**
      * @hide
@@ -1571,9 +1633,11 @@ public class AudioSystem
 
     /** @hide returns master balance value in range -1.f -> 1.f, where 0.f is dead center. */
     @TestApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS)
     public static native float getMasterBalance();
     /** @hide Changes the audio balance of the device. */
     @TestApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS)
     public static native int setMasterBalance(float balance);
 
     // helpers for android.media.AudioManager.getProperty(), see description there for meaning
@@ -1592,6 +1656,8 @@ public class AudioSystem
     /** @hide */
     @UnsupportedAppUsage
     public static native int checkAudioFlinger();
+    /** @hide */
+    public static native void setAudioFlingerBinder(IBinder audioFlinger);
 
     /** @hide */
     public static native int listAudioPorts(ArrayList<AudioPort> ports, int[] generation);
@@ -1615,6 +1681,8 @@ public class AudioSystem
     private static native final void native_register_dynamic_policy_callback();
     // declare this instance as having a recording configuration update callback handler
     private static native final void native_register_recording_callback();
+    // declare this instance as having a routing update callback handler
+    private static native void native_register_routing_callback();
 
     // must be kept in sync with value in include/system/audio.h
     /** @hide */ public static final int AUDIO_HW_SYNC_INVALID = 0;
@@ -1657,21 +1725,32 @@ public class AudioSystem
      */
     public static native int setAllowedCapturePolicy(int uid, int flags);
 
-    static boolean isOffloadSupported(@NonNull AudioFormat format, @NonNull AudioAttributes attr) {
-        return native_is_offload_supported(format.getEncoding(), format.getSampleRate(),
+    /**
+     * @hide
+     * Compressed audio offload decoding modes supported by audio HAL implementation.
+     * Keep in sync with system/media/include/media/audio.h.
+     */
+    public static final int OFFLOAD_NOT_SUPPORTED = 0;
+    public static final int OFFLOAD_SUPPORTED = 1;
+    public static final int OFFLOAD_GAPLESS_SUPPORTED = 2;
+
+    static int getOffloadSupport(@NonNull AudioFormat format, @NonNull AudioAttributes attr) {
+        return native_get_offload_support(format.getEncoding(), format.getSampleRate(),
                 format.getChannelMask(), format.getChannelIndexMask(),
                 attr.getVolumeControlStream());
     }
 
-    private static native boolean native_is_offload_supported(int encoding, int sampleRate,
+    private static native int native_get_offload_support(int encoding, int sampleRate,
             int channelMask, int channelIndexMask, int streamType);
 
     /** @hide */
     public static native int getMicrophones(ArrayList<MicrophoneInfo> microphonesInfo);
 
     /** @hide */
-    public static native int getSurroundFormats(Map<Integer, Boolean> surroundFormats,
-                                                boolean reported);
+    public static native int getSurroundFormats(Map<Integer, Boolean> surroundFormats);
+
+    /** @hide */
+    public static native int getReportedSurroundFormats(ArrayList<Integer> surroundFormats);
 
     /**
      * @hide
@@ -1688,6 +1767,13 @@ public class AudioSystem
      * Communicate UID of active assistant to audio policy service.
      */
     public static native int setAssistantUid(int uid);
+
+    /**
+     * Communicate UID of the current {@link android.service.voice.HotwordDetectionService} to audio
+     * policy service.
+     * @hide
+     */
+    public static native int setHotwordDetectionServiceUid(int uid);
 
     /**
      * @hide
@@ -1905,6 +1991,14 @@ public class AudioSystem
      */
     public static native int getDevicesForRoleAndCapturePreset(
             int capturePreset, int role, @NonNull List<AudioDeviceAttributes> devices);
+
+    /**
+     * @hide
+     * Set the vibrators' information. The value will be used to initialize HapticGenerator.
+     * @param vibrators a list of all available vibrators
+     * @return command completion status
+     */
+    public static native int setVibratorInfos(@NonNull List<Vibrator> vibrators);
 
     // Items shared with audio service
 

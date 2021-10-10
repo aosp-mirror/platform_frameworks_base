@@ -35,6 +35,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -51,6 +52,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 /**
  *
@@ -695,6 +697,8 @@ public class TextToSpeech {
         public static final String KEY_FEATURE_NETWORK_RETRIES_COUNT = "networkRetriesCount";
     }
 
+    private static final boolean DEBUG = false;
+
     private final Context mContext;
     @UnsupportedAppUsage
     private Connection mConnectingServiceConnection;
@@ -716,6 +720,9 @@ public class TextToSpeech {
     private final Map<CharSequence, Uri> mUtterances;
     private final Bundle mParams = new Bundle();
     private final TtsEngines mEnginesHelper;
+    private final boolean mIsSystem;
+    @Nullable private final Executor mInitExecutor;
+
     @UnsupportedAppUsage
     private volatile String mCurrentEngine = null;
 
@@ -758,8 +765,21 @@ public class TextToSpeech {
      */
     public TextToSpeech(Context context, OnInitListener listener, String engine,
             String packageName, boolean useFallback) {
+        this(context, /* initExecutor= */ null, listener, engine, packageName,
+                useFallback, /* isSystem= */ true);
+    }
+
+    /**
+     * Used internally to instantiate TextToSpeech objects.
+     *
+     * @hide
+     */
+    private TextToSpeech(Context context, @Nullable Executor initExecutor,
+            OnInitListener initListener, String engine, String packageName, boolean useFallback,
+            boolean isSystem) {
         mContext = context;
-        mInitListener = listener;
+        mInitExecutor = initExecutor;
+        mInitListener = initListener;
         mRequestedEngine = engine;
         mUseFallback = useFallback;
 
@@ -768,6 +788,9 @@ public class TextToSpeech {
         mUtteranceProgressListener = null;
 
         mEnginesHelper = new TtsEngines(mContext);
+
+        mIsSystem = isSystem;
+
         initTts();
     }
 
@@ -842,10 +865,14 @@ public class TextToSpeech {
     }
 
     private boolean connectToEngine(String engine) {
-        Connection connection = new Connection();
-        Intent intent = new Intent(Engine.INTENT_ACTION_TTS_SERVICE);
-        intent.setPackage(engine);
-        boolean bound = mContext.bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        Connection connection;
+        if (mIsSystem) {
+            connection = new SystemConnection();
+        } else {
+            connection = new DirectConnection();
+        }
+
+        boolean bound = connection.connect(engine);
         if (!bound) {
             Log.e(TAG, "Failed to bind to " + engine);
             return false;
@@ -857,11 +884,19 @@ public class TextToSpeech {
     }
 
     private void dispatchOnInit(int result) {
-        synchronized (mStartLock) {
-            if (mInitListener != null) {
-                mInitListener.onInit(result);
-                mInitListener = null;
+        Runnable onInitCommand = () -> {
+            synchronized (mStartLock) {
+                if (mInitListener != null) {
+                    mInitListener.onInit(result);
+                    mInitListener = null;
+                }
             }
+        };
+
+        if (mInitExecutor != null) {
+            mInitExecutor.execute(onInitCommand);
+        } else {
+            onInitCommand.run();
         }
     }
 
@@ -878,7 +913,7 @@ public class TextToSpeech {
         // Special case, we are asked to shutdown connection that did finalize its connection.
         synchronized (mStartLock) {
             if (mConnectingServiceConnection != null) {
-                mContext.unbindService(mConnectingServiceConnection);
+                mConnectingServiceConnection.disconnect();
                 mConnectingServiceConnection = null;
                 return;
             }
@@ -930,10 +965,7 @@ public class TextToSpeech {
      * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
      */
     public int addSpeech(String text, String packagename, @RawRes int resourceId) {
-        synchronized (mStartLock) {
-            mUtterances.put(text, makeResourceUri(packagename, resourceId));
-            return SUCCESS;
-        }
+        return addSpeech(text, makeResourceUri(packagename, resourceId));
     }
 
     /**
@@ -964,10 +996,7 @@ public class TextToSpeech {
      * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
      */
     public int addSpeech(CharSequence text, String packagename, @RawRes int resourceId) {
-        synchronized (mStartLock) {
-            mUtterances.put(text, makeResourceUri(packagename, resourceId));
-            return SUCCESS;
-        }
+        return addSpeech(text, makeResourceUri(packagename, resourceId));
     }
 
     /**
@@ -985,14 +1014,11 @@ public class TextToSpeech {
      * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
      */
     public int addSpeech(String text, String filename) {
-        synchronized (mStartLock) {
-            mUtterances.put(text, Uri.parse(filename));
-            return SUCCESS;
-        }
+        return addSpeech(text, Uri.parse(filename));
     }
 
     /**
-     * Adds a mapping between a CharSequence (may be spanned with TtsSpans and a sound file.
+     * Adds a mapping between a CharSequence (may be spanned with TtsSpans) and a sound file.
      * Using this, it is possible to add custom pronounciations for a string of text. After a call
      * to this method, subsequent calls to {@link #speak(CharSequence, int, Bundle, String)}
      * will play the specified sound resource if it is available, or synthesize the text it is
@@ -1006,8 +1032,26 @@ public class TextToSpeech {
      * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
      */
     public int addSpeech(CharSequence text, File file) {
+        return addSpeech(text, Uri.fromFile(file));
+    }
+
+     /**
+     * Adds a mapping between a CharSequence (may be spanned with TtsSpans) and a sound file.
+     * Using this, it is possible to add custom pronounciations for a string of text. After a call
+     * to this method, subsequent calls to {@link #speak(CharSequence, int, Bundle, String)}
+     * will play the specified sound resource if it is available, or synthesize the text it is
+     * missing.
+     *
+     * @param text
+     *            The string of text. Example: <code>"south_south_east"</code>
+     * @param uri
+     *            Uri object pointing to the sound file.
+     *
+     * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
+     */
+    public int addSpeech(@NonNull CharSequence text, @NonNull Uri uri) {
         synchronized (mStartLock) {
-            mUtterances.put(text, Uri.fromFile(file));
+            mUtterances.put(text, uri);
             return SUCCESS;
         }
     }
@@ -1038,10 +1082,7 @@ public class TextToSpeech {
      * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
      */
     public int addEarcon(String earcon, String packagename, @RawRes int resourceId) {
-        synchronized(mStartLock) {
-            mEarcons.put(earcon, makeResourceUri(packagename, resourceId));
-            return SUCCESS;
-        }
+        return addEarcon(earcon, makeResourceUri(packagename, resourceId));
     }
 
     /**
@@ -1064,10 +1105,7 @@ public class TextToSpeech {
      */
     @Deprecated
     public int addEarcon(String earcon, String filename) {
-        synchronized(mStartLock) {
-            mEarcons.put(earcon, Uri.parse(filename));
-            return SUCCESS;
-        }
+        return addEarcon(earcon, Uri.parse(filename));
     }
 
     /**
@@ -1085,8 +1123,26 @@ public class TextToSpeech {
      * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
      */
     public int addEarcon(String earcon, File file) {
+        return addEarcon(earcon, Uri.fromFile(file));
+    }
+
+    /**
+     * Adds a mapping between a string of text and a sound file.
+     * Use this to add custom earcons.
+     *
+     * @see #playEarcon(String, int, HashMap)
+     *
+     * @param earcon
+     *            The name of the earcon.
+     *            Example: <code>"[tick]"</code>
+     * @param uri
+     *            Uri object pointing to the sound file.
+     *
+     * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
+     */
+    public int addEarcon(@NonNull String earcon, @NonNull Uri uri) {
         synchronized(mStartLock) {
-            mEarcons.put(earcon, Uri.fromFile(file));
+            mEarcons.put(earcon, uri);
             return SUCCESS;
         }
     }
@@ -2106,12 +2162,16 @@ public class TextToSpeech {
         return mEnginesHelper.getEngines();
     }
 
-    private class Connection implements ServiceConnection {
+    private abstract class Connection implements ServiceConnection {
         private ITextToSpeechService mService;
 
         private SetupConnectionAsyncTask mOnSetupConnectionAsyncTask;
 
         private boolean mEstablished;
+
+        abstract boolean connect(String engine);
+
+        abstract void disconnect();
 
         private final ITextToSpeechCallback.Stub mCallback =
                 new ITextToSpeechCallback.Stub() {
@@ -2135,7 +2195,7 @@ public class TextToSpeech {
                     public void onError(String utteranceId, int errorCode) {
                         UtteranceProgressListener listener = mUtteranceProgressListener;
                         if (listener != null) {
-                            listener.onError(utteranceId);
+                            listener.onError(utteranceId, errorCode);
                         }
                     }
 
@@ -2178,11 +2238,6 @@ public class TextToSpeech {
                 };
 
         private class SetupConnectionAsyncTask extends AsyncTask<Void, Void, Integer> {
-            private final ComponentName mName;
-
-            public SetupConnectionAsyncTask(ComponentName name) {
-                mName = name;
-            }
 
             @Override
             protected Integer doInBackground(Void... params) {
@@ -2206,7 +2261,7 @@ public class TextToSpeech {
                             mParams.putString(Engine.KEY_PARAM_VOICE_NAME, defaultVoiceName);
                         }
 
-                        Log.i(TAG, "Set up connection to " + mName);
+                        Log.i(TAG, "Setting up the connection to TTS engine...");
                         return SUCCESS;
                     } catch (RemoteException re) {
                         Log.e(TAG, "Error connecting to service, setCallback() failed");
@@ -2228,11 +2283,11 @@ public class TextToSpeech {
         }
 
         @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
             synchronized(mStartLock) {
                 mConnectingServiceConnection = null;
 
-                Log.i(TAG, "Connected to " + name);
+                Log.i(TAG, "Connected to TTS engine");
 
                 if (mOnSetupConnectionAsyncTask != null) {
                     mOnSetupConnectionAsyncTask.cancel(false);
@@ -2242,7 +2297,7 @@ public class TextToSpeech {
                 mServiceConnection = Connection.this;
 
                 mEstablished = false;
-                mOnSetupConnectionAsyncTask = new SetupConnectionAsyncTask(name);
+                mOnSetupConnectionAsyncTask = new SetupConnectionAsyncTask();
                 mOnSetupConnectionAsyncTask.execute();
             }
         }
@@ -2256,7 +2311,7 @@ public class TextToSpeech {
          *
          * @return true if we cancel mOnSetupConnectionAsyncTask in progress.
          */
-        private boolean clearServiceConnection() {
+        protected boolean clearServiceConnection() {
             synchronized(mStartLock) {
                 boolean result = false;
                 if (mOnSetupConnectionAsyncTask != null) {
@@ -2274,8 +2329,8 @@ public class TextToSpeech {
         }
 
         @Override
-        public void onServiceDisconnected(ComponentName name) {
-            Log.i(TAG, "Asked to disconnect from " + name);
+        public void onServiceDisconnected(ComponentName componentName) {
+            Log.i(TAG, "Disconnected from TTS engine");
             if (clearServiceConnection()) {
                 /* We need to protect against a rare case where engine
                  * dies just after successful connection - and we process onServiceDisconnected
@@ -2285,11 +2340,6 @@ public class TextToSpeech {
                  */
                 dispatchOnInit(ERROR);
             }
-        }
-
-        public void disconnect() {
-            mContext.unbindService(this);
-            clearServiceConnection();
         }
 
         public boolean isEstablished() {
@@ -2317,6 +2367,90 @@ public class TextToSpeech {
                     }
                     return errorResult;
                 }
+            }
+        }
+    }
+
+    // Currently all the clients are routed through the System connection. Direct connection
+    // is left for debugging, testing and benchmarking purposes.
+    // TODO(b/179599071): Remove direct connection once system one is fully tested.
+    private class DirectConnection extends Connection {
+        @Override
+        boolean connect(String engine) {
+            Intent intent = new Intent(Engine.INTENT_ACTION_TTS_SERVICE);
+            intent.setPackage(engine);
+            return mContext.bindService(intent, this, Context.BIND_AUTO_CREATE);
+        }
+
+        @Override
+        void disconnect() {
+            mContext.unbindService(this);
+            clearServiceConnection();
+        }
+    }
+
+    private class SystemConnection extends Connection {
+
+        @Nullable
+        private volatile ITextToSpeechSession mSession;
+
+        @Override
+        boolean connect(String engine) {
+            IBinder binder = ServiceManager.getService(Context.TEXT_TO_SPEECH_MANAGER_SERVICE);
+
+            ITextToSpeechManager manager = ITextToSpeechManager.Stub.asInterface(binder);
+
+            if (manager == null) {
+                Log.e(TAG, "System service is not available!");
+                return false;
+            }
+
+            if (DEBUG) {
+                Log.d(TAG, "Connecting to engine: " + engine);
+            }
+
+            try {
+                manager.createSession(engine, new ITextToSpeechSessionCallback.Stub() {
+                    @Override
+                    public void onConnected(ITextToSpeechSession session, IBinder serviceBinder) {
+                        mSession = session;
+                        onServiceConnected(
+                                /* componentName= */ null,
+                                serviceBinder);
+                    }
+
+                    @Override
+                    public void onDisconnected() {
+                        onServiceDisconnected(/* componentName= */ null);
+                    }
+
+                    @Override
+                    public void onError(String errorInfo) {
+                        Log.w(TAG, "System TTS connection error: " + errorInfo);
+                        // There is an error connecting to the engine - notify the listener.
+                        dispatchOnInit(ERROR);
+                    }
+                });
+
+                return true;
+            } catch (RemoteException ex) {
+                Log.e(TAG, "Error communicating with the System Server: ", ex);
+                throw ex.rethrowFromSystemServer();
+            }
+        }
+
+        @Override
+        void disconnect() {
+            ITextToSpeechSession session = mSession;
+
+            if (session != null) {
+                try {
+                    session.disconnect();
+                } catch (RemoteException ex) {
+                    Log.w(TAG, "Error disconnecting session", ex);
+                }
+
+                clearServiceConnection();
             }
         }
     }

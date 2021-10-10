@@ -28,6 +28,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.ArrayMap;
@@ -650,6 +651,10 @@ public class TransportManager {
 
         int result;
         try {
+            // This is a temporary fix to allow blocking calls.
+            // TODO: b/147702043. Redesign IBackupTransport so as to make the calls non-blocking.
+            Binder.allowBlocking(transport.asBinder());
+
             String transportName = transport.name();
             String transportDirName = transport.transportDirName();
             registerTransport(transportComponent, transport);

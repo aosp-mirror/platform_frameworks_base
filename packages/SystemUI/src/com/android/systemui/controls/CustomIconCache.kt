@@ -19,8 +19,8 @@ package com.android.systemui.controls
 import android.content.ComponentName
 import android.graphics.drawable.Icon
 import androidx.annotation.GuardedBy
+import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Icon cache for custom icons sent with controls.
@@ -28,7 +28,7 @@ import javax.inject.Singleton
  * It assumes that only one component can be current at the time, to minimize the number of icons
  * stored at a given time.
  */
-@Singleton
+@SysUISingleton
 class CustomIconCache @Inject constructor() {
 
     private var currentComponent: ComponentName? = null

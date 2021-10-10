@@ -141,6 +141,21 @@ public class DragEvent implements Parcelable {
     boolean mDragResult;
     boolean mEventHandlerWasCalled;
 
+    /**
+     * The drag surface containing the object being dragged. Only provided if the target window
+     * has the {@link WindowManager.LayoutParams#PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP} flag
+     * and is only sent with {@link #ACTION_DROP}.
+     */
+    private SurfaceControl mDragSurface;
+
+    /**
+     * The offsets from the touch that the surface is adjusted by as the surface is moved around the
+     * screen. Necessary for the target using the drag surface to animate it properly once it takes
+     * ownership of the drag surface after the drop.
+     */
+    private float mOffsetX;
+    private float mOffsetY;
+
     private DragEvent mNext;
     private RuntimeException mRecycledLocation;
     private boolean mRecycled;
@@ -275,32 +290,37 @@ public class DragEvent implements Parcelable {
     private DragEvent() {
     }
 
-    private void init(int action, float x, float y, ClipDescription description, ClipData data,
+    private void init(int action, float x, float y, float offsetX, float offsetY,
+            ClipDescription description, ClipData data, SurfaceControl dragSurface,
             IDragAndDropPermissions dragAndDropPermissions, Object localState, boolean result) {
         mAction = action;
         mX = x;
         mY = y;
+        mOffsetX = offsetX;
+        mOffsetY = offsetY;
         mClipDescription = description;
         mClipData = data;
-        this.mDragAndDropPermissions = dragAndDropPermissions;
+        mDragSurface = dragSurface;
+        mDragAndDropPermissions = dragAndDropPermissions;
         mLocalState = localState;
         mDragResult = result;
     }
 
     static DragEvent obtain() {
-        return DragEvent.obtain(0, 0f, 0f, null, null, null, null, false);
+        return DragEvent.obtain(0, 0f, 0f, 0f, 0f, null, null, null, null, null, false);
     }
 
     /** @hide */
-    public static DragEvent obtain(int action, float x, float y, Object localState,
-            ClipDescription description, ClipData data,
-            IDragAndDropPermissions dragAndDropPermissions, boolean result) {
+    public static DragEvent obtain(int action, float x, float y, float offsetX, float offsetY,
+            Object localState, ClipDescription description, ClipData data,
+            SurfaceControl dragSurface, IDragAndDropPermissions dragAndDropPermissions,
+            boolean result) {
         final DragEvent ev;
         synchronized (gRecyclerLock) {
             if (gRecyclerTop == null) {
                 ev = new DragEvent();
-                ev.init(action, x, y, description, data, dragAndDropPermissions, localState,
-                        result);
+                ev.init(action, x, y, offsetX, offsetY, description, data, dragSurface,
+                        dragAndDropPermissions, localState, result);
                 return ev;
             }
             ev = gRecyclerTop;
@@ -311,7 +331,8 @@ public class DragEvent implements Parcelable {
         ev.mRecycled = false;
         ev.mNext = null;
 
-        ev.init(action, x, y, description, data, dragAndDropPermissions, localState, result);
+        ev.init(action, x, y, offsetX, offsetY, description, data, dragSurface,
+                dragAndDropPermissions, localState, result);
 
         return ev;
     }
@@ -319,9 +340,9 @@ public class DragEvent implements Parcelable {
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static DragEvent obtain(DragEvent source) {
-        return obtain(source.mAction, source.mX, source.mY, source.mLocalState,
-                source.mClipDescription, source.mClipData, source.mDragAndDropPermissions,
-                source.mDragResult);
+        return obtain(source.mAction, source.mX, source.mY, source.mOffsetX, source.mOffsetY,
+                source.mLocalState, source.mClipDescription, source.mClipData, source.mDragSurface,
+                source.mDragAndDropPermissions, source.mDragResult);
     }
 
     /**
@@ -359,6 +380,16 @@ public class DragEvent implements Parcelable {
         return mY;
     }
 
+    /** @hide */
+    public float getOffsetX() {
+        return mOffsetX;
+    }
+
+    /** @hide */
+    public float getOffsetY() {
+        return mOffsetY;
+    }
+
     /**
      * Returns the {@link android.content.ClipData} object sent to the system as part of the call
      * to
@@ -385,6 +416,11 @@ public class DragEvent implements Parcelable {
      */
     public ClipDescription getClipDescription() {
         return mClipDescription;
+    }
+
+    /** @hide */
+    public SurfaceControl getDragSurface() {
+        return mDragSurface;
     }
 
     /** @hide */
@@ -473,6 +509,34 @@ public class DragEvent implements Parcelable {
     }
 
     /**
+     * Returns a string that represents the symbolic name of the specified unmasked action
+     * such as "ACTION_DRAG_START", "ACTION_DRAG_END" or an equivalent numeric constant
+     * such as "35" if unknown.
+     *
+     * @param action The action.
+     * @return The symbolic name of the specified action.
+     * @see #getAction()
+     * @hide
+     */
+    public static String actionToString(int action) {
+        switch (action) {
+            case ACTION_DRAG_STARTED:
+                return "ACTION_DRAG_STARTED";
+            case ACTION_DRAG_LOCATION:
+                return "ACTION_DRAG_LOCATION";
+            case ACTION_DROP:
+                return "ACTION_DROP";
+            case ACTION_DRAG_ENDED:
+                return "ACTION_DRAG_ENDED";
+            case ACTION_DRAG_ENTERED:
+                return "ACTION_DRAG_ENTERED";
+            case ACTION_DRAG_EXITED:
+                return "ACTION_DRAG_EXITED";
+        }
+        return Integer.toString(action);
+    }
+
+    /**
      * Returns a string containing a concise, human-readable representation of this DragEvent
      * object.
      * @return A string representation of the DragEvent object.
@@ -505,6 +569,8 @@ public class DragEvent implements Parcelable {
         dest.writeInt(mAction);
         dest.writeFloat(mX);
         dest.writeFloat(mY);
+        dest.writeFloat(mOffsetX);
+        dest.writeFloat(mOffsetY);
         dest.writeInt(mDragResult ? 1 : 0);
         if (mClipData == null) {
             dest.writeInt(0);
@@ -517,6 +583,12 @@ public class DragEvent implements Parcelable {
         } else {
             dest.writeInt(1);
             mClipDescription.writeToParcel(dest, flags);
+        }
+        if (mDragSurface == null) {
+            dest.writeInt(0);
+        } else {
+            dest.writeInt(1);
+            mDragSurface.writeToParcel(dest, flags);
         }
         if (mDragAndDropPermissions == null) {
             dest.writeInt(0);
@@ -536,12 +608,17 @@ public class DragEvent implements Parcelable {
             event.mAction = in.readInt();
             event.mX = in.readFloat();
             event.mY = in.readFloat();
+            event.mOffsetX = in.readFloat();
+            event.mOffsetY = in.readFloat();
             event.mDragResult = (in.readInt() != 0);
             if (in.readInt() != 0) {
                 event.mClipData = ClipData.CREATOR.createFromParcel(in);
             }
             if (in.readInt() != 0) {
                 event.mClipDescription = ClipDescription.CREATOR.createFromParcel(in);
+            }
+            if (in.readInt() != 0) {
+                event.mDragSurface = SurfaceControl.CREATOR.createFromParcel(in);
             }
             if (in.readInt() != 0) {
                 event.mDragAndDropPermissions =

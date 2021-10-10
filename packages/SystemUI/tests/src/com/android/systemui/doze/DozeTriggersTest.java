@@ -16,7 +16,10 @@
 
 package com.android.systemui.doze;
 
+import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
@@ -27,27 +30,29 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.app.AlarmManager;
 import android.hardware.Sensor;
 import android.hardware.display.AmbientDisplayConfiguration;
-import android.os.Handler;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.Display;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.doze.DozeTriggers.DozingUpdateUiEvent;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.concurrency.FakeThreadFactory;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 import com.android.systemui.util.sensors.FakeProximitySensor;
 import com.android.systemui.util.sensors.FakeSensorManager;
 import com.android.systemui.util.sensors.FakeThresholdSensor;
 import com.android.systemui.util.sensors.ProximitySensor;
+import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.wakelock.WakeLock;
 import com.android.systemui.util.wakelock.WakeLockFake;
@@ -69,13 +74,15 @@ public class DozeTriggersTest extends SysuiTestCase {
     @Mock
     private DozeHost mHost;
     @Mock
-    private AlarmManager mAlarmManager;
-    @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
     private DockManager mDockManager;
     @Mock
     private ProximitySensor.ProximityCheck mProximityCheck;
+    @Mock
+    private AuthController mAuthController;
+    @Mock
+    private UiEventLogger mUiEventLogger;
 
     private DozeTriggers mTriggers;
     private FakeSensorManager mSensors;
@@ -86,21 +93,29 @@ public class DozeTriggersTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        AmbientDisplayConfiguration config = DozeConfigurationUtil.createMockConfig();
-        DozeParameters parameters = DozeConfigurationUtil.createMockParameters();
+        setupDozeTriggers(
+                DozeConfigurationUtil.createMockConfig(),
+                DozeConfigurationUtil.createMockParameters());
+    }
+
+    private void setupDozeTriggers(
+            AmbientDisplayConfiguration config,
+            DozeParameters dozeParameters) throws Exception {
         mSensors = spy(new FakeSensorManager(mContext));
         mTapSensor = mSensors.getFakeTapSensor().getSensor();
         WakeLock wakeLock = new WakeLockFake();
         AsyncSensorManager asyncSensorManager =
-                new AsyncSensorManager(mSensors, null, new Handler());
+                new AsyncSensorManager(mSensors, new FakeThreadFactory(mExecutor), null);
 
         FakeThresholdSensor thresholdSensor = new FakeThresholdSensor();
         thresholdSensor.setLoaded(true);
         mProximitySensor = new FakeProximitySensor(thresholdSensor,  null, mExecutor);
 
-        mTriggers = new DozeTriggers(mContext, mMachine, mHost, mAlarmManager, config, parameters,
-                asyncSensorManager, wakeLock, true, mDockManager, mProximitySensor,
-                mProximityCheck, mock(DozeLog.class), mBroadcastDispatcher);
+        mTriggers = new DozeTriggers(mContext, mHost, config, dozeParameters,
+                asyncSensorManager, wakeLock, mDockManager, mProximitySensor,
+                mProximityCheck, mock(DozeLog.class), mBroadcastDispatcher, new FakeSettings(),
+                mAuthController, mExecutor, mUiEventLogger);
+        mTriggers.setDozeMachine(mMachine);
         waitForSensorManager();
     }
 
@@ -149,7 +164,7 @@ public class DozeTriggersTest extends SysuiTestCase {
 
         clearInvocations(mSensors);
         mTriggers.transitionTo(DozeMachine.State.DOZE_PULSING, DozeMachine.State.DOZE_PULSE_DONE);
-        mTriggers.transitionTo(DozeMachine.State.DOZE_PULSE_DONE, DozeMachine.State.DOZE_AOD);
+        mTriggers.transitionTo(DozeMachine.State.DOZE_PULSE_DONE, DOZE_AOD);
         waitForSensorManager();
         verify(mSensors).requestTriggerSensor(any(), eq(mTapSensor));
     }
@@ -186,7 +201,50 @@ public class DozeTriggersTest extends SysuiTestCase {
         mTriggers.onSensor(DozeLog.REASON_SENSOR_TAP, 100, 100, null);
     }
 
+    @Test
+    public void testQuickPickup() {
+        // GIVEN device is in doze (screen blank, but running doze sensors)
+        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
+
+        // WHEN quick pick up is triggered
+        mTriggers.onSensor(DozeLog.REASON_SENSOR_QUICK_PICKUP, 100, 100, null);
+
+        // THEN request pulse
+        verify(mMachine).requestPulse(anyInt());
+
+        // THEN a log is taken that quick pick up was triggered
+        verify(mUiEventLogger).log(DozingUpdateUiEvent.DOZING_UPDATE_QUICK_PICKUP);
+    }
+
+    @Test
+    public void testOnSensor_Fingerprint() {
+        // GIVEN dozing state
+        when(mMachine.getState()).thenReturn(DOZE_AOD);
+        final int screenX = 100;
+        final int screenY = 100;
+        final float misc = -1;
+        final float minor = 2f;
+        final float major = 3f;
+        final int reason = DozeLog.REASON_SENSOR_UDFPS_LONG_PRESS;
+        float[] rawValues = new float[]{screenX, screenY, misc, major, minor};
+
+        // WHEN longpress gesture is triggered
+        mTriggers.onSensor(reason, screenX, screenY, rawValues);
+
+        // THEN
+        // * don't immediately send interrupt
+        // * immediately extend pulse
+        verify(mAuthController, never()).onAodInterrupt(anyInt(), anyInt(), anyFloat(), anyFloat());
+        verify(mHost).extendPulse(reason);
+
+        // WHEN display state changes to ON
+        mTriggers.onScreenState(Display.STATE_ON);
+
+        // THEN send interrupt
+        verify(mAuthController).onAodInterrupt(eq(screenX), eq(screenY), eq(major), eq(minor));
+    }
+
     private void waitForSensorManager() {
-        TestableLooper.get(this).processAllMessages();
+        mExecutor.runAllReady();
     }
 }

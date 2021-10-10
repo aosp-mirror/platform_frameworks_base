@@ -9,6 +9,7 @@ package {
 
 android_app {
     name: "WallpaperCropper",
+    defaults: ["platform_app_defaults"],
     srcs: ["src/**/*.java"],
     platform_apis: true,
     certificate: "platform",
