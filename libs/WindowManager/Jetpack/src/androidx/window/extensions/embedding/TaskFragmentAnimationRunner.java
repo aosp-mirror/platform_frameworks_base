@@ -23,7 +23,7 @@ import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_OPEN;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
-import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -40,6 +40,7 @@ import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 
 /** To run the TaskFragment animations. */
 class TaskFragmentAnimationRunner extends IRemoteAnimationRunner.Stub {
@@ -167,24 +168,66 @@ class TaskFragmentAnimationRunner extends IRemoteAnimationRunner.Stub {
 
     private List<TaskFragmentAnimationAdapter> createOpenAnimationAdapters(
             @NonNull RemoteAnimationTarget[] targets) {
-        final List<TaskFragmentAnimationAdapter> adapters = new ArrayList<>();
-        for (RemoteAnimationTarget target : targets) {
-            final Animation animation =
-                    mAnimationSpec.loadOpenAnimation(target.mode != MODE_CLOSING /* isEnter */);
-            adapters.add(new TaskFragmentAnimationAdapter(animation, target));
-        }
-        return adapters;
+        return createOpenCloseAnimationAdapters(targets,
+                mAnimationSpec::loadOpenAnimation);
     }
 
     private List<TaskFragmentAnimationAdapter> createCloseAnimationAdapters(
             @NonNull RemoteAnimationTarget[] targets) {
-        final List<TaskFragmentAnimationAdapter> adapters = new ArrayList<>();
+        return createOpenCloseAnimationAdapters(targets,
+                mAnimationSpec::loadCloseAnimation);
+    }
+
+    private List<TaskFragmentAnimationAdapter> createOpenCloseAnimationAdapters(
+            @NonNull RemoteAnimationTarget[] targets,
+            @NonNull BiFunction<RemoteAnimationTarget, Rect, Animation> animationProvider) {
+        // We need to know if the target window is only a partial of the whole animation screen.
+        // If so, we will need to adjust it to make the whole animation screen looks like one.
+        final List<RemoteAnimationTarget> openingTargets = new ArrayList<>();
+        final List<RemoteAnimationTarget> closingTargets = new ArrayList<>();
+        final Rect openingWholeScreenBounds = new Rect();
+        final Rect closingWholeScreenBounds = new Rect();
         for (RemoteAnimationTarget target : targets) {
-            final Animation animation =
-                    mAnimationSpec.loadCloseAnimation(target.mode != MODE_CLOSING /* isEnter */);
-            adapters.add(new TaskFragmentAnimationAdapter(animation, target));
+            if (target.mode != MODE_CLOSING) {
+                openingTargets.add(target);
+                openingWholeScreenBounds.union(target.localBounds);
+            } else {
+                closingTargets.add(target);
+                closingWholeScreenBounds.union(target.localBounds);
+            }
+        }
+
+        final List<TaskFragmentAnimationAdapter> adapters = new ArrayList<>();
+        for (RemoteAnimationTarget target : openingTargets) {
+            adapters.add(createOpenCloseAnimationAdapter(target, animationProvider,
+                    openingWholeScreenBounds));
+        }
+        for (RemoteAnimationTarget target : closingTargets) {
+            adapters.add(createOpenCloseAnimationAdapter(target, animationProvider,
+                    closingWholeScreenBounds));
         }
         return adapters;
+    }
+
+    private TaskFragmentAnimationAdapter createOpenCloseAnimationAdapter(
+            @NonNull RemoteAnimationTarget target,
+            @NonNull BiFunction<RemoteAnimationTarget, Rect, Animation> animationProvider,
+            @NonNull Rect wholeAnimationBounds) {
+        final Animation animation = animationProvider.apply(target, wholeAnimationBounds);
+        final Rect targetBounds = target.localBounds;
+        if (targetBounds.left == wholeAnimationBounds.left
+                && targetBounds.right != wholeAnimationBounds.right) {
+            // This is the left split of the whole animation window.
+            return new TaskFragmentAnimationAdapter.SplitAdapter(animation, target,
+                    true /* isLeftHalf */, wholeAnimationBounds.width());
+        } else if (targetBounds.left != wholeAnimationBounds.left
+                && targetBounds.right == wholeAnimationBounds.right) {
+            // This is the right split of the whole animation window.
+            return new TaskFragmentAnimationAdapter.SplitAdapter(animation, target,
+                    false /* isLeftHalf */, wholeAnimationBounds.width());
+        }
+        // Open/close window that fills the whole animation.
+        return new TaskFragmentAnimationAdapter(animation, target);
     }
 
     private List<TaskFragmentAnimationAdapter> createChangeAnimationAdapters(
@@ -192,17 +235,19 @@ class TaskFragmentAnimationRunner extends IRemoteAnimationRunner.Stub {
         final List<TaskFragmentAnimationAdapter> adapters = new ArrayList<>();
         for (RemoteAnimationTarget target : targets) {
             if (target.startBounds != null) {
+                // This is the target with bounds change.
                 final Animation[] animations =
                         mAnimationSpec.createChangeBoundsChangeAnimations(target);
-                // The snapshot surface will always be at (0, 0) of its parent.
-                adapters.add(new TaskFragmentAnimationAdapter(animations[0], target,
-                        target.startLeash, false /* sizeChanged */, new Point(0, 0)));
-                // The end surface will have size change for scaling.
-                adapters.add(new TaskFragmentAnimationAdapter(animations[1], target,
-                        target.leash, true /* sizeChanged */, null /* position */));
+                // Adapter for the starting snapshot leash.
+                adapters.add(new TaskFragmentAnimationAdapter.SnapshotAdapter(
+                        animations[0], target));
+                // Adapter for the ending bounds changed leash.
+                adapters.add(new TaskFragmentAnimationAdapter.BoundsChangeAdapter(
+                        animations[1], target));
                 continue;
             }
 
+            // These are the other targets that don't have bounds change in the same transition.
             final Animation animation;
             if (target.hasAnimatingParent) {
                 // No-op if it will be covered by the changing parent window.
