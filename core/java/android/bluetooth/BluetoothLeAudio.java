@@ -199,11 +199,8 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      *
      * <p>
      * <ul>
-     * <li> {@link #GROUP_STATUS_IDLE} </li>
-     * <li> {@link #GROUP_STATUS_STREAMING} </li>
-     * <li> {@link #GROUP_STATUS_SUSPENDED} </li>
-     * <li> {@link #GROUP_STATUS_RECONFIGURED} </li>
-     * <li> {@link #GROUP_STATUS_DESTROYED} </li>
+     * <li> {@link #GROUP_STATUS_ACTIVE} </li>
+     * <li> {@link #GROUP_STATUS_INACTIVE} </li>
      * </ul>
      * <p>
      * @hide
@@ -241,6 +238,19 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
 
     private final BluetoothAdapter mAdapter;
     private final AttributionSource mAttributionSource;
+    /**
+     * Indicating that group is Active ( Audio device is available )
+     * @hide
+     */
+    public static final int GROUP_STATUS_ACTIVE = IBluetoothLeAudio.GROUP_STATUS_ACTIVE;
+
+    /**
+     * Indicating that group is Inactive ( Audio device is not available )
+     * @hide
+     */
+    public static final int GROUP_STATUS_INACTIVE = IBluetoothLeAudio.GROUP_STATUS_INACTIVE;
+
+
     private final BluetoothProfileConnector<IBluetoothLeAudio> mProfileConnector =
             new BluetoothProfileConnector(this, BluetoothProfile.LE_AUDIO, "BluetoothLeAudio",
                     IBluetoothLeAudio.class.getName()) {
