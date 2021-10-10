@@ -1178,4 +1178,5 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"ಸದ್ಯದ ಮಟ್ಟಿಗೆ ವೈ-ಫೈ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಕನೆಕ್ಟ್ ಆಗುವುದಿಲ್ಲ"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"ಎಲ್ಲವನ್ನೂ ನೋಡಿ"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ನೆಟ್‌ವರ್ಕ್‌ಗಳನ್ನು ಬದಲಿಸಲು, ಇಥರ್ನೆಟ್ ಅನ್ನು ಡಿಸ್‌ಕನೆಕ್ಟ್ ಮಾಡಿ"</string>
+    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ಬಳಕೆದಾರ ಆಯ್ಕೆಮಾಡಿ"</string>
 </resources>
