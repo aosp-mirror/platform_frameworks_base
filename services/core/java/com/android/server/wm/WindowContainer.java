@@ -178,6 +178,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     protected final SurfaceAnimator mSurfaceAnimator;
 
+    /** The parent leash added for animation. */
+    @Nullable
+    private SurfaceControl mAnimationLeash;
+
     final SurfaceFreezer mSurfaceFreezer;
     protected final WindowManagerService mWmService;
     final TransitionController mTransitionController;
@@ -2561,11 +2565,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @param animationFinishedCallback The callback being triggered when the animation finishes.
      * @param animationCancelledCallback The callback is triggered after the SurfaceAnimator sends a
      *                                   cancel call to the underlying AnimationAdapter.
+     * @param snapshotAnim  The animation to run for the snapshot. {@code null} if there is no
+     *                      snapshot.
      */
     void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
             @AnimationType int type,
             @Nullable OnAnimationFinishedCallback animationFinishedCallback,
-            @Nullable Runnable animationCancelledCallback) {
+            @Nullable Runnable animationCancelledCallback,
+            @Nullable AnimationAdapter snapshotAnim) {
         if (DEBUG_ANIM) {
             Slog.v(TAG, "Starting animation on " + this + ": type=" + type + ", anim=" + anim);
         }
@@ -2573,14 +2580,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // TODO: This should use isVisible() but because isVisible has a really weird meaning at
         // the moment this doesn't work for all animatable window containers.
         mSurfaceAnimator.startAnimation(t, anim, hidden, type, animationFinishedCallback,
-                animationCancelledCallback, mSurfaceFreezer);
+                animationCancelledCallback, snapshotAnim, mSurfaceFreezer);
     }
 
     void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
             @AnimationType int type,
             @Nullable OnAnimationFinishedCallback animationFinishedCallback) {
         startAnimation(t, anim, hidden, type, animationFinishedCallback,
-                null /* adapterAnimationCancelledCallback */);
+                null /* adapterAnimationCancelledCallback */, null /* snapshotAnim */);
     }
 
     void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
@@ -2832,16 +2839,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                     ? taskDisplayArea::clearBackgroundColor : () -> {};
 
             startAnimation(getPendingTransaction(), adapter, !isVisible(),
-                    ANIMATION_TYPE_APP_TRANSITION,
-                    (type, anim) -> cleanUpCallback.run(),
-                    cleanUpCallback);
+                    ANIMATION_TYPE_APP_TRANSITION, (type, anim) -> cleanUpCallback.run(),
+                    cleanUpCallback, thumbnailAdapter);
 
             if (adapter.getShowWallpaper()) {
                 getDisplayContent().pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
-            }
-            if (thumbnailAdapter != null) {
-                mSurfaceFreezer.mSnapshot.startAnimation(getPendingTransaction(),
-                        thumbnailAdapter, ANIMATION_TYPE_APP_TRANSITION, (type, anim) -> { });
             }
         }
     }
@@ -2972,6 +2974,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     @Override
     public void onAnimationLeashCreated(Transaction t, SurfaceControl leash) {
         mLastLayer = -1;
+        mAnimationLeash = leash;
         reassignLayer(t);
 
         // Leash is now responsible for position, so set our position to 0.
@@ -2981,9 +2984,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     @Override
     public void onAnimationLeashLost(Transaction t) {
         mLastLayer = -1;
-        mSurfaceFreezer.unfreeze(t);
+        mAnimationLeash = null;
         reassignLayer(t);
         updateSurfacePosition(t);
+    }
+
+    @Override
+    public SurfaceControl getAnimationLeash() {
+        return mAnimationLeash;
     }
 
     private void doAnimationFinished(@AnimationType int type, AnimationAdapter anim) {

@@ -1178,4 +1178,5 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"I-Wi-Fi ngeke ixhume ngokuzenzakalelayo okwamanje"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Bona konke"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Ukuze ushintshe amanethiwekhi, nqamula i-ethernet"</string>
+    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Khetha umsebenzisi"</string>
 </resources>

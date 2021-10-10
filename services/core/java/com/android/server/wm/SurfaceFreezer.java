@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_SCREEN_ROTATION;
 
 import android.annotation.NonNull;
@@ -27,12 +26,10 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
-import android.view.Surface;
 import android.view.SurfaceControl;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
-
-import java.util.function.Supplier;
 
 /**
  * This class handles "freezing" of an Animatable. The Animatable in question should implement
@@ -54,7 +51,8 @@ class SurfaceFreezer {
 
     private final Freezable mAnimatable;
     private final WindowManagerService mWmService;
-    private SurfaceControl mLeash;
+    @VisibleForTesting
+    SurfaceControl mLeash;
     Snapshot mSnapshot = null;
     final Rect mFreezeBounds = new Rect();
 
@@ -94,7 +92,7 @@ class SurfaceFreezer {
             if (buffer == null || buffer.getWidth() <= 1 || buffer.getHeight() <= 1) {
                 return;
             }
-            mSnapshot = new Snapshot(mWmService.mSurfaceFactory, t, screenshotBuffer, mLeash);
+            mSnapshot = new Snapshot(t, screenshotBuffer, mLeash);
         }
     }
 
@@ -109,12 +107,25 @@ class SurfaceFreezer {
     }
 
     /**
+     * Used by {@link SurfaceAnimator}. This "transfers" the snapshot leash to be used for
+     * animation. By transferring the leash, this will no longer try to clean-up the leash when
+     * finished.
+     */
+    @Nullable
+    Snapshot takeSnapshotForAnimation() {
+        final Snapshot out = mSnapshot;
+        mSnapshot = null;
+        return out;
+    }
+
+    /**
      * Clean-up the snapshot and remove leash. If the leash was taken, this just cleans-up the
      * snapshot.
      */
     void unfreeze(SurfaceControl.Transaction t) {
         if (mSnapshot != null) {
             mSnapshot.cancelAnimation(t, false /* restarting */);
+            mSnapshot = null;
         }
         if (mLeash == null) {
             return;
@@ -163,13 +174,12 @@ class SurfaceFreezer {
     class Snapshot {
         private SurfaceControl mSurfaceControl;
         private AnimationAdapter mAnimation;
-        private SurfaceAnimator.OnAnimationFinishedCallback mFinishedCallback;
 
         /**
          * @param t Transaction to create the thumbnail in.
          * @param screenshotBuffer A thumbnail or placeholder for thumbnail to initialize with.
          */
-        Snapshot(Supplier<Surface> surfaceFactory, SurfaceControl.Transaction t,
+        Snapshot(SurfaceControl.Transaction t,
                 SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer, SurfaceControl parent) {
             // We can't use a delegating constructor since we need to
             // reference this::onAnimationFinished
@@ -211,19 +221,15 @@ class SurfaceFreezer {
          *             component responsible for running the animation. It runs the animation with
          *             {@link AnimationAdapter#startAnimation} once the hierarchy with
          *             the Leash has been set up.
-         * @param animationFinishedCallback The callback being triggered when the animation
-         *                                  finishes.
          */
-        void startAnimation(SurfaceControl.Transaction t, AnimationAdapter anim, int type,
-                @Nullable SurfaceAnimator.OnAnimationFinishedCallback animationFinishedCallback) {
+        void startAnimation(SurfaceControl.Transaction t, AnimationAdapter anim, int type) {
             cancelAnimation(t, true /* restarting */);
             mAnimation = anim;
-            mFinishedCallback = animationFinishedCallback;
             if (mSurfaceControl == null) {
                 cancelAnimation(t, false /* restarting */);
                 return;
             }
-            mAnimation.startAnimation(mSurfaceControl, t, type, animationFinishedCallback);
+            mAnimation.startAnimation(mSurfaceControl, t, type, null /* finishCallback */);
         }
 
         /**
@@ -235,18 +241,9 @@ class SurfaceFreezer {
         void cancelAnimation(SurfaceControl.Transaction t, boolean restarting) {
             final SurfaceControl leash = mSurfaceControl;
             final AnimationAdapter animation = mAnimation;
-            final SurfaceAnimator.OnAnimationFinishedCallback animationFinishedCallback =
-                    mFinishedCallback;
             mAnimation = null;
-            mFinishedCallback = null;
             if (animation != null) {
                 animation.onAnimationCancelled(leash);
-                if (!restarting) {
-                    if (animationFinishedCallback != null) {
-                        animationFinishedCallback.onAnimationFinished(
-                                ANIMATION_TYPE_APP_TRANSITION, animation);
-                    }
-                }
             }
             if (!restarting) {
                 destroy(t);
