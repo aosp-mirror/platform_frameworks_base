@@ -16,7 +16,8 @@
 
 package androidx.window.extensions.embedding;
 
-import android.graphics.Point;
+import static android.graphics.Matrix.MSCALE_X;
+
 import android.graphics.Rect;
 import android.view.Choreographer;
 import android.view.RemoteAnimationTarget;
@@ -25,58 +26,151 @@ import android.view.animation.Animation;
 import android.view.animation.Transformation;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 /**
  * Wrapper to handle the TaskFragment animation update in one {@link SurfaceControl.Transaction}.
+ *
+ * The base adapter can be used for {@link RemoteAnimationTarget} that is simple open/close.
  */
 class TaskFragmentAnimationAdapter {
-    private final Animation mAnimation;
-    private final RemoteAnimationTarget mTarget;
-    private final SurfaceControl mLeash;
-    private final boolean mSizeChanged;
-    private final Point mPosition;
-    private final Transformation mTransformation = new Transformation();
-    private final float[] mMatrix = new float[9];
-    private final float[] mVecs = new float[4];
-    private final Rect mRect = new Rect();
+    final Animation mAnimation;
+    final RemoteAnimationTarget mTarget;
+    final SurfaceControl mLeash;
+
+    final Transformation mTransformation = new Transformation();
+    final float[] mMatrix = new float[9];
     private boolean mIsFirstFrame = true;
 
     TaskFragmentAnimationAdapter(@NonNull Animation animation,
             @NonNull RemoteAnimationTarget target) {
-        this(animation, target, target.leash, false /* sizeChanged */, null /* position */);
+        this(animation, target, target.leash);
     }
 
     /**
-     * @param sizeChanged whether the surface size needs to be changed.
+     * @param leash the surface to animate.
      */
     TaskFragmentAnimationAdapter(@NonNull Animation animation,
-            @NonNull RemoteAnimationTarget target, @NonNull SurfaceControl leash,
-            boolean sizeChanged, @Nullable Point position) {
+            @NonNull RemoteAnimationTarget target, @NonNull SurfaceControl leash) {
         mAnimation = animation;
         mTarget = target;
         mLeash = leash;
-        mSizeChanged = sizeChanged;
-        mPosition = position != null
-                ? position
-                : new Point(target.localBounds.left, target.localBounds.top);
     }
 
     /** Called on frame update. */
-    void onAnimationUpdate(@NonNull SurfaceControl.Transaction t, long currentPlayTime) {
+    final void onAnimationUpdate(@NonNull SurfaceControl.Transaction t, long currentPlayTime) {
         if (mIsFirstFrame) {
             t.show(mLeash);
             mIsFirstFrame = false;
         }
 
-        currentPlayTime = Math.min(currentPlayTime, mAnimation.getDuration());
-        mAnimation.getTransformation(currentPlayTime, mTransformation);
-        mTransformation.getMatrix().postTranslate(mPosition.x, mPosition.y);
+        // Extract the transformation to the current time.
+        mAnimation.getTransformation(Math.min(currentPlayTime, mAnimation.getDuration()),
+                mTransformation);
+        t.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
+        onAnimationUpdateInner(t);
+    }
+
+    /** To be overridden by subclasses to adjust the animation surface change. */
+    void onAnimationUpdateInner(@NonNull SurfaceControl.Transaction t) {
+        mTransformation.getMatrix().postTranslate(
+                mTarget.localBounds.left, mTarget.localBounds.top);
         t.setMatrix(mLeash, mTransformation.getMatrix(), mMatrix);
         t.setAlpha(mLeash, mTransformation.getAlpha());
-        t.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
+    }
 
-        if (mSizeChanged) {
+    /** Called after animation finished. */
+    final void onAnimationEnd(@NonNull SurfaceControl.Transaction t) {
+        onAnimationUpdate(t, mAnimation.getDuration());
+    }
+
+    final long getDurationHint() {
+        return mAnimation.computeDurationHint();
+    }
+
+    /**
+     * Should be used when the {@link RemoteAnimationTarget} is in split with others, and want to
+     * animate together as one. This adapter will offset the animation leash to make the animate of
+     * two windows look like a single window.
+     */
+    static class SplitAdapter extends TaskFragmentAnimationAdapter {
+        private final boolean mIsLeftHalf;
+        private final int mWholeAnimationWidth;
+
+        /**
+         * @param isLeftHalf whether this is the left half of the animation.
+         * @param wholeAnimationWidth the whole animation windows width.
+         */
+        SplitAdapter(@NonNull Animation animation, @NonNull RemoteAnimationTarget target,
+                boolean isLeftHalf, int wholeAnimationWidth) {
+            super(animation, target);
+            mIsLeftHalf = isLeftHalf;
+            mWholeAnimationWidth = wholeAnimationWidth;
+            if (wholeAnimationWidth == 0) {
+                throw new IllegalArgumentException("SplitAdapter must provide wholeAnimationWidth");
+            }
+        }
+
+        @Override
+        void onAnimationUpdateInner(@NonNull SurfaceControl.Transaction t) {
+            float posX = mTarget.localBounds.left;
+            final float posY = mTarget.localBounds.top;
+            // This window is half of the whole animation window. Offset left/right to make it
+            // look as one with the other half.
+            mTransformation.getMatrix().getValues(mMatrix);
+            final int targetWidth = mTarget.localBounds.width();
+            final float scaleX = mMatrix[MSCALE_X];
+            final float totalOffset = mWholeAnimationWidth * (1 - scaleX) / 2;
+            final float curOffset = targetWidth * (1 - scaleX) / 2;
+            final float offsetDiff = totalOffset - curOffset;
+            if (mIsLeftHalf) {
+                posX += offsetDiff;
+            } else {
+                posX -= offsetDiff;
+            }
+            mTransformation.getMatrix().postTranslate(posX, posY);
+            t.setMatrix(mLeash, mTransformation.getMatrix(), mMatrix);
+            t.setAlpha(mLeash, mTransformation.getAlpha());
+        }
+    }
+
+    /**
+     * Should be used for the animation of the snapshot of a {@link RemoteAnimationTarget} that has
+     * size change.
+     */
+    static class SnapshotAdapter extends TaskFragmentAnimationAdapter {
+
+        SnapshotAdapter(@NonNull Animation animation, @NonNull RemoteAnimationTarget target) {
+            // Start leash is the snapshot of the starting surface.
+            super(animation, target, target.startLeash);
+        }
+
+        @Override
+        void onAnimationUpdateInner(@NonNull SurfaceControl.Transaction t) {
+            // Snapshot should always be placed at the top left of the animation leash.
+            mTransformation.getMatrix().postTranslate(0, 0);
+            t.setMatrix(mLeash, mTransformation.getMatrix(), mMatrix);
+            t.setAlpha(mLeash, mTransformation.getAlpha());
+        }
+    }
+
+    /**
+     * Should be used for the animation of the {@link RemoteAnimationTarget} that has size change.
+     */
+    static class BoundsChangeAdapter extends TaskFragmentAnimationAdapter {
+        private final float[] mVecs = new float[4];
+        private final Rect mRect = new Rect();
+
+        BoundsChangeAdapter(@NonNull Animation animation, @NonNull RemoteAnimationTarget target) {
+            super(animation, target);
+        }
+
+        @Override
+        void onAnimationUpdateInner(@NonNull SurfaceControl.Transaction t) {
+            mTransformation.getMatrix().postTranslate(
+                    mTarget.localBounds.left, mTarget.localBounds.top);
+            t.setMatrix(mLeash, mTransformation.getMatrix(), mMatrix);
+            t.setAlpha(mLeash, mTransformation.getAlpha());
+
             // The following applies an inverse scale to the clip-rect so that it crops "after" the
             // scale instead of before.
             mVecs[1] = mVecs[2] = 0;
@@ -91,14 +185,5 @@ class TaskFragmentAnimationAdapter {
             mRect.bottom = (int) (clipRect.bottom * mVecs[3] + 0.5f);
             t.setWindowCrop(mLeash, mRect);
         }
-    }
-
-    /** Called after animation finished. */
-    void onAnimationEnd(@NonNull SurfaceControl.Transaction t) {
-        onAnimationUpdate(t, mAnimation.getDuration());
-    }
-
-    long getDurationHint() {
-        return mAnimation.computeDurationHint();
     }
 }

@@ -29,7 +29,6 @@ import android.window.TaskFragmentOrganizer;
 class TaskFragmentAnimationController {
 
     private static final String TAG = "TaskFragAnimationCtrl";
-    // TODO(b/196173550) turn off when finalize
     static final boolean DEBUG = false;
 
     private final TaskFragmentOrganizer mOrganizer;
