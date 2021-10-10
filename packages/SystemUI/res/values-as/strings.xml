@@ -1178,4 +1178,5 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"এতিয়া ৱাই-ফাই স্বয়ংক্ৰিয়ভাৱে সংযুক্ত নহ’ব"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"আটাইবোৰ চাওক"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"নেটৱৰ্ক সলনি কৰিবলৈ ইথাৰনেটৰ পৰা সংযোগ বিচ্ছিন্ন কৰক"</string>
+    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ব্যৱহাৰকাৰী বাছনি কৰক"</string>
 </resources>

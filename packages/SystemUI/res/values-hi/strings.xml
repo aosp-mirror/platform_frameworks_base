@@ -1178,4 +1178,5 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"फ़िलहाल, वाई-फ़ाई अपने-आप कनेक्ट नहीं होगा"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"सभी देखें"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"नेटवर्क बदलने के लिए, पहले ईथरनेट को डिसकनेक्ट करें"</string>
+    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"उपयोगकर्ता चुनें"</string>
 </resources>
