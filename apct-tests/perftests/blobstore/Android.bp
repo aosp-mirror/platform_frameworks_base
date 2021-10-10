@@ -30,6 +30,7 @@ android_test {
     "androidx.annotation_annotation",
     "apct-perftests-utils",
     "ub-uiautomator",
+    "collector-device-lib-platform",
   ],
   platform_apis: true,
   test_suites: ["device-tests"],

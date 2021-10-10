@@ -1,5 +1,9 @@
 LIBANDROID {
   global:
+    AActivityManager_addUidImportanceListener; # apex # introduced=31
+    AActivityManager_removeUidImportanceListener; # apex # introduced=31
+    AActivityManager_isUidActive; # apex # introduced=31
+    AActivityManager_getUidImportance; # apex # introduced=31
     AAssetDir_close;
     AAssetDir_getNextFileName;
     AAssetDir_rewind;
@@ -76,6 +80,7 @@ LIBANDROID {
     AInputEvent_getDeviceId;
     AInputEvent_getSource;
     AInputEvent_getType;
+    AInputEvent_release; # introduced=31
     AInputQueue_attachLooper;
     AInputQueue_detachLooper;
     AInputQueue_finishEvent;
@@ -90,6 +95,7 @@ LIBANDROID {
     AKeyEvent_getMetaState;
     AKeyEvent_getRepeatCount;
     AKeyEvent_getScanCode;
+    AKeyEvent_fromJava; # introduced=31
     ALooper_acquire;
     ALooper_addFd;
     ALooper_forThread;
@@ -139,6 +145,7 @@ LIBANDROID {
     AMotionEvent_getY;
     AMotionEvent_getYOffset;
     AMotionEvent_getYPrecision;
+    AMotionEvent_fromJava; # introduced=31
     ANativeActivity_finish;
     ANativeActivity_hideSoftInput;
     ANativeActivity_setWindowFlags;
@@ -148,6 +155,7 @@ LIBANDROID {
     AHardwareBuffer_allocate; # introduced=26
     AHardwareBuffer_describe; # introduced=26
     AHardwareBuffer_fromHardwareBuffer; # introduced=26
+    AHardwareBuffer_getId; # introduced=31
     AHardwareBuffer_getNativeHandle; # introduced=26
     AHardwareBuffer_isSupported; # introduced=29
     AHardwareBuffer_lock; # introduced=26
@@ -173,6 +181,7 @@ LIBANDROID {
     AObbInfo_getPackageName;
     AObbInfo_getVersion;
     AObbScanner_getObbInfo;
+    APermissionManager_checkPermission; # introduced=31
     ASensorEventQueue_disableSensor;
     ASensorEventQueue_enableSensor;
     ASensorEventQueue_getEvents;
@@ -216,6 +225,7 @@ LIBANDROID {
     AStorageManager_unmountObb;
     ASurfaceControl_create; # introduced=29
     ASurfaceControl_createFromWindow; # introduced=29
+    ASurfaceControl_acquire; # introduced=31
     ASurfaceControl_release; # introduced=29
     ASurfaceTexture_acquireANativeWindow; # introduced=28
     ASurfaceTexture_attachToGLContext; # introduced=28
@@ -242,11 +252,18 @@ LIBANDROID {
     ASurfaceTransaction_setColor; # introduced=29
     ASurfaceTransaction_setDamageRegion; # introduced=29
     ASurfaceTransaction_setDesiredPresentTime; # introduced=29
+    ASurfaceTransaction_setEnableBackPressure; # introduced=31
     ASurfaceTransaction_setFrameRate; # introduced=30
+    ASurfaceTransaction_setFrameRateWithChangeStrategy; # introduced=31
     ASurfaceTransaction_setGeometry; # introduced=29
     ASurfaceTransaction_setHdrMetadata_cta861_3; # introduced=29
     ASurfaceTransaction_setHdrMetadata_smpte2086; # introduced=29
     ASurfaceTransaction_setOnComplete; # introduced=29
+    ASurfaceTransaction_setOnCommit; # introduced=31
+    ASurfaceTransaction_setPosition; # introduced=31
+    ASurfaceTransaction_setCrop; # introduced=31
+    ASurfaceTransaction_setBufferTransform; # introduced=31
+    ASurfaceTransaction_setScale; # introduced=31
     ASurfaceTransaction_setVisibility; # introduced=29
     ASurfaceTransaction_setZOrder; # introduced=29
     ASystemFontIterator_open; # introduced=29
@@ -288,6 +305,24 @@ LIBANDROID {
     AThermal_getCurrentThermalStatus; # introduced=30
     AThermal_registerThermalStatusListener; # introduced=30
     AThermal_unregisterThermalStatusListener; # introduced=30
+    AThermal_getThermalHeadroom; # introduced=31
   local:
     *;
 };
+
+LIBANDROID_PLATFORM {
+  global:
+    APerformanceHint_getManager;
+    APerformanceHint_createSession;
+    APerformanceHint_getPreferredUpdateRateNanos;
+    APerformanceHint_updateTargetWorkDuration;
+    APerformanceHint_reportActualWorkDuration;
+    APerformanceHint_closeSession;
+    APerformanceHint_setIHintManagerForTesting;
+    extern "C++" {
+        ASurfaceControl_registerSurfaceStatsListener*;
+        ASurfaceControl_unregisterSurfaceStatsListener*;
+        ASurfaceControlStats_getAcquireTime*;
+        ASurfaceControlStats_getFrameNumber*;
+    };
+} LIBANDROID;

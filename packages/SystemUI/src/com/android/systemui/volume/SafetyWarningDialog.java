@@ -101,7 +101,12 @@ abstract public class SafetyWarningDialog extends SystemUIDialog
 
     @Override
     public void onDismiss(DialogInterface unused) {
-        mContext.unregisterReceiver(mReceiver);
+        try {
+            mContext.unregisterReceiver(mReceiver);
+        } catch (IllegalArgumentException e) {
+            // Don't crash if the receiver has already been unregistered.
+            e.printStackTrace();
+        }
         cleanUp();
     }
 

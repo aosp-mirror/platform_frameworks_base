@@ -59,5 +59,9 @@ public class ProcessMap<E> {
         return mMap.size();
     }
 
+    public void clear() {
+        mMap.clear();
+    }
+
     public void putAll(ProcessMap<E> other) { mMap.putAll(other.mMap); }
 }

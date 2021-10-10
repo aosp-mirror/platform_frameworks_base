@@ -18,14 +18,14 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"Πρόγρ. εγκατάστ. πακέτου"</string>
     <string name="install" msgid="711829760615509273">"Εγκατάσταση"</string>
+    <string name="update" msgid="3932142540719227615">"Ενημέρωση"</string>
     <string name="done" msgid="6632441120016885253">"Τέλος"</string>
     <string name="cancel" msgid="1018267193425558088">"Ακύρωση"</string>
     <string name="installing" msgid="4921993079741206516">"Εγκατάσταση…"</string>
     <string name="installing_app" msgid="1165095864863849422">"Εγκατάσταση <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"Η εφαρμογή εγκαταστάθηκε."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"Θέλετε να εγκαταστήσετε αυτήν την εφαρμογή;"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"Θέλετε να εγκαταστήσετε μια ενημέρωση σε αυτήν την υπάρχουσα εφαρμογή; Τα υπάρχοντα δεδομένα σας δεν θα χαθούν."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Θέλετε να εγκαταστήσετε μια ενημέρωση σε αυτήν την ενσωματωμένη εφαρμογή; Τα υπάρχοντα δεδομένα σας δεν θα χαθούν."</string>
+    <string name="install_confirm_question" msgid="7663733664476363311">"Θέλετε να εγκαταστήσετε αυτήν την εφαρμογή;"</string>
+    <string name="install_confirm_question_update" msgid="3348888852318388584">"Θέλετε να ενημερώσετε αυτήν την εφαρμογή;"</string>
     <string name="install_failed" msgid="5777824004474125469">"Η εφαρμογή δεν εγκαταστάθηκε."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Η εγκατάσταση του πακέτου αποκλείστηκε."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Η εφαρμογή δεν εγκαταστάθηκε, επειδή το πακέτο είναι σε διένεξη με κάποιο υπάρχον πακέτο."</string>
@@ -80,9 +80,9 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Οι ενέργειες εγκατάστασης/απεγκατάστασης δεν υποστηρίζονται στο Wear."</string>
     <string name="message_staging" msgid="8032722385658438567">"Σταδιακή διάθεση εφαρμογής…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Άγνωστη"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"Για λόγους ασφάλειας, δεν επιτρέπεται η εγκατάσταση άγνωστων εφαρμογών από αυτήν την πηγή στο tablet σας."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"Για λόγους ασφάλειας, δεν επιτρέπεται η εγκατάσταση άγνωστων εφαρμογών από αυτήν την πηγή στην τηλεόρασή σας."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"Για λόγους ασφάλειας, δεν επιτρέπεται η εγκατάσταση άγνωστων εφαρμογών από αυτήν την πηγή στο τηλέφωνό σας."</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Για λόγους ασφαλείας, δεν επιτρέπεται προς το παρόν η εγκατάσταση άγνωστων εφαρμογών από αυτήν την πηγή στο tablet σας. Μπορείτε να αλλάξετε την επιλογή από τις Ρυθμίσεις."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Για λόγους ασφαλείας, δεν επιτρέπεται προς το παρόν η εγκατάσταση άγνωστων εφαρμογών από αυτήν την πηγή στην τηλεόρασή σας. Μπορείτε να αλλάξετε την επιλογή από τις Ρυθμίσεις."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Για λόγους ασφαλείας, δεν επιτρέπεται προς το παρόν η εγκατάσταση άγνωστων εφαρμογών από αυτήν την πηγή στο τηλέφωνό σας. Μπορείτε να αλλάξετε την επιλογή από τις Ρυθμίσεις."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Το τηλέφωνό σας και τα προσωπικά δεδομένα σας είναι πιο ευάλωτα σε επιθέσεις από άγνωστες εφαρμογές. Με την εγκατάσταση αυτής της εφαρμογής, συμφωνείτε ότι είστε υπεύθυνοι για τυχόν βλάβη που μπορεί να προκληθεί στο τηλέφωνο ή απώλεια δεδομένων που μπορεί να προκύψει από τη χρήση τους."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Το tablet σας και τα προσωπικά δεδομένα σας είναι πιο ευάλωτα σε επιθέσεις από άγνωστες εφαρμογές. Με την εγκατάσταση αυτής της εφαρμογής, συμφωνείτε ότι είστε υπεύθυνοι για τυχόν βλάβη που μπορεί να προκληθεί στο tablet ή απώλεια δεδομένων που μπορεί να προκύψει από τη χρήση τους."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Η τηλεόρασή σας και τα προσωπικά δεδομένα σας είναι πιο ευάλωτα σε επιθέσεις από άγνωστες εφαρμογές. Με την εγκατάσταση αυτής της εφαρμογής, συμφωνείτε ότι είστε υπεύθυνοι για τυχόν βλάβη που μπορεί να προκληθεί στην τηλεόρασή ή απώλεια δεδομένων που μπορεί να προκύψει από τη χρήση τους."</string>

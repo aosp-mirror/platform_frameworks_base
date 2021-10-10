@@ -362,6 +362,18 @@ public final class Telephony {
 
         /**
          * Used to determine the currently configured default SMS package.
+         * <p>
+         * As of Android 11 apps will need specific permission to query other packages. To use
+         * this method an app must include in their AndroidManifest:
+         * <queries>
+         *   <intent>
+         *     <action android:name="android.provider.Telephony.SMS_DELIVER"/>
+         *   </intent>
+         * </queries>
+         * Which will allow them to query packages which declare intent filters that include
+         * the {@link android.provider.Telephony.Sms.Intents#SMS_DELIVER_ACTION} intent.
+         * </p>
+         *
          * @param context context of the requesting application
          * @return package name for the default SMS package or null
          */
@@ -4333,11 +4345,13 @@ public final class Telephony {
         public static final String ETWS_WARNING_TYPE = "etws_warning_type";
 
         /**
-         * ETWS (Earthquake and Tsunami Warning System) primary message or not (ETWS alerts only).
+         * ETWS (Earthquake and Tsunami Warning System, Japan only) primary message or not. The
+         * primary message is sent as soon as the emergency occurs. It does not provide any
+         * information except the emergency type (e.g. earthquake, tsunami). The ETWS secondary
+         * message is sent afterwards and provides the details of the emergency.
+         *
          * <p>See {@link android.telephony.SmsCbEtwsInfo}</p>
          * <P>Type: BOOLEAN</P>
-         *
-         * @hide        // TODO: Unhide this for S.
          */
         public static final String ETWS_IS_PRIMARY = "etws_is_primary";
 
@@ -5329,19 +5343,19 @@ public final class Telephony {
         public static final String COLUMN_RCS_CONFIG = "rcs_config";
 
         /**
-         * TelephonyProvider column name for device to device sharing status.
-         *
-         * @hide
-         */
-        public static final String COLUMN_D2D_STATUS_SHARING = "d2d_sharing_status";
-
-        /**
          * TelephonyProvider column name for VoIMS provisioning. Default is 0.
          * <P>Type: INTEGER </P>
          *
          * @hide
          */
         public static final String COLUMN_VOIMS_OPT_IN_STATUS = "voims_opt_in_status";
+
+        /**
+         * TelephonyProvider column name for device to device sharing status.
+         *
+         * @hide
+         */
+        public static final String COLUMN_D2D_STATUS_SHARING = "d2d_sharing_status";
 
         /**
          * TelephonyProvider column name for information selected contacts that allow device to

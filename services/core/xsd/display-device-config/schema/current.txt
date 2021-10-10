@@ -3,8 +3,59 @@ package com.android.server.display.config {
 
   public class DisplayConfiguration {
     ctor public DisplayConfiguration();
+    method public com.android.server.display.config.HighBrightnessMode getHighBrightnessMode();
+    method public final com.android.server.display.config.SensorDetails getLightSensor();
+    method public final com.android.server.display.config.SensorDetails getProxSensor();
+    method public com.android.server.display.config.DisplayQuirks getQuirks();
+    method @NonNull public final java.math.BigDecimal getScreenBrightnessDefault();
     method @NonNull public final com.android.server.display.config.NitsMap getScreenBrightnessMap();
+    method public final java.math.BigDecimal getScreenBrightnessRampFastDecrease();
+    method public final java.math.BigDecimal getScreenBrightnessRampFastIncrease();
+    method public final java.math.BigDecimal getScreenBrightnessRampSlowDecrease();
+    method public final java.math.BigDecimal getScreenBrightnessRampSlowIncrease();
+    method public void setHighBrightnessMode(com.android.server.display.config.HighBrightnessMode);
+    method public final void setLightSensor(com.android.server.display.config.SensorDetails);
+    method public final void setProxSensor(com.android.server.display.config.SensorDetails);
+    method public void setQuirks(com.android.server.display.config.DisplayQuirks);
+    method public final void setScreenBrightnessDefault(@NonNull java.math.BigDecimal);
     method public final void setScreenBrightnessMap(@NonNull com.android.server.display.config.NitsMap);
+    method public final void setScreenBrightnessRampFastDecrease(java.math.BigDecimal);
+    method public final void setScreenBrightnessRampFastIncrease(java.math.BigDecimal);
+    method public final void setScreenBrightnessRampSlowDecrease(java.math.BigDecimal);
+    method public final void setScreenBrightnessRampSlowIncrease(java.math.BigDecimal);
+  }
+
+  public class DisplayQuirks {
+    ctor public DisplayQuirks();
+    method public java.util.List<java.lang.String> getQuirk();
+  }
+
+  public class HbmTiming {
+    ctor public HbmTiming();
+    method @NonNull public final java.math.BigInteger getTimeMaxSecs_all();
+    method @NonNull public final java.math.BigInteger getTimeMinSecs_all();
+    method @NonNull public final java.math.BigInteger getTimeWindowSecs_all();
+    method public final void setTimeMaxSecs_all(@NonNull java.math.BigInteger);
+    method public final void setTimeMinSecs_all(@NonNull java.math.BigInteger);
+    method public final void setTimeWindowSecs_all(@NonNull java.math.BigInteger);
+  }
+
+  public class HighBrightnessMode {
+    ctor public HighBrightnessMode();
+    method @NonNull public final boolean getAllowInLowPowerMode_all();
+    method public boolean getEnabled();
+    method @NonNull public final java.math.BigDecimal getMinimumLux_all();
+    method @Nullable public final com.android.server.display.config.RefreshRateRange getRefreshRate_all();
+    method @NonNull public final com.android.server.display.config.ThermalStatus getThermalStatusLimit_all();
+    method public com.android.server.display.config.HbmTiming getTiming_all();
+    method @NonNull public final java.math.BigDecimal getTransitionPoint_all();
+    method public final void setAllowInLowPowerMode_all(@NonNull boolean);
+    method public void setEnabled(boolean);
+    method public final void setMinimumLux_all(@NonNull java.math.BigDecimal);
+    method public final void setRefreshRate_all(@Nullable com.android.server.display.config.RefreshRateRange);
+    method public final void setThermalStatusLimit_all(@NonNull com.android.server.display.config.ThermalStatus);
+    method public void setTiming_all(com.android.server.display.config.HbmTiming);
+    method public final void setTransitionPoint_all(@NonNull java.math.BigDecimal);
   }
 
   public class NitsMap {
@@ -18,6 +69,35 @@ package com.android.server.display.config {
     method @NonNull public final java.math.BigDecimal getValue();
     method public final void setNits(@NonNull java.math.BigDecimal);
     method public final void setValue(@NonNull java.math.BigDecimal);
+  }
+
+  public class RefreshRateRange {
+    ctor public RefreshRateRange();
+    method public final java.math.BigInteger getMaximum();
+    method public final java.math.BigInteger getMinimum();
+    method public final void setMaximum(java.math.BigInteger);
+    method public final void setMinimum(java.math.BigInteger);
+  }
+
+  public class SensorDetails {
+    ctor public SensorDetails();
+    method @Nullable public final String getName();
+    method @Nullable public final com.android.server.display.config.RefreshRateRange getRefreshRate();
+    method @Nullable public final String getType();
+    method public final void setName(@Nullable String);
+    method public final void setRefreshRate(@Nullable com.android.server.display.config.RefreshRateRange);
+    method public final void setType(@Nullable String);
+  }
+
+  public enum ThermalStatus {
+    method public String getRawName();
+    enum_constant public static final com.android.server.display.config.ThermalStatus critical;
+    enum_constant public static final com.android.server.display.config.ThermalStatus emergency;
+    enum_constant public static final com.android.server.display.config.ThermalStatus light;
+    enum_constant public static final com.android.server.display.config.ThermalStatus moderate;
+    enum_constant public static final com.android.server.display.config.ThermalStatus none;
+    enum_constant public static final com.android.server.display.config.ThermalStatus severe;
+    enum_constant public static final com.android.server.display.config.ThermalStatus shutdown;
   }
 
   public class XmlParser {

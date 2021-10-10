@@ -313,7 +313,7 @@ public final class ComponentName implements Parcelable, Cloneable, Comparable<Co
      * same name, and if the classes that implement each component also have the same name.
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         try {
             if (obj != null) {
                 ComponentName other = (ComponentName)obj;

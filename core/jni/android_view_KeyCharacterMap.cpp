@@ -1,24 +1,25 @@
 /*
  * Copyright 2006, The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); 
- * you may not use this file except in compliance with the License. 
- * You may obtain a copy of the License at 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0 
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, 
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- * See the License for the specific language governing permissions and 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include <android_runtime/AndroidRuntime.h>
 
-#include <input/KeyCharacterMap.h>
-#include <input/Input.h>
 #include <binder/Parcel.h>
+#include <input/Input.h>
+#include <input/InputDevice.h>
+#include <input/KeyCharacterMap.h>
 
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
@@ -47,9 +48,8 @@ static struct {
 
 class NativeKeyCharacterMap {
 public:
-    NativeKeyCharacterMap(int32_t deviceId, const sp<KeyCharacterMap>& map) :
-        mDeviceId(deviceId), mMap(map) {
-    }
+    NativeKeyCharacterMap(int32_t deviceId, std::shared_ptr<KeyCharacterMap> map)
+          : mDeviceId(deviceId), mMap(std::move(map)) {}
 
     ~NativeKeyCharacterMap() {
     }
@@ -58,26 +58,26 @@ public:
         return mDeviceId;
     }
 
-    inline const sp<KeyCharacterMap>& getMap() const {
-        return mMap;
-    }
+    inline const std::shared_ptr<KeyCharacterMap> getMap() const { return mMap; }
 
 private:
     int32_t mDeviceId;
-    sp<KeyCharacterMap> mMap;
+    std::shared_ptr<KeyCharacterMap> mMap;
 };
 
-
 jobject android_view_KeyCharacterMap_create(JNIEnv* env, int32_t deviceId,
-        const sp<KeyCharacterMap>& kcm) {
-    NativeKeyCharacterMap* map = new NativeKeyCharacterMap(deviceId,
-            kcm.get() ? kcm : KeyCharacterMap::empty());
-    if (!map) {
-        return NULL;
+                                            const std::shared_ptr<KeyCharacterMap> kcm) {
+    NativeKeyCharacterMap* nativeMap = new NativeKeyCharacterMap(deviceId, kcm);
+    if (!nativeMap) {
+        return nullptr;
     }
 
     return env->NewObject(gKeyCharacterMapClassInfo.clazz, gKeyCharacterMapClassInfo.ctor,
-            reinterpret_cast<jlong>(map));
+                          reinterpret_cast<jlong>(nativeMap));
+}
+
+static jobject nativeObtainEmptyKeyCharacterMap(JNIEnv* env, jobject /* clazz */, jint deviceId) {
+    return android_view_KeyCharacterMap_create(env, deviceId, nullptr);
 }
 
 static jlong nativeReadFromParcel(JNIEnv *env, jobject clazz, jobject parcelObj) {
@@ -91,11 +91,14 @@ static jlong nativeReadFromParcel(JNIEnv *env, jobject clazz, jobject parcelObj)
         return 0;
     }
 
-    sp<KeyCharacterMap> kcm = KeyCharacterMap::readFromParcel(parcel);
-    if (!kcm.get()) {
-        return 0;
+    std::shared_ptr<KeyCharacterMap> kcm = nullptr;
+    // Check if map is a null character map
+    if (parcel->readBool()) {
+        kcm = KeyCharacterMap::readFromParcel(parcel);
+        if (!kcm.get()) {
+            return 0;
+        }
     }
-
     NativeKeyCharacterMap* map = new NativeKeyCharacterMap(deviceId, kcm);
     return reinterpret_cast<jlong>(map);
 }
@@ -103,10 +106,16 @@ static jlong nativeReadFromParcel(JNIEnv *env, jobject clazz, jobject parcelObj)
 static void nativeWriteToParcel(JNIEnv* env, jobject clazz, jlong ptr, jobject parcelObj) {
     NativeKeyCharacterMap* map = reinterpret_cast<NativeKeyCharacterMap*>(ptr);
     Parcel* parcel = parcelForJavaObject(env, parcelObj);
-    if (parcel) {
-        parcel->writeInt32(map->getDeviceId());
-        map->getMap()->writeToParcel(parcel);
+    if (!parcel || !map) {
+        return;
     }
+    parcel->writeInt32(map->getDeviceId());
+    if (!map->getMap()) {
+        parcel->writeBool(false);
+        return;
+    }
+    parcel->writeBool(true);
+    map->getMap()->writeToParcel(parcel);
 }
 
 static void nativeDispose(JNIEnv *env, jobject clazz, jlong ptr) {
@@ -114,15 +123,22 @@ static void nativeDispose(JNIEnv *env, jobject clazz, jlong ptr) {
     delete map;
 }
 
+// Return the associated character or combining accent, or 0 if none.
 static jchar nativeGetCharacter(JNIEnv *env, jobject clazz, jlong ptr,
         jint keyCode, jint metaState) {
     NativeKeyCharacterMap* map = reinterpret_cast<NativeKeyCharacterMap*>(ptr);
+    if (!map || !map->getMap()) {
+        return static_cast<jchar>(0);
+    }
     return map->getMap()->getCharacter(keyCode, metaState);
 }
 
 static jboolean nativeGetFallbackAction(JNIEnv *env, jobject clazz, jlong ptr, jint keyCode,
         jint metaState, jobject fallbackActionObj) {
     NativeKeyCharacterMap* map = reinterpret_cast<NativeKeyCharacterMap*>(ptr);
+    if (!map || !map->getMap()) {
+        return static_cast<jboolean>(false);
+    }
     KeyCharacterMap::FallbackAction fallbackAction;
 
     bool result = map->getMap()->getFallbackAction(keyCode, metaState, &fallbackAction);
@@ -135,43 +151,59 @@ static jboolean nativeGetFallbackAction(JNIEnv *env, jobject clazz, jlong ptr, j
     return result;
 }
 
+// Return the number of a key code, or 0 if none.
 static jchar nativeGetNumber(JNIEnv *env, jobject clazz, jlong ptr, jint keyCode) {
     NativeKeyCharacterMap* map = reinterpret_cast<NativeKeyCharacterMap*>(ptr);
+    if (!map || !map->getMap()) {
+        return static_cast<jchar>(0);
+    }
     return map->getMap()->getNumber(keyCode);
 }
 
+// Return the matched key code and meta state, or 0 if none.
 static jchar nativeGetMatch(JNIEnv *env, jobject clazz, jlong ptr, jint keyCode,
         jcharArray charsArray, jint metaState) {
     NativeKeyCharacterMap* map = reinterpret_cast<NativeKeyCharacterMap*>(ptr);
-
+    if (!map || !map->getMap()) {
+        return static_cast<jchar>(0);
+    }
     jsize numChars = env->GetArrayLength(charsArray);
     jchar* chars = static_cast<jchar*>(env->GetPrimitiveArrayCritical(charsArray, NULL));
     if (!chars) {
         return 0;
     }
 
-    char16_t result = map->getMap()->getMatch(
-        keyCode, reinterpret_cast<char16_t*>(chars), size_t(numChars),
-        metaState);
+    char16_t result = map->getMap()->getMatch(keyCode, reinterpret_cast<char16_t*>(chars),
+                                              size_t(numChars), metaState);
 
     env->ReleasePrimitiveArrayCritical(charsArray, chars, JNI_ABORT);
     return result;
 }
 
+// Return the associated display label, or 0 if none.
 static jchar nativeGetDisplayLabel(JNIEnv *env, jobject clazz, jlong ptr, jint keyCode) {
     NativeKeyCharacterMap* map = reinterpret_cast<NativeKeyCharacterMap*>(ptr);
+    if (!map || !map->getMap()) {
+        return static_cast<jchar>(0);
+    }
     return map->getMap()->getDisplayLabel(keyCode);
 }
 
+// Return the associated keyboard type, or 0 if none.
 static jint nativeGetKeyboardType(JNIEnv *env, jobject clazz, jlong ptr) {
     NativeKeyCharacterMap* map = reinterpret_cast<NativeKeyCharacterMap*>(ptr);
-    return map->getMap()->getKeyboardType();
+    if (!map || !map->getMap()) {
+        return static_cast<jint>(0);
+    }
+    return static_cast<jint>(map->getMap()->getKeyboardType());
 }
 
 static jobjectArray nativeGetEvents(JNIEnv *env, jobject clazz, jlong ptr,
         jcharArray charsArray) {
     NativeKeyCharacterMap* map = reinterpret_cast<NativeKeyCharacterMap*>(ptr);
-
+    if (!map || !map->getMap()) {
+        return env->NewObjectArray(0 /* size */, gKeyEventClassInfo.clazz, NULL);
+    }
     jchar* chars = env->GetCharArrayElements(charsArray, NULL);
     if (!chars) {
         return NULL;
@@ -180,8 +212,7 @@ static jobjectArray nativeGetEvents(JNIEnv *env, jobject clazz, jlong ptr,
 
     Vector<KeyEvent> events;
     jobjectArray result = NULL;
-    if (map->getMap()->getEvents(map->getDeviceId(),
-                                 reinterpret_cast<char16_t*>(chars),
+    if (map->getMap()->getEvents(map->getDeviceId(), reinterpret_cast<char16_t*>(chars),
                                  size_t(numChars), events)) {
         result = env->NewObjectArray(jsize(events.size()), gKeyEventClassInfo.clazz, NULL);
         if (result) {
@@ -198,33 +229,37 @@ static jobjectArray nativeGetEvents(JNIEnv *env, jobject clazz, jlong ptr,
     return result;
 }
 
+static jboolean nativeEquals(JNIEnv* env, jobject clazz, jlong ptr1, jlong ptr2) {
+    const std::shared_ptr<KeyCharacterMap>& map1 =
+            (reinterpret_cast<NativeKeyCharacterMap*>(ptr1))->getMap();
+    const std::shared_ptr<KeyCharacterMap>& map2 =
+            (reinterpret_cast<NativeKeyCharacterMap*>(ptr2))->getMap();
+    if (map1 == nullptr || map2 == nullptr) {
+        return map1 == map2;
+    }
+    return static_cast<jboolean>(*map1 == *map2);
+}
 
 /*
  * JNI registration.
  */
 
 static const JNINativeMethod g_methods[] = {
-    /* name, signature, funcPtr */
-    { "nativeReadFromParcel", "(Landroid/os/Parcel;)J",
-            (void*)nativeReadFromParcel },
-    { "nativeWriteToParcel", "(JLandroid/os/Parcel;)V",
-            (void*)nativeWriteToParcel },
-    { "nativeDispose", "(J)V",
-            (void*)nativeDispose },
-    { "nativeGetCharacter", "(JII)C",
-            (void*)nativeGetCharacter },
-    { "nativeGetFallbackAction", "(JIILandroid/view/KeyCharacterMap$FallbackAction;)Z",
-            (void*)nativeGetFallbackAction },
-    { "nativeGetNumber", "(JI)C",
-            (void*)nativeGetNumber },
-    { "nativeGetMatch", "(JI[CI)C",
-            (void*)nativeGetMatch },
-    { "nativeGetDisplayLabel", "(JI)C",
-            (void*)nativeGetDisplayLabel },
-    { "nativeGetKeyboardType", "(J)I",
-            (void*)nativeGetKeyboardType },
-    { "nativeGetEvents", "(J[C)[Landroid/view/KeyEvent;",
-            (void*)nativeGetEvents },
+        /* name, signature, funcPtr */
+        {"nativeReadFromParcel", "(Landroid/os/Parcel;)J", (void*)nativeReadFromParcel},
+        {"nativeWriteToParcel", "(JLandroid/os/Parcel;)V", (void*)nativeWriteToParcel},
+        {"nativeDispose", "(J)V", (void*)nativeDispose},
+        {"nativeGetCharacter", "(JII)C", (void*)nativeGetCharacter},
+        {"nativeGetFallbackAction", "(JIILandroid/view/KeyCharacterMap$FallbackAction;)Z",
+         (void*)nativeGetFallbackAction},
+        {"nativeGetNumber", "(JI)C", (void*)nativeGetNumber},
+        {"nativeGetMatch", "(JI[CI)C", (void*)nativeGetMatch},
+        {"nativeGetDisplayLabel", "(JI)C", (void*)nativeGetDisplayLabel},
+        {"nativeGetKeyboardType", "(J)I", (void*)nativeGetKeyboardType},
+        {"nativeGetEvents", "(J[C)[Landroid/view/KeyEvent;", (void*)nativeGetEvents},
+        {"nativeObtainEmptyKeyCharacterMap", "(I)Landroid/view/KeyCharacterMap;",
+         (void*)nativeObtainEmptyKeyCharacterMap},
+        {"nativeEquals", "(JJ)Z", (void*)nativeEquals},
 };
 
 int register_android_view_KeyCharacterMap(JNIEnv* env)

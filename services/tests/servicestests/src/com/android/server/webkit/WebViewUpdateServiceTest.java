@@ -67,36 +67,30 @@ public class WebViewUpdateServiceTest {
     }
 
     private void setupWithPackages(WebViewProviderInfo[] packages) {
-        setupWithAllParameters(packages, false /* fallbackLogicEnabled */, 1 /* numRelros */,
-                true /* isDebuggable */, false /* multiProcessDefault */);
-    }
-
-    private void setupWithPackagesAndFallbackLogic(WebViewProviderInfo[] packages) {
-        setupWithAllParameters(packages, true /* fallbackLogicEnabled */, 1 /* numRelros */,
-                true /* isDebuggable */, false /* multiProcessDefault */);
+        setupWithAllParameters(packages, 1 /* numRelros */, true /* isDebuggable */,
+                false /* multiProcessDefault */);
     }
 
     private void setupWithPackagesAndRelroCount(WebViewProviderInfo[] packages, int numRelros) {
-        setupWithAllParameters(packages, false /* fallbackLogicEnabled */, numRelros,
-                true /* isDebuggable */, false /* multiProcessDefault */);
+        setupWithAllParameters(packages, numRelros, true /* isDebuggable */,
+                false /* multiProcessDefault */);
     }
 
     private void setupWithPackagesNonDebuggable(WebViewProviderInfo[] packages) {
-        setupWithAllParameters(packages, false /* fallbackLogicEnabled */, 1 /* numRelros */,
-                false /* isDebuggable */, false /* multiProcessDefault */);
+        setupWithAllParameters(packages, 1 /* numRelros */, false /* isDebuggable */,
+                false /* multiProcessDefault */);
     }
 
     private void setupWithPackagesAndMultiProcess(WebViewProviderInfo[] packages,
             boolean multiProcessDefault) {
-        setupWithAllParameters(packages, false /* fallbackLogicEnabled */, 1 /* numRelros */,
-                true /* isDebuggable */, multiProcessDefault);
+        setupWithAllParameters(packages, 1 /* numRelros */, true /* isDebuggable */,
+                multiProcessDefault);
     }
 
-    private void setupWithAllParameters(WebViewProviderInfo[] packages,
-            boolean fallbackLogicEnabled, int numRelros, boolean isDebuggable,
-            boolean multiProcessDefault) {
-        TestSystemImpl testing = new TestSystemImpl(packages, fallbackLogicEnabled, numRelros,
-                isDebuggable, multiProcessDefault);
+    private void setupWithAllParameters(WebViewProviderInfo[] packages, int numRelros,
+            boolean isDebuggable, boolean multiProcessDefault) {
+        TestSystemImpl testing = new TestSystemImpl(packages, numRelros, isDebuggable,
+                multiProcessDefault);
         mTestSystemImpl = Mockito.spy(testing);
         mWebViewUpdateServiceImpl =
             new WebViewUpdateServiceImpl(null /*Context*/, mTestSystemImpl);
@@ -514,49 +508,29 @@ public class WebViewUpdateServiceTest {
     }
 
     /**
-     * Scenario for testing migrating away from the fallback logic.
-     * We start with a primary package that's a disabled fallback, and an enabled secondary,
-     * so that the fallback being re-enabled will cause a provider switch, as that covers
-     * the most complex case.
+     * Scenario for testing re-enabling a fallback package.
      */
     @Test
-    public void testFallbackLogicMigration() {
-        String primaryPackage = "primary";
-        String secondaryPackage = "secondary";
+    public void testFallbackPackageEnabling() {
+        String testPackage = "testFallback";
         WebViewProviderInfo[] packages = new WebViewProviderInfo[] {
             new WebViewProviderInfo(
-                    primaryPackage, "", true /* default available */, true /* fallback */, null),
-            new WebViewProviderInfo(
-                    secondaryPackage, "", true /* default available */, false /* fallback */,
-                    null)};
-        setupWithPackagesAndFallbackLogic(packages);
+                    testPackage, "", true /* default available */, true /* fallback */, null)};
+        setupWithPackages(packages);
         mTestSystemImpl.setPackageInfo(
-                createPackageInfo(primaryPackage, false /* enabled */ , true /* valid */,
-                    true /* installed */));
-        mTestSystemImpl.setPackageInfo(
-                createPackageInfo(secondaryPackage, true /* enabled */ , true /* valid */,
+                createPackageInfo(testPackage, false /* enabled */ , true /* valid */,
                     true /* installed */));
 
-        // Check that the boot time logic re-enables and chooses the primary, and disables the
-        // fallback logic.
+        // Check that the boot time logic re-enables the fallback package.
         runWebViewBootPreparationOnMainSync();
         Mockito.verify(mTestSystemImpl).enablePackageForAllUsers(
-                Matchers.anyObject(), Mockito.eq(primaryPackage), Mockito.eq(true));
-        checkPreparationPhasesForPackage(primaryPackage, 1);
-        assertFalse(mTestSystemImpl.isFallbackLogicEnabled());
+                Matchers.anyObject(), Mockito.eq(testPackage), Mockito.eq(true));
 
-        // Disable primary again
-        mTestSystemImpl.setPackageInfo(createPackageInfo(primaryPackage, false /* enabled */,
-                        true /* valid */, true /* installed */));
-        mWebViewUpdateServiceImpl.packageStateChanged(primaryPackage,
-                WebViewUpdateService.PACKAGE_CHANGED, TestSystemImpl.PRIMARY_USER_ID);
-        checkPreparationPhasesForPackage(secondaryPackage, 1);
-
-        // Run boot logic again and check that we didn't re-enable the primary a second time.
-        runWebViewBootPreparationOnMainSync();
-        Mockito.verify(mTestSystemImpl, Mockito.times(1)).enablePackageForAllUsers(
-                Matchers.anyObject(), Mockito.eq(primaryPackage), Mockito.eq(true));
-        checkPreparationPhasesForPackage(secondaryPackage, 2);
+        // Fake the message about the enabling having changed the package state,
+        // and check we now use that package.
+        mWebViewUpdateServiceImpl.packageStateChanged(
+                testPackage, WebViewUpdateService.PACKAGE_CHANGED, TestSystemImpl.PRIMARY_USER_ID);
+        checkPreparationPhasesForPackage(testPackage, 1);
     }
 
     /**

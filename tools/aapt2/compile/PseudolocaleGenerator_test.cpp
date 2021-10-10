@@ -236,13 +236,14 @@ TEST(PseudolocaleGeneratorTest, PseudolocalizeOnlyDefaultConfigs) {
 
 TEST(PseudolocaleGeneratorTest, PluralsArePseudolocalized) {
   std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
-  std::unique_ptr<ResourceTable> table =
-      test::ResourceTableBuilder().SetPackageId("com.pkg", 0x7F).Build();
+  std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder().Build();
   std::unique_ptr<Plural> plural = util::make_unique<Plural>();
   plural->values = {util::make_unique<String>(table->string_pool.MakeRef("zero")),
                     util::make_unique<String>(table->string_pool.MakeRef("one"))};
-  ASSERT_TRUE(table->AddResource(test::ParseNameOrDie("com.pkg:plurals/foo"), ConfigDescription{},
-                                 {}, std::move(plural), context->GetDiagnostics()));
+  ASSERT_TRUE(table->AddResource(NewResourceBuilder(test::ParseNameOrDie("com.pkg:plurals/foo"))
+                                     .SetValue(std::move(plural))
+                                     .Build(),
+                                 context->GetDiagnostics()));
   std::unique_ptr<Plural> expected = util::make_unique<Plural>();
   expected->values = {util::make_unique<String>(table->string_pool.MakeRef("[žéŕö one]")),
                       util::make_unique<String>(table->string_pool.MakeRef("[öñé one]"))};
@@ -252,6 +253,7 @@ TEST(PseudolocaleGeneratorTest, PluralsArePseudolocalized) {
 
   const auto* actual = test::GetValueForConfig<Plural>(table.get(), "com.pkg:plurals/foo",
                                                        test::ParseConfigOrDie("en-rXA"));
+  ASSERT_NE(nullptr, actual);
   EXPECT_TRUE(actual->Equals(expected.get()));
 }
 
@@ -273,11 +275,14 @@ TEST(PseudolocaleGeneratorTest, RespectUntranslateableSections) {
     auto string = util::make_unique<String>(table->string_pool.MakeRef(original_style.str));
     string->untranslatable_sections.push_back(UntranslatableSection{6u, 11u});
 
-    ASSERT_TRUE(table->AddResource(test::ParseNameOrDie("android:string/foo"), ConfigDescription{},
-                                   {} /* product */, std::move(styled_string),
+    ASSERT_TRUE(table->AddResource(NewResourceBuilder(test::ParseNameOrDie("android:string/foo"))
+                                       .SetValue(std::move(styled_string))
+                                       .Build(),
                                    context->GetDiagnostics()));
-    ASSERT_TRUE(table->AddResource(test::ParseNameOrDie("android:string/bar"), ConfigDescription{},
-                                   {} /* product */, std::move(string), context->GetDiagnostics()));
+    ASSERT_TRUE(table->AddResource(NewResourceBuilder(test::ParseNameOrDie("android:string/bar"))
+                                       .SetValue(std::move(string))
+                                       .Build(),
+                                   context->GetDiagnostics()));
   }
 
   PseudolocaleGenerator generator;

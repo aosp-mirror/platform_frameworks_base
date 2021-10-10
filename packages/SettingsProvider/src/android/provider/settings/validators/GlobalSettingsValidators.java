@@ -16,16 +16,16 @@
 
 package android.provider.settings.validators;
 
+import static android.media.AudioFormat.SURROUND_SOUND_ENCODING;
 import static android.provider.settings.validators.SettingsValidators.ANY_INTEGER_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.ANY_STRING_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.BOOLEAN_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.PACKAGE_NAME_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.PERCENTAGE_INTEGER_VALIDATOR;
+import static android.view.Display.HdrCapabilities.HDR_TYPES;
 
-import android.media.AudioFormat;
 import android.os.BatteryManager;
 import android.provider.Settings.Global;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 
 import java.util.Map;
@@ -34,10 +34,6 @@ import java.util.Map;
  * Validators for Global settings
  */
 public class GlobalSettingsValidators {
-    /**
-     * All settings in {@link Global.SETTINGS_TO_BACKUP} array *must* have a non-null validator,
-     * otherwise they won't be restored.
-     */
     public static final Map<String, Validator> VALIDATORS = new ArrayMap<>();
 
     static {
@@ -92,31 +88,17 @@ public class GlobalSettingsValidators {
                 Global.ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS,
                 new DiscreteValueValidator(new String[] {"0", "1"}));
         VALIDATORS.put(
+                Global.ARE_USER_DISABLED_HDR_FORMATS_ALLOWED,
+                new DiscreteValueValidator(new String[] {"0", "1"}));
+        VALIDATORS.put(
+                Global.USER_DISABLED_HDR_FORMATS,
+                new DiscreteValueIntegerListValidator(",", HDR_TYPES));
+        VALIDATORS.put(
                 Global.ENCODED_SURROUND_OUTPUT,
                 new DiscreteValueValidator(new String[] {"0", "1", "2", "3"}));
         VALIDATORS.put(
                 Global.ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS,
-                value -> {
-                    try {
-                        String[] surroundFormats = TextUtils.split(value, ",");
-                        for (String format : surroundFormats) {
-                            int audioFormat = Integer.valueOf(format);
-                            boolean isSurroundFormat = false;
-                            for (int sf : AudioFormat.SURROUND_SOUND_ENCODING) {
-                                if (sf == audioFormat) {
-                                    isSurroundFormat = true;
-                                    break;
-                                }
-                            }
-                            if (!isSurroundFormat) {
-                                return false;
-                            }
-                        }
-                        return true;
-                    } catch (NumberFormatException e) {
-                        return false;
-                    }
-                });
+                new DiscreteValueIntegerListValidator(",", SURROUND_SOUND_ENCODING));
         VALIDATORS.put(
                 Global.LOW_POWER_MODE_STICKY_AUTO_DISABLE_LEVEL,
                 new InclusiveIntegerRangeValidator(0, 100));
@@ -145,10 +127,19 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.POWER_BUTTON_LONG_PRESS, new InclusiveIntegerRangeValidator(0, 5));
         VALIDATORS.put(
                 Global.POWER_BUTTON_VERY_LONG_PRESS, new InclusiveIntegerRangeValidator(0, 1));
-        VALIDATORS.put(Global.NOTIFICATION_BUBBLES, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.KEY_CHORD_POWER_VOLUME_UP, new InclusiveIntegerRangeValidator(0, 2));
         VALIDATORS.put(Global.CUSTOM_BUGREPORT_HANDLER_APP, ANY_STRING_VALIDATOR);
         VALIDATORS.put(Global.CUSTOM_BUGREPORT_HANDLER_USER, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.DEVELOPMENT_SETTINGS_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.NOTIFICATION_FEEDBACK_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.RESTRICTED_NETWORKING_MODE, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(
+                Global.ONE_HANDED_KEYGUARD_SIDE,
+                new InclusiveIntegerRangeValidator(
+                        /* first= */Global.ONE_HANDED_KEYGUARD_SIDE_LEFT,
+                        /* last= */Global.ONE_HANDED_KEYGUARD_SIDE_RIGHT));
+        VALIDATORS.put(Global.DISABLE_WINDOW_BLURS, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.DEVICE_CONFIG_SYNC_DISABLED, BOOLEAN_VALIDATOR);
     }
 }
+

@@ -20,8 +20,10 @@ import android.app.AppOpsManager;
 import android.app.AsyncNotedAppOp;
 import android.app.SyncNotedAppOp;
 import android.app.RuntimeAppOpAccessMessage;
+import android.content.AttributionSource;
 import android.content.pm.ParceledListSlice;
 import android.os.Bundle;
+import android.os.PackageTagsList;
 import android.os.RemoteCallback;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsActiveCallback;
@@ -35,11 +37,12 @@ interface IAppOpsService {
     // be kept in sync with frameworks/native/libs/permission/include/binder/IAppOpsService.h
     // and not be reordered
     int checkOperation(int code, int uid, String packageName);
-    int noteOperation(int code, int uid, String packageName, @nullable String attributionTag,
+    SyncNotedAppOp noteOperation(int code, int uid, String packageName, @nullable String attributionTag,
             boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage);
-    int startOperation(IBinder clientId, int code, int uid, String packageName,
+    SyncNotedAppOp startOperation(IBinder clientId, int code, int uid, String packageName,
             @nullable String attributionTag, boolean startIfModeDefault,
-            boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage);
+            boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
+            int attributionFlags, int attributionChainId);
     @UnsupportedAppUsage
     void finishOperation(IBinder clientId, int code, int uid, String packageName,
             @nullable String attributionTag);
@@ -52,10 +55,15 @@ interface IAppOpsService {
     // End of methods also called by native code.
     // Any new method exposed to native must be added after the last one, do not reorder
 
-    int noteProxyOperation(int code, int proxiedUid, String proxiedPackageName,
-            String proxiedAttributionTag, int proxyUid, String proxyPackageName,
-            String proxyAttributionTag, boolean shouldCollectAsyncNotedOp, String message,
-            boolean shouldCollectMessage);
+    SyncNotedAppOp noteProxyOperation(int code, in AttributionSource attributionSource,
+            boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
+            boolean skipProxyOperation);
+    SyncNotedAppOp startProxyOperation(int code, in AttributionSource attributionSource,
+            boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp, String message,
+            boolean shouldCollectMessage, boolean skipProxyOperation, int proxyAttributionFlags,
+            int proxiedAttributionFlags, int attributionChainId);
+    void finishProxyOperation(int code, in AttributionSource attributionSource,
+            boolean skipProxyOperation);
 
     // Remaining methods are only used in Java.
     int checkPackage(int uid, String packageName);
@@ -67,15 +75,16 @@ interface IAppOpsService {
     @UnsupportedAppUsage
     List<AppOpsManager.PackageOps> getOpsForPackage(int uid, String packageName, in int[] ops);
     void getHistoricalOps(int uid, String packageName, String attributionTag, in List<String> ops,
-            int filter, long beginTimeMillis, long endTimeMillis, int flags,
+            int historyFlags, int filter, long beginTimeMillis, long endTimeMillis, int flags,
             in RemoteCallback callback);
     void getHistoricalOpsFromDiskRaw(int uid, String packageName, String attributionTag,
-            in List<String> ops, int filter, long beginTimeMillis, long endTimeMillis, int flags,
-            in RemoteCallback callback);
+            in List<String> ops, int historyFlags, int filter, long beginTimeMillis,
+            long endTimeMillis, int flags, in RemoteCallback callback);
     void offsetHistory(long duration);
     void setHistoryParameters(int mode, long baseSnapshotInterval, int compressionStep);
     void addHistoricalOps(in AppOpsManager.HistoricalOps ops);
     void resetHistoryParameters();
+    void resetPackageOpsNoHistory(String packageName);
     void clearHistory();
     void rebootHistory(long offlineDurationMillis);
     List<AppOpsManager.PackageOps> getUidOps(int uid, in int[] ops);
@@ -87,12 +96,15 @@ interface IAppOpsService {
     void setAudioRestriction(int code, int usage, int uid, int mode, in String[] exceptionPackages);
 
     void setUserRestrictions(in Bundle restrictions, IBinder token, int userHandle);
-    void setUserRestriction(int code, boolean restricted, IBinder token, int userHandle, in String[] exceptionPackages);
+    void setUserRestriction(int code, boolean restricted, IBinder token, int userHandle, in PackageTagsList excludedPackageTags);
+
     void removeUser(int userHandle);
 
     void startWatchingActive(in int[] ops, IAppOpsActiveCallback callback);
     void stopWatchingActive(IAppOpsActiveCallback callback);
     boolean isOperationActive(int code, int uid, String packageName);
+    boolean isProxying(int op, String proxyPackageName, String proxyAttributionTag, int proxiedUid,
+            String proxiedPackageName);
 
     void startWatchingStarted(in int[] ops, IAppOpsStartedCallback callback);
     void stopWatchingStarted(IAppOpsStartedCallback callback);
@@ -106,7 +118,7 @@ interface IAppOpsService {
     void stopWatchingAsyncNoted(String packageName, IAppOpsAsyncNotedCallback callback);
     List<AsyncNotedAppOp> extractAsyncOps(String packageName);
 
-    int checkOperationRaw(int code, int uid, String packageName);
+    int checkOperationRaw(int code, int uid, String packageName, @nullable String attributionTag);
 
     void reloadNonHistoricalState();
 

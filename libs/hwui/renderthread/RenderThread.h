@@ -17,10 +17,11 @@
 #ifndef RENDERTHREAD_H_
 #define RENDERTHREAD_H_
 
-#include <GrContext.h>
+#include <surface_control_private.h>
+#include <GrDirectContext.h>
 #include <SkBitmap.h>
-#include <apex/choreographer.h>
 #include <cutils/compiler.h>
+#include <private/android/choreographer.h>
 #include <thread/ThreadBase.h>
 #include <utils/Looper.h>
 #include <utils/Thread.h>
@@ -78,6 +79,48 @@ struct VsyncSource {
     virtual ~VsyncSource() {}
 };
 
+typedef ASurfaceControl* (*ASC_create)(ASurfaceControl* parent, const char* debug_name);
+typedef void (*ASC_acquire)(ASurfaceControl* control);
+typedef void (*ASC_release)(ASurfaceControl* control);
+
+typedef void (*ASC_registerSurfaceStatsListener)(ASurfaceControl* control, void* context,
+        ASurfaceControl_SurfaceStatsListener func);
+typedef void (*ASC_unregisterSurfaceStatsListener)(void* context,
+                                                   ASurfaceControl_SurfaceStatsListener func);
+
+typedef int64_t (*ASCStats_getAcquireTime)(ASurfaceControlStats* stats);
+typedef uint64_t (*ASCStats_getFrameNumber)(ASurfaceControlStats* stats);
+
+typedef ASurfaceTransaction* (*AST_create)();
+typedef void (*AST_delete)(ASurfaceTransaction* transaction);
+typedef void (*AST_apply)(ASurfaceTransaction* transaction);
+typedef void (*AST_reparent)(ASurfaceTransaction* aSurfaceTransaction,
+                             ASurfaceControl* aSurfaceControl,
+                             ASurfaceControl* newParentASurfaceControl);
+typedef void (*AST_setVisibility)(ASurfaceTransaction* transaction,
+                                  ASurfaceControl* surface_control, int8_t visibility);
+typedef void (*AST_setZOrder)(ASurfaceTransaction* transaction, ASurfaceControl* surface_control,
+                              int32_t z_order);
+
+struct ASurfaceControlFunctions {
+    ASurfaceControlFunctions();
+
+    ASC_create createFunc;
+    ASC_acquire acquireFunc;
+    ASC_release releaseFunc;
+    ASC_registerSurfaceStatsListener registerListenerFunc;
+    ASC_unregisterSurfaceStatsListener unregisterListenerFunc;
+    ASCStats_getAcquireTime getAcquireTimeFunc;
+    ASCStats_getFrameNumber getFrameNumberFunc;
+
+    AST_create transactionCreateFunc;
+    AST_delete transactionDeleteFunc;
+    AST_apply transactionApplyFunc;
+    AST_reparent transactionReparentFunc;
+    AST_setVisibility transactionSetVisibilityFunc;
+    AST_setZOrder transactionSetZOrderFunc;
+};
+
 class ChoreographerSource;
 class DummyVsyncSource;
 
@@ -88,7 +131,7 @@ class RenderThread : private ThreadBase {
 
 public:
     // Sets a callback that fires before any RenderThread setup has occurred.
-    ANDROID_API static void setOnStartHook(JVMAttachHook onStartHook);
+    static void setOnStartHook(JVMAttachHook onStartHook);
     static JVMAttachHook getOnStartHook();
 
     WorkQueue& queue() { return ThreadBase::queue(); }
@@ -104,23 +147,29 @@ public:
     RenderState& renderState() const { return *mRenderState; }
     EglManager& eglManager() const { return *mEglManager; }
     ProfileDataContainer& globalProfileData() { return mGlobalProfileData; }
+    std::mutex& getJankDataMutex() { return mJankDataMutex; }
     Readback& readback();
 
-    GrContext* getGrContext() const { return mGrContext.get(); }
-    void setGrContext(sk_sp<GrContext> cxt);
-    sk_sp<GrContext> requireGrContext();
+    GrDirectContext* getGrContext() const { return mGrContext.get(); }
+    void setGrContext(sk_sp<GrDirectContext> cxt);
+    sk_sp<GrDirectContext> requireGrContext();
 
     CacheManager& cacheManager() { return *mCacheManager; }
-    VulkanManager& vulkanManager() { return *mVkManager; }
+    VulkanManager& vulkanManager();
 
     sk_sp<Bitmap> allocateHardwareBitmap(SkBitmap& skBitmap);
-    void dumpGraphicsMemory(int fd);
+    void dumpGraphicsMemory(int fd, bool includeProfileData);
+    void getMemoryUsage(size_t* cpuUsage, size_t* gpuUsage);
 
     void requireGlContext();
     void requireVkContext();
     void destroyRenderingContext();
 
     void preload();
+
+    const ASurfaceControlFunctions& getASurfaceControlFunctions() {
+        return mASurfaceControlFunctions;
+    }
 
     /**
      * isCurrent provides a way to query, if the caller is running on
@@ -145,6 +194,7 @@ private:
     friend class android::uirenderer::WebViewFunctor;
     friend class android::uirenderer::skiapipeline::VkFunctorDrawHandler;
     friend class android::uirenderer::VectorDrawable::Tree;
+    friend class sp<RenderThread>;
 
     RenderThread();
     virtual ~RenderThread();
@@ -187,9 +237,12 @@ private:
     ProfileDataContainer mGlobalProfileData;
     Readback* mReadback = nullptr;
 
-    sk_sp<GrContext> mGrContext;
+    sk_sp<GrDirectContext> mGrContext;
     CacheManager* mCacheManager;
-    VulkanManager* mVkManager;
+    sp<VulkanManager> mVkManager;
+
+    ASurfaceControlFunctions mASurfaceControlFunctions;
+    std::mutex mJankDataMutex;
 };
 
 } /* namespace renderthread */

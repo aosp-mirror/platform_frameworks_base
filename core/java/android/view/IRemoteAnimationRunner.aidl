@@ -30,11 +30,15 @@ oneway interface IRemoteAnimationRunner {
     /**
      * Called when the process needs to start the remote animation.
      *
+     * @param transition The old transition type. Must be one of WindowManager.TRANSIT_OLD_* values.
      * @param apps The list of apps to animate.
+     * @param wallpapers The list of wallpapers to animate.
+     * @param nonApps The list of non-app windows such as Bubbles to animate.
      * @param finishedCallback The callback to invoke when the animation is finished.
      */
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
-    void onAnimationStart(in RemoteAnimationTarget[] apps, in RemoteAnimationTarget[] wallpapers,
+    void onAnimationStart(int transit, in RemoteAnimationTarget[] apps,
+            in RemoteAnimationTarget[] wallpapers, in RemoteAnimationTarget[] nonApps,
             in IRemoteAnimationFinishedCallback finishedCallback);
 
     /**

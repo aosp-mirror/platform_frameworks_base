@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Copyright (C) 2020 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="pip_phone_close" msgid="5783752637260411309">"Bezárás"</string>
+    <string name="pip_phone_expand" msgid="2579292903468287504">"Kibontás"</string>
+    <string name="pip_phone_settings" msgid="5468987116750491918">"Beállítások"</string>
+    <string name="pip_menu_title" msgid="5393619322111827096">"Menü"</string>
+    <string name="pip_notification_title" msgid="1347104727641353453">"A(z) <xliff:g id="NAME">%s</xliff:g> kép a képben funkciót használ"</string>
+    <string name="pip_notification_message" msgid="8854051911700302620">"Ha nem szeretné, hogy a(z) <xliff:g id="NAME">%s</xliff:g> használja ezt a funkciót, koppintson a beállítások megnyitásához, és kapcsolja ki."</string>
+    <string name="pip_play" msgid="3496151081459417097">"Lejátszás"</string>
+    <string name="pip_pause" msgid="690688849510295232">"Szüneteltetés"</string>
+    <string name="pip_skip_to_next" msgid="8403429188794867653">"Ugrás a következőre"</string>
+    <string name="pip_skip_to_prev" msgid="7172158111196394092">"Ugrás az előzőre"</string>
+    <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Átméretezés"</string>
+    <string name="dock_forced_resizable" msgid="1749750436092293116">"Lehet, hogy az alkalmazás nem működik osztott képernyős nézetben."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Az alkalmazás nem támogatja az osztott képernyős nézetet."</string>
+    <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Előfordulhat, hogy az alkalmazás nem működik másodlagos kijelzőn."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Az alkalmazást nem lehet másodlagos kijelzőn elindítani."</string>
+    <string name="accessibility_divider" msgid="703810061635792791">"Elválasztó az osztott nézetben"</string>
+    <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Bal oldali teljes képernyőre"</string>
+    <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Bal oldali 70%-ra"</string>
+    <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Bal oldali 50%-ra"</string>
+    <string name="accessibility_action_divider_left_30" msgid="6023611335723838727">"Bal oldali 30%-ra"</string>
+    <string name="accessibility_action_divider_right_full" msgid="3408505054325944903">"Jobb oldali teljes képernyőre"</string>
+    <string name="accessibility_action_divider_top_full" msgid="3495871951082107594">"Felső teljes képernyőre"</string>
+    <string name="accessibility_action_divider_top_70" msgid="1779164068887875474">"Felső 70%-ra"</string>
+    <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Felső 50%-ra"</string>
+    <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Felső 30%-ra"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Alsó teljes képernyőre"</string>
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Egykezes mód használata"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"A kilépéshez csúsztasson felfelé a képernyő aljáról, vagy koppintson az alkalmazás felett a képernyő bármelyik részére"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Egykezes mód indítása"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Kilépés az egykezes módból"</string>
+    <string name="bubbles_settings_button_description" msgid="1301286017420516912">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g>-buborékok beállításai"</string>
+    <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"További elemeket tartalmazó menü"</string>
+    <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Visszaküldés a verembe"</string>
+    <string name="bubble_content_description_single" msgid="8495748092720065813">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>, <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
+    <string name="bubble_content_description_stack" msgid="8071515017164630429">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> a(z) <xliff:g id="APP_NAME">%2$s</xliff:g> alkalmazásból és <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> további"</string>
+    <string name="bubble_accessibility_action_move_top_left" msgid="2644118920500782758">"Áthelyezés fel és balra"</string>
+    <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Áthelyezés fel és jobbra"</string>
+    <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Áthelyezés le és balra"</string>
+    <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Áthelyezés le és jobbra"</string>
+    <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> beállításai"</string>
+    <string name="bubble_dismiss_text" msgid="8816558050659478158">"Buborék elvetése"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Ne jelenjen meg a beszélgetés buborékban"</string>
+    <string name="bubbles_user_education_title" msgid="2112319053732691899">"Buborékokat használó csevegés"</string>
+    <string name="bubbles_user_education_description" msgid="4215862563054175407">"Az új beszélgetések lebegő ikonként, vagyis buborékként jelennek meg. A buborék megnyitásához koppintson rá. Áthelyezéshez húzza a kívánt helyre."</string>
+    <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Buborékok vezérlése bármikor"</string>
+    <string name="bubbles_user_education_manage" msgid="3460756219946517198">"A Kezelés gombra koppintva kapcsolhatja ki az alkalmazásból származó buborékokat"</string>
+    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Értem"</string>
+    <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Nincsenek buborékok a közelmúltból"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"A legutóbbi és az elvetett buborékok itt jelennek majd meg"</string>
+    <string name="notification_bubble_title" msgid="6082910224488253378">"Buborék"</string>
+    <string name="manage_bubbles_text" msgid="7730624269650594419">"Kezelés"</string>
+    <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Buborék elvetve."</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"Koppintson az alkalmazás újraindításához és a teljes képernyős mód elindításához."</string>
+    <string name="got_it" msgid="4428750913636945527">"Rendben"</string>
+</resources>

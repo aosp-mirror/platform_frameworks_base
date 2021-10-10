@@ -84,6 +84,10 @@ final class HdmiControlShellCommand extends ShellCommand {
         pw.println("                --args <vendor specific arguments>");
         pw.println("                [--id <true if vendor command should be sent with vendor id>]");
         pw.println("      Send a Vendor Command to the given target device");
+        pw.println("  cec_setting get <setting name>");
+        pw.println("      Get the current value of a CEC setting");
+        pw.println("  cec_setting set <setting name> <value>");
+        pw.println("      Set the value of a CEC setting");
         pw.println("  setsystemaudiomode, setsam [on|off]");
         pw.println("      Sets the System Audio Mode feature on or off on TV devices");
         pw.println("  setarc [on|off]");
@@ -99,6 +103,8 @@ final class HdmiControlShellCommand extends ShellCommand {
                 return oneTouchPlay(pw);
             case "vendorcommand":
                 return vendorCommand(pw);
+            case "cec_setting":
+                return cecSetting(pw);
             case "setsystemaudiomode":
             case "setsam":
                 return setSystemAudioMode(pw);
@@ -165,6 +171,41 @@ final class HdmiControlShellCommand extends ShellCommand {
         pw.println("Sending <Vendor Command>");
         mBinderService.sendVendorCommand(deviceType, destination, params, hasVendorId);
         return 0;
+    }
+
+    private int cecSetting(PrintWriter pw) throws RemoteException {
+        if (getRemainingArgsCount() < 1) {
+            throw new IllegalArgumentException("Expected at least 1 argument (operation).");
+        }
+        String operation = getNextArgRequired();
+        switch (operation) {
+            case "get": {
+                String setting = getNextArgRequired();
+                try {
+                    String value = mBinderService.getCecSettingStringValue(setting);
+                    pw.println(setting + " = " + value);
+                } catch (IllegalArgumentException e) {
+                    int intValue = mBinderService.getCecSettingIntValue(setting);
+                    pw.println(setting + " = " + intValue);
+                }
+                return 0;
+            }
+            case "set": {
+                String setting = getNextArgRequired();
+                String value = getNextArgRequired();
+                try {
+                    mBinderService.setCecSettingStringValue(setting, value);
+                    pw.println(setting + " = " + value);
+                } catch (IllegalArgumentException e) {
+                    int intValue = Integer.parseInt(value);
+                    mBinderService.setCecSettingIntValue(setting, intValue);
+                    pw.println(setting + " = " + intValue);
+                }
+                return 0;
+            }
+            default:
+                throw new IllegalArgumentException("Unknown operation: " + operation);
+        }
     }
 
     private int setSystemAudioMode(PrintWriter pw) throws RemoteException {

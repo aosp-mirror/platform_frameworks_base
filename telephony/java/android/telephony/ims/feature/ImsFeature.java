@@ -199,8 +199,9 @@ public abstract class ImsFeature {
          * {@link MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_UT}, or
          * {@link MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_SMS}.
          * @param radioTech The radio tech that this capability failed for, defined as
-         * {@link ImsRegistrationImplBase#REGISTRATION_TECH_LTE} or
-         * {@link ImsRegistrationImplBase#REGISTRATION_TECH_IWLAN}.
+         * {@link ImsRegistrationImplBase#REGISTRATION_TECH_LTE},
+         * {@link ImsRegistrationImplBase#REGISTRATION_TECH_IWLAN} or
+         * {@link ImsRegistrationImplBase#REGISTRATION_TECH_CROSS_SIM}.
          * @param reason The reason this capability was unable to be changed, defined as
          * {@link #CAPABILITY_ERROR_GENERIC} or {@link #CAPABILITY_SUCCESS}.
          */

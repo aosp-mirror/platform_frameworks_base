@@ -30,7 +30,10 @@ import android.os.HandlerExecutor;
 import android.os.UserManager;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.util.ConcurrentUtils;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 
@@ -40,12 +43,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Controller used to retrieve information related to a hotspot.
  */
-@Singleton
+@SysUISingleton
 public class HotspotControllerImpl implements HotspotController, WifiManager.SoftApCallback {
 
     private static final String TAG = "HotspotController";
@@ -143,7 +145,7 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
      * changes. It will immediately trigger the callback added to notify current state.
      */
     @Override
-    public void addCallback(Callback callback) {
+    public void addCallback(@NonNull Callback callback) {
         synchronized (mCallbacks) {
             if (callback == null || mCallbacks.contains(callback)) return;
             if (DEBUG) Log.d(TAG, "addCallback " + callback);
@@ -163,7 +165,7 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
     }
 
     @Override
-    public void removeCallback(Callback callback) {
+    public void removeCallback(@NonNull Callback callback) {
         if (callback == null) return;
         if (DEBUG) Log.d(TAG, "removeCallback " + callback);
         synchronized (mCallbacks) {

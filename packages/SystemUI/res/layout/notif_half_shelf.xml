@@ -64,10 +64,12 @@
                     android:layout_gravity="center"
                     android:padding="8dp"
                     android:gravity="center_vertical|start"
-                    android:textSize="15sp"
                     android:ellipsize="end"
-                    android:maxLines="1"
-                    style="@style/TextAppearance.NotificationInfo.Title" />
+                    android:maxLines="2"
+                    android:textColor="?android:attr/textColorPrimary"
+                    android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
+                    android:textSize="16sp"
+                />
 
                 <Switch
                     android:id="@+id/toggle"
@@ -80,18 +82,13 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="@color/notification_channel_dialog_separator"
+                android:background="@*android:color/background_device_default_light"
             />
 
             <!-- ChannelRows get added dynamically -->
 
         </com.android.systemui.statusbar.notification.row.ChannelEditorListView>
-        <!-- divider view -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/notification_channel_dialog_separator"
-        />
+
         <RelativeLayout
             android:id="@+id/bottom_actions"
             android:layout_width="match_parent"

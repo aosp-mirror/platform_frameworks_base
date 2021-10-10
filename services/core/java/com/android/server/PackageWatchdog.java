@@ -23,6 +23,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.net.ConnectivityModuleConnector;
@@ -39,34 +40,37 @@ import android.util.AtomicFile;
 import android.util.LongArrayQueue;
 import android.util.MathUtils;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
 
 import libcore.io.IoUtils;
 
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -116,14 +120,25 @@ public class PackageWatchdog {
     static final int DEFAULT_TRIGGER_FAILURE_COUNT = 5;
     @VisibleForTesting
     static final long DEFAULT_OBSERVING_DURATION_MS = TimeUnit.DAYS.toMillis(2);
+    // Sliding window for tracking how many mitigation calls were made for a package.
+    @VisibleForTesting
+    static final long DEFAULT_DEESCALATION_WINDOW_MS = TimeUnit.HOURS.toMillis(1);
     // Whether explicit health checks are enabled or not
     private static final boolean DEFAULT_EXPLICIT_HEALTH_CHECK_ENABLED = true;
 
     @VisibleForTesting
     static final int DEFAULT_BOOT_LOOP_TRIGGER_COUNT = 5;
     static final long DEFAULT_BOOT_LOOP_TRIGGER_WINDOW_MS = TimeUnit.MINUTES.toMillis(10);
+
+    // These properties track individual system server boot events, and are reset once the boot
+    // threshold is met, or the boot loop trigger window is exceeded between boot events.
     private static final String PROP_RESCUE_BOOT_COUNT = "sys.rescue_boot_count";
     private static final String PROP_RESCUE_BOOT_START = "sys.rescue_boot_start";
+
+    // These properties track multiple calls made to observers tracking boot loops. They are reset
+    // when the de-escalation window is exceeded between boot events.
+    private static final String PROP_BOOT_MITIGATION_WINDOW_START = "sys.boot_mitigation_start";
+    private static final String PROP_BOOT_MITIGATION_COUNT = "sys.boot_mitigation_count";
 
     private long mNumberOfNativeCrashPollsRemaining;
 
@@ -136,6 +151,12 @@ public class PackageWatchdog {
     private static final String ATTR_DURATION = "duration";
     private static final String ATTR_EXPLICIT_HEALTH_CHECK_DURATION = "health-check-duration";
     private static final String ATTR_PASSED_HEALTH_CHECK = "passed-health-check";
+    private static final String ATTR_MITIGATION_CALLS = "mitigation-calls";
+
+    // A file containing information about the current mitigation count in the case of a boot loop.
+    // This allows boot loop information to persist in the case of an fs-checkpoint being
+    // aborted.
+    private static final String METADATA_FILE = "/metadata/watchdog/mitigation_count.txt";
 
     @GuardedBy("PackageWatchdog.class")
     private static PackageWatchdog sPackageWatchdog;
@@ -161,6 +182,9 @@ public class PackageWatchdog {
     private final Runnable mSaveToFile = this::saveToFile;
     private final SystemClock mSystemClock;
     private final BootThreshold mBootThreshold;
+    private final DeviceConfig.OnPropertiesChangedListener
+            mOnPropertyChangedListener = this::onPropertyChanged;
+
     // The set of packages that have been synced with the ExplicitHealthCheckController
     @GuardedBy("mLock")
     private Set<String> mRequestedHealthCheckPackages = new ArraySet<>();
@@ -184,7 +208,6 @@ public class PackageWatchdog {
     @FunctionalInterface
     @VisibleForTesting
     interface SystemClock {
-        // TODO: Add elapsedRealtime to this interface
         long uptimeMillis();
     }
 
@@ -239,10 +262,7 @@ public class PackageWatchdog {
             mIsPackagesReady = true;
             mHealthCheckController.setCallbacks(packageName -> onHealthCheckPassed(packageName),
                     packages -> onSupportedPackages(packages),
-                    () -> {
-                            syncRequestsAsync();
-                            mSyncRequired = true;
-                    });
+                    this::onSyncRequestNotified);
             setPropertyChangedListenerLocked();
             updateConfigs();
             registerConnectivityModuleHealthListener();
@@ -306,6 +326,8 @@ public class PackageWatchdog {
             MonitoredPackage pkg = newMonitoredPackage(packageNames.get(i), durationMs, false);
             if (pkg != null) {
                 packages.add(pkg);
+            } else {
+                Slog.w(TAG, "Failed to create MonitoredPackage for pkg=" + packageNames.get(i));
             }
         }
 
@@ -350,10 +372,12 @@ public class PackageWatchdog {
      * even from a previous boot.
      */
     public void unregisterHealthObserver(PackageHealthObserver observer) {
-        synchronized (mLock) {
-            mAllObservers.remove(observer.getName());
-        }
-        syncState("unregistering observer: " + observer.getName());
+        mLongTaskHandler.post(() -> {
+            synchronized (mLock) {
+                mAllObservers.remove(observer.getName());
+            }
+            syncState("unregistering observer: " + observer.getName());
+        });
     }
 
     /**
@@ -385,6 +409,7 @@ public class PackageWatchdog {
                         // Observer that will receive failure for versionedPackage
                         PackageHealthObserver currentObserverToNotify = null;
                         int currentObserverImpact = Integer.MAX_VALUE;
+                        MonitoredPackage currentMonitoredPackage = null;
 
                         // Find observer with least user impact
                         for (int oIndex = 0; oIndex < mAllObservers.size(); oIndex++) {
@@ -393,19 +418,33 @@ public class PackageWatchdog {
                             if (registeredObserver != null
                                     && observer.onPackageFailureLocked(
                                     versionedPackage.getPackageName())) {
+                                MonitoredPackage p = observer.getMonitoredPackage(
+                                        versionedPackage.getPackageName());
+                                int mitigationCount = 1;
+                                if (p != null) {
+                                    mitigationCount = p.getMitigationCountLocked() + 1;
+                                }
                                 int impact = registeredObserver.onHealthCheckFailed(
-                                        versionedPackage, failureReason);
+                                        versionedPackage, failureReason, mitigationCount);
                                 if (impact != PackageHealthObserverImpact.USER_IMPACT_NONE
                                         && impact < currentObserverImpact) {
                                     currentObserverToNotify = registeredObserver;
                                     currentObserverImpact = impact;
+                                    currentMonitoredPackage = p;
                                 }
                             }
                         }
 
                         // Execute action with least user impact
                         if (currentObserverToNotify != null) {
-                            currentObserverToNotify.execute(versionedPackage, failureReason);
+                            int mitigationCount = 1;
+                            if (currentMonitoredPackage != null) {
+                                currentMonitoredPackage.noteMitigationCallLocked();
+                                mitigationCount =
+                                        currentMonitoredPackage.getMitigationCountLocked();
+                            }
+                            currentObserverToNotify.execute(versionedPackage,
+                                    failureReason, mitigationCount);
                         }
                     }
                 }
@@ -426,7 +465,7 @@ public class PackageWatchdog {
             PackageHealthObserver registeredObserver = observer.registeredObserver;
             if (registeredObserver != null) {
                 int impact = registeredObserver.onHealthCheckFailed(
-                        failingPackage, failureReason);
+                        failingPackage, failureReason, 1);
                 if (impact != PackageHealthObserverImpact.USER_IMPACT_NONE
                         && impact < currentObserverImpact) {
                     currentObserverToNotify = registeredObserver;
@@ -435,7 +474,7 @@ public class PackageWatchdog {
             }
         }
         if (currentObserverToNotify != null) {
-            currentObserverToNotify.execute(failingPackage,  failureReason);
+            currentObserverToNotify.execute(failingPackage,  failureReason, 1);
         }
     }
 
@@ -447,13 +486,14 @@ public class PackageWatchdog {
         synchronized (mLock) {
             if (mBootThreshold.incrementAndTest()) {
                 mBootThreshold.reset();
+                int mitigationCount = mBootThreshold.getMitigationCount() + 1;
                 PackageHealthObserver currentObserverToNotify = null;
                 int currentObserverImpact = Integer.MAX_VALUE;
                 for (int i = 0; i < mAllObservers.size(); i++) {
                     final ObserverInternal observer = mAllObservers.valueAt(i);
                     PackageHealthObserver registeredObserver = observer.registeredObserver;
                     if (registeredObserver != null) {
-                        int impact = registeredObserver.onBootLoop();
+                        int impact = registeredObserver.onBootLoop(mitigationCount);
                         if (impact != PackageHealthObserverImpact.USER_IMPACT_NONE
                                 && impact < currentObserverImpact) {
                             currentObserverToNotify = registeredObserver;
@@ -462,7 +502,9 @@ public class PackageWatchdog {
                     }
                 }
                 if (currentObserverToNotify != null) {
-                    currentObserverToNotify.executeBootLoopMitigation();
+                    mBootThreshold.setMitigationCount(mitigationCount);
+                    mBootThreshold.saveMitigationCountToMetadata();
+                    currentObserverToNotify.executeBootLoopMitigation(mitigationCount);
                 }
             }
         }
@@ -495,6 +537,7 @@ public class PackageWatchdog {
         synchronized (mLock) {
             mIsHealthCheckEnabled = enabled;
             mHealthCheckController.setEnabled(enabled);
+            mSyncRequired = true;
             // Prune to update internal state whenever health check is enabled/disabled
             syncState("health check state " + (enabled ? "enabled" : "disabled"));
         }
@@ -556,6 +599,8 @@ public class PackageWatchdog {
          * @param versionedPackage the package that is failing. This may be null if a native
          *                          service is crashing.
          * @param failureReason   the type of failure that is occurring.
+         * @param mitigationCount the number of times mitigation has been called for this package
+         *                        (including this time).
          *
          *
          * @return any one of {@link PackageHealthObserverImpact} to express the impact
@@ -563,7 +608,8 @@ public class PackageWatchdog {
          */
         @PackageHealthObserverImpact int onHealthCheckFailed(
                 @Nullable VersionedPackage versionedPackage,
-                @FailureReasons int failureReason);
+                @FailureReasons int failureReason,
+                int mitigationCount);
 
         /**
          * Executes mitigation for {@link #onHealthCheckFailed}.
@@ -571,24 +617,31 @@ public class PackageWatchdog {
          * @param versionedPackage the package that is failing. This may be null if a native
          *                          service is crashing.
          * @param failureReason   the type of failure that is occurring.
+         * @param mitigationCount the number of times mitigation has been called for this package
+         *                        (including this time).
          * @return {@code true} if action was executed successfully, {@code false} otherwise
          */
         boolean execute(@Nullable VersionedPackage versionedPackage,
-                @FailureReasons int failureReason);
+                @FailureReasons int failureReason, int mitigationCount);
 
 
         /**
          * Called when the system server has booted several times within a window of time, defined
          * by {@link #mBootThreshold}
+         *
+         * @param mitigationCount the number of times mitigation has been attempted for this
+         *                        boot loop (including this time).
          */
-        default @PackageHealthObserverImpact int onBootLoop() {
+        default @PackageHealthObserverImpact int onBootLoop(int mitigationCount) {
             return PackageHealthObserverImpact.USER_IMPACT_NONE;
         }
 
         /**
          * Executes mitigation for {@link #onBootLoop}
+         * @param mitigationCount the number of times mitigation has been attempted for this
+         *                        boot loop (including this time).
          */
-        default boolean executeBootLoopMitigation() {
+        default boolean executeBootLoopMitigation(int mitigationCount) {
             return false;
         }
 
@@ -619,9 +672,17 @@ public class PackageWatchdog {
         }
     }
 
+    @VisibleForTesting
     long getTriggerFailureCount() {
         synchronized (mLock) {
             return mTriggerFailureCount;
+        }
+    }
+
+    @VisibleForTesting
+    long getTriggerFailureDurationMs() {
+        synchronized (mLock) {
+            return mTriggerFailureDurationMs;
         }
     }
 
@@ -681,7 +742,7 @@ public class PackageWatchdog {
         synchronized (mLock) {
             for (int observerIdx = 0; observerIdx < mAllObservers.size(); observerIdx++) {
                 ObserverInternal observer = mAllObservers.valueAt(observerIdx);
-                MonitoredPackage monitoredPackage = observer.packages.get(packageName);
+                MonitoredPackage monitoredPackage = observer.getMonitoredPackage(packageName);
 
                 if (monitoredPackage != null) {
                     int oldState = monitoredPackage.getHealthCheckStateLocked();
@@ -710,7 +771,8 @@ public class PackageWatchdog {
             Slog.d(TAG, "Received supported packages " + supportedPackages);
             Iterator<ObserverInternal> oit = mAllObservers.values().iterator();
             while (oit.hasNext()) {
-                Iterator<MonitoredPackage> pit = oit.next().packages.values().iterator();
+                Iterator<MonitoredPackage> pit = oit.next().getMonitoredPackages()
+                        .values().iterator();
                 while (pit.hasNext()) {
                     MonitoredPackage monitoredPackage = pit.next();
                     String packageName = monitoredPackage.getName();
@@ -735,15 +797,21 @@ public class PackageWatchdog {
         }
     }
 
+    private void onSyncRequestNotified() {
+        synchronized (mLock) {
+            mSyncRequired = true;
+            syncRequestsAsync();
+        }
+    }
+
     @GuardedBy("mLock")
     private Set<String> getPackagesPendingHealthChecksLocked() {
-        Slog.d(TAG, "Getting all observed packages pending health checks");
         Set<String> packages = new ArraySet<>();
         Iterator<ObserverInternal> oit = mAllObservers.values().iterator();
         while (oit.hasNext()) {
             ObserverInternal observer = oit.next();
             Iterator<MonitoredPackage> pit =
-                    observer.packages.values().iterator();
+                    observer.getMonitoredPackages().values().iterator();
             while (pit.hasNext()) {
                 MonitoredPackage monitoredPackage = pit.next();
                 String packageName = monitoredPackage.getName();
@@ -786,7 +854,6 @@ public class PackageWatchdog {
             Slog.i(TAG, "Cancelling state sync, nothing to sync");
             mUptimeAtLastStateSync = 0;
         } else {
-            Slog.i(TAG, "Scheduling next state sync in " + durationMs + "ms");
             mUptimeAtLastStateSync = mSystemClock.uptimeMillis();
             mShortTaskHandler.postDelayed(mSyncStateWithScheduledReason, durationMs);
         }
@@ -801,7 +868,8 @@ public class PackageWatchdog {
     private long getNextStateSyncMillisLocked() {
         long shortestDurationMs = Long.MAX_VALUE;
         for (int oIndex = 0; oIndex < mAllObservers.size(); oIndex++) {
-            ArrayMap<String, MonitoredPackage> packages = mAllObservers.valueAt(oIndex).packages;
+            ArrayMap<String, MonitoredPackage> packages = mAllObservers.valueAt(oIndex)
+                    .getMonitoredPackages();
             for (int pIndex = 0; pIndex < packages.size(); pIndex++) {
                 MonitoredPackage mp = packages.valueAt(pIndex);
                 long duration = mp.getShortestScheduleDurationMsLocked();
@@ -826,7 +894,6 @@ public class PackageWatchdog {
             return;
         }
 
-        Slog.i(TAG, "Removing " + elapsedMs + "ms from all packages on all observers");
         Iterator<ObserverInternal> it = mAllObservers.values().iterator();
         while (it.hasNext()) {
             ObserverInternal observer = it.next();
@@ -835,7 +902,7 @@ public class PackageWatchdog {
             if (!failedPackages.isEmpty()) {
                 onHealthCheckFailed(observer, failedPackages);
             }
-            if (observer.packages.isEmpty() && (observer.registeredObserver == null
+            if (observer.getMonitoredPackages().isEmpty() && (observer.registeredObserver == null
                     || !observer.registeredObserver.isPersistent())) {
                 Slog.i(TAG, "Discarding observer " + observer.name + ". All packages expired");
                 it.remove();
@@ -851,14 +918,36 @@ public class PackageWatchdog {
                 if (registeredObserver != null) {
                     Iterator<MonitoredPackage> it = failedPackages.iterator();
                     while (it.hasNext()) {
-                        VersionedPackage versionedPkg = it.next().mPackage;
-                        Slog.i(TAG, "Explicit health check failed for package " + versionedPkg);
-                        registeredObserver.execute(versionedPkg,
-                                PackageWatchdog.FAILURE_REASON_EXPLICIT_HEALTH_CHECK);
+                        VersionedPackage versionedPkg = getVersionedPackage(it.next().getName());
+                        if (versionedPkg != null) {
+                            Slog.i(TAG,
+                                    "Explicit health check failed for package " + versionedPkg);
+                            registeredObserver.execute(versionedPkg,
+                                    PackageWatchdog.FAILURE_REASON_EXPLICIT_HEALTH_CHECK, 1);
+                        }
                     }
                 }
             }
         });
+    }
+
+    /**
+     * Gets PackageInfo for the given package. Matches any user and apex.
+     *
+     * @throws PackageManager.NameNotFoundException if no such package is installed.
+     */
+    private PackageInfo getPackageInfo(String packageName)
+            throws PackageManager.NameNotFoundException {
+        PackageManager pm = mContext.getPackageManager();
+        try {
+            // The MATCH_ANY_USER flag doesn't mix well with the MATCH_APEX
+            // flag, so make two separate attempts to get the package info.
+            // We don't need both flags at the same time because we assume
+            // apex files are always installed for all users.
+            return pm.getPackageInfo(packageName, PackageManager.MATCH_ANY_USER);
+        } catch (PackageManager.NameNotFoundException e) {
+            return pm.getPackageInfo(packageName, PackageManager.MATCH_APEX);
+        }
     }
 
     @Nullable
@@ -868,8 +957,7 @@ public class PackageWatchdog {
             return null;
         }
         try {
-            final long versionCode = pm.getPackageInfo(
-                    packageName, 0 /* flags */).getLongVersionCode();
+            final long versionCode = getPackageInfo(packageName).getLongVersionCode();
             return new VersionedPackage(packageName, versionCode);
         } catch (PackageManager.NameNotFoundException e) {
             return null;
@@ -887,8 +975,7 @@ public class PackageWatchdog {
         mAllObservers.clear();
         try {
             infile = mPolicyFile.openRead();
-            final XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(infile, StandardCharsets.UTF_8.name());
+            final TypedXmlPullParser parser = Xml.resolvePullParser(infile);
             XmlUtils.beginDocument(parser, TAG_PACKAGE_WATCHDOG);
             int outerDepth = parser.getDepth();
             while (XmlUtils.nextElementWithin(parser, outerDepth)) {
@@ -907,24 +994,33 @@ public class PackageWatchdog {
         }
     }
 
+    private void onPropertyChanged(DeviceConfig.Properties properties) {
+        try {
+            updateConfigs();
+        } catch (Exception ignore) {
+            Slog.w(TAG, "Failed to reload device config changes");
+        }
+    }
+
     /** Adds a {@link DeviceConfig#OnPropertiesChangedListener}. */
     private void setPropertyChangedListenerLocked() {
         DeviceConfig.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_ROLLBACK,
                 mContext.getMainExecutor(),
-                (properties) -> {
-                    if (!DeviceConfig.NAMESPACE_ROLLBACK.equals(properties.getNamespace())) {
-                        return;
-                    }
-                    updateConfigs();
-                });
+                mOnPropertyChangedListener);
+    }
+
+    @VisibleForTesting
+    void removePropertyChangedListener() {
+        DeviceConfig.removeOnPropertiesChangedListener(mOnPropertyChangedListener);
     }
 
     /**
      * Health check is enabled or disabled after reading the flags
      * from DeviceConfig.
      */
-    private void updateConfigs() {
+    @VisibleForTesting
+    void updateConfigs() {
         synchronized (mLock) {
             mTriggerFailureCount = DeviceConfig.getInt(
                     DeviceConfig.NAMESPACE_ROLLBACK,
@@ -980,11 +1076,10 @@ public class PackageWatchdog {
             }
 
             try {
-                XmlSerializer out = new FastXmlSerializer();
-                out.setOutput(stream, StandardCharsets.UTF_8.name());
+                TypedXmlSerializer out = Xml.resolveSerializer(stream);
                 out.startDocument(null, true);
                 out.startTag(null, TAG_PACKAGE_WATCHDOG);
-                out.attribute(null, ATTR_VERSION, Integer.toString(DB_VERSION));
+                out.attributeInt(null, ATTR_VERSION, DB_VERSION);
                 for (int oIndex = 0; oIndex < mAllObservers.size(); oIndex++) {
                     mAllObservers.valueAt(oIndex).writeLocked(out);
                 }
@@ -1007,6 +1102,33 @@ public class PackageWatchdog {
             mLongTaskHandler.post(mSaveToFile);
         }
     }
+
+    /** Convert a {@code LongArrayQueue} to a String of comma-separated values. */
+    public static String longArrayQueueToString(LongArrayQueue queue) {
+        if (queue.size() > 0) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(queue.get(0));
+            for (int i = 1; i < queue.size(); i++) {
+                sb.append(",");
+                sb.append(queue.get(i));
+            }
+            return sb.toString();
+        }
+        return "";
+    }
+
+    /** Parse a comma-separated String of longs into a LongArrayQueue. */
+    public static LongArrayQueue parseLongArrayQueue(String commaSeparatedValues) {
+        LongArrayQueue result = new LongArrayQueue();
+        if (!TextUtils.isEmpty(commaSeparatedValues)) {
+            String[] values = commaSeparatedValues.split(",");
+            for (String value : values) {
+                result.addLast(Long.parseLong(value));
+            }
+        }
+        return result;
+    }
+
 
     /** Dump status of every observer in mAllObservers. */
     public void dump(IndentingPrintWriter pw) {
@@ -1033,7 +1155,7 @@ public class PackageWatchdog {
     private static class ObserverInternal {
         public final String name;
         @GuardedBy("mLock")
-        public final ArrayMap<String, MonitoredPackage> packages = new ArrayMap<>();
+        private final ArrayMap<String, MonitoredPackage> mPackages = new ArrayMap<>();
         @Nullable
         @GuardedBy("mLock")
         public PackageHealthObserver registeredObserver;
@@ -1048,12 +1170,12 @@ public class PackageWatchdog {
          * Does not persist any package failure thresholds.
          */
         @GuardedBy("mLock")
-        public boolean writeLocked(XmlSerializer out) {
+        public boolean writeLocked(TypedXmlSerializer out) {
             try {
                 out.startTag(null, TAG_OBSERVER);
                 out.attribute(null, ATTR_NAME, name);
-                for (int i = 0; i < packages.size(); i++) {
-                    MonitoredPackage p = packages.valueAt(i);
+                for (int i = 0; i < mPackages.size(); i++) {
+                    MonitoredPackage p = mPackages.valueAt(i);
                     p.writeLocked(out);
                 }
                 out.endTag(null, TAG_OBSERVER);
@@ -1068,11 +1190,11 @@ public class PackageWatchdog {
         public void updatePackagesLocked(List<MonitoredPackage> packages) {
             for (int pIndex = 0; pIndex < packages.size(); pIndex++) {
                 MonitoredPackage p = packages.get(pIndex);
-                MonitoredPackage existingPackage = this.packages.get(p.getName());
+                MonitoredPackage existingPackage = getMonitoredPackage(p.getName());
                 if (existingPackage != null) {
                     existingPackage.updateHealthCheckDuration(p.mDurationMs);
                 } else {
-                    this.packages.put(p.getName(), p);
+                    putMonitoredPackage(p);
                 }
             }
         }
@@ -1090,7 +1212,7 @@ public class PackageWatchdog {
         @GuardedBy("mLock")
         private Set<MonitoredPackage> prunePackagesLocked(long elapsedMs) {
             Set<MonitoredPackage> failedPackages = new ArraySet<>();
-            Iterator<MonitoredPackage> it = packages.values().iterator();
+            Iterator<MonitoredPackage> it = mPackages.values().iterator();
             while (it.hasNext()) {
                 MonitoredPackage p = it.next();
                 int oldState = p.getHealthCheckStateLocked();
@@ -1113,16 +1235,50 @@ public class PackageWatchdog {
          */
         @GuardedBy("mLock")
         public boolean onPackageFailureLocked(String packageName) {
-            if (packages.get(packageName) == null && registeredObserver.isPersistent()
+            if (getMonitoredPackage(packageName) == null && registeredObserver.isPersistent()
                     && registeredObserver.mayObservePackage(packageName)) {
-                packages.put(packageName, sPackageWatchdog.newMonitoredPackage(
+                putMonitoredPackage(sPackageWatchdog.newMonitoredPackage(
                         packageName, DEFAULT_OBSERVING_DURATION_MS, false));
             }
-            MonitoredPackage p = packages.get(packageName);
+            MonitoredPackage p = getMonitoredPackage(packageName);
             if (p != null) {
                 return p.onFailureLocked();
             }
             return false;
+        }
+
+        /**
+         * Returns the map of packages monitored by this observer.
+         *
+         * @return a mapping of package names to {@link MonitoredPackage} objects.
+         */
+        @GuardedBy("mLock")
+        public ArrayMap<String, MonitoredPackage> getMonitoredPackages() {
+            return mPackages;
+        }
+
+        /**
+         * Returns the {@link MonitoredPackage} associated with a given package name if the
+         * package is being monitored by this observer.
+         *
+         * @param packageName: the name of the package.
+         * @return the {@link MonitoredPackage} object associated with the package name if one
+         *         exists, {@code null} otherwise.
+         */
+        @GuardedBy("mLock")
+        @Nullable
+        public MonitoredPackage getMonitoredPackage(String packageName) {
+            return mPackages.get(packageName);
+        }
+
+        /**
+         * Associates a {@link MonitoredPackage} with the observer.
+         *
+         * @param p: the {@link MonitoredPackage} to store.
+         */
+        @GuardedBy("mLock")
+        public void putMonitoredPackage(MonitoredPackage p) {
+            mPackages.put(p.getName(), p);
         }
 
         /**
@@ -1132,7 +1288,7 @@ public class PackageWatchdog {
          * #loadFromFile which in turn is only called on construction of the
          * singleton PackageWatchdog.
          **/
-        public static ObserverInternal read(XmlPullParser parser, PackageWatchdog watchdog) {
+        public static ObserverInternal read(TypedXmlPullParser parser, PackageWatchdog watchdog) {
             String observerName = null;
             if (TAG_OBSERVER.equals(parser.getName())) {
                 observerName = parser.getAttributeValue(null, ATTR_NAME);
@@ -1147,16 +1303,7 @@ public class PackageWatchdog {
                 while (XmlUtils.nextElementWithin(parser, innerDepth)) {
                     if (TAG_PACKAGE.equals(parser.getName())) {
                         try {
-                            String packageName = parser.getAttributeValue(null, ATTR_NAME);
-                            long duration = Long.parseLong(
-                                    parser.getAttributeValue(null, ATTR_DURATION));
-                            long healthCheckDuration = Long.parseLong(
-                                    parser.getAttributeValue(null,
-                                            ATTR_EXPLICIT_HEALTH_CHECK_DURATION));
-                            boolean hasPassedHealthCheck = Boolean.parseBoolean(
-                                    parser.getAttributeValue(null, ATTR_PASSED_HEALTH_CHECK));
-                            MonitoredPackage pkg = watchdog.newMonitoredPackage(packageName,
-                                    duration, healthCheckDuration, hasPassedHealthCheck);
+                            MonitoredPackage pkg = watchdog.parseMonitoredPackage(parser);
                             if (pkg != null) {
                                 packages.add(pkg);
                             }
@@ -1180,8 +1327,8 @@ public class PackageWatchdog {
         public void dump(IndentingPrintWriter pw) {
             boolean isPersistent = registeredObserver != null && registeredObserver.isPersistent();
             pw.println("Persistent: " + isPersistent);
-            for (String packageName : packages.keySet()) {
-                MonitoredPackage p = packages.get(packageName);
+            for (String packageName : mPackages.keySet()) {
+                MonitoredPackage p = getMonitoredPackage(packageName);
                 pw.println(packageName +  ": ");
                 pw.increaseIndent();
                 pw.println("# Failures: " + p.mFailureHistory.size());
@@ -1212,16 +1359,27 @@ public class PackageWatchdog {
 
     MonitoredPackage newMonitoredPackage(
             String name, long durationMs, boolean hasPassedHealthCheck) {
-        return newMonitoredPackage(name, durationMs, Long.MAX_VALUE, hasPassedHealthCheck);
+        return newMonitoredPackage(name, durationMs, Long.MAX_VALUE, hasPassedHealthCheck,
+                new LongArrayQueue());
     }
 
     MonitoredPackage newMonitoredPackage(String name, long durationMs, long healthCheckDurationMs,
-            boolean hasPassedHealthCheck) {
-        VersionedPackage pkg = getVersionedPackage(name);
-        if (pkg == null) {
-            return null;
-        }
-        return new MonitoredPackage(pkg, durationMs, healthCheckDurationMs, hasPassedHealthCheck);
+            boolean hasPassedHealthCheck, LongArrayQueue mitigationCalls) {
+        return new MonitoredPackage(name, durationMs, healthCheckDurationMs,
+                hasPassedHealthCheck, mitigationCalls);
+    }
+
+    MonitoredPackage parseMonitoredPackage(TypedXmlPullParser parser)
+            throws XmlPullParserException {
+        String packageName = parser.getAttributeValue(null, ATTR_NAME);
+        long duration = parser.getAttributeLong(null, ATTR_DURATION);
+        long healthCheckDuration = parser.getAttributeLong(null,
+                        ATTR_EXPLICIT_HEALTH_CHECK_DURATION);
+        boolean hasPassedHealthCheck = parser.getAttributeBoolean(null, ATTR_PASSED_HEALTH_CHECK);
+        LongArrayQueue mitigationCalls = parseLongArrayQueue(
+                parser.getAttributeValue(null, ATTR_MITIGATION_CALLS));
+        return newMonitoredPackage(packageName,
+                duration, healthCheckDuration, hasPassedHealthCheck, mitigationCalls);
     }
 
     /**
@@ -1232,10 +1390,14 @@ public class PackageWatchdog {
      * instances of this class.
      */
     class MonitoredPackage {
-        private final VersionedPackage mPackage;
+        private final String mPackageName;
         // Times when package failures happen sorted in ascending order
         @GuardedBy("mLock")
         private final LongArrayQueue mFailureHistory = new LongArrayQueue();
+        // Times when an observer was called to mitigate this package's failure. Sorted in
+        // ascending order.
+        @GuardedBy("mLock")
+        private final LongArrayQueue mMitigationCalls;
         // One of STATE_[ACTIVE|INACTIVE|PASSED|FAILED]. Updated on construction and after
         // methods that could change the health check state: handleElapsedTimeLocked and
         // tryPassHealthCheckLocked
@@ -1256,25 +1418,27 @@ public class PackageWatchdog {
         @GuardedBy("mLock")
         private long mHealthCheckDurationMs = Long.MAX_VALUE;
 
-        private MonitoredPackage(VersionedPackage pkg, long durationMs,
-                long healthCheckDurationMs, boolean hasPassedHealthCheck) {
-            mPackage = pkg;
+        MonitoredPackage(String packageName, long durationMs,
+                long healthCheckDurationMs, boolean hasPassedHealthCheck,
+                LongArrayQueue mitigationCalls) {
+            mPackageName = packageName;
             mDurationMs = durationMs;
             mHealthCheckDurationMs = healthCheckDurationMs;
             mHasPassedHealthCheck = hasPassedHealthCheck;
+            mMitigationCalls = mitigationCalls;
             updateHealthCheckStateLocked();
         }
 
         /** Writes the salient fields to disk using {@code out}. */
         @GuardedBy("mLock")
-        public void writeLocked(XmlSerializer out) throws IOException {
+        public void writeLocked(TypedXmlSerializer out) throws IOException {
             out.startTag(null, TAG_PACKAGE);
             out.attribute(null, ATTR_NAME, getName());
-            out.attribute(null, ATTR_DURATION, String.valueOf(mDurationMs));
-            out.attribute(null, ATTR_EXPLICIT_HEALTH_CHECK_DURATION,
-                    String.valueOf(mHealthCheckDurationMs));
-            out.attribute(null, ATTR_PASSED_HEALTH_CHECK,
-                    String.valueOf(mHasPassedHealthCheck));
+            out.attributeLong(null, ATTR_DURATION, mDurationMs);
+            out.attributeLong(null, ATTR_EXPLICIT_HEALTH_CHECK_DURATION, mHealthCheckDurationMs);
+            out.attributeBoolean(null, ATTR_PASSED_HEALTH_CHECK, mHasPassedHealthCheck);
+            LongArrayQueue normalizedCalls = normalizeMitigationCalls();
+            out.attribute(null, ATTR_MITIGATION_CALLS, longArrayQueueToString(normalizedCalls));
             out.endTag(null, TAG_PACKAGE);
         }
 
@@ -1298,6 +1462,50 @@ public class PackageWatchdog {
                 mFailureHistory.clear();
             }
             return failed;
+        }
+
+        /**
+         * Notes the timestamp of a mitigation call into the observer.
+         */
+        @GuardedBy("mLock")
+        public void noteMitigationCallLocked() {
+            mMitigationCalls.addLast(mSystemClock.uptimeMillis());
+        }
+
+        /**
+         * Prunes any mitigation calls outside of the de-escalation window, and returns the
+         * number of calls that are in the window afterwards.
+         *
+         * @return the number of mitigation calls made in the de-escalation window.
+         */
+        @GuardedBy("mLock")
+        public int getMitigationCountLocked() {
+            try {
+                final long now = mSystemClock.uptimeMillis();
+                while (now - mMitigationCalls.peekFirst() > DEFAULT_DEESCALATION_WINDOW_MS) {
+                    mMitigationCalls.removeFirst();
+                }
+            } catch (NoSuchElementException ignore) {
+            }
+
+            return mMitigationCalls.size();
+        }
+
+        /**
+         * Before writing to disk, make the mitigation call timestamps relative to the current
+         * system uptime. This is because they need to be relative to the uptime which will reset
+         * at the next boot.
+         *
+         * @return a LongArrayQueue of the mitigation calls relative to the current system uptime.
+         */
+        @GuardedBy("mLock")
+        public LongArrayQueue normalizeMitigationCalls() {
+            LongArrayQueue normalized = new LongArrayQueue();
+            final long now = mSystemClock.uptimeMillis();
+            for (int i = 0; i < mMitigationCalls.size(); i++) {
+                normalized.addLast(mMitigationCalls.get(i) - now);
+            }
+            return normalized;
         }
 
         /**
@@ -1367,7 +1575,7 @@ public class PackageWatchdog {
 
         /** Returns the monitored package name. */
         private String getName() {
-            return mPackage.getPackageName();
+            return mPackageName;
         }
 
         /**
@@ -1432,8 +1640,11 @@ public class PackageWatchdog {
             } else {
                 mHealthCheckState = HealthCheckState.ACTIVE;
             }
-            Slog.i(TAG, "Updated health check state for package " + getName() + ": "
-                    + toString(oldState) + " -> " + toString(mHealthCheckState));
+
+            if (oldState != mHealthCheckState) {
+                Slog.i(TAG, "Updated health check state for package " + getName() + ": "
+                        + toString(oldState) + " -> " + toString(mHealthCheckState));
+            }
             return mHealthCheckState;
         }
 
@@ -1457,12 +1668,22 @@ public class PackageWatchdog {
         private long toPositive(long value) {
             return value > 0 ? value : Long.MAX_VALUE;
         }
+
+        /** Compares the equality of this object with another {@link MonitoredPackage}. */
+        @VisibleForTesting
+        boolean isEqualTo(MonitoredPackage pkg) {
+            return (getName().equals(pkg.getName()))
+                    && mDurationMs == pkg.mDurationMs
+                    && mHasPassedHealthCheck == pkg.mHasPassedHealthCheck
+                    && mHealthCheckDurationMs == pkg.mHealthCheckDurationMs
+                    && (mMitigationCalls.toString()).equals(pkg.mMitigationCalls.toString());
+        }
     }
 
     /**
      * Handles the thresholding logic for system server boots.
      */
-    static class BootThreshold {
+    class BootThreshold {
 
         private final int mBootTriggerCount;
         private final long mTriggerWindow;
@@ -1489,18 +1710,66 @@ public class PackageWatchdog {
             return SystemProperties.getLong(PROP_RESCUE_BOOT_START, 0);
         }
 
-        public void setStart(long start) {
-            final long now = android.os.SystemClock.elapsedRealtime();
-            final long newStart = MathUtils.constrain(start, 0, now);
-            SystemProperties.set(PROP_RESCUE_BOOT_START, Long.toString(newStart));
+        public int getMitigationCount() {
+            return SystemProperties.getInt(PROP_BOOT_MITIGATION_COUNT, 0);
         }
+
+        public void setStart(long start) {
+            setPropertyStart(PROP_RESCUE_BOOT_START, start);
+        }
+
+        public void setMitigationStart(long start) {
+            setPropertyStart(PROP_BOOT_MITIGATION_WINDOW_START, start);
+        }
+
+        public long getMitigationStart() {
+            return SystemProperties.getLong(PROP_BOOT_MITIGATION_WINDOW_START, 0);
+        }
+
+        public void setMitigationCount(int count) {
+            SystemProperties.set(PROP_BOOT_MITIGATION_COUNT, Integer.toString(count));
+        }
+
+        public void setPropertyStart(String property, long start) {
+            final long now = mSystemClock.uptimeMillis();
+            final long newStart = MathUtils.constrain(start, 0, now);
+            SystemProperties.set(property, Long.toString(newStart));
+        }
+
+        public void saveMitigationCountToMetadata() {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(METADATA_FILE))) {
+                writer.write(String.valueOf(getMitigationCount()));
+            } catch (Exception e) {
+                Slog.e(TAG, "Could not save metadata to file: " + e);
+            }
+        }
+
+        public void readMitigationCountFromMetadataIfNecessary() {
+            File bootPropsFile = new File(METADATA_FILE);
+            if (bootPropsFile.exists()) {
+                try (BufferedReader reader = new BufferedReader(new FileReader(METADATA_FILE))) {
+                    String mitigationCount = reader.readLine();
+                    setMitigationCount(Integer.parseInt(mitigationCount));
+                    bootPropsFile.delete();
+                } catch (Exception e) {
+                    Slog.i(TAG, "Could not read metadata file: " + e);
+                }
+            }
+        }
+
 
         /** Increments the boot counter, and returns whether the device is bootlooping. */
         public boolean incrementAndTest() {
-            final long now = android.os.SystemClock.elapsedRealtime();
+            readMitigationCountFromMetadataIfNecessary();
+            final long now = mSystemClock.uptimeMillis();
             if (now - getStart() < 0) {
                 Slog.e(TAG, "Window was less than zero. Resetting start to current time.");
                 setStart(now);
+                setMitigationStart(now);
+            }
+            if (now - getMitigationStart() > DEFAULT_DEESCALATION_WINDOW_MS) {
+                setMitigationCount(0);
+                setMitigationStart(now);
             }
             final long window = now - getStart();
             if (window >= mTriggerWindow) {

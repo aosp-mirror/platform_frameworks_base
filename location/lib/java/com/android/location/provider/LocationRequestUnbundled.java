@@ -17,6 +17,7 @@
 package com.android.location.provider;
 
 import android.location.LocationRequest;
+import android.location.LocationRequest.Quality;
 
 /**
  * This class is an interface to LocationRequests for unbundled applications.
@@ -24,55 +25,50 @@ import android.location.LocationRequest;
  * <p>IMPORTANT: This class is effectively a public API for unbundled
  * applications, and must remain API stable. See README.txt in the root
  * of this package for more information.
+ *
+ * @deprecated Do not use.
  */
+@Deprecated
 public final class LocationRequestUnbundled {
+
     /**
-     * Returned by {@link #getQuality} when requesting the most accurate locations available.
-     *
-     * <p>This may be up to 1 meter accuracy, although this is implementation dependent.
+     * @deprecated Use {@link LocationRequest#QUALITY_HIGH_ACCURACY} instead.
      */
+    @Deprecated
     public static final int ACCURACY_FINE = LocationRequest.ACCURACY_FINE;
 
     /**
-     * Returned by {@link #getQuality} when requesting "block" level accuracy.
-     *
-     * <p>Block level accuracy is considered to be about 100 meter accuracy,
-     * although this is implementation dependent. Using a coarse accuracy
-     * such as this often consumes less power.
+     * @deprecated Use {@link LocationRequest#QUALITY_BALANCED_POWER_ACCURACY} instead.
      */
+    @Deprecated
     public static final int ACCURACY_BLOCK = LocationRequest.ACCURACY_BLOCK;
 
+
     /**
-     * Returned by {@link #getQuality} when requesting "city" level accuracy.
-     *
-     * <p>City level accuracy is considered to be about 10km accuracy,
-     * although this is implementation dependent. Using a coarse accuracy
-     * such as this often consumes less power.
+     * @deprecated Use {@link LocationRequest#QUALITY_LOW_POWER} instead.
      */
+    @Deprecated
     public static final int ACCURACY_CITY = LocationRequest.ACCURACY_CITY;
 
+
     /**
-     * Returned by {@link #getQuality} when requiring no direct power impact (passive locations).
-     *
-     * <p>This location request will not trigger any active location requests,
-     * but will receive locations triggered by other applications. Your application
-     * will not receive any direct power blame for location work.
+     * @deprecated Do not use.
      */
+    @Deprecated
     public static final int POWER_NONE = LocationRequest.POWER_NONE;
 
-    /**
-     * Returned by {@link #getQuality} when requesting low power impact.
-     *
-     * <p>This location request will avoid high power location work where
-     * possible.
-     */
-    public static final int POWER_LOW = LocationRequest.POWER_LOW;
 
     /**
-     * Returned by {@link #getQuality} when allowing high power consumption for location.
-     *
-     * <p>This location request will allow high power location work.
+     * @deprecated Use {@link LocationRequest#QUALITY_LOW_POWER} instead.
      */
+    @Deprecated
+    public static final int POWER_LOW = LocationRequest.POWER_LOW;
+
+
+    /**
+     * @deprecated Use {@link LocationRequest#QUALITY_BALANCED_POWER_ACCURACY} instead.
+     */
+    @Deprecated
     public static final int POWER_HIGH = LocationRequest.POWER_HIGH;
 
     private final LocationRequest delegate;
@@ -82,33 +78,29 @@ public final class LocationRequestUnbundled {
     }
 
     /**
-     * Get the desired interval of this request, in milliseconds.
+     * Get the location update interval.
      *
-     * @return desired interval in milliseconds, inexact
+     * @return location update interval
      */
     public long getInterval() {
-        return delegate.getInterval();
+        return delegate.getIntervalMillis();
     }
 
     /**
-     * Get the fastest interval of this request, in milliseconds.
+     * Get the minimum delivery interval.
      *
-     * <p>The system will never provide location updates faster
-     * than the minimum of {@link #getFastestInterval} and
-     * {@link #getInterval}.
-     *
-     * @return fastest interval in milliseconds, exact
+     * @return minimum delivery interval
      */
     public long getFastestInterval() {
-        return delegate.getFastestInterval();
+        return delegate.getMinUpdateIntervalMillis();
     }
 
     /**
      * Get the quality of the request.
      *
-     * @return an accuracy or power constant
+     * @return a {@link LocationRequest} QUALITY_* constant
      */
-    public int getQuality() {
+    public @Quality int getQuality() {
         return delegate.getQuality();
     }
 
@@ -118,7 +110,7 @@ public final class LocationRequestUnbundled {
      * @return minimum distance between location updates in meters
      */
     public float getSmallestDisplacement() {
-        return delegate.getSmallestDisplacement();
+        return delegate.getMinUpdateDistanceMeters();
     }
 
     /**

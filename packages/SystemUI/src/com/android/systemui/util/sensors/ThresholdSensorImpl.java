@@ -25,7 +25,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.util.Assert;
+import com.android.systemui.util.concurrency.Execution;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +37,7 @@ class ThresholdSensorImpl implements ThresholdSensor {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final AsyncSensorManager mSensorManager;
+    private final Execution mExecution;
     private final Sensor mSensor;
     private final float mThreshold;
     private boolean mRegistered;
@@ -61,9 +62,10 @@ class ThresholdSensorImpl implements ThresholdSensor {
         }
     };
 
-    private ThresholdSensorImpl(AsyncSensorManager sensorManager,
-            Sensor sensor, float threshold, float thresholdLatch, int sensorDelay) {
+    private ThresholdSensorImpl(AsyncSensorManager sensorManager, Sensor sensor,
+            Execution execution,  float threshold, float thresholdLatch, int sensorDelay) {
         mSensorManager = sensorManager;
+        mExecution = execution;
         mSensor = sensor;
         mThreshold = threshold;
         mThresholdLatch = thresholdLatch;
@@ -107,7 +109,7 @@ class ThresholdSensorImpl implements ThresholdSensor {
      */
     @Override
     public void register(Listener listener) {
-        Assert.isMainThread();
+        mExecution.assertIsMainThread();
         if (!mListeners.contains(listener)) {
             mListeners.add(listener);
         }
@@ -116,7 +118,7 @@ class ThresholdSensorImpl implements ThresholdSensor {
 
     @Override
     public void unregister(Listener listener) {
-        Assert.isMainThread();
+        mExecution.assertIsMainThread();
         mListeners.remove(listener);
         unregisterInternal();
     }
@@ -126,7 +128,7 @@ class ThresholdSensorImpl implements ThresholdSensor {
      */
     @Override
     public void pause() {
-        Assert.isMainThread();
+        mExecution.assertIsMainThread();
         mPaused = true;
         unregisterInternal();
     }
@@ -136,7 +138,7 @@ class ThresholdSensorImpl implements ThresholdSensor {
      */
     @Override
     public void resume() {
-        Assert.isMainThread();
+        mExecution.assertIsMainThread();
         mPaused = false;
         registerInternal();
     }
@@ -148,7 +150,7 @@ class ThresholdSensorImpl implements ThresholdSensor {
     }
 
     private void registerInternal() {
-        Assert.isMainThread();
+        mExecution.assertIsMainThread();
         if (mRegistered || mPaused || mListeners.isEmpty()) {
             return;
         }
@@ -158,7 +160,7 @@ class ThresholdSensorImpl implements ThresholdSensor {
     }
 
     private void unregisterInternal() {
-        Assert.isMainThread();
+        mExecution.assertIsMainThread();
         if (!mRegistered) {
             return;
         }
@@ -177,7 +179,7 @@ class ThresholdSensorImpl implements ThresholdSensor {
      * still appears entirely binary.
      */
     private void onSensorEvent(boolean belowThreshold, boolean aboveThreshold, long timestampNs) {
-        Assert.isMainThread();
+        mExecution.assertIsMainThread();
         if (!mRegistered) {
             return;
         }
@@ -199,7 +201,7 @@ class ThresholdSensorImpl implements ThresholdSensor {
 
     @Override
     public String toString() {
-        return String.format("{registered=%s, paused=%s, threshold=%s, sensor=%s}",
+        return String.format("{isLoaded=%s, registered=%s, paused=%s, threshold=%s, sensor=%s}",
                 isLoaded(), mRegistered, mPaused, mThreshold, mSensor);
     }
 
@@ -212,6 +214,7 @@ class ThresholdSensorImpl implements ThresholdSensor {
     static class Builder {
         private final Resources mResources;
         private final AsyncSensorManager mSensorManager;
+        private final Execution mExecution;
         private int mSensorDelay = SensorManager.SENSOR_DELAY_NORMAL;;
         private float mThresholdValue;
         private float mThresholdLatchValue;
@@ -221,19 +224,22 @@ class ThresholdSensorImpl implements ThresholdSensor {
         private boolean mThresholdLatchValueSet;
 
         @Inject
-        Builder(@Main Resources resources, AsyncSensorManager sensorManager) {
+        Builder(@Main Resources resources, AsyncSensorManager sensorManager, Execution execution) {
             mResources = resources;
             mSensorManager = sensorManager;
+            mExecution = execution;
         }
-
 
         Builder setSensorDelay(int sensorDelay) {
             mSensorDelay = sensorDelay;
             return this;
         }
-
-        Builder setSensorResourceId(int sensorResourceId) {
-            setSensorType(mResources.getString(sensorResourceId));
+        /**
+         * If requiresWakeUp is false, the first sensor with sensorType (regardless of whether the
+         * sensor is a wakeup sensor or not) will be set.
+         */
+        Builder setSensorResourceId(int sensorResourceId, boolean requireWakeUp) {
+            setSensorType(mResources.getString(sensorResourceId), requireWakeUp);
             return this;
         }
 
@@ -255,8 +261,12 @@ class ThresholdSensorImpl implements ThresholdSensor {
             return this;
         }
 
-        Builder setSensorType(String sensorType) {
-            Sensor sensor = findSensorByType(sensorType);
+        /**
+         * If requiresWakeUp is false, the first sensor with sensorType (regardless of whether the
+         * sensor is a wakeup sensor or not) will be set.
+         */
+        Builder setSensorType(String sensorType, boolean requireWakeUp) {
+            Sensor sensor = findSensorByType(sensorType, requireWakeUp);
             if (sensor != null) {
                 setSensor(sensor);
             }
@@ -302,10 +312,12 @@ class ThresholdSensorImpl implements ThresholdSensor {
             }
 
             return new ThresholdSensorImpl(
-                    mSensorManager, mSensor, mThresholdValue, mThresholdLatchValue, mSensorDelay);
+                    mSensorManager, mSensor, mExecution,
+                    mThresholdValue, mThresholdLatchValue, mSensorDelay);
         }
 
-        private Sensor findSensorByType(String sensorType) {
+        @VisibleForTesting
+        Sensor findSensorByType(String sensorType, boolean requireWakeUp) {
             if (sensorType.isEmpty()) {
                 return null;
             }
@@ -315,7 +327,9 @@ class ThresholdSensorImpl implements ThresholdSensor {
             for (Sensor s : sensorList) {
                 if (sensorType.equals(s.getStringType())) {
                     sensor = s;
-                    break;
+                    if (!requireWakeUp || sensor.isWakeUpSensor()) {
+                        break;
+                    }
                 }
             }
 

@@ -150,4 +150,45 @@ public class BluetoothUtilsTest {
         assertThat(BluetoothUtils.getUriMetaData(mBluetoothDevice,
                 BluetoothDevice.METADATA_MAIN_ICON)).isNull();
     }
+
+    @Test
+    public void isAdvancedDetailsHeader_untetheredHeadset_returnTrue() {
+        when(mBluetoothDevice.getMetadata(
+                BluetoothDevice.METADATA_IS_UNTETHERED_HEADSET)).thenReturn(
+                BOOL_METADATA.getBytes());
+
+        assertThat(BluetoothUtils.isAdvancedDetailsHeader(mBluetoothDevice)).isEqualTo(true);
+    }
+
+    @Test
+    public void isAdvancedDetailsHeader_deviceTypeUntetheredHeadset_returnTrue() {
+        when(mBluetoothDevice.getMetadata(
+                BluetoothDevice.METADATA_DEVICE_TYPE)).thenReturn(
+                BluetoothDevice.DEVICE_TYPE_UNTETHERED_HEADSET.getBytes());
+
+        assertThat(BluetoothUtils.isAdvancedDetailsHeader(mBluetoothDevice)).isEqualTo(true);
+    }
+
+    @Test
+    public void isAdvancedDetailsHeader_deviceTypeWatch_returnTrue() {
+        when(mBluetoothDevice.getMetadata(
+                BluetoothDevice.METADATA_DEVICE_TYPE)).thenReturn(
+                BluetoothDevice.DEVICE_TYPE_WATCH.getBytes());
+
+        assertThat(BluetoothUtils.isAdvancedDetailsHeader(mBluetoothDevice)).isEqualTo(true);
+    }
+
+    @Test
+    public void isAdvancedDetailsHeader_deviceTypeDefault_returnTrue() {
+        when(mBluetoothDevice.getMetadata(
+                BluetoothDevice.METADATA_DEVICE_TYPE)).thenReturn(
+                BluetoothDevice.DEVICE_TYPE_DEFAULT.getBytes());
+
+        assertThat(BluetoothUtils.isAdvancedDetailsHeader(mBluetoothDevice)).isEqualTo(true);
+    }
+
+    @Test
+    public void isAdvancedDetailsHeader_noMetadata_returnFalse() {
+        assertThat(BluetoothUtils.isAdvancedDetailsHeader(mBluetoothDevice)).isEqualTo(false);
+    }
 }

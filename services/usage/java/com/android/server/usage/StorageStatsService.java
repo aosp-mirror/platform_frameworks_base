@@ -20,7 +20,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import static com.android.internal.util.ArrayUtils.defeatNullable;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
-import static com.android.server.usage.StorageStatsManagerInternal.StorageStatsAugmenter;
+import static com.android.server.usage.StorageStatsManagerLocal.StorageStatsAugmenter;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -71,6 +71,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.IoThread;
+import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.Installer;
@@ -152,7 +153,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             }
         });
 
-        LocalServices.addService(StorageStatsManagerInternal.class, new LocalService());
+        LocalManagerRegistry.addManager(StorageStatsManagerLocal.class, new LocalService());
     }
 
     private void invalidateMounts() {
@@ -335,9 +336,10 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
                 throw new ParcelableException(new IOException(e.getMessage()));
             }
             if (volumeUuid == StorageManager.UUID_PRIVATE_INTERNAL) {
+                UserHandle userHandle = UserHandle.of(userId);
                 forEachStorageStatsAugmenter((storageStatsAugmenter) -> {
-                    storageStatsAugmenter.augmentStatsForPackage(stats,
-                            packageName, userId, callerHasStatsPermission);
+                    storageStatsAugmenter.augmentStatsForPackageForUser(stats,
+                            packageName, userHandle, callerHasStatsPermission);
                 }, "queryStatsForPackage");
             }
             return translate(stats);
@@ -430,6 +432,12 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         } catch (InstallerException e) {
             throw new ParcelableException(new IOException(e.getMessage()));
         }
+        if (volumeUuid == StorageManager.UUID_PRIVATE_INTERNAL) {
+            UserHandle userHandle = UserHandle.of(userId);
+            forEachStorageStatsAugmenter((storageStatsAugmenter) -> {
+                storageStatsAugmenter.augmentStatsForUser(stats, userHandle);
+            }, "queryStatsForUser");
+        }
         return translate(stats);
     }
 
@@ -514,6 +522,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         res.codeBytes = stats.codeSize + stats.externalCodeSize;
         res.dataBytes = stats.dataSize + stats.externalDataSize;
         res.cacheBytes = stats.cacheSize + stats.externalCacheSize;
+        res.externalCacheBytes = stats.externalCacheSize;
         return res;
     }
 
@@ -783,7 +792,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         }
     }
 
-    private class LocalService extends StorageStatsManagerInternal {
+    private class LocalService implements StorageStatsManagerLocal {
         @Override
         public void registerStorageStatsAugmenter(
                 @NonNull StorageStatsAugmenter storageStatsAugmenter,

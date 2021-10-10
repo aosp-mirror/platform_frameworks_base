@@ -139,7 +139,7 @@ final class InstantAppResolverConnection implements DeathRecipient {
     @WorkerThread
     private IInstantAppResolver getRemoteInstanceLazy(String token)
             throws ConnectionException, TimeoutException, InterruptedException {
-        long binderToken = Binder.clearCallingIdentity();
+        final long binderToken = Binder.clearCallingIdentity();
         try {
             return bind(token);
         } finally {

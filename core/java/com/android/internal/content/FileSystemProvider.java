@@ -20,10 +20,10 @@ import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.database.MatrixCursor;
 import android.database.MatrixCursor.RowBuilder;
 import android.graphics.Point;
@@ -39,7 +39,6 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsProvider;
 import android.provider.MediaStore;
-import android.provider.MediaStore.Files.FileColumns;
 import android.provider.MetadataReader;
 import android.system.Int64Ref;
 import android.text.TextUtils;
@@ -66,6 +65,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Predicate;
@@ -271,8 +271,7 @@ public abstract class FileSystemProvider extends DocumentsProvider {
                 throw new IllegalStateException("Failed to touch " + file + ": " + e);
             }
         }
-        MediaStore.scanFile(getContext().getContentResolver(), file);
-
+        updateMediaStore(getContext(), file);
         return childId;
     }
 
@@ -295,7 +294,9 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         onDocIdChanged(afterDocId);
 
         final File afterVisibleFile = getFileForDocId(afterDocId, true);
-        moveInMediaStore(beforeVisibleFile, afterVisibleFile);
+
+        updateMediaStore(getContext(), beforeVisibleFile);
+        updateMediaStore(getContext(), afterVisibleFile);
 
         if (!TextUtils.equals(docId, afterDocId)) {
             return afterDocId;
@@ -323,17 +324,23 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         onDocIdChanged(sourceDocumentId);
         onDocIdDeleted(sourceDocumentId);
         onDocIdChanged(docId);
-        moveInMediaStore(visibleFileBefore, getFileForDocId(docId, true));
-
+        // update the database
+        updateMediaStore(getContext(), visibleFileBefore);
+        updateMediaStore(getContext(), getFileForDocId(docId, true));
         return docId;
     }
 
-    private void moveInMediaStore(@Nullable File oldVisibleFile, @Nullable File newVisibleFile) {
-        if (oldVisibleFile != null) {
-            MediaStore.scanFile(getContext().getContentResolver(), oldVisibleFile);
-        }
-        if (newVisibleFile != null) {
-            MediaStore.scanFile(getContext().getContentResolver(), newVisibleFile);
+    private static void updateMediaStore(@NonNull Context context, File file) {
+        if (file != null) {
+            final ContentResolver resolver = context.getContentResolver();
+            final String noMedia = ".nomedia";
+            // For file, check whether the file name is .nomedia or not.
+            // If yes, scan the parent directory to update all files in the directory.
+            if (!file.isDirectory() && file.getName().toLowerCase(Locale.ROOT).endsWith(noMedia)) {
+                MediaStore.scanFile(resolver, file.getParentFile());
+            } else {
+                MediaStore.scanFile(resolver, file);
+            }
         }
     }
 
@@ -354,35 +361,7 @@ public abstract class FileSystemProvider extends DocumentsProvider {
 
         onDocIdChanged(docId);
         onDocIdDeleted(docId);
-        removeFromMediaStore(visibleFile);
-    }
-
-    private void removeFromMediaStore(@Nullable File visibleFile)
-            throws FileNotFoundException {
-        // visibleFolder is null if we're removing a document from external thumb drive or SD card.
-        if (visibleFile != null) {
-            final long token = Binder.clearCallingIdentity();
-
-            try {
-                final ContentResolver resolver = getContext().getContentResolver();
-                final Uri externalUri = MediaStore.Files.getContentUri("external");
-                final Bundle queryArgs = new Bundle();
-                queryArgs.putInt(MediaStore.QUERY_ARG_MATCH_PENDING, MediaStore.MATCH_INCLUDE);
-
-                // Remove the media store entry corresponding to visibleFile and if it is a
-                // directory, also remove media store entries for any files inside this directory.
-                // Logic borrowed from com.android.providers.media.scan.ModernMediaScanner.
-                final String pathEscapedForLike = DatabaseUtils.escapeForLike(
-                        visibleFile.getAbsolutePath());
-                ContentResolver.includeSqlSelectionArgs(queryArgs,
-                        FileColumns.DATA + " LIKE ? ESCAPE '\\' OR "
-                                + FileColumns.DATA + " LIKE ? ESCAPE '\\'",
-                        new String[] {pathEscapedForLike + "/%", pathEscapedForLike});
-                resolver.delete(externalUri, queryArgs);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
+        updateMediaStore(getContext(), visibleFile);
     }
 
     @Override
@@ -525,8 +504,10 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         final File visibleFile = getFileForDocId(documentId, true);
 
         final int pfdMode = ParcelFileDescriptor.parseMode(mode);
-        if (pfdMode == ParcelFileDescriptor.MODE_READ_ONLY || visibleFile == null) {
+        if (visibleFile == null) {
             return ParcelFileDescriptor.open(file, pfdMode);
+        } else if (pfdMode == ParcelFileDescriptor.MODE_READ_ONLY) {
+            return openFileForRead(visibleFile);
         } else {
             try {
                 // When finished writing, kick off media scanner
@@ -539,6 +520,29 @@ public abstract class FileSystemProvider extends DocumentsProvider {
                 throw new FileNotFoundException("Failed to open for writing: " + e);
             }
         }
+    }
+
+    private ParcelFileDescriptor openFileForRead(final File target) throws FileNotFoundException {
+        final Uri uri = MediaStore.scanFile(getContext().getContentResolver(), target);
+        if (uri == null) {
+            Log.w(TAG, "Failed to retrieve media store URI for: " + target);
+            return ParcelFileDescriptor.open(target, ParcelFileDescriptor.MODE_READ_ONLY);
+        }
+
+        // Passing the calling uid via EXTRA_MEDIA_CAPABILITIES_UID, so that the decision to
+        // transcode or not transcode can be made based upon the calling app's uid, and not based
+        // upon the Provider's uid.
+        final Bundle opts = new Bundle();
+        opts.putInt(MediaStore.EXTRA_MEDIA_CAPABILITIES_UID, Binder.getCallingUid());
+
+        final AssetFileDescriptor afd =
+                getContext().getContentResolver().openTypedAssetFileDescriptor(uri, "*/*", opts);
+        if (afd == null) {
+            Log.w(TAG, "Failed to open with media_capabilities uid for URI: " + uri);
+            return ParcelFileDescriptor.open(target, ParcelFileDescriptor.MODE_READ_ONLY);
+        }
+
+        return afd.getParcelFileDescriptor();
     }
 
     /**

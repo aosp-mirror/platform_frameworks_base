@@ -17,6 +17,7 @@ package android.multiuser;
 
 import static org.junit.Assume.assumeTrue;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
@@ -38,6 +39,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IProgressListener;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -62,7 +64,10 @@ import java.util.concurrent.TimeUnit;
 /**
  * Perf tests for user life cycle events.
  *
- * Running the tests:
+ * To run the tests: atest UserLifecycleTests
+ *
+ *
+ * Old methods for running the tests:
  *
  * make MultiUserPerfTests &&
  * adb install -r \
@@ -85,6 +90,10 @@ public class UserLifecycleTests {
     private static final int TIMEOUT_IN_SECOND = 30;
     private static final int CHECK_USER_REMOVED_INTERVAL_MS = 200;
 
+    /** Name of users/profiles in the test. Users with this name may be freely removed. */
+    private static final String TEST_USER_NAME = "UserLifecycleTests_test_user";
+
+    /** Name of dummy package used when timing how long app launches take. */
     private static final String DUMMY_PACKAGE_NAME = "perftests.multiuser.apps.dummyapp";
 
     // Copy of UserSystemPackageInstaller whitelist mode constants.
@@ -115,6 +124,11 @@ public class UserLifecycleTests {
         mUsersToRemove = new ArrayList<>();
         mPm = context.getPackageManager();
         mHasManagedUserFeature = mPm.hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS);
+        removeAnyPreviousTestUsers();
+        if (mAm.getCurrentUser() != UserHandle.USER_SYSTEM) {
+            Log.w(TAG, "WARNING: Tests are being run from user " + mAm.getCurrentUser()
+                    + " rather than the system user");
+        }
     }
 
     @After
@@ -140,7 +154,7 @@ public class UserLifecycleTests {
     }
 
     @Test
-    public void createAndStartUser() throws Exception {
+    public void createAndStartUser() throws RemoteException {
         while (mRunner.keepRunning()) {
             final int userId = createUserNoFlags();
 
@@ -149,7 +163,7 @@ public class UserLifecycleTests {
             // Don't use this.startUserInBackgroundAndWaitForUnlock() since only waiting until
             // ACTION_USER_STARTED.
             mIam.startUserInBackground(userId);
-            latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
+            waitForLatch("Failed to achieve ACTION_USER_STARTED for user " + userId, latch);
 
             mRunner.pauseTiming();
             removeUser(userId);
@@ -161,7 +175,7 @@ public class UserLifecycleTests {
      * Measures the time until ACTION_USER_STARTED is received.
      */
     @Test
-    public void startUser() throws Exception {
+    public void startUser() throws RemoteException {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int userId = createUserNoFlags();
@@ -170,7 +184,7 @@ public class UserLifecycleTests {
             mRunner.resumeTiming();
 
             mIam.startUserInBackground(userId);
-            latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
+            waitForLatch("Failed to achieve ACTION_USER_STARTED for user " + userId, latch);
 
             mRunner.pauseTiming();
             removeUser(userId);
@@ -182,7 +196,7 @@ public class UserLifecycleTests {
      * Measures the time until unlock listener is triggered and user is unlocked.
      */
     @Test
-    public void startAndUnlockUser() throws Exception {
+    public void startAndUnlockUser() {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int userId = createUserNoFlags();
@@ -197,10 +211,8 @@ public class UserLifecycleTests {
         }
     }
 
-
-
     @Test
-    public void switchUser() throws Exception {
+    public void switchUser() throws RemoteException {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int startUser = mAm.getCurrentUser();
@@ -210,7 +222,7 @@ public class UserLifecycleTests {
             switchUser(userId);
 
             mRunner.pauseTiming();
-            switchUser(startUser);
+            switchUserNoCheck(startUser);
             removeUser(userId);
             mRunner.resumeTiming();
         }
@@ -218,7 +230,7 @@ public class UserLifecycleTests {
 
     /** Tests switching to an already-created, but no-longer-running, user. */
     @Test
-    public void switchUser_stopped() throws Exception {
+    public void switchUser_stopped() throws RemoteException {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int startUser = mAm.getCurrentUser();
@@ -228,11 +240,11 @@ public class UserLifecycleTests {
             mRunner.resumeTiming();
 
             mAm.switchUser(testUser);
-            boolean success = latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
+            waitForLatch("Failed to achieve 2nd ACTION_USER_UNLOCKED for user " + testUser, latch);
+
 
             mRunner.pauseTiming();
-            attestTrue("Failed to achieve 2nd ACTION_USER_UNLOCKED for user " + testUser, success);
-            switchUser(startUser);
+            switchUserNoCheck(startUser);
             removeUser(testUser);
             mRunner.resumeTiming();
         }
@@ -240,7 +252,7 @@ public class UserLifecycleTests {
 
     /** Tests switching to an already-created already-running non-owner user. */
     @Test
-    public void switchUser_running() throws Exception {
+    public void switchUser_running() throws RemoteException {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int startUser = mAm.getCurrentUser();
@@ -250,22 +262,21 @@ public class UserLifecycleTests {
             switchUser(testUser);
 
             mRunner.pauseTiming();
-            attestTrue("Failed to switch to user " + testUser, mAm.isUserRunning(testUser));
-            switchUser(startUser);
+            switchUserNoCheck(startUser);
             removeUser(testUser);
             mRunner.resumeTiming();
         }
     }
 
     @Test
-    public void stopUser() throws Exception {
+    public void stopUser() throws RemoteException {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int userId = createUserNoFlags();
             final CountDownLatch latch = new CountDownLatch(1);
             registerBroadcastReceiver(Intent.ACTION_USER_STARTED, latch, userId);
             mIam.startUserInBackground(userId);
-            latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
+            waitForLatch("Failed to achieve ACTION_USER_STARTED for user " + userId, latch);
             mRunner.resumeTiming();
 
             stopUser(userId, false);
@@ -277,7 +288,7 @@ public class UserLifecycleTests {
     }
 
     @Test
-    public void lockedBootCompleted() throws Exception {
+    public void lockedBootCompleted() throws RemoteException {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int startUser = mAm.getCurrentUser();
@@ -287,17 +298,17 @@ public class UserLifecycleTests {
             mRunner.resumeTiming();
 
             mAm.switchUser(userId);
-            latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
+            waitForLatch("Failed to achieve onLockedBootComplete for user " + userId, latch);
 
             mRunner.pauseTiming();
-            switchUser(startUser);
+            switchUserNoCheck(startUser);
             removeUser(userId);
             mRunner.resumeTiming();
         }
     }
 
     @Test
-    public void ephemeralUserStopped() throws Exception {
+    public void ephemeralUserStopped() throws RemoteException {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int startUser = mAm.getCurrentUser();
@@ -318,10 +329,14 @@ public class UserLifecycleTests {
             mRunner.resumeTiming();
 
             mAm.switchUser(startUser);
-            latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
+            waitForLatch("Failed to achieve ACTION_USER_STOPPED for user " + userId, latch);
 
             mRunner.pauseTiming();
-            switchLatch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
+            try {
+                switchLatch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Log.e(TAG, "Thread interrupted unexpectedly while waiting for switch.", e);
+            }
             removeUser(userId);
             mRunner.resumeTiming();
         }
@@ -329,7 +344,7 @@ public class UserLifecycleTests {
 
     /** Tests creating a new profile. */
     @Test
-    public void managedProfileCreate() throws Exception {
+    public void managedProfileCreate() {
         assumeTrue(mHasManagedUserFeature);
 
         while (mRunner.keepRunning()) {
@@ -344,7 +359,7 @@ public class UserLifecycleTests {
 
     /** Tests starting (unlocking) a newly-created profile. */
     @Test
-    public void managedProfileUnlock() throws Exception {
+    public void managedProfileUnlock() {
         assumeTrue(mHasManagedUserFeature);
 
         while (mRunner.keepRunning()) {
@@ -362,7 +377,7 @@ public class UserLifecycleTests {
 
     /** Tests starting (unlocking) an already-created, but no-longer-running, profile. */
     @Test
-    public void managedProfileUnlock_stopped() throws Exception {
+    public void managedProfileUnlock_stopped() throws RemoteException {
         assumeTrue(mHasManagedUserFeature);
 
         while (mRunner.keepRunning()) {
@@ -385,7 +400,7 @@ public class UserLifecycleTests {
      * Tests starting (unlocking) and launching an already-installed app in a newly-created profile.
      */
     @Test
-    public void managedProfileUnlockAndLaunchApp() throws Exception {
+    public void managedProfileUnlockAndLaunchApp() throws RemoteException {
         assumeTrue(mHasManagedUserFeature);
 
         while (mRunner.keepRunning()) {
@@ -411,7 +426,7 @@ public class UserLifecycleTests {
      * {@link #managedProfileUnlock_stopped}}.
      */
     @Test
-    public void managedProfileUnlockAndLaunchApp_stopped() throws Exception {
+    public void managedProfileUnlockAndLaunchApp_stopped() throws RemoteException {
         assumeTrue(mHasManagedUserFeature);
 
         while (mRunner.keepRunning()) {
@@ -422,7 +437,7 @@ public class UserLifecycleTests {
             startUserInBackgroundAndWaitForUnlock(userId);
             startApp(userId, DUMMY_PACKAGE_NAME);
             stopUser(userId, true);
-            TimeUnit.SECONDS.sleep(1); // Brief cool-down before re-starting profile.
+            SystemClock.sleep(1_000); // 1 second cool-down before re-starting profile.
             mRunner.resumeTiming();
 
             startUserInBackgroundAndWaitForUnlock(userId);
@@ -436,7 +451,7 @@ public class UserLifecycleTests {
 
     /** Tests installing a pre-existing app in a newly-created profile. */
     @Test
-    public void managedProfileInstall() throws Exception {
+    public void managedProfileInstall() throws RemoteException {
         assumeTrue(mHasManagedUserFeature);
 
         while (mRunner.keepRunning()) {
@@ -457,7 +472,7 @@ public class UserLifecycleTests {
      * and launching that app in it.
      */
     @Test
-    public void managedProfileCreateUnlockInstallAndLaunchApp() throws Exception {
+    public void managedProfileCreateUnlockInstallAndLaunchApp() throws RemoteException {
         assumeTrue(mHasManagedUserFeature);
 
         while (mRunner.keepRunning()) {
@@ -478,7 +493,7 @@ public class UserLifecycleTests {
 
     /** Tests stopping a profile. */
     @Test
-    public void managedProfileStopped() throws Exception {
+    public void managedProfileStopped() throws RemoteException {
         assumeTrue(mHasManagedUserFeature);
 
         while (mRunner.keepRunning()) {
@@ -498,7 +513,7 @@ public class UserLifecycleTests {
     // TODO: This is just a POC. Do this properly and add more.
     /** Tests starting (unlocking) a newly-created profile using the user-type-pkg-whitelist. */
     @Test
-    public void managedProfileUnlock_usingWhitelist() throws Exception {
+    public void managedProfileUnlock_usingWhitelist() {
         assumeTrue(mHasManagedUserFeature);
         final int origMode = getUserTypePackageWhitelistMode();
         setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_ENFORCE
@@ -522,7 +537,7 @@ public class UserLifecycleTests {
     }
     /** Tests starting (unlocking) a newly-created profile NOT using the user-type-pkg-whitelist. */
     @Test
-    public void managedProfileUnlock_notUsingWhitelist() throws Exception {
+    public void managedProfileUnlock_notUsingWhitelist() {
         assumeTrue(mHasManagedUserFeature);
         final int origMode = getUserTypePackageWhitelistMode();
         setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_DISABLE);
@@ -551,19 +566,17 @@ public class UserLifecycleTests {
 
     /** Creates a new user with the given flags, returning its userId. */
     private int createUserWithFlags(int flags) {
-        int userId = mUm.createUser("TestUser", flags).id;
+        int userId = mUm.createUser(TEST_USER_NAME, flags).id;
         mUsersToRemove.add(userId);
         return userId;
     }
 
     /** Creates a managed (work) profile under the current user, returning its userId. */
     private int createManagedProfile() {
-        final UserInfo userInfo = mUm.createProfileForUser("TestProfile",
+        final UserInfo userInfo = mUm.createProfileForUser(TEST_USER_NAME,
                 UserManager.USER_TYPE_PROFILE_MANAGED, /* flags */ 0, mAm.getCurrentUser());
-        if (userInfo == null) {
-            throw new IllegalStateException("Creating managed profile failed. Most likely there is "
-                    + "already a pre-existing profile on the device.");
-        }
+        attestFalse("Creating managed profile failed. Most likely there is "
+                + "already a pre-existing profile on the device.", userInfo == null);
         mUsersToRemove.add(userInfo.id);
         return userInfo.id;
     }
@@ -576,24 +589,40 @@ public class UserLifecycleTests {
      */
     private void startUserInBackgroundAndWaitForUnlock(int userId) {
         final ProgressWaiter waiter = new ProgressWaiter();
+        boolean success = false;
         try {
             mIam.startUserInBackgroundWithListener(userId, waiter);
-            boolean success = waiter.waitForFinish(TIMEOUT_IN_SECOND);
-            attestTrue("Failed to start user " + userId + " in background.", success);
+            success = waiter.waitForFinish(TIMEOUT_IN_SECOND);
         } catch (RemoteException e) {
             Log.e(TAG, "startUserInBackgroundAndWaitForUnlock failed", e);
         }
+        attestTrue("Failed to start user " + userId + " in background.", success);
     }
 
     /** Starts the given user in the foreground. */
-    private void switchUser(int userId) throws Exception {
+    private void switchUser(int userId) throws RemoteException {
+        boolean success = switchUserNoCheck(userId);
+        attestTrue("Failed to properly switch to user " + userId, success);
+    }
+
+    /**
+     * Starts the given user in the foreground.
+     * Returns true if successful. Does not fail the test if unsuccessful.
+     * If lack of success should fail the test, use {@link #switchUser(int)} instead.
+     */
+    private boolean switchUserNoCheck(int userId) throws RemoteException {
         final CountDownLatch latch = new CountDownLatch(1);
         registerUserSwitchObserver(latch, null, userId);
         mAm.switchUser(userId);
-        latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
+        try {
+            return latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Log.e(TAG, "Thread interrupted unexpectedly.", e);
+            return false;
+        }
     }
 
-    private void stopUser(int userId, boolean force) throws Exception {
+    private void stopUser(int userId, boolean force) throws RemoteException {
         final CountDownLatch latch = new CountDownLatch(1);
         mIam.stopUser(userId, force /* force */, new IStopUserCallback.Stub() {
             @Override
@@ -605,7 +634,7 @@ public class UserLifecycleTests {
             public void userStopAborted(int userId) throws RemoteException {
             }
         });
-        latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
+        waitForLatch("Failed to properly stop user " + userId, latch);
     }
 
     /**
@@ -615,15 +644,14 @@ public class UserLifecycleTests {
      * @param stopNewUser whether to stop the new user after switching to otherUser.
      * @return userId of the newly created user.
      */
-    private int initializeNewUserAndSwitchBack(boolean stopNewUser) throws Exception {
+    private int initializeNewUserAndSwitchBack(boolean stopNewUser) throws RemoteException {
         final int origUser = mAm.getCurrentUser();
         // First, create and switch to testUser, waiting for its ACTION_USER_UNLOCKED
         final int testUser = createUserNoFlags();
         final CountDownLatch latch1 = new CountDownLatch(1);
         registerBroadcastReceiver(Intent.ACTION_USER_UNLOCKED, latch1, testUser);
         mAm.switchUser(testUser);
-        attestTrue("Failed to achieve initial ACTION_USER_UNLOCKED for user " + testUser,
-                latch1.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS));
+        waitForLatch("Failed to achieve initial ACTION_USER_UNLOCKED for user " + testUser, latch1);
 
         // Second, switch back to origUser, waiting merely for switchUser() to finish
         switchUser(origUser);
@@ -656,11 +684,7 @@ public class UserLifecycleTests {
                 PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
                 PackageManager.INSTALL_REASON_UNKNOWN, sender, userId, null);
 
-        try {
-            latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            Log.e(TAG, "Thread interrupted unexpectedly.", e);
-        }
+        waitForLatch("Failed to install app " + packageName + " on user " + userId, latch);
     }
 
     /**
@@ -678,7 +702,7 @@ public class UserLifecycleTests {
     }
 
     private void registerUserSwitchObserver(final CountDownLatch switchLatch,
-            final CountDownLatch bootCompleteLatch, final int userId) throws Exception {
+            final CountDownLatch bootCompleteLatch, final int userId) throws RemoteException {
         ActivityManager.getService().registerUserSwitchObserver(
                 new UserSwitchObserver() {
                     @Override
@@ -734,6 +758,17 @@ public class UserLifecycleTests {
         }
     }
 
+    /** Waits TIMEOUT_IN_SECOND for the latch to complete, otherwise declares the given error. */
+    private void waitForLatch(String errMsg, CountDownLatch latch) {
+        boolean success = false;
+        try {
+            success = latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Log.e(TAG, "Thread interrupted unexpectedly.", e);
+        }
+        attestTrue(errMsg, success);
+    }
+
     /** Gets the PACKAGE_WHITELIST_MODE_PROP System Property. */
     private int getUserTypePackageWhitelistMode() {
         return SystemProperties.getInt(PACKAGE_WHITELIST_MODE_PROP,
@@ -767,13 +802,30 @@ public class UserLifecycleTests {
         }
     }
 
-    private void attestTrue(String message, boolean assertion) {
-        if (!assertion) {
-            Log.w(TAG, message);
+    private void removeAnyPreviousTestUsers() {
+        for (UserInfo user : mUm.getUsers()) {
+            if (TEST_USER_NAME.equals(user.name)) {
+                Log.i(TAG, "Found previous test user " + user.id + ". Removing it.");
+                if (mAm.getCurrentUser() == user.id) {
+                    try {
+                        switchUserNoCheck(UserHandle.USER_SYSTEM);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Failed to correctly switch to system user", e);
+                    }
+                }
+                mUm.removeUser(user.id);
+            }
         }
     }
 
-    private void attestFalse(String message, boolean assertion) {
+    private void attestTrue(@NonNull String message, boolean assertion) {
+        if (!assertion) {
+            Log.e(TAG, "Test failed on iteration #" + mRunner.getIteration() + ": " + message);
+            mRunner.markAsFailed(new AssertionError(message));
+        }
+    }
+
+    private void attestFalse(@NonNull String message, boolean assertion) {
         attestTrue(message, !assertion);
     }
 }

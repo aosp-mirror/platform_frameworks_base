@@ -25,6 +25,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
@@ -99,7 +100,7 @@ public final class BluetoothCsipSetCoordinator implements BluetoothProfile, Auto
      * {@link #STATE_DISCONNECTED}, {@link #STATE_CONNECTING},
      * {@link #STATE_CONNECTED}, {@link #STATE_DISCONNECTING}.
      */
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH)
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CSIS_CONNECTION_STATE_CHANGED =
             "android.bluetooth.action.CSIS_CONNECTION_STATE_CHANGED";
@@ -221,7 +222,8 @@ public final class BluetoothCsipSetCoordinator implements BluetoothProfile, Auto
      */
     public static final int LOCKED_GROUP_MEMBER_LOST = 6;
 
-    private BluetoothAdapter mAdapter;
+    private final BluetoothAdapter mAdapter;
+    private final AttributionSource mAttributionSource;
     private final BluetoothProfileConnector<IBluetoothCsipSetCoordinator> mProfileConnector =
             new BluetoothProfileConnector(this, BluetoothProfile.CSIP_SET_COORDINATOR, TAG,
                     IBluetoothCsipSetCoordinator.class.getName()) {
@@ -236,8 +238,9 @@ public final class BluetoothCsipSetCoordinator implements BluetoothProfile, Auto
      * Create a BluetoothCsipSetCoordinator proxy object for interacting with the local
      * Bluetooth CSIS service.
      */
-    /*package*/ BluetoothCsipSetCoordinator(Context context, ServiceListener listener) {
-        mAdapter = BluetoothAdapter.getDefaultAdapter();
+    /*package*/ BluetoothCsipSetCoordinator(Context context, ServiceListener listener, BluetoothAdapter adapter) {
+        mAdapter = adapter;
+        mAttributionSource = adapter.getAttributionSource();
         mProfileConnector.connect(context, listener);
         mCloseGuard = new CloseGuard();
         mCloseGuard.open("close");
@@ -290,7 +293,7 @@ public final class BluetoothCsipSetCoordinator implements BluetoothProfile, Auto
                 if ((executor != null) && (cb != null)) {
                     delegate = new BluetoothCsipSetCoordinatorLockCallbackDelegate(executor, cb);
                 }
-                return service.groupLock(groupId, delegate).getUuid();
+                return service.groupLock(groupId, delegate, mAttributionSource).getUuid();
             }
             if (service == null) {
                 Log.w(TAG, "Proxy not attached to service");
@@ -322,7 +325,7 @@ public final class BluetoothCsipSetCoordinator implements BluetoothProfile, Auto
         final IBluetoothCsipSetCoordinator service = getService();
         try {
             if (service != null && isEnabled()) {
-                service.groupUnlock(new ParcelUuid(lockUuid));
+                service.groupUnlock(new ParcelUuid(lockUuid), mAttributionSource);
                 return true;
             }
             if (service == null) {
@@ -351,7 +354,7 @@ public final class BluetoothCsipSetCoordinator implements BluetoothProfile, Auto
         final IBluetoothCsipSetCoordinator service = getService();
         try {
             if (service != null && isEnabled()) {
-                return service.getGroupUuidMapByDevice(device);
+                return service.getGroupUuidMapByDevice(device, mAttributionSource);
             }
             if (service == null) {
                 Log.w(TAG, "Proxy not attached to service");
@@ -379,7 +382,7 @@ public final class BluetoothCsipSetCoordinator implements BluetoothProfile, Auto
         final IBluetoothCsipSetCoordinator service = getService();
         try {
             if (service != null && isEnabled()) {
-                return service.getAllGroupIds(uuid);
+                return service.getAllGroupIds(uuid, mAttributionSource);
             }
             if (service == null) {
                 Log.w(TAG, "Proxy not attached to service");
@@ -402,7 +405,7 @@ public final class BluetoothCsipSetCoordinator implements BluetoothProfile, Auto
         final IBluetoothCsipSetCoordinator service = getService();
         if (service != null && isEnabled()) {
             try {
-                return service.getConnectedDevices();
+                return service.getConnectedDevices(mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();
@@ -427,7 +430,7 @@ public final class BluetoothCsipSetCoordinator implements BluetoothProfile, Auto
         final IBluetoothCsipSetCoordinator service = getService();
         if (service != null && isEnabled()) {
             try {
-                return service.getDevicesMatchingConnectionStates(states);
+                return service.getDevicesMatchingConnectionStates(states, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return new ArrayList<BluetoothDevice>();
@@ -452,7 +455,7 @@ public final class BluetoothCsipSetCoordinator implements BluetoothProfile, Auto
         final IBluetoothCsipSetCoordinator service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
-                return service.getConnectionState(device);
+                return service.getConnectionState(device, mAttributionSource);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
                 return BluetoothProfile.STATE_DISCONNECTED;
@@ -491,7 +494,7 @@ public final class BluetoothCsipSetCoordinator implements BluetoothProfile, Auto
                         && connectionPolicy != BluetoothProfile.CONNECTION_POLICY_ALLOWED) {
                     return false;
                 }
-                return service.setConnectionPolicy(device, connectionPolicy);
+                return service.setConnectionPolicy(device, connectionPolicy, mAttributionSource);
             }
             if (service == null) {
                 Log.w(TAG, "Proxy not attached to service");
@@ -524,7 +527,7 @@ public final class BluetoothCsipSetCoordinator implements BluetoothProfile, Auto
         final IBluetoothCsipSetCoordinator service = getService();
         try {
             if (service != null && isEnabled() && isValidDevice(device)) {
-                return service.getConnectionPolicy(device);
+                return service.getConnectionPolicy(device, mAttributionSource);
             }
             if (service == null) {
                 Log.w(TAG, "Proxy not attached to service");

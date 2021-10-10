@@ -124,7 +124,7 @@ public final class AdvertiseData implements Parcelable {
      * @hide
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }

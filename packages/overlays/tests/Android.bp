@@ -23,24 +23,18 @@ package {
 
 android_test {
     name: "OverlayTests",
-
     certificate: "platform",
-
     srcs: ["src/**/*.java"],
-
     libs: [
         "android.test.runner",
         "android.test.base",
     ],
-
     platform_apis: true,
-
     static_libs: [
         "androidx.test.rules",
         "androidx.test.espresso.core",
         "mockito-target-minus-junit4",
         "truth-prebuilt",
     ],
-
     dxflags: ["--multi-dex"],
 }

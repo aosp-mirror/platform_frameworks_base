@@ -38,13 +38,6 @@ void BinaryStreamVisitor::Write32(uint32_t value) {
   stream_.write(reinterpret_cast<char*>(&x), sizeof(uint32_t));
 }
 
-void BinaryStreamVisitor::WriteString256(const StringPiece& value) {
-  char buf[kIdmapStringLength];
-  memset(buf, 0, sizeof(buf));
-  memcpy(buf, value.data(), std::min(value.size(), sizeof(buf)));
-  stream_.write(buf, sizeof(buf));
-}
-
 void BinaryStreamVisitor::WriteString(const StringPiece& value) {
   // pad with null to nearest word boundary;
   size_t padding_size = CalculatePadding(value.size());
@@ -64,8 +57,9 @@ void BinaryStreamVisitor::visit(const IdmapHeader& header) {
   Write32(header.GetOverlayCrc());
   Write32(header.GetFulfilledPolicies());
   Write32(static_cast<uint8_t>(header.GetEnforceOverlayable()));
-  WriteString256(header.GetTargetPath());
-  WriteString256(header.GetOverlayPath());
+  WriteString(header.GetTargetPath());
+  WriteString(header.GetOverlayPath());
+  WriteString(header.GetOverlayName());
   WriteString(header.GetDebugInfo());
 }
 
@@ -93,10 +87,6 @@ void BinaryStreamVisitor::visit(const IdmapData& data) {
 }
 
 void BinaryStreamVisitor::visit(const IdmapData::Header& header) {
-  Write8(header.GetTargetPackageId());
-  Write8(header.GetOverlayPackageId());
-  Write8(0U);  // padding
-  Write8(0U);  // padding
   Write32(header.GetTargetEntryCount());
   Write32(header.GetTargetInlineEntryCount());
   Write32(header.GetOverlayEntryCount());

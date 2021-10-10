@@ -2,6 +2,9 @@
   "presubmit": [
     {
       "name": "CtsMediaParserTestCases"
+    },
+    {
+      "name": "CtsMediaParserHostTestCases"
     }
   ]
 }

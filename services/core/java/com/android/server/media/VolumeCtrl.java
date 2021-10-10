@@ -32,6 +32,8 @@ import com.android.internal.os.BaseCommand;
 public class VolumeCtrl {
 
     private static final String TAG = "VolumeCtrl";
+    private static final String LOG_V = "[V]";
+    private static final String LOG_E = "[E]";
 
     // --stream affects --set, --adj or --get options.
     // --show affects --set and --adj options.
@@ -80,21 +82,22 @@ public class VolumeCtrl {
                     break;
                 case "--get":
                     doGet = true;
-                    log(LOG_V, "will get volume");
+                    cmd.log(LOG_V, "will get volume");
                     break;
                 case "--stream":
                     stream = Integer.decode(cmd.getNextArgRequired()).intValue();
-                    log(LOG_V, "will control stream=" + stream + " (" + streamName(stream) + ")");
+                    cmd.log(LOG_V,
+                            "will control stream=" + stream + " (" + streamName(stream) + ")");
                     break;
                 case "--set":
                     volIndex = Integer.decode(cmd.getNextArgRequired()).intValue();
                     mode = VOLUME_CONTROL_MODE_SET;
-                    log(LOG_V, "will set volume to index=" + volIndex);
+                    cmd.log(LOG_V, "will set volume to index=" + volIndex);
                     break;
                 case "--adj":
                     mode = VOLUME_CONTROL_MODE_ADJUST;
                     adjustment = cmd.getNextArgRequired();
-                    log(LOG_V, "will adjust volume");
+                    cmd.log(LOG_V, "will adjust volume");
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown argument " + option);
@@ -122,11 +125,11 @@ public class VolumeCtrl {
 
         //----------------------------------------
         // Test initialization
-        log(LOG_V, "Connecting to AudioService");
+        cmd.log(LOG_V, "Connecting to AudioService");
         IAudioService audioService = IAudioService.Stub.asInterface(ServiceManager.checkService(
                 Context.AUDIO_SERVICE));
         if (audioService == null) {
-            System.err.println(BaseCommand.NO_SYSTEM_ERROR_CODE);
+            cmd.log(LOG_E, BaseCommand.NO_SYSTEM_ERROR_CODE);
             throw new AndroidException(
                     "Can't connect to audio service; is the system running?");
         }
@@ -152,21 +155,10 @@ public class VolumeCtrl {
             audioService.adjustStreamVolume(stream, adjDir, flag, pack);
         }
         if (doGet) {
-            log(LOG_V, "volume is " + audioService.getStreamVolume(stream)
+            cmd.log(LOG_V, "volume is " + audioService.getStreamVolume(stream)
                     + " in range [" + audioService.getStreamMinVolume(stream)
                     + ".." + audioService.getStreamMaxVolume(stream) + "]");
         }
-    }
-
-    //--------------------------------------------
-    // Utilities
-
-    static final String LOG_V = "[v]";
-    static final String LOG_W = "[w]";
-    static final String LOG_OK = "[ok]";
-
-    static void log(String code, String msg) {
-        System.out.println(code + " " + msg);
     }
 
     static String streamName(int stream) {

@@ -22,6 +22,7 @@ import android.os.SystemClock;
 import android.service.dreams.DreamService;
 import android.util.Log;
 
+import com.android.systemui.doze.dagger.DozeComponent;
 import com.android.systemui.plugins.DozeServicePlugin;
 import com.android.systemui.plugins.DozeServicePlugin.RequestDoze;
 import com.android.systemui.plugins.PluginListener;
@@ -36,16 +37,16 @@ public class DozeService extends DreamService
         implements DozeMachine.Service, RequestDoze, PluginListener<DozeServicePlugin> {
     private static final String TAG = "DozeService";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-    private final DozeFactory mDozeFactory;
+    private final DozeComponent.Builder mDozeComponentBuilder;
 
     private DozeMachine mDozeMachine;
     private DozeServicePlugin mDozePlugin;
     private PluginManager mPluginManager;
 
     @Inject
-    public DozeService(DozeFactory dozeFactory, PluginManager pluginManager) {
+    public DozeService(DozeComponent.Builder dozeComponentBuilder, PluginManager pluginManager) {
+        mDozeComponentBuilder = dozeComponentBuilder;
         setDebug(DEBUG);
-        mDozeFactory = dozeFactory;
         mPluginManager = pluginManager;
     }
 
@@ -56,7 +57,8 @@ public class DozeService extends DreamService
         setWindowless(true);
 
         mPluginManager.addPluginListener(this, DozeServicePlugin.class, false /* allowMultiple */);
-        mDozeMachine = mDozeFactory.assembleMachine(this);
+        DozeComponent dozeComponent = mDozeComponentBuilder.build(this);
+        mDozeMachine = dozeComponent.getDozeMachine();
     }
 
     @Override

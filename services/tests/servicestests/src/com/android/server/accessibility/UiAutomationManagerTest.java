@@ -63,6 +63,7 @@ public class UiAutomationManagerTest {
     @Mock AccessibilitySecurityPolicy mMockSecurityPolicy;
     @Mock AccessibilityWindowManager mMockA11yWindowManager;
     @Mock AbstractAccessibilityServiceConnection.SystemSupport mMockSystemSupport;
+    @Mock AccessibilityTrace mMockA11yTrace;
     @Mock WindowManagerInternal mMockWindowManagerInternal;
     @Mock SystemActionPerformer mMockSystemActionPerformer;
     @Mock IBinder mMockOwner;
@@ -80,6 +81,7 @@ public class UiAutomationManagerTest {
         mMockResolveInfo.serviceInfo.applicationInfo = mock(ApplicationInfo.class);
 
         when(mMockAccessibilityServiceClient.asBinder()).thenReturn(mMockServiceAsBinder);
+        when(mMockA11yTrace.isA11yTracingEnabled()).thenReturn(false);
 
         final Context context = getInstrumentation().getTargetContext();
         when(mMockContext.getSystemService(Context.DISPLAY_SERVICE)).thenReturn(
@@ -170,10 +172,34 @@ public class UiAutomationManagerTest {
         verify(mMockSystemSupport).onClientChangeLocked(false);
     }
 
+    @Test
+    public void uiAutomationWithDontUseAccessibilityFlagAfterUnregistering_notifiesSystem()
+            throws Exception {
+        register(UiAutomation.FLAG_DONT_USE_ACCESSIBILITY);
+        unregister();
+        verify(mMockSystemSupport).onClientChangeLocked(false);
+    }
+
+    @Test
+    public void uiAutomationWithDontUseAccessibilityFlag_disableAccessibilityFunctions()
+            throws Exception {
+        register(0);
+        assertTrue(mUiAutomationManager.isUiAutomationRunningLocked());
+        unregister();
+        assertFalse(mUiAutomationManager.isUiAutomationRunningLocked());
+        register(UiAutomation.FLAG_DONT_USE_ACCESSIBILITY);
+        assertTrue(mUiAutomationManager.isUiAutomationRunningLocked());
+        assertFalse(mUiAutomationManager.useAccessibility());
+        assertFalse(mUiAutomationManager.canRetrieveInteractiveWindowsLocked());
+        assertFalse(mUiAutomationManager.isTouchExplorationEnabledLocked());
+        assertEquals(0, mUiAutomationManager.getRelevantEventTypes());
+        assertEquals(0, mUiAutomationManager.getRequestedEventMaskLocked());
+    }
+
     private void register(int flags) {
         mUiAutomationManager.registerUiTestAutomationServiceLocked(mMockOwner,
                 mMockAccessibilityServiceClient, mMockContext, mMockServiceInfo, SERVICE_ID,
-                mMessageCapturingHandler, mMockSecurityPolicy, mMockSystemSupport,
+                mMessageCapturingHandler, mMockSecurityPolicy, mMockSystemSupport, mMockA11yTrace,
                 mMockWindowManagerInternal, mMockSystemActionPerformer,
                 mMockA11yWindowManager, flags);
     }

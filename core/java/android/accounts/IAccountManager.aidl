@@ -43,7 +43,7 @@ interface IAccountManager {
         in String[] features, String opPackageName);
     void getAccountsByFeatures(in IAccountManagerResponse response, String accountType,
         in String[] features, String opPackageName);
-    boolean addAccountExplicitly(in Account account, String password, in Bundle extras);
+    boolean addAccountExplicitly(in Account account, String password, in Bundle extras, in String opPackageName);
     void removeAccountAsUser(in IAccountManagerResponse response, in Account account,
         boolean expectActivityLaunch, int userId);
     boolean removeAccountExplicitly(in Account account);
@@ -109,7 +109,7 @@ interface IAccountManager {
     Map getPackagesAndVisibilityForAccount(in Account account);
     @SuppressWarnings(value = {"untyped-collection"})
     boolean addAccountExplicitlyWithVisibility(in Account account, String password, in Bundle extras,
-            in Map visibility);
+            in Map visibility, in String opPackageName);
     boolean setAccountVisibility(in Account a, in String packageName, int newVisibility);
     int getAccountVisibility(in Account a, in String packageName);
     /* Type may be null returns Map <Account, Integer>*/

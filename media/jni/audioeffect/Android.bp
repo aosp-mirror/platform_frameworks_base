@@ -19,6 +19,7 @@ cc_library_shared {
     ],
 
     shared_libs: [
+        "framework-permission-aidl-cpp",
         "liblog",
         "libcutils",
         "libutils",
@@ -27,6 +28,11 @@ cc_library_shared {
         "libaudioclient",
         "libaudioutils",
         "libaudiofoundation",
+        "libbinder"
+    ],
+
+    export_shared_lib_headers: [
+        "framework-permission-aidl-cpp",
     ],
 
     version_script: "exports.lds",

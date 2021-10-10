@@ -36,7 +36,7 @@ public class IntegrityUtils {
     public static byte[] getBytesFromHexDigest(String hexDigest) {
         checkArgument(
                 hexDigest.length() % 2 == 0,
-                "Invalid hex encoding " + hexDigest + ": must have even length");
+                "Invalid hex encoding %s: must have even length", hexDigest);
 
         byte[] rawBytes = new byte[hexDigest.length() / 2];
         for (int i = 0; i < rawBytes.length; i++) {

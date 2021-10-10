@@ -16,42 +16,60 @@
 
 package com.android.systemui.qs;
 
-import com.android.systemui.R;
+import android.content.res.Configuration;
+
+import com.android.systemui.qs.dagger.QSScope;
+import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
 
-public class QSContainerImplController {
-    private final QSContainerImpl mView;
+/** */
+@QSScope
+public class QSContainerImplController extends ViewController<QSContainerImpl> {
+    private final QSPanelController mQsPanelController;
     private final QuickStatusBarHeaderController mQuickStatusBarHeaderController;
+    private final ConfigurationController mConfigurationController;
 
-    private QSContainerImplController(QSContainerImpl view,
-            QuickStatusBarHeaderController.Builder quickStatusBarHeaderControllerBuilder) {
-        mView = view;
-        mQuickStatusBarHeaderController = quickStatusBarHeaderControllerBuilder
-                .setQuickStatusBarHeader(mView.findViewById(R.id.header)).build();
+    private final ConfigurationController.ConfigurationListener mConfigurationListener =
+            new ConfigurationController.ConfigurationListener() {
+        @Override
+        public void onConfigChanged(Configuration newConfig) {
+            mView.updateResources(mQsPanelController, mQuickStatusBarHeaderController);
+        }
+    };
+
+    @Inject
+    QSContainerImplController(QSContainerImpl view, QSPanelController qsPanelController,
+            QuickStatusBarHeaderController quickStatusBarHeaderController,
+            ConfigurationController configurationController) {
+        super(view);
+        mQsPanelController = qsPanelController;
+        mQuickStatusBarHeaderController = quickStatusBarHeaderController;
+        mConfigurationController = configurationController;
+    }
+
+    @Override
+    public void onInit() {
+        mQuickStatusBarHeaderController.init();
     }
 
     public void setListening(boolean listening) {
         mQuickStatusBarHeaderController.setListening(listening);
     }
 
-    public static class Builder {
-        private final QuickStatusBarHeaderController.Builder mQuickStatusBarHeaderControllerBuilder;
-        private QSContainerImpl mView;
+    @Override
+    protected void onViewAttached() {
+        mView.updateResources(mQsPanelController, mQuickStatusBarHeaderController);
+        mConfigurationController.addCallback(mConfigurationListener);
+    }
 
-        @Inject
-        public Builder(
-                QuickStatusBarHeaderController.Builder quickStatusBarHeaderControllerBuilder) {
-            mQuickStatusBarHeaderControllerBuilder = quickStatusBarHeaderControllerBuilder;
-        }
+    @Override
+    protected void onViewDetached() {
+        mConfigurationController.removeCallback(mConfigurationListener);
+    }
 
-        public Builder setQSContainerImpl(QSContainerImpl view) {
-            mView = view;
-            return this;
-        }
-
-        public QSContainerImplController build() {
-            return new QSContainerImplController(mView, mQuickStatusBarHeaderControllerBuilder);
-        }
+    public QSContainerImpl getView() {
+        return mView;
     }
 }

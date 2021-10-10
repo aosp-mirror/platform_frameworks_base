@@ -19,16 +19,20 @@ package com.android.server.om;
 import static android.content.om.OverlayInfo.STATE_DISABLED;
 import static android.content.om.OverlayInfo.STATE_ENABLED;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.content.om.OverlayIdentifier;
 import android.content.om.OverlayInfo;
 import android.text.TextUtils;
+import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
+import androidx.annotation.NonNull;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
@@ -38,71 +42,36 @@ import org.xmlpull.v1.XmlPullParser;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.StringReader;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
+
+import javax.annotation.Nullable;
 
 @RunWith(AndroidJUnit4.class)
 public class OverlayManagerSettingsTests {
     private OverlayManagerSettings mSettings;
+    private static int USER_0 = 0;
+    private static int USER_1 = 1;
 
-    private static final OverlayInfo OVERLAY_A0 = new OverlayInfo(
-            "com.test.overlay_a",
-            "com.test.target",
-            null,
-            "some-category",
-            "/data/app/com.test.overlay_a-1/base.apk",
-            STATE_DISABLED,
-            0,
-            0,
-            true);
+    private static OverlayIdentifier OVERLAY_A = new OverlayIdentifier("com.test.overlay_a",
+            null /* overlayName */);
+    private static OverlayIdentifier OVERLAY_B = new OverlayIdentifier("com.test.overlay_b",
+            null /* overlayName */);
+    private static OverlayIdentifier OVERLAY_C = new OverlayIdentifier("com.test.overlay_c",
+            null /* overlayName */);
 
-    private static final OverlayInfo OVERLAY_B0 = new OverlayInfo(
-            "com.test.overlay_b",
-            "com.test.target",
-            null,
-            "some-category",
-            "/data/app/com.test.overlay_b-1/base.apk",
-            STATE_DISABLED,
-            0,
-            0,
-            true);
+    private static final OverlayInfo OVERLAY_A_USER0 = createInfo(OVERLAY_A, USER_0);
+    private static final OverlayInfo OVERLAY_B_USER0 = createInfo(OVERLAY_B, USER_0);
+    private static final OverlayInfo OVERLAY_C_USER0 = createInfo(OVERLAY_C, USER_0);
 
-    private static final OverlayInfo OVERLAY_C0 = new OverlayInfo(
-            "com.test.overlay_c",
-            "com.test.target",
-            null,
-            "some-category",
-            "/data/app/com.test.overlay_c-1/base.apk",
-            STATE_DISABLED,
-            0,
-            0,
-            true);
+    private static final OverlayInfo OVERLAY_A_USER1 = createInfo(OVERLAY_A, USER_1);
+    private static final OverlayInfo OVERLAY_B_USER1 = createInfo(OVERLAY_B, USER_1);
 
-    private static final OverlayInfo OVERLAY_A1 = new OverlayInfo(
-            "com.test.overlay_a",
-            "com.test.target",
-            null,
-            "some-category",
-            "/data/app/com.test.overlay_a-1/base.apk",
-            STATE_DISABLED,
-            1,
-            0,
-            true);
-
-    private static final OverlayInfo OVERLAY_B1 = new OverlayInfo(
-            "com.test.overlay_b",
-            "com.test.target",
-            null,
-            "some-category",
-            "/data/app/com.test.overlay_b-1/base.apk",
-            STATE_DISABLED,
-            1,
-            0,
-            true);
+    private static final String TARGET_PACKAGE = "com.test.target";
 
     @Before
     public void setUp() throws Exception {
@@ -113,124 +82,112 @@ public class OverlayManagerSettingsTests {
 
     @Test
     public void testSettingsInitiallyEmpty() throws Exception {
-        final int userId = 0;
-        Map<String, List<OverlayInfo>> map = mSettings.getOverlaysForUser(userId);
+        final Map<String, List<OverlayInfo>> map = mSettings.getOverlaysForUser(0 /* userId */);
         assertEquals(0, map.size());
     }
 
     @Test
     public void testBasicSetAndGet() throws Exception {
-        assertDoesNotContain(mSettings, OVERLAY_A0.packageName, OVERLAY_A0.userId);
+        assertDoesNotContain(mSettings, OVERLAY_A_USER0);
 
-        insert(OVERLAY_A0);
-        assertContains(mSettings, OVERLAY_A0);
-        OverlayInfo oi = mSettings.getOverlayInfo(OVERLAY_A0.packageName, OVERLAY_A0.userId);
-        assertEquals(OVERLAY_A0, oi);
+        insertSetting(OVERLAY_A_USER0);
+        assertContains(mSettings, OVERLAY_A_USER0);
+        final OverlayInfo oi = mSettings.getOverlayInfo(OVERLAY_A, USER_0);
+        assertEquals(OVERLAY_A_USER0, oi);
 
-        assertTrue(mSettings.remove(OVERLAY_A0.packageName, OVERLAY_A0.userId));
-        assertDoesNotContain(mSettings, OVERLAY_A0.packageName, OVERLAY_A0.userId);
+        assertTrue(mSettings.remove(OVERLAY_A, USER_0));
+        assertDoesNotContain(mSettings, OVERLAY_A, USER_0);
     }
 
     @Test
     public void testGetUsers() throws Exception {
-        int[] users = mSettings.getUsers();
-        assertEquals(0, users.length);
+        assertArrayEquals(new int[]{}, mSettings.getUsers());
 
-        insert(OVERLAY_A0);
-        users = mSettings.getUsers();
-        assertEquals(1, users.length);
-        assertContains(users, OVERLAY_A0.userId);
+        insertSetting(OVERLAY_A_USER0);
+        assertArrayEquals(new int[]{USER_0}, mSettings.getUsers());
 
-        insert(OVERLAY_A1);
-        insert(OVERLAY_B1);
-        users = mSettings.getUsers();
-        assertEquals(2, users.length);
-        assertContains(users, OVERLAY_A0.userId);
-        assertContains(users, OVERLAY_A1.userId);
+        insertSetting(OVERLAY_A_USER1);
+        insertSetting(OVERLAY_B_USER1);
+        assertArrayEquals(new int[]{USER_0, USER_1}, mSettings.getUsers());
     }
 
     @Test
     public void testGetOverlaysForUser() throws Exception {
-        insert(OVERLAY_A0);
-        insert(OVERLAY_B0);
-        insert(OVERLAY_A1);
-        insert(OVERLAY_B1);
+        insertSetting(OVERLAY_A_USER0);
+        insertSetting(OVERLAY_B_USER0);
+        insertSetting(OVERLAY_A_USER1);
+        insertSetting(OVERLAY_B_USER0);
 
-        Map<String, List<OverlayInfo>> map = mSettings.getOverlaysForUser(OVERLAY_A0.userId);
-        assertEquals(1, map.keySet().size());
-        assertTrue(map.keySet().contains(OVERLAY_A0.targetPackageName));
+        final Map<String, List<OverlayInfo>> map = mSettings.getOverlaysForUser(USER_0);
+        assertEquals(Set.of(TARGET_PACKAGE), map.keySet());
 
-        List<OverlayInfo> list = map.get(OVERLAY_A0.targetPackageName);
-        assertEquals(2, list.size());
-        assertTrue(list.contains(OVERLAY_A0));
-        assertTrue(list.contains(OVERLAY_B0));
+        // Two overlays in user 0 target the same package
+        final List<OverlayInfo> list = map.get(TARGET_PACKAGE);
+        assertListsAreEqual(List.of(OVERLAY_A_USER0, OVERLAY_B_USER0), list);
 
-        // getOverlaysForUser should never return null
-        map = mSettings.getOverlaysForUser(-1);
-        assertNotNull(map);
-        assertEquals(0, map.size());
+        // No users installed for user 3
+        assertEquals(Map.<String, List<OverlayInfo>>of(), mSettings.getOverlaysForUser(3));
     }
 
     @Test
     public void testRemoveUser() throws Exception {
-        insert(OVERLAY_A0);
-        insert(OVERLAY_B0);
-        insert(OVERLAY_A1);
+        insertSetting(OVERLAY_A_USER0);
+        insertSetting(OVERLAY_B_USER0);
+        insertSetting(OVERLAY_A_USER1);
 
-        assertContains(mSettings, OVERLAY_A0);
-        assertContains(mSettings, OVERLAY_B0);
-        assertContains(mSettings, OVERLAY_A1);
+        assertContains(mSettings, OVERLAY_A_USER0);
+        assertContains(mSettings, OVERLAY_B_USER0);
+        assertContains(mSettings, OVERLAY_A_USER1);
 
-        mSettings.removeUser(OVERLAY_A0.userId);
+        mSettings.removeUser(USER_0);
 
-        assertDoesNotContain(mSettings, OVERLAY_A0);
-        assertDoesNotContain(mSettings, OVERLAY_B0);
-        assertContains(mSettings, OVERLAY_A1);
+        assertDoesNotContain(mSettings, OVERLAY_A_USER0);
+        assertDoesNotContain(mSettings, OVERLAY_B_USER0);
+        assertContains(mSettings, OVERLAY_A_USER1);
     }
 
     @Test
     public void testOrderOfNewlyAddedItems() throws Exception {
         // new items are appended to the list
-        insert(OVERLAY_A0);
-        insert(OVERLAY_B0);
-        insert(OVERLAY_C0);
+        insertSetting(OVERLAY_A_USER0);
+        insertSetting(OVERLAY_B_USER0);
+        insertSetting(OVERLAY_C_USER0);
 
-        List<OverlayInfo> list =
-                mSettings.getOverlaysForTarget(OVERLAY_A0.targetPackageName, OVERLAY_A0.userId);
-        assertListsAreEqual(list, OVERLAY_A0, OVERLAY_B0, OVERLAY_C0);
+        assertListsAreEqual(List.of(OVERLAY_A_USER0, OVERLAY_B_USER0, OVERLAY_C_USER0),
+                mSettings.getOverlaysForTarget(TARGET_PACKAGE, USER_0));
 
         // overlays keep their positions when updated
-        mSettings.setState(OVERLAY_B0.packageName, OVERLAY_B0.userId, STATE_ENABLED);
-        OverlayInfo oi = mSettings.getOverlayInfo(OVERLAY_B0.packageName, OVERLAY_B0.userId);
+        mSettings.setState(OVERLAY_B, USER_0, STATE_ENABLED);
+        final OverlayInfo oi = mSettings.getOverlayInfo(OVERLAY_B, USER_0);
+        assertNotNull(oi);
 
-        list = mSettings.getOverlaysForTarget(OVERLAY_A0.targetPackageName, OVERLAY_A0.userId);
-        assertListsAreEqual(list, OVERLAY_A0, oi, OVERLAY_C0);
+        assertListsAreEqual(List.of(OVERLAY_A_USER0, oi, OVERLAY_C_USER0),
+                mSettings.getOverlaysForTarget(TARGET_PACKAGE, USER_0));
     }
 
     @Test
     public void testSetPriority() throws Exception {
-        insert(OVERLAY_A0);
-        insert(OVERLAY_B0);
-        insert(OVERLAY_C0);
+        insertSetting(OVERLAY_A_USER0);
+        insertSetting(OVERLAY_B_USER0);
+        insertSetting(OVERLAY_C_USER0);
 
-        List<OverlayInfo> list =
-                mSettings.getOverlaysForTarget(OVERLAY_A0.targetPackageName, OVERLAY_A0.userId);
-        assertListsAreEqual(list, OVERLAY_A0, OVERLAY_B0, OVERLAY_C0);
+        assertListsAreEqual(List.of(OVERLAY_A_USER0, OVERLAY_B_USER0, OVERLAY_C_USER0),
+                mSettings.getOverlaysForTarget(TARGET_PACKAGE, USER_0));
 
-        boolean changed = mSettings.setPriority(OVERLAY_B0.packageName, OVERLAY_C0.packageName,
-                OVERLAY_B0.userId);
-        assertTrue(changed);
-        list = mSettings.getOverlaysForTarget(OVERLAY_A0.targetPackageName, OVERLAY_A0.userId);
-        assertListsAreEqual(list, OVERLAY_A0, OVERLAY_C0, OVERLAY_B0);
+        assertTrue(mSettings.setPriority(OVERLAY_B, OVERLAY_C, USER_0));
+        assertListsAreEqual(List.of(OVERLAY_A_USER0, OVERLAY_C_USER0, OVERLAY_B_USER0),
+                mSettings.getOverlaysForTarget(TARGET_PACKAGE, USER_0));
 
-        changed =
-            mSettings.setPriority(OVERLAY_B0.packageName, "does.not.exist", OVERLAY_B0.userId);
-        assertFalse(changed);
-        list = mSettings.getOverlaysForTarget(OVERLAY_A0.targetPackageName, OVERLAY_A0.userId);
-        assertListsAreEqual(list, OVERLAY_A0, OVERLAY_C0, OVERLAY_B0);
+        // Nothing happens if the parent package cannot be found
+        assertFalse(mSettings.setPriority(OVERLAY_B, new OverlayIdentifier("does.not.exist"),
+                USER_0));
+        assertListsAreEqual(List.of(OVERLAY_A_USER0, OVERLAY_C_USER0, OVERLAY_B_USER0),
+                mSettings.getOverlaysForTarget(TARGET_PACKAGE, USER_0));
 
-        OverlayInfo otherTarget = new OverlayInfo(
+        // An overlay should not affect the priority of overlays targeting a different package
+        final OverlayInfo otherTarget = new OverlayInfo(
                 "com.test.overlay_other",
+                null,
                 "com.test.some.other.target",
                 null,
                 "some-category",
@@ -238,45 +195,36 @@ public class OverlayManagerSettingsTests {
                 STATE_DISABLED,
                 0,
                 0,
-                true);
-        insert(otherTarget);
-        changed = mSettings.setPriority(OVERLAY_A0.packageName, otherTarget.packageName,
-                OVERLAY_A0.userId);
-        assertFalse(changed);
+                true,
+                false);
+        insertSetting(otherTarget);
+        assertFalse(mSettings.setPriority(OVERLAY_A, otherTarget.getOverlayIdentifier(), USER_0));
     }
 
     @Test
     public void testSetLowestPriority() throws Exception {
-        insert(OVERLAY_A0);
-        insert(OVERLAY_B0);
-        insert(OVERLAY_C0);
+        insertSetting(OVERLAY_A_USER0);
+        insertSetting(OVERLAY_B_USER0);
+        insertSetting(OVERLAY_C_USER0);
+        assertListsAreEqual(List.of(OVERLAY_A_USER0, OVERLAY_B_USER0, OVERLAY_C_USER0),
+                mSettings.getOverlaysForTarget(TARGET_PACKAGE, USER_0));
 
-        List<OverlayInfo> list =
-                mSettings.getOverlaysForTarget(OVERLAY_A0.targetPackageName, OVERLAY_A0.userId);
-        assertListsAreEqual(list, OVERLAY_A0, OVERLAY_B0, OVERLAY_C0);
-
-        boolean changed = mSettings.setLowestPriority(OVERLAY_B0.packageName, OVERLAY_B0.userId);
-        assertTrue(changed);
-
-        list = mSettings.getOverlaysForTarget(OVERLAY_A0.targetPackageName, OVERLAY_A0.userId);
-        assertListsAreEqual(list, OVERLAY_B0, OVERLAY_A0, OVERLAY_C0);
+        assertTrue(mSettings.setLowestPriority(OVERLAY_B, USER_0));
+        assertListsAreEqual(List.of(OVERLAY_B_USER0, OVERLAY_A_USER0, OVERLAY_C_USER0),
+                mSettings.getOverlaysForTarget(TARGET_PACKAGE, USER_0));
     }
 
     @Test
     public void testSetHighestPriority() throws Exception {
-        insert(OVERLAY_A0);
-        insert(OVERLAY_B0);
-        insert(OVERLAY_C0);
+        insertSetting(OVERLAY_A_USER0);
+        insertSetting(OVERLAY_B_USER0);
+        insertSetting(OVERLAY_C_USER0);
+        assertListsAreEqual(List.of(OVERLAY_A_USER0, OVERLAY_B_USER0, OVERLAY_C_USER0),
+                mSettings.getOverlaysForTarget(TARGET_PACKAGE, USER_0));
 
-        List<OverlayInfo> list =
-                mSettings.getOverlaysForTarget(OVERLAY_A0.targetPackageName, OVERLAY_A0.userId);
-        assertListsAreEqual(list, OVERLAY_A0, OVERLAY_B0, OVERLAY_C0);
-
-        boolean changed = mSettings.setHighestPriority(OVERLAY_B0.packageName, OVERLAY_B0.userId);
-        assertTrue(changed);
-
-        list = mSettings.getOverlaysForTarget(OVERLAY_A0.targetPackageName, OVERLAY_A0.userId);
-        assertListsAreEqual(list, OVERLAY_A0, OVERLAY_C0, OVERLAY_B0);
+        assertTrue(mSettings.setHighestPriority(OVERLAY_B, USER_0));
+        assertListsAreEqual(List.of(OVERLAY_A_USER0, OVERLAY_C_USER0, OVERLAY_B_USER0),
+                mSettings.getOverlaysForTarget(OVERLAY_A_USER0.targetPackageName, USER_0));
     }
 
     // tests: persist and restore
@@ -285,7 +233,7 @@ public class OverlayManagerSettingsTests {
     public void testPersistEmpty() throws Exception {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         mSettings.persist(os);
-        String xml = new String(os.toByteArray(), "utf-8");
+        ByteArrayInputStream xml = new ByteArrayInputStream(os.toByteArray());
 
         assertEquals(1, countXmlTags(xml, "overlays"));
         assertEquals(0, countXmlTags(xml, "item"));
@@ -293,50 +241,50 @@ public class OverlayManagerSettingsTests {
 
     @Test
     public void testPersistDifferentOverlaysSameUser() throws Exception {
-        insert(OVERLAY_A0);
-        insert(OVERLAY_B0);
+        insertSetting(OVERLAY_A_USER0);
+        insertSetting(OVERLAY_B_USER0);
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         mSettings.persist(os);
-        final String xml = new String(os.toByteArray(), "utf-8");
+        ByteArrayInputStream xml = new ByteArrayInputStream(os.toByteArray());
 
         assertEquals(1, countXmlTags(xml, "overlays"));
         assertEquals(2, countXmlTags(xml, "item"));
         assertEquals(1, countXmlAttributesWhere(xml, "item", "packageName",
-                    OVERLAY_A0.packageName));
+                OVERLAY_A.getPackageName()));
         assertEquals(1, countXmlAttributesWhere(xml, "item", "packageName",
-                    OVERLAY_B0.packageName));
+                OVERLAY_B.getPackageName()));
         assertEquals(2, countXmlAttributesWhere(xml, "item", "userId",
-                    Integer.toString(OVERLAY_A0.userId)));
+                    Integer.toString(USER_0)));
     }
 
     @Test
     public void testPersistSameOverlayDifferentUsers() throws Exception {
-        insert(OVERLAY_A0);
-        insert(OVERLAY_A1);
+        insertSetting(OVERLAY_A_USER0);
+        insertSetting(OVERLAY_A_USER1);
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         mSettings.persist(os);
-        String xml = new String(os.toByteArray(), "utf-8");
+        ByteArrayInputStream xml = new ByteArrayInputStream(os.toByteArray());
 
         assertEquals(1, countXmlTags(xml, "overlays"));
         assertEquals(2, countXmlTags(xml, "item"));
         assertEquals(2, countXmlAttributesWhere(xml, "item", "packageName",
-                    OVERLAY_A0.packageName));
+                OVERLAY_A.getPackageName()));
         assertEquals(1, countXmlAttributesWhere(xml, "item", "userId",
-                    Integer.toString(OVERLAY_A0.userId)));
+                    Integer.toString(USER_0)));
         assertEquals(1, countXmlAttributesWhere(xml, "item", "userId",
-                    Integer.toString(OVERLAY_A1.userId)));
+                    Integer.toString(USER_1)));
     }
 
     @Test
     public void testPersistEnabled() throws Exception {
-        insert(OVERLAY_A0);
-        mSettings.setEnabled(OVERLAY_A0.packageName, OVERLAY_A0.userId, true);
+        insertSetting(OVERLAY_A_USER0);
+        mSettings.setEnabled(OVERLAY_A, USER_0, true);
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         mSettings.persist(os);
-        String xml = new String(os.toByteArray(), "utf-8");
+        ByteArrayInputStream xml = new ByteArrayInputStream(os.toByteArray());
 
         assertEquals(1, countXmlAttributesWhere(xml, "item", "isEnabled", "true"));
     }
@@ -350,7 +298,7 @@ public class OverlayManagerSettingsTests {
         ByteArrayInputStream is = new ByteArrayInputStream(xml.getBytes("utf-8"));
 
         mSettings.restore(is);
-        assertDoesNotContain(mSettings, "com.test.overlay", 0);
+        assertDoesNotContain(mSettings, new OverlayIdentifier("com.test.overlay"), 0);
     }
 
     @Test
@@ -360,6 +308,7 @@ public class OverlayManagerSettingsTests {
                 "<?xml version='1.0' encoding='utf-8' standalone='yes'?>\n"
                 + "<overlays version='" + version + "'>\n"
                 + "<item packageName='com.test.overlay'\n"
+                + "      overlayName='test'\n"
                 + "      userId='1234'\n"
                 + "      targetPackageName='com.test.target'\n"
                 + "      baseCodePath='/data/app/com.test.overlay-1/base.apk'\n"
@@ -372,39 +321,40 @@ public class OverlayManagerSettingsTests {
         ByteArrayInputStream is = new ByteArrayInputStream(xml.getBytes("utf-8"));
 
         mSettings.restore(is);
-        OverlayInfo oi = mSettings.getOverlayInfo("com.test.overlay", 1234);
+        final OverlayIdentifier identifier = new OverlayIdentifier("com.test.overlay", "test");
+        OverlayInfo oi = mSettings.getOverlayInfo(identifier, 1234);
         assertNotNull(oi);
         assertEquals("com.test.overlay", oi.packageName);
+        assertEquals("test", oi.overlayName);
         assertEquals("com.test.target", oi.targetPackageName);
         assertEquals("/data/app/com.test.overlay-1/base.apk", oi.baseCodePath);
         assertEquals(1234, oi.userId);
         assertEquals(STATE_DISABLED, oi.state);
-        assertFalse(mSettings.getEnabled("com.test.overlay", 1234));
+        assertFalse(mSettings.getEnabled(identifier, 1234));
     }
 
     @Test
     public void testPersistAndRestore() throws Exception {
-        insert(OVERLAY_A0);
-        insert(OVERLAY_B1);
+        insertSetting(OVERLAY_A_USER0);
+        insertSetting(OVERLAY_B_USER1);
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         mSettings.persist(os);
-        String xml = new String(os.toByteArray(), "utf-8");
-        ByteArrayInputStream is = new ByteArrayInputStream(xml.getBytes("utf-8"));
+        ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
         OverlayManagerSettings newSettings = new OverlayManagerSettings();
         newSettings.restore(is);
 
-        OverlayInfo a = newSettings.getOverlayInfo(OVERLAY_A0.packageName, OVERLAY_A0.userId);
-        assertEquals(OVERLAY_A0, a);
+        OverlayInfo a = newSettings.getOverlayInfo(OVERLAY_A, USER_0);
+        assertEquals(OVERLAY_A_USER0, a);
 
-        OverlayInfo b = newSettings.getOverlayInfo(OVERLAY_B1.packageName, OVERLAY_B1.userId);
-        assertEquals(OVERLAY_B1, b);
+        OverlayInfo b = newSettings.getOverlayInfo(OVERLAY_B, USER_1);
+        assertEquals(OVERLAY_B_USER1, b);
     }
 
-    private int countXmlTags(String xml, String tagToLookFor) throws Exception {
+    private int countXmlTags(InputStream in, String tagToLookFor) throws Exception {
+        in.reset();
         int count = 0;
-        XmlPullParser parser = Xml.newPullParser();
-        parser.setInput(new StringReader(xml));
+        TypedXmlPullParser parser = Xml.resolvePullParser(in);
         int event = parser.getEventType();
         while (event != XmlPullParser.END_DOCUMENT) {
             if (event == XmlPullParser.START_TAG && tagToLookFor.equals(parser.getName())) {
@@ -415,11 +365,11 @@ public class OverlayManagerSettingsTests {
         return count;
     }
 
-    private int countXmlAttributesWhere(String xml, String tag, String attr, String value)
+    private int countXmlAttributesWhere(InputStream in, String tag, String attr, String value)
             throws Exception {
+        in.reset();
         int count = 0;
-        XmlPullParser parser = Xml.newPullParser();
-        parser.setInput(new StringReader(xml));
+        TypedXmlPullParser parser = Xml.resolvePullParser(in);
         int event = parser.getEventType();
         while (event != XmlPullParser.END_DOCUMENT) {
             if (event == XmlPullParser.START_TAG && tag.equals(parser.getName())) {
@@ -433,41 +383,51 @@ public class OverlayManagerSettingsTests {
         return count;
     }
 
-    private void insert(OverlayInfo oi) throws Exception {
-        mSettings.init(oi.packageName, oi.userId, oi.targetPackageName, null, oi.baseCodePath,
-                true, false,0, oi.category);
-        mSettings.setState(oi.packageName, oi.userId, oi.state);
-        mSettings.setEnabled(oi.packageName, oi.userId, false);
+    private void insertSetting(OverlayInfo oi) throws Exception {
+        mSettings.init(oi.getOverlayIdentifier(), oi.userId, oi.targetPackageName, null,
+                oi.baseCodePath, true, false,0, oi.category, oi.isFabricated);
+        mSettings.setState(oi.getOverlayIdentifier(), oi.userId, oi.state);
+        mSettings.setEnabled(oi.getOverlayIdentifier(), oi.userId, false);
     }
 
     private static void assertContains(final OverlayManagerSettings settings,
             final OverlayInfo oi) {
-        assertContains(settings, oi.packageName, oi.userId);
-    }
-
-    private static void assertContains(final OverlayManagerSettings settings,
-            final String packageName, int userId) {
         try {
-            settings.getOverlayInfo(packageName, userId);
+            settings.getOverlayInfo(oi.getOverlayIdentifier(), oi.userId);
         } catch (OverlayManagerSettings.BadKeyException e) {
-            fail(String.format("settings does not contain packageName=%s userId=%d",
-                        packageName, userId));
+            fail(String.format("settings does not contain overlay=%s userId=%d",
+                    oi.getOverlayIdentifier(), oi.userId));
         }
     }
 
     private static void assertDoesNotContain(final OverlayManagerSettings settings,
             final OverlayInfo oi) {
-        assertDoesNotContain(settings, oi.packageName, oi.userId);
+        assertDoesNotContain(settings, oi.getOverlayIdentifier(), oi.userId);
     }
 
     private static void assertDoesNotContain(final OverlayManagerSettings settings,
-            final String packageName, int userId) {
+            final OverlayIdentifier overlay, int userId) {
         try {
-            settings.getOverlayInfo(packageName, userId);
-            fail(String.format("settings contains packageName=%s userId=%d", packageName, userId));
+            settings.getOverlayInfo(overlay, userId);
+            fail(String.format("settings contains overlay=%s userId=%d", overlay, userId));
         } catch (OverlayManagerSettings.BadKeyException e) {
             // do nothing: we expect to end up here
         }
+    }
+
+    private static OverlayInfo createInfo(@NonNull OverlayIdentifier identifier, int userId) {
+        return new OverlayInfo(
+                identifier.getPackageName(),
+                identifier.getOverlayName(),
+                "com.test.target",
+                null,
+                "some-category",
+                "/data/app/" + identifier + "/base.apk",
+                STATE_DISABLED,
+                userId,
+                0,
+                true,
+                false);
     }
 
     private static void assertContains(int[] haystack, int needle) {
@@ -490,16 +450,11 @@ public class OverlayManagerSettingsTests {
         }
     }
 
-    private static void assertListsAreEqual(List<OverlayInfo> list, OverlayInfo... array) {
-        List<OverlayInfo> other = Stream.of(array)
-                .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
-        assertListsAreEqual(list, other);
-    }
-
-    private static void assertListsAreEqual(List<OverlayInfo> list, List<OverlayInfo> other) {
-        if (!list.equals(other)) {
+    private static void assertListsAreEqual(
+            @NonNull List<OverlayInfo> expected, @Nullable List<OverlayInfo> actual) {
+        if (!expected.equals(actual)) {
             fail(String.format("lists [%s] and [%s] differ",
-                        TextUtils.join(",", list), TextUtils.join(",", other)));
+                        TextUtils.join(",", expected), TextUtils.join(",", actual)));
         }
     }
 }

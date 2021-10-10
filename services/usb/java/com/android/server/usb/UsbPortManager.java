@@ -156,6 +156,9 @@ public class UsbPortManager {
      */
     private int mIsPortContaminatedNotificationId;
 
+    private boolean mEnableUsbDataSignaling;
+    protected int mCurrentUsbHalVersion;
+
     public UsbPortManager(Context context) {
         mContext = context;
         try {
@@ -181,6 +184,7 @@ public class UsbPortManager {
         if (mProxy != null) {
             try {
                 mProxy.queryPortStatus();
+                mEnableUsbDataSignaling = true;
             } catch (RemoteException e) {
                 logAndPrintException(null,
                         "ServiceStart: Failed to query port status", e);
@@ -230,8 +234,9 @@ public class UsbPortManager {
                     com.android.internal.R.string.config_usbContaminantActivity)));
             intent.putExtra(UsbManager.EXTRA_PORT, ParcelableUsbPort.of(currentPortInfo.mUsbPort));
 
+            // Simple notification clicks are immutable
             PendingIntent pi = PendingIntent.getActivityAsUser(mContext, 0,
-                                intent, 0, null, UserHandle.CURRENT);
+                                intent, PendingIntent.FLAG_IMMUTABLE, null, UserHandle.CURRENT);
 
             Notification.Builder builder = new Notification.Builder(mContext, channel)
                     .setOngoing(true)
@@ -343,6 +348,53 @@ public class UsbPortManager {
         } catch (ClassCastException e) {
             logAndPrintException(pw, "Method only applicable to V1.2 or above implementation", e);
         }
+    }
+
+    /**
+     * Enable/disable the USB data signaling
+     *
+     * @param enable enable or disable USB data signaling
+     */
+    public boolean enableUsbDataSignal(boolean enable) {
+        try {
+            mEnableUsbDataSignaling = enable;
+            // Call into the hal. Use the castFrom method from HIDL.
+            android.hardware.usb.V1_3.IUsb proxy = android.hardware.usb.V1_3.IUsb.castFrom(mProxy);
+            return proxy.enableUsbDataSignal(enable);
+        } catch (RemoteException e) {
+            logAndPrintException(null, "Failed to set USB data signaling", e);
+            return false;
+        } catch (ClassCastException e) {
+            logAndPrintException(null, "Method only applicable to V1.3 or above implementation", e);
+            return false;
+        }
+    }
+
+    /**
+     * Get USB HAL version
+     *
+     * @param none
+     */
+    public int getUsbHalVersion() {
+        return mCurrentUsbHalVersion;
+    }
+
+    /**
+     * update USB HAL version
+     *
+     * @param none
+     */
+    private void updateUsbHalVersion() {
+        if (android.hardware.usb.V1_3.IUsb.castFrom(mProxy) != null) {
+            mCurrentUsbHalVersion = UsbManager.USB_HAL_V1_3;
+        } else if (android.hardware.usb.V1_2.IUsb.castFrom(mProxy) != null) {
+            mCurrentUsbHalVersion = UsbManager.USB_HAL_V1_2;
+        } else if (android.hardware.usb.V1_1.IUsb.castFrom(mProxy) != null) {
+            mCurrentUsbHalVersion = UsbManager.USB_HAL_V1_1;
+        } else {
+            mCurrentUsbHalVersion = UsbManager.USB_HAL_V1_0;
+        }
+        logAndPrint(Log.INFO, null, "USB HAL version: " + mCurrentUsbHalVersion);
     }
 
     public void setPortRoles(String portId, int newPowerRole, int newDataRole,
@@ -609,6 +661,9 @@ public class UsbPortManager {
             for (PortInfo portInfo : mPorts.values()) {
                 portInfo.dump(dump, "usb_ports", UsbPortManagerProto.USB_PORTS);
             }
+
+            dump.write("enable_usb_data_signaling", UsbPortManagerProto.ENABLE_USB_DATA_SIGNALING,
+                    mEnableUsbDataSignaling);
         }
 
         dump.end(token);
@@ -782,6 +837,7 @@ public class UsbPortManager {
                 mProxy.linkToDeath(new DeathRecipient(pw), USB_HAL_DEATH_COOKIE);
                 mProxy.setCallback(mHALCallback);
                 mProxy.queryPortStatus();
+                updateUsbHalVersion();
             } catch (NoSuchElementException e) {
                 logAndPrintException(pw, "connectToProxy: usb hal service not found."
                         + " Did the service fail to start?", e);

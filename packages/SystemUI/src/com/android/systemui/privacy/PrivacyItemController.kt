@@ -16,41 +16,42 @@
 
 package com.android.systemui.privacy
 
-import android.app.ActivityManager
 import android.app.AppOpsManager
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.UserInfo
 import android.os.UserHandle
-import android.os.UserManager
 import android.provider.DeviceConfig
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags
 import com.android.systemui.Dumpable
 import com.android.systemui.appops.AppOpItem
 import com.android.systemui.appops.AppOpsController
-import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.privacy.logging.PrivacyLogger
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.DeviceConfigProxy
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.time.SystemClock
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.lang.ref.WeakReference
 import java.util.concurrent.Executor
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+@SysUISingleton
 class PrivacyItemController @Inject constructor(
     private val appOpsController: AppOpsController,
     @Main uiExecutor: DelayableExecutor,
-    @Background private val bgExecutor: Executor,
-    private val broadcastDispatcher: BroadcastDispatcher,
+    @Background private val bgExecutor: DelayableExecutor,
     private val deviceConfigProxy: DeviceConfigProxy,
-    private val userManager: UserManager,
+    private val userTracker: UserTracker,
+    private val logger: PrivacyLogger,
+    private val systemClock: SystemClock,
     dumpManager: DumpManager
 ) : Dumpable {
 
@@ -69,9 +70,11 @@ class PrivacyItemController @Inject constructor(
             addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)
         }
         const val TAG = "PrivacyItemController"
-        private const val ALL_INDICATORS =
-                SystemUiDeviceConfigFlags.PROPERTY_PERMISSIONS_HUB_ENABLED
         private const val MIC_CAMERA = SystemUiDeviceConfigFlags.PROPERTY_MIC_CAMERA_ENABLED
+        private const val LOCATION = SystemUiDeviceConfigFlags.PROPERTY_LOCATION_INDICATORS_ENABLED
+        private const val DEFAULT_MIC_CAMERA = true
+        private const val DEFAULT_LOCATION = false
+        @VisibleForTesting const val TIME_TO_HOLD_INDICATORS = 5000L
     }
 
     @VisibleForTesting
@@ -79,20 +82,22 @@ class PrivacyItemController @Inject constructor(
         @Synchronized get() = field.toList() // Returns a shallow copy of the list
         @Synchronized set
 
-    fun isAllIndicatorsEnabled(): Boolean {
-        return deviceConfigProxy.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
-                ALL_INDICATORS, false)
-    }
-
     private fun isMicCameraEnabled(): Boolean {
         return deviceConfigProxy.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
-                MIC_CAMERA, false)
+                MIC_CAMERA, DEFAULT_MIC_CAMERA)
+    }
+
+    private fun isLocationEnabled(): Boolean {
+        return deviceConfigProxy.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
+                LOCATION, DEFAULT_LOCATION)
     }
 
     private var currentUserIds = emptyList<Int>()
     private var listening = false
     private val callbacks = mutableListOf<WeakReference<Callback>>()
-    private val internalUiExecutor = MyExecutor(WeakReference(this), uiExecutor)
+    private val internalUiExecutor = MyExecutor(uiExecutor)
+
+    private var holdingRunnableCanceler: Runnable? = null
 
     private val notifyChanges = Runnable {
         val list = privacyList
@@ -104,32 +109,35 @@ class PrivacyItemController @Inject constructor(
         uiExecutor.execute(notifyChanges)
     }
 
-    var allIndicatorsAvailable = false
+    var micCameraAvailable = isMicCameraEnabled()
         private set
-    var micCameraAvailable = false
-        private set
+    var locationAvailable = isLocationEnabled()
+
+    var allIndicatorsAvailable = micCameraAvailable && locationAvailable
 
     private val devicePropertiesChangedListener =
             object : DeviceConfig.OnPropertiesChangedListener {
         override fun onPropertiesChanged(properties: DeviceConfig.Properties) {
-                if (DeviceConfig.NAMESPACE_PRIVACY.equals(properties.getNamespace()) &&
-                        (properties.keyset.contains(ALL_INDICATORS) ||
-                                properties.keyset.contains(MIC_CAMERA))) {
+            if (DeviceConfig.NAMESPACE_PRIVACY.equals(properties.getNamespace()) &&
+                    (properties.keyset.contains(MIC_CAMERA) ||
+                            properties.keyset.contains(LOCATION))) {
 
-                    // Running on the ui executor so can iterate on callbacks
-                    if (properties.keyset.contains(ALL_INDICATORS)) {
-                        allIndicatorsAvailable = properties.getBoolean(ALL_INDICATORS, false)
-                        callbacks.forEach { it.get()?.onFlagAllChanged(allIndicatorsAvailable) }
-                    }
-
-                    if (properties.keyset.contains(MIC_CAMERA)) {
-                        micCameraAvailable = properties.getBoolean(MIC_CAMERA, false)
-                        callbacks.forEach { it.get()?.onFlagMicCameraChanged(micCameraAvailable) }
-                    }
-                    internalUiExecutor.updateListeningState()
+                // Running on the ui executor so can iterate on callbacks
+                if (properties.keyset.contains(MIC_CAMERA)) {
+                    micCameraAvailable = properties.getBoolean(MIC_CAMERA, DEFAULT_MIC_CAMERA)
+                    allIndicatorsAvailable = micCameraAvailable && locationAvailable
+                    callbacks.forEach { it.get()?.onFlagMicCameraChanged(micCameraAvailable) }
                 }
+
+                if (properties.keyset.contains(LOCATION)) {
+                    locationAvailable = properties.getBoolean(LOCATION, DEFAULT_LOCATION)
+                    allIndicatorsAvailable = micCameraAvailable && locationAvailable
+                    callbacks.forEach { it.get()?.onFlagLocationChanged(locationAvailable) }
+                }
+                internalUiExecutor.updateListeningState()
             }
         }
+    }
 
     private val cb = object : AppOpsController.Callback {
         override fun onActiveStateChanged(
@@ -139,42 +147,51 @@ class PrivacyItemController @Inject constructor(
             active: Boolean
         ) {
             // Check if we care about this code right now
-            if (!allIndicatorsAvailable && code in OPS_LOCATION) {
+            if (code in OPS_LOCATION && !locationAvailable) {
                 return
             }
             val userId = UserHandle.getUserId(uid)
-            if (userId in currentUserIds) {
+            if (userId in currentUserIds ||
+                    code == AppOpsManager.OP_PHONE_CALL_MICROPHONE ||
+                    code == AppOpsManager.OP_PHONE_CALL_CAMERA) {
+                logger.logUpdatedItemFromAppOps(code, uid, packageName, active)
                 update(false)
             }
         }
     }
 
     @VisibleForTesting
-    internal var userSwitcherReceiver = Receiver()
-        set(value) {
-            unregisterReceiver()
-            field = value
-            if (listening) registerReceiver()
+    internal var userTrackerCallback = object : UserTracker.Callback {
+        override fun onUserChanged(newUser: Int, userContext: Context) {
+            update(true)
         }
 
+        override fun onProfilesChanged(profiles: List<UserInfo>) {
+            update(true)
+        }
+    }
+
     init {
+        deviceConfigProxy.addOnPropertiesChangedListener(
+                DeviceConfig.NAMESPACE_PRIVACY,
+                uiExecutor,
+                devicePropertiesChangedListener)
         dumpManager.registerDumpable(TAG, this)
     }
 
-    private fun unregisterReceiver() {
-        broadcastDispatcher.unregisterReceiver(userSwitcherReceiver)
+    private fun unregisterListener() {
+        userTracker.removeCallback(userTrackerCallback)
     }
 
     private fun registerReceiver() {
-        broadcastDispatcher.registerReceiver(userSwitcherReceiver, intentFilter,
-                null /* handler */, UserHandle.ALL)
+        userTracker.addCallback(userTrackerCallback, bgExecutor)
     }
 
     private fun update(updateUsers: Boolean) {
         bgExecutor.execute {
             if (updateUsers) {
-                val currentUser = ActivityManager.getCurrentUser()
-                currentUserIds = userManager.getProfiles(currentUser).map { it.id }
+                currentUserIds = userTracker.userProfiles.map { it.id }
+                logger.logCurrentProfilesChanged(currentUserIds)
             }
             updateListAndNotifyChanges.run()
         }
@@ -190,7 +207,8 @@ class PrivacyItemController @Inject constructor(
      * main thread.
      */
     private fun setListeningState() {
-        val listen = !callbacks.isEmpty() and (allIndicatorsAvailable || micCameraAvailable)
+        val listen = !callbacks.isEmpty() and
+                (micCameraAvailable || locationAvailable)
         if (listening == listen) return
         listening = listen
         if (listening) {
@@ -199,7 +217,7 @@ class PrivacyItemController @Inject constructor(
             update(true)
         } else {
             appOpsController.removeCallback(OPS, cb)
-            unregisterReceiver()
+            unregisterListener()
             // Make sure that we remove all indicators and notify listeners if we are not
             // listening anymore due to indicators being disabled
             update(false)
@@ -226,21 +244,69 @@ class PrivacyItemController @Inject constructor(
     }
 
     fun addCallback(callback: Callback) {
-        internalUiExecutor.addCallback(callback)
+        addCallback(WeakReference(callback))
     }
 
     fun removeCallback(callback: Callback) {
-        internalUiExecutor.removeCallback(callback)
+        removeCallback(WeakReference(callback))
     }
 
     private fun updatePrivacyList() {
+        holdingRunnableCanceler?.run()?.also {
+            holdingRunnableCanceler = null
+        }
         if (!listening) {
             privacyList = emptyList()
             return
         }
-        val list = currentUserIds.flatMap { appOpsController.getActiveAppOpsForUser(it) }
-                .mapNotNull { toPrivacyItem(it) }.distinct()
-        privacyList = list
+        val list = appOpsController.getActiveAppOps(true).filter {
+            UserHandle.getUserId(it.uid) in currentUserIds ||
+                    it.code == AppOpsManager.OP_PHONE_CALL_MICROPHONE ||
+                    it.code == AppOpsManager.OP_PHONE_CALL_CAMERA
+        }.mapNotNull { toPrivacyItem(it) }.distinct()
+        privacyList = processNewList(list)
+    }
+
+    /**
+     * Figure out which items have not been around for long enough and put them back in the list.
+     *
+     * Also schedule when we should check again to remove expired items. Because we always retrieve
+     * the current list, we have the latest info.
+     *
+     * @param list map of list retrieved from [AppOpsController].
+     * @return a list that may have added items that should be kept for some time.
+     */
+    private fun processNewList(list: List<PrivacyItem>): List<PrivacyItem> {
+        logger.logRetrievedPrivacyItemsList(list)
+
+        // Anything earlier than this timestamp can be removed
+        val removeBeforeTime = systemClock.elapsedRealtime() - TIME_TO_HOLD_INDICATORS
+        val mustKeep = privacyList.filter {
+            it.timeStampElapsed > removeBeforeTime && !(it isIn list)
+        }
+
+        // There are items we must keep because they haven't been around for enough time.
+        if (mustKeep.isNotEmpty()) {
+            logger.logPrivacyItemsToHold(mustKeep)
+            val earliestTime = mustKeep.minByOrNull { it.timeStampElapsed }!!.timeStampElapsed
+
+            // Update the list again when the earliest item should be removed.
+            val delay = earliestTime - removeBeforeTime
+            logger.logPrivacyItemsUpdateScheduled(delay)
+            holdingRunnableCanceler = bgExecutor.executeDelayed(updateListAndNotifyChanges, delay)
+        }
+        return list.filter { !it.paused } + mustKeep
+    }
+
+    /**
+     * Ignores the paused status to determine if the element is in the list
+     */
+    private infix fun PrivacyItem.isIn(list: List<PrivacyItem>): Boolean {
+        return list.any {
+            it.privacyType == privacyType &&
+                    it.application == application &&
+                    it.timeStampElapsed == timeStampElapsed
+        }
     }
 
     private fun toPrivacyItem(appOpItem: AppOpItem): PrivacyItem? {
@@ -253,12 +319,13 @@ class PrivacyItemController @Inject constructor(
             AppOpsManager.OP_RECORD_AUDIO -> PrivacyType.TYPE_MICROPHONE
             else -> return null
         }
-        if (type == PrivacyType.TYPE_LOCATION && !allIndicatorsAvailable) return null
+        if (type == PrivacyType.TYPE_LOCATION && !locationAvailable) {
+            return null
+        }
         val app = PrivacyApplication(appOpItem.packageName, appOpItem.uid)
-        return PrivacyItem(type, app)
+        return PrivacyItem(type, app, appOpItem.timeStartedElapsed, appOpItem.isDisabled)
     }
 
-    // Used by containing class to get notified of changes
     interface Callback {
         fun onPrivacyItemsChanged(privacyItems: List<PrivacyItem>)
 
@@ -267,14 +334,9 @@ class PrivacyItemController @Inject constructor(
 
         @JvmDefault
         fun onFlagMicCameraChanged(flag: Boolean) {}
-    }
 
-    internal inner class Receiver : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            if (intentFilter.hasAction(intent.action)) {
-                update(true)
-            }
-        }
+        @JvmDefault
+        fun onFlagLocationChanged(flag: Boolean) {}
     }
 
     private class NotifyChangesToCallback(
@@ -304,8 +366,7 @@ class PrivacyItemController @Inject constructor(
         }
     }
 
-    private class MyExecutor(
-        private val outerClass: WeakReference<PrivacyItemController>,
+    private inner class MyExecutor(
         private val delegate: DelayableExecutor
     ) : Executor {
 
@@ -317,17 +378,7 @@ class PrivacyItemController @Inject constructor(
 
         fun updateListeningState() {
             listeningCanceller?.run()
-            listeningCanceller = delegate.executeDelayed({
-                outerClass.get()?.setListeningState()
-            }, 0L)
-        }
-
-        fun addCallback(callback: Callback) {
-            outerClass.get()?.addCallback(WeakReference(callback))
-        }
-
-        fun removeCallback(callback: Callback) {
-            outerClass.get()?.removeCallback(WeakReference(callback))
+            listeningCanceller = delegate.executeDelayed({ setListeningState() }, 0L)
         }
     }
 }

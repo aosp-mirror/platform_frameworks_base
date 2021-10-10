@@ -34,7 +34,6 @@ import static org.junit.Assert.assertTrue;
 import android.platform.test.annotations.Presubmit;
 import android.view.InputChannel;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
@@ -63,7 +62,8 @@ public class TaskPositioningControllerTests extends WindowTestsBase {
 
         when(mWm.mInputManager.transferTouchFocus(
                 any(InputChannel.class),
-                any(InputChannel.class))).thenReturn(true);
+                any(InputChannel.class),
+                any(boolean.class))).thenReturn(true);
 
         mWindow = createWindow(null, TYPE_BASE_APPLICATION, "window");
         mWindow.getTask().setResizeMode(RESIZE_MODE_RESIZEABLE);

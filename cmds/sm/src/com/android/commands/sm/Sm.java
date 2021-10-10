@@ -104,8 +104,6 @@ public final class Sm {
             runFstrim();
         } else if ("set-virtual-disk".equals(op)) {
             runSetVirtualDisk();
-        } else if ("set-isolated-storage".equals(op)) {
-            runIsolatedStorage();
         } else if ("start-checkpoint".equals(op)) {
             runStartCheckpoint();
         } else if ("supports-checkpoint".equals(op)) {
@@ -302,28 +300,6 @@ public final class Sm {
                 StorageManager.DEBUG_VIRTUAL_DISK);
     }
 
-    public void runIsolatedStorage() throws RemoteException {
-        final int value;
-        final int mask = StorageManager.DEBUG_ISOLATED_STORAGE_FORCE_ON
-                | StorageManager.DEBUG_ISOLATED_STORAGE_FORCE_OFF;
-        switch (nextArg()) {
-            case "on":
-            case "true":
-                value = StorageManager.DEBUG_ISOLATED_STORAGE_FORCE_ON;
-                break;
-            case "off":
-                value = StorageManager.DEBUG_ISOLATED_STORAGE_FORCE_OFF;
-                break;
-            case "default":
-            case "false":
-                value = 0;
-                break;
-            default:
-                return;
-        }
-        mSm.setDebugFlags(value, mask);
-    }
-
     public void runIdleMaint() throws RemoteException {
         final boolean im_run = "run".equals(nextArg());
         if (im_run) {
@@ -382,8 +358,6 @@ public final class Sm {
         System.err.println("       sm forget [UUID|all]");
         System.err.println("");
         System.err.println("       sm set-emulate-fbe [true|false]");
-        System.err.println("");
-        System.err.println("       sm set-isolated-storage [on|off|default]");
         System.err.println("");
         System.err.println("       sm start-checkpoint <num-retries>");
         System.err.println("");

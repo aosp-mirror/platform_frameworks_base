@@ -22,11 +22,13 @@ import static junit.framework.Assert.assertTrue;
 import android.content.ComponentName;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.UserHandle;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.settings.UserTracker;
 
 import org.junit.After;
 import org.junit.Before;
@@ -44,6 +46,7 @@ public class TileServiceManagerTest extends SysuiTestCase {
     private HandlerThread mThread;
     private Handler mHandler;
     private TileServiceManager mTileServiceManager;
+    private UserTracker mUserTracker;
 
     @Before
     public void setUp() throws Exception {
@@ -51,13 +54,18 @@ public class TileServiceManagerTest extends SysuiTestCase {
         mThread.start();
         mHandler = Handler.createAsync(mThread.getLooper());
         mTileServices = Mockito.mock(TileServices.class);
+        mUserTracker = Mockito.mock(UserTracker.class);
+        Mockito.when(mUserTracker.getUserId()).thenReturn(UserHandle.USER_SYSTEM);
+        Mockito.when(mUserTracker.getUserHandle()).thenReturn(UserHandle.SYSTEM);
+
         Mockito.when(mTileServices.getContext()).thenReturn(mContext);
         mTileLifecycle = Mockito.mock(TileLifecycleManager.class);
         Mockito.when(mTileLifecycle.isActiveTile()).thenReturn(false);
         ComponentName componentName = new ComponentName(mContext,
                 TileServiceManagerTest.class);
         Mockito.when(mTileLifecycle.getComponent()).thenReturn(componentName);
-        mTileServiceManager = new TileServiceManager(mTileServices, mHandler, mTileLifecycle);
+        mTileServiceManager = new TileServiceManager(mTileServices, mHandler, mUserTracker,
+                mTileLifecycle);
     }
 
     @After

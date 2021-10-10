@@ -29,6 +29,7 @@ import android.provider.Settings;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.SpannedString;
+import android.text.TextUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

@@ -27,11 +27,10 @@ import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
 import android.text.TextUtils;
 import android.util.DataUnit;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 import android.util.TimeUtils;
-
-import com.android.internal.util.IndentingPrintWriter;
 
 import java.io.File;
 import java.util.concurrent.TimeUnit;
@@ -47,8 +46,9 @@ class BlobStoreConfig {
     public static final int XML_VERSION_ADD_DESC_RES_NAME = 3;
     public static final int XML_VERSION_ADD_COMMIT_TIME = 4;
     public static final int XML_VERSION_ADD_SESSION_CREATION_TIME = 5;
+    public static final int XML_VERSION_ALLOW_ACCESS_ACROSS_USERS = 6;
 
-    public static final int XML_VERSION_CURRENT = XML_VERSION_ADD_SESSION_CREATION_TIME;
+    public static final int XML_VERSION_CURRENT = XML_VERSION_ALLOW_ACCESS_ACROSS_USERS;
 
     public static final long INVALID_BLOB_ID = 0;
     public static final long INVALID_BLOB_SIZE = 0;

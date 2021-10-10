@@ -98,20 +98,6 @@ public class GraphicBuffer implements Parcelable {
     }
 
     /**
-     * For SurfaceControl JNI.
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public static GraphicBuffer createFromExisting(int width, int height,
-            int format, int usage, long unwrappedNativeObject) {
-        long nativeObject = nWrapGraphicBuffer(unwrappedNativeObject);
-        if (nativeObject != 0) {
-            return new GraphicBuffer(width, height, format, usage, nativeObject);
-        }
-        return null;
-    }
-
-    /**
      * For Bitmap until all usages are updated to AHB
      * @hide
      */
@@ -314,6 +300,5 @@ public class GraphicBuffer implements Parcelable {
     private static native long nReadGraphicBufferFromParcel(Parcel in);
     private static native boolean nLockCanvas(long nativeObject, Canvas canvas, Rect dirty);
     private static native boolean nUnlockCanvasAndPost(long nativeObject, Canvas canvas);
-    private static native long nWrapGraphicBuffer(long nativeObject);
     private static native GraphicBuffer nCreateFromHardwareBuffer(HardwareBuffer buffer);
 }

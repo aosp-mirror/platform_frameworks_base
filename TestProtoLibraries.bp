@@ -16,6 +16,7 @@ java_library_host {
     name: "platformtestprotos",
     srcs: [
         ":libstats_atom_enum_protos",
+        ":libstats_atom_message_protos",
         ":libstats_internal_protos",
         ":statsd_internal_protos",
     ],

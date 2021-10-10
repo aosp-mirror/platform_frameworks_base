@@ -24,6 +24,7 @@ import androidx.annotation.Nullable;
 import androidx.core.os.CancellationSignal;
 
 import com.android.internal.util.NotificationMessagingUtil;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.coordinator.HeadsUpCoordinator;
@@ -34,7 +35,6 @@ import com.android.systemui.statusbar.notification.row.RowContentBindStage;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Wrapper around heads up view binding logic. {@link HeadsUpViewBinder} is responsible for
@@ -44,7 +44,7 @@ import javax.inject.Singleton;
  * TODO: This should be moved into {@link HeadsUpCoordinator} when the old pipeline is deprecated
  * (i.e. when {@link HeadsUpController} is removed).
  */
-@Singleton
+@SysUISingleton
 public class HeadsUpViewBinder {
     private final RowContentBindStage mStage;
     private final NotificationMessagingUtil mNotificationMessagingUtil;

@@ -55,6 +55,7 @@ public class RankingBuilder {
     private boolean mIsVisuallyInterruptive = false;
     private boolean mIsConversation = false;
     private ShortcutInfo mShortcutInfo = null;
+    private int mRankingAdjustment = 0;
     private boolean mIsBubble = false;
 
     public RankingBuilder() {
@@ -64,7 +65,7 @@ public class RankingBuilder {
         mKey = ranking.getKey();
         mRank = ranking.getRank();
         mMatchesInterruptionFilter = ranking.matchesInterruptionFilter();
-        mVisibilityOverride = ranking.getVisibilityOverride();
+        mVisibilityOverride = ranking.getLockscreenVisibilityOverride();
         mSuppressedVisualEffects = ranking.getSuppressedVisualEffects();
         mImportance = ranking.getImportance();
         mExplanation = ranking.getImportanceExplanation();
@@ -82,7 +83,8 @@ public class RankingBuilder {
         mCanBubble = ranking.canBubble();
         mIsVisuallyInterruptive = ranking.visuallyInterruptive();
         mIsConversation = ranking.isConversation();
-        mShortcutInfo = ranking.getShortcutInfo();
+        mShortcutInfo = ranking.getConversationShortcutInfo();
+        mRankingAdjustment = ranking.getRankingAdjustment();
         mIsBubble = ranking.isBubble();
     }
 
@@ -111,6 +113,7 @@ public class RankingBuilder {
                 mIsVisuallyInterruptive,
                 mIsConversation,
                 mShortcutInfo,
+                mRankingAdjustment,
                 mIsBubble);
         return ranking;
     }
@@ -198,6 +201,11 @@ public class RankingBuilder {
 
     public RankingBuilder setShortcutInfo(ShortcutInfo shortcutInfo) {
         mShortcutInfo = shortcutInfo;
+        return this;
+    }
+
+    public RankingBuilder setRankingAdjustment(int rankingAdjustment) {
+        mRankingAdjustment = rankingAdjustment;
         return this;
     }
 

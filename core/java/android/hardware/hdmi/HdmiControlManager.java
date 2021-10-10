@@ -16,8 +16,6 @@
 
 package android.hardware.hdmi;
 
-import static com.android.internal.os.RoSystemProperties.PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH;
-
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -26,6 +24,7 @@ import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.StringDef;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -33,16 +32,21 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.RemoteException;
-import android.os.SystemProperties;
+import android.sysprop.HdmiProperties;
 import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.ConcurrentUtils;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 /**
  * The {@link HdmiControlManager} class is used to send HDMI control messages
@@ -317,6 +321,540 @@ public final class HdmiControlManager {
     /** The HdmiControlService will be disabled to standby. */
     public static final int CONTROL_STATE_CHANGED_REASON_STANDBY = 3;
 
+    // -- Whether the HDMI CEC is enabled or disabled.
+    /**
+     * HDMI CEC enabled.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int HDMI_CEC_CONTROL_ENABLED = 1;
+    /**
+     * HDMI CEC disabled.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int HDMI_CEC_CONTROL_DISABLED = 0;
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "HDMI_CEC_CONTROL_" }, value = {
+            HDMI_CEC_CONTROL_ENABLED,
+            HDMI_CEC_CONTROL_DISABLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface HdmiCecControl {}
+
+    // -- Supported HDM-CEC versions.
+    /**
+     * Version constant for HDMI-CEC v1.4b.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int HDMI_CEC_VERSION_1_4_B = 0x05;
+    /**
+     * Version constant for HDMI-CEC v2.0.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int HDMI_CEC_VERSION_2_0 = 0x06;
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "HDMI_CEC_VERSION_" }, value = {
+            HDMI_CEC_VERSION_1_4_B,
+            HDMI_CEC_VERSION_2_0
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface HdmiCecVersion {}
+
+    // -- Scope of CEC power control messages sent by a playback device.
+    /**
+     * Send CEC power control messages to TV only.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String POWER_CONTROL_MODE_TV = "to_tv";
+    /**
+     * Broadcast CEC power control messages to all devices in the network.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String POWER_CONTROL_MODE_BROADCAST = "broadcast";
+    /**
+     * Don't send any CEC power control messages.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String POWER_CONTROL_MODE_NONE = "none";
+    /**
+     * @hide
+     */
+    @StringDef(prefix = { "POWER_CONTROL_MODE_" }, value = {
+            POWER_CONTROL_MODE_TV,
+            POWER_CONTROL_MODE_BROADCAST,
+            POWER_CONTROL_MODE_NONE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PowerControlMode {}
+
+    // -- Which power state action should be taken when Active Source is lost.
+    /**
+     * No action to be taken.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_NONE = "none";
+    /**
+     * Go to standby immediately.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW = "standby_now";
+    /**
+     * @hide
+     */
+    @StringDef(prefix = { "POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_" }, value = {
+            POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_NONE,
+            POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ActiveSourceLostBehavior {}
+
+    // -- Whether System Audio Mode muting is enabled or disabled.
+    /**
+     * System Audio Mode muting enabled.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int SYSTEM_AUDIO_MODE_MUTING_ENABLED = 1;
+    /**
+     * System Audio Mode muting disabled.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int SYSTEM_AUDIO_MODE_MUTING_DISABLED = 0;
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "SYSTEM_AUDIO_MODE_MUTING_" }, value = {
+            SYSTEM_AUDIO_MODE_MUTING_ENABLED,
+            SYSTEM_AUDIO_MODE_MUTING_DISABLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SystemAudioModeMuting {}
+
+    // -- Whether the HDMI CEC volume control is enabled or disabled.
+    /**
+     * HDMI CEC enabled.
+     *
+     * @see HdmiControlManager#CEC_SETTING_NAME_VOLUME_CONTROL_MODE
+     * @hide
+     */
+    @SystemApi
+    public static final int VOLUME_CONTROL_ENABLED = 1;
+    /**
+     * HDMI CEC disabled.
+     *
+     * @see HdmiControlManager#CEC_SETTING_NAME_VOLUME_CONTROL_MODE
+     * @hide
+     */
+    @SystemApi
+    public static final int VOLUME_CONTROL_DISABLED = 0;
+    /**
+     * @see HdmiControlManager#CEC_SETTING_NAME_VOLUME_CONTROL_MODE
+     * @hide
+     */
+    @IntDef(prefix = { "VOLUME_CONTROL_" }, value = {
+            VOLUME_CONTROL_ENABLED,
+            VOLUME_CONTROL_DISABLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface VolumeControl {}
+
+    // -- Whether TV Wake on One Touch Play is enabled or disabled.
+    /**
+     * TV Wake on One Touch Play enabled.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int TV_WAKE_ON_ONE_TOUCH_PLAY_ENABLED = 1;
+    /**
+     * TV Wake on One Touch Play disabled.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int TV_WAKE_ON_ONE_TOUCH_PLAY_DISABLED = 0;
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "TV_WAKE_ON_ONE_TOUCH_PLAY_" }, value = {
+            TV_WAKE_ON_ONE_TOUCH_PLAY_ENABLED,
+            TV_WAKE_ON_ONE_TOUCH_PLAY_DISABLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TvWakeOnOneTouchPlay {}
+
+    // -- Whether TV should send &lt;Standby&gt; on sleep.
+    /**
+     * Sending &lt;Standby&gt; on sleep.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int TV_SEND_STANDBY_ON_SLEEP_ENABLED = 1;
+    /**
+     * Not sending &lt;Standby&gt; on sleep.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int TV_SEND_STANDBY_ON_SLEEP_DISABLED = 0;
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "TV_SEND_STANDBY_ON_SLEEP_" }, value = {
+            TV_SEND_STANDBY_ON_SLEEP_ENABLED,
+            TV_SEND_STANDBY_ON_SLEEP_DISABLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TvSendStandbyOnSleep {}
+
+    // -- The RC profile of a TV panel.
+    /**
+     * RC profile none.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_TV_NONE = 0x0;
+    /**
+     * RC profile 1.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_TV_ONE = 0x2;
+    /**
+     * RC profile 2.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_TV_TWO = 0x6;
+    /**
+     * RC profile 3.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_TV_THREE = 0xA;
+    /**
+     * RC profile 4.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_TV_FOUR = 0xE;
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "RC_PROFILE_TV_" }, value = {
+            RC_PROFILE_TV_NONE,
+            RC_PROFILE_TV_ONE,
+            RC_PROFILE_TV_TWO,
+            RC_PROFILE_TV_THREE,
+            RC_PROFILE_TV_FOUR
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RcProfileTv {}
+
+    // -- RC profile parameter defining if a source handles the root menu.
+    /**
+     * Handles the root menu.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_SOURCE_ROOT_MENU_HANDLED = 1;
+    /**
+     * Doesn't handle the root menu.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_SOURCE_ROOT_MENU_NOT_HANDLED = 0;
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "RC_PROFILE_SOURCE_ROOT_MENU_" }, value = {
+            RC_PROFILE_SOURCE_ROOT_MENU_HANDLED,
+            RC_PROFILE_SOURCE_ROOT_MENU_NOT_HANDLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RcProfileSourceHandlesRootMenu {}
+
+    // -- RC profile parameter defining if a source handles the setup menu.
+    /**
+     * Handles the setup menu.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_SOURCE_SETUP_MENU_HANDLED = 1;
+    /**
+     * Doesn't handle the setup menu.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_SOURCE_SETUP_MENU_NOT_HANDLED = 0;
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "RC_PROFILE_SOURCE_SETUP_MENU_" }, value = {
+            RC_PROFILE_SOURCE_SETUP_MENU_HANDLED,
+            RC_PROFILE_SOURCE_SETUP_MENU_NOT_HANDLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RcProfileSourceHandlesSetupMenu {}
+
+
+    // -- RC profile parameter defining if a source handles the contents menu.
+    /**
+     * Handles the contents menu.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_SOURCE_CONTENTS_MENU_HANDLED = 1;
+    /**
+     * Doesn't handle the contents menu.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_SOURCE_CONTENTS_MENU_NOT_HANDLED = 0;
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "RC_PROFILE_SOURCE_CONTENTS_MENU_" }, value = {
+            RC_PROFILE_SOURCE_CONTENTS_MENU_HANDLED,
+            RC_PROFILE_SOURCE_CONTENTS_MENU_NOT_HANDLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RcProfileSourceHandlesContentsMenu {}
+
+
+    // -- RC profile parameter defining if a source handles the top menu.
+    /**
+     * Handles the top menu.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_SOURCE_TOP_MENU_HANDLED = 1;
+    /**
+     * Doesn't handle the top menu.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_SOURCE_TOP_MENU_NOT_HANDLED = 0;
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "RC_PROFILE_SOURCE_TOP_MENU_" }, value = {
+            RC_PROFILE_SOURCE_TOP_MENU_HANDLED,
+            RC_PROFILE_SOURCE_TOP_MENU_NOT_HANDLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RcProfileSourceHandlesTopMenu {}
+
+
+    // -- RC profile parameter defining if a source handles the media context sensitive menu.
+    /**
+     * Handles the media context sensitive menu.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_SOURCE_MEDIA_CONTEXT_SENSITIVE_MENU_HANDLED = 1;
+    /**
+     * Doesn't handle the media context sensitive menu.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_SOURCE_MEDIA_CONTEXT_SENSITIVE_MENU_NOT_HANDLED = 0;
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "RC_PROFILE_SOURCE_MEDIA_CONTEXT_SENSITIVE_" }, value = {
+            RC_PROFILE_SOURCE_MEDIA_CONTEXT_SENSITIVE_MENU_HANDLED,
+            RC_PROFILE_SOURCE_MEDIA_CONTEXT_SENSITIVE_MENU_NOT_HANDLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RcProfileSourceHandlesMediaContextSensitiveMenu {}
+
+    // -- Settings available in the CEC Configuration.
+    /**
+     * Name of a setting deciding whether the CEC is enabled.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String CEC_SETTING_NAME_HDMI_CEC_ENABLED = "hdmi_cec_enabled";
+    /**
+     * Name of a setting controlling the version of HDMI-CEC used.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String CEC_SETTING_NAME_HDMI_CEC_VERSION = "hdmi_cec_version";
+    /**
+     * Name of a setting deciding on the power control mode.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String CEC_SETTING_NAME_POWER_CONTROL_MODE = "power_control_mode";
+    /**
+     * Name of a setting deciding on power state action when losing Active Source.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST =
+            "power_state_change_on_active_source_lost";
+    /**
+     * Name of a setting deciding whether System Audio Muting is allowed.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING =
+            "system_audio_mode_muting";
+    /**
+     * Controls whether volume control commands via HDMI CEC are enabled.
+     *
+     * <p>Effects on different device types:
+     * <table>
+     *     <tr><th>HDMI CEC device type</th><th>0: disabled</th><th>1: enabled</th></tr>
+     *     <tr>
+     *         <td>TV (type: 0)</td>
+     *         <td>Per CEC specification.</td>
+     *         <td>TV changes system volume. TV no longer reacts to incoming volume changes
+     *         via {@code <User Control Pressed>}. TV no longer handles {@code <Report Audio
+     *         Status>}.</td>
+     *     </tr>
+     *     <tr>
+     *         <td>Playback device (type: 4)</td>
+     *         <td>Device sends volume commands to TV/Audio system via {@code <User Control
+     *         Pressed>}</td>
+     *         <td>Device does not send volume commands via {@code <User Control Pressed>}.</td>
+     *     </tr>
+     *     <tr>
+     *         <td>Audio device (type: 5)</td>
+     *         <td>Full "System Audio Control" capabilities.</td>
+     *         <td>Audio device no longer reacts to incoming {@code <User Control Pressed>}
+     *         volume commands. Audio device no longer reports volume changes via {@code
+     *         <Report Audio Status>}.</td>
+     *     </tr>
+     * </table>
+     *
+     * <p> Due to the resulting behavior, usage on TV and Audio devices is discouraged.
+     *
+     * @hide
+     * @see android.hardware.hdmi.HdmiControlManager#setHdmiCecVolumeControlEnabled(int)
+     */
+    @SystemApi
+    public static final String CEC_SETTING_NAME_VOLUME_CONTROL_MODE =
+            "volume_control_enabled";
+    /**
+     * Name of a setting deciding whether the TV will automatically turn on upon reception
+     * of the CEC command &lt;Text View On&gt; or &lt;Image View On&gt;.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY =
+            "tv_wake_on_one_touch_play";
+    /**
+     * Name of a setting deciding whether the device will also turn off other CEC devices
+     * when it goes to standby mode.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP =
+            "tv_send_standby_on_sleep";
+    /**
+     * Name of a setting representing the RC profile of a TV panel.
+     *
+     * @hide
+     */
+    public static final String CEC_SETTING_NAME_RC_PROFILE_TV =
+            "rc_profile_tv";
+    /**
+     * Name of a setting representing the RC profile parameter defining if a source handles the root
+     * menu.
+     *
+     * @hide
+     */
+    public static final String CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_ROOT_MENU =
+            "rc_profile_source_handles_root_menu";
+    /**
+     * Name of a setting representing the RC profile parameter defining if a source handles the
+     * setup menu.
+     *
+     * @hide
+     */
+    public static final String CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_SETUP_MENU =
+            "rc_profile_source_handles_setup_menu";
+    /**
+     * Name of a setting representing the RC profile parameter defining if a source handles the
+     * contents menu.
+     *
+     * @hide
+     */
+    public static final String CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_CONTENTS_MENU =
+            "rc_profile_source_handles_contents_menu";
+    /**
+     * Name of a setting representing the RC profile parameter defining if a source handles the top
+     * menu.
+     *
+     * @hide
+     */
+    public static final String CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_TOP_MENU =
+            "rc_profile_source_handles_top_menu";
+    /**
+     * Name of a setting representing the RC profile parameter defining if a source handles the
+     * media context sensitive menu.
+     *
+     * @hide
+     */
+    public static final String
+            CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU =
+            "rc_profile_source_handles_media_context_sensitive_menu";
+    /**
+     * @hide
+     */
+    @StringDef(prefix = { "CEC_SETTING_NAME_" }, value = {
+        CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+        CEC_SETTING_NAME_HDMI_CEC_VERSION,
+        CEC_SETTING_NAME_POWER_CONTROL_MODE,
+        CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+        CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
+        CEC_SETTING_NAME_VOLUME_CONTROL_MODE,
+        CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY,
+        CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP,
+        CEC_SETTING_NAME_RC_PROFILE_TV,
+        CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_ROOT_MENU,
+        CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_SETUP_MENU,
+        CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_CONTENTS_MENU,
+        CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_TOP_MENU,
+        CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU,
+    })
+    public @interface CecSettingName {}
+
     // True if we have a logical device of type playback hosted in the system.
     private final boolean mHasPlaybackDevice;
     // True if we have a logical device of type TV hosted in the system.
@@ -347,8 +885,7 @@ public final class HdmiControlManager {
         mHasPlaybackDevice = hasDeviceType(types, HdmiDeviceInfo.DEVICE_PLAYBACK);
         mHasAudioSystemDevice = hasDeviceType(types, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
         mHasSwitchDevice = hasDeviceType(types, HdmiDeviceInfo.DEVICE_PURE_CEC_SWITCH);
-        mIsSwitchDevice = SystemProperties.getBoolean(
-            PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH, false);
+        mIsSwitchDevice = HdmiProperties.is_switch().orElse(false);
         addHotplugEventListener(new ClientHotplugEventListener());
     }
 
@@ -373,8 +910,8 @@ public final class HdmiControlManager {
                     if (port.getType() == HdmiPortInfo.PORT_OUTPUT) {
                         setLocalPhysicalAddress(
                                 event.isConnected()
-                                ? port.getAddress()
-                                : INVALID_PHYSICAL_ADDRESS);
+                                        ? port.getAddress()
+                                        : INVALID_PHYSICAL_ADDRESS);
                     }
                     break;
                 }
@@ -661,6 +1198,36 @@ public final class HdmiControlManager {
     }
 
     /**
+     * For CEC source devices (OTT/STB/Audio system): toggle the power status of the HDMI-connected
+     * display and follow the display's new power status.
+     * For all other devices: no functionality.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void toggleAndFollowTvPower() {
+        try {
+            mService.toggleAndFollowTvPower();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Determines whether the HDMI CEC stack should handle KEYCODE_TV_POWER.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public boolean shouldHandleTvPowerKey() {
+        try {
+            return mService.shouldHandleTvPowerKey();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Controls whether volume control commands via HDMI CEC are enabled.
      *
      * <p>When disabled:
@@ -696,14 +1263,17 @@ public final class HdmiControlManager {
      *
      * <p> Due to the resulting behavior, usage on TV and Audio devices is discouraged.
      *
-     * @param isHdmiCecVolumeControlEnabled target state of HDMI CEC volume control.
-     * @see Settings.Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED
+     * @param hdmiCecVolumeControlEnabled target state of HDMI CEC volume control.
+     * @see HdmiControlManager#CEC_SETTING_NAME_VOLUME_CONTROL_MODE
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
-    public void setHdmiCecVolumeControlEnabled(boolean isHdmiCecVolumeControlEnabled) {
+    public void setHdmiCecVolumeControlEnabled(
+            @VolumeControl int hdmiCecVolumeControlEnabled) {
         try {
-            mService.setHdmiCecVolumeControlEnabled(isHdmiCecVolumeControlEnabled);
+            mService.setCecSettingIntValue(CEC_SETTING_NAME_VOLUME_CONTROL_MODE,
+                    hdmiCecVolumeControlEnabled);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -713,10 +1283,12 @@ public final class HdmiControlManager {
      * Returns whether volume changes via HDMI CEC are enabled.
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
-    public boolean isHdmiCecVolumeControlEnabled() {
+    @VolumeControl
+    public int getHdmiCecVolumeControlEnabled() {
         try {
-            return mService.isHdmiCecVolumeControlEnabled();
+            return mService.getCecSettingIntValue(CEC_SETTING_NAME_VOLUME_CONTROL_MODE);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -825,7 +1397,8 @@ public final class HdmiControlManager {
          *
          * Note: Value of isCecAvailable is only valid when isCecEnabled is true.
          **/
-        void onStatusChange(boolean isCecEnabled, boolean isCecAvailable);
+        void onStatusChange(@HdmiControlManager.HdmiCecControl int isCecEnabled,
+                boolean isCecAvailable);
     }
 
     private final ArrayMap<HdmiControlStatusChangeListener, IHdmiControlStatusChangeListener>
@@ -839,10 +1412,10 @@ public final class HdmiControlManager {
         /**
          * Called when the HDMI Control (CEC) volume control feature is enabled/disabled.
          *
-         * @param enabled status of HDMI CEC volume control feature
-         * @see {@link HdmiControlManager#setHdmiCecVolumeControlEnabled(boolean)} ()}
+         * @param hdmiCecVolumeControl status of HDMI CEC volume control feature
+         * @see {@link HdmiControlManager#setHdmiCecVolumeControlEnabled(int)} ()}
          **/
-        void onHdmiCecVolumeControlFeature(boolean enabled);
+        void onHdmiCecVolumeControlFeature(@VolumeControl int hdmiCecVolumeControl);
     }
 
     private final ArrayMap<HdmiCecVolumeControlFeatureListener,
@@ -891,6 +1464,11 @@ public final class HdmiControlManager {
      * <p>To stop getting the notification,
      * use {@link #removeHotplugEventListener(HotplugEventListener)}.
      *
+     * Note that each invocation of the callback will be executed on an arbitrary
+     * Binder thread. This means that all callback implementations must be
+     * thread safe. To specify the execution thread, use
+     * {@link addHotplugEventListener(Executor, HotplugEventListener)}.
+     *
      * @param listener {@link HotplugEventListener} instance
      * @see HdmiControlManager#removeHotplugEventListener(HotplugEventListener)
      *
@@ -899,6 +1477,24 @@ public final class HdmiControlManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public void addHotplugEventListener(HotplugEventListener listener) {
+        addHotplugEventListener(ConcurrentUtils.DIRECT_EXECUTOR, listener);
+    }
+
+    /**
+     * Adds a listener to get informed of {@link HdmiHotplugEvent}.
+     *
+     * <p>To stop getting the notification,
+     * use {@link #removeHotplugEventListener(HotplugEventListener)}.
+     *
+     * @param listener {@link HotplugEventListener} instance
+     * @see HdmiControlManager#removeHotplugEventListener(HotplugEventListener)
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void addHotplugEventListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull HotplugEventListener listener) {
         if (mService == null) {
             Log.e(TAG, "HdmiControlService is not available");
             return;
@@ -907,7 +1503,8 @@ public final class HdmiControlManager {
             Log.e(TAG, "listener is already registered");
             return;
         }
-        IHdmiHotplugEventListener wrappedListener = getHotplugEventListenerWrapper(listener);
+        IHdmiHotplugEventListener wrappedListener =
+                getHotplugEventListenerWrapper(executor, listener);
         mHotplugEventListeners.put(listener, wrappedListener);
         try {
             mService.addHotplugEventListener(wrappedListener);
@@ -943,13 +1540,40 @@ public final class HdmiControlManager {
     }
 
     private IHdmiHotplugEventListener getHotplugEventListenerWrapper(
-            final HotplugEventListener listener) {
+            Executor executor, final HotplugEventListener listener) {
         return new IHdmiHotplugEventListener.Stub() {
             @Override
             public void onReceived(HdmiHotplugEvent event) {
-                listener.onReceived(event);;
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> listener.onReceived(event));
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
             }
         };
+    }
+
+    /**
+     * Adds a listener to get informed of {@link HdmiControlStatusChange}.
+     *
+     * <p>To stop getting the notification,
+     * use {@link #removeHdmiControlStatusChangeListener(HdmiControlStatusChangeListener)}.
+     *
+     * Note that each invocation of the callback will be executed on an arbitrary
+     * Binder thread. This means that all callback implementations must be
+     * thread safe. To specify the execution thread, use
+     * {@link addHdmiControlStatusChangeListener(Executor, HdmiControlStatusChangeListener)}.
+     *
+     * @param listener {@link HdmiControlStatusChangeListener} instance
+     * @see HdmiControlManager#removeHdmiControlStatusChangeListener(
+     * HdmiControlStatusChangeListener)
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void addHdmiControlStatusChangeListener(HdmiControlStatusChangeListener listener) {
+        addHdmiControlStatusChangeListener(ConcurrentUtils.DIRECT_EXECUTOR, listener);
     }
 
     /**
@@ -965,7 +1589,8 @@ public final class HdmiControlManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
-    public void addHdmiControlStatusChangeListener(HdmiControlStatusChangeListener listener) {
+    public void addHdmiControlStatusChangeListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull HdmiControlStatusChangeListener listener) {
         if (mService == null) {
             Log.e(TAG, "HdmiControlService is not available");
             return;
@@ -975,7 +1600,7 @@ public final class HdmiControlManager {
             return;
         }
         IHdmiControlStatusChangeListener wrappedListener =
-                getHdmiControlStatusChangeListenerWrapper(listener);
+                getHdmiControlStatusChangeListenerWrapper(executor, listener);
         mHdmiControlStatusChangeListeners.put(listener, wrappedListener);
         try {
             mService.addHdmiControlStatusChangeListener(wrappedListener);
@@ -1011,11 +1636,16 @@ public final class HdmiControlManager {
     }
 
     private IHdmiControlStatusChangeListener getHdmiControlStatusChangeListenerWrapper(
-            final HdmiControlStatusChangeListener listener) {
+            Executor executor, final HdmiControlStatusChangeListener listener) {
         return new IHdmiControlStatusChangeListener.Stub() {
             @Override
-            public void onStatusChange(boolean isCecEnabled, boolean isCecAvailable) {
-                listener.onStatusChange(isCecEnabled, isCecAvailable);
+            public void onStatusChange(@HdmiCecControl int isCecEnabled, boolean isCecAvailable) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> listener.onStatusChange(isCecEnabled, isCecAvailable));
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
             }
         };
     }
@@ -1086,10 +1716,536 @@ public final class HdmiControlManager {
             Executor executor, final HdmiCecVolumeControlFeatureListener listener) {
         return new android.hardware.hdmi.IHdmiCecVolumeControlFeatureListener.Stub() {
             @Override
-            public void onHdmiCecVolumeControlFeature(boolean enabled) {
-                Binder.clearCallingIdentity();
-                executor.execute(() -> listener.onHdmiCecVolumeControlFeature(enabled));
+            public void onHdmiCecVolumeControlFeature(int enabled) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> listener.onHdmiCecVolumeControlFeature(enabled));
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
             }
         };
+    }
+
+    /**
+     * Listener used to get setting change notification.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface CecSettingChangeListener {
+        /**
+         * Called when value of a setting changes.
+         *
+         * @param setting name of a CEC setting that changed
+         */
+        void onChange(@NonNull @CecSettingName String setting);
+    }
+
+    private final ArrayMap<String,
+            ArrayMap<CecSettingChangeListener, IHdmiCecSettingChangeListener>>
+                    mCecSettingChangeListeners = new ArrayMap<>();
+
+    private void addCecSettingChangeListener(
+            @NonNull @CecSettingName String setting,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull CecSettingChangeListener listener) {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            return;
+        }
+        if (mCecSettingChangeListeners.containsKey(setting)
+                && mCecSettingChangeListeners.get(setting).containsKey(listener)) {
+            Log.e(TAG, "listener is already registered");
+            return;
+        }
+        IHdmiCecSettingChangeListener wrappedListener =
+                getCecSettingChangeListenerWrapper(executor, listener);
+        if (!mCecSettingChangeListeners.containsKey(setting)) {
+            mCecSettingChangeListeners.put(setting, new ArrayMap<>());
+        }
+        mCecSettingChangeListeners.get(setting).put(listener, wrappedListener);
+        try {
+            mService.addCecSettingChangeListener(setting, wrappedListener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private void removeCecSettingChangeListener(
+            @NonNull @CecSettingName String setting,
+            @NonNull CecSettingChangeListener listener) {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            return;
+        }
+        IHdmiCecSettingChangeListener wrappedListener =
+                !mCecSettingChangeListeners.containsKey(setting) ? null :
+                    mCecSettingChangeListeners.get(setting).remove(listener);
+        if (wrappedListener == null) {
+            Log.e(TAG, "tried to remove not-registered listener");
+            return;
+        }
+        try {
+            mService.removeCecSettingChangeListener(setting, wrappedListener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private IHdmiCecSettingChangeListener getCecSettingChangeListenerWrapper(
+            Executor executor, final CecSettingChangeListener listener) {
+        return new IHdmiCecSettingChangeListener.Stub() {
+            @Override
+            public void onChange(String setting) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> listener.onChange(setting));
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
+        };
+    }
+
+    /**
+     * Get a set of user-modifiable settings.
+     *
+     * @return a set of user-modifiable settings.
+     * @throws RuntimeException when the HdmiControlService is not available.
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @CecSettingName
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public List<String> getUserCecSettings() {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            return mService.getUserCecSettings();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get a set of allowed values for a setting (string value-type).
+     *
+     * @param name name of the setting
+     * @return a set of allowed values for a settings. {@code null} on failure.
+     * @throws IllegalArgumentException when setting {@code name} does not exist.
+     * @throws IllegalArgumentException when setting {@code name} value type is invalid.
+     * @throws RuntimeException when the HdmiControlService is not available.
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public List<String> getAllowedCecSettingStringValues(@NonNull @CecSettingName String name) {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            return mService.getAllowedCecSettingStringValues(name);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get a set of allowed values for a setting (int value-type).
+     *
+     * @param name name of the setting
+     * @return a set of allowed values for a settings. {@code null} on failure.
+     * @throws IllegalArgumentException when setting {@code name} does not exist.
+     * @throws IllegalArgumentException when setting {@code name} value type is invalid.
+     * @throws RuntimeException when the HdmiControlService is not available.
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public List<Integer> getAllowedCecSettingIntValues(@NonNull @CecSettingName String name) {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            int[] allowedValues = mService.getAllowedCecSettingIntValues(name);
+            return Arrays.stream(allowedValues).boxed().collect(Collectors.toList());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the global status of HDMI CEC.
+     *
+     * <p>This allows to enable/disable HDMI CEC on the device.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void setHdmiCecEnabled(@NonNull @HdmiCecControl int value) {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            mService.setCecSettingIntValue(CEC_SETTING_NAME_HDMI_CEC_ENABLED, value);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the current global status of HDMI CEC.
+     *
+     * <p>Reflects whether HDMI CEC is currently enabled on the device.
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @HdmiCecControl
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public int getHdmiCecEnabled() {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            return mService.getCecSettingIntValue(CEC_SETTING_NAME_HDMI_CEC_ENABLED);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Add change listener for global status of HDMI CEC.
+     *
+     * <p>To stop getting the notification,
+     * use {@link #removeHdmiCecEnabledChangeListener(CecSettingChangeListener)}.
+     *
+     * Note that each invocation of the callback will be executed on an arbitrary
+     * Binder thread. This means that all callback implementations must be
+     * thread safe. To specify the execution thread, use
+     * {@link addHdmiCecEnabledChangeListener(Executor, CecSettingChangeListener)}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void addHdmiCecEnabledChangeListener(@NonNull CecSettingChangeListener listener) {
+        addHdmiCecEnabledChangeListener(ConcurrentUtils.DIRECT_EXECUTOR, listener);
+    }
+
+    /**
+     * Add change listener for global status of HDMI CEC.
+     *
+     * <p>To stop getting the notification,
+     * use {@link #removeHdmiCecEnabledChangeListener(CecSettingChangeListener)}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void addHdmiCecEnabledChangeListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull CecSettingChangeListener listener) {
+        addCecSettingChangeListener(CEC_SETTING_NAME_HDMI_CEC_ENABLED, executor, listener);
+    }
+
+    /**
+     * Remove change listener for global status of HDMI CEC.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void removeHdmiCecEnabledChangeListener(
+            @NonNull CecSettingChangeListener listener) {
+        removeCecSettingChangeListener(CEC_SETTING_NAME_HDMI_CEC_ENABLED, listener);
+    }
+
+    /**
+     * Set the version of the HDMI CEC specification currently used.
+     *
+     * <p>Allows to select either CEC 1.4b or 2.0 to be used by the device.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void setHdmiCecVersion(@NonNull @HdmiCecVersion int value) {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            mService.setCecSettingIntValue(CEC_SETTING_NAME_HDMI_CEC_VERSION, value);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the version of the HDMI CEC specification currently used.
+     *
+     * <p>Reflects which CEC version 1.4b or 2.0 is currently used by the device.
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @HdmiCecVersion
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public int getHdmiCecVersion() {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            return mService.getCecSettingIntValue(CEC_SETTING_NAME_HDMI_CEC_VERSION);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the status of Power Control.
+     *
+     * <p>Specifies to which devices Power Control messages should be sent:
+     * only to the TV, broadcast to all devices, no power control messages.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void setPowerControlMode(@NonNull @PowerControlMode String value) {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            mService.setCecSettingStringValue(CEC_SETTING_NAME_POWER_CONTROL_MODE, value);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the status of Power Control.
+     *
+     * <p>Reflects to which devices Power Control messages should be sent:
+     * only to the TV, broadcast to all devices, no power control messages.
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @PowerControlMode
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public String getPowerControlMode() {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            return mService.getCecSettingStringValue(CEC_SETTING_NAME_POWER_CONTROL_MODE);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the current power state behaviour when Active Source is lost.
+     *
+     * <p>Sets the action taken: do nothing or go to sleep immediately.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void setPowerStateChangeOnActiveSourceLost(
+            @NonNull @ActiveSourceLostBehavior String value) {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            mService.setCecSettingStringValue(
+                    CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST, value);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the current power state behaviour when Active Source is lost.
+     *
+     * <p>Reflects the action taken: do nothing or go to sleep immediately.
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @ActiveSourceLostBehavior
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public String getPowerStateChangeOnActiveSourceLost() {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            return mService.getCecSettingStringValue(
+                    CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the current status of System Audio Mode muting.
+     *
+     * <p>Sets whether the device should be muted when System Audio Mode is turned off.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void setSystemAudioModeMuting(@NonNull @SystemAudioModeMuting int value) {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            mService.setCecSettingIntValue(CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING, value);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the current status of System Audio Mode muting.
+     *
+     * <p>Reflects whether the device should be muted when System Audio Mode is turned off.
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @SystemAudioModeMuting
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public int getSystemAudioModeMuting() {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            return mService.getCecSettingIntValue(CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the current status of TV Wake on One Touch Play.
+     *
+     * <p>Sets whether the TV should wake up upon reception of &lt;Text View On&gt;
+     * or &lt;Image View On&gt;.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void setTvWakeOnOneTouchPlay(@NonNull @TvWakeOnOneTouchPlay int value) {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            mService.setCecSettingIntValue(CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY, value);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the current status of TV Wake on One Touch Play.
+     *
+     * <p>Reflects whether the TV should wake up upon reception of &lt;Text View On&gt;
+     * or &lt;Image View On&gt;.
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @TvWakeOnOneTouchPlay
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public int getTvWakeOnOneTouchPlay() {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            return mService.getCecSettingIntValue(CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the current status of TV send &lt;Standby&gt; on Sleep.
+     *
+     * <p>Sets whether the device will also turn off other CEC devices
+     * when it goes to standby mode.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void setTvSendStandbyOnSleep(@NonNull @TvSendStandbyOnSleep int value) {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            mService.setCecSettingIntValue(CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP, value);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the current status of TV send &lt;Standby&gt; on Sleep.
+     *
+     * <p>Reflects whether the device will also turn off other CEC devices
+     * when it goes to standby mode.
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @TvSendStandbyOnSleep
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public int getTvSendStandbyOnSleep() {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            return mService.getCecSettingIntValue(CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 }

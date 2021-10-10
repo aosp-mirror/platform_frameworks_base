@@ -17,31 +17,20 @@
 */
 -->
 
-<com.android.systemui.statusbar.phone.NavigationBarView
+<com.android.systemui.navigationbar.NavigationBarView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:systemui="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/navigation_bar_view"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
+    android:clipChildren="false"
+    android:clipToPadding="false"
     android:background="@drawable/system_bar_background">
 
-    <com.android.systemui.CornerHandleView
-        android:id="@+id/assist_hint_left"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:layout_gravity="left|bottom"
-        android:rotation="270"
-        android:visibility="gone"/>
-    <com.android.systemui.CornerHandleView
-        android:id="@+id/assist_hint_right"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:layout_gravity="right|bottom"
-        android:rotation="180"
-        android:visibility="gone"/>
-
-    <com.android.systemui.statusbar.phone.NavigationBarInflaterView
+    <com.android.systemui.navigationbar.NavigationBarInflaterView
         android:id="@+id/navigation_inflater"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:clipChildren="false"
+        android:clipToPadding="false" />
 
-</com.android.systemui.statusbar.phone.NavigationBarView>
+</com.android.systemui.navigationbar.NavigationBarView>

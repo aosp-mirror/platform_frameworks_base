@@ -19,20 +19,46 @@ import com.android.systemui.R
 
 typealias Privacy = PrivacyType
 
-enum class PrivacyType(val nameId: Int, val iconId: Int) {
-    // This is uses the icons used by the corresponding permission groups in the AndroidManifest
-    TYPE_CAMERA(R.string.privacy_type_camera,
-            com.android.internal.R.drawable.perm_group_camera),
-    TYPE_MICROPHONE(R.string.privacy_type_microphone,
-            com.android.internal.R.drawable.perm_group_microphone),
-    TYPE_LOCATION(R.string.privacy_type_location,
-            com.android.internal.R.drawable.perm_group_location);
+enum class PrivacyType(
+    val nameId: Int,
+    val iconId: Int,
+    val permGroupName: String,
+    val logName: String
+) {
+    // This uses the icons used by the corresponding permission groups in the AndroidManifest
+    TYPE_CAMERA(
+        R.string.privacy_type_camera,
+        com.android.internal.R.drawable.perm_group_camera,
+        android.Manifest.permission_group.CAMERA,
+        "camera"
+    ),
+    TYPE_MICROPHONE(
+        R.string.privacy_type_microphone,
+        com.android.internal.R.drawable.perm_group_microphone,
+        android.Manifest.permission_group.MICROPHONE,
+        "microphone"
+    ),
+    TYPE_LOCATION(
+        R.string.privacy_type_location,
+        com.android.internal.R.drawable.perm_group_location,
+        android.Manifest.permission_group.LOCATION,
+        "location"
+    );
 
     fun getName(context: Context) = context.resources.getString(nameId)
 
     fun getIcon(context: Context) = context.resources.getDrawable(iconId, context.theme)
 }
 
-data class PrivacyItem(val privacyType: PrivacyType, val application: PrivacyApplication)
+private const val UNKNOWN_TIMESTAMP = -1L
+data class PrivacyItem(
+    val privacyType: PrivacyType,
+    val application: PrivacyApplication,
+    val timeStampElapsed: Long = UNKNOWN_TIMESTAMP,
+    val paused: Boolean = false
+) {
+    val log = "(${privacyType.logName}, ${application.packageName}(${application.uid}), " +
+            "$timeStampElapsed, paused=$paused)"
+}
 
 data class PrivacyApplication(val packageName: String, val uid: Int)

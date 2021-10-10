@@ -40,7 +40,7 @@ public:
 void BeginTrace(const std::string& tag);
 void EndTrace();
 
-// A master trace is required to flush events to disk. Events are formatted in systrace
+// A main trace is required to flush events to disk. Events are formatted in systrace
 // json format.
 class FlushTrace {
 public:
