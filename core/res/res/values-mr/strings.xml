@@ -100,7 +100,7 @@
     <string name="peerTtyModeHco" msgid="5626377160840915617">"समवयस्क व्यक्तीने TTY मोड HCO ची विनंती केली"</string>
     <string name="peerTtyModeVco" msgid="572208600818270944">"समवयस्क व्यक्तीने TTY मोड VCO ची विनंती केली"</string>
     <string name="peerTtyModeOff" msgid="2420380956369226583">"समवयस्क व्यक्तीने TTY मोड बंद ची विनंती केली"</string>
-    <string name="serviceClassVoice" msgid="2065556932043454987">"Voice"</string>
+    <string name="serviceClassVoice" msgid="2065556932043454987">"व्हॉइस"</string>
     <string name="serviceClassData" msgid="4148080018967300248">"डेटा"</string>
     <string name="serviceClassFAX" msgid="2561653371698904118">"फॅक्स"</string>
     <string name="serviceClassSMS" msgid="1547664561704509004">"SMS"</string>
@@ -306,7 +306,7 @@
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"आपल्या संपर्कांवर प्रवेश"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"स्थान"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"या डिव्हाइसच्या स्थानावर प्रवेश"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"कॅलेंडर"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"आपल्या कॅलेंडरवर प्रवेश"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS मेसेज पाठवणे आणि पाहणे हे"</string>
