@@ -512,6 +512,30 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
     }
 
     /**
+     * Set volume for the streaming devices
+     *
+     * @param volume volume to set
+     * @hide
+     */
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED})
+    public void setVolume(int volume) {
+        if (VDBG) log("setVolume(vol: " + volume + " )");
+        try {
+            final IBluetoothLeAudio service = getService();
+            if (service != null && mAdapter.isEnabled()) {
+                service.setVolume(volume, mAttributionSource);
+                return;
+            }
+            if (service == null) Log.w(TAG, "Proxy not attached to service");
+            return;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+            return;
+        }
+    }
+
+    /**
      * Set connection policy of the profile
      *
      * <p> The device should already be paired.
