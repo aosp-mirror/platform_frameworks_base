@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone
 
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
@@ -31,12 +32,14 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.mock
 import org.mockito.MockitoAnnotations
 
 @SmallTest
 class PhoneStatusBarViewControllerTest : SysuiTestCase() {
 
     private val stateChangeListener = TestStateChangedListener()
+    private val touchEventHandler = TestTouchEventHandler()
 
     @Mock
     private lateinit var commandQueue: CommandQueue
@@ -63,37 +66,31 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
             val parent = FrameLayout(mContext) // add parent to keep layout params
             view = LayoutInflater.from(mContext)
                 .inflate(R.layout.status_bar, parent, false) as PhoneStatusBarView
-            view.setPanel(panelViewController)
             view.setScrimController(scrimController)
+            view.setBar(mock(StatusBar::class.java))
         }
 
         controller = PhoneStatusBarViewController(
                 view,
-                commandQueue,
                 null,
-                stateChangeListener
+                stateChangeListener,
+                touchEventHandler,
         )
     }
 
     @Test
-    fun constructor_setsPanelEnabledProviderOnView() {
-        var providerUsed = false
-        `when`(commandQueue.panelsEnabled()).then {
-            providerUsed = true
-            true
-        }
+    fun constructor_setsTouchHandlerOnView() {
+        val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
 
-        // If the constructor correctly set a [PanelEnabledProvider], then it should be used
-        // when [PhoneStatusBarView.panelEnabled] is called.
-        view.panelEnabled()
+        view.onTouchEvent(event)
 
-        assertThat(providerUsed).isTrue()
+        assertThat(touchEventHandler.lastEvent).isEqualTo(event)
     }
 
     @Test
     fun constructor_moveFromCenterAnimationIsNotNull_moveFromCenterAnimationInitialized() {
         controller = PhoneStatusBarViewController(
-                view, commandQueue, moveFromCenterAnimation, stateChangeListener
+                view, moveFromCenterAnimation, stateChangeListener, touchEventHandler
         )
 
         verify(moveFromCenterAnimation).init(any(), any())
@@ -116,5 +113,14 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
         override fun onPanelExpansionStateChanged() {
             stateChangeCalled = true
         }
+    }
+
+    private class TestTouchEventHandler : PhoneStatusBarView.TouchEventHandler {
+        var lastEvent: MotionEvent? = null
+        override fun handleTouchEvent(event: MotionEvent?): Boolean {
+            lastEvent = event
+            return false
+        }
+
     }
 }

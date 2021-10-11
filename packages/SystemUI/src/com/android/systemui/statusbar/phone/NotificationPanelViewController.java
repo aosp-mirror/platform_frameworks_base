@@ -3767,6 +3767,45 @@ public class NotificationPanelViewController extends PanelViewController {
             private long mLastTouchDownTime = -1L;
 
             @Override
+            public boolean onTouchForwardedFromStatusBar(MotionEvent event) {
+                // TODO(b/202981994): Move the touch debugging in this method to a central location.
+                //  (Right now, it's split between StatusBar and here.)
+
+                // If panels aren't enabled, ignore the gesture and don't pass it down to the
+                // panel view.
+                if (!mCommandQueue.panelsEnabled()) {
+                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                        Log.v(
+                                TAG,
+                                String.format(
+                                        "onTouchForwardedFromStatusBar: "
+                                                + "panel disabled, ignoring touch at (%d,%d)",
+                                        (int) event.getX(),
+                                        (int) event.getY()
+                                )
+                        );
+                    }
+                    return false;
+                }
+
+                // If the view that would receive the touch is disabled, just have status bar eat
+                // the gesture.
+                if (event.getAction() == MotionEvent.ACTION_DOWN && !mView.isEnabled()) {
+                    Log.v(TAG,
+                            String.format(
+                                    "onTouchForwardedFromStatusBar: "
+                                            + "panel view disabled, eating touch at (%d,%d)",
+                                    (int) event.getX(),
+                                    (int) event.getY()
+                            )
+                    );
+                    return true;
+                }
+
+                return mView.dispatchTouchEvent(event);
+            }
+
+            @Override
             public boolean onInterceptTouchEvent(MotionEvent event) {
                 if (mBlockTouches || mQs.disallowPanelTouches()) {
                     return false;
@@ -3777,7 +3816,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 if (mStatusBar.isBouncerShowing()) {
                     return true;
                 }
-                if (mBar.panelEnabled()
+                if (mCommandQueue.panelsEnabled()
                         && !mNotificationStackScrollLayoutController.isLongPressInProgress()
                         && mHeadsUpTouchHelper.onInterceptTouchEvent(event)) {
                     mMetricsLogger.count(COUNTER_PANEL_OPEN, 1);
@@ -4631,5 +4670,11 @@ public class NotificationPanelViewController extends PanelViewController {
 
     public PanelBar.PanelStateChangeListener getPanelStateChangeListener() {
         return mPanelStateChangeListener;
+    }
+
+
+    /** Returns the handler that the status bar should forward touches to. */
+    public PhoneStatusBarView.TouchEventHandler getStatusBarTouchEventHandler() {
+        return getTouchHandler()::onTouchForwardedFromStatusBar;
     }
 }

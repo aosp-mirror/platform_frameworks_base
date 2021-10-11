@@ -1167,7 +1167,6 @@ public class StatusBar extends SystemUI implements
                     PhoneStatusBarView oldStatusBarView = mStatusBarView;
                     mStatusBarView = (PhoneStatusBarView) statusBarFragment.getView();
                     mStatusBarView.setBar(this);
-                    mStatusBarView.setPanel(mNotificationPanelViewController);
                     mStatusBarView.setPanelStateChangeListener(
                             mNotificationPanelViewController.getPanelStateChangeListener());
                     mStatusBarView.setScrimController(mScrimController);
@@ -1176,6 +1175,8 @@ public class StatusBar extends SystemUI implements
                         sendInitialExpansionAmount(listener);
                     }
 
+                    mNotificationPanelViewController.setBar(mStatusBarView);
+
                     StatusBarMoveFromCenterAnimationController moveFromCenterAnimation = null;
                     if (mUnfoldTransitionConfig.isEnabled()) {
                         moveFromCenterAnimation = mMoveFromCenterAnimation.get();
@@ -1183,9 +1184,10 @@ public class StatusBar extends SystemUI implements
                     mPhoneStatusBarViewController =
                             new PhoneStatusBarViewController(
                                     mStatusBarView,
-                                    mCommandQueue,
                                     moveFromCenterAnimation,
-                                    this::onPanelExpansionStateChanged);
+                                    this::onPanelExpansionStateChanged,
+                                    mNotificationPanelViewController.getStatusBarTouchEventHandler()
+                            );
                     mPhoneStatusBarViewController.init();
 
                     mBatteryMeterViewController = new BatteryMeterViewController(
@@ -2208,6 +2210,8 @@ public class StatusBar extends SystemUI implements
 
     /** Called when a touch event occurred on {@link PhoneStatusBarView}. */
     public void onTouchEvent(MotionEvent event) {
+        // TODO(b/202981994): Move this touch debugging to a central location. (Right now, it's
+        //   split between NotificationPanelViewController and here.)
         if (DEBUG_GESTURES) {
             if (event.getActionMasked() != MotionEvent.ACTION_MOVE) {
                 EventLog.writeEvent(EventLogTags.SYSUI_STATUSBAR_TOUCH,

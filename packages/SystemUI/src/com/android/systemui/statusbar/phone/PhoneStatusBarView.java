@@ -24,7 +24,6 @@ import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.EventLog;
 import android.util.Log;
 import android.util.Pair;
 import android.view.DisplayCutout;
@@ -37,7 +36,6 @@ import android.view.accessibility.AccessibilityEvent;
 import android.widget.LinearLayout;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
@@ -69,8 +67,8 @@ public class PhoneStatusBarView extends PanelBar {
     private List<StatusBar.ExpansionChangedListener> mExpansionChangedListeners;
     @Nullable
     private PanelExpansionStateChangedListener mPanelExpansionStateChangedListener;
-
-    private PanelEnabledProvider mPanelEnabledProvider;
+    @Nullable
+    private TouchEventHandler mTouchEventHandler;
 
     /**
      * Draw this many pixels into the left/right side of the cutout to optimally use the space
@@ -93,6 +91,10 @@ public class PhoneStatusBarView extends PanelBar {
 
     void setPanelExpansionStateChangedListener(PanelExpansionStateChangedListener listener) {
         mPanelExpansionStateChangedListener = listener;
+    }
+
+    void setTouchEventHandler(TouchEventHandler handler) {
+        mTouchEventHandler = handler;
     }
 
     public void setScrimController(ScrimController scrimController) {
@@ -169,15 +171,6 @@ public class PhoneStatusBarView extends PanelBar {
     }
 
     @Override
-    public boolean panelEnabled() {
-        if (mPanelEnabledProvider == null) {
-            Log.e(TAG, "panelEnabledProvider is null; defaulting to super class.");
-            return super.panelEnabled();
-        }
-        return mPanelEnabledProvider.panelEnabled();
-    }
-
-    @Override
     public boolean onRequestSendAccessibilityEventInternal(View child, AccessibilityEvent event) {
         if (super.onRequestSendAccessibilityEventInternal(child, event)) {
             // The status bar is very small so augment the view that the user is touching
@@ -201,15 +194,18 @@ public class PhoneStatusBarView extends PanelBar {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         mBar.onTouchEvent(event);
-
-        if (DEBUG_GESTURES) {
-            if (event.getActionMasked() != MotionEvent.ACTION_MOVE) {
-                EventLog.writeEvent(EventLogTags.SYSUI_PANELBAR_TOUCH,
-                        event.getActionMasked(), (int) event.getX(), (int) event.getY());
-            }
+        if (mTouchEventHandler == null) {
+            Log.w(
+                    TAG,
+                    String.format(
+                            "onTouch: No touch handler provided; eating gesture at (%d,%d)",
+                            (int) event.getX(),
+                            (int) event.getY()
+                    )
+            );
+            return true;
         }
-
-        return super.onTouchEvent(event);
+        return mTouchEventHandler.handleTouchEvent(event);
     }
 
     @Override
@@ -259,11 +255,6 @@ public class PhoneStatusBarView extends PanelBar {
                 listener.onExpansionChanged(frac, expanded);
             }
         }
-    }
-
-    /** Set the {@link PanelEnabledProvider} to use. */
-    public void setPanelEnabledProvider(PanelEnabledProvider panelEnabledProvider) {
-        mPanelEnabledProvider = panelEnabledProvider;
     }
 
     public void updateResources() {
@@ -345,15 +336,20 @@ public class PhoneStatusBarView extends PanelBar {
                 getPaddingBottom());
     }
 
-    /** An interface that will provide whether panel is enabled. */
-    interface PanelEnabledProvider {
-        /** Returns true if the panel is enabled and false otherwise. */
-        boolean panelEnabled();
-    }
-
     /** A listener that will be notified when a panel's expansion state may have changed. */
     public interface PanelExpansionStateChangedListener {
         /** Called when a panel's expansion state may have changed. */
         void onPanelExpansionStateChanged();
+    }
+
+    /**
+     * A handler repsonsible for all touch event handling on the status bar.
+     *
+     * The handler will be notified each time {@link this#onTouchEvent} is called, and the return
+     * value from the handler will be returned from {@link this#onTouchEvent}.
+     **/
+    public interface TouchEventHandler {
+        /** Called each time {@link this#onTouchEvent} is called. */
+        boolean handleTouchEvent(MotionEvent event);
     }
 }

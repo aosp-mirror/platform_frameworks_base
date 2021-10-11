@@ -519,6 +519,51 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onTouchForwardedFromStatusBar_panelsNotEnabled_returnsFalseAndNoViewEvent() {
+        when(mCommandQueue.panelsEnabled()).thenReturn(false);
+
+        boolean returnVal = mTouchHandler.onTouchForwardedFromStatusBar(
+                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0));
+
+        assertThat(returnVal).isFalse();
+        verify(mView, never()).dispatchTouchEvent(any());
+    }
+
+    @Test
+    public void onTouchForwardedFromStatusBar_viewNotEnabled_returnsTrueAndNoViewEvent() {
+        when(mCommandQueue.panelsEnabled()).thenReturn(true);
+        when(mView.isEnabled()).thenReturn(false);
+
+        boolean returnVal = mTouchHandler.onTouchForwardedFromStatusBar(
+                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0));
+
+        assertThat(returnVal).isTrue();
+        verify(mView, never()).dispatchTouchEvent(any());
+    }
+
+    @Test
+    public void onTouchForwardedFromStatusBar_viewNotEnabledButIsMoveEvent_viewReceivesEvent() {
+        when(mCommandQueue.panelsEnabled()).thenReturn(true);
+        when(mView.isEnabled()).thenReturn(false);
+        MotionEvent event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 0f, 0f, 0);
+
+        mTouchHandler.onTouchForwardedFromStatusBar(event);
+
+        verify(mView).dispatchTouchEvent(event);
+    }
+
+    @Test
+    public void onTouchForwardedFromStatusBar_panelAndViewEnabled_viewReceivesEvent() {
+        when(mCommandQueue.panelsEnabled()).thenReturn(true);
+        when(mView.isEnabled()).thenReturn(true);
+        MotionEvent event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0);
+
+        mTouchHandler.onTouchForwardedFromStatusBar(event);
+
+        verify(mView).dispatchTouchEvent(event);
+    }
+
+    @Test
     public void testA11y_initializeNode() {
         AccessibilityNodeInfo nodeInfo = new AccessibilityNodeInfo();
         mAccessibiltyDelegate.onInitializeAccessibilityNodeInfo(mView, nodeInfo);
