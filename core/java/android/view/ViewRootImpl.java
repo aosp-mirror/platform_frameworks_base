@@ -3384,14 +3384,12 @@ public final class ViewRootImpl implements ViewParent,
 
     private void handleWindowFocusChanged() {
         final boolean hasWindowFocus;
-        final boolean inTouchMode;
         synchronized (this) {
             if (!mWindowFocusChanged) {
                 return;
             }
             mWindowFocusChanged = false;
             hasWindowFocus = mUpcomingWindowFocus;
-            inTouchMode = mUpcomingInTouchMode;
         }
         // TODO (b/131181940): Make sure this doesn't leak Activity with mActivityConfigCallback
         // config changes.
@@ -3404,9 +3402,7 @@ public final class ViewRootImpl implements ViewParent,
 
         if (mAdded) {
             profileRendering(hasWindowFocus);
-
             if (hasWindowFocus) {
-                ensureTouchModeLocally(inTouchMode);
                 if (mAttachInfo.mThreadedRenderer != null && mSurface.isValid()) {
                     mFullRedrawNeeded = true;
                     try {
@@ -3476,6 +3472,14 @@ public final class ViewRootImpl implements ViewParent,
         if (hasWindowFocus) {
             handleContentCaptureFlush();
         }
+    }
+
+    private void handleWindowTouchModeChanged() {
+        final boolean inTouchMode;
+        synchronized (this) {
+            inTouchMode = mUpcomingInTouchMode;
+        }
+        ensureTouchModeLocally(inTouchMode);
     }
 
     private void fireAccessibilityFocusEventIfHasFocusedNode() {
@@ -5135,6 +5139,7 @@ public final class ViewRootImpl implements ViewParent,
     private static final int MSG_SHOW_INSETS = 34;
     private static final int MSG_HIDE_INSETS = 35;
     private static final int MSG_REQUEST_SCROLL_CAPTURE = 36;
+    private static final int MSG_WINDOW_TOUCH_MODE_CHANGED = 37;
 
 
     final class ViewRootHandler extends Handler {
@@ -5201,6 +5206,8 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_SHOW_INSETS";
                 case MSG_HIDE_INSETS:
                     return "MSG_HIDE_INSETS";
+                case MSG_WINDOW_TOUCH_MODE_CHANGED:
+                    return "MSG_WINDOW_TOUCH_MODE_CHANGED";
             }
             return super.getMessageName(message);
         }
@@ -5323,9 +5330,12 @@ public final class ViewRootImpl implements ViewParent,
                 case MSG_WINDOW_FOCUS_CHANGED: {
                     handleWindowFocusChanged();
                 } break;
-                case MSG_DIE:
+                case MSG_WINDOW_TOUCH_MODE_CHANGED: {
+                    handleWindowTouchModeChanged();
+                } break;
+                case MSG_DIE: {
                     doDie();
-                    break;
+                } break;
                 case MSG_DISPATCH_INPUT_EVENT: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     InputEvent event = (InputEvent) args.arg1;
@@ -8696,6 +8706,11 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         @Override
+        public void onTouchModeChanged(boolean inTouchMode) {
+            touchModeChanged(inTouchMode);
+        }
+
+        @Override
         public void onPointerCaptureEvent(boolean pointerCaptureEnabled) {
             dispatchPointerCaptureChanged(pointerCaptureEnabled);
         }
@@ -8953,14 +8968,30 @@ public final class ViewRootImpl implements ViewParent,
         mHandler.sendMessage(msg);
     }
 
-    public void windowFocusChanged(boolean hasFocus, boolean inTouchMode) {
+    /**
+     * Notifies this {@link ViewRootImpl} object that window focus has changed.
+     */
+    public void windowFocusChanged(boolean hasFocus, boolean unusedInTouchMode) {
+        // TODO(b/193718270): Delete unused inTouchMode parameter here once fully removing touch
+        // mode status from focus event.
         synchronized (this) {
             mWindowFocusChanged = true;
             mUpcomingWindowFocus = hasFocus;
-            mUpcomingInTouchMode = inTouchMode;
         }
         Message msg = Message.obtain();
         msg.what = MSG_WINDOW_FOCUS_CHANGED;
+        mHandler.sendMessage(msg);
+    }
+
+    /**
+     * Notifies this {@link ViewRootImpl} object that touch mode state has changed.
+     */
+    public void touchModeChanged(boolean inTouchMode) {
+        synchronized (this) {
+            mUpcomingInTouchMode = inTouchMode;
+        }
+        Message msg = Message.obtain();
+        msg.what = MSG_WINDOW_TOUCH_MODE_CHANGED;
         mHandler.sendMessage(msg);
     }
 
