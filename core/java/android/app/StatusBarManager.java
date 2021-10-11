@@ -228,55 +228,59 @@ public class StatusBarManager {
     /** @hide */
     public static final int TILE_ADD_REQUEST_RESULT_DIALOG_DISMISSED = 3;
 
-    /** @hide */
-    @IntDef(prefix = {"TILE_ADD_REQUEST_RESULT_"}, value = {
-            TILE_ADD_REQUEST_RESULT_TILE_NOT_ADDED,
-            TILE_ADD_REQUEST_RESULT_TILE_ALREADY_ADDED,
-            TILE_ADD_REQUEST_RESULT_TILE_ADDED,
-            TILE_ADD_REQUEST_RESULT_DIALOG_DISMISSED
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface RequestResult {}
-
     /**
-     * Indicates that the request was sent successfully. Does not indicate that the user
-     * has accepted the request.
+     * Values greater or equal to this value indicate an error in the request.
      */
-    public static final int TILE_ADD_REQUEST_ANSWER_SUCCESS = 0;
+    private static final int TILE_ADD_REQUEST_FIRST_ERROR_CODE = 1000;
+
     /**
      * Indicates that this package does not match that of the
      * {@link android.service.quicksettings.TileService}.
      */
-    public static final int TILE_ADD_REQUEST_ANSWER_FAILED_MISMATCHED_PACKAGE = 1;
+    public static final int TILE_ADD_REQUEST_ERROR_MISMATCHED_PACKAGE =
+            TILE_ADD_REQUEST_FIRST_ERROR_CODE;
     /**
      * Indicates that there's a request in progress for this package.
      */
-    public static final int TILE_ADD_REQUEST_ANSWER_FAILED_REQUEST_IN_PROGRESS = 2;
+    public static final int TILE_ADD_REQUEST_ERROR_REQUEST_IN_PROGRESS =
+            TILE_ADD_REQUEST_FIRST_ERROR_CODE + 1;
     /**
-     * Indicates that the component does not match an enabled
+     * Indicates that the component does not match an enabled exported
      * {@link android.service.quicksettings.TileService} for the current user.
      */
-    public static final int TILE_ADD_REQUEST_ANSWER_FAILED_BAD_COMPONENT = 3;
+    public static final int TILE_ADD_REQUEST_ERROR_BAD_COMPONENT =
+            TILE_ADD_REQUEST_FIRST_ERROR_CODE + 2;
     /**
      * Indicates that the user is not the current user.
      */
-    public static final int TILE_ADD_REQUEST_ANSWER_FAILED_NOT_CURRENT_USER = 4;
+    public static final int TILE_ADD_REQUEST_ERROR_NOT_CURRENT_USER =
+            TILE_ADD_REQUEST_FIRST_ERROR_CODE + 3;
     /**
-     * The request could not be processed due to an unkonwn reason.
+     * Indicates that the requesting application is not in the foreground.
      */
-    public static final int TILE_ADD_REQUEST_ANSWER_FAILED_UNKNOWN_REASON = 5;
+    public static final int TILE_ADD_REQUEST_ERROR_APP_NOT_IN_FOREGROUND =
+            TILE_ADD_REQUEST_FIRST_ERROR_CODE + 4;
+    /**
+     * The request could not be processed because no fulfilling service was found. This could be
+     * a temporary issue (for example, SystemUI has crashed).
+     */
+    public static final int TILE_ADD_REQUEST_ERROR_NO_STATUS_BAR_SERVICE =
+            TILE_ADD_REQUEST_FIRST_ERROR_CODE + 5;
 
     /** @hide */
-    @IntDef(prefix = {"TILE_ADD_REQUEST_ANSWER_"}, value = {
-            TILE_ADD_REQUEST_ANSWER_SUCCESS,
-            TILE_ADD_REQUEST_ANSWER_FAILED_MISMATCHED_PACKAGE,
-            TILE_ADD_REQUEST_ANSWER_FAILED_REQUEST_IN_PROGRESS,
-            TILE_ADD_REQUEST_ANSWER_FAILED_BAD_COMPONENT,
-            TILE_ADD_REQUEST_ANSWER_FAILED_NOT_CURRENT_USER,
-            TILE_ADD_REQUEST_ANSWER_FAILED_UNKNOWN_REASON
+    @IntDef(prefix = {"TILE_ADD_REQUEST"}, value = {
+            TILE_ADD_REQUEST_RESULT_TILE_NOT_ADDED,
+            TILE_ADD_REQUEST_RESULT_TILE_ALREADY_ADDED,
+            TILE_ADD_REQUEST_RESULT_TILE_ADDED,
+            TILE_ADD_REQUEST_ERROR_MISMATCHED_PACKAGE,
+            TILE_ADD_REQUEST_ERROR_REQUEST_IN_PROGRESS,
+            TILE_ADD_REQUEST_ERROR_BAD_COMPONENT,
+            TILE_ADD_REQUEST_ERROR_NOT_CURRENT_USER,
+            TILE_ADD_REQUEST_ERROR_APP_NOT_IN_FOREGROUND,
+            TILE_ADD_REQUEST_ERROR_NO_STATUS_BAR_SERVICE
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface RequestAnswer {}
+    public @interface RequestResult {}
 
     @UnsupportedAppUsage
     private Context mContext;
@@ -618,7 +622,9 @@ public class StatusBarManager {
      * </ul>
      * <p>
      * The user for which this will be added is determined from the {@link Context} used to retrieve
-     * this service, and must match the current user.
+     * this service, and must match the current user. The requesting application must be in the
+     * foreground ({@link ActivityManager.RunningAppProcessInfo#IMPORTANCE_FOREGROUND}
+     * and the {@link android.service.quicksettings.TileService} must be exported.
      *
      * @param tileServiceComponentName {@link ComponentName} of the
      *        {@link android.service.quicksettings.TileService} for the request.
@@ -626,12 +632,10 @@ public class StatusBarManager {
      * @param icon icon to use in the tile shown to the user.
      * @param resultExecutor an executor to run the callback on
      * @param resultCallback callback to indicate the {@link RequestResult}.
-     * @return whether the request was successfully sent.
      *
      * @see android.service.quicksettings.TileService
      */
-    @RequestAnswer
-    public int requestAddTileService(
+    public void requestAddTileService(
             @NonNull ComponentName tileServiceComponentName,
             @NonNull CharSequence tileLabel,
             @NonNull Icon icon,
@@ -644,14 +648,16 @@ public class StatusBarManager {
         Objects.requireNonNull(resultExecutor);
         Objects.requireNonNull(resultCallback);
         if (!tileServiceComponentName.getPackageName().equals(mContext.getPackageName())) {
-            return TILE_ADD_REQUEST_ANSWER_FAILED_MISMATCHED_PACKAGE;
+            resultExecutor.execute(
+                    () -> resultCallback.accept(TILE_ADD_REQUEST_ERROR_MISMATCHED_PACKAGE));
+            return;
         }
         int userId = mContext.getUserId();
         RequestResultCallback callbackProxy = new RequestResultCallback(resultExecutor,
                 resultCallback);
         IStatusBarService svc = getService();
         try {
-            return svc.requestAddTile(
+            svc.requestAddTile(
                     tileServiceComponentName,
                     tileLabel,
                     icon,
@@ -661,7 +667,6 @@ public class StatusBarManager {
         } catch (RemoteException ex) {
             ex.rethrowFromSystemServer();
         }
-        return TILE_ADD_REQUEST_ANSWER_FAILED_UNKNOWN_REASON;
     }
 
     /** @hide */

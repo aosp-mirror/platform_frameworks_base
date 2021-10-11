@@ -52,7 +52,7 @@ class TileServiceRequestController constructor(
         internal const val DONT_ADD_TILE = StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_NOT_ADDED
         internal const val TILE_ALREADY_ADDED =
                 StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ALREADY_ADDED
-        internal const val DISMISSED = 3
+        internal const val DISMISSED = StatusBarManager.TILE_ADD_REQUEST_RESULT_DIALOG_DISMISSED
     }
 
     private val commandQueueCallback = object : CommandQueue.Callbacks {
