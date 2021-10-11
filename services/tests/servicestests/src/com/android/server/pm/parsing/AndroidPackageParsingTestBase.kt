@@ -38,7 +38,7 @@ import com.android.server.pm.PackageManagerService
 import com.android.server.pm.PackageSetting
 import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.pkg.PackageStateUnserialized
-import com.android.server.pm.pkg.PackageUserStateInternalImpl
+import com.android.server.pm.pkg.PackageUserStateImpl
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
 import org.junit.BeforeClass
@@ -85,7 +85,8 @@ open class AndroidPackageParsingTestBase {
                 }
                 .distinct()
 
-        private val dummyUserState = PackageUserStateInternalImpl()
+        private val dummyUserState =
+            PackageUserStateImpl()
 
         val oldPackages = mutableListOf<PackageParser.Package>()
 

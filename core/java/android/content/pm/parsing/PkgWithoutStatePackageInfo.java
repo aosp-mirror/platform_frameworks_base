@@ -34,6 +34,7 @@ import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedPermission;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
+import android.content.pm.pkg.FrameworkPackageUserState;
 
 import com.android.internal.R;
 
@@ -81,7 +82,7 @@ public interface PkgWithoutStatePackageInfo {
      * provide the same information as {@link ActivityInfo}. Effective state can be queried through
      * {@link android.content.pm.PackageManager#getActivityInfo(ComponentName, int)} or by
      * combining state from from com.android.server.pm.pkg.PackageState and
-     * {@link android.content.pm.pkg.PackageUserState}.
+     * {@link FrameworkPackageUserState}.
      *
      * @see ActivityInfo
      * @see PackageInfo#activities
@@ -152,7 +153,7 @@ public interface PkgWithoutStatePackageInfo {
      * provide the same information as {@link ProviderInfo}. Effective state can be queried through
      * {@link android.content.pm.PackageManager#getProviderInfo(ComponentName, int)} or by
      * combining state from from com.android.server.pm.pkg.PackageState and
-     * {@link android.content.pm.pkg.PackageUserState}.
+     * {@link FrameworkPackageUserState}.
      *
      * @see ProviderInfo
      * @see PackageInfo#providers
@@ -167,7 +168,7 @@ public interface PkgWithoutStatePackageInfo {
      * provide the same information as {@link ActivityInfo}. Effective state can be queried through
      * {@link android.content.pm.PackageManager#getReceiverInfo(ComponentName, int)} or by
      * combining state from from com.android.server.pm.pkg.PackageState and
-     * {@link android.content.pm.pkg.PackageUserState}.
+     * {@link FrameworkPackageUserState}.
      *
      * Since they share several attributes, receivers are parsed as {@link ParsedActivity}, even
      * though they represent different functionality.
@@ -221,7 +222,7 @@ public interface PkgWithoutStatePackageInfo {
      * provide the same information as {@link ServiceInfo}. Effective state can be queried through
      * {@link android.content.pm.PackageManager#getServiceInfo(ComponentName, int)} or by
      * combining state from from com.android.server.pm.pkg.PackageState and
-     * {@link android.content.pm.pkg.PackageUserState}.
+     * {@link FrameworkPackageUserState}.
      *
      * @see ServiceInfo
      * @see PackageInfo#services

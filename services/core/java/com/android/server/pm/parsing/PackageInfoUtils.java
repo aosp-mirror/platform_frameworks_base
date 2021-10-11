@@ -46,7 +46,6 @@ import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.parsing.component.ParsedProcess;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
-import android.content.pm.pkg.PackageUserState;
 import android.content.pm.pkg.PackageUserStateUtils;
 import android.os.UserHandle;
 import android.util.ArrayMap;
@@ -60,6 +59,7 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.pkg.PackageStateUnserialized;
+import com.android.server.pm.pkg.PackageUserState;
 
 import libcore.util.EmptyArray;
 

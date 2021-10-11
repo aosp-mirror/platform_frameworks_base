@@ -146,10 +146,11 @@ import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedMainComponent;
 import android.content.pm.parsing.component.ParsedProvider;
-import android.content.pm.pkg.PackageUserState;
-import android.content.pm.pkg.PackageUserStateInternal;
+
+import com.android.server.pm.pkg.PackageUserState;
+import com.android.server.pm.pkg.PackageUserStateInternal;
 import android.content.pm.pkg.PackageUserStateUtils;
-import android.content.pm.pkg.SuspendParams;
+import com.android.server.pm.pkg.SuspendParams;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;

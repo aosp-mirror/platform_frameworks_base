@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.content.pm.pkg;
+package com.android.server.pm.pkg;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -23,10 +23,14 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Pair;
 
-/** @hide */
+/**
+ * Internal variant of {@link PackageUserState} that includes data not exposed as API. This is
+ * still read-only and should be used inside system server code when possible over the
+ * implementation.
+ */
 public interface PackageUserStateInternal extends PackageUserState {
 
-    PackageUserStateInternal DEFAULT = new PackageUserStateInternalDefault();
+    PackageUserStateInternal DEFAULT = new PackageUserStateDefault();
 
     @Nullable
     ArrayMap<String, SuspendParams> getSuspendParams();

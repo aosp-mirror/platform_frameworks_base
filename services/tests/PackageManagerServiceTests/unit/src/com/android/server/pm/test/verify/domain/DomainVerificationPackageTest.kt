@@ -22,7 +22,7 @@ import android.content.pm.Signature
 import android.content.pm.SigningDetails
 import android.content.pm.parsing.component.ParsedActivityImpl
 import android.content.pm.parsing.component.ParsedIntentInfoImpl
-import android.content.pm.pkg.PackageUserStateInternal
+import com.android.server.pm.pkg.PackageUserStateInternal
 import android.content.pm.verify.domain.DomainOwner
 import android.content.pm.verify.domain.DomainVerificationInfo.STATE_MODIFIABLE_VERIFIED
 import android.content.pm.verify.domain.DomainVerificationInfo.STATE_NO_RESPONSE
@@ -52,7 +52,6 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.ArgumentMatchers.anyString
-import org.mockito.Mockito
 import org.mockito.Mockito.doReturn
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream

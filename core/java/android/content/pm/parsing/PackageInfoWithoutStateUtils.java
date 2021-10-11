@@ -52,7 +52,7 @@ import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
 import android.content.pm.parsing.component.ParsedUsesPermission;
-import android.content.pm.pkg.PackageUserState;
+import android.content.pm.pkg.FrameworkPackageUserState;
 import android.content.pm.pkg.PackageUserStateUtils;
 import android.os.Environment;
 import android.os.UserHandle;
@@ -77,7 +77,7 @@ public class PackageInfoWithoutStateUtils {
     @Nullable
     public static PackageInfo generate(ParsingPackageRead pkg, int[] gids,
             @PackageManager.PackageInfoFlags int flags, long firstInstallTime, long lastUpdateTime,
-            Set<String> grantedPermissions, PackageUserState state, int userId) {
+            Set<String> grantedPermissions, FrameworkPackageUserState state, int userId) {
         return generateWithComponents(pkg, gids, flags, firstInstallTime, lastUpdateTime, grantedPermissions,
                 state, userId, null);
     }
@@ -85,13 +85,13 @@ public class PackageInfoWithoutStateUtils {
     @Nullable
     public static PackageInfo generate(ParsingPackageRead pkg, ApexInfo apexInfo, int flags) {
         return generateWithComponents(pkg, EmptyArray.INT, flags, 0, 0, Collections.emptySet(),
-                PackageUserState.DEFAULT, UserHandle.getCallingUserId(), apexInfo);
+                FrameworkPackageUserState.DEFAULT, UserHandle.getCallingUserId(), apexInfo);
     }
 
     @Nullable
     private static PackageInfo generateWithComponents(ParsingPackageRead pkg, int[] gids,
             @PackageManager.PackageInfoFlags int flags, long firstInstallTime, long lastUpdateTime,
-            Set<String> grantedPermissions, PackageUserState state, int userId,
+            Set<String> grantedPermissions, FrameworkPackageUserState state, int userId,
             @Nullable ApexInfo apexInfo) {
         ApplicationInfo applicationInfo = generateApplicationInfo(pkg, flags, state, userId);
         if (applicationInfo == null) {
@@ -191,7 +191,7 @@ public class PackageInfoWithoutStateUtils {
     @Nullable
     public static PackageInfo generateWithoutComponents(ParsingPackageRead pkg, int[] gids,
             @PackageManager.PackageInfoFlags int flags, long firstInstallTime, long lastUpdateTime,
-            Set<String> grantedPermissions, PackageUserState state, int userId,
+            Set<String> grantedPermissions, FrameworkPackageUserState state, int userId,
             @Nullable ApexInfo apexInfo, @NonNull ApplicationInfo applicationInfo) {
         if (!checkUseInstalled(pkg, state, flags)) {
             return null;
@@ -206,12 +206,12 @@ public class PackageInfoWithoutStateUtils {
      * server.
      * <p>
      * Prefer {@link #generateWithoutComponents(ParsingPackageRead, int[], int, long, long, Set,
-     * PackageUserState, int, ApexInfo, ApplicationInfo)}.
+     * FrameworkPackageUserState, int, ApexInfo, ApplicationInfo)}.
      */
     @NonNull
     public static PackageInfo generateWithoutComponentsUnchecked(ParsingPackageRead pkg, int[] gids,
             @PackageManager.PackageInfoFlags int flags, long firstInstallTime, long lastUpdateTime,
-            Set<String> grantedPermissions, PackageUserState state, int userId,
+            Set<String> grantedPermissions, FrameworkPackageUserState state, int userId,
             @Nullable ApexInfo apexInfo, @NonNull ApplicationInfo applicationInfo) {
         PackageInfo pi = new PackageInfo();
         pi.packageName = pkg.getPackageName();
@@ -365,7 +365,7 @@ public class PackageInfoWithoutStateUtils {
 
     @Nullable
     public static ApplicationInfo generateApplicationInfo(ParsingPackageRead pkg,
-            @PackageManager.ApplicationInfoFlags int flags, PackageUserState state, int userId) {
+            @PackageManager.ApplicationInfoFlags int flags, FrameworkPackageUserState state, int userId) {
         if (pkg == null) {
             return null;
         }
@@ -382,7 +382,7 @@ public class PackageInfoWithoutStateUtils {
      * This bypasses critical checks that are necessary for usage with data passed outside of system
      * server.
      * <p>
-     * Prefer {@link #generateApplicationInfo(ParsingPackageRead, int, PackageUserState, int)}.
+     * Prefer {@link #generateApplicationInfo(ParsingPackageRead, int, FrameworkPackageUserState, int)}.
      *
      * @param assignUserFields whether to fill the returned {@link ApplicationInfo} with user
      *                         specific fields. This can be skipped when building from a system
@@ -392,7 +392,7 @@ public class PackageInfoWithoutStateUtils {
      */
     @NonNull
     public static ApplicationInfo generateApplicationInfoUnchecked(@NonNull ParsingPackageRead pkg,
-            @PackageManager.ApplicationInfoFlags int flags, @NonNull PackageUserState state,
+            @PackageManager.ApplicationInfoFlags int flags, @NonNull FrameworkPackageUserState state,
             int userId, boolean assignUserFields) {
         // Make shallow copy so we can store the metadata/libraries safely
         ApplicationInfo ai = ((ParsingPackageHidden) pkg).toAppInfoWithoutState();
@@ -407,7 +407,7 @@ public class PackageInfoWithoutStateUtils {
     }
 
     private static void updateApplicationInfo(ApplicationInfo ai, int flags,
-            PackageUserState state) {
+            FrameworkPackageUserState state) {
         if ((flags & PackageManager.GET_META_DATA) == 0) {
             ai.metaData = null;
         }
@@ -452,7 +452,7 @@ public class PackageInfoWithoutStateUtils {
 
     @Nullable
     public static ApplicationInfo generateDelegateApplicationInfo(@Nullable ApplicationInfo ai,
-            @PackageManager.ApplicationInfoFlags int flags, @NonNull PackageUserState state,
+            @PackageManager.ApplicationInfoFlags int flags, @NonNull FrameworkPackageUserState state,
             int userId) {
         if (ai == null || !checkUseInstalledOrHidden(flags, state, ai)) {
             return null;
@@ -469,7 +469,7 @@ public class PackageInfoWithoutStateUtils {
 
     @Nullable
     public static ActivityInfo generateDelegateActivityInfo(@Nullable ActivityInfo a,
-            @PackageManager.ComponentInfoFlags int flags, @NonNull PackageUserState state,
+            @PackageManager.ComponentInfoFlags int flags, @NonNull FrameworkPackageUserState state,
             int userId) {
         if (a == null || !checkUseInstalledOrHidden(flags, state, a.applicationInfo)) {
             return null;
@@ -484,7 +484,7 @@ public class PackageInfoWithoutStateUtils {
 
     @Nullable
     public static ActivityInfo generateActivityInfo(ParsingPackageRead pkg, ParsedActivity a,
-            @PackageManager.ComponentInfoFlags int flags, PackageUserState state,
+            @PackageManager.ComponentInfoFlags int flags, FrameworkPackageUserState state,
             @Nullable ApplicationInfo applicationInfo, int userId) {
         if (a == null) return null;
         if (!checkUseInstalled(pkg, state, flags)) {
@@ -505,7 +505,7 @@ public class PackageInfoWithoutStateUtils {
      * server.
      * <p>
      * Prefer {@link #generateActivityInfo(ParsingPackageRead, ParsedActivity, int,
-     * PackageUserState, ApplicationInfo, int)}.
+     * FrameworkPackageUserState, ApplicationInfo, int)}.
      */
     @NonNull
     public static ActivityInfo generateActivityInfoUnchecked(@NonNull ParsedActivity a,
@@ -550,13 +550,13 @@ public class PackageInfoWithoutStateUtils {
 
     @Nullable
     public static ActivityInfo generateActivityInfo(ParsingPackageRead pkg, ParsedActivity a,
-            @PackageManager.ComponentInfoFlags int flags, PackageUserState state, int userId) {
+            @PackageManager.ComponentInfoFlags int flags, FrameworkPackageUserState state, int userId) {
         return generateActivityInfo(pkg, a, flags, state, null, userId);
     }
 
     @Nullable
     public static ServiceInfo generateServiceInfo(ParsingPackageRead pkg, ParsedService s,
-            @PackageManager.ComponentInfoFlags int flags, PackageUserState state,
+            @PackageManager.ComponentInfoFlags int flags, FrameworkPackageUserState state,
             @Nullable ApplicationInfo applicationInfo, int userId) {
         if (s == null) return null;
         if (!checkUseInstalled(pkg, state, flags)) {
@@ -576,7 +576,7 @@ public class PackageInfoWithoutStateUtils {
      * This bypasses critical checks that are necessary for usage with data passed outside of system
      * server.
      * <p>
-     * Prefer {@link #generateServiceInfo(ParsingPackageRead, ParsedService, int, PackageUserState,
+     * Prefer {@link #generateServiceInfo(ParsingPackageRead, ParsedService, int, FrameworkPackageUserState,
      * ApplicationInfo, int)}.
      */
     @NonNull
@@ -600,13 +600,13 @@ public class PackageInfoWithoutStateUtils {
 
     @Nullable
     public static ServiceInfo generateServiceInfo(ParsingPackageRead pkg, ParsedService s,
-            @PackageManager.ComponentInfoFlags int flags, PackageUserState state, int userId) {
+            @PackageManager.ComponentInfoFlags int flags, FrameworkPackageUserState state, int userId) {
         return generateServiceInfo(pkg, s, flags, state, null, userId);
     }
 
     @Nullable
     public static ProviderInfo generateProviderInfo(ParsingPackageRead pkg, ParsedProvider p,
-            @PackageManager.ComponentInfoFlags int flags, PackageUserState state,
+            @PackageManager.ComponentInfoFlags int flags, FrameworkPackageUserState state,
             @Nullable ApplicationInfo applicationInfo, int userId) {
         if (p == null) return null;
         if (!checkUseInstalled(pkg, state, flags)) {
@@ -627,7 +627,7 @@ public class PackageInfoWithoutStateUtils {
      * server.
      * <p>
      * Prefer {@link #generateProviderInfo(ParsingPackageRead, ParsedProvider, int,
-     * PackageUserState, ApplicationInfo, int)}.
+     * FrameworkPackageUserState, ApplicationInfo, int)}.
      */
     @NonNull
     public static ProviderInfo generateProviderInfoUnchecked(@NonNull ParsedProvider p,
@@ -661,13 +661,13 @@ public class PackageInfoWithoutStateUtils {
 
     @Nullable
     public static ProviderInfo generateProviderInfo(ParsingPackageRead pkg, ParsedProvider p,
-            @PackageManager.ComponentInfoFlags int flags, PackageUserState state, int userId) {
+            @PackageManager.ComponentInfoFlags int flags, FrameworkPackageUserState state, int userId) {
         return generateProviderInfo(pkg, p, flags, state, null, userId);
     }
 
     /**
      * @param assignUserFields see {@link #generateApplicationInfoUnchecked(ParsingPackageRead, int,
-     *                         PackageUserState, int, boolean)}
+     *                         FrameworkPackageUserState, int, boolean)}
      */
     @Nullable
     public static InstrumentationInfo generateInstrumentationInfo(ParsedInstrumentation i,
@@ -753,7 +753,7 @@ public class PackageInfoWithoutStateUtils {
         return new Attribution(pa.getTag(), pa.getLabel());
     }
 
-    private static boolean checkUseInstalledOrHidden(int flags, @NonNull PackageUserState state,
+    private static boolean checkUseInstalledOrHidden(int flags, @NonNull FrameworkPackageUserState state,
             @Nullable ApplicationInfo appInfo) {
         // Returns false if the package is hidden system app until installed.
         if ((flags & PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS) == 0
@@ -882,7 +882,7 @@ public class PackageInfoWithoutStateUtils {
         return privateFlagsExt;
     }
 
-    private static boolean checkUseInstalled(ParsingPackageRead pkg, PackageUserState state,
+    private static boolean checkUseInstalled(ParsingPackageRead pkg, FrameworkPackageUserState state,
             @PackageManager.PackageInfoFlags int flags) {
         // If available for the target user
         return PackageUserStateUtils.isAvailable(state, flags);

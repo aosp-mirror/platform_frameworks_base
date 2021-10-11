@@ -24,7 +24,6 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningInfo;
 import android.content.pm.overlay.OverlayPaths;
-import android.content.pm.pkg.PackageUserState;
 import android.util.SparseArray;
 
 import com.android.internal.util.DataClass;

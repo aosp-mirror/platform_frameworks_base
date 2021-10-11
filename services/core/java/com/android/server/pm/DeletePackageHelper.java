@@ -44,7 +44,6 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.VersionedPackage;
-import android.content.pm.pkg.PackageUserState;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Process;
@@ -63,6 +62,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
+import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.util.Collections;
