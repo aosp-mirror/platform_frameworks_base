@@ -208,9 +208,18 @@ public class StatusBarWindowController {
         apply(mCurrentState);
     }
 
-    /** Sets whether there is currently an ongoing call. */
-    public void setIsCallOngoing(boolean isCallOngoing) {
-        mCurrentState.mIsCallOngoing = isCallOngoing;
+    /**
+     * Sets whether an ongoing process requires the status bar to be forced visible.
+     *
+     * This method is separate from {@link this#setForceStatusBarVisible} because the ongoing
+     * process **takes priority**. For example, if {@link this#setForceStatusBarVisible} is set to
+     * false but this method is set to true, then the status bar **will** be visible.
+     *
+     * TODO(b/195839150): We should likely merge this method and
+     * {@link this#setForceStatusBarVisible} together and use some sort of ranking system instead.
+     */
+    public void setOngoingProcessRequiresStatusBarVisible(boolean visible) {
+        mCurrentState.mOngoingProcessRequiresStatusBarVisible = visible;
         apply(mCurrentState);
     }
 
@@ -254,13 +263,14 @@ public class StatusBarWindowController {
     private static class State {
         boolean mForceStatusBarVisible;
         boolean mIsLaunchAnimationRunning;
-        boolean mIsCallOngoing;
+        boolean mOngoingProcessRequiresStatusBarVisible;
     }
 
     private void applyForceStatusBarVisibleFlag(State state) {
         if (state.mForceStatusBarVisible
                 || state.mIsLaunchAnimationRunning
-                || state.mIsCallOngoing) {
+                // Don't force-show the status bar if the user has already dismissed it.
+                || state.mOngoingProcessRequiresStatusBarVisible) {
             mLpChanged.privateFlags |= PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
         } else {
             mLpChanged.privateFlags &= ~PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
