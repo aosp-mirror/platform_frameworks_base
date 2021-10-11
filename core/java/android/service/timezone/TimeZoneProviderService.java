@@ -28,8 +28,11 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.Objects;
 
 /**
@@ -122,7 +125,9 @@ import java.util.Objects;
  * #onDestroy()} can occur on a different thread from those made to {@link
  * TimeZoneProviderService}-defined service methods, so implementations must be defensive and not
  * assume an ordering between them, e.g. a call to {@link #onStopUpdates()} can occur after {@link
- * #onDestroy()} and should be handled safely.
+ * #onDestroy()} and should be handled safely. {@link #mLock} is used to ensure that synchronous
+ * calls like {@link #dump(FileDescriptor, PrintWriter, String[])} are safe with respect to
+ * asynchronous behavior.
  *
  * @hide
  */
@@ -162,11 +167,25 @@ public abstract class TimeZoneProviderService extends Service {
 
     private final TimeZoneProviderServiceWrapper mWrapper = new TimeZoneProviderServiceWrapper();
 
+    /** The object used for operations that occur between the main / handler thread. */
+    private final Object mLock = new Object();
+
+    /** The handler used for most operations. */
     private final Handler mHandler = BackgroundThread.getHandler();
 
     /** Set by {@link #mHandler} thread. */
+    @GuardedBy("mLock")
     @Nullable
     private ITimeZoneProviderManager mManager;
+
+    /**
+     * The type of the last suggestion sent to the system server. Used to de-dupe suggestions client
+     * side and avoid calling into the system server unnecessarily. {@code null} means no previous
+     * event has been sent this cycle; this field is cleared when the service is started.
+     */
+    @GuardedBy("mLock")
+    @Nullable
+    private TimeZoneProviderEvent mLastEventSent;
 
     @Override
     @NonNull
@@ -182,12 +201,19 @@ public abstract class TimeZoneProviderService extends Service {
         Objects.requireNonNull(suggestion);
 
         mHandler.post(() -> {
-            ITimeZoneProviderManager manager = mManager;
-            if (manager != null) {
-                try {
-                    manager.onTimeZoneProviderSuggestion(suggestion);
-                } catch (RemoteException | RuntimeException e) {
-                    Log.w(TAG, e);
+            synchronized (mLock) {
+                ITimeZoneProviderManager manager = mManager;
+                if (manager != null) {
+                    try {
+                        TimeZoneProviderEvent thisEvent =
+                                TimeZoneProviderEvent.createSuggestionEvent(suggestion);
+                        if (!thisEvent.isEquivalentTo(mLastEventSent)) {
+                            manager.onTimeZoneProviderEvent(thisEvent);
+                            mLastEventSent = thisEvent;
+                        }
+                    } catch (RemoteException | RuntimeException e) {
+                        Log.w(TAG, e);
+                    }
                 }
             }
         });
@@ -200,12 +226,19 @@ public abstract class TimeZoneProviderService extends Service {
      */
     public final void reportUncertain() {
         mHandler.post(() -> {
-            ITimeZoneProviderManager manager = mManager;
-            if (manager != null) {
-                try {
-                    manager.onTimeZoneProviderUncertain();
-                } catch (RemoteException | RuntimeException e) {
-                    Log.w(TAG, e);
+            synchronized (mLock) {
+                ITimeZoneProviderManager manager = mManager;
+                if (manager != null) {
+                    try {
+                        TimeZoneProviderEvent thisEvent =
+                                TimeZoneProviderEvent.createUncertainEvent();
+                        if (!thisEvent.isEquivalentTo(mLastEventSent)) {
+                            manager.onTimeZoneProviderEvent(thisEvent);
+                            mLastEventSent = thisEvent;
+                        }
+                    } catch (RemoteException | RuntimeException e) {
+                        Log.w(TAG, e);
+                    }
                 }
             }
         });
@@ -219,12 +252,20 @@ public abstract class TimeZoneProviderService extends Service {
         Objects.requireNonNull(cause);
 
         mHandler.post(() -> {
-            ITimeZoneProviderManager manager = mManager;
-            if (manager != null) {
-                try {
-                    manager.onTimeZoneProviderPermanentFailure(cause.getMessage());
-                } catch (RemoteException | RuntimeException e) {
-                    Log.w(TAG, e);
+            synchronized (mLock) {
+                ITimeZoneProviderManager manager = mManager;
+                if (manager != null) {
+                    try {
+                        String causeString = cause.getMessage();
+                        TimeZoneProviderEvent thisEvent =
+                                TimeZoneProviderEvent.createPermanentFailureEvent(causeString);
+                        if (!thisEvent.isEquivalentTo(mLastEventSent)) {
+                            manager.onTimeZoneProviderEvent(thisEvent);
+                            mLastEventSent = thisEvent;
+                        }
+                    } catch (RemoteException | RuntimeException e) {
+                        Log.w(TAG, e);
+                    }
                 }
             }
         });
@@ -232,8 +273,11 @@ public abstract class TimeZoneProviderService extends Service {
 
     private void onStartUpdatesInternal(@NonNull ITimeZoneProviderManager manager,
             @DurationMillisLong long initializationTimeoutMillis) {
-        mManager = manager;
-        onStartUpdates(initializationTimeoutMillis);
+        synchronized (mLock) {
+            mManager = manager;
+            mLastEventSent = null;
+            onStartUpdates(initializationTimeoutMillis);
+        }
     }
 
     /**
@@ -265,8 +309,10 @@ public abstract class TimeZoneProviderService extends Service {
     public abstract void onStartUpdates(@DurationMillisLong long initializationTimeoutMillis);
 
     private void onStopUpdatesInternal() {
-        onStopUpdates();
-        mManager = null;
+        synchronized (mLock) {
+            onStopUpdates();
+            mManager = null;
+        }
     }
 
     /**
@@ -274,6 +320,14 @@ public abstract class TimeZoneProviderService extends Service {
      * #onStartUpdates(long)}.
      */
     public abstract void onStopUpdates();
+
+    /** @hide */
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+        synchronized (mLock) {
+            writer.append("mLastEventSent=" + mLastEventSent);
+        }
+    }
 
     private class TimeZoneProviderServiceWrapper extends ITimeZoneProvider.Stub {
 
