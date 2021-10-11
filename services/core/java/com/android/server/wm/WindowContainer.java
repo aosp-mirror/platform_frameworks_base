@@ -111,6 +111,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -2835,8 +2836,18 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 taskDisplayArea.setBackgroundColor(backgroundColor);
             }
 
+            // Atomic counter to make sure the clearColor callback is only called one.
+            // It will be called twice in the case we cancel the animation without restart
+            // (in that case it will run as the cancel and finished callbacks).
+            final AtomicInteger callbackCounter = new AtomicInteger(0);
+            final Runnable clearBackgroundColorHandler = () -> {
+                if (callbackCounter.getAndIncrement() == 0) {
+                    taskDisplayArea.clearBackgroundColor();
+                }
+            };
+
             final Runnable cleanUpCallback = isSettingBackgroundColor
-                    ? taskDisplayArea::clearBackgroundColor : () -> {};
+                    ? clearBackgroundColorHandler : () -> {};
 
             startAnimation(getPendingTransaction(), adapter, !isVisible(),
                     ANIMATION_TYPE_APP_TRANSITION, (type, anim) -> cleanUpCallback.run(),
