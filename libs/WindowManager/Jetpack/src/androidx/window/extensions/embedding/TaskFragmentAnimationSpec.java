@@ -176,18 +176,28 @@ class TaskFragmentAnimationSpec {
         return new Animation[]{startSet, endSet};
     }
 
-    Animation loadOpenAnimation(boolean isEnter) {
-        // TODO(b/196173550) We need to customize the animation to handle two open window as one.
-        return mTransitionAnimation.loadDefaultAnimationAttr(isEnter
+    Animation loadOpenAnimation(@NonNull RemoteAnimationTarget target,
+            @NonNull Rect wholeAnimationBounds) {
+        final boolean isEnter = target.mode != MODE_CLOSING;
+        final Animation animation = mTransitionAnimation.loadDefaultAnimationAttr(isEnter
                 ? R.styleable.WindowAnimation_activityOpenEnterAnimation
                 : R.styleable.WindowAnimation_activityOpenExitAnimation);
+        animation.initialize(target.localBounds.width(), target.localBounds.height(),
+                wholeAnimationBounds.width(), wholeAnimationBounds.height());
+        animation.scaleCurrentDuration(mTransitionAnimationScaleSetting);
+        return animation;
     }
 
-    Animation loadCloseAnimation(boolean isEnter) {
-        // TODO(b/196173550) We need to customize the animation to handle two open window as one.
-        return mTransitionAnimation.loadDefaultAnimationAttr(isEnter
+    Animation loadCloseAnimation(@NonNull RemoteAnimationTarget target,
+            @NonNull Rect wholeAnimationBounds) {
+        final boolean isEnter = target.mode != MODE_CLOSING;
+        final Animation animation = mTransitionAnimation.loadDefaultAnimationAttr(isEnter
                 ? R.styleable.WindowAnimation_activityCloseEnterAnimation
                 : R.styleable.WindowAnimation_activityCloseExitAnimation);
+        animation.initialize(target.localBounds.width(), target.localBounds.height(),
+                wholeAnimationBounds.width(), wholeAnimationBounds.height());
+        animation.scaleCurrentDuration(mTransitionAnimationScaleSetting);
+        return animation;
     }
 
     private class SettingsObserver extends ContentObserver {
