@@ -16,7 +16,7 @@
 
 package com.android.server.pm;
 
-import android.annotation.Nullable;
+import android.annotation.NonNull;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.parsing.component.ParsedProcess;
 import android.service.pm.PackageServiceDumpProto;
@@ -31,6 +31,7 @@ import com.android.server.utils.SnapshotCache;
 import libcore.util.EmptyArray;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -51,6 +52,11 @@ public final class SharedUserSetting extends SettingBase {
     int seInfoTargetSdkVersion;
 
     final ArraySet<PackageSetting> packages;
+
+    // It is possible for a system app to leave shared user ID by an update.
+    // We need to keep track of the shadowed PackageSettings so that it is possible to uninstall
+    // the update and revert the system app back into the original shared user ID.
+    final ArraySet<PackageSetting> mDisabledPackages;
 
     final PackageSignatures signatures = new PackageSignatures();
     Boolean signaturesChanged;
@@ -77,6 +83,7 @@ public final class SharedUserSetting extends SettingBase {
         name = _name;
         seInfoTargetSdkVersion = android.os.Build.VERSION_CODES.CUR_DEVELOPMENT;
         packages = new ArraySet<>();
+        mDisabledPackages = new ArraySet<>();
         processes = new ArrayMap<>();
         mSnapshot = makeCache();
     }
@@ -87,13 +94,14 @@ public final class SharedUserSetting extends SettingBase {
         name = orig.name;
         uidFlags = orig.uidFlags;
         uidPrivateFlags = orig.uidPrivateFlags;
-        packages = new ArraySet(orig.packages);
+        packages = new ArraySet<>(orig.packages);
+        mDisabledPackages = new ArraySet<>(orig.mDisabledPackages);
         // A SigningDetails seems to consist solely of final attributes, so
         // it is safe to copy the reference.
         signatures.mSigningDetails = orig.signatures.mSigningDetails;
         signaturesChanged = orig.signaturesChanged;
-        processes = new ArrayMap(orig.processes);
-        mSnapshot = new SnapshotCache.Sealed();
+        processes = new ArrayMap<>(orig.processes);
+        mSnapshot = new SnapshotCache.Sealed<>();
     }
 
     /**
@@ -174,9 +182,12 @@ public final class SharedUserSetting extends SettingBase {
         }
     }
 
-    public @Nullable List<AndroidPackage> getPackages() {
+    /**
+     * @return the list of packages that uses this shared UID
+     */
+    public @NonNull List<AndroidPackage> getPackages() {
         if (packages == null || packages.size() == 0) {
-            return null;
+            return Collections.emptyList();
         }
         final ArrayList<AndroidPackage> pkgList = new ArrayList<>(packages.size());
         for (PackageSetting ps : packages) {
