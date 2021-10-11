@@ -265,7 +265,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         boolean wasShowingUnlockIcon = mShowUnlockIcon;
         mShowLockIcon = !mCanDismissLockScreen && !mUserUnlockedWithBiometric && isLockScreen()
             && (!mUdfpsEnrolled || !mRunningFPS);
-        mShowUnlockIcon = mCanDismissLockScreen && isLockScreen();
+        mShowUnlockIcon = (mCanDismissLockScreen || mUserUnlockedWithBiometric) && isLockScreen();
         mShowAODFpIcon = mIsDozing && mUdfpsEnrolled && !mRunningFPS;
 
         final CharSequence prevContentDescription = mView.getContentDescription();
@@ -477,13 +477,15 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                 @Override
                 public void onBiometricRunningStateChanged(boolean running,
                         BiometricSourceType biometricSourceType) {
+                    final boolean wasRunningFps = mRunningFPS;
+                    final boolean wasUserUnlockedWithBiometric = mUserUnlockedWithBiometric;
                     mUserUnlockedWithBiometric =
                             mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(
                                     KeyguardUpdateMonitor.getCurrentUser());
 
                     if (biometricSourceType == FINGERPRINT) {
                         mRunningFPS = running;
-                        if (!mRunningFPS) {
+                        if (wasRunningFps && !mRunningFPS) {
                             if (mCancelDelayedUpdateVisibilityRunnable != null) {
                                 mCancelDelayedUpdateVisibilityRunnable.run();
                             }
@@ -493,9 +495,13 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                             // button in this case, so we delay updating the visibility by 50ms.
                             mCancelDelayedUpdateVisibilityRunnable =
                                     mExecutor.executeDelayed(() -> updateVisibility(), 50);
-                        } else {
-                            updateVisibility();
+                            return;
                         }
+                    }
+
+                    if (wasUserUnlockedWithBiometric != mUserUnlockedWithBiometric
+                            || wasRunningFps != mRunningFPS) {
+                        updateVisibility();
                     }
                 }
             };

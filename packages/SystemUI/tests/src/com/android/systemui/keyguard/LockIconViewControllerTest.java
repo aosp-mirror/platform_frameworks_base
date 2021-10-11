@@ -18,14 +18,18 @@ package com.android.systemui.keyguard;
 
 import static junit.framework.Assert.assertEquals;
 
+import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.PointF;
+import android.graphics.drawable.AnimatedVectorDrawable;
+import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.SensorLocationInternal;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Vibrator;
@@ -39,15 +43,18 @@ import android.view.accessibility.AccessibilityManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.KeyguardViewController;
 import com.android.keyguard.LockIconView;
 import com.android.keyguard.LockIconViewController;
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.AuthRippleController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -69,7 +76,10 @@ import java.util.List;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class LockIconViewControllerTest extends SysuiTestCase {
+    private static final String UNLOCKED_LABEL = "unlocked";
+
     private @Mock LockIconView mLockIconView;
+    private @Mock AnimatedVectorDrawable mIconDrawable;
     private @Mock Context mContext;
     private @Mock Resources mResources;
     private @Mock DisplayMetrics mDisplayMetrics;
@@ -97,6 +107,11 @@ public class LockIconViewControllerTest extends SysuiTestCase {
     @Captor private ArgumentCaptor<AuthController.Callback> mAuthControllerCallbackCaptor;
     private AuthController.Callback mAuthControllerCallback;
 
+    @Captor private ArgumentCaptor<KeyguardUpdateMonitorCallback>
+            mKeyguardUpdateMonitorCallbackCaptor =
+            ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback.class);
+    private KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback;
+
     @Captor private ArgumentCaptor<PointF> mPointCaptor;
 
     @Before
@@ -108,6 +123,13 @@ public class LockIconViewControllerTest extends SysuiTestCase {
         when(mContext.getResources()).thenReturn(mResources);
         when(mResources.getDisplayMetrics()).thenReturn(mDisplayMetrics);
         when(mLockIconView.findViewById(anyInt())).thenReturn(mAodFp);
+        when(mResources.getString(R.string.accessibility_unlock_button)).thenReturn(UNLOCKED_LABEL);
+        when(mResources.getDrawable(anyInt(), anyObject())).thenReturn(mIconDrawable);
+
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mKeyguardStateController.isKeyguardGoingAway()).thenReturn(false);
+        when(mStatusBarStateController.isDozing()).thenReturn(false);
+        when(mStatusBarStateController.getState()).thenReturn(StatusBarState.KEYGUARD);
 
         mLockIconViewController = new LockIconViewController(
                 mLockIconView,
@@ -192,6 +214,29 @@ public class LockIconViewControllerTest extends SysuiTestCase {
         verify(mLockIconView).setUseBackground(false);
     }
 
+    @Test
+    public void testUnlockIconShows_biometricUnlockedTrue() {
+        // GIVEN UDFPS sensor location is available
+        setupUdfps();
+
+        // GIVEN lock icon controller is initialized and view is attached
+        mLockIconViewController.init();
+        captureAttachListener();
+        mAttachListener.onViewAttachedToWindow(mLockIconView);
+        captureKeyguardUpdateMonitorCallback();
+
+        // GIVEN user has unlocked with a biometric auth (ie: face auth)
+        when(mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(anyInt())).thenReturn(true);
+        reset(mLockIconView);
+
+        // WHEN face auth's biometric running state changes
+        mKeyguardUpdateMonitorCallback.onBiometricRunningStateChanged(false,
+                BiometricSourceType.FACE);
+
+        // THEN the unlock icon is shown
+        verify(mLockIconView).setContentDescription(UNLOCKED_LABEL);
+    }
+
     private Pair<Integer, PointF> setupUdfps() {
         final PointF udfpsLocation = new PointF(50, 75);
         final int radius = 33;
@@ -219,5 +264,11 @@ public class LockIconViewControllerTest extends SysuiTestCase {
     private void captureAttachListener() {
         verify(mLockIconView).addOnAttachStateChangeListener(mAttachCaptor.capture());
         mAttachListener = mAttachCaptor.getValue();
+    }
+
+    private void captureKeyguardUpdateMonitorCallback() {
+        verify(mKeyguardUpdateMonitor).registerCallback(
+                mKeyguardUpdateMonitorCallbackCaptor.capture());
+        mKeyguardUpdateMonitorCallback = mKeyguardUpdateMonitorCallbackCaptor.getValue();
     }
 }
