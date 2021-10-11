@@ -3338,9 +3338,9 @@ public class NotificationPanelViewController extends PanelViewController {
      * cases, such as if there's a heads-up notification.
      */
     public void setPanelScrimMinFraction(float minFraction) {
-        mBar.onPanelMinFractionChanged(minFraction);
         mMinFraction = minFraction;
         mDepthController.setPanelPullDownMinFraction(mMinFraction);
+        mScrimController.setPanelScrimMinFraction(mMinFraction);
     }
 
     public void clearNotificationEffects() {

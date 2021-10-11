@@ -146,11 +146,6 @@ public abstract class PanelBar extends FrameLayout {
     }
 
     /**
-     * Percentage of panel expansion offset, caused by pulling down on a heads-up.
-     */
-    abstract void onPanelMinFractionChanged(float minFraction);
-
-    /**
      * @param frac the fraction from the expansion in [0, 1]
      * @param expanded whether the panel is currently expanded; this is independent from the
      *                 fraction as the panel also might be expanded if the fraction is 0
