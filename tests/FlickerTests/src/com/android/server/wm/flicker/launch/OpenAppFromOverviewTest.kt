@@ -17,11 +17,13 @@
 package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.Presubmit
+import android.view.Display
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
+import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
@@ -73,16 +75,22 @@ class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) : OpenAppTransitio
                     device.pressHome()
                     wmHelper.waitForAppTransitionIdle()
                     device.pressRecentApps()
-                    wmHelper.waitForAppTransitionIdle()
+                    wmHelper.waitFor(
+                        WindowManagerConditionsFactory
+                            .isAppTransitionIdle(Display.DEFAULT_DISPLAY),
+                        WindowManagerConditionsFactory.isActivityVisible(LAUNCHER_COMPONENT),
+                        WindowManagerConditionsFactory.hasLayersAnimating().negate()
+                    )
                     this.setRotation(testSpec.config.startRotation)
                 }
             }
             transitions {
                 device.reopenAppFromOverview(wmHelper)
                 wmHelper.waitFor(
-                        WindowManagerConditionsFactory.hasLayersAnimating().negate(),
-                        WindowManagerConditionsFactory.isWMStateComplete(),
-                        WindowManagerConditionsFactory.isHomeActivityVisible().negate()
+                    WindowManagerConditionsFactory.hasLayersAnimating().negate(),
+                    WindowManagerConditionsFactory.isWMStateComplete(),
+                    WindowManagerConditionsFactory.isLayerVisible(LAUNCHER_COMPONENT).negate(),
+                    WindowManagerConditionsFactory.isActivityVisible(LAUNCHER_COMPONENT).negate()
                 )
                 wmHelper.waitForFullScreenApp(testApp.component)
             }
