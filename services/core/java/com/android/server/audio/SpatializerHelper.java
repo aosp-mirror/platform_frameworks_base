@@ -825,9 +825,18 @@ public class SpatializerHelper {
     }
 
     synchronized void onInitSensors(boolean init) {
-        final int[] modes = getSupportedHeadTrackingModes();
-        if (modes.length == 0) {
-            Log.i(TAG, "not initializing sensors, no headtracking supported");
+        final String action = init ? "initializing" : "releasing";
+        if (mSpat == null) {
+            Log.e(TAG, "not " + action + " sensors, null spatializer");
+            return;
+        }
+        try {
+            if (!mSpat.isHeadTrackingSupported()) {
+                Log.e(TAG, "not " + action + " sensors, spatializer doesn't support headtracking");
+                return;
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "not " + action + " sensors, error querying headtracking", e);
             return;
         }
         initSensors(init);
