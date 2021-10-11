@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.rotation
 
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -24,14 +25,14 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
-import com.android.server.wm.flicker.startRotation
+import com.android.server.wm.flicker.rules.WMFlickerServiceRuleForTestSpec
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.common.FlickerComponentName
 import org.junit.FixMethodOrder
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -80,6 +81,9 @@ import org.junit.runners.Parameterized
 class ChangeAppRotationTest(
     testSpec: FlickerTestParameter
 ) : RotationTransition(testSpec) {
+    @get:Rule
+    val flickerRule = WMFlickerServiceRuleForTestSpec(testSpec)
+
     override val testApp = SimpleAppHelper(instrumentation)
     override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = {
@@ -90,6 +94,24 @@ class ChangeAppRotationTest(
                 }
             }
         }
+
+    @Postsubmit
+    @Test
+    fun runPresubmitAssertion() {
+        flickerRule.checkPresubmitAssertions()
+    }
+
+    @Postsubmit
+    @Test
+    fun runPostsubmitAssertion() {
+        flickerRule.checkPostsubmitAssertions()
+    }
+
+    @FlakyTest
+    @Test
+    fun runFlakyAssertion() {
+        flickerRule.checkFlakyAssertions()
+    }
 
     /** {@inheritDoc} */
     @FlakyTest(bugId = 190185577)
@@ -111,6 +133,7 @@ class ChangeAppRotationTest(
                 .isVisible(FlickerComponentName.ROTATION)
                 .then()
                 .isVisible(testApp.component)
+                .isInvisible(FlickerComponentName.ROTATION)
         }
     }
 
@@ -138,10 +161,7 @@ class ChangeAppRotationTest(
      */
     @Presubmit
     @Test
-    fun statusBarLayerRotatesScales() {
-        testSpec.statusBarLayerRotatesScales(
-            testSpec.config.startRotation, testSpec.config.endRotation)
-    }
+    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
     /** {@inheritDoc} */
     @FlakyTest
