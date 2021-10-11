@@ -583,6 +583,18 @@ public class KeyguardService extends Service {
             checkPermission();
             mKeyguardViewMediator.onShortPowerPressedGoHome();
         }
+
+        @Override
+        public void dismissKeyguardToLaunch(Intent intentToLaunch) {
+            checkPermission();
+            mKeyguardViewMediator.dismissKeyguardToLaunch(intentToLaunch);
+        }
+
+        @Override
+        public void onSystemKeyPressed(int keycode) {
+            checkPermission();
+            mKeyguardViewMediator.onSystemKeyPressed(keycode);
+        }
     };
 }
 

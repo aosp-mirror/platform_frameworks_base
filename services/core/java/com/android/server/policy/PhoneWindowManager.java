@@ -363,6 +363,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public static final int TOAST_WINDOW_TIMEOUT = 3500 + TOAST_WINDOW_ANIM_BUFFER;
 
     /**
+     * Action for launching assistant in retail mode
+     */
+    private static final String ACTION_VOICE_ASSIST_RETAIL =
+            "android.intent.action.VOICE_ASSIST_RETAIL";
+
+    /**
      * Lock protecting internal state.  Must not call out into window
      * manager with lock held.  (This lock will be acquired in places
      * where the window manager is calling in with its own lock held.)
@@ -1090,29 +1096,35 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mPowerManager.boostScreenBrightness(eventTime);
                 break;
             case MULTI_PRESS_POWER_LAUNCH_TARGET_ACTIVITY:
-                if (DEBUG_INPUT) {
-                    Slog.d(TAG, "Executing the double press power action.");
-                }
+                launchTargetActivityOnMultiPressPower();
+                break;
+        }
+    }
+
+    private void launchTargetActivityOnMultiPressPower() {
+        if (DEBUG_INPUT) {
+            Slog.d(TAG, "Executing the double press power action.");
+        }
+        if (mPowerDoublePressTargetActivity != null) {
+            Intent intent = new Intent();
+            intent.setComponent(mPowerDoublePressTargetActivity);
+            ResolveInfo resolveInfo = mContext.getPackageManager().resolveActivity(
+                    intent, /* flags= */0);
+            if (resolveInfo != null) {
                 final boolean keyguardActive =
                         mKeyguardDelegate != null && mKeyguardDelegate.isShowing();
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
                 if (!keyguardActive) {
-                    Intent intent = new Intent();
-                    if (mPowerDoublePressTargetActivity != null) {
-                        intent.setComponent(mPowerDoublePressTargetActivity);
-                        ResolveInfo resolveInfo = mContext.getPackageManager().resolveActivity(
-                                intent, /* flags= */0);
-                        if (resolveInfo != null) {
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                                    | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-                            startActivityAsUser(intent, UserHandle.CURRENT_OR_SELF);
-                        } else {
-                            Slog.e(TAG, "Could not resolve activity with : "
-                                    + mPowerDoublePressTargetActivity.flattenToString()
-                                    + " name.");
-                        }
-                    }
+                    startActivityAsUser(intent, UserHandle.CURRENT_OR_SELF);
+                } else {
+                    mKeyguardDelegate.dismissKeyguardToLaunch(intent);
                 }
-                break;
+            } else {
+                Slog.e(TAG, "Could not resolve activity with : "
+                        + mPowerDoublePressTargetActivity.flattenToString()
+                        + " name.");
+            }
         }
     }
 
@@ -1242,6 +1254,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return LONG_PRESS_POWER_GLOBAL_ACTIONS;
         }
 
+        // If long press to launch assistant is disabled in settings, do nothing.
+        if (mLongPressOnPowerBehavior == LONG_PRESS_POWER_GO_TO_VOICE_ASSIST
+                && !isLongPressToAssistantEnabled(mContext)) {
+            return LONG_PRESS_POWER_NOTHING;
+        }
+
         return mLongPressOnPowerBehavior;
     }
 
@@ -1273,6 +1291,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                             | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
                     startActivityAsUser(intent, UserHandle.CURRENT_OR_SELF);
+                } else {
+                    // If keyguarded then notify the keyguard.
+                    mKeyguardDelegate.onSystemKeyPressed(KeyEvent.KEYCODE_STEM_PRIMARY);
                 }
                 break;
         }
@@ -3218,17 +3239,50 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 .getSystemService(Context.SEARCH_SERVICE)).launchAssist(args);
     }
 
-    /** Launches ACTION_VOICE_ASSIST. Does nothing on keyguard. */
+    /**
+     * Launches ACTION_VOICE_ASSIST_RETAIL if in retail mode, or ACTION_VOICE_ASSIST otherwise
+     * Does nothing on keyguard except for watches. Delegates it to keyguard if present on watch.
+     */
     private void launchVoiceAssist(boolean allowDuringSetup) {
-        final boolean keyguardActive = mKeyguardDelegate == null
-                ? false
-                : mKeyguardDelegate.isShowing();
+        final boolean keyguardActive =
+                mKeyguardDelegate != null && mKeyguardDelegate.isShowing();
         if (!keyguardActive) {
-            Intent intent = new Intent(Intent.ACTION_VOICE_ASSIST);
-            startActivityAsUser(intent, null, UserHandle.CURRENT_OR_SELF,
-                    allowDuringSetup);
+            if (mHasFeatureWatch && isInRetailMode()) {
+                launchRetailVoiceAssist(allowDuringSetup);
+            } else {
+                startVoiceAssistIntent(allowDuringSetup);
+            }
+        } else {
+            mKeyguardDelegate.dismissKeyguardToLaunch(new Intent(Intent.ACTION_VOICE_ASSIST));
         }
+    }
 
+    private void launchRetailVoiceAssist(boolean allowDuringSetup) {
+        Intent retailIntent = new Intent(ACTION_VOICE_ASSIST_RETAIL);
+        ResolveInfo resolveInfo = mContext.getPackageManager().resolveActivity(
+                retailIntent, /* flags= */0);
+        if (resolveInfo != null) {
+            retailIntent.setComponent(
+                    new ComponentName(resolveInfo.activityInfo.packageName,
+                            resolveInfo.activityInfo.name));
+            startActivityAsUser(retailIntent, null, UserHandle.CURRENT_OR_SELF,
+                    allowDuringSetup);
+        } else {
+            Slog.w(TAG, "Couldn't find an app to process " + ACTION_VOICE_ASSIST_RETAIL
+                    + ". Fall back to start " + Intent.ACTION_VOICE_ASSIST);
+            startVoiceAssistIntent(allowDuringSetup);
+        }
+    }
+
+    private void startVoiceAssistIntent(boolean allowDuringSetup) {
+        Intent intent = new Intent(Intent.ACTION_VOICE_ASSIST);
+        startActivityAsUser(intent, null, UserHandle.CURRENT_OR_SELF,
+                allowDuringSetup);
+    }
+
+    private boolean isInRetailMode() {
+        return Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.DEVICE_DEMO_MODE, 0) == 1;
     }
 
     private void startActivityAsUser(Intent intent, UserHandle handle) {
@@ -5822,6 +5876,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             default:
                 return Integer.toString(behavior);
         }
+    }
+
+    public static boolean isLongPressToAssistantEnabled(Context context) {
+        ContentResolver resolver = context.getContentResolver();
+        int longPressToAssistant = Settings.System.getIntForUser(resolver,
+                Settings.Global.Wearable.CLOCKWORK_LONG_PRESS_TO_ASSISTANT_ENABLED,
+                /* def= */ 1,
+                UserHandle.USER_CURRENT);
+        if(Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "longPressToAssistant = " + longPressToAssistant);
+        }
+        return (longPressToAssistant == 1);
     }
 
     private class HdmiVideoExtconUEventObserver extends ExtconStateObserver<Boolean> {
