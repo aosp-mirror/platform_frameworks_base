@@ -18,8 +18,6 @@ package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.ScreenDecorations.DisplayCutoutView.boundsFromDirection;
 
-import static java.lang.Float.isNaN;
-
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -57,7 +55,6 @@ public class PhoneStatusBarView extends PanelBar {
     StatusBar mBar;
 
     private ScrimController mScrimController;
-    private float mMinFraction;
     private Runnable mHideExpandedRunnable = new Runnable() {
         @Override
         public void run() {
@@ -268,20 +265,8 @@ public class PhoneStatusBarView extends PanelBar {
     }
 
     @Override
-    public void onPanelMinFractionChanged(float minFraction) {
-        if (isNaN(minFraction)) {
-            throw new IllegalArgumentException("minFraction cannot be NaN");
-        }
-        if (mMinFraction != minFraction) {
-            mMinFraction = minFraction;
-            updateScrimFraction();
-        }
-    }
-
-    @Override
     public void panelExpansionChanged(float frac, boolean expanded) {
         super.panelExpansionChanged(frac, expanded);
-        updateScrimFraction();
         if ((frac == 0 || frac == 1)) {
             if (mPanelExpansionStateChangedListener != null) {
                 mPanelExpansionStateChangedListener.onPanelExpansionStateChanged();
@@ -300,15 +285,6 @@ public class PhoneStatusBarView extends PanelBar {
     /** Set the {@link PanelEnabledProvider} to use. */
     public void setPanelEnabledProvider(PanelEnabledProvider panelEnabledProvider) {
         mPanelEnabledProvider = panelEnabledProvider;
-    }
-
-    private void updateScrimFraction() {
-        float scrimFraction = mPanelFraction;
-        if (mMinFraction < 1.0f) {
-            scrimFraction = Math.max((mPanelFraction - mMinFraction) / (1.0f - mMinFraction),
-                    0);
-        }
-        mScrimController.setPanelExpansion(scrimFraction);
     }
 
     public void updateResources() {
