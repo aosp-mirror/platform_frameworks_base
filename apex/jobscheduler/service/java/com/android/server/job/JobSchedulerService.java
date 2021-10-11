@@ -29,6 +29,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.IUidObserver;
+import android.app.compat.CompatChanges;
 import android.app.job.IJobScheduler;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
@@ -2932,7 +2933,9 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         private void validateJobFlags(JobInfo job, int callingUid) {
-            job.enforceValidity();
+            job.enforceValidity(
+                    CompatChanges.isChangeEnabled(
+                            JobInfo.DISALLOW_DEADLINES_FOR_PREFETCH_JOBS, callingUid));
             if ((job.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0) {
                 getContext().enforceCallingOrSelfPermission(
                         android.Manifest.permission.CONNECTIVITY_INTERNAL, TAG);

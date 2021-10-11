@@ -49,7 +49,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.BitUtils;
 import com.android.server.IoThread;
-import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerInternal.JobStorePersistStats;
 import com.android.server.job.controllers.JobStatus;
 
@@ -978,10 +977,17 @@ public final class JobStore {
 
             final JobInfo builtJob;
             try {
-                builtJob = jobBuilder.build();
+                // Don't perform prefetch-deadline check here. Apps targeting S- shouldn't have
+                // any prefetch-with-deadline jobs accidentally dropped. It's not worth doing
+                // target SDK version checks here for apps targeting T+. There's no way for an
+                // app to keep a perpetually scheduled prefetch job with a deadline. Prefetch jobs
+                // with a deadline would run and then any newly scheduled prefetch jobs wouldn't
+                // have a deadline. If a job is rescheduled (via jobFinished(true) or onStopJob()'s
+                // return value), the deadline is dropped. Periodic jobs require all constraints
+                // to be met, so there's no issue with their deadlines.
+                builtJob = jobBuilder.build(false);
             } catch (Exception e) {
-                Slog.w(TAG, "Unable to build job from XML, ignoring: "
-                        + jobBuilder.summarize());
+                Slog.w(TAG, "Unable to build job from XML, ignoring: " + jobBuilder.summarize(), e);
                 return null;
             }
 
@@ -997,11 +1003,10 @@ public final class JobStore {
             }
 
             // And now we're done
-            JobSchedulerInternal service = LocalServices.getService(JobSchedulerInternal.class);
             final int appBucket = JobSchedulerService.standbyBucketForPackage(sourcePackageName,
                     sourceUserId, elapsedNow);
             JobStatus js = new JobStatus(
-                    jobBuilder.build(), uid, sourcePackageName, sourceUserId,
+                    builtJob, uid, sourcePackageName, sourceUserId,
                     appBucket, sourceTag,
                     elapsedRuntimes.first, elapsedRuntimes.second,
                     lastSuccessfulRunTime, lastFailedRunTime,
