@@ -793,7 +793,7 @@ public class RecentsAnimationController implements DeathRecipient {
 
     private RemoteAnimationTarget[] createWallpaperAnimations() {
         ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "createWallpaperAnimations()");
-        return WallpaperAnimationAdapter.startWallpaperAnimations(mService, 0L, 0L,
+        return WallpaperAnimationAdapter.startWallpaperAnimations(mDisplayContent, 0L, 0L,
                 adapter -> {
                     synchronized (mService.mGlobalLock) {
                         // If the wallpaper animation is canceled, continue with the recents

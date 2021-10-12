@@ -207,7 +207,7 @@ class RemoteAnimationController implements DeathRecipient {
                 if (wrappers.mThumbnailAdapter != null
                         && wrappers.mThumbnailAdapter.mCapturedFinishCallback != null) {
                     wrappers.mThumbnailAdapter.mCapturedFinishCallback
-                            .onAnimationFinished(wrappers.mAdapter.mAnimationType,
+                            .onAnimationFinished(wrappers.mThumbnailAdapter.mAnimationType,
                                     wrappers.mThumbnailAdapter);
                 }
                 mPendingAnimations.remove(i);
@@ -218,7 +218,7 @@ class RemoteAnimationController implements DeathRecipient {
 
     private RemoteAnimationTarget[] createWallpaperAnimations() {
         ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "createWallpaperAnimations()");
-        return WallpaperAnimationAdapter.startWallpaperAnimations(mService,
+        return WallpaperAnimationAdapter.startWallpaperAnimations(mDisplayContent,
                 mRemoteAnimationAdapter.getDuration(),
                 mRemoteAnimationAdapter.getStatusBarTransitionDelay(),
                 adapter -> {
@@ -260,7 +260,7 @@ class RemoteAnimationController implements DeathRecipient {
                     }
                     if (adapters.mThumbnailAdapter != null) {
                         adapters.mThumbnailAdapter.mCapturedFinishCallback
-                                .onAnimationFinished(adapters.mAdapter.mAnimationType,
+                                .onAnimationFinished(adapters.mThumbnailAdapter.mAnimationType,
                                         adapters.mThumbnailAdapter);
                     }
                     mPendingAnimations.remove(i);

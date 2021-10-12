@@ -43,6 +43,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -888,6 +889,33 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         prepareAndTriggerAppTransition(openingActivity, closingActivity, taskFragment);
 
         // Should not be overridden
+        verify(mDisplayContent.mAppTransition, never())
+                .overridePendingAppTransitionRemote(adapter, false /* sync */);
+    }
+
+    @Test
+    public void testOverrideTaskFragmentAdapter_noOverrideWithWallpaper() {
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final RemoteAnimationAdapter adapter = new RemoteAnimationAdapter(
+                new TestRemoteAnimationRunner(), 10, 1);
+        setupTaskFragmentRemoteAnimation(organizer, adapter);
+
+        // Create a TaskFragment with embedded activity.
+        final TaskFragment taskFragment = createTaskFragmentWithEmbeddedActivity(
+                createTask(mDisplayContent), organizer);
+        final ActivityRecord activity = taskFragment.getTopMostActivity();
+        activity.allDrawn = true;
+        // Set wallpaper as visible.
+        final WallpaperWindowToken wallpaperWindowToken = new WallpaperWindowToken(mWm,
+                mock(IBinder.class), true, mDisplayContent, true /* ownerCanManageAppTokens */);
+        spyOn(mDisplayContent.mWallpaperController);
+        doReturn(true).when(mDisplayContent.mWallpaperController).isWallpaperVisible();
+        spyOn(mDisplayContent.mAppTransition);
+
+        // Prepare a transition.
+        prepareAndTriggerAppTransition(activity, null /* closingActivity */, taskFragment);
+
+        // Should not be overridden when there is wallpaper in the transition.
         verify(mDisplayContent.mAppTransition, never())
                 .overridePendingAppTransitionRemote(adapter, false /* sync */);
     }

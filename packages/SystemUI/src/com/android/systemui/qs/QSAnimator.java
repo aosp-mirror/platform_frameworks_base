@@ -35,7 +35,6 @@ import com.android.systemui.qs.TouchAnimator.Builder;
 import com.android.systemui.qs.TouchAnimator.Listener;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.tileimpl.HeightOverrideable;
-import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.wm.shell.animation.Interpolators;
@@ -167,19 +166,6 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         updateQQSVisibility();
         if (mOnKeyguard) {
             clearAnimationState();
-        }
-    }
-
-    void startAlphaAnimation(boolean show) {
-        if (show == mToShowing) {
-            return;
-        }
-        mToShowing = show;
-        if (show) {
-            CrossFadeHelper.fadeIn(mQs.getView(), QQS_FADE_IN_DURATION, 0 /* delay */);
-        } else {
-            CrossFadeHelper.fadeOut(mQs.getView(), QQS_FADE_OUT_DURATION, 0 /* delay */,
-                    null /* endRunnable */);
         }
     }
 

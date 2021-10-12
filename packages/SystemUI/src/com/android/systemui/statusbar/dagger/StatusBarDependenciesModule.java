@@ -257,7 +257,8 @@ public interface StatusBarDependenciesModule {
             OngoingCallLogger logger,
             DumpManager dumpManager,
             StatusBarWindowController statusBarWindowController,
-            SwipeStatusBarAwayGestureHandler swipeStatusBarAwayGestureHandler) {
+            SwipeStatusBarAwayGestureHandler swipeStatusBarAwayGestureHandler,
+            StatusBarStateController statusBarStateController) {
         Optional<StatusBarWindowController> windowController =
                 featureFlags.isOngoingCallInImmersiveEnabled()
                         ? Optional.of(statusBarWindowController)
@@ -277,8 +278,8 @@ public interface StatusBarDependenciesModule {
                         logger,
                         dumpManager,
                         windowController,
-                        gestureHandler
-                );
+                        gestureHandler,
+                        statusBarStateController);
         ongoingCallController.init();
         return ongoingCallController;
     }
