@@ -2013,7 +2013,7 @@ class ActivityStarter {
 
         // Allowing the embedding if the task is owned by system.
         final int hostUid = hostTask.effectiveUid;
-        if (hostUid == Process.SYSTEM_UID) {
+        if (UserHandle.getAppId(hostUid) == Process.SYSTEM_UID) {
             return true;
         }
 
