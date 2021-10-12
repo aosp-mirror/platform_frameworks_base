@@ -123,7 +123,7 @@ class ConfigurationControllerImpl(context: Context) : ConfigurationController {
 
         if (lastConfig.updateFrom(newConfig) and ActivityInfo.CONFIG_ASSETS_PATHS != 0) {
             listeners.filterForEach({ this.listeners.contains(it) }) {
-                it.onOverlayChanged()
+                it.onThemeChanged()
             }
         }
     }

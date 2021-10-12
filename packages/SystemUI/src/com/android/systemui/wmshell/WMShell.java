@@ -212,7 +212,7 @@ public final class WMShell extends SystemUI
             }
 
             @Override
-            public void onOverlayChanged() {
+            public void onThemeChanged() {
                 pip.onOverlayChanged();
             }
         });
