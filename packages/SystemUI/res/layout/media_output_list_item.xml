@@ -28,7 +28,7 @@
         <FrameLayout
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:layout_gravity="center_vertical"
+            android:layout_gravity="center_vertical|start"
             android:layout_marginStart="16dp">
             <ImageView
                 android:id="@+id/title_icon"
@@ -41,7 +41,7 @@
             android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
+            android:layout_gravity="center_vertical|start"
             android:layout_marginStart="68dp"
             android:ellipsize="end"
             android:maxLines="1"
@@ -81,6 +81,7 @@
                 android:visibility="gone"/>
             <SeekBar
                 android:id="@+id/volume_seekbar"
+                style="@*android:style/Widget.DeviceDefault.SeekBar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"/>

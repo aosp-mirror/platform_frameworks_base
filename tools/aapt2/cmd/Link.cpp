@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "android-base/errors.h"
+#include "android-base/expected.h"
 #include "android-base/file.h"
 #include "android-base/stringprintf.h"
 #include "androidfw/Locale.h"
@@ -74,9 +75,26 @@
 using ::aapt::io::FileInputStream;
 using ::android::ConfigDescription;
 using ::android::StringPiece;
+using ::android::base::expected;
 using ::android::base::StringPrintf;
+using ::android::base::unexpected;
 
 namespace aapt {
+
+namespace {
+
+expected<ResourceTablePackage*, const char*> GetStaticLibraryPackage(ResourceTable* table) {
+  // Resource tables built by aapt2 always contain one package. This is a post condition of
+  // VerifyNoExternalPackages.
+  if (table->packages.size() != 1u) {
+    return unexpected("static library contains more than one package");
+  }
+  return table->packages.back().get();
+}
+
+}  // namespace
+
+constexpr uint8_t kAndroidPackageId = 0x01;
 
 class LinkContext : public IAaptContext {
  public:
@@ -444,7 +462,7 @@ std::vector<std::unique_ptr<xml::XmlResource>> ResourceFileFlattener::LinkAndVer
   // that existing projects have out-of-date references which pass compilation.
   xml::StripAndroidStudioAttributes(doc->root.get());
 
-  XmlReferenceLinker xml_linker;
+  XmlReferenceLinker xml_linker(table);
   if (!options_.do_not_fail_on_missing_resources && !xml_linker.Consume(context_, doc)) {
     return {};
   }
@@ -631,13 +649,18 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
               const ResourceFile& file = doc->file;
               dst_path = ResourceUtils::BuildResourceFileName(file, context_->GetNameMangler());
 
-              std::unique_ptr<FileReference> file_ref =
+              auto file_ref =
                   util::make_unique<FileReference>(table->string_pool.MakeRef(dst_path));
               file_ref->SetSource(doc->file.source);
+
               // Update the output format of this XML file.
               file_ref->type = XmlFileTypeForOutputFormat(options_.output_format);
-              if (!table->AddResourceMangled(file.name, file.config, {}, std::move(file_ref),
-                                             context_->GetDiagnostics())) {
+              bool result = table->AddResource(NewResourceBuilder(file.name)
+                                                   .SetValue(std::move(file_ref), file.config)
+                                                   .SetAllowMangled(true)
+                                                   .Build(),
+                                               context_->GetDiagnostics());
+              if (!result) {
                 return false;
               }
             }
@@ -840,18 +863,15 @@ class Linker {
         ResourceTable* table = static_apk->GetResourceTable();
 
         // If we are using --no-static-lib-packages, we need to rename the package of this table to
-        // our compilation package.
-        if (options_.no_static_lib_packages) {
-          // Since package names can differ, and multiple packages can exist in a ResourceTable,
-          // we place the requirement that all static libraries are built with the package
-          // ID 0x7f. So if one is not found, this is an error.
-          if (ResourceTablePackage* pkg = table->FindPackageById(kAppPackageId)) {
-            pkg->name = context_->GetCompilationPackage();
-          } else {
-            context_->GetDiagnostics()->Error(DiagMessage(path)
-                                              << "no package with ID 0x7f found in static library");
+        // our compilation package so the symbol package name does not get mangled into the entry
+        // name.
+        if (options_.no_static_lib_packages && !table->packages.empty()) {
+          auto lib_package_result = GetStaticLibraryPackage(table);
+          if (!lib_package_result.has_value()) {
+            context_->GetDiagnostics()->Error(DiagMessage(path) << lib_package_result.error());
             return false;
           }
+          lib_package_result.value()->name = context_->GetCompilationPackage();
         }
 
         context_->GetExternalSymbols()->AppendSource(
@@ -980,8 +1000,7 @@ class Linker {
   // stripped, or there is an error and false is returned.
   bool VerifyNoExternalPackages() {
     auto is_ext_package_func = [&](const std::unique_ptr<ResourceTablePackage>& pkg) -> bool {
-      return context_->GetCompilationPackage() != pkg->name || !pkg->id ||
-             pkg->id.value() != context_->GetPackageId();
+      return context_->GetCompilationPackage() != pkg->name;
     };
 
     bool error = false;
@@ -1025,19 +1044,11 @@ class Linker {
   bool VerifyNoIdsSet() {
     for (const auto& package : final_table_.packages) {
       for (const auto& type : package->types) {
-        if (type->id) {
-          context_->GetDiagnostics()->Error(DiagMessage() << "type " << type->type << " has ID "
-                                                          << StringPrintf("%02x", type->id.value())
-                                                          << " assigned");
-          return false;
-        }
-
         for (const auto& entry : type->entries) {
           if (entry->id) {
             ResourceNameRef res_name(package->name, type->type, entry->name);
-            context_->GetDiagnostics()->Error(
-                DiagMessage() << "entry " << res_name << " has ID "
-                              << StringPrintf("%02x", entry->id.value()) << " assigned");
+            context_->GetDiagnostics()->Error(DiagMessage() << "resource " << res_name << " has ID "
+                                                            << entry->id.value() << " assigned");
             return false;
           }
         }
@@ -1311,12 +1322,17 @@ class Linker {
     }
 
     ResourceTable* table = apk->GetResourceTable();
-    ResourceTablePackage* pkg = table->FindPackageById(kAppPackageId);
-    if (!pkg) {
-      context_->GetDiagnostics()->Error(DiagMessage(input) << "static library has no package");
+    if (table->packages.empty()) {
+      return true;
+    }
+
+    auto lib_package_result = GetStaticLibraryPackage(table);
+    if (!lib_package_result.has_value()) {
+      context_->GetDiagnostics()->Error(DiagMessage(input) << lib_package_result.error());
       return false;
     }
 
+    ResourceTablePackage* pkg = lib_package_result.value();
     bool result;
     if (options_.no_static_lib_packages) {
       // Merge all resources as if they were in the compilation package. This is the old behavior
@@ -1363,11 +1379,11 @@ class Linker {
         res_name = mangled_name.value();
       }
 
-      std::unique_ptr<Id> id = util::make_unique<Id>();
+      auto id = util::make_unique<Id>();
       id->SetSource(source.WithLine(exported_symbol.line));
-      bool result =
-          final_table_.AddResourceMangled(res_name, ConfigDescription::DefaultConfig(),
-                                          std::string(), std::move(id), context_->GetDiagnostics());
+      bool result = final_table_.AddResource(
+          NewResourceBuilder(res_name).SetValue(std::move(id)).SetAllowMangled(true).Build(),
+          context_->GetDiagnostics());
       if (!result) {
         return false;
       }
@@ -1389,7 +1405,7 @@ class Linker {
     return MergeExportedSymbols(compiled_file.source, compiled_file.exported_symbols);
   }
 
-  // Takes a path to load as a ZIP file and merges the files within into the master ResourceTable.
+  // Takes a path to load as a ZIP file and merges the files within into the main ResourceTable.
   // If override is true, conflicting resources are allowed to override each other, in order of last
   // seen.
   // An io::IFileCollection is created from the ZIP file and added to the set of
@@ -1420,7 +1436,7 @@ class Linker {
     return !error;
   }
 
-  // Takes a path to load and merge into the master ResourceTable. If override is true,
+  // Takes a path to load and merge into the main ResourceTable. If override is true,
   // conflicting resources are allowed to override each other, in order of last seen.
   // If the file path ends with .flata, .jar, .jack, or .zip the file is treated
   // as ZIP archive and the files within are merged individually.
@@ -1437,7 +1453,7 @@ class Linker {
     return MergeFile(file, override);
   }
 
-  // Takes an AAPT Container file (.apc/.flat) to load and merge into the master ResourceTable.
+  // Takes an AAPT Container file (.apc/.flat) to load and merge into the main ResourceTable.
   // If override is true, conflicting resources are allowed to override each other, in order of last
   // seen.
   // All other file types are ignored. This is because these files could be coming from a zip,
@@ -1566,32 +1582,37 @@ class Linker {
     return true;
   }
 
+  ResourceEntry* ResolveTableEntry(LinkContext* context, ResourceTable* table,
+                                   Reference* reference) {
+    if (!reference || !reference->name) {
+      return nullptr;
+    }
+    auto name_ref = ResourceNameRef(reference->name.value());
+    if (name_ref.package.empty()) {
+      name_ref.package = context->GetCompilationPackage();
+    }
+    const auto search_result = table->FindResource(name_ref);
+    if (!search_result) {
+      return nullptr;
+    }
+    return search_result.value().entry;
+  }
+
   void AliasAdaptiveIcon(xml::XmlResource* manifest, ResourceTable* table) {
-    xml::Element* application = manifest->root->FindChild("", "application");
+    const xml::Element* application = manifest->root->FindChild("", "application");
     if (!application) {
       return;
     }
 
-    xml::Attribute* icon = application->FindAttribute(xml::kSchemaAndroid, "icon");
-    xml::Attribute* round_icon = application->FindAttribute(xml::kSchemaAndroid, "roundIcon");
+    const xml::Attribute* icon = application->FindAttribute(xml::kSchemaAndroid, "icon");
+    const xml::Attribute* round_icon = application->FindAttribute(xml::kSchemaAndroid, "roundIcon");
     if (!icon || !round_icon) {
       return;
     }
 
     // Find the icon resource defined within the application.
-    auto icon_reference = ValueCast<Reference>(icon->compiled_value.get());
-    if (!icon_reference || !icon_reference->name) {
-      return;
-    }
-    auto package = table->FindPackageById(icon_reference->id.value().package_id());
-    if (!package) {
-      return;
-    }
-    auto type = package->FindType(icon_reference->name.value().type);
-    if (!type) {
-      return;
-    }
-    auto icon_entry = type->FindEntry(icon_reference->name.value().entry);
+    const auto icon_reference = ValueCast<Reference>(icon->compiled_value.get());
+    const auto icon_entry = ResolveTableEntry(context_, table, icon_reference);
     if (!icon_entry) {
       return;
     }
@@ -1607,19 +1628,8 @@ class Linker {
     }
 
     // Find the roundIcon resource defined within the application.
-    auto round_icon_reference = ValueCast<Reference>(round_icon->compiled_value.get());
-    if (!round_icon_reference || !round_icon_reference->name) {
-      return;
-    }
-    package = table->FindPackageById(round_icon_reference->id.value().package_id());
-    if (!package) {
-      return;
-    }
-    type = package->FindType(round_icon_reference->name.value().type);
-    if (!type) {
-      return;
-    }
-    auto round_icon_entry = type->FindEntry(round_icon_reference->name.value().entry);
+    const auto round_icon_reference = ValueCast<Reference>(round_icon->compiled_value.get());
+    const auto round_icon_entry = ResolveTableEntry(context_, table, round_icon_reference);
     if (!round_icon_entry) {
       return;
     }
@@ -1646,11 +1656,62 @@ class Linker {
                                                      << " with config \"" << config_value->config
                                                      << "\" for round icon compatibility");
 
-      auto value = icon_reference->Clone(&table->string_pool);
-      auto round_config_value = round_icon_entry->FindOrCreateValue(
-          config_value->config, config_value->product);
-      round_config_value->value.reset(value);
+      CloningValueTransformer cloner(&table->string_pool);
+      auto value = icon_reference->Transform(cloner);
+      auto round_config_value =
+          round_icon_entry->FindOrCreateValue(config_value->config, config_value->product);
+      round_config_value->value = std::move(value);
     }
+  }
+
+  bool VerifySharedUserId(xml::XmlResource* manifest, ResourceTable* table) {
+    const xml::Element* manifest_el = xml::FindRootElement(manifest->root.get());
+    if (manifest_el == nullptr) {
+      return true;
+    }
+    if (!manifest_el->namespace_uri.empty() || manifest_el->name != "manifest") {
+      return true;
+    }
+    const xml::Attribute* attr = manifest_el->FindAttribute(xml::kSchemaAndroid, "sharedUserId");
+    if (!attr) {
+      return true;
+    }
+    const auto validate = [&](const std::string& shared_user_id) -> bool {
+      if (util::IsAndroidSharedUserId(context_->GetCompilationPackage(), shared_user_id)) {
+        return true;
+      }
+      DiagMessage error_msg(manifest_el->line_number);
+      error_msg << "attribute 'sharedUserId' in <manifest> tag is not a valid shared user id: '"
+                << shared_user_id << "'";
+      if (options_.manifest_fixer_options.warn_validation) {
+        // Treat the error only as a warning.
+        context_->GetDiagnostics()->Warn(error_msg);
+        return true;
+      }
+      context_->GetDiagnostics()->Error(error_msg);
+      return false;
+    };
+    // If attr->compiled_value is not null, check if it is a ref
+    if (attr->compiled_value) {
+      const auto ref = ValueCast<Reference>(attr->compiled_value.get());
+      if (ref == nullptr) {
+        return true;
+      }
+      const auto shared_user_id_entry = ResolveTableEntry(context_, table, ref);
+      if (!shared_user_id_entry) {
+        return true;
+      }
+      for (const auto& value : shared_user_id_entry->values) {
+        const auto str_value = ValueCast<String>(value->value.get());
+        if (str_value != nullptr && !validate(*str_value->value)) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    // Fallback to checking the raw value
+    return validate(attr->value);
   }
 
   // Writes the AndroidManifest, ResourceTable, and all XML files referenced by the ResourceTable
@@ -1673,6 +1734,11 @@ class Linker {
     // the android:roundIcon on API 25 devices, and prefer the adaptive icon on API 26 devices.
     // See (b/34829129)
     AliasAdaptiveIcon(manifest, table);
+
+    // Verify the shared user id here to handle the case of reference value.
+    if (!VerifySharedUserId(manifest, table)) {
+      return false;
+    }
 
     ResourceFileFlattenerOptions file_flattener_options;
     file_flattener_options.keep_raw_values = keep_raw_values;
@@ -1708,15 +1774,13 @@ class Linker {
           context_->GetPackageId() != kAppPackageId &&
           context_->GetPackageId() != kFrameworkPackageId)
         || (!options_.allow_reserved_package_id && context_->GetPackageId() > kAppPackageId);
-    if (isSplitPackage &&
-        included_feature_base_ == make_value(context_->GetCompilationPackage())) {
+    if (isSplitPackage && included_feature_base_ == context_->GetCompilationPackage()) {
       // The base APK is included, and this is a feature split. If the base package is
       // the same as this package, then we are building an old style Android Instant Apps feature
       // split and must apply this workaround to avoid requiring namespaces support.
-      package_to_rewrite = table->FindPackage(context_->GetCompilationPackage());
-      if (package_to_rewrite != nullptr) {
-        CHECK_EQ(1u, table->packages.size()) << "can't change name of package when > 1 package";
-
+      if (!table->packages.empty() &&
+          table->packages.back()->name == context_->GetCompilationPackage()) {
+        package_to_rewrite = table->packages.back().get();
         std::string new_package_name =
             StringPrintf("%s.%s", package_to_rewrite->name.c_str(),
                          app_info_.split_name.value_or_default("feature").c_str());
@@ -1735,9 +1799,12 @@ class Linker {
     if (package_to_rewrite != nullptr) {
       // Change the name back.
       package_to_rewrite->name = context_->GetCompilationPackage();
-      if (package_to_rewrite->id) {
-        table->included_packages_.erase(package_to_rewrite->id.value());
-      }
+
+      // TableFlattener creates an `included_packages_` mapping entry for each package with a
+      // non-standard package id (not 0x01 or 0x7f). Since this is a feature split and not a shared
+      // library, do not include a mapping from the feature package name to the feature package id
+      // in the feature's dynamic reference table.
+      table->included_packages_.erase(context_->GetPackageId());
     }
 
     if (!success) {
@@ -1797,7 +1864,7 @@ class Linker {
 
     // Override the package ID when it is "android".
     if (context_->GetCompilationPackage() == "android") {
-      context_->SetPackageId(0x01);
+      context_->SetPackageId(kAndroidPackageId);
 
       // Verify we're building a regular app.
       if (context_->GetPackageType() != PackageType::kApp) {
@@ -1854,7 +1921,8 @@ class Linker {
 
     if (context_->GetPackageType() != PackageType::kStaticLib) {
       PrivateAttributeMover mover;
-      if (!mover.Consume(context_, &final_table_)) {
+      if (context_->GetPackageId() == kAndroidPackageId &&
+          !mover.Consume(context_, &final_table_)) {
         context_->GetDiagnostics()->Error(DiagMessage() << "failed moving private attributes");
         return 1;
       }
@@ -1873,8 +1941,7 @@ class Linker {
             for (auto& entry : type->entries) {
               ResourceName name(package->name, type->type, entry->name);
               // The IDs are guaranteed to exist.
-              options_.stable_id_map[std::move(name)] =
-                  ResourceId(package->id.value(), type->id.value(), entry->id.value());
+              options_.stable_id_map[std::move(name)] = entry->id.value();
             }
           }
         }
@@ -2045,7 +2112,7 @@ class Linker {
         std::unique_ptr<xml::XmlResource> split_manifest =
             GenerateSplitManifest(app_info_, *split_constraints_iter);
 
-        XmlReferenceLinker linker;
+        XmlReferenceLinker linker(&final_table_);
         if (!linker.Consume(context_, split_manifest.get())) {
           context_->GetDiagnostics()->Error(DiagMessage()
                                             << "failed to create Split AndroidManifest.xml");
@@ -2076,7 +2143,7 @@ class Linker {
       // So we give it a package name so it can see local resources.
       manifest_xml->file.name.package = context_->GetCompilationPackage();
 
-      XmlReferenceLinker manifest_linker;
+      XmlReferenceLinker manifest_linker(&final_table_);
       if (options_.merge_only || manifest_linker.Consume(context_, manifest_xml.get())) {
         if (options_.generate_proguard_rules_path &&
             !proguard::CollectProguardRulesForManifest(manifest_xml.get(), &proguard_keep_set)) {
@@ -2208,6 +2275,16 @@ int LinkCommand::Action(const std::vector<std::string>& args) {
     context.GetDiagnostics()->Error(
         DiagMessage()
             << "only one of --shared-lib, --static-lib, or --proto_format can be defined");
+    return 1;
+  }
+
+  if (shared_lib_ && options_.private_symbols) {
+    // If a shared library styleable in a public R.java uses a private attribute, attempting to
+    // reference the private attribute within the styleable array will cause a link error because
+    // the private attribute will not be emitted in the public R.java.
+    context.GetDiagnostics()->Error(DiagMessage()
+                                    << "--shared-lib cannot currently be used in combination with"
+                                    << " --private-symbols");
     return 1;
   }
 

@@ -43,18 +43,22 @@ import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.LongSparseArray;
+import android.view.View;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.qs.tileimpl.QSIconViewImpl;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 
 import java.io.FileDescriptor;
@@ -63,14 +67,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Suite of tools to periodically inspect the System UI heap and possibly prompt the user to
  * capture heap dumps and report them. Includes the implementation of the "Dump SysUI Heap"
  * quick settings tile.
  */
-@Singleton
+@SysUISingleton
 public class GarbageMonitor implements Dumpable {
     // Feature switches
     // ================
@@ -294,7 +297,7 @@ public class GarbageMonitor implements Dumpable {
         MemoryIconDrawable(Context context) {
             baseIcon = context.getDrawable(R.drawable.ic_memory).mutate();
             dp = context.getResources().getDisplayMetrics().density;
-            paint.setColor(QSTileImpl.getColorForState(context, STATE_ACTIVE));
+            paint.setColor(QSIconViewImpl.getIconColorForState(context, STATE_ACTIVE));
         }
 
         public void setRss(long rss) {
@@ -408,14 +411,15 @@ public class GarbageMonitor implements Dumpable {
                 QSHost host,
                 @Background Looper backgroundLooper,
                 @Main Handler mainHandler,
+                FalsingManager falsingManager,
                 MetricsLogger metricsLogger,
                 StatusBarStateController statusBarStateController,
                 ActivityStarter activityStarter,
                 QSLogger qsLogger,
                 GarbageMonitor monitor
         ) {
-            super(host, backgroundLooper, mainHandler, metricsLogger, statusBarStateController,
-                    activityStarter, qsLogger);
+            super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+                    statusBarStateController, activityStarter, qsLogger);
             gm = monitor;
         }
 
@@ -430,7 +434,7 @@ public class GarbageMonitor implements Dumpable {
         }
 
         @Override
-        protected void handleClick() {
+        protected void handleClick(@Nullable View view) {
             if (dumpInProgress) return;
 
             dumpInProgress = true;
@@ -552,7 +556,7 @@ public class GarbageMonitor implements Dumpable {
     }
 
     /** */
-    @Singleton
+    @SysUISingleton
     public static class Service extends SystemUI implements Dumpable {
         private final GarbageMonitor mGarbageMonitor;
 

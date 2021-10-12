@@ -27,6 +27,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -35,11 +36,13 @@ import android.sysprop.InitProperties;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
+import android.view.Display;
 
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.time.Duration;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -195,6 +198,9 @@ public final class PowerManager {
      * application as the normal behavior.  Notifications that pop up and want
      * the device to be on are the exception; use this flag to be like them.
      * </p><p>
+     * Android TV playback devices attempt to turn on the HDMI-connected TV via HDMI-CEC on any
+     * wake-up, including wake-ups triggered by wake locks.
+     * </p><p>
      * Cannot be used with {@link #PARTIAL_WAKE_LOCK}.
      * </p>
      */
@@ -272,7 +278,6 @@ public final class PowerManager {
 
     /**
      * Brightness value for fully off in float.
-     * TODO(brightnessfloat): rename this to BRIGHTNES_OFF and remove the integer-based constant.
      * @hide
      */
     public static final float BRIGHTNESS_OFF_FLOAT = -1.0f;
@@ -320,6 +325,13 @@ public final class PowerManager {
      * @hide
      */
     public static final int USER_ACTIVITY_EVENT_ATTENTION = 4;
+
+    /**
+     * User activity event type: {@link com.android.server.power.FaceDownDetector} taking action
+     * on behalf of user.
+     * @hide
+     */
+    public static final int USER_ACTIVITY_EVENT_FACE_DOWN = 5;
 
     /**
      * User activity flag: If already dimmed, extend the dim timeout
@@ -415,9 +427,21 @@ public final class PowerManager {
     public static final int GO_TO_SLEEP_REASON_QUIESCENT = 10;
 
     /**
+     * Go to sleep reason code: The last powered on display group has been removed.
      * @hide
      */
-    public static final int GO_TO_SLEEP_REASON_MAX = GO_TO_SLEEP_REASON_QUIESCENT;
+    public static final int GO_TO_SLEEP_REASON_DISPLAY_GROUP_REMOVED = 11;
+
+    /**
+     * Go to sleep reason code: Every display group has been turned off.
+     * @hide
+     */
+    public static final int GO_TO_SLEEP_REASON_DISPLAY_GROUPS_TURNED_OFF = 12;
+
+    /**
+     * @hide
+     */
+    public static final int GO_TO_SLEEP_REASON_MAX = GO_TO_SLEEP_REASON_DISPLAY_GROUPS_TURNED_OFF;
 
     /**
      * @hide
@@ -434,6 +458,8 @@ public final class PowerManager {
             case GO_TO_SLEEP_REASON_ACCESSIBILITY: return "accessibility";
             case GO_TO_SLEEP_REASON_FORCE_SUSPEND: return "force_suspend";
             case GO_TO_SLEEP_REASON_INATTENTIVE: return "inattentive";
+            case GO_TO_SLEEP_REASON_DISPLAY_GROUP_REMOVED: return "display_group_removed";
+            case GO_TO_SLEEP_REASON_DISPLAY_GROUPS_TURNED_OFF: return "display_groups_turned_off";
             default: return Integer.toString(sleepReason);
         }
     }
@@ -520,9 +546,30 @@ public final class PowerManager {
             WAKE_REASON_WAKE_KEY,
             WAKE_REASON_WAKE_MOTION,
             WAKE_REASON_HDMI,
+            WAKE_REASON_DISPLAY_GROUP_ADDED,
+            WAKE_REASON_DISPLAY_GROUP_TURNED_ON,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface WakeReason{}
+
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "GO_TO_SLEEP_REASON_" }, value = {
+            GO_TO_SLEEP_REASON_APPLICATION,
+            GO_TO_SLEEP_REASON_DEVICE_ADMIN,
+            GO_TO_SLEEP_REASON_TIMEOUT,
+            GO_TO_SLEEP_REASON_LID_SWITCH,
+            GO_TO_SLEEP_REASON_POWER_BUTTON,
+            GO_TO_SLEEP_REASON_HDMI,
+            GO_TO_SLEEP_REASON_SLEEP_BUTTON,
+            GO_TO_SLEEP_REASON_ACCESSIBILITY,
+            GO_TO_SLEEP_REASON_FORCE_SUSPEND,
+            GO_TO_SLEEP_REASON_INATTENTIVE,
+            GO_TO_SLEEP_REASON_QUIESCENT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface GoToSleepReason{}
 
     /**
      * Wake up reason code: Waking for an unknown reason.
@@ -588,6 +635,18 @@ public final class PowerManager {
     public static final int WAKE_REASON_LID = 9;
 
     /**
+     * Wake up reason code: Waking due to display group being added.
+     * @hide
+     */
+    public static final int WAKE_REASON_DISPLAY_GROUP_ADDED = 10;
+
+    /**
+     * Wake up reason code: Waking due to display group being powered on.
+     * @hide
+     */
+    public static final int WAKE_REASON_DISPLAY_GROUP_TURNED_ON = 11;
+
+    /**
      * Convert the wake reason to a string for debugging purposes.
      * @hide
      */
@@ -603,6 +662,8 @@ public final class PowerManager {
             case WAKE_REASON_WAKE_MOTION: return "WAKE_REASON_WAKE_MOTION";
             case WAKE_REASON_HDMI: return "WAKE_REASON_HDMI";
             case WAKE_REASON_LID: return "WAKE_REASON_LID";
+            case WAKE_REASON_DISPLAY_GROUP_ADDED: return "WAKE_REASON_DISPLAY_GROUP_ADDED";
+            case WAKE_REASON_DISPLAY_GROUP_TURNED_ON: return "WAKE_REASON_DISPLAY_GROUP_TURNED_ON";
             default: return Integer.toString(wakeReason);
         }
     }
@@ -611,12 +672,14 @@ public final class PowerManager {
      * @hide
      */
     public static class WakeData {
-        public WakeData(long wakeTime, @WakeReason int wakeReason) {
+        public WakeData(long wakeTime, @WakeReason int wakeReason, long sleepDuration) {
             this.wakeTime = wakeTime;
             this.wakeReason = wakeReason;
+            this.sleepDuration = sleepDuration;
         }
         public long wakeTime;
         public @WakeReason int wakeReason;
+        public long sleepDuration;
     }
 
     /**
@@ -863,6 +926,45 @@ public final class PowerManager {
     })
     public @interface LocationPowerSaveMode {}
 
+    /**
+     * In this mode, all active SoundTrigger recognitions are enabled by the SoundTrigger system
+     * service.
+     * @hide
+     */
+    @SystemApi
+    public static final int SOUND_TRIGGER_MODE_ALL_ENABLED = 0;
+    /**
+     * In this mode, only privileged components of the SoundTrigger system service should be
+     * enabled. This functionality is to be used to limit SoundTrigger recognitions to those only
+     * deemed necessary by the system.
+     * @hide
+     */
+    @SystemApi
+    public static final int SOUND_TRIGGER_MODE_CRITICAL_ONLY = 1;
+    /**
+     * In this mode, all active SoundTrigger recognitions should be disabled by the SoundTrigger
+     * system service.
+     * @hide
+     */
+    @SystemApi
+    public static final int SOUND_TRIGGER_MODE_ALL_DISABLED = 2;
+
+    /** @hide */
+    public static final int MIN_SOUND_TRIGGER_MODE = SOUND_TRIGGER_MODE_ALL_ENABLED;
+    /** @hide */
+    public static final int MAX_SOUND_TRIGGER_MODE = SOUND_TRIGGER_MODE_ALL_DISABLED;
+
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"SOUND_TRIGGER_MODE_"}, value = {
+            SOUND_TRIGGER_MODE_ALL_ENABLED,
+            SOUND_TRIGGER_MODE_CRITICAL_ONLY,
+            SOUND_TRIGGER_MODE_ALL_DISABLED,
+    })
+    public @interface SoundTriggerPowerSaveMode {}
+
     /** @hide */
     public static String locationPowerSaveModeToString(@LocationPowerSaveMode int mode) {
         switch (mode) {
@@ -1042,8 +1144,7 @@ public final class PowerManager {
      * wake lock, and {@link WakeLock#release release()} when you are done.
      * </p><p>
      * {@samplecode
-     * PowerManager pm = (PowerManager)mContext.getSystemService(
-     *                                          Context.POWER_SERVICE);
+     * PowerManager pm = mContext.getSystemService(PowerManager.class);
      * PowerManager.WakeLock wl = pm.newWakeLock(
      *                                      PowerManager.SCREEN_DIM_WAKE_LOCK
      *                                      | PowerManager.ON_AFTER_RELEASE,
@@ -1061,6 +1162,8 @@ public final class PowerManager {
      * {@link android.view.WindowManager.LayoutParams#FLAG_KEEP_SCREEN_ON} instead.
      * This window flag will be correctly managed by the platform
      * as the user moves between applications and doesn't require a special permission.
+     * Additionally using the flag will keep only the appropriate screen on in a
+     * multi-display scenario while using a wake lock will keep every screen powered on.
      * </p>
      *
      * <p>
@@ -1078,7 +1181,7 @@ public final class PowerManager {
      * can be transformed by java optimizer and obfuscator tools.
      * <li>avoid wrapping the tag or a prefix to avoid collision with wake lock
      * tags from the platform (e.g. *alarm*).
-     * <li>never include personnally identifiable information for privacy
+     * <li>never include personally identifiable information for privacy
      * reasons.
      * </ul>
      * </p>
@@ -1099,7 +1202,27 @@ public final class PowerManager {
      */
     public WakeLock newWakeLock(int levelAndFlags, String tag) {
         validateWakeLockParameters(levelAndFlags, tag);
-        return new WakeLock(levelAndFlags, tag, mContext.getOpPackageName());
+        return new WakeLock(levelAndFlags, tag, mContext.getOpPackageName(),
+                Display.INVALID_DISPLAY);
+    }
+
+    /**
+     * Creates a new wake lock with the specified level and flags.
+     * <p>
+     * The wakelock will only apply to the {@link com.android.server.display.DisplayGroup} of the
+     * provided {@code displayId}. If {@code displayId} is {@link Display#INVALID_DISPLAY} then it
+     * will apply to all {@link com.android.server.display.DisplayGroup DisplayGroups}.
+     *
+     * @param levelAndFlags Combination of wake lock level and flag values defining
+     * the requested behavior of the WakeLock.
+     * @param tag Your class name (or other tag) for debugging purposes.
+     * @param displayId The display id to which this wake lock is tied.
+     *
+     * @hide
+     */
+    public WakeLock newWakeLock(int levelAndFlags, String tag, int displayId) {
+        validateWakeLockParameters(levelAndFlags, tag);
+        return new WakeLock(levelAndFlags, tag, mContext.getOpPackageName(), displayId);
     }
 
     /** @hide */
@@ -1186,14 +1309,24 @@ public final class PowerManager {
     })
     public void userActivity(long when, int event, int flags) {
         try {
-            mService.userActivity(when, event, flags);
+            mService.userActivity(mContext.getDisplayId(), when, event, flags);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
-   /**
-     * Forces the device to go to sleep.
+    /**
+     * Forces the {@link com.android.server.display.DisplayGroup#DEFAULT default display group}
+     * to turn off.
+     *
+     * <p>If the {@link com.android.server.display.DisplayGroup#DEFAULT default display group} is
+     * turned on it will be turned off. If all displays are off as a result of this action the
+     * device will be put to sleep. If the {@link com.android.server.display.DisplayGroup#DEFAULT
+     * default display group} is already off then nothing will happen.
+     *
+     * <p>If the device is an Android TV playback device and the current active source on the
+     * HDMI-connected TV, it will attempt to turn off that TV via HDMI-CEC.
+     *
      * <p>
      * Overrides all the wake locks that are held.
      * This is what happens when the power key is pressed to turn off the screen.
@@ -1216,7 +1349,14 @@ public final class PowerManager {
     }
 
     /**
-     * Forces the device to go to sleep.
+     * Forces the {@link com.android.server.display.DisplayGroup#DEFAULT default display group}
+     * to turn off.
+     *
+     * <p>If the {@link com.android.server.display.DisplayGroup#DEFAULT default display group} is
+     * turned on it will be turned off. If all displays are off as a result of this action the
+     * device will be put to sleep. If the {@link com.android.server.display.DisplayGroup#DEFAULT
+     * default display group} is already off then nothing will happen.
+     *
      * <p>
      * Overrides all the wake locks that are held.
      * This is what happens when the power key is pressed to turn off the screen.
@@ -1246,9 +1386,15 @@ public final class PowerManager {
     }
 
     /**
-     * Forces the device to wake up from sleep.
+     * Forces the {@link com.android.server.display.DisplayGroup#DEFAULT default display group}
+     * to turn on.
+     *
+     * <p>If the {@link com.android.server.display.DisplayGroup#DEFAULT default display group} is
+     * turned off it will be turned on. Additionally, if the device is asleep it will be awoken. If
+     * the {@link com.android.server.display.DisplayGroup#DEFAULT default display group} is already
+     * on then nothing will happen.
+     *
      * <p>
-     * If the device is currently asleep, wakes it up, otherwise does nothing.
      * This is what happens when the power key is pressed to turn on the screen.
      * </p><p>
      * Requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
@@ -1271,9 +1417,15 @@ public final class PowerManager {
     }
 
     /**
-     * Forces the device to wake up from sleep.
+     * Forces the {@link com.android.server.display.DisplayGroup#DEFAULT default display group}
+     * to turn on.
+     *
+     * <p>If the {@link com.android.server.display.DisplayGroup#DEFAULT default display group} is
+     * turned off it will be turned on. Additionally, if the device is asleep it will be awoken. If
+     * the {@link com.android.server.display.DisplayGroup#DEFAULT default display group} is already
+     * on then nothing will happen.
+     *
      * <p>
-     * If the device is currently asleep, wakes it up, otherwise does nothing.
      * This is what happens when the power key is pressed to turn on the screen.
      * </p><p>
      * Requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
@@ -1300,9 +1452,17 @@ public final class PowerManager {
     }
 
     /**
-     * Forces the device to wake up from sleep.
+     * Forces the {@link android.view.Display#DEFAULT_DISPLAY default display} to turn on.
+     *
+     * <p>If the {@link android.view.Display#DEFAULT_DISPLAY default display} is turned off it will
+     * be turned on. Additionally, if the device is asleep it will be awoken. If the {@link
+     * android.view.Display#DEFAULT_DISPLAY default display} is already on then nothing will happen.
+     *
+     * <p>If the device is an Android TV playback device, it will attempt to turn on the
+     * HDMI-connected TV and become the current active source via the HDMI-CEC One Touch Play
+     * feature.
+     *
      * <p>
-     * If the device is currently asleep, wakes it up, otherwise does nothing.
      * This is what happens when the power key is pressed to turn on the screen.
      * </p><p>
      * Requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
@@ -1508,6 +1668,12 @@ public final class PowerManager {
      * <p>
      * Requires the {@link android.Manifest.permission#REBOOT} permission.
      * </p>
+     * <p>
+     * If the {@code reason} string contains ",quiescent", then the screen stays off during reboot
+     * and is not turned on again until the user triggers the device to wake up (for example,
+     * by pressing the power key).
+     * This behavior applies to Android TV devices launched on Android 11 (API level 30) or higher.
+     * </p>
      *
      * @param reason code to pass to the kernel (e.g., "recovery") to
      *               request special boot modes, or null.
@@ -1571,6 +1737,65 @@ public final class PowerManager {
     public boolean setPowerSaveModeEnabled(boolean mode) {
         try {
             return mService.setPowerSaveModeEnabled(mode);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the current policy for full power save mode.
+     *
+     * @return The {@link BatterySaverPolicyConfig} which is currently set for the full power save
+     *          policy level.
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    public BatterySaverPolicyConfig getFullPowerSavePolicy() {
+        try {
+            return mService.getFullPowerSavePolicy();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the policy for full power save mode.
+     *
+     * Any settings set by this API will persist for only one session of full battery saver mode.
+     * The settings set by this API are cleared upon exit of full battery saver mode, and the
+     * caller is expected to set the desired values again for the next full battery saver mode
+     * session if desired.
+     *
+     * Use-cases:
+     * 1. Set policy outside of full battery saver mode
+     *     - full policy set -> enter BS -> policy setting applied -> exit BS -> setting cleared
+     * 2. Set policy inside of full battery saver mode
+     *     - enter BS -> full policy set -> policy setting applied -> exit BS -> setting cleared
+     *
+     * This API is intended to be used with {@link #getFullPowerSavePolicy()} API when a client only
+     * wants to modify a specific setting(s) and leave the remaining policy attributes the same.
+     * Example:
+     * BatterySaverPolicyConfig newFullPolicyConfig =
+     *     new BatterySaverPolicyConfig.Builder(powerManager.getFullPowerSavePolicy())
+     *         .setSoundTriggerMode(PowerManager.SOUND_TRIGGER_MODE_ALL_DISABLED)
+     *         .build();
+     * powerManager.setFullPowerSavePolicy(newFullPolicyConfig);
+     *
+     * @return true if there was an effectual change. If full battery saver is enabled, then this
+     * will return true.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.DEVICE_POWER,
+            android.Manifest.permission.POWER_SAVER
+    })
+    public boolean setFullPowerSavePolicy(@NonNull BatterySaverPolicyConfig config) {
+        try {
+            return mService.setFullPowerSavePolicy(config);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1695,6 +1920,10 @@ public final class PowerManager {
      * Returns the current battery saver control mode. Values it may return are defined in
      * AutoPowerSaveModeTriggers. Note that this is a global device state, not a per user setting.
      *
+     * <p>Note: Prior to Android version {@link Build.VERSION_CODES#S}, any app calling this method
+     * was required to hold the {@link android.Manifest.permission#POWER_SAVER} permission. Starting
+     * from Android version {@link Build.VERSION_CODES#S}, that permission is no longer required.
+     *
      * @return The current value power saver mode for the system.
      *
      * @see AutoPowerSaveModeTriggers
@@ -1703,10 +1932,76 @@ public final class PowerManager {
      */
     @AutoPowerSaveModeTriggers
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.POWER_SAVER)
     public int getPowerSaveModeTrigger() {
         try {
             return mService.getPowerSaveModeTrigger();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Allows an app to tell the system how long it believes the battery will last and whether
+     * this estimate is customized based on historical device usage or on a generic configuration.
+     * These estimates will be displayed on system UI surfaces in place of the system computed
+     * value.
+     *
+     * Calling this requires either the {@link android.Manifest.permission#DEVICE_POWER} or the
+     * {@link android.Manifest.permission#BATTERY_PREDICTION} permissions.
+     *
+     * @param timeRemaining  The time remaining as a {@link Duration}.
+     * @param isPersonalized true if personalized based on device usage history, false otherwise.
+     * @throws IllegalStateException if the device is powered or currently charging
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.BATTERY_PREDICTION,
+            android.Manifest.permission.DEVICE_POWER
+    })
+    public void setBatteryDischargePrediction(@NonNull Duration timeRemaining,
+            boolean isPersonalized) {
+        if (timeRemaining == null) {
+            throw new IllegalArgumentException("time remaining must not be null");
+        }
+        try {
+            mService.setBatteryDischargePrediction(new ParcelDuration(timeRemaining),
+                    isPersonalized);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the current battery life remaining estimate.
+     *
+     * @return The estimated battery life remaining as a {@link Duration}. Will be {@code null} if
+     * the device is powered, charging, or an error was encountered.
+     */
+    @Nullable
+    public Duration getBatteryDischargePrediction() {
+        try {
+            final ParcelDuration parcelDuration = mService.getBatteryDischargePrediction();
+            if (parcelDuration == null) {
+                return null;
+            }
+            return parcelDuration.getDuration();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns whether the current battery life remaining estimate is personalized based on device
+     * usage history or not. This value does not take a device's powered or charging state into
+     * account.
+     *
+     * @return A boolean indicating if the current discharge estimate is personalized based on
+     * historical device usage or not.
+     */
+    public boolean isBatteryDischargePredictionPersonalized() {
+        try {
+            return mService.isBatteryDischargePredictionPersonalized();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1745,6 +2040,26 @@ public final class PowerManager {
             return LOCATION_MODE_NO_CHANGE;
         }
         return powerSaveState.locationMode;
+    }
+
+    /**
+     * Returns how SoundTrigger features should behave when battery saver is on. When battery saver
+     * is off, this will always return {@link #SOUND_TRIGGER_MODE_ALL_ENABLED}.
+     *
+     * <p>This API is normally only useful for components that provide use SoundTrigger features.
+     *
+     * @see #isPowerSaveMode()
+     * @see #ACTION_POWER_SAVE_MODE_CHANGED
+     *
+     * @hide
+     */
+    @SoundTriggerPowerSaveMode
+    public int getSoundTriggerPowerSaveMode() {
+        final PowerSaveState powerSaveState = getPowerSaveState(ServiceType.SOUND);
+        if (!powerSaveState.batterySaverEnabled) {
+            return SOUND_TRIGGER_MODE_ALL_ENABLED;
+        }
+        return powerSaveState.soundTriggerMode;
     }
 
     /**
@@ -1792,6 +2107,8 @@ public final class PowerManager {
      * Return whether the given application package name is on the device's power allowlist.
      * Apps can be placed on the allowlist through the settings UI invoked by
      * {@link android.provider.Settings#ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS}.
+     * <p>Being on the power allowlist means that the system will not apply most power saving
+     * features to the app. Guardrails for extreme cases may still be applied.
      */
     public boolean isIgnoringBatteryOptimizations(String packageName) {
         return getPowerWhitelistManager().isWhitelisted(packageName, true);
@@ -1935,7 +2252,7 @@ public final class PowerManager {
         Preconditions.checkNotNull(listener, "listener cannot be null");
         Preconditions.checkNotNull(executor, "executor cannot be null");
         Preconditions.checkArgument(!mListenerMap.containsKey(listener),
-                "Listener already registered: " + listener);
+                "Listener already registered: %s", listener);
         IThermalStatusListener internalListener = new IThermalStatusListener.Stub() {
             @Override
             public void onStatusChange(int status) {
@@ -2200,6 +2517,18 @@ public final class PowerManager {
     }
 
     /**
+     * Intent that is broadcast when the enhanced battery discharge prediction changes. The new
+     * value can be retrieved via {@link #getBatteryDischargePrediction()}.
+     * This broadcast is only sent to registered receivers.
+     *
+     * @hide
+     */
+    @TestApi
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_ENHANCED_DISCHARGE_PREDICTION_CHANGED =
+            "android.os.action.ENHANCED_DISCHARGE_PREDICTION_CHANGED";
+
+    /**
      * Intent that is broadcast when the state of {@link #isPowerSaveMode()} changes.
      * This broadcast is only sent to registered receivers.
      */
@@ -2250,33 +2579,6 @@ public final class PowerManager {
             = "android.os.action.POWER_SAVE_TEMP_WHITELIST_CHANGED";
 
     /**
-     * Intent that is broadcast when the state of {@link #isPowerSaveMode()} is about to change.
-     * This broadcast is only sent to registered receivers.
-     *
-     * @deprecated This is sent at the same time as {@link #ACTION_POWER_SAVE_MODE_CHANGED} so it
-     * does not provide advanced warning. As such it will be removed in future Android versions.
-     * Use {@link #ACTION_POWER_SAVE_MODE_CHANGED} and {@link #isPowerSaveMode()} instead.
-     *
-     * @hide
-     */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q,
-            publicAlternatives = "Use {@link #ACTION_POWER_SAVE_MODE_CHANGED} instead.")
-    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
-    @Deprecated
-    public static final String ACTION_POWER_SAVE_MODE_CHANGING
-            = "android.os.action.POWER_SAVE_MODE_CHANGING";
-
-    /**
-     * @deprecated Use {@link #isPowerSaveMode()} instead.
-     *
-     * @hide
-     */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q,
-            publicAlternatives = "Use {@link #isPowerSaveMode()} instead.")
-    @Deprecated
-    public static final String EXTRA_POWER_SAVE_MODE = "mode";
-
-    /**
      * Constant for PreIdleTimeout normal mode (default mode, not short nor extend timeout) .
      * @hide
      */
@@ -2325,19 +2627,17 @@ public final class PowerManager {
         private WorkSource mWorkSource;
         private String mHistoryTag;
         private final String mTraceName;
+        private final int mDisplayId;
 
-        private final Runnable mReleaser = new Runnable() {
-            public void run() {
-                release(RELEASE_FLAG_TIMEOUT);
-            }
-        };
+        private final Runnable mReleaser = () -> release(RELEASE_FLAG_TIMEOUT);
 
-        WakeLock(int flags, String tag, String packageName) {
+        WakeLock(int flags, String tag, String packageName, int displayId) {
             mFlags = flags;
             mTag = tag;
             mPackageName = packageName;
             mToken = new Binder();
             mTraceName = "WakeLock (" + mTag + ")";
+            mDisplayId = displayId;
         }
 
         @Override
@@ -2418,7 +2718,7 @@ public final class PowerManager {
                 Trace.asyncTraceBegin(Trace.TRACE_TAG_POWER, mTraceName, 0);
                 try {
                     mService.acquireWakeLock(mToken, mFlags, mTag, mPackageName, mWorkSource,
-                            mHistoryTag);
+                            mHistoryTag, mDisplayId);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 }

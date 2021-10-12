@@ -28,7 +28,6 @@ import android.location.LocationManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.telephony.PhoneNumberUtils;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -158,7 +157,7 @@ public class GpsNetInitiatedHandler {
                        be set to true when the phone is having emergency call, and then will
                        be set to false by mPhoneStateListener when the emergency call ends.
                 */
-                mIsInEmergencyCall = PhoneNumberUtils.isEmergencyNumber(phoneNumber);
+                mIsInEmergencyCall = mTelephonyManager.isEmergencyNumber(phoneNumber);
                 if (DEBUG) Log.v(TAG, "ACTION_NEW_OUTGOING_CALL - " + getInEmergency());
             } else if (action.equals(LocationManager.MODE_CHANGED_ACTION)) {
                 updateLocationMode();
@@ -248,10 +247,23 @@ public class GpsNetInitiatedHandler {
      * @return true if is considered in user initiated emergency mode for NI purposes
      */
     public boolean getInEmergency() {
+        return getInEmergency(mEmergencyExtensionMillis);
+    }
+
+    /**
+     * Determines whether device is in user-initiated emergency session with the given extension
+     * time.
+     *
+     * @return true if is considered in user initiated emergency mode for NI purposes within the
+     * given extension time.
+     *
+     * @see {@link #getInEmergency()}
+     */
+    public boolean getInEmergency(long emergencyExtensionMillis) {
         boolean isInEmergencyExtension =
                 (mCallEndElapsedRealtimeMillis > 0)
-                && ((SystemClock.elapsedRealtime() - mCallEndElapsedRealtimeMillis)
-                        < mEmergencyExtensionMillis);
+                        && ((SystemClock.elapsedRealtime() - mCallEndElapsedRealtimeMillis)
+                        < emergencyExtensionMillis);
         boolean isInEmergencyCallback = mTelephonyManager.getEmergencyCallbackMode();
         boolean isInEmergencySmsMode = mTelephonyManager.isInEmergencySmsMode();
         return mIsInEmergencyCall || isInEmergencyCallback || isInEmergencyExtension

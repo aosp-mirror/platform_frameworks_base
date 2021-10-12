@@ -17,7 +17,7 @@ package android.content.pm.split;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
-import android.content.pm.PackageParser;
+import android.content.pm.parsing.PackageLite;
 import android.util.IntArray;
 import android.util.SparseArray;
 
@@ -149,10 +149,19 @@ public abstract class SplitDependencyLoader<E extends Exception> {
         return dst;
     }
 
-    public static @NonNull SparseArray<int[]> createDependenciesFromPackage(
-            PackageParser.PackageLite pkg) throws IllegalDependencyException {
-        // The data structure that holds the dependencies. In PackageParser, splits are stored
-        // in their own array, separate from the base. We treat all paths as equals, so
+    /**
+     * Build the split dependency tree by the given package
+     *
+     * @param pkg The package to retrieve the dependency tree
+     * @return The dependency tree of splits
+     * @throws IllegalDependencyException if the requires split is missing, targets split is
+     *         missing, it declares itself as configuration split for a non-feature split, or
+     *         cycle detected in split dependencies.
+     */
+    public static @NonNull SparseArray<int[]> createDependenciesFromPackage(PackageLite pkg)
+            throws IllegalDependencyException {
+        // The data structure that holds the dependencies. In ParsingPackageUtils, splits are
+        // stored in their own array, separate from the base. We treat all paths as equals, so
         // we need to insert the base as index 0, and shift all other splits.
         final SparseArray<int[]> splitDependencies = new SparseArray<>();
 
@@ -161,19 +170,19 @@ public abstract class SplitDependencyLoader<E extends Exception> {
 
         // First write out the <uses-split> dependencies. These must appear first in the
         // array of ints, as is convention in this class.
-        for (int splitIdx = 0; splitIdx < pkg.splitNames.length; splitIdx++) {
-            if (!pkg.isFeatureSplits[splitIdx]) {
+        for (int splitIdx = 0; splitIdx < pkg.getSplitNames().length; splitIdx++) {
+            if (!pkg.getIsFeatureSplits()[splitIdx]) {
                 // Non-feature splits don't have dependencies.
                 continue;
             }
 
             // Implicit dependency on the base.
             final int targetIdx;
-            final String splitDependency = pkg.usesSplitNames[splitIdx];
+            final String splitDependency = pkg.getUsesSplitNames()[splitIdx];
             if (splitDependency != null) {
-                final int depIdx = Arrays.binarySearch(pkg.splitNames, splitDependency);
+                final int depIdx = Arrays.binarySearch(pkg.getSplitNames(), splitDependency);
                 if (depIdx < 0) {
-                    throw new IllegalDependencyException("Split '" + pkg.splitNames[splitIdx]
+                    throw new IllegalDependencyException("Split '" + pkg.getSplitNames()[splitIdx]
                             + "' requires split '" + splitDependency + "', which is missing.");
                 }
                 targetIdx = depIdx + 1;
@@ -188,26 +197,26 @@ public abstract class SplitDependencyLoader<E extends Exception> {
         // dependencies and are considered leaves.
         //
         // At this point, all splits in splitDependencies have the first element in their array set.
-        for (int splitIdx = 0; splitIdx < pkg.splitNames.length; splitIdx++) {
-            if (pkg.isFeatureSplits[splitIdx]) {
+        for (int splitIdx = 0, size = pkg.getSplitNames().length; splitIdx < size; splitIdx++) {
+            if (pkg.getIsFeatureSplits()[splitIdx]) {
                 // Feature splits are not configForSplits.
                 continue;
             }
 
             // Implicit feature for the base.
             final int targetSplitIdx;
-            final String configForSplit = pkg.configForSplit[splitIdx];
+            final String configForSplit = pkg.getConfigForSplit()[splitIdx];
             if (configForSplit != null) {
-                final int depIdx = Arrays.binarySearch(pkg.splitNames, configForSplit);
+                final int depIdx = Arrays.binarySearch(pkg.getSplitNames(), configForSplit);
                 if (depIdx < 0) {
-                    throw new IllegalDependencyException("Split '" + pkg.splitNames[splitIdx]
+                    throw new IllegalDependencyException("Split '" + pkg.getSplitNames()[splitIdx]
                             + "' targets split '" + configForSplit + "', which is missing.");
                 }
 
-                if (!pkg.isFeatureSplits[depIdx]) {
-                    throw new IllegalDependencyException("Split '" + pkg.splitNames[splitIdx]
+                if (!pkg.getIsFeatureSplits()[depIdx]) {
+                    throw new IllegalDependencyException("Split '" + pkg.getSplitNames()[splitIdx]
                             + "' declares itself as configuration split for a non-feature split '"
-                            + pkg.splitNames[depIdx] + "'");
+                            + pkg.getSplitNames()[depIdx] + "'");
                 }
                 targetSplitIdx = depIdx + 1;
             } else {

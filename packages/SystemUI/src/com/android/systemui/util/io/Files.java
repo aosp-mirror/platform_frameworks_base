@@ -18,6 +18,8 @@ package com.android.systemui.util.io;
 
 import androidx.annotation.NonNull;
 
+import com.android.systemui.dagger.SysUISingleton;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -28,12 +30,11 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Wrapper around {@link java.nio.file.Files} that can be mocked in tests.
  */
-@Singleton
+@SysUISingleton
 public class Files {
     @Inject
     public Files() { }

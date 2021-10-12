@@ -9,7 +9,7 @@ package {
 
 java_library_static {
     name: "services.people",
-    defaults: ["services_defaults"],
+    defaults: ["platform_service_defaults"],
     srcs: ["java/**/*.java"],
     libs: ["services.core"],
 }

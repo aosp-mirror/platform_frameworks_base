@@ -48,7 +48,7 @@ public class ActionButtonsPreferenceTest {
     @Before
     public void setUp() {
         mContext = RuntimeEnvironment.application;
-        mRootView = View.inflate(mContext, R.layout.settings_action_buttons, null /* parent */);
+        mRootView = View.inflate(mContext, R.layout.settingslib_action_buttons, null /* parent */);
         mHolder = PreferenceViewHolder.createInstanceForTests(mRootView);
         mPref = new ActionButtonsPreference(mContext);
     }
@@ -249,6 +249,114 @@ public class ActionButtonsPreferenceTest {
                         .getCompoundDrawables();
 
         assertThat(drawablesAroundText[1 /* top */]).isNull();
+    }
+
+    @Test
+    public void onBindViewHolder_setAllButton_shouldShowAllDivider() {
+        mPref.setButton1Text(R.string.install_other_apps);
+        mPref.setButton2Text(R.string.install_other_apps);
+        mPref.setButton3Text(R.string.install_other_apps);
+        mPref.setButton4Text(R.string.install_other_apps);
+
+        mPref.onBindViewHolder(mHolder);
+
+        assertThat(mRootView.findViewById(R.id.divider1).getVisibility())
+                .isEqualTo(View.VISIBLE);
+        assertThat(mRootView.findViewById(R.id.divider2).getVisibility())
+                .isEqualTo(View.VISIBLE);
+        assertThat(mRootView.findViewById(R.id.divider3).getVisibility())
+                .isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void onBindViewHolder_setAllButtonWithoutButton2_shouldHideDivider1() {
+        mPref.setButton1Text(R.string.install_other_apps);
+        mPref.setButton3Text(R.string.install_other_apps);
+        mPref.setButton4Text(R.string.install_other_apps);
+
+        mPref.onBindViewHolder(mHolder);
+
+        assertThat(mRootView.findViewById(R.id.divider1).getVisibility())
+                .isEqualTo(View.GONE);
+        assertThat(mRootView.findViewById(R.id.divider2).getVisibility())
+                .isEqualTo(View.VISIBLE);
+        assertThat(mRootView.findViewById(R.id.divider3).getVisibility())
+                .isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void onBindViewHolder_setAllButtonWithoutButton3_shouldHideDivider2() {
+        mPref.setButton1Text(R.string.install_other_apps);
+        mPref.setButton2Text(R.string.install_other_apps);
+        mPref.setButton4Text(R.string.install_other_apps);
+
+        mPref.onBindViewHolder(mHolder);
+
+        assertThat(mRootView.findViewById(R.id.divider1).getVisibility())
+                .isEqualTo(View.VISIBLE);
+        assertThat(mRootView.findViewById(R.id.divider2).getVisibility())
+                .isEqualTo(View.GONE);
+        assertThat(mRootView.findViewById(R.id.divider3).getVisibility())
+                .isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void onBindViewHolder_setButton1And4_shouldShowDivider3Only() {
+        mPref.setButton1Text(R.string.install_other_apps);
+        mPref.setButton4Text(R.string.install_other_apps);
+
+        mPref.onBindViewHolder(mHolder);
+
+        assertThat(mRootView.findViewById(R.id.divider1).getVisibility())
+                .isEqualTo(View.GONE);
+        assertThat(mRootView.findViewById(R.id.divider2).getVisibility())
+                .isEqualTo(View.GONE);
+        assertThat(mRootView.findViewById(R.id.divider3).getVisibility())
+                .isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void onBindViewHolder_setOneButtonOnly_noDivider() {
+        mPref.setButton4Text(R.string.install_other_apps);
+
+        mPref.onBindViewHolder(mHolder);
+
+        assertThat(mRootView.findViewById(R.id.divider1).getVisibility())
+                .isEqualTo(View.GONE);
+        assertThat(mRootView.findViewById(R.id.divider2).getVisibility())
+                .isEqualTo(View.GONE);
+        assertThat(mRootView.findViewById(R.id.divider3).getVisibility())
+                .isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void onBindViewHolder_setButton1And2_shouldShowDivider1Only() {
+        mPref.setButton1Text(R.string.install_other_apps);
+        mPref.setButton2Text(R.string.install_other_apps);
+
+        mPref.onBindViewHolder(mHolder);
+
+        assertThat(mRootView.findViewById(R.id.divider1).getVisibility())
+                .isEqualTo(View.VISIBLE);
+        assertThat(mRootView.findViewById(R.id.divider2).getVisibility())
+                .isEqualTo(View.GONE);
+        assertThat(mRootView.findViewById(R.id.divider3).getVisibility())
+                .isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void onBindViewHolder_setButton1And3_shouldShowDivider2Only() {
+        mPref.setButton1Text(R.string.install_other_apps);
+        mPref.setButton3Text(R.string.install_other_apps);
+
+        mPref.onBindViewHolder(mHolder);
+
+        assertThat(mRootView.findViewById(R.id.divider1).getVisibility())
+                .isEqualTo(View.GONE);
+        assertThat(mRootView.findViewById(R.id.divider2).getVisibility())
+                .isEqualTo(View.VISIBLE);
+        assertThat(mRootView.findViewById(R.id.divider3).getVisibility())
+                .isEqualTo(View.GONE);
     }
 
     public static ActionButtonsPreference createMock() {

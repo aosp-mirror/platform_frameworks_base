@@ -17,6 +17,34 @@
         }
       ],
       "file_patterns": ["Toast\\.java"]
+    },
+    {
+      "name": "CtsAutoFillServiceTestCases",
+      "options": [
+        {
+          "include-filter": "android.autofillservice.cts.dropdown.LoginActivityTest"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "android.platform.test.annotations.AppModeFull"
+        }
+      ]
+    },
+    {
+      "name": "CtsAutoFillServiceTestCases",
+      "options": [
+        {
+          "include-filter": "android.autofillservice.cts.dropdown.CheckoutActivityTest"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "android.platform.test.annotations.AppModeFull"
+        }
+      ]
     }
   ]
 }

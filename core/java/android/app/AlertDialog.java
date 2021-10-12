@@ -325,7 +325,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
     }
 
     /**
-     * Set a listener to be invoked when the positive button of the dialog is pressed.
+     * Set a listener to be invoked when the specified button of the dialog is pressed.
      *
      * @param whichButton Which button to set the listener on, can be one of
      *            {@link DialogInterface#BUTTON_POSITIVE},

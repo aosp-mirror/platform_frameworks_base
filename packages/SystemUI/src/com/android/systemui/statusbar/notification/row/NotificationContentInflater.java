@@ -27,8 +27,10 @@ import android.app.Notification;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.CancellationSignal;
+import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.view.View;
@@ -36,37 +38,31 @@ import android.widget.RemoteViews;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.ImageMessageConsumer;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
-import com.android.systemui.media.MediaDataManagerKt;
 import com.android.systemui.media.MediaFeatureFlag;
 import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
-import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.ConversationNotificationProcessor;
 import com.android.systemui.statusbar.notification.InflationException;
-import com.android.systemui.statusbar.notification.MediaNotificationProcessor;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
-import com.android.systemui.statusbar.policy.InflatedSmartReplies;
-import com.android.systemui.statusbar.policy.InflatedSmartReplies.SmartRepliesAndActions;
-import com.android.systemui.statusbar.policy.SmartReplyConstants;
+import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
+import com.android.systemui.statusbar.policy.InflatedSmartReplyViewHolder;
+import com.android.systemui.statusbar.policy.SmartReplyStateInflater;
 import com.android.systemui.util.Assert;
 
 import java.util.HashMap;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import dagger.Lazy;
 
 /**
  * {@link NotificationContentInflater} binds content to a {@link ExpandableNotificationRow} by
  * asynchronously building the content's {@link RemoteViews} and applying it to the row.
  */
-@Singleton
+@SysUISingleton
 @VisibleForTesting(visibility = PACKAGE)
 public class NotificationContentInflater implements NotificationRowContentBinder {
 
@@ -76,27 +72,24 @@ public class NotificationContentInflater implements NotificationRowContentBinder
     private final boolean mIsMediaInQS;
     private final NotificationRemoteInputManager mRemoteInputManager;
     private final NotifRemoteViewCache mRemoteViewCache;
-    private final Lazy<SmartReplyConstants> mSmartReplyConstants;
-    private final Lazy<SmartReplyController> mSmartReplyController;
     private final ConversationNotificationProcessor mConversationProcessor;
     private final Executor mBgExecutor;
+    private final SmartReplyStateInflater mSmartReplyStateInflater;
 
     @Inject
     NotificationContentInflater(
             NotifRemoteViewCache remoteViewCache,
             NotificationRemoteInputManager remoteInputManager,
-            Lazy<SmartReplyConstants> smartReplyConstants,
-            Lazy<SmartReplyController> smartReplyController,
             ConversationNotificationProcessor conversationProcessor,
             MediaFeatureFlag mediaFeatureFlag,
-            @Background Executor bgExecutor) {
+            @Background Executor bgExecutor,
+            SmartReplyStateInflater smartRepliesInflater) {
         mRemoteViewCache = remoteViewCache;
         mRemoteInputManager = remoteInputManager;
-        mSmartReplyConstants = smartReplyConstants;
-        mSmartReplyController = smartReplyController;
         mConversationProcessor = conversationProcessor;
         mIsMediaInQS = mediaFeatureFlag.getEnabled();
         mBgExecutor = bgExecutor;
+        mSmartReplyStateInflater = smartRepliesInflater;
     }
 
     @Override
@@ -132,8 +125,6 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 contentToBind,
                 mRemoteViewCache,
                 entry,
-                mSmartReplyConstants.get(),
-                mSmartReplyController.get(),
                 mConversationProcessor,
                 row,
                 bindParams.isLowPriority,
@@ -141,7 +132,8 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 bindParams.usesIncreasedHeadsUpHeight,
                 callback,
                 mRemoteInputManager.getRemoteViewsOnClickHandler(),
-                mIsMediaInQS);
+                mIsMediaInQS,
+                mSmartReplyStateInflater);
         if (mInflateSynchronously) {
             task.onPostExecute(task.doInBackground());
         } else {
@@ -157,17 +149,19 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             boolean inflateSynchronously,
             @InflationFlag int reInflateFlags,
             Notification.Builder builder,
-            Context packageContext) {
+            Context packageContext,
+            SmartReplyStateInflater smartRepliesInflater) {
         InflationProgress result = createRemoteViews(reInflateFlags,
                 builder,
                 bindParams.isLowPriority,
                 bindParams.usesIncreasedHeight,
                 bindParams.usesIncreasedHeadsUpHeight,
                 packageContext);
+
         result = inflateSmartReplyViews(result, reInflateFlags, entry,
-                row.getContext(), packageContext, row.getHeadsUpManager(),
-                mSmartReplyConstants.get(), mSmartReplyController.get(),
-                row.getExistingSmartRepliesAndActions());
+                row.getContext(), packageContext,
+                row.getExistingSmartReplyState(),
+                smartRepliesInflater);
 
         apply(
                 mBgExecutor,
@@ -268,22 +262,32 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         }
     }
 
-    private static InflationProgress inflateSmartReplyViews(InflationProgress result,
-            @InflationFlag int reInflateFlags, NotificationEntry entry, Context context,
-            Context packageContext, HeadsUpManager headsUpManager,
-            SmartReplyConstants smartReplyConstants, SmartReplyController smartReplyController,
-            SmartRepliesAndActions previousSmartRepliesAndActions) {
-        if ((reInflateFlags & FLAG_CONTENT_VIEW_EXPANDED) != 0 && result.newExpandedView != null) {
-            result.expandedInflatedSmartReplies =
-                    InflatedSmartReplies.inflate(
-                            context, packageContext, entry, smartReplyConstants,
-                            smartReplyController, headsUpManager, previousSmartRepliesAndActions);
+    private static InflationProgress inflateSmartReplyViews(
+            InflationProgress result,
+            @InflationFlag int reInflateFlags,
+            NotificationEntry entry,
+            Context context,
+            Context packageContext,
+            InflatedSmartReplyState previousSmartReplyState,
+            SmartReplyStateInflater inflater) {
+        boolean inflateContracted = (reInflateFlags & FLAG_CONTENT_VIEW_CONTRACTED) != 0
+                && result.newContentView != null;
+        boolean inflateExpanded = (reInflateFlags & FLAG_CONTENT_VIEW_EXPANDED) != 0
+                && result.newExpandedView != null;
+        boolean inflateHeadsUp = (reInflateFlags & FLAG_CONTENT_VIEW_HEADS_UP) != 0
+                && result.newHeadsUpView != null;
+        if (inflateContracted || inflateExpanded || inflateHeadsUp) {
+            result.inflatedSmartReplyState = inflater.inflateSmartReplyState(entry);
         }
-        if ((reInflateFlags & FLAG_CONTENT_VIEW_HEADS_UP) != 0 && result.newHeadsUpView != null) {
-            result.headsUpInflatedSmartReplies =
-                    InflatedSmartReplies.inflate(
-                            context, packageContext, entry, smartReplyConstants,
-                            smartReplyController, headsUpManager, previousSmartRepliesAndActions);
+        if (inflateExpanded) {
+            result.expandedInflatedSmartReplies = inflater.inflateSmartReplyViewHolder(
+                    context, packageContext, entry, previousSmartReplyState,
+                    result.inflatedSmartReplyState);
+        }
+        if (inflateHeadsUp) {
+            result.headsUpInflatedSmartReplies = inflater.inflateSmartReplyViewHolder(
+                    context, packageContext, entry, previousSmartReplyState,
+                    result.inflatedSmartReplyState);
         }
         return result;
     }
@@ -324,7 +328,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             NotifRemoteViewCache remoteViewCache,
             NotificationEntry entry,
             ExpandableNotificationRow row,
-            RemoteViews.OnClickHandler remoteViewClickHandler,
+            RemoteViews.InteractionHandler remoteViewClickHandler,
             @Nullable InflationCallback callback) {
         NotificationContentView privateLayout = row.getPrivateLayout();
         NotificationContentView publicLayout = row.getPublicLayout();
@@ -449,7 +453,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             final NotificationEntry entry,
             final ExpandableNotificationRow row,
             boolean isNewView,
-            RemoteViews.OnClickHandler remoteViewClickHandler,
+            RemoteViews.InteractionHandler remoteViewClickHandler,
             @Nullable final InflationCallback callback,
             NotificationContentView parentLayout,
             View existingView,
@@ -573,6 +577,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         NotificationContentView privateLayout = row.getPrivateLayout();
         NotificationContentView publicLayout = row.getPublicLayout();
         if (runningInflations.isEmpty()) {
+            boolean setRepliesAndActions = true;
             if ((reInflateFlags & FLAG_CONTENT_VIEW_CONTRACTED) != 0) {
                 if (result.inflatedContentView != null) {
                     // New view case
@@ -585,6 +590,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                     remoteViewCache.putCachedView(entry, FLAG_CONTENT_VIEW_CONTRACTED,
                             result.newContentView);
                 }
+                setRepliesAndActions = true;
             }
 
             if ((reInflateFlags & FLAG_CONTENT_VIEW_EXPANDED) != 0) {
@@ -606,6 +612,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                     privateLayout.setExpandedInflatedSmartReplies(null);
                 }
                 row.setExpandable(result.newExpandedView != null);
+                setRepliesAndActions = true;
             }
 
             if ((reInflateFlags & FLAG_CONTENT_VIEW_HEADS_UP) != 0) {
@@ -626,6 +633,10 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 } else {
                     privateLayout.setHeadsUpInflatedSmartReplies(null);
                 }
+                setRepliesAndActions = true;
+            }
+            if (setRepliesAndActions) {
+                privateLayout.setInflatedSmartReplyState(result.inflatedSmartReplyState);
             }
 
             if ((reInflateFlags & FLAG_CONTENT_VIEW_PUBLIC) != 0) {
@@ -709,15 +720,14 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         private final boolean mUsesIncreasedHeadsUpHeight;
         private final @InflationFlag int mReInflateFlags;
         private final NotifRemoteViewCache mRemoteViewCache;
-        private final SmartReplyConstants mSmartReplyConstants;
-        private final SmartReplyController mSmartReplyController;
         private final Executor mBgExecutor;
         private ExpandableNotificationRow mRow;
         private Exception mError;
-        private RemoteViews.OnClickHandler mRemoteViewClickHandler;
+        private RemoteViews.InteractionHandler mRemoteViewClickHandler;
         private CancellationSignal mCancellationSignal;
         private final ConversationNotificationProcessor mConversationProcessor;
         private final boolean mIsMediaInQS;
+        private final SmartReplyStateInflater mSmartRepliesInflater;
 
         private AsyncInflationTask(
                 Executor bgExecutor,
@@ -725,24 +735,22 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 @InflationFlag int reInflateFlags,
                 NotifRemoteViewCache cache,
                 NotificationEntry entry,
-                SmartReplyConstants smartReplyConstants,
-                SmartReplyController smartReplyController,
                 ConversationNotificationProcessor conversationProcessor,
                 ExpandableNotificationRow row,
                 boolean isLowPriority,
                 boolean usesIncreasedHeight,
                 boolean usesIncreasedHeadsUpHeight,
                 InflationCallback callback,
-                RemoteViews.OnClickHandler remoteViewClickHandler,
-                boolean isMediaFlagEnabled) {
+                RemoteViews.InteractionHandler remoteViewClickHandler,
+                boolean isMediaFlagEnabled,
+                SmartReplyStateInflater smartRepliesInflater) {
             mEntry = entry;
             mRow = row;
-            mSmartReplyConstants = smartReplyConstants;
-            mSmartReplyController = smartReplyController;
             mBgExecutor = bgExecutor;
             mInflateSynchronously = inflateSynchronously;
             mReInflateFlags = reInflateFlags;
             mRemoteViewCache = cache;
+            mSmartRepliesInflater = smartRepliesInflater;
             mContext = mRow.getContext();
             mIsLowPriority = isLowPriority;
             mUsesIncreasedHeight = usesIncreasedHeight;
@@ -760,10 +768,26 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             return mReInflateFlags;
         }
 
+        void updateApplicationInfo(StatusBarNotification sbn) {
+            String packageName = sbn.getPackageName();
+            int userId = UserHandle.getUserId(sbn.getUid());
+            final ApplicationInfo appInfo;
+            try {
+                // This method has an internal cache, so we don't need to add our own caching here.
+                appInfo = mContext.getPackageManager().getApplicationInfoAsUser(packageName,
+                        PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
+            } catch (PackageManager.NameNotFoundException e) {
+                return;
+            }
+            Notification.addFieldsFromContext(appInfo, sbn.getNotification());
+        }
+
         @Override
         protected InflationProgress doInBackground(Void... params) {
             try {
                 final StatusBarNotification sbn = mEntry.getSbn();
+                // Ensure the ApplicationInfo is updated before a builder is recovered.
+                updateApplicationInfo(sbn);
                 final Notification.Builder recoveredBuilder
                         = Notification.Builder.recoverBuilder(mContext,
                         sbn.getNotification());
@@ -773,23 +797,21 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                     // For all of our templates, we want it to be RTL
                     packageContext = new RtlEnabledContext(packageContext);
                 }
-                Notification notification = sbn.getNotification();
-                if (notification.isMediaNotification() && !(mIsMediaInQS
-                        && MediaDataManagerKt.isMediaNotification(sbn))) {
-                    MediaNotificationProcessor processor = new MediaNotificationProcessor(mContext,
-                            packageContext);
-                    processor.processNotification(notification, recoveredBuilder);
-                }
                 if (mEntry.getRanking().isConversation()) {
                     mConversationProcessor.processNotification(mEntry, recoveredBuilder);
                 }
                 InflationProgress inflationProgress = createRemoteViews(mReInflateFlags,
                         recoveredBuilder, mIsLowPriority, mUsesIncreasedHeight,
                         mUsesIncreasedHeadsUpHeight, packageContext);
-                return inflateSmartReplyViews(inflationProgress, mReInflateFlags, mEntry,
-                        mRow.getContext(), packageContext, mRow.getHeadsUpManager(),
-                        mSmartReplyConstants, mSmartReplyController,
-                        mRow.getExistingSmartRepliesAndActions());
+                InflatedSmartReplyState previousSmartReplyState = mRow.getExistingSmartReplyState();
+                return inflateSmartReplyViews(
+                        inflationProgress,
+                        mReInflateFlags,
+                        mEntry,
+                        mContext,
+                        packageContext,
+                        previousSmartReplyState,
+                        mSmartRepliesInflater);
             } catch (Exception e) {
                 mError = e;
                 return null;
@@ -883,8 +905,9 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         private CharSequence headsUpStatusBarText;
         private CharSequence headsUpStatusBarTextPublic;
 
-        private InflatedSmartReplies expandedInflatedSmartReplies;
-        private InflatedSmartReplies headsUpInflatedSmartReplies;
+        private InflatedSmartReplyState inflatedSmartReplyState;
+        private InflatedSmartReplyViewHolder expandedInflatedSmartReplies;
+        private InflatedSmartReplyViewHolder headsUpInflatedSmartReplies;
     }
 
     @VisibleForTesting

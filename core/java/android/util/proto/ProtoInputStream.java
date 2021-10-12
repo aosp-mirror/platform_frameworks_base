@@ -16,10 +16,11 @@
 
 package android.util.proto;
 
+import android.util.LongArray;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 
 /**
  * Class to read to a protobuf stream.
@@ -98,7 +99,7 @@ public final class ProtoInputStream extends ProtoStream {
     /**
      * Keeps track of the currently read nested Objects, for end object checking and debug
      */
-    private ArrayList<Long> mExpectedObjectTokenStack = null;
+    private LongArray mExpectedObjectTokenStack = null;
 
     /**
      * Current nesting depth of start calls.
@@ -498,7 +499,7 @@ public final class ProtoInputStream extends ProtoStream {
         int messageSize = (int) readVarint();
 
         if (mExpectedObjectTokenStack == null) {
-            mExpectedObjectTokenStack = new ArrayList<>();
+            mExpectedObjectTokenStack = new LongArray();
         }
         if (++mDepth == mExpectedObjectTokenStack.size()) {
             // Create a token to keep track of nested Object and extend the object stack

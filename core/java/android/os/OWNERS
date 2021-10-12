@@ -1,14 +1,18 @@
 # Haptics
+per-file CombinedVibrationEffect.aidl = michaelwr@google.com
+per-file CombinedVibrationEffect.java = michaelwr@google.com
 per-file ExternalVibration.aidl = michaelwr@google.com
 per-file ExternalVibration.java = michaelwr@google.com
 per-file IExternalVibrationController.aidl = michaelwr@google.com
 per-file IExternalVibratorService.aidl = michaelwr@google.com
-per-file IVibratorService.aidl = michaelwr@google.com
+per-file IVibratorManagerService.aidl = michaelwr@google.com
 per-file NullVibrator.java = michaelwr@google.com
 per-file SystemVibrator.java = michaelwr@google.com
+per-file SystemVibratorManager.java = michaelwr@google.com
 per-file VibrationEffect.aidl = michaelwr@google.com
 per-file VibrationEffect.java = michaelwr@google.com
 per-file Vibrator.java = michaelwr@google.com
+per-file VibratorManager.java = michaelwr@google.com
 
 # PowerManager
 per-file IPowerManager.aidl = michaelwr@google.com, santoscordon@google.com

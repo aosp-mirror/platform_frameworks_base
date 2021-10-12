@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-
 package com.android.server.pm;
-
 
 import android.annotation.NonNull;
 import android.content.IntentFilter;
 
-import com.android.server.IntentResolver;
+import com.android.server.utils.Snappable;
+import com.android.server.utils.SnapshotCache;
+
 import java.util.List;
 
 /**
  * Used to find a list of {@link CrossProfileIntentFilter}s that match an intent.
  */
 class CrossProfileIntentResolver
-        extends IntentResolver<CrossProfileIntentFilter, CrossProfileIntentFilter> {
+        extends WatchedIntentResolver<CrossProfileIntentFilter, CrossProfileIntentFilter>
+        implements Snappable {
     @Override
     protected CrossProfileIntentFilter[] newArray(int size) {
         return new CrossProfileIntentFilter[size];
@@ -46,6 +47,42 @@ class CrossProfileIntentResolver
 
     @Override
     protected IntentFilter getIntentFilter(@NonNull CrossProfileIntentFilter input) {
-        return input;
+        return input.getIntentFilter();
+    }
+
+    CrossProfileIntentResolver() {
+        mSnapshot = makeCache();
+    }
+
+    // Take the snapshot of F
+    protected CrossProfileIntentFilter snapshot(CrossProfileIntentFilter f) {
+        return (f == null) ? null : f.snapshot();
+    }
+
+    // Copy constructor used only to create a snapshot.
+    private CrossProfileIntentResolver(CrossProfileIntentResolver f) {
+        copyFrom(f);
+        mSnapshot = new SnapshotCache.Sealed();
+    }
+
+    // The cache for snapshots, so they are not rebuilt if the base object has not
+    // changed.
+    final SnapshotCache<CrossProfileIntentResolver> mSnapshot;
+
+    private SnapshotCache makeCache() {
+        return new SnapshotCache<CrossProfileIntentResolver>(this, this) {
+            @Override
+            public CrossProfileIntentResolver createSnapshot() {
+                return new CrossProfileIntentResolver(mSource);
+            }};
+    }
+
+    /**
+     * Return a snapshot of the current object.  The snapshot is a read-only copy suitable
+     * for read-only methods.
+     * @return A snapshot of the current object.
+     */
+    public CrossProfileIntentResolver snapshot() {
+        return mSnapshot.snapshot();
     }
 }

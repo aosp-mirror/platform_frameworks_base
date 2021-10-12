@@ -375,6 +375,13 @@ public class MockContext extends Context {
 
     /** @hide */
     @Override
+    public void sendBroadcastMultiplePermissions(Intent intent, String[] receiverPermissions,
+            Bundle options) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
     public void sendBroadcastAsUserMultiplePermissions(Intent intent, UserHandle user,
             String[] receiverPermissions) {
         throw new UnsupportedOperationException();
@@ -566,8 +573,23 @@ public class MockContext extends Context {
 
     /** @hide */
     @Override
+    @SystemApi
+    public Intent registerReceiverForAllUsers(BroadcastReceiver receiver,
+            IntentFilter filter, String broadcastPermission, Handler scheduler, int flags) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
     public Intent registerReceiverAsUser(BroadcastReceiver receiver, UserHandle user,
             IntentFilter filter, String broadcastPermission, Handler scheduler) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public Intent registerReceiverAsUser(BroadcastReceiver receiver, UserHandle user,
+            IntentFilter filter, String broadcastPermission, Handler scheduler, int flags) {
         throw new UnsupportedOperationException();
     }
 
@@ -822,6 +844,11 @@ public class MockContext extends Context {
     }
 
     @Override
+    public @NonNull Context createWindowContext(Display display, int type, Bundle options) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean isRestricted() {
         throw new UnsupportedOperationException();
     }
@@ -891,6 +918,12 @@ public class MockContext extends Context {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
+    @Override
+    public Context createTokenContext(@NonNull IBinder token, @NonNull Display display) {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public boolean isDeviceProtectedStorage() {
         throw new UnsupportedOperationException();
@@ -937,6 +970,12 @@ public class MockContext extends Context {
     /** {@hide} */
     @Override
     public boolean isUiContext() {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @Override
+    public boolean isConfigurationContext() {
         throw new UnsupportedOperationException();
     }
 }

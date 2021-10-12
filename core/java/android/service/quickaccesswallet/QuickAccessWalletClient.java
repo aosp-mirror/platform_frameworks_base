@@ -178,6 +178,14 @@ public interface QuickAccessWalletClient extends Closeable {
     Drawable getLogo();
 
     /**
+     * Returns the tile icon associated with the {@link QuickAccessWalletService}.
+     *
+     * @hide
+     */
+    @Nullable
+    Drawable getTileIcon();
+
+    /**
      * Returns the service label specified by {@code android:label} in the service manifest entry.
      *
      * @hide

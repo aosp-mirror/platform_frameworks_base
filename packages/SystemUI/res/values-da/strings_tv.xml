@@ -19,10 +19,11 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="notification_channel_tv_pip" msgid="844249465483874817">"Integreret billede"</string>
-    <string name="pip_notification_unknown_title" msgid="4413256731340767259">"(Program uden titel)"</string>
-    <string name="pip_close" msgid="5775212044472849930">"Luk integreret billede"</string>
-    <string name="pip_fullscreen" msgid="3877997489869475181">"Fuld skærm"</string>
     <string name="mic_active" msgid="5766614241012047024">"Mikrofonen er slået til"</string>
     <string name="app_accessed_mic" msgid="2754428675130470196">"%1$s fik adgang til din mikrofon"</string>
+    <string name="notification_vpn_connected" msgid="3891023882833274730">"VPN er tilsluttet"</string>
+    <string name="notification_vpn_disconnected" msgid="7150747626448044843">"VPN er afbrudt"</string>
+    <string name="notification_disclosure_vpn_text" msgid="3873532735584866236">"Via <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="tv_notification_panel_title" msgid="5311050946506276154">"Notifikationer"</string>
+    <string name="tv_notification_panel_no_notifications" msgid="9115191912267270678">"Ingen notifikationer"</string>
 </resources>

@@ -374,6 +374,7 @@ std::unique_ptr<XmlResource> Inflate(const void* data, size_t len, std::string* 
 
 std::unique_ptr<XmlResource> XmlResource::Clone() const {
   std::unique_ptr<XmlResource> cloned = util::make_unique<XmlResource>(file);
+  CloningValueTransformer cloner(&cloned->string_pool);
   if (root != nullptr) {
     cloned->root = root->CloneElement([&](const xml::Element& src, xml::Element* dst) {
       dst->attributes.reserve(src.attributes.size());
@@ -384,7 +385,7 @@ std::unique_ptr<XmlResource> XmlResource::Clone() const {
         cloned_attr.value = attr.value;
         cloned_attr.compiled_attribute = attr.compiled_attribute;
         if (attr.compiled_value != nullptr) {
-          cloned_attr.compiled_value.reset(attr.compiled_value->Clone(&cloned->string_pool));
+          cloned_attr.compiled_value = attr.compiled_value->Transform(cloner);
         }
         dst->attributes.push_back(std::move(cloned_attr));
       }

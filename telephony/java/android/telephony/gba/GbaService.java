@@ -36,8 +36,8 @@ import android.util.Log;
 import android.util.SparseArray;
 
 /**
-  * Base class for GBA (Generic Bootstrapping Architecture) Service. Any
-  * implementation which wants to provide GBA service must extend this class.
+  * Base class for GBA Service. Any implementation which wants to provide
+  * GBA service must extend this class.
   *
   * <p>Note that the application to implement the service must declare to use
   * the permission {@link android.Manifest.permission#BIND_GBA_SERVICE},

@@ -27,9 +27,9 @@
 #include <cstring>
 #include <memory>
 
-#include <android/log.h>
 #include <android/looper.h>
 #include <jni.h>
+#include <log/log.h>
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedLocalRef.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
@@ -37,10 +37,8 @@
 
 #include <android-base/stringprintf.h>
 
-#define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
-#define  LOGW(...)  __android_log_print(ANDROID_LOG_WARN,LOG_TAG,__VA_ARGS__)
-#define  LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
-#define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
+// Log debug messages about the output.
+static constexpr bool DEBUG_OUTPUT = false;
 
 namespace android {
 namespace uhid {
@@ -50,6 +48,7 @@ static const char* UHID_PATH = "/dev/uhid";
 static struct {
     jmethodID onDeviceOpen;
     jmethodID onDeviceGetReport;
+    jmethodID onDeviceSetReport;
     jmethodID onDeviceOutput;
     jmethodID onDeviceError;
 } gDeviceCallbackClassInfo;
@@ -61,7 +60,7 @@ static int handleLooperEvents(int /* fd */, int events, void* data) {
 
 static void checkAndClearException(JNIEnv* env, const char* methodName) {
     if (env->ExceptionCheck()) {
-        LOGE("An exception was thrown by callback '%s'.", methodName);
+        ALOGE("An exception was thrown by callback '%s'.", methodName);
         env->ExceptionClear();
     }
 }
@@ -115,9 +114,18 @@ void DeviceCallback::onDeviceGetReport(uint32_t requestId, uint8_t reportId) {
     checkAndClearException(env, "onDeviceGetReport");
 }
 
-void DeviceCallback::onDeviceOutput(const std::vector<uint8_t>& data) {
+void DeviceCallback::onDeviceSetReport(uint8_t rType,
+                                    const std::vector<uint8_t>& data) {
     JNIEnv* env = getJNIEnv();
-    env->CallVoidMethod(mCallbackObject, gDeviceCallbackClassInfo.onDeviceOutput,
+    env->CallVoidMethod(mCallbackObject, gDeviceCallbackClassInfo.onDeviceSetReport, rType,
+                        toJbyteArray(env, data).get());
+    checkAndClearException(env, "onDeviceSetReport");
+}
+
+void DeviceCallback::onDeviceOutput(uint8_t rType,
+                                    const std::vector<uint8_t>& data) {
+    JNIEnv* env = getJNIEnv();
+    env->CallVoidMethod(mCallbackObject, gDeviceCallbackClassInfo.onDeviceOutput, rType,
                         toJbyteArray(env, data).get());
     checkAndClearException(env, "onDeviceOutput");
 }
@@ -133,13 +141,13 @@ std::unique_ptr<Device> Device::open(int32_t id, const char* name, int32_t vid, 
                                      std::unique_ptr<DeviceCallback> callback) {
     size_t size = descriptor.size();
     if (size > HID_MAX_DESCRIPTOR_SIZE) {
-        LOGE("Received invalid hid report with descriptor size %zu, skipping", size);
+        ALOGE("Received invalid hid report with descriptor size %zu, skipping", size);
         return nullptr;
     }
 
     android::base::unique_fd fd(::open(UHID_PATH, O_RDWR | O_CLOEXEC));
     if (!fd.ok()) {
-        LOGE("Failed to open uhid: %s", strerror(errno));
+        ALOGE("Failed to open uhid: %s", strerror(errno));
         return nullptr;
     }
 
@@ -159,14 +167,14 @@ std::unique_ptr<Device> Device::open(int32_t id, const char* name, int32_t vid, 
     errno = 0;
     ssize_t ret = TEMP_FAILURE_RETRY(::write(fd, &ev, sizeof(ev)));
     if (ret < 0 || ret != sizeof(ev)) {
-        LOGE("Failed to create uhid node: %s", strerror(errno));
+        ALOGE("Failed to create uhid node: %s", strerror(errno));
         return nullptr;
     }
 
     // Wait for the device to actually be created.
     ret = TEMP_FAILURE_RETRY(::read(fd, &ev, sizeof(ev)));
     if (ret < 0 || ev.type != UHID_START) {
-        LOGE("uhid node failed to start: %s", strerror(errno));
+        ALOGE("uhid node failed to start: %s", strerror(errno));
         return nullptr;
     }
     // using 'new' to access non-public constructor
@@ -177,7 +185,7 @@ Device::Device(int32_t id, android::base::unique_fd fd, std::unique_ptr<DeviceCa
       : mId(id), mFd(std::move(fd)), mDeviceCallback(std::move(callback)) {
     ALooper* aLooper = ALooper_forThread();
     if (aLooper == NULL) {
-        LOGE("Could not get ALooper, ALooper_forThread returned NULL");
+        ALOGE("Could not get ALooper, ALooper_forThread returned NULL");
         aLooper = ALooper_prepare(ALOOPER_PREPARE_ALLOW_NON_CALLBACKS);
     }
     ALooper_addFd(aLooper, mFd, 0, ALOOPER_EVENT_INPUT, handleLooperEvents,
@@ -189,7 +197,7 @@ Device::~Device() {
     if (looper != NULL) {
         ALooper_removeFd(looper, mFd);
     } else {
-        LOGE("Could not remove fd, ALooper_forThread() returned NULL!");
+        ALOGE("Could not remove fd, ALooper_forThread() returned NULL!");
     }
     struct uhid_event ev = {};
     ev.type = UHID_DESTROY;
@@ -200,13 +208,13 @@ Device::~Device() {
 static void writeEvent(int fd, struct uhid_event& ev, const char* messageType) {
     ssize_t ret = TEMP_FAILURE_RETRY(::write(fd, &ev, sizeof(ev)));
     if (ret < 0 || ret != sizeof(ev)) {
-        LOGE("Failed to send uhid_event %s: %s", messageType, strerror(errno));
+        ALOGE("Failed to send uhid_event %s: %s", messageType, strerror(errno));
     }
 }
 
 void Device::sendReport(const std::vector<uint8_t>& report) const {
     if (report.size() > UHID_DATA_MAX) {
-        LOGE("Received invalid report of size %zu, skipping", report.size());
+        ALOGE("Received invalid report of size %zu, skipping", report.size());
         return;
     }
 
@@ -230,14 +238,14 @@ void Device::sendGetFeatureReportReply(uint32_t id, const std::vector<uint8_t>& 
 
 int Device::handleEvents(int events) {
     if (events & (ALOOPER_EVENT_ERROR | ALOOPER_EVENT_HANGUP)) {
-        LOGE("uhid node was closed or an error occurred. events=0x%x", events);
+        ALOGE("uhid node was closed or an error occurred. events=0x%x", events);
         mDeviceCallback->onDeviceError();
         return 0;
     }
     struct uhid_event ev;
     ssize_t ret = TEMP_FAILURE_RETRY(::read(mFd, &ev, sizeof(ev)));
     if (ret < 0) {
-        LOGE("Failed to read from uhid node: %s", strerror(errno));
+        ALOGE("Failed to read from uhid node: %s", strerror(errno));
         mDeviceCallback->onDeviceError();
         return 0;
     }
@@ -254,23 +262,29 @@ int Device::handleEvents(int events) {
         case UHID_SET_REPORT: {
             const struct uhid_set_report_req& set_report = ev.u.set_report;
             if (set_report.size > UHID_DATA_MAX) {
-                LOGE("SET_REPORT contains too much data: size = %" PRIu16, set_report.size);
+                ALOGE("SET_REPORT contains too much data: size = %" PRIu16, set_report.size);
                 return 0;
             }
 
             std::vector<uint8_t> data(set_report.data, set_report.data + set_report.size);
-            LOGI("Received SET_REPORT: id=%" PRIu32 " rnum=%" PRIu8 " data=%s", set_report.id,
-                 set_report.rnum, toString(data).c_str());
+            if (DEBUG_OUTPUT) {
+                ALOGD("Received SET_REPORT: id=%" PRIu32 " rnum=%" PRIu8 " data=%s", set_report.id,
+                      set_report.rnum, toString(data).c_str());
+            }
+            mDeviceCallback->onDeviceSetReport(set_report.rtype, data);
             break;
         }
         case UHID_OUTPUT: {
             struct uhid_output_req& output = ev.u.output;
             std::vector<uint8_t> data(output.data, output.data + output.size);
-            mDeviceCallback->onDeviceOutput(data);
+            if (DEBUG_OUTPUT) {
+                ALOGD("UHID_OUTPUT rtype=%" PRIu8 " data=%s", output.rtype, toString(data).c_str());
+            }
+            mDeviceCallback->onDeviceOutput(output.rtype, data);
             break;
         }
         default: {
-            LOGI("Unhandled event type: %" PRIu32, ev.type);
+            ALOGI("Unhandled event type: %" PRIu32, ev.type);
             break;
         }
     }
@@ -318,7 +332,7 @@ static void sendReport(JNIEnv* env, jclass /* clazz */, jlong ptr, jbyteArray ra
     if (d) {
         d->sendReport(report);
     } else {
-        LOGE("Could not send report, Device* is null!");
+        ALOGE("Could not send report, Device* is null!");
     }
 }
 
@@ -329,7 +343,7 @@ static void sendGetFeatureReportReply(JNIEnv* env, jclass /* clazz */, jlong ptr
         std::vector<uint8_t> report = getData(env, rawReport);
         d->sendGetFeatureReportReply(id, report);
     } else {
-        LOGE("Could not send get feature report reply, Device* is null!");
+        ALOGE("Could not send get feature report reply, Device* is null!");
     }
 }
 
@@ -354,20 +368,22 @@ static JNINativeMethod sMethods[] = {
 int register_com_android_commands_hid_Device(JNIEnv* env) {
     jclass clazz = env->FindClass("com/android/commands/hid/Device$DeviceCallback");
     if (clazz == NULL) {
-        LOGE("Unable to find class 'DeviceCallback'");
+        ALOGE("Unable to find class 'DeviceCallback'");
         return JNI_ERR;
     }
     uhid::gDeviceCallbackClassInfo.onDeviceOpen =
             env->GetMethodID(clazz, "onDeviceOpen", "()V");
     uhid::gDeviceCallbackClassInfo.onDeviceGetReport =
             env->GetMethodID(clazz, "onDeviceGetReport", "(II)V");
+    uhid::gDeviceCallbackClassInfo.onDeviceSetReport =
+            env->GetMethodID(clazz, "onDeviceSetReport", "(B[B)V");
     uhid::gDeviceCallbackClassInfo.onDeviceOutput =
-            env->GetMethodID(clazz, "onDeviceOutput", "([B)V");
+            env->GetMethodID(clazz, "onDeviceOutput", "(B[B)V");
     uhid::gDeviceCallbackClassInfo.onDeviceError =
             env->GetMethodID(clazz, "onDeviceError", "()V");
     if (uhid::gDeviceCallbackClassInfo.onDeviceOpen == NULL ||
             uhid::gDeviceCallbackClassInfo.onDeviceError == NULL) {
-        LOGE("Unable to obtain onDeviceOpen or onDeviceError methods");
+        ALOGE("Unable to obtain onDeviceOpen or onDeviceError methods");
         return JNI_ERR;
     }
 

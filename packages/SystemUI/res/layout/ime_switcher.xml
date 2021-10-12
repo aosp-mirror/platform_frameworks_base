@@ -15,7 +15,7 @@
   ~ limitations under the License
   -->
 
-<com.android.systemui.statusbar.policy.KeyButtonView
+<com.android.systemui.navigationbar.buttons.KeyButtonView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/ime_switcher"
     android:layout_width="@dimen/navigation_key_width"

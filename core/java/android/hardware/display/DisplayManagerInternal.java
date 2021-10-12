@@ -16,17 +16,24 @@
 
 package android.hardware.display;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.graphics.Point;
 import android.hardware.SensorManager;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.util.IntArray;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Display manager local system service interface.
@@ -34,6 +41,16 @@ import android.view.SurfaceControl.Transaction;
  * @hide Only for use within the system server.
  */
 public abstract class DisplayManagerInternal {
+
+    @IntDef(prefix = {"REFRESH_RATE_LIMIT_"}, value = {
+            REFRESH_RATE_LIMIT_HIGH_BRIGHTNESS_MODE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RefreshRateLimitType {}
+
+    /** Refresh rate should be limited when High Brightness Mode is active. */
+    public static final int REFRESH_RATE_LIMIT_HIGH_BRIGHTNESS_MODE = 1;
+
     /**
      * Called by the power manager to initialize power management facilities.
      */
@@ -47,22 +64,40 @@ public abstract class DisplayManagerInternal {
      * begins adjusting the power state to match what was requested.
      * </p>
      *
+     * @param groupId The identifier for the display group being requested to change power state
      * @param request The requested power state.
-     * @param waitForNegativeProximity If true, issues a request to wait for
+     * @param waitForNegativeProximity If {@code true}, issues a request to wait for
      * negative proximity before turning the screen back on, assuming the screen
      * was turned off by the proximity sensor.
-     * @return True if display is ready, false if there are important changes that must
-     * be made asynchronously (such as turning the screen on), in which case the caller
-     * should grab a wake lock, watch for {@link DisplayPowerCallbacks#onStateChanged()}
-     * then try the request again later until the state converges.
+     * @return {@code true} if display group is ready, {@code false} if there are important
+     * changes that must be made asynchronously (such as turning the screen on), in which case
+     * the caller should grab a wake lock, watch for {@link DisplayPowerCallbacks#onStateChanged}
+     * then try the request again later until the state converges. If the provided {@code groupId}
+     * cannot be found then {@code true} will be returned.
      */
-    public abstract boolean requestPowerState(DisplayPowerRequest request,
+    public abstract boolean requestPowerState(int groupId, DisplayPowerRequest request,
             boolean waitForNegativeProximity);
 
     /**
-     * Returns true if the proximity sensor screen-off function is available.
+     * Returns {@code true} if the proximity sensor screen-off function is available.
      */
     public abstract boolean isProximitySensorAvailable();
+
+    /**
+     * Registers a display group listener which will be informed of the addition, removal, or change
+     * of display groups.
+     *
+     * @param listener The listener to register.
+     */
+    public abstract void registerDisplayGroupListener(DisplayGroupListener listener);
+
+    /**
+     * Unregisters a display group listener which will be informed of the addition, removal, or
+     * change of display groups.
+     *
+     * @param listener The listener to unregister.
+     */
+    public abstract void unregisterDisplayGroupListener(DisplayGroupListener listener);
 
     /**
      * Screenshot for internal system-only use such as rotation, etc.  This method includes
@@ -72,7 +107,7 @@ public abstract class DisplayManagerInternal {
      * @param displayId The display id to take the screenshot of.
      * @return The buffer or null if we have failed.
      */
-    public abstract SurfaceControl.ScreenshotGraphicBuffer systemScreenshot(int displayId);
+    public abstract SurfaceControl.ScreenshotHardwareBuffer systemScreenshot(int displayId);
 
     /**
      * General screenshot functionality that excludes secure layers and applies appropriate
@@ -81,7 +116,7 @@ public abstract class DisplayManagerInternal {
      * @param displayId The display id to take the screenshot of.
      * @return The buffer or null if we have failed.
      */
-    public abstract SurfaceControl.ScreenshotGraphicBuffer userScreenshot(int displayId);
+    public abstract SurfaceControl.ScreenshotHardwareBuffer userScreenshot(int displayId);
 
     /**
      * Returns information about the specified logical display.
@@ -172,6 +207,10 @@ public abstract class DisplayManagerInternal {
      * has a preference.
      * @param requestedModeId The preferred mode id for the top-most visible window that has a
      * preference.
+     * @param requestedMinRefreshRate The preferred lowest refresh rate for the top-most visible
+     *                                window that has a preference.
+     * @param requestedMaxRefreshRate The preferred highest refresh rate for the top-most visible
+     *                                window that has a preference.
      * @param requestedMinimalPostProcessing The preferred minimal post processing setting for the
      * display. This is true when there is at least one visible window that wants minimal post
      * processng on.
@@ -179,7 +218,8 @@ public abstract class DisplayManagerInternal {
      * prior to call to performTraversalInTransactionFromWindowManager.
      */
     public abstract void setDisplayProperties(int displayId, boolean hasContent,
-            float requestedRefreshRate, int requestedModeId, boolean requestedMinimalPostProcessing,
+            float requestedRefreshRate, int requestedModeId, float requestedMinRefreshRate,
+            float requestedMaxRefreshRate, boolean requestedMinimalPostProcessing,
             boolean inTraversal);
 
     /**
@@ -265,6 +305,39 @@ public abstract class DisplayManagerInternal {
      * is obstructing the proximity sensor.
      */
     public abstract void ignoreProximitySensorUntilChanged();
+
+    /**
+     * Returns the refresh rate switching type.
+     */
+    @DisplayManager.SwitchingType
+    public abstract int getRefreshRateSwitchingType();
+
+    /**
+     * TODO: b/191384041 - Replace this with getRefreshRateLimitations()
+     * Return the refresh rate restriction for the specified display and sensor pairing. If the
+     * specified sensor is identified as an associated sensor in the specified display's
+     * display-device-config file, then return any refresh rate restrictions that it might define.
+     * If no restriction is specified, or the sensor is not associated with the display, then null
+     * will be returned.
+     *
+     * @param displayId The display to check against.
+     * @param name The name of the sensor.
+     * @param type The type of sensor.
+     *
+     * @return The min/max refresh-rate restriction as a {@link Pair} of floats, or null if not
+     * restricted.
+     */
+    public abstract RefreshRateRange getRefreshRateForDisplayAndSensor(
+            int displayId, String name, String type);
+
+    /**
+     * Returns a list of various refresh rate limitations for the specified display.
+     *
+     * @param displayId The display to get limitations for.
+     *
+     * @return a list of {@link RefreshRateLimitation}s describing the various limits.
+     */
+    public abstract List<RefreshRateLimitation> getRefreshRateLimitations(int displayId);
 
     /**
      * Describes the requested power state of the display.
@@ -372,7 +445,7 @@ public abstract class DisplayManagerInternal {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             return o instanceof DisplayPowerRequest
                     && equals((DisplayPowerRequest)o);
         }
@@ -445,7 +518,7 @@ public abstract class DisplayManagerInternal {
         void onStateChanged();
         void onProximityPositive();
         void onProximityNegative();
-        void onDisplayStateChange(int state); // one of the Display state constants
+        void onDisplayStateChange(boolean allInactive, boolean allOff);
 
         void acquireSuspendBlocker();
         void releaseSuspendBlocker();
@@ -458,5 +531,134 @@ public abstract class DisplayManagerInternal {
      */
     public interface DisplayTransactionListener {
         void onDisplayTransaction(Transaction t);
+    }
+
+    /**
+     * Called when there are changes to {@link com.android.server.display.DisplayGroup
+     * DisplayGroups}.
+     */
+    public interface DisplayGroupListener {
+        /**
+         * A new display group with the provided {@code groupId} was added.
+         *
+         * <ol>
+         *     <li>The {@code groupId} is applied to all appropriate {@link Display displays}.
+         *     <li>This method is called.
+         *     <li>{@link android.hardware.display.DisplayManager.DisplayListener DisplayListeners}
+         *     are informed of any corresponding changes.
+         * </ol>
+         */
+        void onDisplayGroupAdded(int groupId);
+
+        /**
+         * The display group with the provided {@code groupId} was removed.
+         *
+         * <ol>
+         *     <li>All affected {@link Display displays} have their group IDs updated appropriately.
+         *     <li>{@link android.hardware.display.DisplayManager.DisplayListener DisplayListeners}
+         *     are informed of any corresponding changes.
+         *     <li>This method is called.
+         * </ol>
+         */
+        void onDisplayGroupRemoved(int groupId);
+
+        /**
+         * The display group with the provided {@code groupId} has changed.
+         *
+         * <ol>
+         *     <li>All affected {@link Display displays} have their group IDs updated appropriately.
+         *     <li>{@link android.hardware.display.DisplayManager.DisplayListener DisplayListeners}
+         *     are informed of any corresponding changes.
+         *     <li>This method is called.
+         * </ol>
+         */
+        void onDisplayGroupChanged(int groupId);
+    }
+
+    /**
+     * Information about the min and max refresh rate DM would like to set the display to.
+     */
+    public static final class RefreshRateRange {
+        public static final String TAG = "RefreshRateRange";
+
+        // The tolerance within which we consider something approximately equals.
+        public static final float FLOAT_TOLERANCE = 0.01f;
+
+        /**
+         * The lowest desired refresh rate.
+         */
+        public float min;
+
+        /**
+         * The highest desired refresh rate.
+         */
+        public float max;
+
+        public RefreshRateRange() {}
+
+        public RefreshRateRange(float min, float max) {
+            if (min < 0 || max < 0 || min > max + FLOAT_TOLERANCE) {
+                Slog.e(TAG, "Wrong values for min and max when initializing RefreshRateRange : "
+                        + min + " " + max);
+                this.min = this.max = 0;
+                return;
+            }
+            if (min > max) {
+                // Min and max are within epsilon of each other, but in the wrong order.
+                float t = min;
+                min = max;
+                max = t;
+            }
+            this.min = min;
+            this.max = max;
+        }
+
+        /**
+         * Checks whether the two objects have the same values.
+         */
+        @Override
+        public boolean equals(Object other) {
+            if (other == this) {
+                return true;
+            }
+
+            if (!(other instanceof RefreshRateRange)) {
+                return false;
+            }
+
+            RefreshRateRange refreshRateRange = (RefreshRateRange) other;
+            return (min == refreshRateRange.min && max == refreshRateRange.max);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(min, max);
+        }
+
+        @Override
+        public String toString() {
+            return "(" + min + " " + max + ")";
+        }
+    }
+
+    /**
+     * Describes a limitation on a display's refresh rate. Includes the allowed refresh rate
+     * range as well as information about when it applies, such as high-brightness-mode.
+     */
+    public static final class RefreshRateLimitation {
+        @RefreshRateLimitType public int type;
+
+        /** The range the that refresh rate should be limited to. */
+        public RefreshRateRange range;
+
+        public RefreshRateLimitation(@RefreshRateLimitType int type, float min, float max) {
+            this.type = type;
+            range = new RefreshRateRange(min, max);
+        }
+
+        @Override
+        public String toString() {
+            return "RefreshRateLimitation(" + type + ": " + range + ")";
+        }
     }
 }

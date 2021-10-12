@@ -64,10 +64,10 @@ public final class ShutdownThread extends Thread {
     private static final int ACTION_DONE_POLL_WAIT_MS = 500;
     private static final int RADIOS_STATE_POLL_SLEEP_MS = 100;
     // maximum time we wait for the shutdown broadcast before going on.
-    private static final int MAX_BROADCAST_TIME = 10*1000;
-    private static final int MAX_SHUTDOWN_WAIT_TIME = 20*1000;
-    private static final int MAX_RADIO_WAIT_TIME = 12*1000;
-    private static final int MAX_UNCRYPT_WAIT_TIME = 15*60*1000;
+    private static final int MAX_BROADCAST_TIME = 10 * 1000;
+    private static final int MAX_CHECK_POINTS_DUMP_WAIT_TIME = 10 * 1000;
+    private static final int MAX_RADIO_WAIT_TIME = 12 * 1000;
+    private static final int MAX_UNCRYPT_WAIT_TIME = 15 * 60 * 1000;
     // constants for progress bar. the values are roughly estimated based on timeout.
     private static final int BROADCAST_STOP_PERCENT = 2;
     private static final int ACTIVITY_MANAGER_STOP_PERCENT = 4;
@@ -105,8 +105,11 @@ public final class ShutdownThread extends Thread {
     // Metrics that will be reported to tron after reboot
     private static final ArrayMap<String, Long> TRON_METRICS = new ArrayMap<>();
 
-    // File to use for save metrics
+    // File to use for saving shutdown metrics
     private static final String METRICS_FILE_BASENAME = "/data/system/shutdown-metrics";
+    // File to use for saving shutdown check points
+    private static final String CHECK_POINTS_FILE_BASENAME =
+            "/data/system/shutdown-checkpoints/checkpoints";
 
     // Metrics names to be persisted in shutdown-metrics file
     private static String METRIC_SYSTEM_SERVER = "shutdown_system_server";
@@ -161,6 +164,10 @@ public final class ShutdownThread extends Thread {
                 return;
             }
         }
+
+        // Add checkpoint for this shutdown attempt. The user might still cancel the dialog, but
+        // this point preserves the system trace of the trigger point of the ShutdownThread.
+        ShutdownCheckPoints.recordCheckPoint(/* reason= */ null);
 
         final int longPressBehavior = context.getResources().getInteger(
                         com.android.internal.R.integer.config_longPressOnPowerBehavior);
@@ -422,6 +429,11 @@ public final class ShutdownThread extends Thread {
         metricShutdownStart();
         metricStarted(METRIC_SYSTEM_SERVER);
 
+        // Start dumping check points for this shutdown in a separate thread.
+        Thread dumpCheckPointsThread = ShutdownCheckPoints.newDumpThread(
+                new File(CHECK_POINTS_FILE_BASENAME));
+        dumpCheckPointsThread.start();
+
         BroadcastReceiver br = new BroadcastReceiver() {
             @Override public void onReceive(Context context, Intent intent) {
                 // We don't allow apps to cancel this, so ignore the result.
@@ -541,6 +553,14 @@ public final class ShutdownThread extends Thread {
             // done yet, trigger it now.
             uncrypt();
         }
+
+        // Wait for the check points dump thread to finish, or kill it if not finished in time.
+        shutdownTimingLog.traceBegin("ShutdownCheckPointsDumpWait");
+        try {
+            dumpCheckPointsThread.join(MAX_CHECK_POINTS_DUMP_WAIT_TIME);
+        } catch (InterruptedException ex) {
+        }
+        shutdownTimingLog.traceEnd(); // ShutdownCheckPointsDumpWait
 
         shutdownTimingLog.traceEnd(); // SystemServerShutdown
         metricEnded(METRIC_SYSTEM_SERVER);

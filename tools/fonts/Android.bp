@@ -46,3 +46,15 @@ python_binary_host {
         "fontTools",
     ],
 }
+
+python_binary_host {
+    name: "update_font_metadata",
+    defaults: ["fonts_python_defaults"],
+    main: "update_font_metadata.py",
+    srcs: [
+        "update_font_metadata.py",
+    ],
+    libs: [
+        "fontTools",
+    ],
+}

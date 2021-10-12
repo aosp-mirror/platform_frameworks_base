@@ -77,18 +77,6 @@ public abstract class DevicePolicyManagerInternal {
             OnCrossProfileWidgetProvidersChangeListener listener);
 
     /**
-     * Checks if an app with given uid is an active device admin of its user and has the policy
-     * specified.
-     *
-     * <p>This takes the DPMS lock.  DO NOT call from PM/UM/AM with their lock held.
-     *
-     * @param uid App uid.
-     * @param reqPolicy Required policy, for policies see {@link DevicePolicyManager}.
-     * @return true if the uid is an active admin with the given policy.
-     */
-    public abstract boolean isActiveAdminWithPolicy(int uid, int reqPolicy);
-
-    /**
      * Checks if an app with given uid is an active device owner of its user.
      *
      * <p>This takes the DPMS lock.  DO NOT call from PM/UM/AM with their lock held.
@@ -243,7 +231,18 @@ public abstract class DevicePolicyManagerInternal {
      * Returns the profile owner component for the given user, or {@code null} if there is not one.
      */
     @Nullable
-    public abstract ComponentName getProfileOwnerAsUser(int userHandle);
+    public abstract ComponentName getProfileOwnerAsUser(@UserIdInt int userId);
+
+    /**
+     * Returns the user id of the device owner, or {@link UserHandle#USER_NULL} if there is not one.
+     */
+    @UserIdInt
+    public abstract int getDeviceOwnerUserId();
+
+    /**
+     * Returns whether the given package is a device owner or a profile owner in the calling user.
+     */
+    public abstract boolean isDeviceOrProfileOwnerInCallingUser(String packageName);
 
     /**
      * Returns whether this class supports being deferred the responsibility for resetting the given
@@ -256,9 +255,4 @@ public abstract class DevicePolicyManagerInternal {
      * {@link #supportsResetOp(int)} is true.
      */
     public abstract void resetOp(int op, String packageName, @UserIdInt int userId);
-
-    /**
-     * Returns whether the given package is a device owner or a profile owner in the calling user.
-     */
-    public abstract boolean isDeviceOrProfileOwnerInCallingUser(String packageName);
 }

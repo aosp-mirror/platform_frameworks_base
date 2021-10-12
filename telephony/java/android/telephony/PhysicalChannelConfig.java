@@ -125,6 +125,7 @@ public final class PhysicalChannelConfig implements Parcelable {
 
     /**
      * The physical cell identifier for this cell - PCI, PSC, {@link #PHYSICAL_CELL_ID_UNKNOWN}
+     * if unknown.
      */
     private int mPhysicalCellId;
 
@@ -569,7 +570,8 @@ public final class PhysicalChannelConfig implements Parcelable {
         }
 
         public @NonNull Builder setFrequencyRange(int frequencyRange) {
-            if (!ServiceState.isFrequencyRangeValid(frequencyRange)) {
+            if (!ServiceState.isFrequencyRangeValid(frequencyRange)
+                    && frequencyRange != ServiceState.FREQUENCY_RANGE_UNKNOWN) {
                 throw new IllegalArgumentException("Frequency range: " + frequencyRange +
                         " is invalid.");
             }

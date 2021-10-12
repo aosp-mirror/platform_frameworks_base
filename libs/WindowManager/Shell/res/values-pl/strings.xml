@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Copyright (C) 2020 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="pip_phone_close" msgid="5783752637260411309">"Zamknij"</string>
+    <string name="pip_phone_expand" msgid="2579292903468287504">"Rozwiń"</string>
+    <string name="pip_phone_settings" msgid="5468987116750491918">"Ustawienia"</string>
+    <string name="pip_menu_title" msgid="5393619322111827096">"Menu"</string>
+    <string name="pip_notification_title" msgid="1347104727641353453">"Aplikacja <xliff:g id="NAME">%s</xliff:g> działa w trybie obraz w obrazie"</string>
+    <string name="pip_notification_message" msgid="8854051911700302620">"Jeśli nie chcesz, by aplikacja <xliff:g id="NAME">%s</xliff:g> korzystała z tej funkcji, otwórz ustawienia i wyłącz ją."</string>
+    <string name="pip_play" msgid="3496151081459417097">"Odtwórz"</string>
+    <string name="pip_pause" msgid="690688849510295232">"Wstrzymaj"</string>
+    <string name="pip_skip_to_next" msgid="8403429188794867653">"Dalej"</string>
+    <string name="pip_skip_to_prev" msgid="7172158111196394092">"Wstecz"</string>
+    <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Zmień rozmiar"</string>
+    <string name="dock_forced_resizable" msgid="1749750436092293116">"Aplikacja może nie działać przy podzielonym ekranie."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Aplikacja nie obsługuje dzielonego ekranu."</string>
+    <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Aplikacja może nie działać na dodatkowym ekranie."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Aplikacja nie obsługuje uruchamiania na dodatkowych ekranach."</string>
+    <string name="accessibility_divider" msgid="703810061635792791">"Linia dzielenia ekranu"</string>
+    <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Lewa część ekranu na pełnym ekranie"</string>
+    <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"70% lewej części ekranu"</string>
+    <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"50% lewej części ekranu"</string>
+    <string name="accessibility_action_divider_left_30" msgid="6023611335723838727">"30% lewej części ekranu"</string>
+    <string name="accessibility_action_divider_right_full" msgid="3408505054325944903">"Prawa część ekranu na pełnym ekranie"</string>
+    <string name="accessibility_action_divider_top_full" msgid="3495871951082107594">"Górna część ekranu na pełnym ekranie"</string>
+    <string name="accessibility_action_divider_top_70" msgid="1779164068887875474">"70% górnej części ekranu"</string>
+    <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"50% górnej części ekranu"</string>
+    <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"30% górnej części ekranu"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Dolna część ekranu na pełnym ekranie"</string>
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Korzystanie z trybu jednej ręki"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Aby zamknąć, przesuń palcem z dołu ekranu w górę lub kliknij dowolne miejsce nad aplikacją"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Uruchom tryb jednej ręki"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Zamknij tryb jednej ręki"</string>
+    <string name="bubbles_settings_button_description" msgid="1301286017420516912">"Ustawienia dymków aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"Przepełnienie"</string>
+    <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Dodaj ponownie do stosu"</string>
+    <string name="bubble_content_description_single" msgid="8495748092720065813">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> z aplikacji <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
+    <string name="bubble_content_description_stack" msgid="8071515017164630429">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> z aplikacji <xliff:g id="APP_NAME">%2$s</xliff:g> i jeszcze <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
+    <string name="bubble_accessibility_action_move_top_left" msgid="2644118920500782758">"Przenieś w lewy górny róg"</string>
+    <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Przenieś w prawy górny róg"</string>
+    <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Przenieś w lewy dolny róg"</string>
+    <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Przenieś w prawy dolny róg"</string>
+    <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> – ustawienia"</string>
+    <string name="bubble_dismiss_text" msgid="8816558050659478158">"Zamknij dymek"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Nie wyświetlaj rozmowy jako dymka"</string>
+    <string name="bubbles_user_education_title" msgid="2112319053732691899">"Czatuj, korzystając z dymków"</string>
+    <string name="bubbles_user_education_description" msgid="4215862563054175407">"Nowe rozmowy będą wyświetlane jako pływające ikony lub dymki. Kliknij, by otworzyć dymek. Przeciągnij, by go przenieść."</string>
+    <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Zarządzaj dymkami w dowolnym momencie"</string>
+    <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Kliknij Zarządzaj, aby wyłączyć dymki z tej aplikacji"</string>
+    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"OK"</string>
+    <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Brak ostatnich dymków"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Tutaj będą pojawiać się ostatnie i odrzucone dymki"</string>
+    <string name="notification_bubble_title" msgid="6082910224488253378">"Dymek"</string>
+    <string name="manage_bubbles_text" msgid="7730624269650594419">"Zarządzaj"</string>
+    <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Zamknięto dymek"</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"Kliknij, by uruchomić tę aplikację ponownie i przejść w tryb pełnoekranowy."</string>
+    <string name="got_it" msgid="4428750913636945527">"OK"</string>
+</resources>

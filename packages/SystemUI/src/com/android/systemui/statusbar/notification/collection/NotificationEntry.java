@@ -35,23 +35,23 @@ import static com.android.systemui.statusbar.notification.stack.NotificationSect
 
 import static java.util.Objects.requireNonNull;
 
-import android.annotation.CurrentTimeMillisLong;
 import android.app.Notification;
 import android.app.Notification.MessagingStyle.Message;
 import android.app.NotificationChannel;
 import android.app.NotificationManager.Policy;
 import android.app.Person;
 import android.app.RemoteInput;
-import android.app.RemoteInputHistoryItem;
 import android.content.Context;
 import android.content.pm.ShortcutInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.os.SystemClock;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
+import android.view.ContentInfo;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -61,6 +61,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.notification.collection.NotifCollection.CancellationReason;
+import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifDismissInterceptor;
@@ -70,7 +71,6 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.stack.PriorityBucket;
-import com.android.systemui.statusbar.phone.NotificationGroupManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,7 +96,6 @@ public final class NotificationEntry extends ListEntry {
     private final String mKey;
     private StatusBarNotification mSbn;
     private Ranking mRanking;
-    private long mCreationTime;
 
     /*
      * Bookkeeping members
@@ -128,8 +127,12 @@ public final class NotificationEntry extends ListEntry {
     public int targetSdk;
     private long lastFullScreenIntentLaunchTime = NOT_LAUNCHED_YET;
     public CharSequence remoteInputText;
+    // Mimetype and Uri used to display the image in the notification *after* it has been sent.
     public String remoteInputMimeType;
     public Uri remoteInputUri;
+    // ContentInfo used to keep the attachment permission alive until RemoteInput is sent or
+    // cancelled.
+    public ContentInfo remoteInputAttachment;
     private Notification.BubbleMetadata mBubbleMetadata;
     private ShortcutInfo mShortcutInfo;
 
@@ -178,7 +181,11 @@ public final class NotificationEntry extends ListEntry {
     private int mBucket = BUCKET_ALERTING;
     @Nullable private Long mPendingAnimationDuration;
     private boolean mIsMarkedForUserTriggeredMovement;
-    private boolean mShelfIconVisible;
+    private boolean mIsAlerting;
+
+    public boolean mRemoteEditImeAnimatingAway;
+    public boolean mRemoteEditImeVisible;
+    private boolean mExpandAnimationRunning;
 
     /**
      * @param sbn the StatusBarNotification from system server
@@ -198,11 +205,10 @@ public final class NotificationEntry extends ListEntry {
             boolean allowFgsDismissal,
             long creationTime
     ) {
-        super(requireNonNull(requireNonNull(sbn).getKey()));
+        super(requireNonNull(requireNonNull(sbn).getKey()), creationTime);
 
         requireNonNull(ranking);
 
-        mCreationTime = creationTime;
         mKey = sbn.getKey();
         setSbn(sbn);
         setRanking(ranking);
@@ -252,21 +258,6 @@ public final class NotificationEntry extends ListEntry {
      */
     public Ranking getRanking() {
         return mRanking;
-    }
-
-    /**
-     * A timestamp of SystemClock.uptimeMillis() of when this entry was first created, regardless
-     * of any changes to the data presented. It is set once on creation and will never change, and
-     * allows us to know exactly how long this notification has been alive for in our listener
-     * service. It is entirely unrelated to the information inside of the notification.
-     *
-     * This is different to Notification#when because it persists throughout updates, whereas
-     * system server treats every single call to notify() as a new notification and we handle
-     * updates to NotificationEntry locally.
-     */
-    @CurrentTimeMillisLong
-    public long getCreationTime() {
-        return mCreationTime;
     }
 
     /**
@@ -432,7 +423,6 @@ public final class NotificationEntry extends ListEntry {
     //TODO: This will go away when we have a way to bind an entry to a row
     public void setRow(ExpandableNotificationRow row) {
         this.row = row;
-        updateShelfIconVisibility();
     }
 
     public ExpandableNotificationRowController getRowController() {
@@ -447,7 +437,7 @@ public final class NotificationEntry extends ListEntry {
      * Get the children that are actually attached to this notification's row.
      *
      * TODO: Seems like most callers here should probably be using
-     * {@link NotificationGroupManager#getChildren}
+     * {@link NotificationGroupManagerLegacy#getChildren}
      */
     public @Nullable List<NotificationEntry> getAttachedNotifChildren() {
         if (row == null) {
@@ -551,8 +541,8 @@ public final class NotificationEntry extends ListEntry {
             return false;
         }
         Bundle extras = mSbn.getNotification().extras;
-        RemoteInputHistoryItem[] replyTexts = (RemoteInputHistoryItem[]) extras.getParcelableArray(
-                Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
+        Parcelable[] replyTexts =
+                extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
         if (!ArrayUtils.isEmpty(replyTexts)) {
             return true;
         }
@@ -953,24 +943,30 @@ public final class NotificationEntry extends ListEntry {
         return mIsMarkedForUserTriggeredMovement;
     }
 
-    /** Whether or not the icon for this notification is visible in the shelf. */
-    public void setShelfIconVisible(boolean shelfIconVisible) {
-        mShelfIconVisible = shelfIconVisible;
-        updateShelfIconVisibility();
-    }
-
-    private void updateShelfIconVisibility() {
-        if (row != null) {
-            row.setShelfIconVisible(mShelfIconVisible);
-        }
-    }
-
     /**
      * Mark this entry for movement triggered by a user action (ex: changing the priorirty of a
      * conversation). This can then be used for custom animations.
      */
     public void markForUserTriggeredMovement(boolean marked) {
         mIsMarkedForUserTriggeredMovement = marked;
+    }
+
+    public void setIsAlerting(boolean isAlerting) {
+        mIsAlerting = isAlerting;
+    }
+
+    public boolean isAlerting() {
+        return mIsAlerting;
+    }
+
+    /** Set whether this notification is currently used to animate a launch. */
+    public void setExpandAnimationRunning(boolean expandAnimationRunning) {
+        mExpandAnimationRunning = expandAnimationRunning;
+    }
+
+    /** Whether this notification is currently used to animate a launch. */
+    public boolean isExpandAnimationRunning() {
+        return mExpandAnimationRunning;
     }
 
     /** Information about a suggestion that is being edited. */

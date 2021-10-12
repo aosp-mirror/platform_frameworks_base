@@ -42,11 +42,7 @@ oneway interface IBackupAgent {
      * @param newState Read-write file, empty when onBackup() is called,
      *        where the new state blob is to be recorded.
      *
-     * @param quota Quota reported by the transport for this backup operation (in bytes).
-     *
-     * @param token Opaque token identifying this transaction.  This must
-     *        be echoed back to the backup service binder once the new
-     *        data has been written to the data and newState files.
+     * @param quotaBytes Quota reported by the transport for this backup operation (in bytes).
      *
      * @param callbackBinder Binder on which to indicate operation completion.
      *
@@ -106,7 +102,7 @@ oneway interface IBackupAgent {
      *        The data must be formatted correctly for the resulting archive to be
      *        legitimate, so that will be tightly controlled by the available API.
      *
-     * @param quota Quota reported by the transport for this backup operation (in bytes).
+     * @param quotaBytes Quota reported by the transport for this backup operation (in bytes).
      *
      * @param token Opaque token identifying this transaction.  This must
      *        be echoed back to the backup service binder once the agent is

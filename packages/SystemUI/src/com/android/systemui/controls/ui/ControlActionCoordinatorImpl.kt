@@ -16,42 +16,54 @@
 
 package com.android.systemui.controls.ui
 
+import android.annotation.MainThread
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
-import android.annotation.MainThread
-import android.os.Vibrator
 import android.os.VibrationEffect
+import android.os.Vibrator
 import android.service.controls.Control
 import android.service.controls.actions.BooleanAction
 import android.service.controls.actions.CommandAction
 import android.service.controls.actions.FloatAction
 import android.util.Log
 import android.view.HapticFeedbackConstants
+import com.android.internal.annotations.VisibleForTesting
+import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.controls.ControlsMetricsLogger
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
-
+import com.android.wm.shell.TaskViewFactory
+import dagger.Lazy
+import java.util.Optional
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+@SysUISingleton
 class ControlActionCoordinatorImpl @Inject constructor(
     private val context: Context,
     private val bgExecutor: DelayableExecutor,
     @Main private val uiExecutor: DelayableExecutor,
     private val activityStarter: ActivityStarter,
     private val keyguardStateController: KeyguardStateController,
-    private val globalActionsComponent: GlobalActionsComponent
+    private val globalActionsComponent: GlobalActionsComponent,
+    private val taskViewFactory: Optional<TaskViewFactory>,
+    private val broadcastDispatcher: BroadcastDispatcher,
+    private val lazyUiController: Lazy<ControlsUiController>,
+    private val controlsMetricsLogger: ControlsMetricsLogger
 ) : ControlActionCoordinator {
     private var dialog: Dialog? = null
     private val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
     private var pendingAction: Action? = null
     private var actionsInProgress = mutableSetOf<String>()
+    private val isLocked: Boolean
+        get() = !keyguardStateController.isUnlocked()
+    override lateinit var activityContext: Context
 
     companion object {
         private const val RESPONSE_TIMEOUT_IN_MILLIS = 3000L
@@ -63,18 +75,20 @@ class ControlActionCoordinatorImpl @Inject constructor(
     }
 
     override fun toggle(cvh: ControlViewHolder, templateId: String, isChecked: Boolean) {
-        bouncerOrRun(Action(cvh.cws.ci.controlId, {
+        controlsMetricsLogger.touch(cvh, isLocked)
+        bouncerOrRun(createAction(cvh.cws.ci.controlId, {
             cvh.layout.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             cvh.action(BooleanAction(templateId, !isChecked))
         }, true /* blockable */))
     }
 
     override fun touch(cvh: ControlViewHolder, templateId: String, control: Control) {
+        controlsMetricsLogger.touch(cvh, isLocked)
         val blockable = cvh.usePanel()
-        bouncerOrRun(Action(cvh.cws.ci.controlId, {
+        bouncerOrRun(createAction(cvh.cws.ci.controlId, {
             cvh.layout.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             if (cvh.usePanel()) {
-                showDialog(cvh, control.getAppIntent().getIntent())
+                showDetail(cvh, control.getAppIntent().getIntent())
             } else {
                 cvh.action(CommandAction(templateId))
             }
@@ -90,22 +104,25 @@ class ControlActionCoordinatorImpl @Inject constructor(
     }
 
     override fun setValue(cvh: ControlViewHolder, templateId: String, newValue: Float) {
-        bouncerOrRun(Action(cvh.cws.ci.controlId, {
+        controlsMetricsLogger.drag(cvh, isLocked)
+        bouncerOrRun(createAction(cvh.cws.ci.controlId, {
             cvh.action(FloatAction(templateId, newValue))
         }, false /* blockable */))
     }
 
     override fun longPress(cvh: ControlViewHolder) {
-        bouncerOrRun(Action(cvh.cws.ci.controlId, {
+        controlsMetricsLogger.longPress(cvh, isLocked)
+        bouncerOrRun(createAction(cvh.cws.ci.controlId, {
             // Long press snould only be called when there is valid control state, otherwise ignore
             cvh.cws.control?.let {
                 cvh.layout.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                showDialog(cvh, it.getAppIntent().getIntent())
+                showDetail(cvh, it.getAppIntent().getIntent())
             }
         }, false /* blockable */))
     }
 
     override fun runPendingAction(controlId: String) {
+        if (isLocked) return
         if (pendingAction?.controlId == controlId) {
             pendingAction?.invoke()
             pendingAction = null
@@ -127,23 +144,18 @@ class ControlActionCoordinatorImpl @Inject constructor(
             false
         }
 
-    private fun bouncerOrRun(action: Action) {
+    @VisibleForTesting
+    fun bouncerOrRun(action: Action) {
         if (keyguardStateController.isShowing()) {
-            var closeGlobalActions = !keyguardStateController.isUnlocked()
-            if (closeGlobalActions) {
+            if (isLocked) {
                 context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
 
                 // pending actions will only run after the control state has been refreshed
                 pendingAction = action
             }
-
             activityStarter.dismissKeyguardThenExecute({
                 Log.d(ControlsUiController.TAG, "Device unlocked, invoking controls action")
-                if (closeGlobalActions) {
-                    globalActionsComponent.handleShowGlobalActionsMenu()
-                } else {
-                    action.invoke()
-                }
+                action.invoke()
                 true
             }, { pendingAction = null }, true /* afterKeyguardGone */)
         } else {
@@ -155,26 +167,32 @@ class ControlActionCoordinatorImpl @Inject constructor(
         bgExecutor.execute { vibrator.vibrate(effect) }
     }
 
-    private fun showDialog(cvh: ControlViewHolder, intent: Intent) {
+    private fun showDetail(cvh: ControlViewHolder, intent: Intent) {
         bgExecutor.execute {
-            val activities: List<ResolveInfo> = cvh.context.packageManager.queryIntentActivities(
+            val activities: List<ResolveInfo> = context.packageManager.queryIntentActivities(
                 intent,
                 PackageManager.MATCH_DEFAULT_ONLY
             )
 
             uiExecutor.execute {
                 // make sure the intent is valid before attempting to open the dialog
-                if (activities.isNotEmpty()) {
-                    dialog = DetailDialog(cvh, intent).also {
-                        it.setOnDismissListener { _ -> dialog = null }
-                        it.show()
-                    }
+                if (activities.isNotEmpty() && taskViewFactory.isPresent) {
+                    taskViewFactory.get().create(context, uiExecutor, {
+                        dialog = DetailDialog(activityContext, it, intent, cvh).also {
+                            it.setOnDismissListener { _ -> dialog = null }
+                            it.show()
+                        }
+                    })
                 } else {
                     cvh.setErrorStatus()
                 }
             }
         }
     }
+
+    @VisibleForTesting
+    fun createAction(controlId: String, f: () -> Unit, blockable: Boolean) =
+        Action(controlId, f, blockable)
 
     inner class Action(val controlId: String, val f: () -> Unit, val blockable: Boolean) {
         fun invoke() {

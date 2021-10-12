@@ -31,6 +31,11 @@ namespace android {
 
 class LoadedIdmap;
 class IdmapResMap;
+struct Idmap_header;
+struct Idmap_data_header;
+struct Idmap_target_entry;
+struct Idmap_target_entry_inline;
+struct Idmap_overlay_entry;
 
 // A string pool for overlay apk assets. The string pool holds the strings of the overlay resources
 // table and additionally allows for loading strings from the idmap string pool. The idmap string
@@ -144,34 +149,33 @@ class IdmapResMap {
 class LoadedIdmap {
  public:
   // Loads an IDMAP from a chunk of memory. Returns nullptr if the IDMAP data was malformed.
-  static std::unique_ptr<const LoadedIdmap> Load(const StringPiece& idmap_path,
-                                                 const StringPiece& idmap_data);
+  static std::unique_ptr<LoadedIdmap> Load(const StringPiece& idmap_path,
+                                           const StringPiece& idmap_data);
 
   // Returns the path to the IDMAP.
-  inline const std::string& IdmapPath() const {
+  std::string_view IdmapPath() const {
     return idmap_path_;
   }
 
   // Returns the path to the RRO (Runtime Resource Overlay) APK for which this IDMAP was generated.
-  inline const std::string& OverlayApkPath() const {
+  std::string_view OverlayApkPath() const {
     return overlay_apk_path_;
   }
 
   // Returns the path to the RRO (Runtime Resource Overlay) APK for which this IDMAP was generated.
-  inline const std::string& TargetApkPath() const {
+  std::string_view TargetApkPath() const {
     return target_apk_path_;
   }
 
   // Returns a mapping from target resource ids to overlay values.
-  inline const IdmapResMap GetTargetResourcesMap(
-      uint8_t target_assigned_package_id, const OverlayDynamicRefTable* overlay_ref_table) const {
+  const IdmapResMap GetTargetResourcesMap(uint8_t target_assigned_package_id,
+                                          const OverlayDynamicRefTable* overlay_ref_table) const {
     return IdmapResMap(data_header_, target_entries_, target_inline_entries_,
                        target_assigned_package_id, overlay_ref_table);
   }
 
   // Returns a dynamic reference table for a loaded overlay package.
-  inline const OverlayDynamicRefTable GetOverlayDynamicRefTable(
-      uint8_t target_assigned_package_id) const {
+  const OverlayDynamicRefTable GetOverlayDynamicRefTable(uint8_t target_assigned_package_id) const {
     return OverlayDynamicRefTable(data_header_, overlay_entries_, target_assigned_package_id);
   }
 
@@ -190,22 +194,23 @@ class LoadedIdmap {
   const Idmap_overlay_entry* overlay_entries_;
   const std::unique_ptr<ResStringPool> string_pool_;
 
-  const std::string idmap_path_;
-  std::string overlay_apk_path_;
-  std::string target_apk_path_;
-  const time_t idmap_last_mod_time_;
+  std::string idmap_path_;
+  std::string_view overlay_apk_path_;
+  std::string_view target_apk_path_;
+  time_t idmap_last_mod_time_;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(LoadedIdmap);
 
   explicit LoadedIdmap(std::string&& idmap_path,
-                       time_t last_mod_time,
                        const Idmap_header* header,
                        const Idmap_data_header* data_header,
                        const Idmap_target_entry* target_entries,
                        const Idmap_target_entry_inline* target_inline_entries,
                        const Idmap_overlay_entry* overlay_entries,
-                       ResStringPool* string_pool);
+                       std::unique_ptr<ResStringPool>&& string_pool,
+                       std::string_view overlay_apk_path,
+                       std::string_view target_apk_path);
 
   friend OverlayStringPool;
 };

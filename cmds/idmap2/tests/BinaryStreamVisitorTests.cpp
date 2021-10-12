@@ -33,7 +33,7 @@ using ::testing::NotNull;
 namespace android::idmap2 {
 
 TEST(BinaryStreamVisitorTests, CreateBinaryStreamViaBinaryStreamVisitor) {
-  std::string raw(reinterpret_cast<const char*>(idmap_raw_data), idmap_raw_data_len);
+  std::string raw(reinterpret_cast<const char*>(kIdmapRawData), kIdmapRawDataLen);
   std::istringstream raw_stream(raw);
 
   auto result1 = Idmap::FromBinaryStream(raw_stream);

@@ -1262,17 +1262,6 @@
     <issue
         id="MergeRootFrame"
         message="This `&lt;FrameLayout>` can be replaced with a `&lt;merge>` tag"
-        errorLine1="&lt;FrameLayout"
-        errorLine2="^">
-        <location
-            file="res/layout/pip_menu_activity.xml"
-            line="16"
-            column="1"/>
-    </issue>
-
-    <issue
-        id="MergeRootFrame"
-        message="This `&lt;FrameLayout>` can be replaced with a `&lt;merge>` tag"
         errorLine1="&lt;FrameLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
         errorLine2="^">
         <location
@@ -2904,17 +2893,6 @@
         <location
             file="res/values/dimens.xml"
             line="451"
-            column="12"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.dimen.notification_header_height` appears to be unused"
-        errorLine1="    &lt;dimen name=&quot;notification_header_height&quot;>53dp&lt;/dimen>"
-        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="res/values/dimens.xml"
-            line="473"
             column="12"/>
     </issue>
 

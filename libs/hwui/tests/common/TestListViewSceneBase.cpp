@@ -70,7 +70,7 @@ void TestListViewSceneBase::doFrame(int frameNr) {
         // draw it to parent DisplayList
         canvas->drawRenderNode(mListItems[ci].get());
     }
-    mListView->setStagingDisplayList(canvas->finishRecording());
+    canvas->finishRecording(mListView.get());
 }
 
 }  // namespace test

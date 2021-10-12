@@ -23,6 +23,8 @@ import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Slog;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -316,8 +318,7 @@ public class FileUpdater {
             outs = file.startWrite();
 
             // Write to XML
-            XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(outs, StandardCharsets.UTF_8.name());
+            TypedXmlSerializer out = Xml.resolveSerializer(outs);
             out.startDocument(null, true);
             out.startTag(null, TAG_DEFAULT_ROOT);
 
@@ -344,8 +345,7 @@ public class FileUpdater {
         }
         Map<String, String> read = null;
         try (FileInputStream in = file.openRead()) {
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(in, StandardCharsets.UTF_8.name());
+            TypedXmlPullParser parser = Xml.resolvePullParser(in);
 
             int type;
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {

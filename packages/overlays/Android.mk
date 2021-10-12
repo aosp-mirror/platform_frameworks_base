@@ -20,66 +20,18 @@ LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
 LOCAL_LICENSE_CONDITIONS := notice
 LOCAL_NOTICE_FILE := $(LOCAL_PATH)/../../NOTICE
 LOCAL_REQUIRED_MODULES := \
-	AccentColorBlackOverlay \
-	AccentColorCinnamonOverlay \
-	AccentColorOceanOverlay \
-	AccentColorOrchidOverlay \
-	AccentColorSpaceOverlay \
-	AccentColorGreenOverlay \
-	AccentColorPurpleOverlay \
-	AccentColorPaletteOverlay \
-	AccentColorCarbonOverlay \
-	AccentColorSandOverlay \
-	AccentColorAmethystOverlay \
-	AccentColorAquamarineOverlay \
-	AccentColorTangerineOverlay \
 	DisplayCutoutEmulationCornerOverlay \
 	DisplayCutoutEmulationDoubleOverlay \
     DisplayCutoutEmulationHoleOverlay \
 	DisplayCutoutEmulationTallOverlay \
 	DisplayCutoutEmulationWaterfallOverlay \
 	FontNotoSerifSourceOverlay \
-	IconPackCircularAndroidOverlay \
-	IconPackCircularLauncherOverlay \
-	IconPackCircularSettingsOverlay \
-	IconPackCircularSystemUIOverlay \
-	IconPackCircularThemePickerOverlay \
-	IconPackVictorAndroidOverlay \
-    IconPackVictorLauncherOverlay \
-    IconPackVictorSettingsOverlay \
-    IconPackVictorSystemUIOverlay \
-    IconPackVictorThemePickerOverlay \
-    IconPackSamAndroidOverlay \
-    IconPackSamLauncherOverlay \
-    IconPackSamSettingsOverlay \
-    IconPackSamSystemUIOverlay \
-    IconPackSamThemePickerOverlay \
-    IconPackKaiAndroidOverlay \
-    IconPackKaiLauncherOverlay \
-    IconPackKaiSettingsOverlay \
-    IconPackKaiSystemUIOverlay \
-    IconPackKaiThemePickerOverlay \
-	IconPackFilledAndroidOverlay \
-	IconPackFilledLauncherOverlay \
-	IconPackFilledSettingsOverlay \
-	IconPackFilledSystemUIOverlay \
-	IconPackFilledThemePickerOverlay \
-	IconPackRoundedAndroidOverlay \
-	IconPackRoundedLauncherOverlay \
-	IconPackRoundedSettingsOverlay \
-	IconPackRoundedSystemUIOverlay \
-	IconPackRoundedThemePickerOverlay \
-	IconShapePebbleOverlay \
-	IconShapeRoundedRectOverlay \
-	IconShapeSquircleOverlay \
-	IconShapeTaperedRectOverlay \
-	IconShapeTeardropOverlay \
-	IconShapeVesselOverlay \
 	NavigationBarMode3ButtonOverlay \
 	NavigationBarModeGesturalOverlay \
 	NavigationBarModeGesturalOverlayNarrowBack \
 	NavigationBarModeGesturalOverlayWideBack \
 	NavigationBarModeGesturalOverlayExtraWideBack \
+        OneHandedModeGesturalOverlay \
 	preinstalled-packages-platform-overlays.xml
 
 include $(BUILD_PHONY_PACKAGE)

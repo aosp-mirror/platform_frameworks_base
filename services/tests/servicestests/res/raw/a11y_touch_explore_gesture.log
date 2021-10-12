@@ -1,0 +1,4 @@
+* Gesture4_id-2:Touch explore
+MotionEvent { action=ACTION_DOWN, actionButton=0, id[0]=0, x[0]=825.0, y[0]=2028.0, toolType[0]=TOOL_TYPE_FINGER, buttonState=0, classification=NONE, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=5258108, downTime=5258108, deviceId=4, source=0x1002, displayId=0 }
+MotionEvent { action=ACTION_MOVE, actionButton=0, id[0]=0, x[0]=825.0, y[0]=2028.0, toolType[0]=TOOL_TYPE_FINGER, buttonState=0, classification=NONE, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=5258133, downTime=5258108, deviceId=4, source=0x1002, displayId=0 }
+MotionEvent { action=ACTION_UP, actionButton=0, id[0]=0, x[0]=825.0, y[0]=2028.0, toolType[0]=TOOL_TYPE_FINGER, buttonState=0, classification=NONE, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=5258141, downTime=5258108, deviceId=4, source=0x1002, displayId=0 }

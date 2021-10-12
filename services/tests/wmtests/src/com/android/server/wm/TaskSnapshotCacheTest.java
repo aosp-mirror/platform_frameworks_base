@@ -23,7 +23,7 @@ import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import android.app.ActivityManager.TaskSnapshot;
+import android.window.TaskSnapshot;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;

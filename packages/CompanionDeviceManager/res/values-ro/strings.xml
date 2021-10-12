@@ -17,6 +17,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Manager de dispozitiv Companion"</string>
-    <string name="chooser_title" msgid="4958797271463138976">"Conectați cu &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
-    <string name="confirmation_title" msgid="5683126664999349196">"Conectați &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; cu &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="chooser_title" msgid="2262294130493605839">"Alegeți un profil <xliff:g id="PROFILE_NAME">%1$s</xliff:g> pe care să îl gestioneze &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="profile_name_generic" msgid="6851028682723034988">"dispozitiv"</string>
+    <string name="profile_name_watch" msgid="576290739483672360">"ceas"</string>
+    <string name="confirmation_title" msgid="8455544820286920304">"Permiteți ca &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; să vă gestioneze dispozitivul &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="profile_summary" msgid="2059360676631420073">"Această aplicație este necesară pentru a gestiona <xliff:g id="PROFILE_NAME">%1$s</xliff:g>. <xliff:g id="PRIVILEGES_DISCPLAIMER">%2$s</xliff:g>"</string>
+    <string name="consent_yes" msgid="8344487259618762872">"Permiteți"</string>
+    <string name="consent_no" msgid="2640796915611404382">"Nu permiteți"</string>
 </resources>

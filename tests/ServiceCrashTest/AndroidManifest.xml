@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.tests.servicecrashtest">
+     package="com.android.tests.servicecrashtest">
 
     <application android:label="Service Crash Test">
-        <uses-library android:name="android.test.runner" />
+        <uses-library android:name="android.test.runner"/>
 
         <service android:name=".CrashingService"
-                android:process=":badservice" />
+             android:process=":badservice"/>
 
-        <activity android:name=".MainActivity" >
+        <activity android:name=".MainActivity"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
             </intent-filter>
         </activity>
     </application>
 
     <instrumentation android:label="Test bound service crash restart"
-            android:name="android.test.InstrumentationTestRunner"
-            android:targetPackage="com.android.tests.servicecrashtest" />
+         android:name="android.test.InstrumentationTestRunner"
+         android:targetPackage="com.android.tests.servicecrashtest"/>
 
 </manifest>

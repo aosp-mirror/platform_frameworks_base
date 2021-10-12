@@ -127,7 +127,7 @@ public final class BluetoothDeviceFilter implements DeviceFilter<BluetoothDevice
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BluetoothDeviceFilter that = (BluetoothDeviceFilter) o;

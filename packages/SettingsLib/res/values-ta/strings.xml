@@ -36,6 +36,7 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"தானாக இணைக்கப்படாது"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"இண்டர்நெட் அணுகல் இல்லை"</string>
     <string name="saved_network" msgid="7143698034077223645">"<xliff:g id="NAME">%1$s</xliff:g> சேமித்தது"</string>
+    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"கட்டண நெட்வொர்க்குடன் இணைக்கப்பட்டுள்ளது"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"%1$s மூலம் தானாக இணைக்கப்பட்டது"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"நெட்வொர்க் மதிப்பீடு வழங்குநரால் தானாக இணைக்கப்பட்டது"</string>
     <string name="connected_via_passpoint" msgid="7735442932429075684">"%1$s வழியாக இணைக்கப்பட்டது"</string>
@@ -399,6 +400,11 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"செயலில் இல்லை. மாற்ற, தட்டவும்."</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"செயலில் உள்ளது. மாற்ற, தட்டவும்."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"காத்திருப்பில் உள்ள ஆப்ஸின் நிலை:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
+    <string name="transcode_settings_title" msgid="2581975870429850549">"மீடியா குறிமாற்ற அமைப்புகள்"</string>
+    <string name="transcode_user_control" msgid="6176368544817731314">"இயல்புநிலை குறிமாற்றங்களை மீறிச் செயல்படு"</string>
+    <string name="transcode_enable_all" msgid="2411165920039166710">"குறிமாற்றத்தை இயக்கு"</string>
+    <string name="transcode_default" msgid="3784803084573509491">"ஆப்ஸ் மாடர்ன் வடிவங்களை ஆதரிக்கும்படி அமை"</string>
+    <string name="transcode_notification" msgid="5560515979793436168">"குறிமாற்ற அறிவிப்புகளைக் காட்டு"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"இயங்கும் சேவைகள்"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"தற்போது இயக்கத்தில் இருக்கும் சேவைகளைப் பார்த்து கட்டுப்படுத்து"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView செயல்படுத்தல்"</string>
@@ -418,7 +424,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"நிறம் அடையாளங்காண முடியாமை (சிவப்பு-பச்சை)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"நிறம் அடையாளங்காண முடியாமை (நீலம்-மஞ்சள்)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"வண்ணத்திருத்தம்"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"கலர் கரெக்‌ஷனைப் பயன்படுத்தி உங்கள் சாதனத்தில் வண்ணங்கள் காண்பிக்கப்படும் விதத்தைச் சரிசெய்யலாம்"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="2333641630205214702">"சாதனத்தில் வண்ணங்கள் காண்பிக்கப்படும் விதத்தைச் சரிசெய்யலாம். இதன் மூலம் நீங்கள் விரும்பும்போதெல்லாம்:&lt;br/&gt;&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;வண்ணங்களை மிகத் தெளிவாகப் பார்க்கலாம்&lt;/li&gt; &lt;li&gt;கவனம் சிதறாமல் இருக்க வண்ணங்களை நீக்கலாம்&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> மூலம் மேலெழுதப்பட்டது"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"கிட்டத்தட்ட <xliff:g id="TIME_REMAINING">%1$s</xliff:g> மீதமுள்ளது"</string>
@@ -444,8 +450,10 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"டேப்லெட் விரைவில் ஆஃப் ஆகக்கூடும் (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"சாதனம் விரைவில் ஆஃப் ஆகக்கூடும் (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"முழு சார்ஜாக <xliff:g id="TIME">%1$s</xliff:g> ஆகும்"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - முழு சார்ஜாக <xliff:g id="TIME">%2$s</xliff:g> ஆகும்"</string>
+    <!-- no translation found for power_remaining_charging_duration_only (8085099012811384899) -->
+    <skip />
+    <!-- no translation found for power_charging_duration (6127154952524919719) -->
+    <skip />
     <string name="power_charging_limited" msgid="1956874810658999681">"<xliff:g id="LEVEL">%1$s</xliff:g> - பேட்டரியின் ஆயுளை மேம்படுத்துகிறது"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"அறியப்படாத"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"சார்ஜ் ஆகிறது"</string>
@@ -453,12 +461,13 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"மெதுவாக சார்ஜாகிறது"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"சார்ஜ் செய்யப்படவில்லை"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"செருகப்பட்டது, ஆனால் இப்போது சார்ஜ் செய்ய முடியவில்லை"</string>
-    <string name="battery_info_status_full" msgid="4443168946046847468">"முழுவதும் சார்ஜ் ஆனது"</string>
+    <!-- no translation found for battery_info_status_full (1339002294876531312) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"நிர்வாகி கட்டுப்படுத்துகிறார்"</string>
     <string name="disabled" msgid="8017887509554714950">"முடக்கப்பட்டது"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"அனுமதிக்கப்பட்டது"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"அனுமதிக்கப்படவில்லை"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"தெரியாத ஆப்ஸ்களை நிறுவுதல்"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"நிறுவுதல் (அறியாதவை)"</string>
     <string name="home" msgid="973834627243661438">"அமைப்புகள் முகப்பு"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
@@ -481,7 +490,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"சாதன மொழிகளைப் பயன்படுத்து"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> க்கான அமைப்புகளைத் திறப்பதில் தோல்வி"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"இந்த உள்ளீட்டு முறையானது, கடவுச்சொற்கள் மற்றும் கிரெடிட் கார்டு எண்கள் போன்ற தனிப்பட்ட தகவல் உள்பட நீங்கள் உள்ளிடும் எல்லா உரையையும் சேகரிக்கக்கூடும். இது <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> பயன்பாட்டிலிருந்து வந்துள்ளது. இந்த உள்ளீட்டு முறையைப் பயன்படுத்தவா?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"குறிப்பு: மறுதொடக்கம் செய்த பிறகு, மொபைலை அன்லாக் செய்யும் வரை இந்த ஆப்ஸால் தொடங்க முடியாது"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"குறிப்பு: மறுதொடக்கம் செய்த பிறகு, மொபைலைத் திறக்கும் வரை இந்த ஆப்ஸால் தொடங்க முடியாது"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS பதிவின் நிலை"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"பதிவு செய்யப்பட்டது"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"பதிவு செய்யப்படவில்லை"</string>
@@ -495,6 +504,11 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"நேரத்தைக் குறைக்கும்."</string>
     <string name="cancel" msgid="5665114069455378395">"ரத்துசெய்"</string>
     <string name="okay" msgid="949938843324579502">"சரி"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"அலாரங்களும் நினைவூட்டல்களும்"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="186992351401152744">"அலாரங்களையோ நினைவூட்டல்களையோ அமைக்க அனுமதித்தல்"</string>
+    <string name="alarms_and_reminders_title" msgid="2988400785896875237">"அலாரங்களும் நினைவூட்டல்களும்"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="5882788882647778753">"அலாரங்களையோ பிற நேரம் சார்ந்த நிகழ்வுகளையோ திட்டமிட இந்த ஆப்ஸை அனுமதிக்கும். சாதனத்தைப் பயன்படுத்தாதபோதும், ஆப்ஸ் தொடங்கவும் இயங்கவும் இது அனுமதிக்கும். கவனத்திற்கு: இந்த அனுமதியைத் திரும்பப்பெற்றால் ஆப்ஸ் செயலிழக்கக்கூடும். குறிப்பாக, ஆப்ஸ் திட்டமிட்டுள்ள அலாரங்கள் எதுவும் இனி இயங்காது."</string>
+    <string name="keywords_alarms_and_reminders" msgid="8882739572152019456">"திட்ட அட்டவணை, அலாரம், நினைவூட்டல், நிகழ்வு"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ஆன் செய்"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"தொந்தரவு செய்ய வேண்டாம் என்பதை ஆன் செய்யும்"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"ஒருபோதும் வேண்டாம்"</string>
@@ -509,6 +523,7 @@
     <string name="zen_mode_forever" msgid="3339224497605461291">"ஆஃப் செய்யும் வரை"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"சற்றுமுன்"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"மொபைல் ஸ்பீக்கர்"</string>
+    <string name="media_transfer_this_phone" msgid="7194341457812151531">"இந்த மொபைல்"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"இணைப்பதில் சிக்கல். சாதனத்தை ஆஃப் செய்து மீண்டும் ஆன் செய்யவும்"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"வயருடன்கூடிய ஆடியோ சாதனம்"</string>
     <string name="help_label" msgid="3528360748637781274">"உதவியும் கருத்தும்"</string>
@@ -546,12 +561,48 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"நீங்கள் வரையறுக்கப்பட்டச் சுயவிவரத்தை உருவாக்குவதற்கு முன்பு, உங்கள் ஆப்ஸ் மற்றும் தனிப்பட்ட தரவைப் பாதுகாக்கும் வகையில் நீங்கள் திரைப் பூட்டை அமைக்க வேண்டும்."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"பூட்டை அமை"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g>க்கு மாறு"</string>
+    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"புதிய பயனரை உருவாக்குகிறது…"</string>
+    <!-- no translation found for add_user_failed (4809887794313944872) -->
+    <skip />
+    <string name="user_nickname" msgid="262624187455825083">"புனைப்பெயர்"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"கெஸ்ட்டைச் சேர்"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"கெஸ்ட்டை அகற்று"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"கெஸ்ட்"</string>
+    <string name="user_image_take_photo" msgid="467512954561638530">"படமெடுங்கள்"</string>
+    <string name="user_image_choose_photo" msgid="1363820919146782908">"படத்தைத் தேர்வுசெய்யுங்கள்"</string>
+    <string name="user_image_photo_selector" msgid="433658323306627093">"படத்தைத் தேர்ந்தெடுங்கள்"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"சாதனத்தின் இயல்புநிலை"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"முடக்கப்பட்டது"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"இயக்கப்பட்டது"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"இந்த மாற்றங்கள் செயல்படுத்தப்பட உங்கள் சாதனத்தை மறுபடி தொடங்க வேண்டும். இப்போதே மறுபடி தொடங்கவும் அல்லது ரத்துசெய்யவும்."</string>
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"வயருள்ள ஹெட்ஃபோன்"</string>
+    <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"ஆன்"</string>
+    <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"ஆஃப்"</string>
+    <string name="carrier_network_change_mode" msgid="4257621815706644026">"மொபைல் நிறுவன நெட்வொர்க்கை மாற்றும்"</string>
+    <string name="data_connection_3g" msgid="931852552688157407">"3G"</string>
+    <string name="data_connection_edge" msgid="4625509456544797637">"EDGE"</string>
+    <string name="data_connection_cdma" msgid="9098161966701934334">"1X"</string>
+    <string name="data_connection_gprs" msgid="1251945769006770189">"GPRS"</string>
+    <string name="data_connection_3_5g" msgid="4298721462047921400">"H"</string>
+    <string name="data_connection_3_5g_plus" msgid="6683055858295918170">"H+"</string>
+    <string name="data_connection_4g" msgid="2581705503356752044">"4G"</string>
+    <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
+    <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
+    <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
+    <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"W+"</string>
+    <string name="cell_data_off_content_description" msgid="2280700839891636498">"மொபைல் டேட்டா ஆஃப் செய்யப்பட்டது"</string>
+    <string name="not_default_data_content_description" msgid="6517068332106592887">"தரவை உபயோகிக்க அமைக்கப்படவில்லை"</string>
+    <string name="accessibility_no_phone" msgid="2687419663127582503">"சிக்னல் இல்லை."</string>
+    <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"சிக்னல் ஒரு கோட்டில் உள்ளது."</string>
+    <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"சிக்னல் இரண்டு கோட்டில் உள்ளது."</string>
+    <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"சிக்னல் மூன்று கோட்டில் உள்ளது."</string>
+    <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"சிக்னல் முழுமையாக உள்ளது."</string>
+    <string name="accessibility_no_data" msgid="4563181886936931008">"டேட்டா சிக்னல் இல்லை."</string>
+    <string name="accessibility_data_one_bar" msgid="6892888138070752480">"தரவு சிக்னல் ஒரு கோட்டில் உள்ளது."</string>
+    <string name="accessibility_data_two_bars" msgid="9202641507241802499">"தரவின் சிக்னல் இரண்டு கோடு வரை உள்ளது."</string>
+    <string name="accessibility_data_three_bars" msgid="2813876214466722413">"தரவு சிக்னல் மூன்று கோட்டில் உள்ளது."</string>
+    <string name="accessibility_data_signal_full" msgid="1808301899314382337">"தரவு சிக்னல் முழுமையாக உள்ளது."</string>
+    <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ஈத்தர்நெட் துண்டிக்கப்பட்டது."</string>
+    <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"ஈதர்நெட்."</string>
+    <string name="accessibility_no_calling" msgid="3540827068323895748">"அழைப்பை மேற்கொள்ள முடியவில்லை."</string>
 </resources>

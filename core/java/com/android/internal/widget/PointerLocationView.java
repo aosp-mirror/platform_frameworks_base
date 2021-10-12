@@ -399,7 +399,10 @@ public class PointerLocationView extends View implements InputDeviceListener,
             if (mCurDown && ps.mCurDown) {
                 // Draw crosshairs.
                 canvas.drawLine(0, ps.mCoords.y, getWidth(), ps.mCoords.y, mTargetPaint);
-                canvas.drawLine(ps.mCoords.x, 0, ps.mCoords.x, getHeight(), mTargetPaint);
+                // Extend crosshairs to cover screen regardless of rotation (ie. since the rotated
+                // canvas can "expose" content past 0 and up-to the largest screen dimension).
+                canvas.drawLine(ps.mCoords.x, -getHeight(), ps.mCoords.x,
+                        Math.max(getHeight(), getWidth()), mTargetPaint);
 
                 // Draw current point.
                 int pressureLevel = (int)(ps.mCoords.pressure * 255);

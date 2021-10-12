@@ -25,7 +25,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.debug.AdbManagerInternal;
-import android.debug.AdbTransportType;
 import android.location.LocationManager;
 import android.os.BatteryManager;
 import android.os.Binder;
@@ -162,12 +161,11 @@ public class TestHarnessModeService extends SystemService {
     private void configureSettings() {
         ContentResolver cr = getContext().getContentResolver();
 
-        // Stop ADB before we enable it, otherwise on userdebug/eng builds, the keys won't have
-        // registered with adbd, and it will prompt the user to confirm the keys.
-        Settings.Global.putInt(cr, Settings.Global.ADB_ENABLED, 0);
-        AdbManagerInternal adbManager = LocalServices.getService(AdbManagerInternal.class);
-        if (adbManager.isAdbEnabled(AdbTransportType.USB)) {
-            adbManager.stopAdbdForTransport(AdbTransportType.USB);
+        // If adb is already enabled, then we need to restart the daemon to pick up the change in
+        // keys. This is only really useful for userdebug/eng builds.
+        if (Settings.Global.getInt(cr, Settings.Global.ADB_ENABLED, 0) == 1) {
+            SystemProperties.set("ctl.restart", "adbd");
+            Slog.d(TAG, "Restarted adbd");
         }
 
         // Disable the TTL for ADB keys before enabling ADB

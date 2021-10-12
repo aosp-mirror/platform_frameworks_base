@@ -30,13 +30,19 @@ import android.content.pm.PackageManager.ApplicationInfoFlags;
 import android.content.pm.PackageManager.ComponentInfoFlags;
 import android.content.pm.PackageManager.PackageInfoFlags;
 import android.content.pm.PackageManager.ResolveInfoFlags;
+import android.content.pm.overlay.OverlayPaths;
 import android.content.pm.parsing.component.ParsedMainComponent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerExecutor;
+import android.os.IBinder;
+import android.os.Looper;
 import android.os.PersistableBundle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.pm.PackageList;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
@@ -44,8 +50,9 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
@@ -53,7 +60,28 @@ import java.util.function.Consumer;
  *
  * @hide Only for use within the system server.
  */
-public abstract class PackageManagerInternal {
+public abstract class PackageManagerInternal implements PackageSettingsSnapshotProvider {
+    @IntDef(prefix = "PACKAGE_", value = {
+            PACKAGE_SYSTEM,
+            PACKAGE_SETUP_WIZARD,
+            PACKAGE_INSTALLER,
+            PACKAGE_VERIFIER,
+            PACKAGE_BROWSER,
+            PACKAGE_SYSTEM_TEXT_CLASSIFIER,
+            PACKAGE_PERMISSION_CONTROLLER,
+            PACKAGE_DOCUMENTER,
+            PACKAGE_CONFIGURATOR,
+            PACKAGE_INCIDENT_REPORT_APPROVER,
+            PACKAGE_APP_PREDICTOR,
+            PACKAGE_OVERLAY_CONFIG_SIGNATURE,
+            PACKAGE_WIFI,
+            PACKAGE_COMPANION,
+            PACKAGE_RETAIL_DEMO,
+            PACKAGE_RECENTS,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface KnownPackage {}
+
     public static final int PACKAGE_SYSTEM = 0;
     public static final int PACKAGE_SETUP_WIZARD = 1;
     public static final int PACKAGE_INSTALLER = 2;
@@ -66,10 +94,14 @@ public abstract class PackageManagerInternal {
     public static final int PACKAGE_CONFIGURATOR = 9;
     public static final int PACKAGE_INCIDENT_REPORT_APPROVER = 10;
     public static final int PACKAGE_APP_PREDICTOR = 11;
+    public static final int PACKAGE_OVERLAY_CONFIG_SIGNATURE = 12;
     public static final int PACKAGE_WIFI = 13;
     public static final int PACKAGE_COMPANION = 14;
     public static final int PACKAGE_RETAIL_DEMO = 15;
-    public static final int PACKAGE_OVERLAY_CONFIG_SIGNATURE = 16;
+    public static final int PACKAGE_RECENTS = 16;
+    // Integer value of the last known package ID. Increases as new ID is added to KnownPackage.
+    // Please note the numbers should be continuous.
+    public static final int LAST_KNOWN_PACKAGE = PACKAGE_RECENTS;
 
     @IntDef(flag = true, prefix = "RESOLVE_", value = {
             RESOLVE_NON_BROWSER_ONLY,
@@ -110,26 +142,6 @@ public abstract class PackageManagerInternal {
      * integrity component does not allow install to proceed.
      */
     public static final int INTEGRITY_VERIFICATION_REJECT = 0;
-
-    @IntDef(value = {
-        PACKAGE_SYSTEM,
-        PACKAGE_SETUP_WIZARD,
-        PACKAGE_INSTALLER,
-        PACKAGE_VERIFIER,
-        PACKAGE_BROWSER,
-        PACKAGE_SYSTEM_TEXT_CLASSIFIER,
-        PACKAGE_PERMISSION_CONTROLLER,
-        PACKAGE_WELLBEING,
-        PACKAGE_DOCUMENTER,
-        PACKAGE_CONFIGURATOR,
-        PACKAGE_INCIDENT_REPORT_APPROVER,
-        PACKAGE_APP_PREDICTOR,
-        PACKAGE_WIFI,
-        PACKAGE_COMPANION,
-        PACKAGE_RETAIL_DEMO,
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface KnownPackage {}
 
     /** Observer called whenever the list of packages changes */
     public interface PackageListObserver {
@@ -302,24 +314,11 @@ public abstract class PackageManagerInternal {
             String packageName, int userId);
 
     /**
-     * Do a straight uid lookup for the given package/application in the given user. This enforces
-     * app visibility rules and permissions. Call {@link #getPackageUidInternal} for the internal
-     * implementation.
-     * @deprecated Use {@link PackageManager#getPackageUid(String, int)}
-     * @return The app's uid, or < 0 if the package was not found in that user
-     */
-    @Deprecated
-    public abstract int getPackageUid(String packageName,
-            @PackageInfoFlags int flags, int userId);
-
-    /**
      * Do a straight uid lookup for the given package/application in the given user.
      * @see PackageManager#getPackageUidAsUser(String, int, int)
      * @return The app's uid, or < 0 if the package was not found in that user
-     * TODO(b/148235092): rename this to getPackageUid
      */
-    public abstract int getPackageUidInternal(String packageName,
-            @PackageInfoFlags int flags, int userId);
+    public abstract int getPackageUid(String packageName, @PackageInfoFlags int flags, int userId);
 
     /**
      * Retrieve all of the information we know about a particular package/application.
@@ -383,10 +382,10 @@ public abstract class PackageManagerInternal {
             int deviceOwnerUserId, String deviceOwner, SparseArray<String> profileOwners);
 
     /**
-     * Called by DevicePolicyManagerService to set the package names protected by the device
-     * owner.
+     * Called by Owners to set the package names protected by the device owner.
      */
-    public abstract void setDeviceOwnerProtectedPackages(List<String> packageNames);
+    public abstract void setDeviceOwnerProtectedPackages(
+            String deviceOwnerPackageName, List<String> packageNames);
 
     /**
      * Returns {@code true} if a given package can't be wiped. Otherwise, returns {@code false}.
@@ -536,17 +535,17 @@ public abstract class PackageManagerInternal {
      * Set which overlay to use for a package.
      * @param userId The user for which to update the overlays.
      * @param targetPackageName The package name of the package for which to update the overlays.
-     * @param overlayPackageNames The complete list of overlay packages that should be enabled for
-     *                            the target. Previously enabled overlays not specified in the list
-     *                            will be disabled. Pass in null or an empty list to disable
-     *                            all overlays. The order of the items is significant if several
-     *                            overlays modify the same resource.
+     * @param overlayPaths  The complete list of overlay paths that should be enabled for
+     *                      the target. Previously enabled overlays not specified in the list
+     *                      will be disabled. Pass in null or empty paths to disable all overlays.
+     *                      The order of the items is significant if several overlays modify the
+     *                      same resource.
      * @param outUpdatedPackageNames An output list that contains the package names of packages
      *                               affected by the update of enabled overlays.
      * @return true if all packages names were known by the package manager, false otherwise
      */
     public abstract boolean setEnabledOverlayPackages(int userId, String targetPackageName,
-            List<String> overlayPackageNames, Collection<String> outUpdatedPackageNames);
+            @Nullable OverlayPaths overlayPaths, Set<String> outUpdatedPackageNames);
 
     /**
      * Resolves an activity intent, allowing instant apps to be resolved.
@@ -565,6 +564,12 @@ public abstract class PackageManagerInternal {
     * Resolves a content provider intent.
     */
     public abstract ProviderInfo resolveContentProvider(String name, int flags, int userId);
+
+    /**
+    * Resolves a content provider intent.
+    */
+    public abstract ProviderInfo resolveContentProvider(String name, int flags, int userId,
+            int callingUid);
 
     /**
      * Track the creator of a new isolated uid.
@@ -796,6 +801,9 @@ public abstract class PackageManagerInternal {
      * Perform the given action for each package.
      * Note that packages lock will be held while performing the actions.
      *
+     * If the caller does not need all packages, prefer the potentially non-locking
+     * {@link #withPackageSettingsSnapshot(Consumer)}.
+     *
      * @param actionLocked action to be performed
      */
     public abstract void forEachPackage(Consumer<AndroidPackage> actionLocked);
@@ -803,6 +811,9 @@ public abstract class PackageManagerInternal {
     /**
      * Perform the given action for each {@link PackageSetting}.
      * Note that packages lock will be held while performing the actions.
+     *
+     * If the caller does not need all packages, prefer the potentially non-locking
+     * {@link #withPackageSettingsSnapshot(Consumer)}.
      *
      * @param actionLocked action to be performed
      */
@@ -824,6 +835,12 @@ public abstract class PackageManagerInternal {
     /** Returns whether the given package is enabled for the given user */
     public abstract @PackageManager.EnabledState int getApplicationEnabledState(
             String packageName, int userId);
+
+    /**
+     * Return the enabled setting for a package component (activity, receiver, service, provider).
+     */
+    public abstract @PackageManager.EnabledState int getComponentEnabledSetting(
+            @NonNull ComponentName componentName, int callingUid, int userId);
 
     /**
      * Extra field name for the token of a request to enable rollback for a
@@ -950,9 +967,6 @@ public abstract class PackageManagerInternal {
     /** Returns whether or not permissions need to be upgraded for the given user */
     public abstract boolean isPermissionUpgradeNeeded(@UserIdInt int userId);
 
-    /** Sets the enforcement of reading external storage */
-    public abstract void setReadExternalStorageEnforced(boolean enforced);
-
     /**
      * Allows the integrity component to respond to the
      * {@link Intent#ACTION_PACKAGE_NEEDS_INTEGRITY_VERIFICATION package verification
@@ -999,4 +1013,152 @@ public abstract class PackageManagerInternal {
      * Returns {@code true} if the package is suspending any packages for the user.
      */
     public abstract boolean isSuspendingAnyPackages(String suspendingPackage, int userId);
+
+    /**
+     * Register to listen for loading progress of an installed package.
+     * The listener is automatically unregistered when the app is fully loaded.
+     * @param packageName The name of the installed package
+     * @param callback To loading reporting progress
+     * @param userId The user under which to check.
+     * @return Whether the registration was successful. It can fail if the package has not been
+     *          installed yet.
+     */
+    public abstract boolean registerInstalledLoadingProgressCallback(@NonNull String packageName,
+            @NonNull InstalledLoadingProgressCallback callback, int userId);
+
+    /**
+     * Returns the string representation of a known package. For example,
+     * {@link #PACKAGE_SETUP_WIZARD} is represented by the string Setup Wizard.
+     *
+     * @param knownPackage The known package.
+     * @return The string representation.
+     */
+    public static @NonNull String knownPackageToString(@KnownPackage int knownPackage) {
+        switch (knownPackage) {
+            case PACKAGE_SYSTEM:
+                return "System";
+            case PACKAGE_SETUP_WIZARD:
+                return "Setup Wizard";
+            case PACKAGE_INSTALLER:
+                return "Installer";
+            case PACKAGE_VERIFIER:
+                return "Verifier";
+            case PACKAGE_BROWSER:
+                return "Browser";
+            case PACKAGE_SYSTEM_TEXT_CLASSIFIER:
+                return "System Text Classifier";
+            case PACKAGE_PERMISSION_CONTROLLER:
+                return "Permission Controller";
+            case PACKAGE_WELLBEING:
+                return "Wellbeing";
+            case PACKAGE_DOCUMENTER:
+                return "Documenter";
+            case PACKAGE_CONFIGURATOR:
+                return "Configurator";
+            case PACKAGE_INCIDENT_REPORT_APPROVER:
+                return "Incident Report Approver";
+            case PACKAGE_APP_PREDICTOR:
+                return "App Predictor";
+            case PACKAGE_WIFI:
+                return "Wi-Fi";
+            case PACKAGE_COMPANION:
+                return "Companion";
+            case PACKAGE_RETAIL_DEMO:
+                return "Retail Demo";
+            case PACKAGE_OVERLAY_CONFIG_SIGNATURE:
+                return "Overlay Config Signature";
+            case PACKAGE_RECENTS:
+                return "Recents";
+        }
+        return "Unknown";
+    }
+
+    /**
+     * Callback to listen for loading progress of a package installed on Incremental File System.
+     */
+    public abstract static class InstalledLoadingProgressCallback {
+        final LoadingProgressCallbackBinder mBinder = new LoadingProgressCallbackBinder();
+        final Executor mExecutor;
+        /**
+         * Default constructor that should always be called on subclass instantiation
+         * @param handler To dispatch callback events through. If null, the main thread
+         *                handler will be used.
+         */
+        public InstalledLoadingProgressCallback(@Nullable Handler handler) {
+            if (handler == null) {
+                handler = new Handler(Looper.getMainLooper());
+            }
+            mExecutor = new HandlerExecutor(handler);
+        }
+
+        /**
+         * Binder used by Package Manager Service to register as a callback
+         * @return the binder object of IPackageLoadingProgressCallback
+         */
+        public final @NonNull IBinder getBinder() {
+            return mBinder;
+        }
+
+        /**
+         * Report loading progress of an installed package.
+         *
+         * @param progress    Loading progress between [0, 1] for the registered package.
+         */
+        public abstract void onLoadingProgressChanged(float progress);
+
+        private class LoadingProgressCallbackBinder extends
+                android.content.pm.IPackageLoadingProgressCallback.Stub {
+            @Override
+            public void onPackageLoadingProgressChanged(float progress) {
+                mExecutor.execute(PooledLambda.obtainRunnable(
+                        InstalledLoadingProgressCallback::onLoadingProgressChanged,
+                        InstalledLoadingProgressCallback.this,
+                        progress).recycleOnUse());
+            }
+        }
+    }
+
+    /**
+     * Retrieve all of the information we know about a particular activity class including its
+     * package states.
+     *
+     * @param packageName a specific package
+     * @param filterCallingUid The results will be filtered in the context of this UID instead
+     *                         of the calling UID.
+     * @param userId The user for whom the package is installed
+     * @return IncrementalStatesInfo that contains information about package states.
+     */
+    public abstract IncrementalStatesInfo getIncrementalStatesInfo(String packageName,
+            int filterCallingUid, int userId);
+
+    /**
+     * Requesting the checksums for APKs within a package.
+     * See {@link PackageManager#requestChecksums} for details.
+     *
+     * @param executor to use for digest calculations.
+     * @param handler to use for postponed calculations.
+     */
+    public abstract void requestChecksums(@NonNull String packageName, boolean includeSplits,
+            @Checksum.TypeMask int optional, @Checksum.TypeMask int required,
+            @Nullable List trustedInstallers,
+            @NonNull IOnChecksumsReadyListener onChecksumsReadyListener, int userId,
+            @NonNull Executor executor, @NonNull Handler handler);
+
+    /**
+     * Returns true if the given {@code packageName} and {@code userId} is frozen.
+     *
+     * @param packageName a specific package
+     * @param callingUid The uid of the caller
+     * @param userId The user for whom the package is installed
+     * @return {@code true} If the package is current frozen (due to install/update etc.)
+     */
+    public abstract boolean isPackageFrozen(
+            @NonNull String packageName, int callingUid, int userId);
+
+    /**
+     * Deletes the OAT artifacts of a package.
+     * @param packageName a specific package
+     * @return the number of freed bytes or -1 if there was an error in the process.
+     */
+    public abstract long deleteOatArtifactsOfPackage(String packageName);
 }

@@ -84,10 +84,10 @@ import java.util.Stack;
  * <dd>Defines the name of this vector drawable.</dd>
  * <dt><code>android:width</code></dt>
  * <dd>Used to define the intrinsic width of the drawable.
- * This support all the dimension units, normally specified with dp.</dd>
+ * This supports all the dimension units, normally specified with dp.</dd>
  * <dt><code>android:height</code></dt>
- * <dd>Used to define the intrinsic height the drawable.
- * This support all the dimension units, normally specified with dp.</dd>
+ * <dd>Used to define the intrinsic height of the drawable.
+ * This supports all the dimension units, normally specified with dp.</dd>
  * <dt><code>android:viewportWidth</code></dt>
  * <dd>Used to define the width of the viewport space. Viewport is basically
  * the virtual canvas where the paths are drawn on.</dd>
@@ -349,15 +349,19 @@ public class VectorDrawable extends Drawable {
     private final Rect mTmpBounds = new Rect();
 
     public VectorDrawable() {
-        this(new VectorDrawableState(null), null);
+        this(null, null);
     }
 
     /**
      * The one constructor to rule them all. This is called by all public
      * constructors to set the state and initialize local properties.
      */
-    private VectorDrawable(@NonNull VectorDrawableState state, @Nullable Resources res) {
-        mVectorState = state;
+    private VectorDrawable(@Nullable VectorDrawableState state, @Nullable Resources res) {
+        // As the mutable, not-thread-safe native instance is stored in VectorDrawableState, we
+        // need to always do a defensive copy even if mutate() isn't called. Otherwise
+        // draw() being called on 2 different VectorDrawable instances could still hit the same
+        // underlying native object.
+        mVectorState = new VectorDrawableState(state);
         updateLocalState(res);
     }
 
@@ -503,7 +507,6 @@ public class VectorDrawable extends Drawable {
         return super.isStateful() || (mVectorState != null && mVectorState.isStateful());
     }
 
-    /** @hide */
     @Override
     public boolean hasFocusStateSpecified() {
         return mVectorState != null && mVectorState.hasFocusStateSpecified();

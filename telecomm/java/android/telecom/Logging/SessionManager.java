@@ -17,6 +17,7 @@
 package android.telecom.Logging;
 
 import android.annotation.Nullable;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -453,7 +454,9 @@ public class SessionManager {
      * perform a sweep to check and make sure that the session is still not incomplete (stale).
      */
     private long getCleanupTimeout(Context context) {
-        return Settings.Secure.getLong(context.getContentResolver(), TIMEOUTS_PREFIX +
-                "stale_session_cleanup_timeout_millis", DEFAULT_SESSION_TIMEOUT_MS);
+        final ContentResolver cr = context.getContentResolver();
+        return Settings.Secure.getLongForUser(cr, TIMEOUTS_PREFIX
+                        + "stale_session_cleanup_timeout_millis", DEFAULT_SESSION_TIMEOUT_MS,
+                cr.getUserId());
     }
 }

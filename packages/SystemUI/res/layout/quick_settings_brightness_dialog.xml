@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2012 The Android Open Source Project
+<!-- Copyright (C) 2020 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -13,21 +13,26 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:systemui="http://schemas.android.com/apk/res-auto"
-    android:layout_height="wrap_content"
-    android:layout_width="match_parent"
-    android:layout_gravity="center_vertical"
-    style="@style/BrightnessDialogContainer">
-
-    <com.android.systemui.settings.ToggleSliderView
+    <com.android.systemui.settings.brightness.BrightnessSliderView
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/brightness_slider"
-        android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/brightness_mirror_height"
+        android:layout_gravity="center"
         android:contentDescription="@string/accessibility_brightness"
-        android:importantForAccessibility="no"
-        systemui:text="@string/status_bar_settings_auto_brightness_label" />
+        android:importantForAccessibility="no" >
 
-</LinearLayout>
+        <com.android.systemui.settings.brightness.ToggleSeekBar
+            android:id="@+id/slider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:minHeight="48dp"
+            android:thumb="@null"
+            android:background="@null"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:progressDrawable="@drawable/brightness_progress_drawable"
+            android:splitTrack="false"
+        />
+    </com.android.systemui.settings.brightness.BrightnessSliderView>

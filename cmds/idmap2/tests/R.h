@@ -14,30 +14,21 @@
  * limitations under the License.
  */
 
-#ifndef IDMAP2_TESTS_R_H
-#define IDMAP2_TESTS_R_H
+#ifndef IDMAP2_TESTS_R_H_
+#define IDMAP2_TESTS_R_H_
 
-#include <idmap2/ResourceUtils.h>
+#include <string>
+
+#include "idmap2/ResourceUtils.h"
 
 namespace android::idmap2 {
 
-static std::string hexify(ResourceId id) {
-  std::stringstream stream;
-  stream << std::hex << static_cast<uint32_t>(id);
-  return stream.str();
-}
-
 // clang-format off
 namespace R::target {
-  namespace integer {
+  namespace integer {  // NOLINT(runtime/indentation_namespace)
     constexpr ResourceId int1 = 0x7f010000;
-
-    namespace literal {
-      inline const std::string int1 = hexify(R::target::integer::int1);
-    }
   }
-
-  namespace string {
+  namespace string {  // NOLINT(runtime/indentation_namespace)
     constexpr ResourceId not_overlayable = 0x7f020003;
     constexpr ResourceId other = 0x7f020004;
     constexpr ResourceId policy_actor = 0x7f020005;
@@ -52,58 +43,33 @@ namespace R::target {
     constexpr ResourceId str1 = 0x7f02000e;
     constexpr ResourceId str3 = 0x7f020010;
     constexpr ResourceId str4 = 0x7f020011;
-
-    namespace literal {
-      inline const std::string str1 = hexify(R::target::string::str1);
-      inline const std::string str3 = hexify(R::target::string::str3);
-      inline const std::string str4 = hexify(R::target::string::str4);
-    }
-  }
-}
+  }  // namespace string
+}  // namespace R::target
 
 namespace R::overlay {
-  namespace integer {
+  namespace integer {  // NOLINT(runtime/indentation_namespace)
     constexpr ResourceId int1 = 0x7f010000;
+    constexpr ResourceId not_in_target = 0x7f010001;
   }
-  namespace string {
-    constexpr ResourceId str1 = 0x7f020000;
-    constexpr ResourceId str3 = 0x7f020001;
-    constexpr ResourceId str4 = 0x7f020002;
-  }
-}
-
-namespace R::overlay_shared {
-  namespace integer {
-    constexpr ResourceId int1 = 0x00010000;
-  }
-  namespace string {
-    constexpr ResourceId str1 = 0x00020000;
-    constexpr ResourceId str3 = 0x00020001;
-    constexpr ResourceId str4 = 0x00020002;
-  }
-}
-
-namespace R::system_overlay::string {
-  constexpr ResourceId policy_public = 0x7f010000;
-  constexpr ResourceId policy_system = 0x7f010001;
-  constexpr ResourceId policy_system_vendor = 0x7f010002;
-}
-
-namespace R::system_overlay_invalid::string {
-  constexpr ResourceId not_overlayable = 0x7f010000;
-  constexpr ResourceId other = 0x7f010001;
-  constexpr ResourceId policy_actor = 0x7f010002;
-  constexpr ResourceId policy_config_signature = 0x7f010003;
-  constexpr ResourceId policy_odm = 0x7f010004;
-  constexpr ResourceId policy_oem = 0x7f010005;
-  constexpr ResourceId policy_product = 0x7f010006;
-  constexpr ResourceId policy_public = 0x7f010007;
-  constexpr ResourceId policy_signature = 0x7f010008;
-  constexpr ResourceId policy_system = 0x7f010009;
-  constexpr ResourceId policy_system_vendor = 0x7f01000a;
-}
+  namespace string {  // NOLINT(runtime/indentation_namespace)
+    constexpr ResourceId not_overlayable = 0x7f020000;
+    constexpr ResourceId other = 0x7f020001;
+    constexpr ResourceId policy_actor = 0x7f020002;
+    constexpr ResourceId policy_config_signature = 0x7f020003;
+    constexpr ResourceId policy_odm = 0x7f020004;
+    constexpr ResourceId policy_oem = 0x7f020005;
+    constexpr ResourceId policy_product = 0x7f020006;
+    constexpr ResourceId policy_public = 0x7f020007;
+    constexpr ResourceId policy_signature = 0x7f020008;
+    constexpr ResourceId policy_system = 0x7f020009;
+    constexpr ResourceId policy_system_vendor = 0x7f02000a;
+    constexpr ResourceId str1 = 0x7f02000b;
+    constexpr ResourceId str3 = 0x7f02000c;
+    constexpr ResourceId str4 = 0x7f02000d;
+  }  // namespace string
+}  // namespace R::overlay
 // clang-format on
 
 }  // namespace android::idmap2
 
-#endif  // IDMAP2_TESTS_R_H
+#endif  // IDMAP2_TESTS_R_H_

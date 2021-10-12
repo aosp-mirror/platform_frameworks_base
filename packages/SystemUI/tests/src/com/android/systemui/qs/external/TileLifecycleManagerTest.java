@@ -77,9 +77,9 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
 
         // Stub.asInterface will just return itself.
         when(mMockTileService.queryLocalInterface(anyString())).thenReturn(mMockTileService);
+        when(mMockTileService.asBinder()).thenReturn(mMockTileService);
 
         mContext.addMockService(mTileServiceComponentName, mMockTileService);
-
 
         mTileServiceIntent = new Intent().setComponent(mTileServiceComponentName);
         mUser = new UserHandle(UserHandle.myUserId());

@@ -16,8 +16,11 @@
 
 package com.android.server.job;
 
+import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_NONE;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.job.IJobCallback;
 import android.app.job.IJobService;
 import android.app.job.JobInfo;
@@ -41,6 +44,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.util.EventLog;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.TimeUtils;
 
@@ -73,9 +77,6 @@ public final class JobServiceContext implements ServiceConnection {
     private static final boolean DEBUG_STANDBY = JobSchedulerService.DEBUG_STANDBY;
 
     private static final String TAG = "JobServiceContext";
-    /** Amount of time a job is allowed to execute for before being considered timed-out. */
-    public static final long EXECUTING_TIMESLICE_MILLIS =
-            10 * 60 * 1000 * Build.HW_TIMEOUT_MULTIPLIER; // 10mins.
     /** Amount of time the JobScheduler waits for the initial service launch+bind. */
     private static final long OP_BIND_TIMEOUT_MILLIS = 18 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
     /** Amount of time the JobScheduler will wait for a response from an app for a message. */
@@ -101,6 +102,8 @@ public final class JobServiceContext implements ServiceConnection {
     private final Handler mCallbackHandler;
     /** Make callbacks to {@link JobSchedulerService} to inform on job completion status. */
     private final JobCompletedListener mCompletedListener;
+    private final JobConcurrencyManager mJobConcurrencyManager;
+    private final JobSchedulerService mService;
     /** Used for service binding, etc. */
     private final Context mContext;
     private final Object mLock;
@@ -113,15 +116,28 @@ public final class JobServiceContext implements ServiceConnection {
     @VisibleForTesting
     int mVerb;
     private boolean mCancelled;
+    /**
+     * True if the previous job on this context successfully finished (ie. called jobFinished or
+     * dequeueWork with no work left).
+     */
+    private boolean mPreviousJobHadSuccessfulFinish;
+    /**
+     * The last time a job on this context didn't finish successfully, in the elapsed realtime
+     * timebase.
+     */
+    private long mLastUnsuccessfulFinishElapsed;
 
     /**
      * All the information maintained about the job currently being executed.
      *
      * Any reads (dereferences) not done from the handler thread must be synchronized on
      * {@link #mLock}.
-     * Writes can only be done from the handler thread, or {@link #executeRunnableJob(JobStatus)}.
+     * Writes can only be done from the handler thread,
+     * or {@link #executeRunnableJob(JobStatus, int)}.
      */
     private JobStatus mRunningJob;
+    @JobConcurrencyManager.WorkType
+    private int mRunningJobWorkType;
     private JobCallback mRunningCallback;
     /** Used to store next job to run when current job is to be preempted. */
     private int mPreferredUid;
@@ -137,6 +153,21 @@ public final class JobServiceContext implements ServiceConnection {
     private long mExecutionStartTimeElapsed;
     /** Track when job will timeout. */
     private long mTimeoutElapsed;
+    /**
+     * The minimum amount of time the context will allow the job to run before checking whether to
+     * stop it or not.
+     */
+    private long mMinExecutionGuaranteeMillis;
+    /** The absolute maximum amount of time the job can run */
+    private long mMaxExecutionTimeMillis;
+
+    /**
+     * The stop reason for a pending cancel. If there's not pending cancel, then the value should be
+     * {@link JobParameters#STOP_REASON_UNDEFINED}.
+     */
+    private int mPendingStopReason = JobParameters.STOP_REASON_UNDEFINED;
+    private int mPendingInternalStopReason;
+    private String mPendingDebugStopReason;
 
     // Debugging: reason this job was last stopped.
     public String mStoppedReason;
@@ -174,32 +205,30 @@ public final class JobServiceContext implements ServiceConnection {
         }
     }
 
-    JobServiceContext(JobSchedulerService service, IBatteryStats batteryStats,
-            JobPackageTracker tracker, Looper looper) {
-        this(service.getContext(), service.getLock(), batteryStats, tracker, service, looper);
-    }
-
-    @VisibleForTesting
-    JobServiceContext(Context context, Object lock, IBatteryStats batteryStats,
-            JobPackageTracker tracker, JobCompletedListener completedListener, Looper looper) {
-        mContext = context;
-        mLock = lock;
+    JobServiceContext(JobSchedulerService service, JobConcurrencyManager concurrencyManager,
+            IBatteryStats batteryStats, JobPackageTracker tracker, Looper looper) {
+        mContext = service.getContext();
+        mLock = service.getLock();
+        mService = service;
         mBatteryStats = batteryStats;
         mJobPackageTracker = tracker;
         mCallbackHandler = new JobServiceHandler(looper);
-        mCompletedListener = completedListener;
+        mJobConcurrencyManager = concurrencyManager;
+        mCompletedListener = service;
         mAvailable = true;
         mVerb = VERB_FINISHED;
         mPreferredUid = NO_PREFERRED_UID;
     }
 
     /**
-     * Give a job to this context for execution. Callers must first check {@link #getRunningJobLocked()}
+     * Give a job to this context for execution. Callers must first check {@link
+     * #getRunningJobLocked()}
      * and ensure it is null to make sure this is a valid context.
+     *
      * @param job The status of the job that we are going to run.
      * @return True if the job is valid and is running. False if the job cannot be executed.
      */
-    boolean executeRunnableJob(JobStatus job) {
+    boolean executeRunnableJob(JobStatus job, @JobConcurrencyManager.WorkType int workType) {
         synchronized (mLock) {
             if (!mAvailable) {
                 Slog.e(TAG, "Starting new runnable but context is unavailable > Error.");
@@ -209,6 +238,7 @@ public final class JobServiceContext implements ServiceConnection {
             mPreferredUid = NO_PREFERRED_UID;
 
             mRunningJob = job;
+            mRunningJobWorkType = workType;
             mRunningCallback = new JobCallback();
             final boolean isDeadlineExpired =
                     job.hasDeadlineConstraint() &&
@@ -226,8 +256,12 @@ public final class JobServiceContext implements ServiceConnection {
             final JobInfo ji = job.getJob();
             mParams = new JobParameters(mRunningCallback, job.getJobId(), ji.getExtras(),
                     ji.getTransientExtras(), ji.getClipData(), ji.getClipGrantFlags(),
-                    isDeadlineExpired, triggeredUris, triggeredAuthorities, job.network);
+                    isDeadlineExpired, job.shouldTreatAsExpeditedJob(),
+                    triggeredUris, triggeredAuthorities, job.network);
             mExecutionStartTimeElapsed = sElapsedRealtimeClock.millis();
+            mMinExecutionGuaranteeMillis = mService.getMinJobExecutionGuaranteeMs(job);
+            mMaxExecutionTimeMillis =
+                    Math.max(mService.getMaxJobExecutionTimeMs(job), mMinExecutionGuaranteeMillis);
 
             final long whenDeferred = job.getWhenStandbyDeferred();
             if (whenDeferred > 0) {
@@ -252,9 +286,18 @@ public final class JobServiceContext implements ServiceConnection {
             final Intent intent = new Intent().setComponent(job.getServiceComponent());
             boolean binding = false;
             try {
-                binding = mContext.bindServiceAsUser(intent, this,
-                        Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
-                        | Context.BIND_NOT_PERCEPTIBLE,
+                final int bindFlags;
+                if (job.shouldTreatAsExpeditedJob()) {
+                    bindFlags = Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
+                            | Context.BIND_ALMOST_PERCEPTIBLE
+                            | Context.BIND_BYPASS_POWER_NETWORK_RESTRICTIONS
+                            | Context.BIND_NOT_APP_COMPONENT_USAGE;
+                } else {
+                    bindFlags = Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
+                            | Context.BIND_NOT_PERCEPTIBLE
+                            | Context.BIND_NOT_APP_COMPONENT_USAGE;
+                }
+                binding = mContext.bindServiceAsUser(intent, this, bindFlags,
                         UserHandle.of(job.getUserId()));
             } catch (SecurityException e) {
                 // Some permission policy, for example INTERACT_ACROSS_USERS and
@@ -269,6 +312,7 @@ public final class JobServiceContext implements ServiceConnection {
                     Slog.d(TAG, job.getServiceComponent().getShortClassName() + " unavailable.");
                 }
                 mRunningJob = null;
+                mRunningJobWorkType = WORK_TYPE_NONE;
                 mRunningCallback = null;
                 mParams = null;
                 mExecutionStartTimeElapsed = 0L;
@@ -280,7 +324,8 @@ public final class JobServiceContext implements ServiceConnection {
             FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
                     job.getSourceUid(), null, job.getBatteryName(),
                     FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__STARTED,
-                    JobProtoEnums.STOP_REASON_UNKNOWN, job.getStandbyBucket(), job.getJobId(),
+                    JobProtoEnums.INTERNAL_STOP_REASON_UNKNOWN,
+                    job.getStandbyBucket(), job.getJobId(),
                     job.hasChargingConstraint(),
                     job.hasBatteryNotLowConstraint(),
                     job.hasStorageNotLowConstraint(),
@@ -288,7 +333,10 @@ public final class JobServiceContext implements ServiceConnection {
                     job.hasDeadlineConstraint(),
                     job.hasIdleConstraint(),
                     job.hasConnectivityConstraint(),
-                    job.hasContentTriggerConstraint());
+                    job.hasContentTriggerConstraint(),
+                    job.isRequestedExpeditedJob(),
+                    job.shouldTreatAsExpeditedJob(),
+                    JobProtoEnums.STOP_REASON_UNDEFINED);
             try {
                 mBatteryStats.noteJobStart(job.getBatteryName(), job.getSourceUid());
             } catch (RemoteException e) {
@@ -302,6 +350,7 @@ public final class JobServiceContext implements ServiceConnection {
             mAvailable = false;
             mStoppedReason = null;
             mStoppedTime = 0;
+            job.startedAsExpeditedJob = job.shouldTreatAsExpeditedJob();
             return true;
         }
     }
@@ -309,8 +358,14 @@ public final class JobServiceContext implements ServiceConnection {
     /**
      * Used externally to query the running job. Will return null if there is no job running.
      */
+    @Nullable
     JobStatus getRunningJobLocked() {
         return mRunningJob;
+    }
+
+    @JobConcurrencyManager.WorkType
+    int getRunningJobWorkType() {
+        return mRunningJobWorkType;
     }
 
     /**
@@ -322,13 +377,9 @@ public final class JobServiceContext implements ServiceConnection {
 
     /** Called externally when a job that was scheduled for execution should be cancelled. */
     @GuardedBy("mLock")
-    void cancelExecutingJobLocked(int reason, String debugReason) {
-        doCancelLocked(reason, debugReason);
-    }
-
-    @GuardedBy("mLock")
-    void preemptExecutingJobLocked() {
-        doCancelLocked(JobParameters.REASON_PREEMPT, "cancelled due to preemption");
+    void cancelExecutingJobLocked(@JobParameters.StopReason int reason,
+            int internalStopReason, @NonNull String debugReason) {
+        doCancelLocked(reason, internalStopReason, debugReason);
     }
 
     int getPreferredUid() {
@@ -347,6 +398,11 @@ public final class JobServiceContext implements ServiceConnection {
         return mTimeoutElapsed;
     }
 
+    boolean isWithinExecutionGuaranteeTime() {
+        return sElapsedRealtimeClock.millis()
+                < mExecutionStartTimeElapsed + mMinExecutionGuaranteeMillis;
+    }
+
     @GuardedBy("mLock")
     boolean timeoutIfExecutingLocked(String pkgName, int userId, boolean matchJobId, int jobId,
             String reason) {
@@ -355,7 +411,8 @@ public final class JobServiceContext implements ServiceConnection {
                 && (pkgName == null || pkgName.equals(executing.getSourcePackageName()))
                 && (!matchJobId || jobId == executing.getJobId())) {
             if (mVerb == VERB_EXECUTING) {
-                mParams.setStopReason(JobParameters.REASON_TIMEOUT, reason);
+                mParams.setStopReason(JobParameters.STOP_REASON_TIMEOUT,
+                        JobParameters.INTERNAL_STOP_REASON_TIMEOUT, reason);
                 sendStopMessageLocked("force timeout from shell");
                 return true;
             }
@@ -364,7 +421,20 @@ public final class JobServiceContext implements ServiceConnection {
     }
 
     void doJobFinished(JobCallback cb, int jobId, boolean reschedule) {
-        doCallback(cb, reschedule, "app called jobFinished");
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLock) {
+                if (!verifyCallerLocked(cb)) {
+                    return;
+                }
+                mParams.setStopReason(JobParameters.STOP_REASON_UNDEFINED,
+                        JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH,
+                        "app called jobFinished");
+                doCallbackLocked(reschedule, "app called jobFinished");
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     void doAcknowledgeStopMessage(JobCallback cb, int jobId, boolean reschedule) {
@@ -379,7 +449,9 @@ public final class JobServiceContext implements ServiceConnection {
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                assertCallerLocked(cb);
+                if (!assertCallerLocked(cb)) {
+                    return null;
+                }
                 if (mVerb == VERB_STOPPING || mVerb == VERB_FINISHED) {
                     // This job is either all done, or on its way out.  Either way, it
                     // should not dispatch any more work.  We will pick up any remaining
@@ -388,6 +460,9 @@ public final class JobServiceContext implements ServiceConnection {
                 }
                 final JobWorkItem work = mRunningJob.dequeueWorkLocked();
                 if (work == null && !mRunningJob.hasExecutingWorkLocked()) {
+                    mParams.setStopReason(JobParameters.STOP_REASON_UNDEFINED,
+                            JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH,
+                            "last work dequeued");
                     // This will finish the job.
                     doCallbackLocked(false, "last work dequeued");
                 }
@@ -402,7 +477,11 @@ public final class JobServiceContext implements ServiceConnection {
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                assertCallerLocked(cb);
+                if (!assertCallerLocked(cb)) {
+                    // Return true instead of false here so we don't just kick the
+                    // Exception-throwing-can down the road to JobParameters.completeWork >:(
+                    return true;
+                }
                 return mRunningJob.completeWorkLocked(workId);
             }
         } finally {
@@ -491,18 +570,34 @@ public final class JobServiceContext implements ServiceConnection {
         return true;
     }
 
-    private void assertCallerLocked(JobCallback cb) {
+    /**
+     * Will throw a {@link SecurityException} if the callback is not for the currently running job,
+     * but may decide not to throw an exception if the call from the previous job appears to be an
+     * accident.
+     *
+     * @return true if the callback is for the current job, false otherwise
+     */
+    private boolean assertCallerLocked(JobCallback cb) {
         if (!verifyCallerLocked(cb)) {
+            final long nowElapsed = sElapsedRealtimeClock.millis();
+            if (!mPreviousJobHadSuccessfulFinish
+                    && (nowElapsed - mLastUnsuccessfulFinishElapsed) < 15_000L) {
+                // Don't punish apps for race conditions
+                return false;
+            }
+            // It's been long enough that the app should really not be calling into JS for the
+            // stopped job.
             StringBuilder sb = new StringBuilder(128);
             sb.append("Caller no longer running");
             if (cb.mStoppedReason != null) {
                 sb.append(", last stopped ");
-                TimeUtils.formatDuration(sElapsedRealtimeClock.millis() - cb.mStoppedTime, sb);
+                TimeUtils.formatDuration(nowElapsed - cb.mStoppedTime, sb);
                 sb.append(" because: ");
                 sb.append(cb.mStoppedReason);
             }
             throw new SecurityException(sb.toString());
         }
+        return true;
     }
 
     /**
@@ -582,7 +677,8 @@ public final class JobServiceContext implements ServiceConnection {
     }
 
     @GuardedBy("mLock")
-    void doCancelLocked(int arg1, String debugReason) {
+    private void doCancelLocked(@JobParameters.StopReason int stopReasonCode,
+            int internalStopReasonCode, @Nullable String debugReason) {
         if (mVerb == VERB_FINISHED) {
             if (DEBUG) {
                 Slog.d(TAG,
@@ -590,10 +686,22 @@ public final class JobServiceContext implements ServiceConnection {
             }
             return;
         }
-        mParams.setStopReason(arg1, debugReason);
-        if (arg1 == JobParameters.REASON_PREEMPT) {
-            mPreferredUid = mRunningJob != null ? mRunningJob.getUid() :
-                    NO_PREFERRED_UID;
+        if (mRunningJob.startedAsExpeditedJob
+                && stopReasonCode == JobParameters.STOP_REASON_QUOTA) {
+            // EJs should be able to run for at least the min upper limit regardless of quota.
+            final long earliestStopTimeElapsed =
+                    mExecutionStartTimeElapsed + mMinExecutionGuaranteeMillis;
+            final long nowElapsed = sElapsedRealtimeClock.millis();
+            if (nowElapsed < earliestStopTimeElapsed) {
+                mPendingStopReason = stopReasonCode;
+                mPendingInternalStopReason = internalStopReasonCode;
+                mPendingDebugStopReason = debugReason;
+                return;
+            }
+        }
+        mParams.setStopReason(stopReasonCode, internalStopReasonCode, debugReason);
+        if (internalStopReasonCode == JobParameters.INTERNAL_STOP_REASON_PREEMPT) {
+            mPreferredUid = mRunningJob != null ? mRunningJob.getUid() : NO_PREFERRED_UID;
         }
         handleCancelLocked(debugReason);
     }
@@ -695,7 +803,7 @@ public final class JobServiceContext implements ServiceConnection {
      *     _ENDING     -> No point in doing anything here, so we ignore.
      */
     @GuardedBy("mLock")
-    private void handleCancelLocked(String reason) {
+    private void handleCancelLocked(@Nullable String reason) {
         if (JobSchedulerService.DEBUG) {
             Slog.d(TAG, "Handling cancel for: " + mRunningJob.getJobId() + " "
                     + VERB_STRINGS[mVerb]);
@@ -742,11 +850,52 @@ public final class JobServiceContext implements ServiceConnection {
                 closeAndCleanupJobLocked(true /* needsReschedule */, "timed out while stopping");
                 break;
             case VERB_EXECUTING:
-                // Not an error - client ran out of time.
-                Slog.i(TAG, "Client timed out while executing (no jobFinished received), " +
-                        "sending onStop: " + getRunningJobNameLocked());
-                mParams.setStopReason(JobParameters.REASON_TIMEOUT, "client timed out");
-                sendStopMessageLocked("timeout while executing");
+                if (mPendingStopReason != JobParameters.STOP_REASON_UNDEFINED) {
+                    if (mService.isReadyToBeExecutedLocked(mRunningJob, false)) {
+                        // Job became ready again while we were waiting to stop it (for example,
+                        // the device was temporarily taken off the charger). Ignore the pending
+                        // stop and see what the manager says.
+                        mPendingStopReason = JobParameters.STOP_REASON_UNDEFINED;
+                        mPendingInternalStopReason = 0;
+                        mPendingDebugStopReason = null;
+                    } else {
+                        Slog.i(TAG, "JS was waiting to stop this job."
+                                + " Sending onStop: " + getRunningJobNameLocked());
+                        mParams.setStopReason(mPendingStopReason, mPendingInternalStopReason,
+                                mPendingDebugStopReason);
+                        sendStopMessageLocked(mPendingDebugStopReason);
+                        break;
+                    }
+                }
+                final long latestStopTimeElapsed =
+                        mExecutionStartTimeElapsed + mMaxExecutionTimeMillis;
+                final long nowElapsed = sElapsedRealtimeClock.millis();
+                if (nowElapsed >= latestStopTimeElapsed) {
+                    // Not an error - client ran out of time.
+                    Slog.i(TAG, "Client timed out while executing (no jobFinished received)."
+                            + " Sending onStop: " + getRunningJobNameLocked());
+                    mParams.setStopReason(JobParameters.STOP_REASON_TIMEOUT,
+                            JobParameters.INTERNAL_STOP_REASON_TIMEOUT, "client timed out");
+                    sendStopMessageLocked("timeout while executing");
+                } else {
+                    // We've given the app the minimum execution time. See if we should stop it or
+                    // let it continue running
+                    final String reason = mJobConcurrencyManager.shouldStopRunningJobLocked(this);
+                    if (reason != null) {
+                        Slog.i(TAG, "Stopping client after min execution time: "
+                                + getRunningJobNameLocked() + " because " + reason);
+                        // Tell the developer we're stopping the job due to device state instead
+                        // of timeout since all of the reasons could equate to "the system needs
+                        // the resources the app is currently using."
+                        mParams.setStopReason(JobParameters.STOP_REASON_DEVICE_STATE,
+                                JobParameters.INTERNAL_STOP_REASON_TIMEOUT, reason);
+                        sendStopMessageLocked(reason);
+                    } else {
+                        Slog.i(TAG, "Letting " + getRunningJobNameLocked()
+                                + " continue to run past min execution time");
+                        scheduleOpTimeOutLocked();
+                    }
+                }
                 break;
             default:
                 Slog.e(TAG, "Handling timeout for an invalid job state: "
@@ -760,7 +909,7 @@ public final class JobServiceContext implements ServiceConnection {
      * VERB_STOPPING.
      */
     @GuardedBy("mLock")
-    private void sendStopMessageLocked(String reason) {
+    private void sendStopMessageLocked(@Nullable String reason) {
         removeOpTimeOutLocked();
         if (mVerb != VERB_EXECUTING) {
             Slog.e(TAG, "Sending onStopJob for a job that isn't started. " + mRunningJob);
@@ -786,18 +935,24 @@ public final class JobServiceContext implements ServiceConnection {
      * we want to clean up internally.
      */
     @GuardedBy("mLock")
-    private void closeAndCleanupJobLocked(boolean reschedule, String reason) {
+    private void closeAndCleanupJobLocked(boolean reschedule, @Nullable String reason) {
         final JobStatus completedJob;
         if (mVerb == VERB_FINISHED) {
             return;
         }
         applyStoppedReasonLocked(reason);
         completedJob = mRunningJob;
-        mJobPackageTracker.noteInactive(completedJob, mParams.getStopReason(), reason);
+        final int internalStopReason = mParams.getInternalStopReasonCode();
+        mPreviousJobHadSuccessfulFinish =
+                (internalStopReason == JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH);
+        if (!mPreviousJobHadSuccessfulFinish) {
+            mLastUnsuccessfulFinishElapsed = sElapsedRealtimeClock.millis();
+        }
+        mJobPackageTracker.noteInactive(completedJob, internalStopReason, reason);
         FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
                 completedJob.getSourceUid(), null, completedJob.getBatteryName(),
                 FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__FINISHED,
-                mParams.getStopReason(), completedJob.getStandbyBucket(), completedJob.getJobId(),
+                internalStopReason, completedJob.getStandbyBucket(), completedJob.getJobId(),
                 completedJob.hasChargingConstraint(),
                 completedJob.hasBatteryNotLowConstraint(),
                 completedJob.hasStorageNotLowConstraint(),
@@ -805,30 +960,39 @@ public final class JobServiceContext implements ServiceConnection {
                 completedJob.hasDeadlineConstraint(),
                 completedJob.hasIdleConstraint(),
                 completedJob.hasConnectivityConstraint(),
-                completedJob.hasContentTriggerConstraint());
+                completedJob.hasContentTriggerConstraint(),
+                completedJob.isRequestedExpeditedJob(),
+                completedJob.startedAsExpeditedJob,
+                mParams.getStopReason());
         try {
             mBatteryStats.noteJobFinish(mRunningJob.getBatteryName(), mRunningJob.getSourceUid(),
-                    mParams.getStopReason());
+                    internalStopReason);
         } catch (RemoteException e) {
             // Whatever.
         }
         if (mWakeLock != null) {
             mWakeLock.release();
         }
+        final int workType = mRunningJobWorkType;
         mContext.unbindService(JobServiceContext.this);
         mWakeLock = null;
         mRunningJob = null;
+        mRunningJobWorkType = WORK_TYPE_NONE;
         mRunningCallback = null;
         mParams = null;
         mVerb = VERB_FINISHED;
         mCancelled = false;
         service = null;
         mAvailable = true;
+        mPendingStopReason = JobParameters.STOP_REASON_UNDEFINED;
+        mPendingInternalStopReason = 0;
+        mPendingDebugStopReason = null;
         removeOpTimeOutLocked();
-        mCompletedListener.onJobCompletedLocked(completedJob, reschedule);
+        mCompletedListener.onJobCompletedLocked(completedJob, internalStopReason, reschedule);
+        mJobConcurrencyManager.onJobCompletedLocked(this, completedJob, workType);
     }
 
-    private void applyStoppedReasonLocked(String reason) {
+    private void applyStoppedReasonLocked(@Nullable String reason) {
         if (reason != null && mStoppedReason == null) {
             mStoppedReason = reason;
             mStoppedTime = sElapsedRealtimeClock.millis();
@@ -850,7 +1014,16 @@ public final class JobServiceContext implements ServiceConnection {
         final long timeoutMillis;
         switch (mVerb) {
             case VERB_EXECUTING:
-                timeoutMillis = EXECUTING_TIMESLICE_MILLIS;
+                final long earliestStopTimeElapsed =
+                        mExecutionStartTimeElapsed + mMinExecutionGuaranteeMillis;
+                final long latestStopTimeElapsed =
+                        mExecutionStartTimeElapsed + mMaxExecutionTimeMillis;
+                final long nowElapsed = sElapsedRealtimeClock.millis();
+                if (nowElapsed < earliestStopTimeElapsed) {
+                    timeoutMillis = earliestStopTimeElapsed - nowElapsed;
+                } else {
+                    timeoutMillis = latestStopTimeElapsed - nowElapsed;
+                }
                 break;
 
             case VERB_BINDING:
@@ -871,8 +1044,46 @@ public final class JobServiceContext implements ServiceConnection {
         mTimeoutElapsed = sElapsedRealtimeClock.millis() + timeoutMillis;
     }
 
-
     private void removeOpTimeOutLocked() {
         mCallbackHandler.removeMessages(MSG_TIMEOUT);
+    }
+
+    void dumpLocked(IndentingPrintWriter pw, final long nowElapsed) {
+        if (mRunningJob == null) {
+            if (mStoppedReason != null) {
+                pw.print("inactive since ");
+                TimeUtils.formatDuration(mStoppedTime, nowElapsed, pw);
+                pw.print(", stopped because: ");
+                pw.println(mStoppedReason);
+            } else {
+                pw.println("inactive");
+            }
+        } else {
+            pw.println(mRunningJob.toShortString());
+
+            pw.increaseIndent();
+            pw.print("Running for: ");
+            TimeUtils.formatDuration(nowElapsed - mExecutionStartTimeElapsed, pw);
+            pw.print(", timeout at: ");
+            TimeUtils.formatDuration(mTimeoutElapsed - nowElapsed, pw);
+            pw.println();
+            pw.print("Remaining execution limits: [");
+            TimeUtils.formatDuration(
+                    (mExecutionStartTimeElapsed + mMinExecutionGuaranteeMillis) - nowElapsed, pw);
+            pw.print(", ");
+            TimeUtils.formatDuration(
+                    (mExecutionStartTimeElapsed + mMaxExecutionTimeMillis) - nowElapsed, pw);
+            pw.print("]");
+            if (mPendingStopReason != JobParameters.STOP_REASON_UNDEFINED) {
+                pw.print(" Pending stop because ");
+                pw.print(mPendingStopReason);
+                pw.print("/");
+                pw.print(mPendingInternalStopReason);
+                pw.print("/");
+                pw.print(mPendingDebugStopReason);
+            }
+            pw.println();
+            pw.decreaseIndent();
+        }
     }
 }

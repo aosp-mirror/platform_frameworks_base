@@ -35,14 +35,14 @@ import android.os.ParcelFileDescriptor;
 import android.view.DisplayCutout;
 import android.view.IApplicationToken;
 import android.view.IAppTransitionAnimationSpecsFuture;
-import android.view.IDockedStackListener;
+import android.view.ICrossWindowBlurEnabledListener;
 import android.view.IDisplayWindowInsetsController;
 import android.view.IDisplayWindowListener;
 import android.view.IDisplayFoldListener;
 import android.view.IDisplayWindowRotationController;
 import android.view.IOnKeyguardExitResult;
-import android.view.IPinnedStackListener;
-import android.view.IScrollCaptureController;
+import android.view.IPinnedTaskListener;
+import android.view.IScrollCaptureResponseListener;
 import android.view.RemoteAnimationAdapter;
 import android.view.IRotationWatcher;
 import android.view.ISystemGestureExclusionListener;
@@ -62,6 +62,8 @@ import android.view.AppTransitionAnimationSpec;
 import android.view.WindowContentFrameStats;
 import android.view.WindowManager;
 import android.view.SurfaceControl;
+import android.view.displayhash.DisplayHash;
+import android.view.displayhash.VerifiedDisplayHash;
 
 /**
  * System private interface to the window manager.
@@ -116,23 +118,17 @@ interface IWindowManager
     // These can only be called when holding the MANAGE_APP_TOKENS permission.
     void setEventDispatching(boolean enabled);
 
-    /** @return {@code true} if this binder is a registered window token. */
+    /** Returns {@code true} if this binder is a registered window token. */
     boolean isWindowToken(in IBinder binder);
     /**
      * Adds window token for a given type.
      *
      * @param token Token to be registered.
      * @param type Window type to be used with this token.
-     * @param options A bundle used to pass window-related options.
      * @param displayId The ID of the display where this token should be added.
-     * @param packageName The name of package to request to add window token. Could be {@code null}
-     *                    if callers holds the MANAGE_APP_TOKENS permission.
-     * @return {@link WindowManagerGlobal#ADD_OKAY} if the addition was successful, an error code
-     *         otherwise.
+     * @param options A bundle used to pass window-related options.
      */
-    int addWindowTokenWithOptions(IBinder token, int type, int displayId, in Bundle options,
-            String packageName);
-    void addWindowToken(IBinder token, int type, int displayId);
+    void addWindowToken(IBinder token, int type, int displayId, in Bundle options);
     /**
      * Remove window token on a specific display.
      *
@@ -140,7 +136,6 @@ interface IWindowManager
      * @displayId The ID of the display where this token should be removed.
      */
     void removeWindowToken(IBinder token, int displayId);
-    void prepareAppTransition(int transit, boolean alwaysKeepCurrent);
 
     /**
      * Sets a singular remote controller of display rotations. There can only be one. The
@@ -154,11 +149,10 @@ interface IWindowManager
      * WindowlessWindowManager).
      *
      * @param client an IWindow used for window-level communication (ime, finish draw, etc.).
-     * @param windowType used by WM to determine the z-order. This is the same as the window type
-     *                   used in {@link WindowManager.LayoutParams}.
+     * @param shellRootLayer The container's layer. See WindowManager#ShellRootLayer.
      * @return a SurfaceControl to add things to.
      */
-    SurfaceControl addShellRoot(int displayId, IWindow client, int windowType);
+    SurfaceControl addShellRoot(int displayId, IWindow client, int shellRootLayer);
 
     /**
      * Sets the window token sent to accessibility for a particular shell root. The
@@ -166,7 +160,7 @@ interface IWindowManager
      *
      * @param target The IWindow that accessibility service interfaces with.
      */
-    void setShellRootAccessibilityWindow(int displayId, int windowType, IWindow target);
+    void setShellRootAccessibilityWindow(int displayId, int shellRootLayer, IWindow target);
 
     /**
      * Like overridePendingAppTransitionMultiThumb, but uses a future to supply the specs. This is
@@ -180,8 +174,6 @@ interface IWindowManager
     @UnsupportedAppUsage
     void overridePendingAppTransitionRemote(in RemoteAnimationAdapter remoteAnimationAdapter,
             int displayId);
-    @UnsupportedAppUsage
-    void executeAppTransition();
 
     /**
       * Used by system ui to report that recents has shown itself.
@@ -337,10 +329,15 @@ interface IWindowManager
      */
     boolean isDisplayRotationFrozen(int displayId);
 
-    /**
+   /**
     *  Sets if display rotation is fixed to user specified value for given displayId.
     */
     void setFixedToUserRotation(int displayId, int fixedToUserRotation);
+
+   /**
+    *  Sets if all requested fixed orientation should be ignored for given displayId.
+    */
+    void setIgnoreOrientationRequest(int displayId, boolean ignoreOrientationRequest);
 
     /**
      * Screenshot the current wallpaper layer, including the whole screen.
@@ -378,11 +375,6 @@ interface IWindowManager
     boolean requestAssistScreenshot(IAssistDataReceiver receiver);
 
     /**
-     * Called by the status bar to notify Views of changes to System UI visiblity.
-     */
-    oneway void statusBarVisibilityChanged(int displayId, int visibility);
-
-    /**
      * Called by System UI to notify Window Manager to hide transient bars.
      */
     oneway void hideTransientBars(int displayId);
@@ -393,9 +385,11 @@ interface IWindowManager
     oneway void setRecentsVisibility(boolean visible);
 
     /**
-     * Called by System UI to notify of changes to the visibility of PIP.
-     */
-    oneway void setPipVisibility(boolean visible);
+    * Called by System UI to indicate the maximum bounds of the system Privacy Indicator, for the
+    * current orientation, whether the indicator is showing or not. Should be an array of length
+    * 4, with the bounds for ROTATION_0, 90, 180, and 270, in that order.
+    */
+     oneway void updateStaticPrivacyIndicatorBounds(int displayId, in Rect[] staticBounds);
 
     /**
      * Called by System UI to enable or disable haptic feedback on the navigation bar buttons.
@@ -459,12 +453,12 @@ interface IWindowManager
      * Sets the region the user can touch the divider. This region will be excluded from the region
      * which is used to cause a focus switch when dispatching touch.
      */
-    void setDockedStackDividerTouchRegion(in Rect touchableRegion);
+    void setDockedTaskDividerTouchRegion(in Rect touchableRegion);
 
     /**
-     * Registers a listener that will be called when the pinned stack state changes.
+     * Registers a listener that will be called when the pinned task state changes.
      */
-    void registerPinnedStackListener(int displayId, IPinnedStackListener listener);
+    void registerPinnedTaskListener(int displayId, IPinnedTaskListener listener);
 
     /**
      * Requests Keyboard Shortcuts from the displayed window.
@@ -657,42 +651,44 @@ interface IWindowManager
     void setShouldShowSystemDecors(int displayId, boolean shouldShow);
 
     /**
-     * Indicates that the display should show IME.
+     * Indicates the policy for how the display should show IME.
      *
      * @param displayId The id of the display.
-     * @return {@code true} if the display should show IME.
+     * @return The policy for how the display should show IME.
      * @see KeyguardManager#isDeviceSecure()
      * @see KeyguardManager#isDeviceLocked()
      */
-    boolean shouldShowIme(int displayId);
+    int getDisplayImePolicy(int displayId);
 
     /**
-     * Sets that the display should show IME.
+     * Sets the policy for how the display should show IME.
      *
      * @param displayId The id of the display.
-     * @param shouldShow Indicates that the display should show IME.
+     * @param imePolicy Indicates the policy for how the display should show IME.
      * @see KeyguardManager#isDeviceSecure()
      * @see KeyguardManager#isDeviceLocked()
      */
-    void setShouldShowIme(int displayId, boolean shouldShow);
+    void setDisplayImePolicy(int displayId, int imePolicy);
 
     /**
-     * Waits for transactions to get applied before injecting input.
-     * This includes waiting for the input windows to get sent to InputManager.
+     * Waits for transactions to get applied before injecting input, optionally waiting for
+     * animations to complete. This includes waiting for the input windows to get sent to
+     * InputManager.
      *
      * This is needed for testing since the system add windows and injects input
      * quick enough that the windows don't have time to get sent to InputManager.
      */
-    boolean injectInputAfterTransactionsApplied(in InputEvent ev, int mode);
+    boolean injectInputAfterTransactionsApplied(in InputEvent ev, int mode,
+            boolean waitForAnimations);
 
     /**
-     * Waits until all animations have completed and input information has been sent from
-     * WindowManager to native InputManager.
+     * Waits until input information has been sent from WindowManager to native InputManager,
+     * optionally waiting for animations to complete.
      *
      * This is needed for testing since we need to ensure input information has been propagated to
      * native InputManager before proceeding with tests.
      */
-    void syncInputTransactions();
+    void syncInputTransactions(boolean waitForAnimations);
 
     /**
      * Returns whether SurfaceFlinger layer tracing is enabled.
@@ -734,8 +730,7 @@ interface IWindowManager
      * @return {@code true} if system bars are always comsumed.
      */
     boolean getWindowInsets(in WindowManager.LayoutParams attrs, int displayId,
-            out Rect outContentInsets, out Rect outStableInsets,
-            out DisplayCutout.ParcelableWrapper outDisplayCutout, out InsetsState outInsetsState);
+            out InsetsState outInsetsState);
 
     /**
      * Called to show global actions.
@@ -743,7 +738,7 @@ interface IWindowManager
     void showGlobalActions();
 
     /**
-     * Sets layer tracing flags for SurfaceFlingerTrace. 
+     * Sets layer tracing flags for SurfaceFlingerTrace.
      *
      * @param flags see definition in SurfaceTracing.cpp
      */
@@ -756,10 +751,118 @@ interface IWindowManager
      * @param behindClient token for a window, used to filter the search to windows behind it, or
      *                     {@code null} to accept a window at any zOrder
      * @param taskId specifies the id of a task the result must belong to, or -1 to ignore task ids
-     * @param controller the controller to receive results, a call to either
-     *      {@link IScrollCaptureController#onClientConnected} or
-     *      {@link IScrollCaptureController#onClientUnavailable}.
+     * @param listener the object to receive the response
      */
     void requestScrollCapture(int displayId, IBinder behindClient, int taskId,
-            IScrollCaptureController controller);
+            IScrollCaptureResponseListener listener);
+
+    /**
+     * Holds the WM lock for the specified amount of milliseconds.
+     * Intended for use by the tests that need to imitate lock contention.
+     * The token should be obtained by
+     * {@link android.content.pm.PackageManager#getHoldLockToken()}.
+     */
+    void holdLock(in IBinder token, in int durationMs);
+
+    /**
+     * Gets an array of support hash algorithms that can be used to generate a DisplayHash. The
+     * String value of one algorithm should be used when requesting to generate
+     * the DisplayHash.
+     *
+     * @return a String array of supported hash algorithms.
+     */
+    String[] getSupportedDisplayHashAlgorithms();
+
+    /**
+     * Validate the DisplayHash was generated by the system. The DisplayHash passed in should be
+     * the object generated when calling {@link IWindowSession#generateDisplayHash}
+     *
+     * @param DisplayHash The hash to verify that it was generated by the system.
+     * @return a {@link VerifiedDisplayHash} if the hash was generated by the system or null
+     * if the token cannot be verified.
+     */
+    VerifiedDisplayHash verifyDisplayHash(in DisplayHash displayHash);
+
+    /**
+     * Call to enable or disable the throttling when generating a display hash. This should only be
+     * used for testing. Throttling is enabled by default.
+     *
+     * Must be called from a process that has {@link android.Manifest.permission#READ_FRAME_BUFFER}
+     * permission.
+     */
+     void setDisplayHashThrottlingEnabled(boolean enable);
+
+    /**
+     * Attaches a {@link android.window.WindowContext} to the DisplayArea specified by {@code type},
+     * {@code displayId} and {@code options}.
+     * <p>
+     * Note that this API should be invoked after calling
+     * {@link android.window.WindowTokenClient#attachContext(Context)}
+     * </p><p>
+     * Generally, this API is used for initializing a {@link android.window.WindowContext}
+     * before obtaining a valid {@link com.android.server.wm.WindowToken}. A WindowToken is usually
+     * generated when calling {@link android.view.WindowManager#addView(View, LayoutParams)}, or
+     * obtained from {@link android.view.WindowManager.LayoutParams#token}.
+     * </p><p>
+     * In some cases, the WindowToken is passed from the server side because it is managed by the
+     * system server. {@link #attachWindowContextToWindowToken(IBinder, IBinder)} could be used in
+     * this case to attach the WindowContext to the WindowToken.</p>
+     *
+     * @param clientToken {@link android.window.WindowContext#getWindowContextToken()
+     * the WindowContext's token}
+     * @param type Window type of the window context
+     * @param displayId The display associated with the window context
+     * @param options A bundle used to pass window-related options and choose the right DisplayArea
+     *
+     * @return {@code true} if the WindowContext is attached to the DisplayArea successfully.
+     */
+    boolean attachWindowContextToDisplayArea(IBinder clientToken, int type, int displayId,
+            in Bundle options);
+
+    /**
+     * Attaches a {@link android.window.WindowContext} to a {@code WindowToken}.
+     * <p>
+     * This API is used when we hold a valid WindowToken and want to associate with the token and
+     * receive its configuration updates.
+     * </p><p>
+     * Note that this API should be invoked after calling
+     * {@link android.window.WindowTokenClient#attachContext(Context)}
+     * </p>
+     *
+     * @param clientToken {@link android.window.WindowContext#getWindowContextToken()
+     * the WindowContext's token}
+     * @param token the WindowToken to attach
+     *
+     * @throws IllegalArgumentException if the {@code clientToken} have not been attached to
+     * the server or the WindowContext's type doesn't match WindowToken {@code token}'s type.
+     *
+     * @see #attachWindowContextToDisplayArea(IBinder, int, int, Bundle)
+     */
+    void attachWindowContextToWindowToken(IBinder clientToken, IBinder token);
+
+    /**
+     * Detaches {@link android.window.WindowContext} from the window manager node it's currently
+     * attached to. It is no-op if the WindowContext is not attached to a window manager node.
+     *
+     * @param clientToken the window context's token
+     */
+    void detachWindowContextFromWindowContainer(IBinder clientToken);
+
+    /**
+     * Registers a listener, which is to be called whenever cross-window blur is enabled/disabled.
+     *
+     * @param listener the listener to be registered
+     * @return true if cross-window blur is currently enabled; false otherwise
+     */
+    boolean registerCrossWindowBlurEnabledListener(ICrossWindowBlurEnabledListener listener);
+
+    /**
+     * Unregisters a listener which was registered with
+     * {@link #registerCrossWindowBlurEnabledListener()}.
+     *
+     * @param listener the listener to be unregistered
+     */
+    void unregisterCrossWindowBlurEnabledListener(ICrossWindowBlurEnabledListener listener);
+
+    boolean isTaskSnapshotSupported();
 }

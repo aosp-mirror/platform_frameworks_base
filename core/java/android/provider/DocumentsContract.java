@@ -49,6 +49,7 @@ import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
+import android.util.Size;
 
 import com.android.internal.util.Preconditions;
 
@@ -235,9 +236,20 @@ public final class DocumentsContract {
     public static final String
             ACTION_DOCUMENT_ROOT_SETTINGS = "android.provider.action.DOCUMENT_ROOT_SETTINGS";
 
-    /** {@hide} */
+    /**
+     * External Storage Provider's authority string
+     * {@hide}
+     */
+    @SystemApi
     public static final String EXTERNAL_STORAGE_PROVIDER_AUTHORITY =
             "com.android.externalstorage.documents";
+
+    /**
+     * Download Manager's authority string
+     * {@hide}
+     */
+    @SystemApi
+    public static final String DOWNLOADS_PROVIDER_AUTHORITY = Downloads.Impl.AUTHORITY;
 
     /** {@hide} */
     public static final String EXTERNAL_STORAGE_PRIMARY_EMULATED_ROOT_ID = "primary";
@@ -1337,8 +1349,8 @@ public final class DocumentsContract {
             @NonNull Uri documentUri, @NonNull Point size, @Nullable CancellationSignal signal)
             throws FileNotFoundException {
         try {
-            return ContentResolver.loadThumbnail(content, documentUri, Point.convert(size), signal,
-                    ImageDecoder.ALLOCATOR_SOFTWARE);
+            return ContentResolver.loadThumbnail(content, documentUri, new Size(size.x, size.y),
+                    signal, ImageDecoder.ALLOCATOR_SOFTWARE);
         } catch (Exception e) {
             if (!(e instanceof OperationCanceledException)) {
                 Log.w(TAG, "Failed to load thumbnail for " + documentUri + ": " + e);
@@ -1807,7 +1819,7 @@ public final class DocumentsContract {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (this == o) {
                 return true;
             }

@@ -45,12 +45,12 @@ namespace renderthread {
  * malloc/free churn of small objects?
  */
 
-class ANDROID_API RenderTask {
+class RenderTask {
 public:
-    ANDROID_API RenderTask() : mNext(nullptr), mRunAt(0) {}
-    ANDROID_API virtual ~RenderTask() {}
+    RenderTask() : mNext(nullptr), mRunAt(0) {}
+    virtual ~RenderTask() {}
 
-    ANDROID_API virtual void run() = 0;
+    virtual void run() = 0;
 
     RenderTask* mNext;
     nsecs_t mRunAt;  // nano-seconds on the SYSTEM_TIME_MONOTONIC clock
