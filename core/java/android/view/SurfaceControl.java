@@ -241,7 +241,8 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeRemoveJankDataListener(long nativeListener);
     private static native long nativeCreateJankDataListenerWrapper(OnJankDataListener listener);
     private static native int nativeGetGPUContextPriority();
-    private static native void nativeSetTransformHint(long nativeObject, int transformHint);
+    private static native void nativeSetTransformHint(long nativeObject,
+            @SurfaceControl.BufferTransform int transformHint);
     private static native int nativeGetTransformHint(long nativeObject);
     private static native int nativeGetLayerId(long nativeObject);
 
@@ -3729,7 +3730,7 @@ public final class SurfaceControl implements Parcelable {
     /**
      * @hide
      */
-    public int getTransformHint() {
+    public @SurfaceControl.BufferTransform int getTransformHint() {
         checkNotReleased();
         return nativeGetTransformHint(mNativeObject);
     }
@@ -3743,7 +3744,7 @@ public final class SurfaceControl implements Parcelable {
      * with the same size.
      * @hide
      */
-    public void setTransformHint(@Surface.Rotation int transformHint) {
+    public void setTransformHint(@SurfaceControl.BufferTransform int transformHint) {
         nativeSetTransformHint(mNativeObject, transformHint);
     }
 
