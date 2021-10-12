@@ -30,7 +30,6 @@ import android.hardware.ICameraServiceListener;
 import android.hardware.camera2.impl.CameraDeviceImpl;
 import android.hardware.camera2.impl.CameraInjectionSessionImpl;
 import android.hardware.camera2.impl.CameraMetadataNative;
-import android.hardware.camera2.params.DeviceStateOrientationMap;
 import android.hardware.camera2.params.ExtensionSessionConfiguration;
 import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.params.StreamConfiguration;
