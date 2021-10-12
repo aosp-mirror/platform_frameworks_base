@@ -27,6 +27,7 @@ import static com.android.server.job.JobSchedulerService.RARE_INDEX;
 import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
 import static com.android.server.job.JobSchedulerService.WORKING_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
+import static com.android.server.job.controllers.Package.packageToString;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -79,7 +80,6 @@ import com.android.server.utils.AlarmQueue;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -122,52 +122,6 @@ public final class QuotaController extends StateController {
     private static final int SYSTEM_APP_CHECK_FLAGS =
             PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                     | PackageManager.GET_PERMISSIONS | PackageManager.MATCH_KNOWN_PACKAGES;
-
-    /**
-     * Standardize the output of userId-packageName combo.
-     */
-    private static String string(int userId, String packageName) {
-        return "<" + userId + ">" + packageName;
-    }
-
-    private static final class Package {
-        public final String packageName;
-        public final int userId;
-
-        Package(int userId, String packageName) {
-            this.userId = userId;
-            this.packageName = packageName;
-        }
-
-        @Override
-        public String toString() {
-            return string(userId, packageName);
-        }
-
-        public void dumpDebug(ProtoOutputStream proto, long fieldId) {
-            final long token = proto.start(fieldId);
-
-            proto.write(StateControllerProto.QuotaController.Package.USER_ID, userId);
-            proto.write(StateControllerProto.QuotaController.Package.NAME, packageName);
-
-            proto.end(token);
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj instanceof Package) {
-                Package other = (Package) obj;
-                return userId == other.userId && Objects.equals(packageName, other.packageName);
-            } else {
-                return false;
-            }
-        }
-
-        @Override
-        public int hashCode() {
-            return packageName.hashCode() + userId;
-        }
-    }
 
     private static int hashLong(long val) {
         return (int) (val ^ (val >>> 32));
@@ -1741,7 +1695,6 @@ public final class QuotaController extends StateController {
             return;
         }
 
-        final String pkgString = string(userId, packageName);
         ExecutionStats stats = getExecutionStatsLocked(userId, packageName, standbyBucket);
         final boolean isUnderJobCountQuota = isUnderJobCountQuotaLocked(stats, standbyBucket);
         final boolean isUnderTimingSessionCountQuota = isUnderSessionCountQuotaLocked(stats,
@@ -1755,7 +1708,8 @@ public final class QuotaController extends StateController {
         if (inRegularQuota && remainingEJQuota > 0) {
             // Already in quota. Why was this method called?
             if (DEBUG) {
-                Slog.e(TAG, "maybeScheduleStartAlarmLocked called for " + pkgString
+                Slog.e(TAG, "maybeScheduleStartAlarmLocked called for "
+                        + packageToString(userId, packageName)
                         + " even though it already has "
                         + getRemainingExecutionTimeLocked(userId, packageName, standbyBucket)
                         + "ms in its quota.");
@@ -1811,8 +1765,8 @@ public final class QuotaController extends StateController {
                 // In some strange cases, an app may end be in the NEVER bucket but could have run
                 // some regular jobs. This results in no EJ timing sessions and QC having a bad
                 // time.
-                Slog.wtf(TAG,
-                        string(userId, packageName) + " has 0 EJ quota without running anything");
+                Slog.wtf(TAG, packageToString(userId, packageName)
+                        + " has 0 EJ quota without running anything");
                 return;
             }
         }
@@ -2272,7 +2226,6 @@ public final class QuotaController extends StateController {
         public void dump(ProtoOutputStream proto, long fieldId, Predicate<JobStatus> predicate) {
             final long token = proto.start(fieldId);
 
-            mPkg.dumpDebug(proto, StateControllerProto.QuotaController.Timer.PKG);
             proto.write(StateControllerProto.QuotaController.Timer.IS_ACTIVE, isActive());
             proto.write(StateControllerProto.QuotaController.Timer.START_TIME_ELAPSED,
                     mStartTimeElapsed);
@@ -2381,7 +2334,6 @@ public final class QuotaController extends StateController {
         public void dump(ProtoOutputStream proto, long fieldId) {
             final long token = proto.start(fieldId);
 
-            mPkg.dumpDebug(proto, StateControllerProto.QuotaController.TopAppTimer.PKG);
             proto.write(StateControllerProto.QuotaController.TopAppTimer.IS_ACTIVE, isActive());
             proto.write(StateControllerProto.QuotaController.TopAppTimer.START_TIME_ELAPSED,
                     mStartTimeElapsed);
@@ -2413,7 +2365,7 @@ public final class QuotaController extends StateController {
     void updateStandbyBucket(
             final int userId, final @NonNull String packageName, final int bucketIndex) {
         if (DEBUG) {
-            Slog.i(TAG, "Moving pkg " + string(userId, packageName)
+            Slog.i(TAG, "Moving pkg " + packageToString(userId, packageName)
                     + " to bucketIndex " + bucketIndex);
         }
         List<JobStatus> restrictedChanges = new ArrayList<>();
@@ -2641,7 +2593,7 @@ public final class QuotaController extends StateController {
                         String packageName = (String) msg.obj;
                         int userId = msg.arg1;
                         if (DEBUG) {
-                            Slog.d(TAG, "Checking pkg " + string(userId, packageName));
+                            Slog.d(TAG, "Checking pkg " + packageToString(userId, packageName));
                         }
                         if (maybeUpdateConstraintForPkgLocked(sElapsedRealtimeClock.millis(),
                                 userId, packageName)) {
@@ -2722,7 +2674,7 @@ public final class QuotaController extends StateController {
                         final String pkgName = event.getPackageName();
                         if (DEBUG) {
                             Slog.d(TAG, "Processing event " + event.getEventType()
-                                    + " for " + string(userId, pkgName));
+                                    + " for " + packageToString(userId, pkgName));
                         }
                         switch (event.getEventType()) {
                             case UsageEvents.Event.ACTIVITY_RESUMED:
@@ -4119,7 +4071,7 @@ public final class QuotaController extends StateController {
                 final String pkgName = mExecutionStatsCache.keyAt(u, p);
                 ExecutionStats[] stats = mExecutionStatsCache.valueAt(u, p);
 
-                pw.println(string(userId, pkgName));
+                pw.println(packageToString(userId, pkgName));
                 pw.increaseIndent();
                 for (int i = 0; i < stats.length; ++i) {
                     ExecutionStats executionStats = stats[i];
@@ -4143,7 +4095,7 @@ public final class QuotaController extends StateController {
                 final String pkgName = mEJStats.keyAt(u, p);
                 ShrinkableDebits debits = mEJStats.valueAt(u, p);
 
-                pw.print(string(userId, pkgName));
+                pw.print(packageToString(userId, pkgName));
                 pw.print(": ");
                 debits.dumpLocked(pw);
             }
