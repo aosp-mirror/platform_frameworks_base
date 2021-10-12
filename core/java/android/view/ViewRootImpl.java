@@ -312,7 +312,7 @@ public final class ViewRootImpl implements ViewParent,
     static final ArrayList<Runnable> sFirstDrawHandlers = new ArrayList<>();
     static boolean sFirstDrawComplete = false;
 
-    private ArrayList<OnSurfaceTransformHintChangedListener> mTransformHintListeners =
+    private ArrayList<OnBufferTransformHintChangedListener> mTransformHintListeners =
             new ArrayList<>();
     private @Surface.Rotation int mPreviousTransformHint = Surface.ROTATION_0;
     /**
@@ -7872,7 +7872,8 @@ public final class ViewRootImpl implements ViewParent,
             int transformHint = mSurfaceControl.getTransformHint();
             if (mPreviousTransformHint != transformHint) {
                 mPreviousTransformHint = transformHint;
-                dispatchTransformHintChanged(transformHint);
+                dispatchTransformHintChanged(
+                        SurfaceControl.rotationToBufferTransform(transformHint));
             }
         } else {
             destroySurface();
@@ -10499,38 +10500,38 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     @Override
-    public @Surface.Rotation int getSurfaceTransformHint() {
-        return mSurfaceControl.getTransformHint();
+    public @SurfaceControl.BufferTransform int getBufferTransformHint() {
+        return SurfaceControl.rotationToBufferTransform(mSurfaceControl.getTransformHint());
     }
 
     @Override
-    public void addOnSurfaceTransformHintChangedListener(
-            OnSurfaceTransformHintChangedListener listener) {
+    public void addOnBufferTransformHintChangedListener(
+            OnBufferTransformHintChangedListener listener) {
         Objects.requireNonNull(listener);
         if (mTransformHintListeners.contains(listener)) {
             throw new IllegalArgumentException(
-                    "attempt to call addOnSurfaceTransformHintChangedListener() "
+                    "attempt to call addOnBufferTransformHintChangedListener() "
                             + "with a previously registered listener");
         }
         mTransformHintListeners.add(listener);
     }
 
     @Override
-    public void removeOnSurfaceTransformHintChangedListener(
-            OnSurfaceTransformHintChangedListener listener) {
+    public void removeOnBufferTransformHintChangedListener(
+            OnBufferTransformHintChangedListener listener) {
         Objects.requireNonNull(listener);
         mTransformHintListeners.remove(listener);
     }
 
-    private void dispatchTransformHintChanged(@Surface.Rotation int hint) {
+    private void dispatchTransformHintChanged(@SurfaceControl.BufferTransform int hint) {
         if (mTransformHintListeners.isEmpty()) {
             return;
         }
-        ArrayList<OnSurfaceTransformHintChangedListener> listeners =
-                (ArrayList<OnSurfaceTransformHintChangedListener>) mTransformHintListeners.clone();
+        ArrayList<OnBufferTransformHintChangedListener> listeners =
+                (ArrayList<OnBufferTransformHintChangedListener>) mTransformHintListeners.clone();
         for (int i = 0; i < listeners.size(); i++) {
-            OnSurfaceTransformHintChangedListener listener = listeners.get(i);
-            listener.onSurfaceTransformHintChanged(hint);
+            OnBufferTransformHintChangedListener listener = listeners.get(i);
+            listener.onBufferTransformHintChanged(hint);
         }
     }
 }
