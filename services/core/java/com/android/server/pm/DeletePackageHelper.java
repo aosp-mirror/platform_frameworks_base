@@ -156,9 +156,9 @@ final class DeletePackageHelper {
             }
 
             if (versionCode != PackageManager.VERSION_CODE_HIGHEST
-                    && uninstalledPs.getLongVersionCode() != versionCode) {
+                    && uninstalledPs.getVersionCode() != versionCode) {
                 Slog.w(TAG, "Not removing package " + packageName + " with versionCode "
-                        + uninstalledPs.getLongVersionCode() + " != " + versionCode);
+                        + uninstalledPs.getVersionCode() + " != " + versionCode);
                 return PackageManager.DELETE_FAILED_INTERNAL_ERROR;
             }
 
@@ -252,7 +252,7 @@ final class DeletePackageHelper {
                     for (int i = 0; i < allUsers.length; i++) {
                         TempUserState priorUserState = priorUserStates.get(allUsers[i]);
                         int enabledState = priorUserState.enabledState;
-                        PackageSetting pkgSetting = mPm.getPackageSetting(packageName);
+                        PackageSetting pkgSetting = mPm.getPackageSettingForMutation(packageName);
                         pkgSetting.setEnabled(enabledState, allUsers[i],
                                 priorUserState.lastDisableAppCaller);
 

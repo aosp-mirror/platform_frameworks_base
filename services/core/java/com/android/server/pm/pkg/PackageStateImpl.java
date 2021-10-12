@@ -50,7 +50,7 @@ import java.util.function.Consumer;
 @DataClass.Suppress({"mUserStates"})
 public class PackageStateImpl implements PackageState {
 
-    public static PackageState copy(@NonNull PackageSetting pkgSetting) {
+    public static PackageState copy(@NonNull PackageStateInternal pkgSetting) {
         return new PackageStateImpl(pkgSetting, pkgSetting.getPkg());
     }
 
@@ -165,7 +165,7 @@ public class PackageStateImpl implements PackageState {
         mFirstInstallTime = pkgState.getFirstInstallTime();
         mLastModifiedTime = pkgState.getLastModifiedTime();
         mLastUpdateTime = pkgState.getLastUpdateTime();
-        mLongVersionCode = pkgState.getLongVersionCode();
+        mLongVersionCode = pkgState.getVersionCode();
         mMimeGroups = pkgState.getMimeGroups();
         mPath = pkgState.getPath();
         mPrimaryCpuAbi = pkgState.getPrimaryCpuAbi();
@@ -579,7 +579,7 @@ public class PackageStateImpl implements PackageState {
     }
 
     @DataClass.Generated.Member
-    public long getLongVersionCode() {
+    public long getVersionCode() {
         return mLongVersionCode;
     }
 

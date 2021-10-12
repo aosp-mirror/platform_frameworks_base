@@ -34,6 +34,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -78,8 +79,10 @@ class PackageManagerServiceHibernationTests {
             rule.system().dataAppDirectory)
         val pm = createPackageManagerService()
         rule.system().validateFinalState()
-        val ps = pm.getPackageSetting(TEST_PACKAGE_NAME)
-        ps!!.setStopped(true, TEST_USER_ID)
+
+        pm.setPackageStoppedState(TEST_PACKAGE_NAME, true, TEST_USER_ID)
+        TestableLooper.get(this).processAllMessages()
+        Mockito.clearInvocations(appHibernationManager)
 
         pm.setPackageStoppedState(TEST_PACKAGE_NAME, false, TEST_USER_ID)
 

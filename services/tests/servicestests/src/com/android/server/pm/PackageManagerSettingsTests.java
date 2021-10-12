@@ -745,7 +745,7 @@ public class PackageManagerSettingsTests {
         assertThat(testPkgSetting01.getSecondaryCpuAbi(), is("armeabi"));
         // signatures object must be different
         assertNotSame(testPkgSetting01.getSignatures(), originalSignatures);
-        assertThat(testPkgSetting01.getLongVersionCode(), is(UPDATED_VERSION_CODE));
+        assertThat(testPkgSetting01.getVersionCode(), is(UPDATED_VERSION_CODE));
         final PackageUserState userState = testPkgSetting01.readUserState(0);
         verifyUserState(userState, null /*oldUserState*/, false /*userStateChanged*/,
                 false /*notLaunched*/, false /*stopped*/, true /*installed*/);
@@ -783,7 +783,7 @@ public class PackageManagerSettingsTests {
         assertThat(testPkgSetting01.pkgPrivateFlags, is(0));
         assertThat(testPkgSetting01.getPrimaryCpuAbi(), is("x86_64"));
         assertThat(testPkgSetting01.getSecondaryCpuAbi(), is("x86"));
-        assertThat(testPkgSetting01.getLongVersionCode(), is(INITIAL_VERSION_CODE));
+        assertThat(testPkgSetting01.getVersionCode(), is(INITIAL_VERSION_CODE));
         // by default, the package is considered stopped
         final PackageUserState userState = testPkgSetting01.readUserState(0);
         verifyUserState(userState, null /*oldUserState*/, false /*userStateChanged*/,
@@ -825,7 +825,7 @@ public class PackageManagerSettingsTests {
         assertThat(testPkgSetting01.pkgPrivateFlags, is(0));
         assertThat(testPkgSetting01.getPrimaryCpuAbi(), is("x86_64"));
         assertThat(testPkgSetting01.getSecondaryCpuAbi(), is("x86"));
-        assertThat(testPkgSetting01.getLongVersionCode(), is(INITIAL_VERSION_CODE));
+        assertThat(testPkgSetting01.getVersionCode(), is(INITIAL_VERSION_CODE));
         final PackageUserState userState = testPkgSetting01.readUserState(0);
         verifyUserState(userState, null /*oldUserState*/, false /*userStateChanged*/,
                 false /*notLaunched*/, false /*stopped*/, true /*installed*/);
@@ -868,7 +868,7 @@ public class PackageManagerSettingsTests {
         assertThat(testPkgSetting01.getPrimaryCpuAbi(), is("arm64-v8a"));
         assertThat(testPkgSetting01.getSecondaryCpuAbi(), is("armeabi"));
         assertNotSame(testPkgSetting01.getSignatures(), disabledSignatures);
-        assertThat(testPkgSetting01.getLongVersionCode(), is(UPDATED_VERSION_CODE));
+        assertThat(testPkgSetting01.getVersionCode(), is(UPDATED_VERSION_CODE));
         final PackageUserState userState = testPkgSetting01.readUserState(0);
         verifyUserState(userState, null /*oldUserState*/, false /*userStateChanged*/,
                 false /*notLaunched*/, false /*stopped*/, true /*installed*/);
@@ -960,7 +960,7 @@ public class PackageManagerSettingsTests {
         assertNotSame(origPkgSetting.getUserStates(), is(testPkgSetting.getUserStates()));
         // No equals() method for SparseArray object
         // assertThat(origPkgSetting.getUserState(), is(testPkgSetting.getUserState()));
-        assertThat(origPkgSetting.getLongVersionCode(), is(testPkgSetting.getLongVersionCode()));
+        assertThat(origPkgSetting.getVersionCode(), is(testPkgSetting.getVersionCode()));
         assertSame(origPkgSetting.getVolumeUuid(), testPkgSetting.getVolumeUuid());
         assertThat(origPkgSetting.getVolumeUuid(), is(testPkgSetting.getVolumeUuid()));
     }

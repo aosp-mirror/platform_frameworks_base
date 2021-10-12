@@ -58,6 +58,8 @@ import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
+import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.PackageUserStateInternal;
 import com.android.server.utils.Snappable;
 import com.android.server.utils.SnapshotCache;
 import com.android.server.utils.Watchable;
@@ -372,14 +374,15 @@ class InstantAppRegistry implements Watchable, Snappable {
 
     @GuardedBy("mService.mLock")
     public void onPackageInstalledLPw(@NonNull AndroidPackage pkg, @NonNull int[] userIds) {
-        PackageSetting ps = mPmInternal.getPackageSetting(pkg.getPackageName());
+        PackageStateInternal ps = mPmInternal.getPackageStateInternal(pkg.getPackageName());
         if (ps == null) {
             return;
         }
 
         for (int userId : userIds) {
             // Ignore not installed apps
-            if (mService.mPackages.get(pkg.getPackageName()) == null || !ps.getInstalled(userId)) {
+            if (mService.mPackages.get(pkg.getPackageName()) == null
+                    || !ps.getUserStateOrDefault(userId).isInstalled()) {
                 continue;
             }
 
@@ -387,7 +390,7 @@ class InstantAppRegistry implements Watchable, Snappable {
             propagateInstantAppPermissionsIfNeeded(pkg, userId);
 
             // Track instant apps
-            if (ps.getInstantApp(userId)) {
+            if (ps.getUserStateOrDefault(userId).isInstantApp()) {
                 addInstantAppLPw(userId, ps.getAppId());
             }
 
@@ -791,20 +794,22 @@ class InstantAppRegistry implements Watchable, Snappable {
             final int packageCount = mService.mPackages.size();
             for (int i = 0; i < packageCount; i++) {
                 final AndroidPackage pkg = mService.mPackages.valueAt(i);
-                final PackageSetting ps = mPmInternal.getPackageSetting(pkg.getPackageName());
+                final PackageStateInternal ps =
+                        mPmInternal.getPackageStateInternal(pkg.getPackageName());
                 if (ps == null) {
                     continue;
                 }
 
-                if (now - ps.getPkgState().getLatestPackageUseTimeInMills()
+                if (now - ps.getTransientState().getLatestPackageUseTimeInMills()
                         < maxInstalledCacheDuration) {
                     continue;
                 }
 
                 boolean installedOnlyAsInstantApp = false;
                 for (int userId : allUsers) {
-                    if (ps.getInstalled(userId)) {
-                        if (ps.getInstantApp(userId)) {
+                    final PackageUserStateInternal userState = ps.getUserStateOrDefault(userId);
+                    if (userState.isInstalled()) {
+                        if (userState.isInstantApp()) {
                             installedOnlyAsInstantApp = true;
                         } else {
                             installedOnlyAsInstantApp = false;
@@ -831,23 +836,23 @@ class InstantAppRegistry implements Watchable, Snappable {
                     } else if (rhsPkg == null) {
                         return 1;
                     } else {
-                        final PackageSetting lhsPs = mPmInternal.getPackageSetting(
-                                lhsPkg.getPackageName());
+                        final PackageStateInternal lhsPs =
+                                mPmInternal.getPackageStateInternal(lhsPkg.getPackageName());
                         if (lhsPs == null) {
                             return 0;
                         }
 
-                        final PackageSetting rhsPs = mPmInternal.getPackageSetting(
-                                rhsPkg.getPackageName());
+                        final PackageStateInternal rhsPs =
+                                mPmInternal.getPackageStateInternal(rhsPkg.getPackageName());
                         if (rhsPs == null) {
                             return 0;
                         }
 
-                        if (lhsPs.getPkgState().getLatestPackageUseTimeInMills() >
-                                rhsPs.getPkgState().getLatestPackageUseTimeInMills()) {
+                        if (lhsPs.getTransientState().getLatestPackageUseTimeInMills() >
+                                rhsPs.getTransientState().getLatestPackageUseTimeInMills()) {
                             return 1;
-                        } else if (lhsPs.getPkgState().getLatestPackageUseTimeInMills() <
-                                rhsPs.getPkgState().getLatestPackageUseTimeInMills()) {
+                        } else if (lhsPs.getTransientState().getLatestPackageUseTimeInMills() <
+                                rhsPs.getTransientState().getLatestPackageUseTimeInMills()) {
                             return -1;
                         } else if (lhsPs.getFirstInstallTime() > rhsPs.getFirstInstallTime()) {
                             return 1;
@@ -927,8 +932,9 @@ class InstantAppRegistry implements Watchable, Snappable {
         final int packageCount = mService.mPackages.size();
         for (int i = 0; i < packageCount; i++) {
             final AndroidPackage pkg = mService.mPackages.valueAt(i);
-            final PackageSetting ps = mPmInternal.getPackageSetting(pkg.getPackageName());
-            if (ps == null || !ps.getInstantApp(userId)) {
+            final PackageStateInternal ps =
+                    mPmInternal.getPackageStateInternal(pkg.getPackageName());
+            if (ps == null || !ps.getUserStateOrDefault(userId).isInstantApp()) {
                 continue;
             }
             final InstantAppInfo info = createInstantAppInfoForPackage(
@@ -949,11 +955,11 @@ class InstantAppRegistry implements Watchable, Snappable {
     InstantAppInfo createInstantAppInfoForPackage(
             @NonNull AndroidPackage pkg, @UserIdInt int userId,
             boolean addApplicationInfo) {
-        PackageSetting ps = mPmInternal.getPackageSetting(pkg.getPackageName());
+        PackageStateInternal ps = mPmInternal.getPackageStateInternal(pkg.getPackageName());
         if (ps == null) {
             return null;
         }
-        if (!ps.getInstalled(userId)) {
+        if (!ps.getUserStateOrDefault(userId).isInstalled()) {
             return null;
         }
 
@@ -968,7 +974,7 @@ class InstantAppRegistry implements Watchable, Snappable {
         // TODO(b/135203078): This may be broken due to inner mutability problems that were broken
         //  as part of moving to PackageInfoUtils. Flags couldn't be determined.
         ApplicationInfo appInfo = PackageInfoUtils.generateApplicationInfo(ps.getPkg(), 0,
-                ps.readUserState(userId), userId, ps);
+                ps.getUserStateOrDefault(userId), userId, ps);
         if (addApplicationInfo) {
             return new InstantAppInfo(appInfo, requestedPermissions, grantedPermissions);
         } else {

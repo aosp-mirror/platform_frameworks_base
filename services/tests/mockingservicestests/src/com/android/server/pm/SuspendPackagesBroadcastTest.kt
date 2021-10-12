@@ -20,6 +20,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.SparseArray
+import com.android.server.pm.pkg.PackageStateInternal
 import com.android.server.testutils.any
 import com.android.server.testutils.eq
 import com.android.server.testutils.nullable
@@ -49,8 +50,8 @@ class SuspendPackagesBroadcastTest {
     }
 
     lateinit var pms: PackageManagerService
-    lateinit var packageSetting1: PackageSetting
-    lateinit var packageSetting2: PackageSetting
+    lateinit var packageSetting1: PackageStateInternal
+    lateinit var packageSetting2: PackageStateInternal
     lateinit var packagesToSuspend: Array<String>
     lateinit var uidsToSuspend: IntArray
 
@@ -67,8 +68,8 @@ class SuspendPackagesBroadcastTest {
         MockitoAnnotations.initMocks(this)
         rule.system().stageNominalSystemState()
         pms = spy(createPackageManagerService(TEST_PACKAGE_1, TEST_PACKAGE_2))
-        packageSetting1 = pms.getPackageSetting(TEST_PACKAGE_1)!!
-        packageSetting2 = pms.getPackageSetting(TEST_PACKAGE_2)!!
+        packageSetting1 = pms.getPackageStateInternal(TEST_PACKAGE_1)!!
+        packageSetting2 = pms.getPackageStateInternal(TEST_PACKAGE_2)!!
         packagesToSuspend = arrayOf(TEST_PACKAGE_1, TEST_PACKAGE_2)
         uidsToSuspend = intArrayOf(packageSetting1.appId, packageSetting2.appId)
     }
@@ -153,10 +154,10 @@ class SuspendPackagesBroadcastTest {
         this.put(TEST_USER_ID, uids)
     }
 
-    private fun mockAllowList(pkgSetting: PackageSetting, list: SparseArray<IntArray>?) {
+    private fun mockAllowList(pkgSetting: PackageStateInternal, list: SparseArray<IntArray>?) {
         whenever(rule.mocks().injector.appsFilter.getVisibilityAllowList(eq(pkgSetting),
-                any(IntArray::class.java), any() as WatchedArrayMap<String, PackageSetting>))
-                .thenReturn(list)
+            any(IntArray::class.java), any() as WatchedArrayMap<String, out PackageStateInternal>))
+            .thenReturn(list)
     }
 
     private fun createPackageManagerService(vararg stageExistingPackages: String):

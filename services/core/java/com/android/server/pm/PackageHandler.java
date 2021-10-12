@@ -78,6 +78,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.EventLogTags;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageStateInternal;
 
 import dalvik.system.VMRuntime;
 
@@ -498,9 +499,10 @@ public final class PackageHandler extends Handler {
         boolean succeeded = res.mReturnCode == PackageManager.INSTALL_SUCCEEDED;
         final boolean update = res.mRemovedInfo != null && res.mRemovedInfo.mRemovedPackage != null;
         final String packageName = res.mName;
-        final PackageSetting pkgSetting = succeeded ? mPm.getPackageSetting(packageName) : null;
+        final PackageStateInternal pkgSetting =
+                succeeded ? mPm.getPackageStateInternal(packageName) : null;
         final boolean removedBeforeUpdate = (pkgSetting == null)
-                || (pkgSetting.isSystem() && !pkgSetting.getPathString().equals(
+                || (pkgSetting.isSystem() && !pkgSetting.getPath().getPath().equals(
                 res.mPkg.getPath()));
         if (succeeded && removedBeforeUpdate) {
             Slog.e(TAG, packageName + " was removed before handlePackagePostInstall "
@@ -547,7 +549,8 @@ public final class PackageHandler extends Handler {
             int[] instantUserIds = EMPTY_INT_ARRAY;
             final boolean allNewUsers = res.mOrigUsers == null || res.mOrigUsers.length == 0;
             for (int newUser : res.mNewUsers) {
-                final boolean isInstantApp = pkgSetting.getInstantApp(newUser);
+                final boolean isInstantApp = pkgSetting.getUserStateOrDefault(newUser)
+                        .isInstantApp();
                 if (allNewUsers) {
                     if (isInstantApp) {
                         firstInstantUserIds = ArrayUtils.appendInt(firstInstantUserIds, newUser);
@@ -602,7 +605,7 @@ public final class PackageHandler extends Handler {
 
                 synchronized (mPm.mLock) {
                     newBroadcastAllowList = mPm.mAppsFilter.getVisibilityAllowList(
-                            mPm.getPackageSettingInternal(res.mName, Process.SYSTEM_UID),
+                            mPm.getPackageStateInternal(res.mName, Process.SYSTEM_UID),
                             updateUserIds, mPm.mSettings.getPackagesLocked());
                 }
                 mPm.sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
