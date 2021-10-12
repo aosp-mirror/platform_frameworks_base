@@ -121,7 +121,6 @@ public abstract class MediaOutputBaseAdapter extends
         final ProgressBar mProgressBar;
         final SeekBar mSeekBar;
         final RelativeLayout mTwoLineLayout;
-        final View mDivider;
         final View mBottomDivider;
         final CheckBox mCheckBox;
         private String mDeviceId;
@@ -136,7 +135,6 @@ public abstract class MediaOutputBaseAdapter extends
             mTitleIcon = view.requireViewById(R.id.title_icon);
             mProgressBar = view.requireViewById(R.id.volume_indeterminate_progress);
             mSeekBar = view.requireViewById(R.id.volume_seekbar);
-            mDivider = view.requireViewById(R.id.end_divider);
             mBottomDivider = view.requireViewById(R.id.bottom_divider);
             mAddIcon = view.requireViewById(R.id.add_icon);
             mCheckBox = view.requireViewById(R.id.check_box);
@@ -151,21 +149,12 @@ public abstract class MediaOutputBaseAdapter extends
                         return;
                     }
                     mTitleIcon.setImageIcon(icon);
-                    setMargin(topMargin, bottomMargin);
                 });
             });
         }
 
         void onBind(int customizedItem, boolean topMargin, boolean bottomMargin) {
-            setMargin(topMargin, bottomMargin);
-        }
-
-        private void setMargin(boolean topMargin, boolean bottomMargin) {
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) mContainerLayout
-                    .getLayoutParams();
-            params.topMargin = topMargin ? mMargin : 0;
-            params.bottomMargin = bottomMargin ? mMargin : 0;
-            mContainerLayout.setLayoutParams(params);
+            // TODO (b/201718621): clean up method after adjustment
         }
 
         void setSingleLineLayout(CharSequence title, boolean bFocused) {
