@@ -16,18 +16,26 @@
 
 package com.android.systemui.communal.dagger;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.res.Resources;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import com.android.systemui.R;
+import com.android.systemui.communal.CommunalSource;
+import com.android.systemui.communal.PackageObserver;
 import com.android.systemui.communal.conditions.CommunalCondition;
 import com.android.systemui.communal.conditions.CommunalSettingCondition;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.idle.AmbientLightModeMonitor;
 import com.android.systemui.idle.LightSensorEventsDebounceAlgorithm;
 import com.android.systemui.idle.dagger.IdleViewComponent;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Named;
@@ -54,6 +62,20 @@ public interface CommunalModule {
     static View provideIdleView(Context context) {
         FrameLayout view = new FrameLayout(context);
         return view;
+    }
+
+    /** */
+    @Provides
+    static Optional<CommunalSource.Observer> provideCommunalSourcePackageObserver(
+            Context context, @Main Resources resources) {
+        final String componentName = resources.getString(R.string.config_communalSourceComponent);
+
+        if (TextUtils.isEmpty(componentName)) {
+            return Optional.empty();
+        }
+
+        return Optional.of(new PackageObserver(context,
+                ComponentName.unflattenFromString(componentName).getPackageName()));
     }
 
     /**
