@@ -20,7 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -28,7 +28,6 @@ import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -107,8 +106,8 @@ class WallpaperWindowToken extends WindowToken {
 
     void updateWallpaperWindows(boolean visible) {
         if (isVisible() != visible) {
-            if (DEBUG_WALLPAPER_LIGHT) Slog.d(TAG,
-                    "Wallpaper token " + token + " visible=" + visible);
+            ProtoLog.d(WM_DEBUG_WALLPAPER, "Wallpaper token %s visible=%b",
+                    token, visible);
             setVisibility(visible);
         }
         final WallpaperController wallpaperController = mDisplayContent.mWallpaperController;
