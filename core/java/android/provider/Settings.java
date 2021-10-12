@@ -11050,16 +11050,6 @@ public final class Settings {
         public static final String INSTALL_NON_MARKET_APPS = Secure.INSTALL_NON_MARKET_APPS;
 
         /**
-         * Whether TV will also turn off other CEC devices when it goes to standby mode.
-         * (0 = false, 1 = true)
-         *
-         * @hide
-         */
-        @Readable
-        public static final String HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED =
-                "hdmi_control_auto_device_off_enabled";
-
-        /**
          * Whether or not media is shown automatically when bypassing as a heads up.
          * @hide
          */
