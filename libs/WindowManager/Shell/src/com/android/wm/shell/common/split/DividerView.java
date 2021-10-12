@@ -19,6 +19,8 @@ package com.android.wm.shell.common.split;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Rect;
@@ -57,6 +59,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
     private final int mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
 
     private SplitLayout mSplitLayout;
+    private SplitWindowManager mSplitWindowManager;
     private SurfaceControlViewHost mViewHost;
     private DividerHandleView mHandle;
     private View mBackground;
@@ -67,6 +70,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
     private int mStartPos;
     private GestureDetector mDoubleTapDetector;
     private boolean mInteractive;
+    private boolean mSetTouchRegion = true;
 
     /**
      * Tracks divider bar visible bounds in screen-based coordination. Used to calculate with
@@ -93,6 +97,18 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
                 }
             };
 
+    private AnimatorListenerAdapter mAnimatorListener = new AnimatorListenerAdapter() {
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            mSetTouchRegion = true;
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+            mSetTouchRegion = true;
+        }
+    };
+
     public DividerView(@NonNull Context context) {
         super(context);
     }
@@ -114,9 +130,11 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
     /** Sets up essential dependencies of the divider bar. */
     public void setup(
             SplitLayout layout,
+            SplitWindowManager splitWindowManager,
             SurfaceControlViewHost viewHost,
             InsetsState insetsState) {
         mSplitLayout = layout;
+        mSplitWindowManager = splitWindowManager;
         mViewHost = viewHost;
         mDividerBounds.set(layout.getDividerBounds());
         onInsetsChanged(insetsState, false /* animate */);
@@ -138,9 +156,11 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
                         DIVIDER_HEIGHT_PROPERTY, mDividerBounds.height(), mTempRect.height());
                 animator.setInterpolator(InsetsController.RESIZE_INTERPOLATOR);
                 animator.setDuration(InsetsController.ANIMATION_DURATION_RESIZE);
+                animator.addListener(mAnimatorListener);
                 animator.start();
             } else {
                 DIVIDER_HEIGHT_PROPERTY.set(this, mTempRect.height());
+                mSetTouchRegion = true;
             }
             mDividerBounds.set(mTempRect);
         }
@@ -159,6 +179,17 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
         mDoubleTapDetector = new GestureDetector(getContext(), new DoubleTapListener());
         mInteractive = true;
         setOnTouchListener(this);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        if (mSetTouchRegion) {
+            mTempRect.set(mHandle.getLeft(), mHandle.getTop(), mHandle.getRight(),
+                    mHandle.getBottom());
+            mSplitWindowManager.setTouchRegion(mTempRect);
+            mSetTouchRegion = false;
+        }
     }
 
     @Override

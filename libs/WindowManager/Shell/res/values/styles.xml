@@ -43,7 +43,7 @@
     </style>
 
     <style name="DockedDividerHandle">
-        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:layout_gravity">center</item>
         <item name="android:layout_width">96dp</item>
         <item name="android:layout_height">48dp</item>
     </style>

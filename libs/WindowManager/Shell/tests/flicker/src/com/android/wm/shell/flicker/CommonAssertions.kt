@@ -78,7 +78,7 @@ fun FlickerTestParameter.appPairsPrimaryBoundsIsVisibleAtEnd(
     assertLayersEnd {
         val dividerRegion = layer(APP_PAIR_SPLIT_DIVIDER_COMPONENT).visibleRegion.region
         visibleRegion(primaryComponent)
-            .coversExactly(getPrimaryRegion(dividerRegion, rotation))
+            .overlaps(getPrimaryRegion(dividerRegion, rotation))
     }
 }
 
@@ -89,7 +89,7 @@ fun FlickerTestParameter.dockedStackPrimaryBoundsIsVisibleAtEnd(
     assertLayersEnd {
         val dividerRegion = layer(DOCKED_STACK_DIVIDER_COMPONENT).visibleRegion.region
         visibleRegion(primaryComponent)
-            .coversExactly(getPrimaryRegion(dividerRegion, rotation))
+            .overlaps(getPrimaryRegion(dividerRegion, rotation))
     }
 }
 
@@ -100,7 +100,7 @@ fun FlickerTestParameter.appPairsSecondaryBoundsIsVisibleAtEnd(
     assertLayersEnd {
         val dividerRegion = layer(APP_PAIR_SPLIT_DIVIDER_COMPONENT).visibleRegion.region
         visibleRegion(secondaryComponent)
-            .coversExactly(getSecondaryRegion(dividerRegion, rotation))
+            .overlaps(getSecondaryRegion(dividerRegion, rotation))
     }
 }
 
@@ -111,7 +111,7 @@ fun FlickerTestParameter.dockedStackSecondaryBoundsIsVisibleAtEnd(
     assertLayersEnd {
         val dividerRegion = layer(DOCKED_STACK_DIVIDER_COMPONENT).visibleRegion.region
         visibleRegion(secondaryComponent)
-            .coversExactly(getSecondaryRegion(dividerRegion, rotation))
+            .overlaps(getSecondaryRegion(dividerRegion, rotation))
     }
 }
 

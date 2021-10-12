@@ -40,8 +40,10 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.view.Display;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
+import android.view.RoundedCorner;
 import android.view.SurfaceControl;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -53,6 +55,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DockedDividerUtils;
+import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.DisplayImeController;
@@ -133,15 +136,30 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         mDismissingEffectPolicy = new DismissingEffectPolicy(applyDismissingParallax);
 
         final Resources resources = context.getResources();
-        mDividerWindowWidth = resources.getDimensionPixelSize(
-                com.android.internal.R.dimen.docked_stack_divider_thickness);
-        mDividerInsets = resources.getDimensionPixelSize(
-                com.android.internal.R.dimen.docked_stack_divider_insets);
-        mDividerSize = mDividerWindowWidth - mDividerInsets * 2;
+        mDividerSize = resources.getDimensionPixelSize(R.dimen.split_divider_bar_width);
+        mDividerInsets = getDividerInsets(resources, context.getDisplay());
+        mDividerWindowWidth = mDividerSize + 2 * mDividerInsets;
 
         mRootBounds.set(configuration.windowConfiguration.getBounds());
         mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds);
         resetDividerPosition();
+    }
+
+    private int getDividerInsets(Resources resources, Display display) {
+        final int dividerInset = resources.getDimensionPixelSize(
+                com.android.internal.R.dimen.docked_stack_divider_insets);
+
+        int radius = 0;
+        RoundedCorner corner = display.getRoundedCorner(RoundedCorner.POSITION_TOP_LEFT);
+        radius = corner != null ? Math.max(radius, corner.getRadius()) : radius;
+        corner = display.getRoundedCorner(RoundedCorner.POSITION_TOP_RIGHT);
+        radius = corner != null ? Math.max(radius, corner.getRadius()) : radius;
+        corner = display.getRoundedCorner(RoundedCorner.POSITION_BOTTOM_RIGHT);
+        radius = corner != null ? Math.max(radius, corner.getRadius()) : radius;
+        corner = display.getRoundedCorner(RoundedCorner.POSITION_BOTTOM_LEFT);
+        radius = corner != null ? Math.max(radius, corner.getRadius()) : radius;
+
+        return Math.max(dividerInset, radius);
     }
 
     /** Gets bounds of the primary split. */
