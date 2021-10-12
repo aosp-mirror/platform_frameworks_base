@@ -201,11 +201,8 @@ class OngoingCallController @Inject constructor(
                 statusBarWindowController.ifPresent {
                     it.setOngoingProcessRequiresStatusBarVisible(true)
                 }
-                // TODO(b/195839150): Only listen for the gesture when in immersive mode.
-                swipeStatusBarAwayGestureHandler.ifPresent {
-                    it.addOnGestureDetectedCallback(TAG, this::onSwipeAwayGestureDetected)
-                }
             }
+            updateGestureListening()
             mListeners.forEach { l -> l.onOngoingCallStateChanged(animate = true) }
         } else {
             // If we failed to update the chip, don't store the call info. Then [hasOngoingCall]
@@ -293,6 +290,18 @@ class OngoingCallController @Inject constructor(
         return procState <= ActivityManager.PROCESS_STATE_TOP
     }
 
+    private fun updateGestureListening() {
+        if (callNotificationInfo == null
+            || callNotificationInfo?.statusBarSwipedAway == true
+            || !isFullscreen) {
+            swipeStatusBarAwayGestureHandler.ifPresent { it.removeOnGestureDetectedCallback(TAG) }
+        } else {
+            swipeStatusBarAwayGestureHandler.ifPresent {
+                it.addOnGestureDetectedCallback(TAG, this::onSwipeAwayGestureDetected)
+            }
+        }
+    }
+
     private fun removeChip() {
         callNotificationInfo = null
         tearDownChipView()
@@ -335,6 +344,7 @@ class OngoingCallController @Inject constructor(
         override fun onFullscreenStateChanged(isFullscreen: Boolean) {
             this@OngoingCallController.isFullscreen = isFullscreen
             updateChipClickListener()
+            updateGestureListening()
         }
     }
 
