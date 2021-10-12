@@ -3288,16 +3288,13 @@ public class StatusBar extends SystemUI implements
      * Switches theme from light to dark and vice-versa.
      */
     protected void updateTheme() {
-
         // Lock wallpaper defines the color of the majority of the views, hence we'll use it
         // to set our default theme.
         final boolean lockDarkText = mColorExtractor.getNeutralColors().supportsDarkText();
         final int themeResId = lockDarkText ? R.style.Theme_SystemUI_LightWallpaper
                 : R.style.Theme_SystemUI;
-        if (mContext.getThemeResId() != themeResId) {
-            mContext.setTheme(themeResId);
-            mConfigurationController.notifyThemeChanged();
-        }
+        mContext.setTheme(themeResId);
+        mConfigurationController.notifyThemeChanged();
     }
 
     private void updateDozingState() {
@@ -4410,6 +4407,13 @@ public class StatusBar extends SystemUI implements
 
         @Override
         public void onThemeChanged() {
+            if (mBrightnessMirrorController != null) {
+                mBrightnessMirrorController.onOverlayChanged();
+            }
+            // We need the new R.id.keyguard_indication_area before recreating
+            // mKeyguardIndicationController
+            mNotificationPanelViewController.onThemeChanged();
+
             if (mStatusBarKeyguardViewManager != null) {
                 mStatusBarKeyguardViewManager.onThemeChanged();
             }
@@ -4417,17 +4421,6 @@ public class StatusBar extends SystemUI implements
                 ((AutoReinflateContainer) mAmbientIndicationContainer).inflateLayout();
             }
             mNotificationIconAreaController.onThemeChanged();
-        }
-
-        @Override
-        public void onOverlayChanged() {
-            if (mBrightnessMirrorController != null) {
-                mBrightnessMirrorController.onOverlayChanged();
-            }
-            // We need the new R.id.keyguard_indication_area before recreating
-            // mKeyguardIndicationController
-            mNotificationPanelViewController.onThemeChanged();
-            onThemeChanged();
         }
 
         @Override
