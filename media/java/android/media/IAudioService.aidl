@@ -38,6 +38,7 @@ import android.media.IStrategyPreferredDevicesDispatcher;
 import android.media.ISpatializerCallback;
 import android.media.ISpatializerHeadTrackingModeCallback;
 import android.media.ISpatializerHeadToSoundStagePoseCallback;
+import android.media.ISpatializerOutputCallback;
 import android.media.IVolumeController;
 import android.media.IVolumeController;
 import android.media.PlayerBase;
@@ -440,4 +441,10 @@ interface IAudioService {
     void setSpatializerParameter(int key, in byte[] value);
 
     void getSpatializerParameter(int key, inout byte[] value);
+
+    int getSpatializerOutput();
+
+    void registerSpatializerOutputCallback(in ISpatializerOutputCallback cb);
+
+    void unregisterSpatializerOutputCallback(in ISpatializerOutputCallback cb);
 }
