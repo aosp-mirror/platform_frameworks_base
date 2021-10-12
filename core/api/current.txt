@@ -47033,15 +47033,15 @@ package android.view {
   }
 
   @UiThread public interface AttachedSurfaceControl {
-    method public default void addOnSurfaceTransformHintChangedListener(@NonNull android.view.AttachedSurfaceControl.OnSurfaceTransformHintChangedListener);
+    method public default void addOnBufferTransformHintChangedListener(@NonNull android.view.AttachedSurfaceControl.OnBufferTransformHintChangedListener);
     method public boolean applyTransactionOnDraw(@NonNull android.view.SurfaceControl.Transaction);
     method @Nullable public android.view.SurfaceControl.Transaction buildReparentTransaction(@NonNull android.view.SurfaceControl);
-    method public default int getSurfaceTransformHint();
-    method public default void removeOnSurfaceTransformHintChangedListener(@NonNull android.view.AttachedSurfaceControl.OnSurfaceTransformHintChangedListener);
+    method public default int getBufferTransformHint();
+    method public default void removeOnBufferTransformHintChangedListener(@NonNull android.view.AttachedSurfaceControl.OnBufferTransformHintChangedListener);
   }
 
-  @UiThread public static interface AttachedSurfaceControl.OnSurfaceTransformHintChangedListener {
-    method public void onSurfaceTransformHintChanged(int);
+  @UiThread public static interface AttachedSurfaceControl.OnBufferTransformHintChangedListener {
+    method public void onBufferTransformHintChanged(int);
   }
 
   public final class Choreographer {
@@ -48531,6 +48531,12 @@ package android.view {
     method public void readFromParcel(android.os.Parcel);
     method public void release();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final int BUFFER_TRANSFORM_IDENTITY = 0; // 0x0
+    field public static final int BUFFER_TRANSFORM_MIRROR_HORIZONTAL = 1; // 0x1
+    field public static final int BUFFER_TRANSFORM_MIRROR_VERTICAL = 2; // 0x2
+    field public static final int BUFFER_TRANSFORM_ROTATE_180 = 3; // 0x3
+    field public static final int BUFFER_TRANSFORM_ROTATE_270 = 7; // 0x7
+    field public static final int BUFFER_TRANSFORM_ROTATE_90 = 4; // 0x4
     field @NonNull public static final android.os.Parcelable.Creator<android.view.SurfaceControl> CREATOR;
   }
 
