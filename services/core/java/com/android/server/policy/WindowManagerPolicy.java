@@ -69,7 +69,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -221,21 +220,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
 
         /** @return true if the window can show over keyguard. */
         boolean canShowWhenLocked();
-    }
-
-    /**
-     * Holds the contents of a starting window. {@link #addSplashScreen} needs to wrap the
-     * contents of the starting window into an class implementing this interface, which then will be
-     * held by WM and released with {@link #remove} when no longer needed.
-     */
-    interface StartingSurface {
-
-        /**
-         * Removes the starting window surface. Do not hold the window manager lock when calling
-         * this method!
-         * @param animate Whether need to play the default exit animation for starting window.
-         */
-        void remove(boolean animate);
     }
 
     /**
@@ -685,33 +669,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
                 return getWindowLayerLw(win) < getWindowLayerFromTypeLw(TYPE_NOTIFICATION_SHADE);
         }
     }
-
-    /**
-     * Called when the system would like to show a UI to indicate that an
-     * application is starting.  You can use this to add a
-     * APPLICATION_STARTING_TYPE window with the given appToken to the window
-     * manager (using the normal window manager APIs) that will be shown until
-     * the application displays its own window.  This is called without the
-     * window manager locked so that you can call back into it.
-     *
-     * @param appToken Token of the application being started.
-     * @param packageName The name of the application package being started.
-     * @param theme Resource defining the application's overall visual theme.
-     * @param nonLocalizedLabel The default title label of the application if
-     *        no data is found in the resource.
-     * @param labelRes The resource ID the application would like to use as its name.
-     * @param icon The resource ID the application would like to use as its icon.
-     * @param windowFlags Window layout flags.
-     * @param overrideConfig override configuration to consider when generating
-     *        context to for resources.
-     * @param displayId Id of the display to show the splash screen at.
-     *
-     * @return The starting surface.
-     *
-     */
-    StartingSurface addSplashScreen(IBinder appToken, int userId, String packageName,
-            int theme, CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes,
-            int icon, int logo, int windowFlags, Configuration overrideConfig, int displayId);
 
     /**
      * Create and return an animation to re-display a window that was force hidden by Keyguard.

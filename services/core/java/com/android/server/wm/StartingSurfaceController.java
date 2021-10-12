@@ -31,13 +31,8 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
-import android.content.res.CompatibilityInfo;
-import android.content.res.Configuration;
-import android.os.SystemProperties;
 import android.util.Slog;
 import android.window.TaskSnapshot;
-
-import com.android.server.policy.WindowManagerPolicy.StartingSurface;
 
 import java.util.function.Supplier;
 
@@ -47,9 +42,6 @@ import java.util.function.Supplier;
 public class StartingSurfaceController {
     private static final String TAG = TAG_WITH_CLASS_NAME
             ? StartingSurfaceController.class.getSimpleName() : TAG_WM;
-    /** Set to {@code true} to enable shell starting surface drawer. */
-    static final boolean DEBUG_ENABLE_SHELL_DRAWER =
-            SystemProperties.getBoolean("persist.debug.shell_starting_surface", true);
     private final WindowManagerService mService;
     private final SplashScreenExceptionList mSplashScreenExceptionsList;
 
@@ -58,20 +50,13 @@ public class StartingSurfaceController {
         mSplashScreenExceptionsList = new SplashScreenExceptionList(wm.mContext.getMainExecutor());
     }
 
-    StartingSurface createSplashScreenStartingSurface(ActivityRecord activity, String packageName,
-            int theme, CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes,
-            int icon, int logo, int windowFlags, Configuration overrideConfig, int displayId) {
-        if (!DEBUG_ENABLE_SHELL_DRAWER) {
-            return mService.mPolicy.addSplashScreen(activity.token, activity.mUserId, packageName,
-                    theme, compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
-                    overrideConfig, displayId);
-        }
+    StartingSurface createSplashScreenStartingSurface(ActivityRecord activity, int theme) {
 
         synchronized (mService.mGlobalLock) {
             final Task task = activity.getTask();
             if (task != null && mService.mAtmService.mTaskOrganizerController.addStartingWindow(
                     task, activity, theme, null /* taskSnapshot */)) {
-                return new ShellStartingSurface(task);
+                return new StartingSurface(task);
             }
         }
         return null;
@@ -151,24 +136,25 @@ public class StartingSurfaceController {
                 activity.mDisplayContent.handleTopActivityLaunchingInDifferentOrientation(
                         topFullscreenActivity, false /* checkOpening */);
             }
-            if (DEBUG_ENABLE_SHELL_DRAWER) {
                 mService.mAtmService.mTaskOrganizerController.addStartingWindow(task,
                         activity, 0 /* launchTheme */, taskSnapshot);
-                return new ShellStartingSurface(task);
-            }
+            return new StartingSurface(task);
         }
-        return mService.mTaskSnapshotController.createStartingSurface(activity, taskSnapshot);
     }
 
 
-    private final class ShellStartingSurface implements StartingSurface {
+    final class StartingSurface {
         private final Task mTask;
 
-        ShellStartingSurface(Task task) {
+        StartingSurface(Task task) {
             mTask = task;
         }
 
-        @Override
+        /**
+         * Removes the starting window surface. Do not hold the window manager lock when calling
+         * this method!
+         * @param animate Whether need to play the default exit animation for starting window.
+         */
         public void remove(boolean animate) {
             synchronized (mService.mGlobalLock) {
                 mService.mAtmService.mTaskOrganizerController.removeStartingWindow(mTask, animate);

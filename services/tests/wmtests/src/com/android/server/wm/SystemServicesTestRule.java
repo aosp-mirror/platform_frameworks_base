@@ -99,7 +99,6 @@ public class SystemServicesTestRule implements TestRule {
     private static final String TAG = SystemServicesTestRule.class.getSimpleName();
 
     static int sNextDisplayId = DEFAULT_DISPLAY + 100;
-    static int sNextTaskId = 100;
 
     private static final int[] TEST_USER_PROFILE_IDS = {};
 
@@ -109,8 +108,6 @@ public class SystemServicesTestRule implements TestRule {
     private ActivityManagerService mAmService;
     private ActivityTaskManagerService mAtmService;
     private WindowManagerService mWmService;
-    private TestWindowManagerPolicy mWMPolicy;
-    private TestDisplayWindowSettingsProvider mTestDisplayWindowSettingsProvider;
     private WindowState.PowerManagerWrapper mPowerManagerWrapper;
     private InputManagerService mImService;
     private InputChannel mInputChannel;
@@ -283,14 +280,14 @@ public class SystemServicesTestRule implements TestRule {
 
     private void setUpWindowManagerService() {
         mPowerManagerWrapper = mock(WindowState.PowerManagerWrapper.class);
-        mWMPolicy = new TestWindowManagerPolicy(this::getWindowManagerService,
-                mPowerManagerWrapper);
-        mTestDisplayWindowSettingsProvider = new TestDisplayWindowSettingsProvider();
+        TestWindowManagerPolicy wmPolicy = new TestWindowManagerPolicy();
+        TestDisplayWindowSettingsProvider testDisplayWindowSettingsProvider =
+                new TestDisplayWindowSettingsProvider();
         // Suppress StrictMode violation (DisplayWindowSettings) to avoid log flood.
         DisplayThread.getHandler().post(StrictMode::allowThreadDiskWritesMask);
         mWmService = WindowManagerService.main(
-                mContext, mImService, false, false, mWMPolicy, mAtmService,
-                mTestDisplayWindowSettingsProvider, StubTransaction::new,
+                mContext, mImService, false, false, wmPolicy, mAtmService,
+                testDisplayWindowSettingsProvider, StubTransaction::new,
                 () -> mSurfaceFactory.get(), (unused) -> new MockSurfaceControlBuilder());
         spyOn(mWmService);
         spyOn(mWmService.mRoot);

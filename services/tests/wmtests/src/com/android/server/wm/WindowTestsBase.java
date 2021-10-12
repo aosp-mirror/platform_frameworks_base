@@ -54,7 +54,6 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-import static com.android.server.wm.StartingSurfaceController.DEBUG_ENABLE_SHELL_DRAWER;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
@@ -1427,18 +1426,12 @@ class WindowTestsBase extends SystemServiceTestsBase {
             mAtm = service;
             mWMService = mAtm.mWindowManager;
             mPowerManagerWrapper = powerManagerWrapper;
-            if (DEBUG_ENABLE_SHELL_DRAWER) {
-                mAtm.mTaskOrganizerController.setDeferTaskOrgCallbacksConsumer(Runnable::run);
-                mAtm.mTaskOrganizerController.registerTaskOrganizer(this);
-            }
+            mAtm.mTaskOrganizerController.setDeferTaskOrgCallbacksConsumer(Runnable::run);
+            mAtm.mTaskOrganizerController.registerTaskOrganizer(this);
         }
 
         void setRunnableWhenAddingSplashScreen(Runnable r) {
-            if (DEBUG_ENABLE_SHELL_DRAWER) {
-                mRunnableWhenAddingSplashScreen = r;
-            } else {
-                ((TestWindowManagerPolicy) mWMService.mPolicy).setRunnableWhenAddingSplashScreen(r);
-            }
+            mRunnableWhenAddingSplashScreen = r;
         }
 
         @Override
