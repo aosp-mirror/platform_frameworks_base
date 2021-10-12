@@ -155,7 +155,7 @@
     <string name="running_process_item_user_label" msgid="3988506293099805796">"ଉପଯୋଗକର୍ତ୍ତା: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"କିଛି ପୂର୍ବ-ନିର୍ଦ୍ଧାରିତ ମାନ ସେଟ୍‌ ହୋଇଛି"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"କୌଣସି ଡିଫଲ୍ଟ ସେଟ୍‍ ହୋଇନାହିଁ"</string>
-    <string name="tts_settings" msgid="8130616705989351312">"ଟେକ୍ସଟ-ରୁ-ସ୍ପିଚ୍ ସେଟିଂସ୍"</string>
+    <string name="tts_settings" msgid="8130616705989351312">"ଟେକ୍ସଟ୍-ଟୁ-ସ୍ପିଚ୍ ସେଟିଂସ"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"ଟେକ୍ସଟ୍‍-ଟୁ-ସ୍ପିଚ୍‍ ଆଉଟ୍‍ପୁଟ୍‌"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"ସ୍ପିଚ୍‌ ରେଟ୍"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"ଲେଖା ପଢ଼ିବାର ବେଗ"</string>
