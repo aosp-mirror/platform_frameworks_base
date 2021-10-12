@@ -1267,9 +1267,14 @@ public class CarrierConfigManager {
     /**
      * Determines whether a maximum size limit for IMS conference calls is enforced on the device.
      * When {@code true}, IMS conference calls will be limited to at most
-     * {@link #KEY_IMS_CONFERENCE_SIZE_LIMIT_INT} participants.  When {@code false}, no attempt is made
-     * to limit the number of participants in a conference (the carrier will raise an error when an
-     * attempt is made to merge too many participants into a conference).
+     * {@link #KEY_IMS_CONFERENCE_SIZE_LIMIT_INT} participants.  When {@code false}, no attempt is
+     * made to limit the number of participants in a conference (the carrier will raise an error
+     * when an attempt is made to merge too many participants into a conference).
+     * <p>
+     * Note: The maximum size of a conference can ONLY be supported where
+     * {@link #KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_BOOL} is {@code true} since the platform
+     * needs conference event package data to accurately know the number of participants in the
+     * conference.
      */
     public static final String KEY_IS_IMS_CONFERENCE_SIZE_ENFORCED_BOOL =
             "is_ims_conference_size_enforced_bool";
