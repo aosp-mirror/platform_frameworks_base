@@ -4,10 +4,10 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
-import android.content.res.Configuration
 import android.database.ContentObserver
 import android.os.Handler
 import android.provider.Settings
+import android.view.Surface
 import android.view.View
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
@@ -239,10 +239,11 @@ class UnlockedScreenOffAnimationController @Inject constructor(
             return false
         }
 
-        // If we're not allowed to rotate the keyguard, then only do the screen off animation if
-        // we're in portrait. Otherwise, AOD will animate in sideways, which looks weird.
+        // If we're not allowed to rotate the keyguard, it can only be displayed in zero-degree
+        // portrait. If we're in another orientation, disable the screen off animation so we don't
+        // animate in the keyguard AOD UI sideways or upside down.
         if (!keyguardStateController.isKeyguardScreenRotationAllowed &&
-                context.resources.configuration.orientation != Configuration.ORIENTATION_PORTRAIT) {
+            context.display.rotation != Surface.ROTATION_0) {
             return false
         }
 

@@ -270,6 +270,24 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             | Context.BIND_IMPORTANT_BACKGROUND;
 
     /**
+     * Binding flags for establishing connection to the {@link InputMethodService} when
+     * config_killableInputMethods is enabled.
+     */
+    private static final int IME_CONNECTION_LOW_PRIORITY_BIND_FLAGS =
+            Context.BIND_AUTO_CREATE
+            | Context.BIND_REDUCTION_FLAGS;
+
+    /**
+     * Binding flags for establishing connection to the {@link InputMethodService}.
+     *
+     * <p>
+     * This defaults to {@link #IME_CONNECTION_BIND_FLAGS} unless config_killableInputMethods is
+     * enabled, in which case this takes the value of
+     * {@link #IME_CONNECTION_LOW_PRIORITY_BIND_FLAGS}.
+     */
+    private final int mImeConnectionBindFlags;
+
+    /**
      * Binding flags used only while the {@link InputMethodService} is showing window.
      */
     private static final int IME_VISIBLE_BIND_FLAGS =
@@ -1651,6 +1669,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mSwitchingController = InputMethodSubtypeSwitchingController.createInstanceLocked(
                 mSettings, context);
         mMenuController = new InputMethodMenuController(this);
+
+        // If configured, use low priority flags to make the IME killable by the lowmemorykiller
+        final boolean lowerIMEPriority = mRes.getBoolean(
+                com.android.internal.R.bool.config_killableInputMethods);
+
+        if (lowerIMEPriority) {
+            mImeConnectionBindFlags = IME_CONNECTION_LOW_PRIORITY_BIND_FLAGS;
+        } else {
+            mImeConnectionBindFlags = IME_CONNECTION_BIND_FLAGS;
+        }
     }
 
     @GuardedBy("mMethodMap")
@@ -2437,7 +2465,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mContext, 0, new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS),
                 PendingIntent.FLAG_IMMUTABLE));
 
-        if (bindCurrentInputMethodServiceLocked(mCurIntent, this, IME_CONNECTION_BIND_FLAGS)) {
+        if (bindCurrentInputMethodServiceLocked(mCurIntent, this, mImeConnectionBindFlags)) {
             mLastBindTime = SystemClock.uptimeMillis();
             mHaveConnection = true;
             mCurId = info.getId();
@@ -3158,7 +3186,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     SystemClock.uptimeMillis()-mLastBindTime,1);
             Slog.w(TAG, "Force disconnect/connect to the IME in showCurrentInputLocked()");
             mContext.unbindService(this);
-            bindCurrentInputMethodServiceLocked(mCurIntent, this, IME_CONNECTION_BIND_FLAGS);
+            bindCurrentInputMethodServiceLocked(mCurIntent, this, mImeConnectionBindFlags);
         } else {
             if (DEBUG) {
                 Slog.d(TAG, "Can't show input: connection = " + mHaveConnection + ", time = "

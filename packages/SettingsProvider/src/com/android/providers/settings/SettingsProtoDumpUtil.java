@@ -805,12 +805,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.HDMI_CONTROL_ENABLED,
                 GlobalSettingsProto.Hdmi.CONTROL_ENABLED);
         dumpSetting(s, p,
-                Settings.Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED,
-                GlobalSettingsProto.Hdmi.SYSTEM_AUDIO_CONTROL_ENABLED);
-        dumpSetting(s, p,
-                Settings.Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED,
-                GlobalSettingsProto.Hdmi.CONTROL_AUTO_WAKEUP_ENABLED);
-        dumpSetting(s, p,
                 Settings.Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
                 GlobalSettingsProto.Hdmi.CONTROL_AUTO_DEVICE_OFF_ENABLED);
         p.end(hdmiToken);

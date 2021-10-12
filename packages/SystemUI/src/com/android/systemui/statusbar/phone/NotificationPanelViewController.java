@@ -1091,7 +1091,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 Utils.shouldUseSplitNotificationShade(mResources);
         mScrimController.setClipsQsScrim(!mShouldUseSplitNotificationShade);
         if (mQs != null) {
-            mQs.setTranslateWhileExpanding(mShouldUseSplitNotificationShade);
+            mQs.setInSplitShade(mShouldUseSplitNotificationShade);
         }
 
         int topMargin = mShouldUseSplitNotificationShade ? mSplitShadeStatusBarHeight :
@@ -2344,7 +2344,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private void updateQsExpansion() {
         if (mQs == null) return;
         float qsExpansionFraction = computeQsExpansionFraction();
-        mQs.setQsExpansion(qsExpansionFraction, getHeaderTranslation());
+        mQs.setQsExpansion(qsExpansionFraction, getExpandedFraction(), getHeaderTranslation());
         mMediaHierarchyManager.setQsExpansion(qsExpansionFraction);
         int qsPanelBottomY = calculateQsBottomPosition(qsExpansionFraction);
         mScrimController.setQsPosition(qsExpansionFraction, qsPanelBottomY);
@@ -3489,9 +3489,9 @@ public class NotificationPanelViewController extends PanelViewController {
      * cases, such as if there's a heads-up notification.
      */
     public void setPanelScrimMinFraction(float minFraction) {
-        mBar.onPanelMinFractionChanged(minFraction);
         mMinFraction = minFraction;
         mDepthController.setPanelPullDownMinFraction(mMinFraction);
+        mScrimController.setPanelScrimMinFraction(mMinFraction);
     }
 
     public void clearNotificationEffects() {
@@ -3607,7 +3607,7 @@ public class NotificationPanelViewController extends PanelViewController {
             mQs.setExpandClickListener(mOnClickListener);
             mQs.setHeaderClickable(isQsExpansionEnabled());
             mQs.setOverscrolling(mStackScrollerOverscrolling);
-            mQs.setTranslateWhileExpanding(mShouldUseSplitNotificationShade);
+            mQs.setInSplitShade(mShouldUseSplitNotificationShade);
 
             // recompute internal state when qspanel height changes
             mQs.getView().addOnLayoutChangeListener(

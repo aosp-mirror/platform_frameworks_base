@@ -160,5 +160,5 @@ interface IStatusBarService
      */
     void suppressAmbientDisplay(boolean suppress);
 
-    int requestAddTile(in ComponentName componentName, in CharSequence label, in Icon icon, int userId, in IAddTileResultCallback callback);
+    void requestAddTile(in ComponentName componentName, in CharSequence label, in Icon icon, int userId, in IAddTileResultCallback callback);
 }

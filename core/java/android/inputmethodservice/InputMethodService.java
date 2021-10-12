@@ -789,11 +789,6 @@ public class InputMethodService extends AbstractInputMethodService {
                 return;
             }
 
-            if (Trace.isEnabled()) {
-                Binder.enableTracing();
-            } else {
-                Binder.disableTracing();
-            }
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.showSoftInput");
             ImeTracing.getInstance().triggerServiceDump(
                     "InputMethodService.InputMethodImpl#showSoftInput", mDumper,

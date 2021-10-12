@@ -1632,13 +1632,13 @@ public final class DisplayManagerService extends SystemService {
             mDisplayModeDirector.getAppRequestObserver().setAppRequest(
                     displayId, requestedModeId, requestedMinRefreshRate, requestedMaxRefreshRate);
 
-            if (display.getDisplayInfoLocked().minimalPostProcessingSupported) {
-                boolean mppRequest = mMinimalPostProcessingAllowed && preferMinimalPostProcessing;
+            // TODO(b/202378408) set minimal post-processing only if it's supported once we have a
+            // separate API for disabling on-device processing.
+            boolean mppRequest = mMinimalPostProcessingAllowed && preferMinimalPostProcessing;
 
-                if (display.getRequestedMinimalPostProcessingLocked() != mppRequest) {
-                    display.setRequestedMinimalPostProcessingLocked(mppRequest);
-                    shouldScheduleTraversal = true;
-                }
+            if (display.getRequestedMinimalPostProcessingLocked() != mppRequest) {
+                display.setRequestedMinimalPostProcessingLocked(mppRequest);
+                shouldScheduleTraversal = true;
             }
 
             if (shouldScheduleTraversal) {

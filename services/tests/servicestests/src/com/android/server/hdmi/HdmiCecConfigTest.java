@@ -339,18 +339,6 @@ public final class HdmiCecConfigTest {
     }
 
     @Test
-    public void getStringValue_GlobalSetting_BasicSanity() {
-        when(mStorageAdapter.retrieveGlobalSetting(
-                  Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
-                  HdmiControlManager.POWER_CONTROL_MODE_TV_AND_AUDIO_SYSTEM))
-            .thenReturn(HdmiControlManager.POWER_CONTROL_MODE_BROADCAST);
-        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
-        assertThat(hdmiCecConfig.getStringValue(
-                    HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE))
-                .isEqualTo(HdmiControlManager.POWER_CONTROL_MODE_BROADCAST);
-    }
-
-    @Test
     public void getStringValue_SharedPref_BasicSanity() {
         when(mStorageAdapter.retrieveSharedPref(
                   HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
@@ -426,16 +414,6 @@ public final class HdmiCecConfigTest {
                 () -> hdmiCecConfig.setStringValue(
                         HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
                         "bar"));
-    }
-
-    @Test
-    public void setStringValue_GlobalSetting_BasicSanity() {
-        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
-        hdmiCecConfig.setStringValue(HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
-                               HdmiControlManager.POWER_CONTROL_MODE_BROADCAST);
-        verify(mStorageAdapter).storeGlobalSetting(
-                  Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
-                  HdmiControlManager.POWER_CONTROL_MODE_BROADCAST);
     }
 
     @Test
