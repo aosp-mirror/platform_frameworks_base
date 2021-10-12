@@ -513,6 +513,10 @@
         <item name="android:background">@drawable/btn_borderless_rect</item>
     </style>
 
+    <style name="MediaOutputRoundedOutlinedButton" parent="@android:style/Widget.Material.Button">
+        <item name="android:background">@drawable/media_output_dialog_button_background</item>
+    </style>
+
     <style name="TunerSettings" parent="@android:style/Theme.DeviceDefault.Settings">
         <item name="android:windowActionBar">false</item>
         <item name="preferenceTheme">@style/TunerPreferenceTheme</item>
