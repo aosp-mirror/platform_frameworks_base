@@ -213,6 +213,10 @@ public class SpatializerHelper {
                 postInitSensors(true);
             }
         }
+
+        public void onOutputChanged(int output) {
+            logd("SpatializerCallback.onOutputChanged output:" + output);
+        }
     };
 
     // spatializer head tracking callback from native
