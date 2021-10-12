@@ -28,7 +28,6 @@ import android.util.SparseArray;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -267,42 +266,6 @@ public final class BarringInfo implements Parcelable {
             @NonNull SparseArray<BarringServiceInfo> barringServiceInfos) {
         mCellIdentity = barringCellId;
         mBarringServiceInfos = barringServiceInfos;
-    }
-
-    /** @hide */
-    public static BarringInfo create(
-            @NonNull android.hardware.radio.V1_5.CellIdentity halBarringCellId,
-            @NonNull List<android.hardware.radio.V1_5.BarringInfo> halBarringInfos) {
-        CellIdentity ci = CellIdentity.create(halBarringCellId);
-        SparseArray<BarringServiceInfo> serviceInfos = new SparseArray<>();
-
-        for (android.hardware.radio.V1_5.BarringInfo halBarringInfo : halBarringInfos) {
-            if (halBarringInfo.barringType
-                    == android.hardware.radio.V1_5.BarringInfo.BarringType.CONDITIONAL) {
-                if (halBarringInfo.barringTypeSpecificInfo.getDiscriminator()
-                        != android.hardware.radio.V1_5.BarringInfo.BarringTypeSpecificInfo
-                                .hidl_discriminator.conditional) {
-                    // this is an error case where the barring info is conditional but the
-                    // conditional barring fields weren't included
-                    continue;
-                }
-                android.hardware.radio.V1_5.BarringInfo.BarringTypeSpecificInfo
-                        .Conditional conditionalInfo =
-                        halBarringInfo.barringTypeSpecificInfo.conditional();
-                serviceInfos.put(
-                        halBarringInfo.serviceType, new BarringServiceInfo(
-                                halBarringInfo.barringType, // will always be CONDITIONAL here
-                                conditionalInfo.isBarred,
-                                conditionalInfo.factor,
-                                conditionalInfo.timeSeconds));
-            } else {
-                // Barring type is either NONE or UNCONDITIONAL
-                serviceInfos.put(
-                        halBarringInfo.serviceType, new BarringServiceInfo(
-                                halBarringInfo.barringType, false, 0, 0));
-            }
-        }
-        return new BarringInfo(ci, serviceInfos);
     }
 
     /**
