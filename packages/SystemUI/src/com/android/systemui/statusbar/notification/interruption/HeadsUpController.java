@@ -24,25 +24,25 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Controller class for old pipeline heads up logic. It listens to {@link NotificationEntryManager}
  * entry events and appropriately binds or unbinds the heads up view and promotes it to the top
  * of the screen.
  */
-@Singleton
+@SysUISingleton
 public class HeadsUpController {
     private final HeadsUpViewBinder mHeadsUpViewBinder;
     private final NotificationInterruptStateProvider mInterruptStateProvider;

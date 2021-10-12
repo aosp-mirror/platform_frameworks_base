@@ -18,7 +18,6 @@ package com.android.systemui.qs.tiles;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_QS_MODE;
 
-import android.annotation.Nullable;
 import android.content.Intent;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.NightDisplayListener;
@@ -29,16 +28,20 @@ import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 import android.widget.Switch;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
+import com.android.systemui.dagger.NightDisplayListenerModule;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
@@ -68,6 +71,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState> implements
 
     private ColorDisplayManager mManager;
     private final LocationController mLocationController;
+    private final NightDisplayListenerModule.Builder mNightDisplayListenerBuilder;
     private NightDisplayListener mListener;
     private boolean mIsListening;
 
@@ -76,18 +80,21 @@ public class NightDisplayTile extends QSTileImpl<BooleanState> implements
             QSHost host,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
+            FalsingManager falsingManager,
             MetricsLogger metricsLogger,
             StatusBarStateController statusBarStateController,
             ActivityStarter activityStarter,
             QSLogger qsLogger,
             LocationController locationController,
-            ColorDisplayManager colorDisplayManager
+            ColorDisplayManager colorDisplayManager,
+            NightDisplayListenerModule.Builder nightDisplayListenerBuilder
     ) {
-        super(host, backgroundLooper, mainHandler, metricsLogger, statusBarStateController,
-                activityStarter, qsLogger);
+        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+                statusBarStateController, activityStarter, qsLogger);
         mLocationController = locationController;
         mManager = colorDisplayManager;
-        mListener = new NightDisplayListener(mContext, mainHandler);
+        mNightDisplayListenerBuilder = nightDisplayListenerBuilder;
+        mListener = mNightDisplayListenerBuilder.setUser(host.getUserContext().getUserId()).build();
     }
 
     @Override
@@ -101,7 +108,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState> implements
     }
 
     @Override
-    protected void handleClick() {
+    protected void handleClick(@Nullable View view) {
         // Enroll in forced auto mode if eligible.
         if ("1".equals(Settings.Global.getString(mContext.getContentResolver(),
                 Settings.Global.NIGHT_DISPLAY_FORCED_AUTO_MODE_AVAILABLE))
@@ -125,7 +132,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState> implements
         mManager = getHost().getUserContext().getSystemService(ColorDisplayManager.class);
 
         // Make a new controller for the new user.
-        mListener = new NightDisplayListener(mContext, newUserId, new Handler(Looper.myLooper()));
+        mListener = mNightDisplayListenerBuilder.setUser(newUserId).build();
         if (mIsListening) {
             mListener.setCallback(this);
         }

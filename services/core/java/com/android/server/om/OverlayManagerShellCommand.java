@@ -19,12 +19,17 @@ package com.android.server.om;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.om.FabricatedOverlay;
 import android.content.om.IOverlayManager;
+import android.content.om.OverlayIdentifier;
 import android.content.om.OverlayInfo;
+import android.content.om.OverlayManagerTransaction;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.os.Binder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.os.UserHandle;
@@ -72,6 +77,8 @@ final class OverlayManagerShellCommand extends ShellCommand {
                     return runSetPriority();
                 case "lookup":
                     return runLookup();
+                case "fabricate":
+                    return runFabricate();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -89,35 +96,40 @@ final class OverlayManagerShellCommand extends ShellCommand {
         out.println("Overlay manager (overlay) commands:");
         out.println("  help");
         out.println("    Print this help text.");
-        out.println("  dump [--verbose] [--user USER_ID] [[FIELD] PACKAGE]");
+        out.println("  dump [--verbose] [--user USER_ID] [[FIELD] PACKAGE[:NAME]]");
         out.println("    Print debugging information about the overlay manager.");
-        out.println("    With optional parameter PACKAGE, limit output to the specified");
-        out.println("    package. With optional parameter FIELD, limit output to");
-        out.println("    the value of that SettingsItem field. Field names are");
-        out.println("    case insensitive and out.println the m prefix can be omitted,");
-        out.println("    so the following are equivalent: mState, mstate, State, state.");
-        out.println("  list [--user USER_ID] [PACKAGE]");
+        out.println("    With optional parameters PACKAGE and NAME, limit output to the specified");
+        out.println("    overlay or target. With optional parameter FIELD, limit output to");
+        out.println("    the corresponding SettingsItem field. Field names are all lower case");
+        out.println("    and omit the m prefix, i.e. 'userid' for SettingsItem.mUserId.");
+        out.println("  list [--user USER_ID] [PACKAGE[:NAME]]");
         out.println("    Print information about target and overlay packages.");
         out.println("    Overlay packages are printed in priority order. With optional");
-        out.println("    parameter PACKAGE, limit output to the specified package.");
-        out.println("  enable [--user USER_ID] PACKAGE");
-        out.println("    Enable overlay package PACKAGE.");
-        out.println("  disable [--user USER_ID] PACKAGE");
-        out.println("    Disable overlay package PACKAGE.");
+        out.println("    parameters PACKAGE and NAME, limit output to the specified overlay or");
+        out.println("    target.");
+        out.println("  enable [--user USER_ID] PACKAGE[:NAME]");
+        out.println("    Enable overlay within or owned by PACKAGE with optional unique NAME.");
+        out.println("  disable [--user USER_ID] PACKAGE[:NAME]");
+        out.println("    Disable overlay within or owned by PACKAGE with optional unique NAME.");
         out.println("  enable-exclusive [--user USER_ID] [--category] PACKAGE");
-        out.println("    Enable overlay package PACKAGE and disable all other overlays for");
-        out.println("    its target package. If the --category option is given, only disables");
+        out.println("    Enable overlay within or owned by PACKAGE and disable all other overlays");
+        out.println("    for its target package. If the --category option is given, only disables");
         out.println("    other overlays in the same category.");
         out.println("  set-priority [--user USER_ID] PACKAGE PARENT|lowest|highest");
-        out.println("    Change the priority of the overlay PACKAGE to be just higher than");
-        out.println("    the priority of PACKAGE_PARENT If PARENT is the special keyword");
+        out.println("    Change the priority of the overlay to be just higher than");
+        out.println("    the priority of PARENT If PARENT is the special keyword");
         out.println("    'lowest', change priority of PACKAGE to the lowest priority.");
         out.println("    If PARENT is the special keyword 'highest', change priority of");
         out.println("    PACKAGE to the highest priority.");
         out.println("  lookup [--user USER_ID] [--verbose] PACKAGE-TO-LOAD PACKAGE:TYPE/NAME");
         out.println("    Load a package and print the value of a given resource");
         out.println("    applying the current configuration and enabled overlays.");
-        out.println("    For a more fine-grained alernative, use 'idmap2 lookup'.");
+        out.println("    For a more fine-grained alternative, use 'idmap2 lookup'.");
+        out.println("  fabricate [--user USER_ID] [--target-name OVERLAYABLE] --target PACKAGE");
+        out.println("            --name NAME PACKAGE:TYPE/NAME ENCODED-TYPE-ID ENCODED-VALUE");
+        out.println("    Create an overlay from a single resource. Caller must be root. Example:");
+        out.println("      fabricate --target android --name LighterGray \\");
+        out.println("                android:color/lighter_gray 0x1c 0xffeeeeee");
     }
 
     private int runList() throws RemoteException {
@@ -192,7 +204,7 @@ final class OverlayManagerShellCommand extends ShellCommand {
                 status = "---";
                 break;
         }
-        out.println(String.format("%s %s", status, oi.packageName));
+        out.println(String.format("%s %s", status, oi.getOverlayIdentifier()));
     }
 
     private int runEnableDisable(final boolean enable) throws RemoteException {
@@ -211,8 +223,88 @@ final class OverlayManagerShellCommand extends ShellCommand {
             }
         }
 
-        final String packageName = getNextArgRequired();
-        return mInterface.setEnabled(packageName, enable, userId) ? 0 : 1;
+        final OverlayIdentifier overlay = OverlayIdentifier.fromString(getNextArgRequired());
+        mInterface.commit(new OverlayManagerTransaction.Builder()
+                .setEnabled(overlay, enable, userId)
+                .build());
+        return 0;
+    }
+
+    private int runFabricate() throws RemoteException {
+        final PrintWriter err = getErrPrintWriter();
+        if (Binder.getCallingUid() != Process.ROOT_UID) {
+            err.println("Error: must be root to fabricate overlays through the shell");
+            return 1;
+        }
+
+        int userId = UserHandle.USER_SYSTEM;
+        String targetPackage = "";
+        String targetOverlayable = "";
+        String name = "";
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "--user":
+                    userId = UserHandle.parseUserArg(getNextArgRequired());
+                    break;
+                case "--target":
+                    targetPackage = getNextArgRequired();
+                    break;
+                case "--target-name":
+                    targetOverlayable = getNextArgRequired();
+                    break;
+                case "--name":
+                    name = getNextArgRequired();
+                    break;
+                default:
+                    err.println("Error: Unknown option: " + opt);
+                    return 1;
+            }
+        }
+
+        if (name.isEmpty()) {
+            err.println("Error: Missing required arg '--name'");
+            return 1;
+        }
+
+        if (targetPackage.isEmpty()) {
+            err.println("Error: Missing required arg '--target'");
+            return 1;
+        }
+
+        final String resourceName = getNextArgRequired();
+        final String typeStr = getNextArgRequired();
+        final int type;
+        if (typeStr.startsWith("0x")) {
+            type = Integer.parseUnsignedInt(typeStr.substring(2), 16);
+        } else {
+            type = Integer.parseUnsignedInt(typeStr);
+        }
+        final String dataStr = getNextArgRequired();
+        final int data;
+        if (dataStr.startsWith("0x")) {
+            data = Integer.parseUnsignedInt(dataStr.substring(2), 16);
+        } else {
+            data = Integer.parseUnsignedInt(dataStr);
+        }
+
+        final PackageManager pm = mContext.getPackageManager();
+        if (pm == null) {
+            err.println("Error: failed to get package manager");
+            return 1;
+        }
+
+        final String overlayPackageName = "com.android.shell";
+        final FabricatedOverlay overlay = new FabricatedOverlay.Builder(
+                overlayPackageName, name, targetPackage)
+                .setTargetOverlayable(targetOverlayable)
+                .setResourceValue(resourceName, type, data)
+                .build();
+
+        mInterface.commit(new OverlayManagerTransaction.Builder()
+                .registerFabricatedOverlay(overlay)
+                .build());
+        return 0;
     }
 
     private int runEnableExclusive() throws RemoteException {

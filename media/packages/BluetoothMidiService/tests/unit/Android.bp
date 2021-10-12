@@ -29,7 +29,6 @@ android_test {
     certificate: "platform",
     static_libs: [
         //"frameworks-base-testutils",
-        "android-support-test",
         "androidx.test.core",
         "androidx.test.ext.truth",
         "androidx.test.runner",

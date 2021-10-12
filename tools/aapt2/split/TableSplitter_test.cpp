@@ -193,15 +193,23 @@ TEST(TableSplitterTest, SplitTableByConfigAndDensity) {
   ResourceTable table;
 
   const ResourceName foo = test::ParseNameOrDie("android:string/foo");
-  ASSERT_TRUE(table.AddResource(foo, test::ParseConfigOrDie("land-hdpi"), {},
-                                util::make_unique<Id>(),
-                                test::GetDiagnostics()));
-  ASSERT_TRUE(table.AddResource(foo, test::ParseConfigOrDie("land-xhdpi"), {},
-                                util::make_unique<Id>(),
-                                test::GetDiagnostics()));
-  ASSERT_TRUE(table.AddResource(foo, test::ParseConfigOrDie("land-xxhdpi"), {},
-                                util::make_unique<Id>(),
-                                test::GetDiagnostics()));
+  ASSERT_TRUE(
+      table.AddResource(NewResourceBuilder(foo)
+                            .SetValue(util::make_unique<Id>(), test::ParseConfigOrDie("land-hdpi"))
+                            .Build(),
+                        test::GetDiagnostics()));
+
+  ASSERT_TRUE(
+      table.AddResource(NewResourceBuilder(foo)
+                            .SetValue(util::make_unique<Id>(), test::ParseConfigOrDie("land-xhdpi"))
+                            .Build(),
+                        test::GetDiagnostics()));
+
+  ASSERT_TRUE(table.AddResource(
+      NewResourceBuilder(foo)
+          .SetValue(util::make_unique<Id>(), test::ParseConfigOrDie("land-xxhdpi"))
+          .Build(),
+      test::GetDiagnostics()));
 
   std::vector<SplitConstraints> constraints;
   constraints.push_back(

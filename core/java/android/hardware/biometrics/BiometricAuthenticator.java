@@ -16,12 +16,13 @@
 
 package android.hardware.biometrics;
 
-import android.annotation.CallbackExecutor;
-import android.annotation.NonNull;
+import android.annotation.IntDef;
 import android.hardware.biometrics.BiometricPrompt.AuthenticationResultType;
 import android.os.CancellationSignal;
 import android.os.Parcelable;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.Executor;
 
 /**
@@ -61,6 +62,21 @@ public interface BiometricAuthenticator {
      * @hide
      */
     int TYPE_FACE = 1 << 3;
+
+    /**
+     * @hide
+     */
+    int TYPE_ANY_BIOMETRIC = TYPE_FINGERPRINT | TYPE_IRIS | TYPE_FACE;
+
+    @IntDef(flag = true, value = {
+            TYPE_NONE,
+            TYPE_CREDENTIAL,
+            TYPE_FINGERPRINT,
+            TYPE_IRIS,
+            TYPE_FACE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface Modality {}
 
     /**
      * Container for biometric data
@@ -218,85 +234,5 @@ public interface BiometricAuthenticator {
          * @hide
          */
         public void onAuthenticationAcquired(int acquireInfo) {}
-    };
-
-    /**
-     * @return true if the biometric hardware is detected.
-     */
-    default boolean isHardwareDetected() {
-        throw new UnsupportedOperationException("Stub!");
-    }
-
-    /**
-     * @return true if the user has enrolled templates for this biometric.
-     */
-    default boolean hasEnrolledTemplates() {
-        throw new UnsupportedOperationException("Stub!");
-    }
-
-    /**
-     * @return true if the user has enrolled templates for this biometric.
-     */
-    default boolean hasEnrolledTemplates(int userId) {
-        throw new UnsupportedOperationException("Stub!");
-    }
-
-    /**
-     * Sets the active user. This is meant to be used to select the current profile
-     * to allow separate templates for work profile.
-     */
-    default void setActiveUser(int userId) {
-        throw new UnsupportedOperationException("Stub!");
-    }
-
-    /**
-     * This call warms up the hardware and starts scanning for valid biometrics. It terminates
-     * when {@link AuthenticationCallback#onAuthenticationError(int,
-     * CharSequence)} is called or when {@link AuthenticationCallback#onAuthenticationSucceeded(
-     * AuthenticationResult)} is called, at which point the crypto object becomes invalid. This
-     * operation can be canceled by using the provided cancel object. The application wil receive
-     * authentication errors through {@link AuthenticationCallback}. Calling
-     * {@link BiometricAuthenticator#authenticate(CryptoObject, CancellationSignal, Executor,
-     * AuthenticationCallback)} while an existing authentication attempt is occurring will stop
-     * the previous client and start a new authentication. The interrupted client will receive a
-     * cancelled notification through {@link AuthenticationCallback#onAuthenticationError(int,
-     * CharSequence)}.
-     *
-     * @throws IllegalArgumentException If any of the arguments are null
-     *
-     * @param crypto Object associated with the call
-     * @param cancel An object that can be used to cancel authentication
-     * @param executor An executor to handle callback events
-     * @param callback An object to receive authentication events
-     */
-    default void authenticate(@NonNull CryptoObject crypto,
-            @NonNull CancellationSignal cancel,
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull AuthenticationCallback callback) {
-        throw new UnsupportedOperationException("Stub!");
-    }
-
-    /**
-     * This call warms up the hardware and starts scanning for valid biometrics. It terminates
-     * when {@link AuthenticationCallback#onAuthenticationError(int,
-     * CharSequence)} is called or when {@link AuthenticationCallback#onAuthenticationSucceeded(
-     * AuthenticationResult)} is called. This operation can be canceled by using the provided cancel
-     * object. The application wil receive authentication errors through
-     * {@link AuthenticationCallback}. Calling {@link BiometricAuthenticator#authenticate(
-     * CryptoObject, CancellationSignal, Executor, AuthenticationCallback)} while an existing
-     * authentication attempt is occurring will stop the previous client and start a new
-     * authentication. The interrupted client will receive a cancelled notification through
-     * {@link AuthenticationCallback#onAuthenticationError(int, CharSequence)}.
-     *
-     * @throws IllegalArgumentException If any of the arguments are null
-     *
-     * @param cancel An object that can be used to cancel authentication
-     * @param executor An executor to handle callback events
-     * @param callback An object to receive authentication events
-     */
-    default void authenticate(@NonNull CancellationSignal cancel,
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull AuthenticationCallback callback) {
-        throw new UnsupportedOperationException("Stub!");
     }
 }

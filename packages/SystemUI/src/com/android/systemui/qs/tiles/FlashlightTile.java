@@ -22,7 +22,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.service.quicksettings.Tile;
+import android.view.View;
 import android.widget.Switch;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -30,6 +33,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
@@ -51,14 +55,15 @@ public class FlashlightTile extends QSTileImpl<BooleanState> implements
             QSHost host,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
+            FalsingManager falsingManager,
             MetricsLogger metricsLogger,
             StatusBarStateController statusBarStateController,
             ActivityStarter activityStarter,
             QSLogger qsLogger,
             FlashlightController flashlightController
     ) {
-        super(host, backgroundLooper, mainHandler, metricsLogger, statusBarStateController,
-                activityStarter, qsLogger);
+        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+                statusBarStateController, activityStarter, qsLogger);
         mFlashlightController = flashlightController;
         mFlashlightController.observe(getLifecycle(), this);
     }
@@ -90,7 +95,7 @@ public class FlashlightTile extends QSTileImpl<BooleanState> implements
     }
 
     @Override
-    protected void handleClick() {
+    protected void handleClick(@Nullable View view) {
         if (ActivityManager.isUserAMonkey()) {
             return;
         }
@@ -105,8 +110,8 @@ public class FlashlightTile extends QSTileImpl<BooleanState> implements
     }
 
     @Override
-    protected void handleLongClick() {
-        handleClick();
+    protected void handleLongClick(@Nullable View view) {
+        handleClick(view);
     }
 
     @Override

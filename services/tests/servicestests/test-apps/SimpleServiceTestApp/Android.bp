@@ -22,7 +22,7 @@ package {
 }
 
 android_test_helper_app {
-    name: "SimpleServiceTestApp",
+    name: "SimpleServiceTestApp1",
 
     test_suites: ["device-tests"],
 
@@ -36,4 +36,47 @@ android_test_helper_app {
     optimize: {
         enabled: false,
     },
+    aaptflags: [
+        "--rename-manifest-package com.android.servicestests.apps.simpleservicetestapp1",
+    ],
+}
+
+android_test_helper_app {
+    name: "SimpleServiceTestApp2",
+
+    test_suites: ["device-tests"],
+
+    srcs: ["**/*.java"],
+
+    platform_apis: true,
+    certificate: "platform",
+    dex_preopt: {
+        enabled: false,
+    },
+    optimize: {
+        enabled: false,
+    },
+    aaptflags: [
+        "--rename-manifest-package com.android.servicestests.apps.simpleservicetestapp2",
+    ],
+}
+
+android_test_helper_app {
+    name: "SimpleServiceTestApp3",
+
+    test_suites: ["device-tests"],
+
+    srcs: ["**/*.java"],
+
+    platform_apis: true,
+    certificate: "platform",
+    dex_preopt: {
+        enabled: false,
+    },
+    optimize: {
+        enabled: false,
+    },
+    aaptflags: [
+        "--rename-manifest-package com.android.servicestests.apps.simpleservicetestapp3",
+    ],
 }

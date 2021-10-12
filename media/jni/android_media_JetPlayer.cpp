@@ -43,11 +43,33 @@ struct fields_t {
     jfieldID  nativePlayerInJavaObj; // stores in Java the native JetPlayer object
 };
 
-static fields_t javaJetPlayerFields;
+static fields_t javaJetPlayerFields {};
 
+#define JAVA_NATIVEJETPLAYERINJAVAOBJ_FIELD_NAME "mNativePlayerInJavaObj"
+#define JAVA_NATIVEJETPOSTEVENT_CALLBACK_NAME "postEventFromNative"
+
+static void initializeJavaIDs(JNIEnv* env) {
+    static std::once_flag sJniInitialized;
+
+    std::call_once(sJniInitialized, [](JNIEnv* env) {
+        // Get the JetPlayer java class
+        jclass jetPlayerClass = FindClassOrDie(env, kClassPathName);
+        javaJetPlayerFields.jetClass = MakeGlobalRefOrDie(env, jetPlayerClass);
+
+        // Get the mNativePlayerInJavaObj variable field
+        javaJetPlayerFields.nativePlayerInJavaObj =
+                GetFieldIDOrDie(env, jetPlayerClass, JAVA_NATIVEJETPLAYERINJAVAOBJ_FIELD_NAME, "J");
+
+        // Get the callback to post events from this native code to Java
+        javaJetPlayerFields.postNativeEventInJava = GetStaticMethodIDOrDie(env,
+                javaJetPlayerFields.jetClass, JAVA_NATIVEJETPOSTEVENT_CALLBACK_NAME,
+                "(Ljava/lang/Object;III)V");
+    }, env);
+}
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
+
 
 /*
  * This function is called from JetPlayer instance's render thread
@@ -79,6 +101,8 @@ static jboolean
 android_media_JetPlayer_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     jint maxTracks, jint trackBufferSize)
 {
+    initializeJavaIDs(env);
+
     //ALOGV("android_media_JetPlayer_setup(): entering.");
     JetPlayer* lpJet = new JetPlayer(env->NewGlobalRef(weak_this), maxTracks, trackBufferSize);
 
@@ -511,28 +535,9 @@ static const JNINativeMethod gMethods[] = {
     {"native_clearQueue",  "()Z",                   (void *)android_media_JetPlayer_clearQueue},
 };
 
-#define JAVA_NATIVEJETPLAYERINJAVAOBJ_FIELD_NAME "mNativePlayerInJavaObj"
-#define JAVA_NATIVEJETPOSTEVENT_CALLBACK_NAME "postEventFromNative"
 
 
 int register_android_media_JetPlayer(JNIEnv *env)
 {
-    javaJetPlayerFields.jetClass = NULL;
-    javaJetPlayerFields.postNativeEventInJava = NULL;
-    javaJetPlayerFields.nativePlayerInJavaObj = NULL;
-
-    // Get the JetPlayer java class
-    jclass jetPlayerClass = FindClassOrDie(env, kClassPathName);
-    javaJetPlayerFields.jetClass = MakeGlobalRefOrDie(env, jetPlayerClass);
-
-    // Get the mNativePlayerInJavaObj variable field
-    javaJetPlayerFields.nativePlayerInJavaObj = GetFieldIDOrDie(env,
-            jetPlayerClass, JAVA_NATIVEJETPLAYERINJAVAOBJ_FIELD_NAME, "J");
-
-    // Get the callback to post events from this native code to Java
-    javaJetPlayerFields.postNativeEventInJava = GetStaticMethodIDOrDie(env,
-            javaJetPlayerFields.jetClass, JAVA_NATIVEJETPOSTEVENT_CALLBACK_NAME,
-            "(Ljava/lang/Object;III)V");
-
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }

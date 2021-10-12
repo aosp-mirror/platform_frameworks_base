@@ -304,11 +304,6 @@ public class ForwardDeleteTest {
         forwardDelete(state, 0);
         state.assertEquals("|");
 
-        // Regional indicator symbol + COMBINING ENCLOSING KEYCAP
-        state.setByString("| U+1F1FA U+20E3");
-        forwardDelete(state, 0);
-        state.assertEquals("|");
-
         // COMBINING ENCLOSING KEYCAP + emoji modifier
         state.setByString("| '1' U+20E3 U+1F3FB");
         forwardDelete(state, 0);
@@ -407,11 +402,6 @@ public class ForwardDeleteTest {
         // state.setByString("| U+1F466 U+1F3FB U+200D U+1F469");
         // forwardDelete(state, 0);
         // state.assertEquals("|");
-
-        // Regional indicator symbol + emoji modifier
-        state.setByString("| U+1F1FA U+1F3FB");
-        forwardDelete(state, 0);
-        state.assertEquals("|");
 
         // Emoji modifier + regional indicator symbol
         state.setByString("| U+1F466 U+1F3FB U+1F1FA");

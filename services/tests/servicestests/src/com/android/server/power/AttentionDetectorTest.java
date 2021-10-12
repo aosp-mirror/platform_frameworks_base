@@ -39,7 +39,6 @@ import static org.mockito.Mockito.when;
 
 import android.attention.AttentionManagerInternal;
 import android.attention.AttentionManagerInternal.AttentionCallbackInternal;
-import android.content.pm.PackageManager;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.SystemClock;
@@ -64,8 +63,6 @@ public class AttentionDetectorTest extends AndroidTestCase {
     private static final long DEFAULT_DIM_DURATION_MILLIS = 6_000L;
 
     @Mock
-    private PackageManager mPackageManager;
-    @Mock
     private AttentionManagerInternal mAttentionManagerInternal;
     @Mock
     private WindowManagerInternal mWindowManagerInternal;
@@ -73,16 +70,12 @@ public class AttentionDetectorTest extends AndroidTestCase {
     private Runnable mOnUserAttention;
     private TestableAttentionDetector mAttentionDetector;
     private AttentionDetector mRealAttentionDetector;
-    private long mPreDimCheckDuration;
     private long mNextDimming;
     private int mIsSettingEnabled;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(mPackageManager.getAttentionServicePackageName()).thenReturn("com.google.android.as");
-        when(mPackageManager.checkPermission(any(), any())).thenReturn(
-                PackageManager.PERMISSION_GRANTED);
         when(mAttentionManagerInternal.checkAttention(anyLong(), any()))
                 .thenReturn(true);
         when(mWindowManagerInternal.isKeyguardShowingAndNotOccluded()).thenReturn(false);
@@ -150,16 +143,6 @@ public class AttentionDetectorTest extends AndroidTestCase {
     @Test
     public void testOnUserActivity_doesntCheckIfInLockscreen() {
         when(mWindowManagerInternal.isKeyguardShowingAndNotOccluded()).thenReturn(true);
-
-        long when = registerAttention();
-        verify(mAttentionManagerInternal, never()).checkAttention(anyLong(), any());
-        assertThat(mNextDimming).isEqualTo(when);
-    }
-
-    @Test
-    public void testOnUserActivity_doesntCheckIfNotSufficientPermissions() {
-        when(mPackageManager.checkPermission(any(), any())).thenReturn(
-                PackageManager.PERMISSION_DENIED);
 
         long when = registerAttention();
         verify(mAttentionManagerInternal, never()).checkAttention(anyLong(), any());
@@ -358,23 +341,14 @@ public class AttentionDetectorTest extends AndroidTestCase {
     public void testGetPostDimCheckDurationMillis_handlesGoodFlagValue() {
         DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
                 KEY_POST_DIM_CHECK_DURATION_MILLIS, "333", false);
-        assertThat(mRealAttentionDetector.getPostDimCheckDurationMillis(
-                DEFAULT_DIM_DURATION_MILLIS)).isEqualTo(333);
-    }
-
-    @Test
-    public void testGetPostDimCheckDurationMillis_capsGoodFlagValueByMaxDimDuration() {
-        DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
-                KEY_POST_DIM_CHECK_DURATION_MILLIS, "7000", false);
-        assertThat(mRealAttentionDetector.getPostDimCheckDurationMillis(6500)).isEqualTo(6500);
+        assertThat(mRealAttentionDetector.getPostDimCheckDurationMillis()).isEqualTo(333);
     }
 
     @Test
     public void testGetPostDimCheckDurationMillis_rejectsNegativeValue() {
         DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
                 KEY_POST_DIM_CHECK_DURATION_MILLIS, "-50", false);
-        assertThat(mRealAttentionDetector.getPostDimCheckDurationMillis(
-                DEFAULT_DIM_DURATION_MILLIS)).isEqualTo(
+        assertThat(mRealAttentionDetector.getPostDimCheckDurationMillis()).isEqualTo(
                 DEFAULT_POST_DIM_CHECK_DURATION_MILLIS);
     }
 
@@ -382,8 +356,7 @@ public class AttentionDetectorTest extends AndroidTestCase {
     public void testGetPostDimCheckDurationMillis_rejectsTooBigValue() {
         DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
                 KEY_POST_DIM_CHECK_DURATION_MILLIS, "20000", false);
-        assertThat(mRealAttentionDetector.getPostDimCheckDurationMillis(
-                DEFAULT_DIM_DURATION_MILLIS)).isEqualTo(
+        assertThat(mRealAttentionDetector.getPostDimCheckDurationMillis()).isEqualTo(
                 DEFAULT_POST_DIM_CHECK_DURATION_MILLIS);
     }
 
@@ -391,14 +364,12 @@ public class AttentionDetectorTest extends AndroidTestCase {
     public void testGetPostDimCheckDurationMillis_handlesBadFlagValue() {
         DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
                 KEY_POST_DIM_CHECK_DURATION_MILLIS, "20000k", false);
-        assertThat(mRealAttentionDetector.getPostDimCheckDurationMillis(
-                DEFAULT_DIM_DURATION_MILLIS)).isEqualTo(
+        assertThat(mRealAttentionDetector.getPostDimCheckDurationMillis()).isEqualTo(
                 DEFAULT_POST_DIM_CHECK_DURATION_MILLIS);
 
         DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
                 KEY_POST_DIM_CHECK_DURATION_MILLIS, "0.25", false);
-        assertThat(mRealAttentionDetector.getPostDimCheckDurationMillis(
-                DEFAULT_DIM_DURATION_MILLIS)).isEqualTo(
+        assertThat(mRealAttentionDetector.getPostDimCheckDurationMillis()).isEqualTo(
                 DEFAULT_POST_DIM_CHECK_DURATION_MILLIS);
     }
 
@@ -439,7 +410,7 @@ public class AttentionDetectorTest extends AndroidTestCase {
     }
 
     private long registerAttention() {
-        mPreDimCheckDuration = 4000L;
+        mAttentionDetector.mPreDimCheckDurationMillis = 4000L;
         mAttentionDetector.onUserActivity(SystemClock.uptimeMillis(),
                 PowerManager.USER_ACTIVITY_EVENT_TOUCH);
         return mAttentionDetector.updateUserActivity(mNextDimming, DEFAULT_DIM_DURATION_MILLIS);
@@ -452,7 +423,6 @@ public class AttentionDetectorTest extends AndroidTestCase {
             super(AttentionDetectorTest.this.mOnUserAttention, new Object());
             mAttentionManager = mAttentionManagerInternal;
             mWindowManager = mWindowManagerInternal;
-            mPackageManager = AttentionDetectorTest.this.mPackageManager;
             mContentResolver = getContext().getContentResolver();
         }
 
@@ -463,11 +433,6 @@ public class AttentionDetectorTest extends AndroidTestCase {
         @Override
         public boolean isAttentionServiceSupported() {
             return mAttentionServiceSupported;
-        }
-
-        @Override
-        public long getPreDimCheckDurationMillis() {
-            return mPreDimCheckDuration;
         }
     }
 }

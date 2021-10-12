@@ -93,7 +93,7 @@ public class ApplicationPackageManagerTest extends TestCase {
         private boolean mAllow3rdPartyOnInternal = true;
 
         public MockedApplicationPackageManager() {
-            super(null, null, null);
+            super(null, null);
         }
 
         public void setForceAllowOnExternal(boolean forceAllowOnExternal) {

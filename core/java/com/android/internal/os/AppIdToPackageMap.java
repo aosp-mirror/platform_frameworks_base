@@ -16,25 +16,23 @@
 
 package com.android.internal.os;
 
-
 import android.app.AppGlobals;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /** Maps AppIds to their package names. */
 public final class AppIdToPackageMap {
-    private final Map<Integer, String> mAppIdToPackageMap;
+    private final SparseArray<String> mAppIdToPackageMap;
 
     @VisibleForTesting
-    public AppIdToPackageMap(Map<Integer, String> appIdToPackageMap) {
+    public AppIdToPackageMap(SparseArray<String> appIdToPackageMap) {
         mAppIdToPackageMap = appIdToPackageMap;
     }
 
@@ -50,10 +48,10 @@ public final class AppIdToPackageMap {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-        final Map<Integer, String> map = new HashMap<>();
+        final SparseArray<String> map = new SparseArray<>();
         for (PackageInfo pkg : packages) {
             final int uid = pkg.applicationInfo.uid;
-            if (pkg.sharedUserId != null && map.containsKey(uid)) {
+            if (pkg.sharedUserId != null && map.indexOfKey(uid) >= 0) {
                 // Use sharedUserId string as package name if there are collisions
                 map.put(uid, "shared:" + pkg.sharedUserId);
             } else {

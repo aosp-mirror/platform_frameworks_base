@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.IntFunction;
 
 /**
@@ -208,6 +209,13 @@ public class ArrayUtils {
     }
 
     /**
+     * Length of the given map or 0 if it's null.
+     */
+    public static int size(@Nullable Map<?, ?> map) {
+        return map == null ? 0 : map.size();
+    }
+
+    /**
      * Checks that value is present as at least one of the elements of the array.
      * @param array the array to check in
      * @param value the value to check for
@@ -311,6 +319,10 @@ public class ArrayUtils {
         return total;
     }
 
+    /**
+     * @deprecated use {@code IntArray} instead
+     */
+    @Deprecated
     public static int[] convertToIntArray(List<Integer> list) {
         int[] array = new int[list.size()];
         for (int i = 0; i < list.size(); i++) {
@@ -588,6 +600,20 @@ public class ArrayUtils {
         return cur;
     }
 
+    /**
+     * Similar to {@link Set#addAll(Collection)}}, but with support for set values of {@code null}.
+     */
+    public static @NonNull <T> ArraySet<T> addAll(@Nullable ArraySet<T> cur,
+            @Nullable Collection<T> val) {
+        if (cur == null) {
+            cur = new ArraySet<>();
+        }
+        if (val != null) {
+            cur.addAll(val);
+        }
+        return cur;
+    }
+
     public static @Nullable <T> ArraySet<T> remove(@Nullable ArraySet<T> cur, T val) {
         if (cur == null) {
             return null;
@@ -780,6 +806,7 @@ public class ArrayUtils {
 
     /**
      * Returns an array containing elements from the given one that match the given predicate.
+     * The returned array may, in some cases, be the reference to the input array.
      */
     public static @Nullable <T> T[] filter(@Nullable T[] items,
             @NonNull IntFunction<T[]> arrayConstructor,
@@ -790,24 +817,23 @@ public class ArrayUtils {
 
         int matchesCount = 0;
         int size = size(items);
+        final boolean[] tests = new boolean[size];
         for (int i = 0; i < size; i++) {
-            if (predicate.test(items[i])) {
+            tests[i] = predicate.test(items[i]);
+            if (tests[i]) {
                 matchesCount++;
             }
-        }
-        if (matchesCount == 0) {
-            return items;
         }
         if (matchesCount == items.length) {
             return items;
         }
-        if (matchesCount == 0) {
-            return null;
-        }
         T[] result = arrayConstructor.apply(matchesCount);
+        if (matchesCount == 0) {
+            return result;
+        }
         int outIdx = 0;
         for (int i = 0; i < size; i++) {
-            if (predicate.test(items[i])) {
+            if (tests[i]) {
                 result[outIdx++] = items[i];
             }
         }

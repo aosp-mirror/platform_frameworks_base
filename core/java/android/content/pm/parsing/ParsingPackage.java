@@ -16,6 +16,7 @@
 
 package android.content.pm.parsing;
 
+import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Intent;
@@ -23,6 +24,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
+import android.content.pm.PackageManager.Property;
 import android.content.pm.PackageParser;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedAttribution;
@@ -33,6 +35,7 @@ import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.parsing.component.ParsedProcess;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
+import android.content.pm.parsing.component.ParsedUsesPermission;
 import android.os.Bundle;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -75,6 +78,9 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage addPreferredActivityFilter(String className, ParsedIntentInfo intentInfo);
 
+    /** Add a property to the application scope */
+    ParsingPackage addProperty(Property property);
+
     ParsingPackage addProtectedBroadcast(String protectedBroadcast);
 
     ParsingPackage addProvider(ParsedProvider parsedProvider);
@@ -85,13 +91,17 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage addReqFeature(FeatureInfo reqFeature);
 
-    ParsingPackage addRequestedPermission(String permission);
+    ParsingPackage addUsesPermission(ParsedUsesPermission parsedUsesPermission);
 
     ParsingPackage addService(ParsedService parsedService);
 
     ParsingPackage addUsesLibrary(String libraryName);
 
     ParsingPackage addUsesOptionalLibrary(String libraryName);
+
+    ParsingPackage addUsesNativeLibrary(String libraryName);
+
+    ParsingPackage addUsesOptionalNativeLibrary(String libraryName);
 
     ParsingPackage addUsesStaticLibrary(String libraryName);
 
@@ -190,6 +200,8 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage setProfileableByShell(boolean profileableByShell);
 
+    ParsingPackage setProfileable(boolean profileable);
+
     ParsingPackage setRequestLegacyExternalStorage(boolean requestLegacyExternalStorage);
 
     ParsingPackage setAllowNativeHeapPointerTagging(boolean allowNativeHeapPointerTagging);
@@ -220,6 +232,8 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage removeUsesOptionalLibrary(String libraryName);
 
+    ParsingPackage removeUsesOptionalNativeLibrary(String libraryName);
+
     ParsingPackage setAnyDensity(int anyDensity);
 
     ParsingPackage setAppComponentFactory(String appComponentFactory);
@@ -247,9 +261,14 @@ public interface ParsingPackage extends ParsingPackageRead {
     ParsingPackage setNativeHeapZeroInitialized(
             @ApplicationInfo.NativeHeapZeroInitialized int nativeHeapZeroInitialized);
 
+    ParsingPackage setRequestRawExternalStorageAccess(
+            @Nullable Boolean requestRawExternalStorageAccess);
+
     ParsingPackage setCrossProfile(boolean crossProfile);
 
     ParsingPackage setFullBackupContent(int fullBackupContent);
+
+    ParsingPackage setDataExtractionRules(int dataExtractionRules);
 
     ParsingPackage setHasDomainUrls(boolean hasDomainUrls);
 
@@ -319,6 +338,8 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage setTheme(int theme);
 
+    ParsingPackage setRequestForegroundServiceExemption(boolean requestForegroundServiceExemption);
+
     ParsingPackage setUpgradeKeySets(@NonNull Set<String> upgradeKeySets);
 
     ParsingPackage setUse32BitAbi(boolean use32BitAbi);
@@ -341,8 +362,10 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage setCompileSdkVersionCodename(String compileSdkVersionCodename);
 
+    ParsingPackage setAttributionsAreUserVisible(boolean attributionsAreUserVisible);
+
     // TODO(b/135203078): This class no longer has access to ParsedPackage, find a replacement
     //  for moving to the next step
-    @Deprecated
+    @CallSuper
     Object hideAsParsed();
 }

@@ -67,5 +67,9 @@
         <permission name="android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS"/>
         <permission name="android.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS" />
         <permission name="android.permission.CAMERA_OPEN_CLOSE_LISTENER" />
+        <permission name="android.permission.READ_WIFI_CREDENTIAL" />
+        <permission name="android.permission.USE_BACKGROUND_BLUR" />
+        <permission name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS" />
+        <permission name="android.permission.FORCE_STOP_PACKAGES" />
     </privapp-permissions>
 </permissions>

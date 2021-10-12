@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-
 package android.bluetooth;
 
-import android.Manifest;
 import android.annotation.IntDef;
-import android.annotation.RequiresPermission;
+import android.annotation.RequiresNoPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -320,7 +318,6 @@ public interface BluetoothProfile {
      *
      * @return List of devices. The list will be empty on error.
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public List<BluetoothDevice> getConnectedDevices();
 
     /**
@@ -334,7 +331,6 @@ public interface BluetoothProfile {
      * #STATE_CONNECTING}, {@link #STATE_DISCONNECTED}, {@link #STATE_DISCONNECTING},
      * @return List of devices. The list will be empty on error.
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states);
 
     /**
@@ -344,7 +340,6 @@ public interface BluetoothProfile {
      * @return State of the profile connection. One of {@link #STATE_CONNECTED}, {@link
      * #STATE_CONNECTING}, {@link #STATE_DISCONNECTED}, {@link #STATE_DISCONNECTING}
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
     @BtProfileState int getConnectionState(BluetoothDevice device);
 
     /**
@@ -359,6 +354,7 @@ public interface BluetoothProfile {
          * @param profile - One of {@link #HEADSET} or {@link #A2DP}
          * @param proxy - One of {@link BluetoothHeadset} or {@link BluetoothA2dp}
          */
+        @RequiresNoPermission
         public void onServiceConnected(int profile, BluetoothProfile proxy);
 
         /**
@@ -367,6 +363,7 @@ public interface BluetoothProfile {
          *
          * @param profile - One of {@link #HEADSET} or {@link #A2DP}
          */
+        @RequiresNoPermission
         public void onServiceDisconnected(int profile);
     }
 

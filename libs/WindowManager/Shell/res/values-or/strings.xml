@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Copyright (C) 2020 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="pip_phone_close" msgid="5783752637260411309">"ବନ୍ଦ କରନ୍ତୁ"</string>
+    <string name="pip_phone_expand" msgid="2579292903468287504">"ବଢ଼ାନ୍ତୁ"</string>
+    <string name="pip_phone_settings" msgid="5468987116750491918">"ସେଟିଂସ୍"</string>
+    <string name="pip_menu_title" msgid="5393619322111827096">"ମେନୁ"</string>
+    <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> \"ଛବି-ଭିତରେ-ଛବି\"ରେ ଅଛି"</string>
+    <string name="pip_notification_message" msgid="8854051911700302620">"ଏହି ବୈଶିଷ୍ଟ୍ୟ <xliff:g id="NAME">%s</xliff:g> ବ୍ୟବହାର ନକରିବାକୁ ଯଦି ଆପଣ ଚାହାଁନ୍ତି, ସେଟିଙ୍ଗ ଖୋଲିବାକୁ ଟାପ୍‍ କରନ୍ତୁ ଏବଂ ଏହା ଅଫ୍‍ କରିଦିଅନ୍ତୁ।"</string>
+    <string name="pip_play" msgid="3496151081459417097">"ପ୍ଲେ କରନ୍ତୁ"</string>
+    <string name="pip_pause" msgid="690688849510295232">"ପଜ୍‍ କରନ୍ତୁ"</string>
+    <string name="pip_skip_to_next" msgid="8403429188794867653">"ପରବର୍ତ୍ତୀକୁ ଯାଆନ୍ତୁ"</string>
+    <string name="pip_skip_to_prev" msgid="7172158111196394092">"ପୂର୍ବବର୍ତ୍ତୀକୁ ଛାଡ଼ନ୍ତୁ"</string>
+    <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"ରିସାଇଜ୍ କରନ୍ତୁ"</string>
+    <string name="dock_forced_resizable" msgid="1749750436092293116">"ସ୍ପ୍ଲିଟ୍-ସ୍କ୍ରିନରେ ଆପ୍ କାମ କରିନପାରେ।"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"ଆପ୍‍ ସ୍ପ୍ଲିଟ୍‍-ସ୍କ୍ରୀନକୁ ସପୋର୍ଟ କରେ ନାହିଁ।"</string>
+    <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ସେକେଣ୍ଡାରୀ ଡିସପ୍ଲେରେ ଆପ୍‍ କାମ ନକରିପାରେ।"</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"ସେକେଣ୍ଡାରୀ ଡିସପ୍ଲେରେ ଆପ୍‍ ଲଞ୍ଚ ସପୋର୍ଟ କରେ ନାହିଁ।"</string>
+    <string name="accessibility_divider" msgid="703810061635792791">"ସ୍ପ୍ଲିଟ୍‍-ସ୍କ୍ରୀନ ବିଭାଜକ"</string>
+    <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"ବାମ ପଟକୁ ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନ୍‍ କରନ୍ତୁ"</string>
+    <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"ବାମ ପଟକୁ 70% କରନ୍ତୁ"</string>
+    <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"ବାମ ପଟକୁ 50% କରନ୍ତୁ"</string>
+    <string name="accessibility_action_divider_left_30" msgid="6023611335723838727">"ବାମ ପଟେ 30%"</string>
+    <string name="accessibility_action_divider_right_full" msgid="3408505054325944903">"ଡାହାଣ ପଟକୁ ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନ୍‍ କରନ୍ତୁ"</string>
+    <string name="accessibility_action_divider_top_full" msgid="3495871951082107594">"ଉପର ଆଡ଼କୁ ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନ୍‍ କରନ୍ତୁ"</string>
+    <string name="accessibility_action_divider_top_70" msgid="1779164068887875474">"ଉପର ଆଡ଼କୁ 70% କରନ୍ତୁ"</string>
+    <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"ଉପର ଆଡ଼କୁ 50% କରନ୍ତୁ"</string>
+    <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"ଉପର ଆଡ଼କୁ 30% କରନ୍ତୁ"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"ତଳ ଅଂଶର ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନ୍‍"</string>
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"ଏକ-ହାତ ମୋଡ୍ ବ୍ୟବହାର କରି"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"ବାହାରି ଯିବା ପାଇଁ, ସ୍କ୍ରିନର ତଳୁ ଉପରକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ କିମ୍ବା ଆପରେ ଯେ କୌଣସି ସ୍ଥାନରେ ଟାପ୍ କରନ୍ତୁ"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"ଏକ-ହାତ ମୋଡ୍ ଆରମ୍ଭ କରନ୍ତୁ"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"ଏକ-ହାତ ମୋଡରୁ ବାହାରି ଯାଆନ୍ତୁ"</string>
+    <string name="bubbles_settings_button_description" msgid="1301286017420516912">"<xliff:g id="APP_NAME">%1$s</xliff:g> ବବଲ୍‌ଗୁଡ଼ିକ ପାଇଁ ସେଟିଂସ୍"</string>
+    <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"ଓଭରଫ୍ଲୋ"</string>
+    <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"ଷ୍ଟାକରେ ପୁଣି ଯୋଗ କରନ୍ତୁ"</string>
+    <string name="bubble_content_description_single" msgid="8495748092720065813">"<xliff:g id="APP_NAME">%2$s</xliff:g>ରୁ <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_content_description_stack" msgid="8071515017164630429">"<xliff:g id="APP_NAME">%2$s</xliff:g> ଏବଂ ଅଧିକ <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>ଟିରୁ <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_accessibility_action_move_top_left" msgid="2644118920500782758">"ଉପର ବାମକୁ ନିଅନ୍ତୁ"</string>
+    <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"ଉପର-ଡାହାଣକୁ ନିଅନ୍ତୁ"</string>
+    <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"ତଳ ବାମକୁ ନିଅନ୍ତୁ"</string>
+    <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"ତଳ ଡାହାଣକୁ ନିଅନ୍ତୁ"</string>
+    <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ସେଟିଂସ୍"</string>
+    <string name="bubble_dismiss_text" msgid="8816558050659478158">"ବବଲ୍ ଖାରଜ କରନ୍ତୁ"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"ବାର୍ତ୍ତାଳାପକୁ ବବଲ୍ କରନ୍ତୁ ନାହିଁ"</string>
+    <string name="bubbles_user_education_title" msgid="2112319053732691899">"ବବଲଗୁଡ଼ିକୁ ବ୍ୟବହାର କରି ଚାଟ୍ କରନ୍ତୁ"</string>
+    <string name="bubbles_user_education_description" msgid="4215862563054175407">"ନୂଆ ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ ଫ୍ଲୋଟିଂ ଆଇକନ୍ କିମ୍ବା ବବଲ୍ ଭାବେ ଦେଖାଯିବ। ବବଲ୍ ଖୋଲିବାକୁ ଟାପ୍ କରନ୍ତୁ। ଏହାକୁ ମୁଭ୍ କରିବାକୁ ଟାଣନ୍ତୁ।"</string>
+    <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"ଯେ କୌଣସି ସମୟରେ ବବଲଗୁଡ଼ିକ ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ"</string>
+    <string name="bubbles_user_education_manage" msgid="3460756219946517198">"ଏହି ଆପର ବବଲଗୁଡ଼ିକ ବନ୍ଦ କରିବା ପାଇଁ \'ପରିଚାଳନା କରନ୍ତୁ\' ବଟନରେ ଟାପ୍ କରନ୍ତୁ"</string>
+    <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"ବୁଝିଗଲି"</string>
+    <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"ବର୍ତ୍ତମାନ କୌଣସି ବବଲ୍ ନାହିଁ"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"ବର୍ତ୍ତମାନର ଏବଂ ଖାରଜ କରାଯାଇଥିବା ବବଲଗୁଡ଼ିକ ଏଠାରେ ଦେଖାଯିବ"</string>
+    <string name="notification_bubble_title" msgid="6082910224488253378">"ବବଲ୍"</string>
+    <string name="manage_bubbles_text" msgid="7730624269650594419">"ପରିଚାଳନା କରନ୍ତୁ"</string>
+    <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ବବଲ୍ ଖାରଜ କରାଯାଇଛି।"</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"ଏହି ଆପକୁ ରିଷ୍ଟାର୍ଟ କରି ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନ୍ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ।"</string>
+    <string name="got_it" msgid="4428750913636945527">"ବୁଝିଗଲି"</string>
+</resources>

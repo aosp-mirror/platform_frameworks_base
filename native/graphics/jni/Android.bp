@@ -31,22 +31,19 @@ cc_library_shared {
         "-Wunreachable-code",
     ],
 
-    // our source files
-    //
     srcs: [
-        "aassetstreamadaptor.cpp",
-        "bitmap.cpp",
         "imagedecoder.cpp",
     ],
 
     shared_libs: [
-        "libandroid",
-        "libandroid_runtime",
         "libhwui",
         "liblog",
     ],
 
-    header_libs: [ "libhwui_internal_headers" ],
+    header_libs: [
+        "jni_headers",
+        "libhwui_internal_headers",
+    ],
 
     static_libs: ["libarect"],
 
@@ -57,7 +54,24 @@ cc_library_shared {
             ldflags: ["-Wl,--hash-style=both"],
         },
     },
-    version_script: "libjnigraphics.map.txt",
+    host_supported: true,
+    target: {
+        android: {
+            srcs: [
+                "aassetstreamadaptor.cpp",
+                "bitmap.cpp",
+            ],
+            shared_libs: [
+                "libandroid",
+            ],
+            version_script: "libjnigraphics.map.txt",
+        },
+        host: {
+            header_libs: [
+                "libnativewindow_headers",
+            ],
+        },
+    },
 }
 
 // The headers module is in frameworks/native/Android.bp.
@@ -66,4 +80,47 @@ ndk_library {
     symbol_file: "libjnigraphics.map.txt",
     first_version: "9",
     unversioned_until: "current",
+}
+
+cc_defaults {
+    name: "imagedecoder_fuzzer_defaults",
+    srcs: ["fuzz/fuzz_imagedecoder.cpp"],
+    header_libs: ["jni_headers"],
+    shared_libs: [
+        "libbinder",
+        "libjnigraphics",
+        "libutils",
+    ],
+    static_libs: ["libarect"],
+    fuzz_config: {
+        cc: ["scroggo@google.com"],
+        asan_options: [
+            "detect_odr_violation=1",
+        ],
+        hwasan_options: [
+             // Image decoders may attempt to allocate a large amount of memory
+             // (especially if the encoded image is large). This doesn't
+             // necessarily mean there is a bug. Set allocator_may_return_null=1
+             // for hwasan so the fuzzer can continue running.
+            "allocator_may_return_null = 1",
+        ],
+    },
+    host_supported: true,
+}
+
+cc_fuzz {
+    name: "imagedecoder_fuzzer",
+    defaults: ["imagedecoder_fuzzer_defaults"],
+    corpus: ["fuzz/corpus/*"],
+}
+
+cc_fuzz {
+    name: "imagedecoder_png_fuzzer",
+    defaults: ["imagedecoder_fuzzer_defaults"],
+    shared_libs: [
+        "libz",
+    ],
+    cflags: [
+        "-DPNG_MUTATOR_DEFINE_LIBFUZZER_CUSTOM_MUTATOR",
+    ],
 }

@@ -17,7 +17,6 @@
 
 #define LOG_TAG "StringBlock"
 
-#include "android_util_AssetManager_private.h"
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
 #include <utils/misc.h>
@@ -73,22 +72,19 @@ static jstring android_content_StringBlock_nativeGetString(JNIEnv* env, jobject 
     ResStringPool* osb = reinterpret_cast<ResStringPool*>(token);
     if (osb == NULL) {
         jniThrowNullPointerException(env, NULL);
-        return 0;
+        return NULL;
     }
 
-    auto str8 = osb->string8At(idx);
-    if (UNLIKELY(ThrowIfIOError(env, str8))) {
-        return 0;
-    } else if (str8.has_value()) {
+    if (auto str8 = osb->string8At(idx); str8.has_value()) {
         return env->NewStringUTF(str8->data());
     }
 
     auto str = osb->stringAt(idx);
-    if (UNLIKELY(ThrowIfIOError(env, str))) {
-        return 0;
+    if (IsIOError(str)) {
+        return NULL;
     } else if (UNLIKELY(!str.has_value())) {
         jniThrowException(env, "java/lang/IndexOutOfBoundsException", NULL);
-        return 0;
+        return NULL;
     }
 
     return env->NewString((const jchar*)str->data(), str->size());
@@ -104,7 +100,6 @@ static jintArray android_content_StringBlock_nativeGetStyle(JNIEnv* env, jobject
 
     auto spans = osb->styleAt(idx);
     if (!spans.has_value()) {
-        ThrowIfIOError(env, spans);
         return NULL;
     }
 
@@ -114,7 +109,6 @@ static jintArray android_content_StringBlock_nativeGetStyle(JNIEnv* env, jobject
         auto pos = *spans;
         while (true) {
             if (UNLIKELY(!pos)) {
-                jniThrowException(env, kResourcesNotFound, kIOErrorMessage);
                 return NULL;
             }
             if (pos->name.index == ResStringPool_span::END) {

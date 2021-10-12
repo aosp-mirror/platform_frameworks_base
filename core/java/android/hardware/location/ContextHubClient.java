@@ -127,11 +127,27 @@ public class ContextHubClient implements Closeable {
      * This function returns RESULT_SUCCESS if the message has reached the HAL, but
      * does not guarantee delivery of the message to the target nanoapp.
      *
+     * Before sending the first message to your nanoapp, it's recommended that the following
+     * operations should be performed:
+     * 1) Invoke {@link ContextHubManager#queryNanoApps(ContextHubInfo)} to verify the nanoapp is
+     *    present.
+     * 2) Validate that you have the permissions to communicate with the nanoapp by looking at
+     *    {@link NanoAppState#getNanoAppPermissions}.
+     * 3) If you don't have permissions, send an idempotent message to the nanoapp ensuring any
+     *    work your app previously may have asked it to do is stopped. This is useful if your app
+     *    restarts due to permission changes and no longer has the permissions when it is started
+     *    again.
+     * 4) If you have valid permissions, send a message to your nanoapp to resubscribe so that it's
+     *    aware you have restarted or so you can initially subscribe if this is the first time you
+     *    have sent it a message.
+     *
      * @param message the message object to send
      *
      * @return the result of sending the message defined as in ContextHubTransaction.Result
      *
      * @throws NullPointerException if NanoAppMessage is null
+     * @throws SecurityException if this client doesn't have permissions to send a message to the
+     * nanoapp.
      *
      * @see NanoAppMessage
      * @see ContextHubTransaction.Result

@@ -20,14 +20,7 @@
 
     <dimen name="preference_no_icon_padding_start">72dp</dimen>
 
-    <!-- Footer Preferences -->
-    <style name="Preference.FooterPreference.SettingsBase" parent="@style/Preference.Material">
-        <item name="android:layout">@layout/preference_footer</item>
-        <item name="allowDividerAbove">true</item>
-    </style>
-
     <style name="PreferenceThemeOverlay.SettingsBase" parent="@style/PreferenceThemeOverlay">
-        <item name="footerPreferenceStyle">@style/Preference.FooterPreference.SettingsBase</item>
     </style>
 
 </resources>

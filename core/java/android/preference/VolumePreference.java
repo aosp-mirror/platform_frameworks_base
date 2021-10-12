@@ -176,6 +176,11 @@ public class VolumePreference extends SeekBarDialogPreference implements
     }
 
     @Override
+    public void onStartTrackingTouch(SeekBarVolumizer sbv) {
+        // noop
+    }
+
+    @Override
     protected Parcelable onSaveInstanceState() {
         final Parcelable superState = super.onSaveInstanceState();
         if (isPersistent()) {

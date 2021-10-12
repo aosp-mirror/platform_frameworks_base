@@ -18,6 +18,7 @@ package com.android.internal.os;
 
 import android.os.SystemProperties;
 import android.sysprop.CryptoProperties;
+import android.sysprop.HdmiProperties;
 
 /**
  * This is a cache of various ro.* properties so that they can be read just once
@@ -37,16 +38,7 @@ public class RoSystemProperties {
      * mode is off.
      */
     public static final boolean CEC_AUDIO_DEVICE_FORWARD_VOLUME_KEYS_SYSTEM_AUDIO_MODE_OFF =
-            SystemProperties.getBoolean(
-                    "ro.hdmi.cec_audio_device_forward_volume_keys_system_audio_mode_off", false);
-
-    /**
-     * Property to indicate if the current device is a cec switch device.
-     *
-     * <p> Default is false.
-     */
-    public static final String PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH =
-            "ro.hdmi.property_is_device_hdmi_cec_switch";
+            HdmiProperties.forward_volume_keys_when_system_audio_mode_off().orElse(false);
 
     // ------ ro.config.* -------- //
     public static final boolean CONFIG_AVOID_GFX_ACCEL =

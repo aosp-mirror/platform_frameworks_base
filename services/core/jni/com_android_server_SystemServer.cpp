@@ -32,32 +32,50 @@
 
 #include <memtrackproxy/MemtrackProxy.h>
 #include <schedulerservice/SchedulingPolicyService.h>
-#include <sensorservice/SensorService.h>
 #include <sensorservicehidl/SensorManager.h>
+#include <stats/StatsAidl.h>
 #include <stats/StatsHal.h>
 
 #include <bionic/malloc.h>
 #include <bionic/reserved_signals.h>
 
 #include <android-base/properties.h>
-#include <cutils/properties.h>
 #include <utils/Log.h>
 #include <utils/misc.h>
 #include <utils/AndroidThreads.h>
 
-using android::base::GetIntProperty;
 using namespace std::chrono_literals;
+
+namespace {
+
+static void startStatsAidlService() {
+    using aidl::android::frameworks::stats::IStats;
+    using aidl::android::frameworks::stats::StatsHal;
+
+    std::shared_ptr<StatsHal> statsService = ndk::SharedRefBase::make<StatsHal>();
+
+    const std::string instance = std::string() + IStats::descriptor + "/default";
+    const binder_exception_t err =
+            AServiceManager_addService(statsService->asBinder().get(), instance.c_str());
+    LOG_ALWAYS_FATAL_IF(err != EX_NONE, "Cannot register AIDL %s: %d", instance.c_str(), err);
+}
+
+static void startStatsHidlService() {
+    using android::frameworks::stats::V1_0::IStats;
+    using android::frameworks::stats::V1_0::implementation::StatsHal;
+
+    android::sp<IStats> statsHal = new StatsHal();
+    const android::status_t err = statsHal->registerAsService();
+    ALOGW_IF(err != android::OK, "Cannot register HIDL %s: %d", IStats::descriptor, err);
+}
+
+} // namespace
 
 namespace android {
 
-static void android_server_SystemServer_startSensorService(JNIEnv* /* env */, jobject /* clazz */) {
-    char propBuf[PROPERTY_VALUE_MAX];
-    property_get("system_init.startsensorservice", propBuf, "1");
-    if (strcmp(propBuf, "1") == 0) {
-        SensorService::publish(false /* allowIsolated */,
-                               IServiceManager::DUMP_FLAG_PRIORITY_CRITICAL);
-    }
-
+static void android_server_SystemServer_startIStatsService(JNIEnv* /* env */, jobject /* clazz */) {
+    startStatsHidlService();
+    startStatsAidlService();
 }
 
 static void android_server_SystemServer_startMemtrackProxyService(JNIEnv* env,
@@ -80,8 +98,6 @@ static void android_server_SystemServer_startHidlServices(JNIEnv* env, jobject /
     using ::android::frameworks::schedulerservice::V1_0::implementation::SchedulingPolicyService;
     using ::android::frameworks::sensorservice::V1_0::ISensorManager;
     using ::android::frameworks::sensorservice::V1_0::implementation::SensorManager;
-    using ::android::frameworks::stats::V1_0::IStats;
-    using ::android::frameworks::stats::V1_0::implementation::StatsHal;
     using ::android::hardware::configureRpcThreadpool;
     using ::android::hidl::manager::V1_0::IServiceManager;
 
@@ -106,10 +122,6 @@ static void android_server_SystemServer_startHidlServices(JNIEnv* env, jobject /
     } else {
         ALOGW("%s is deprecated. Skipping registration.", ISchedulingPolicyService::descriptor);
     }
-
-    sp<IStats> statsHal = new StatsHal();
-    err = statsHal->registerAsService();
-    LOG_ALWAYS_FATAL_IF(err != OK, "Cannot register %s: %d", IStats::descriptor, err);
 }
 
 static void android_server_SystemServer_initZygoteChildHeapProfiling(JNIEnv* /* env */,
@@ -138,7 +150,7 @@ static void android_server_SystemServer_setIncrementalServiceSystemReady(JNIEnv*
  */
 static const JNINativeMethod gMethods[] = {
         /* name, signature, funcPtr */
-        {"startSensorService", "()V", (void*)android_server_SystemServer_startSensorService},
+        {"startIStatsService", "()V", (void*)android_server_SystemServer_startIStatsService},
         {"startMemtrackProxyService", "()V",
          (void*)android_server_SystemServer_startMemtrackProxyService},
         {"startHidlServices", "()V", (void*)android_server_SystemServer_startHidlServices},

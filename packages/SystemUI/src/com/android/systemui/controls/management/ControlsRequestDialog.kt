@@ -71,10 +71,7 @@ open class ControlsRequestDialog @Inject constructor(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (!controller.available) {
-            Log.w(TAG, "Quick Controls not available for this user ")
-            finish()
-        }
+
         currentUserTracker.startTracking()
         controlsListingController.addCallback(callback)
 

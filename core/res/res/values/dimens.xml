@@ -30,7 +30,15 @@
          will be displayed in the app launcher and elsewhere. -->
     <dimen name="app_icon_size">48dip</dimen>
 
-    <dimen name="toast_y_offset">24dp</dimen>
+    <!-- Offset from the bottom of the device a toast shows -->
+    <dimen name="toast_y_offset">48dp</dimen>
+    <!-- Max width of a toast -->
+    <dimen name="toast_width">300dp</dimen>
+    <!-- Text size of the message within a toast -->
+    <dimen name="toast_text_size">14sp</dimen>
+    <!-- Elevation of toast view -->
+    <dimen name="toast_elevation">2dp</dimen>
+
     <!-- Height of the status bar -->
     <dimen name="status_bar_height">@dimen/status_bar_height_portrait</dimen>
     <!-- Height of the status bar in portrait. The height should be
@@ -41,10 +49,6 @@
     <dimen name="status_bar_height_landscape">@dimen/status_bar_height_portrait</dimen>
     <!-- Height of area above QQS where battery/time go -->
     <dimen name="quick_qs_offset_height">48dp</dimen>
-    <!-- Total height of QQS (quick_qs_offset_height + 128) -->
-    <dimen name="quick_qs_total_height">176dp</dimen>
-    <!-- Total height of QQS with two rows to fit media player (quick_qs_offset_height + 176) -->
-    <dimen name="quick_qs_total_height_with_media">224dp</dimen>
     <!-- Height of the bottom navigation / system bar. -->
     <dimen name="navigation_bar_height">48dp</dimen>
     <!-- Height of the bottom navigation bar in portrait; often the same as @dimen/navigation_bar_height -->
@@ -65,6 +69,10 @@
 
     <!-- The height of the navigation gesture area if the gesture is starting from the bottom. -->
     <dimen name="navigation_bar_gesture_height">@dimen/navigation_bar_frame_height</dimen>
+
+    <!-- The height of the navigation larger gesture area if the gesture is starting from
+         the bottom. -->
+    <dimen name="navigation_bar_gesture_larger_height">80dp</dimen>
 
     <!-- Height of the bottom navigation / system bar in car mode. -->
     <dimen name="navigation_bar_height_car_mode">96dp</dimen>
@@ -207,32 +215,50 @@
     <!-- Default padding for dialogs. -->
     <dimen name="dialog_padding">16dp</dimen>
 
-    <!-- The margin on the start of the content view -->
-    <dimen name="notification_content_margin_start">16dp</dimen>
+    <!-- The margin on the start of the content view (accommodates the icon) -->
+    <dimen name="notification_content_margin_start">52dp</dimen>
 
-    <!-- The margin on the end of the content view. -->
+    <!-- The margin on the end of most content views (ignores the expander) -->
     <dimen name="notification_content_margin_end">16dp</dimen>
 
-    <!-- The inset of the reply icon. -->
-    <dimen name="notification_reply_inset">8dp</dimen>
+    <!-- The margin on the end of the top-line content views (accommodates the expander) -->
+    <dimen name="notification_heading_margin_end">56dp</dimen>
 
-    <!-- The margin for text at the end of the image view for media notifications -->
-    <dimen name="notification_media_image_margin_end">72dp</dimen>
-
-    <!-- The height of the notification action list -->
+    <!-- The total height of the notification action list -->
     <dimen name="notification_action_list_height">60dp</dimen>
 
     <!-- The margin of the notification action list at the top -->
     <dimen name="notification_action_list_margin_top">0dp</dimen>
 
-    <!-- The height of the notification action list -->
-    <dimen name="notification_action_emphasized_height">48dp</dimen>
+    <!-- The visual height of the emphasized notification action -->
+    <dimen name="notification_action_emphasized_height">36dp</dimen>
+
+    <!-- The padding of the actions in non-conversation layout. For conversations, the analogous
+         value is calculated in ConversationLayout#updateActionListPadding() -->
+    <dimen name="notification_actions_padding_start">36dp</dimen>
+
+    <!-- The start padding to optionally use (e.g. if there's extra space) for CallStyle
+         notification actions.
+         this = conversation_content_start (80dp) - button inset (4dp) - action padding (12dp) -->
+    <dimen name="call_notification_collapsible_indent">64dp</dimen>
+
+    <!-- The minimum width of the system actions added to the CallStyle notifications. -->
+    <dimen name="call_notification_system_action_min_width">100dp</dimen>
+
+    <!-- The size of icons for visual actions in the notification_material_action_list -->
+    <dimen name="notification_actions_icon_size">56dp</dimen>
+
+    <!-- The size of icons for visual actions in the notification_material_action_list -->
+    <dimen name="notification_actions_icon_drawable_size">20dp</dimen>
+
+    <!-- The corner radius if the emphasized action buttons in a notification -->
+    <dimen name="notification_action_button_radius">18dp</dimen>
 
     <!-- Size of the stroke with for the emphasized notification button style -->
     <dimen name="emphasized_button_stroke_width">1dp</dimen>
 
     <!-- height of the content margin to accomodate for the header -->
-    <dimen name="notification_content_margin_top">46dp</dimen>
+    <dimen name="notification_content_margin_top">50dp</dimen>
 
     <!-- height of the content margin that is applied at the end of the notification content -->
     <dimen name="notification_content_margin">20dp</dimen>
@@ -243,11 +269,14 @@
     <!-- The top margin before the notification progress bar. -->
     <dimen name="notification_progress_margin_top">8dp</dimen>
 
-    <!-- height of the notification header (for icon and package name) -->
-    <dimen name="notification_header_height">50dp</dimen>
+    <!-- height of the notification header -->
+    <dimen name="notification_header_height">56dp</dimen>
 
     <!-- The height of the background for a notification header on a group -->
     <dimen name="notification_header_background_height">49.5dp</dimen>
+
+    <!-- The height of the full-width touch rectangle for the notification header -->
+    <dimen name="notification_header_touchable_height">36dp</dimen>
 
     <!-- The top padding for the notification header -->
     <dimen name="notification_header_padding_top">16dp</dimen>
@@ -258,11 +287,17 @@
     <!-- The margin at the bottom of the notification header. -->
     <dimen name="notification_header_margin_bottom">0dp</dimen>
 
-    <!-- The end margin after the application icon in the notification header -->
-    <dimen name="notification_header_icon_margin_end">3dp</dimen>
-
     <!-- size (width and height) of the icon in the notification header -->
     <dimen name="notification_header_icon_size">18dp</dimen>
+
+    <!-- size (width and height) of the circle around the icon in the notification header -->
+    <dimen name="notification_icon_circle_size">24dp</dimen>
+
+    <!-- padding between the notification icon and the circle containing it -->
+    <dimen name="notification_icon_circle_padding">4dp</dimen>
+
+    <!-- start margin of the icon circle in the notification view -->
+    <dimen name="notification_icon_circle_start">16dp</dimen>
 
     <!-- size (width and height) of the icon in the notification header -->
     <dimen name="notification_header_icon_size_ambient">18dp</dimen>
@@ -276,14 +311,28 @@
     <!-- The margin before and after each of the items in the conversation header. -->
     <dimen name="notification_conversation_header_separating_margin">4dp</dimen>
 
-    <!-- The absolute size of the notification expand icon. -2 for wrap_content. -->
-    <dimen name="notification_header_expand_icon_size">-2px</dimen>
+    <!-- The absolute size of the notification expand icon. -->
+    <dimen name="notification_header_expand_icon_size">56dp</dimen>
 
-    <!-- The top padding for the notification expand button. -->
-    <dimen name="notification_expand_button_padding_top">1dp</dimen>
+    <!-- the height of the expand button pill -->
+    <dimen name="notification_expand_button_pill_height">24dp</dimen>
+
+    <!-- Vertical margin for the headerless notification content, when content has 1 line -->
+    <!-- 16 * 2 (margins) + 24 (1 line) = 56 (notification) -->
+    <dimen name="notification_headerless_margin_oneline">16dp</dimen>
+
+    <!-- Vertical margin for the headerless notification content, when content has 2 lines -->
+    <!-- 20 * 2 (margins) + 24 * 2 (2 lines) = 88 (notification) -->
+    <dimen name="notification_headerless_margin_twoline">20dp</dimen>
+
+    <!-- The height of each of the 1 or 2 lines in the headerless notification template -->
+    <dimen name="notification_headerless_line_height">24dp</dimen>
+
+    <!-- vertical margin for the headerless notification content -->
+    <dimen name="notification_headerless_min_height">56dp</dimen>
 
     <!-- Height of a small notification in the status bar -->
-    <dimen name="notification_min_height">106dp</dimen>
+    <dimen name="notification_min_height">88dp</dimen>
 
     <!-- The width of the big icons in notifications. -->
     <dimen name="notification_large_icon_width">64dp</dimen>
@@ -294,8 +343,8 @@
     <!-- The minimum width of the app name in the header if it shrinks -->
     <dimen name="notification_header_shrink_min_width">72dp</dimen>
 
-    <!-- The minimum height of the content if there are at least two lines or a picture-->
-    <dimen name="notification_min_content_height">39dp</dimen>
+    <!-- The minimum width of optional header fields below which the view is simply hidden -->
+    <dimen name="notification_header_shrink_hide_width">24sp</dimen>
 
     <!-- The size of the media actions in the media notification. -->
     <dimen name="media_notification_action_button_size">48dp</dimen>
@@ -312,17 +361,14 @@
     <!-- The absolute height for the header in a media notification. -->
     <dimen name="media_notification_header_height">@dimen/notification_header_height</dimen>
 
-    <!-- The margin of the content to an image-->
-    <dimen name="notification_content_image_margin_end">8dp</dimen>
-
-    <!-- The padding at the end of actions when the bubble button is visible-->
-    <dimen name="bubble_visible_padding_end">3dp</dimen>
-
-    <!-- The padding at the end of actions when the bubble button is gone-->
-    <dimen name="bubble_gone_padding_end">12dp</dimen>
+    <!-- The padding at the end of actions when the snooze and bubble buttons are gone-->
+    <dimen name="snooze_and_bubble_gone_padding_end">12dp</dimen>
 
     <!-- The spacing between messages in Notification.MessagingStyle -->
     <dimen name="notification_messaging_spacing">6dp</dimen>
+
+    <!-- The spacing between messages in Notification.MessagingStyle -->
+    <dimen name="notification_messaging_spacing_conversation_group">24dp</dimen>
 
     <!-- The rounding for messaging images -->
     <dimen name="messaging_image_rounding">4dp</dimen>
@@ -348,10 +394,6 @@
     <dimen name="alert_dialog_button_bar_width">64dp</dimen>
     <!-- Dialog button bar height -->
     <dimen name="alert_dialog_button_bar_height">48dip</dimen>
-    <!-- Leanback dialog vertical margin -->
-    <dimen name="leanback_alert_dialog_vertical_margin">27dip</dimen>
-    <!-- Leanback dialog horizontal margin -->
-    <dimen name="leanback_alert_dialog_horizontal_margin">54dip</dimen>
 
     <!-- Default height of an action bar. -->
     <dimen name="action_bar_default_height">48dip</dimen>
@@ -426,6 +468,8 @@
     <dimen name="notification_text_size">14sp</dimen>
     <!-- Size of notification text titles (see TextAppearance.StatusBar.EventContent.Title) -->
     <dimen name="notification_title_text_size">14sp</dimen>
+    <!-- Size of big notification text titles (see TextAppearance.StatusBar.EventContent.BigTitle) -->
+    <dimen name="notification_big_title_text_size">16sp</dimen>
     <!-- Size of smaller notification text (see TextAppearance.StatusBar.EventContent.Line2, Info, Time) -->
     <dimen name="notification_subtext_size">12sp</dimen>
     <!-- Top padding for notifications in the standard layout. -->
@@ -440,20 +484,29 @@
     <!-- Top padding for notification when text is large and narrow (i.e. it has 3 lines -->
     <dimen name="notification_top_pad_large_text_narrow">-4dp</dimen>
 
-    <!-- Padding for notification icon when drawn with circle around it -->
-    <dimen name="notification_large_icon_circle_padding">11dp</dimen>
-
     <!-- The margin on top of the text of the notification -->
-    <dimen name="notification_text_margin_top">0.5dp</dimen>
+    <dimen name="notification_text_margin_top">6dp</dimen>
+
+    <!-- Height of a single line text view in a notification -->
+    <dimen name="notification_text_height">20sp</dimen>
 
     <!-- The padding on top of inbox style elements -->
     <dimen name="notification_inbox_item_top_padding">5dp</dimen>
+
+    <!-- Size of the verification icon for call notifications -->
+    <dimen name="notification_verification_icon_size">@dimen/notification_badge_size</dimen>
+
+    <!-- Size of the feedback indicator for notifications -->
+    <dimen name="notification_feedback_size">20dp</dimen>
+
+    <!-- Size of the phishing alert for notifications -->
+    <dimen name="notification_phishing_alert_size">@dimen/notification_badge_size</dimen>
 
     <!-- Size of the profile badge for notifications -->
     <dimen name="notification_badge_size">12dp</dimen>
 
     <!-- Size of the alerted icon for notifications -->
-    <dimen name="notification_alerted_size">12dp</dimen>
+    <dimen name="notification_alerted_size">@dimen/notification_badge_size</dimen>
 
     <!-- Keyguard dimensions -->
     <!-- TEMP -->
@@ -520,6 +573,12 @@
     <!-- Width of the outline stroke used by the accessibility screen magnification indicator -->
     <dimen name="accessibility_magnification_indicator_width">4dip</dimen>
 
+    <!-- Width of the outline stroke used by the accessibility focus rectangle -->
+    <dimen name="accessibility_focus_highlight_stroke_width">4dp</dimen>
+
+    <!-- The padding ratio of the Accessibility icon foreground drawable -->
+    <item name="accessibility_icon_foreground_padding_ratio" type="dimen">21.88%</item>
+
     <!-- Margin around the various security views -->
     <dimen name="keyguard_muliuser_selector_margin">8dp</dimen>
 
@@ -576,9 +635,9 @@
          aliasing effects). This is only used on circular displays. -->
     <dimen name="circular_display_mask_thickness">1px</dimen>
 
-    <dimen name="lock_pattern_dot_line_width">3dp</dimen>
-    <dimen name="lock_pattern_dot_size">12dp</dimen>
-    <dimen name="lock_pattern_dot_size_activated">28dp</dimen>
+    <dimen name="lock_pattern_dot_line_width">22dp</dimen>
+    <dimen name="lock_pattern_dot_size">14dp</dimen>
+    <dimen name="lock_pattern_dot_size_activated">30dp</dimen>
 
     <dimen name="text_handle_min_size">40dp</dimen>
 
@@ -678,12 +737,19 @@
     <dimen name="notification_big_picture_max_height">284dp</dimen>
     <!-- The maximum width of a big picture in a notification. The images will be reduced to that width in case they are bigger. This value is determined by the standard panel size -->
     <dimen name="notification_big_picture_max_width">416dp</dimen>
-    <!-- The maximum height of a image in a media notification. The images will be reduced to that height in case they are bigger. This value is determined by the expanded media template-->
-    <dimen name="notification_media_image_max_height">140dp</dimen>
-    <!-- The maximum width of a image in a media notification. The images will be reduced to that width in case they are bigger.-->
-    <dimen name="notification_media_image_max_width">280dp</dimen>
     <!-- The size of the right icon -->
-    <dimen name="notification_right_icon_size">36dp</dimen>
+    <dimen name="notification_right_icon_size">48dp</dimen>
+    <!-- The margin between the right icon and the content. -->
+    <dimen name="notification_right_icon_content_margin">12dp</dimen>
+    <!-- The top and bottom margin of the right icon in the normal notification states -->
+    <dimen name="notification_right_icon_headerless_margin">20dp</dimen>
+    <!-- The top margin of the right icon in the "big" notification states -->
+    <!--  TODO(b/181048615): Move the large icon below the expander in big states  -->
+    <dimen name="notification_right_icon_big_margin_top">16dp</dimen>
+    <!-- The size of the left icon -->
+    <dimen name="notification_left_icon_size">@dimen/notification_icon_circle_size</dimen>
+    <!-- The left padding of the left icon -->
+    <dimen name="notification_left_icon_start">@dimen/notification_icon_circle_start</dimen>
     <!-- The alpha of a disabled notification button -->
     <item type="dimen" format="float" name="notification_action_disabled_alpha">0.5</item>
 
@@ -695,43 +761,41 @@
     <dimen name="notification_big_picture_max_height_low_ram">208dp</dimen>
     <!-- The maximum width of a big picture in a notification. The images will be reduced to that width in case they are bigger. -->
     <dimen name="notification_big_picture_max_width_low_ram">294dp</dimen>
-    <!-- The maximum height of a image in a media notification. The images will be reduced to that height in case they are bigger. -->
-    <dimen name="notification_media_image_max_height_low_ram">100dp</dimen>
-    <!-- The maximum width of a image in a media notification. The images will be reduced to that width in case they are bigger.-->
-    <dimen name="notification_media_image_max_width_low_ram">100dp</dimen>
     <!-- The size of the right icon image when on low ram -->
     <dimen name="notification_right_icon_size_low_ram">@dimen/notification_right_icon_size</dimen>
     <!-- The maximum size of the grayscale icon -->
     <dimen name="notification_grayscale_icon_max_size">256dp</dimen>
 
-    <dimen name="messaging_avatar_size">@dimen/notification_right_icon_size</dimen>
-    <dimen name="conversation_avatar_size">52dp</dimen>
+    <dimen name="messaging_avatar_size">48dp</dimen>
+    <dimen name="conversation_avatar_size">48dp</dimen>
+    <!-- start margin of the icon circle in the conversation's skin of the header -->
+    <dimen name="conversation_icon_circle_start">28dp</dimen>
     <!-- Start of the content in the conversation template -->
     <dimen name="conversation_content_start">80dp</dimen>
-    <!-- Size of the expand button in the conversation layout -->
-    <dimen name="conversation_expand_button_size">80dp</dimen>
-    <!-- Top margin of the expand button for conversations when expanded -->
-    <dimen name="conversation_expand_button_top_margin_expanded">18dp</dimen>
-    <!-- Side margins of the conversation badge in relation to the conversation icon -->
-    <dimen name="conversation_badge_side_margin">36dp</dimen>
+    <!-- Height of the expand button in the conversation layout -->
+    <dimen name="conversation_expand_button_height">88dp</dimen>
+    <!-- this is the margin between the Conversation image and the content -->
+    <dimen name="conversation_image_start_margin">12dp</dimen>
+    <!-- amount the badge sticks out from the conversation avatar -->
+    <dimen name="conversation_badge_protrusion">4dp</dimen>
     <!-- size of the notification badge when applied to the conversation icon -->
     <dimen name="conversation_icon_size_badged">20dp</dimen>
     <!-- size of the conversation avatar in an expanded group -->
     <dimen name="conversation_avatar_size_group_expanded">@dimen/messaging_avatar_size</dimen>
     <!-- size of the face pile icons -->
-    <dimen name="conversation_face_pile_avatar_size">@dimen/messaging_avatar_size</dimen>
+    <dimen name="conversation_face_pile_avatar_size">32dp</dimen>
     <!-- size of the face pile icons when the group is expanded -->
-    <dimen name="conversation_face_pile_avatar_size_group_expanded">25dp</dimen>
-    <!-- Side margins of the conversation badge in relation to the conversation icon when the group is expanded-->
-    <dimen name="conversation_badge_side_margin_group_expanded">22dp</dimen>
-    <!-- Side margins of the conversation badge in relation to the conversation icon when the group is expanded-->
-    <dimen name="conversation_badge_side_margin_group_expanded_face_pile">18dp</dimen>
+    <dimen name="conversation_face_pile_avatar_size_group_expanded">@dimen/conversation_face_pile_avatar_size</dimen>
+    <!-- amount the badge sticks out from the conversation avatar when the group is expanded -->
+    <dimen name="conversation_badge_protrusion_group_expanded">@dimen/conversation_badge_protrusion</dimen>
+    <!-- amount the badge sticks out from the conversation face pile when the group is expanded -->
+    <dimen name="conversation_badge_protrusion_group_expanded_face_pile">@dimen/conversation_badge_protrusion</dimen>
     <!-- The width of the protection of the face pile layout-->
     <dimen name="conversation_face_pile_protection_width">2dp</dimen>
     <!-- The width of the protection of the face pile layout when expanded-->
-    <dimen name="conversation_face_pile_protection_width_expanded">1dp</dimen>
+    <dimen name="conversation_face_pile_protection_width_expanded">@dimen/conversation_face_pile_protection_width</dimen>
     <!-- The padding of the expanded message container-->
-    <dimen name="expanded_group_conversation_message_padding">17dp</dimen>
+    <dimen name="expanded_group_conversation_message_padding">32dp</dimen>
     <!-- The stroke width of the ring used to visually mark a conversation as important -->
     <dimen name="importance_ring_stroke_width">2dp</dimen>
     <!-- The maximum stroke width used for the animation shown when a conversation is marked as important -->
@@ -740,16 +804,16 @@
     <dimen name="importance_ring_size">20dp</dimen>
 
     <!-- The top padding of the conversation icon container in the regular state-->
-    <dimen name="conversation_icon_container_top_padding">12dp</dimen>
+    <dimen name="conversation_icon_container_top_padding">20dp</dimen>
 
     <!-- The top padding of the conversation icon container when the avatar is small-->
-    <dimen name="conversation_icon_container_top_padding_small_avatar">9dp</dimen>
+    <dimen name="conversation_icon_container_top_padding_small_avatar">8dp</dimen>
 
-    <!-- The padding of the conversation header when expanded. This is calculated from the expand button size + notification_content_margin_end -->
-    <dimen name="conversation_header_expanded_padding_end">38dp</dimen>
+    <!-- The padding of the conversation header when expanded. This is calculated from the expand button size (56dp) - notification_content_margin_end (16dp) -->
+    <dimen name="conversation_header_expanded_padding_end">40dp</dimen>
 
-    <!-- margin at the end of messaging group icons when not conversations -->
-    <dimen name="messaging_layout_margin_end">12dp</dimen>
+    <!-- extra padding at the start of the icons when not conversations to keep them horizontally aligned with the notification icon -->
+    <dimen name="messaging_layout_icon_padding_start">4dp</dimen>
 
     <!-- Padding between text and sender when singleline -->
     <dimen name="messaging_group_singleline_sender_padding_end">4dp</dimen>
@@ -822,7 +886,7 @@
     <dimen name="seekbar_thumb_exclusion_max_size">48dp</dimen>
 
     <!-- chooser/resolver (sharesheet) spacing -->
-    <dimen name="chooser_corner_radius">8dp</dimen>
+    <dimen name="chooser_corner_radius">16dp</dimen>
     <dimen name="chooser_row_text_option_translate">25dp</dimen>
     <dimen name="chooser_view_spacing">18dp</dimen>
     <dimen name="chooser_edge_margin_thin">16dp</dimen>
@@ -861,4 +925,22 @@
     <dimen name="waterfall_display_top_edge_size">0px</dimen>
     <dimen name="waterfall_display_right_edge_size">0px</dimen>
     <dimen name="waterfall_display_bottom_edge_size">0px</dimen>
+
+    <dimen name="default_background_blur_radius">100dp</dimen>
+    <!-- The maximum height of a thumbnail in a ThumbnailTemplate. The image will be reduced to that height in case they are bigger. -->
+    <dimen name="controls_thumbnail_image_max_height">140dp</dimen>
+    <!-- The maximum width of a thumbnail in a ThumbnailTemplate. The image will be reduced to that width in case they are bigger.-->
+    <dimen name="controls_thumbnail_image_max_width">280dp</dimen>
+
+    <!-- System-provided radius for the background view of app widgets. The resolved value of this resource may change at runtime. -->
+    <dimen name="system_app_widget_background_radius">16dp</dimen>
+    <!-- System-provided radius for inner views on app widgets. The resolved value of this resource may change at runtime. -->
+    <dimen name="system_app_widget_inner_radius">8dp</dimen>
+    <!-- System-provided padding for inner views on app widgets. The resolved value of this resource may change at runtime. @removed -->
+    <dimen name="__removed_system_app_widget_internal_padding">16dp</dimen>
+
+    <!-- The width/height of the icon view on staring surface. -->
+    <dimen name="starting_surface_icon_size">160dp</dimen>
+    <!-- The default width/height of the icon on the spec of adaptive icon drawable. -->
+    <dimen name="starting_surface_default_icon_size">108dp</dimen>
 </resources>

@@ -24,6 +24,7 @@
 #include "io/ZipArchive.h"
 #include "java/AnnotationProcessor.h"
 #include "test/Test.h"
+#include "format/proto/ProtoDeserialize.h"
 
 namespace aapt {
 
@@ -216,6 +217,7 @@ static void AssertTranslations(CommandTestFixture *ctf, std::string file_name,
   }, compiled_files_dir, &diag));
 
   std::unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(out_apk, &diag);
+  ASSERT_NE(apk, nullptr);
 
   ResourceTable* table = apk->GetResourceTable();
   ASSERT_NE(table, nullptr);
@@ -252,4 +254,93 @@ TEST_F(CompilerTest, DoNotTranslateTest) {
   AssertTranslations(this, "donottranslate", expected_not_translatable);
   AssertTranslations(this, "donottranslate_foo", expected_not_translatable);
 }
+
+TEST_F(CompilerTest, RelativePathTest) {
+  StdErrDiagnostics diag;
+  const std::string res_path = BuildPath(
+      {android::base::Dirname(android::base::GetExecutablePath()),
+       "integration-tests", "CompileTest", "res"});
+
+  const std::string path_values_colors = GetTestPath("values/colors.xml");
+  WriteFile(path_values_colors, "<resources>"
+                   "<color name=\"color_one\">#008577</color>"
+                   "</resources>");
+
+  const std::string path_layout_layout_one = GetTestPath("layout/layout_one.xml");
+  WriteFile(path_layout_layout_one, "<LinearLayout "
+                   "xmlns:android=\"http://schemas.android.com/apk/res/android\">"
+                   "<TextBox android:id=\"@+id/text_one\" android:background=\"@color/color_one\"/>"
+                   "</LinearLayout>");
+
+  const std::string compiled_files_dir  = BuildPath(
+      {android::base::Dirname(android::base::GetExecutablePath()),
+       "integration-tests", "CompileTest", "compiled"});
+  CHECK(file::mkdirs(compiled_files_dir.data()));
+
+  const std::string path_values_colors_out =
+      BuildPath({compiled_files_dir,"values_colors.arsc.flat"});
+  const std::string path_layout_layout_one_out =
+      BuildPath({compiled_files_dir, "layout_layout_one.flat"});
+  ::android::base::utf8::unlink(path_values_colors_out.c_str());
+  ::android::base::utf8::unlink(path_layout_layout_one_out.c_str());
+  const std::string apk_path = BuildPath(
+      {android::base::Dirname(android::base::GetExecutablePath()),
+       "integration-tests", "CompileTest", "out.apk"});
+
+  const std::string source_set_res = BuildPath({"main", "res"});
+  const std::string relative_path_values_colors =
+      BuildPath({source_set_res, "values", "colors.xml"});
+  const std::string relative_path_layout_layout_one =
+      BuildPath({source_set_res, "layout", "layout_one.xml"});
+
+  CompileCommand(&diag).Execute({
+    path_values_colors,
+    "-o",
+    compiled_files_dir,
+    "--source-path",
+    relative_path_values_colors},
+        &std::cerr);
+
+  CompileCommand(&diag).Execute({
+    path_layout_layout_one,
+    "-o",
+    compiled_files_dir,
+    "--source-path",
+    relative_path_layout_layout_one},
+        &std::cerr);
+
+  std::ifstream ifs_values(path_values_colors_out);
+  std::string content_values((std::istreambuf_iterator<char>(ifs_values)),
+                             (std::istreambuf_iterator<char>()));
+  ASSERT_NE(content_values.find(relative_path_values_colors), -1);
+  ASSERT_EQ(content_values.find(path_values_colors), -1);
+
+  ASSERT_TRUE(Link({"-o", apk_path,
+                    "--manifest", GetDefaultManifest(),
+                    "--proto-format"},
+                    compiled_files_dir, &diag));
+
+  std::unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(apk_path, &diag);
+  ResourceTable* resource_table = apk.get()->GetResourceTable();
+  const std::vector<std::unique_ptr<StringPool::Entry>>& pool_strings =
+      resource_table->string_pool.strings();
+
+  ASSERT_EQ(pool_strings.size(), 2);
+  ASSERT_EQ(pool_strings[0]->value, "res/layout/layout_one.xml");
+  ASSERT_EQ(pool_strings[1]->value, "res/layout-v1/layout_one.xml");
+
+  // Check resources.pb contains relative sources.
+  io::IFile* proto_file =
+      apk.get()->GetFileCollection()->FindFile("resources.pb");
+  std::unique_ptr<io::InputStream> proto_stream = proto_file->OpenInputStream();
+  io::ProtoInputStreamReader proto_reader(proto_stream.get());
+  pb::ResourceTable pb_table;
+  proto_reader.ReadMessage(&pb_table);
+
+  const std::string pool_strings_proto = pb_table.source_pool().data();
+
+  ASSERT_NE(pool_strings_proto.find(relative_path_values_colors), -1);
+  ASSERT_NE(pool_strings_proto.find(relative_path_layout_layout_one), -1);
+}
+
 }  // namespace aapt

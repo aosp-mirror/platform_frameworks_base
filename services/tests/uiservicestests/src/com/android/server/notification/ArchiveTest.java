@@ -21,6 +21,8 @@ import static android.service.notification.NotificationListenerService.REASON_CA
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.fail;
+
 import android.app.Notification;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
@@ -37,7 +39,11 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.ConcurrentModificationException;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -56,7 +62,7 @@ public class ArchiveTest extends UiServiceTestCase {
     }
 
     private StatusBarNotification getNotification(String pkg, int id, UserHandle user) {
-        Notification n = new Notification.Builder(getContext(), "test")
+        Notification n = new Notification.Builder(getContext(), "test" + id)
                 .setContentTitle("A")
                 .setWhen(1205)
                 .build();
@@ -133,6 +139,81 @@ public class ArchiveTest extends UiServiceTestCase {
             }
         }
         mArchive.updateHistoryEnabled(USER_CURRENT, false);
+
+        List<StatusBarNotification> actual = Arrays.asList(mArchive.getArray(SIZE, true));
+        assertThat(actual).hasSize(expected.size());
+        for (StatusBarNotification sbn : actual) {
+            assertThat(expected).contains(sbn.getKey());
+        }
+    }
+
+    @Test
+    public void testRemoveChannelNotifications() {
+        List<String> expected = new ArrayList<>();
+        // Add one extra notification to the beginning to test when 2 adjacent notifications will be
+        // removed in the same pass.
+        StatusBarNotification sbn0 = getNotification("pkg", 0, UserHandle.of(USER_CURRENT));
+        mArchive.record(sbn0, REASON_CANCEL);
+        for (int i = 0; i < SIZE - 1; i++) {
+            StatusBarNotification sbn = getNotification("pkg", i, UserHandle.of(USER_CURRENT));
+            mArchive.record(sbn, REASON_CANCEL);
+            if (i != 0 && i != SIZE - 2) {
+                // Will delete notification for this user in channel "test0", and also the last
+                // element in the list.
+                expected.add(sbn.getKey());
+            }
+        }
+        mArchive.removeChannelNotifications("pkg", USER_CURRENT, "test0");
+        mArchive.removeChannelNotifications("pkg", USER_CURRENT, "test" + (SIZE - 2));
+        List<StatusBarNotification> actual = Arrays.asList(mArchive.getArray(SIZE, true));
+        assertThat(actual).hasSize(expected.size());
+        for (StatusBarNotification sbn : actual) {
+            assertThat(expected).contains(sbn.getKey());
+        }
+    }
+
+    @Test
+    public void testRemoveChannelNotifications_concurrently() throws InterruptedException {
+        List<String> expected = new ArrayList<>();
+        // Add one extra notification to the beginning to test when 2 adjacent notifications will be
+        // removed in the same pass.
+        StatusBarNotification sbn0 = getNotification("pkg", 0, UserHandle.of(USER_CURRENT));
+        mArchive.record(sbn0, REASON_CANCEL);
+        for (int i = 0; i < SIZE; i++) {
+            StatusBarNotification sbn = getNotification("pkg", i, UserHandle.of(USER_CURRENT));
+            mArchive.record(sbn, REASON_CANCEL);
+            if (i >= SIZE - 2) {
+                // Remove everything < SIZE - 2
+                expected.add(sbn.getKey());
+            }
+        }
+
+        // Remove these in multiple threads to try to get them to happen at the same time
+        int numThreads = SIZE - 2;
+        AtomicBoolean error = new AtomicBoolean(false);
+        CountDownLatch startThreadsLatch = new CountDownLatch(1);
+        CountDownLatch threadsDone = new CountDownLatch(numThreads);
+        for (int i = 0; i < numThreads; i++) {
+            final int idx = i;
+            new Thread(() -> {
+                try {
+                    startThreadsLatch.await(10, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                try {
+                    mArchive.removeChannelNotifications("pkg", USER_CURRENT, "test" + idx);
+                } catch (ConcurrentModificationException e) {
+                    error.compareAndSet(false, true);
+                }
+            }).start();
+        }
+
+        startThreadsLatch.countDown();
+        threadsDone.await(10, TimeUnit.SECONDS);
+        if (error.get()) {
+            fail("Concurrent modification exception");
+        }
 
         List<StatusBarNotification> actual = Arrays.asList(mArchive.getArray(SIZE, true));
         assertThat(actual).hasSize(expected.size());

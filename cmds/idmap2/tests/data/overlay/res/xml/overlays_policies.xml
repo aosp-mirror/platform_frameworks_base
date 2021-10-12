@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2019 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<overlay>
+    <item target="string/policy_system" value="@string/overlay_policy_system"/>
+    <item target="string/policy_system_vendor" value="@string/overlay_policy_system_vendor" />
+    <item target="string/policy_public" value="@string/overlay_policy_public" />
+    <item target="string/policy_product" value="@string/overlay_policy_product"/>
+    <item target="string/policy_signature" value="@string/overlay_policy_signature" />
+    <item target="string/policy_odm" value="@string/overlay_policy_odm" />
+    <item target="string/policy_oem" value="@string/overlay_policy_oem"/>
+    <item target="string/policy_actor" value="@string/overlay_policy_actor" />
+    <item target="string/policy_config_signature" value="@string/overlay_policy_config_signature" />
+
+    <!-- Requests to overlay a resource that is not declared as overlayable. -->
+    <item target="string/not_overlayable" value="@string/overlay_not_overlayable" />
+
+    <!-- Requests to overlay a resource that is defined in an overlayable with a name other than
+         the targetName in the manifest. -->
+    <item target="string/other" value="@string/overlay_other" />
+</overlay>

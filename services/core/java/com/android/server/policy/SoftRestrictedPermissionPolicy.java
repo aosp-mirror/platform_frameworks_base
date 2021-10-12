@@ -189,12 +189,16 @@ public abstract class SoftRestrictedPermissionPolicy {
                             return false;
                         }
 
-                        // 3. The app has WRITE_MEDIA_STORAGE, OR
-                        //      the app already has legacy external storage or requested it,
-                        //      and is < R.
-                        return hasWriteMediaStorageGrantedForUid
-                                || ((hasLegacyExternalStorage || hasRequestedLegacyExternalStorage)
-                                    && targetSDK < Build.VERSION_CODES.R);
+                        // 3. The app targetSDK should be less than R
+                        if (targetSDK >= Build.VERSION_CODES.R) {
+                            return false;
+                        }
+
+                        // 4. The app has WRITE_MEDIA_STORAGE,
+                        //    OR the app already has legacy external storage
+                        //    OR the app requested legacy external storage
+                        return hasWriteMediaStorageGrantedForUid || hasLegacyExternalStorage
+                                || hasRequestedLegacyExternalStorage;
                     }
                     @Override
                     public boolean mayDenyExtraAppOpIfGranted() {
@@ -216,10 +220,8 @@ public abstract class SoftRestrictedPermissionPolicy {
                             return true;
                         }
 
-                        // The package doesn't have WRITE_MEDIA_STORAGE,
-                        // AND didn't request legacy storage to be preserved
-                        if (!hasWriteMediaStorageGrantedForUid
-                                && !hasRequestedPreserveLegacyExternalStorage) {
+                        // The package doesn't request legacy storage to be preserved
+                        if (!hasRequestedPreserveLegacyExternalStorage) {
                             return true;
                         }
 

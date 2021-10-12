@@ -21,6 +21,7 @@
 #include <log/log.h>
 
 #include <minikin/MeasuredText.h>
+#include <minikin/Measurement.h>
 #include "Paint.h"
 #include "SkPathMeasure.h"
 #include "Typeface.h"
@@ -67,6 +68,18 @@ minikin::Layout MinikinUtils::doLayout(const Paint* paint, minikin::Bidi bidiFla
     } else {
         return mt->buildLayout(textBuf, range, contextRange, minikinPaint, startHyphen, endHyphen);
     }
+}
+
+void MinikinUtils::getBounds(const Paint* paint, minikin::Bidi bidiFlags, const Typeface* typeface,
+                             const uint16_t* buf, size_t bufSize, minikin::MinikinRect* out) {
+    minikin::MinikinPaint minikinPaint = prepareMinikinPaint(paint, typeface);
+
+    const minikin::U16StringPiece textBuf(buf, bufSize);
+    const minikin::StartHyphenEdit startHyphen = paint->getStartHyphenEdit();
+    const minikin::EndHyphenEdit endHyphen = paint->getEndHyphenEdit();
+
+    minikin::getBounds(textBuf, minikin::Range(0, textBuf.size()), bidiFlags, minikinPaint,
+        startHyphen, endHyphen, out);
 }
 
 float MinikinUtils::measureText(const Paint* paint, minikin::Bidi bidiFlags,

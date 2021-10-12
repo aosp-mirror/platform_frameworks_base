@@ -19,10 +19,11 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="notification_channel_tv_pip" msgid="844249465483874817">"పిక్చర్-ఇన్-పిక్చర్"</string>
-    <string name="pip_notification_unknown_title" msgid="4413256731340767259">"(శీర్షిక లేని ప్రోగ్రామ్)"</string>
-    <string name="pip_close" msgid="5775212044472849930">"PIPని మూసివేయి"</string>
-    <string name="pip_fullscreen" msgid="3877997489869475181">"పూర్తి స్క్రీన్"</string>
     <string name="mic_active" msgid="5766614241012047024">"మైక్రోఫోన్ యాక్టివ్‌గా ఉంది"</string>
     <string name="app_accessed_mic" msgid="2754428675130470196">"మీ మైక్రోఫోన్‌ను %1$s యాక్సెస్ చేసింది"</string>
+    <string name="notification_vpn_connected" msgid="3891023882833274730">"VPN కనెక్ట్ అయింది"</string>
+    <string name="notification_vpn_disconnected" msgid="7150747626448044843">"VPN డిస్‌కనెక్ట్ అయింది"</string>
+    <string name="notification_disclosure_vpn_text" msgid="3873532735584866236">"<xliff:g id="VPN_APP">%1$s</xliff:g> ద్వారా"</string>
+    <string name="tv_notification_panel_title" msgid="5311050946506276154">"నోటిఫికేషన్‌లు"</string>
+    <string name="tv_notification_panel_no_notifications" msgid="9115191912267270678">"నోటిఫికేషన్‌లు లేవు"</string>
 </resources>

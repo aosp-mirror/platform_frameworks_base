@@ -81,6 +81,9 @@ public abstract class AbstractAsset {
     /**
      * If this is the source asset of a statement file, should the retriever follow
      * any insecure (non-HTTPS) include statements made by the asset.
+     *
+     * TODO(b/171219506): Why would this be allowed? Can it be removed, even for web assets?
+     *  Android doesn't even allow non-secure traffic by default.
      */
     public abstract boolean followInsecureInclude();
 }

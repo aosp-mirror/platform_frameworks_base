@@ -31,6 +31,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -57,6 +58,9 @@ import android.service.wallpaper.WallpaperService;
 import android.testing.TestableContext;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
+import android.util.Xml;
 import android.view.Display;
 
 import androidx.test.filters.FlakyTest;
@@ -82,9 +86,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.quality.Strictness;
+import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Tests for the {@link WallpaperManagerService} class.
@@ -353,6 +360,31 @@ public class WallpaperManagerServiceTests {
         }
         verifyNoConnectionBeforeLastUser(lastUserId);
         verifyDisplayData();
+    }
+
+    @Test
+    public void testXmlSerializationRoundtrip() {
+        WallpaperData systemWallpaperData = mService.getCurrentWallpaperData(FLAG_SYSTEM, 0);
+        try {
+            TypedXmlSerializer serializer = Xml.newBinarySerializer();
+            serializer.setOutput(new ByteArrayOutputStream(), StandardCharsets.UTF_8.name());
+            serializer.startDocument(StandardCharsets.UTF_8.name(), true);
+            mService.writeWallpaperAttributes(serializer, "wp", systemWallpaperData);
+        } catch (IOException e) {
+            fail("exception occurred while writing system wallpaper attributes");
+        }
+
+        WallpaperData shouldMatchSystem = new WallpaperData(systemWallpaperData.userId,
+                systemWallpaperData.wallpaperFile.getParentFile(),
+                systemWallpaperData.wallpaperFile.getAbsolutePath(),
+                systemWallpaperData.cropFile.getAbsolutePath());
+        try {
+            TypedXmlPullParser parser = Xml.newBinaryPullParser();
+            mService.parseWallpaperAttributes(parser, shouldMatchSystem, true);
+        } catch (XmlPullParserException e) {
+            fail("exception occurred while parsing wallpaper");
+        }
+        assertEquals(systemWallpaperData.primaryColors, shouldMatchSystem.primaryColors);
     }
 
     // Verify that after continue switch user from userId 0 to lastUserId, the wallpaper data for

@@ -155,7 +155,6 @@ class TableFlattenerTest : public ::testing::Test {
 TEST_F(TableFlattenerTest, FlattenFullyLinkedTable) {
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .SetPackageId("com.app.test", 0x7f)
           .AddSimple("com.app.test:id/one", ResourceId(0x7f020000))
           .AddSimple("com.app.test:id/two", ResourceId(0x7f020001))
           .AddValue("com.app.test:id/three", ResourceId(0x7f020002),
@@ -204,7 +203,6 @@ TEST_F(TableFlattenerTest, FlattenFullyLinkedTable) {
 TEST_F(TableFlattenerTest, FlattenEntriesWithGapsInIds) {
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .SetPackageId("com.app.test", 0x7f)
           .AddSimple("com.app.test:id/one", ResourceId(0x7f020001))
           .AddSimple("com.app.test:id/three", ResourceId(0x7f020003))
           .Build();
@@ -225,7 +223,6 @@ TEST_F(TableFlattenerTest, FlattenMinMaxAttributes) {
   attr.max_int = 23;
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .SetPackageId("android", 0x01)
           .AddValue("android:attr/foo", ResourceId(0x01010000), util::make_unique<Attribute>(attr))
           .Build();
 
@@ -248,7 +245,6 @@ TEST_F(TableFlattenerTest, FlattenArray) {
                                                                2u));
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .SetPackageId("android", 0x01)
           .AddValue("android:array/foo", ResourceId(0x01010000), std::move(array))
           .Build();
 
@@ -300,10 +296,10 @@ static std::unique_ptr<ResourceTable> BuildTableWithSparseEntries(
     IAaptContext* context, const ConfigDescription& sparse_config, float load) {
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .SetPackageId(context->GetCompilationPackage(), context->GetPackageId())
           .Build();
 
   // Add regular entries.
+  CloningValueTransformer cloner(&table->string_pool);
   int stride = static_cast<int>(1.0f / load);
   for (int i = 0; i < 100; i++) {
     const ResourceName name = test::ParseNameOrDie(
@@ -311,15 +307,20 @@ static std::unique_ptr<ResourceTable> BuildTableWithSparseEntries(
     const ResourceId resid(context->GetPackageId(), 0x02, static_cast<uint16_t>(i));
     const auto value =
         util::make_unique<BinaryPrimitive>(Res_value::TYPE_INT_DEC, static_cast<uint32_t>(i));
-    CHECK(table->AddResourceWithId(name, resid, ConfigDescription::DefaultConfig(), "",
-                                   std::unique_ptr<Value>(value->Clone(nullptr)),
-                                   context->GetDiagnostics()));
+    CHECK(table->AddResource(NewResourceBuilder(name)
+                                 .SetId(resid)
+                                 .SetValue(std::unique_ptr<Value>(value->Transform(cloner)))
+                                 .Build(),
+                             context->GetDiagnostics()));
 
     // Every few entries, write out a sparse_config value. This will give us the desired load.
     if (i % stride == 0) {
-      CHECK(table->AddResourceWithId(name, resid, sparse_config, "",
-                                     std::unique_ptr<Value>(value->Clone(nullptr)),
-                                     context->GetDiagnostics()));
+      CHECK(table->AddResource(
+          NewResourceBuilder(name)
+              .SetId(resid)
+              .SetValue(std::unique_ptr<Value>(value->Transform(cloner)), sparse_config)
+              .Build(),
+          context->GetDiagnostics()));
     }
   }
   return table;
@@ -417,7 +418,6 @@ TEST_F(TableFlattenerTest, FlattenSharedLibrary) {
       test::ContextBuilder().SetCompilationPackage("lib").SetPackageId(0x00).Build();
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .SetPackageId("lib", 0x00)
           .AddValue("lib:id/foo", ResourceId(0x00010000), util::make_unique<Id>())
           .Build();
   ResourceTable result;
@@ -426,7 +426,7 @@ TEST_F(TableFlattenerTest, FlattenSharedLibrary) {
   Maybe<ResourceTable::SearchResult> search_result =
       result.FindResource(test::ParseNameOrDie("lib:id/foo"));
   ASSERT_TRUE(search_result);
-  EXPECT_EQ(0x00u, search_result.value().package->id.value());
+  EXPECT_EQ(0x00u, search_result.value().entry->id.value().package_id());
 
   auto iter = result.included_packages_.find(0x00);
   ASSERT_NE(result.included_packages_.end(), iter);
@@ -438,7 +438,6 @@ TEST_F(TableFlattenerTest, FlattenSharedLibraryWithStyle) {
       test::ContextBuilder().SetCompilationPackage("lib").SetPackageId(0x00).Build();
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .SetPackageId("lib", 0x00)
           .AddValue("lib:style/Theme",
                     ResourceId(0x00030001),
                     test::StyleBuilder()
@@ -458,9 +457,7 @@ TEST_F(TableFlattenerTest, FlattenSharedLibraryWithStyle) {
   Maybe<ResourceTable::SearchResult> search_result =
       result.FindResource(test::ParseNameOrDie("lib:style/Theme"));
   ASSERT_TRUE(search_result);
-  EXPECT_EQ(0x00u, search_result.value().package->id.value());
-  EXPECT_EQ(0x03u, search_result.value().type->id.value());
-  EXPECT_EQ(0x01u, search_result.value().entry->id.value());
+  EXPECT_EQ(0x00030001u, search_result.value().entry->id.value());
   ASSERT_EQ(1u, search_result.value().entry->values.size());
   Value* value = search_result.value().entry->values[0]->value.get();
   Style* style = ValueCast<Style>(value);
@@ -479,7 +476,6 @@ TEST_F(TableFlattenerTest, FlattenTableReferencingSharedLibraries) {
       test::ContextBuilder().SetCompilationPackage("app").SetPackageId(0x7f).Build();
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .SetPackageId("app", 0x7f)
           .AddValue("app:id/foo", ResourceId(0x7f010000),
                     test::BuildReference("lib_one:id/foo", ResourceId(0x02010000)))
           .AddValue("app:id/bar", ResourceId(0x7f010001),
@@ -509,7 +505,6 @@ TEST_F(TableFlattenerTest, PackageWithNonStandardIdHasDynamicRefTable) {
   std::unique_ptr<IAaptContext> context =
       test::ContextBuilder().SetCompilationPackage("app").SetPackageId(0x80).Build();
   std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-                                             .SetPackageId("app", 0x80)
                                              .AddSimple("app:id/foo", ResourceId(0x80010000))
                                              .Build();
 
@@ -532,7 +527,6 @@ TEST_F(TableFlattenerTest, LongPackageNameIsTruncated) {
       test::ContextBuilder().SetCompilationPackage(kPackageName).SetPackageId(0x7f).Build();
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .SetPackageId(kPackageName, 0x7f)
           .AddSimple(kPackageName + ":id/foo", ResourceId(0x7f010000))
           .Build();
 
@@ -553,7 +547,6 @@ TEST_F(TableFlattenerTest, LongSharedLibraryPackageNameIsIllegal) {
                                               .Build();
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .SetPackageId(kPackageName, 0x7f)
           .AddSimple(kPackageName + ":id/foo", ResourceId(0x7f010000))
           .Build();
 
@@ -564,7 +557,6 @@ TEST_F(TableFlattenerTest, LongSharedLibraryPackageNameIsIllegal) {
 TEST_F(TableFlattenerTest, ObfuscatingResourceNamesNoNameCollapseExemptionsSucceeds) {
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .SetPackageId("com.app.test", 0x7f)
           .AddSimple("com.app.test:id/one", ResourceId(0x7f020000))
           .AddSimple("com.app.test:id/two", ResourceId(0x7f020001))
           .AddValue("com.app.test:id/three", ResourceId(0x7f020002),
@@ -618,7 +610,6 @@ TEST_F(TableFlattenerTest, ObfuscatingResourceNamesNoNameCollapseExemptionsSucce
 TEST_F(TableFlattenerTest, ObfuscatingResourceNamesWithNameCollapseExemptionsSucceeds) {
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .SetPackageId("com.app.test", 0x7f)
           .AddSimple("com.app.test:id/one", ResourceId(0x7f020000))
           .AddSimple("com.app.test:id/two", ResourceId(0x7f020001))
           .AddValue("com.app.test:id/three", ResourceId(0x7f020002),
@@ -680,7 +671,6 @@ TEST_F(TableFlattenerTest, FlattenOverlayable) {
   std::string name = "com.app.test:integer/overlayable";
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .SetPackageId("com.app.test", 0x7f)
           .AddSimple(name, ResourceId(0x7f020000))
           .SetOverlayable(name, overlayable_item)
           .Build();
@@ -717,7 +707,6 @@ TEST_F(TableFlattenerTest, FlattenMultipleOverlayablePolicies) {
 
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .SetPackageId("com.app.test", 0x7f)
           .AddSimple(name_zero, ResourceId(0x7f020000))
           .SetOverlayable(name_zero, overlayable_item_zero)
           .AddSimple(name_one, ResourceId(0x7f020001))
@@ -780,7 +769,6 @@ TEST_F(TableFlattenerTest, FlattenMultipleOverlayable) {
 
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .SetPackageId("com.app.test", 0x7f)
           .AddSimple(name_zero, ResourceId(0x7f020000))
           .SetOverlayable(name_zero, overlayable_item_zero)
           .AddSimple(name_one, ResourceId(0x7f020001))
@@ -842,7 +830,6 @@ TEST_F(TableFlattenerTest, FlattenOverlayableNoPolicyFails) {
 
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
-          .SetPackageId("com.app.test", 0x7f)
           .AddSimple(name_zero, ResourceId(0x7f020000))
           .SetOverlayable(name_zero, overlayable_item_zero)
           .Build();

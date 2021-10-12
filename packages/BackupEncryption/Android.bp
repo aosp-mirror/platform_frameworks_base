@@ -25,6 +25,7 @@ package {
 
 android_app {
     name: "BackupEncryption",
+    defaults: ["platform_app_defaults"],
     srcs: ["src/**/*.java"],
     static_libs: ["backup-encryption-protos", "backuplib"],
     optimize: { enabled: false },

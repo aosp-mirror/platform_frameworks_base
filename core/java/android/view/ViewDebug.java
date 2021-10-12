@@ -34,7 +34,6 @@ import android.os.Debug;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.RemoteException;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -756,11 +755,7 @@ public class ViewDebug {
 
         try {
             Rect outRect = new Rect();
-            try {
-                root.mAttachInfo.mSession.getDisplayFrame(root.mAttachInfo.mWindow, outRect);
-            } catch (RemoteException e) {
-                // Ignore
-            }
+            root.mAttachInfo.mViewRootImpl.getDisplayFrame(outRect);
 
             clientStream.writeInt(outRect.width());
             clientStream.writeInt(outRect.height());
@@ -958,8 +953,7 @@ public class ViewDebug {
         private final Callable<OutputStream> mCallback;
         private final Executor mExecutor;
         private final ReentrantLock mLock = new ReentrantLock(false);
-        private final ArrayDeque<byte[]> mQueue = new ArrayDeque<>(3);
-        private final ByteArrayOutputStream mByteStream = new ByteArrayOutputStream();
+        private final ArrayDeque<Picture> mQueue = new ArrayDeque<>(3);
         private boolean mStopListening;
         private Thread mRenderThread;
 
@@ -995,9 +989,7 @@ public class ViewDebug {
                 mQueue.removeLast();
                 needsInvoke = false;
             }
-            picture.writeToStream(mByteStream);
-            mQueue.add(mByteStream.toByteArray());
-            mByteStream.reset();
+            mQueue.add(picture);
             mLock.unlock();
 
             if (needsInvoke) {
@@ -1008,7 +1000,7 @@ public class ViewDebug {
         @Override
         public void run() {
             mLock.lock();
-            final byte[] picture = mQueue.poll();
+            final Picture picture = mQueue.poll();
             final boolean isStopped = mStopListening;
             mLock.unlock();
             if (Thread.currentThread() == mRenderThread) {
@@ -1029,7 +1021,8 @@ public class ViewDebug {
             }
             if (stream != null) {
                 try {
-                    stream.write(picture);
+                    picture.writeToStream(stream);
+                    stream.flush();
                 } catch (IOException ex) {
                     Log.w("ViewDebug", "Aborting rendering commands capture "
                             + "due to IOException writing to output stream", ex);

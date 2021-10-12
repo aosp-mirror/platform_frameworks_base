@@ -36,7 +36,7 @@
     <string name="keyguard_charged" msgid="5478247181205188995">"चार्ज भयो"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • तारविनै चार्ज गर्दै"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्ज गरिँदै"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • द्रुत गतिमा चार्ज गरिँदै छ"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • द्रुत गतिमा चार्ज गरिँदै"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • मन्द गतिमा चार्ज गरिँदै"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1158086783302116604">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ब्याट्री लामो समयसम्म टिक्ने बनाउन अप्टिमाइज गरिँदै छ"</string>
     <string name="keyguard_low_battery" msgid="1868012396800230904">"तपाईंको चार्जर जोड्नुहोस्।"</string>
@@ -89,7 +89,7 @@
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"SIM को PIN कोड गलत छ। तपाईंले अब आफ्नो यन्त्र खोल्न आफ्नो सेवा प्रदायकलाई सम्पर्क गर्नै पर्ने हुन्छ।"</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
       <item quantity="other">SIM को PIN कोड गलत छ, तपाईं अझै <xliff:g id="NUMBER_1">%d</xliff:g> पटक प्रयास गर्न सक्नुहुन्छ।</item>
-      <item quantity="one">SIM को PIN कोड गलत छ,तपाईंले आफ्नो डिभाइस अनलक गर्न आफ्नो सेवा प्रदायकलाई सम्पर्क गर्नैपर्ने अवस्था आउनु अघि तपाईं अझै <xliff:g id="NUMBER_0">%d</xliff:g> पटक प्रयास गर्न सक्नुहुन्छ।</item>
+      <item quantity="one">SIM को PIN कोड गलत छ,तपाईंले आफ्नो यन्त्र अनलक गर्न आफ्नो सेवा प्रदायकलाई सम्पर्क गर्नैपर्ने अवस्था आउनु अघि तपाईं अझै <xliff:g id="NUMBER_0">%d</xliff:g> पटक प्रयास गर्न सक्नुहुन्छ।</item>
     </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM काम नलाग्ने भएको छ। आफ्नो सेवा प्रदायकलाई सम्पर्क गर्नुहोस्।"</string>
     <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
@@ -129,7 +129,7 @@
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"पहिचान भएन"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">SIM को PIN प्रविष्टि गर्नुहोस्। तपाईंसँग <xliff:g id="NUMBER_1">%d</xliff:g>  प्रयासहरू बाँकी छन्।</item>
-      <item quantity="one">SIM को PIN प्रविष्टि गर्नुहोस्। तपाईंसँग <xliff:g id="NUMBER_0">%d</xliff:g> प्रयास बाँकी छ, त्यसपछि भने आफ्नो डिभाइस अनलक गर्नका लागि तपाईंले अनिवार्य रूपमा आफ्नो सेवा प्रदायकलाई सम्पर्क गर्नु पर्ने हुन्छ।</item>
+      <item quantity="one">SIM को PIN प्रविष्टि गर्नुहोस्। तपाईंसँग <xliff:g id="NUMBER_0">%d</xliff:g> प्रयास बाँकी छ, त्यसपछि भने आफ्नो यन्त्र अनलक गर्नका लागि तपाईंले अनिवार्य रूपमा आफ्नो सेवा प्रदायकलाई सम्पर्क गर्नु पर्ने हुन्छ।</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
       <item quantity="other">SIM लाई असक्षम पारिएको छ। जारी राख्न PUK कोड प्रविष्टि गर्नुहोस्। तपाईंसँग <xliff:g id="_NUMBER_1">%d</xliff:g> प्रयासहरू बाँकी छन्, त्यसपछि SIM सदाका लागि प्रयोग गर्न नमिल्ने हुन्छ। विवरणहरूका लागि सेवा प्रदायकलाई सम्पर्क गर्नुहोस्।</item>

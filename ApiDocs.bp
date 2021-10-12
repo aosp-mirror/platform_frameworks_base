@@ -101,12 +101,14 @@ stubs_defaults {
         "metalava-manual",
     ],
     write_sdk_values: true,
-}
-
-droidstubs {
-    name: "android-non-updatable-doc-stubs",
-    defaults: ["android-non-updatable-doc-stubs-defaults"],
-    args: metalava_framework_docs_args,
+    // TODO(b/169090544): remove below aidl includes.
+    aidl: {
+        local_include_dirs: ["media/aidl"],
+        include_dirs: [
+            "frameworks/av/aidl",
+            "frameworks/native/libs/permission/aidl",
+        ],
+    },
 }
 
 // Defaults module for doc-stubs targets that use module source code as input.
@@ -115,9 +117,13 @@ stubs_defaults {
     name: "framework-doc-stubs-sources-default",
     defaults: ["framework-doc-stubs-default"],
     srcs: [
+        ":framework-appsearch-sources",
         ":framework-connectivity-sources",
+        ":framework-graphics-srcs",
         ":framework-mediaprovider-sources",
         ":framework-permission-sources",
+        ":framework-permission-s-sources",
+        ":framework-scheduling-sources",
         ":framework-sdkextensions-sources",
         ":framework-statsd-sources",
         ":framework-tethering-srcs",
@@ -125,6 +131,12 @@ stubs_defaults {
         ":ike-srcs",
         ":updatable-media-srcs",
     ],
+}
+
+droidstubs {
+    name: "android-non-updatable-doc-stubs",
+    defaults: ["android-non-updatable-doc-stubs-defaults"],
+    args: metalava_framework_docs_args,
 }
 
 droidstubs {
@@ -157,10 +169,14 @@ droidstubs {
     args: metalava_framework_docs_args,
     srcs: [
         ":android.net.ipsec.ike{.public.stubs.source}",
+        ":framework-appsearch{.public.stubs.source}",
         ":framework-connectivity{.public.stubs.source}",
+        ":framework-graphics{.public.stubs.source}",
         ":framework-media{.public.stubs.source}",
         ":framework-mediaprovider{.public.stubs.source}",
         ":framework-permission{.public.stubs.source}",
+        ":framework-permission-s{.public.stubs.source}",
+        ":framework-scheduling{.public.stubs.source}",
         ":framework-sdkextensions{.public.stubs.source}",
         ":framework-statsd{.public.stubs.source}",
         ":framework-tethering{.public.stubs.source}",
@@ -221,6 +237,14 @@ doc_defaults {
         ":current-support-api",
         ":current-androidx-api",
     ],
+    // TODO(b/169090544): remove below aidl includes.
+    aidl: {
+        local_include_dirs: ["media/aidl"],
+        include_dirs: [
+            "frameworks/av/aidl",
+            "frameworks/native/libs/permission/aidl",
+        ],
+    },
 }
 
 doc_defaults {

@@ -16,16 +16,19 @@
 
 package com.android.server.wm;
 
-import static android.view.Surface.ROTATION_180;
-import static android.view.Surface.ROTATION_270;
-import static android.view.Surface.ROTATION_90;
-import static com.android.server.wm.DisplayFramesProto.STABLE_BOUNDS;
+import static android.view.InsetsState.ITYPE_BOTTOM_DISPLAY_CUTOUT;
+import static android.view.InsetsState.ITYPE_LEFT_DISPLAY_CUTOUT;
+import static android.view.InsetsState.ITYPE_RIGHT_DISPLAY_CUTOUT;
+import static android.view.InsetsState.ITYPE_TOP_DISPLAY_CUTOUT;
 
 import android.annotation.NonNull;
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
+import android.view.InsetsState;
+import android.view.PrivacyIndicatorBounds;
+import android.view.RoundedCorners;
 
 import com.android.server.wm.utils.WmDisplayCutout;
 
@@ -38,62 +41,13 @@ import java.io.PrintWriter;
 public class DisplayFrames {
     public final int mDisplayId;
 
+    public final InsetsState mInsetsState;
+
     /**
      * The current visible size of the screen; really; (ir)regardless of whether the status bar can
      * be hidden but not extending into the overscan area.
      */
     public final Rect mUnrestricted = new Rect();
-
-    /**
-     * The current size of the screen; these may be different than (0,0)-(dw,dh) if the status bar
-     * can't be hidden; in that case it effectively carves out that area of the display from all
-     * other windows.
-     */
-    public final Rect mRestricted = new Rect();
-
-    /**
-     * During layout, the current screen borders accounting for any currently visible system UI
-     * elements.
-     */
-    public final Rect mSystem = new Rect();
-
-    /** For applications requesting stable content insets, these are them. */
-    public final Rect mStable = new Rect();
-
-    /**
-     * For applications requesting stable content insets but have also set the fullscreen window
-     * flag, these are the stable dimensions without the status bar.
-     */
-    public final Rect mStableFullscreen = new Rect();
-
-    /**
-     * During layout, the current screen borders with all outer decoration (status bar, input method
-     * dock) accounted for.
-     */
-    public final Rect mCurrent = new Rect();
-
-    /**
-     * During layout, the frame in which content should be displayed to the user, accounting for all
-     * screen decoration except for any space they deem as available for other content. This is
-     * usually the same as mCurrent*, but may be larger if the screen decor has supplied content
-     * insets.
-     */
-    public final Rect mContent = new Rect();
-
-    /**
-     * During layout, the frame in which voice content should be displayed to the user, accounting
-     * for all screen decoration except for any space they deem as available for other content.
-     */
-    public final Rect mVoiceContent = new Rect();
-
-    /** During layout, the current screen borders along which input method windows are placed. */
-    public final Rect mDock = new Rect();
-
-    /** The display cutout used for layout (after rotation) */
-    @NonNull public WmDisplayCutout mDisplayCutout = WmDisplayCutout.NO_CUTOUT;
-
-    /** The cutout as supplied by display info */
-    @NonNull public WmDisplayCutout mDisplayInfoCutout = WmDisplayCutout.NO_CUTOUT;
 
     /**
      * During layout, the frame that is display-cutout safe, i.e. that does not intersect with it.
@@ -105,76 +59,82 @@ public class DisplayFrames {
 
     public int mRotation;
 
-    public DisplayFrames(int displayId, DisplayInfo info, WmDisplayCutout displayCutout) {
+    public DisplayFrames(int displayId, InsetsState insetsState, DisplayInfo info,
+            WmDisplayCutout displayCutout, RoundedCorners roundedCorners,
+            PrivacyIndicatorBounds indicatorBounds) {
         mDisplayId = displayId;
-        onDisplayInfoUpdated(info, displayCutout);
+        mInsetsState = insetsState;
+        onDisplayInfoUpdated(info, displayCutout, roundedCorners, indicatorBounds);
     }
 
-    public void onDisplayInfoUpdated(DisplayInfo info, WmDisplayCutout displayCutout) {
+    /**
+     * Update {@link DisplayFrames} when {@link DisplayInfo} is updated.
+     *
+     * @param info the updated {@link DisplayInfo}.
+     * @param displayCutout the updated {@link DisplayCutout}.
+     * @param roundedCorners the updated {@link RoundedCorners}.
+     * @return {@code true} if the insets state has been changed; {@code false} otherwise.
+     */
+    public boolean onDisplayInfoUpdated(DisplayInfo info, @NonNull WmDisplayCutout displayCutout,
+            @NonNull RoundedCorners roundedCorners,
+            @NonNull PrivacyIndicatorBounds indicatorBounds) {
+        mRotation = info.rotation;
+
+        final InsetsState state = mInsetsState;
+        final Rect safe = mDisplayCutoutSafe;
+        final DisplayCutout cutout = displayCutout.getDisplayCutout();
+        if (mDisplayWidth == info.logicalWidth && mDisplayHeight == info.logicalHeight
+                 && state.getDisplayCutout().equals(cutout)
+                && state.getRoundedCorners().equals(roundedCorners)
+                && state.getPrivacyIndicatorBounds().equals(indicatorBounds)) {
+            return false;
+        }
         mDisplayWidth = info.logicalWidth;
         mDisplayHeight = info.logicalHeight;
-        mRotation = info.rotation;
-        mDisplayInfoCutout = displayCutout != null ? displayCutout : WmDisplayCutout.NO_CUTOUT;
-    }
-
-    public void onBeginLayout() {
-        mUnrestricted.set(0, 0, mDisplayWidth, mDisplayHeight);
-        mRestricted.set(mUnrestricted);
-        mSystem.set(mUnrestricted);
-        mDock.set(mUnrestricted);
-        mContent.set(mUnrestricted);
-        mVoiceContent.set(mUnrestricted);
-        mStable.set(mUnrestricted);
-        mStableFullscreen.set(mUnrestricted);
-        mCurrent.set(mUnrestricted);
-
-        mDisplayCutout = mDisplayInfoCutout;
-        mDisplayCutoutSafe.set(Integer.MIN_VALUE, Integer.MIN_VALUE,
-                Integer.MAX_VALUE, Integer.MAX_VALUE);
-        if (!mDisplayCutout.getDisplayCutout().isEmpty()) {
-            final DisplayCutout c = mDisplayCutout.getDisplayCutout();
-            if (c.getSafeInsetLeft() > 0) {
-                mDisplayCutoutSafe.left = mUnrestricted.left + c.getSafeInsetLeft();
+        final Rect unrestricted = mUnrestricted;
+        unrestricted.set(0, 0, mDisplayWidth, mDisplayHeight);
+        safe.set(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
+        state.setDisplayFrame(unrestricted);
+        state.setDisplayCutout(cutout);
+        state.setRoundedCorners(roundedCorners);
+        state.setPrivacyIndicatorBounds(indicatorBounds);
+        if (!cutout.isEmpty()) {
+            if (cutout.getSafeInsetLeft() > 0) {
+                safe.left = unrestricted.left + cutout.getSafeInsetLeft();
             }
-            if (c.getSafeInsetTop() > 0) {
-                mDisplayCutoutSafe.top = mUnrestricted.top + c.getSafeInsetTop();
+            if (cutout.getSafeInsetTop() > 0) {
+                safe.top = unrestricted.top + cutout.getSafeInsetTop();
             }
-            if (c.getSafeInsetRight() > 0) {
-                mDisplayCutoutSafe.right = mUnrestricted.right - c.getSafeInsetRight();
+            if (cutout.getSafeInsetRight() > 0) {
+                safe.right = unrestricted.right - cutout.getSafeInsetRight();
             }
-            if (c.getSafeInsetBottom() > 0) {
-                mDisplayCutoutSafe.bottom = mUnrestricted.bottom - c.getSafeInsetBottom();
+            if (cutout.getSafeInsetBottom() > 0) {
+                safe.bottom = unrestricted.bottom - cutout.getSafeInsetBottom();
             }
+            state.getSource(ITYPE_LEFT_DISPLAY_CUTOUT).setFrame(
+                    unrestricted.left, unrestricted.top, safe.left, unrestricted.bottom);
+            state.getSource(ITYPE_TOP_DISPLAY_CUTOUT).setFrame(
+                    unrestricted.left, unrestricted.top, unrestricted.right, safe.top);
+            state.getSource(ITYPE_RIGHT_DISPLAY_CUTOUT).setFrame(
+                    safe.right, unrestricted.top, unrestricted.right, unrestricted.bottom);
+            state.getSource(ITYPE_BOTTOM_DISPLAY_CUTOUT).setFrame(
+                    unrestricted.left, safe.bottom, unrestricted.right, unrestricted.bottom);
+        } else {
+            state.removeSource(ITYPE_LEFT_DISPLAY_CUTOUT);
+            state.removeSource(ITYPE_TOP_DISPLAY_CUTOUT);
+            state.removeSource(ITYPE_RIGHT_DISPLAY_CUTOUT);
+            state.removeSource(ITYPE_BOTTOM_DISPLAY_CUTOUT);
         }
-    }
-
-    public int getInputMethodWindowVisibleHeight() {
-        return mDock.bottom - mCurrent.bottom;
+        return true;
     }
 
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        mStable.dumpDebug(proto, STABLE_BOUNDS);
         proto.end(token);
     }
 
     public void dump(String prefix, PrintWriter pw) {
         pw.println(prefix + "DisplayFrames w=" + mDisplayWidth + " h=" + mDisplayHeight
                 + " r=" + mRotation);
-        final String myPrefix = prefix + "  ";
-        dumpFrame(mStable, "mStable", myPrefix, pw);
-        dumpFrame(mStableFullscreen, "mStableFullscreen", myPrefix, pw);
-        dumpFrame(mDock, "mDock", myPrefix, pw);
-        dumpFrame(mCurrent, "mCurrent", myPrefix, pw);
-        dumpFrame(mSystem, "mSystem", myPrefix, pw);
-        dumpFrame(mContent, "mContent", myPrefix, pw);
-        dumpFrame(mVoiceContent, "mVoiceContent", myPrefix, pw);
-        dumpFrame(mRestricted, "mRestricted", myPrefix, pw);
-        dumpFrame(mUnrestricted, "mUnrestricted", myPrefix, pw);
-        pw.println(myPrefix + "mDisplayCutout=" + mDisplayCutout);
-    }
-
-    private void dumpFrame(Rect frame, String name, String prefix, PrintWriter pw) {
-        pw.print(prefix + name + "="); frame.printShortString(pw); pw.println();
     }
 }

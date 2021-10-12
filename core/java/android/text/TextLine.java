@@ -23,6 +23,8 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint.FontMetricsInt;
+import android.graphics.text.PositionedGlyphs;
+import android.graphics.text.TextRunShaper;
 import android.os.Build;
 import android.text.Layout.Directions;
 import android.text.Layout.TabStops;
@@ -307,6 +309,34 @@ public class TextLine {
     }
 
     /**
+     * Shape the TextLine.
+     */
+    void shape(TextShaper.GlyphsConsumer consumer) {
+        float horizontal = 0;
+        float x = 0;
+        final int runCount = mDirections.getRunCount();
+        for (int runIndex = 0; runIndex < runCount; runIndex++) {
+            final int runStart = mDirections.getRunStart(runIndex);
+            if (runStart > mLen) break;
+            final int runLimit = Math.min(runStart + mDirections.getRunLength(runIndex), mLen);
+            final boolean runIsRtl = mDirections.isRunRtl(runIndex);
+
+            int segStart = runStart;
+            for (int j = mHasTabs ? runStart : runLimit; j <= runLimit; j++) {
+                if (j == runLimit || charAt(j) == TAB_CHAR) {
+                    horizontal += shapeRun(consumer, segStart, j, runIsRtl, x + horizontal,
+                            runIndex != (runCount - 1) || j != mLen);
+
+                    if (j != runLimit) {  // charAt(j) == TAB_CHAR
+                        horizontal = mDir * nextTab(horizontal * mDir);
+                    }
+                    segStart = j + 1;
+                }
+            }
+        }
+    }
+
+    /**
      * Returns the signed graphical offset from the leading margin.
      *
      * Following examples are all for measuring offset=3. LX(e.g. L0, L1, ...) denotes a
@@ -483,12 +513,12 @@ public class TextLine {
 
         if ((mDir == Layout.DIR_LEFT_TO_RIGHT) == runIsRtl) {
             float w = -measureRun(start, limit, limit, runIsRtl, null);
-            handleRun(start, limit, limit, runIsRtl, c, x + w, top,
+            handleRun(start, limit, limit, runIsRtl, c, null, x + w, top,
                     y, bottom, null, false);
             return w;
         }
 
-        return handleRun(start, limit, limit, runIsRtl, c, x, top,
+        return handleRun(start, limit, limit, runIsRtl, c, null, x, top,
                 y, bottom, null, needWidth);
     }
 
@@ -507,8 +537,34 @@ public class TextLine {
      */
     private float measureRun(int start, int offset, int limit, boolean runIsRtl,
             FontMetricsInt fmi) {
-        return handleRun(start, offset, limit, runIsRtl, null, 0, 0, 0, 0, fmi, true);
+        return handleRun(start, offset, limit, runIsRtl, null, null, 0, 0, 0, 0, fmi, true);
     }
+
+    /**
+     * Shape a unidirectional (but possibly multi-styled) run of text.
+     *
+     * @param consumer the consumer of the shape result
+     * @param start the line-relative start
+     * @param limit the line-relative limit
+     * @param runIsRtl true if the run is right-to-left
+     * @param x the position of the run that is closest to the leading margin
+     * @param needWidth true if the width value is required.
+     * @return the signed width of the run, based on the paragraph direction.
+     * Only valid if needWidth is true.
+     */
+    private float shapeRun(TextShaper.GlyphsConsumer consumer, int start,
+            int limit, boolean runIsRtl, float x, boolean needWidth) {
+
+        if ((mDir == Layout.DIR_LEFT_TO_RIGHT) == runIsRtl) {
+            float w = -measureRun(start, limit, limit, runIsRtl, null);
+            handleRun(start, limit, limit, runIsRtl, null, consumer, x + w, 0, 0, 0, null, false);
+            return w;
+        }
+
+        return handleRun(start, limit, limit, runIsRtl, null, consumer, x, 0, 0, 0, null,
+                needWidth);
+    }
+
 
     /**
      * Walk the cursor through this line, skipping conjuncts and
@@ -841,6 +897,7 @@ public class TextLine {
      * @param end the end of the text
      * @param runIsRtl true if the run is right-to-left
      * @param c the canvas, can be null if rendering is not needed
+     * @param consumer the output positioned glyph list, can be null if not necessary
      * @param x the edge of the run closest to the leading margin
      * @param top the top of the line
      * @param y the baseline
@@ -854,7 +911,7 @@ public class TextLine {
      */
     private float handleText(TextPaint wp, int start, int end,
             int contextStart, int contextEnd, boolean runIsRtl,
-            Canvas c, float x, int top, int y, int bottom,
+            Canvas c, TextShaper.GlyphsConsumer consumer, float x, int top, int y, int bottom,
             FontMetricsInt fmi, boolean needWidth, int offset,
             @Nullable ArrayList<DecorationInfo> decorations) {
 
@@ -874,20 +931,25 @@ public class TextLine {
         float totalWidth = 0;
 
         final int numDecorations = decorations == null ? 0 : decorations.size();
-        if (needWidth || (c != null && (wp.bgColor != 0 || numDecorations != 0 || runIsRtl))) {
+        if (needWidth || ((c != null || consumer != null) && (wp.bgColor != 0
+                || numDecorations != 0 || runIsRtl))) {
             totalWidth = getRunAdvance(wp, start, end, contextStart, contextEnd, runIsRtl, offset);
         }
 
-        if (c != null) {
-            final float leftX, rightX;
-            if (runIsRtl) {
-                leftX = x - totalWidth;
-                rightX = x;
-            } else {
-                leftX = x;
-                rightX = x + totalWidth;
-            }
+        final float leftX, rightX;
+        if (runIsRtl) {
+            leftX = x - totalWidth;
+            rightX = x;
+        } else {
+            leftX = x;
+            rightX = x + totalWidth;
+        }
 
+        if (consumer != null) {
+            shapeTextRun(consumer, wp, start, end, contextStart, contextEnd, runIsRtl, leftX);
+        }
+
+        if (c != null) {
             if (wp.bgColor != 0) {
                 int previousColor = wp.getColor();
                 Paint.Style previousStyle = wp.getStyle();
@@ -1072,6 +1134,7 @@ public class TextLine {
      * @param limit the limit of the run
      * @param runIsRtl true if the run is right-to-left
      * @param c the canvas, can be null
+     * @param consumer the output positioned glyphs, can be null
      * @param x the end of the run closest to the leading margin
      * @param top the top of the line
      * @param y the baseline
@@ -1082,7 +1145,8 @@ public class TextLine {
      * valid if needWidth is true
      */
     private float handleRun(int start, int measureLimit,
-            int limit, boolean runIsRtl, Canvas c, float x, int top, int y,
+            int limit, boolean runIsRtl, Canvas c,
+            TextShaper.GlyphsConsumer consumer, float x, int top, int y,
             int bottom, FontMetricsInt fmi, boolean needWidth) {
 
         if (measureLimit < start || measureLimit > limit) {
@@ -1115,7 +1179,7 @@ public class TextLine {
             wp.set(mPaint);
             wp.setStartHyphenEdit(adjustStartHyphenEdit(start, wp.getStartHyphenEdit()));
             wp.setEndHyphenEdit(adjustEndHyphenEdit(limit, wp.getEndHyphenEdit()));
-            return handleText(wp, start, limit, start, limit, runIsRtl, c, x, top,
+            return handleText(wp, start, limit, start, limit, runIsRtl, c, consumer, x, top,
                     y, bottom, fmi, needWidth, measureLimit, null);
         }
 
@@ -1196,8 +1260,8 @@ public class TextLine {
                             adjustStartHyphenEdit(activeStart, mPaint.getStartHyphenEdit()));
                     activePaint.setEndHyphenEdit(
                             adjustEndHyphenEdit(activeEnd, mPaint.getEndHyphenEdit()));
-                    x += handleText(activePaint, activeStart, activeEnd, i, inext, runIsRtl, c, x,
-                            top, y, bottom, fmi, needWidth || activeEnd < measureLimit,
+                    x += handleText(activePaint, activeStart, activeEnd, i, inext, runIsRtl, c,
+                            consumer, x, top, y, bottom, fmi, needWidth || activeEnd < measureLimit,
                             Math.min(activeEnd, mlimit), mDecorations);
 
                     activeStart = j;
@@ -1223,7 +1287,7 @@ public class TextLine {
                     adjustStartHyphenEdit(activeStart, mPaint.getStartHyphenEdit()));
             activePaint.setEndHyphenEdit(
                     adjustEndHyphenEdit(activeEnd, mPaint.getEndHyphenEdit()));
-            x += handleText(activePaint, activeStart, activeEnd, i, inext, runIsRtl, c, x,
+            x += handleText(activePaint, activeStart, activeEnd, i, inext, runIsRtl, c, consumer, x,
                     top, y, bottom, fmi, needWidth || activeEnd < measureLimit,
                     Math.min(activeEnd, mlimit), mDecorations);
         }
@@ -1258,6 +1322,47 @@ public class TextLine {
                     delta + contextStart, delta + contextEnd, x, y, runIsRtl, wp);
         }
     }
+
+    /**
+     * Shape a text run with the set-up paint.
+     *
+     * @param consumer the output positioned glyphs list
+     * @param paint the paint used to render the text
+     * @param start the start of the run
+     * @param end the end of the run
+     * @param contextStart the start of context for the run
+     * @param contextEnd the end of the context for the run
+     * @param runIsRtl true if the run is right-to-left
+     * @param x the x position of the left edge of the run
+     */
+    private void shapeTextRun(TextShaper.GlyphsConsumer consumer, TextPaint paint,
+            int start, int end, int contextStart, int contextEnd, boolean runIsRtl, float x) {
+
+        int count = end - start;
+        int contextCount = contextEnd - contextStart;
+        PositionedGlyphs glyphs;
+        if (mCharsValid) {
+            glyphs = TextRunShaper.shapeTextRun(
+                    mChars,
+                    start, count,
+                    contextStart, contextCount,
+                    x, 0f,
+                    runIsRtl,
+                    paint
+            );
+        } else {
+            glyphs = TextRunShaper.shapeTextRun(
+                    mText,
+                    mStart + start, count,
+                    mStart + contextStart, contextCount,
+                    x, 0f,
+                    runIsRtl,
+                    paint
+            );
+        }
+        consumer.accept(start, count, glyphs, paint);
+    }
+
 
     /**
      * Returns the next tab position.

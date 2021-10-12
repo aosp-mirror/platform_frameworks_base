@@ -40,6 +40,7 @@ import android.util.ArrayMap;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.infra.AbstractRemoteService;
 import com.android.server.LocalServices;
 import com.android.server.infra.AbstractPerUserSystemService;
@@ -55,6 +56,8 @@ public class AppPredictionPerUserService extends
     private static final String TAG = AppPredictionPerUserService.class.getSimpleName();
     private static final String PREDICT_USING_PEOPLE_SERVICE_PREFIX =
             "predict_using_people_service_";
+    private static final String REMOTE_APP_PREDICTOR_KEY = "remote_app_predictor";
+
 
     @Nullable
     @GuardedBy("mLock")
@@ -112,9 +115,17 @@ public class AppPredictionPerUserService extends
     @GuardedBy("mLock")
     public void onCreatePredictionSessionLocked(@NonNull AppPredictionContext context,
             @NonNull AppPredictionSessionId sessionId, @NonNull IBinder token) {
-        final boolean usesPeopleService = DeviceConfig.getBoolean(NAMESPACE_SYSTEMUI,
+        boolean usesPeopleService = DeviceConfig.getBoolean(NAMESPACE_SYSTEMUI,
                 PREDICT_USING_PEOPLE_SERVICE_PREFIX + context.getUiSurface(), false);
-        final boolean serviceExists = resolveService(sessionId, false,
+        if (context.getExtras() != null
+                && context.getExtras().getBoolean(REMOTE_APP_PREDICTOR_KEY, false)
+                && DeviceConfig.getBoolean(NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.DARK_LAUNCH_REMOTE_PREDICTION_SERVICE_ENABLED, false)
+        ) {
+            // connect with remote AppPredictionService instead for dark launch
+            usesPeopleService = false;
+        }
+        final boolean serviceExists = resolveService(sessionId, true,
                 usesPeopleService, s -> s.onCreatePredictionSession(context, sessionId));
         if (serviceExists && !mSessionInfos.containsKey(sessionId)) {
             final AppPredictionSessionInfo sessionInfo = new AppPredictionSessionInfo(

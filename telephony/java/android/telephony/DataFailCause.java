@@ -1069,6 +1069,13 @@ public final class DataFailCause {
      */
     public static final int NO_DEFAULT_DATA = 0x10008;
 
+    /**
+     * Data service is temporarily unavailable.
+     *
+     * @hide
+     */
+    public static final int SERVICE_TEMPORARILY_UNAVAILABLE = 0x10009;
+
     private static final Map<Integer, String> sFailCauseMap;
     static {
         sFailCauseMap = new HashMap<>();
@@ -1500,6 +1507,7 @@ public final class DataFailCause {
         sFailCauseMap.put(HANDOVER_FAILED, "HANDOVER_FAILED");
         sFailCauseMap.put(DUPLICATE_CID, "DUPLICATE_CID");
         sFailCauseMap.put(NO_DEFAULT_DATA, "NO_DEFAULT_DATA");
+        sFailCauseMap.put(SERVICE_TEMPORARILY_UNAVAILABLE, "SERVICE_TEMPORARILY_UNAVAILABLE");
     }
 
     private DataFailCause() {

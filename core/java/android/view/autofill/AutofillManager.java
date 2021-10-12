@@ -19,6 +19,7 @@ package android.view.autofill;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.service.autofill.FillRequest.FLAG_PASSWORD_INPUT_TYPE;
 import static android.service.autofill.FillRequest.FLAG_VIEW_NOT_FOCUSED;
+import static android.view.ContentInfo.SOURCE_AUTOFILL;
 import static android.view.autofill.Helper.sDebug;
 import static android.view.autofill.Helper.sVerbose;
 import static android.view.autofill.Helper.toList;
@@ -31,7 +32,11 @@ import android.annotation.RequiresFeature;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.app.assist.AssistStructure.ViewNode;
+import android.app.assist.AssistStructure.ViewNodeBuilder;
+import android.app.assist.AssistStructure.ViewNodeParcelable;
 import android.content.AutofillOptions;
+import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -59,8 +64,11 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Choreographer;
+import android.view.ContentInfo;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewRootImpl;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -192,6 +200,34 @@ public final class AutofillManager {
             "android.view.autofill.extra.AUTHENTICATION_RESULT";
 
     /**
+     * Intent extra: The optional boolean extra field provided by the
+     * {@link android.service.autofill.AutofillService} accompanying the {@link
+     * android.service.autofill.Dataset} result of an authentication operation.
+     *
+     * <p> Before {@link android.os.Build.VERSION_CODES#R}, if the authentication result is a
+     * {@link android.service.autofill.Dataset}, it'll be used to autofill the fields, and also
+     * replace the existing dataset in the cached {@link android.service.autofill.FillResponse}.
+     * That means if the user clears the field values, the autofill suggestion will show up again
+     * with the new authenticated Dataset.
+     *
+     * <p> In {@link android.os.Build.VERSION_CODES#R}, we added an exception to this behavior
+     * that if the Dataset being authenticated is a pinned dataset (see
+     * {@link android.service.autofill.InlinePresentation#isPinned()}), the old Dataset will not be
+     * replaced.
+     *
+     * <p> In {@link android.os.Build.VERSION_CODES#S}, we added this boolean extra field to
+     * allow the {@link android.service.autofill.AutofillService} to explicitly specify whether
+     * the returned authenticated Dataset is ephemeral. An ephemeral Dataset will be used to
+     * autofill once and then thrown away. Therefore, when the boolean extra is set to true, the
+     * returned Dataset will not replace the old dataset from the existing
+     * {@link android.service.autofill.FillResponse}. When it's set to false, it will. When it's not
+     * set, the old dataset will be replaced, unless it is a pinned inline suggestion, which is
+     * consistent with the behavior in {@link android.os.Build.VERSION_CODES#R}.
+     */
+    public static final String EXTRA_AUTHENTICATION_RESULT_EPHEMERAL_DATASET =
+            "android.view.autofill.extra.AUTHENTICATION_RESULT_EPHEMERAL_DATASET";
+
+    /**
      * Intent extra: The optional extras provided by the
      * {@link android.service.autofill.AutofillService}.
      *
@@ -212,6 +248,18 @@ public final class AutofillManager {
      */
     public static final String EXTRA_CLIENT_STATE =
             "android.view.autofill.extra.CLIENT_STATE";
+
+    /**
+     * Intent extra: the {@link android.view.inputmethod.InlineSuggestionsRequest} in the
+     * autofill request.
+     *
+     * <p>This is filled in the authentication intent so the
+     * {@link android.service.autofill.AutofillService} can use it to create the inline
+     * suggestion {@link android.service.autofill.Dataset} in the response, if the original autofill
+     * request contains the {@link android.view.inputmethod.InlineSuggestionsRequest}.
+     */
+    public static final String EXTRA_INLINE_SUGGESTIONS_REQUEST =
+            "android.view.autofill.extra.INLINE_SUGGESTIONS_REQUEST";
 
     /** @hide */
     public static final String EXTRA_RESTORE_SESSION_TOKEN =
@@ -727,16 +775,22 @@ public final class AutofillManager {
             mState = savedInstanceState.getInt(STATE_TAG, STATE_UNKNOWN);
 
             if (mSessionId != NO_SESSION) {
-                ensureServiceClientAddedIfNeededLocked();
+                final boolean clientAdded = tryAddServiceClientIfNeededLocked();
 
                 final AutofillClient client = getClient();
                 if (client != null) {
                     final SyncResultReceiver receiver = new SyncResultReceiver(
                             SYNC_CALLS_TIMEOUT_MS);
                     try {
-                        mService.restoreSession(mSessionId, client.autofillClientGetActivityToken(),
-                                mServiceClient.asBinder(), receiver);
-                        final boolean sessionWasRestored = receiver.getIntResult() == 1;
+                        boolean sessionWasRestored = false;
+                        if (clientAdded) {
+                            mService.restoreSession(mSessionId,
+                                    client.autofillClientGetActivityToken(),
+                                    mServiceClient.asBinder(), receiver);
+                            sessionWasRestored = receiver.getIntResult() == 1;
+                        } else {
+                            Log.w(TAG, "No service client for session " + mSessionId);
+                        }
 
                         if (!sessionWasRestored) {
                             Log.w(TAG, "Session " + mSessionId + " could not be restored");
@@ -850,8 +904,8 @@ public final class AutofillManager {
             if (isDisabledByServiceLocked()) {
                 return false;
             }
-            ensureServiceClientAddedIfNeededLocked();
-            return mEnabled;
+            final boolean clientAdded = tryAddServiceClientIfNeededLocked();
+            return clientAdded ? mEnabled : false;
         }
     }
 
@@ -1007,7 +1061,12 @@ public final class AutofillManager {
 
         AutofillCallback callback = null;
 
-        ensureServiceClientAddedIfNeededLocked();
+        final boolean clientAdded = tryAddServiceClientIfNeededLocked();
+
+        if (!clientAdded) {
+            if (sVerbose) Log.v(TAG, "ignoring notifyViewEntered(" + id + "): no service client");
+            return callback;
+        }
 
         if (!mEnabled && !mEnabledForAugmentedAutofillOnly) {
             if (sVerbose) Log.v(TAG, "ignoring notifyViewEntered(" + id + "): disabled");
@@ -1060,9 +1119,10 @@ public final class AutofillManager {
 
     @GuardedBy("mLock")
     void notifyViewExitedLocked(@NonNull View view) {
-        ensureServiceClientAddedIfNeededLocked();
+        final boolean clientAdded = tryAddServiceClientIfNeededLocked();
 
-        if ((mEnabled || mEnabledForAugmentedAutofillOnly) && isActiveLocked()) {
+        if (clientAdded && (mEnabled || mEnabledForAugmentedAutofillOnly)
+                && isActiveLocked()) {
             // dont notify exited when Activity is already in background
             if (!isClientDisablingEnterExitEvent()) {
                 final AutofillId id = view.getAutofillId();
@@ -1178,7 +1238,12 @@ public final class AutofillManager {
         AutofillCallback callback = null;
         if (shouldIgnoreViewEnteredLocked(id, flags)) return callback;
 
-        ensureServiceClientAddedIfNeededLocked();
+        final boolean clientAdded = tryAddServiceClientIfNeededLocked();
+
+        if (!clientAdded) {
+            if (sVerbose) Log.v(TAG, "ignoring notifyViewEntered(" + id + "): no service client");
+            return callback;
+        }
 
         if (!mEnabled && !mEnabledForAugmentedAutofillOnly) {
             if (sVerbose) {
@@ -1241,9 +1306,10 @@ public final class AutofillManager {
 
     @GuardedBy("mLock")
     private void notifyViewExitedLocked(@NonNull View view, int virtualId) {
-        ensureServiceClientAddedIfNeededLocked();
+        final boolean clientAdded = tryAddServiceClientIfNeededLocked();
 
-        if ((mEnabled || mEnabledForAugmentedAutofillOnly) && isActiveLocked()) {
+        if (clientAdded && (mEnabled || mEnabledForAugmentedAutofillOnly)
+                && isActiveLocked()) {
             // don't notify exited when Activity is already in background
             if (!isClientDisablingEnterExitEvent()) {
                 final AutofillId id = getAutofillId(view, virtualId);
@@ -1729,6 +1795,11 @@ public final class AutofillManager {
             if (newClientState != null) {
                 responseData.putBundle(EXTRA_CLIENT_STATE, newClientState);
             }
+            if (data.getExtras().containsKey(EXTRA_AUTHENTICATION_RESULT_EPHEMERAL_DATASET)) {
+                responseData.putBoolean(EXTRA_AUTHENTICATION_RESULT_EPHEMERAL_DATASET,
+                        data.getBooleanExtra(EXTRA_AUTHENTICATION_RESULT_EPHEMERAL_DATASET,
+                                false));
+            }
             try {
                 mService.setAuthenticationResult(responseData, mSessionId, authenticationId,
                         mContext.getUserId());
@@ -1804,20 +1875,20 @@ public final class AutofillManager {
             if (client == null) return; // NOTE: getClient() already logged it..
 
             final SyncResultReceiver receiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
-            final ComponentName componentName = client.autofillClientGetComponentName();
+            final ComponentName clientActivity = client.autofillClientGetComponentName();
 
             if (!mEnabledForAugmentedAutofillOnly && mOptions != null
-                    && mOptions.isAutofillDisabledLocked(componentName)) {
+                    && mOptions.isAutofillDisabledLocked(clientActivity)) {
                 if (mOptions.isAugmentedAutofillEnabled(mContext)) {
                     if (sDebug) {
-                        Log.d(TAG, "startSession(" + componentName + "): disabled by service but "
-                                + "whitelisted for augmented autofill");
+                        Log.d(TAG, "startSession(" + clientActivity + "): disabled by service but "
+                                + "allowlisted for augmented autofill");
                         flags |= FLAG_ADD_CLIENT_ENABLED_FOR_AUGMENTED_AUTOFILL_ONLY;
                     }
                 } else {
                     if (sDebug) {
-                        Log.d(TAG, "startSession(" + componentName + "): ignored because "
-                                + "disabled by service and not whitelisted for augmented autofill");
+                        Log.d(TAG, "startSession(" + clientActivity + "): ignored because "
+                                + "disabled by service and not allowlisted for augmented autofill");
                     }
                     setSessionFinished(AutofillManager.STATE_DISABLED_BY_SERVICE, null);
                     client.autofillClientResetableStateAvailable();
@@ -1827,7 +1898,7 @@ public final class AutofillManager {
 
             mService.startSession(client.autofillClientGetActivityToken(),
                     mServiceClient.asBinder(), id, bounds, value, mContext.getUserId(),
-                    mCallback != null, flags, componentName,
+                    mCallback != null, flags, clientActivity,
                     isCompatibilityModeEnabledLocked(), receiver);
             mSessionId = receiver.getIntResult();
             if (mSessionId != NO_SESSION) {
@@ -1835,7 +1906,7 @@ public final class AutofillManager {
             }
             final int extraFlags = receiver.getOptionalExtraIntResult(0);
             if ((extraFlags & RECEIVER_FLAG_SESSION_FOR_AUGMENTED_AUTOFILL_ONLY) != 0) {
-                if (sDebug) Log.d(TAG, "startSession(" + componentName + "): for augmented only");
+                if (sDebug) Log.d(TAG, "startSession(" + clientActivity + "): for augmented only");
                 mForAugmentedAutofillOnly = true;
             }
             client.autofillClientResetableStateAvailable();
@@ -1905,15 +1976,20 @@ public final class AutofillManager {
         }
     }
 
+    /**
+     * Tries to add AutofillManagerClient to service if it does not been added. Returns {@code true}
+     * if the AutofillManagerClient is added successfully or is already added. Otherwise,
+     * returns {@code false}.
+     */
     @GuardedBy("mLock")
-    private void ensureServiceClientAddedIfNeededLocked() {
+    private boolean tryAddServiceClientIfNeededLocked() {
         final AutofillClient client = getClient();
         if (client == null) {
-            return;
+            return false;
         }
         if (mService == null) {
             Log.w(TAG, "Autofill service is null!");
-            return;
+            return false;
         }
         if (mServiceClient == null) {
             mServiceClient = new AutofillManagerClient(this);
@@ -1927,7 +2003,10 @@ public final class AutofillManager {
                     flags = receiver.getIntResult();
                 } catch (SyncResultReceiver.TimeoutException e) {
                     Log.w(TAG, "Failed to initialize autofill: " + e);
-                    return;
+                    // Reset the states initialized above.
+                    mService.removeClient(mServiceClient, userId);
+                    mServiceClient = null;
+                    return false;
                 }
                 mEnabled = (flags & FLAG_ADD_CLIENT_ENABLED) != 0;
                 sDebug = (flags & FLAG_ADD_CLIENT_DEBUG) != 0;
@@ -1952,6 +2031,7 @@ public final class AutofillManager {
                 throw e.rethrowFromSystemServer();
             }
         }
+        return true;
     }
 
     @GuardedBy("mLock")
@@ -1965,12 +2045,13 @@ public final class AutofillManager {
                 && view.isLaidOut()
                 && view.isVisibleToUser()) {
 
-            ensureServiceClientAddedIfNeededLocked();
+            final boolean clientAdded = tryAddServiceClientIfNeededLocked();
 
             if (sVerbose) {
-                Log.v(TAG, "startAutofillIfNeededLocked(): enabled=" + mEnabled);
+                Log.v(TAG, "startAutofillIfNeededLocked(): enabled=" + mEnabled + " mServiceClient="
+                        + mServiceClient);
             }
-            if (mEnabled && !isClientDisablingEnterExitEvent()) {
+            if (clientAdded && mEnabled && !isClientDisablingEnterExitEvent()) {
                 final AutofillId id = view.getAutofillId();
                 final AutofillValue value = view.getAutofillValue();
                 // Starts new session.
@@ -2325,6 +2406,47 @@ public final class AutofillManager {
         }
     }
 
+    private void autofillContent(int sessionId, AutofillId id, ClipData clip) {
+        synchronized (mLock) {
+            if (sessionId != mSessionId) {
+                return;
+            }
+            final AutofillClient client = getClient();
+            if (client == null) {
+                return;
+            }
+            final View view = client.autofillClientFindViewByAutofillIdTraversal(id);
+            if (view == null) {
+                // Most likely view has been removed after the initial request was sent to the
+                // the service; this is fine, but we need to update the view status in the
+                // server side so it can be triggered again.
+                Log.d(TAG, "autofillContent(): no view with id " + id);
+                reportAutofillContentFailure(id);
+                return;
+            }
+            ContentInfo payload = new ContentInfo.Builder(clip, SOURCE_AUTOFILL).build();
+            ContentInfo result = view.performReceiveContent(payload);
+            if (result != null) {
+                Log.w(TAG, "autofillContent(): receiver could not insert content: id=" + id
+                        + ", view=" + view + ", clip=" + clip);
+                reportAutofillContentFailure(id);
+                return;
+            }
+            mMetricsLogger.write(newLog(MetricsEvent.AUTOFILL_DATASET_APPLIED)
+                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_VALUES, 1)
+                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_VIEWS_FILLED, 1));
+        }
+    }
+
+    private void reportAutofillContentFailure(AutofillId id) {
+        try {
+            mService.setAutofillFailure(mSessionId, Collections.singletonList(id),
+                    mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     private LogMaker newLog(int category) {
         final LogMaker log = new LogMaker(category)
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SESSION_ID, mSessionId);
@@ -2337,7 +2459,10 @@ public final class AutofillManager {
             // Client should never be null here, but it doesn't hurt to check...
             log.setPackageName(mContext.getPackageName());
         } else {
-            log.setComponentName(client.autofillClientGetComponentName());
+            // Remove activity name from logging
+            final ComponentName sanitizedComponentName =
+                    new ComponentName(client.autofillClientGetComponentName().getPackageName(), "");
+            log.setComponentName(sanitizedComponentName);
         }
         return log;
     }
@@ -2439,8 +2564,7 @@ public final class AutofillManager {
      *  {@link #STATE_UNKNOWN_COMPAT_MODE} (beucase the session was finished when the URL bar
      *  changed on compat mode), {@link #STATE_UNKNOWN_FAILED} (because the session was finished
      *  when the service failed to fullfil the request, or {@link #STATE_DISABLED_BY_SERVICE}
-     *  (because the autofill service or {@link #STATE_DISABLED_BY_SERVICE} (because the autofill
-     *  service disabled further autofill requests for the activity).
+     *  (because the autofill service disabled further autofill requests for the activity).
      * @param autofillableIds list of ids that could trigger autofill, use to not handle a new
      *  session when they're entered.
      */
@@ -2694,6 +2818,7 @@ public final class AutofillManager {
         pw.print(pfx); pw.print("sessionId: "); pw.println(mSessionId);
         pw.print(pfx); pw.print("state: "); pw.println(getStateAsStringLocked());
         pw.print(pfx); pw.print("context: "); pw.println(mContext);
+        pw.print(pfx); pw.print("service client: "); pw.println(mServiceClient);
         final AutofillClient client = getClient();
         if (client != null) {
             pw.print(pfx); pw.print("client: "); pw.print(client);
@@ -3366,6 +3491,14 @@ public final class AutofillManager {
         }
 
         @Override
+        public void autofillContent(int sessionId, AutofillId id, ClipData content) {
+            final AutofillManager afm = mAfm.get();
+            if (afm != null) {
+                afm.post(() -> afm.autofillContent(sessionId, id, content));
+            }
+        }
+
+        @Override
         public void authenticate(int sessionId, int authenticationId, IntentSender intent,
                 Intent fillInIntent, boolean authenticateInline) {
             final AutofillManager afm = mAfm.get();
@@ -3502,6 +3635,35 @@ public final class AutofillManager {
 
         private AugmentedAutofillManagerClient(AutofillManager autofillManager) {
             mAfm = new WeakReference<>(autofillManager);
+        }
+
+        @Nullable
+        @Override
+        public ViewNodeParcelable getViewNodeParcelable(@NonNull AutofillId id) {
+            final AutofillManager afm = mAfm.get();
+            if (afm == null) return null;
+
+            final View view = getView(afm, id);
+            if (view == null) {
+                Log.w(TAG, "getViewNodeParcelable(" + id + "): could not find view");
+                return null;
+            }
+            final ViewRootImpl root = view.getViewRootImpl();
+            if (root != null
+                    && (root.getWindowFlags() & WindowManager.LayoutParams.FLAG_SECURE) == 0) {
+                ViewNodeBuilder viewStructure = new ViewNodeBuilder();
+                viewStructure.setAutofillId(view.getAutofillId());
+                view.onProvideAutofillStructure(viewStructure, /* flags= */ 0);
+                // TODO(b/141703532): We don't call View#onProvideAutofillVirtualStructure for
+                //  efficiency reason. But this also means we will return null for virtual views
+                //  for now. We will add a new API to fetch the view node info of the virtual
+                //  child view.
+                ViewNode viewNode = viewStructure.getViewNode();
+                if (viewNode != null && id.equals(viewNode.getAutofillId())) {
+                    return new ViewNodeParcelable(viewNode);
+                }
+            }
+            return null;
         }
 
         @Override

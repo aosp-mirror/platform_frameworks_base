@@ -13,19 +13,22 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.tests.bandwidthenforcement">
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+     package="com.android.tests.bandwidthenforcement">
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <application>
-        <activity android:name=".BandwidthEnforcementTestActivity">
+        <activity android:name=".BandwidthEnforcementTestActivity"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <!-- adb shell am startservice -n com.android.tests.bandwidthenforcement/.BandwidthEnforcementTestService -->
-        <service android:name=".BandwidthEnforcementTestService" android:exported="true" />
+        <service android:name=".BandwidthEnforcementTestService"
+             android:exported="true"/>
     </application>
 </manifest>

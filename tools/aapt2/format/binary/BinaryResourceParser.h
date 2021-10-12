@@ -51,10 +51,13 @@ class BinaryResourceParser {
 
   bool ParseTable(const android::ResChunk_header* chunk);
   bool ParsePackage(const android::ResChunk_header* chunk);
-  bool ParseTypeSpec(const ResourceTablePackage* package, const android::ResChunk_header* chunk);
-  bool ParseType(const ResourceTablePackage* package, const android::ResChunk_header* chunk);
+  bool ParseTypeSpec(const ResourceTablePackage* package, const android::ResChunk_header* chunk,
+                     uint8_t package_id);
+  bool ParseType(const ResourceTablePackage* package, const android::ResChunk_header* chunk,
+                 uint8_t package_id);
   bool ParseLibrary(const android::ResChunk_header* chunk);
   bool ParseOverlayable(const android::ResChunk_header* chunk);
+  bool ParseStagedAliases(const android::ResChunk_header* chunk);
 
   std::unique_ptr<Item> ParseValue(const ResourceNameRef& name,
                                    const android::ConfigDescription& config,

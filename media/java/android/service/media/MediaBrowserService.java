@@ -685,10 +685,17 @@ public abstract class MediaBrowserService extends Service {
                 List<MediaBrowser.MediaItem> filteredList =
                         (flag & RESULT_FLAG_OPTION_NOT_HANDLED) != 0
                                 ? applyOptions(list, options) : list;
-                final ParceledListSlice<MediaBrowser.MediaItem> pls =
-                        filteredList == null ? null : new ParceledListSlice<>(filteredList);
+                final ParceledListSlice<MediaBrowser.MediaItem> pls;
+                if (filteredList == null) {
+                    pls = null;
+                } else {
+                    pls = new ParceledListSlice<>(filteredList);
+                    // Limit the size of initial Parcel to prevent binder buffer overflow
+                    // as onLoadChildren is an async binder call.
+                    pls.setInlineCountLimit(1);
+                }
                 try {
-                    connection.callbacks.onLoadChildrenWithOptions(parentId, pls, options);
+                    connection.callbacks.onLoadChildren(parentId, pls, options);
                 } catch (RemoteException ex) {
                     // The other side is in the process of crashing.
                     Log.w(TAG, "Calling onLoadChildren() failed for id=" + parentId
