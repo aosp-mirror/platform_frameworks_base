@@ -16,6 +16,12 @@
 
 package com.android.systemui.statusbar.connectivity
 
+import android.telephony.ServiceState
+import android.telephony.SignalStrength
+import android.telephony.TelephonyDisplayInfo
+import android.telephony.TelephonyManager
+import com.android.settingslib.Utils
+import com.android.settingslib.mobile.MobileStatusTracker.MobileStatus
 import com.android.settingslib.mobile.TelephonyIcons
 import java.lang.IllegalArgumentException
 
@@ -33,14 +39,20 @@ internal class MobileState(
     @JvmField var isDefault: Boolean = false,
     @JvmField var userSetup: Boolean = false,
     @JvmField var roaming: Boolean = false,
+    @JvmField var dataState: Int = TelephonyManager.DATA_DISCONNECTED,
     // Tracks the on/off state of the defaultDataSubscription
     @JvmField var defaultDataOff: Boolean = false
 ) : ConnectivityState() {
 
+    @JvmField var telephonyDisplayInfo = TelephonyDisplayInfo(TelephonyManager.NETWORK_TYPE_UNKNOWN,
+            TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE)
+    @JvmField var serviceState: ServiceState? = null
+    @JvmField var signalStrength: SignalStrength? = null
+
     /** @return true if this state is disabled or not default data */
     val isDataDisabledOrNotDefault: Boolean
-        get() = (iconGroup === TelephonyIcons.DATA_DISABLED
-                || iconGroup === TelephonyIcons.NOT_DEFAULT_DATA) && userSetup
+        get() = (iconGroup === TelephonyIcons.DATA_DISABLED ||
+                iconGroup === TelephonyIcons.NOT_DEFAULT_DATA) && userSetup
 
     /** @return if this state is considered to have inbound activity */
     fun hasActivityIn(): Boolean {
@@ -72,24 +84,82 @@ internal class MobileState(
         isDefault = o.isDefault
         userSetup = o.userSetup
         roaming = o.roaming
+        dataState = o.dataState
         defaultDataOff = o.defaultDataOff
+
+        telephonyDisplayInfo = o.telephonyDisplayInfo
+        serviceState = o.serviceState
+        signalStrength = o.signalStrength
+    }
+
+    fun isDataConnected(): Boolean {
+        return connected && dataState == TelephonyManager.DATA_CONNECTED
+    }
+
+    /** @return the current voice service state, or -1 if null */
+    fun getVoiceServiceState(): Int {
+        return serviceState?.state ?: -1
+    }
+
+    fun isNoCalling(): Boolean {
+        return serviceState?.state != ServiceState.STATE_IN_SERVICE
+    }
+
+    fun getOperatorAlphaShort(): String {
+        return serviceState?.operatorAlphaShort ?: ""
+    }
+
+    fun isCdma(): Boolean {
+        return signalStrength != null && !signalStrength!!.isGsm
+    }
+
+    fun isEmergencyOnly(): Boolean {
+        return serviceState != null && serviceState!!.isEmergencyOnly
+    }
+
+    fun isInService(): Boolean {
+        return Utils.isInService(serviceState)
+    }
+
+    fun isRoaming(): Boolean {
+        return serviceState != null && serviceState!!.roaming
+    }
+
+    fun setFromMobileStatus(mobileStatus: MobileStatus) {
+        activityIn = mobileStatus.activityIn
+        activityOut = mobileStatus.activityOut
+        dataSim = mobileStatus.dataSim
+        carrierNetworkChangeMode = mobileStatus.carrierNetworkChangeMode
+        dataState = mobileStatus.dataState
+        signalStrength = mobileStatus.signalStrength
+        telephonyDisplayInfo = mobileStatus.telephonyDisplayInfo
+        serviceState = mobileStatus.serviceState
     }
 
     override fun toString(builder: StringBuilder) {
-        builder.append("connected=$connected,")
-                .append(',')
-                .append("dataSim=$dataSim,")
-                .append("networkName=$networkName,")
-                .append("networkNameData=$networkNameData,")
-                .append("dataConnected=$dataConnected,")
-                .append("roaming=$roaming,")
-                .append("isDefault=$isDefault,")
-                .append("isEmergency=$isEmergency,")
-                .append("airplaneMode=$airplaneMode,")
-                .append("carrierNetworkChangeMode=$carrierNetworkChangeMode,")
-                .append("userSetup=$userSetup,")
-                .append("defaultDataOff=$defaultDataOff,")
-                .append("showQuickSettingsRatIcon=${showQuickSettingsRatIcon()}")
+        super.toString(builder)
+        builder.append(',')
+        builder.append("dataSim=$dataSim,")
+        builder.append("networkName=$networkName,")
+        builder.append("networkNameData=$networkNameData,")
+        builder.append("dataConnected=$dataConnected,")
+        builder.append("roaming=$roaming,")
+        builder.append("isDefault=$isDefault,")
+        builder.append("isEmergency=$isEmergency,")
+        builder.append("airplaneMode=$airplaneMode,")
+        builder.append("carrierNetworkChangeMode=$carrierNetworkChangeMode,")
+        builder.append("userSetup=$userSetup,")
+        builder.append("dataState=$dataState,")
+        builder.append("defaultDataOff=$defaultDataOff,")
+
+        // Computed properties
+        builder.append("showQuickSettingsRatIcon=${showQuickSettingsRatIcon()},")
+        builder.append("voiceServiceState=${getVoiceServiceState()},")
+        builder.append("isInService=${isInService()},")
+
+        builder.append("serviceState=${serviceState?.minLog() ?: "(null)"},")
+        builder.append("signalStrength=${signalStrength?.minLog() ?: "(null)"},")
+        builder.append("displayInfo=$telephonyDisplayInfo")
     }
 
     override fun equals(other: Any?): Boolean {
@@ -109,7 +179,11 @@ internal class MobileState(
         if (isDefault != other.isDefault) return false
         if (userSetup != other.userSetup) return false
         if (roaming != other.roaming) return false
+        if (dataState != other.dataState) return false
         if (defaultDataOff != other.defaultDataOff) return false
+        if (telephonyDisplayInfo != other.telephonyDisplayInfo) return false
+        if (serviceState != other.serviceState) return false
+        if (signalStrength != other.signalStrength) return false
 
         return true
     }
@@ -126,7 +200,26 @@ internal class MobileState(
         result = 31 * result + isDefault.hashCode()
         result = 31 * result + userSetup.hashCode()
         result = 31 * result + roaming.hashCode()
+        result = 31 * result + dataState
         result = 31 * result + defaultDataOff.hashCode()
+        result = 31 * result + telephonyDisplayInfo.hashCode()
+        result = 31 * result + (serviceState?.hashCode() ?: 0)
+        result = 31 * result + (signalStrength?.hashCode() ?: 0)
         return result
     }
+}
+
+/** toString() is a little more verbose than we need. Just log the fields we read */
+private fun ServiceState.minLog(): String {
+    return "serviceState={" +
+            "state=$state," +
+            "isEmergencyOnly=$isEmergencyOnly," +
+            "roaming=$roaming," +
+            "operatorNameAlphaShort=$operatorAlphaShort}"
+}
+
+private fun SignalStrength.minLog(): String {
+    return "signalStrength={" +
+            "isGsm=$isGsm," +
+            "level=$level}"
 }
