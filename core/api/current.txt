@@ -13301,6 +13301,7 @@ package android.content.res {
     method public int describeContents();
     method public int diff(android.content.res.Configuration);
     method public boolean equals(android.content.res.Configuration);
+    method @NonNull public static android.content.res.Configuration generateDelta(@NonNull android.content.res.Configuration, @NonNull android.content.res.Configuration);
     method public int getLayoutDirection();
     method @NonNull public android.os.LocaleList getLocales();
     method public boolean isLayoutSizeAtLeast(int);
