@@ -166,6 +166,11 @@ public class FeatureFlags {
                 && mFlagReader.isEnabled(R.bool.flag_ongoing_call_in_immersive);
     }
 
+    public boolean isOngoingCallInImmersiveChipTapEnabled() {
+        return isOngoingCallInImmersiveEnabled()
+                && mFlagReader.isEnabled(R.bool.flag_ongoing_call_in_immersive_chip_tap);
+    }
+
     public boolean isSmartspaceEnabled() {
         return mFlagReader.isEnabled(R.bool.flag_smartspace);
     }
