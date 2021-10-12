@@ -2371,12 +2371,6 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "457951957": {
-      "message": "\tNot visible=%s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_REMOTE_ANIMATIONS",
-      "at": "com\/android\/server\/wm\/WallpaperAnimationAdapter.java"
-    },
     "463993897": {
       "message": "Aborted waiting for drawn: %s",
       "level": "WARN",
@@ -3697,6 +3691,12 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
     },
+    "2024493888": {
+      "message": "\tWallpaper of display=%s is not visible",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_REMOTE_ANIMATIONS",
+      "at": "com\/android\/server\/wm\/WallpaperAnimationAdapter.java"
+    },
     "2028163120": {
       "message": "applyAnimation: anim=%s nextAppTransition=ANIM_SCALE_UP transit=%s isEntrance=%s Callers=%s",
       "level": "VERBOSE",
@@ -3720,12 +3720,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/AppTransitionController.java"
-    },
-    "2057434754": {
-      "message": "\tvisible=%s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_REMOTE_ANIMATIONS",
-      "at": "com\/android\/server\/wm\/WallpaperAnimationAdapter.java"
     },
     "2060978050": {
       "message": "moveWindowTokenToDisplay: Attempted to move token: %s to non-exiting displayId=%d",
