@@ -5022,13 +5022,18 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public boolean matchesCallFilter(Bundle extras) {
-            enforceSystemOrSystemUI("INotificationManager.matchesCallFilter");
             return mZenModeHelper.matchesCallFilter(
                     Binder.getCallingUserHandle(),
                     extras,
                     mRankingHelper.findExtractor(ValidateNotificationPeople.class),
                     MATCHES_CALL_FILTER_CONTACTS_TIMEOUT_MS,
                     MATCHES_CALL_FILTER_TIMEOUT_AFFINITY);
+        }
+
+        @Override
+        public void cleanUpCallersAfter(long timeThreshold) {
+            enforceSystemOrSystemUI("INotificationManager.cleanUpCallersAfter");
+            mZenModeHelper.cleanUpCallersAfter(timeThreshold);
         }
 
         @Override

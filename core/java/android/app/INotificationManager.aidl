@@ -175,6 +175,7 @@ interface INotificationManager
 
     ComponentName getEffectsSuppressor();
     boolean matchesCallFilter(in Bundle extras);
+    void cleanUpCallersAfter(long timeThreshold);
     boolean isSystemConditionProviderEnabled(String path);
 
     boolean isNotificationListenerAccessGranted(in ComponentName listener);
