@@ -330,7 +330,8 @@ class TestUtil {
         return format;
     }
 
-    static RecognitionEvent createRecognitionEvent(@RecognitionStatus int status) {
+    static RecognitionEvent createRecognitionEvent(@RecognitionStatus int status,
+            boolean recognitionStillActive) {
         RecognitionEvent event = new RecognitionEvent();
         event.status = status;
         event.type = SoundModelType.GENERIC;
@@ -346,6 +347,7 @@ class TestUtil {
         event.audioConfig.base.format = createAudioFormatMp3();
         //event.audioConfig.offloadInfo is irrelevant.
         event.data = new byte[]{31, 32, 33};
+        event.recognitionStillActive = recognitionStillActive;
         return event;
     }
 
@@ -360,7 +362,8 @@ class TestUtil {
         return halEvent;
     }
 
-    static void validateRecognitionEvent(RecognitionEvent event, @RecognitionStatus int status) {
+    static void validateRecognitionEvent(RecognitionEvent event, @RecognitionStatus int status,
+            boolean recognitionStillActive) {
         assertEquals(status, event.status);
         assertEquals(SoundModelType.GENERIC, event.type);
         assertTrue(event.captureAvailable);
@@ -372,11 +375,13 @@ class TestUtil {
                 event.audioConfig.base.channelMask);
         assertEquals(createAudioFormatMp3(), event.audioConfig.base.format);
         assertArrayEquals(new byte[]{31, 32, 33}, event.data);
+        assertEquals(recognitionStillActive, event.recognitionStillActive);
     }
 
-    static PhraseRecognitionEvent createPhraseRecognitionEvent(@RecognitionStatus int status) {
+    static PhraseRecognitionEvent createPhraseRecognitionEvent(@RecognitionStatus int status,
+            boolean recognitionStillActive) {
         PhraseRecognitionEvent event = new PhraseRecognitionEvent();
-        event.common = createRecognitionEvent(status);
+        event.common = createRecognitionEvent(status, recognitionStillActive);
 
         PhraseRecognitionExtra extra = new PhraseRecognitionExtra();
         extra.id = 123;
@@ -434,8 +439,8 @@ class TestUtil {
     }
 
     static void validatePhraseRecognitionEvent(PhraseRecognitionEvent event,
-            @RecognitionStatus int status) {
-        validateRecognitionEvent(event.common, status);
+            @RecognitionStatus int status, boolean recognitionStillActive) {
+        validateRecognitionEvent(event.common, status, recognitionStillActive);
 
         assertEquals(1, event.phraseExtras.length);
         assertEquals(123, event.phraseExtras[0].id);

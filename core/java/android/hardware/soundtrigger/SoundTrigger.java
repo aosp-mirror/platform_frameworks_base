@@ -1175,6 +1175,11 @@ public class SoundTrigger {
         @UnsupportedAppUsage
         @NonNull
         public final byte[] data;
+        /**
+         * Is recognition still active after this event.
+         * @hide
+         */
+        public final boolean recognitionStillActive;
 
         /** @hide */
         @TestApi
@@ -1182,6 +1187,16 @@ public class SoundTrigger {
         public RecognitionEvent(int status, int soundModelHandle, boolean captureAvailable,
                 int captureSession, int captureDelayMs, int capturePreambleMs,
                 boolean triggerInData, @NonNull AudioFormat captureFormat, @Nullable byte[] data) {
+            this(status, soundModelHandle, captureAvailable, captureSession, captureDelayMs,
+                    capturePreambleMs, triggerInData, captureFormat, data,
+                    status == RECOGNITION_STATUS_GET_STATE_RESPONSE);
+        }
+
+        /** @hide */
+        public RecognitionEvent(int status, int soundModelHandle, boolean captureAvailable,
+                int captureSession, int captureDelayMs, int capturePreambleMs,
+                boolean triggerInData, @NonNull AudioFormat captureFormat, @Nullable byte[] data,
+                boolean recognitionStillActive) {
             this.status = status;
             this.soundModelHandle = soundModelHandle;
             this.captureAvailable = captureAvailable;
@@ -1191,6 +1206,7 @@ public class SoundTrigger {
             this.triggerInData = triggerInData;
             this.captureFormat = requireNonNull(captureFormat);
             this.data = data != null ? data : new byte[0];
+            this.recognitionStillActive = recognitionStillActive;
         }
 
         /**
@@ -1266,8 +1282,10 @@ public class SoundTrigger {
                         .build();
             }
             byte[] data = in.readBlob();
+            boolean recognitionStillActive = in.readBoolean();
             return new RecognitionEvent(status, soundModelHandle, captureAvailable, captureSession,
-                    captureDelayMs, capturePreambleMs, triggerInData, captureFormat, data);
+                    captureDelayMs, capturePreambleMs, triggerInData, captureFormat, data,
+                    recognitionStillActive);
         }
 
         /** @hide */
@@ -1293,8 +1311,8 @@ public class SoundTrigger {
                 dest.writeByte((byte)0);
             }
             dest.writeBlob(data);
+            dest.writeBoolean(recognitionStillActive);
         }
-
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -1312,6 +1330,7 @@ public class SoundTrigger {
             result = prime * result + Arrays.hashCode(data);
             result = prime * result + soundModelHandle;
             result = prime * result + status;
+            result = result + (recognitionStillActive ? 1289 : 1291);
             return result;
         }
 
@@ -1333,6 +1352,8 @@ public class SoundTrigger {
             if (captureSession != other.captureSession)
                 return false;
             if (!Arrays.equals(data, other.data))
+                return false;
+            if (recognitionStillActive != other.recognitionStillActive)
                 return false;
             if (soundModelHandle != other.soundModelHandle)
                 return false;
@@ -1370,7 +1391,9 @@ public class SoundTrigger {
                         (", encoding=" + captureFormat.getEncoding()))
                     + ((captureFormat == null) ? "" :
                         (", channelMask=" + captureFormat.getChannelMask()))
-                    + ", data=" + (data == null ? 0 : data.length) + "]";
+                    + ", data=" + (data == null ? 0 : data.length)
+                    + ", recognitionStillActive=" + recognitionStillActive
+                    + "]";
         }
     }
 
@@ -1673,11 +1696,21 @@ public class SoundTrigger {
 
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public KeyphraseRecognitionEvent(int status, int soundModelHandle, boolean captureAvailable,
-               int captureSession, int captureDelayMs, int capturePreambleMs,
-               boolean triggerInData, @NonNull AudioFormat captureFormat, @Nullable byte[] data,
-               @Nullable KeyphraseRecognitionExtra[] keyphraseExtras) {
+                int captureSession, int captureDelayMs, int capturePreambleMs,
+                boolean triggerInData, @NonNull AudioFormat captureFormat, @Nullable byte[] data,
+                @Nullable KeyphraseRecognitionExtra[] keyphraseExtras) {
+            this(status, soundModelHandle, captureAvailable, captureSession, captureDelayMs,
+                    capturePreambleMs, triggerInData, captureFormat, data, keyphraseExtras,
+                    status == RECOGNITION_STATUS_GET_STATE_RESPONSE);
+        }
+
+        public KeyphraseRecognitionEvent(int status, int soundModelHandle, boolean captureAvailable,
+                int captureSession, int captureDelayMs, int capturePreambleMs,
+                boolean triggerInData, @NonNull AudioFormat captureFormat, @Nullable byte[] data,
+                @Nullable KeyphraseRecognitionExtra[] keyphraseExtras,
+                boolean recognitionStillActive) {
             super(status, soundModelHandle, captureAvailable, captureSession, captureDelayMs,
-                  capturePreambleMs, triggerInData, captureFormat, data);
+                    capturePreambleMs, triggerInData, captureFormat, data, recognitionStillActive);
             this.keyphraseExtras =
                     keyphraseExtras != null ? keyphraseExtras : new KeyphraseRecognitionExtra[0];
         }
@@ -1713,11 +1746,12 @@ public class SoundTrigger {
                     .build();
             }
             byte[] data = in.readBlob();
+            boolean recognitionStillActive = in.readBoolean();
             KeyphraseRecognitionExtra[] keyphraseExtras =
                     in.createTypedArray(KeyphraseRecognitionExtra.CREATOR);
             return new KeyphraseRecognitionEvent(status, soundModelHandle, captureAvailable,
                     captureSession, captureDelayMs, capturePreambleMs, triggerInData,
-                    captureFormat, data, keyphraseExtras);
+                    captureFormat, data, keyphraseExtras, recognitionStillActive);
         }
 
         @Override
@@ -1738,6 +1772,7 @@ public class SoundTrigger {
                 dest.writeByte((byte)0);
             }
             dest.writeBlob(data);
+            dest.writeBoolean(recognitionStillActive);
             dest.writeTypedArray(keyphraseExtras, flags);
         }
 
@@ -1782,7 +1817,9 @@ public class SoundTrigger {
                         (", encoding=" + captureFormat.getEncoding()))
                     + ((captureFormat == null) ? "" :
                         (", channelMask=" + captureFormat.getChannelMask()))
-                    + ", data=" + (data == null ? 0 : data.length) + "]";
+                    + ", data=" + (data == null ? 0 : data.length)
+                    + ", recognitionStillActive=" + recognitionStillActive
+                    + "]";
         }
     }
 
@@ -1798,9 +1835,17 @@ public class SoundTrigger {
                 boolean captureAvailable, int captureSession, int captureDelayMs,
                 int capturePreambleMs, boolean triggerInData, @NonNull AudioFormat captureFormat,
                 @Nullable byte[] data) {
-            super(status, soundModelHandle, captureAvailable, captureSession,
-                    captureDelayMs, capturePreambleMs, triggerInData, captureFormat,
-                    data);
+            this(status, soundModelHandle, captureAvailable, captureSession, captureDelayMs,
+                    capturePreambleMs, triggerInData, captureFormat, data,
+                    status == RECOGNITION_STATUS_GET_STATE_RESPONSE);
+        }
+
+        public GenericRecognitionEvent(int status, int soundModelHandle,
+                boolean captureAvailable, int captureSession, int captureDelayMs,
+                int capturePreambleMs, boolean triggerInData, @NonNull AudioFormat captureFormat,
+                @Nullable byte[] data, boolean recognitionStillActive) {
+            super(status, soundModelHandle, captureAvailable, captureSession, captureDelayMs,
+                    capturePreambleMs, triggerInData, captureFormat, data, recognitionStillActive);
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<GenericRecognitionEvent> CREATOR
@@ -1818,7 +1863,8 @@ public class SoundTrigger {
             RecognitionEvent event = RecognitionEvent.fromParcel(in);
             return new GenericRecognitionEvent(event.status, event.soundModelHandle,
                     event.captureAvailable, event.captureSession, event.captureDelayMs,
-                    event.capturePreambleMs, event.triggerInData, event.captureFormat, event.data);
+                    event.capturePreambleMs, event.triggerInData, event.captureFormat, event.data,
+                    event.recognitionStillActive);
         }
 
         @Override

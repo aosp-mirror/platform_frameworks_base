@@ -717,7 +717,8 @@ public class SoundHw2CompatTest {
             hwCallback.recognitionCallback(TestUtil.createRecognitionEvent_2_0(handle, status), 99);
             mCanonical.flushCallbacks();
             verify(canonicalCallback).recognitionCallback(eq(handle), eventCaptor.capture());
-            TestUtil.validateRecognitionEvent(eventCaptor.getValue(), RecognitionStatus.ABORTED);
+            TestUtil.validateRecognitionEvent(eventCaptor.getValue(), RecognitionStatus.ABORTED,
+                    false);
         }
 
         {
@@ -732,7 +733,7 @@ public class SoundHw2CompatTest {
             mCanonical.flushCallbacks();
             verify(canonicalCallback).phraseRecognitionCallback(eq(handle), eventCaptor.capture());
             TestUtil.validatePhraseRecognitionEvent(eventCaptor.getValue(),
-                    RecognitionStatus.SUCCESS);
+                    RecognitionStatus.SUCCESS, false);
         }
         verifyNoMoreInteractions(canonicalCallback);
         clearInvocations(canonicalCallback);
@@ -752,7 +753,22 @@ public class SoundHw2CompatTest {
                     99);
             mCanonical.flushCallbacks();
             verify(canonicalCallback).recognitionCallback(eq(handle), eventCaptor.capture());
-            TestUtil.validateRecognitionEvent(eventCaptor.getValue(), RecognitionStatus.ABORTED);
+            TestUtil.validateRecognitionEvent(eventCaptor.getValue(), RecognitionStatus.ABORTED,
+                    false);
+        }
+
+        {
+            final int handle = 87;
+            final int status = 3; // FORCED;
+            ArgumentCaptor<RecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
+                    RecognitionEvent.class);
+
+            hwCallback.recognitionCallback_2_1(TestUtil.createRecognitionEvent_2_1(handle, status),
+                    99);
+            mCanonical.flushCallbacks();
+            verify(canonicalCallback).recognitionCallback(eq(handle), eventCaptor.capture());
+            TestUtil.validateRecognitionEvent(eventCaptor.getValue(), RecognitionStatus.FORCED,
+                    true);
         }
 
         {
@@ -767,7 +783,21 @@ public class SoundHw2CompatTest {
             mCanonical.flushCallbacks();
             verify(canonicalCallback).phraseRecognitionCallback(eq(handle), eventCaptor.capture());
             TestUtil.validatePhraseRecognitionEvent(eventCaptor.getValue(),
-                    RecognitionStatus.SUCCESS);
+                    RecognitionStatus.SUCCESS, false);
+        }
+
+        {
+            final int handle = 102;
+            final int status = 3; // FORCED;
+            ArgumentCaptor<PhraseRecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
+                    PhraseRecognitionEvent.class);
+
+            hwCallback.phraseRecognitionCallback_2_1(
+                    TestUtil.createPhraseRecognitionEvent_2_1(handle, status), 99);
+            mCanonical.flushCallbacks();
+            verify(canonicalCallback).phraseRecognitionCallback(eq(handle), eventCaptor.capture());
+            TestUtil.validatePhraseRecognitionEvent(eventCaptor.getValue(),
+                    RecognitionStatus.FORCED, true);
         }
         verifyNoMoreInteractions(canonicalCallback);
         clearInvocations(canonicalCallback);
