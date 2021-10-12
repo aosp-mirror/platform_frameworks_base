@@ -1727,7 +1727,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     @Override
-    public WindowState asWindowState() {
+    public WindowState getWindowState() {
         return this;
     }
 

@@ -87,16 +87,12 @@ class AnrController {
                 return;
             }
 
-            WindowState windowState = target.asWindowState();
+            WindowState windowState = target.getWindowState();
             pid = target.getPid();
-            if (windowState != null) {
-                activity = windowState.mActivityRecord;
-            } else {
-                // Don't blame the host process, instead blame the embedded pid.
-                activity = null;
-                // Use host WindowState for logging and z-order test.
-                windowState = target.asEmbeddedWindow().mHostWindowState;
-            }
+            // Blame the activity if the input token belongs to the window. If the target is
+            // embedded, then we will blame the pid instead.
+            activity = (windowState.mInputChannelToken == inputToken)
+                    ? windowState.mActivityRecord : null;
             Slog.i(TAG_WM, "ANR in " + target + ". Reason:" + reason);
             aboveSystem = isWindowAboveSystem(windowState);
             dumpAnrStateLocked(activity, windowState, reason);
