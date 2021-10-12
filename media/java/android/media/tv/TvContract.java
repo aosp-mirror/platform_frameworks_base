@@ -1658,6 +1658,25 @@ public final class TvContract {
          */
         String COLUMN_CONTENT_ID = "content_id";
 
+        /**
+         * The start time of this TV program, in milliseconds since the epoch.
+         *
+         * <p>Should be empty if this program is not live.
+         *
+         * <p>Type: INTEGER (long)
+         * @see #COLUMN_LIVE
+         */
+        String COLUMN_START_TIME_UTC_MILLIS = "start_time_utc_millis";
+
+        /**
+         * The end time of this TV program, in milliseconds since the epoch.
+         *
+         * <p>Should be empty if this program is not live.
+         *
+         * <p>Type: INTEGER (long)
+         * @see #COLUMN_LIVE
+         */
+        String COLUMN_END_TIME_UTC_MILLIS = "end_time_utc_millis";
     }
 
     /** Column definitions for the TV channels table. */
