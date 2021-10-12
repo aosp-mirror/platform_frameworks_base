@@ -57,6 +57,11 @@ public class AgentTest {
         MockScribe(InternalResourceService irs) {
             super(irs);
         }
+
+        @Override
+        void postWrite() {
+            // Do nothing
+        }
     }
 
     @Before
