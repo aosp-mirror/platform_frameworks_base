@@ -23,9 +23,9 @@ import android.graphics.ImageFormat;
 import android.graphics.ImageFormat.Format;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.hardware.HardwareBuffer;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.utils.SurfaceUtils;
-import android.hardware.HardwareBuffer;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -454,8 +454,9 @@ public class ImageWriter implements AutoCloseable {
         }
 
         Rect crop = image.getCropRect();
-        nativeQueueInputImage(mNativeContext, image, image.getTimestamp(), crop.left, crop.top,
-                crop.right, crop.bottom, image.getTransform(), image.getScalingMode());
+        nativeQueueInputImage(mNativeContext, image, image.getTimestamp(), image.getDataSpace(),
+                crop.left, crop.top, crop.right, crop.bottom, image.getTransform(),
+                image.getScalingMode());
 
         /**
          * Only remove and cleanup the Images that are owned by this
@@ -642,13 +643,13 @@ public class ImageWriter implements AutoCloseable {
         Rect crop = image.getCropRect();
         if (image.getNativeContext() != 0) {
             nativeAttachAndQueueImage(mNativeContext, image.getNativeContext(), image.getFormat(),
-                    image.getTimestamp(), crop.left, crop.top, crop.right, crop.bottom,
-                    image.getTransform(), image.getScalingMode());
+                    image.getTimestamp(), image.getDataSpace(), crop.left, crop.top, crop.right,
+                    crop.bottom, image.getTransform(), image.getScalingMode());
         } else {
             GraphicBuffer gb = GraphicBuffer.createFromHardwareBuffer(image.getHardwareBuffer());
             nativeAttachAndQueueGraphicBuffer(mNativeContext, gb, image.getFormat(),
-                    image.getTimestamp(), crop.left, crop.top, crop.right, crop.bottom,
-                    image.getTransform(), image.getScalingMode());
+                    image.getTimestamp(), image.getDataSpace(), crop.left, crop.top, crop.right,
+                    crop.bottom, image.getTransform(), image.getScalingMode());
             gb.destroy();
             image.close();
         }
@@ -976,15 +977,15 @@ public class ImageWriter implements AutoCloseable {
     private synchronized native void nativeDequeueInputImage(long nativeCtx, Image wi);
 
     private synchronized native void nativeQueueInputImage(long nativeCtx, Image image,
-            long timestampNs, int left, int top, int right, int bottom, int transform,
-            int scalingMode);
+            long timestampNs, long dataSpace, int left, int top, int right, int bottom,
+            int transform, int scalingMode);
 
     private synchronized native int nativeAttachAndQueueImage(long nativeCtx,
-            long imageNativeBuffer, int imageFormat, long timestampNs, int left,
-            int top, int right, int bottom, int transform, int scalingMode);
+            long imageNativeBuffer, int imageFormat, long timestampNs, long dataSpace,
+            int left, int top, int right, int bottom, int transform, int scalingMode);
     private synchronized native int nativeAttachAndQueueGraphicBuffer(long nativeCtx,
-            GraphicBuffer graphicBuffer, int imageFormat, long timestampNs, int left,
-            int top, int right, int bottom, int transform, int scalingMode);
+            GraphicBuffer graphicBuffer, int imageFormat, long timestampNs, long dataSpace,
+            int left, int top, int right, int bottom, int transform, int scalingMode);
 
     private synchronized native void cancelImage(long nativeCtx, Image image);
 

@@ -16,7 +16,6 @@
 
 package android.media;
 
-import android.annotation.CallbackExecutor;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.graphics.GraphicBuffer;
@@ -28,7 +27,6 @@ import android.hardware.HardwareBuffer.Usage;
 import android.hardware.camera2.MultiResolutionImageReader;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.view.Surface;
 
 import dalvik.system.VMRuntime;

@@ -48,6 +48,7 @@
 #define ANDROID_MEDIA_IMAGEREADER_CTX_JNI_ID       "mNativeContext"
 #define ANDROID_MEDIA_SURFACEIMAGE_BUFFER_JNI_ID   "mNativeBuffer"
 #define ANDROID_MEDIA_SURFACEIMAGE_TS_JNI_ID       "mTimestamp"
+#define ANDROID_MEDIA_SURFACEIMAGE_DS_JNI_ID       "mDataSpace"
 #define ANDROID_MEDIA_SURFACEIMAGE_TF_JNI_ID       "mTransform"
 #define ANDROID_MEDIA_SURFACEIMAGE_SM_JNI_ID       "mScalingMode"
 
@@ -71,6 +72,7 @@ static struct {
 static struct {
     jfieldID mNativeBuffer;
     jfieldID mTimestamp;
+    jfieldID mDataSpace;
     jfieldID mTransform;
     jfieldID mScalingMode;
     jfieldID mPlanes;
@@ -318,6 +320,12 @@ static void ImageReader_classInit(JNIEnv* env, jclass clazz)
     LOG_ALWAYS_FATAL_IF(gSurfaceImageClassInfo.mTimestamp == NULL,
                         "can't find android/graphics/ImageReader.%s",
                         ANDROID_MEDIA_SURFACEIMAGE_TS_JNI_ID);
+
+    gSurfaceImageClassInfo.mDataSpace = env->GetFieldID(
+            imageClazz, ANDROID_MEDIA_SURFACEIMAGE_DS_JNI_ID, "J");
+    LOG_ALWAYS_FATAL_IF(gSurfaceImageClassInfo.mDataSpace == NULL,
+                        "can't find android/graphics/ImageReader.%s",
+                        ANDROID_MEDIA_SURFACEIMAGE_DS_JNI_ID);
 
     gSurfaceImageClassInfo.mTransform = env->GetFieldID(
             imageClazz, ANDROID_MEDIA_SURFACEIMAGE_TF_JNI_ID, "I");
@@ -619,6 +627,8 @@ static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz, jobject image) {
     Image_setBufferItem(env, image, buffer);
     env->SetLongField(image, gSurfaceImageClassInfo.mTimestamp,
             static_cast<jlong>(buffer->mTimestamp));
+    env->SetLongField(image, gSurfaceImageClassInfo.mDataSpace,
+            static_cast<jlong>(buffer->mDataSpace));
     auto transform = buffer->mTransform;
     if (buffer->mTransformToDisplayInverse) {
         transform |= NATIVE_WINDOW_TRANSFORM_INVERSE_DISPLAY;
