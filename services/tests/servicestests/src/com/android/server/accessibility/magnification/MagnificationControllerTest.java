@@ -38,6 +38,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.accessibilityservice.MagnificationConfig;
 import android.content.Context;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -229,7 +230,7 @@ public class MagnificationControllerTest {
     }
 
     @Test
-    public void transitionToFullScreen_centerNotInTheBounds_magnifyTheCenterOfMagnificationBounds()
+    public void transitionToFullScreen_centerNotInTheBounds_magnifyBoundsCenter()
             throws RemoteException {
         final Rect magnificationBounds = MAGNIFICATION_REGION.getBounds();
         final PointF magnifiedCenter = new PointF(magnificationBounds.right + 100,
@@ -286,6 +287,73 @@ public class MagnificationControllerTest {
                 DEFAULT_SCALE, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y,
                 true, MAGNIFICATION_GESTURE_HANDLER_ID);
         verify(mTransitionCallBack).onResult(TEST_DISPLAY, false);
+    }
+
+    @Test
+    public void configTransitionToWindowMode_fullScreenMagnifying_disableFullScreenAndEnableWindow()
+            throws RemoteException {
+        activateMagnifier(MODE_FULLSCREEN, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y);
+
+        mMagnificationController.transitionMagnificationConfigMode(TEST_DISPLAY,
+                obtainMagnificationConfig(MODE_WINDOW),
+                false);
+
+        verify(mScreenMagnificationController).reset(eq(TEST_DISPLAY), eq(false));
+        mMockConnection.invokeCallbacks();
+        assertEquals(MAGNIFIED_CENTER_X, mWindowMagnificationManager.getCenterX(TEST_DISPLAY), 0);
+        assertEquals(MAGNIFIED_CENTER_Y, mWindowMagnificationManager.getCenterY(TEST_DISPLAY), 0);
+    }
+
+    @Test
+    public void configTransitionToFullScreen_windowMagnifying_disableWindowAndEnableFullScreen()
+            throws RemoteException {
+        final boolean animate = true;
+        activateMagnifier(MODE_WINDOW, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y);
+        mMagnificationController.transitionMagnificationConfigMode(TEST_DISPLAY,
+                obtainMagnificationConfig(MODE_FULLSCREEN),
+                animate);
+        mMockConnection.invokeCallbacks();
+
+        assertFalse(mWindowMagnificationManager.isWindowMagnifierEnabled(TEST_DISPLAY));
+        verify(mScreenMagnificationController).setScaleAndCenter(TEST_DISPLAY,
+                DEFAULT_SCALE, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y,
+                animate, MAGNIFICATION_GESTURE_HANDLER_ID);
+    }
+
+    @Test
+    public void configTransitionToFullScreen_userSettingsDisablingFullScreen_enableFullScreen()
+            throws RemoteException {
+        activateMagnifier(MODE_FULLSCREEN, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y);
+        // User-setting mode
+        mMagnificationController.transitionMagnificationModeLocked(TEST_DISPLAY,
+                MODE_WINDOW, mTransitionCallBack);
+
+        // Config-setting mode
+        mMagnificationController.transitionMagnificationConfigMode(TEST_DISPLAY,
+                obtainMagnificationConfig(MODE_FULLSCREEN),
+                true);
+
+        assertEquals(DEFAULT_SCALE, mScreenMagnificationController.getScale(TEST_DISPLAY), 0);
+        assertEquals(MAGNIFIED_CENTER_X, mScreenMagnificationController.getCenterX(TEST_DISPLAY),
+                0);
+        assertEquals(MAGNIFIED_CENTER_Y, mScreenMagnificationController.getCenterY(TEST_DISPLAY),
+                0);
+    }
+
+    @Test
+    public void interruptDuringTransitionToWindow_disablingFullScreen_discardPreviousTransition()
+            throws RemoteException {
+        activateMagnifier(MODE_FULLSCREEN, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y);
+        // User-setting mode
+        mMagnificationController.transitionMagnificationModeLocked(TEST_DISPLAY,
+                MODE_WINDOW, mTransitionCallBack);
+
+        // Config-setting mode
+        mMagnificationController.transitionMagnificationConfigMode(TEST_DISPLAY,
+                obtainMagnificationConfig(MODE_FULLSCREEN),
+                true);
+
+        verify(mTransitionCallBack, never()).onResult(TEST_DISPLAY, true);
     }
 
     @Test
@@ -609,6 +677,10 @@ public class MagnificationControllerTest {
     private void setMagnificationEnabled(int mode, float centerX, float centerY)
             throws RemoteException {
         setMagnificationModeSettings(mode);
+        activateMagnifier(mode, centerX, centerY);
+    }
+
+    private void activateMagnifier(int mode, float centerX, float centerY) throws RemoteException {
         mScreenMagnificationControllerStubber.resetAndStubMethods();
         final boolean windowMagnifying = mWindowMagnificationManager.isWindowMagnifierEnabled(
                 TEST_DISPLAY);
@@ -629,6 +701,11 @@ public class MagnificationControllerTest {
     private void setMagnificationModeSettings(int mode) {
         Settings.Secure.putIntForUser(mMockResolver,
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE, mode, CURRENT_USER_ID);
+    }
+
+    private MagnificationConfig obtainMagnificationConfig(int mode) {
+        return new MagnificationConfig.Builder().setMode(mode).setScale(DEFAULT_SCALE).setCenterX(
+                MAGNIFIED_CENTER_X).setCenterY(MAGNIFIED_CENTER_Y).build();
     }
 
     /**
