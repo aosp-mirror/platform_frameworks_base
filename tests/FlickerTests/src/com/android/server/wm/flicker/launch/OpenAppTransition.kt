@@ -18,13 +18,11 @@ package com.android.server.wm.flicker.launch
 
 import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
-import android.view.Surface
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.StandardAppHelper
@@ -98,9 +96,7 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
      */
     @Presubmit
     @Test
-    open fun navBarLayerRotatesAndScales() {
-        testSpec.navBarLayerRotatesAndScales(Surface.ROTATION_0, testSpec.config.endRotation)
-    }
+    open fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
 
     /**
      * Checks that the status bar window is visible during the whole transition
@@ -125,9 +121,7 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
      */
     @Presubmit
     @Test
-    open fun statusBarLayerRotatesScales() {
-        testSpec.statusBarLayerRotatesScales(Surface.ROTATION_0, testSpec.config.endRotation)
-    }
+    open fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
     /**
      * Checks that all windows that are visible on the trace, are visible for at least 2
