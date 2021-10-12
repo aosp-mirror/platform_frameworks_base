@@ -29,6 +29,9 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.compat.Compatibility;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
 import android.content.ComponentName;
@@ -62,6 +65,25 @@ import java.util.Objects;
  */
 public class JobInfo implements Parcelable {
     private static String TAG = "JobInfo";
+
+    /**
+     * Disallow setting a deadline (via {@link Builder#setOverrideDeadline(long)}) for prefetch
+     * jobs ({@link Builder#setPrefetch(boolean)}. Prefetch jobs are meant to run close to the next
+     * app launch, so there's no good reason to allow them to have deadlines.
+     *
+     * We don't drop or cancel any previously scheduled prefetch jobs with a deadline.
+     * There's no way for an app to keep a perpetually scheduled prefetch job with a deadline.
+     * Prefetch jobs with a deadline will run and apps under this restriction won't be able to
+     * schedule new prefetch jobs with a deadline. If a job is rescheduled (by providing
+     * {@code true} via {@link JobService#jobFinished(JobParameters, boolean)} or
+     * {@link JobService#onStopJob(JobParameters)}'s return value),the deadline is dropped.
+     * Periodic jobs require all constraints to be met, so there's no issue with their deadlines.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    public static final long DISALLOW_DEADLINES_FOR_PREFETCH_JOBS = 194532703L;
 
     /** @hide */
     @IntDef(prefix = { "NETWORK_TYPE_" }, value = {
@@ -1445,7 +1467,9 @@ public class JobInfo implements Parcelable {
         /**
          * Specify that this job should recur with the provided interval, not more than once per
          * period. You have no control over when within this interval this job will be executed,
-         * only the guarantee that it will be executed at most once within this interval.
+         * only the guarantee that it will be executed at most once within this interval, as long
+         * as the constraints are satisfied. If the constraints are not satisfied within this
+         * interval, the job will wait until the constraints are satisfied.
          * Setting this function on the builder with {@link #setMinimumLatency(long)} or
          * {@link #setOverrideDeadline(long)} will result in an error.
          * @param intervalMillis Millisecond interval for which this job will repeat.
@@ -1641,6 +1665,9 @@ public class JobInfo implements Parcelable {
          * the specific user of this device. For example, fetching top headlines
          * of interest to the current user.
          * <p>
+         * Starting with Android version {@link Build.VERSION_CODES#TIRAMISU}, prefetch jobs are
+         * not allowed to have deadlines (set via {@link #setOverrideDeadline(long)}.
+         * <p>
          * The system may use this signal to relax the network constraints you
          * originally requested, such as allowing a
          * {@link JobInfo#NETWORK_TYPE_UNMETERED} job to run over a metered
@@ -1675,6 +1702,11 @@ public class JobInfo implements Parcelable {
          * @return The job object to hand to the JobScheduler. This object is immutable.
          */
         public JobInfo build() {
+            return build(Compatibility.isChangeEnabled(DISALLOW_DEADLINES_FOR_PREFETCH_JOBS));
+        }
+
+        /** @hide */
+        public JobInfo build(boolean disallowPrefetchDeadlines) {
             // This check doesn't need to be inside enforceValidity. It's an unnecessary legacy
             // check that would ideally be phased out instead.
             if (mBackoffPolicySet && (mConstraintFlags & CONSTRAINT_FLAG_DEVICE_IDLE) != 0) {
@@ -1683,7 +1715,7 @@ public class JobInfo implements Parcelable {
                         " setRequiresDeviceIdle is an error.");
             }
             JobInfo jobInfo = new JobInfo(this);
-            jobInfo.enforceValidity();
+            jobInfo.enforceValidity(disallowPrefetchDeadlines);
             return jobInfo;
         }
 
@@ -1701,7 +1733,7 @@ public class JobInfo implements Parcelable {
     /**
      * @hide
      */
-    public final void enforceValidity() {
+    public final void enforceValidity(boolean disallowPrefetchDeadlines) {
         // Check that network estimates require network type and are reasonable values.
         if ((networkDownloadBytes > 0 || networkUploadBytes > 0 || minimumNetworkChunkBytes > 0)
                 && networkRequest == null) {
@@ -1725,9 +1757,10 @@ public class JobInfo implements Parcelable {
             throw new IllegalArgumentException("Minimum chunk size must be positive");
         }
 
+        final boolean hasDeadline = maxExecutionDelayMillis != 0L;
         // Check that a deadline was not set on a periodic job.
         if (isPeriodic) {
-            if (maxExecutionDelayMillis != 0L) {
+            if (hasDeadline) {
                 throw new IllegalArgumentException(
                         "Can't call setOverrideDeadline() on a periodic job.");
             }
@@ -1739,6 +1772,12 @@ public class JobInfo implements Parcelable {
                 throw new IllegalArgumentException(
                         "Can't call addTriggerContentUri() on a periodic job");
             }
+        }
+
+        // Prefetch jobs should not have deadlines
+        if (disallowPrefetchDeadlines && hasDeadline && (flags & FLAG_PREFETCH) != 0) {
+            throw new IllegalArgumentException(
+                    "Can't call setOverrideDeadline() on a prefetch job.");
         }
 
         if (isPersisted) {
