@@ -18,6 +18,7 @@ package android.view;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiThread;
+import android.hardware.HardwareBuffer;
 
 /**
  * Provides an interface to the root-Surface of a View Hierarchy or Window. This
@@ -84,41 +85,43 @@ public interface AttachedSurfaceControl {
      * Note, when using ANativeWindow APIs in conjunction with a NativeActivity Surface or
      * SurfaceView Surface, the buffer producer will already have access to the transform hint and
      * no additional work is needed.
+     *
+     * @see HardwareBuffer
      */
-    default @Surface.Rotation int getSurfaceTransformHint() {
-        return Surface.ROTATION_0;
+    default @SurfaceControl.BufferTransform int getBufferTransformHint() {
+        return SurfaceControl.BUFFER_TRANSFORM_IDENTITY;
     }
 
     /**
-     * Surface transform hint change listener.
-     * @see #getSurfaceTransformHint
+     * Buffer transform hint change listener.
+     * @see #getBufferTransformHint
      */
     @UiThread
-    interface OnSurfaceTransformHintChangedListener {
+    interface OnBufferTransformHintChangedListener {
         /**
          * @param hint new surface transform hint
-         * @see #getSurfaceTransformHint
+         * @see #getBufferTransformHint
          */
-        void onSurfaceTransformHintChanged(@Surface.Rotation int hint);
+        void onBufferTransformHintChanged(@SurfaceControl.BufferTransform int hint);
     }
 
     /**
-     * Registers a surface transform hint changed listener to receive notifications about when
+     * Registers a {@link OnBufferTransformHintChangedListener} to receive notifications about when
      * the transform hint changes.
      *
-     * @see #getSurfaceTransformHint
-     * @see #removeOnSurfaceTransformHintChangedListener
+     * @see #getBufferTransformHint
+     * @see #removeOnBufferTransformHintChangedListener
      */
-    default void addOnSurfaceTransformHintChangedListener(
-            @NonNull OnSurfaceTransformHintChangedListener listener) {
+    default void addOnBufferTransformHintChangedListener(
+            @NonNull OnBufferTransformHintChangedListener listener) {
     }
 
     /**
-     * Unregisters a surface transform hint changed listener.
+     * Unregisters a {@link OnBufferTransformHintChangedListener}.
      *
-     * @see #addOnSurfaceTransformHintChangedListener
+     * @see #addOnBufferTransformHintChangedListener
      */
-    default void removeOnSurfaceTransformHintChangedListener(
-            @NonNull OnSurfaceTransformHintChangedListener listener) {
+    default void removeOnBufferTransformHintChangedListener(
+            @NonNull OnBufferTransformHintChangedListener listener) {
     }
 }

@@ -27,6 +27,7 @@ import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.traces.common.WindowManagerConditionsFactory
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -78,6 +79,11 @@ class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) : OpenAppTransitio
             }
             transitions {
                 device.reopenAppFromOverview(wmHelper)
+                wmHelper.waitFor(
+                        WindowManagerConditionsFactory.hasLayersAnimating().negate(),
+                        WindowManagerConditionsFactory.isWMStateComplete(),
+                        WindowManagerConditionsFactory.isHomeActivityVisible().negate()
+                )
                 wmHelper.waitForFullScreenApp(testApp.component)
             }
         }
