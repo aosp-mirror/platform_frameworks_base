@@ -249,11 +249,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
         @Override
-        public void onLockScreenModeChanged(int mode) {
-            mKeyguardSliceViewController.updateLockScreenMode(mode);
-        }
-
-        @Override
         public void onTimeChanged() {
             refreshTime();
         }
