@@ -110,9 +110,9 @@ public class SplashscreenContentDrawer {
     @VisibleForTesting
     final ColorCache mColorCache;
 
-    SplashscreenContentDrawer(Context context, TransactionPool pool) {
+    SplashscreenContentDrawer(Context context, IconProvider iconProvider, TransactionPool pool) {
         mContext = context;
-        mIconProvider = new IconProvider(context);
+        mIconProvider = iconProvider;
         mTransactionPool = pool;
 
         // Initialize Splashscreen worker thread
