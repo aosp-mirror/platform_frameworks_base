@@ -1320,6 +1320,42 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<Boolean>("android.flash.info.available", boolean.class);
 
     /**
+     * <p>Maximum flashlight brightness level.</p>
+     * <p>If this value is greater than 1, then the device supports controlling the
+     * flashlight brightness level via
+     * {android.hardware.camera2.CameraManager#setTorchStrengthLevel}.
+     * If this value is equal to 1, flashlight brightness control is not supported.
+     * This value will be -1 if the flash unit is not available.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<Integer> FLASH_INFO_STRENGTH_MAXIMUM_LEVEL =
+            new Key<Integer>("android.flash.info.strengthMaximumLevel", int.class);
+
+    /**
+     * <p>Default flashlight brightness level to be set via
+     * {android.hardware.camera2.CameraManager#setTorchStrengthLevel}.</p>
+     * <p>If flash unit is available this will be greater than or equal to 1 and less
+     * or equal to <code>{@link CameraCharacteristics#FLASH_INFO_STRENGTH_MAXIMUM_LEVEL android.flash.info.strengthMaximumLevel}</code>.
+     * If flash unit is not available this will be set to -1.</p>
+     * <p>Setting flashlight brightness above the default level
+     * (i.e.<code>{@link CameraCharacteristics#FLASH_INFO_STRENGTH_DEFAULT_LEVEL android.flash.info.strengthDefaultLevel}</code>) may make the device more
+     * likely to reach thermal throttling conditions and slow down, or drain the
+     * battery quicker than normal. To minimize such issues, it is recommended to
+     * start the flashlight at this default brightness until a user explicitly requests
+     * a brighter level.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#FLASH_INFO_STRENGTH_DEFAULT_LEVEL
+     * @see CameraCharacteristics#FLASH_INFO_STRENGTH_MAXIMUM_LEVEL
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<Integer> FLASH_INFO_STRENGTH_DEFAULT_LEVEL =
+            new Key<Integer>("android.flash.info.strengthDefaultLevel", int.class);
+
+    /**
      * <p>List of hot pixel correction modes for {@link CaptureRequest#HOT_PIXEL_MODE android.hotPixel.mode} that are supported by this
      * camera device.</p>
      * <p>FULL mode camera devices will always support FAST.</p>
