@@ -2999,7 +2999,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertTrue(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
 
         // Expect IME insets frozen state will reset when the activity has no IME focusable window.
-        app.mActivityRecord.forAllWindowsUnchecked(w -> {
+        app.mActivityRecord.forAllWindows(w -> {
             w.mAttrs.flags |= FLAG_ALT_FOCUSABLE_IM;
             return true;
         }, true);

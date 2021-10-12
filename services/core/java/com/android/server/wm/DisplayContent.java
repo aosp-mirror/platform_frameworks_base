@@ -81,7 +81,6 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.DisplayAreaOrganizer.FEATURE_ROOT;
 import static android.window.DisplayAreaOrganizer.FEATURE_WINDOWED_MAGNIFICATION;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_BOOT;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
@@ -699,8 +698,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     // Used to indicate that the movement of child tasks to top will not move the display to top as
     // well and thus won't change the top resumed / focused record
     boolean mDontMoveToTop;
-
-    private final ArrayList<ActivityRecord> mTmpActivityList = new ArrayList<>();
 
     private final Consumer<WindowState> mUpdateWindowsForAnimator = w -> {
         WindowStateAnimator winAnimator = w.mWinAnimator;
@@ -4580,14 +4577,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         for (int i = mExitingTokens.size() - 1; i >= 0; i--) {
             mExitingTokens.get(i).hasVisible = hasVisible;
         }
-
-        // Initialize state of exiting applications.
-        forAllRootTasks(task -> {
-            final ArrayList<ActivityRecord> activities = task.mExitingActivities;
-            for (int j = activities.size() - 1; j >= 0; --j) {
-                activities.get(j).hasVisible = hasVisible;
-            }
-        });
     }
 
     void removeExistingTokensIfPossible() {
@@ -4597,34 +4586,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 mExitingTokens.remove(i);
             }
         }
-
-        // clear first just in case.
-        mTmpActivityList.clear();
-        // Time to remove any exiting applications?
-        forAllRootTasks(task -> {
-            final ArrayList<ActivityRecord> activities = task.mExitingActivities;
-            for (int j = activities.size() - 1; j >= 0; --j) {
-                final ActivityRecord activity = activities.get(j);
-                if (!activity.hasVisible && !mDisplayContent.mClosingApps.contains(activity)
-                        && (!activity.mIsExiting || activity.isEmpty())) {
-                    mTmpActivityList.add(activity);
-                }
-            }
-        });
-        if (!mTmpActivityList.isEmpty()) {
-            // Make sure there is no animation running on this activity, so any windows
-            // associated with it will be removed as soon as their animations are
-            // complete.
-            cancelAnimation();
-        }
-        for (int i = 0; i < mTmpActivityList.size(); ++i) {
-            final ActivityRecord activity = mTmpActivityList.get(i);
-            ProtoLog.v(WM_DEBUG_ADD_REMOVE,
-                    "performLayout: Activity exiting now removed %s", activity);
-            activity.removeIfPossible();
-        }
-        // Clear afterwards so we don't hold references.
-        mTmpActivityList.clear();
     }
 
     @Override

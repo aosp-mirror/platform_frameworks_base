@@ -485,9 +485,6 @@ class Task extends TaskFragment {
 
     private static Exception sTmpException;
 
-    /** ActivityRecords that are exiting, but still on screen for animations. */
-    final ArrayList<ActivityRecord> mExitingActivities = new ArrayList<>();
-
     private boolean mForceShowForAllUsers;
 
     /** When set, will force the task to report as invisible. */
@@ -3321,20 +3318,6 @@ class Task extends TaskFragment {
     @Override
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         super.dump(pw, prefix, dumpAll);
-
-        if (!mExitingActivities.isEmpty()) {
-            final String doublePrefix = prefix + "  ";
-            pw.println();
-            pw.println(prefix + "Exiting application tokens:");
-            for (int i = mExitingActivities.size() - 1; i >= 0; i--) {
-                WindowToken token = mExitingActivities.get(i);
-                pw.print(doublePrefix + "Exiting App #" + i);
-                pw.print(' '); pw.print(token);
-                pw.println(':');
-                token.dump(pw, doublePrefix, dumpAll);
-            }
-            pw.println();
-        }
         mAnimatingActivityRegistry.dump(pw, "AnimatingApps:", prefix);
     }
 

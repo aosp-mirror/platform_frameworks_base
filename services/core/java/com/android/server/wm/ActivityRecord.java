@@ -329,7 +329,6 @@ import com.android.internal.content.ReferrerIntent;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.policy.AttributeCache;
 import com.android.internal.protolog.common.ProtoLog;
-import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.util.XmlUtils;
 import com.android.server.LocalServices;
 import com.android.server.am.AppTimeTracker;
@@ -1443,8 +1442,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (getDisplayContent() != null) {
                 getDisplayContent().mClosingApps.remove(this);
             }
-        } else if (oldTask != null && oldTask.getRootTask() != null) {
-            task.getRootTask().mExitingActivities.remove(this);
         }
         final Task rootTask = getRootTask();
 
@@ -3832,22 +3829,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             getDisplayContent().mNoAnimationNotifyOnTransitionFinished.add(token);
         }
 
-        final Task rootTask = getRootTask();
         if (delayed && !isEmpty()) {
             // set the token aside because it has an active animation to be finished
             ProtoLog.v(WM_DEBUG_ADD_REMOVE,
                     "removeAppToken make exiting: %s", this);
-            if (rootTask != null) {
-                rootTask.mExitingActivities.add(this);
-            }
             mIsExiting = true;
         } else {
             // Make sure there is no animation running on this token, so any windows associated
             // with it will be removed as soon as their animations are complete
             cancelAnimation();
-            if (rootTask != null) {
-                rootTask.mExitingActivities.remove(this);
-            }
             removeIfPossible();
         }
 
@@ -4202,23 +4192,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
         }
         return candidate;
-    }
-
-    @Override
-    boolean forAllWindows(ToBooleanFunction<WindowState> callback, boolean traverseTopToBottom) {
-        // For legacy reasons we process the TaskStack.mExitingActivities first in DisplayContent
-        // before the non-exiting app tokens. So, we skip the exiting app tokens here.
-        // TODO: Investigate if we need to continue to do this or if we can just process them
-        // in-order.
-        if (mIsExiting && !forAllWindowsUnchecked(WindowState::waitingForReplacement, true)) {
-            return false;
-        }
-        return forAllWindowsUnchecked(callback, traverseTopToBottom);
-    }
-
-    boolean forAllWindowsUnchecked(ToBooleanFunction<WindowState> callback,
-            boolean traverseTopToBottom) {
-        return super.forAllWindows(callback, traverseTopToBottom);
     }
 
     @Override
