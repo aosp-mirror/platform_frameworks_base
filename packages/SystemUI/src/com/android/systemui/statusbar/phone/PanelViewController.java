@@ -385,11 +385,16 @@ public abstract class PanelViewController {
 
             final boolean expand;
             if (event.getActionMasked() == MotionEvent.ACTION_CANCEL || forceCancel) {
-                // If we get a cancel, put the shade back to the state it was in when the gesture
-                // started
-                if (onKeyguard) {
+                // If the keyguard is fading away, don't expand it again. This can happen if you're
+                // swiping to unlock, the app below the keyguard is in landscape, and the screen
+                // rotates while your finger is still down after the swipe to unlock.
+                if (mKeyguardStateController.isKeyguardFadingAway()) {
+                    expand = false;
+                } else if (onKeyguard) {
                     expand = true;
                 } else {
+                    // If we get a cancel, put the shade back to the state it was in when the
+                    // gesture started
                     expand = !mPanelClosedOnDown;
                 }
             } else {

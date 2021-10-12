@@ -200,10 +200,10 @@ public class Interpolators {
     /**
      * Interpolate alpha for notifications background scrim during shade expansion.
      * @param fraction Shade expansion fraction
-     * @param forNotification If we want the alpha of the notification shade or the scrim.
+     * @param forUiContent If we want the alpha of the scrims, or ui that's on top of them.
      */
-    public static float getNotificationScrimAlpha(float fraction, boolean forNotification) {
-        if (forNotification) {
+    public static float getNotificationScrimAlpha(float fraction, boolean forUiContent) {
+        if (forUiContent) {
             fraction = MathUtils.constrainedMap(0f, 1f, 0.3f, 1f, fraction);
         } else {
             fraction = MathUtils.constrainedMap(0f, 1f, 0f, 0.5f, fraction);

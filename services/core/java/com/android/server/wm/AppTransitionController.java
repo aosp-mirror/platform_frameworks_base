@@ -124,6 +124,7 @@ public class AppTransitionController {
     @interface TransitContainerType {}
 
     private final ArrayMap<WindowContainer, Integer> mTempTransitionReasons = new ArrayMap<>();
+    private final ArrayList<WindowContainer> mTempTransitionWindows = new ArrayList<>();
 
     AppTransitionController(WindowManagerService service, DisplayContent displayContent) {
         mService = service;
@@ -523,26 +524,44 @@ public class AppTransitionController {
         }
     }
 
+    private boolean transitionMayContainNonAppWindows(@TransitionOldType int transit) {
+        // We don't want to have the client to animate any non-app windows.
+        // Having {@code transit} of those types doesn't mean it will contain non-app windows, but
+        // non-app windows will only be included with those transition types. And we don't currently
+        // have any use case of those for TaskFragment transition.
+        // @see NonAppWindowAnimationAdapter#startNonAppWindowAnimations
+        if (transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY
+                || transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER
+                || transit == TRANSIT_OLD_TASK_OPEN || transit == TRANSIT_OLD_TASK_TO_FRONT
+                || transit == TRANSIT_OLD_WALLPAPER_CLOSE) {
+            return true;
+        }
+
+        // Check if the wallpaper is going to participate in the transition. We don't want to have
+        // the client to animate the wallpaper windows.
+        // @see WallpaperAnimationAdapter#startWallpaperAnimations
+        return mDisplayContent.mWallpaperController.isWallpaperVisible();
+    }
+
     /**
-     * Overrides the pending transition with the remote animation defined by the
-     * {@link ITaskFragmentOrganizer} if all windows in the transition are children of
-     * {@link TaskFragment} that are organized by the same organizer.
-     *
-     * @return {@code true} if the transition is overridden.
+     * Finds the common {@link android.window.TaskFragmentOrganizer} that organizes all app windows
+     * in the current transition.
+     * @return {@code null} if there is no such organizer, or if there are more than one.
      */
-    private boolean overrideWithTaskFragmentRemoteAnimation(@TransitionOldType int transit,
-            ArraySet<Integer> activityTypes) {
-        final ArrayList<WindowContainer> allWindows = new ArrayList<>();
-        allWindows.addAll(mDisplayContent.mClosingApps);
-        allWindows.addAll(mDisplayContent.mOpeningApps);
-        allWindows.addAll(mDisplayContent.mChangingContainers);
+    @Nullable
+    private ITaskFragmentOrganizer findTaskFragmentOrganizerForAllWindows() {
+        mTempTransitionWindows.clear();
+        mTempTransitionWindows.addAll(mDisplayContent.mClosingApps);
+        mTempTransitionWindows.addAll(mDisplayContent.mOpeningApps);
+        mTempTransitionWindows.addAll(mDisplayContent.mChangingContainers);
 
         // It should only animated by the organizer if all windows are below the same leaf Task.
         Task leafTask = null;
-        for (int i = allWindows.size() - 1; i >= 0; i--) {
-            final ActivityRecord r = getAppFromContainer(allWindows.get(i));
+        for (int i = mTempTransitionWindows.size() - 1; i >= 0; i--) {
+            final ActivityRecord r = getAppFromContainer(mTempTransitionWindows.get(i));
             if (r == null) {
-                return false;
+                leafTask = null;
+                break;
             }
             // The activity may be a child of embedded Task, but we want to find the owner Task.
             // As a result, find the organized TaskFragment first.
@@ -561,26 +580,31 @@ public class AppTransitionController {
                     ? organizedTaskFragment.getTask()
                     : r.getTask();
             if (task == null) {
-                return false;
+                leafTask = null;
+                break;
             }
             // We don't want the organizer to handle transition of other non-embedded Task.
             if (leafTask != null && leafTask != task) {
-                return false;
+                leafTask = null;
+                break;
             }
             final ActivityRecord rootActivity = task.getRootActivity();
             // We don't want the organizer to handle transition when the whole app is closing.
             if (rootActivity == null) {
-                return false;
+                leafTask = null;
+                break;
             }
             // We don't want the organizer to handle transition of non-embedded activity of other
             // app.
             if (r.getUid() != rootActivity.getUid() && !r.isEmbedded()) {
-                return false;
+                leafTask = null;
+                break;
             }
             leafTask = task;
         }
+        mTempTransitionWindows.clear();
         if (leafTask == null) {
-            return false;
+            return null;
         }
 
         // We don't support remote animation for Task with multiple TaskFragmentOrganizers.
@@ -599,12 +623,28 @@ public class AppTransitionController {
         if (hasMultipleOrganizers) {
             ProtoLog.e(WM_DEBUG_APP_TRANSITIONS, "We don't support remote animation for"
                     + " Task with multiple TaskFragmentOrganizers.");
+            return null;
+        }
+        return organizer[0];
+    }
+
+    /**
+     * Overrides the pending transition with the remote animation defined by the
+     * {@link ITaskFragmentOrganizer} if all windows in the transition are children of
+     * {@link TaskFragment} that are organized by the same organizer.
+     *
+     * @return {@code true} if the transition is overridden.
+     */
+    private boolean overrideWithTaskFragmentRemoteAnimation(@TransitionOldType int transit,
+            ArraySet<Integer> activityTypes) {
+        if (transitionMayContainNonAppWindows(transit)) {
             return false;
         }
 
-        final RemoteAnimationDefinition definition = organizer[0] != null
+        final ITaskFragmentOrganizer organizer = findTaskFragmentOrganizerForAllWindows();
+        final RemoteAnimationDefinition definition = organizer != null
                 ? mDisplayContent.mAtmService.mTaskFragmentOrganizerController
-                    .getRemoteAnimationDefinition(organizer[0])
+                    .getRemoteAnimationDefinition(organizer)
                 : null;
         final RemoteAnimationAdapter adapter = definition != null
                 ? definition.getAdapter(transit, activityTypes)

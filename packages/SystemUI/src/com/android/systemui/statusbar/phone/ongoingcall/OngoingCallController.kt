@@ -34,6 +34,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
@@ -60,8 +61,11 @@ class OngoingCallController @Inject constructor(
     private val logger: OngoingCallLogger,
     private val dumpManager: DumpManager,
     private val statusBarWindowController: Optional<StatusBarWindowController>,
+    private val swipeStatusBarAwayGestureHandler: Optional<SwipeStatusBarAwayGestureHandler>,
+    private val statusBarStateController: StatusBarStateController,
 ) : CallbackController<OngoingCallListener>, Dumpable {
 
+    private var isFullscreen: Boolean = false
     /** Non-null if there's an active call notification. */
     private var callNotificationInfo: CallNotificationInfo? = null
     /** True if the application managing the call is visible to the user. */
@@ -96,7 +100,8 @@ class OngoingCallController @Inject constructor(
                         entry.sbn.notification.contentIntent?.intent,
                         entry.sbn.uid,
                         entry.sbn.notification.extras.getInt(
-                                Notification.EXTRA_CALL_TYPE, -1) == CALL_TYPE_ONGOING
+                                Notification.EXTRA_CALL_TYPE, -1) == CALL_TYPE_ONGOING,
+                        statusBarSwipedAway = callNotificationInfo?.statusBarSwipedAway ?: false
                 )
                 if (newOngoingCallInfo == callNotificationInfo) {
                     return
@@ -122,6 +127,7 @@ class OngoingCallController @Inject constructor(
         dumpManager.registerDumpable(this)
         if (featureFlags.isOngoingCallStatusBarChipEnabled) {
             notifCollection.addCollectionListener(notifListener)
+            statusBarStateController.addCallback(statusBarStateListener)
         }
     }
 
@@ -175,10 +181,8 @@ class OngoingCallController @Inject constructor(
 
         val currentChipView = chipView
         val timeView = currentChipView?.getTimeView()
-        val backgroundView =
-            currentChipView?.findViewById<View>(R.id.ongoing_call_chip_background)
 
-        if (currentChipView != null && timeView != null && backgroundView != null) {
+        if (currentChipView != null && timeView != null) {
             if (currentCallNotificationInfo.hasValidStartTime()) {
                 timeView.setShouldHideText(false)
                 timeView.base = currentCallNotificationInfo.callStartTime -
@@ -189,22 +193,18 @@ class OngoingCallController @Inject constructor(
                 timeView.setShouldHideText(true)
                 timeView.stop()
             }
-
-            currentCallNotificationInfo.intent?.let { intent ->
-                currentChipView.setOnClickListener {
-                    logger.logChipClicked()
-                    activityStarter.postStartActivityDismissingKeyguard(
-                            intent,
-                            0,
-                            ActivityLaunchAnimator.Controller.fromView(
-                                    backgroundView,
-                                    InteractionJankMonitor.CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP)
-                    )
-                }
-            }
+            updateChipClickListener()
 
             setUpUidObserver(currentCallNotificationInfo)
-            statusBarWindowController.ifPresent { it.setIsCallOngoing(true) }
+            if (!currentCallNotificationInfo.statusBarSwipedAway) {
+                statusBarWindowController.ifPresent {
+                    it.setOngoingProcessRequiresStatusBarVisible(true)
+                }
+                // TODO(b/195839150): Only listen for the gesture when in immersive mode.
+                swipeStatusBarAwayGestureHandler.ifPresent {
+                    it.addOnGestureDetectedCallback(TAG, this::onSwipeAwayGestureDetected)
+                }
+            }
             mListeners.forEach { l -> l.onOngoingCallStateChanged(animate = true) }
         } else {
             // If we failed to update the chip, don't store the call info. Then [hasOngoingCall]
@@ -214,6 +214,30 @@ class OngoingCallController @Inject constructor(
             if (DEBUG) {
                 Log.w(TAG, "Ongoing call chip view could not be found; " +
                         "Not displaying chip in status bar")
+            }
+        }
+    }
+
+    private fun updateChipClickListener() {
+        if (callNotificationInfo == null) { return }
+        if (isFullscreen && !featureFlags.isOngoingCallInImmersiveChipTapEnabled) {
+            chipView?.setOnClickListener(null)
+        } else {
+            val currentChipView = chipView
+            val backgroundView =
+                currentChipView?.findViewById<View>(R.id.ongoing_call_chip_background)
+            val intent = callNotificationInfo?.intent
+            if (currentChipView != null && backgroundView != null && intent != null) {
+                currentChipView.setOnClickListener {
+                    logger.logChipClicked()
+                    activityStarter.postStartActivityDismissingKeyguard(
+                        intent,
+                        0,
+                        ActivityLaunchAnimator.Controller.fromView(
+                            backgroundView,
+                            InteractionJankMonitor.CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP)
+                    )
+                }
             }
         }
     }
@@ -271,7 +295,8 @@ class OngoingCallController @Inject constructor(
     private fun removeChip() {
         callNotificationInfo = null
         tearDownChipView()
-        statusBarWindowController.ifPresent { it.setIsCallOngoing(false) }
+        statusBarWindowController.ifPresent { it.setOngoingProcessRequiresStatusBarVisible(false) }
+        swipeStatusBarAwayGestureHandler.ifPresent { it.removeOnGestureDetectedCallback(TAG) }
         mListeners.forEach { l -> l.onOngoingCallStateChanged(animate = true) }
         if (uidObserver != null) {
             iActivityManager.unregisterUidObserver(uidObserver)
@@ -286,13 +311,41 @@ class OngoingCallController @Inject constructor(
         return this.findViewById(R.id.ongoing_call_chip_time)
     }
 
+   /**
+    * If there's an active ongoing call, then we will force the status bar to always show, even if
+    * the user is in immersive mode. However, we also want to give users the ability to swipe away
+    * the status bar if they need to access the area under the status bar.
+    *
+    * This method updates the status bar window appropriately when the swipe away gesture is
+    * detected.
+    */
+   private fun onSwipeAwayGestureDetected() {
+       if (DEBUG) { Log.d(TAG, "Swipe away gesture detected") }
+       callNotificationInfo = callNotificationInfo?.copy(statusBarSwipedAway = true)
+       statusBarWindowController.ifPresent {
+           it.setOngoingProcessRequiresStatusBarVisible(false)
+       }
+       swipeStatusBarAwayGestureHandler.ifPresent {
+           it.removeOnGestureDetectedCallback(TAG)
+       }
+   }
+
+    private val statusBarStateListener = object : StatusBarStateController.StateListener {
+        override fun onFullscreenStateChanged(isFullscreen: Boolean) {
+            this@OngoingCallController.isFullscreen = isFullscreen
+            updateChipClickListener()
+        }
+    }
+
     private data class CallNotificationInfo(
         val key: String,
         val callStartTime: Long,
         val intent: Intent?,
         val uid: Int,
         /** True if the call is currently ongoing (as opposed to incoming, screening, etc.). */
-        val isOngoing: Boolean
+        val isOngoing: Boolean,
+        /** True if the user has swiped away the status bar while in this phone call. */
+        val statusBarSwipedAway: Boolean
     ) {
         /**
          * Returns true if the notification information has a valid call start time.
