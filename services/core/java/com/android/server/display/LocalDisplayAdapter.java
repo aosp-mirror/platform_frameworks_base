@@ -993,12 +993,12 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
             mGameContentTypeRequested = on;
 
-            if (!mGameContentTypeSupported) {
-                Slog.d(TAG, "Unable to set game content type because the connected "
-                        + "display does not support game content type.");
-                return;
-            }
-
+            // Even if game content type is not supported on the connected display we
+            // propagate the requested state down to the HAL. This is because some devices
+            // with external displays, such as Android TV set-top boxes, use this signal
+            // to disable/enable on-device processing.
+            // TODO(b/202378408) set game content type only if it's supported once we have a
+            // separate API for disabling on-device processing.
             mSurfaceControlProxy.setGameContentType(getDisplayTokenLocked(), on);
         }
 

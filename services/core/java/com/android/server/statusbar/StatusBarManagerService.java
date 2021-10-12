@@ -23,6 +23,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
 import android.app.ITransientNotificationCallback;
@@ -1689,7 +1690,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     @Override
-    public int requestAddTile(
+    public void requestAddTile(
             @NonNull ComponentName componentName,
             @NonNull CharSequence label,
             @NonNull Icon icon,
@@ -1710,13 +1711,35 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
         // Check current user
         if (userId != currentUser) {
-            return StatusBarManager.TILE_ADD_REQUEST_ANSWER_FAILED_NOT_CURRENT_USER;
+            try {
+                callback.onTileRequest(StatusBarManager.TILE_ADD_REQUEST_ERROR_NOT_CURRENT_USER);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "requestAddTile", e);
+            }
+            return;
         }
 
         // We've checked that the package, component name and uid all match.
         ResolveInfo r = isComponentValidTileService(componentName, userId);
-        if (r == null) {
-            return StatusBarManager.TILE_ADD_REQUEST_ANSWER_FAILED_BAD_COMPONENT;
+        if (r == null || !r.serviceInfo.exported) {
+            try {
+                callback.onTileRequest(StatusBarManager.TILE_ADD_REQUEST_ERROR_BAD_COMPONENT);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "requestAddTile", e);
+            }
+            return;
+        }
+
+        final int procState = mActivityManagerInternal.getUidProcessState(callingUid);
+        if (ActivityManager.RunningAppProcessInfo.procStateToImportance(procState)
+                != ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+            try {
+                callback.onTileRequest(
+                        StatusBarManager.TILE_ADD_REQUEST_ERROR_APP_NOT_IN_FOREGROUND);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "requestAddTile", e);
+            }
+            return;
         }
 
         IAddTileResultCallback proxyCallback = new IAddTileResultCallback.Stub() {
@@ -1734,12 +1757,16 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         if (mBar != null) {
             try {
                 mBar.requestAddTile(componentName, appName, label, icon, proxyCallback);
-                return StatusBarManager.TILE_ADD_REQUEST_ANSWER_SUCCESS;
             } catch (RemoteException e) {
                 Slog.e(TAG, "requestAddTile", e);
             }
+            return;
         }
-        return StatusBarManager.TILE_ADD_REQUEST_ANSWER_FAILED_UNKNOWN_REASON;
+        try {
+            callback.onTileRequest(StatusBarManager.TILE_ADD_REQUEST_ERROR_NO_STATUS_BAR_SERVICE);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "requestAddTile", e);
+        }
     }
 
     public String[] getStatusBarIcons() {

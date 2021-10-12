@@ -69,6 +69,7 @@ import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.phone.SystemUIHostDialogProvider;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallLogger;
+import com.android.systemui.statusbar.phone.ongoingcall.SwipeStatusBarAwayGestureHandler;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -255,15 +256,29 @@ public interface StatusBarDependenciesModule {
             IActivityManager iActivityManager,
             OngoingCallLogger logger,
             DumpManager dumpManager,
-            StatusBarWindowController statusBarWindowController) {
+            StatusBarWindowController statusBarWindowController,
+            SwipeStatusBarAwayGestureHandler swipeStatusBarAwayGestureHandler) {
         Optional<StatusBarWindowController> windowController =
                 featureFlags.isOngoingCallInImmersiveEnabled()
                         ? Optional.of(statusBarWindowController)
                         : Optional.empty();
+        Optional<SwipeStatusBarAwayGestureHandler> gestureHandler =
+                featureFlags.isOngoingCallInImmersiveEnabled()
+                        ? Optional.of(swipeStatusBarAwayGestureHandler)
+                        : Optional.empty();
         OngoingCallController ongoingCallController =
                 new OngoingCallController(
-                        notifCollection, featureFlags, systemClock, activityStarter, mainExecutor,
-                        iActivityManager, logger, dumpManager, windowController);
+                        notifCollection,
+                        featureFlags,
+                        systemClock,
+                        activityStarter,
+                        mainExecutor,
+                        iActivityManager,
+                        logger,
+                        dumpManager,
+                        windowController,
+                        gestureHandler
+                );
         ongoingCallController.init();
         return ongoingCallController;
     }

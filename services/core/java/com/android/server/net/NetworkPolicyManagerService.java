@@ -408,8 +408,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String ATTR_NETWORK_TYPES = "networkTypes";
     private static final String ATTR_XML_UTILS_NAME = "name";
 
-    private static final String ACTION_ALLOW_BACKGROUND =
-            "com.android.server.net.action.ALLOW_BACKGROUND";
     private static final String ACTION_SNOOZE_WARNING =
             "com.android.server.net.action.SNOOZE_WARNING";
     private static final String ACTION_SNOOZE_RAPID =
@@ -974,11 +972,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             mContext.registerReceiver(
                     mStatsReceiver, statsFilter, READ_NETWORK_USAGE_HISTORY, mHandler);
 
-            // listen for restrict background changes from notifications
-            final IntentFilter allowFilter = new IntentFilter(ACTION_ALLOW_BACKGROUND);
-            mContext.registerReceiver(mAllowReceiver, allowFilter, MANAGE_NETWORK_POLICY, mHandler,
-                    Context.RECEIVER_EXPORTED);
-
             // Listen for snooze from notifications
             mContext.registerReceiver(mSnoozeReceiver,
                     new IntentFilter(ACTION_SNOOZE_WARNING), MANAGE_NETWORK_POLICY, mHandler);
@@ -1192,20 +1185,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 updateNetworkEnabledNL();
                 updateNotificationsNL();
             }
-        }
-    };
-
-    /**
-     * Receiver that watches for {@link Notification} control of
-     * {@link #mRestrictBackground}.
-     */
-    final private BroadcastReceiver mAllowReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // on background handler thread, and verified MANAGE_NETWORK_POLICY
-            // permission above.
-
-            setRestrictBackground(false);
         }
     };
 
@@ -5520,10 +5499,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(token);
         }
-    }
-
-    private static Intent buildAllowBackgroundDataIntent() {
-        return new Intent(ACTION_ALLOW_BACKGROUND);
     }
 
     private static Intent buildSnoozeWarningIntent(NetworkTemplate template, String targetPackage) {

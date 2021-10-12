@@ -9723,6 +9723,14 @@ public final class Settings {
         public static final String NOTIFICATION_DISMISS_RTL = "notification_dismiss_rtl";
 
         /**
+         * Whether the app-level notification setting is represented by a manifest permission.
+         *
+         * @hide
+         */
+        public static final String NOTIFICATION_PERMISSION_ENABLED =
+                "notification_permission_enabled";
+
+        /**
          * Comma separated list of QS tiles that have been auto-added already.
          * @hide
          */
@@ -11050,75 +11058,6 @@ public final class Settings {
         public static final String HDMI_CONTROL_ENABLED = "hdmi_control_enabled";
 
         /**
-         * Controls whether volume control commands via HDMI CEC are enabled. (0 = false, 1 =
-         * true).
-         *
-         * <p>Effects on different device types:
-         * <table>
-         *     <tr><th>HDMI CEC device type</th><th>0: disabled</th><th>1: enabled</th></tr>
-         *     <tr>
-         *         <td>TV (type: 0)</td>
-         *         <td>Per CEC specification.</td>
-         *         <td>TV changes system volume. TV no longer reacts to incoming volume changes
-         *         via {@code <User Control Pressed>}. TV no longer handles {@code <Report Audio
-         *         Status>}.</td>
-         *     </tr>
-         *     <tr>
-         *         <td>Playback device (type: 4)</td>
-         *         <td>Device sends volume commands to TV/Audio system via {@code <User Control
-         *         Pressed>}</td>
-         *         <td>Device does not send volume commands via {@code <User Control Pressed>}.</td>
-         *     </tr>
-         *     <tr>
-         *         <td>Audio device (type: 5)</td>
-         *         <td>Full "System Audio Control" capabilities.</td>
-         *         <td>Audio device no longer reacts to incoming {@code <User Control Pressed>}
-         *         volume commands. Audio device no longer reports volume changes via {@code
-         *         <Report Audio Status>}.</td>
-         *     </tr>
-         * </table>
-         *
-         * <p> Due to the resulting behavior, usage on TV and Audio devices is discouraged.
-         *
-         * @hide
-         * @see android.hardware.hdmi.HdmiControlManager#setHdmiCecVolumeControlEnabled(boolean)
-         */
-        @Readable
-        public static final String HDMI_CONTROL_VOLUME_CONTROL_ENABLED =
-                "hdmi_control_volume_control_enabled";
-
-        /**
-        * Whether HDMI System Audio Control feature is enabled. If enabled, TV will try to turn on
-        * system audio mode if there's a connected CEC-enabled AV Receiver. Then audio stream will
-        * be played on AVR instead of TV spaeker. If disabled, the system audio mode will never be
-        * activated.
-        * @hide
-        */
-        @Readable
-        public static final String HDMI_SYSTEM_AUDIO_CONTROL_ENABLED =
-                "hdmi_system_audio_control_enabled";
-
-        /**
-         * Whether HDMI Routing Control feature is enabled. If enabled, the switch device will
-         * route to the correct input source on receiving Routing Control related messages. If
-         * disabled, you can only switch the input via controls on this device.
-         * @hide
-         */
-        @Readable
-        public static final String HDMI_CEC_SWITCH_ENABLED =
-                "hdmi_cec_switch_enabled";
-
-        /**
-         * Whether TV will automatically turn on upon reception of the CEC command
-         * &lt;Text View On&gt; or &lt;Image View On&gt;. (0 = false, 1 = true)
-         *
-         * @hide
-         */
-        @Readable
-        public static final String HDMI_CONTROL_AUTO_WAKEUP_ENABLED =
-                "hdmi_control_auto_wakeup_enabled";
-
-        /**
          * Whether TV will also turn off other CEC devices when it goes to standby mode.
          * (0 = false, 1 = true)
          *
@@ -11127,30 +11066,6 @@ public final class Settings {
         @Readable
         public static final String HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED =
                 "hdmi_control_auto_device_off_enabled";
-
-        /**
-         * Property to decide which devices the playback device can send a <Standby> message to
-         * upon going to sleep. It additionally controls whether a playback device attempts to turn
-         * on the connected Audio system when waking up. Supported values are:
-         * <ul>
-         * <li>{@link HdmiControlManager#POWER_CONTROL_MODE_TV} Upon going to sleep, device
-         * sends {@code <Standby>} to TV only. Upon waking up, device does not turn on the Audio
-         * system via {@code <System Audio Mode Request>}.</li>
-         * <li>{@link HdmiControlManager#POWER_CONTROL_MODE_TV_AND_AUDIO_SYSTEM} Upon going to
-         * sleep, sends {@code <Standby>} to TV and Audio system. Upon waking up, device attempts
-         * to turn on the Audio system via {@code <System Audio Mode Request>}.</li>
-         * <li>{@link HdmiControlManager#POWER_CONTROL_MODE_BROADCAST} Upon going to sleep,
-         * device sends {@code <Standby>} to all devices in the network. Upon waking up, device
-         * attempts to turn on the Audio system via {@code <System Audio Mode Request>}.</li>
-         * <li>{@link HdmiControlManager#POWER_CONTROL_MODE_NONE} Upon going to sleep, device
-         * does not send any {@code <Standby>} message. Upon waking up, device does not turn on the
-         * Audio system via {@code <System Audio Mode Request>}.</li>
-         * </ul>
-         *
-         * @hide
-         */
-        public static final String HDMI_CONTROL_SEND_STANDBY_ON_SLEEP =
-                "hdmi_control_send_standby_on_sleep";
 
         /**
          * Whether or not media is shown automatically when bypassing as a heads up.

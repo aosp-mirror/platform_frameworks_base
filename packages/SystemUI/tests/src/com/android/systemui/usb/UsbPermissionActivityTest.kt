@@ -31,7 +31,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.lang.Exception
 
 /**
  * UsbPermissionActivityTest
@@ -54,7 +53,9 @@ class UsbPermissionActivityTest : SysuiTestCase() {
                 putExtra(Intent.EXTRA_INTENT, PendingIntent.getBroadcast(
                         mContext,
                         334,
-                        Intent("NO_ACTION"),
+                        Intent("NO_ACTION").apply {
+                                setPackage("com.android.systemui.tests")
+                        },
                         PendingIntent.FLAG_MUTABLE))
                 putExtra(UsbManager.EXTRA_ACCESSORY, UsbAccessory(
                         "manufacturer",
