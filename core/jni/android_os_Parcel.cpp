@@ -635,6 +635,22 @@ static jboolean android_os_Parcel_hasFileDescriptors(jlong nativePtr)
     return ret;
 }
 
+static jboolean android_os_Parcel_hasFileDescriptorsInRange(JNIEnv* env, jclass clazz,
+                                                            jlong nativePtr, jint offset,
+                                                            jint length) {
+    Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
+    if (parcel != NULL) {
+        bool result;
+        status_t err = parcel->hasFileDescriptorsInRange(offset, length, result);
+        if (err != NO_ERROR) {
+            signalExceptionForError(env, clazz, err);
+            return JNI_FALSE;
+        }
+        return result ? JNI_TRUE : JNI_FALSE;
+    }
+    return JNI_FALSE;
+}
+
 // String tries to allocate itself on the stack, within a known size, but will
 // make a heap allocation if not.
 template <size_t StackReserve>
@@ -828,6 +844,7 @@ static const JNINativeMethod gParcelMethods[] = {
     {"nativeAppendFrom",          "(JJII)V", (void*)android_os_Parcel_appendFrom},
     // @CriticalNative
     {"nativeHasFileDescriptors",  "(J)Z", (void*)android_os_Parcel_hasFileDescriptors},
+    {"nativeHasFileDescriptorsInRange",  "(JII)Z", (void*)android_os_Parcel_hasFileDescriptorsInRange},
     {"nativeWriteInterfaceToken", "(JLjava/lang/String;)V", (void*)android_os_Parcel_writeInterfaceToken},
     {"nativeEnforceInterface",    "(JLjava/lang/String;)V", (void*)android_os_Parcel_enforceInterface},
 
