@@ -84,6 +84,13 @@ public final class CardEmulation {
     public static final String EXTRA_SERVICE_COMPONENT = "component";
 
     /**
+     * The caller userId extra for {@link #ACTION_CHANGE_DEFAULT}.
+     *
+     * @see #ACTION_CHANGE_DEFAULT
+     */
+    public static final String EXTRA_USERID = "android.nfc.cardemulation.extra.USERID";
+
+    /**
      * Category used for NFC payment services.
      */
     public static final String CATEGORY_PAYMENT = "payment";

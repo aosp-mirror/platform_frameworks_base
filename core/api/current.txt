@@ -27373,6 +27373,7 @@ package android.nfc.cardemulation {
     field public static final String CATEGORY_PAYMENT = "payment";
     field public static final String EXTRA_CATEGORY = "category";
     field public static final String EXTRA_SERVICE_COMPONENT = "component";
+    field public static final String EXTRA_USERID = "android.nfc.cardemulation.extra.USERID";
     field public static final int SELECTION_MODE_ALWAYS_ASK = 1; // 0x1
     field public static final int SELECTION_MODE_ASK_IF_CONFLICT = 2; // 0x2
     field public static final int SELECTION_MODE_PREFER_DEFAULT = 0; // 0x0
