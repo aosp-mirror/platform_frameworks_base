@@ -209,7 +209,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private ConfigurationController.ConfigurationListener mConfigurationListener =
             new ConfigurationController.ConfigurationListener() {
                 @Override
-                public void onOverlayChanged() {
+                public void onThemeChanged() {
                     mSecurityViewFlipperController.reloadColors();
                 }
 

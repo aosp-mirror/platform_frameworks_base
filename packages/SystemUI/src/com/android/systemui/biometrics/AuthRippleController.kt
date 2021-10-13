@@ -272,9 +272,6 @@ class AuthRippleController @Inject constructor(
             override fun onThemeChanged() {
                 updateRippleColor()
             }
-            override fun onOverlayChanged() {
-                updateRippleColor()
-            }
     }
 
     private val udfpsControllerCallback =

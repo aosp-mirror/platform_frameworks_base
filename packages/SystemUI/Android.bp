@@ -50,6 +50,16 @@ java_library {
     srcs: ["src/com/android/systemui/EventLogTags.logtags"],
 }
 
+filegroup {
+    name: "ReleaseJavaFiles",
+    srcs: ["src/com/android/systemui/flags/FeatureFlagManager.java"],
+}
+
+filegroup {
+    name: "DebugJavaFiles",
+    srcs: ["src-debug/com/android/systemui/flags/FeatureFlagManager.java"],
+}
+
 android_library {
     name: "SystemUI-core",
     srcs: [
@@ -57,6 +67,12 @@ android_library {
         "src/**/*.java",
         "src/**/I*.aidl",
     ],
+    product_variables: {
+        debuggable: {
+            srcs: [":DebugJavaFiles"],
+            exclude_srcs: [":ReleaseJavaFiles"],
+        },
+    },
     resource_dirs: [
         "res-product",
         "res-keyguard",

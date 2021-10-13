@@ -25,7 +25,6 @@ import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
@@ -248,7 +247,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     }
 
     @Override
-    public void onOverlayChanged() {
+    public void onThemeChanged() {
         onDensityOrFontScaleChanged();
     }
 
