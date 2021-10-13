@@ -32,17 +32,18 @@ import static com.android.wm.shell.pip.PipAnimationController.isOutPipDirection;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_REMOVE_PIP;
 
+import android.app.ActivityManager;
 import android.app.TaskInfo;
 import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
-import android.window.WindowContainerTransactionCallback;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -57,11 +58,14 @@ import com.android.wm.shell.transition.Transitions;
  */
 public class PipTransition extends PipTransitionController {
 
+    private static final String TAG = PipTransition.class.getSimpleName();
+
     private final PipTransitionState mPipTransitionState;
     private final int mEnterExitAnimationDuration;
     private @PipAnimationController.AnimationType int mOneShotAnimationType = ANIM_TYPE_BOUNDS;
     private Transitions.TransitionFinishCallback mFinishCallback;
     private Rect mExitDestinationBounds = new Rect();
+    private IBinder mExitTransition = null;
 
     public PipTransition(Context context,
             PipBoundsState pipBoundsState,
@@ -96,7 +100,7 @@ public class PipTransition extends PipTransitionController {
     public void startTransition(Rect destinationBounds, WindowContainerTransaction out) {
         if (destinationBounds != null) {
             mExitDestinationBounds.set(destinationBounds);
-            mTransitions.startTransition(TRANSIT_EXIT_PIP, out, this);
+            mExitTransition = mTransitions.startTransition(TRANSIT_EXIT_PIP, out, this);
         } else {
             mTransitions.startTransition(TRANSIT_REMOVE_PIP, out, this);
         }
@@ -109,14 +113,19 @@ public class PipTransition extends PipTransitionController {
             @android.annotation.NonNull SurfaceControl.Transaction finishTransaction,
             @android.annotation.NonNull Transitions.TransitionFinishCallback finishCallback) {
 
-        if (info.getType() == TRANSIT_EXIT_PIP && info.getChanges().size() == 1) {
-            final TransitionInfo.Change change = info.getChanges().get(0);
-            mFinishCallback = finishCallback;
-            startTransaction.apply();
-            boolean success = startExpandAnimation(change.getTaskInfo(), change.getLeash(),
-                    new Rect(mExitDestinationBounds));
-            mExitDestinationBounds.setEmpty();
-            return success;
+        if (mExitTransition == transition || info.getType() == TRANSIT_EXIT_PIP) {
+            mExitTransition = null;
+            if (info.getChanges().size() == 1) {
+                final TransitionInfo.Change change = info.getChanges().get(0);
+                mFinishCallback = finishCallback;
+                startTransaction.apply();
+                boolean success = startExpandAnimation(change.getTaskInfo(), change.getLeash(),
+                        new Rect(mExitDestinationBounds));
+                mExitDestinationBounds.setEmpty();
+                return success;
+            } else {
+                Log.e(TAG, "Got an exit-pip transition with unexpected change-list");
+            }
         }
 
         if (info.getType() == TRANSIT_REMOVE_PIP) {
@@ -183,24 +192,56 @@ public class PipTransition extends PipTransitionController {
     }
 
     @Override
+    public void onTransitionMerged(@NonNull IBinder transition) {
+        if (transition != mExitTransition) {
+            return;
+        }
+        // This means an expand happened before enter-pip finished and we are now "merging" a
+        // no-op transition that happens to match our exit-pip.
+        boolean cancelled = false;
+        if (mPipAnimationController.getCurrentAnimator() != null) {
+            mPipAnimationController.getCurrentAnimator().cancel();
+            cancelled = true;
+        }
+        // Unset exitTransition AFTER cancel so that finishResize knows we are merging.
+        mExitTransition = null;
+        if (!cancelled) return;
+        final ActivityManager.RunningTaskInfo taskInfo = mPipOrganizer.getTaskInfo();
+        if (taskInfo != null) {
+            startExpandAnimation(taskInfo, mPipOrganizer.getSurfaceControl(),
+                    new Rect(mExitDestinationBounds));
+        }
+        mExitDestinationBounds.setEmpty();
+    }
+
+    @Override
     public void onFinishResize(TaskInfo taskInfo, Rect destinationBounds,
             @PipAnimationController.TransitionDirection int direction,
-            SurfaceControl.Transaction tx) {
+            @Nullable SurfaceControl.Transaction tx) {
 
         if (isInPipDirection(direction)) {
             mPipTransitionState.setTransitionState(PipTransitionState.ENTERED_PIP);
         }
-        WindowContainerTransaction wct = new WindowContainerTransaction();
-        prepareFinishResizeTransaction(taskInfo, destinationBounds,
-                direction, tx, wct);
-        mFinishCallback.onTransitionFinished(wct, new WindowContainerTransactionCallback() {
-            @Override
-            public void onTransactionReady(int id, @NonNull SurfaceControl.Transaction t) {
-                t.merge(tx);
-                t.apply();
+        // If there is an expected exit transition, then the exit will be "merged" into this
+        // transition so don't fire the finish-callback in that case.
+        if (mExitTransition == null && mFinishCallback != null) {
+            WindowContainerTransaction wct = new WindowContainerTransaction();
+            prepareFinishResizeTransaction(taskInfo, destinationBounds,
+                    direction, wct);
+            if (tx != null) {
+                wct.setBoundsChangeTransaction(taskInfo.token, tx);
             }
-        });
+            mFinishCallback.onTransitionFinished(wct, null /* wctCallback */);
+            mFinishCallback = null;
+        }
         finishResizeForMenu(destinationBounds);
+    }
+
+    @Override
+    public void forceFinishTransition() {
+        if (mFinishCallback == null) return;
+        mFinishCallback.onTransitionFinished(null /* wct */, null /* wctCallback */);
+        mFinishCallback = null;
     }
 
     private boolean startExpandAnimation(final TaskInfo taskInfo, final SurfaceControl leash,
@@ -243,7 +284,7 @@ public class PipTransition extends PipTransitionController {
             startTransaction.merge(tx);
             startTransaction.apply();
             mPipBoundsState.setBounds(destinationBounds);
-            onFinishResize(taskInfo, destinationBounds, TRANSITION_DIRECTION_TO_PIP, tx);
+            onFinishResize(taskInfo, destinationBounds, TRANSITION_DIRECTION_TO_PIP, null /* tx */);
             sendOnPipTransitionFinished(TRANSITION_DIRECTION_TO_PIP);
             mFinishCallback = null;
             mPipTransitionState.setInSwipePipToHomeTransition(false);
@@ -292,7 +333,6 @@ public class PipTransition extends PipTransitionController {
 
     private void prepareFinishResizeTransaction(TaskInfo taskInfo, Rect destinationBounds,
             @PipAnimationController.TransitionDirection int direction,
-            SurfaceControl.Transaction tx,
             WindowContainerTransaction wct) {
         Rect taskBounds = null;
         if (isInPipDirection(direction)) {
