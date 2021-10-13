@@ -940,21 +940,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
-     * Similar to {@link #isAnimating(int, int)} except provide a bitmask of
-     * {@link AnimationType} to exclude, rather than include
-     * @param flags The combination of bitmask flags to specify targets and condition for
-     *              checking animating status.
-     * @param typesToExclude The combination of bitmask {@link AnimationType} to exclude when
-     *                     checking if animating.
-     *
-     * @deprecated Use {@link #isAnimating(int, int)}
-     */
-    @Deprecated
-    final boolean isAnimatingExcluding(int flags, int typesToExclude) {
-        return isAnimating(flags, ANIMATION_TYPE_ALL & ~typesToExclude);
-    }
-
-    /**
      * @deprecated Use {@link #isAnimating(int, int)}
      * TODO (b/152333373): Migrate calls to use isAnimating with specified animation type
      */

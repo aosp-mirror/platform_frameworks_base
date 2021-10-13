@@ -2583,13 +2583,17 @@ public class WindowManagerService extends IWindowManager.Stub
             // an exit.
             win.mAnimatingExit = true;
         } else if (win.mDisplayContent.okToAnimate()
-                && win.mDisplayContent.mWallpaperController.isWallpaperTarget(win)) {
-            // If the wallpaper is currently behind this
-            // window, we need to change both of them inside
-            // of a transaction to avoid artifacts.
+                && win.mDisplayContent.mWallpaperController.isWallpaperTarget(win)
+                && win.mAttrs.type == TYPE_NOTIFICATION_SHADE) {
+            // If the wallpaper is currently behind this app window, we need to change both of them
+            // inside of a transaction to avoid artifacts.
+            // For NotificationShade, sysui is in charge of running window animation and it updates
+            // the client view visibility only after both NotificationShade and the wallpaper are
+            // hidden. So we don't need to care about exit animation, but can destroy its surface
+            // immediately.
             win.mAnimatingExit = true;
         } else {
-            boolean stopped = win.mActivityRecord != null ? win.mActivityRecord.mAppStopped : true;
+            boolean stopped = win.mActivityRecord == null || win.mActivityRecord.mAppStopped;
             // We set mDestroying=true so ActivityRecord#notifyAppStopped in-to destroy surfaces
             // will later actually destroy the surface if we do not do so here. Normally we leave
             // this to the exit animation.
@@ -5014,16 +5018,17 @@ public class WindowManagerService extends IWindowManager.Stub
             ProtoLog.i(WM_DEBUG_FOCUS_LIGHT, "Focus changing: %s -> %s", lastTarget, newTarget);
         }
 
-        if (newTarget != null && newTarget.asWindowState() != null) {
-            WindowState newFocus = newTarget.asWindowState();
-            mAnrController.onFocusChanged(newFocus);
-            newFocus.reportFocusChangedSerialized(true);
+        // Call WindowState focus change observers
+        WindowState newFocusedWindow = newTarget != null ? newTarget.getWindowState() : null;
+        if (newFocusedWindow != null && newFocusedWindow.mInputChannelToken == newToken) {
+            mAnrController.onFocusChanged(newFocusedWindow);
+            newFocusedWindow.reportFocusChangedSerialized(true);
             notifyFocusChanged();
         }
 
-        if (lastTarget != null && lastTarget.asWindowState() != null) {
-            WindowState lastFocus = lastTarget.asWindowState();
-            lastFocus.reportFocusChangedSerialized(false);
+        WindowState lastFocusedWindow = lastTarget != null ? lastTarget.getWindowState() : null;
+        if (lastFocusedWindow != null && lastFocusedWindow.mInputChannelToken == oldToken) {
+            lastFocusedWindow.reportFocusChangedSerialized(false);
         }
     }
 

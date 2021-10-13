@@ -555,7 +555,9 @@ public final class JobStatus {
             requestBuilder.setUids(
                     Collections.singleton(new Range<Integer>(this.sourceUid, this.sourceUid)));
             builder.setRequiredNetwork(requestBuilder.build());
-            job = builder.build();
+            // Don't perform prefetch-deadline check at this point. We've already passed the
+            // initial validation check.
+            job = builder.build(false);
         }
 
         final JobSchedulerInternal jsi = LocalServices.getService(JobSchedulerInternal.class);

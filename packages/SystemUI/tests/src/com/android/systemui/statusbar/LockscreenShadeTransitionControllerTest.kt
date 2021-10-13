@@ -209,7 +209,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         verify(scrimController, never()).setTransitionToFullShadeProgress(anyFloat())
         verify(notificationPanelController, never()).setTransitionToFullShadeAmount(anyFloat(),
                 anyBoolean(), anyLong())
-        verify(qS, never()).setTransitionToFullShadeAmount(anyFloat(), anyBoolean())
+        verify(qS, never()).setTransitionToFullShadeAmount(anyFloat(), anyFloat())
     }
 
     @Test
@@ -220,7 +220,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         verify(scrimController).setTransitionToFullShadeProgress(anyFloat())
         verify(notificationPanelController).setTransitionToFullShadeAmount(anyFloat(),
                 anyBoolean(), anyLong())
-        verify(qS).setTransitionToFullShadeAmount(anyFloat(), anyBoolean())
+        verify(qS).setTransitionToFullShadeAmount(anyFloat(), anyFloat())
         verify(depthController).transitionToFullShadeProgress = anyFloat()
     }
 }
