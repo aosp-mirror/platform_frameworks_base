@@ -24,10 +24,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -44,7 +40,6 @@ import com.android.systemui.shared.system.InputMonitorCompat;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
-import com.android.systemui.util.sensors.AsyncSensorManager;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -56,8 +51,7 @@ import javax.inject.Provider;
 /**
  * {@link IdleHostViewController} processes signals to control the lifecycle of the idle screen.
  */
-public class IdleHostViewController extends ViewController<IdleHostView> implements
-        SensorEventListener {
+public class IdleHostViewController extends ViewController<IdleHostView> {
     private static final String INPUT_MONITOR_IDENTIFIER = "IdleHostViewController";
     private static final String TAG = "IdleHostViewController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -114,11 +108,6 @@ public class IdleHostViewController extends ViewController<IdleHostView> impleme
 
     private final PowerManager mPowerManager;
 
-    private final AsyncSensorManager mSensorManager;
-
-    // Light sensor used to detect low light condition.
-    private final Sensor mSensor;
-
     // Runnable for canceling enabling idle.
     private Runnable mCancelEnableIdling;
 
@@ -145,6 +134,9 @@ public class IdleHostViewController extends ViewController<IdleHostView> impleme
 
     // Intent filter for receiving dream broadcasts.
     private IntentFilter mDreamIntentFilter;
+
+    // Monitor for the current ambient light mode. Used to trigger / exit low-light mode.
+    private final AmbientLightModeMonitor mAmbientLightModeMonitor;
 
     // Delayed callback for starting idling.
     private final Runnable mEnableIdlingCallback = () -> {
@@ -181,6 +173,31 @@ public class IdleHostViewController extends ViewController<IdleHostView> impleme
         }
     };
 
+    private final AmbientLightModeMonitor.Callback mAmbientLightModeCallback =
+            mode -> {
+                boolean shouldBeLowLight;
+                switch (mode) {
+                    case AmbientLightModeMonitor.AMBIENT_LIGHT_MODE_UNDECIDED:
+                        return;
+                    case AmbientLightModeMonitor.AMBIENT_LIGHT_MODE_LIGHT:
+                        shouldBeLowLight = false;
+                        break;
+                    case AmbientLightModeMonitor.AMBIENT_LIGHT_MODE_DARK:
+                        shouldBeLowLight = true;
+                        break;
+                    default:
+                        Log.w(TAG, "invalid ambient light mode");
+                        return;
+                }
+
+                if (DEBUG) Log.d(TAG, "ambient light mode changed to " + mode);
+
+                final boolean isLowLight = getState(STATE_LOW_LIGHT);
+                if (shouldBeLowLight != isLowLight) {
+                    setState(STATE_LOW_LIGHT, shouldBeLowLight);
+                }
+            };
+
     final Provider<View> mIdleViewProvider;
 
     @Inject
@@ -188,7 +205,6 @@ public class IdleHostViewController extends ViewController<IdleHostView> impleme
             Context context,
             BroadcastDispatcher broadcastDispatcher,
             PowerManager powerManager,
-            AsyncSensorManager sensorManager,
             IdleHostView view, InputMonitorFactory factory,
             @Main DelayableExecutor delayableExecutor,
             @Main Resources resources,
@@ -197,18 +213,19 @@ public class IdleHostViewController extends ViewController<IdleHostView> impleme
             Choreographer choreographer,
             KeyguardStateController keyguardStateController,
             StatusBarStateController statusBarStateController,
-            DreamHelper dreamHelper) {
+            DreamHelper dreamHelper,
+            AmbientLightModeMonitor ambientLightModeMonitor) {
         super(view);
         mContext = context;
         mBroadcastDispatcher = broadcastDispatcher;
         mPowerManager = powerManager;
-        mSensorManager = sensorManager;
         mIdleViewProvider = idleViewProvider;
         mKeyguardStateController = keyguardStateController;
         mStatusBarStateController = statusBarStateController;
         mLooper = looper;
         mChoreographer = choreographer;
         mDreamHelper = dreamHelper;
+        mAmbientLightModeMonitor = ambientLightModeMonitor;
 
         mState = STATE_KEYGUARD_SHOWING;
 
@@ -222,7 +239,6 @@ public class IdleHostViewController extends ViewController<IdleHostView> impleme
         mIdleTimeout = resources.getInteger(R.integer.config_idleModeTimeout);
         mInputMonitorFactory = factory;
         mDelayableExecutor = delayableExecutor;
-        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
 
         if (DEBUG) {
             Log.d(TAG, "initial state:" + mState + " enabled:" + enabled
@@ -405,11 +421,10 @@ public class IdleHostViewController extends ViewController<IdleHostView> impleme
 
         if (mIsMonitoringLowLight) {
             if (DEBUG) Log.d(TAG, "enable low light monitoring");
-            mSensorManager.registerListener(this /*listener*/, mSensor,
-                    SensorManager.SENSOR_DELAY_NORMAL);
+            mAmbientLightModeMonitor.start(mAmbientLightModeCallback);
         } else {
             if (DEBUG) Log.d(TAG, "disable low light monitoring");
-            mSensorManager.unregisterListener(this);
+            mAmbientLightModeMonitor.stop();
         }
     }
 
@@ -447,28 +462,6 @@ public class IdleHostViewController extends ViewController<IdleHostView> impleme
     protected void onViewDetached() {
         mKeyguardStateController.removeCallback(mKeyguardCallback);
         mStatusBarStateController.removeCallback(mStatusBarCallback);
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        if (event.values.length == 0) {
-            if (DEBUG) Log.w(TAG, "SensorEvent doesn't have value");
-            return;
-        }
-
-        final boolean shouldBeLowLight = event.values[0] < 10;
-        final boolean isLowLight = getState(STATE_LOW_LIGHT);
-
-        if (shouldBeLowLight != isLowLight) {
-            setState(STATE_LOW_LIGHT, shouldBeLowLight);
-        }
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        if (DEBUG) {
-            Log.d(TAG, "onAccuracyChanged accuracy=" + accuracy);
-        }
     }
 
     // Returns whether the device just stopped idling by comparing the previous state with the
