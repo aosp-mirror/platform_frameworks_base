@@ -1066,6 +1066,7 @@ public class ViewDebug {
      */
     @TestApi
     @Nullable
+    @UnsupportedAppUsage // Visible for Studio; least-worst option available
     public static AutoCloseable startRenderingCommandsCapture(View tree, Executor executor,
             Callable<OutputStream> callback) {
         final View.AttachInfo attachInfo = tree.mAttachInfo;
