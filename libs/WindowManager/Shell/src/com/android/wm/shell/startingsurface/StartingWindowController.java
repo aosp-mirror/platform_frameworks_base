@@ -43,7 +43,6 @@ import androidx.annotation.BinderThread;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.function.TriConsumer;
-import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
@@ -86,11 +85,9 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
     private final SparseIntArray mTaskBackgroundColors = new SparseIntArray();
 
     public StartingWindowController(Context context, ShellExecutor splashScreenExecutor,
-            StartingWindowTypeAlgorithm startingWindowTypeAlgorithm, IconProvider iconProvider,
-            TransactionPool pool) {
+            StartingWindowTypeAlgorithm startingWindowTypeAlgorithm, TransactionPool pool) {
         mContext = context;
-        mStartingSurfaceDrawer = new StartingSurfaceDrawer(context, splashScreenExecutor,
-                iconProvider, pool);
+        mStartingSurfaceDrawer = new StartingSurfaceDrawer(context, splashScreenExecutor, pool);
         mStartingWindowTypeAlgorithm = startingWindowTypeAlgorithm;
         mSplashScreenExecutor = splashScreenExecutor;
     }
