@@ -45,6 +45,8 @@ interface ITvInputManager {
     TvInputInfo getTvInputInfo(in String inputId, int userId);
     void updateTvInputInfo(in TvInputInfo inputInfo, int userId);
     int getTvInputState(in String inputId, int userId);
+    List<String> getAvailableExtensionInterfaceNames(in String inputId, int userId);
+    IBinder getExtensionInterface(in String inputId, in String name, int userId);
 
     List<TvContentRatingSystemInfo> getTvContentRatingSystemList(int userId);
 
