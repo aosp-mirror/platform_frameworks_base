@@ -166,6 +166,7 @@ import android.view.Choreographer;
 import android.view.Display;
 import android.view.DisplayAdjustments;
 import android.view.DisplayAdjustments.FixedRotationAdjustments;
+import android.view.SurfaceControl;
 import android.view.ThreadedRenderer;
 import android.view.View;
 import android.view.ViewDebug;
@@ -235,7 +236,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
 import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 /**
@@ -4073,10 +4073,11 @@ public final class ActivityThread extends ClientTransactionHandler
 
     @Override
     public void handleAttachSplashScreenView(@NonNull ActivityClientRecord r,
-            @Nullable SplashScreenView.SplashScreenViewParcelable parcelable) {
+            @Nullable SplashScreenView.SplashScreenViewParcelable parcelable,
+            @NonNull SurfaceControl startingWindowLeash) {
         final DecorView decorView = (DecorView) r.window.peekDecorView();
         if (parcelable != null && decorView != null) {
-            createSplashScreen(r, decorView, parcelable);
+            createSplashScreen(r, decorView, parcelable, startingWindowLeash);
         } else {
             // shouldn't happen!
             Slog.e(TAG, "handleAttachSplashScreenView failed, unable to attach");
@@ -4084,61 +4085,50 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     private void createSplashScreen(ActivityClientRecord r, DecorView decorView,
-            SplashScreenView.SplashScreenViewParcelable parcelable) {
+            SplashScreenView.SplashScreenViewParcelable parcelable,
+            @NonNull SurfaceControl startingWindowLeash) {
         final SplashScreenView.Builder builder = new SplashScreenView.Builder(r.activity);
         final SplashScreenView view = builder.createFromParcel(parcelable).build();
         decorView.addView(view);
         view.attachHostActivityAndSetSystemUIColors(r.activity, r.window);
         view.requestLayout();
-        // Ensure splash screen view is shown before remove the splash screen window.
-        final ViewRootImpl impl = decorView.getViewRootImpl();
-        final boolean hardwareEnabled = impl != null && impl.isHardwareEnabled();
-        final AtomicBoolean notified = new AtomicBoolean();
-        if (hardwareEnabled) {
-            final Runnable frameCommit = new Runnable() {
-                        @Override
-                        public void run() {
-                            view.post(() -> {
-                                if (!notified.get()) {
-                                    view.getViewTreeObserver().unregisterFrameCommitCallback(this);
-                                    ActivityClient.getInstance().reportSplashScreenAttached(
-                                            r.token);
-                                    notified.set(true);
-                                }
-                            });
-                        }
-                    };
-            view.getViewTreeObserver().registerFrameCommitCallback(frameCommit);
-        } else {
-            final ViewTreeObserver.OnDrawListener onDrawListener =
-                    new ViewTreeObserver.OnDrawListener() {
-                        @Override
-                        public void onDraw() {
-                            view.post(() -> {
-                                if (!notified.get()) {
-                                    view.getViewTreeObserver().removeOnDrawListener(this);
-                                    ActivityClient.getInstance().reportSplashScreenAttached(
-                                            r.token);
-                                    notified.set(true);
-                                }
-                            });
-                        }
-                    };
-            view.getViewTreeObserver().addOnDrawListener(onDrawListener);
+
+        view.getViewTreeObserver().addOnDrawListener(new ViewTreeObserver.OnDrawListener() {
+            @Override
+            public void onDraw() {
+                // Transfer the splash screen view from shell to client.
+                // Call syncTransferSplashscreenViewTransaction at the first onDraw so we can ensure
+                // the client view is ready to show and we can use applyTransactionOnDraw to make
+                // all transitions happen at the same frame.
+                syncTransferSplashscreenViewTransaction(
+                        view, r.token, decorView, startingWindowLeash);
+                view.postOnAnimation(() -> view.getViewTreeObserver().removeOnDrawListener(this));
+            }
+        });
+    }
+
+    private void reportSplashscreenViewShown(IBinder token, SplashScreenView view) {
+        ActivityClient.getInstance().reportSplashScreenAttached(token);
+        synchronized (this) {
+            if (mSplashScreenGlobal != null) {
+                mSplashScreenGlobal.handOverSplashScreenView(token, view);
+            }
         }
     }
 
-    @Override
-    public void handOverSplashScreenView(@NonNull ActivityClientRecord r) {
-        final SplashScreenView v = r.activity.getSplashScreenView();
-        if (v == null) {
-            return;
-        }
-        synchronized (this) {
-            if (mSplashScreenGlobal != null) {
-                mSplashScreenGlobal.handOverSplashScreenView(r.token, v);
-            }
-        }
+    private void syncTransferSplashscreenViewTransaction(SplashScreenView view, IBinder token,
+            View decorView, @NonNull SurfaceControl startingWindowLeash) {
+        // Ensure splash screen view is shown before remove the splash screen window.
+        // Once the copied splash screen view is onDrawn on decor view, use applyTransactionOnDraw
+        // to ensure the transfer of surface view and hide starting window are happen at the same
+        // frame.
+        final SurfaceControl.Transaction transaction = new SurfaceControl.Transaction();
+        transaction.hide(startingWindowLeash);
+
+        decorView.getViewRootImpl().applyTransactionOnDraw(transaction);
+        view.syncTransferSurfaceOnDraw();
+        // Tell server we can remove the starting window
+        decorView.postOnAnimation(() -> reportSplashscreenViewShown(token, view));
     }
 
     /**
