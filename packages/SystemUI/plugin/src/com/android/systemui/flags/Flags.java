@@ -18,6 +18,12 @@ package com.android.systemui.flags;
 
 /**
  * List of {@link Flag} objects for use in SystemUI.
+ *
+ * Flag Ids are integers. They must be unique.
+ *
+ * On public release builds, flags will always return their default value. There is no way to
+ * change their value on release builds.
  */
 public class Flags {
+    public static final BooleanFlag THE_FIRST_FLAG = new BooleanFlag(1, false);
 }

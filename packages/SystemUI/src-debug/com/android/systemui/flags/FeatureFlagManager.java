@@ -18,6 +18,9 @@ package com.android.systemui.flags;
 
 import com.android.systemui.dagger.SysUISingleton;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import javax.inject.Inject;
 
 /**
@@ -25,28 +28,61 @@ import javax.inject.Inject;
  */
 @SysUISingleton
 public class FeatureFlagManager implements FlagReader, FlagWriter {
-    @Inject
-    public FeatureFlagManager() {}
+    private static final String SYSPROP_PREFIX = "persist.systemui.flag_";
+    private static final String FIELD_TYPE = "type";
+    private static final String FIELD_VALUE = "value";
+    private static final String TYPE_BOOLEAN = "boolean";
+    private final SystemPropertiesHelper mSystemPropertiesHelper;
 
-    public boolean isEnabled(int key, boolean defaultValue) {
-        return isEnabled(Integer.toString(key), defaultValue);
+    @Inject
+    public FeatureFlagManager(SystemPropertiesHelper systemPropertiesHelper) {
+        mSystemPropertiesHelper = systemPropertiesHelper;
     }
 
-    public boolean isEnabled(String key, boolean defaultValue) {
-        // TODO
-        return false;
+    /** Return a {@link BooleanFlag}'s value. */
+    public boolean isEnabled(int key, boolean defaultValue) {
+        String data = mSystemPropertiesHelper.get(keyToSysPropKey(key));
+        if (data.isEmpty()) {
+            return defaultValue;
+        }
+        JSONObject json;
+        try {
+            json = new JSONObject(data);
+            if (!assertType(json, TYPE_BOOLEAN)) {
+                return defaultValue;
+            }
+            return json.getBoolean(FIELD_VALUE);
+        } catch (JSONException e) {
+            // TODO: delete the property
+            return defaultValue;
+        }
     }
 
     public void setEnabled(int key, boolean value) {
-        setEnabled(Integer.toString(key), value);
-    }
-
-    public void setEnabled(String key, boolean value) {
-        // TODO
+        JSONObject json = new JSONObject();
+        try {
+            json.put(FIELD_TYPE, TYPE_BOOLEAN);
+            json.put(FIELD_VALUE, value);
+            mSystemPropertiesHelper.set(keyToSysPropKey(key), json.toString());
+        } catch (JSONException e) {
+            // no-op
+        }
     }
 
     public void addListener(Listener run) {}
 
     public void removeListener(Listener run) {}
+
+    private static String keyToSysPropKey(int key) {
+        return SYSPROP_PREFIX + key;
+    }
+
+    private static boolean assertType(JSONObject json, String type) {
+        try {
+            return json.getString(FIELD_TYPE).equals(TYPE_BOOLEAN);
+        } catch (JSONException e) {
+            return false;
+        }
+    }
 
 }
