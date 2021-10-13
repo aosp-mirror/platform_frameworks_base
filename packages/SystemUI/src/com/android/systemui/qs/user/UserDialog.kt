@@ -32,7 +32,7 @@ import com.android.systemui.R
  */
 class UserDialog(
     context: Context
-) : SystemUIDialog(context, R.style.Theme_SystemUI_Dialog_QSDialog) {
+) : SystemUIDialog(context) {
 
     // create() is no-op after creation
     private lateinit var _doneButton: View
@@ -72,7 +72,7 @@ class UserDialog(
             attributes.fitInsetsTypes = attributes.fitInsetsTypes or WindowInsets.Type.statusBars()
             attributes.receiveInsetsIgnoringZOrder = true
             setLayout(
-                    context.resources.getDimensionPixelSize(R.dimen.qs_panel_width),
+                    context.resources.getDimensionPixelSize(R.dimen.notification_panel_width),
                     ViewGroup.LayoutParams.WRAP_CONTENT
             )
             setGravity(Gravity.CENTER)
