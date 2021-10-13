@@ -166,25 +166,6 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
     }
 
     /** @hide */
-    public CellSignalStrengthLte(android.hardware.radio.V1_0.LteSignalStrength lte) {
-        // Convert from HAL values as part of construction.
-        this(convertRssiAsuToDBm(lte.signalStrength),
-                lte.rsrp != CellInfo.UNAVAILABLE ? -lte.rsrp : lte.rsrp,
-                lte.rsrq != CellInfo.UNAVAILABLE ? -lte.rsrq : lte.rsrq,
-                convertRssnrUnitFromTenDbToDB(lte.rssnr), lte.cqi, lte.timingAdvance);
-    }
-
-    /** @hide */
-    public CellSignalStrengthLte(android.hardware.radio.V1_6.LteSignalStrength lte) {
-        // Convert from HAL values as part of construction.
-        this(convertRssiAsuToDBm(lte.base.signalStrength),
-                lte.base.rsrp != CellInfo.UNAVAILABLE ? -lte.base.rsrp : lte.base.rsrp,
-                lte.base.rsrq != CellInfo.UNAVAILABLE ? -lte.base.rsrq : lte.base.rsrq,
-                convertRssnrUnitFromTenDbToDB(lte.base.rssnr), lte.cqiTableIndex, lte.base.cqi,
-                lte.base.timingAdvance);
-    }
-
-    /** @hide */
     public CellSignalStrengthLte(CellSignalStrengthLte s) {
         copyFrom(s);
     }
@@ -617,11 +598,13 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
         Rlog.w(LOG_TAG, s);
     }
 
-    private static int convertRssnrUnitFromTenDbToDB(int rssnr) {
+    /** @hide */
+    public static int convertRssnrUnitFromTenDbToDB(int rssnr) {
         return rssnr / 10;
     }
 
-    private static int convertRssiAsuToDBm(int rssiAsu) {
+    /** @hide */
+    public static int convertRssiAsuToDBm(int rssiAsu) {
         if (rssiAsu == SIGNAL_STRENGTH_LTE_RSSI_ASU_UNKNOWN) {
             return CellInfo.UNAVAILABLE;
         }
