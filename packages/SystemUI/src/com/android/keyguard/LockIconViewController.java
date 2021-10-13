@@ -551,11 +551,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         }
 
         @Override
-        public void onOverlayChanged() {
-            updateColors();
-        }
-
-        @Override
         public void onConfigChanged(Configuration newConfig) {
             updateConfiguration();
             updateColors();

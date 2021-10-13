@@ -91,7 +91,7 @@ class StatusBarContentInsetsProvider @Inject constructor(
         clearCachedInsets()
     }
 
-    override fun onOverlayChanged() {
+    override fun onThemeChanged() {
         clearCachedInsets()
     }
 
