@@ -50,11 +50,10 @@ import android.hardware.camera2.marshal.impl.MarshalQueryableStreamConfiguration
 import android.hardware.camera2.marshal.impl.MarshalQueryableStreamConfigurationDuration;
 import android.hardware.camera2.marshal.impl.MarshalQueryableString;
 import android.hardware.camera2.params.Capability;
-import android.hardware.camera2.params.DeviceStateOrientationMap;
+import android.hardware.camera2.params.DeviceStateSensorOrientationMap;
 import android.hardware.camera2.params.Face;
 import android.hardware.camera2.params.HighSpeedVideoConfiguration;
 import android.hardware.camera2.params.LensShadingMap;
-import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.params.MandatoryStreamCombination;
 import android.hardware.camera2.params.MultiResolutionStreamConfigurationMap;
 import android.hardware.camera2.params.OisSample;
@@ -763,7 +762,7 @@ public class CameraMetadataNative implements Parcelable {
                     }
                 });
         sGetCommandMap.put(
-                CameraCharacteristics.INFO_DEVICE_STATE_ORIENTATION_MAP.getNativeKey(),
+                CameraCharacteristics.INFO_DEVICE_STATE_SENSOR_ORIENTATION_MAP.getNativeKey(),
                         new GetCommand() {
                     @Override
                     @SuppressWarnings("unchecked")
@@ -1004,7 +1003,7 @@ public class CameraMetadataNative implements Parcelable {
         return map;
     }
 
-    private DeviceStateOrientationMap getDeviceStateOrientationMap() {
+    private DeviceStateSensorOrientationMap getDeviceStateOrientationMap() {
         long[] mapArray = getBase(CameraCharacteristics.INFO_DEVICE_STATE_ORIENTATIONS);
 
         // Do not warn if map is null while s is not. This is valid.
@@ -1012,7 +1011,7 @@ public class CameraMetadataNative implements Parcelable {
             return null;
         }
 
-        DeviceStateOrientationMap map = new DeviceStateOrientationMap(mapArray);
+        DeviceStateSensorOrientationMap map = new DeviceStateSensorOrientationMap(mapArray);
         return map;
     }
 
