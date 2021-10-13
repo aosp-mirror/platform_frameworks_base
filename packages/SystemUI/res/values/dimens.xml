@@ -1291,4 +1291,6 @@
     <!-- ************************************************************************* -->
 
     <dimen name="keyguard_unfold_translation_x">16dp</dimen>
+
+    <dimen name="fgs_manager_min_width_minor">100%</dimen>
 </resources>

@@ -984,4 +984,14 @@
 
     <style name="InternetDialog.Divider.Active"/>
 
+    <style name="FgsManagerDialogTitle">
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textDirection">locale</item>
+    </style>
+
+    <style name="FgsManagerAppDuration">
+        <item name="android:fontFamily">?android:attr/textAppearanceSmall</item>
+        <item name="android:textDirection">locale</item>
+    </style>
 </resources>
