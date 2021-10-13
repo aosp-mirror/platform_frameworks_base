@@ -600,10 +600,6 @@ public class KeyguardIndicationController {
         mHideTransientMessageOnScreenOff = hideOnScreenOff && transientIndication != null;
         mHandler.removeMessages(MSG_HIDE_TRANSIENT);
         mHandler.removeMessages(MSG_SHOW_ACTION_TO_UNLOCK);
-        if (mDozing && !TextUtils.isEmpty(mTransientIndication)) {
-            // Make sure this doesn't get stuck and burns in. Acquire wakelock until its cleared.
-            mWakeLock.setAcquired(true);
-        }
         hideTransientIndicationDelayed(BaseKeyguardCallback.HIDE_DELAY_MS);
 
         updateIndication(false);
@@ -623,10 +619,6 @@ public class KeyguardIndicationController {
     }
 
     protected final void updateIndication(boolean animate) {
-        if (TextUtils.isEmpty(mTransientIndication)) {
-            mWakeLock.setAcquired(false);
-        }
-
         if (!mVisible) {
             return;
         }
@@ -644,24 +636,31 @@ public class KeyguardIndicationController {
             // colors can be hard to read in low brightness.
             mTopIndicationView.setTextColor(Color.WHITE);
             if (!TextUtils.isEmpty(mTransientIndication)) {
-                mTopIndicationView.switchIndication(mTransientIndication, null);
+                mWakeLock.setAcquired(true);
+                mTopIndicationView.switchIndication(mTransientIndication, null,
+                        true, () -> mWakeLock.setAcquired(false));
             } else if (!mBatteryPresent) {
                 // If there is no battery detected, hide the indication and bail
                 mIndicationArea.setVisibility(GONE);
             } else if (!TextUtils.isEmpty(mAlignmentIndication)) {
-                mTopIndicationView.switchIndication(mAlignmentIndication, null);
+                mTopIndicationView.switchIndication(mAlignmentIndication, null,
+                        false /* animate */, null /* onAnimationEndCallback */);
                 mTopIndicationView.setTextColor(mContext.getColor(R.color.misalignment_text_color));
             } else if (mPowerPluggedIn || mEnableBatteryDefender) {
                 String indication = computePowerIndication();
                 if (animate) {
-                    animateText(mTopIndicationView, indication);
+                    mWakeLock.setAcquired(true);
+                    mTopIndicationView.switchIndication(indication, null, true /* animate */,
+                            () -> mWakeLock.setAcquired(false));
                 } else {
-                    mTopIndicationView.switchIndication(indication, null);
+                    mTopIndicationView.switchIndication(indication, null, false /* animate */,
+                            null /* onAnimationEndCallback */);
                 }
             } else {
                 String percentage = NumberFormat.getPercentInstance()
                         .format(mBatteryLevel / 100f);
-                mTopIndicationView.switchIndication(percentage, null);
+                mTopIndicationView.switchIndication(percentage, null /* indication */,
+                        false /* animate */, null /* onAnimationEnd*/);
             }
             return;
         }

@@ -166,7 +166,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     private BroadcastReceiver mBroadcastReceiver;
     private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
 
-    private KeyguardIndicationTextView mTextView;
+    private KeyguardIndicationTextView mTextView; // AOD text
 
     private KeyguardIndicationController mController;
     private WakeLockFake.Builder mWakeLockBuilder;
@@ -412,41 +412,32 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
     @Test
     public void transientIndication_holdsWakeLock_whenDozing() {
+        // GIVEN animations are enabled and text is visible
+        mTextView.setAnimationsEnabled(true);
         createController();
+        mController.setVisible(true);
 
+        // WHEN transient text is shown
         mStatusBarStateListener.onDozingChanged(true);
         mController.showTransientIndication("Test");
 
-        assertTrue(mWakeLock.isHeld());
+        // THEN wake lock is held while the animation is running
+        assertTrue("WakeLock expected: HELD, was: RELEASED", mWakeLock.isHeld());
     }
 
     @Test
-    public void transientIndication_releasesWakeLock_afterHiding() {
+    public void transientIndication_releasesWakeLock_whenDozing() {
+        // GIVEN animations aren't enabled
+        mTextView.setAnimationsEnabled(false);
         createController();
+        mController.setVisible(true);
 
+        // WHEN we show the transient indication
         mStatusBarStateListener.onDozingChanged(true);
         mController.showTransientIndication("Test");
-        mController.hideTransientIndication();
 
-        assertFalse(mWakeLock.isHeld());
-    }
-
-    @Test
-    public void transientIndication_releasesWakeLock_afterHidingDelayed() throws Throwable {
-        mInstrumentation.runOnMainSync(() -> {
-            createController();
-
-            mStatusBarStateListener.onDozingChanged(true);
-            mController.showTransientIndication("Test");
-            mController.hideTransientIndicationDelayed(0);
-        });
-        mInstrumentation.waitForIdleSync();
-
-        Boolean[] held = new Boolean[1];
-        mInstrumentation.runOnMainSync(() -> {
-            held[0] = mWakeLock.isHeld();
-        });
-        assertFalse("WakeLock expected: RELEASED, was: HELD", held[0]);
+        // THEN wake lock is RELEASED, not held
+        assertFalse("WakeLock expected: RELEASED, was: HELD", mWakeLock.isHeld());
     }
 
     @Test
