@@ -1337,7 +1337,9 @@ final class DefaultPermissionGrantPolicy {
                         pm.grantPermission(permission, pkg, user);
                     }
 
-                    pm.updatePermissionFlags(permission, pkg, newFlags, newFlags, user);
+                    // clear the REVIEW_REQUIRED flag, if set
+                    int flagMask = newFlags | PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
+                    pm.updatePermissionFlags(permission, pkg, flagMask, newFlags, user);
                 }
 
                 // If a component gets a permission for being the default handler A

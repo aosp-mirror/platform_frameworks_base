@@ -201,6 +201,7 @@ import com.android.server.lights.LogicalLight;
 import com.android.server.notification.NotificationManagerService.NotificationAssistants;
 import com.android.server.notification.NotificationManagerService.NotificationListeners;
 import com.android.server.pm.PackageManagerService;
+import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.utils.quota.MultiRateLimiter;
@@ -239,6 +240,8 @@ import java.util.function.Consumer;
 @RunWithLooper
 public class NotificationManagerServiceTest extends UiServiceTestCase {
     private static final String TEST_CHANNEL_ID = "NotificationManagerServiceTestChannelId";
+    private static final String PKG_NO_CHANNELS = "com.example.no.channels";
+    private static final int TEST_TASK_ID = 1;
     private static final int UID_HEADLESS = 1000000;
 
     private final int mUid = Binder.getCallingUid();
@@ -252,6 +255,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     private PackageManager mPackageManagerClient;
     @Mock
     private PackageManagerInternal mPackageManagerInternal;
+    @Mock
+    private PermissionPolicyInternal mPermissionPolicyInternal;
     @Mock
     private WindowManagerInternal mWindowManagerInternal;
     @Mock
@@ -381,6 +386,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         LocalServices.addService(ActivityManagerInternal.class, mAmi);
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternal);
+        LocalServices.removeServiceForTest(PermissionPolicyInternal.class);
+        LocalServices.addService(PermissionPolicyInternal.class, mPermissionPolicyInternal);
         mContext.addMockSystemService(Context.ALARM_SERVICE, mAlarmManager);
 
         doNothing().when(mContext).sendBroadcastAsUser(any(), any(), any());
@@ -411,7 +418,17 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mUgmInternal.newUriPermissionOwner(anyString())).thenReturn(mPermOwner);
         when(mPackageManager.getPackagesForUid(mUid)).thenReturn(new String[]{PKG});
         when(mPackageManagerClient.getPackagesForUid(anyInt())).thenReturn(new String[]{PKG});
+        when(mPermissionPolicyInternal.canShowPermissionPromptForTask(
+                any(ActivityManager.RecentTaskInfo.class))).thenReturn(false);
         mContext.addMockSystemService(AppOpsManager.class, mock(AppOpsManager.class));
+
+        ActivityManager.AppTask task = mock(ActivityManager.AppTask.class);
+        List<ActivityManager.AppTask> taskList = new ArrayList<>();
+        ActivityManager.RecentTaskInfo taskInfo = new ActivityManager.RecentTaskInfo();
+        taskInfo.taskId = TEST_TASK_ID;
+        when(task.getTaskInfo()).thenReturn(taskInfo);
+        taskList.add(task);
+        when(mAtm.getAppTasks(anyString(), anyInt())).thenReturn(taskList);
 
         // write to a test file; the system file isn't readable from tests
         mFile = new File(mContext.getCacheDir(), "test.xml");
@@ -931,6 +948,51 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         } catch (NullPointerException e) {
             // pass
         }
+    }
+
+    @Test
+    public void testCreateNotificationChannels_FirstChannelWithFgndTaskStartsPermDialog()
+            throws Exception {
+        when(mPermissionPolicyInternal.canShowPermissionPromptForTask(any(
+                ActivityManager.RecentTaskInfo.class))).thenReturn(true);
+        final NotificationChannel channel =
+                new NotificationChannel("id", "name", IMPORTANCE_DEFAULT);
+        mBinderService.createNotificationChannels(PKG_NO_CHANNELS,
+                new ParceledListSlice(Arrays.asList(channel)));
+        verify(mWorkerHandler).post(eq(new NotificationManagerService
+                .ShowNotificationPermissionPromptRunnable(PKG_NO_CHANNELS,
+                UserHandle.getUserId(mUid), TEST_TASK_ID, mPermissionPolicyInternal)));
+    }
+
+    @Test
+    public void testCreateNotificationChannels_SecondChannelWithFgndTaskDoesntStartPermDialog()
+            throws Exception {
+        when(mPermissionPolicyInternal.canShowPermissionPromptForTask(any(
+                ActivityManager.RecentTaskInfo.class))).thenReturn(true);
+        assertTrue(mBinderService.getNumNotificationChannelsForPackage(PKG, mUid, true) > 0);
+
+        final NotificationChannel channel =
+                new NotificationChannel("id", "name", IMPORTANCE_DEFAULT);
+        mBinderService.createNotificationChannels(PKG,
+                new ParceledListSlice(Arrays.asList(channel)));
+        verify(mWorkerHandler, never()).post(any(
+                NotificationManagerService.ShowNotificationPermissionPromptRunnable.class));
+    }
+
+    @Test
+    public void testCreateNotificationChannels_FirstChannelWithBgndTaskDoesntStartPermDialog()
+            throws Exception {
+        reset(mPermissionPolicyInternal);
+        when(mPermissionPolicyInternal.canShowPermissionPromptForTask(any(
+                ActivityManager.RecentTaskInfo.class))).thenReturn(false);
+
+        final NotificationChannel channel =
+                new NotificationChannel("id", "name", IMPORTANCE_DEFAULT);
+        mBinderService.createNotificationChannels(PKG,
+                new ParceledListSlice(Arrays.asList(channel)));
+
+        verify(mWorkerHandler, never()).post(any(
+                NotificationManagerService.ShowNotificationPermissionPromptRunnable.class));
     }
 
     @Test

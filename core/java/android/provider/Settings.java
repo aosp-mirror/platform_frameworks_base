@@ -9890,6 +9890,7 @@ public final class Settings {
          *
          * @hide
          */
+        @Readable
         public static final String NOTIFICATION_PERMISSION_ENABLED =
                 "notification_permission_enabled";
 

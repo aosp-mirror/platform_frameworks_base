@@ -4215,6 +4215,17 @@ public abstract class PackageManager {
             "android.content.pm.action.REQUEST_PERMISSIONS";
 
     /**
+     * The action used to request that the user approve a permission request
+     * from the application. Sent from an application other than the one whose permissions
+     * will be granted. Can only be used by the system server.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String ACTION_REQUEST_PERMISSIONS_FOR_OTHER =
+            "android.content.pm.action.REQUEST_PERMISSIONS_FOR_OTHER";
+
+    /**
      * The names of the requested permissions.
      * <p>
      * <strong>Type:</strong> String[]
@@ -4322,8 +4333,9 @@ public abstract class PackageManager {
     public static final int FLAG_PERMISSION_GRANTED_BY_DEFAULT =  1 << 5;
 
     /**
-     * Permission flag: The permission has to be reviewed before any of
-     * the app components can run.
+     * Permission flag: If app targetSDK < M, then the permission has to be reviewed before any of
+     * the app components can run. If app targetSDK >= M, then the system might need to show a
+     * request dialog for this permission on behalf of an app.
      *
      * @hide
      */
