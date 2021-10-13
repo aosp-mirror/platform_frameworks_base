@@ -112,11 +112,12 @@ class BinderLocationTimeZoneProvider extends LocationTimeZoneProvider {
     }
 
     @Override
-    void onStartUpdates(@NonNull Duration initializationTimeout) {
+    void onStartUpdates(@NonNull Duration initializationTimeout,
+            @NonNull Duration eventFilteringAgeThreshold) {
         // Set a request on the proxy - it will be sent immediately if the service is bound,
         // or will be sent as soon as the service becomes bound.
-        TimeZoneProviderRequest request =
-                TimeZoneProviderRequest.createStartUpdatesRequest(initializationTimeout);
+        TimeZoneProviderRequest request = TimeZoneProviderRequest.createStartUpdatesRequest(
+                initializationTimeout, eventFilteringAgeThreshold);
         mProxy.setRequest(request);
     }
 

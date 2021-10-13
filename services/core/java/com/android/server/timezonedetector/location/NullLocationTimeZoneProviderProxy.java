@@ -19,6 +19,7 @@ package com.android.server.timezonedetector.location;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.os.SystemClock;
 import android.service.timezone.TimeZoneProviderEvent;
 import android.util.IndentingPrintWriter;
 
@@ -59,7 +60,7 @@ class NullLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy {
     void setRequest(@NonNull TimeZoneProviderRequest request) {
         if (request.sendUpdates()) {
             TimeZoneProviderEvent event = TimeZoneProviderEvent.createPermanentFailureEvent(
-                    "Provider is disabled");
+                    SystemClock.elapsedRealtime(), "Provider is disabled");
             handleTimeZoneProviderEvent(event);
         }
     }

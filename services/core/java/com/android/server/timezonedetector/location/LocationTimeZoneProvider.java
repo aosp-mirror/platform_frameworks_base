@@ -532,7 +532,8 @@ abstract class LocationTimeZoneProvider implements Dumpable {
      * called using the handler thread from the {@link ThreadingDomain}.
      */
     final void startUpdates(@NonNull ConfigurationInternal currentUserConfiguration,
-            @NonNull Duration initializationTimeout, @NonNull Duration initializationTimeoutFuzz) {
+            @NonNull Duration initializationTimeout, @NonNull Duration initializationTimeoutFuzz,
+            @NonNull Duration eventFilteringAgeThreshold) {
         mThreadingDomain.assertCurrentThread();
 
         synchronized (mSharedLock) {
@@ -548,7 +549,7 @@ abstract class LocationTimeZoneProvider implements Dumpable {
             mInitializationTimeoutQueue.runDelayed(
                     this::handleInitializationTimeout, delay.toMillis());
 
-            onStartUpdates(initializationTimeout);
+            onStartUpdates(initializationTimeout, eventFilteringAgeThreshold);
         }
     }
 
@@ -574,9 +575,11 @@ abstract class LocationTimeZoneProvider implements Dumpable {
      * Implemented by subclasses to do work during {@link #startUpdates}. This is where the logic
      * to start the real provider should be implemented.
      *
-     * @param initializationTimeout the initialization timeout to pass to the real provider
+     * @param initializationTimeout the initialization timeout to pass to the provider
+     * @param eventFilteringAgeThreshold the event filtering age threshold to pass to the provider
      */
-    abstract void onStartUpdates(@NonNull Duration initializationTimeout);
+    abstract void onStartUpdates(@NonNull Duration initializationTimeout,
+            @NonNull Duration eventFilteringAgeThreshold);
 
     /**
      * Stops the provider. It is an error to call this method except when the {@link
