@@ -229,7 +229,7 @@ class SurfaceFreezer {
                 cancelAnimation(t, false /* restarting */);
                 return;
             }
-            mAnimation.startAnimation(mSurfaceControl, t, type, null /* finishCallback */);
+            mAnimation.startAnimation(mSurfaceControl, t, type, (typ, ani) -> { });
         }
 
         /**

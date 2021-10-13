@@ -27,6 +27,7 @@ import static com.android.server.wm.AnimationAdapterProto.REMOTE;
 import static com.android.server.wm.RemoteAnimationAdapterWrapperProto.TARGET;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 
+import android.annotation.NonNull;
 import android.graphics.Rect;
 import android.os.SystemClock;
 import android.util.proto.ProtoOutputStream;
@@ -145,7 +146,7 @@ class NonAppWindowAnimationAdapter implements AnimationAdapter {
 
     @Override
     public void startAnimation(SurfaceControl animationLeash, SurfaceControl.Transaction t,
-            int type, SurfaceAnimator.OnAnimationFinishedCallback finishCallback) {
+            int type, @NonNull SurfaceAnimator.OnAnimationFinishedCallback finishCallback) {
         ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "startAnimation");
         mCapturedLeash = animationLeash;
         mCapturedLeashFinishCallback = finishCallback;
