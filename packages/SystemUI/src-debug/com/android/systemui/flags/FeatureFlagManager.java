@@ -28,6 +28,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -54,6 +55,8 @@ public class FeatureFlagManager implements FlagReader, FlagWriter {
     private static final String FLAGS_PERMISSION = "com.android.systemui.permission.FLAGS";
     private final SystemPropertiesHelper mSystemPropertiesHelper;
 
+    private final Map<Integer, Boolean> mBooleanFlagCache = new HashMap<>();
+
     @Inject
     public FeatureFlagManager(SystemPropertiesHelper systemPropertiesHelper, Context context) {
         mSystemPropertiesHelper = systemPropertiesHelper;
@@ -64,9 +67,12 @@ public class FeatureFlagManager implements FlagReader, FlagWriter {
 
     /** Return a {@link BooleanFlag}'s value. */
     public boolean isEnabled(int id, boolean defaultValue) {
+        if (!mBooleanFlagCache.containsKey(id)) {
+            Boolean result = isEnabledInternal(id);
+            mBooleanFlagCache.put(id, result == null ? defaultValue : result);
+        }
 
-        Boolean result = isEnabledInternal(id);
-        return result == null ? defaultValue : result;
+        return mBooleanFlagCache.get(id);
     }
 
     /** Returns the stored value or null if not set. */
