@@ -6065,6 +6065,12 @@
     <permission android:name="android.permission.LAUNCH_DEVICE_MANAGER_SETUP"
         android:protectionLevel="signature|role" />
 
+    <!-- @SystemApi Allows an application to update certain device management related system
+         resources.
+         @hide -->
+    <permission android:name="android.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES"
+                android:protectionLevel="signature|role" />
+    
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->
