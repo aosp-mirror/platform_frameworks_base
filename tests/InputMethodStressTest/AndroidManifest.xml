@@ -19,7 +19,8 @@
     package="com.android.inputmethod.stresstest">
 
     <application>
-        <activity android:name=".TestActivity"/>
+        <activity android:name=".AutoShowTest$TestActivity"/>
+        <activity android:name=".ImeOpenCloseStressTest$TestActivity"/>
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"

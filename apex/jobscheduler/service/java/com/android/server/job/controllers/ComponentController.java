@@ -113,7 +113,6 @@ public class ComponentController extends StateController {
         userFilter.addAction(Intent.ACTION_USER_STOPPED);
         mContext.registerReceiverAsUser(
                 mBroadcastReceiver, UserHandle.ALL, userFilter, null, null);
-
     }
 
     @Override

@@ -1104,7 +1104,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             || mWindowSpaceTop != mLocation[1];
         final boolean layoutSizeChanged = getWidth() != mScreenRect.width()
             || getHeight() != mScreenRect.height();
-        final boolean hintChanged = (viewRoot.getSurfaceTransformHint() != mTransformHint)
+        final boolean hintChanged = (viewRoot.getBufferTransformHint() != mTransformHint)
                 && mRequestedVisible;
 
         if (creating || formatChanged || sizeChanged || visibleChanged ||
@@ -1130,7 +1130,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 mSurfaceHeight = myHeight;
                 mFormat = mRequestedFormat;
                 mLastWindowVisibility = mWindowVisibility;
-                mTransformHint = viewRoot.getSurfaceTransformHint();
+                mTransformHint = viewRoot.getBufferTransformHint();
 
                 mScreenRect.left = mWindowSpaceLeft;
                 mScreenRect.top = mWindowSpaceTop;
@@ -1362,7 +1362,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         if (mBlastBufferQueue != null) {
             mBlastBufferQueue.destroy();
         }
-        mTransformHint = viewRoot.getSurfaceTransformHint();
+        mTransformHint = viewRoot.getBufferTransformHint();
         mBlastSurfaceControl.setTransformHint(mTransformHint);
         mBlastBufferQueue = new BLASTBufferQueue(name, mBlastSurfaceControl, mSurfaceWidth,
                 mSurfaceHeight, mFormat);

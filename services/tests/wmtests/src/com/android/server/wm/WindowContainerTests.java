@@ -43,6 +43,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.DisplayArea.Type.ANY;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_SCREEN_ROTATION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
@@ -442,7 +443,7 @@ public class WindowContainerTests extends WindowTestsBase {
         assertTrue(window.isAnimating());
         assertFalse(window.isAnimating(0, ANIMATION_TYPE_SCREEN_ROTATION));
         assertTrue(window.isAnimating(0, ANIMATION_TYPE_APP_TRANSITION));
-        assertFalse(window.isAnimatingExcluding(0, ANIMATION_TYPE_APP_TRANSITION));
+        assertFalse(window.isAnimating(0, ANIMATION_TYPE_ALL & ~ANIMATION_TYPE_APP_TRANSITION));
 
         final TestWindowContainer child = window.addChildWindow();
         assertFalse(child.isAnimating());

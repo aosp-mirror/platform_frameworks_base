@@ -311,6 +311,10 @@ public class ZenModeFiltering {
         }
     }
 
+    protected void cleanUpCallersAfter(long timeThreshold) {
+        REPEAT_CALLERS.cleanUpCallsAfter(timeThreshold);
+    }
+
     private static class RepeatCallers {
         // Person : time
         private final ArrayMap<String, Long> mCalls = new ArrayMap<>();
@@ -342,6 +346,17 @@ public class ZenModeFiltering {
                 final long time = mCalls.valueAt(i);
                 if (time > now || (now - time) > mThresholdMinutes * 1000 * 60) {
                     calls.removeAt(i);
+                }
+            }
+        }
+
+        // Clean up all calls that occurred after the given time.
+        // Used only for tests, to clean up after testing.
+        private synchronized void cleanUpCallsAfter(long timeThreshold) {
+            for (int i = mCalls.size() - 1; i >= 0; i--) {
+                final long time = mCalls.valueAt(i);
+                if (time > timeThreshold) {
+                    mCalls.removeAt(i);
                 }
             }
         }

@@ -61,6 +61,11 @@ class Ledger {
     Ledger() {
     }
 
+    Ledger(long currentBalance, @NonNull List<Transaction> transactions) {
+        mCurrentBalance = currentBalance;
+        mTransactions.addAll(transactions);
+    }
+
     long getCurrentBalance() {
         return mCurrentBalance;
     }
@@ -71,6 +76,11 @@ class Ledger {
             return mTransactions.get(0);
         }
         return null;
+    }
+
+    @NonNull
+    List<Transaction> getTransactions() {
+        return mTransactions;
     }
 
     void recordTransaction(@NonNull Transaction transaction) {
