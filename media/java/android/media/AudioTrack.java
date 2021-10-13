@@ -1805,9 +1805,15 @@ public class AudioTrack extends PlayerBase
             return false;
         }
         final int channelCount = AudioFormat.channelCountFromOutChannelMask(channelConfig);
-        final int channelCountLimit = AudioFormat.isEncodingLinearFrames(encoding)
-                ? AudioSystem.OUT_CHANNEL_COUNT_MAX  // PCM limited to OUT_CHANNEL_COUNT_MAX
-                : AudioSystem.FCC_24;                // Compressed limited to 24 channels
+        final int channelCountLimit;
+        try {
+            channelCountLimit = AudioFormat.isEncodingLinearFrames(encoding)
+                    ? AudioSystem.OUT_CHANNEL_COUNT_MAX  // PCM limited to OUT_CHANNEL_COUNT_MAX
+                    : AudioSystem.FCC_24;                // Compressed limited to 24 channels
+        } catch (IllegalArgumentException iae) {
+            loge("Unsupported encoding " + iae);
+            return false;
+        }
         if (channelCount > channelCountLimit) {
             loge("Channel configuration contains too many channels for encoding "
                     + encoding + "(" + channelCount + " > " + channelCountLimit + ")");
