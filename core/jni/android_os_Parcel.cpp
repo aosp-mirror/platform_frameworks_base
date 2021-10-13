@@ -596,13 +596,10 @@ static jint android_os_Parcel_compareData(JNIEnv* env, jclass clazz, jlong thisN
                                           jlong otherNativePtr)
 {
     Parcel* thisParcel = reinterpret_cast<Parcel*>(thisNativePtr);
-    if (thisParcel == NULL) {
-       return 0;
-    }
+    LOG_ALWAYS_FATAL_IF(thisParcel == nullptr, "Should not be null");
+
     Parcel* otherParcel = reinterpret_cast<Parcel*>(otherNativePtr);
-    if (otherParcel == NULL) {
-       return thisParcel->getOpenAshmemSize();
-    }
+    LOG_ALWAYS_FATAL_IF(otherParcel == nullptr, "Should not be null");
 
     return thisParcel->compareData(*otherParcel);
 }
