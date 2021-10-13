@@ -208,6 +208,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.function.Consumer;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -756,6 +757,8 @@ public final class ViewRootImpl implements ViewParent,
      * has been sent to SurfaceFlinger.
      */
     private boolean mNextDrawUseBlastSync = false;
+
+    private Consumer<SurfaceControl.Transaction> mBLASTDrawConsumer;
 
     /**
      * Wait for the blast sync transaction complete callback before drawing and queuing up more
@@ -3351,6 +3354,9 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         boolean cancelDraw = mAttachInfo.mTreeObserver.dispatchOnPreDraw() || !isViewVisible;
+        if (mBLASTDrawConsumer != null) {
+            mNextDrawUseBlastSync = true;
+        }
 
         if (!cancelDraw) {
             if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
@@ -4049,6 +4055,8 @@ public final class ViewRootImpl implements ViewParent,
      */
     private HardwareRenderer.FrameCompleteCallback createFrameCompleteCallback(Handler handler,
             boolean reportNextDraw, ArrayList<Runnable> commitCallbacks) {
+        final Consumer<SurfaceControl.Transaction> blastSyncConsumer = mBLASTDrawConsumer;
+        mBLASTDrawConsumer = null;
         return frameNr -> {
             if (DEBUG_BLAST) {
                 Log.d(mTag, "Received frameCompleteCallback frameNum=" + frameNr);
@@ -4061,6 +4069,9 @@ public final class ViewRootImpl implements ViewParent,
                     // is only true when the UI thread is paused. Therefore, no one should be
                     // modifying this object until the next vsync.
                     mSurfaceChangedTransaction.merge(mRtBLASTSyncTransaction);
+                    if (blastSyncConsumer != null) {
+                        blastSyncConsumer.accept(mSurfaceChangedTransaction);
+                    }
                 }
 
                 if (reportNextDraw) {
@@ -10548,4 +10559,35 @@ public final class ViewRootImpl implements ViewParent,
             listener.onBufferTransformHintChanged(hint);
         }
     }
+
+    /**
+     * Redirect the next draw of this ViewRoot (from the UI thread perspective)
+     * to the passed in consumer. This can be used to create P2P synchronization
+     * between ViewRoot's however it comes with many caveats.
+     *
+     * 1. You MUST consume the transaction, by either applying it immediately or
+     *    merging it in to another transaction. The threading model doesn't
+     *    allow you to hold in the passed transaction.
+     * 2. If you merge it in to another transaction, this ViewRootImpl will be
+     *    paused until you finally apply that transaction and it receives
+     *    the callback from SF. If you lose track of the transaction you will
+     *    ANR the app.
+     * 3. Only one person can consume the transaction at a time, if you already
+     *    have a pending consumer for this frame, the function will return false
+     * 4. Someone else may have requested to consume the next frame, in which case
+     *    this function will return false and you will not receive a callback.
+     * 5. This function does not trigger drawing so even if it returns true you
+     *    may not receive a callback unless there is some other UI thread work
+     *    to trigger drawing. If it returns true, and a draw occurs, the callback
+     *    will be called (Though again watch out for the null transaction case!)
+     * 6. This function must be called on the UI thread. The consumer will likewise
+     *    be called on the UI thread.
+     */
+    public boolean consumeNextDraw(Consumer<SurfaceControl.Transaction> consume) {
+       if (mBLASTDrawConsumer != null) {
+           return false;
+       }
+       mBLASTDrawConsumer = consume;
+       return true;
+   }
 }
