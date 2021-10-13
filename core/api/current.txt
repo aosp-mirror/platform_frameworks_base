@@ -31572,6 +31572,7 @@ package android.os {
     method public int dataSize();
     method public void enforceInterface(@NonNull String);
     method public boolean hasFileDescriptors();
+    method public boolean hasFileDescriptors(int, int);
     method public byte[] marshall();
     method @NonNull public static android.os.Parcel obtain();
     method @NonNull public static android.os.Parcel obtain(@NonNull android.os.IBinder);
