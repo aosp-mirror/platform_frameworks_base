@@ -1926,6 +1926,7 @@ class Task extends TaskFragment {
             final ActivityRecord r = topRunningActivity();
             if (r != null && mDisplayContent.isFixedRotationLaunchingApp(r)) {
                 getSyncTransaction().setWindowCrop(mSurfaceControl, null)
+                        .setCornerRadius(mSurfaceControl, 0f)
                         .setMatrix(mSurfaceControl, Matrix.IDENTITY_MATRIX, new float[9]);
             }
         }
