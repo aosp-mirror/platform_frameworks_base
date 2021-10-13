@@ -18,25 +18,28 @@ package com.android.systemui.statusbar.phone
 import android.graphics.Point
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import com.android.systemui.R
 import com.android.systemui.shared.animation.UnfoldMoveFromCenterAnimator
 import com.android.systemui.statusbar.CommandQueue
+import com.android.systemui.unfold.UNFOLD_STATUS_BAR
+import com.android.systemui.unfold.config.UnfoldTransitionConfig
+import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
 import com.android.systemui.util.ViewController
+import javax.inject.Inject
+import javax.inject.Named
+import dagger.Lazy
 
 /** Controller for [PhoneStatusBarView].  */
-class PhoneStatusBarViewController(
+class PhoneStatusBarViewController private constructor(
     view: PhoneStatusBarView,
-    statusBarMoveFromCenterAnimationController: StatusBarMoveFromCenterAnimationController?,
+    @Named(UNFOLD_STATUS_BAR) private val progressProvider: ScopedUnfoldTransitionProgressProvider?,
+    private val moveFromCenterAnimationController: StatusBarMoveFromCenterAnimationController?,
     touchEventHandler: PhoneStatusBarView.TouchEventHandler,
 ) : ViewController<PhoneStatusBarView>(view) {
 
-    override fun onViewAttached() {}
-    override fun onViewDetached() {}
-
-    init {
-        mView.setTouchEventHandler(touchEventHandler)
-
-        statusBarMoveFromCenterAnimationController?.let { animationController ->
+    override fun onViewAttached() {
+        moveFromCenterAnimationController?.let { animationController ->
             val statusBarLeftSide: View = mView.findViewById(R.id.status_bar_left_side)
             val systemIconArea: ViewGroup = mView.findViewById(R.id.system_icon_area)
 
@@ -46,15 +49,33 @@ class PhoneStatusBarViewController(
                 systemIconArea
             )
 
-            animationController.init(viewsToAnimate, viewCenterProvider)
+            mView.viewTreeObserver.addOnPreDrawListener(object :
+                ViewTreeObserver.OnPreDrawListener {
+                override fun onPreDraw(): Boolean {
+                    animationController.onViewsReady(viewsToAnimate, viewCenterProvider)
+                    mView.viewTreeObserver.removeOnPreDrawListener(this)
+                    return true
+                }
+            })
 
             mView.addOnLayoutChangeListener { _, left, _, right, _, oldLeft, _, oldRight, _ ->
                 val widthChanged = right - left != oldRight - oldLeft
                 if (widthChanged) {
-                    statusBarMoveFromCenterAnimationController.onStatusBarWidthChanged()
+                    moveFromCenterAnimationController.onStatusBarWidthChanged()
                 }
             }
         }
+
+        progressProvider?.setReadyToHandleTransition(true)
+    }
+
+    override fun onViewDetached() {
+        progressProvider?.setReadyToHandleTransition(false)
+        moveFromCenterAnimationController?.onViewDetached()
+    }
+
+    init {
+        mView.setTouchEventHandler(touchEventHandler)
     }
 
     fun setImportantForAccessibility(mode: Int) {
@@ -90,6 +111,25 @@ class PhoneStatusBarViewController(
 
             outPoint.x = viewX + if (isLeftEdge) view.height / 2 else view.width - view.height / 2
             outPoint.y = viewY + view.height / 2
+        }
+    }
+
+    class Factory @Inject constructor(
+        @Named(UNFOLD_STATUS_BAR)
+        private val progressProvider: Lazy<ScopedUnfoldTransitionProgressProvider>,
+        private val moveFromCenterController: Lazy<StatusBarMoveFromCenterAnimationController>,
+        private val unfoldConfig: UnfoldTransitionConfig,
+    ) {
+        fun create(
+            view: PhoneStatusBarView,
+            touchEventHandler: PhoneStatusBarView.TouchEventHandler
+        ): PhoneStatusBarViewController {
+            return PhoneStatusBarViewController(
+                view,
+                if (unfoldConfig.isEnabled) progressProvider.get() else null,
+                if (unfoldConfig.isEnabled) moveFromCenterController.get() else null,
+                touchEventHandler
+            )
         }
     }
 }
