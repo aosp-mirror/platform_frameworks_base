@@ -40,7 +40,7 @@ import java.util.Objects;
  *
  * @see CameraCharacteristics#SENSOR_ORIENTATION
  */
-public final class DeviceStateOrientationMap {
+public final class DeviceStateSensorOrientationMap {
     /**
      *  Needs to be kept in sync with the HIDL/AIDL DeviceState
      */
@@ -85,10 +85,10 @@ public final class DeviceStateOrientationMap {
      *
      * @hide
      */
-    public DeviceStateOrientationMap(final long[] elements) {
+    public DeviceStateSensorOrientationMap(final long[] elements) {
         mElements = Objects.requireNonNull(elements, "elements must not be null");
         if ((elements.length % 2) != 0) {
-            throw new IllegalArgumentException("Device state orientation map length " +
+            throw new IllegalArgumentException("Device state sensor orientation map length " +
                     elements.length + " is not even!");
         }
 
@@ -121,7 +121,8 @@ public final class DeviceStateOrientationMap {
     }
 
     /**
-     * Check if this DeviceStateOrientationMap is equal to another DeviceStateOrientationMap.
+     * Check if this DeviceStateSensorOrientationMap is equal to another
+     * DeviceStateSensorOrientationMap.
      *
      * <p>Two device state orientation maps are equal if and only if all of their elements are
      * {@link Object#equals equal}.</p>
@@ -136,8 +137,8 @@ public final class DeviceStateOrientationMap {
         if (this == obj) {
             return true;
         }
-        if (obj instanceof DeviceStateOrientationMap) {
-            final DeviceStateOrientationMap other = (DeviceStateOrientationMap) obj;
+        if (obj instanceof DeviceStateSensorOrientationMap) {
+            final DeviceStateSensorOrientationMap other = (DeviceStateSensorOrientationMap) obj;
             return Arrays.equals(mElements, other.mElements);
         }
         return false;

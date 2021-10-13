@@ -18013,7 +18013,7 @@ package android.hardware.camera2 {
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> EDGE_AVAILABLE_EDGE_MODES;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Boolean> FLASH_INFO_AVAILABLE;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> HOT_PIXEL_AVAILABLE_HOT_PIXEL_MODES;
-    field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.DeviceStateOrientationMap> INFO_DEVICE_STATE_ORIENTATION_MAP;
+    field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.DeviceStateSensorOrientationMap> INFO_DEVICE_STATE_SENSOR_ORIENTATION_MAP;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> INFO_SUPPORTED_HARDWARE_LEVEL;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.String> INFO_VERSION;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.util.Size[]> JPEG_AVAILABLE_THUMBNAIL_SIZES;
@@ -18708,7 +18708,7 @@ package android.hardware.camera2.params {
     method public android.util.Rational getElement(int, int);
   }
 
-  public final class DeviceStateOrientationMap {
+  public final class DeviceStateSensorOrientationMap {
     method public int getSensorOrientation(long);
     field public static final long FOLDED = 4L; // 0x4L
     field public static final long NORMAL = 0L; // 0x0L
