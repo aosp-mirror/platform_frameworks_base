@@ -31,6 +31,7 @@ import android.media.ISpatializerCallback;
 import android.media.ISpatializerHeadToSoundStagePoseCallback;
 import android.media.ISpatializerHeadTrackingCallback;
 import android.media.ISpatializerHeadTrackingModeCallback;
+import android.media.ISpatializerOutputCallback;
 import android.media.SpatializationLevel;
 import android.media.Spatializer;
 import android.media.SpatializerHeadTrackingMode;
@@ -76,6 +77,7 @@ public class SpatializerHelper {
     private int mCapableSpatLevel = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
     private int mActualHeadTrackingMode = Spatializer.HEAD_TRACKING_MODE_UNSUPPORTED;
     private int mDesiredHeadTrackingMode = Spatializer.HEAD_TRACKING_MODE_UNSUPPORTED;
+    private int mSpatOutput = 0;
     private @Nullable ISpatializer mSpat;
     private @Nullable SpatializerCallback mSpatCallback;
     private @Nullable SpatializerHeadTrackingCallback mSpatHeadTrackingCallback;
@@ -216,6 +218,14 @@ public class SpatializerHelper {
 
         public void onOutputChanged(int output) {
             logd("SpatializerCallback.onOutputChanged output:" + output);
+            int oldOutput;
+            synchronized (SpatializerHelper.this) {
+                oldOutput = mSpatOutput;
+                mSpatOutput = output;
+            }
+            if (oldOutput != output) {
+                dispatchOutputUpdate(output);
+            }
         }
     };
 
@@ -783,6 +793,60 @@ public class SpatializerHelper {
         } catch (RemoteException e) {
             Log.e(TAG, "Error in getParameter for key:" + key, e);
         }
+    }
+
+    //------------------------------------------------------
+    // output
+
+    /** @see Spatializer#getOutput */
+    synchronized int getOutput() {
+        switch (mState) {
+            case STATE_UNINITIALIZED:
+            case STATE_NOT_SUPPORTED:
+                throw (new IllegalStateException(
+                        "Can't get output without a spatializer"));
+            case STATE_ENABLED_UNAVAILABLE:
+            case STATE_DISABLED_UNAVAILABLE:
+            case STATE_DISABLED_AVAILABLE:
+            case STATE_ENABLED_AVAILABLE:
+                if (mSpat == null) {
+                    throw (new IllegalStateException(
+                            "null Spatializer for getOutput"));
+                }
+                break;
+        }
+        // mSpat != null
+        try {
+            return mSpat.getOutput();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error in getOutput", e);
+            return 0;
+        }
+    }
+
+    final RemoteCallbackList<ISpatializerOutputCallback> mOutputCallbacks =
+            new RemoteCallbackList<ISpatializerOutputCallback>();
+
+    synchronized void registerSpatializerOutputCallback(
+            @NonNull ISpatializerOutputCallback callback) {
+        mOutputCallbacks.register(callback);
+    }
+
+    synchronized void unregisterSpatializerOutputCallback(
+            @NonNull ISpatializerOutputCallback callback) {
+        mOutputCallbacks.unregister(callback);
+    }
+
+    private void dispatchOutputUpdate(int output) {
+        final int nbCallbacks = mOutputCallbacks.beginBroadcast();
+        for (int i = 0; i < nbCallbacks; i++) {
+            try {
+                mOutputCallbacks.getBroadcastItem(i).dispatchSpatializerOutputChanged(output);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error in dispatchOutputUpdate", e);
+            }
+        }
+        mOutputCallbacks.finishBroadcast();
     }
 
     //------------------------------------------------------

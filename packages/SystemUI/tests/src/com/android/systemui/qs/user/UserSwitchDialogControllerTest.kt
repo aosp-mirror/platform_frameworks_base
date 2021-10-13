@@ -22,6 +22,7 @@ import android.testing.AndroidTestingRunner
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.PseudoGridView
@@ -68,6 +69,8 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
     private lateinit var launchView: View
     @Mock
     private lateinit var gridView: PseudoGridView
+    @Mock
+    private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
     @Captor
     private lateinit var clickCaptor: ArgumentCaptor<View.OnClickListener>
 
@@ -87,6 +90,7 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
                 { userDetailViewAdapter },
                 activityStarter,
                 falsingManager,
+                dialogLaunchAnimator,
                 { dialog }
         )
     }
@@ -94,7 +98,7 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
     @Test
     fun showDialog_callsDialogShow() {
         controller.showDialog(launchView)
-        verify(dialog).show()
+        verify(dialogLaunchAnimator).showFromView(dialog, launchView)
     }
 
     @Test

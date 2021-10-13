@@ -464,7 +464,10 @@ public final class SplashScreenView extends FrameLayout {
     }
 
 
-    void transferSurface() {
+    /**
+     * @hide
+     */
+    public void syncTransferSurfaceOnDraw() {
         if (mSurfacePackage == null) {
             return;
         }
@@ -474,8 +477,8 @@ public final class SplashScreenView extends FrameLayout {
                             String.format("SurfacePackage'surface reparented to %s", parent)));
             Log.d(TAG, "Transferring surface " + mSurfaceView.toString());
         }
-        mSurfaceView.setChildSurfacePackage(mSurfacePackage);
 
+        mSurfaceView.setChildSurfacePackageOnDraw(mSurfacePackage);
     }
 
     void initIconAnimation(Drawable iconDrawable, long duration) {
@@ -533,10 +536,6 @@ public final class SplashScreenView extends FrameLayout {
             restoreSystemUIColors();
             mWindow = null;
         }
-        if (mHostActivity != null) {
-            mHostActivity.setSplashScreenView(null);
-            mHostActivity = null;
-        }
         mHasRemoved = true;
     }
 
@@ -582,7 +581,6 @@ public final class SplashScreenView extends FrameLayout {
      * @hide
      */
     public void attachHostActivityAndSetSystemUIColors(Activity activity, Window window) {
-        activity.setSplashScreenView(this);
         mHostActivity = activity;
         mWindow = window;
         final WindowManager.LayoutParams attr = window.getAttributes();

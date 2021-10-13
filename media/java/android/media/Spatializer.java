@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -63,7 +64,9 @@ public class Spatializer {
     /**
      * Returns whether spatialization is enabled or not.
      * A false value can originate for instance from the user electing to
-     * disable the feature.<br>
+     * disable the feature, or when the feature is not supported on the device (indicated
+     * by {@link #getImmersiveAudioLevel()} returning {@link #SPATIALIZER_IMMERSIVE_LEVEL_NONE}).
+     * <br>
      * Note that this state reflects a platform-wide state of the "desire" to use spatialization,
      * but availability of the audio processing is still dictated by the compatibility between
      * the effect and the hardware configuration, as indicated by {@link #isAvailable()}.
@@ -85,7 +88,10 @@ public class Spatializer {
      * incompatible with sound spatialization, such as playback on a monophonic speaker.<br>
      * Note that spatialization can be available, but disabled by the user, in which case this
      * method would still return {@code true}, whereas {@link #isEnabled()}
-     * would return {@code false}.
+     * would return {@code false}.<br>
+     * Also when the feature is not supported on the device (indicated
+     * by {@link #getImmersiveAudioLevel()} returning {@link #SPATIALIZER_IMMERSIVE_LEVEL_NONE}),
+     * the return value will be false.
      * @return {@code true} if the spatializer effect is available and capable
      *         of processing the audio for the current configuration of the device,
      *         {@code false} otherwise.
@@ -291,6 +297,24 @@ public class Spatializer {
          */
         void onDesiredHeadTrackingModeChanged(@NonNull Spatializer spatializer,
                 @HeadTrackingModeSet int mode);
+    }
+
+
+    /**
+     * @hide
+     * An interface to be notified of changes to the output stream used by the spatializer
+     * effect.
+     * @see #getOutput()
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    public interface OnSpatializerOutputChangedListener {
+        /**
+         * Called when the id of the output stream of the spatializer effect changed.
+         * @param spatializer the {@code Spatializer} instance whose output is updated
+         * @param output the id of the output stream, or 0 when there is no spatializer output
+         */
+        void onSpatializerOutputChanged(@NonNull Spatializer spatializer,
+                @IntRange(from = 0) int output);
     }
 
     /**
@@ -839,6 +863,73 @@ public class Spatializer {
         }
     }
 
+    /**
+     * @hide
+     * Returns the id of the output stream used for the spatializer effect playback
+     * @return id of the output stream, or 0 if no spatializer playback is active
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
+    public @IntRange(from = 0) int getOutput() {
+        try {
+            return mAm.getService().getSpatializerOutput();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling getSpatializerOutput", e);
+            return 0;
+        }
+    }
+
+    /**
+     * @hide
+     * Sets the listener to receive spatializer effect output updates
+     * @param executor the {@code Executor} handling the callbacks
+     * @param listener the listener to register
+     * @see #clearOnSpatializerOutputChangedListener()
+     * @see #getOutput()
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
+    public void setOnSpatializerOutputChangedListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnSpatializerOutputChangedListener listener) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(listener);
+        synchronized (mOutputListenerLock) {
+            if (mOutputListener != null) {
+                throw new IllegalStateException("Trying to overwrite existing listener");
+            }
+            mOutputListener =
+                    new ListenerInfo<OnSpatializerOutputChangedListener>(listener, executor);
+            mOutputDispatcher = new SpatializerOutputDispatcherStub();
+            try {
+                mAm.getService().registerSpatializerOutputCallback(mOutputDispatcher);
+            } catch (RemoteException e) {
+                mOutputListener = null;
+                mOutputDispatcher = null;
+            }
+        }
+    }
+
+    /**
+     * @hide
+     * Clears the listener for spatializer effect output updates
+     * @see #setOnSpatializerOutputChangedListener(Executor, OnSpatializerOutputChangedListener)
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
+    public void clearOnSpatializerOutputChangedListener() {
+        synchronized (mOutputListenerLock) {
+            if (mOutputDispatcher == null) {
+                throw (new IllegalStateException("No listener to clear"));
+            }
+            try {
+                mAm.getService().unregisterSpatializerOutputCallback(mOutputDispatcher);
+            } catch (RemoteException e) { }
+            mOutputListener = null;
+            mOutputDispatcher = null;
+        }
+    }
+
     //-----------------------------------------------------------------------------
     // callback helper definitions
 
@@ -961,6 +1052,37 @@ public class Spatializer {
             try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
                 listener.mExecutor.execute(() -> listener.mListener
                         .onHeadToSoundstagePoseUpdated(Spatializer.this, pose));
+            }
+        }
+    }
+
+    //-----------------------------------------------------------------------------
+    // output callback management and stub
+    private final Object mOutputListenerLock = new Object();
+    /**
+     * Listener for output updates
+     */
+    @GuardedBy("mOutputListenerLock")
+    private @Nullable ListenerInfo<OnSpatializerOutputChangedListener> mOutputListener;
+    @GuardedBy("mOutputListenerLock")
+    private @Nullable SpatializerOutputDispatcherStub mOutputDispatcher;
+
+    private final class SpatializerOutputDispatcherStub
+            extends ISpatializerOutputCallback.Stub {
+
+        @Override
+        public void dispatchSpatializerOutputChanged(int output) {
+            // make a copy of ref to listener so callback is not executed under lock
+            final ListenerInfo<OnSpatializerOutputChangedListener> listener;
+            synchronized (mOutputListenerLock) {
+                listener = mOutputListener;
+            }
+            if (listener == null) {
+                return;
+            }
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                listener.mExecutor.execute(() -> listener.mListener
+                        .onSpatializerOutputChanged(Spatializer.this, output));
             }
         }
     }

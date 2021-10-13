@@ -114,9 +114,6 @@ class WiredChargingRippleController @Inject constructor(
             override fun onThemeChanged() {
                 updateRippleColor()
             }
-            override fun onOverlayChanged() {
-                updateRippleColor()
-            }
 
             override fun onConfigChanged(newConfig: Configuration?) {
                 normalizedPortPosX = context.resources.getFloat(
