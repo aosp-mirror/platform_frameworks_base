@@ -441,14 +441,12 @@ public class ChooserActivity extends ResolverActivity implements
     private final ChooserHandler mChooserHandler = new ChooserHandler();
 
     private class ChooserHandler extends Handler {
-        private static final int SHORTCUT_MANAGER_SHARE_TARGET_RESULT = 4;
-        private static final int SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED = 5;
         private static final int LIST_VIEW_UPDATE_MESSAGE = 6;
+        private static final int SHORTCUT_MANAGER_ALL_SHARE_TARGET_RESULTS = 7;
 
         private void removeAllMessages() {
             removeMessages(LIST_VIEW_UPDATE_MESSAGE);
-            removeMessages(SHORTCUT_MANAGER_SHARE_TARGET_RESULT);
-            removeMessages(SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED);
+            removeMessages(SHORTCUT_MANAGER_ALL_SHARE_TARGET_RESULTS);
         }
 
         @Override
@@ -468,22 +466,23 @@ public class ChooserActivity extends ResolverActivity implements
                             .refreshListView();
                     break;
 
-                case SHORTCUT_MANAGER_SHARE_TARGET_RESULT:
-                    if (DEBUG) Log.d(TAG, "SHORTCUT_MANAGER_SHARE_TARGET_RESULT");
-                    final ServiceResultInfo resultInfo = (ServiceResultInfo) msg.obj;
-                    if (resultInfo.resultTargets != null) {
-                        ChooserListAdapter adapterForUserHandle =
-                                mChooserMultiProfilePagerAdapter.getListAdapterForUserHandle(
-                                        resultInfo.userHandle);
-                        if (adapterForUserHandle != null) {
-                            adapterForUserHandle.addServiceResults(
-                                    resultInfo.originalTarget, resultInfo.resultTargets, msg.arg1,
-                                    mDirectShareShortcutInfoCache);
+                case SHORTCUT_MANAGER_ALL_SHARE_TARGET_RESULTS:
+                    if (DEBUG) Log.d(TAG, "SHORTCUT_MANAGER_ALL_SHARE_TARGET_RESULTS");
+                    final ServiceResultInfo[] resultInfos = (ServiceResultInfo[]) msg.obj;
+                    for (ServiceResultInfo resultInfo : resultInfos) {
+                        if (resultInfo.resultTargets != null) {
+                            ChooserListAdapter adapterForUserHandle =
+                                    mChooserMultiProfilePagerAdapter.getListAdapterForUserHandle(
+                                            resultInfo.userHandle);
+                            if (adapterForUserHandle != null) {
+                                adapterForUserHandle.addServiceResults(
+                                        resultInfo.originalTarget,
+                                        resultInfo.resultTargets, msg.arg1,
+                                        mDirectShareShortcutInfoCache);
+                            }
                         }
                     }
-                    break;
 
-                case SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED:
                     logDirectShareTargetReceived(
                             MetricsEvent.ACTION_DIRECT_SHARE_TARGETS_LOADED_SHORTCUT_MANAGER);
                     sendVoiceChoicesIfNeeded();
@@ -1954,34 +1953,44 @@ public class ChooserActivity extends ResolverActivity implements
         // Match ShareShortcutInfos with DisplayResolveInfos to be able to use the old code path
         // for direct share targets. After ShareSheet is refactored we should use the
         // ShareShortcutInfos directly.
+        List<ServiceResultInfo> resultRecords = new ArrayList<>();
         for (int i = 0; i < chooserListAdapter.getDisplayResolveInfoCount(); i++) {
-            List<ShortcutManager.ShareShortcutInfo> matchingShortcuts = new ArrayList<>();
-            for (int j = 0; j < resultList.size(); j++) {
-                if (chooserListAdapter.getDisplayResolveInfo(i).getResolvedComponentName().equals(
-                            resultList.get(j).getTargetComponent())) {
-                    matchingShortcuts.add(resultList.get(j));
-                }
-            }
+            DisplayResolveInfo displayResolveInfo = chooserListAdapter.getDisplayResolveInfo(i);
+            List<ShortcutManager.ShareShortcutInfo> matchingShortcuts =
+                    filterShortcutsByTargetComponentName(
+                            resultList, displayResolveInfo.getResolvedComponentName());
             if (matchingShortcuts.isEmpty()) {
                 continue;
             }
             List<ChooserTarget> chooserTargets = convertToChooserTarget(
                     matchingShortcuts, resultList, appTargets, shortcutType);
 
-            final Message msg = Message.obtain();
-            msg.what = ChooserHandler.SHORTCUT_MANAGER_SHARE_TARGET_RESULT;
-            msg.obj = new ServiceResultInfo(chooserListAdapter.getDisplayResolveInfo(i),
-                    chooserTargets, userHandle);
-            msg.arg1 = shortcutType;
-            mChooserHandler.sendMessage(msg);
+            ServiceResultInfo resultRecord = new ServiceResultInfo(
+                    displayResolveInfo, chooserTargets, userHandle);
+            resultRecords.add(resultRecord);
         }
 
-        sendShortcutManagerShareTargetResultCompleted();
+        sendShortcutManagerShareTargetResults(
+                shortcutType, resultRecords.toArray(new ServiceResultInfo[0]));
     }
 
-    private void sendShortcutManagerShareTargetResultCompleted() {
+    private List<ShortcutManager.ShareShortcutInfo> filterShortcutsByTargetComponentName(
+            List<ShortcutManager.ShareShortcutInfo> allShortcuts, ComponentName requiredTarget) {
+        List<ShortcutManager.ShareShortcutInfo> matchingShortcuts = new ArrayList<>();
+        for (ShortcutManager.ShareShortcutInfo shortcut : allShortcuts) {
+            if (requiredTarget.equals(shortcut.getTargetComponent())) {
+                matchingShortcuts.add(shortcut);
+            }
+        }
+        return matchingShortcuts;
+    }
+
+    private void sendShortcutManagerShareTargetResults(
+            int shortcutType, ServiceResultInfo[] results) {
         final Message msg = Message.obtain();
-        msg.what = ChooserHandler.SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED;
+        msg.what = ChooserHandler.SHORTCUT_MANAGER_ALL_SHARE_TARGET_RESULTS;
+        msg.obj = results;
+        msg.arg1 = shortcutType;
         mChooserHandler.sendMessage(msg);
     }
 
