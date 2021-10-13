@@ -19,6 +19,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.filters.SmallTest;
@@ -73,6 +74,7 @@ public class InternetDialogTest extends SysuiTestCase {
     private LinearLayout mConnectedWifi;
     private RecyclerView mWifiList;
     private LinearLayout mSeeAll;
+    private LinearLayout mWifiScanNotify;
 
     @Before
     public void setUp() {
@@ -104,6 +106,7 @@ public class InternetDialogTest extends SysuiTestCase {
         mConnectedWifi = mDialogView.requireViewById(R.id.wifi_connected_layout);
         mWifiList = mDialogView.requireViewById(R.id.wifi_list_layout);
         mSeeAll = mDialogView.requireViewById(R.id.see_all_layout);
+        mWifiScanNotify = mDialogView.requireViewById(R.id.wifi_scan_notify_layout);
     }
 
     @After
@@ -261,6 +264,50 @@ public class InternetDialogTest extends SysuiTestCase {
 
         assertThat(mWifiList.getVisibility()).isEqualTo(View.GONE);
         assertThat(mSeeAll.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void updateDialog_wifiOn_hideWifiScanNotify() {
+        // The preconditions WiFi ON and Internet WiFi are already in setUp()
+
+        mInternetDialog.updateDialog();
+
+        assertThat(mWifiScanNotify.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void updateDialog_wifiOffAndWifiScanOff_hideWifiScanNotify() {
+        when(mWifiManager.isWifiEnabled()).thenReturn(false);
+        when(mWifiManager.isScanAlwaysAvailable()).thenReturn(false);
+
+        mInternetDialog.updateDialog();
+
+        assertThat(mWifiScanNotify.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void updateDialog_wifiOffAndWifiScanOnAndDeviceLocked_hideWifiScanNotify() {
+        when(mWifiManager.isWifiEnabled()).thenReturn(false);
+        when(mWifiManager.isScanAlwaysAvailable()).thenReturn(true);
+        when(mInternetDialogController.isDeviceLocked()).thenReturn(true);
+
+        mInternetDialog.updateDialog();
+
+        assertThat(mWifiScanNotify.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void updateDialog_wifiOffAndWifiScanOnAndDeviceUnlocked_showWifiScanNotify() {
+        when(mWifiManager.isWifiEnabled()).thenReturn(false);
+        when(mWifiManager.isScanAlwaysAvailable()).thenReturn(true);
+        when(mInternetDialogController.isDeviceLocked()).thenReturn(false);
+
+        mInternetDialog.updateDialog();
+
+        assertThat(mWifiScanNotify.getVisibility()).isEqualTo(View.VISIBLE);
+        TextView wifiScanNotifyText = mDialogView.requireViewById(R.id.wifi_scan_notify_text);
+        assertThat(wifiScanNotifyText.getText().length()).isNotEqualTo(0);
+        assertThat(wifiScanNotifyText.getMovementMethod()).isNotNull();
     }
 
     @Test
