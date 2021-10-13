@@ -156,6 +156,12 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
             "android.bluetooth.action.LE_AUDIO_CONF_CHANGED";
 
     /**
+     * Indicates unspecified audio content.
+     * @hide
+     */
+    public static final int CONTEXT_TYPE_UNSPECIFIED = 0x0001;
+
+    /**
      * Indicates conversation between humans as, for example, in telephony or video calls.
      * @hide
      */
@@ -166,6 +172,66 @@ public final class BluetoothLeAudio implements BluetoothProfile, AutoCloseable {
      * @hide
      */
     public static final int CONTEXT_TYPE_MEDIA = 0x0004;
+
+    /**
+     * Indicates instructional audio as, for example, in navigation, traffic announcements
+     * or user guidance.
+     * @hide
+     */
+    public static final int CONTEXT_TYPE_INSTRUCTIONAL = 0x0008;
+
+    /**
+     * Indicates attention seeking audio as, for example, in beeps signalling arrival of a message
+     * or keyboard clicks.
+     * @hide
+     */
+    public static final int CONTEXT_TYPE_ATTENTION_SEEKING = 0x0010;
+
+    /**
+     * Indicates immediate alerts as, for example, in a low battery alarm, timer expiry or alarm
+     * clock.
+     * @hide
+     */
+    public static final int CONTEXT_TYPE_IMMEDIATE_ALERT = 0x0020;
+
+    /**
+     * Indicates man machine communication as, for example, with voice recognition or virtual
+     * assistant.
+     * @hide
+     */
+    public static final int CONTEXT_TYPE_MAN_MACHINE = 0x0040;
+
+    /**
+     * Indicates emergency alerts as, for example, with fire alarms or other urgent alerts.
+     * @hide
+     */
+    public static final int CONTEXT_TYPE_EMERGENCY_ALERT = 0x0080;
+
+    /**
+     * Indicates ringtone as in a call alert.
+     * @hide
+     */
+    public static final int CONTEXT_TYPE_RINGTONE = 0x0100;
+
+    /**
+     * Indicates audio associated with a television program and/or with metadata conforming to the
+     * Bluetooth Broadcast TV profile.
+     * @hide
+     */
+    public static final int CONTEXT_TYPE_TV = 0x0200;
+
+    /**
+     * Indicates audio associated with a low latency live audio stream.
+     *
+     * @hide
+     */
+    public static final int CONTEXT_TYPE_LIVE = 0x0400;
+
+    /**
+     * Indicates audio associated with a video game stream.
+     * @hide
+     */
+    public static final int CONTEXT_TYPE_GAME = 0x0800;
 
     /**
      * This represents an invalid group ID.
