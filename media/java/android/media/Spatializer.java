@@ -63,7 +63,9 @@ public class Spatializer {
     /**
      * Returns whether spatialization is enabled or not.
      * A false value can originate for instance from the user electing to
-     * disable the feature.<br>
+     * disable the feature, or when the feature is not supported on the device (indicated
+     * by {@link #getImmersiveAudioLevel()} returning {@link #SPATIALIZER_IMMERSIVE_LEVEL_NONE}).
+     * <br>
      * Note that this state reflects a platform-wide state of the "desire" to use spatialization,
      * but availability of the audio processing is still dictated by the compatibility between
      * the effect and the hardware configuration, as indicated by {@link #isAvailable()}.
@@ -85,7 +87,10 @@ public class Spatializer {
      * incompatible with sound spatialization, such as playback on a monophonic speaker.<br>
      * Note that spatialization can be available, but disabled by the user, in which case this
      * method would still return {@code true}, whereas {@link #isEnabled()}
-     * would return {@code false}.
+     * would return {@code false}.<br>
+     * Also when the feature is not supported on the device (indicated
+     * by {@link #getImmersiveAudioLevel()} returning {@link #SPATIALIZER_IMMERSIVE_LEVEL_NONE}),
+     * the return value will be false.
      * @return {@code true} if the spatializer effect is available and capable
      *         of processing the audio for the current configuration of the device,
      *         {@code false} otherwise.
