@@ -458,10 +458,8 @@ final class DeletePackageHelper {
         mAppDataHelper.destroyAppProfilesLIF(pkg);
 
         final SharedUserSetting sus = ps.getSharedUser();
-        List<AndroidPackage> sharedUserPkgs = sus != null ? sus.getPackages() : null;
-        if (sharedUserPkgs == null) {
-            sharedUserPkgs = Collections.emptyList();
-        }
+        final List<AndroidPackage> sharedUserPkgs =
+                sus != null ? sus.getPackages() : Collections.emptyList();
         final int[] userIds = (userId == UserHandle.USER_ALL) ? mUserManagerInternal.getUserIds()
                 : new int[] {userId};
         for (int nextUserId : userIds) {
