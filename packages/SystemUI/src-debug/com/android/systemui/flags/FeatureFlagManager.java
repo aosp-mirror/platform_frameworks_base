@@ -64,31 +64,45 @@ public class FeatureFlagManager implements FlagReader, FlagWriter {
 
     /** Return a {@link BooleanFlag}'s value. */
     public boolean isEnabled(int id, boolean defaultValue) {
+
+        Boolean result = isEnabledInternal(id);
+        return result == null ? defaultValue : result;
+    }
+
+    /** Returns the stored value or null if not set. */
+    private Boolean isEnabledInternal(int id) {
         String data = mSystemPropertiesHelper.get(keyToSysPropKey(id));
         if (data.isEmpty()) {
-            return defaultValue;
+            return null;
         }
         JSONObject json;
         try {
             json = new JSONObject(data);
             if (!assertType(json, TYPE_BOOLEAN)) {
-                return defaultValue;
+                return null;
             }
+
             return json.getBoolean(FIELD_VALUE);
         } catch (JSONException e) {
-            eraseFlag(id);
-            return defaultValue;
+            eraseInternal(id);  // Don't restart SystemUI in this case.
         }
+        return null;
     }
 
     /** Set whether a given {@link BooleanFlag} is enabled or not. */
     public void setEnabled(int id, boolean value) {
+        Boolean currentValue = isEnabledInternal(id);
+        if (currentValue != null && currentValue == value) {
+            return;
+        }
+
         JSONObject json = new JSONObject();
         try {
             json.put(FIELD_TYPE, TYPE_BOOLEAN);
             json.put(FIELD_VALUE, value);
             mSystemPropertiesHelper.set(keyToSysPropKey(id), json.toString());
-            Log.i(TAG, "Set id " + id + " to  " + value);
+            Log.i(TAG, "Set id " + id + " to " + value);
+            restartSystemUI();
         } catch (JSONException e) {
             // no-op
         }
@@ -96,6 +110,12 @@ public class FeatureFlagManager implements FlagReader, FlagWriter {
 
     /** Erase a flag's overridden value if there is one. */
     public void eraseFlag(int id) {
+        eraseInternal(id);
+        restartSystemUI();
+    }
+
+    /** Works just like {@link #eraseFlag(int)} except that it doesn't restart SystemUI. */
+    private void eraseInternal(int id) {
         // We can't actually "erase" things from sysprops, but we can set them to empty!
         mSystemPropertiesHelper.set(keyToSysPropKey(id), "");
         Log.i(TAG, "Erase id " + id);
@@ -104,6 +124,12 @@ public class FeatureFlagManager implements FlagReader, FlagWriter {
     public void addListener(Listener run) {}
 
     public void removeListener(Listener run) {}
+
+    private void restartSystemUI() {
+        Log.i(TAG, "Restarting SystemUI");
+        // SysUI starts back when up exited. Is there a better way to do this?
+        System.exit(0);
+    }
 
     private static String keyToSysPropKey(int key) {
         return SYSPROP_PREFIX + key;
