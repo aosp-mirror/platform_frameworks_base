@@ -96,6 +96,7 @@ import android.media.IRingtonePlayer;
 import android.media.ISpatializerCallback;
 import android.media.ISpatializerHeadToSoundStagePoseCallback;
 import android.media.ISpatializerHeadTrackingModeCallback;
+import android.media.ISpatializerOutputCallback;
 import android.media.IStrategyPreferredDevicesDispatcher;
 import android.media.IVolumeController;
 import android.media.MediaMetrics;
@@ -8496,6 +8497,26 @@ public class AudioService extends IAudioService.Stub
         enforceModifyDefaultAudioEffectsPermission();
         Objects.requireNonNull(value);
         mSpatializerHelper.getEffectParameter(key, value);
+    }
+
+    /** @see Spatializer#getOutput */
+    public int getSpatializerOutput() {
+        enforceModifyDefaultAudioEffectsPermission();
+        return mSpatializerHelper.getOutput();
+    }
+
+    /** @see Spatializer#setOnSpatializerOutputChangedListener */
+    public void registerSpatializerOutputCallback(ISpatializerOutputCallback cb) {
+        enforceModifyDefaultAudioEffectsPermission();
+        Objects.requireNonNull(cb);
+        mSpatializerHelper.registerSpatializerOutputCallback(cb);
+    }
+
+    /** @see Spatializer#clearOnSpatializerOutputChangedListener */
+    public void unregisterSpatializerOutputCallback(ISpatializerOutputCallback cb) {
+        enforceModifyDefaultAudioEffectsPermission();
+        Objects.requireNonNull(cb);
+        mSpatializerHelper.unregisterSpatializerOutputCallback(cb);
     }
 
     /**
