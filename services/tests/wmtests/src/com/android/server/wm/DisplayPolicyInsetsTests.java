@@ -167,15 +167,13 @@ public class DisplayPolicyInsetsTests extends DisplayPolicyTestsBase {
 
     private Rect getStableInsetsLw(DisplayInfo di) {
         Rect result = new Rect();
-        mDisplayPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
-                di.displayCutout, result);
+        mDisplayPolicy.getStableInsetsLw(di.rotation, di.displayCutout, result);
         return result;
     }
 
     private Rect getNonDecorInsetsLw(DisplayInfo di) {
         Rect result = new Rect();
-        mDisplayPolicy.getNonDecorInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
-                di.displayCutout, result);
+        mDisplayPolicy.getNonDecorInsetsLw(di.rotation, di.displayCutout, result);
         return result;
     }
 
@@ -185,8 +183,8 @@ public class DisplayPolicyInsetsTests extends DisplayPolicyTestsBase {
     }
 
     private int getNonDecorDisplayHeight(DisplayInfo di) {
-        return mDisplayPolicy.getNonDecorDisplayHeight(di.logicalWidth, di.logicalHeight,
-                di.rotation, 0 /* ui */, di.displayCutout);
+        return mDisplayPolicy.getNonDecorDisplayHeight(di.logicalHeight, di.rotation,
+                di.displayCutout);
     }
 
     private int getConfigDisplayWidth(DisplayInfo di) {

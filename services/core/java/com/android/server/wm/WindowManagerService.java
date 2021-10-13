@@ -6950,8 +6950,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final DisplayContent dc = mRoot.getDisplayContent(displayId);
         if (dc != null) {
             final DisplayInfo di = dc.getDisplayInfo();
-            dc.getDisplayPolicy().getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
-                    di.displayCutout, outInsets);
+            dc.getDisplayPolicy().getStableInsetsLw(di.rotation, di.displayCutout, outInsets);
         }
     }
 

@@ -30,7 +30,6 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGAT
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.containsType;
-import static android.view.ViewRootImpl.INSETS_LAYOUT_GENERALIZATION;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS;
@@ -131,10 +130,10 @@ import com.android.systemui.navigationbar.gestural.QuickswitchOrientedNavHandle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
-import com.android.systemui.shared.rotation.RotationButton;
-import com.android.systemui.shared.rotation.RotationButtonController;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.recents.utilities.Utilities;
+import com.android.systemui.shared.rotation.RotationButton;
+import com.android.systemui.shared.rotation.RotationButtonController;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.AutoHideUiElement;
@@ -1606,40 +1605,38 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         int height = WindowManager.LayoutParams.MATCH_PARENT;
         int insetsHeight = -1;
         int gravity = Gravity.BOTTOM;
-        if (INSETS_LAYOUT_GENERALIZATION) {
-            boolean navBarCanMove = true;
-            if (mWindowManager != null && mWindowManager.getCurrentWindowMetrics() != null) {
-                Rect displaySize = mWindowManager.getCurrentWindowMetrics().getBounds();
-                navBarCanMove = displaySize.width() != displaySize.height()
-                        && mContext.getResources().getBoolean(
-                        com.android.internal.R.bool.config_navBarCanMove);
-            }
-            if (!navBarCanMove) {
-                height = mContext.getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.navigation_bar_frame_height);
-                insetsHeight = mContext.getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.navigation_bar_height);
-            } else {
-                switch (rotation) {
-                    case ROTATION_UNDEFINED:
-                    case Surface.ROTATION_0:
-                    case Surface.ROTATION_180:
-                        height = mContext.getResources().getDimensionPixelSize(
-                                com.android.internal.R.dimen.navigation_bar_frame_height);
-                        insetsHeight = mContext.getResources().getDimensionPixelSize(
-                                com.android.internal.R.dimen.navigation_bar_height);
-                        break;
-                    case Surface.ROTATION_90:
-                        gravity = Gravity.RIGHT;
-                        width = mContext.getResources().getDimensionPixelSize(
-                                com.android.internal.R.dimen.navigation_bar_width);
-                        break;
-                    case Surface.ROTATION_270:
-                        gravity = Gravity.LEFT;
-                        width = mContext.getResources().getDimensionPixelSize(
-                                com.android.internal.R.dimen.navigation_bar_width);
-                        break;
-                }
+        boolean navBarCanMove = true;
+        if (mWindowManager != null && mWindowManager.getCurrentWindowMetrics() != null) {
+            Rect displaySize = mWindowManager.getCurrentWindowMetrics().getBounds();
+            navBarCanMove = displaySize.width() != displaySize.height()
+                    && mContext.getResources().getBoolean(
+                    com.android.internal.R.bool.config_navBarCanMove);
+        }
+        if (!navBarCanMove) {
+            height = mContext.getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.navigation_bar_frame_height);
+            insetsHeight = mContext.getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.navigation_bar_height);
+        } else {
+            switch (rotation) {
+                case ROTATION_UNDEFINED:
+                case Surface.ROTATION_0:
+                case Surface.ROTATION_180:
+                    height = mContext.getResources().getDimensionPixelSize(
+                            com.android.internal.R.dimen.navigation_bar_frame_height);
+                    insetsHeight = mContext.getResources().getDimensionPixelSize(
+                            com.android.internal.R.dimen.navigation_bar_height);
+                    break;
+                case Surface.ROTATION_90:
+                    gravity = Gravity.RIGHT;
+                    width = mContext.getResources().getDimensionPixelSize(
+                            com.android.internal.R.dimen.navigation_bar_width);
+                    break;
+                case Surface.ROTATION_270:
+                    gravity = Gravity.LEFT;
+                    width = mContext.getResources().getDimensionPixelSize(
+                            com.android.internal.R.dimen.navigation_bar_width);
+                    break;
             }
         }
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
@@ -1653,13 +1650,11 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                         | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
                         | WindowManager.LayoutParams.FLAG_SLIPPERY,
                 PixelFormat.TRANSLUCENT);
-        if (INSETS_LAYOUT_GENERALIZATION) {
-            lp.gravity = gravity;
-            if (insetsHeight != -1) {
-                lp.providedInternalInsets = Insets.of(0, height - insetsHeight, 0, 0);
-            } else {
-                lp.providedInternalInsets = Insets.NONE;
-            }
+        lp.gravity = gravity;
+        if (insetsHeight != -1) {
+            lp.providedInternalInsets = Insets.of(0, height - insetsHeight, 0, 0);
+        } else {
+            lp.providedInternalInsets = Insets.NONE;
         }
         lp.token = new Binder();
         lp.accessibilityTitle = mContext.getString(R.string.nav_bar);
