@@ -255,7 +255,7 @@ final class DexOptHelper {
         // First boot or factory reset.
         // Note: we also handle devices that are upgrading to N right now as if it is their
         //       first boot, as they do not have profile data.
-        boolean causeFirstBoot = mPm.isFirstBoot() || mPm.mIsPreNUpgrade;
+        boolean causeFirstBoot = mPm.isFirstBoot() || mPm.isPreNUpgrade();
 
         if (!causeUpgrade && !causeFirstBoot) {
             return;
@@ -272,7 +272,7 @@ final class DexOptHelper {
         }
 
         final long startTime = System.nanoTime();
-        final int[] stats = performDexOptUpgrade(pkgs, mPm.mIsPreNUpgrade /* showDialog */,
+        final int[] stats = performDexOptUpgrade(pkgs, mPm.isPreNUpgrade() /* showDialog */,
                 causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT_AFTER_OTA,
                 false /* bootComplete */);
 

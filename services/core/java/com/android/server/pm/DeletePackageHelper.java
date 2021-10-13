@@ -83,6 +83,7 @@ final class DeletePackageHelper {
     private final UserManagerInternal mUserManagerInternal;
     private final PermissionManagerServiceInternal mPermissionManager;
     private final RemovePackageHelper mRemovePackageHelper;
+    // TODO(b/201815903): remove dependency to InitAndSystemPackageHelper
     private final InitAndSystemPackageHelper mInitAndSystemPackageHelper;
     private final AppDataHelper mAppDataHelper;
 
@@ -104,8 +105,7 @@ final class DeletePackageHelper {
         mUserManagerInternal = mPm.mInjector.getUserManagerInternal();
         mPermissionManager = mPm.mInjector.getPermissionManagerServiceInternal();
         mRemovePackageHelper = new RemovePackageHelper(mPm, mAppDataHelper);
-        mInitAndSystemPackageHelper = new InitAndSystemPackageHelper(mPm, mRemovePackageHelper,
-                mAppDataHelper);
+        mInitAndSystemPackageHelper = mPm.getInitAndSystemPackageHelper();
     }
 
     /**
@@ -282,8 +282,7 @@ final class DeletePackageHelper {
                             Slog.i(TAG, "Enabling system stub after removal; pkg: "
                                     + stubPkg.getPackageName());
                         }
-                        mInitAndSystemPackageHelper.enableCompressedPackage(stubPkg, stubPs,
-                                mPm.mDefParseFlags, mPm.getDirsToScanAsSystem());
+                        mInitAndSystemPackageHelper.enableCompressedPackage(stubPkg, stubPs);
                     } else if (DEBUG_COMPRESSION) {
                         Slog.i(TAG, "System stub disabled for all users, leaving uncompressed "
                                 + "after removal; pkg: " + stubPkg.getPackageName());
@@ -424,8 +423,7 @@ final class DeletePackageHelper {
             PackageSetting disabledPs = deleteInstalledSystemPackage(action, ps, allUserHandles,
                     flags, outInfo, writeSettings);
             mInitAndSystemPackageHelper.restoreDisabledSystemPackageLIF(
-                    action, ps, allUserHandles, outInfo, writeSettings, mPm.mDefParseFlags,
-                    mPm.getDirsToScanAsSystem(), disabledPs);
+                    action, ps, allUserHandles, outInfo, writeSettings, disabledPs);
         } else {
             if (DEBUG_REMOVE) Slog.d(TAG, "Removing non-system package: " + ps.getPackageName());
             deleteInstalledPackageLIF(ps, deleteCodeAndResources, flags, allUserHandles,

@@ -164,7 +164,7 @@ final class ResolveIntentHelper {
                         & PackageManagerInternal.RESOLVE_NON_RESOLVER_ONLY) != 0) {
                     return null;
                 }
-                ri = new ResolveInfo(mPm.mResolveInfo);
+                ri = new ResolveInfo(mPm.getResolveInfo());
                 // if all resolve options are browsers, mark the resolver's info as if it were
                 // also a browser.
                 ri.handleAllWebDataURI = browserCount == n;
@@ -586,7 +586,7 @@ final class ResolveIntentHelper {
                     if (ri == null) {
                         continue;
                     }
-                    if (ri == mPm.mResolveInfo) {
+                    if (ri == mPm.getResolveInfo()) {
                         // ACK!  Must do something better with this.
                     }
                     ai = ri.activityInfo;

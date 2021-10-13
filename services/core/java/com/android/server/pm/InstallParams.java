@@ -733,7 +733,7 @@ final class InstallParams extends HandlerParams {
 
         // Retrieve PackageSettings and parse package
         @ParsingPackageUtils.ParseFlags final int parseFlags =
-                mPm.mDefParseFlags | ParsingPackageUtils.PARSE_CHATTY
+                mPm.getDefParseFlags() | ParsingPackageUtils.PARSE_CHATTY
                 | ParsingPackageUtils.PARSE_ENFORCE_CODE
                 | (onExternal ? ParsingPackageUtils.PARSE_EXTERNAL_STORAGE : 0);
 

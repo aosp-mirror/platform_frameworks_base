@@ -38,12 +38,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.backup.IBackupManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.DataLoaderType;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
@@ -52,7 +49,6 @@ import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.component.ParsedInstrumentation;
-import android.content.pm.pkg.PackageUserState;
 import android.os.Binder;
 import android.os.Message;
 import android.os.Process;
@@ -66,11 +62,8 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 
-import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.app.ResolverActivity;
 import com.android.internal.util.ArrayUtils;
-import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
@@ -477,46 +470,11 @@ final class InstallPackageHelper {
         final String pkgName = pkg.getPackageName();
         if (mPm.mCustomResolverComponentName != null
                 && mPm.mCustomResolverComponentName.getPackageName().equals(pkg.getPackageName())) {
-            setUpCustomResolverActivity(pkg, pkgSetting);
+            mPm.setUpCustomResolverActivity(pkg, pkgSetting);
         }
 
         if (pkg.getPackageName().equals("android")) {
-            synchronized (mPm.mLock) {
-                // Set up information for our fall-back user intent resolution activity.
-                mPm.mPlatformPackage = pkg;
-
-                // The instance stored in PackageManagerService is special cased to be non-user
-                // specific, so initialize all the needed fields here.
-                mPm.mAndroidApplication = PackageInfoUtils.generateApplicationInfo(pkg, 0,
-                        PackageUserState.DEFAULT, UserHandle.USER_SYSTEM, pkgSetting);
-
-                if (!mPm.mResolverReplaced) {
-                    mPm.mResolveActivity.applicationInfo = mPm.mAndroidApplication;
-                    mPm.mResolveActivity.name = ResolverActivity.class.getName();
-                    mPm.mResolveActivity.packageName = mPm.mAndroidApplication.packageName;
-                    mPm.mResolveActivity.processName = "system:ui";
-                    mPm.mResolveActivity.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
-                    mPm.mResolveActivity.documentLaunchMode = ActivityInfo.DOCUMENT_LAUNCH_NEVER;
-                    mPm.mResolveActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS;
-                    mPm.mResolveActivity.theme = R.style.Theme_Material_Dialog_Alert;
-                    mPm.mResolveActivity.exported = true;
-                    mPm.mResolveActivity.enabled = true;
-                    mPm.mResolveActivity.resizeMode = ActivityInfo.RESIZE_MODE_RESIZEABLE;
-                    mPm.mResolveActivity.configChanges = ActivityInfo.CONFIG_SCREEN_SIZE
-                            | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE
-                            | ActivityInfo.CONFIG_SCREEN_LAYOUT
-                            | ActivityInfo.CONFIG_ORIENTATION
-                            | ActivityInfo.CONFIG_KEYBOARD
-                            | ActivityInfo.CONFIG_KEYBOARD_HIDDEN;
-                    mPm.mResolveInfo.activityInfo = mPm.mResolveActivity;
-                    mPm.mResolveInfo.priority = 0;
-                    mPm.mResolveInfo.preferredOrder = 0;
-                    mPm.mResolveInfo.match = 0;
-                    mPm.mResolveComponentName = new ComponentName(
-                            mPm.mAndroidApplication.packageName, mPm.mResolveActivity.name);
-                }
-                PackageManagerService.onChanged();
-            }
+            mPm.setPlatformPackage(pkg, pkgSetting);
         }
 
         ArrayList<AndroidPackage> clientLibPkgs = null;
@@ -630,37 +588,6 @@ final class InstallPackageHelper {
         }
 
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-    }
-
-    private void setUpCustomResolverActivity(AndroidPackage pkg, PackageSetting pkgSetting) {
-        synchronized (mPm.mLock) {
-            mPm.mResolverReplaced = true;
-
-            // The instance created in PackageManagerService is special cased to be non-user
-            // specific, so initialize all the needed fields here.
-            ApplicationInfo appInfo = PackageInfoUtils.generateApplicationInfo(pkg, 0,
-                    PackageUserState.DEFAULT, UserHandle.USER_SYSTEM, pkgSetting);
-
-            // Set up information for custom user intent resolution activity.
-            mPm.mResolveActivity.applicationInfo = appInfo;
-            mPm.mResolveActivity.name = mPm.mCustomResolverComponentName.getClassName();
-            mPm.mResolveActivity.packageName = pkg.getPackageName();
-            mPm.mResolveActivity.processName = pkg.getProcessName();
-            mPm.mResolveActivity.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
-            mPm.mResolveActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS
-                    | ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS;
-            mPm.mResolveActivity.theme = 0;
-            mPm.mResolveActivity.exported = true;
-            mPm.mResolveActivity.enabled = true;
-            mPm.mResolveInfo.activityInfo = mPm.mResolveActivity;
-            mPm.mResolveInfo.priority = 0;
-            mPm.mResolveInfo.preferredOrder = 0;
-            mPm.mResolveInfo.match = 0;
-            mPm.mResolveComponentName = mPm.mCustomResolverComponentName;
-            PackageManagerService.onChanged();
-            Slog.i(TAG, "Replacing default ResolverActivity with custom activity: "
-                    + mPm.mResolveComponentName);
-        }
     }
 
     /**

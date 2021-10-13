@@ -208,6 +208,7 @@ import android.view.Display;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.F2fsUtils;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.content.om.OverlayConfig;
@@ -300,7 +301,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -441,40 +441,40 @@ public class PackageManagerService extends IPackageManager.Stub
         PACKAGE_STARTABILITY_DIRECT_BOOT_UNSUPPORTED,
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface PackageStartability {}
+    private @interface PackageStartability {}
 
     /**
      * Used as the result code of the {@link #getPackageStartability} to indicate
      * the given package is allowed to start.
      */
-    static final int PACKAGE_STARTABILITY_OK = 0;
+    private static final int PACKAGE_STARTABILITY_OK = 0;
 
     /**
      * Used as the result code of the {@link #getPackageStartability} to indicate
      * the given package is <b>not</b> allowed to start because it's not found
      * (could be due to that package is invisible to the given user).
      */
-    static final int PACKAGE_STARTABILITY_NOT_FOUND = 1;
+    private static final int PACKAGE_STARTABILITY_NOT_FOUND = 1;
 
     /**
      * Used as the result code of the {@link #getPackageStartability} to indicate
      * the given package is <b>not</b> allowed to start because it's not a system app
      * and the system is running in safe mode.
      */
-    static final int PACKAGE_STARTABILITY_NOT_SYSTEM = 2;
+    private static final int PACKAGE_STARTABILITY_NOT_SYSTEM = 2;
 
     /**
      * Used as the result code of the {@link #getPackageStartability} to indicate
      * the given package is <b>not</b> allowed to start because it's currently frozen.
      */
-    static final int PACKAGE_STARTABILITY_FROZEN = 3;
+    private static final int PACKAGE_STARTABILITY_FROZEN = 3;
 
     /**
      * Used as the result code of the {@link #getPackageStartability} to indicate
      * the given package is <b>not</b> allowed to start because it doesn't support
      * direct boot.
      */
-    static final int PACKAGE_STARTABILITY_DIRECT_BOOT_UNSUPPORTED = 4;
+    private static final int PACKAGE_STARTABILITY_DIRECT_BOOT_UNSUPPORTED = 4;
 
     private static final String STATIC_SHARED_LIB_DELIMITER = "_";
     /** Extension of the compressed packages */
@@ -580,14 +580,14 @@ public class PackageManagerService extends IPackageManager.Stub
     private final int mSdkVersion;
     final Context mContext;
     final boolean mFactoryTest;
-    final boolean mOnlyCore;
+    private final boolean mOnlyCore;
     final DisplayMetrics mMetrics;
-    final int mDefParseFlags;
-    final String[] mSeparateProcesses;
-    final boolean mIsUpgrade;
-    final boolean mIsPreNUpgrade;
-    final boolean mIsPreNMR1Upgrade;
-    final boolean mIsPreQUpgrade;
+    private final int mDefParseFlags;
+    private final String[] mSeparateProcesses;
+    private final boolean mIsUpgrade;
+    private final boolean mIsPreNUpgrade;
+    private final boolean mIsPreNMR1Upgrade;
+    private final boolean mIsPreQUpgrade;
 
     // Used for privilege escalation. MUST NOT BE CALLED WITH mPackages
     // LOCK HELD.  Can be called with mInstallLock held.
@@ -635,13 +635,6 @@ public class PackageManagerService extends IPackageManager.Stub
                                    "PackageManagerService.mIsolatedOwners");
 
     /**
-     * Tracks new system packages [received in an OTA] that we expect to
-     * find updated user-installed versions. Keys are package name, values
-     * are package location.
-     */
-    final ArrayMap<String, File> mExpectingBetter = new ArrayMap<>();
-
-    /**
      * Tracks existing packages prior to receiving an OTA. Keys are package name.
      * Only non-null during an OTA, and even then it is nulled again once systemReady().
      */
@@ -687,7 +680,7 @@ public class PackageManagerService extends IPackageManager.Stub
     @GuardedBy("mLoadedVolumes")
     final ArraySet<String> mLoadedVolumes = new ArraySet<>();
 
-    boolean mFirstBoot;
+    private boolean mFirstBoot;
 
     final boolean mIsEngBuild;
     private final boolean mIsUserDebugBuild;
@@ -733,9 +726,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public static final List<ScanPartition> SYSTEM_PARTITIONS = Collections.unmodifiableList(
             PackagePartitions.getOrderedPartitions(ScanPartition::new));
 
-    private final List<ScanPartition> mDirsToScanAsSystem;
-
-    final OverlayConfig mOverlayConfig;
+    private @NonNull final OverlayConfig mOverlayConfig;
 
     @GuardedBy("itself")
     final ArrayList<IPackageChangeObserver> mPackageChangeObservers =
@@ -845,7 +836,7 @@ public class PackageManagerService extends IPackageManager.Stub
     int mPendingEnableRollbackToken = 0;
 
     @Watched(manual = true)
-    volatile boolean mSystemReady;
+    private volatile boolean mSystemReady;
     @Watched(manual = true)
     private volatile boolean mSafeMode;
     @Watched
@@ -853,16 +844,16 @@ public class PackageManagerService extends IPackageManager.Stub
             new WatchedSparseBooleanArray();
 
     @Watched(manual = true)
-    ApplicationInfo mAndroidApplication;
+    private ApplicationInfo mAndroidApplication;
     @Watched(manual = true)
-    final ActivityInfo mResolveActivity = new ActivityInfo();
-    final ResolveInfo mResolveInfo = new ResolveInfo();
+    private final ActivityInfo mResolveActivity = new ActivityInfo();
+    private final ResolveInfo mResolveInfo = new ResolveInfo();
     @Watched(manual = true)
     ComponentName mResolveComponentName;
-    AndroidPackage mPlatformPackage;
+    private AndroidPackage mPlatformPackage;
     ComponentName mCustomResolverComponentName;
 
-    boolean mResolverReplaced = false;
+    private boolean mResolverReplaced = false;
 
     @NonNull
     final DomainVerificationManagerInternal mDomainVerificationManager;
@@ -1575,7 +1566,6 @@ public class PackageManagerService extends IPackageManager.Stub
         mDefaultAppProvider = testParams.defaultAppProvider;
         mLegacyPermissionManager = testParams.legacyPermissionManagerInternal;
         mDexManager = testParams.dexManager;
-        mDirsToScanAsSystem = testParams.dirsToScanAsSystem;
         mFactoryTest = testParams.factoryTest;
         mIncrementalManager = testParams.incrementalManager;
         mInstallerService = testParams.installerService;
@@ -1636,16 +1626,14 @@ public class PackageManagerService extends IPackageManager.Stub
         mIncrementalVersion = testParams.incrementalVersion;
         mDomainVerificationConnection = new DomainVerificationConnection(this);
 
-        mBroadcastHelper = new BroadcastHelper(mInjector);
-        mAppDataHelper = new AppDataHelper(this);
-        mRemovePackageHelper = new RemovePackageHelper(this, mAppDataHelper);
-        mInitAndSystemPackageHelper = new InitAndSystemPackageHelper(this, mRemovePackageHelper,
-                mAppDataHelper);
-        mDeletePackageHelper = new DeletePackageHelper(this, mRemovePackageHelper,
-                mInitAndSystemPackageHelper, mAppDataHelper);
-        mPreferredActivityHelper = new PreferredActivityHelper(this);
-        mResolveIntentHelper = new ResolveIntentHelper(this, mPreferredActivityHelper);
-        mDexOptHelper = new DexOptHelper(this);
+        mBroadcastHelper = testParams.broadcastHelper;
+        mAppDataHelper = testParams.appDataHelper;
+        mRemovePackageHelper = testParams.removePackageHelper;
+        mInitAndSystemPackageHelper = testParams.initAndSystemPackageHelper;
+        mDeletePackageHelper = testParams.deletePackageHelper;
+        mPreferredActivityHelper = testParams.preferredActivityHelper;
+        mResolveIntentHelper = testParams.resolveIntentHelper;
+        mDexOptHelper = testParams.dexOptHelper;
 
         invalidatePackageInfoCache();
     }
@@ -1768,21 +1756,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mApexManager = injector.getApexManager();
         mAppsFilter = mInjector.getAppsFilter();
 
-        final List<ScanPartition> scanPartitions = new ArrayList<>();
-        final List<ApexManager.ActiveApexInfo> activeApexInfos = mApexManager.getActiveApexInfos();
-        for (int i = 0; i < activeApexInfos.size(); i++) {
-            final ScanPartition scanPartition = resolveApexToScanPartition(activeApexInfos.get(i));
-            if (scanPartition != null) {
-                scanPartitions.add(scanPartition);
-            }
-        }
-
         mInstantAppRegistry = new InstantAppRegistry(this, mPermissionManager, mPmInternal);
-
-        mDirsToScanAsSystem = new ArrayList<>();
-        mDirsToScanAsSystem.addAll(injector.getSystemPartitions());
-        mDirsToScanAsSystem.addAll(scanPartitions);
-        Slog.d(TAG, "Directories scanned as system partitions: " + mDirsToScanAsSystem);
 
         mAppInstallDir = new File(Environment.getDataDirectory(), "app");
         mAppLib32InstallDir = getAppLib32InstallDir();
@@ -1925,38 +1899,9 @@ public class PackageManagerService extends IPackageManager.Stub
             mCacheDir = PackageManagerServiceUtils.preparePackageParserCache(
                     mIsEngBuild, mIsUserDebugBuild, mIncrementalVersion);
 
-            // Set flag to monitor and not change apk file paths when
-            // scanning install directories.
-            int scanFlags = SCAN_BOOTING | SCAN_INITIAL;
-
-            if (mIsUpgrade || mFirstBoot) {
-                scanFlags = scanFlags | SCAN_FIRST_BOOT_OR_UPGRADE;
-            }
-
-            final int systemParseFlags = mDefParseFlags | ParsingPackageUtils.PARSE_IS_SYSTEM_DIR;
-            final int systemScanFlags = scanFlags | SCAN_AS_SYSTEM;
-
-            PackageParser2 packageParser = injector.getScanningCachingPackageParser();
-
-            ExecutorService executorService = ParallelPackageParser.makeExecutorService();
-            // Prepare apex package info before scanning APKs, these information are needed when
-            // scanning apk in apex.
-            mApexManager.scanApexPackagesTraced(packageParser, executorService);
-
-            mInitAndSystemPackageHelper.scanSystemDirs(mDirsToScanAsSystem, mIsUpgrade,
-                    packageParser, executorService, mPlatformPackage, mIsPreNMR1Upgrade,
-                    systemParseFlags, systemScanFlags);
-            // Parse overlay configuration files to set default enable state, mutability, and
-            // priority of system overlays.
-            mOverlayConfig = OverlayConfig.initializeSystemInstance(
-                    consumer -> mPmInternal.forEachPackage(
-                            pkg -> consumer.accept(pkg, pkg.isSystem())));
             final int[] userIds = mUserManager.getUserIds();
-            mInitAndSystemPackageHelper.cleanupSystemPackagesAndInstallStubs(mDirsToScanAsSystem,
-                    mIsUpgrade, packageParser, executorService, mOnlyCore, packageSettings,
-                    startTime, mAppInstallDir, mPlatformPackage, mIsPreNMR1Upgrade,
-                    scanFlags, systemParseFlags, systemScanFlags, userIds);
-            packageParser.close();
+            mOverlayConfig = mInitAndSystemPackageHelper.setUpSystemPackages(packageSettings,
+                    userIds, startTime);
 
             // Resolve the storage manager.
             mStorageManagerPackage = getStorageManagerPackageName();
@@ -2012,7 +1957,7 @@ public class PackageManagerService extends IPackageManager.Stub
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_SCAN_END,
                     SystemClock.uptimeMillis());
             Slog.i(TAG, "Time to scan packages: "
-                    + ((SystemClock.uptimeMillis()-startTime)/1000f)
+                    + ((SystemClock.uptimeMillis() - startTime) / 1000f)
                     + " seconds");
 
             // If the build fingerprint has changed since the last time we booted,
@@ -6817,18 +6762,6 @@ public class PackageManagerService extends IPackageManager.Stub
         return mDevicePolicyManager;
     }
 
-    private static @Nullable ScanPartition resolveApexToScanPartition(
-            ApexManager.ActiveApexInfo apexInfo) {
-        for (int i = 0, size = SYSTEM_PARTITIONS.size(); i < size; i++) {
-            ScanPartition sp = SYSTEM_PARTITIONS.get(i);
-            if (apexInfo.preInstalledApexPath.getAbsolutePath().startsWith(
-                    sp.getFolder().getAbsolutePath())) {
-                return new ScanPartition(apexInfo.apexDirectory, sp, SCAN_AS_APK_IN_APEX);
-            }
-        }
-        return null;
-    }
-
     @Override
     public boolean setBlockUninstallForUser(String packageName, boolean blockUninstall,
             int userId) {
@@ -7883,8 +7816,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (isSystemStub
                     && (newState == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
                     || newState == PackageManager.COMPONENT_ENABLED_STATE_ENABLED)) {
-                if (!mInitAndSystemPackageHelper.enableCompressedPackage(deletedPkg, pkgSetting,
-                        mDefParseFlags, mDirsToScanAsSystem)) {
+                if (!mInitAndSystemPackageHelper.enableCompressedPackage(deletedPkg, pkgSetting)) {
                     Slog.w(TAG, "Failed setApplicationEnabledSetting: failed to enable "
                             + "commpressed package " + setting.getPackageName());
                     updateAllowed[i] = false;
@@ -10929,10 +10861,6 @@ public class PackageManagerService extends IPackageManager.Stub
         return mCacheDir;
     }
 
-    List<ScanPartition> getDirsToScanAsSystem() {
-        return mDirsToScanAsSystem;
-    }
-
     PackageProperty getPackageProperty() {
         return mPackageProperty;
     }
@@ -11053,5 +10981,119 @@ public class PackageManagerService extends IPackageManager.Stub
 
     String getModuleMetadataPackageName() {
         return mModuleInfoProvider.getPackageName();
+    }
+
+    File getAppInstallDir() {
+        return mAppInstallDir;
+    }
+
+    boolean isExpectingBetter(String packageName) {
+        return mInitAndSystemPackageHelper.isExpectingBetter(packageName);
+    }
+
+    int getDefParseFlags() {
+        return mDefParseFlags;
+    }
+
+    void setUpCustomResolverActivity(AndroidPackage pkg, PackageSetting pkgSetting) {
+        synchronized (mLock) {
+            mResolverReplaced = true;
+
+            // The instance created in PackageManagerService is special cased to be non-user
+            // specific, so initialize all the needed fields here.
+            ApplicationInfo appInfo = PackageInfoUtils.generateApplicationInfo(pkg, 0,
+                    PackageUserState.DEFAULT, UserHandle.USER_SYSTEM, pkgSetting);
+
+            // Set up information for custom user intent resolution activity.
+            mResolveActivity.applicationInfo = appInfo;
+            mResolveActivity.name = mCustomResolverComponentName.getClassName();
+            mResolveActivity.packageName = pkg.getPackageName();
+            mResolveActivity.processName = pkg.getProcessName();
+            mResolveActivity.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
+            mResolveActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS
+                    | ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS;
+            mResolveActivity.theme = 0;
+            mResolveActivity.exported = true;
+            mResolveActivity.enabled = true;
+            mResolveInfo.activityInfo = mResolveActivity;
+            mResolveInfo.priority = 0;
+            mResolveInfo.preferredOrder = 0;
+            mResolveInfo.match = 0;
+            mResolveComponentName = mCustomResolverComponentName;
+            PackageManagerService.onChanged();
+            Slog.i(TAG, "Replacing default ResolverActivity with custom activity: "
+                    + mResolveComponentName);
+        }
+    }
+
+    void setPlatformPackage(AndroidPackage pkg, PackageSetting pkgSetting) {
+        synchronized (mLock) {
+            // Set up information for our fall-back user intent resolution activity.
+            mPlatformPackage = pkg;
+
+            // The instance stored in PackageManagerService is special cased to be non-user
+            // specific, so initialize all the needed fields here.
+            mAndroidApplication = PackageInfoUtils.generateApplicationInfo(pkg, 0,
+                    PackageUserState.DEFAULT, UserHandle.USER_SYSTEM, pkgSetting);
+
+            if (!mResolverReplaced) {
+                mResolveActivity.applicationInfo = mAndroidApplication;
+                mResolveActivity.name = ResolverActivity.class.getName();
+                mResolveActivity.packageName = mAndroidApplication.packageName;
+                mResolveActivity.processName = "system:ui";
+                mResolveActivity.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
+                mResolveActivity.documentLaunchMode = ActivityInfo.DOCUMENT_LAUNCH_NEVER;
+                mResolveActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS;
+                mResolveActivity.theme = R.style.Theme_Material_Dialog_Alert;
+                mResolveActivity.exported = true;
+                mResolveActivity.enabled = true;
+                mResolveActivity.resizeMode = ActivityInfo.RESIZE_MODE_RESIZEABLE;
+                mResolveActivity.configChanges = ActivityInfo.CONFIG_SCREEN_SIZE
+                        | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE
+                        | ActivityInfo.CONFIG_SCREEN_LAYOUT
+                        | ActivityInfo.CONFIG_ORIENTATION
+                        | ActivityInfo.CONFIG_KEYBOARD
+                        | ActivityInfo.CONFIG_KEYBOARD_HIDDEN;
+                mResolveInfo.activityInfo = mResolveActivity;
+                mResolveInfo.priority = 0;
+                mResolveInfo.preferredOrder = 0;
+                mResolveInfo.match = 0;
+                mResolveComponentName = new ComponentName(
+                        mAndroidApplication.packageName, mResolveActivity.name);
+            }
+            PackageManagerService.onChanged();
+        }
+    }
+
+    ResolveInfo getResolveInfo() {
+        return mResolveInfo;
+    }
+
+    ApplicationInfo getCoreAndroidApplication() {
+        return mAndroidApplication;
+    }
+
+    boolean isSystemReady() {
+        return mSystemReady;
+    }
+
+    AndroidPackage getPlatformPackage() {
+        return mPlatformPackage;
+    }
+
+    boolean isPreNUpgrade() {
+        return mIsPreNUpgrade;
+    }
+
+    boolean isPreNMR1Upgrade() {
+        return mIsPreNMR1Upgrade;
+    }
+
+    InitAndSystemPackageHelper getInitAndSystemPackageHelper() {
+        return mInitAndSystemPackageHelper;
+    }
+
+    boolean isOverlayMutable(String packageName) {
+        return mOverlayConfig.isMutable(packageName);
     }
 }
