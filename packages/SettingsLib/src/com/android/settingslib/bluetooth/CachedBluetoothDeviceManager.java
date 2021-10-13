@@ -340,22 +340,24 @@ public class CachedBluetoothDeviceManager {
 
     /**
      * Called when we found a set member of a group. The function will check the {@code groupId} if
-     * it exists and if there is a ongoing pair, the device would be ignored.
+     * it exists and the bond state of the device is BOND_NOE, and if there isn't any ongoing pair
+     * , and then return {@code true} to pair the device automatically.
      *
      * @param device The found device
      * @param groupId The group id of the found device
+     *
+     * @return {@code true}, if the device should pair automatically; Otherwise, return
+     * {@code false}.
      */
-    public synchronized void onSetMemberAppear(BluetoothDevice device, int groupId) {
-        Log.d(TAG, "onSetMemberAppear, groupId: " + groupId + " device: " + device.toString());
-
-        if (mOngoingSetMemberPair != null) {
-            Log.d(TAG, "Ongoing set memberPairing in process, drop it!");
-            return;
+    public synchronized boolean shouldPairByCsip(BluetoothDevice device, int groupId) {
+        if (mOngoingSetMemberPair != null || device.getBondState() != BluetoothDevice.BOND_NONE
+                || !mCsipDeviceManager.isExistedGroupId(groupId)) {
+            return false;
         }
 
-        if (mCsipDeviceManager.onSetMemberAppear(device, groupId)) {
-            mOngoingSetMemberPair = device;
-        }
+        Log.d(TAG, "Bond " + device.getName() + " by CSIP");
+        mOngoingSetMemberPair = device;
+        return true;
     }
 
     /**
