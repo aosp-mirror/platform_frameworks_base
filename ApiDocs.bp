@@ -127,6 +127,7 @@ stubs_defaults {
         ":framework-sdkextensions-sources",
         ":framework-statsd-sources",
         ":framework-tethering-srcs",
+        ":framework-uwb-updatable-sources",
         ":framework-wifi-updatable-sources",
         ":ike-srcs",
         ":updatable-media-srcs",
@@ -180,6 +181,7 @@ droidstubs {
         ":framework-sdkextensions{.public.stubs.source}",
         ":framework-statsd{.public.stubs.source}",
         ":framework-tethering{.public.stubs.source}",
+        ":framework-uwb{.public.stubs.source}",
         ":framework-wifi{.public.stubs.source}",
     ],
     aidl: {
@@ -217,6 +219,7 @@ genrule {
         ":framework-sdkextensions{.public.annotations.zip}",
         ":framework-statsd{.public.annotations.zip}",
         ":framework-tethering{.public.annotations.zip}",
+        ":framework-uwb{.public.annotations.zip}",
         ":framework-wifi{.public.annotations.zip}",
     ],
     out: ["annotations.zip"],
