@@ -292,6 +292,11 @@ public class KeyguardUpdateMonitorCallback {
     public void onStrongAuthStateChanged(int userId) { }
 
     /**
+     * Called when the state whether we have a lockscreen wallpaper has changed.
+     */
+    public void onHasLockscreenWallpaperChanged(boolean hasLockscreenWallpaper) { }
+
+    /**
      * Called when the dream's window state is changed.
      * @param dreaming true if the dream's window has been created and is visible
      */
