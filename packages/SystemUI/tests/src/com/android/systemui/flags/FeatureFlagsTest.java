@@ -23,7 +23,6 @@ import static org.mockito.Mockito.verify;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.plugins.FlagReaderPlugin;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,11 +50,10 @@ public class FeatureFlagsTest extends SysuiTestCase {
         mFeatureFlags.addFlag(flag);
 
         // Assert and capture that a plugin listener was added.
-        ArgumentCaptor<FlagReaderPlugin.Listener> pluginListenerCaptor =
-                ArgumentCaptor.forClass(FlagReaderPlugin.Listener.class);
-
+        ArgumentCaptor<FlagReader.Listener> pluginListenerCaptor =
+                ArgumentCaptor.forClass(FlagReader.Listener.class);
         verify(mFeatureFlagReader).addListener(pluginListenerCaptor.capture());
-        FlagReaderPlugin.Listener pluginListener = pluginListenerCaptor.getValue();
+        FlagReader.Listener pluginListener = pluginListenerCaptor.getValue();
 
         // Signal a change. No listeners, so no real effect.
         pluginListener.onFlagChanged(flag.getId());
@@ -81,11 +79,10 @@ public class FeatureFlagsTest extends SysuiTestCase {
         mFeatureFlags.addFlag(flag);
 
         // Assert and capture that a plugin listener was added.
-        ArgumentCaptor<FlagReaderPlugin.Listener> pluginListenerCaptor =
-                ArgumentCaptor.forClass(FlagReaderPlugin.Listener.class);
-
+        ArgumentCaptor<FlagReader.Listener> pluginListenerCaptor =
+                ArgumentCaptor.forClass(FlagReader.Listener.class);
         verify(mFeatureFlagReader).addListener(pluginListenerCaptor.capture());
-        FlagReaderPlugin.Listener pluginListener = pluginListenerCaptor.getValue();
+        FlagReader.Listener pluginListener = pluginListenerCaptor.getValue();
 
         // Add a listener for the flag
         final Flag<?>[] changedFlag = {null};

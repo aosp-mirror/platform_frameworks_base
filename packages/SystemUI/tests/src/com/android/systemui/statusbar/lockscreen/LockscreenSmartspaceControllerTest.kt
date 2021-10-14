@@ -246,6 +246,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         clearInvocations(plugin)
 
         // WHEN the session is closed
+        controller.stateChangeListener.onViewDetachedFromWindow(smartspaceView as View)
         controller.disconnect()
 
         // THEN the listener receives an empty list of targets
@@ -417,6 +418,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         connectSession()
 
         // WHEN we are told to cleanup
+        controller.stateChangeListener.onViewDetachedFromWindow(smartspaceView as View)
         controller.disconnect()
 
         // THEN we disconnect from the session and unregister any listeners

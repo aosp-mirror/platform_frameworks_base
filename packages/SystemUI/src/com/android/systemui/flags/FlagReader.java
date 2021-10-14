@@ -14,46 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.systemui.plugins;
-
-import com.android.systemui.plugins.annotations.ProvidesInterface;
+package com.android.systemui.flags;
 
 
 /**
- * Plugin for loading flag values from an alternate source of truth.
+ * Plugin for loading flag values
  */
-@ProvidesInterface(action = FlagReaderPlugin.ACTION, version = FlagReaderPlugin.VERSION)
-public interface FlagReaderPlugin extends Plugin {
-    int VERSION = 1;
-    String ACTION = "com.android.systemui.flags.FLAG_READER_PLUGIN";
-
+public interface FlagReader {
     /** Returns a boolean value for the given flag. */
     default boolean isEnabled(int id, boolean def) {
-        return def;
-    }
-
-    /** Returns a string value for the given flag id. */
-    default String getValue(int id, String def) {
-        return def;
-    }
-
-    /** Returns a int value for the given flag. */
-    default int getValue(int id, int def) {
-        return def;
-    }
-
-    /** Returns a long value for the given flag. */
-    default long getValue(int id, long def) {
-        return def;
-    }
-
-    /** Returns a float value for the given flag. */
-    default float getValue(int id, float def) {
-        return def;
-    }
-
-    /** Returns a double value for the given flag. */
-    default double getValue(int id, double def) {
         return def;
     }
 

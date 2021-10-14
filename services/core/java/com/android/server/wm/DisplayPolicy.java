@@ -1521,30 +1521,50 @@ public class DisplayPolicy {
      * some temporal states, but doesn't change the window frames used to show on screen.
      */
     void simulateLayoutDisplay(DisplayFrames displayFrames, SparseArray<Rect> barContentFrames) {
-        if (mNavigationBar != null) {
-            final WindowFrames simulatedWindowFrames = new WindowFrames();
-            if (INSETS_LAYOUT_GENERALIZATION) {
-                simulateLayoutDecorWindow(mNavigationBar, displayFrames, simulatedWindowFrames,
+        if (INSETS_LAYOUT_GENERALIZATION) {
+            final InsetsStateController insetsStateController =
+                    mDisplayContent.getInsetsStateController();
+            for (int type = 0; type < InsetsState.SIZE; type++) {
+                final InsetsSourceProvider provider =
+                        insetsStateController.peekSourceProvider(type);
+                if (provider == null || !provider.hasWindow()
+                        || provider.mWin.getControllableInsetProvider() != provider) {
+                    continue;
+                }
+                final WindowFrames simulatedWindowFrames = new WindowFrames();
+                simulateLayoutDecorWindow(provider.mWin, displayFrames, simulatedWindowFrames,
                         barContentFrames,
                         contentFrame -> simulateLayoutForContentFrame(displayFrames,
-                                mNavigationBar, contentFrame));
-            } else {
+                                provider.mWin, contentFrame));
+            }
+        } else {
+            if (mNavigationBar != null) {
+                final WindowFrames simulatedWindowFrames = new WindowFrames();
                 simulateLayoutDecorWindow(mNavigationBar, displayFrames, simulatedWindowFrames,
                         barContentFrames, contentFrame -> layoutNavigationBar(displayFrames,
                                 contentFrame));
             }
-        }
-        if (mStatusBar != null) {
-            final WindowFrames simulatedWindowFrames = new WindowFrames();
-            if (INSETS_LAYOUT_GENERALIZATION) {
-                simulateLayoutDecorWindow(mStatusBar, displayFrames, simulatedWindowFrames,
-                        barContentFrames,
-                        contentFrame -> simulateLayoutForContentFrame(displayFrames,
-                                mStatusBar, contentFrame));
-            } else {
+            if (mStatusBar != null) {
+                final WindowFrames simulatedWindowFrames = new WindowFrames();
                 simulateLayoutDecorWindow(mStatusBar, displayFrames, simulatedWindowFrames,
                         barContentFrames,
                         contentFrame -> layoutStatusBar(displayFrames, contentFrame));
+            }
+            if (mExtraNavBarAlt != null) {
+                // There's no pre-defined behavior for the extra navigation bar, we need to use the
+                // new flexible insets logic anyway.
+                final WindowFrames simulatedWindowFrames = new WindowFrames();
+                simulateLayoutDecorWindow(mExtraNavBarAlt, displayFrames, simulatedWindowFrames,
+                        barContentFrames,
+                        contentFrame -> simulateLayoutForContentFrame(displayFrames,
+                                mExtraNavBarAlt, contentFrame));
+            }
+            if (mClimateBarAlt != null) {
+                final WindowFrames simulatedWindowFrames = new WindowFrames();
+                simulateLayoutDecorWindow(mClimateBarAlt, displayFrames, simulatedWindowFrames,
+                        barContentFrames,
+                        contentFrame -> simulateLayoutForContentFrame(displayFrames,
+                                mClimateBarAlt, contentFrame));
             }
         }
     }

@@ -64,7 +64,6 @@ import android.os.Handler;
 import android.os.IRemoteCallback;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.Vibrator;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
@@ -173,8 +172,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private FeatureFlags mFeatureFlags;
     @Mock
     private InteractionJankMonitor mInteractionJankMonitor;
-    @Mock
-    private Vibrator mVibrator;
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStatusBarStateListenerCaptor;
     // Direct executor
@@ -241,8 +238,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mSpiedContext.addMockSystemService(TelephonyManager.class, mTelephonyManager);
 
         when(mRingerModeTracker.getRingerMode()).thenReturn(mRingerModeLiveData);
-
-        when(mFeatureFlags.isKeyguardLayoutEnabled()).thenReturn(false);
 
         mMockitoSession = ExtendedMockito.mockitoSession()
                 .spyStatic(SubscriptionManager.class).startMocking();
@@ -1064,7 +1059,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                     mRingerModeTracker, mBackgroundExecutor,
                     mStatusBarStateController, mLockPatternUtils,
                     mAuthController, mTelephonyListenerManager, mFeatureFlags,
-                    mInteractionJankMonitor, mVibrator);
+                    mInteractionJankMonitor);
             setStrongAuthTracker(KeyguardUpdateMonitorTest.this.mStrongAuthTracker);
         }
 

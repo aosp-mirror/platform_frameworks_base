@@ -22,7 +22,6 @@ import android.util.FeatureFlagUtils;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.plugins.FlagReaderPlugin;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,7 +50,7 @@ public class FeatureFlags {
         flagReader.addListener(mListener);
     }
 
-    private final FlagReaderPlugin.Listener mListener = id -> {
+    private final FlagReader.Listener mListener = id -> {
         if (mListeners.containsKey(id) && mFlagMap.containsKey(id)) {
             mListeners.get(id).forEach(listener -> listener.onFlagChanged(mFlagMap.get(id)));
         }
@@ -71,44 +70,7 @@ public class FeatureFlags {
     }
 
     /**
-     * @param flag The {@link StringFlag} of interest.
-     * @return The value of the flag.
-     */
-    public String getValue(StringFlag flag) {
-        return mFlagReader.getValue(flag);
-    }
-
-    /**
      * @param flag The {@link IntFlag} of interest.
-     * @return The value of the flag.
-     */
-    public int getValue(IntFlag flag) {
-        return mFlagReader.getValue(flag);
-    }
-
-    /**
-     * @param flag The {@link LongFlag} of interest.
-     * @return The value of the flag.
-     */
-    public long getValue(LongFlag flag) {
-        return mFlagReader.getValue(flag);
-    }
-
-    /**
-     * @param flag The {@link FloatFlag} of interest.
-     * @return The value of the flag.
-     */
-    public float getValue(FloatFlag flag) {
-        return mFlagReader.getValue(flag);
-    }
-
-    /**
-     * @param flag The {@link DoubleFlag} of interest.
-     * @return The value of the flag.
-     */
-    public double getValue(DoubleFlag flag) {
-        return mFlagReader.getValue(flag);
-    }
 
     /** Add a listener for a specific flag. */
     public void addFlagListener(Flag<?> flag, Listener listener) {
@@ -130,10 +92,6 @@ public class FeatureFlags {
 
     public boolean isNewNotifPipelineRenderingEnabled() {
         return mFlagReader.isEnabled(R.bool.flag_notification_pipeline2_rendering);
-    }
-
-    public boolean isKeyguardLayoutEnabled() {
-        return mFlagReader.isEnabled(R.bool.flag_keyguard_layout);
     }
 
     /** */

@@ -37,6 +37,7 @@ public class AutoHideController {
     private final Handler mHandler;
 
     private AutoHideUiElement mStatusBar;
+    /** For tablets, this will represent the Taskbar */
     private AutoHideUiElement mNavigationBar;
     private int mDisplayId;
 
@@ -89,7 +90,7 @@ public class AutoHideController {
         }
     }
 
-    void resumeSuspendedAutoHide() {
+    public void resumeSuspendedAutoHide() {
         if (mAutoHideSuspended) {
             scheduleAutoHide();
             Runnable checkBarModesRunnable = getCheckBarModesRunnable();
@@ -99,7 +100,7 @@ public class AutoHideController {
         }
     }
 
-    void suspendAutoHide() {
+    public void suspendAutoHide() {
         mHandler.removeCallbacks(mAutoHide);
         Runnable checkBarModesRunnable = getCheckBarModesRunnable();
         if (checkBarModesRunnable != null) {
