@@ -30,7 +30,6 @@ import android.hardware.ICameraServiceListener;
 import android.hardware.camera2.impl.CameraDeviceImpl;
 import android.hardware.camera2.impl.CameraInjectionSessionImpl;
 import android.hardware.camera2.impl.CameraMetadataNative;
-import android.hardware.camera2.params.DeviceStateOrientationMap;
 import android.hardware.camera2.params.ExtensionSessionConfiguration;
 import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.params.StreamConfiguration;
@@ -110,8 +109,16 @@ public final class CameraManager {
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
         mFoldStateListener = new FoldStateListener(context);
-        context.getSystemService(DeviceStateManager.class)
-                .registerCallback(new HandlerExecutor(mHandler), mFoldStateListener);
+        try {
+            context.getSystemService(DeviceStateManager.class)
+                    .registerCallback(new HandlerExecutor(mHandler), mFoldStateListener);
+        } catch (IllegalStateException e) {
+            Log.v(TAG, "Failed to register device state listener!");
+            Log.v(TAG, "Device state dependent characteristics updates will not be functional!");
+            mHandlerThread.quitSafely();
+            mHandler = null;
+            mFoldStateListener = null;
+        }
     }
 
     private HandlerThread mHandlerThread;
@@ -177,7 +184,9 @@ public final class CameraManager {
         synchronized (mLock) {
             DeviceStateListener listener = chars.getDeviceStateListener();
             listener.onDeviceStateChanged(mFoldedDeviceState);
-            mDeviceStateListeners.add(new WeakReference<>(listener));
+            if (mFoldStateListener != null) {
+                mDeviceStateListeners.add(new WeakReference<>(listener));
+            }
         }
     }
 

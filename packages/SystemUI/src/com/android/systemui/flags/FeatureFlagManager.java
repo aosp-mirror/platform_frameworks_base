@@ -18,19 +18,21 @@ package com.android.systemui.flags;
 
 import com.android.systemui.dagger.SysUISingleton;
 
+import javax.inject.Inject;
+
 /**
  * Default implementation of the a Flag manager that returns default values for release builds
  */
 @SysUISingleton
-public class FeatureFlagManager {
-    public boolean getBoolean(int key, boolean defaultValue) {
+public class FeatureFlagManager implements FlagReader, FlagWriter {
+    @Inject
+    public FeatureFlagManager() {}
+    public boolean isEnabled(String key, boolean defaultValue) {
         return defaultValue;
     }
-    public void setBoolean(int key, boolean value) {}
-    public boolean getBoolean(String key, boolean defaultValue) {
+    public boolean isEnabled(int key, boolean defaultValue) {
         return defaultValue;
     }
-    public void setBoolean(String key, boolean value) {}
-    public void addFlagChangedListener(Runnable run) {}
-    public void removeFlagUpdatedListener(Runnable run) {}
+    public void setEnabled(String key, boolean value) {}
+    public void setEnabled(int key, boolean value) {}
 }

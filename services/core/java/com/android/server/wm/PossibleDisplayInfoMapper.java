@@ -120,8 +120,15 @@ public class PossibleDisplayInfoMapper {
             @Surface.Rotation int rotation) {
         DisplayInfo updatedDisplayInfo = new DisplayInfo();
         updatedDisplayInfo.copyFrom(displayInfo);
-        updatedDisplayInfo.rotation = rotation;
+        // Apply rotations before updating width and height
+        updatedDisplayInfo.roundedCorners = updatedDisplayInfo.roundedCorners.rotate(rotation,
+                updatedDisplayInfo.logicalWidth, updatedDisplayInfo.logicalHeight);
+        updatedDisplayInfo.displayCutout =
+                DisplayContent.calculateDisplayCutoutForRotationAndDisplaySizeUncached(
+                        updatedDisplayInfo.displayCutout, rotation, updatedDisplayInfo.logicalWidth,
+                        updatedDisplayInfo.logicalHeight).getDisplayCutout();
 
+        updatedDisplayInfo.rotation = rotation;
         final int naturalWidth = updatedDisplayInfo.getNaturalWidth();
         final int naturalHeight = updatedDisplayInfo.getNaturalHeight();
         updatedDisplayInfo.logicalWidth = naturalWidth;

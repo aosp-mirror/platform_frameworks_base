@@ -15,15 +15,19 @@
  */
 
 package com.android.systemui.flags;
-import android.util.ArraySet;
 
 import com.android.systemui.dagger.SysUISingleton;
+
+import javax.inject.Inject;
 
 /**
  * Concrete implementation of the a Flag manager that returns default values for debug builds
  */
 @SysUISingleton
-public class FeatureFlagManager {
+public class FeatureFlagManager implements FlagReader, FlagWriter {
+    @Inject
+    public FeatureFlagManager() {}
+
     public boolean isEnabled(int key, boolean defaultValue) {
         return isEnabled(Integer.toString(key), defaultValue);
     }
@@ -40,4 +44,9 @@ public class FeatureFlagManager {
     public void setEnabled(String key, boolean value) {
         // TODO
     }
+
+    public void addListener(Listener run) {}
+
+    public void removeListener(Listener run) {}
+
 }
