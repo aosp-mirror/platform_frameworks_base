@@ -26,7 +26,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.service.timezone.ITimeZoneProvider;
 import android.service.timezone.ITimeZoneProviderManager;
-import android.service.timezone.TimeZoneProviderSuggestion;
+import android.service.timezone.TimeZoneProviderEvent;
 import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.GuardedBy;
@@ -177,25 +177,7 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy im
 
         // executed on binder thread
         @Override
-        public void onTimeZoneProviderSuggestion(TimeZoneProviderSuggestion suggestion) {
-            onTimeZoneProviderEvent(TimeZoneProviderEvent.createSuggestionEvent(suggestion));
-        }
-
-        // executed on binder thread
-        @Override
-        public void onTimeZoneProviderUncertain() {
-            onTimeZoneProviderEvent(TimeZoneProviderEvent.createUncertainEvent());
-
-        }
-
-        // executed on binder thread
-        @Override
-        public void onTimeZoneProviderPermanentFailure(String failureReason) {
-            onTimeZoneProviderEvent(
-                    TimeZoneProviderEvent.createPermanentFailureEvent(failureReason));
-        }
-
-        private void onTimeZoneProviderEvent(TimeZoneProviderEvent event) {
+        public void onTimeZoneProviderEvent(TimeZoneProviderEvent event) {
             synchronized (mSharedLock) {
                 if (mManagerProxy != this) {
                     // Ignore incoming calls if this instance is no longer the current

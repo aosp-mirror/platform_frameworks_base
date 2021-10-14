@@ -19,6 +19,7 @@ package com.android.server.timezonedetector.location;
 import static com.android.server.timezonedetector.location.LocationTimeZoneManagerService.infoLog;
 
 import android.annotation.NonNull;
+import android.service.timezone.TimeZoneProviderEvent;
 
 import com.android.i18n.timezone.ZoneInfoDb;
 

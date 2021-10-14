@@ -17,6 +17,7 @@
 package com.android.server.timezonedetector.location;
 
 import android.annotation.NonNull;
+import android.service.timezone.TimeZoneProviderEvent;
 
 /**
  * Used by {@link LocationTimeZoneProvider} to ensure that all time zone IDs are understood by the
