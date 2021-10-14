@@ -150,14 +150,6 @@ class OngoingCallControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun onEntryUpdated_isOngoingCallNotif_swipeGestureCallbackAdded() {
-        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
-
-        verify(mockSwipeStatusBarAwayGestureHandler)
-            .addOnGestureDetectedCallback(anyString(), any())
-    }
-
-    @Test
     fun onEntryUpdated_notOngoingCallNotif_listenerNotNotified() {
         notifCollectionListener.onEntryUpdated(createNotCallNotifEntry())
 
@@ -256,17 +248,6 @@ class OngoingCallControllerTest : SysuiTestCase() {
         notifCollectionListener.onEntryRemoved(ongoingCallNotifEntry, REASON_USER_STOPPED)
 
         verify(mockStatusBarWindowController).setOngoingProcessRequiresStatusBarVisible(false)
-    }
-
-    @Test
-    fun onEntryUpdated_callNotifAddedThenRemoved_swipeGestureCallbackRemoved() {
-        val ongoingCallNotifEntry = createOngoingCallNotifEntry()
-        notifCollectionListener.onEntryAdded(ongoingCallNotifEntry)
-
-        notifCollectionListener.onEntryRemoved(ongoingCallNotifEntry, REASON_USER_STOPPED)
-
-        verify(mockSwipeStatusBarAwayGestureHandler)
-            .removeOnGestureDetectedCallback(anyString())
     }
 
     /** Regression test for b/188491504. */
@@ -508,6 +489,70 @@ class OngoingCallControllerTest : SysuiTestCase() {
 
         assertThat(chipView.hasOnClickListeners()).isTrue()
     }
+
+    // Swipe gesture tests
+
+    @Test
+    fun callStartedInImmersiveMode_swipeGestureCallbackAdded() {
+        getStateListener().onFullscreenStateChanged(true)
+
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+
+        verify(mockSwipeStatusBarAwayGestureHandler)
+            .addOnGestureDetectedCallback(anyString(), any())
+    }
+
+    @Test
+    fun callStartedNotInImmersiveMode_swipeGestureCallbackNotAdded() {
+        getStateListener().onFullscreenStateChanged(false)
+
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+
+        verify(mockSwipeStatusBarAwayGestureHandler, never())
+            .addOnGestureDetectedCallback(anyString(), any())
+    }
+
+    @Test
+    fun transitionToImmersiveMode_swipeGestureCallbackAdded() {
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+
+        getStateListener().onFullscreenStateChanged(true)
+
+        verify(mockSwipeStatusBarAwayGestureHandler)
+            .addOnGestureDetectedCallback(anyString(), any())
+    }
+
+    @Test
+    fun transitionOutOfImmersiveMode_swipeGestureCallbackRemoved() {
+        getStateListener().onFullscreenStateChanged(true)
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+        reset(mockSwipeStatusBarAwayGestureHandler)
+
+        getStateListener().onFullscreenStateChanged(false)
+
+        verify(mockSwipeStatusBarAwayGestureHandler)
+            .removeOnGestureDetectedCallback(anyString())
+    }
+
+    @Test
+    fun callEndedWhileInImmersiveMode_swipeGestureCallbackRemoved() {
+        getStateListener().onFullscreenStateChanged(true)
+        val ongoingCallNotifEntry = createOngoingCallNotifEntry()
+        notifCollectionListener.onEntryAdded(ongoingCallNotifEntry)
+        reset(mockSwipeStatusBarAwayGestureHandler)
+
+        notifCollectionListener.onEntryRemoved(ongoingCallNotifEntry, REASON_USER_STOPPED)
+
+        verify(mockSwipeStatusBarAwayGestureHandler)
+            .removeOnGestureDetectedCallback(anyString())
+    }
+
+    // TODO(b/195839150): Add test
+    //  swipeGesturedTriggeredPreviously_entersImmersiveModeAgain_callbackNotAdded(). That's
+    //  difficult to add now because we have no way to trigger [SwipeStatusBarAwayGestureHandler]'s
+    //  callbacks in test.
+
+    // END swipe gesture tests
 
     private fun createOngoingCallNotifEntry() = createCallNotifEntry(ongoingCallStyle)
 
