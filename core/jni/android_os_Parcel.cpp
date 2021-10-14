@@ -740,11 +740,11 @@ static jlong android_os_Parcel_getGlobalAllocCount(JNIEnv* env, jclass clazz)
     return Parcel::getGlobalAllocCount();
 }
 
-static jlong android_os_Parcel_getBlobAshmemSize(jlong nativePtr)
+static jlong android_os_Parcel_getOpenAshmemSize(jlong nativePtr)
 {
     Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
     if (parcel != NULL) {
-        return parcel->getBlobAshmemSize();
+        return parcel->getOpenAshmemSize();
     }
     return 0;
 }
@@ -852,7 +852,7 @@ static const JNINativeMethod gParcelMethods[] = {
     {"getGlobalAllocCount",       "()J", (void*)android_os_Parcel_getGlobalAllocCount},
 
     // @CriticalNative
-    {"nativeGetBlobAshmemSize",       "(J)J", (void*)android_os_Parcel_getBlobAshmemSize},
+    {"nativeGetOpenAshmemSize",       "(J)J", (void*)android_os_Parcel_getOpenAshmemSize},
 
     // @CriticalNative
     {"nativeReadCallingWorkSourceUid", "(J)I", (void*)android_os_Parcel_readCallingWorkSourceUid},
