@@ -9300,7 +9300,7 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             scheduleWritePackageRestrictionsLocked(userId);
             scheduleWritePackageListLocked(userId);
-            mAppsFilter.onUsersChanged();
+            mAppsFilter.onUserCreated(userId);
         }
     }
 
