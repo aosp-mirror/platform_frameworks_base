@@ -53,7 +53,6 @@ open class SwipeStatusBarAwayGestureHandler @Inject constructor(
     private var inputMonitor: InputMonitorCompat? = null
     private var inputReceiver: InputChannelCompat.InputEventReceiver? = null
 
-    // TODO(b/195839150): Update this threshold when the config changes?
     private var swipeDistanceThreshold: Int = context.resources.getDimensionPixelSize(
         com.android.internal.R.dimen.system_gestures_start_threshold
     )
@@ -84,8 +83,6 @@ open class SwipeStatusBarAwayGestureHandler @Inject constructor(
             ACTION_DOWN -> {
                 if (
                     // Gesture starts just below the status bar
-                    // TODO(b/195839150): Is [statusBarHeight] the correct dimension to use for
-                    //   determining which down touches are valid?
                     ev.y >= statusBarWindowController.statusBarHeight
                     && ev.y <= 3 * statusBarWindowController.statusBarHeight
                 ) {
