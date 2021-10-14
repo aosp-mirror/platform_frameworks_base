@@ -2099,7 +2099,7 @@ public final class BluetoothAdapter {
         try {
             return mManagerService.isBleScanAlwaysAvailable();
         } catch (RemoteException e) {
-            Log.e(TAG, "remote expection when calling isBleScanAlwaysAvailable", e);
+            Log.e(TAG, "remote exception when calling isBleScanAlwaysAvailable", e);
             return false;
         }
     }
@@ -2307,7 +2307,7 @@ public final class BluetoothAdapter {
         try {
             return mManagerService.isHearingAidProfileSupported();
         } catch (RemoteException e) {
-            Log.e(TAG, "remote expection when calling isHearingAidProfileSupported", e);
+            Log.e(TAG, "remote exception when calling isHearingAidProfileSupported", e);
             return false;
         }
     }
