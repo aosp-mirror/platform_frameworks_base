@@ -352,25 +352,11 @@ public final class WindowManagerImpl implements WindowManager {
             throw e.rethrowFromSystemServer();
         }
 
-        int size = possibleDisplayInfos.size();
-        DisplayInfo currentDisplayInfo;
-        WindowInsets windowInsets = null;
-        if (size > 0) {
-            currentDisplayInfo = possibleDisplayInfos.get(0);
-
-            final WindowManager.LayoutParams params =  new WindowManager.LayoutParams();
-            final boolean isScreenRound = (currentDisplayInfo.flags & Display.FLAG_ROUND) != 0;
-            // TODO(181127261) not computing insets correctly - need to have underlying
-            // frame reflect the faked orientation.
-            windowInsets = getWindowInsetsFromServerForDisplay(
-                    currentDisplayInfo.displayId, params,
-                    new Rect(0, 0, currentDisplayInfo.getNaturalWidth(),
-                            currentDisplayInfo.getNaturalHeight()), isScreenRound,
-                    WINDOWING_MODE_FULLSCREEN);
-        }
-
         Set<WindowMetrics> maxMetrics = new HashSet<>();
-        for (int i = 0; i < size; i++) {
+        WindowInsets windowInsets;
+        DisplayInfo currentDisplayInfo;
+        final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+        for (int i = 0; i < possibleDisplayInfos.size(); i++) {
             currentDisplayInfo = possibleDisplayInfos.get(i);
 
             // Calculate max bounds for this rotation and state.
@@ -378,7 +364,18 @@ public final class WindowManagerImpl implements WindowManager {
                     currentDisplayInfo.logicalHeight);
 
             // Calculate insets for the rotated max bounds.
-            // TODO(181127261) calculate insets for each display rotation and state.
+            final boolean isScreenRound = (currentDisplayInfo.flags & Display.FLAG_ROUND) != 0;
+            // Initialize insets based upon display rotation. Note any window-provided insets
+            // will not be set.
+            windowInsets = getWindowInsetsFromServerForDisplay(
+                    currentDisplayInfo.displayId, params,
+                    new Rect(0, 0, currentDisplayInfo.getNaturalWidth(),
+                            currentDisplayInfo.getNaturalHeight()), isScreenRound,
+                    WINDOWING_MODE_FULLSCREEN);
+            // Set the hardware-provided insets.
+            windowInsets = new WindowInsets.Builder(windowInsets).setRoundedCorners(
+                    currentDisplayInfo.roundedCorners)
+                    .setDisplayCutout(currentDisplayInfo.displayCutout).build();
 
             maxMetrics.add(new WindowMetrics(maxBounds, windowInsets));
         }
