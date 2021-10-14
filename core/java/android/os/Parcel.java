@@ -380,6 +380,8 @@ public final class Parcel {
     private static native void nativeUnmarshall(
             long nativePtr, byte[] data, int offset, int length);
     private static native int nativeCompareData(long thisNativePtr, long otherNativePtr);
+    private static native boolean nativeCompareDataInRange(
+            long ptrA, int offsetA, long ptrB, int offsetB, int length);
     private static native void nativeAppendFrom(
             long thisNativePtr, long otherNativePtr, int offset, int length);
     @CriticalNative
@@ -677,8 +679,13 @@ public final class Parcel {
     }
 
     /** @hide */
-    public final int compareData(Parcel other) {
+    public int compareData(Parcel other) {
         return nativeCompareData(mNativePtr, other.mNativePtr);
+    }
+
+    /** @hide */
+    public static boolean compareData(Parcel a, int offsetA, Parcel b, int offsetB, int length) {
+        return nativeCompareDataInRange(a.mNativePtr, offsetA, b.mNativePtr, offsetB, length);
     }
 
     /** @hide */
@@ -3580,7 +3587,6 @@ public final class Parcel {
         private final int mType;
         @Nullable private final ClassLoader mLoader;
         @Nullable private Object mObject;
-        @Nullable private volatile Parcel mValueParcel;
 
         /**
          * This goes from non-null to null once. Always check the nullability of this object before
@@ -3678,24 +3684,13 @@ public final class Parcel {
                 return false;
             }
             // Finally we compare the payload.
-            return getValueParcel(source).compareData(value.getValueParcel(otherSource)) == 0;
+            return Parcel.compareData(source, mPosition, otherSource, value.mPosition, mLength);
         }
 
         @Override
         public int hashCode() {
             // Accessing mSource first to provide memory barrier for mObject
             return Objects.hash(mSource == null, mObject, mLoader, mType, mLength);
-        }
-
-        /** This extracts the parcel section responsible for the object and returns it. */
-        private Parcel getValueParcel(Parcel source) {
-            Parcel parcel = mValueParcel;
-            if (parcel == null) {
-                parcel = Parcel.obtain();
-                parcel.appendFrom(source, mPosition, mLength);
-                mValueParcel = parcel;
-            }
-            return parcel;
         }
     }
 

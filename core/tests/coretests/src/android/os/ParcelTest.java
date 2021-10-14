@@ -17,6 +17,9 @@
 package android.os;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import android.platform.test.annotations.Presubmit;
 
@@ -109,5 +112,131 @@ public class ParcelTest {
             assertEquals(string, p.readString8());
             assertEquals(string, p.readString16());
         }
+    }
+
+    @Test
+    public void testCompareDataInRange_whenSameData() {
+        Parcel pA = Parcel.obtain();
+        int iA = pA.dataPosition();
+        pA.writeInt(13);
+        pA.writeString("Tiramisu");
+        int length = pA.dataPosition() - iA;
+        Parcel pB = Parcel.obtain();
+        pB.writeString("Prefix");
+        int iB = pB.dataPosition();
+        pB.writeInt(13);
+        pB.writeString("Tiramisu");
+
+        assertTrue(Parcel.compareData(pA, iA, pB, iB, length));
+    }
+
+    @Test
+    public void testCompareDataInRange_whenSameDataWithBinder() {
+        Binder binder = new Binder();
+        Parcel pA = Parcel.obtain();
+        int iA = pA.dataPosition();
+        pA.writeInt(13);
+        pA.writeStrongBinder(binder);
+        pA.writeString("Tiramisu");
+        int length = pA.dataPosition() - iA;
+        Parcel pB = Parcel.obtain();
+        pB.writeString("Prefix");
+        int iB = pB.dataPosition();
+        pB.writeInt(13);
+        pB.writeStrongBinder(binder);
+        pB.writeString("Tiramisu");
+
+        assertTrue(Parcel.compareData(pA, iA, pB, iB, length));
+    }
+
+    @Test
+    public void testCompareDataInRange_whenDifferentData() {
+        Parcel pA = Parcel.obtain();
+        int iA = pA.dataPosition();
+        pA.writeInt(13);
+        pA.writeString("Tiramisu");
+        int length = pA.dataPosition() - iA;
+        Parcel pB = Parcel.obtain();
+        int iB = pB.dataPosition();
+        pB.writeString("Prefix");
+        pB.writeInt(13);
+        pB.writeString("Tiramisu");
+
+        assertFalse(Parcel.compareData(pA, iA, pB, iB, length));
+    }
+
+    @Test
+    public void testCompareDataInRange_whenLimitOutOfBounds_throws() {
+        Parcel pA = Parcel.obtain();
+        int iA = pA.dataPosition();
+        pA.writeInt(12);
+        pA.writeString("Tiramisu");
+        int length = pA.dataPosition() - iA;
+        Parcel pB = Parcel.obtain();
+        pB.writeString("Prefix");
+        int iB = pB.dataPosition();
+        pB.writeInt(13);
+        pB.writeString("Tiramisu");
+        pB.writeInt(-1);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> Parcel.compareData(pA, iA + length, pB, iB, 1));
+        assertThrows(IllegalArgumentException.class,
+                () -> Parcel.compareData(pA, iA, pB, pB.dataSize(), 1));
+        assertThrows(IllegalArgumentException.class,
+                () -> Parcel.compareData(pA, iA, pB, iB, length + 1));
+        assertThrows(IllegalArgumentException.class,
+                () -> Parcel.compareData(pA, iA + length + 1, pB, iB, 0));
+        assertThrows(IllegalArgumentException.class,
+                () -> Parcel.compareData(pA, iA, pB, iB + pB.dataSize() + 1, 0));
+    }
+
+    @Test
+    public void testCompareDataInRange_whenLengthZero() {
+        Parcel pA = Parcel.obtain();
+        int iA = pA.dataPosition();
+        pA.writeInt(12);
+        pA.writeString("Tiramisu");
+        int length = pA.dataPosition() - iA;
+        Parcel pB = Parcel.obtain();
+        pB.writeString("Prefix");
+        int iB = pB.dataPosition();
+        pB.writeInt(13);
+        pB.writeString("Tiramisu");
+
+        assertTrue(Parcel.compareData(pA, 0, pB, iB, 0));
+        assertTrue(Parcel.compareData(pA, iA + length, pB, iB, 0));
+        assertTrue(Parcel.compareData(pA, iA, pB, pB.dataSize(), 0));
+    }
+
+    @Test
+    public void testCompareDataInRange_whenNegativeLength_throws() {
+        Parcel pA = Parcel.obtain();
+        int iA = pA.dataPosition();
+        pA.writeInt(12);
+        pA.writeString("Tiramisu");
+        Parcel pB = Parcel.obtain();
+        pB.writeString("Prefix");
+        int iB = pB.dataPosition();
+        pB.writeInt(13);
+        pB.writeString("Tiramisu");
+
+        assertThrows(IllegalArgumentException.class, () -> Parcel.compareData(pA, iA, pB, iB, -1));
+    }
+
+    @Test
+    public void testCompareDataInRange_whenNegativeOffset_throws() {
+        Parcel pA = Parcel.obtain();
+        int iA = pA.dataPosition();
+        pA.writeInt(12);
+        pA.writeString("Tiramisu");
+        Parcel pB = Parcel.obtain();
+        pB.writeString("Prefix");
+        int iB = pB.dataPosition();
+        pB.writeInt(13);
+        pB.writeString("Tiramisu");
+
+        assertThrows(IllegalArgumentException.class, () -> Parcel.compareData(pA, -1, pB, iB, 0));
+        assertThrows(IllegalArgumentException.class, () -> Parcel.compareData(pA, 0, pB, -1, 0));
     }
 }
