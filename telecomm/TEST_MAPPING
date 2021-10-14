@@ -25,14 +25,6 @@
       ]
     },
     {
-      "name": "CtsTelephonySdk28TestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
-    },
-    {
       "name": "CtsTelephony2TestCases",
       "options": [
         {

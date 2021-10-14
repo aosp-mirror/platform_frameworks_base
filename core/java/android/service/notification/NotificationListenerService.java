@@ -83,11 +83,11 @@ import java.util.Objects;
  *     &lt;/intent-filter>
  *     &lt;meta-data
  *               android:name="android.service.notification.default_filter_types"
- *               android:value="conversations,alerting">
+ *               android:value="conversations|alerting">
  *           &lt;/meta-data>
  *     &lt;meta-data
  *               android:name="android.service.notification.disabled_filter_types"
- *               android:value="ongoing,silent">
+ *               android:value="ongoing|silent">
  *           &lt;/meta-data>
  * &lt;/service></pre>
  *
@@ -112,8 +112,9 @@ public abstract class NotificationListenerService extends Service {
     private final String TAG = getClass().getSimpleName();
 
     /**
-     * The name of the {@code meta-data} tag containing a comma separated list of default
-     * integer notification types that should be provided to this listener. See
+     * The name of the {@code meta-data} tag containing a pipe separated list of default
+     * integer notification types or "ongoing", "conversations", "alerting", or "silent"
+     * that should be provided to this listener. See
      * {@link #FLAG_FILTER_TYPE_ONGOING},
      * {@link #FLAG_FILTER_TYPE_CONVERSATIONS}, {@link #FLAG_FILTER_TYPE_ALERTING),
      * and {@link #FLAG_FILTER_TYPE_SILENT}.

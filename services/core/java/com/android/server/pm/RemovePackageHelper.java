@@ -220,9 +220,8 @@ final class RemovePackageHelper {
             outInfo.mInstallerPackageName = deletedPs.getInstallSource().installerPackageName;
             outInfo.mIsStaticSharedLib = deletedPkg != null
                     && deletedPkg.getStaticSharedLibName() != null;
-            outInfo.populateUsers(
-                    deletedPs == null ? null : deletedPs.queryInstalledUsers(
-                            mUserManagerInternal.getUserIds(), true), deletedPs);
+            outInfo.populateUsers(deletedPs.queryInstalledUsers(
+                    mUserManagerInternal.getUserIds(), true), deletedPs);
         }
 
         removePackageLI(deletedPs.getPackageName(), (flags & PackageManager.DELETE_CHATTY) != 0);
@@ -249,58 +248,53 @@ final class RemovePackageHelper {
 
         // writer
         boolean installedStateChanged = false;
-        if (deletedPs != null) {
-            if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
-                final SparseBooleanArray changedUsers = new SparseBooleanArray();
-                synchronized (mPm.mLock) {
-                    mPm.mDomainVerificationManager.clearPackage(deletedPs.getPackageName());
-                    mPm.mSettings.getKeySetManagerService().removeAppKeySetDataLPw(packageName);
-                    mPm.mAppsFilter.removePackage(mPm.getPackageSetting(packageName),
-                            false /* isReplace */);
-                    removedAppId = mPm.mSettings.removePackageLPw(packageName);
-                    if (outInfo != null) {
-                        outInfo.mRemovedAppId = removedAppId;
-                    }
-                    if (!mPm.mSettings.isDisabledSystemPackageLPr(packageName)) {
-                        // If we don't have a disabled system package to reinstall, the package is
-                        // really gone and its permission state should be removed.
-                        final SharedUserSetting sus = deletedPs.getSharedUser();
-                        List<AndroidPackage> sharedUserPkgs = sus != null ? sus.getPackages()
-                                : null;
-                        if (sharedUserPkgs == null) {
-                            sharedUserPkgs = Collections.emptyList();
-                        }
-                        mPermissionManager.onPackageUninstalled(packageName, deletedPs.getAppId(),
-                                deletedPs.getPkg(), sharedUserPkgs, UserHandle.USER_ALL);
-                    }
-                    mPm.clearPackagePreferredActivitiesLPw(
-                            deletedPs.getPackageName(), changedUsers, UserHandle.USER_ALL);
+        if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
+            final SparseBooleanArray changedUsers = new SparseBooleanArray();
+            synchronized (mPm.mLock) {
+                mPm.mDomainVerificationManager.clearPackage(deletedPs.getPackageName());
+                mPm.mSettings.getKeySetManagerService().removeAppKeySetDataLPw(packageName);
+                mPm.mAppsFilter.removePackage(mPm.getPackageSetting(packageName),
+                        false /* isReplace */);
+                removedAppId = mPm.mSettings.removePackageLPw(packageName);
+                if (outInfo != null) {
+                    outInfo.mRemovedAppId = removedAppId;
+                }
+                if (!mPm.mSettings.isDisabledSystemPackageLPr(packageName)) {
+                    // If we don't have a disabled system package to reinstall, the package is
+                    // really gone and its permission state should be removed.
+                    final SharedUserSetting sus = deletedPs.getSharedUser();
+                    List<AndroidPackage> sharedUserPkgs =
+                            sus != null ? sus.getPackages() : Collections.emptyList();
+                    mPermissionManager.onPackageUninstalled(packageName, deletedPs.getAppId(),
+                            deletedPs.getPkg(), sharedUserPkgs, UserHandle.USER_ALL);
+                }
+                mPm.clearPackagePreferredActivitiesLPw(
+                        deletedPs.getPackageName(), changedUsers, UserHandle.USER_ALL);
 
-                    mPm.mSettings.removeRenamedPackageLPw(deletedPs.getRealName());
-                }
-                if (changedUsers.size() > 0) {
-                    mPm.updateDefaultHomeNotLocked(changedUsers);
-                    mPm.postPreferredActivityChangedBroadcast(UserHandle.USER_ALL);
-                }
+                mPm.mSettings.removeRenamedPackageLPw(deletedPs.getRealName());
             }
-            // make sure to preserve per-user disabled state if this removal was just
-            // a downgrade of a system app to the factory package
-            if (outInfo != null && outInfo.mOrigUsers != null) {
+            if (changedUsers.size() > 0) {
+                mPm.updateDefaultHomeNotLocked(changedUsers);
+                mPm.postPreferredActivityChangedBroadcast(UserHandle.USER_ALL);
+            }
+        }
+        // make sure to preserve per-user disabled state if this removal was just
+        // a downgrade of a system app to the factory package
+        if (outInfo != null && outInfo.mOrigUsers != null) {
+            if (DEBUG_REMOVE) {
+                Slog.d(TAG, "Propagating install state across downgrade");
+            }
+            for (int userId : allUserHandles) {
+                final boolean installed = ArrayUtils.contains(outInfo.mOrigUsers, userId);
                 if (DEBUG_REMOVE) {
-                    Slog.d(TAG, "Propagating install state across downgrade");
+                    Slog.d(TAG, "    user " + userId + " => " + installed);
                 }
-                for (int userId : allUserHandles) {
-                    final boolean installed = ArrayUtils.contains(outInfo.mOrigUsers, userId);
-                    if (DEBUG_REMOVE) {
-                        Slog.d(TAG, "    user " + userId + " => " + installed);
-                    }
-                    if (installed != deletedPs.getInstalled(userId)) {
-                        installedStateChanged = true;
-                    }
-                    deletedPs.setInstalled(installed, userId);
-                    if (installed) {
-                        deletedPs.setUninstallReason(UNINSTALL_REASON_UNKNOWN, userId);
-                    }
+                if (installed != deletedPs.getInstalled(userId)) {
+                    installedStateChanged = true;
+                }
+                deletedPs.setInstalled(installed, userId);
+                if (installed) {
+                    deletedPs.setUninstallReason(UNINSTALL_REASON_UNKNOWN, userId);
                 }
             }
         }

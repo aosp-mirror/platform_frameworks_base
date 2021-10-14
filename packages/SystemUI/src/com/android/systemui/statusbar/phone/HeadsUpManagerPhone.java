@@ -121,7 +121,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
             }
 
             @Override
-            public void onOverlayChanged() {
+            public void onThemeChanged() {
                 updateResources();
             }
         });

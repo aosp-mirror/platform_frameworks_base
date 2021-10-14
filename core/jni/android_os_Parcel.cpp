@@ -596,13 +596,10 @@ static jint android_os_Parcel_compareData(JNIEnv* env, jclass clazz, jlong thisN
                                           jlong otherNativePtr)
 {
     Parcel* thisParcel = reinterpret_cast<Parcel*>(thisNativePtr);
-    if (thisParcel == NULL) {
-       return 0;
-    }
+    LOG_ALWAYS_FATAL_IF(thisParcel == nullptr, "Should not be null");
+
     Parcel* otherParcel = reinterpret_cast<Parcel*>(otherNativePtr);
-    if (otherParcel == NULL) {
-       return thisParcel->getOpenAshmemSize();
-    }
+    LOG_ALWAYS_FATAL_IF(otherParcel == nullptr, "Should not be null");
 
     return thisParcel->compareData(*otherParcel);
 }
@@ -636,6 +633,22 @@ static jboolean android_os_Parcel_hasFileDescriptors(jlong nativePtr)
         }
     }
     return ret;
+}
+
+static jboolean android_os_Parcel_hasFileDescriptorsInRange(JNIEnv* env, jclass clazz,
+                                                            jlong nativePtr, jint offset,
+                                                            jint length) {
+    Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
+    if (parcel != NULL) {
+        bool result;
+        status_t err = parcel->hasFileDescriptorsInRange(offset, length, result);
+        if (err != NO_ERROR) {
+            signalExceptionForError(env, clazz, err);
+            return JNI_FALSE;
+        }
+        return result ? JNI_TRUE : JNI_FALSE;
+    }
+    return JNI_FALSE;
 }
 
 // String tries to allocate itself on the stack, within a known size, but will
@@ -831,6 +844,7 @@ static const JNINativeMethod gParcelMethods[] = {
     {"nativeAppendFrom",          "(JJII)V", (void*)android_os_Parcel_appendFrom},
     // @CriticalNative
     {"nativeHasFileDescriptors",  "(J)Z", (void*)android_os_Parcel_hasFileDescriptors},
+    {"nativeHasFileDescriptorsInRange",  "(JII)Z", (void*)android_os_Parcel_hasFileDescriptorsInRange},
     {"nativeWriteInterfaceToken", "(JLjava/lang/String;)V", (void*)android_os_Parcel_writeInterfaceToken},
     {"nativeEnforceInterface",    "(JLjava/lang/String;)V", (void*)android_os_Parcel_enforceInterface},
 

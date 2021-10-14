@@ -22,7 +22,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.PublicKey;
 import android.hardware.camera2.impl.SyntheticKey;
-import android.hardware.camera2.params.DeviceStateOrientationMap;
+import android.hardware.camera2.params.DeviceStateSensorOrientationMap;
 import android.hardware.camera2.params.RecommendedStreamConfigurationMap;
 import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.utils.TypeReference;
@@ -258,11 +258,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     private <T> T overrideProperty(Key<T> key) {
         if (CameraCharacteristics.SENSOR_ORIENTATION.equals(key) && (mFoldStateListener != null) &&
                 (mProperties.get(CameraCharacteristics.INFO_DEVICE_STATE_ORIENTATIONS) != null)) {
-            DeviceStateOrientationMap deviceStateOrientationMap =
-                    mProperties.get(CameraCharacteristics.INFO_DEVICE_STATE_ORIENTATION_MAP);
+            DeviceStateSensorOrientationMap deviceStateSensorOrientationMap =
+                    mProperties.get(CameraCharacteristics.INFO_DEVICE_STATE_SENSOR_ORIENTATION_MAP);
             synchronized (mLock) {
-                Integer ret = deviceStateOrientationMap.getSensorOrientation(mFoldedDeviceState ?
-                        DeviceStateOrientationMap.FOLDED : DeviceStateOrientationMap.NORMAL);
+                Integer ret = deviceStateSensorOrientationMap.getSensorOrientation(
+                        mFoldedDeviceState ? DeviceStateSensorOrientationMap.FOLDED :
+                                DeviceStateSensorOrientationMap.NORMAL);
                 if (ret >= 0) {
                     return (T) ret;
                 } else {
@@ -4056,7 +4057,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * Clients are advised to not cache or store the orientation value of such logical sensors.
      * In case repeated queries to CameraCharacteristics are not preferred, then clients can
      * also access the entire mapping from device state to sensor orientation in
-     * {@link android.hardware.camera2.params.DeviceStateOrientationMap }.
+     * {@link android.hardware.camera2.params.DeviceStateSensorOrientationMap }.
      * Do note that a dynamically changing sensor orientation value in camera characteristics
      * will not be the best way to establish the orientation per frame. Clients that want to
      * know the sensor orientation of a particular captured frame should query the
@@ -4384,7 +4385,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * values. The orientation value may need to change depending on the specific folding
      * state. Information about the mapping between the device folding state and the
      * sensor orientation can be obtained in
-     * {@link android.hardware.camera2.params.DeviceStateOrientationMap }.
+     * {@link android.hardware.camera2.params.DeviceStateSensorOrientationMap }.
      * Device state orientation maps are optional and maybe present on devices that support
      * {@link CaptureRequest#SCALER_ROTATE_AND_CROP android.scaler.rotateAndCrop}.</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
@@ -4398,8 +4399,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @PublicKey
     @NonNull
     @SyntheticKey
-    public static final Key<android.hardware.camera2.params.DeviceStateOrientationMap> INFO_DEVICE_STATE_ORIENTATION_MAP =
-            new Key<android.hardware.camera2.params.DeviceStateOrientationMap>("android.info.deviceStateOrientationMap", android.hardware.camera2.params.DeviceStateOrientationMap.class);
+    public static final Key<android.hardware.camera2.params.DeviceStateSensorOrientationMap> INFO_DEVICE_STATE_SENSOR_ORIENTATION_MAP =
+            new Key<android.hardware.camera2.params.DeviceStateSensorOrientationMap>("android.info.deviceStateSensorOrientationMap", android.hardware.camera2.params.DeviceStateSensorOrientationMap.class);
 
     /**
      * <p>HAL must populate the array with

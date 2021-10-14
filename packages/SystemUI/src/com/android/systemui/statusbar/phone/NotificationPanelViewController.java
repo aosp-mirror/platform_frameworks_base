@@ -4411,12 +4411,7 @@ public class NotificationPanelViewController extends PanelViewController {
         @Override
         public void onThemeChanged() {
             if (DEBUG) Log.d(TAG, "onThemeChanged");
-            final int themeResId = mView.getContext().getThemeResId();
-            if (mThemeResId == themeResId) {
-                return;
-            }
-            mThemeResId = themeResId;
-
+            mThemeResId = mView.getContext().getThemeResId();
             reInflateViews();
         }
 
@@ -4426,12 +4421,6 @@ public class NotificationPanelViewController extends PanelViewController {
 
             // Can affect multi-user switcher visibility as it depends on screen size by default:
             // it is enabled only for devices with large screens (see config_keyguardUserSwitcher)
-            reInflateViews();
-        }
-
-        @Override
-        public void onOverlayChanged() {
-            if (DEBUG) Log.d(TAG, "onOverlayChanged");
             reInflateViews();
         }
 

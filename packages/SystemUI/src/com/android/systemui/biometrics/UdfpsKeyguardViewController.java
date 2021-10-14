@@ -398,11 +398,6 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                 }
 
                 @Override
-                public void onOverlayChanged() {
-                    mView.updateColor();
-                }
-
-                @Override
                 public void onConfigChanged(Configuration newConfig) {
                     mView.updateColor();
                 }
