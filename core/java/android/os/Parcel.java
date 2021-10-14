@@ -401,7 +401,7 @@ public final class Parcel {
     private static final int WRITE_EXCEPTION_STACK_TRACE_THRESHOLD_MS = 1000;
 
     @CriticalNative
-    private static native long nativeGetBlobAshmemSize(long nativePtr);
+    private static native long nativeGetOpenAshmemSize(long nativePtr);
 
     public final static Parcelable.Creator<String> STRING_CREATOR
              = new Parcelable.Creator<String>() {
@@ -4381,8 +4381,8 @@ public final class Parcel {
     /**
      * @hide For testing
      */
-    public long getBlobAshmemSize() {
-        return nativeGetBlobAshmemSize(mNativePtr);
+    public long getOpenAshmemSize() {
+        return nativeGetOpenAshmemSize(mNativePtr);
     }
 
     private static String valueTypeToString(int type) {
