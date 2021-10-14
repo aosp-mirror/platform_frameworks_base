@@ -16,26 +16,29 @@
 
 package com.android.systemui.flags;
 
-import android.content.Context;
 import android.content.res.Resources;
 import android.util.SparseArray;
 
 import androidx.annotation.BoolRes;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.plugins.FlagReaderPlugin;
-import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.util.wrapper.BuildInfo;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.ArrayList;
 
 import javax.inject.Inject;
 /**
  * Reads and caches feature flags for quick access
  *
- * Feature flags must be defined as boolean resources. For example:
+ * Feature flags must be defined as boolean resources. For example:t
  *
  * {@code
  *  <bool name="flag_foo_bar_baz">false</bool>
@@ -55,71 +58,39 @@ import javax.inject.Inject;
  * Calls to this class should probably be wrapped by a method in {@link FeatureFlags}.
  */
 @SysUISingleton
-public class FeatureFlagReader {
+public class FeatureFlagReader implements Dumpable {
     private final Resources mResources;
     private final boolean mAreFlagsOverrideable;
-    private final PluginManager mPluginManager;
     private final SystemPropertiesHelper mSystemPropertiesHelper;
     private final SparseArray<CachedFlag> mCachedFlags = new SparseArray<>();
 
-    private FlagReaderPlugin mPlugin = new FlagReaderPlugin(){};
+    private final FlagReader mFlagReader;
 
     @Inject
     public FeatureFlagReader(
             @Main Resources resources,
             BuildInfo build,
-            PluginManager pluginManager,
-            SystemPropertiesHelper systemPropertiesHelper) {
+            DumpManager dumpManager,
+            SystemPropertiesHelper systemPropertiesHelper,
+            FlagReader reader) {
         mResources = resources;
-        mPluginManager = pluginManager;
+        mFlagReader = reader;
         mSystemPropertiesHelper = systemPropertiesHelper;
         mAreFlagsOverrideable =
                 build.isDebuggable() && mResources.getBoolean(R.bool.are_flags_overrideable);
-
-        mPluginManager.addPluginListener(mPluginListener, FlagReaderPlugin.class);
+        dumpManager.registerDumpable("FeatureFlags", this);
     }
-
-    private final PluginListener<FlagReaderPlugin> mPluginListener =
-            new PluginListener<FlagReaderPlugin>() {
-                public void onPluginConnected(FlagReaderPlugin plugin, Context context) {
-                    mPlugin = plugin;
-                }
-
-                public void onPluginDisconnected(FlagReaderPlugin plugin) {
-                    mPlugin = new FlagReaderPlugin() {};
-                }
-            };
 
     boolean isEnabled(BooleanFlag flag) {
-        return mPlugin.isEnabled(flag.getId(), flag.getDefault());
+        return mFlagReader.isEnabled(flag.getId(), flag.getDefault());
     }
 
-    String getValue(StringFlag flag) {
-        return mPlugin.getValue(flag.getId(), flag.getDefault());
+    void addListener(FlagReader.Listener listener) {
+        mFlagReader.addListener(listener);
     }
 
-    int getValue(IntFlag flag) {
-        return mPlugin.getValue(flag.getId(), flag.getDefault());
-    }
-
-    long getValue(LongFlag flag) {
-        return mPlugin.getValue(flag.getId(), flag.getDefault());
-    }
-
-    float getValue(FloatFlag flag) {
-        return mPlugin.getValue(flag.getId(), flag.getDefault());
-    }
-
-    double getValue(DoubleFlag flag) {
-        return mPlugin.getValue(flag.getId(), flag.getDefault());
-    }
-
-    void addListener(FlagReaderPlugin.Listener listener) {
-        mPlugin.addListener(listener);
-    }
-
-    void removeListener(FlagReaderPlugin.Listener listener) {
-        mPlugin.removeListener(listener);
+    void removeListener(FlagReader.Listener listener) {
+        mFlagReader.removeListener(listener);
     }
 
     /**
@@ -169,6 +140,23 @@ public class FeatureFlagReader {
             return configName.substring(STORAGE_KEY_PREFIX.length());
         } else {
             return null;
+        }
+    }
+
+    @Override
+    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+        ArrayList<String> flagStrings = new ArrayList<>(mCachedFlags.size());
+        for (int i = 0; i < mCachedFlags.size(); i++) {
+            int key = mCachedFlags.keyAt(i);
+            // get the object by the key.
+            CachedFlag flag = mCachedFlags.get(key);
+            flagStrings.add("  " + RESNAME_PREFIX + flag.name + ": " + flag.value + "\n");
+        }
+        flagStrings.sort(String.CASE_INSENSITIVE_ORDER);
+        pw.println("AreFlagsOverrideable: " + mAreFlagsOverrideable);
+        pw.println("Cached FeatureFlags:");
+        for (String flagString : flagStrings) {
+            pw.print(flagString);
         }
     }
 
