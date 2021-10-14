@@ -87,6 +87,7 @@ import java.util.List;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
+// TODO (b/194833441): remove when notification permission is enabled
 public class RoleObserverTest extends UiServiceTestCase {
     private TestableNotificationManagerService mService;
     private NotificationManagerService.RoleObserver mRoleObserver;
@@ -162,7 +163,7 @@ public class RoleObserverTest extends UiServiceTestCase {
                     mock(AppOpsManager.class), mUm, mock(NotificationHistoryManager.class),
                     mock(StatsManager.class), mock(TelephonyManager.class),
                     mock(ActivityManagerInternal.class),
-                    mock(MultiRateLimiter.class));
+                    mock(MultiRateLimiter.class), mock(PermissionHelper.class));
         } catch (SecurityException e) {
             if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
                 throw e;

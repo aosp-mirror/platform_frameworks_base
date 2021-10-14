@@ -246,6 +246,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     private PackageManager mPackageManagerClient;
     @Mock
     private WindowManagerInternal mWindowManagerInternal;
+    @Mock
+    private PermissionHelper mPermissionHelper;
     private TestableContext mContext = spy(getContext());
     private final String PKG = mContext.getPackageName();
     private TestableLooper mTestableLooper;
@@ -333,83 +335,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     StatusBarManagerInternal mStatusBar;
 
     private NotificationManagerService.WorkerHandler mWorkerHandler;
-
-    // Use a Testable subclass so we can simulate calls from the system without failing.
-    private static class TestableNotificationManagerService extends NotificationManagerService {
-        int countSystemChecks = 0;
-        boolean isSystemUid = true;
-        int countLogSmartSuggestionsVisible = 0;
-        @Nullable
-        NotificationAssistantAccessGrantedCallback mNotificationAssistantAccessGrantedCallback;
-
-        TestableNotificationManagerService(Context context, NotificationRecordLogger logger,
-                InstanceIdSequence notificationInstanceIdSequence) {
-            super(context, logger, notificationInstanceIdSequence);
-        }
-
-        RankingHelper getRankingHelper() {
-            return mRankingHelper;
-        }
-
-        @Override
-        protected boolean isCallingUidSystem() {
-            countSystemChecks++;
-            return isSystemUid;
-        }
-
-        @Override
-        protected boolean isCallerSystemOrPhone() {
-            countSystemChecks++;
-            return isSystemUid;
-        }
-
-        @Override
-        protected ICompanionDeviceManager getCompanionManager() {
-            return null;
-        }
-
-        @Override
-        protected void reportUserInteraction(NotificationRecord r) {
-            return;
-        }
-
-        @Override
-        protected void handleSavePolicyFile() {
-            return;
-        }
-
-        @Override
-        void logSmartSuggestionsVisible(NotificationRecord r, int notificationLocation) {
-            super.logSmartSuggestionsVisible(r, notificationLocation);
-            countLogSmartSuggestionsVisible++;
-        }
-
-        @Override
-        protected void setNotificationAssistantAccessGrantedForUserInternal(
-                ComponentName assistant, int userId, boolean granted, boolean userSet) {
-            if (mNotificationAssistantAccessGrantedCallback != null) {
-                mNotificationAssistantAccessGrantedCallback.onGranted(assistant, userId, granted,
-                        userSet);
-                return;
-            }
-            super.setNotificationAssistantAccessGrantedForUserInternal(assistant, userId, granted,
-                    userSet);
-        }
-
-        @Override
-        protected String[] getStringArrayResource(int key) {
-            return new String[] {PKG_O};
-        }
-
-        private void setNotificationAssistantAccessGrantedCallback(
-                @Nullable NotificationAssistantAccessGrantedCallback callback) {
-            this.mNotificationAssistantAccessGrantedCallback = callback;
-        }
-
-        interface NotificationAssistantAccessGrantedCallback {
-            void onGranted(ComponentName assistant, int userId, boolean granted, boolean userSet);
-        }
-    }
 
     private class TestableToastCallback extends ITransientNotification.Stub {
         @Override
@@ -516,13 +441,16 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         when(mAssistants.isAdjustmentAllowed(anyString())).thenReturn(true);
 
+        // apps allowed as convos
+        mService.setStringArrayResourceValue(PKG_O);
+
         mWorkerHandler = spy(mService.new WorkerHandler(mTestableLooper.getLooper()));
         mService.init(mWorkerHandler, mRankingHandler, mPackageManager, mPackageManagerClient,
                 mockLightsManager, mListeners, mAssistants, mConditionProviders, mCompanionMgr,
                 mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager, mGroupHelper, mAm, mAtm,
                 mAppUsageStats, mock(DevicePolicyManagerInternal.class), mUgm, mUgmInternal,
                 mAppOpsManager, mUm, mHistoryManager, mStatsManager, mock(TelephonyManager.class),
-                mAmi, mToastRateLimiter);
+                mAmi, mToastRateLimiter, mPermissionHelper);
         // Return first true for RoleObserver main-thread check
         when(mMainLooper.isCurrentThread()).thenReturn(true).thenReturn(false);
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY, mMainLooper);
@@ -6685,6 +6613,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         enableInteractAcrossUsers();
         mBinderService.areNotificationsEnabledForPackage(mContext.getPackageName(),
                 mUid + UserHandle.PER_USER_RANGE);
+
+        verify(mPermissionHelper, never()).hasPermission(anyInt());
     }
 
     @Test
@@ -8334,5 +8264,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(FLAG_FILTER_TYPE_ONGOING, captor.getValue().getTypes());
         assertTrue(captor.getValue().isPackageAllowed(new VersionedPackage("apples", 1001)));
         assertFalse(captor.getValue().isPackageAllowed(new VersionedPackage("test", 1002)));
+    }
+
+    @Test
+    public void testMigrationDisabledByDefault() {
+        assertThat(mService.mEnableAppSettingMigration).isFalse();
     }
 }
