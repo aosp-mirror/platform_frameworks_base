@@ -89,6 +89,7 @@ import androidx.lifecycle.Observer;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
+import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.settingslib.WirelessUtils;
 import com.android.settingslib.fuelgauge.BatteryStatus;
@@ -313,6 +314,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private final DevicePolicyManager mDevicePolicyManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final InteractionJankMonitor mInteractionJankMonitor;
+    private final LatencyTracker mLatencyTracker;
     private boolean mLogoutEnabled;
     // cached value to avoid IPCs
     private boolean mIsUdfpsEnrolled;
@@ -1739,8 +1741,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             AuthController authController,
             TelephonyListenerManager telephonyListenerManager,
             FeatureFlags featureFlags,
-            InteractionJankMonitor interactionJankMonitor
-    ) {
+            InteractionJankMonitor interactionJankMonitor,
+            LatencyTracker latencyTracker) {
         mContext = context;
         mSubscriptionManager = SubscriptionManager.from(context);
         mTelephonyListenerManager = telephonyListenerManager;
@@ -1749,6 +1751,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mBackgroundExecutor = backgroundExecutor;
         mBroadcastDispatcher = broadcastDispatcher;
         mInteractionJankMonitor = interactionJankMonitor;
+        mLatencyTracker = latencyTracker;
         mRingerModeTracker = ringerModeTracker;
         mStatusBarStateController = statusBarStateController;
         mStatusBarStateController.addCallback(mStatusBarStateControllerListener);
@@ -2579,6 +2582,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             }
         }
         mInteractionJankMonitor.end(InteractionJankMonitor.CUJ_USER_SWITCH);
+        mLatencyTracker.onActionEnd(LatencyTracker.ACTION_USER_SWITCH);
     }
 
     /**
