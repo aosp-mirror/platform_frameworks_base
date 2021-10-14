@@ -590,10 +590,6 @@ public class InputMethodService extends AbstractInputMethodService {
         @Override
         public final void initializeInternal(@NonNull IBinder token,
                 IInputMethodPrivilegedOperations privilegedOperations, int configChanges) {
-            if (InputMethodPrivilegedOperationsRegistry.isRegistered(token)) {
-                Log.w(TAG, "The token has already registered, ignore this initialization.");
-                return;
-            }
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.initializeInternal");
             mConfigTracker.onInitialize(configChanges);
             mPrivOps.set(privilegedOperations);
