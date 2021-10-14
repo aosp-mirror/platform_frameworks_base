@@ -5133,6 +5133,10 @@ public class PackageManagerService extends IPackageManager.Stub
                             InstantAppRegistry.DEFAULT_UNINSTALLED_INSTANT_APP_MIN_CACHE_PERIOD))) {
                 return;
             }
+
+            // 12. Clear temp install session files
+            mInstallerService.freeStageDirs(volumeUuid);
+
         } else {
             try {
                 mInstaller.freeCache(volumeUuid, bytes, 0, 0);
