@@ -53,6 +53,7 @@ import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.phone.StatusBarIconController.DarkIconManager;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallListener;
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.EncryptionHelper;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -101,6 +102,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private final StatusBarLocationPublisher mLocationPublisher;
     private final FeatureFlags mFeatureFlags;
     private final NotificationIconAreaController mNotificationIconAreaController;
+    private final PanelExpansionStateManager mPanelExpansionStateManager;
     private final StatusBarIconController mStatusBarIconController;
 
     private List<String> mBlockedIcons = new ArrayList<>();
@@ -126,6 +128,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             SystemStatusAnimationScheduler animationScheduler,
             StatusBarLocationPublisher locationPublisher,
             NotificationIconAreaController notificationIconAreaController,
+            PanelExpansionStateManager panelExpansionStateManager,
             FeatureFlags featureFlags,
             Lazy<Optional<StatusBar>> statusBarOptionalLazy,
             StatusBarIconController statusBarIconController,
@@ -140,6 +143,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mAnimationScheduler = animationScheduler;
         mLocationPublisher = locationPublisher;
         mNotificationIconAreaController = notificationIconAreaController;
+        mPanelExpansionStateManager = panelExpansionStateManager;
         mFeatureFlags = featureFlags;
         mStatusBarOptionalLazy = statusBarOptionalLazy;
         mStatusBarIconController = statusBarIconController;
@@ -363,7 +367,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     private boolean shouldHideNotificationIcons() {
         final Optional<StatusBar> statusBarOptional = mStatusBarOptionalLazy.get();
-        if (!mStatusBar.isClosed()
+        if (!mPanelExpansionStateManager.isClosed()
                 && statusBarOptional.map(
                         StatusBar::hideStatusBarIconsWhenExpanded).orElse(false)) {
             return true;
@@ -409,7 +413,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
      * don't set the clock GONE otherwise it'll mess up the animation.
      */
     private int clockHiddenMode() {
-        if (!mStatusBar.isClosed() && !mKeyguardStateController.isShowing()
+        if (!mPanelExpansionStateManager.isClosed() && !mKeyguardStateController.isShowing()
                 && !mStatusBarStateController.isDozing()) {
             return View.INVISIBLE;
         }

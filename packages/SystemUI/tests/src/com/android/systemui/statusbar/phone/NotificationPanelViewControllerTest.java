@@ -173,8 +173,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     @Mock
     private HeadsUpTouchHelper.Callback mHeadsUpCallback;
     @Mock
-    private PanelBar mPanelBar;
-    @Mock
     private KeyguardUpdateMonitor mUpdateMonitor;
     @Mock
     private KeyguardBypassController mKeyguardBypassController;
@@ -453,7 +451,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 () -> {},
                 mNotificationShelfController);
         mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);
-        mNotificationPanelViewController.setBar(mPanelBar);
         mNotificationPanelViewController.setKeyguardIndicationController(
                 mKeyguardIndicationController);
         ArgumentCaptor<View.OnAttachStateChangeListener> onAttachStateChangeListenerArgumentCaptor =

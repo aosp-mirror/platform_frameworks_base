@@ -33,6 +33,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityEvent;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import com.android.internal.policy.SystemBarUtils;
@@ -44,10 +45,8 @@ import com.android.systemui.util.leak.RotationUtils;
 
 import java.util.Objects;
 
-public class PhoneStatusBarView extends PanelBar {
+public class PhoneStatusBarView extends FrameLayout {
     private static final String TAG = "PhoneStatusBarView";
-    private static final boolean DEBUG = StatusBar.DEBUG;
-    private static final boolean DEBUG_GESTURES = false;
     private final StatusBarContentInsetsProvider mContentInsetsProvider;
 
     StatusBar mBar;
