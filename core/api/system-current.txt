@@ -383,6 +383,7 @@ package android {
     field public static final int config_systemNotificationIntelligence = 17039413; // 0x1040035
     field public static final int config_systemShell = 17039402; // 0x104002a
     field public static final int config_systemSpeechRecognizer = 17039406; // 0x104002e
+    field public static final int config_systemSupervision;
     field public static final int config_systemTelevisionNotificationHandler = 17039409; // 0x1040031
     field public static final int config_systemTextIntelligence = 17039414; // 0x1040036
     field public static final int config_systemUi = 17039418; // 0x104003a
