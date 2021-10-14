@@ -524,6 +524,7 @@ public final class DisplayManagerService extends SystemService {
             }
         } else if (phase == PHASE_BOOT_COMPLETED) {
             mDisplayModeDirector.onBootCompleted();
+            mLogicalDisplayMapper.onBootCompleted();
         }
     }
 
@@ -3600,6 +3601,11 @@ public final class DisplayManagerService extends SystemService {
                 }
             }
             return device.getDisplaySurfaceDefaultSize();
+        }
+
+        @Override
+        public void onEarlyInteractivityChange(boolean interactive) {
+            mLogicalDisplayMapper.onEarlyInteractivityChange(interactive);
         }
     }
 

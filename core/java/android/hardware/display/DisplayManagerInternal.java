@@ -372,6 +372,13 @@ public abstract class DisplayManagerInternal {
     public abstract Point getDisplaySurfaceDefaultSize(int displayId);
 
     /**
+     * Receives early interactivity changes from power manager.
+     *
+     * @param interactive The interactive state that the device is moving into.
+     */
+    public abstract void onEarlyInteractivityChange(boolean interactive);
+
+    /**
      * Describes the requested power state of the display.
      *
      * This object is intended to describe the general characteristics of the

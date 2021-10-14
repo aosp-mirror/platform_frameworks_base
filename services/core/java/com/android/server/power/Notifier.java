@@ -24,6 +24,7 @@ import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.InputManagerInternal;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
@@ -129,6 +130,7 @@ public class Notifier {
     private final TrustManager mTrustManager;
     private final Vibrator mVibrator;
     private final WakeLockLog mWakeLockLog;
+    private final DisplayManagerInternal mDisplayManagerInternal;
 
     private final NotifierHandler mHandler;
     private final Intent mScreenOnIntent;
@@ -181,6 +183,7 @@ public class Notifier {
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         mInputMethodManagerInternal = LocalServices.getService(InputMethodManagerInternal.class);
         mStatusBarManagerInternal = LocalServices.getService(StatusBarManagerInternal.class);
+        mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mTrustManager = mContext.getSystemService(TrustManager.class);
         mVibrator = mContext.getSystemService(Vibrator.class);
 
@@ -460,7 +463,10 @@ public class Notifier {
         synchronized (mLock) {
             if (mInteractive) {
                 // Waking up...
-                mHandler.post(() -> mPolicy.startedWakingUp(mInteractiveChangeReason));
+                mHandler.post(() -> {
+                    mPolicy.startedWakingUp(mInteractiveChangeReason);
+                    mDisplayManagerInternal.onEarlyInteractivityChange(true /*isInteractive*/);
+                });
 
                 // Send interactive broadcast.
                 mPendingInteractiveState = INTERACTIVE_STATE_AWAKE;
@@ -469,7 +475,10 @@ public class Notifier {
             } else {
                 // Going to sleep...
                 // Tell the policy that we started going to sleep.
-                mHandler.post(() -> mPolicy.startedGoingToSleep(mInteractiveChangeReason));
+                mHandler.post(() -> {
+                    mPolicy.startedGoingToSleep(mInteractiveChangeReason);
+                    mDisplayManagerInternal.onEarlyInteractivityChange(false /*isInteractive*/);
+                });
             }
         }
     }
