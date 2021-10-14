@@ -326,7 +326,7 @@ public class AppsFilterTest {
     }
 
     @Test
-    public void testOnUserCreated_FilterMatches() throws Exception {
+    public void testOnUserUpdated_FilterMatches() throws Exception {
         final AppsFilter appsFilter =
                 new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
                         mMockExecutor);
@@ -359,6 +359,23 @@ public class AppsFilterTest {
 
         for (int subjectUserId : USER_ARRAY_WITH_ADDED) {
             for (int otherUserId : USER_ARRAY_WITH_ADDED) {
+                assertFalse(appsFilter.shouldFilterApplication(
+                        UserHandle.getUid(DUMMY_CALLING_APPID, subjectUserId), calling, target,
+                        otherUserId));
+            }
+        }
+
+        // delete user
+        doAnswer(invocation -> {
+            ((AppsFilter.StateProvider.CurrentStateCallback) invocation.getArgument(0))
+                    .currentState(mExisting, USER_INFO_LIST);
+            return new Object();
+        }).when(mStateProvider)
+                .runWithState(any(AppsFilter.StateProvider.CurrentStateCallback.class));
+        appsFilter.onUserDeleted(ADDED_USER);
+
+        for (int subjectUserId : USER_ARRAY) {
+            for (int otherUserId : USER_ARRAY) {
                 assertFalse(appsFilter.shouldFilterApplication(
                         UserHandle.getUid(DUMMY_CALLING_APPID, subjectUserId), calling, target,
                         otherUserId));

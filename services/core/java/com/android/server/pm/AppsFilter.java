@@ -26,6 +26,7 @@ import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIV
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -874,24 +875,6 @@ public class AppsFilter implements Watchable, Snappable {
             WatchedSparseBooleanMatrix cache =
                     updateEntireShouldFilterCacheInner(settings, users, userId);
             synchronized (mCacheLock) {
-                if (userId != USER_ALL) {
-                    // if we're only updating a single user id, we need to copy over the prior
-                    // cached values for the other users.
-                    int[] uids = mShouldFilterCache.keys();
-                    for (int i = 0; i < uids.length; i++) {
-                        int uid1 = uids[i];
-                        if (UserHandle.getUserId(uid1) == userId) {
-                            continue;
-                        }
-                        for (int j = 0; j < uids.length; j++) {
-                            int uid2 = uids[j];
-                            if (UserHandle.getUserId(uid2) == userId) {
-                                continue;
-                            }
-                            cache.put(uid1, uid2, mShouldFilterCache.get(uid1, uid2));
-                        }
-                    }
-                }
                 mShouldFilterCache = cache;
             }
         });
@@ -899,8 +882,15 @@ public class AppsFilter implements Watchable, Snappable {
 
     private WatchedSparseBooleanMatrix updateEntireShouldFilterCacheInner(
             ArrayMap<String, PackageSetting> settings, UserInfo[] users, int subjectUserId) {
-        WatchedSparseBooleanMatrix cache =
-                new WatchedSparseBooleanMatrix(users.length * settings.size());
+        final WatchedSparseBooleanMatrix cache;
+        if (subjectUserId == USER_ALL) {
+            cache = new WatchedSparseBooleanMatrix(users.length * settings.size());
+        } else {
+            synchronized (mCacheLock) {
+                cache = mShouldFilterCache.snapshot();
+            }
+            cache.setCapacity(users.length * settings.size());
+        }
         for (int i = settings.size() - 1; i >= 0; i--) {
             updateShouldFilterCacheForPackage(cache,
                     null /*skipPackage*/, settings.valueAt(i), settings, users, subjectUserId, i);
@@ -964,6 +954,15 @@ public class AppsFilter implements Watchable, Snappable {
         }
     }
 
+    public void onUserDeleted(@UserIdInt int userId) {
+        synchronized (mCacheLock) {
+            if (mShouldFilterCache != null) {
+                removeShouldFilterCacheForUser(userId);
+                onChanged();
+            }
+        }
+    }
+
     private void updateShouldFilterCacheForPackage(String packageName) {
         mStateProvider.runWithState((settings, users) -> {
             synchronized (mCacheLock) {
@@ -1016,6 +1015,29 @@ public class AppsFilter implements Watchable, Snappable {
                     shouldFilterApplicationInternal(
                             otherUid, otherSetting, subjectSetting, subjectUserId));
         }
+    }
+
+    @GuardedBy("mCacheLock")
+    private void removeShouldFilterCacheForUser(int userId) {
+        // Sorted uids with the ascending order
+        final int[] cacheUids = mShouldFilterCache.keys();
+        final int size = cacheUids.length;
+        int pos = Arrays.binarySearch(cacheUids, UserHandle.getUid(userId, 0));
+        final int fromIndex = (pos >= 0 ? pos : ~pos);
+        if (fromIndex >= size || UserHandle.getUserId(cacheUids[fromIndex]) != userId) {
+            Slog.w(TAG, "Failed to remove should filter cache for user " + userId
+                    + ", fromIndex=" + fromIndex);
+            return;
+        }
+        pos = Arrays.binarySearch(cacheUids, UserHandle.getUid(userId + 1, 0) - 1);
+        final int toIndex = (pos >= 0 ? pos + 1 : ~pos);
+        if (fromIndex >= toIndex || UserHandle.getUserId(cacheUids[toIndex - 1]) != userId) {
+            Slog.w(TAG, "Failed to remove should filter cache for user " + userId
+                    + ", fromIndex=" + fromIndex + ", toIndex=" + toIndex);
+            return;
+        }
+        mShouldFilterCache.removeRange(fromIndex, toIndex);
+        mShouldFilterCache.compact();
     }
 
     private static boolean isSystemSigned(@NonNull SigningDetails sysSigningDetails,
