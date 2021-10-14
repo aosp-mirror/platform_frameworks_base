@@ -261,6 +261,10 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         return mKeyguardStateMonitor.isTrusted();
     }
 
+    public boolean hasLockscreenWallpaper() {
+        return mKeyguardStateMonitor.hasLockscreenWallpaper();
+    }
+
     public boolean isSecure(int userId) {
         return mKeyguardStateMonitor.isSecure(userId);
     }
