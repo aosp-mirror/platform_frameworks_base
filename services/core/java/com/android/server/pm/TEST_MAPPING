@@ -21,9 +21,6 @@
       "name": "CtsAppEnumerationTestCases"
     },
     {
-      "name": "AppEnumerationInternalTests"
-    },
-    {
       "name": "CtsMatchFlagTestCases"
     },
     {
