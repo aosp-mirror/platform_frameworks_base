@@ -1,18 +1,18 @@
 # Haptics
-per-file CombinedVibrationEffect.aidl = michaelwr@google.com
-per-file CombinedVibrationEffect.java = michaelwr@google.com
-per-file ExternalVibration.aidl = michaelwr@google.com
-per-file ExternalVibration.java = michaelwr@google.com
-per-file IExternalVibrationController.aidl = michaelwr@google.com
-per-file IExternalVibratorService.aidl = michaelwr@google.com
-per-file IVibratorManagerService.aidl = michaelwr@google.com
-per-file NullVibrator.java = michaelwr@google.com
-per-file SystemVibrator.java = michaelwr@google.com
-per-file SystemVibratorManager.java = michaelwr@google.com
-per-file VibrationEffect.aidl = michaelwr@google.com
-per-file VibrationEffect.java = michaelwr@google.com
-per-file Vibrator.java = michaelwr@google.com
-per-file VibratorManager.java = michaelwr@google.com
+per-file CombinedVibrationEffect.aidl = file:/services/core/java/com/android/server/vibrator/OWNERS
+per-file CombinedVibrationEffect.java = file:/services/core/java/com/android/server/vibrator/OWNERS
+per-file ExternalVibration.aidl = file:/services/core/java/com/android/server/vibrator/OWNERS
+per-file ExternalVibration.java = file:/services/core/java/com/android/server/vibrator/OWNERS
+per-file IExternalVibrationController.aidl = file:/services/core/java/com/android/server/vibrator/OWNERS
+per-file IExternalVibratorService.aidl = file:/services/core/java/com/android/server/vibrator/OWNERS
+per-file IVibratorManagerService.aidl = file:/services/core/java/com/android/server/vibrator/OWNERS
+per-file NullVibrator.java = file:/services/core/java/com/android/server/vibrator/OWNERS
+per-file SystemVibrator.java = file:/services/core/java/com/android/server/vibrator/OWNERS
+per-file SystemVibratorManager.java = file:/services/core/java/com/android/server/vibrator/OWNERS
+per-file VibrationEffect.aidl = file:/services/core/java/com/android/server/vibrator/OWNERS
+per-file VibrationEffect.java = file:/services/core/java/com/android/server/vibrator/OWNERS
+per-file Vibrator.java = file:/services/core/java/com/android/server/vibrator/OWNERS
+per-file VibratorManager.java = file:/services/core/java/com/android/server/vibrator/OWNERS
 
 # PowerManager
 per-file IPowerManager.aidl = michaelwr@google.com, santoscordon@google.com

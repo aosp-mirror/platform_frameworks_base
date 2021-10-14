@@ -802,7 +802,9 @@ public final class Settings implements Watchable, Snappable {
                 disabled = p;
             }
             mDisabledSysPackages.put(name, disabled);
-
+            if (disabled.getSharedUser() != null) {
+                disabled.getSharedUser().mDisabledPackages.add(disabled);
+            }
             return true;
         }
         return false;
@@ -813,6 +815,9 @@ public final class Settings implements Watchable, Snappable {
         if(p == null) {
             Log.w(PackageManagerService.TAG, "Package " + name + " is not disabled");
             return null;
+        }
+        if (p.getSharedUser() != null) {
+            p.getSharedUser().mDisabledPackages.remove(p);
         }
         p.getPkgState().setUpdatedSystemApp(false);
         PackageSetting ret = addPackageLPw(name, p.getRealName(), p.getPath(),
@@ -833,7 +838,11 @@ public final class Settings implements Watchable, Snappable {
     }
 
     void removeDisabledSystemPackageLPw(String name) {
-        mDisabledSysPackages.remove(name);
+        final PackageSetting p = mDisabledSysPackages.remove(name);
+        if (p != null && p.getSharedUser() != null) {
+            p.getSharedUser().mDisabledPackages.remove(p);
+            checkAndPruneSharedUserLPw(p.getSharedUser(), false);
+        }
     }
 
     PackageSetting addPackageLPw(String name, String realName, File codePath,
@@ -883,27 +892,24 @@ public final class Settings implements Watchable, Snappable {
     }
 
     void pruneSharedUsersLPw() {
-        ArrayList<String> removeStage = new ArrayList<String>();
-        for (Map.Entry<String,SharedUserSetting> entry : mSharedUsers.entrySet()) {
+        List<String> removeKeys = new ArrayList<>();
+        List<SharedUserSetting> removeValues = new ArrayList<>();
+        for (Map.Entry<String, SharedUserSetting> entry : mSharedUsers.entrySet()) {
             final SharedUserSetting sus = entry.getValue();
             if (sus == null) {
-                removeStage.add(entry.getKey());
+                removeKeys.add(entry.getKey());
                 continue;
             }
             // remove packages that are no longer installed
-            for (Iterator<PackageSetting> iter = sus.packages.iterator(); iter.hasNext();) {
-                PackageSetting ps = iter.next();
-                if (mPackages.get(ps.getPackageName()) == null) {
-                    iter.remove();
-                }
-            }
-            if (sus.packages.size() == 0) {
-                removeStage.add(entry.getKey());
+            sus.packages.removeIf(ps -> mPackages.get(ps.getPackageName()) == null);
+            sus.mDisabledPackages.removeIf(
+                    ps -> mDisabledSysPackages.get(ps.getPackageName()) == null);
+            if (sus.packages.isEmpty() && sus.mDisabledPackages.isEmpty()) {
+                removeValues.add(sus);
             }
         }
-        for (int i = 0; i < removeStage.size(); i++) {
-            mSharedUsers.remove(removeStage.get(i));
-        }
+        removeKeys.forEach(mSharedUsers::remove);
+        removeValues.forEach(sus -> checkAndPruneSharedUserLPw(sus, true));
     }
 
     /**
@@ -1233,18 +1239,20 @@ public final class Settings implements Watchable, Snappable {
         }
     }
 
+    private void checkAndPruneSharedUserLPw(SharedUserSetting s, boolean skipCheck) {
+        if (skipCheck || (s.packages.isEmpty() && s.mDisabledPackages.isEmpty())) {
+            mSharedUsers.remove(s.name);
+            removeAppIdLPw(s.userId);
+        }
+    }
+
     int removePackageLPw(String name) {
-        final PackageSetting p = mPackages.get(name);
+        final PackageSetting p = mPackages.remove(name);
         if (p != null) {
-            mPackages.remove(name);
             removeInstallerPackageStatus(name);
             if (p.getSharedUser() != null) {
                 p.getSharedUser().removePackage(p);
-                if (p.getSharedUser().packages.size() == 0) {
-                    mSharedUsers.remove(p.getSharedUser().name);
-                    removeAppIdLPw(p.getSharedUser().userId);
-                    return p.getSharedUser().userId;
-                }
+                checkAndPruneSharedUserLPw(p.getSharedUser(), false);
             } else {
                 removeAppIdLPw(p.getAppId());
                 return p.getAppId();
@@ -3052,17 +3060,16 @@ public final class Settings implements Watchable, Snappable {
          * Make sure all the updated system packages have their shared users
          * associated with them.
          */
-        final Iterator<PackageSetting> disabledIt = mDisabledSysPackages.values().iterator();
-        while (disabledIt.hasNext()) {
-            final PackageSetting disabledPs = disabledIt.next();
+        for (PackageSetting disabledPs : mDisabledSysPackages.values()) {
             final Object id = getSettingLPr(disabledPs.getAppId());
-            if (id != null && id instanceof SharedUserSetting) {
+            if (id instanceof SharedUserSetting) {
                 disabledPs.setSharedUser((SharedUserSetting) id);
+                disabledPs.getSharedUser().mDisabledPackages.add(disabledPs);
             }
         }
 
-        mReadMessages.append("Read completed successfully: " + mPackages.size() + " packages, "
-                + mSharedUsers.size() + " shared uids\n");
+        mReadMessages.append("Read completed successfully: ").append(mPackages.size())
+                .append(" packages, ").append(mSharedUsers.size()).append(" shared uids\n");
 
         writeKernelMappingLPr();
 

@@ -25661,6 +25661,7 @@ package android.media.tv {
     field public static final String COLUMN_CONTENT_ID = "content_id";
     field public static final String COLUMN_CONTENT_RATING = "content_rating";
     field public static final String COLUMN_DURATION_MILLIS = "duration_millis";
+    field public static final String COLUMN_END_TIME_UTC_MILLIS = "end_time_utc_millis";
     field public static final String COLUMN_EPISODE_DISPLAY_NUMBER = "episode_display_number";
     field public static final String COLUMN_EPISODE_TITLE = "episode_title";
     field public static final String COLUMN_INTENT_URI = "intent_uri";
@@ -25691,6 +25692,7 @@ package android.media.tv {
     field public static final String COLUMN_SHORT_DESCRIPTION = "short_description";
     field public static final String COLUMN_SPLIT_ID = "split_id";
     field public static final String COLUMN_STARTING_PRICE = "starting_price";
+    field public static final String COLUMN_START_TIME_UTC_MILLIS = "start_time_utc_millis";
     field public static final String COLUMN_THUMBNAIL_ASPECT_RATIO = "poster_thumbnail_aspect_ratio";
     field public static final String COLUMN_THUMBNAIL_URI = "thumbnail_uri";
     field public static final String COLUMN_TITLE = "title";
@@ -25853,6 +25855,7 @@ package android.media.tv {
     field public static final String COLUMN_CONTENT_ID = "content_id";
     field public static final String COLUMN_CONTENT_RATING = "content_rating";
     field public static final String COLUMN_DURATION_MILLIS = "duration_millis";
+    field public static final String COLUMN_END_TIME_UTC_MILLIS = "end_time_utc_millis";
     field public static final String COLUMN_EPISODE_DISPLAY_NUMBER = "episode_display_number";
     field public static final String COLUMN_EPISODE_TITLE = "episode_title";
     field public static final String COLUMN_INTENT_URI = "intent_uri";
@@ -25884,6 +25887,7 @@ package android.media.tv {
     field public static final String COLUMN_SHORT_DESCRIPTION = "short_description";
     field public static final String COLUMN_SPLIT_ID = "split_id";
     field public static final String COLUMN_STARTING_PRICE = "starting_price";
+    field public static final String COLUMN_START_TIME_UTC_MILLIS = "start_time_utc_millis";
     field public static final String COLUMN_THUMBNAIL_ASPECT_RATIO = "poster_thumbnail_aspect_ratio";
     field public static final String COLUMN_THUMBNAIL_URI = "thumbnail_uri";
     field public static final String COLUMN_TITLE = "title";
@@ -31568,6 +31572,7 @@ package android.os {
     method public int dataSize();
     method public void enforceInterface(@NonNull String);
     method public boolean hasFileDescriptors();
+    method public boolean hasFileDescriptors(int, int);
     method public byte[] marshall();
     method @NonNull public static android.os.Parcel obtain();
     method @NonNull public static android.os.Parcel obtain(@NonNull android.os.IBinder);

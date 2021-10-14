@@ -118,7 +118,7 @@ public class NavigationModeController implements Dumpable {
 
         configurationController.addCallback(new ConfigurationController.ConfigurationListener() {
             @Override
-            public void onOverlayChanged() {
+            public void onThemeChanged() {
                 if (DEBUG) {
                     Log.d(TAG, "onOverlayChanged");
                 }

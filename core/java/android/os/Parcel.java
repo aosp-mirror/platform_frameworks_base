@@ -384,6 +384,8 @@ public final class Parcel {
             long thisNativePtr, long otherNativePtr, int offset, int length);
     @CriticalNative
     private static native boolean nativeHasFileDescriptors(long nativePtr);
+    private static native boolean nativeHasFileDescriptorsInRange(
+            long nativePtr, int offset, int length);
     private static native void nativeWriteInterfaceToken(long nativePtr, String interfaceName);
     private static native void nativeEnforceInterface(long nativePtr, String interfaceName);
 
@@ -717,8 +719,23 @@ public final class Parcel {
     /**
      * Report whether the parcel contains any marshalled file descriptors.
      */
-    public final boolean hasFileDescriptors() {
+    public boolean hasFileDescriptors() {
         return nativeHasFileDescriptors(mNativePtr);
+    }
+
+    /**
+     * Report whether the parcel contains any marshalled file descriptors in the range defined by
+     * {@code offset} and {@code length}.
+     *
+     * @param offset The offset from which the range starts. Should be between 0 and
+     *     {@link #dataSize()}.
+     * @param length The length of the range. Should be between 0 and {@link #dataSize()} - {@code
+     *     offset}.
+     * @return whether there are file descriptors or not.
+     * @throws IllegalArgumentException if the parameters are out of the permitted ranges.
+     */
+    public boolean hasFileDescriptors(int offset, int length) {
+        return nativeHasFileDescriptorsInRange(mNativePtr, offset, length);
     }
 
     /**
@@ -3536,15 +3553,26 @@ public final class Parcel {
         int start = dataPosition();
         int type = readInt();
         if (isLengthPrefixed(type)) {
-            int length = readInt();
-            setDataPosition(MathUtils.addOrThrow(dataPosition(), length));
-            return new LazyValue(this, start, length, type, loader);
+            int objectLength = readInt();
+            int end = MathUtils.addOrThrow(dataPosition(), objectLength);
+            int valueLength = end - start;
+            setDataPosition(end);
+            return new LazyValue(this, start, valueLength, type, loader);
         } else {
             return readValue(type, loader, /* clazz */ null);
         }
     }
 
+
     private static final class LazyValue implements Supplier<Object> {
+        /**
+         *                      |   4B   |   4B   |
+         * mSource = Parcel{... |  type  | length | object | ...}
+         *                      a        b        c        d
+         * length = d - c
+         * mPosition = a
+         * mLength = d - a
+         */
         private final int mPosition;
         private final int mLength;
         private final int mType;
@@ -3592,7 +3620,7 @@ public final class Parcel {
         public void writeToParcel(Parcel out) {
             Parcel source = mSource;
             if (source != null) {
-                out.appendFrom(source, mPosition, mLength + 8);
+                out.appendFrom(source, mPosition, mLength);
             } else {
                 out.writeValue(mObject);
             }
@@ -3601,7 +3629,7 @@ public final class Parcel {
         public boolean hasFileDescriptors() {
             Parcel source = mSource;
             return (source != null)
-                    ? getValueParcel(source).hasFileDescriptors()
+                    ? source.hasFileDescriptors(mPosition, mLength)
                     : Parcel.hasFileDescriptors(mObject);
         }
 
@@ -3662,10 +3690,7 @@ public final class Parcel {
             Parcel parcel = mValueParcel;
             if (parcel == null) {
                 parcel = Parcel.obtain();
-                // mLength is the length of object representation, excluding the type and length.
-                // mPosition is the position of the entire value container, right before the type.
-                // So, we add 4 bytes for the type + 4 bytes for the length written.
-                parcel.appendFrom(source, mPosition, mLength + 8);
+                parcel.appendFrom(source, mPosition, mLength);
                 mValueParcel = parcel;
             }
             return parcel;

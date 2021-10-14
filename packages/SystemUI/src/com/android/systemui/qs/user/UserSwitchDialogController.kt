@@ -21,6 +21,7 @@ import android.content.Intent
 import android.provider.Settings
 import android.view.View
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
@@ -36,6 +37,7 @@ class UserSwitchDialogController @VisibleForTesting constructor(
     private val userDetailViewAdapterProvider: Provider<UserDetailView.Adapter>,
     private val activityStarter: ActivityStarter,
     private val falsingManager: FalsingManager,
+    private val dialogLaunchAnimator: DialogLaunchAnimator,
     private val dialogFactory: (Context) -> UserDialog
 ) {
 
@@ -43,11 +45,13 @@ class UserSwitchDialogController @VisibleForTesting constructor(
     constructor(
         userDetailViewAdapterProvider: Provider<UserDetailView.Adapter>,
         activityStarter: ActivityStarter,
-        falsingManager: FalsingManager
+        falsingManager: FalsingManager,
+        dialogLaunchAnimator: DialogLaunchAnimator
     ) : this(
         userDetailViewAdapterProvider,
         activityStarter,
         falsingManager,
+        dialogLaunchAnimator,
         { UserDialog(it) }
     )
 
@@ -69,7 +73,11 @@ class UserSwitchDialogController @VisibleForTesting constructor(
 
             settingsButton.setOnClickListener {
                 if (!falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
-                    activityStarter.postStartActivityDismissingKeyguard(USER_SETTINGS_INTENT, 0)
+                    dialogLaunchAnimator.disableAllCurrentDialogsExitAnimations()
+                    activityStarter.postStartActivityDismissingKeyguard(
+                        USER_SETTINGS_INTENT,
+                        0
+                    )
                 }
                 dismiss()
             }
@@ -81,7 +89,7 @@ class UserSwitchDialogController @VisibleForTesting constructor(
             }
             adapter.linkToViewGroup(grid)
 
-            show()
+            dialogLaunchAnimator.showFromView(this, view)
         }
     }
 }
