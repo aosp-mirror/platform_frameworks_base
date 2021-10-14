@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone.ongoingcall
+package com.android.systemui.statusbar.gesture
 
 import android.content.Context
 import android.os.Looper
-import android.util.Log
 import android.view.Choreographer
 import android.view.Display
 import android.view.InputEvent
@@ -38,6 +37,7 @@ import javax.inject.Inject
 open class SwipeStatusBarAwayGestureHandler @Inject constructor(
     context: Context,
     private val statusBarWindowController: StatusBarWindowController,
+    private val logger: SwipeStatusBarAwayGestureLogger
 ) {
 
     /**
@@ -89,7 +89,7 @@ open class SwipeStatusBarAwayGestureHandler @Inject constructor(
                     ev.y >= statusBarWindowController.statusBarHeight
                     && ev.y <= 3 * statusBarWindowController.statusBarHeight
                 ) {
-                    Log.d(TAG, "Beginning gesture detection, y=${ev.y}")
+                    logger.logGestureDetectionStarted(ev.y.toInt())
                     startY = ev.y
                     startTime = ev.eventTime
                     monitoringCurrentTouch = true
@@ -109,12 +109,15 @@ open class SwipeStatusBarAwayGestureHandler @Inject constructor(
                     // Gesture completed quickly enough
                     && (ev.eventTime - startTime) < SWIPE_TIMEOUT_MS
                 ) {
-                    Log.i(TAG, "Gesture detected; notifying callbacks")
-                    callbacks.values.forEach { it.invoke() }
                     monitoringCurrentTouch = false
+                    logger.logGestureDetected(ev.y.toInt())
+                    callbacks.values.forEach { it.invoke() }
                 }
             }
             ACTION_CANCEL, ACTION_UP -> {
+                if (monitoringCurrentTouch) {
+                    logger.logGestureDetectionEndedWithoutTriggering(ev.y.toInt())
+                }
                 monitoringCurrentTouch = false
             }
         }
@@ -124,7 +127,7 @@ open class SwipeStatusBarAwayGestureHandler @Inject constructor(
     private fun startGestureListening() {
         stopGestureListening()
 
-        if (DEBUG) { Log.d(TAG, "Input listening started") }
+        logger.logInputListeningStarted()
         inputMonitor = InputMonitorCompat(TAG, Display.DEFAULT_DISPLAY).also {
             inputReceiver = it.getInputReceiver(
                 Looper.getMainLooper(),
@@ -137,7 +140,7 @@ open class SwipeStatusBarAwayGestureHandler @Inject constructor(
     /** Stop listening for the swipe gesture. */
     private fun stopGestureListening() {
         inputMonitor?.let {
-            if (DEBUG) { Log.d(TAG, "Input listening stopped") }
+            logger.logInputListeningStopped()
             inputMonitor = null
             it.dispose()
         }
@@ -150,4 +153,3 @@ open class SwipeStatusBarAwayGestureHandler @Inject constructor(
 
 private const val SWIPE_TIMEOUT_MS: Long = 500
 private val TAG = SwipeStatusBarAwayGestureHandler::class.simpleName
-private val DEBUG = Log.isLoggable(TAG, Log.DEBUG)
