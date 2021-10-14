@@ -257,8 +257,12 @@
 
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the Hearing Aid profile. -->
     <string name="bluetooth_profile_hearing_aid">Hearing Aids</string>
+    <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the LE_AUDIO profile. -->
+    <string name="bluetooth_profile_le_audio">LE_AUDIO</string>
     <!-- Bluetooth settings.  Connection options screen.  The summary for the Hearing Aid checkbox preference when Hearing Aid is connected. -->
     <string name="bluetooth_hearing_aid_profile_summary_connected">Connected to Hearing Aids</string>
+    <!-- Bluetooth settings.  Connection options screen.  The summary for the LE_AUDIO checkbox preference when LE_AUDIO is connected. -->
+    <string name="bluetooth_le_audio_profile_summary_connected">Connected to LE_AUDIO</string>
 
     <!-- Bluetooth settings.  Connection options screen.  The summary for the A2DP checkbox preference when A2DP is connected. -->
     <string name="bluetooth_a2dp_profile_summary_connected">Connected to media audio</string>
@@ -299,6 +303,8 @@
     <string name="bluetooth_hid_profile_summary_use_for">Use for input</string>
     <!-- Bluetooth settings.  Connection options screen.  The summary for the Hearing Aid checkbox preference that describes how checking it will set the Hearing Aid profile as preferred. -->
     <string name="bluetooth_hearing_aid_profile_summary_use_for">Use for Hearing Aids</string>
+    <!-- Bluetooth settings.  Connection options screen.  The summary for the LE_AUDIO checkbox preference that describes how checking it will set the LE_AUDIO profile as preferred. -->
+    <string name="bluetooth_le_audio_profile_summary_use_for">Use for LE_AUDIO</string>
 
     <!-- Button text for accepting an incoming pairing request. [CHAR LIMIT=20] -->
     <string name="bluetooth_pairing_accept">Pair</string>
