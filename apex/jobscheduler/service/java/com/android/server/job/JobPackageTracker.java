@@ -499,7 +499,7 @@ public final class JobPackageTracker {
             mCurDataSet.decActive(job.getSourceUid(), job.getSourcePackageName(), now, stopReason);
         }
         rebatchIfNeeded(now);
-        addEvent(job.getJob().isPeriodic() ? EVENT_STOP_JOB :  EVENT_STOP_PERIODIC_JOB,
+        addEvent(job.getJob().isPeriodic() ? EVENT_STOP_PERIODIC_JOB : EVENT_STOP_JOB,
                 job.getSourceUid(), job.getBatteryName(), job.getJobId(), stopReason, debugReason);
     }
 
