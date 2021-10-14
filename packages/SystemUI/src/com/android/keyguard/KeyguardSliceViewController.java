@@ -73,7 +73,6 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
     private Uri mKeyguardSliceUri;
     private Slice mSlice;
     private Map<View, PendingIntent> mClickActions;
-    private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
 
     TunerService.Tunable mTunable = (key, newValue) -> setupUri(newValue);
 
@@ -137,7 +136,6 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
                 TAG + "@" + Integer.toHexString(
                         KeyguardSliceViewController.this.hashCode()),
                 KeyguardSliceViewController.this);
-        mView.updateLockScreenMode(mLockScreenMode);
     }
 
     @Override
@@ -157,14 +155,6 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
         ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) mView.getLayoutParams();
         lp.topMargin = (int) clockTopTextPadding;
         mView.setLayoutParams(lp);
-    }
-
-    /**
-     * Updates the lockscreen mode which may change the layout of the keyguard slice view.
-     */
-    public void updateLockScreenMode(int mode) {
-        mLockScreenMode = mode;
-        mView.updateLockScreenMode(mLockScreenMode);
     }
 
     /**
@@ -249,6 +239,5 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("  mSlice: " + mSlice);
         pw.println("  mClickActions: " + mClickActions);
-        pw.println("  mLockScreenMode: " + mLockScreenMode);
     }
 }

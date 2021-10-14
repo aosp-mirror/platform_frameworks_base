@@ -24,9 +24,6 @@
 
     <bool name="flag_monet">true</bool>
 
-    <!-- AOD/Lockscreen alternate layout -->
-    <bool name="flag_keyguard_layout">true</bool>
-
     <!-- People Tile flag -->
     <bool name="flag_conversations">false</bool>
 

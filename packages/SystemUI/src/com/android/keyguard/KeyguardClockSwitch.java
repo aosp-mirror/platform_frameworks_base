@@ -41,7 +41,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     private static final long CLOCK_OUT_MILLIS = 150;
     private static final long CLOCK_IN_MILLIS = 200;
-    private static final long SMARTSPACE_MOVE_MILLIS = 350;
+    private static final long STATUS_AREA_MOVE_MILLIS = 350;
 
     @IntDef({LARGE, SMALL})
     @Retention(RetentionPolicy.SOURCE)
@@ -63,13 +63,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
     private AnimatableClockView mClockView;
     private AnimatableClockView mLargeClockView;
 
-    /**
-     * Status area (date and other stuff) shown below the clock. Plugin can decide whether or not to
-     * show it below the alternate clock.
-     */
-    private View mKeyguardStatusArea;
-    /** Mutually exclusive with mKeyguardStatusArea */
-    private View mSmartspaceView;
+    private View mStatusArea;
     private int mSmartspaceTopOffset;
 
     /**
@@ -85,7 +79,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     @VisibleForTesting AnimatorSet mClockInAnim = null;
     @VisibleForTesting AnimatorSet mClockOutAnim = null;
-    private ObjectAnimator mSmartspaceAnim = null;
+    private ObjectAnimator mStatusAreaAnim = null;
 
     /**
      * If the Keyguard Slice has a header (big center-aligned text.)
@@ -131,7 +125,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
         mClockView = findViewById(R.id.animatable_clock_view);
         mLargeClockFrame = findViewById(R.id.lockscreen_clock_view_large);
         mLargeClockView = findViewById(R.id.animatable_clock_view_large);
-        mKeyguardStatusArea = findViewById(R.id.keyguard_status_area);
+        mStatusArea = findViewById(R.id.keyguard_status_area);
 
         onDensityOrFontScaleChanged();
     }
@@ -200,22 +194,22 @@ public class KeyguardClockSwitch extends RelativeLayout {
     private void animateClockChange(boolean useLargeClock) {
         if (mClockInAnim != null) mClockInAnim.cancel();
         if (mClockOutAnim != null) mClockOutAnim.cancel();
-        if (mSmartspaceAnim != null) mSmartspaceAnim.cancel();
+        if (mStatusAreaAnim != null) mStatusAreaAnim.cancel();
 
         View in, out;
         int direction = 1;
-        float smartspaceYTranslation;
+        float statusAreaYTranslation;
         if (useLargeClock) {
             out = mClockFrame;
             in = mLargeClockFrame;
             if (indexOfChild(in) == -1) addView(in);
             direction = -1;
-            smartspaceYTranslation = mSmartspaceView == null ? 0
-                    : mClockFrame.getTop() - mSmartspaceView.getTop() + mSmartspaceTopOffset;
+            statusAreaYTranslation = mClockFrame.getTop() - mStatusArea.getTop()
+                    + mSmartspaceTopOffset;
         } else {
             in = mClockFrame;
             out = mLargeClockFrame;
-            smartspaceYTranslation = 0f;
+            statusAreaYTranslation = 0f;
 
             // Must remove in order for notifications to appear in the proper place
             removeView(out);
@@ -251,18 +245,16 @@ public class KeyguardClockSwitch extends RelativeLayout {
         mClockInAnim.start();
         mClockOutAnim.start();
 
-        if (mSmartspaceView != null) {
-            mSmartspaceAnim = ObjectAnimator.ofFloat(mSmartspaceView, View.TRANSLATION_Y,
-                    smartspaceYTranslation);
-            mSmartspaceAnim.setDuration(SMARTSPACE_MOVE_MILLIS);
-            mSmartspaceAnim.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
-            mSmartspaceAnim.addListener(new AnimatorListenerAdapter() {
-                public void onAnimationEnd(Animator animation) {
-                    mSmartspaceAnim = null;
-                }
-            });
-            mSmartspaceAnim.start();
-        }
+        mStatusAreaAnim = ObjectAnimator.ofFloat(mStatusArea, View.TRANSLATION_Y,
+                statusAreaYTranslation);
+        mStatusAreaAnim.setDuration(STATUS_AREA_MOVE_MILLIS);
+        mStatusAreaAnim.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
+        mStatusAreaAnim.addListener(new AnimatorListenerAdapter() {
+            public void onAnimationEnd(Animator animation) {
+                mStatusAreaAnim = null;
+            }
+        });
+        mStatusAreaAnim.start();
     }
 
     /**
@@ -352,10 +344,6 @@ public class KeyguardClockSwitch extends RelativeLayout {
         }
     }
 
-    void setSmartspaceView(View smartspaceView) {
-        mSmartspaceView = smartspaceView;
-    }
-
     void updateColors(ColorExtractor.GradientColors colors) {
         mSupportsDarkText = colors.supportsDarkText();
         mColorPalette = colors.getColorPalette();
@@ -369,8 +357,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
         pw.println("  mClockPlugin: " + mClockPlugin);
         pw.println("  mClockFrame: " + mClockFrame);
         pw.println("  mLargeClockFrame: " + mLargeClockFrame);
-        pw.println("  mKeyguardStatusArea: " + mKeyguardStatusArea);
-        pw.println("  mSmartspaceView: " + mSmartspaceView);
+        pw.println("  mStatusArea: " + mStatusArea);
         pw.println("  mDarkAmount: " + mDarkAmount);
         pw.println("  mSupportsDarkText: " + mSupportsDarkText);
         pw.println("  mColorPalette: " + Arrays.toString(mColorPalette));

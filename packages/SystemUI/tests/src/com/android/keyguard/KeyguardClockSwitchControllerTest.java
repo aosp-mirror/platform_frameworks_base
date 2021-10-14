@@ -19,7 +19,6 @@ package com.android.keyguard;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -30,6 +29,7 @@ import android.content.res.Resources;
 import android.testing.AndroidTestingRunner;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import androidx.test.filters.SmallTest;
@@ -108,7 +108,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     private final View mFakeSmartspaceView = new View(mContext);
 
     private KeyguardClockSwitchController mController;
-    private View mStatusArea;
+    private View mSliceView;
 
     @Before
     public void setup() {
@@ -149,8 +149,10 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
         when(mColorExtractor.getColors(anyInt())).thenReturn(mGradientColors);
 
-        mStatusArea = new View(getContext());
-        when(mView.findViewById(R.id.keyguard_status_area)).thenReturn(mStatusArea);
+        mSliceView = new View(getContext());
+        when(mView.findViewById(R.id.keyguard_slice_view)).thenReturn(mSliceView);
+        when(mView.findViewById(R.id.keyguard_status_area)).thenReturn(
+                new LinearLayout(getContext()));
     }
 
     @Test
@@ -215,7 +217,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         when(mSmartspaceController.buildAndConnectView(any())).thenReturn(mFakeSmartspaceView);
         mController.init();
 
-        assertEquals(View.GONE, mStatusArea.getVisibility());
+        assertEquals(View.GONE, mSliceView.getVisibility());
     }
 
     @Test
@@ -223,22 +225,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         when(mSmartspaceController.isEnabled()).thenReturn(false);
         mController.init();
 
-        assertEquals(View.VISIBLE, mStatusArea.getVisibility());
-    }
-
-    @Test
-    public void testDetachDisconnectsSmartspace() {
-        when(mSmartspaceController.isEnabled()).thenReturn(true);
-        when(mSmartspaceController.buildAndConnectView(any())).thenReturn(mFakeSmartspaceView);
-        mController.init();
-        verify(mView).addView(eq(mFakeSmartspaceView), anyInt(), any());
-
-        ArgumentCaptor<View.OnAttachStateChangeListener> listenerArgumentCaptor =
-                ArgumentCaptor.forClass(View.OnAttachStateChangeListener.class);
-        verify(mView).addOnAttachStateChangeListener(listenerArgumentCaptor.capture());
-
-        listenerArgumentCaptor.getValue().onViewDetachedFromWindow(mView);
-        verify(mSmartspaceController).disconnect();
+        assertEquals(View.VISIBLE, mSliceView.getVisibility());
     }
 
     @Test
