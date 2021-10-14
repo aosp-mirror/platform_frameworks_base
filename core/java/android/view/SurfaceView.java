@@ -214,7 +214,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     final Rect mSurfaceFrame = new Rect();
     int mLastSurfaceWidth = -1, mLastSurfaceHeight = -1;
-    int mTransformHint = 0;
+    @SurfaceControl.BufferTransform int mTransformHint = 0;
 
     private boolean mGlobalListenersAdded;
     private boolean mAttachedToWindow;
