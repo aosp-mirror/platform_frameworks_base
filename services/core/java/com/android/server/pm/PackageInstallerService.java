@@ -125,6 +125,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     private static final long MAX_ACTIVE_SESSIONS = 1024;
     /** Upper bound on number of historical sessions for a UID */
     private static final long MAX_HISTORICAL_SESSIONS = 1048576;
+    /** Destroy sessions older than this on storage free request */
+    private static final long MAX_SESSION_AGE_ON_LOW_STORAGE_MILLIS = 8 * DateUtils.HOUR_IN_MILLIS;
 
     private final Context mContext;
     private final PackageManagerService mPm;
@@ -228,23 +230,58 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
     @GuardedBy("mSessions")
     private void reconcileStagesLocked(String volumeUuid, boolean isEphemeral) {
-        final File stagingDir = buildStagingDir(volumeUuid, isEphemeral);
-        final ArraySet<File> unclaimedStages = newArraySet(
-                stagingDir.listFiles(sStageFilter));
+        final ArraySet<File> unclaimedStages = getStagingDirsOnVolume(volumeUuid, isEphemeral);
 
         // Ignore stages claimed by active sessions
         for (int i = 0; i < mSessions.size(); i++) {
             final PackageInstallerSession session = mSessions.valueAt(i);
             unclaimedStages.remove(session.stageDir);
         }
+        removeStagingDirs(unclaimedStages);
+    }
 
+    private ArraySet<File> getStagingDirsOnVolume(String volumeUuid, boolean isEphemeral) {
+        final File stagingDir = buildStagingDir(volumeUuid, isEphemeral);
+        final ArraySet<File> stagingDirs = newArraySet(
+                stagingDir.listFiles(sStageFilter));
+        return stagingDirs;
+    }
+
+    private void removeStagingDirs(ArraySet<File> stagingDirsToRemove) {
         // Clean up orphaned staging directories
-        for (File stage : unclaimedStages) {
+        for (File stage : stagingDirsToRemove) {
             Slog.w(TAG, "Deleting orphan stage " + stage);
             synchronized (mPm.mInstallLock) {
                 mPm.removeCodePathLI(stage);
+             }
+        }
+    }
+
+    /**
+     * Called to free up some storage space from obsolete installation files
+     */
+    public void freeStageDirs(String volumeUuid, boolean internalVolume) {
+        final ArraySet<File> unclaimedStagingDirsOnVolume = getStagingDirsOnVolume(volumeUuid, internalVolume);
+        final long currentTimeMillis = System.currentTimeMillis();
+        synchronized (mSessions) {
+            for (int i = 0; i < mSessions.size(); i++) {
+                final PackageInstallerSession session = mSessions.valueAt(i);
+                if (!unclaimedStagingDirsOnVolume.contains(session.stageDir)) {
+                    // Only handles sessions stored on the target volume
+                    continue;
+                }
+                final long age = currentTimeMillis - session.createdMillis;
+                if (age >= MAX_SESSION_AGE_ON_LOW_STORAGE_MILLIS) {
+                    // Aggressively close old sessions because we are running low on storage
+                    // Their staging dirs will be removed too
+                    session.abandon();
+                } else {
+                    // Session is new enough, so it deserves to be kept even on low storage
+                    unclaimedStagingDirsOnVolume.remove(session.stageDir);
+                }
             }
         }
+        removeStagingDirs(unclaimedStagingDirsOnVolume);
     }
 
     public void onPrivateVolumeMounted(String volumeUuid) {
