@@ -1424,12 +1424,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         wrapper.release();
     }
 
-    boolean forAllActivities(Function<ActivityRecord, Boolean> callback) {
+    boolean forAllActivities(Predicate<ActivityRecord> callback) {
         return forAllActivities(callback, true /*traverseTopToBottom*/);
     }
 
-    boolean forAllActivities(
-            Function<ActivityRecord, Boolean> callback, boolean traverseTopToBottom) {
+    boolean forAllActivities(Predicate<ActivityRecord> callback, boolean traverseTopToBottom) {
         if (traverseTopToBottom) {
             for (int i = mChildren.size() - 1; i >= 0; --i) {
                 if (mChildren.get(i).forAllActivities(callback, traverseTopToBottom)) return true;
@@ -1471,13 +1470,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @param traverseTopToBottom direction to traverse the tree.
      * @return {@code true} if we ended the search before reaching the end of the tree.
      */
-    final boolean forAllActivities(Function<ActivityRecord, Boolean> callback,
+    final boolean forAllActivities(Predicate<ActivityRecord> callback,
             WindowContainer boundary, boolean includeBoundary, boolean traverseTopToBottom) {
         return forAllActivities(
                 callback, boundary, includeBoundary, traverseTopToBottom, new boolean[1]);
     }
 
-    private boolean forAllActivities(Function<ActivityRecord, Boolean> callback,
+    private boolean forAllActivities(Predicate<ActivityRecord> callback,
             WindowContainer boundary, boolean includeBoundary, boolean traverseTopToBottom,
             boolean[] boundaryFound) {
         if (traverseTopToBottom) {
@@ -1500,7 +1499,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return false;
     }
 
-    private boolean processForAllActivitiesWithBoundary(Function<ActivityRecord, Boolean> callback,
+    private boolean processForAllActivitiesWithBoundary(Predicate<ActivityRecord> callback,
             WindowContainer boundary, boolean includeBoundary, boolean traverseTopToBottom,
             boolean[] boundaryFound, WindowContainer wc) {
         if (wc == boundary) {
@@ -1665,7 +1664,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @param callback Calls the {@link ToBooleanFunction#apply} method for each task found and
      *                 stops the search if {@link ToBooleanFunction#apply} returns {@code true}.
      */
-    boolean forAllTasks(Function<Task, Boolean> callback) {
+    boolean forAllTasks(Predicate<Task> callback) {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             if (mChildren.get(i).forAllTasks(callback)) {
                 return true;
@@ -1674,7 +1673,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return false;
     }
 
-    boolean forAllLeafTasks(Function<Task, Boolean> callback) {
+    boolean forAllLeafTasks(Predicate<Task> callback) {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             if (mChildren.get(i).forAllLeafTasks(callback)) {
                 return true;
@@ -1683,7 +1682,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return false;
     }
 
-    boolean forAllLeafTaskFragments(Function<TaskFragment, Boolean> callback) {
+    boolean forAllLeafTaskFragments(Predicate<TaskFragment> callback) {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             if (mChildren.get(i).forAllLeafTaskFragments(callback)) {
                 return true;
@@ -1698,11 +1697,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @param callback Calls the {@link ToBooleanFunction#apply} method for each root task found and
      *                 stops the search if {@link ToBooleanFunction#apply} returns {@code true}.
      */
-    boolean forAllRootTasks(Function<Task, Boolean> callback) {
+    boolean forAllRootTasks(Predicate<Task> callback) {
         return forAllRootTasks(callback, true /* traverseTopToBottom */);
     }
 
-    boolean forAllRootTasks(Function<Task, Boolean> callback, boolean traverseTopToBottom) {
+    boolean forAllRootTasks(Predicate<Task> callback, boolean traverseTopToBottom) {
         int count = mChildren.size();
         if (traverseTopToBottom) {
             for (int i = count - 1; i >= 0; --i) {
@@ -1984,7 +1983,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @return {@code true} if the search ended before we reached the end of the hierarchy due to
      *         callback returning {@code true}.
      */
-    boolean forAllTaskDisplayAreas(Function<TaskDisplayArea, Boolean> callback,
+    boolean forAllTaskDisplayAreas(Predicate<TaskDisplayArea> callback,
             boolean traverseTopToBottom) {
         int childCount = mChildren.size();
         int i = traverseTopToBottom ? childCount - 1 : 0;
@@ -2005,7 +2004,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @return {@code true} if the search ended before we reached the end of the hierarchy due to
      *         callback returning {@code true}.
      */
-    boolean forAllTaskDisplayAreas(Function<TaskDisplayArea, Boolean> callback) {
+    boolean forAllTaskDisplayAreas(Predicate<TaskDisplayArea> callback) {
         return forAllTaskDisplayAreas(callback, true /* traverseTopToBottom */);
     }
 

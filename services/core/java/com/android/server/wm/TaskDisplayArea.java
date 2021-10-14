@@ -72,6 +72,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * {@link DisplayArea} that represents a section of a screen that contains app window containers.
@@ -520,16 +521,16 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     }
 
     @Override
-    boolean forAllTaskDisplayAreas(Function<TaskDisplayArea, Boolean> callback,
+    boolean forAllTaskDisplayAreas(Predicate<TaskDisplayArea> callback,
             boolean traverseTopToBottom) {
         // Apply the callback to all TDAs at or below this container. If the callback returns true,
         // stop early.
         if (traverseTopToBottom) {
             // When it is top to bottom, run on child TDA first as they are on top of the parent.
             return super.forAllTaskDisplayAreas(callback, traverseTopToBottom)
-                    || callback.apply(this);
+                    || callback.test(this);
         }
-        return callback.apply(this) || super.forAllTaskDisplayAreas(callback, traverseTopToBottom);
+        return callback.test(this) || super.forAllTaskDisplayAreas(callback, traverseTopToBottom);
     }
 
     @Override
