@@ -1815,16 +1815,12 @@ static void nativeSetTransformHint(JNIEnv* env, jclass clazz, jlong nativeSurfac
     if (surface == nullptr) {
         return;
     }
-    surface->setTransformHint(
-            ui::Transform::toRotationFlags(static_cast<ui::Rotation>(transformHint)));
+    surface->setTransformHint(transformHint);
 }
 
 static jint nativeGetTransformHint(JNIEnv* env, jclass clazz, jlong nativeSurfaceControl) {
     sp<SurfaceControl> surface(reinterpret_cast<SurfaceControl*>(nativeSurfaceControl));
-    ui::Transform::RotationFlags transformHintRotationFlags =
-            static_cast<ui::Transform::RotationFlags>(surface->getTransformHint());
-
-    return toRotationInt(ui::Transform::toRotation((transformHintRotationFlags)));
+    return surface->getTransformHint();
 }
 
 static jint nativeGetLayerId(JNIEnv* env, jclass clazz, jlong nativeSurfaceControl) {

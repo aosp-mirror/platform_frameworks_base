@@ -2472,7 +2472,8 @@ public class WindowManagerService extends IWindowManager.Stub
             if (isPrimaryDisplay) {
                 transformHint = (transformHint + mPrimaryDisplayOrientation) % 4;
             }
-            outSurfaceControl.setTransformHint(transformHint);
+            outSurfaceControl.setTransformHint(
+                    SurfaceControl.rotationToBufferTransform(transformHint));
             ProtoLog.v(WM_DEBUG_ORIENTATION,
                     "Passing transform hint %d for window %s%s",
                     transformHint, win,

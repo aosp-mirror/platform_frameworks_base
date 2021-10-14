@@ -314,7 +314,8 @@ public final class ViewRootImpl implements ViewParent,
 
     private ArrayList<OnBufferTransformHintChangedListener> mTransformHintListeners =
             new ArrayList<>();
-    private @Surface.Rotation int mPreviousTransformHint = Surface.ROTATION_0;
+    private @SurfaceControl.BufferTransform
+            int mPreviousTransformHint = SurfaceControl.BUFFER_TRANSFORM_IDENTITY;
     /**
      * Callback for notifying about global configuration changes.
      */
@@ -7872,8 +7873,7 @@ public final class ViewRootImpl implements ViewParent,
             int transformHint = mSurfaceControl.getTransformHint();
             if (mPreviousTransformHint != transformHint) {
                 mPreviousTransformHint = transformHint;
-                dispatchTransformHintChanged(
-                        SurfaceControl.rotationToBufferTransform(transformHint));
+                dispatchTransformHintChanged(transformHint);
             }
         } else {
             destroySurface();
@@ -10501,7 +10501,7 @@ public final class ViewRootImpl implements ViewParent,
 
     @Override
     public @SurfaceControl.BufferTransform int getBufferTransformHint() {
-        return SurfaceControl.rotationToBufferTransform(mSurfaceControl.getTransformHint());
+        return mSurfaceControl.getTransformHint();
     }
 
     @Override
