@@ -461,6 +461,7 @@ MediaEvent::MediaEvent(sp<FilterClient> filterClient, native_handle_t *avHandle,
 }
 
 MediaEvent::~MediaEvent() {
+    android::Mutex::Autolock autoLock(mLock);
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     env->DeleteWeakGlobalRef(mMediaEventObj);
     mMediaEventObj = nullptr;
