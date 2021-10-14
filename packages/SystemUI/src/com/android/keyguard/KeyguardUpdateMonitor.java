@@ -188,9 +188,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private static final int MSG_TIME_FORMAT_UPDATE = 344;
     private static final int MSG_REQUIRE_NFC_UNLOCK = 345;
 
-    public static final int LOCK_SCREEN_MODE_NORMAL = 0;
-    public static final int LOCK_SCREEN_MODE_LAYOUT_1 = 1;
-
     /** Biometric authentication state: Not listening. */
     private static final int BIOMETRIC_STATE_STOPPED = 0;
 
@@ -1867,9 +1864,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     case MSG_KEYGUARD_GOING_AWAY:
                         handleKeyguardGoingAway((boolean) msg.obj);
                         break;
-                    case MSG_LOCK_SCREEN_MODE:
-                        handleLockScreenMode();
-                        break;
                     case MSG_TIME_FORMAT_UPDATE:
                         handleTimeFormatUpdate((String) msg.obj);
                         break;
@@ -2011,8 +2005,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             }
         }
 
-        updateLockScreenMode(featureFlags.isKeyguardLayoutEnabled());
-
         mTimeFormatChangeObserver = new ContentObserver(mHandler) {
             @Override
             public void onChange(boolean selfChange) {
@@ -2026,14 +2018,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.TIME_12_24),
                 false, mTimeFormatChangeObserver, UserHandle.USER_ALL);
-    }
-
-    private void updateLockScreenMode(boolean isEnabled) {
-        final int newMode = isEnabled ? LOCK_SCREEN_MODE_LAYOUT_1 : LOCK_SCREEN_MODE_NORMAL;
-        if (newMode != mLockScreenMode) {
-            mLockScreenMode = newMode;
-            mHandler.sendEmptyMessage(MSG_LOCK_SCREEN_MODE);
-        }
     }
 
     private void updateUdfpsEnrolled(int userId) {
@@ -2666,20 +2650,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     /**
-     * Handle {@link #MSG_LOCK_SCREEN_MODE}
-     */
-    private void handleLockScreenMode() {
-        Assert.isMainThread();
-        if (DEBUG) Log.d(TAG, "handleLockScreenMode(" + mLockScreenMode + ")");
-        for (int i = 0; i < mCallbacks.size(); i++) {
-            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
-            if (cb != null) {
-                cb.onLockScreenModeChanged(mLockScreenMode);
-            }
-        }
-    }
-
-    /**
      * Handle (@line #MSG_TIMEZONE_UPDATE}
      */
     private void handleTimeZoneUpdate(String timeZone) {
@@ -3057,7 +3027,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         callback.onKeyguardOccludedChanged(mKeyguardOccluded);
         callback.onKeyguardVisibilityChangedRaw(mKeyguardIsVisible);
         callback.onTelephonyCapable(mTelephonyCapable);
-        callback.onLockScreenModeChanged(mLockScreenMode);
 
         for (Entry<Integer, SimData> data : mSimDatas.entrySet()) {
             final SimData state = data.getValue();

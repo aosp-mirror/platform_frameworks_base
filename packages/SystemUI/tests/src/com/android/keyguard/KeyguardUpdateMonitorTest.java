@@ -239,8 +239,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         when(mRingerModeTracker.getRingerMode()).thenReturn(mRingerModeLiveData);
 
-        when(mFeatureFlags.isKeyguardLayoutEnabled()).thenReturn(false);
-
         mMockitoSession = ExtendedMockito.mockitoSession()
                 .spyStatic(SubscriptionManager.class).startMocking();
         ExtendedMockito.doReturn(SubscriptionManager.INVALID_SUBSCRIPTION_ID)
