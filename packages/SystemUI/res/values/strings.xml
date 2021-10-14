@@ -2878,7 +2878,7 @@
     <!-- Summary for media output group with the active device count [CHAR LIMIT=NONE] -->
     <string name="media_output_dialog_multiple_devices"><xliff:g id="count" example="2">%1$d</xliff:g> devices selected</string>
     <!-- Summary for disconnected status [CHAR LIMIT=50] -->
-    <string name="media_output_dialog_disconnected"><xliff:g id="device_name" example="My device">%1$s</xliff:g> (disconnected)</string>
+    <string name="media_output_dialog_disconnected">(disconnected)</string>
     <!-- Summary for connecting error message [CHAR LIMIT=NONE] -->
     <string name="media_output_dialog_connect_failed">Couldn\'t connect. Try again.</string>
     <!-- Title for pairing item [CHAR LIMIT=60] -->
