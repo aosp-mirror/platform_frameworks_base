@@ -2874,9 +2874,11 @@ public final class Parcel {
 
     /**
      * Same as {@link #readList(List, ClassLoader)} but accepts {@code clazz} parameter as
-     * the type required for each item. If the item to be deserialized is not an instance
-     * of that class or any of its children class
-     * a {@link BadParcelableException} will be thrown.
+     * the type required for each item.
+     *
+     * @throws BadParcelableException Throws BadParcelableException if the item to be deserialized
+     * is not an instance of that class or any of its children classes or there was an error
+     * trying to instantiate an element.
      */
     public <T> void readList(@NonNull List<? super T> outVal,
             @Nullable ClassLoader loader, @NonNull Class<T> clazz) {
@@ -3869,8 +3871,11 @@ public final class Parcel {
 
     /**
      * Same as {@link #readParcelable(ClassLoader)} but accepts {@code clazz} parameter as the type
-     * required for each item. If the item to be deserialized is not an instance of that class or
-     * any of its children classes a {@link BadParcelableException} will be thrown.
+     * required for each item.
+     *
+     * @throws BadParcelableException Throws BadParcelableException if the item to be deserialized
+     * is not an instance of that class or any of its children classes or there was an error
+     * trying to instantiate an element.
      */
     @Nullable
     public <T extends Parcelable> T readParcelable(@Nullable ClassLoader loader,
@@ -3936,8 +3941,11 @@ public final class Parcel {
 
     /**
      * Same as {@link #readParcelableCreator(ClassLoader)} but accepts {@code clazz} parameter
-     * as the required type. If the item to be deserialized is not an instance of that class
-     * or any of its children classes a {@link BadParcelableException} will be thrown.
+     * as the required type.
+     *
+     * @throws BadParcelableException Throws BadParcelableException if the item to be deserialized
+     * is not an instance of that class or any of its children class or there there was an error
+     * trying to read the {@link Parcelable.Creator}.
      */
     @Nullable
     public <T> Parcelable.Creator<T> readParcelableCreator(
