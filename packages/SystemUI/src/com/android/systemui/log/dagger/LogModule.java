@@ -111,6 +111,17 @@ public class LogModule {
         return factory.create("CollapsedSbFragmentLog", 20);
     }
 
+    /**
+     * Provides a logging buffer for logs related to swiping away the status bar while in immersive
+     * mode. See {@link com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureLogger}.
+     */
+    @Provides
+    @SysUISingleton
+    @SwipeStatusBarAwayLog
+    public static LogBuffer provideSwipeAwayGestureLogBuffer(LogBufferFactory factory) {
+        return factory.create("SwipeStatusBarAwayLog", 30);
+    }
+
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
     @Provides
     @SysUISingleton
