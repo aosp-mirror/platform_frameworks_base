@@ -2985,7 +2985,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
     @Override
     protected void onExpandingFinished() {
-        super.onExpandingFinished();
+        mScrimController.onExpandingFinished();
         mNotificationStackScrollLayoutController.onExpansionStopped();
         mHeadsUpManager.onExpandingFinished();
         mConversationNotificationManager.onNotificationPanelExpandStateChanged(isFullyCollapsed());
@@ -3060,6 +3060,7 @@ public class NotificationPanelViewController extends PanelViewController {
     protected void onTrackingStarted() {
         mFalsingCollector.onTrackingStarted(!mKeyguardStateController.canDismissLockScreen());
         super.onTrackingStarted();
+        mScrimController.onTrackingStarted();
         if (mQsFullyExpanded) {
             mQsExpandImmediate = true;
             if (!mShouldUseSplitNotificationShade) {
@@ -3260,7 +3261,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
     @Override
     protected void onClosingFinished() {
-        super.onClosingFinished();
+        mStatusBar.onClosingFinished();
         setClosingWithAlphaFadeout(false);
         mMediaHierarchyManager.closeGuts();
     }

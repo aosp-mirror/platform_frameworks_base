@@ -156,14 +156,6 @@ public abstract class PanelBar extends FrameLayout {
         mTracking = false;
     }
 
-    public void onExpandingFinished() {
-        if (DEBUG) LOG("onExpandingFinished");
-    }
-
-    public void onClosingFinished() {
-
-    }
-
     /** An interface that will be notified of panel state changes. */
     public interface PanelStateChangeListener {
         /** Called when the state changes. */

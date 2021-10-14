@@ -187,10 +187,7 @@ public abstract class PanelViewController {
     protected final LockscreenGestureLogger mLockscreenGestureLogger;
     private final TouchHandler mTouchHandler;
 
-
-    protected void onExpandingFinished() {
-        mBar.onExpandingFinished();
-    }
+    protected abstract void onExpandingFinished();
 
     protected void onExpandingStarted() {
     }
@@ -455,6 +452,7 @@ public abstract class PanelViewController {
     protected void onTrackingStopped(boolean expand) {
         mTracking = false;
         mBar.onTrackingStopped(expand);
+        mStatusBar.onTrackingStopped(expand);
         updatePanelExpansionAndVisibility();
     }
 
@@ -462,6 +460,7 @@ public abstract class PanelViewController {
         endClosing();
         mTracking = true;
         mBar.onTrackingStarted();
+        mStatusBar.onTrackingStarted();
         notifyExpandingStarted();
         updatePanelExpansionAndVisibility();
     }
@@ -934,10 +933,7 @@ public abstract class PanelViewController {
         mView.removeCallbacks(mFlingCollapseRunnable);
     }
 
-    protected void onClosingFinished() {
-        mBar.onClosingFinished();
-    }
-
+    protected abstract void onClosingFinished();
 
     protected void startUnlockHintAnimation() {
 
