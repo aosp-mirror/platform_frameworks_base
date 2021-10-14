@@ -4406,6 +4406,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     private void updateFontScaleIfNeeded(@UserIdInt int userId) {
+        if (userId != getCurrentUserId()) {
+            return;
+        }
+
         final float scaleFactor = Settings.System.getFloatForUser(mContext.getContentResolver(),
                 FONT_SCALE, 1.0f, userId);
 
@@ -4422,6 +4426,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     private void updateFontWeightAdjustmentIfNeeded(@UserIdInt int userId) {
+        if (userId != getCurrentUserId()) {
+            return;
+        }
+
         final int fontWeightAdjustment =
                 Settings.Secure.getIntForUser(
                         mContext.getContentResolver(),
