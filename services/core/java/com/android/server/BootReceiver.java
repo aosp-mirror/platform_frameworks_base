@@ -476,7 +476,11 @@ public class BootReceiver extends BroadcastReceiver {
      */
     public static void addTombstoneToDropBox(Context ctx, File tombstone, boolean proto) {
         final DropBoxManager db = ctx.getSystemService(DropBoxManager.class);
-        final String bootReason = SystemProperties.get("ro.boot.bootreason", null);
+        if (db == null) {
+            Slog.e(TAG, "Can't log tombstone: DropBoxManager not available");
+            return;
+        }
+
         HashMap<String, Long> timestamps = readTimestamps();
         try {
             if (proto) {
