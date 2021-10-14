@@ -47,6 +47,7 @@ import static android.view.KeyEvent.KEYCODE_VOLUME_UP;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW;
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
@@ -3288,7 +3289,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean showing = mKeyguardDelegate.isShowing();
         final boolean animate = showing && !isOccluded;
         mKeyguardDelegate.setOccluded(isOccluded, animate);
-        return showing;
+
+        if (!showing) {
+            return false;
+        }
+        if (mKeyguardCandidate != null) {
+            if (isOccluded) {
+                mKeyguardCandidate.getAttrs().flags &= ~FLAG_SHOW_WALLPAPER;
+            } else if (!mKeyguardDelegate.hasLockscreenWallpaper()) {
+                mKeyguardCandidate.getAttrs().flags |= FLAG_SHOW_WALLPAPER;
+            }
+        }
+        return true;
     }
 
     /** {@inheritDoc} */
