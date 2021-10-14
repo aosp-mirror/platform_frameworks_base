@@ -13032,6 +13032,7 @@ package android.telephony.ims {
     method @NonNull public java.util.Set<android.telephony.ims.FeatureTagState> getDeregisteredFeatureTags();
     method @NonNull public java.util.Set<android.telephony.ims.FeatureTagState> getDeregisteringFeatureTags();
     method @NonNull public java.util.Set<java.lang.String> getRegisteredFeatureTags();
+    method @NonNull public java.util.Set<java.lang.String> getRegisteringFeatureTags();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.DelegateRegistrationState> CREATOR;
     field public static final int DEREGISTERED_REASON_NOT_PROVISIONED = 1; // 0x1
@@ -13049,6 +13050,7 @@ package android.telephony.ims {
     method @NonNull public android.telephony.ims.DelegateRegistrationState.Builder addDeregisteringFeatureTag(@NonNull String, int);
     method @NonNull public android.telephony.ims.DelegateRegistrationState.Builder addRegisteredFeatureTag(@NonNull String);
     method @NonNull public android.telephony.ims.DelegateRegistrationState.Builder addRegisteredFeatureTags(@NonNull java.util.Set<java.lang.String>);
+    method @NonNull public android.telephony.ims.DelegateRegistrationState.Builder addRegisteringFeatureTags(@NonNull java.util.Set<java.lang.String>);
     method @NonNull public android.telephony.ims.DelegateRegistrationState build();
   }
 
