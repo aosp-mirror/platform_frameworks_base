@@ -32,6 +32,8 @@ import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
 
 import static com.android.server.usage.AppStandbyController.isUserUsage;
 
+import android.annotation.CurrentTimeMillisLong;
+import android.annotation.ElapsedRealtimeLong;
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.UsageStatsManager;
 import android.os.SystemClock;
@@ -115,6 +117,8 @@ public class AppIdleHistory {
     // Reason why the app was last marked for restriction.
     private static final String ATTR_LAST_RESTRICTION_ATTEMPT_REASON =
             "lastRestrictionAttemptReason";
+    // The next estimated launch time of the app, in ms since epoch.
+    private static final String ATTR_NEXT_ESTIMATED_APP_LAUNCH_TIME = "nextEstimatedAppLaunchTime";
 
     // device on time = mElapsedDuration + (timeNow - mElapsedSnapshot)
     private long mElapsedSnapshot; // Elapsed time snapshot when last write of mDeviceOnDuration
@@ -151,6 +155,9 @@ public class AppIdleHistory {
         int lastInformedBucket;
         // The last time a job was run for this app, using elapsed timebase
         long lastJobRunTime;
+        // The estimated time the app will be launched next, in milliseconds since epoch.
+        @CurrentTimeMillisLong
+        long nextEstimatedLaunchTime;
         // When should the bucket active state timeout, in elapsed timebase, if greater than
         // lastUsedElapsedTime.
         // This is used to keep the app in a high bucket regardless of other timeouts and
@@ -411,6 +418,17 @@ public class AppIdleHistory {
     }
 
     /**
+     * Marks the next time the app is expected to be launched, in the current millis timebase.
+     */
+    public void setEstimatedLaunchTime(String packageName, int userId,
+            @ElapsedRealtimeLong long nowElapsed, @CurrentTimeMillisLong long launchTime) {
+        ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
+        AppUsageHistory appUsageHistory =
+                getPackageHistory(userHistory, packageName, nowElapsed, true);
+        appUsageHistory.nextEstimatedLaunchTime = launchTime;
+    }
+
+    /**
      * Marks the last time a job was run, with the given elapsedRealtime. The time stored is
      * based on the elapsed timebase.
      * @param packageName
@@ -440,6 +458,23 @@ public class AppIdleHistory {
                 getPackageHistory(userHistory, packageName, elapsedRealtime, true);
         appUsageHistory.lastRestrictAttemptElapsedTime = getElapsedTime(elapsedRealtime);
         appUsageHistory.lastRestrictReason = reason;
+    }
+
+    /**
+     * Returns the next estimated launch time of this app. Will return {@link Long#MAX_VALUE} if
+     * there's no estimated time.
+     */
+    @CurrentTimeMillisLong
+    public long getEstimatedLaunchTime(String packageName, int userId, long nowElapsed) {
+        ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
+        AppUsageHistory appUsageHistory =
+                getPackageHistory(userHistory, packageName, nowElapsed, false);
+        // Don't adjust the default, else it'll wrap around to a positive value
+        if (appUsageHistory == null
+                || appUsageHistory.nextEstimatedLaunchTime < System.currentTimeMillis()) {
+            return Long.MAX_VALUE;
+        }
+        return appUsageHistory.nextEstimatedLaunchTime;
     }
 
     /**
@@ -671,6 +706,8 @@ public class AppIdleHistory {
                                 Slog.wtf(TAG, "Unable to read last restrict reason", nfe);
                             }
                         }
+                        appUsageHistory.nextEstimatedLaunchTime = getLongValue(parser,
+                                ATTR_NEXT_ESTIMATED_APP_LAUNCH_TIME, 0);
                         appUsageHistory.lastInformedBucket = -1;
                         userHistory.put(packageName, appUsageHistory);
                     }
@@ -753,6 +790,10 @@ public class AppIdleHistory {
                 }
                 xml.attribute(null, ATTR_LAST_RESTRICTION_ATTEMPT_REASON,
                         Integer.toHexString(history.lastRestrictReason));
+                if (history.nextEstimatedLaunchTime > 0) {
+                    xml.attribute(null, ATTR_NEXT_ESTIMATED_APP_LAUNCH_TIME,
+                            Long.toString(history.nextEstimatedLaunchTime));
+                }
                 xml.endTag(null, TAG_PACKAGE);
             }
 
@@ -779,6 +820,7 @@ public class AppIdleHistory {
         idpw.println(" App Standby States:");
         idpw.increaseIndent();
         ArrayMap<String, AppUsageHistory> userHistory = mIdleHistory.get(userId);
+        final long now = System.currentTimeMillis();
         final long elapsedRealtime = SystemClock.elapsedRealtime();
         final long totalElapsedTime = getElapsedTime(elapsedRealtime);
         final long screenOnTime = getScreenOnTime(elapsedRealtime);
@@ -818,6 +860,10 @@ public class AppIdleHistory {
                         totalElapsedTime - appUsageHistory.lastRestrictAttemptElapsedTime, idpw);
                 idpw.print(" lastRestrictReason="
                         + UsageStatsManager.reasonToString(appUsageHistory.lastRestrictReason));
+            }
+            if (appUsageHistory.nextEstimatedLaunchTime > 0) {
+                idpw.print(" nextEstimatedLaunchTime=");
+                TimeUtils.formatDuration(appUsageHistory.nextEstimatedLaunchTime - now, idpw);
             }
             idpw.print(" idle=" + (isIdle(packageName, userId, elapsedRealtime) ? "y" : "n"));
             idpw.println();
