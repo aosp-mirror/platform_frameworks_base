@@ -16,11 +16,13 @@
 
 package android.media.tv.interactive;
 
+import android.media.tv.interactive.ITvIAppSessionCallback;
+
 /**
- * Sub-interface of ITvIAppService.aidl which is created per session and has its own context.
+ * Top-level interface to a TV IApp component (implemented in a Service). It's used for
+ * TvIAppManagerService to communicate with TvIAppService.
  * @hide
  */
-oneway interface ITvIAppSession {
-    void startIApp();
-    void release();
+oneway interface ITvIAppService {
+    void createSession(in ITvIAppSessionCallback callback, in String iAppServiceId, int type);
 }
