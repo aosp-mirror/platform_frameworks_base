@@ -91,6 +91,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final BiometricUnlockController mBiometricUnlockController;
     private final SysuiStatusBarStateController mStatusBarStateController;
+    private final StatusBarContentInsetsProvider mInsetsProvider;
 
     private final ConfigurationController.ConfigurationListener mConfigurationListener =
             new ConfigurationController.ConfigurationListener() {
@@ -228,7 +229,9 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             KeyguardBypassController bypassController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             BiometricUnlockController biometricUnlockController,
-            SysuiStatusBarStateController statusBarStateController) {
+            SysuiStatusBarStateController statusBarStateController,
+            StatusBarContentInsetsProvider statusBarContentInsetsProvider
+    ) {
         super(view);
         mCarrierTextController = carrierTextController;
         mConfigurationController = configurationController;
@@ -244,6 +247,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mBiometricUnlockController = biometricUnlockController;
         mStatusBarStateController = statusBarStateController;
+        mInsetsProvider = statusBarContentInsetsProvider;
 
         mFirstBypassAttempt = mKeyguardBypassController.getBypassEnabled();
         mKeyguardStateController.addCallback(
@@ -287,6 +291,9 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             mTintedIconManager.setBlockList(mBlockedIcons);
             mStatusBarIconController.addIconGroup(mTintedIconManager);
         }
+        mView.setOnApplyWindowInsetsListener(
+                (view, windowInsets) -> mView.updateWindowInsets(windowInsets, mInsetsProvider));
+
         onThemeChanged();
     }
 

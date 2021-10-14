@@ -238,35 +238,32 @@ public class KeyguardStatusBarView extends RelativeLayout {
         }
     }
 
-    @Override
-    public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+    /** Should only be called from {@link KeyguardStatusBarViewController}. */
+    WindowInsets updateWindowInsets(
+            WindowInsets insets,
+            StatusBarContentInsetsProvider insetsProvider) {
         mLayoutState = LAYOUT_NONE;
-        if (updateLayoutConsideringCutout()) {
+        if (updateLayoutConsideringCutout(insetsProvider)) {
             requestLayout();
         }
         return super.onApplyWindowInsets(insets);
     }
 
-    private boolean updateLayoutConsideringCutout() {
+    private boolean updateLayoutConsideringCutout(StatusBarContentInsetsProvider insetsProvider) {
         mDisplayCutout = getRootWindowInsets().getDisplayCutout();
         updateKeyguardStatusBarHeight();
-
-        Pair<Integer, Integer> cornerCutoutMargins =
-                StatusBarWindowView.cornerCutoutMargins(mDisplayCutout, getDisplay());
-        updatePadding(cornerCutoutMargins);
-        if (mDisplayCutout == null || cornerCutoutMargins != null) {
+        updatePadding(insetsProvider);
+        if (mDisplayCutout == null || insetsProvider.currentRotationHasCornerCutout()) {
             return updateLayoutParamsNoCutout();
         } else {
             return updateLayoutParamsForCutout();
         }
     }
 
-    private void updatePadding(Pair<Integer, Integer> cornerCutoutMargins) {
+    private void updatePadding(StatusBarContentInsetsProvider insetsProvider) {
         final int waterfallTop =
                 mDisplayCutout == null ? 0 : mDisplayCutout.getWaterfallInsets().top;
-        mPadding =
-                StatusBarWindowView.paddingNeededForCutoutAndRoundedCorner(
-                        mDisplayCutout, cornerCutoutMargins, mRoundedCornerPadding);
+        mPadding = insetsProvider.getStatusBarContentInsetsForCurrentRotation();
 
         // consider privacy dot space
         final int minLeft = (isLayoutRtl() && mIsPrivacyDotEnabled)
