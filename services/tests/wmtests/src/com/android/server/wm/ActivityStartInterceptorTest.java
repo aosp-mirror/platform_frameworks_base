@@ -95,7 +95,7 @@ public class ActivityStartInterceptorTest {
     @Mock
     private RootWindowContainer mRootWindowContainer;
     @Mock
-    private ActivityStackSupervisor mSupervisor;
+    private ActivityTaskSupervisor mSupervisor;
     @Mock
     private DevicePolicyManagerInternal mDevicePolicyManager;
     @Mock

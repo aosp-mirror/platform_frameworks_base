@@ -387,6 +387,13 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * <p>This mode makes sense for things that will be explicitly started
      * and stopped to run for arbitrary periods of time, such as a service
      * performing background music playback.
+     *
+     * <p>Since Android version {@link Build.VERSION_CODES#S}, apps
+     * targeting {@link Build.VERSION_CODES#S} or above are disallowed
+     * to start a foreground service from the background, but the restriction
+     * doesn't impact <em>restarts</em> of a sticky foreground service. However,
+     * when apps start a sticky foreground service from the background,
+     * the same restriction still applies.
      */
     public static final int START_STICKY = 1;
     
@@ -697,6 +704,23 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * service element of manifest file. The value of attribute
      * {@link android.R.attr#foregroundServiceType} can be multiple flags ORed together.</p>
      *
+     * <div class="caution">
+     * <p><strong>Note:</strong>
+     * Beginning with SDK Version {@link android.os.Build.VERSION_CODES#S},
+     * apps targeting SDK Version {@link android.os.Build.VERSION_CODES#S}
+     * or higher are not allowed to start foreground services from the background.
+     * See
+     * <a href="{@docRoot}/about/versions/12/behavior-changes-12">
+     * Behavior changes: Apps targeting Android 12
+     * </a>
+     * for more details.
+     * </div>
+     *
+     * @throws ForegroundServiceStartNotAllowedException
+     * If the app targeting API is
+     * {@link android.os.Build.VERSION_CODES#S} or later, and the service is restricted from
+     * becoming foreground service due to background restriction.
+     *
      * @param id The identifier for this notification as per
      * {@link NotificationManager#notify(int, Notification)
      * NotificationManager.notify(int, Notification)}; must not be 0.
@@ -728,14 +752,32 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
    * {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_MANIFEST} to use all flags that
    * is specified in manifest attribute foregroundServiceType.</p>
    *
+   * <div class="caution">
+   * <p><strong>Note:</strong>
+   * Beginning with SDK Version {@link android.os.Build.VERSION_CODES#S},
+   * apps targeting SDK Version {@link android.os.Build.VERSION_CODES#S}
+   * or higher are not allowed to start foreground services from the background.
+   * See
+   * <a href="{@docRoot}/about/versions/12/behavior-changes-12">
+   * Behavior changes: Apps targeting Android 12
+   * </a>
+   * for more details.
+   * </div>
+   *
    * @param id The identifier for this notification as per
    * {@link NotificationManager#notify(int, Notification)
    * NotificationManager.notify(int, Notification)}; must not be 0.
    * @param notification The Notification to be displayed.
    * @param foregroundServiceType must be a subset flags of manifest attribute
    * {@link android.R.attr#foregroundServiceType} flags.
+   *
    * @throws IllegalArgumentException if param foregroundServiceType is not subset of manifest
    *     attribute {@link android.R.attr#foregroundServiceType}.
+   * @throws ForegroundServiceStartNotAllowedException
+   * If the app targeting API is
+   * {@link android.os.Build.VERSION_CODES#S} or later, and the service is restricted from
+   * becoming foreground service due to background restriction.
+   *
    * @see android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_MANIFEST
    */
     public final void startForeground(int id, @NonNull Notification notification,
@@ -847,6 +889,19 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
                 < Build.VERSION_CODES.ECLAIR;
 
         setContentCaptureOptions(application.getContentCaptureOptions());
+    }
+
+    /**
+     * Creates the base {@link Context} of this {@link Service}.
+     * Users may override this API to create customized base context.
+     *
+     * @see android.window.WindowProviderService WindowProviderService class for example
+     * @see ContextWrapper#attachBaseContext(Context)
+     *
+     * @hide
+     */
+    public Context createServiceBaseContext(ActivityThread mainThread, LoadedApk packageInfo) {
+        return ContextImpl.createAppContext(mainThread, packageInfo);
     }
 
     /**

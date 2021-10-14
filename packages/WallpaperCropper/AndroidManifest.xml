@@ -29,7 +29,8 @@
             android:name="WallpaperCropActivity"
             android:theme="@style/Theme.WallpaperCropper"
             android:label="@string/crop_wallpaper"
-            android:finishOnCloseSystemDialogs="true">
+            android:finishOnCloseSystemDialogs="true"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.service.wallpaper.CROP_AND_SET_WALLPAPER" />
                 <data android:mimeType="image/*" />

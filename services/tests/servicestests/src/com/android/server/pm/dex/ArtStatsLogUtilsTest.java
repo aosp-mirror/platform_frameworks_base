@@ -28,8 +28,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.Mock;
 import org.mockito.InOrder;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.IOException;
@@ -51,8 +51,9 @@ public final class ArtStatsLogUtilsTest {
     private static final String PROFILE_DEX_METADATA = "primary.prof";
     private static final String VDEX_DEX_METADATA = "primary.vdex";
     private static final String INSTRUCTION_SET = "arm64";
-    private static final String BASE_APK = "base.apk";
-    private static final String SPLIT_APK = "split.apk";
+    private static final String BASE_APK_PATH = "/tmp/base.apk";
+    private static final String[] SPLIT_APK_PATHS =
+            new String[]{"/tmp/split1.apk", "/tmp/split2.apk"};
     private static final byte[] DEX_CONTENT = "dexData".getBytes();
     private static final int COMPILATION_REASON = 1;
     private static final int RESULT_CODE = 222;
@@ -248,12 +249,16 @@ public final class ArtStatsLogUtilsTest {
     @Test
     public void testGetApkType() {
         // Act
-        int result1 = ArtStatsLogUtils.getApkType(BASE_APK);
-        int result2 = ArtStatsLogUtils.getApkType(SPLIT_APK);
+        int result1 = ArtStatsLogUtils.getApkType("/tmp/base.apk", BASE_APK_PATH, SPLIT_APK_PATHS);
+        int result2 = ArtStatsLogUtils.getApkType("/tmp/split1.apk", BASE_APK_PATH,
+                SPLIT_APK_PATHS);
+        int result3 = ArtStatsLogUtils.getApkType("/tmp/none.apk", BASE_APK_PATH, SPLIT_APK_PATHS);
 
         // Assert
         Assert.assertEquals(result1, ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_BASE);
         Assert.assertEquals(result2, ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_SPLIT);
+        Assert.assertEquals(result3,
+                ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_UNKNOWN);
     }
 
     private void verifyWrites(int dexMetadataType) {
@@ -272,7 +277,7 @@ public final class ArtStatsLogUtilsTest {
                 UID,
                 COMPILATION_REASON,
                 COMPILER_FILTER,
-                ArtStatsLog.ART_DATUM_REPORTED__KIND__ART_DATUM_DEX2OAT_DEX_CODE_BYTES,
+                ArtStatsLog.ART_DATUM_REPORTED__KIND__ART_DATUM_DEX2OAT_DEX_CODE_COUNTER_BYTES,
                 DEX_CONTENT.length,
                 dexMetadataType,
                 ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_BASE,
@@ -282,7 +287,7 @@ public final class ArtStatsLogUtilsTest {
                 UID,
                 COMPILATION_REASON,
                 COMPILER_FILTER,
-                ArtStatsLog.ART_DATUM_REPORTED__KIND__ART_DATUM_DEX2OAT_TOTAL_TIME,
+                ArtStatsLog.ART_DATUM_REPORTED__KIND__ART_DATUM_DEX2OAT_TOTAL_TIME_COUNTER_MILLIS,
                 COMPILE_TIME,
                 dexMetadataType,
                 ArtStatsLog.ART_DATUM_REPORTED__APK_TYPE__ART_APK_TYPE_BASE,

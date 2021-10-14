@@ -25,6 +25,7 @@ import android.content.pm.ConfigurationInfo;
 import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.Property;
 import android.content.pm.PackageParser;
 import android.content.pm.ServiceInfo;
 import android.content.pm.parsing.component.ParsedActivity;
@@ -36,14 +37,13 @@ import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.parsing.component.ParsedProcess;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
+import android.content.pm.parsing.component.ParsedUsesPermission;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
-
-import com.android.internal.R;
 
 import java.security.PublicKey;
 import java.util.List;
@@ -67,7 +67,7 @@ public interface ParsingPackageRead extends Parcelable {
 
     /**
      * The names of packages to adopt ownership of permissions from, parsed under
-     * {@link PackageParser#TAG_ADOPT_PERMISSIONS}.
+     * {@link ParsingPackageUtils#TAG_ADOPT_PERMISSIONS}.
      * @see R.styleable#AndroidManifestOriginalPackage_name
      */
     @NonNull
@@ -106,7 +106,7 @@ public interface ParsingPackageRead extends Parcelable {
 
     /**
      * For use with {@link com.android.server.pm.KeySetManagerService}. Parsed in
-     * {@link PackageParser#TAG_KEY_SETS}.
+     * {@link ParsingPackageUtils#TAG_KEY_SETS}.
      * @see R.styleable#AndroidManifestKeySet
      * @see R.styleable#AndroidManifestPublicKey
      */
@@ -194,6 +194,14 @@ public interface ParsingPackageRead extends Parcelable {
     List<FeatureInfo> getReqFeatures();
 
     /**
+     * @deprecated consider migrating to {@link #getUsesPermissions} which has
+     *             more parsed details, such as flags
+     */
+    @NonNull
+    @Deprecated
+    List<String> getRequestedPermissions();
+
+    /**
      * All the permissions declared. This is an effective set, and may include permissions
      * transformed from split/migrated permissions from previous versions, so may not be exactly
      * what the package declares in its manifest.
@@ -201,7 +209,13 @@ public interface ParsingPackageRead extends Parcelable {
      * @see R.styleable#AndroidManifestUsesPermission
      */
     @NonNull
-    List<String> getRequestedPermissions();
+    List<ParsedUsesPermission> getUsesPermissions();
+
+    /**
+     * Returns the properties set on the application
+     */
+    @NonNull
+    Map<String, Property> getProperties();
 
     /**
      * Whether or not the app requested explicitly resizeable Activities.
@@ -229,6 +243,19 @@ public interface ParsingPackageRead extends Parcelable {
      */
     @NonNull
     List<String> getUsesOptionalLibraries();
+
+    /** @see R.styleabele#AndroidManifestUsesNativeLibrary */
+    @NonNull
+    List<String> getUsesNativeLibraries();
+
+    /**
+     * Like {@link #getUsesNativeLibraries()}, but marked optional by setting
+     * {@link R.styleable#AndroidManifestUsesNativeLibrary_required} to false . Application is
+     * expected to handle absence manually.
+     * @see R.styleable#AndroidManifestUsesNativeLibrary
+     */
+    @NonNull
+    List<String> getUsesOptionalNativeLibraries();
 
     /**
      * TODO(b/135203078): Move static library stuff to an inner data class
@@ -425,6 +452,9 @@ public interface ParsingPackageRead extends Parcelable {
     /** @see ApplicationInfo#PRIVATE_FLAG_PROFILEABLE_BY_SHELL */
     boolean isProfileableByShell();
 
+    /** @see ApplicationInfo#PRIVATE_FLAG_EXT_PROFILEABLE */
+    boolean isProfileable();
+
     /** @see ApplicationInfo#PRIVATE_FLAG_REQUEST_LEGACY_EXTERNAL_STORAGE */
     boolean isRequestLegacyExternalStorage();
 
@@ -535,7 +565,7 @@ public interface ParsingPackageRead extends Parcelable {
     String getPackageName();
 
     /** Path of base APK */
-    String getBaseCodePath();
+    String getBaseApkPath();
 
     /**
      * Path where this package was found on disk. For monolithic packages
@@ -543,7 +573,7 @@ public interface ParsingPackageRead extends Parcelable {
      * path to the cluster directory.
      */
     @NonNull
-    String getCodePath();
+    String getPath();
 
     /**
      * @see ApplicationInfo#compatibleWidthLimitDp
@@ -568,6 +598,11 @@ public interface ParsingPackageRead extends Parcelable {
      * @see R.styleable#AndroidManifestApplication_fullBackupContent
      */
     int getFullBackupContent();
+
+    /**
+     * @see R.styleable#AndroidManifestApplication_dataExtractionRules
+     */
+    int getDataExtractionRules();
 
     /** @see ApplicationInfo#PRIVATE_FLAG_HAS_DOMAIN_URLS */
     boolean isHasDomainUrls();
@@ -798,7 +833,7 @@ public interface ParsingPackageRead extends Parcelable {
 
     /**
      * For use with {@link com.android.server.pm.KeySetManagerService}. Parsed in
-     * {@link PackageParser#TAG_KEY_SETS}.
+     * {@link ParsingPackageUtils#TAG_KEY_SETS}.
      * @see R.styleable#AndroidManifestUpgradeKeySet
      */
     @NonNull
@@ -870,6 +905,14 @@ public interface ParsingPackageRead extends Parcelable {
      */
     @ApplicationInfo.NativeHeapZeroInitialized
     int getNativeHeapZeroInitialized();
+    @Nullable
+    Boolean hasRequestRawExternalStorageAccess();
+
+    /**
+     * @see ApplicationInfo#hasRequestForegroundServiceExemption()
+     * @see R.styleable#AndroidManifest_requestForegroundServiceExemption
+     */
+    boolean hasRequestForegroundServiceExemption();
 
     // TODO(b/135203078): Hide and enforce going through PackageInfoUtils
     ApplicationInfo toAppInfoWithoutState();
@@ -878,4 +921,10 @@ public interface ParsingPackageRead extends Parcelable {
      * same as toAppInfoWithoutState except without flag computation.
      */
     ApplicationInfo toAppInfoWithoutStateWithoutFlags();
+
+    /**
+     * Whether or not the app has said its attribution tags can be made user-visible.
+     * @see ApplicationInfo#areAttributionsUserVisible()
+     */
+    boolean areAttributionsUserVisible();
 }

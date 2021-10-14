@@ -71,6 +71,7 @@ public final class Telecom extends BaseCommand {
     private static final String COMMAND_GET_DEFAULT_DIALER = "get-default-dialer";
     private static final String COMMAND_STOP_BLOCK_SUPPRESSION = "stop-block-suppression";
     private static final String COMMAND_CLEANUP_STUCK_CALLS = "cleanup-stuck-calls";
+    private static final String COMMAND_RESET_CAR_MODE = "reset-car-mode";
 
     /**
      * Change the system dialer package name if a package name was specified,
@@ -226,6 +227,9 @@ public final class Telecom extends BaseCommand {
             case COMMAND_CLEANUP_STUCK_CALLS:
                 runCleanupStuckCalls();
                 break;
+            case COMMAND_RESET_CAR_MODE:
+                runResetCarMode();
+                break;
             case COMMAND_SET_DEFAULT_DIALER:
                 runSetDefaultDialer();
                 break;
@@ -356,6 +360,10 @@ public final class Telecom extends BaseCommand {
 
     private void runCleanupStuckCalls() throws RemoteException {
         mTelecomService.cleanupStuckCalls();
+    }
+
+    private void runResetCarMode() throws RemoteException {
+        mTelecomService.resetCarMode();
     }
 
     private void runSetDefaultDialer() throws RemoteException {

@@ -24,6 +24,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.app.ActivityThread;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -59,6 +60,13 @@ public final class ContextHubManager {
     private static final String TAG = "ContextHubManager";
 
     /**
+     * An extra containing one of the {@code AUTHORIZATION_*} constants such as
+     * {@link #AUTHORIZATION_GRANTED} describing the client's authorization state.
+     */
+    public static final String EXTRA_CLIENT_AUTHORIZATION_STATE =
+            "android.hardware.location.extra.CLIENT_AUTHORIZATION_STATE";
+
+    /**
      * An extra of type {@link ContextHubInfo} describing the source of the event.
      */
     public static final String EXTRA_CONTEXT_HUB_INFO =
@@ -86,7 +94,42 @@ public final class ContextHubManager {
     public static final String EXTRA_MESSAGE = "android.hardware.location.extra.MESSAGE";
 
     /**
-     * Constants describing the type of events from a Context Hub.
+     * Constants describing if a {@link ContextHubClient} and a {@link NanoApp} are authorized to
+     * communicate.
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "AUTHORIZATION_" }, value = {
+        AUTHORIZATION_DENIED,
+        AUTHORIZATION_DENIED_GRACE_PERIOD,
+        AUTHORIZATION_GRANTED,
+    })
+    public @interface AuthorizationState { }
+
+    /**
+     * Indicates that the {@link ContextHubClient} can no longer communicate with a nanoapp. If the
+     * {@link ContextHubClient} attempts to send messages to the nanoapp, it will continue to
+     * receive this authorization state if the connection is still closed.
+     */
+    public static final int AUTHORIZATION_DENIED = 0;
+
+    /**
+     * Indicates the {@link ContextHubClient} will soon lose its authorization to communicate with a
+     * nanoapp. After receiving this state event, the {@link ContextHubClient} has one minute to
+     * perform any cleanup with the nanoapp such that the nanoapp is no longer performing work on
+     * behalf of the {@link ContextHubClient}.
+     */
+    public static final int AUTHORIZATION_DENIED_GRACE_PERIOD = 1;
+
+    /**
+     * The {@link ContextHubClient} is authorized to communicate with the nanoapp.
+     */
+    public static final int AUTHORIZATION_GRANTED = 2;
+
+    /**
+     * Constants describing the type of events from a Context Hub, as defined in
+     * {@link ContextHubClientCallback}.
      * {@hide}
      */
     @Retention(RetentionPolicy.SOURCE)
@@ -98,6 +141,7 @@ public final class ContextHubManager {
         EVENT_NANOAPP_ABORTED,
         EVENT_NANOAPP_MESSAGE,
         EVENT_HUB_RESET,
+        EVENT_CLIENT_AUTHORIZATION,
     })
     public @interface Event { }
 
@@ -137,6 +181,14 @@ public final class ContextHubManager {
      * An event describing that the Context Hub has reset.
      */
     public static final int EVENT_HUB_RESET = 6;
+
+    /**
+     * An event describing a client authorization state change. See
+     * {@link ContextHubClientCallback#onClientAuthorizationChanged} for more details on when this
+     * event will be sent. Contains the EXTRA_NANOAPP_ID and EXTRA_CLIENT_AUTHORIZATION_STATE
+     * extras.
+     */
+    public static final int EVENT_CLIENT_AUTHORIZATION = 7;
 
     private final Looper mMainLooper;
     private final IContextHubService mService;
@@ -747,6 +799,14 @@ public final class ContextHubManager {
             public void onNanoAppDisabled(long nanoAppId) {
                 executor.execute(() -> callback.onNanoAppDisabled(client, nanoAppId));
             }
+
+            @Override
+            public void onClientAuthorizationChanged(
+                    long nanoAppId, @ContextHubManager.AuthorizationState int authorization) {
+                executor.execute(
+                        () -> callback.onClientAuthorizationChanged(
+                                client, nanoAppId, authorization));
+            }
         };
     }
 
@@ -757,9 +817,10 @@ public final class ContextHubManager {
      * registration succeeds, the client can send messages to nanoapps through the returned
      * {@link ContextHubClient} object, and receive notifications through the provided callback.
      *
+     * @param context  the context of the application
      * @param hubInfo  the hub to attach this client to
-     * @param callback the notification callback to register
      * @param executor the executor to invoke the callback
+     * @param callback the notification callback to register
      * @return the registered client object
      *
      * @throws IllegalArgumentException if hubInfo does not represent a valid hub
@@ -773,8 +834,9 @@ public final class ContextHubManager {
             android.Manifest.permission.ACCESS_CONTEXT_HUB
     })
     @NonNull public ContextHubClient createClient(
-            @NonNull ContextHubInfo hubInfo, @NonNull ContextHubClientCallback callback,
-            @NonNull @CallbackExecutor Executor executor) {
+            @Nullable Context context, @NonNull ContextHubInfo hubInfo,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull ContextHubClientCallback callback) {
         Objects.requireNonNull(callback, "Callback cannot be null");
         Objects.requireNonNull(hubInfo, "ContextHubInfo cannot be null");
         Objects.requireNonNull(executor, "Executor cannot be null");
@@ -783,9 +845,23 @@ public final class ContextHubManager {
         IContextHubClientCallback clientInterface = createClientCallback(
                 client, callback, executor);
 
+        String attributionTag = null;
+        if (context != null) {
+            attributionTag = context.getAttributionTag();
+        }
+
+        // Workaround for old APIs not providing a context
+        String packageName;
+        if (context != null) {
+            packageName = context.getPackageName();
+        } else {
+            packageName = ActivityThread.currentPackageName();
+        }
+
         IContextHubClient clientProxy;
         try {
-            clientProxy = mService.createClient(hubInfo.getId(), clientInterface);
+            clientProxy = mService.createClient(
+                    hubInfo.getId(), clientInterface, attributionTag, packageName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -794,19 +870,25 @@ public final class ContextHubManager {
         return client;
     }
 
+
+    /**
+     * Equivalent to
+     * {@link #createClient(ContextHubInfo, Executor, String, ContextHubClientCallback)}
+     * with the {@link Context} being set to null.
+     */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.LOCATION_HARDWARE,
+            android.Manifest.permission.ACCESS_CONTEXT_HUB
+    })
+    @NonNull public ContextHubClient createClient(
+            @NonNull ContextHubInfo hubInfo, @NonNull ContextHubClientCallback callback,
+            @NonNull @CallbackExecutor Executor executor) {
+        return createClient(null /* context */, hubInfo, executor, callback);
+    }
+
     /**
      * Equivalent to {@link #createClient(ContextHubInfo, ContextHubClientCallback, Executor)}
      * with the executor using the main thread's Looper.
-     *
-     * @param hubInfo  the hub to attach this client to
-     * @param callback the notification callback to register
-     * @return the registered client object
-     *
-     * @throws IllegalArgumentException if hubInfo does not represent a valid hub
-     * @throws IllegalStateException    if there were too many registered clients at the service
-     * @throws NullPointerException     if callback or hubInfo is null
-     *
-     * @see ContextHubClientCallback
      */
     @RequiresPermission(anyOf = {
             android.Manifest.permission.LOCATION_HARDWARE,
@@ -814,7 +896,8 @@ public final class ContextHubManager {
     })
     @NonNull public ContextHubClient createClient(
             @NonNull ContextHubInfo hubInfo, @NonNull ContextHubClientCallback callback) {
-        return createClient(hubInfo, callback, new HandlerExecutor(Handler.getMain()));
+        return createClient(null /* context */, hubInfo, new HandlerExecutor(Handler.getMain()),
+                            callback);
     }
 
     /**
@@ -848,6 +931,8 @@ public final class ContextHubManager {
      * on the provided PendingIntent, then the client will be automatically unregistered by the
      * service.
      *
+     * @param context       the context of the application. If a PendingIntent client is recreated,
+     * the latest state in the context will be used and old state will be discarded
      * @param hubInfo       the hub to attach this client to
      * @param pendingIntent the PendingIntent to register to the client
      * @param nanoAppId     the ID of the nanoapp that Intent events will be generated for
@@ -862,22 +947,41 @@ public final class ContextHubManager {
             android.Manifest.permission.ACCESS_CONTEXT_HUB
     })
     @NonNull public ContextHubClient createClient(
-            @NonNull ContextHubInfo hubInfo, @NonNull PendingIntent pendingIntent, long nanoAppId) {
+            @Nullable Context context, @NonNull ContextHubInfo hubInfo,
+            @NonNull PendingIntent pendingIntent, long nanoAppId) {
         Objects.requireNonNull(pendingIntent);
         Objects.requireNonNull(hubInfo);
 
         ContextHubClient client = new ContextHubClient(hubInfo, true /* persistent */);
 
+        String attributionTag = null;
+        if (context != null) {
+            attributionTag = context.getAttributionTag();
+        }
+
         IContextHubClient clientProxy;
         try {
             clientProxy = mService.createPendingIntentClient(
-                    hubInfo.getId(), pendingIntent, nanoAppId);
+                    hubInfo.getId(), pendingIntent, nanoAppId, attributionTag);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
 
         client.setClientProxy(clientProxy);
         return client;
+    }
+
+    /**
+     * Equivalent to {@link #createClient(ContextHubInfo, PendingIntent, long, String)}
+     * with {@link Context} being set to null.
+     */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.LOCATION_HARDWARE,
+            android.Manifest.permission.ACCESS_CONTEXT_HUB
+    })
+    @NonNull public ContextHubClient createClient(
+            @NonNull ContextHubInfo hubInfo, @NonNull PendingIntent pendingIntent, long nanoAppId) {
+        return createClient(null /* context */, hubInfo, pendingIntent, nanoAppId);
     }
 
     /**

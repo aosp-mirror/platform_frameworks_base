@@ -24,6 +24,7 @@ import static android.app.usage.UsageEvents.Event.FLUSH_TO_DISK;
 import static android.app.usage.UsageEvents.Event.LOCUS_ID_SET;
 import static android.app.usage.UsageEvents.Event.NOTIFICATION_INTERRUPTION;
 import static android.app.usage.UsageEvents.Event.SHORTCUT_INVOCATION;
+import static android.app.usage.UsageEvents.Event.USER_INTERACTION;
 import static android.app.usage.UsageEvents.Event.USER_STOPPED;
 import static android.app.usage.UsageEvents.Event.USER_UNLOCKED;
 import static android.app.usage.UsageStatsManager.USAGE_SOURCE_CURRENT_ACTIVITY;
@@ -37,7 +38,6 @@ import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.IUidObserver;
 import android.app.PendingIntent;
-import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.ConfigurationStats;
@@ -61,7 +61,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutServiceInternal;
-import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Environment;
@@ -77,13 +76,15 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.CollectionUtils;
@@ -111,7 +112,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A service that collects, aggregates, and persists application usage data.
@@ -140,6 +145,10 @@ public class UsageStatsService extends SystemService implements
     // For migration purposes, indicates whether to keep the legacy usage stats directory or not
     private static final boolean KEEP_LEGACY_DIR = false;
 
+    private static final File COMMON_USAGE_STATS_DE_DIR =
+            new File(Environment.getDataSystemDeDirectory(), "usagestats");
+    private static final String GLOBAL_COMPONENT_USAGE_FILE_NAME = "globalcomponentusage";
+
     private static final char TOKEN_DELIMITER = '/';
 
     // Handler message types.
@@ -150,6 +159,7 @@ public class UsageStatsService extends SystemService implements
     static final int MSG_REPORT_EVENT_TO_ALL_USERID = 4;
     static final int MSG_UNLOCKED_USER = 5;
     static final int MSG_PACKAGE_REMOVED = 6;
+    static final int MSG_ON_START = 7;
 
     private final Object mLock = new Object();
     Handler mHandler;
@@ -163,9 +173,14 @@ public class UsageStatsService extends SystemService implements
     ShortcutServiceInternal mShortcutServiceInternal;
 
     private final SparseArray<UserUsageStatsService> mUserState = new SparseArray<>();
-    private final SparseBooleanArray mUserUnlockedStates = new SparseBooleanArray();
+    private final CopyOnWriteArraySet<Integer> mUserUnlockedStates = new CopyOnWriteArraySet<>();
     private final SparseIntArray mUidToKernelCounter = new SparseIntArray();
     int mUsageSource;
+
+    private long mRealTimeSnapshot;
+    private long mSystemTimeSnapshot;
+    // A map storing last time global usage of packages, measured in milliseconds since the epoch.
+    private final Map<String, Long> mLastTimeComponentUsedGlobal = new ArrayMap<>();
 
     /** Manages the standby state of apps. */
     AppStandbyInternal mAppStandby;
@@ -179,14 +194,18 @@ public class UsageStatsService extends SystemService implements
     private final SparseArray<LinkedList<Event>> mReportedEvents = new SparseArray<>();
     final SparseArray<ArraySet<String>> mUsageReporters = new SparseArray();
     final SparseArray<ActivityData> mVisibleActivities = new SparseArray();
+    private final ArraySet<UsageStatsManagerInternal.UsageEventListener> mUsageEventListeners =
+            new ArraySet<>();
 
     private static class ActivityData {
         private final String mTaskRootPackage;
         private final String mTaskRootClass;
+        private final String mUsageSourcePackage;
         public int lastEvent = Event.NONE;
-        private ActivityData(String taskRootPackage, String taskRootClass) {
+        private ActivityData(String taskRootPackage, String taskRootClass, String sourcePackage) {
             mTaskRootPackage = taskRootPackage;
             mTaskRootClass = taskRootClass;
+            mUsageSourcePackage = sourcePackage;
         }
     }
 
@@ -203,8 +222,24 @@ public class UsageStatsService extends SystemService implements
                 }
             };
 
+    @VisibleForTesting
+    static class Injector {
+        AppStandbyInternal getAppStandbyController(Context context) {
+            return AppStandbyInternal.newAppStandbyController(
+                    UsageStatsService.class.getClassLoader(), context);
+        }
+    }
+
+    private final Injector mInjector;
+
     public UsageStatsService(Context context) {
+        this(context, new Injector());
+    }
+
+    @VisibleForTesting
+    UsageStatsService(Context context, Injector injector) {
         super(context);
+        mInjector = injector;
     }
 
     @Override
@@ -215,11 +250,9 @@ public class UsageStatsService extends SystemService implements
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mHandler = new H(BackgroundThread.get().getLooper());
 
-        mAppStandby = AppStandbyInternal.newAppStandbyController(
-                UsageStatsService.class.getClassLoader(), getContext(),
-                BackgroundThread.get().getLooper());
+        mAppStandby = mInjector.getAppStandbyController(getContext());
 
-        mAppTimeLimit = new AppTimeLimitController(
+        mAppTimeLimit = new AppTimeLimitController(getContext(),
                 new AppTimeLimitController.TimeLimitCallbackListener() {
                     @Override
                     public void onLimitReached(int observerId, int userId, long timeLimit,
@@ -262,8 +295,18 @@ public class UsageStatsService extends SystemService implements
         getContext().registerReceiverAsUser(new UserActionsReceiver(), UserHandle.ALL, filter,
                 null, mHandler);
 
+        mRealTimeSnapshot = SystemClock.elapsedRealtime();
+        mSystemTimeSnapshot = System.currentTimeMillis();
+
         publishLocalService(UsageStatsManagerInternal.class, new LocalService());
         publishLocalService(AppStandbyInternal.class, mAppStandby);
+        publishBinderServices();
+
+        mHandler.obtainMessage(MSG_ON_START).sendToTarget();
+    }
+
+    @VisibleForTesting
+    void publishBinderServices() {
         publishBinderService(Context.USAGE_STATS_SERVICE, new BinderService());
     }
 
@@ -293,42 +336,40 @@ public class UsageStatsService extends SystemService implements
     }
 
     @Override
-    public void onStartUser(UserInfo userInfo) {
+    public void onUserStarting(@NonNull TargetUser user) {
         // Create an entry in the user state map to indicate that the user has been started but
         // not necessarily unlocked. This will ensure that reported events are flushed to disk
         // event if the user is never unlocked (following the logic in #flushToDiskLocked)
-        mUserState.put(userInfo.id, null);
-        super.onStartUser(userInfo);
+        mUserState.put(user.getUserIdentifier(), null);
     }
 
     @Override
-    public void onUnlockUser(@NonNull UserInfo userInfo) {
-        mHandler.obtainMessage(MSG_UNLOCKED_USER, userInfo.id, 0).sendToTarget();
-        super.onUnlockUser(userInfo);
+    public void onUserUnlocking(@NonNull TargetUser user) {
+        mHandler.obtainMessage(MSG_UNLOCKED_USER, user.getUserIdentifier(), 0).sendToTarget();
     }
 
     @Override
-    public void onStopUser(@NonNull UserInfo userInfo) {
+    public void onUserStopping(@NonNull TargetUser user) {
+        final int userId = user.getUserIdentifier();
+
         synchronized (mLock) {
             // User was started but never unlocked so no need to report a user stopped event
-            if (!mUserUnlockedStates.get(userInfo.id)) {
-                persistPendingEventsLocked(userInfo.id);
-                super.onStopUser(userInfo);
+            if (!mUserUnlockedStates.contains(userId)) {
+                persistPendingEventsLocked(userId);
                 return;
             }
 
             // Report a user stopped event before persisting all stats to disk via the user service
             final Event event = new Event(USER_STOPPED, SystemClock.elapsedRealtime());
             event.mPackage = Event.DEVICE_EVENT_PACKAGE_NAME;
-            reportEvent(event, userInfo.id);
-            final UserUsageStatsService userService = mUserState.get(userInfo.id);
+            reportEvent(event, userId);
+            final UserUsageStatsService userService = mUserState.get(userId);
             if (userService != null) {
                 userService.userStopped();
             }
-            mUserUnlockedStates.put(userInfo.id, false);
-            mUserState.put(userInfo.id, null); // release the service (mainly for GC)
+            mUserUnlockedStates.remove(userId);
+            mUserState.put(userId, null); // release the service (mainly for GC)
         }
-        super.onStopUser(userInfo);
     }
 
     private void onUserUnlocked(int userId) {
@@ -340,6 +381,11 @@ public class UsageStatsService extends SystemService implements
             UsageStatsIdleService.scheduleUpdateMappingsJob(getContext());
         }
         synchronized (mLock) {
+            // This should be safe to add this early. Other than reportEventOrAddToQueue, every
+            // other user grabs the lock before accessing
+            // mUserUnlockedStates. reportEventOrAddToQueue does not depend on anything other than
+            // mUserUnlockedStates, and the lock will protect the handler.
+            mUserUnlockedStates.add(userId);
             // Create a user unlocked event to report
             final Event unlockEvent = new Event(USER_UNLOCKED, SystemClock.elapsedRealtime());
             unlockEvent.mPackage = Event.DEVICE_EVENT_PACKAGE_NAME;
@@ -357,7 +403,6 @@ public class UsageStatsService extends SystemService implements
 
             initializeUserUsageStatsServiceLocked(userId, System.currentTimeMillis(),
                     installedPackages);
-            mUserUnlockedStates.put(userId, true);
             final UserUsageStatsService userService = getUserUsageStatsServiceLocked(userId);
             if (userService == null) {
                 Slog.i(TAG, "Attempted to unlock stopped or removed user " + userId);
@@ -681,6 +726,7 @@ public class UsageStatsService extends SystemService implements
             // orderly shutdown, the last event is DEVICE_SHUTDOWN.
             reportEventToAllUserId(event);
             flushToDiskLocked();
+            persistGlobalComponentUsageLocked();
         }
 
         mAppStandby.flushToDisk();
@@ -759,24 +805,100 @@ public class UsageStatsService extends SystemService implements
         }
     }
 
-    private void reportEventOrAddToQueue(int userId, Event event) {
-        synchronized (mLock) {
-            if (mUserUnlockedStates.get(userId)) {
-                mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
-                return;
-            }
+    private void loadGlobalComponentUsageLocked() {
+        final File[] packageUsageFile = COMMON_USAGE_STATS_DE_DIR.listFiles(
+                (dir, name) -> TextUtils.equals(name, GLOBAL_COMPONENT_USAGE_FILE_NAME));
+        if (packageUsageFile == null || packageUsageFile.length == 0) {
+            return;
+        }
 
-            final LinkedList<Event> events = mReportedEvents.get(userId, new LinkedList<>());
-            events.add(event);
-            if (mReportedEvents.get(userId) == null) {
+        final AtomicFile af = new AtomicFile(packageUsageFile[0]);
+        final Map<String, Long> tmpUsage = new ArrayMap<>();
+        try {
+            try (FileInputStream in = af.openRead()) {
+                UsageStatsProtoV2.readGlobalComponentUsage(in, tmpUsage);
+            }
+            // only add to in memory map if the read was successful
+            final Map.Entry<String, Long>[] entries =
+                    (Map.Entry<String, Long>[]) tmpUsage.entrySet().toArray();
+            final int size = entries.length;
+            for (int i = 0; i < size; ++i) {
+                // In memory data is usually the most up-to-date, so skip the packages which already
+                // have usage data.
+                mLastTimeComponentUsedGlobal.putIfAbsent(
+                        entries[i].getKey(), entries[i].getValue());
+            }
+        } catch (Exception e) {
+            // Most likely trying to read a corrupted file - log the failure
+            Slog.e(TAG, "Could not read " + packageUsageFile[0]);
+        }
+    }
+
+    private void persistGlobalComponentUsageLocked() {
+        if (mLastTimeComponentUsedGlobal.isEmpty()) {
+            return;
+        }
+
+        if (!COMMON_USAGE_STATS_DE_DIR.mkdirs() && !COMMON_USAGE_STATS_DE_DIR.exists()) {
+            throw new IllegalStateException("Common usage stats DE directory does not exist: "
+                    + COMMON_USAGE_STATS_DE_DIR.getAbsolutePath());
+        }
+        final File lastTimePackageFile = new File(COMMON_USAGE_STATS_DE_DIR,
+                GLOBAL_COMPONENT_USAGE_FILE_NAME);
+        final AtomicFile af = new AtomicFile(lastTimePackageFile);
+        FileOutputStream fos = null;
+        try {
+            fos = af.startWrite();
+            UsageStatsProtoV2.writeGlobalComponentUsage(fos, mLastTimeComponentUsedGlobal);
+            af.finishWrite(fos);
+            fos = null;
+        } catch (Exception e) {
+            Slog.e(TAG, "Failed to write " + lastTimePackageFile.getAbsolutePath());
+        } finally {
+            af.failWrite(fos); // when fos is null (successful write), this will no-op
+        }
+    }
+
+    private void reportEventOrAddToQueue(int userId, Event event) {
+        if (mUserUnlockedStates.contains(userId)) {
+            mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
+            return;
+        }
+        synchronized (mLock) {
+            LinkedList<Event> events = mReportedEvents.get(userId);
+            if (events == null) {
+                events = new LinkedList<>();
                 mReportedEvents.put(userId, events);
             }
+            events.add(event);
             if (events.size() == 1) {
                 // Every time a file is persisted to disk, mReportedEvents is cleared for this user
                 // so trigger a flush to disk every time the first event has been added.
                 mHandler.sendEmptyMessageDelayed(MSG_FLUSH_TO_DISK, FLUSH_INTERVAL);
             }
         }
+    }
+
+    /**
+     * Assuming the event's timestamp is measured in milliseconds since boot,
+     * convert it to a system wall time. System and real time snapshots are updated before
+     * conversion.
+     */
+    private void convertToSystemTimeLocked(Event event) {
+        final long actualSystemTime = System.currentTimeMillis();
+        if (ENABLE_TIME_CHANGE_CORRECTION) {
+            final long actualRealtime = SystemClock.elapsedRealtime();
+            final long expectedSystemTime =
+                    (actualRealtime - mRealTimeSnapshot) + mSystemTimeSnapshot;
+            final long diffSystemTime = actualSystemTime - expectedSystemTime;
+            if (Math.abs(diffSystemTime) > TIME_CHANGE_THRESHOLD_MILLIS) {
+                // The time has changed.
+                Slog.i(TAG, "Time changed in by " + (diffSystemTime / 1000) + " seconds");
+                mRealTimeSnapshot = actualRealtime;
+                mSystemTimeSnapshot = actualSystemTime;
+            }
+        }
+        event.mTimeStamp = Math.max(0, event.mTimeStamp - mRealTimeSnapshot) + mSystemTimeSnapshot;
     }
 
     /**
@@ -802,7 +924,7 @@ public class UsageStatsService extends SystemService implements
 
         synchronized (mLock) {
             // This should never be called directly when the user is locked
-            if (!mUserUnlockedStates.get(userId)) {
+            if (!mUserUnlockedStates.contains(userId)) {
                 Slog.wtf(TAG, "Failed to report event for locked user " + userId
                         + " (" + event.mPackage + "/" + event.mClass
                         + " eventType:" + event.mEventType
@@ -821,45 +943,46 @@ public class UsageStatsService extends SystemService implements
                                     .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__MOVE_TO_FOREGROUND);
                     // check if this activity has already been resumed
                     if (mVisibleActivities.get(event.mInstanceId) != null) break;
-                    final ActivityData resumedData = new ActivityData(event.mTaskRootPackage,
-                            event.mTaskRootClass);
-                    resumedData.lastEvent = Event.ACTIVITY_RESUMED;
-                    mVisibleActivities.put(event.mInstanceId, resumedData);
+                    final String usageSourcePackage = getUsageSourcePackage(event);
                     try {
-                        switch(mUsageSource) {
-                            case USAGE_SOURCE_CURRENT_ACTIVITY:
-                                mAppTimeLimit.noteUsageStart(event.mPackage, userId);
-                                break;
-                            case USAGE_SOURCE_TASK_ROOT_ACTIVITY:
-                            default:
-                                mAppTimeLimit.noteUsageStart(event.mTaskRootPackage, userId);
-                                break;
-                        }
+                        mAppTimeLimit.noteUsageStart(usageSourcePackage, userId);
                     } catch (IllegalArgumentException iae) {
                         Slog.e(TAG, "Failed to note usage start", iae);
                     }
+                    final ActivityData resumedData = new ActivityData(event.mTaskRootPackage,
+                            event.mTaskRootClass, usageSourcePackage);
+                    resumedData.lastEvent = Event.ACTIVITY_RESUMED;
+                    mVisibleActivities.put(event.mInstanceId, resumedData);
                     break;
                 case Event.ACTIVITY_PAUSED:
-                    final ActivityData pausedData = mVisibleActivities.get(event.mInstanceId);
+                    ActivityData pausedData = mVisibleActivities.get(event.mInstanceId);
                     if (pausedData == null) {
-                        Slog.w(TAG, "Unexpected activity event reported! (" + event.mPackage
-                                + "/" + event.mClass + " event : " + event.mEventType
-                                + " instanceId : " + event.mInstanceId + ")");
-                    } else {
-                        pausedData.lastEvent = Event.ACTIVITY_PAUSED;
-                        if (event.mTaskRootPackage == null) {
-                            // Task Root info is missing. Repair the event based on previous data
-                            event.mTaskRootPackage = pausedData.mTaskRootPackage;
-                            event.mTaskRootClass = pausedData.mTaskRootClass;
+                        // Must have transitioned from Stopped/Destroyed to Paused state.
+                        final String usageSourcePackage2 = getUsageSourcePackage(event);
+                        try {
+                            mAppTimeLimit.noteUsageStart(usageSourcePackage2, userId);
+                        } catch (IllegalArgumentException iae) {
+                            Slog.e(TAG, "Failed to note usage start", iae);
                         }
+                        pausedData = new ActivityData(event.mTaskRootPackage, event.mTaskRootClass,
+                                usageSourcePackage2);
+                        mVisibleActivities.put(event.mInstanceId, pausedData);
+                    } else {
+                        FrameworkStatsLog.write(
+                                FrameworkStatsLog.APP_USAGE_EVENT_OCCURRED,
+                                uid,
+                                event.mPackage,
+                                event.mClass,
+                                FrameworkStatsLog
+                                        .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__MOVE_TO_BACKGROUND);
                     }
-                    FrameworkStatsLog.write(
-                            FrameworkStatsLog.APP_USAGE_EVENT_OCCURRED,
-                            uid,
-                            event.mPackage,
-                            event.mClass,
-                            FrameworkStatsLog
-                                .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__MOVE_TO_BACKGROUND);
+
+                    pausedData.lastEvent = Event.ACTIVITY_PAUSED;
+                    if (event.mTaskRootPackage == null) {
+                        // Task Root info is missing. Repair the event based on previous data
+                        event.mTaskRootPackage = pausedData.mTaskRootPackage;
+                        event.mTaskRootClass = pausedData.mTaskRootClass;
+                    }
                     break;
                 case Event.ACTIVITY_DESTROYED:
                     // Treat activity destroys like activity stops.
@@ -869,7 +992,9 @@ public class UsageStatsService extends SystemService implements
                     final ActivityData prevData =
                             mVisibleActivities.removeReturnOld(event.mInstanceId);
                     if (prevData == null) {
-                        // The activity stop was already handled.
+                        Slog.w(TAG, "Unexpected activity event reported! (" + event.mPackage
+                                + "/" + event.mClass + " event : " + event.mEventType
+                                + " instanceId : " + event.mInstanceId + ")");
                         return;
                     }
 
@@ -909,18 +1034,16 @@ public class UsageStatsService extends SystemService implements
                         event.mTaskRootClass = prevData.mTaskRootClass;
                     }
                     try {
-                        switch(mUsageSource) {
-                            case USAGE_SOURCE_CURRENT_ACTIVITY:
-                                mAppTimeLimit.noteUsageStop(event.mPackage, userId);
-                                break;
-                            case USAGE_SOURCE_TASK_ROOT_ACTIVITY:
-                            default:
-                                mAppTimeLimit.noteUsageStop(event.mTaskRootPackage, userId);
-                                break;
-                        }
+                        mAppTimeLimit.noteUsageStop(prevData.mUsageSourcePackage, userId);
                     } catch (IllegalArgumentException iae) {
                         Slog.w(TAG, "Failed to note usage stop", iae);
                     }
+                    break;
+                case Event.USER_INTERACTION:
+                    // Fall through
+                case Event.APP_COMPONENT_USED:
+                    convertToSystemTimeLocked(event);
+                    mLastTimeComponentUsedGlobal.put(event.mPackage, event.mTimeStamp);
                     break;
             }
 
@@ -931,7 +1054,20 @@ public class UsageStatsService extends SystemService implements
             service.reportEvent(event);
         }
 
-        mAppStandby.reportEvent(event, userId);
+        final int size = mUsageEventListeners.size();
+        for (int i = 0; i < size; ++i) {
+            mUsageEventListeners.valueAt(i).onUsageEvent(userId, event);
+        }
+    }
+
+    private String getUsageSourcePackage(Event event) {
+        switch(mUsageSource) {
+            case USAGE_SOURCE_CURRENT_ACTIVITY:
+                return event.mPackage;
+            case USAGE_SOURCE_TASK_ROOT_ACTIVITY:
+            default:
+                return event.mTaskRootPackage;
+        }
     }
 
     /**
@@ -988,7 +1124,7 @@ public class UsageStatsService extends SystemService implements
         final int tokenRemoved;
         synchronized (mLock) {
             final long timeRemoved = System.currentTimeMillis();
-            if (!mUserUnlockedStates.get(userId)) {
+            if (!mUserUnlockedStates.contains(userId)) {
                 // If user is not unlocked and a package is removed for them, we will handle it
                 // when the user service is initialized and package manager is queried.
                 return;
@@ -1012,7 +1148,7 @@ public class UsageStatsService extends SystemService implements
      */
     private boolean pruneUninstalledPackagesData(int userId) {
         synchronized (mLock) {
-            if (!mUserUnlockedStates.get(userId)) {
+            if (!mUserUnlockedStates.contains(userId)) {
                 return false; // user is no longer unlocked
             }
 
@@ -1032,7 +1168,7 @@ public class UsageStatsService extends SystemService implements
         // fetch the installed packages outside the lock so it doesn't block package manager.
         final HashMap<String, Long> installedPkgs = getInstalledPackages(UserHandle.USER_SYSTEM);
         synchronized (mLock) {
-            if (!mUserUnlockedStates.get(UserHandle.USER_SYSTEM)) {
+            if (!mUserUnlockedStates.contains(UserHandle.USER_SYSTEM)) {
                 return false; // user is no longer unlocked
             }
 
@@ -1051,7 +1187,7 @@ public class UsageStatsService extends SystemService implements
     List<UsageStats> queryUsageStats(int userId, int bucketType, long beginTime, long endTime,
             boolean obfuscateInstantApps) {
         synchronized (mLock) {
-            if (!mUserUnlockedStates.get(userId)) {
+            if (!mUserUnlockedStates.contains(userId)) {
                 Slog.w(TAG, "Failed to query usage stats for locked user " + userId);
                 return null;
             }
@@ -1085,7 +1221,7 @@ public class UsageStatsService extends SystemService implements
     List<ConfigurationStats> queryConfigurationStats(int userId, int bucketType, long beginTime,
             long endTime) {
         synchronized (mLock) {
-            if (!mUserUnlockedStates.get(userId)) {
+            if (!mUserUnlockedStates.contains(userId)) {
                 Slog.w(TAG, "Failed to query configuration stats for locked user " + userId);
                 return null;
             }
@@ -1104,7 +1240,7 @@ public class UsageStatsService extends SystemService implements
     List<EventStats> queryEventStats(int userId, int bucketType, long beginTime,
             long endTime) {
         synchronized (mLock) {
-            if (!mUserUnlockedStates.get(userId)) {
+            if (!mUserUnlockedStates.contains(userId)) {
                 Slog.w(TAG, "Failed to query event stats for locked user " + userId);
                 return null;
             }
@@ -1122,7 +1258,7 @@ public class UsageStatsService extends SystemService implements
      */
     UsageEvents queryEvents(int userId, long beginTime, long endTime, int flags) {
         synchronized (mLock) {
-            if (!mUserUnlockedStates.get(userId)) {
+            if (!mUserUnlockedStates.contains(userId)) {
                 Slog.w(TAG, "Failed to query events for locked user " + userId);
                 return null;
             }
@@ -1141,7 +1277,7 @@ public class UsageStatsService extends SystemService implements
     UsageEvents queryEventsForPackage(int userId, long beginTime, long endTime,
             String packageName, boolean includeTaskRoot) {
         synchronized (mLock) {
-            if (!mUserUnlockedStates.get(userId)) {
+            if (!mUserUnlockedStates.contains(userId)) {
                 Slog.w(TAG, "Failed to query package events for locked user " + userId);
                 return null;
             }
@@ -1151,6 +1287,25 @@ public class UsageStatsService extends SystemService implements
                 return null; // user was stopped or removed
             }
             return service.queryEventsForPackage(beginTime, endTime, packageName, includeTaskRoot);
+        }
+    }
+
+    /**
+     * Called via the local interface.
+     */
+    private void registerListener(@NonNull UsageStatsManagerInternal.UsageEventListener listener) {
+        synchronized (mLock) {
+            mUsageEventListeners.add(listener);
+        }
+    }
+
+    /**
+     * Called via the local interface.
+     */
+    private void unregisterListener(
+            @NonNull UsageStatsManagerInternal.UsageEventListener listener) {
+        synchronized (mLock) {
+            mUsageEventListeners.remove(listener);
         }
     }
 
@@ -1166,7 +1321,7 @@ public class UsageStatsService extends SystemService implements
         final int userCount = mUserState.size();
         for (int i = 0; i < userCount; i++) {
             final int userId = mUserState.keyAt(i);
-            if (!mUserUnlockedStates.get(userId)) {
+            if (!mUserUnlockedStates.contains(userId)) {
                 persistPendingEventsLocked(userId);
                 continue;
             }
@@ -1224,7 +1379,7 @@ public class UsageStatsService extends SystemService implements
                             final int numUsers = mUserState.size();
                             for (int user = 0; user < numUsers; user++) {
                                 final int userId = mUserState.keyAt(user);
-                                if (!mUserUnlockedStates.get(userId)) {
+                                if (!mUserUnlockedStates.contains(userId)) {
                                     continue;
                                 }
                                 ipw.println("user=" + userId);
@@ -1251,7 +1406,7 @@ public class UsageStatsService extends SystemService implements
                             final int numUsers = mUserState.size();
                             for (int user = 0; user < numUsers; user++) {
                                 final int userId = mUserState.keyAt(user);
-                                if (!mUserUnlockedStates.get(userId)) {
+                                if (!mUserUnlockedStates.contains(userId)) {
                                     continue;
                                 }
                                 ipw.println("user=" + userId);
@@ -1307,7 +1462,7 @@ public class UsageStatsService extends SystemService implements
                 idpw.printPair("user", userId);
                 idpw.println();
                 idpw.increaseIndent();
-                if (mUserUnlockedStates.get(userId)) {
+                if (mUserUnlockedStates.contains(userId)) {
                     if (checkin) {
                         mUserState.valueAt(i).checkin(idpw);
                     } else {
@@ -1345,7 +1500,7 @@ public class UsageStatsService extends SystemService implements
             ipw.println("the specified user does not exist.");
             return UserHandle.USER_NULL;
         }
-        if (!mUserUnlockedStates.get(userId)) {
+        if (!mUserUnlockedStates.contains(userId)) {
             ipw.println("the specified user is currently in a locked state.");
             return UserHandle.USER_NULL;
         }
@@ -1404,7 +1559,11 @@ public class UsageStatsService extends SystemService implements
                     }
                     break;
                 }
-
+                case MSG_ON_START:
+                    synchronized (mLock) {
+                        loadGlobalComponentUsageLocked();
+                    }
+                    break;
                 default:
                     super.handleMessage(msg);
                     break;
@@ -1433,10 +1592,11 @@ public class UsageStatsService extends SystemService implements
         private boolean hasObserverPermission() {
             final int callingUid = Binder.getCallingUid();
             DevicePolicyManagerInternal dpmInternal = getDpmInternal();
+            //TODO(b/169395065) Figure out if this flow makes sense in Device Owner mode.
             if (callingUid == Process.SYSTEM_UID
                     || (dpmInternal != null
-                        && dpmInternal.isActiveAdminWithPolicy(callingUid,
-                            DeviceAdminInfo.USES_POLICY_PROFILE_OWNER))) {
+                        && (dpmInternal.isActiveProfileOwner(callingUid)
+                        || dpmInternal.isActiveDeviceOwner(callingUid)))) {
                 // Caller is the system or the profile owner, so proceed.
                 return true;
             }
@@ -1485,15 +1645,19 @@ public class UsageStatsService extends SystemService implements
 
         @Override
         public ParceledListSlice<UsageStats> queryUsageStats(int bucketType, long beginTime,
-                long endTime, String callingPackage) {
+                long endTime, String callingPackage, int userId) {
             if (!hasPermission(callingPackage)) {
                 return null;
             }
 
-            final boolean obfuscateInstantApps = shouldObfuscateInstantAppsForCaller(
-                    Binder.getCallingUid(), UserHandle.getCallingUserId());
+            final int callingUid = Binder.getCallingUid();
+            userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(), callingUid,
+                    userId, false, true, "queryUsageStats", callingPackage);
 
-            final int userId = UserHandle.getCallingUserId();
+            // Check the caller's userId for obfuscation decision, not the user being queried
+            final boolean obfuscateInstantApps = shouldObfuscateInstantAppsForCaller(
+                    callingUid, UserHandle.getCallingUserId());
+
             final long token = Binder.clearCallingIdentity();
             try {
                 final List<UsageStats> results = UsageStatsService.this.queryUsageStats(
@@ -1670,8 +1834,8 @@ public class UsageStatsService extends SystemService implements
 
             // If the calling app is asking about itself, continue, else check for permission.
             if (packageName.equals(callingPackage)) {
-                final int actualCallingUid = mPackageManagerInternal.getPackageUidInternal(
-                        callingPackage, 0, userId);
+                final int actualCallingUid = mPackageManagerInternal.getPackageUid(
+                        callingPackage, /* flags= */ 0, userId);
                 if (actualCallingUid != callingUid) {
                     return false;
                 }
@@ -1833,6 +1997,17 @@ public class UsageStatsService extends SystemService implements
             event.mAction = action;
             event.mContentType = contentType;
             event.mContentAnnotations = annotations;
+            reportEventOrAddToQueue(userId, event);
+        }
+
+        @Override
+        public void reportUserInteraction(String packageName, int userId) {
+            Objects.requireNonNull(packageName);
+            if (!isCallingUidSystem()) {
+                throw new SecurityException("Only system is allowed to call reportUserInteraction");
+            }
+            final Event event = new Event(USER_INTERACTION, SystemClock.elapsedRealtime());
+            event.mPackage = packageName;
             reportEventOrAddToQueue(userId, event);
         }
 
@@ -2049,6 +2224,23 @@ public class UsageStatsService extends SystemService implements
         public void forceUsageSourceSettingRead() {
             readUsageSourceSetting();
         }
+
+        @Override
+        public long getLastTimeAnyComponentUsed(String packageName, String callingPackage) {
+            if (!hasPermissions(
+                    callingPackage, android.Manifest.permission.INTERACT_ACROSS_USERS)) {
+                throw new SecurityException("Caller doesn't have INTERACT_ACROSS_USERS permission");
+            }
+            if (!hasPermission(callingPackage)) {
+                throw new SecurityException("Don't have permission to query usage stats");
+            }
+            synchronized (mLock) {
+                // Truncate the returned milliseconds to the boundary of the last day before exact
+                // time for privacy reasons.
+                return mLastTimeComponentUsedGlobal.getOrDefault(packageName, 0L)
+                        / TimeUnit.DAYS.toMillis(1) * TimeUnit.DAYS.toMillis(1);
+            }
+        }
     }
 
     void registerAppUsageObserver(int callingUid, int observerId, String[] packages,
@@ -2167,6 +2359,7 @@ public class UsageStatsService extends SystemService implements
         @Override
         public void reportLocusUpdate(@NonNull ComponentName activity, @UserIdInt int userId,
                 @Nullable LocusId locusId, @NonNull  IBinder appToken) {
+            if (locusId == null) return;
             Event event = new Event(LOCUS_ID_SET, SystemClock.elapsedRealtime());
             event.mLocusId = locusId.getId();
             event.mPackage = activity.getPackageName();
@@ -2212,12 +2405,11 @@ public class UsageStatsService extends SystemService implements
 
         @Override
         public byte[] getBackupPayload(int user, String key) {
+            if (!mUserUnlockedStates.contains(user)) {
+                Slog.w(TAG, "Failed to get backup payload for locked user " + user);
+                return null;
+            }
             synchronized (mLock) {
-                if (!mUserUnlockedStates.get(user)) {
-                    Slog.w(TAG, "Failed to get backup payload for locked user " + user);
-                    return null;
-                }
-
                 // Check to ensure that only user 0's data is b/r for now
                 // Note: if backup and restore is enabled for users other than the system user, the
                 // #onUserUnlocked logic, specifically when the update mappings job is scheduled via
@@ -2237,7 +2429,7 @@ public class UsageStatsService extends SystemService implements
         @Override
         public void applyRestoredPayload(int user, String key, byte[] payload) {
             synchronized (mLock) {
-                if (!mUserUnlockedStates.get(user)) {
+                if (!mUserUnlockedStates.contains(user)) {
                     Slog.w(TAG, "Failed to apply restored payload for locked user " + user);
                     return;
                 }
@@ -2318,6 +2510,22 @@ public class UsageStatsService extends SystemService implements
         @Override
         public boolean updatePackageMappingsData() {
             return UsageStatsService.this.updatePackageMappingsData();
+        }
+
+        /**
+         * Register a listener that will be notified of every new usage event.
+         */
+        @Override
+        public void registerListener(@NonNull UsageEventListener listener) {
+            UsageStatsService.this.registerListener(listener);
+        }
+
+        /**
+         * Unregister a listener from being notified of every new usage event.
+         */
+        @Override
+        public void unregisterListener(@NonNull UsageEventListener listener) {
+            UsageStatsService.this.unregisterListener(listener);
         }
     }
 

@@ -29,6 +29,7 @@ import android.os.PowerManager;
 import android.os.PowerSaveState;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -38,20 +39,19 @@ import com.android.settingslib.utils.PowerUtil;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.demomode.DemoMode;
+import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.power.EnhancedEstimates;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import java.util.List;
 
 /**
  * Default implementation of a {@link BatteryController}. This controller monitors for battery
  * level change events that are broadcasted by the system.
  */
-@Singleton
 public class BatteryControllerImpl extends BroadcastReceiver implements BatteryController {
     private static final String TAG = "BatteryController";
 
@@ -65,35 +65,42 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
             mChangeCallbacks = new ArrayList<>();
     private final ArrayList<EstimateFetchCompletion> mFetchCallbacks = new ArrayList<>();
     private final PowerManager mPowerManager;
+    private final DemoModeController mDemoModeController;
     private final Handler mMainHandler;
     private final Handler mBgHandler;
     protected final Context mContext;
 
     protected int mLevel;
     protected boolean mPluggedIn;
+    private boolean mPluggedInWireless;
     protected boolean mCharging;
     private boolean mStateUnknown = false;
     private boolean mCharged;
     protected boolean mPowerSave;
     private boolean mAodPowerSave;
-    protected boolean mWirelessCharging;
-    private boolean mTestmode = false;
+    private boolean mWirelessCharging;
+    private boolean mTestMode = false;
     @VisibleForTesting
     boolean mHasReceivedBattery = false;
     private Estimate mEstimate;
     private boolean mFetchingEstimate = false;
 
     @VisibleForTesting
-    @Inject
-    public BatteryControllerImpl(Context context, EnhancedEstimates enhancedEstimates,
-            PowerManager powerManager, BroadcastDispatcher broadcastDispatcher,
-            @Main Handler mainHandler, @Background Handler bgHandler) {
+    public BatteryControllerImpl(
+            Context context,
+            EnhancedEstimates enhancedEstimates,
+            PowerManager powerManager,
+            BroadcastDispatcher broadcastDispatcher,
+            DemoModeController demoModeController,
+            @Main Handler mainHandler,
+            @Background Handler bgHandler) {
         mContext = context;
         mMainHandler = mainHandler;
         mBgHandler = bgHandler;
         mPowerManager = powerManager;
         mEstimates = enhancedEstimates;
         mBroadcastDispatcher = broadcastDispatcher;
+        mDemoModeController = demoModeController;
     }
 
     private void registerReceiver() {
@@ -117,6 +124,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
                 onReceive(mContext, intent);
             }
         }
+        mDemoModeController.addCallback(this);
         updatePowerSave();
         updateEstimate();
     }
@@ -138,7 +146,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     }
 
     @Override
-    public void addCallback(BatteryController.BatteryStateChangeCallback cb) {
+    public void addCallback(@NonNull BatteryController.BatteryStateChangeCallback cb) {
         synchronized (mChangeCallbacks) {
             mChangeCallbacks.add(cb);
         }
@@ -148,10 +156,11 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         cb.onBatteryLevelChanged(mLevel, mPluggedIn, mCharging);
         cb.onPowerSaveChanged(mPowerSave);
         cb.onBatteryUnknownStateChanged(mStateUnknown);
+        cb.onWirelessChargingChanged(mWirelessCharging);
     }
 
     @Override
-    public void removeCallback(BatteryController.BatteryStateChangeCallback cb) {
+    public void removeCallback(@NonNull BatteryController.BatteryStateChangeCallback cb) {
         synchronized (mChangeCallbacks) {
             mChangeCallbacks.remove(cb);
         }
@@ -161,19 +170,25 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     public void onReceive(final Context context, Intent intent) {
         final String action = intent.getAction();
         if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
-            if (mTestmode && !intent.getBooleanExtra("testmode", false)) return;
+            if (mTestMode && !intent.getBooleanExtra("testmode", false)) return;
             mHasReceivedBattery = true;
             mLevel = (int)(100f
                     * intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0)
                     / intent.getIntExtra(BatteryManager.EXTRA_SCALE, 100));
             mPluggedIn = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0;
+            mPluggedInWireless = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0)
+                    == BatteryManager.BATTERY_PLUGGED_WIRELESS;
 
             final int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS,
                     BatteryManager.BATTERY_STATUS_UNKNOWN);
             mCharged = status == BatteryManager.BATTERY_STATUS_FULL;
             mCharging = mCharged || status == BatteryManager.BATTERY_STATUS_CHARGING;
-            mWirelessCharging = mCharging && intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0)
-                    == BatteryManager.BATTERY_PLUGGED_WIRELESS;
+            if (mWirelessCharging != (mCharging
+                    && intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0)
+                    == BatteryManager.BATTERY_PLUGGED_WIRELESS)) {
+                mWirelessCharging = !mWirelessCharging;
+                fireWirelessChargingChanged();
+            }
 
             boolean present = intent.getBooleanExtra(EXTRA_PRESENT, true);
             boolean unknown = !present;
@@ -186,37 +201,44 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         } else if (action.equals(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)) {
             updatePowerSave();
         } else if (action.equals(ACTION_LEVEL_TEST)) {
-            mTestmode = true;
+            mTestMode = true;
             mMainHandler.post(new Runnable() {
-                int curLevel = 0;
-                int incr = 1;
-                int saveLevel = mLevel;
-                boolean savePlugged = mPluggedIn;
-                Intent dummy = new Intent(Intent.ACTION_BATTERY_CHANGED);
+                int mCurrentLevel = 0;
+                int mIncrement = 1;
+                int mSavedLevel = mLevel;
+                boolean mSavedPluggedIn = mPluggedIn;
+                Intent mTestIntent = new Intent(Intent.ACTION_BATTERY_CHANGED);
                 @Override
                 public void run() {
-                    if (curLevel < 0) {
-                        mTestmode = false;
-                        dummy.putExtra("level", saveLevel);
-                        dummy.putExtra("plugged", savePlugged);
-                        dummy.putExtra("testmode", false);
+                    if (mCurrentLevel < 0) {
+                        mTestMode = false;
+                        mTestIntent.putExtra("level", mSavedLevel);
+                        mTestIntent.putExtra("plugged", mSavedPluggedIn);
+                        mTestIntent.putExtra("testmode", false);
                     } else {
-                        dummy.putExtra("level", curLevel);
-                        dummy.putExtra("plugged", incr > 0 ? BatteryManager.BATTERY_PLUGGED_AC
-                                : 0);
-                        dummy.putExtra("testmode", true);
+                        mTestIntent.putExtra("level", mCurrentLevel);
+                        mTestIntent.putExtra("plugged",
+                                mIncrement > 0 ? BatteryManager.BATTERY_PLUGGED_AC : 0);
+                        mTestIntent.putExtra("testmode", true);
                     }
-                    context.sendBroadcast(dummy);
+                    context.sendBroadcast(mTestIntent);
 
-                    if (!mTestmode) return;
+                    if (!mTestMode) return;
 
-                    curLevel += incr;
-                    if (curLevel == 100) {
-                        incr *= -1;
+                    mCurrentLevel += mIncrement;
+                    if (mCurrentLevel == 100) {
+                        mIncrement *= -1;
                     }
                     mMainHandler.postDelayed(this, 200);
                 }
             });
+        }
+    }
+
+    private void fireWirelessChargingChanged() {
+        synchronized (mChangeCallbacks) {
+            mChangeCallbacks.forEach(batteryStateChangeCallback ->
+                    batteryStateChangeCallback.onWirelessChargingChanged(mWirelessCharging));
         }
     }
 
@@ -238,6 +260,11 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     @Override
     public boolean isWirelessCharging() {
         return mWirelessCharging;
+    }
+
+    @Override
+    public boolean isPluggedInWireless() {
+        return mPluggedInWireless;
     }
 
     @Override
@@ -348,37 +375,48 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         }
     }
 
-    private boolean mDemoMode;
-
     @Override
     public void dispatchDemoCommand(String command, Bundle args) {
-        if (!mDemoMode && command.equals(COMMAND_ENTER)) {
-            mDemoMode = true;
-            mBroadcastDispatcher.unregisterReceiver(this);
-        } else if (mDemoMode && command.equals(COMMAND_EXIT)) {
-            mDemoMode = false;
-            registerReceiver();
-            updatePowerSave();
-        } else if (mDemoMode && command.equals(COMMAND_BATTERY)) {
-            String level = args.getString("level");
-            String plugged = args.getString("plugged");
-            String powerSave = args.getString("powersave");
-            String present = args.getString("present");
-            if (level != null) {
-                mLevel = Math.min(Math.max(Integer.parseInt(level), 0), 100);
-            }
-            if (plugged != null) {
-                mPluggedIn = Boolean.parseBoolean(plugged);
-            }
-            if (powerSave != null) {
-                mPowerSave = powerSave.equals("true");
-                firePowerSaveChanged();
-            }
-            if (present != null) {
-                mStateUnknown = !present.equals("true");
-                fireBatteryUnknownStateChanged();
-            }
-            fireBatteryLevelChanged();
+        if (!mDemoModeController.isInDemoMode()) {
+            return;
         }
+
+        String level = args.getString("level");
+        String plugged = args.getString("plugged");
+        String powerSave = args.getString("powersave");
+        String present = args.getString("present");
+        if (level != null) {
+            mLevel = Math.min(Math.max(Integer.parseInt(level), 0), 100);
+        }
+        if (plugged != null) {
+            mPluggedIn = Boolean.parseBoolean(plugged);
+        }
+        if (powerSave != null) {
+            mPowerSave = powerSave.equals("true");
+            firePowerSaveChanged();
+        }
+        if (present != null) {
+            mStateUnknown = !present.equals("true");
+            fireBatteryUnknownStateChanged();
+        }
+        fireBatteryLevelChanged();
+    }
+
+    @Override
+    public List<String> demoCommands() {
+        List<String> s = new ArrayList<>();
+        s.add(DemoMode.COMMAND_BATTERY);
+        return s;
+    }
+
+    @Override
+    public void onDemoModeStarted() {
+        mBroadcastDispatcher.unregisterReceiver(this);
+    }
+
+    @Override
+    public void onDemoModeFinished() {
+        registerReceiver();
+        updatePowerSave();
     }
 }

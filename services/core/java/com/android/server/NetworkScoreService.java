@@ -59,7 +59,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.DumpUtils;
-import com.android.server.pm.permission.PermissionManagerServiceInternal;
+import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -290,7 +290,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                     String useOpenWifiPackage = Global.getString(mContext.getContentResolver(),
                             Global.USE_OPEN_WIFI_PACKAGE);
                     if (!TextUtils.isEmpty(useOpenWifiPackage)) {
-                        LocalServices.getService(PermissionManagerServiceInternal.class)
+                        LocalServices.getService(LegacyPermissionManagerInternal.class)
                                 .grantDefaultPermissionsToDefaultUseOpenWifiApp(useOpenWifiPackage,
                                         userId);
                     }
@@ -302,7 +302,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                 false /*notifyForDescendants*/,
                 mUseOpenWifiPackageObserver);
         // Set a callback for the package manager to query the use open wifi app.
-        LocalServices.getService(PermissionManagerServiceInternal.class)
+        LocalServices.getService(LegacyPermissionManagerInternal.class)
                 .setUseOpenWifiAppPackagesProvider((userId) -> {
                     String useOpenWifiPackage = Global.getString(mContext.getContentResolver(),
                             Global.USE_OPEN_WIFI_PACKAGE);

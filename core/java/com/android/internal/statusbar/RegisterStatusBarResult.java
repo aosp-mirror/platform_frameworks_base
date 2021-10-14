@@ -38,14 +38,14 @@ public final class RegisterStatusBarResult implements Parcelable {
     public final int mDisabledFlags2;                   // switch[6]
     public final IBinder mImeToken;
     public final boolean mNavbarColorManagedByIme;
+    public final int mBehavior;
     public final boolean mAppFullscreen;
-    public final boolean mAppImmersive;
     public final int[] mTransientBarTypes;
 
     public RegisterStatusBarResult(ArrayMap<String, StatusBarIcon> icons, int disabledFlags1,
             int appearance, AppearanceRegion[] appearanceRegions, int imeWindowVis,
             int imeBackDisposition, boolean showImeSwitcher, int disabledFlags2, IBinder imeToken,
-            boolean navbarColorManagedByIme, boolean appFullscreen, boolean appImmersive,
+            boolean navbarColorManagedByIme, int behavior, boolean appFullscreen,
             @NonNull int[] transientBarTypes) {
         mIcons = new ArrayMap<>(icons);
         mDisabledFlags1 = disabledFlags1;
@@ -57,8 +57,8 @@ public final class RegisterStatusBarResult implements Parcelable {
         mDisabledFlags2 = disabledFlags2;
         mImeToken = imeToken;
         mNavbarColorManagedByIme = navbarColorManagedByIme;
+        mBehavior = behavior;
         mAppFullscreen = appFullscreen;
-        mAppImmersive = appImmersive;
         mTransientBarTypes = transientBarTypes;
     }
 
@@ -79,8 +79,8 @@ public final class RegisterStatusBarResult implements Parcelable {
         dest.writeInt(mDisabledFlags2);
         dest.writeStrongBinder(mImeToken);
         dest.writeBoolean(mNavbarColorManagedByIme);
+        dest.writeInt(mBehavior);
         dest.writeBoolean(mAppFullscreen);
-        dest.writeBoolean(mAppImmersive);
         dest.writeIntArray(mTransientBarTypes);
     }
 
@@ -103,13 +103,13 @@ public final class RegisterStatusBarResult implements Parcelable {
                     final int disabledFlags2 = source.readInt();
                     final IBinder imeToken = source.readStrongBinder();
                     final boolean navbarColorManagedByIme = source.readBoolean();
+                    final int behavior = source.readInt();
                     final boolean appFullscreen = source.readBoolean();
-                    final boolean appImmersive = source.readBoolean();
                     final int[] transientBarTypes = source.createIntArray();
                     return new RegisterStatusBarResult(icons, disabledFlags1, appearance,
                             appearanceRegions, imeWindowVis, imeBackDisposition, showImeSwitcher,
-                            disabledFlags2, imeToken, navbarColorManagedByIme, appFullscreen,
-                            appImmersive, transientBarTypes);
+                            disabledFlags2, imeToken, navbarColorManagedByIme, behavior,
+                            appFullscreen, transientBarTypes);
                 }
 
                 @Override

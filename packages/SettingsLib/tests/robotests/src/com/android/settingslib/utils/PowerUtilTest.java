@@ -35,10 +35,12 @@ import java.util.regex.Pattern;
 @RunWith(RobolectricTestRunner.class)
 public class PowerUtilTest {
     private static final String TEST_BATTERY_LEVEL_10 = "10%";
+    private static final long TEN_SEC_MILLIS = Duration.ofSeconds(10).toMillis();
     private static final long SEVENTEEN_MIN_MILLIS = Duration.ofMinutes(17).toMillis();
     private static final long FIVE_MINUTES_MILLIS = Duration.ofMinutes(5).toMillis();
     private static final long TEN_MINUTES_MILLIS = Duration.ofMinutes(10).toMillis();
     private static final long THREE_DAYS_MILLIS = Duration.ofDays(3).toMillis();
+    private static final long TEN_HOURS_MILLIS = Duration.ofHours(10).toMillis();
     private static final long THIRTY_HOURS_MILLIS = Duration.ofHours(30).toMillis();
     private static final String NORMAL_CASE_EXPECTED_PREFIX = "Should last until about";
     private static final String ENHANCED_SUFFIX = " based on your usage";
@@ -152,11 +154,40 @@ public class PowerUtilTest {
                 THIRTY_HOURS_MILLIS,
                 TEST_BATTERY_LEVEL_10 /* percentageString */,
                 false /* basedOnUsage */);
+        String info3 = PowerUtil.getBatteryRemainingStringFormatted(mContext,
+                THIRTY_HOURS_MILLIS + TEN_MINUTES_MILLIS,
+                null /* percentageString */,
+                false /* basedOnUsage */);
 
         // We only add special mention for the long string
         assertThat(info).isEqualTo("About 1 day, 6 hr left based on your usage");
         // shortened string should not have extra text
         assertThat(info2).isEqualTo("About 1 day, 6 hr left (10%)");
+        // present 2 time unit at most
+        assertThat(info3).isEqualTo("About 1 day, 6 hr left");
+    }
+
+    @Test
+    public void testGetBatteryRemainingStringFormatted_lessThanOneDay_usesCorrectString() {
+        String info = PowerUtil.getBatteryRemainingStringFormatted(mContext,
+                TEN_HOURS_MILLIS,
+                null /* percentageString */,
+                true /* basedOnUsage */);
+        String info2 = PowerUtil.getBatteryRemainingStringFormatted(mContext,
+                TEN_HOURS_MILLIS,
+                TEST_BATTERY_LEVEL_10 /* percentageString */,
+                false /* basedOnUsage */);
+        String info3 = PowerUtil.getBatteryRemainingStringFormatted(mContext,
+                TEN_HOURS_MILLIS + TEN_MINUTES_MILLIS + TEN_SEC_MILLIS,
+                null /* percentageString */,
+                false /* basedOnUsage */);
+
+        // We only add special mention for the long string
+        assertThat(info).isEqualTo("About 10 hr left based on your usage");
+        // shortened string should not have extra text
+        assertThat(info2).isEqualTo("About 10 hr left (10%)");
+        // present 2 time unit at most
+        assertThat(info3).isEqualTo("About 10 hr, 10 min left");
     }
 
     @Test

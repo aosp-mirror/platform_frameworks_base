@@ -18,9 +18,12 @@ android_test {
     ],
 
     static_libs: [
-        "android-support-test",
+        "androidx.test.core",
+        "androidx.test.rules",
+        "compatibility-device-util-axt",
         "mockito-target-minus-junit4",
-        "testng"
+        "testng",
+        "truth-prebuilt",
     ],
 
     platform_apis: true,

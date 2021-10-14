@@ -34,11 +34,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
-import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
+import android.content.pm.parsing.ApkLiteParseUtils;
+import android.content.pm.parsing.PackageLite;
+import android.content.pm.parsing.result.ParseResult;
+import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.Build;
 import android.os.Debug;
 import android.os.Environment;
@@ -47,7 +49,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
-import android.os.UserManagerInternal;
 import android.os.incremental.IncrementalManager;
 import android.os.incremental.V4Signature;
 import android.os.incremental.V4Signature.HashingInfo;
@@ -68,7 +69,6 @@ import com.android.server.EventLogTags;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.pm.permission.PermissionsState;
 
 import dalvik.system.VMRuntime;
 
@@ -105,7 +105,8 @@ import java.util.zip.GZIPInputStream;
  * {@hide}
  */
 public class PackageManagerServiceUtils {
-    private final static long SEVEN_DAYS_IN_MILLISECONDS = 7 * 24 * 60 * 60 * 1000;
+    private static final long SEVEN_DAYS_IN_MILLISECONDS = 7 * 24 * 60 * 60 * 1000;
+    private static final long MAX_CRITICAL_INFO_DUMP_SIZE = 3 * 1000 * 1000; // 3MB
 
     public final static Predicate<PackageSetting> REMOVE_IF_NULL_PKG =
             pkgSetting -> pkgSetting.pkg == null;
@@ -328,11 +329,11 @@ public class PackageManagerServiceUtils {
     }
 
     public static long getLastModifiedTime(AndroidPackage pkg) {
-        final File srcFile = new File(pkg.getCodePath());
+        final File srcFile = new File(pkg.getPath());
         if (!srcFile.isDirectory()) {
             return srcFile.lastModified();
         }
-        final File baseFile = new File(pkg.getBaseCodePath());
+        final File baseFile = new File(pkg.getBaseApkPath());
         long maxModifiedTime = baseFile.lastModified();
         if (pkg.getSplitCodePaths() != null) {
             for (int i = pkg.getSplitCodePaths().length - 1; i >=0; --i) {
@@ -351,7 +352,12 @@ public class PackageManagerServiceUtils {
     }
 
     public static void dumpCriticalInfo(ProtoOutputStream proto) {
-        try (BufferedReader in = new BufferedReader(new FileReader(getSettingsProblemFile()))) {
+        final File file = getSettingsProblemFile();
+        final long skipSize = file.length() - MAX_CRITICAL_INFO_DUMP_SIZE;
+        try (BufferedReader in = new BufferedReader(new FileReader(file))) {
+            if (skipSize > 0) {
+                in.skip(skipSize);
+            }
             String line = null;
             while ((line = in.readLine()) != null) {
                 if (line.contains("ignored: updated version")) continue;
@@ -362,7 +368,12 @@ public class PackageManagerServiceUtils {
     }
 
     public static void dumpCriticalInfo(PrintWriter pw, String msg) {
-        try (BufferedReader in = new BufferedReader(new FileReader(getSettingsProblemFile()))) {
+        final File file = getSettingsProblemFile();
+        final long skipSize = file.length() - MAX_CRITICAL_INFO_DUMP_SIZE;
+        try (BufferedReader in = new BufferedReader(new FileReader(file))) {
+            if (skipSize > 0) {
+                in.skip(skipSize);
+            }
             String line = null;
             while ((line = in.readLine()) != null) {
                 if (line.contains("ignored: updated version")) continue;
@@ -423,18 +434,13 @@ public class PackageManagerServiceUtils {
 
     /**
      * Derive the value of the {@code cpuAbiOverride} based on the provided
-     * value and an optional stored value from the package settings.
+     * value.
      */
-    public static String deriveAbiOverride(String abiOverride, PackageSetting settings) {
-        String cpuAbiOverride = null;
+    public static String deriveAbiOverride(String abiOverride) {
         if (NativeLibraryHelper.CLEAR_ABI_OVERRIDE.equals(abiOverride)) {
-            cpuAbiOverride = null;
-        } else if (abiOverride != null) {
-            cpuAbiOverride = abiOverride;
-        } else if (settings != null) {
-            cpuAbiOverride = settings.cpuAbiOverrideString;
+            return null;
         }
-        return cpuAbiOverride;
+        return abiOverride;
     }
 
     /**
@@ -618,7 +624,7 @@ public class PackageManagerServiceUtils {
      */
     public static boolean verifySignatures(PackageSetting pkgSetting,
             PackageSetting disabledPkgSetting, PackageParser.SigningDetails parsedSignatures,
-            boolean compareCompat, boolean compareRecover)
+            boolean compareCompat, boolean compareRecover, boolean isRollback)
             throws PackageManagerException {
         final String packageName = pkgSetting.name;
         boolean compatMatch = false;
@@ -650,6 +656,13 @@ public class PackageManagerServiceUtils {
 
             if (!match && isApkVerificationForced(disabledPkgSetting)) {
                 match = matchSignatureInSystem(pkgSetting, disabledPkgSetting);
+            }
+
+            if (!match && isRollback) {
+                // Since a rollback can only be initiated for an APK previously installed on the
+                // device allow rolling back to a previous signing key even if the rollback
+                // capability has not been granted.
+                match = pkgSetting.signatures.mSigningDetails.hasAncestorOrSelf(parsedSignatures);
             }
 
             if (!match) {
@@ -816,24 +829,20 @@ public class PackageManagerServiceUtils {
     /**
      * Parse given package and return minimal details.
      */
-    public static PackageInfoLite getMinimalPackageInfo(Context context, String packagePath,
-            int flags, String abiOverride) {
+    public static PackageInfoLite getMinimalPackageInfo(Context context, PackageLite pkg,
+            String packagePath, int flags, String abiOverride) {
         final PackageInfoLite ret = new PackageInfoLite();
-        if (packagePath == null) {
+        if (packagePath == null || pkg == null) {
             Slog.i(TAG, "Invalid package file " + packagePath);
             ret.recommendedInstallLocation = PackageHelper.RECOMMEND_FAILED_INVALID_APK;
             return ret;
         }
 
         final File packageFile = new File(packagePath);
-        final PackageParser.PackageLite pkg;
         final long sizeBytes;
         try {
-            pkg = PackageParser.parsePackageLite(packageFile, 0);
             sizeBytes = PackageHelper.calculateInstalledSize(pkg, abiOverride);
-        } catch (PackageParserException | IOException e) {
-            Slog.w(TAG, "Failed to parse package at " + packagePath + ": " + e);
-
+        } catch (IOException e) {
             if (!packageFile.exists()) {
                 ret.recommendedInstallLocation = PackageHelper.RECOMMEND_FAILED_INVALID_URI;
             } else {
@@ -844,19 +853,19 @@ public class PackageManagerServiceUtils {
         }
 
         final int recommendedInstallLocation = PackageHelper.resolveInstallLocation(context,
-                pkg.packageName, pkg.installLocation, sizeBytes, flags);
+                pkg.getPackageName(), pkg.getInstallLocation(), sizeBytes, flags);
 
-        ret.packageName = pkg.packageName;
-        ret.splitNames = pkg.splitNames;
-        ret.versionCode = pkg.versionCode;
-        ret.versionCodeMajor = pkg.versionCodeMajor;
-        ret.baseRevisionCode = pkg.baseRevisionCode;
-        ret.splitRevisionCodes = pkg.splitRevisionCodes;
-        ret.installLocation = pkg.installLocation;
-        ret.verifiers = pkg.verifiers;
+        ret.packageName = pkg.getPackageName();
+        ret.splitNames = pkg.getSplitNames();
+        ret.versionCode = pkg.getVersionCode();
+        ret.versionCodeMajor = pkg.getVersionCodeMajor();
+        ret.baseRevisionCode = pkg.getBaseRevisionCode();
+        ret.splitRevisionCodes = pkg.getSplitRevisionCodes();
+        ret.installLocation = pkg.getInstallLocation();
+        ret.verifiers = pkg.getVerifiers();
         ret.recommendedInstallLocation = recommendedInstallLocation;
-        ret.multiArch = pkg.multiArch;
-        ret.debuggable = pkg.debuggable;
+        ret.multiArch = pkg.isMultiArch();
+        ret.debuggable = pkg.isDebuggable();
 
         return ret;
     }
@@ -869,11 +878,16 @@ public class PackageManagerServiceUtils {
      */
     public static long calculateInstalledSize(String packagePath, String abiOverride) {
         final File packageFile = new File(packagePath);
-        final PackageParser.PackageLite pkg;
         try {
-            pkg = PackageParser.parsePackageLite(packageFile, 0);
-            return PackageHelper.calculateInstalledSize(pkg, abiOverride);
-        } catch (PackageParserException | IOException e) {
+            final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+            final ParseResult<PackageLite> result = ApkLiteParseUtils.parsePackageLite(
+                    input.reset(), packageFile, /* flags */ 0);
+            if (result.isError()) {
+                throw new PackageManagerException(result.getErrorCode(),
+                        result.getErrorMessage(), result.getException());
+            }
+            return PackageHelper.calculateInstalledSize(result.getResult(), abiOverride);
+        } catch (PackageManagerException | IOException e) {
             Slog.w(TAG, "Failed to calculate installed size: " + e);
             return -1;
         }
@@ -932,16 +946,23 @@ public class PackageManagerServiceUtils {
 
         try {
             final File packageFile = new File(packagePath);
-            final PackageParser.PackageLite pkg = PackageParser.parsePackageLite(packageFile, 0);
-            copyFile(pkg.baseCodePath, targetDir, "base.apk");
-            if (!ArrayUtils.isEmpty(pkg.splitNames)) {
-                for (int i = 0; i < pkg.splitNames.length; i++) {
-                    copyFile(pkg.splitCodePaths[i], targetDir,
-                            "split_" + pkg.splitNames[i] + ".apk");
+            final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+            final ParseResult<PackageLite> result = ApkLiteParseUtils.parsePackageLite(
+                    input.reset(), packageFile, /* flags */ 0);
+            if (result.isError()) {
+                Slog.w(TAG, "Failed to parse package at " + packagePath);
+                return result.getErrorCode();
+            }
+            final PackageLite pkg = result.getResult();
+            copyFile(pkg.getBaseApkPath(), targetDir, "base.apk");
+            if (!ArrayUtils.isEmpty(pkg.getSplitNames())) {
+                for (int i = 0; i < pkg.getSplitNames().length; i++) {
+                    copyFile(pkg.getSplitApkPaths()[i], targetDir,
+                            "split_" + pkg.getSplitNames()[i] + ".apk");
                 }
             }
             return PackageManager.INSTALL_SUCCEEDED;
-        } catch (PackageParserException | IOException | ErrnoException e) {
+        } catch (IOException | ErrnoException e) {
             Slog.w(TAG, "Failed to copy package at " + packagePath + ": " + e);
             return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
         }
@@ -965,20 +986,6 @@ public class PackageManagerServiceUtils {
         } finally {
             IoUtils.closeQuietly(source);
         }
-    }
-
-    /**
-     * Returns the {@link PermissionsState} for the given package. If the {@link PermissionsState}
-     * could not be found, {@code null} will be returned.
-     */
-    public static PermissionsState getPermissionsState(
-            PackageManagerInternal packageManagerInternal, AndroidPackage pkg) {
-        final PackageSetting packageSetting = packageManagerInternal.getPackageSetting(
-                pkg.getPackageName());
-        if (packageSetting == null) {
-            return null;
-        }
-        return packageSetting.getPermissionsState();
     }
 
     /**

@@ -33,6 +33,7 @@ license {
 
 android_app {
     name: "InputDevices",
+    defaults: ["platform_app_defaults"],
 
     srcs: [
         "**/*.java",

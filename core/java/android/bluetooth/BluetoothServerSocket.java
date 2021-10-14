@@ -16,6 +16,7 @@
 
 package android.bluetooth;
 
+import android.annotation.SuppressLint;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Handler;
 import android.os.ParcelUuid;
@@ -62,9 +63,6 @@ import java.io.IOException;
  * safe. In particular, {@link #close} will always immediately abort ongoing
  * operations and close the server socket.
  *
- * <p class="note"><strong>Note:</strong>
- * Requires the {@link android.Manifest.permission#BLUETOOTH} permission.
- *
  * <div class="special reference">
  * <h3>Developer Guides</h3>
  * <p>For more information about using Bluetooth, read the
@@ -73,6 +71,7 @@ import java.io.IOException;
  *
  * {@see BluetoothSocket}
  */
+@SuppressLint("AndroidFrameworkBluetoothPermission")
 public final class BluetoothServerSocket implements Closeable {
 
     private static final String TAG = "BluetoothServerSocket";

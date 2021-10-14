@@ -30,6 +30,7 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.BLASTBufferQueue;
 import android.graphics.Insets;
 import android.graphics.Outline;
 import android.graphics.Paint;
@@ -149,9 +150,6 @@ public final class Magnifier {
     private int mLeftCutWidth = 0;
     // The width of the cut region on the right edge of the pixel copy source rect.
     private int mRightCutWidth = 0;
-    // The horizontal bounds of the content source in pixels, relative to the view.
-    private int mLeftBound = Integer.MIN_VALUE;
-    private int mRightBound = Integer.MAX_VALUE;
     // The width of the ramp region in pixels on the left & right sides of the fish-eye effect.
     private final int mRamp;
 
@@ -244,18 +242,6 @@ public final class Magnifier {
     }
 
     /**
-     * Sets the horizontal bounds of the source when showing the magnifier.
-     * This is used for new style magnifier. e.g. limit the source bounds by the text line bounds.
-     *
-     * @param left the left of the bounds, relative to the view.
-     * @param right the right of the bounds, relative to the view.
-     */
-    void setSourceHorizontalBounds(int left, int right) {
-        mLeftBound = left;
-        mRightBound = right;
-    }
-
-    /**
      * Shows the magnifier on the screen. The method takes the coordinates of the center
      * of the content source going to be magnified and copied to the magnifier. The coordinates
      * are relative to the top left corner of the magnified view. The magnifier will be
@@ -278,6 +264,14 @@ public final class Magnifier {
         show(sourceCenterX, sourceCenterY,
                 sourceCenterX + mDefaultHorizontalSourceToMagnifierOffset,
                 sourceCenterY + mDefaultVerticalSourceToMagnifierOffset);
+    }
+
+    private Drawable mCursorDrawable;
+    private boolean mDrawCursorEnabled;
+
+    void setDrawCursor(boolean enabled, Drawable cursorDrawable) {
+        mDrawCursorEnabled = enabled;
+        mCursorDrawable = cursorDrawable;
     }
 
     /**
@@ -309,8 +303,7 @@ public final class Magnifier {
             magnifierCenterX = mClampedCenterZoomCoords.x - mViewCoordinatesInSurface[0];
             magnifierCenterY = mClampedCenterZoomCoords.y - mViewCoordinatesInSurface[1];
 
-            // mLeftBound & mRightBound (typically the text line left/right) is for magnified
-            // content. However the PixelCopy requires the pre-magnified bounds.
+            // PixelCopy requires the pre-magnified bounds.
             // The below logic calculates the leftBound & rightBound for the pre-magnified bounds.
             final float rampPre =
                     (mSourceWidth - (mSourceWidth - 2 * mRamp) / mZoom) / 2;
@@ -318,7 +311,7 @@ public final class Magnifier {
             // Calculates the pre-zoomed left edge.
             // The leftEdge moves from the left of view towards to sourceCenterX, considering the
             // fisheye-like zooming.
-            final float x0 = sourceCenterX - mSourceWidth / 2;
+            final float x0 = sourceCenterX - mSourceWidth / 2f;
             final float rampX0 = x0 + mRamp;
             float leftEdge = 0;
             if (leftEdge > rampX0) {
@@ -330,12 +323,12 @@ public final class Magnifier {
                 // increase per ramp zoom (ramp / rampPre).
                 leftEdge = x0 + rampPre - (rampX0 - leftEdge) * rampPre / mRamp;
             }
-            int leftBound = Math.min(Math.max((int) leftEdge, mLeftBound), mRightBound);
+            int leftBound = Math.min((int) leftEdge, mView.getWidth());
 
             // Calculates the pre-zoomed right edge.
             // The rightEdge moves from the right of view towards to sourceCenterX, considering the
             // fisheye-like zooming.
-            final float x1 = sourceCenterX + mSourceWidth / 2;
+            final float x1 = sourceCenterX + mSourceWidth / 2f;
             final float rampX1 = x1 - mRamp;
             float rightEdge = mView.getWidth();
             if (rightEdge < rampX1) {
@@ -347,7 +340,7 @@ public final class Magnifier {
                 // increase per ramp zoom (ramp / rampPre).
                 rightEdge = x1 - rampPre + (rightEdge - rampX1) * rampPre / mRamp;
             }
-            int rightBound = Math.max(leftBound, Math.min((int) rightEdge, mRightBound));
+            int rightBound = Math.max(leftBound, (int) rightEdge);
 
             // Gets the startX for new style, which should be bounded by the horizontal bounds.
             // Also calculates the left/right cut width for pixel copy.
@@ -772,6 +765,23 @@ public final class Magnifier {
         }
     }
 
+    private void maybeDrawCursor(Canvas canvas) {
+        if (mDrawCursorEnabled) {
+            if (mCursorDrawable != null) {
+                mCursorDrawable.setBounds(
+                        mSourceWidth / 2, 0,
+                        mSourceWidth / 2 + mCursorDrawable.getIntrinsicWidth(), mSourceHeight);
+                mCursorDrawable.draw(canvas);
+            } else {
+                Paint paint = new Paint();
+                paint.setColor(Color.BLACK);  // The cursor on magnifier is by default in black.
+                canvas.drawRect(
+                        new Rect(mSourceWidth / 2 - 1, 0, mSourceWidth / 2 + 1, mSourceHeight),
+                        paint);
+            }
+        }
+    }
+
     private void performPixelCopy(final int startXInSurface, final int startYInSurface,
             final boolean updateWindowPosition) {
         if (mContentCopySurface.mSurface == null || !mContentCopySurface.mSurface.isValid()) {
@@ -827,8 +837,10 @@ public final class Magnifier {
                             final Rect dstRect = new Rect(mLeftCutWidth, 0,
                                     mSourceWidth - mRightCutWidth, bitmap.getHeight());
                             can.drawBitmap(bitmap, null, dstRect, null);
+                            maybeDrawCursor(can);
                             mWindow.updateContent(newBitmap);
                         } else {
+                            maybeDrawCursor(new Canvas(bitmap));
                             mWindow.updateContent(bitmap);
                         }
                     }
@@ -927,6 +939,8 @@ public final class Magnifier {
         // The surface we allocate for the magnifier content + shadow.
         private final SurfaceSession mSurfaceSession;
         private final SurfaceControl mSurfaceControl;
+        private final SurfaceControl mBbqSurfaceControl;
+        private final BLASTBufferQueue mBBQ;
         private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
         private final Surface mSurface;
         // The renderer used for the allocated surface.
@@ -993,15 +1007,23 @@ public final class Magnifier {
             final int surfaceHeight = mContentHeight + 2 * mOffsetY;
             mSurfaceSession = new SurfaceSession();
             mSurfaceControl = new SurfaceControl.Builder(mSurfaceSession)
-                    .setFormat(PixelFormat.TRANSLUCENT)
-                    .setBufferSize(surfaceWidth, surfaceHeight)
                     .setName("magnifier surface")
                     .setFlags(SurfaceControl.HIDDEN)
+                    .setContainerLayer()
                     .setParent(parentSurfaceControl)
                     .setCallsite("InternalPopupWindow")
                     .build();
-            mSurface = new Surface();
-            mSurface.copyFrom(mSurfaceControl);
+            mBbqSurfaceControl = new SurfaceControl.Builder(mSurfaceSession)
+                    .setName("magnifier surface bbq wrapper")
+                    .setHidden(false)
+                    .setBLASTLayer()
+                    .setParent(mSurfaceControl)
+                    .setCallsite("InternalPopupWindow")
+                    .build();
+
+            mBBQ = new BLASTBufferQueue("magnifier surface", mBbqSurfaceControl,
+                surfaceWidth, surfaceHeight, PixelFormat.TRANSLUCENT);
+            mSurface = mBBQ.createSurface();
 
             // Setup the RenderNode tree. The root has two children, one containing the bitmap
             // and one containing the overlay. We use a separate render node for the overlay
@@ -1060,9 +1082,8 @@ public final class Magnifier {
             }
             if (mContentHeight < contentHeight) {
                 // Grows the surface height as necessary.
-                new SurfaceControl.Transaction().setBufferSize(
-                        mSurfaceControl, mContentWidth, contentHeight).apply();
-                mSurface.copyFrom(mSurfaceControl);
+                mBBQ.update(mBbqSurfaceControl, mContentWidth, contentHeight,
+                    PixelFormat.TRANSLUCENT);
                 mRenderer.setSurface(mSurface);
 
                 final Outline outline = new Outline();
@@ -1257,7 +1278,11 @@ public final class Magnifier {
             // Destroy the renderer. This will not proceed until pending frame callbacks complete.
             mRenderer.destroy();
             mSurface.destroy();
-            new SurfaceControl.Transaction().remove(mSurfaceControl).apply();
+            mBBQ.destroy();
+            new SurfaceControl.Transaction()
+                    .remove(mSurfaceControl)
+                    .remove(mBbqSurfaceControl)
+                    .apply();
             mSurfaceSession.kill();
             mHandler.removeCallbacks(mMagnifierUpdater);
             if (mBitmap != null) {
@@ -1323,9 +1348,6 @@ public final class Magnifier {
                         if (!mSurface.isValid()) {
                             return;
                         }
-                        // Show or move the window at the content draw frame.
-                        mTransaction.deferTransactionUntil(mSurfaceControl, mSurfaceControl,
-                                frame);
                         if (updateWindowPosition) {
                             mTransaction.setPosition(mSurfaceControl, pendingX, pendingY);
                         }
@@ -1334,7 +1356,8 @@ public final class Magnifier {
                                 .show(mSurfaceControl);
 
                         }
-                        mTransaction.apply();
+                        // Show or move the window at the content draw frame.
+                        mBBQ.mergeWithNextTransaction(mTransaction, frame);
                     };
                     if (!mIsFishEyeStyle) {
                         // The new style magnifier doesn't need the light/shadow.

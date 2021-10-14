@@ -497,7 +497,7 @@ public class NotificationBuilderTest extends Activity
         intent.setData(Uri.fromParts("content", "//status_bar_test/delete/" + id, null));
         intent.putExtra(ConfirmationActivity.EXTRA_TITLE, "Delete intent");
         intent.putExtra(ConfirmationActivity.EXTRA_TEXT, "id: " + id);
-        return PendingIntent.getActivity(this, 0, intent, 0);
+        return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_MUTABLE_UNAUDITED);
     }
 
     private PendingIntent makeContentIntent(int id) {
@@ -505,7 +505,7 @@ public class NotificationBuilderTest extends Activity
         intent.setData(Uri.fromParts("content", "//status_bar_test/content/" + id, null));
         intent.putExtra(ConfirmationActivity.EXTRA_TITLE, "Content intent");
         intent.putExtra(ConfirmationActivity.EXTRA_TEXT, "id: " + id);
-        return PendingIntent.getActivity(this, 0, intent, 0);
+        return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_MUTABLE_UNAUDITED);
     }
 }
 

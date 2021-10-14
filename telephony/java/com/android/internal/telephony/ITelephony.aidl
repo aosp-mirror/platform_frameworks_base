@@ -298,9 +298,9 @@ interface ITelephony {
     int getCallState();
 
     /**
-     * Returns the call state for a slot.
+     * Returns the call state for a specific subscriiption.
      */
-    int getCallStateForSlot(int slotIndex);
+    int getCallStateForSubscription(int subId, String callingPackage, String featureId);
 
     /**
      * Replaced by getDataActivityForSubId.
@@ -1063,17 +1063,21 @@ interface ITelephony {
 
     /**
      * Similar to above, but check for the package whose name is pkgName.
+     * Requires that the calling app has READ_PRIVILEGED_PHONE_STATE permission
      */
     int checkCarrierPrivilegesForPackage(int subId, String pkgName);
 
     /**
      * Similar to above, but check across all phones.
+     * Requires that the calling app has READ_PRIVILEGED_PHONE_STATE permission
      */
     int checkCarrierPrivilegesForPackageAnyPhone(String pkgName);
 
     /**
      * Returns list of the package names of the carrier apps that should handle the input intent
      * and have carrier privileges for the given phoneId.
+     *
+     * Requires that the calling app has READ_PRIVILEGED_PHONE_STATE permission
      *
      * @param intent Intent that will be sent.
      * @param phoneId The phoneId on which the carrier app has carrier privileges.
@@ -1207,6 +1211,9 @@ interface ITelephony {
      * @return phone radio type and access technology
      */
     int getRadioAccessFamily(in int phoneId, String callingPackage);
+
+    void uploadCallComposerPicture(int subscriptionId, String callingPackage,
+            String contentType, in ParcelFileDescriptor fd, in ResultReceiver callback);
 
     /**
      * Enables or disables video calling.
@@ -1440,11 +1447,13 @@ interface ITelephony {
 
     /**
      * Returns a list of packages that have carrier privileges for the specific phone.
+     * Requires that the calling app has READ_PRIVILEGED_PHONE_STATE permission
      */
     List<String> getPackagesWithCarrierPrivileges(int phoneId);
 
      /**
       * Returns a list of packages that have carrier privileges.
+      * Requires that the calling app has READ_PRIVILEGED_PHONE_STATE permission
       */
     List<String> getPackagesWithCarrierPrivilegesForAllPhones();
 
@@ -1911,6 +1920,16 @@ interface ITelephony {
     void setVoWiFiSettingEnabled(int subId, boolean isEnabled);
 
     /**
+     * return true if the user's setting for Voice over Cross SIM is enabled and false if it is not
+     */
+    boolean isCrossSimCallingEnabledByUser(int subId);
+
+    /**
+     * Sets the user's setting for whether or not Voice over Cross SIM is enabled.
+     */
+    void setCrossSimCallingEnabled(int subId, boolean isEnabled);
+
+    /**
      * return true if the user's setting for Voice over WiFi while roaming is enabled.
      */
     boolean isVoWiFiRoamingSettingEnabled(int subId);
@@ -2156,7 +2175,7 @@ interface ITelephony {
      */
     String getMmsUAProfUrl(int subId);
 
-    void setMobileDataPolicyEnabledStatus(int subscriptionId, int policy, boolean enabled);
+    void setMobileDataPolicyEnabled(int subscriptionId, int policy, boolean enabled);
 
     boolean isMobileDataPolicyEnabled(int subscriptionId, int policy);
 
@@ -2189,7 +2208,7 @@ interface ITelephony {
 
     /**
      * Get the user manual network selection.
-     * Return empty string if in automatic selection.
+     * Return null if inactive or phone process is down.
      *
      * @param subId the id of the subscription
      * @return operatorinfo on success
@@ -2246,7 +2265,7 @@ interface ITelephony {
             String callingPackage);
 
     /**
-     * Get the Generic Bootstrapping Architecture authentication keys
+     * get the Generic Bootstrapping Architecture authentication keys
      */
     void bootstrapAuthenticationRequest(int subId, int appType, in Uri nafUrl,
             in UaSecurityProtocolIdentifier securityProtocol,
@@ -2329,6 +2348,17 @@ interface ITelephony {
     void sendDeviceToDeviceMessage(int message, int value);
 
     /**
+     * Sets the specified transport active; only for use through shell.
+     */
+    void setActiveDeviceToDeviceTransport(String transport);
+
+    /**
+     * Forces Device to Device communication to be enabled, even if the device config has it
+     * disabled.
+     */
+    void setDeviceToDeviceForceEnabled(boolean isForceEnabled);
+
+    /**
      * Gets the config of RCS VoLTE single registration enabled for the carrier/subscription.
      */
     boolean getCarrierSingleRegistrationEnabled(int subId);
@@ -2358,6 +2388,11 @@ interface ITelephony {
      * Get the EAB contact from the EAB database.
      */
     String getContactFromEab(String contact);
+
+    /**
+     * Get the EAB capability from the EAB database.
+     */
+    String getCapabilityFromEab(String contact);
 
     /*
      * Check whether the device supports RCS User Capability Exchange or not.
@@ -2430,6 +2465,11 @@ interface ITelephony {
             String callingPackage);
 
     /**
+     * Gets the current phone capability.
+     */
+    PhoneCapability getPhoneCapability();
+
+    /**
      * Prepare TelephonyManager for an unattended reboot. The reboot is
      * required to be done shortly after the API is invoked.
      *
@@ -2442,11 +2482,6 @@ interface ITelephony {
      * of error.
      */
     int prepareForUnattendedReboot();
-
-    /**
-     * Gets the current phone capability.
-     */
-    PhoneCapability getPhoneCapability();
 
     /**
      * Request to get the current slicing configuration including URSP rules and

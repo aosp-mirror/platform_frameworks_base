@@ -21,14 +21,15 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.ArrayMap;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
+import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
@@ -42,11 +43,16 @@ import java.util.ArrayList;
  * supported by this class is purposefully restricted to simple objects that can
  * safely be persisted to and restored from disk.
  *
+ * <p><b>Warning:</b> Note that {@link PersistableBundle} is a lazy container and as such it does
+ * NOT implement {@link #equals(Object)} or {@link #hashCode()}.
+ *
  * @see Bundle
  */
 public final class PersistableBundle extends BaseBundle implements Cloneable, Parcelable,
         XmlUtils.WriteMapCallback {
     private static final String TAG_PERSISTABLEMAP = "pbundle_as_map";
+
+    /** An unmodifiable {@code PersistableBundle} that is always {@link #isEmpty() empty}. */
     public static final PersistableBundle EMPTY;
 
     static {
@@ -239,7 +245,7 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
 
     /** @hide */
     @Override
-    public void writeUnknownObject(Object v, String name, XmlSerializer out)
+    public void writeUnknownObject(Object v, String name, TypedXmlSerializer out)
             throws XmlPullParserException, IOException {
         if (v instanceof PersistableBundle) {
             out.startTag(null, TAG_PERSISTABLEMAP);
@@ -253,6 +259,11 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
 
     /** @hide */
     public void saveToXml(XmlSerializer out) throws IOException, XmlPullParserException {
+        saveToXml(XmlUtils.makeTyped(out));
+    }
+
+    /** @hide */
+    public void saveToXml(TypedXmlSerializer out) throws IOException, XmlPullParserException {
         unparcel();
         XmlUtils.writeMapXml(mMap, out, this);
     }
@@ -260,7 +271,7 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
     /** @hide */
     static class MyReadMapCallback implements  XmlUtils.ReadMapCallback {
         @Override
-        public Object readThisUnknownObjectXml(XmlPullParser in, String tag)
+        public Object readThisUnknownObjectXml(TypedXmlPullParser in, String tag)
                 throws XmlPullParserException, IOException {
             if (TAG_PERSISTABLEMAP.equals(tag)) {
                 return restoreFromXml(in);
@@ -295,6 +306,12 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
     /** @hide */
     public static PersistableBundle restoreFromXml(XmlPullParser in) throws IOException,
             XmlPullParserException {
+        return restoreFromXml(XmlUtils.makeTyped(in));
+    }
+
+    /** @hide */
+    public static PersistableBundle restoreFromXml(TypedXmlPullParser in) throws IOException,
+            XmlPullParserException {
         final int outerDepth = in.getDepth();
         final String startTag = in.getName();
         final String[] tagName = new String[1];
@@ -310,8 +327,12 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
         return new PersistableBundle();  // An empty mutable PersistableBundle
     }
 
+    /**
+     * Returns a string representation of the {@link PersistableBundle} that may be suitable for
+     * debugging. It won't print the internal map if its content hasn't been unparcelled.
+     */
     @Override
-    synchronized public String toString() {
+    public synchronized String toString() {
         if (mParcelledData != null) {
             if (isEmptyParcel()) {
                 return "PersistableBundle[EMPTY_PARCEL]";
@@ -360,7 +381,7 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
      * @see #readFromStream
      */
     public void writeToStream(@NonNull OutputStream outputStream) throws IOException {
-        FastXmlSerializer serializer = new FastXmlSerializer();
+        TypedXmlSerializer serializer = Xml.newFastSerializer();
         serializer.setOutput(outputStream, UTF_8.name());
         serializer.startTag(null, "bundle");
         try {
@@ -383,7 +404,7 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
     public static PersistableBundle readFromStream(@NonNull InputStream inputStream)
             throws IOException {
         try {
-            XmlPullParser parser = XmlPullParserFactory.newInstance().newPullParser();
+            TypedXmlPullParser parser = Xml.newFastPullParser();
             parser.setInput(inputStream, UTF_8.name());
             parser.next();
             return PersistableBundle.restoreFromXml(parser);

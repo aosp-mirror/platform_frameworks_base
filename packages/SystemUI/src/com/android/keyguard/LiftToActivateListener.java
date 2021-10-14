@@ -16,10 +16,11 @@
 
 package com.android.keyguard;
 
-import android.content.Context;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
+
+import javax.inject.Inject;
 
 /**
  * Hover listener that implements lift-to-activate interaction for
@@ -31,9 +32,9 @@ class LiftToActivateListener implements View.OnHoverListener {
 
     private boolean mCachedClickableState;
 
-    public LiftToActivateListener(Context context) {
-        mAccessibilityManager = (AccessibilityManager) context.getSystemService(
-                Context.ACCESSIBILITY_SERVICE);
+    @Inject
+    LiftToActivateListener(AccessibilityManager accessibilityManager) {
+        mAccessibilityManager = accessibilityManager;
     }
 
     @Override

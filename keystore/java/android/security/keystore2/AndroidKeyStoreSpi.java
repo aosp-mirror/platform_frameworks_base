@@ -601,8 +601,6 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         }
         KeyProtection params = (KeyProtection) param;
 
-        @SecurityLevel int securityLevel = params.isStrongBoxBacked() ? SecurityLevel.STRONGBOX :
-                SecurityLevel.TRUSTED_ENVIRONMENT;
         @Domain int targetDomain = (getTargetDomain());
 
         if (key instanceof AndroidKeyStoreSecretKey) {
@@ -793,6 +791,9 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         if (params.isCriticalToDeviceEncryption()) {
             flags |= IKeystoreSecurityLevel.KEY_FLAG_AUTH_BOUND_WITHOUT_CRYPTOGRAPHIC_LSKF_BINDING;
         }
+
+        @SecurityLevel int securityLevel = params.isStrongBoxBacked() ? SecurityLevel.STRONGBOX :
+                SecurityLevel.TRUSTED_ENVIRONMENT;
 
         try {
             KeyStoreSecurityLevel securityLevelInterface = mKeyStore.getSecurityLevel(

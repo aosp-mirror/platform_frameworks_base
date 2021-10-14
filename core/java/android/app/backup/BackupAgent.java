@@ -16,9 +16,11 @@
 
 package android.app.backup;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.IBackupAgent;
 import android.app.QueuedWork;
+import android.app.backup.BackupManager.OperationType;
 import android.app.backup.FullBackup.BackupScheme.PathWithRequiredFlags;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -38,6 +40,8 @@ import android.system.StructStat;
 import android.util.ArraySet;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -45,11 +49,14 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
@@ -129,6 +136,7 @@ import java.util.concurrent.CountDownLatch;
 public abstract class BackupAgent extends ContextWrapper {
     private static final String TAG = "BackupAgent";
     private static final boolean DEBUG = false;
+    private static final int DEFAULT_OPERATION_TYPE = OperationType.BACKUP;
 
     /** @hide */
     public static final int RESULT_SUCCESS = 0;
@@ -183,9 +191,21 @@ public abstract class BackupAgent extends ContextWrapper {
      */
     public static final int FLAG_FAKE_CLIENT_SIDE_ENCRYPTION_ENABLED = 1 << 31;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, value = {
+            FLAG_CLIENT_SIDE_ENCRYPTION_ENABLED,
+            FLAG_DEVICE_TO_DEVICE_TRANSFER,
+            FLAG_FAKE_CLIENT_SIDE_ENCRYPTION_ENABLED
+    })
+    public @interface BackupTransportFlags {}
+
     Handler mHandler = null;
 
     @Nullable private UserHandle mUser;
+     // This field is written from the main thread (in onCreate), and read in a Binder thread (in
+     // onFullBackup that is called from system_server via Binder).
+    @OperationType private volatile int mOperationType = DEFAULT_OPERATION_TYPE;
 
     Handler getHandler() {
         if (mHandler == null) {
@@ -229,6 +249,13 @@ public abstract class BackupAgent extends ContextWrapper {
     }
 
     /**
+     * @hide
+     */
+    public void onCreate(UserHandle user) {
+        onCreate(user, DEFAULT_OPERATION_TYPE);
+    }
+
+    /**
      * Provided as a convenience for agent implementations that need an opportunity
      * to do one-time initialization before the actual backup or restore operation
      * is begun with information about the calling user.
@@ -236,10 +263,11 @@ public abstract class BackupAgent extends ContextWrapper {
      *
      * @hide
      */
-    public void onCreate(UserHandle user) {
+    public void onCreate(UserHandle user, @OperationType int operationType) {
         onCreate();
 
         mUser = user;
+        mOperationType = operationType;
     }
 
     /**
@@ -385,17 +413,15 @@ public abstract class BackupAgent extends ContextWrapper {
      * @see #onRestoreFile(ParcelFileDescriptor, long, File, int, long, long)
      */
     public void onFullBackup(FullBackupDataOutput data) throws IOException {
-        FullBackup.BackupScheme backupScheme = FullBackup.getBackupScheme(this);
-        if (!backupScheme.isFullBackupContentEnabled()) {
+        FullBackup.BackupScheme backupScheme = FullBackup.getBackupScheme(this,
+                mOperationType);
+        if (!backupScheme.isFullBackupEnabled(data.getTransportFlags())) {
             return;
         }
 
-        Map<String, Set<PathWithRequiredFlags>> manifestIncludeMap;
-        ArraySet<PathWithRequiredFlags> manifestExcludeSet;
+        IncludeExcludeRules includeExcludeRules;
         try {
-            manifestIncludeMap =
-                    backupScheme.maybeParseAndGetCanonicalIncludePaths();
-            manifestExcludeSet = backupScheme.maybeParseAndGetCanonicalExcludePaths();
+            includeExcludeRules = getIncludeExcludeRules(backupScheme);
         } catch (IOException | XmlPullParserException e) {
             if (Log.isLoggable(FullBackup.TAG_XML_PARSER, Log.VERBOSE)) {
                 Log.v(FullBackup.TAG_XML_PARSER,
@@ -404,6 +430,10 @@ public abstract class BackupAgent extends ContextWrapper {
             }
             return;
         }
+        Map<String, Set<PathWithRequiredFlags>> manifestIncludeMap
+                = includeExcludeRules.getIncludeMap();
+        Set<PathWithRequiredFlags> manifestExcludeSet
+                = includeExcludeRules.getExcludeSet();
 
         final String packageName = getPackageName();
         final ApplicationInfo appInfo = getApplicationInfo();
@@ -413,24 +443,18 @@ public abstract class BackupAgent extends ContextWrapper {
         final Context ceContext = createCredentialProtectedStorageContext();
         final String rootDir = ceContext.getDataDir().getCanonicalPath();
         final String filesDir = ceContext.getFilesDir().getCanonicalPath();
-        final String noBackupDir = ceContext.getNoBackupFilesDir().getCanonicalPath();
         final String databaseDir = ceContext.getDatabasePath("foo").getParentFile()
                 .getCanonicalPath();
         final String sharedPrefsDir = ceContext.getSharedPreferencesPath("foo").getParentFile()
                 .getCanonicalPath();
-        final String cacheDir = ceContext.getCacheDir().getCanonicalPath();
-        final String codeCacheDir = ceContext.getCodeCacheDir().getCanonicalPath();
 
         final Context deContext = createDeviceProtectedStorageContext();
         final String deviceRootDir = deContext.getDataDir().getCanonicalPath();
         final String deviceFilesDir = deContext.getFilesDir().getCanonicalPath();
-        final String deviceNoBackupDir = deContext.getNoBackupFilesDir().getCanonicalPath();
         final String deviceDatabaseDir = deContext.getDatabasePath("foo").getParentFile()
                 .getCanonicalPath();
         final String deviceSharedPrefsDir = deContext.getSharedPreferencesPath("foo")
                 .getParentFile().getCanonicalPath();
-        final String deviceCacheDir = deContext.getCacheDir().getCanonicalPath();
-        final String deviceCodeCacheDir = deContext.getCodeCacheDir().getCanonicalPath();
 
         final String libDir = (appInfo.nativeLibraryDir != null)
                 ? new File(appInfo.nativeLibraryDir).getCanonicalPath()
@@ -443,33 +467,36 @@ public abstract class BackupAgent extends ContextWrapper {
 
         // Add the directories we always exclude.
         traversalExcludeSet.add(filesDir);
-        traversalExcludeSet.add(noBackupDir);
         traversalExcludeSet.add(databaseDir);
         traversalExcludeSet.add(sharedPrefsDir);
-        traversalExcludeSet.add(cacheDir);
-        traversalExcludeSet.add(codeCacheDir);
 
         traversalExcludeSet.add(deviceFilesDir);
-        traversalExcludeSet.add(deviceNoBackupDir);
         traversalExcludeSet.add(deviceDatabaseDir);
         traversalExcludeSet.add(deviceSharedPrefsDir);
-        traversalExcludeSet.add(deviceCacheDir);
-        traversalExcludeSet.add(deviceCodeCacheDir);
 
         if (libDir != null) {
             traversalExcludeSet.add(libDir);
         }
+
+        Set<String> extraExcludedDirs = getExtraExcludeDirsIfAny(ceContext);
+        Set<String> extraExcludedDeviceDirs = getExtraExcludeDirsIfAny(deContext);
+        traversalExcludeSet.addAll(extraExcludedDirs);
+        traversalExcludeSet.addAll(extraExcludedDeviceDirs);
 
         // Root dir first.
         applyXmlFiltersAndDoFullBackupForDomain(
                 packageName, FullBackup.ROOT_TREE_TOKEN, manifestIncludeMap,
                 manifestExcludeSet, traversalExcludeSet, data);
         traversalExcludeSet.add(rootDir);
+        // Exclude the extra directories anyway, since we've already covered them if it was needed.
+        traversalExcludeSet.addAll(extraExcludedDirs);
 
         applyXmlFiltersAndDoFullBackupForDomain(
                 packageName, FullBackup.DEVICE_ROOT_TREE_TOKEN, manifestIncludeMap,
                 manifestExcludeSet, traversalExcludeSet, data);
         traversalExcludeSet.add(deviceRootDir);
+        // Exclude the extra directories anyway, since we've already covered them if it was needed.
+        traversalExcludeSet.addAll(extraExcludedDeviceDirs);
 
         // Data dir next.
         traversalExcludeSet.remove(filesDir);
@@ -528,6 +555,28 @@ public abstract class BackupAgent extends ContextWrapper {
         }
     }
 
+    private Set<String> getExtraExcludeDirsIfAny(Context context) throws IOException {
+        Set<String> excludedDirs = new HashSet<>();
+        excludedDirs.add(context.getCacheDir().getCanonicalPath());
+        excludedDirs.add(context.getCodeCacheDir().getCanonicalPath());
+        excludedDirs.add(context.getNoBackupFilesDir().getCanonicalPath());
+        return Collections.unmodifiableSet(excludedDirs);
+    }
+
+    /** @hide */
+    @VisibleForTesting
+    public IncludeExcludeRules getIncludeExcludeRules(FullBackup.BackupScheme backupScheme)
+            throws IOException, XmlPullParserException {
+        Map<String, Set<PathWithRequiredFlags>> manifestIncludeMap;
+        ArraySet<PathWithRequiredFlags> manifestExcludeSet;
+
+        manifestIncludeMap =
+                backupScheme.maybeParseAndGetCanonicalIncludePaths();
+        manifestExcludeSet = backupScheme.maybeParseAndGetCanonicalExcludePaths();
+
+        return new IncludeExcludeRules(manifestIncludeMap, manifestExcludeSet);
+    }
+
     /**
      * Notification that the application's current backup operation causes it to exceed
      * the maximum size permitted by the transport.  The ongoing backup operation is
@@ -570,12 +619,13 @@ public abstract class BackupAgent extends ContextWrapper {
      */
     private void applyXmlFiltersAndDoFullBackupForDomain(String packageName, String domainToken,
             Map<String, Set<PathWithRequiredFlags>> includeMap,
-            ArraySet<PathWithRequiredFlags> filterSet, ArraySet<String> traversalExcludeSet,
+            Set<PathWithRequiredFlags> filterSet, ArraySet<String> traversalExcludeSet,
             FullBackupDataOutput data) throws IOException {
         if (includeMap == null || includeMap.size() == 0) {
             // Do entire sub-tree for the provided token.
             fullBackupFileTree(packageName, domainToken,
-                    FullBackup.getBackupScheme(this).tokenToDirectoryPath(domainToken),
+                    FullBackup.getBackupScheme(this, mOperationType)
+                            .tokenToDirectoryPath(domainToken),
                     filterSet, traversalExcludeSet, data);
         } else if (includeMap.get(domainToken) != null) {
             // This will be null if the xml parsing didn't yield any rules for
@@ -742,11 +792,12 @@ public abstract class BackupAgent extends ContextWrapper {
      * @hide
      */
     protected final void fullBackupFileTree(String packageName, String domain, String startingPath,
-                                            ArraySet<PathWithRequiredFlags> manifestExcludes,
+                                            Set<PathWithRequiredFlags> manifestExcludes,
                                             ArraySet<String> systemExcludes,
             FullBackupDataOutput output) {
         // Pull out the domain and set it aside to use when making the tarball.
-        String domainPath = FullBackup.getBackupScheme(this).tokenToDirectoryPath(domain);
+        String domainPath = FullBackup.getBackupScheme(this, mOperationType)
+                .tokenToDirectoryPath(domain);
         if (domainPath == null) {
             // Should never happen.
             return;
@@ -811,7 +862,7 @@ public abstract class BackupAgent extends ContextWrapper {
     }
 
     private boolean manifestExcludesContainFilePath(
-        ArraySet<PathWithRequiredFlags> manifestExcludes, String filePath) {
+        Set<PathWithRequiredFlags> manifestExcludes, String filePath) {
         for (PathWithRequiredFlags exclude : manifestExcludes) {
             String excludePath = exclude.getPath();
             if (excludePath != null && excludePath.equals(filePath)) {
@@ -857,8 +908,8 @@ public abstract class BackupAgent extends ContextWrapper {
     }
 
     private boolean isFileEligibleForRestore(File destination) throws IOException {
-        FullBackup.BackupScheme bs = FullBackup.getBackupScheme(this);
-        if (!bs.isFullBackupContentEnabled()) {
+        FullBackup.BackupScheme bs = FullBackup.getBackupScheme(this, mOperationType);
+        if (!bs.isFullRestoreEnabled()) {
             if (Log.isLoggable(FullBackup.TAG_XML_PARSER, Log.VERBOSE)) {
                 Log.v(FullBackup.TAG_XML_PARSER,
                         "onRestoreFile \"" + destination.getCanonicalPath()
@@ -931,7 +982,8 @@ public abstract class BackupAgent extends ContextWrapper {
                 + " domain=" + domain + " relpath=" + path + " mode=" + mode
                 + " mtime=" + mtime);
 
-        basePath = FullBackup.getBackupScheme(this).tokenToDirectoryPath(domain);
+        basePath = FullBackup.getBackupScheme(this, mOperationType).tokenToDirectoryPath(
+                domain);
         if (domain.equals(FullBackup.MANAGED_EXTERNAL_TREE_TOKEN)) {
             mode = -1;  // < 0 is a token to skip attempting a chmod()
         }
@@ -1000,14 +1052,15 @@ public abstract class BackupAgent extends ContextWrapper {
                 long quotaBytes,
                 IBackupCallback callbackBinder,
                 int transportFlags) throws RemoteException {
-            // Ensure that we're running with the app's normal permission level
-            long ident = Binder.clearCallingIdentity();
-
             if (DEBUG) Log.v(TAG, "doBackup() invoked");
+
             BackupDataOutput output = new BackupDataOutput(
                     data.getFileDescriptor(), quotaBytes, transportFlags);
 
             long result = RESULT_ERROR;
+
+            // Ensure that we're running with the app's normal permission level
+            final long ident = Binder.clearCallingIdentity();
             try {
                 BackupAgent.this.onBackup(oldState, output, newState);
                 result = RESULT_SUCCESS;
@@ -1057,9 +1110,6 @@ public abstract class BackupAgent extends ContextWrapper {
         private void doRestoreInternal(ParcelFileDescriptor data, long appVersionCode,
                 ParcelFileDescriptor newState, int token, IBackupManager callbackBinder,
                 List<String> excludedKeys) throws RemoteException {
-            // Ensure that we're running with the app's normal permission level
-            long ident = Binder.clearCallingIdentity();
-
             if (DEBUG) Log.v(TAG, "doRestore() invoked");
 
             // Ensure that any side-effect SharedPreferences writes have landed *before*
@@ -1067,6 +1117,9 @@ public abstract class BackupAgent extends ContextWrapper {
             waitForSharedPrefs();
 
             BackupDataInput input = new BackupDataInput(data.getFileDescriptor());
+
+            // Ensure that we're running with the app's normal permission level
+            final long ident = Binder.clearCallingIdentity();
             try {
                 BackupAgent.this.onRestore(input, appVersionCode, newState,
                         excludedKeys != null ? new HashSet<>(excludedKeys)
@@ -1098,15 +1151,14 @@ public abstract class BackupAgent extends ContextWrapper {
         @Override
         public void doFullBackup(ParcelFileDescriptor data,
                 long quotaBytes, int token, IBackupManager callbackBinder, int transportFlags) {
-            // Ensure that we're running with the app's normal permission level
-            long ident = Binder.clearCallingIdentity();
-
             if (DEBUG) Log.v(TAG, "doFullBackup() invoked");
 
             // Ensure that any SharedPreferences writes have landed *before*
             // we potentially try to back up the underlying files directly.
             waitForSharedPrefs();
 
+            // Ensure that we're running with the app's normal permission level
+            final long ident = Binder.clearCallingIdentity();
             try {
                 BackupAgent.this.onFullBackup(new FullBackupDataOutput(
                         data, quotaBytes, transportFlags));
@@ -1145,12 +1197,13 @@ public abstract class BackupAgent extends ContextWrapper {
 
         public void doMeasureFullBackup(long quotaBytes, int token, IBackupManager callbackBinder,
                 int transportFlags) {
-            // Ensure that we're running with the app's normal permission level
-            final long ident = Binder.clearCallingIdentity();
             FullBackupDataOutput measureOutput =
                     new FullBackupDataOutput(quotaBytes, transportFlags);
 
             waitForSharedPrefs();
+
+            // Ensure that we're running with the app's normal permission level
+            final long ident = Binder.clearCallingIdentity();
             try {
                 BackupAgent.this.onFullBackup(measureOutput);
             } catch (IOException ex) {
@@ -1174,7 +1227,7 @@ public abstract class BackupAgent extends ContextWrapper {
         public void doRestoreFile(ParcelFileDescriptor data, long size,
                 int type, String domain, String path, long mode, long mtime,
                 int token, IBackupManager callbackBinder) throws RemoteException {
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 BackupAgent.this.onRestoreFile(data, size, type, domain, path, mode, mtime);
             } catch (IOException e) {
@@ -1201,7 +1254,7 @@ public abstract class BackupAgent extends ContextWrapper {
 
         @Override
         public void doRestoreFinished(int token, IBackupManager callbackBinder) {
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 BackupAgent.this.onRestoreFinished();
             } catch (Exception e) {
@@ -1230,9 +1283,10 @@ public abstract class BackupAgent extends ContextWrapper {
                 long backupDataBytes,
                 long quotaBytes,
                 IBackupCallback callbackBinder) {
-            long ident = Binder.clearCallingIdentity();
-
             long result = RESULT_ERROR;
+
+            // Ensure that we're running with the app's normal permission level
+            final long ident = Binder.clearCallingIdentity();
             try {
                 BackupAgent.this.onQuotaExceeded(backupDataBytes, quotaBytes);
                 result = RESULT_SUCCESS;
@@ -1263,6 +1317,55 @@ public abstract class BackupAgent extends ContextWrapper {
         @Override
         public void run() {
             throw new IllegalStateException(mMessage);
+        }
+    }
+
+    /**  @hide */
+    @VisibleForTesting
+    public static class IncludeExcludeRules {
+        private final Map<String, Set<PathWithRequiredFlags>> mManifestIncludeMap;
+        private final Set<PathWithRequiredFlags> mManifestExcludeSet;
+
+        /** @hide */
+        public IncludeExcludeRules(
+                Map<String, Set<PathWithRequiredFlags>> manifestIncludeMap,
+                Set<PathWithRequiredFlags> manifestExcludeSet) {
+            mManifestIncludeMap = manifestIncludeMap;
+            mManifestExcludeSet = manifestExcludeSet;
+        }
+
+        /**  @hide */
+        @VisibleForTesting
+        public static IncludeExcludeRules emptyRules() {
+            return new IncludeExcludeRules(Collections.emptyMap(), new ArraySet<>());
+        }
+
+        private Map<String, Set<PathWithRequiredFlags>> getIncludeMap() {
+            return mManifestIncludeMap;
+        }
+
+        private Set<PathWithRequiredFlags> getExcludeSet() {
+            return mManifestExcludeSet;
+        }
+
+        /**  @hide */
+        @Override
+        public int hashCode() {
+            return Objects.hash(mManifestIncludeMap, mManifestExcludeSet);
+        }
+
+        /**  @hide */
+        @Override
+        public boolean equals(@Nullable Object object) {
+            if (this == object) {
+                return true;
+            }
+            if (object == null || getClass() != object.getClass()) {
+                return false;
+            }
+            IncludeExcludeRules that = (IncludeExcludeRules) object;
+            return Objects.equals(mManifestIncludeMap, that.mManifestIncludeMap) &&
+                    Objects.equals(mManifestExcludeSet, that.mManifestExcludeSet);
         }
     }
 }

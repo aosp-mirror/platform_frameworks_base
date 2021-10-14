@@ -19,7 +19,6 @@ package com.android.settingslib.drawer;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_ORDER;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_PROFILE;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON;
-import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON_URI;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_KEYHINT;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SUMMARY;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SUMMARY_URI;
@@ -301,16 +300,8 @@ public abstract class Tile implements Parcelable {
         }
 
         int iconResId = mMetaData.getInt(META_DATA_PREFERENCE_ICON);
-        // Set the icon
-        if (iconResId == 0) {
-            // Only fallback to componentInfo.icon if metadata does not contain ICON_URI.
-            // ICON_URI should be loaded in app UI when need the icon object. Handling IPC at this
-            // level is too complex because we don't have a strong threading contract for this class
-            if (!mMetaData.containsKey(META_DATA_PREFERENCE_ICON_URI)) {
-                iconResId = getComponentIcon(componentInfo);
-            }
-        }
-        if (iconResId != 0) {
+        // Set the icon. Skip the transparent color for backward compatibility since Android S.
+        if (iconResId != 0 && iconResId != android.R.color.transparent) {
             final Icon icon = Icon.createWithResource(componentInfo.packageName, iconResId);
             if (isIconTintable(context)) {
                 final TypedArray a = context.obtainStyledAttributes(new int[]{

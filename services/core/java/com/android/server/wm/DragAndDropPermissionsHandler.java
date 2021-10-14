@@ -16,13 +16,15 @@
 
 package com.android.server.wm;
 
-import android.app.ActivityTaskManager;
+import static java.lang.Integer.toHexString;
+
 import android.app.UriGrantsManager;
 import android.content.ClipData;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Log;
 
 import com.android.internal.view.IDragAndDropPermissions;
 import com.android.server.LocalServices;
@@ -30,9 +32,12 @@ import com.android.server.uri.UriGrantsManagerInternal;
 
 import java.util.ArrayList;
 
-class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
-        implements IBinder.DeathRecipient {
+class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub {
 
+    private static final String TAG = "DragAndDrop";
+    private static final boolean DEBUG = false;
+
+    private final WindowManagerGlobalLock mGlobalLock;
     private final int mSourceUid;
     private final String mTargetPackage;
     private final int mMode;
@@ -43,10 +48,10 @@ class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
 
     private IBinder mActivityToken = null;
     private IBinder mPermissionOwnerToken = null;
-    private IBinder mTransientToken = null;
 
-    DragAndDropPermissionsHandler(ClipData clipData, int sourceUid, String targetPackage, int mode,
-                                  int sourceUserId, int targetUserId) {
+    DragAndDropPermissionsHandler(WindowManagerGlobalLock lock, ClipData clipData, int sourceUid,
+            String targetPackage, int mode, int sourceUserId, int targetUserId) {
+        mGlobalLock = lock;
         mSourceUid = sourceUid;
         mTargetPackage = targetPackage;
         mMode = mode;
@@ -61,17 +66,20 @@ class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
         if (mActivityToken != null || mPermissionOwnerToken != null) {
             return;
         }
+        if (DEBUG) {
+            Log.d(TAG, this + ": taking permissions bound to activity: "
+                    + toHexString(activityToken.hashCode()));
+        }
         mActivityToken = activityToken;
 
         // Will throw if Activity is not found.
-        IBinder permissionOwner = ActivityTaskManager.getService().
-                getUriPermissionOwnerForActivity(mActivityToken);
+        IBinder permissionOwner = getUriPermissionOwnerForActivity(mActivityToken);
 
         doTake(permissionOwner);
     }
 
     private void doTake(IBinder permissionOwner) throws RemoteException {
-        long origId = Binder.clearCallingIdentity();
+        final long origId = Binder.clearCallingIdentity();
         try {
             for (int i = 0; i < mUris.size(); i++) {
                 UriGrantsManager.getService().grantUriPermissionFromOwner(
@@ -84,14 +92,15 @@ class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
     }
 
     @Override
-    public void takeTransient(IBinder transientToken) throws RemoteException {
+    public void takeTransient() throws RemoteException {
         if (mActivityToken != null || mPermissionOwnerToken != null) {
             return;
         }
+        if (DEBUG) {
+            Log.d(TAG, this + ": taking transient permissions");
+        }
         mPermissionOwnerToken = LocalServices.getService(UriGrantsManagerInternal.class)
                 .newUriPermissionOwner("drop");
-        mTransientToken = transientToken;
-        mTransientToken.linkToDeath(this, 0);
 
         doTake(mPermissionOwnerToken);
     }
@@ -105,19 +114,22 @@ class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
         IBinder permissionOwner = null;
         if (mActivityToken != null) {
             try {
-                permissionOwner = ActivityTaskManager.getService().
-                        getUriPermissionOwnerForActivity(mActivityToken);
+                permissionOwner = getUriPermissionOwnerForActivity(mActivityToken);
             } catch (Exception e) {
                 // Activity is destroyed, permissions already revoked.
                 return;
             } finally {
                 mActivityToken = null;
             }
+            if (DEBUG) {
+                Log.d(TAG, this + ": releasing activity-bound permissions");
+            }
         } else {
             permissionOwner = mPermissionOwnerToken;
             mPermissionOwnerToken = null;
-            mTransientToken.unlinkToDeath(this, 0);
-            mTransientToken = null;
+            if (DEBUG) {
+                Log.d(TAG, this + ": releasing transient permissions");
+            }
         }
 
         UriGrantsManagerInternal ugm = LocalServices.getService(UriGrantsManagerInternal.class);
@@ -126,12 +138,30 @@ class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
         }
     }
 
-    @Override
-    public void binderDied() {
-        try {
-            release();
-        } catch (RemoteException e) {
-            // Cannot happen, local call.
+    private IBinder getUriPermissionOwnerForActivity(IBinder activityToken) {
+        ActivityTaskManagerService.enforceNotIsolatedCaller("getUriPermissionOwnerForActivity");
+        synchronized (mGlobalLock) {
+            ActivityRecord r = ActivityRecord.isInRootTaskLocked(activityToken);
+            if (r == null) {
+                throw new IllegalArgumentException("Activity does not exist; token="
+                        + activityToken);
+            }
+            return r.getUriPermissionsLocked().getExternalToken();
         }
+    }
+
+    /**
+     * If permissions are not tied to an activity, release whenever there are no more references
+     * to this object (if not already released).
+     */
+    @Override
+    protected void finalize() throws Throwable {
+        if (DEBUG) {
+            Log.d(TAG, this + ": running finalizer");
+        }
+        if (mActivityToken != null || mPermissionOwnerToken == null) {
+            return;
+        }
+        release();
     }
 }

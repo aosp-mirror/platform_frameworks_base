@@ -26,7 +26,7 @@ import static android.service.attention.AttentionService.ATTENTION_FAILURE_UNKNO
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
+import android.app.ActivityThread;
 import android.attention.AttentionManagerInternal;
 import android.attention.AttentionManagerInternal.AttentionCallbackInternal;
 import android.content.BroadcastReceiver;
@@ -38,6 +38,7 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.hardware.SensorPrivacyManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -58,7 +59,6 @@ import android.service.attention.IAttentionCallback;
 import android.service.attention.IAttentionService;
 import android.text.TextUtils;
 import android.util.Slog;
-import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -70,6 +70,7 @@ import com.android.server.SystemService;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * An attention service implementation that runs in System Server process.
@@ -84,34 +85,54 @@ public class AttentionManagerService extends SystemService {
     private static final long CONNECTION_TTL_MILLIS = 60_000;
 
     /** DeviceConfig flag name, if {@code true}, enables AttentionManagerService features. */
-    private static final String KEY_SERVICE_ENABLED = "service_enabled";
+    @VisibleForTesting
+    static final String KEY_SERVICE_ENABLED = "service_enabled";
 
     /** Default value in absence of {@link DeviceConfig} override. */
     private static final boolean DEFAULT_SERVICE_ENABLED = true;
+
+    @VisibleForTesting
+    boolean mIsServiceEnabled;
 
     /**
      * DeviceConfig flag name, describes how much time we consider a result fresh; if the check
      * attention called within that period - cached value will be returned.
      */
-    @VisibleForTesting static final String KEY_STALE_AFTER_MILLIS = "stale_after_millis";
+    @VisibleForTesting
+    static final String KEY_STALE_AFTER_MILLIS = "stale_after_millis";
 
     /** Default value in absence of {@link DeviceConfig} override. */
-    @VisibleForTesting static final long DEFAULT_STALE_AFTER_MILLIS = 1_000;
+    @VisibleForTesting
+    static final long DEFAULT_STALE_AFTER_MILLIS = 1_000;
+
+    @VisibleForTesting
+    long mStaleAfterMillis;
 
     /** The size of the buffer that stores recent attention check results. */
     @VisibleForTesting
     protected static final int ATTENTION_CACHE_BUFFER_SIZE = 5;
 
+    private final AttentionServiceConnection mConnection = new AttentionServiceConnection();
     private static String sTestAttentionServicePackage;
     private final Context mContext;
     private final PowerManager mPowerManager;
+    private final SensorPrivacyManager mPrivacyManager;
     private final Object mLock;
     @GuardedBy("mLock")
-    private final SparseArray<UserState> mUserStates = new SparseArray<>();
+    @VisibleForTesting
+    protected IAttentionService mService;
+    @GuardedBy("mLock")
+    private AttentionCheckCacheBuffer mAttentionCheckCacheBuffer;
+    @GuardedBy("mLock")
+    private boolean mBinding;
     private AttentionHandler mAttentionHandler;
 
     @VisibleForTesting
     ComponentName mComponentName;
+
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    AttentionCheck mCurrentAttentionCheck;
 
     public AttentionManagerService(Context context) {
         this(context, (PowerManager) context.getSystemService(Context.POWER_SERVICE),
@@ -127,6 +148,7 @@ public class AttentionManagerService extends SystemService {
         mPowerManager = powerManager;
         mLock = lock;
         mAttentionHandler = handler;
+        mPrivacyManager = SensorPrivacyManager.getInstance(context);
     }
 
     @Override
@@ -134,6 +156,11 @@ public class AttentionManagerService extends SystemService {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
             mContext.registerReceiver(new ScreenStateReceiver(),
                     new IntentFilter(Intent.ACTION_SCREEN_OFF));
+
+            readValuesFromDeviceConfig();
+            DeviceConfig.addOnPropertiesChangedListener(NAMESPACE_ATTENTION_MANAGER_SERVICE,
+                    ActivityThread.currentApplication().getMainExecutor(),
+                    (properties) -> onDeviceConfigChange(properties.getKeyset()));
         }
     }
 
@@ -143,33 +170,21 @@ public class AttentionManagerService extends SystemService {
         publishLocalService(AttentionManagerInternal.class, new LocalService());
     }
 
-    @Override
-    public void onSwitchUser(int userId) {
-        cancelAndUnbindLocked(peekUserStateLocked(userId));
-    }
-
     /** Returns {@code true} if attention service is configured on this device. */
     public static boolean isServiceConfigured(Context context) {
         return !TextUtils.isEmpty(getServiceConfigPackage(context));
     }
 
     /** Resolves and sets up the attention service if it had not been done yet. */
-    private boolean isServiceAvailable() {
+    @VisibleForTesting
+    protected boolean isServiceAvailable() {
         if (mComponentName == null) {
             mComponentName = resolveAttentionService(mContext);
         }
         return mComponentName != null;
     }
 
-    /**
-     * Returns {@code true} if attention service is supported on this device.
-     */
-    private boolean isAttentionServiceSupported() {
-        return isServiceEnabled() && isServiceConfigured(mContext);
-    }
-
-    @VisibleForTesting
-    protected boolean isServiceEnabled() {
+    private boolean getIsServiceEnabled() {
         return DeviceConfig.getBoolean(NAMESPACE_ATTENTION_MANAGER_SERVICE, KEY_SERVICE_ENABLED,
                 DEFAULT_SERVICE_ENABLED);
     }
@@ -192,6 +207,28 @@ public class AttentionManagerService extends SystemService {
         return millis;
     }
 
+    private void onDeviceConfigChange(@NonNull Set<String> keys) {
+        for (String key : keys) {
+            switch (key) {
+                case KEY_SERVICE_ENABLED:
+                case KEY_STALE_AFTER_MILLIS:
+                    readValuesFromDeviceConfig();
+                    return;
+                default:
+                    Slog.i(LOG_TAG, "Ignoring change on " + key);
+            }
+        }
+    }
+
+    private void readValuesFromDeviceConfig() {
+        mIsServiceEnabled = getIsServiceEnabled();
+        mStaleAfterMillis = getStaleAfterMillis();
+
+        Slog.i(LOG_TAG, "readValuesFromDeviceConfig():"
+                + "\nmIsServiceEnabled=" + mIsServiceEnabled
+                + "\nmStaleAfterMillis=" + mStaleAfterMillis);
+    }
+
     /**
      * Checks whether user attention is at the screen and calls in the provided callback.
      *
@@ -205,7 +242,7 @@ public class AttentionManagerService extends SystemService {
     boolean checkAttention(long timeout, AttentionCallbackInternal callbackInternal) {
         Objects.requireNonNull(callbackInternal);
 
-        if (!isAttentionServiceSupported()) {
+        if (!mIsServiceEnabled) {
             Slog.w(LOG_TAG, "Trying to call checkAttention() on an unsupported device.");
             return false;
         }
@@ -215,8 +252,13 @@ public class AttentionManagerService extends SystemService {
             return false;
         }
 
-        // don't allow attention check in screen off state
-        if (!mPowerManager.isInteractive()) {
+        if (mPrivacyManager.isSensorPrivacyEnabled(SensorPrivacyManager.Sensors.CAMERA)) {
+            Slog.w(LOG_TAG, "Camera is locked by a toggle.");
+            return false;
+        }
+
+        // don't allow attention check in screen off state or power save mode
+        if (!mPowerManager.isInteractive() || mPowerManager.isPowerSaveMode()) {
             return false;
         }
 
@@ -225,35 +267,33 @@ public class AttentionManagerService extends SystemService {
             // schedule shutting down the connection if no one resets this timer
             freeIfInactiveLocked();
 
-            final UserState userState = getOrCreateCurrentUserStateLocked();
             // lazily start the service, which should be very lightweight to start
-            userState.bindLocked();
+            bindLocked();
 
             // throttle frequent requests
-            final AttentionCheckCache cache = userState.mAttentionCheckCacheBuffer == null ? null
-                    : userState.mAttentionCheckCacheBuffer.getLast();
-            if (cache != null && now < cache.mLastComputed + getStaleAfterMillis()) {
+            final AttentionCheckCache cache = mAttentionCheckCacheBuffer == null ? null
+                    : mAttentionCheckCacheBuffer.getLast();
+            if (cache != null && now < cache.mLastComputed + mStaleAfterMillis) {
                 callbackInternal.onSuccess(cache.mResult, cache.mTimestamp);
                 return true;
             }
 
             // prevent spamming with multiple requests, only one at a time is allowed
-            if (userState.mCurrentAttentionCheck != null) {
-                if (!userState.mCurrentAttentionCheck.mIsDispatched
-                        || !userState.mCurrentAttentionCheck.mIsFulfilled) {
+            if (mCurrentAttentionCheck != null) {
+                if (!mCurrentAttentionCheck.mIsDispatched
+                        || !mCurrentAttentionCheck.mIsFulfilled) {
                     return false;
                 }
             }
 
-            userState.mCurrentAttentionCheck = createAttentionCheck(callbackInternal, userState);
+            mCurrentAttentionCheck = new AttentionCheck(callbackInternal, this);
 
-            if (userState.mService != null) {
+            if (mService != null) {
                 try {
                     // schedule request cancellation if not returned by that point yet
                     cancelAfterTimeoutLocked(timeout);
-                    userState.mService.checkAttention(
-                            userState.mCurrentAttentionCheck.mIAttentionCallback);
-                    userState.mCurrentAttentionCheck.mIsDispatched = true;
+                    mService.checkAttention(mCurrentAttentionCheck.mIAttentionCallback);
+                    mCurrentAttentionCheck.mIsDispatched = true;
                 } catch (RemoteException e) {
                     Slog.e(LOG_TAG, "Cannot call into the AttentionService");
                     return false;
@@ -263,59 +303,15 @@ public class AttentionManagerService extends SystemService {
         }
     }
 
-    private AttentionCheck createAttentionCheck(AttentionCallbackInternal callbackInternal,
-            UserState userState) {
-        final IAttentionCallback iAttentionCallback = new IAttentionCallback.Stub() {
-            @Override
-            public void onSuccess(@AttentionSuccessCodes int result, long timestamp) {
-                if (userState.mCurrentAttentionCheck.mIsFulfilled) {
-                    return;
-                }
-                userState.mCurrentAttentionCheck.mIsFulfilled = true;
-                callbackInternal.onSuccess(result, timestamp);
-                logStats(result);
-                synchronized (mLock) {
-                    if (userState.mAttentionCheckCacheBuffer == null) {
-                        userState.mAttentionCheckCacheBuffer = new AttentionCheckCacheBuffer();
-                    }
-                    userState.mAttentionCheckCacheBuffer.add(
-                            new AttentionCheckCache(SystemClock.uptimeMillis(), result, timestamp));
-                }
-            }
-
-            @Override
-            public void onFailure(@AttentionFailureCodes int error) {
-                if (userState.mCurrentAttentionCheck.mIsFulfilled) {
-                    return;
-                }
-                userState.mCurrentAttentionCheck.mIsFulfilled = true;
-                callbackInternal.onFailure(error);
-                logStats(error);
-            }
-
-            private void logStats(int result) {
-                FrameworkStatsLog.write(
-                        FrameworkStatsLog.ATTENTION_MANAGER_SERVICE_RESULT_REPORTED,
-                        result);
-            }
-        };
-
-        return new AttentionCheck(callbackInternal, iAttentionCallback);
-    }
-
     /** Cancels the specified attention check. */
     @VisibleForTesting
     void cancelAttentionCheck(AttentionCallbackInternal callbackInternal) {
         synchronized (mLock) {
-            final UserState userState = peekCurrentUserStateLocked();
-            if (userState == null) {
-                return;
-            }
-            if (!userState.mCurrentAttentionCheck.mCallbackInternal.equals(callbackInternal)) {
+            if (!mCurrentAttentionCheck.mCallbackInternal.equals(callbackInternal)) {
                 Slog.w(LOG_TAG, "Cannot cancel a non-current request");
                 return;
             }
-            cancel(userState);
+            cancel();
         }
     }
 
@@ -334,39 +330,6 @@ public class AttentionManagerService extends SystemService {
     private void cancelAfterTimeoutLocked(long timeout) {
         mAttentionHandler.sendEmptyMessageDelayed(AttentionHandler.ATTENTION_CHECK_TIMEOUT,
                 timeout);
-    }
-
-
-    @GuardedBy("mLock")
-    @VisibleForTesting
-    protected UserState getOrCreateCurrentUserStateLocked() {
-        // Doesn't need to cache the states of different users.
-        return getOrCreateUserStateLocked(0);
-    }
-
-    @GuardedBy("mLock")
-    @VisibleForTesting
-    protected UserState getOrCreateUserStateLocked(int userId) {
-        UserState result = mUserStates.get(userId);
-        if (result == null) {
-            result = new UserState(userId, mContext, mLock, mAttentionHandler, mComponentName);
-            mUserStates.put(userId, result);
-        }
-        return result;
-    }
-
-    @GuardedBy("mLock")
-    @Nullable
-    @VisibleForTesting
-    protected UserState peekCurrentUserStateLocked() {
-        // Doesn't need to cache the states of different users.
-        return peekUserStateLocked(0);
-    }
-
-    @GuardedBy("mLock")
-    @Nullable
-    private UserState peekUserStateLocked(int userId) {
-        return mUserStates.get(userId);
     }
 
     private static String getServiceConfigPackage(Context context) {
@@ -417,7 +380,8 @@ public class AttentionManagerService extends SystemService {
 
     private void dumpInternal(IndentingPrintWriter ipw) {
         ipw.println("Attention Manager Service (dumpsys attention) state:\n");
-        ipw.println("isServiceEnabled=" + isServiceEnabled());
+        ipw.println("isServiceEnabled=" + mIsServiceEnabled);
+        ipw.println("mStaleAfterMillis=" + mStaleAfterMillis);
         ipw.println("AttentionServicePackageName=" + getServiceConfigPackage(mContext));
         ipw.println("Resolved component:");
         if (mComponentName != null) {
@@ -426,21 +390,14 @@ public class AttentionManagerService extends SystemService {
             ipw.println("Class=" + mComponentName.getClassName());
             ipw.decreaseIndent();
         }
-
+        ipw.println("binding=" + mBinding);
+        ipw.println("current attention check:");
         synchronized (mLock) {
-            int size = mUserStates.size();
-            ipw.print("Number user states: ");
-            ipw.println(size);
-            if (size > 0) {
-                ipw.increaseIndent();
-                for (int i = 0; i < size; i++) {
-                    UserState userState = mUserStates.valueAt(i);
-                    ipw.print(i);
-                    ipw.print(":");
-                    userState.dump(ipw);
-                    ipw.println();
-                }
-                ipw.decreaseIndent();
+            if (mCurrentAttentionCheck != null) {
+                mCurrentAttentionCheck.dump(ipw);
+            }
+            if (mAttentionCheckCacheBuffer != null) {
+                mAttentionCheckCacheBuffer.dump(ipw);
             }
         }
     }
@@ -448,7 +405,7 @@ public class AttentionManagerService extends SystemService {
     private final class LocalService extends AttentionManagerInternal {
         @Override
         public boolean isAttentionServiceSupported() {
-            return AttentionManagerService.this.isAttentionServiceSupported();
+            return AttentionManagerService.this.mIsServiceEnabled;
         }
 
         @Override
@@ -493,6 +450,20 @@ public class AttentionManagerService extends SystemService {
             return offset >= mSize ? null
                     : mQueue[(mStartIndex + offset) % ATTENTION_CACHE_BUFFER_SIZE];
         }
+
+        private void dump(IndentingPrintWriter ipw) {
+            ipw.println("attention check cache:");
+            AttentionCheckCache cache;
+            for (int i = 0; i < mSize; i++) {
+                cache = get(i);
+                if (cache != null) {
+                    ipw.increaseIndent();
+                    ipw.println("timestamp=" + cache.mTimestamp);
+                    ipw.println("result=" + cache.mResult);
+                    ipw.decreaseIndent();
+                }
+            }
+        }
     }
 
     @VisibleForTesting
@@ -513,143 +484,113 @@ public class AttentionManagerService extends SystemService {
     static final class AttentionCheck {
         private final AttentionCallbackInternal mCallbackInternal;
         private final IAttentionCallback mIAttentionCallback;
+
         private boolean mIsDispatched;
         private boolean mIsFulfilled;
 
         AttentionCheck(AttentionCallbackInternal callbackInternal,
-                IAttentionCallback iAttentionCallback) {
+                AttentionManagerService service) {
             mCallbackInternal = callbackInternal;
-            mIAttentionCallback = iAttentionCallback;
+            mIAttentionCallback = new IAttentionCallback.Stub() {
+                @Override
+                public void onSuccess(@AttentionSuccessCodes int result, long timestamp) {
+                    if (mIsFulfilled) {
+                        return;
+                    }
+                    mIsFulfilled = true;
+                    callbackInternal.onSuccess(result, timestamp);
+                    logStats(result);
+                    service.appendResultToAttentionCacheBuffer(
+                            new AttentionCheckCache(SystemClock.uptimeMillis(), result,
+                                    timestamp));
+                }
+
+                @Override
+                public void onFailure(@AttentionFailureCodes int error) {
+                    if (mIsFulfilled) {
+                        return;
+                    }
+                    mIsFulfilled = true;
+                    callbackInternal.onFailure(error);
+                    logStats(error);
+                }
+
+                private void logStats(int result) {
+                    FrameworkStatsLog.write(
+                            FrameworkStatsLog.ATTENTION_MANAGER_SERVICE_RESULT_REPORTED,
+                            result);
+                }
+            };
         }
 
         void cancelInternal() {
             mIsFulfilled = true;
             mCallbackInternal.onFailure(ATTENTION_FAILURE_CANCELLED);
         }
+
+        void dump(IndentingPrintWriter ipw) {
+            ipw.increaseIndent();
+            ipw.println("is dispatched=" + mIsDispatched);
+            ipw.println("is fulfilled:=" + mIsFulfilled);
+            ipw.decreaseIndent();
+        }
     }
 
-    @VisibleForTesting
-    protected static class UserState {
-        private final ComponentName mComponentName;
-        private final AttentionServiceConnection mConnection = new AttentionServiceConnection();
-
-        @GuardedBy("mLock")
-        IAttentionService mService;
-        @GuardedBy("mLock")
-        AttentionCheck mCurrentAttentionCheck;
-        @GuardedBy("mLock")
-        AttentionCheckCacheBuffer mAttentionCheckCacheBuffer;
-        @GuardedBy("mLock")
-        private boolean mBinding;
-
-        @UserIdInt
-        private final int mUserId;
-        private final Context mContext;
-        private final Object mLock;
-        private final Handler mAttentionHandler;
-
-        UserState(int userId, Context context, Object lock, Handler handler,
-                ComponentName componentName) {
-            mUserId = userId;
-            mContext = Objects.requireNonNull(context);
-            mLock = Objects.requireNonNull(lock);
-            mComponentName = Objects.requireNonNull(componentName);
-            mAttentionHandler = handler;
-        }
-
-        @GuardedBy("mLock")
-        private void handlePendingCallbackLocked() {
-            if (!mCurrentAttentionCheck.mIsDispatched) {
-                if (mService != null) {
-                    try {
-                        mService.checkAttention(mCurrentAttentionCheck.mIAttentionCallback);
-                        mCurrentAttentionCheck.mIsDispatched = true;
-                    } catch (RemoteException e) {
-                        Slog.e(LOG_TAG, "Cannot call into the AttentionService");
-                    }
-                } else {
-                    mCurrentAttentionCheck.mCallbackInternal.onFailure(ATTENTION_FAILURE_UNKNOWN);
-                }
+    private void appendResultToAttentionCacheBuffer(AttentionCheckCache cache) {
+        synchronized (mLock) {
+            if (mAttentionCheckCacheBuffer == null) {
+                mAttentionCheckCacheBuffer = new AttentionCheckCacheBuffer();
             }
+            mAttentionCheckCacheBuffer.add(cache);
+        }
+    }
+
+    private class AttentionServiceConnection implements ServiceConnection {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            init(IAttentionService.Stub.asInterface(service));
         }
 
-        /** Binds to the system's AttentionService which provides an actual implementation. */
-        @GuardedBy("mLock")
-        private void bindLocked() {
-            // No need to bind if service is binding or has already been bound.
-            if (mBinding || mService != null) {
-                return;
-            }
-
-            mBinding = true;
-            // mContext.bindServiceAsUser() calls into ActivityManagerService which it may already
-            // hold the lock and had called into PowerManagerService, which holds a lock.
-            // That would create a deadlock. To solve that, putting it on a handler.
-            mAttentionHandler.post(() -> {
-                final Intent serviceIntent = new Intent(
-                        AttentionService.SERVICE_INTERFACE).setComponent(
-                        mComponentName);
-                // Note: no reason to clear the calling identity, we won't have one in a handler.
-                mContext.bindServiceAsUser(serviceIntent, mConnection,
-                        BIND_AUTO_CREATE | BIND_FOREGROUND_SERVICE | BIND_INCLUDE_CAPABILITIES,
-                        UserHandle.CURRENT);
-            });
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            cleanupService();
         }
 
-        private void dump(IndentingPrintWriter pw) {
-            pw.println("userId=" + mUserId);
+        @Override
+        public void onBindingDied(ComponentName name) {
+            cleanupService();
+        }
+
+        @Override
+        public void onNullBinding(ComponentName name) {
+            cleanupService();
+        }
+
+        void cleanupService() {
+            init(null);
+        }
+
+        private void init(@Nullable IAttentionService service) {
             synchronized (mLock) {
-                pw.println("binding=" + mBinding);
-                pw.println("current attention check:");
-                if (mCurrentAttentionCheck != null) {
-                    pw.increaseIndent();
-                    pw.println("is dispatched=" + mCurrentAttentionCheck.mIsDispatched);
-                    pw.println("is fulfilled:=" + mCurrentAttentionCheck.mIsFulfilled);
-                    pw.decreaseIndent();
-                }
-                if (mAttentionCheckCacheBuffer != null) {
-                    pw.println("attention check cache:");
-                    for (int i = 0; i < mAttentionCheckCacheBuffer.mSize; i++) {
-                        pw.increaseIndent();
-                        pw.println("timestamp=" + mAttentionCheckCacheBuffer.get(i).mTimestamp);
-                        pw.println("result=" + mAttentionCheckCacheBuffer.get(i).mResult);
-                        pw.decreaseIndent();
-                    }
-                }
+                mService = service;
+                mBinding = false;
+                handlePendingCallbackLocked();
             }
         }
+    }
 
-        private class AttentionServiceConnection implements ServiceConnection {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                init(IAttentionService.Stub.asInterface(service));
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                cleanupService();
-            }
-
-            @Override
-            public void onBindingDied(ComponentName name) {
-                cleanupService();
-            }
-
-            @Override
-            public void onNullBinding(ComponentName name) {
-                cleanupService();
-            }
-
-            void cleanupService() {
-                init(null);
-            }
-
-            private void init(@Nullable IAttentionService service) {
-                synchronized (mLock) {
-                    mService = service;
-                    mBinding = false;
-                    handlePendingCallbackLocked();
+    @GuardedBy("mLock")
+    private void handlePendingCallbackLocked() {
+        if (mCurrentAttentionCheck != null && !mCurrentAttentionCheck.mIsDispatched) {
+            if (mService != null) {
+                try {
+                    mService.checkAttention(mCurrentAttentionCheck.mIAttentionCallback);
+                    mCurrentAttentionCheck.mIsDispatched = true;
+                } catch (RemoteException e) {
+                    Slog.e(LOG_TAG, "Cannot call into the AttentionService");
                 }
+            } else {
+                mCurrentAttentionCheck.mCallbackInternal.onFailure(ATTENTION_FAILURE_UNKNOWN);
             }
         }
     }
@@ -668,16 +609,14 @@ public class AttentionManagerService extends SystemService {
             switch (msg.what) {
                 // Do not occupy resources when not in use - unbind proactively.
                 case CHECK_CONNECTION_EXPIRATION: {
-                    for (int i = 0; i < mUserStates.size(); i++) {
-                        cancelAndUnbindLocked(mUserStates.valueAt(i));
-                    }
+                    cancelAndUnbindLocked();
                 }
                 break;
 
                 // Callee is no longer interested in the attention check result - cancel.
                 case ATTENTION_CHECK_TIMEOUT: {
                     synchronized (mLock) {
-                        cancel(peekCurrentUserStateLocked());
+                        cancel();
                     }
                 }
                 break;
@@ -689,54 +628,70 @@ public class AttentionManagerService extends SystemService {
     }
 
     @VisibleForTesting
-    void cancel(UserState userState) {
-        if (userState == null || userState.mCurrentAttentionCheck == null) {
-            return;
-        }
-
-        if (userState.mCurrentAttentionCheck.mIsFulfilled) {
+    @GuardedBy("mLock")
+    void cancel() {
+        if (mCurrentAttentionCheck.mIsFulfilled) {
             if (DEBUG) {
                 Slog.d(LOG_TAG, "Trying to cancel the check that has been already fulfilled.");
             }
             return;
         }
 
-        if (userState.mService == null) {
-            userState.mCurrentAttentionCheck.cancelInternal();
+        if (mService == null) {
+            mCurrentAttentionCheck.cancelInternal();
             return;
         }
 
         try {
-            userState.mService.cancelAttentionCheck(
-                    userState.mCurrentAttentionCheck.mIAttentionCallback);
+            mService.cancelAttentionCheck(mCurrentAttentionCheck.mIAttentionCallback);
         } catch (RemoteException e) {
             Slog.e(LOG_TAG, "Unable to cancel attention check");
-            userState.mCurrentAttentionCheck.cancelInternal();
+            mCurrentAttentionCheck.cancelInternal();
         }
     }
 
     @GuardedBy("mLock")
-    private void cancelAndUnbindLocked(UserState userState) {
+    private void cancelAndUnbindLocked() {
         synchronized (mLock) {
-            if (userState == null) {
+            if (mCurrentAttentionCheck == null) {
                 return;
             }
-
-            cancel(userState);
-
-            if (userState.mService == null) {
+            cancel();
+            if (mService == null) {
                 return;
             }
-
-            mAttentionHandler.post(() -> mContext.unbindService(userState.mConnection));
+            mAttentionHandler.post(() -> mContext.unbindService(mConnection));
             // Note: this will set mBinding to false even though it could still be trying to bind
             // (i.e. the runnable was posted in bindLocked but then cancelAndUnbindLocked was
             // called before it's run yet). This is a safe state at the moment,
             // since it will eventually, but feels like a source for confusion down the road and
             // may cause some expensive and unnecessary work to be done.
-            userState.mConnection.cleanupService();
-            mUserStates.remove(userState.mUserId);
+            mConnection.cleanupService();
         }
+    }
+
+    /** Binds to the system's AttentionService which provides an actual implementation. */
+    @GuardedBy("mLock")
+    private void bindLocked() {
+        // No need to bind if service is binding or has already been bound.
+        if (mBinding || mService != null) {
+            return;
+        }
+
+        mBinding = true;
+        // mContext.bindServiceAsUser() calls into ActivityManagerService which it may already
+        // hold the lock and had called into PowerManagerService, which holds a lock.
+        // That would create a deadlock. To solve that, putting it on a handler.
+        mAttentionHandler.post(() -> {
+            final Intent serviceIntent = new Intent(
+                    AttentionService.SERVICE_INTERFACE).setComponent(
+                    mComponentName);
+            // Note: no reason to clear the calling identity, we won't have one in a handler.
+            mContext.bindServiceAsUser(serviceIntent, mConnection,
+                    BIND_AUTO_CREATE | BIND_FOREGROUND_SERVICE | BIND_INCLUDE_CAPABILITIES,
+                    UserHandle.CURRENT);
+
+        });
     }
 
     /**
@@ -747,7 +702,7 @@ public class AttentionManagerService extends SystemService {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
-                cancelAndUnbindLocked(peekCurrentUserStateLocked());
+                cancelAndUnbindLocked();
             }
         }
     }
@@ -860,7 +815,6 @@ public class AttentionManagerService extends SystemService {
 
         private void resetStates() {
             mComponentName = resolveAttentionService(mContext);
-            mUserStates.clear();
         }
 
         @Override

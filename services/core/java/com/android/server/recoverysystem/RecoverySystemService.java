@@ -961,11 +961,13 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
 
     @Override
     public boolean allocateSpaceForUpdate(String packageFile) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.RECOVERY, null);
         if (!isUpdatableApexSupported()) {
             Log.i(TAG, "Updatable Apex not supported, "
                     + "allocateSpaceForUpdate does nothing.");
             return true;
         }
+        final long token = Binder.clearCallingIdentity();
         try {
             CompressedApexInfoList apexInfoList = getCompressedApexInfoList(packageFile);
             if (apexInfoList == null) {
@@ -981,6 +983,8 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
             e.rethrowAsRuntimeException();
         } catch (IOException | UnsupportedOperationException e) {
             Slog.e(TAG, "Failed to reserve space for compressed apex: ", e);
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
         return false;
     }

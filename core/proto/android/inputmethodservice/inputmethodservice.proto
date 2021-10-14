@@ -1,0 +1,63 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+import "frameworks/base/core/proto/android/inputmethodservice/softinputwindow.proto";
+import "frameworks/base/core/proto/android/view/inputmethod/editorinfo.proto";
+import "frameworks/base/core/proto/android/view/inputmethod/inputconnection.proto";
+
+package android.inputmethodservice;
+
+option java_multiple_files = true;
+
+message InputMethodServiceProto {
+    optional SoftInputWindowProto soft_input_window = 1;
+    optional bool views_created= 2;
+    optional bool decor_view_visible = 3;
+    optional bool decor_view_was_visible = 4;
+    optional bool window_visible = 5;
+    optional bool in_show_window = 6;
+    optional string configuration = 7;
+    optional string token = 8;
+    optional string input_binding = 9;
+    optional bool input_started = 10;
+    optional bool input_view_started = 11;
+    optional bool candidates_view_started = 12;
+    optional .android.view.inputmethod.EditorInfoProto input_editor_info = 13;
+    optional bool show_input_requested = 14;
+    optional bool last_show_input_requested = 15;
+    reserved 16;  // can_pre_render
+    reserved 17;  // is_pre_rendered
+    optional int32 show_input_flags = 18;
+    optional int32 candidates_visibility = 19;
+    optional bool fullscreen_applied = 20;
+    optional bool is_fullscreen = 21;
+    optional bool extract_view_hidden = 22;
+    optional int32 extracted_token = 23;
+    optional bool is_input_view_shown = 24;
+    optional int32 status_icon = 25;
+    optional InsetsProto last_computed_insets = 26;
+    optional string settings_observer = 27;
+    optional .android.view.inputmethod.InputConnectionCallProto input_connection_call = 28;
+
+    message InsetsProto {
+        optional int32 content_top_insets = 1;
+        optional int32 visible_top_insets = 2;
+        optional int32 touchable_insets = 3;
+        optional string touchable_region = 4;
+    }
+}

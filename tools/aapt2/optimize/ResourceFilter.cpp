@@ -20,8 +20,8 @@
 
 namespace aapt {
 
-ResourceFilter::ResourceFilter(const std::unordered_set<ResourceName>& blacklist)
-    : blacklist_(blacklist) {
+ResourceFilter::ResourceFilter(const std::unordered_set<ResourceName>& exclude_list)
+    : exclude_list_(exclude_list) {
 }
 
 bool ResourceFilter::Consume(IAaptContext* context, ResourceTable* table) {
@@ -29,7 +29,7 @@ bool ResourceFilter::Consume(IAaptContext* context, ResourceTable* table) {
     for (auto& type : package->types) {
       for (auto it = type->entries.begin(); it != type->entries.end(); ) {
         ResourceName resource = ResourceName({}, type->type, (*it)->name);
-        if (blacklist_.find(resource) != blacklist_.end()) {
+        if (exclude_list_.find(resource) != exclude_list_.end()) {
           it = type->entries.erase(it);
         } else {
           ++it;

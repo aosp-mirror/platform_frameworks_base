@@ -24,6 +24,7 @@ package {
 android_test {
     name: "RollbackTest",
     manifest: "RollbackTest/AndroidManifest.xml",
+    platform_apis: true,
     srcs: ["RollbackTest/src/**/*.java"],
     static_libs: ["androidx.test.rules", "cts-rollback-lib", "cts-install-lib"],
     test_suites: ["general-tests"],

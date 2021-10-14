@@ -18,6 +18,7 @@
 
 #include <istream>
 #include <string>
+#include <utility>
 
 #include "android-base/macros.h"
 #include "android-base/stringprintf.h"
@@ -27,8 +28,6 @@
 
 namespace android::idmap2 {
 
-#define RESID(pkg, type, entry) (((pkg) << 24) | ((type) << 16) | (entry))
-
 #define TAB "    "
 
 void PrettyPrintVisitor::visit(const Idmap& idmap ATTRIBUTE_UNUSED) {
@@ -36,8 +35,12 @@ void PrettyPrintVisitor::visit(const Idmap& idmap ATTRIBUTE_UNUSED) {
 
 void PrettyPrintVisitor::visit(const IdmapHeader& header) {
   stream_ << "Paths:" << std::endl
-          << TAB "target apk path  : " << header.GetTargetPath() << std::endl
-          << TAB "overlay apk path : " << header.GetOverlayPath() << std::endl;
+          << TAB "target path  : " << header.GetTargetPath() << std::endl
+          << TAB "overlay path : " << header.GetOverlayPath() << std::endl;
+
+  if (!header.GetOverlayName().empty()) {
+    stream_ << "Overlay name: " << header.GetOverlayName() << std::endl;
+  }
 
   const std::string& debug = header.GetDebugInfo();
   if (!debug.empty()) {
@@ -49,14 +52,11 @@ void PrettyPrintVisitor::visit(const IdmapHeader& header) {
     }
   }
 
-  if (auto target_apk_ = ApkAssets::Load(header.GetTargetPath().to_string())) {
-    target_am_.SetApkAssets({target_apk_.get()});
-    apk_assets_.push_back(std::move(target_apk_));
+  if (auto target = TargetResourceContainer::FromPath(header.GetTargetPath())) {
+    target_ = std::move(*target);
   }
-
-  if (auto overlay_apk = ApkAssets::Load(header.GetOverlayPath().to_string())) {
-    overlay_am_.SetApkAssets({overlay_apk.get()});
-    apk_assets_.push_back(std::move(overlay_apk));
+  if (auto overlay = OverlayResourceContainer::FromPath(header.GetOverlayPath())) {
+    overlay_ = std::move(*overlay);
   }
 
   stream_ << "Mapping:" << std::endl;
@@ -68,23 +68,20 @@ void PrettyPrintVisitor::visit(const IdmapData::Header& header ATTRIBUTE_UNUSED)
 void PrettyPrintVisitor::visit(const IdmapData& data) {
   static constexpr const char* kUnknownResourceName = "???";
 
-  const bool target_package_loaded = !target_am_.GetApkAssets().empty();
-  const bool overlay_package_loaded = !overlay_am_.GetApkAssets().empty();
-
   const ResStringPool string_pool(data.GetStringPoolData().data(), data.GetStringPoolData().size());
   const size_t string_pool_offset = data.GetHeader()->GetStringPoolIndexOffset();
 
   for (const auto& target_entry : data.GetTargetEntries()) {
     std::string target_name = kUnknownResourceName;
-    if (target_package_loaded) {
-      if (auto name = utils::ResToTypeEntryName(target_am_, target_entry.target_id)) {
+    if (target_ != nullptr) {
+      if (auto name = target_->GetResourceName(target_entry.target_id)) {
         target_name = *name;
       }
     }
 
     std::string overlay_name = kUnknownResourceName;
-    if (overlay_package_loaded) {
-      if (auto name = utils::ResToTypeEntryName(overlay_am_, target_entry.overlay_id)) {
+    if (overlay_ != nullptr) {
+      if (auto name = overlay_->GetResourceName(target_entry.overlay_id)) {
         overlay_name = *name;
       }
     }
@@ -108,8 +105,8 @@ void PrettyPrintVisitor::visit(const IdmapData& data) {
     }
 
     std::string target_name = kUnknownResourceName;
-    if (target_package_loaded) {
-      if (auto name = utils::ResToTypeEntryName(target_am_, target_entry.target_id)) {
+    if (target_ != nullptr) {
+      if (auto name = target_->GetResourceName(target_entry.target_id)) {
         target_name = *name;
       }
     }

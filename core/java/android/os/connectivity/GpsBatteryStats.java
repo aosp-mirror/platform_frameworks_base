@@ -15,10 +15,9 @@
  */
 package android.os.connectivity;
 
+import android.location.GnssSignalQuality;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import com.android.internal.location.gnssmetrics.GnssMetrics;
 
 import java.util.Arrays;
 
@@ -85,7 +84,7 @@ public final class GpsBatteryStats implements Parcelable {
 
   public void setTimeInGpsSignalQualityLevel(long[] t) {
     mTimeInGpsSignalQualityLevel = Arrays.copyOfRange(t, 0,
-        Math.min(t.length, GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS));
+        Math.min(t.length, GnssSignalQuality.NUM_GNSS_SIGNAL_QUALITY_LEVELS));
     return;
   }
 
@@ -102,7 +101,7 @@ public final class GpsBatteryStats implements Parcelable {
   private void initialize() {
     mLoggingDurationMs = 0;
     mEnergyConsumedMaMs = 0;
-    mTimeInGpsSignalQualityLevel = new long[GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS];
+    mTimeInGpsSignalQualityLevel = new long[GnssSignalQuality.NUM_GNSS_SIGNAL_QUALITY_LEVELS];
     return;
   }
 }

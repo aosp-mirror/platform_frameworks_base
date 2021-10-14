@@ -17,8 +17,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.android.servicestests.apps.simpleservicetestapp">
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
     <application>
         <service android:name=".SimpleService"
+                 android:exported="true" />
+        <service android:name=".SimpleFgService"
+                 android:exported="true" />
+        <service android:name=".SimpleIsolatedService"
+                 android:isolatedProcess="true"
                  android:exported="true" />
     </application>
 

@@ -51,19 +51,12 @@ static void nativeDestroy(JNIEnv* env, jclass clazz, jlong ptr) {
     client->decStrong((void*)nativeCreate);
 }
 
-static void nativeKill(JNIEnv* env, jclass clazz, jlong ptr) {
-    SurfaceComposerClient* client = reinterpret_cast<SurfaceComposerClient*>(ptr);
-    client->dispose();
-}
-
 static const JNINativeMethod gMethods[] = {
     /* name, signature, funcPtr */
     { "nativeCreate", "()J",
             (void*)nativeCreate },
     { "nativeDestroy", "(J)V",
             (void*)nativeDestroy },
-    { "nativeKill", "(J)V",
-            (void*)nativeKill }
 };
 
 int register_android_view_SurfaceSession(JNIEnv* env) {

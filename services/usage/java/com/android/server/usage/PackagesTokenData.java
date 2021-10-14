@@ -16,6 +16,7 @@
 package com.android.server.usage;
 
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -56,6 +57,11 @@ public final class PackagesTokenData {
      * Stores a map of packages that were removed and when they were removed.
      */
     public final ArrayMap<String, Long> removedPackagesMap = new ArrayMap<>();
+    /**
+     * Stores a set of removed package tokens. This is solely for dump purposes when comparing
+     * parsing errors to recently removed packages.
+     */
+    public final ArraySet<Integer> removedPackageTokens = new ArraySet<>();
 
     public PackagesTokenData() {
     }
@@ -174,6 +180,7 @@ public final class PackagesTokenData {
         final int packageToken = packagesToTokensMap.get(packageName).get(packageName);
         packagesToTokensMap.remove(packageName);
         tokensToPackagesMap.delete(packageToken);
+        removedPackageTokens.add(packageToken);
         return packageToken;
     }
 }

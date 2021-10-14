@@ -38,6 +38,7 @@ import android.view.KeyEvent;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.List;
@@ -53,11 +54,13 @@ public class MediaShellCommand extends ShellCommand {
     private ISessionManager mSessionService;
     private PrintWriter mWriter;
     private PrintWriter mErrorWriter;
+    private InputStream mInput;
 
     @Override
     public int onCommand(String cmd) {
         mWriter = getOutPrintWriter();
         mErrorWriter = getErrPrintWriter();
+        mInput = getRawInputStream();
 
         if (TextUtils.isEmpty(cmd)) {
             return handleDefaultCommands(cmd);
@@ -189,6 +192,10 @@ public class MediaShellCommand extends ShellCommand {
                 KeyCharacterMap.VIRTUAL_KEYBOARD, 0, 0, InputDevice.SOURCE_KEYBOARD));
     }
 
+    void log(String code, String msg) {
+        mWriter.println(code + " " + msg);
+    }
+
     void showError(String errMsg) {
         onHelp();
         mErrorWriter.println(errMsg);
@@ -273,11 +280,14 @@ public class MediaShellCommand extends ShellCommand {
             cbThread.start();
 
             try {
-                InputStreamReader converter = new InputStreamReader(System.in);
+                InputStreamReader converter = new InputStreamReader(mInput);
                 BufferedReader in = new BufferedReader(converter);
                 String line;
 
-                while ((line = in.readLine()) != null) {
+                while (true) {
+                    mWriter.flush();
+                    mErrorWriter.flush();
+                    if ((line = in.readLine()) == null) break;
                     boolean addNewline = true;
                     if (line.length() <= 0) {
                         addNewline = false;
@@ -297,7 +307,7 @@ public class MediaShellCommand extends ShellCommand {
 
                     synchronized (this) {
                         if (addNewline) {
-                            System.out.println("");
+                            mWriter.println("");
                         }
                         printUsageMessage();
                     }

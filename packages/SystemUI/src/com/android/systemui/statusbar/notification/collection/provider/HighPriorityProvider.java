@@ -19,16 +19,15 @@ package com.android.systemui.statusbar.notification.collection.provider;
 import android.app.Notification;
 import android.app.NotificationManager;
 
-import com.android.systemui.statusbar.notification.collection.GroupEntry;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
-import com.android.systemui.statusbar.phone.NotificationGroupManager;
 
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Determines whether a notification is considered 'high priority'.
@@ -36,17 +35,17 @@ import javax.inject.Singleton;
  * Notifications that are high priority are visible on the lock screen/status bar and in the top
  * section in the shade.
  */
-@Singleton
+@SysUISingleton
 public class HighPriorityProvider {
     private final PeopleNotificationIdentifier mPeopleNotificationIdentifier;
-    private final NotificationGroupManager mGroupManager;
+    private final GroupMembershipManager mGroupMembershipManager;
 
     @Inject
     public HighPriorityProvider(
             PeopleNotificationIdentifier peopleNotificationIdentifier,
-            NotificationGroupManager groupManager) {
+            GroupMembershipManager groupManager) {
         mPeopleNotificationIdentifier = peopleNotificationIdentifier;
-        mGroupManager = groupManager;
+        mGroupMembershipManager = groupManager;
     }
 
     /**
@@ -81,20 +80,15 @@ public class HighPriorityProvider {
 
 
     private boolean hasHighPriorityChild(ListEntry entry) {
-        List<NotificationEntry> children = null;
-
-        if (entry instanceof GroupEntry) {
-            // New notification pipeline
-            children = ((GroupEntry) entry).getChildren();
-        } else if (entry.getRepresentativeEntry() != null
-                && mGroupManager.isGroupSummary(entry.getRepresentativeEntry().getSbn())) {
-            // Old notification pipeline
-            children = mGroupManager.getChildren(entry.getRepresentativeEntry().getSbn());
+        if (entry instanceof NotificationEntry
+                && !mGroupMembershipManager.isGroupSummary((NotificationEntry) entry)) {
+            return false;
         }
 
+        List<NotificationEntry> children = mGroupMembershipManager.getChildren(entry);
         if (children != null) {
             for (NotificationEntry child : children) {
-                if (isHighPriority(child)) {
+                if (child != entry && isHighPriority(child)) {
                     return true;
                 }
             }
@@ -105,25 +99,18 @@ public class HighPriorityProvider {
 
     private boolean hasHighPriorityCharacteristics(NotificationEntry entry) {
         return !hasUserSetImportance(entry)
-                && (isImportantOngoing(entry)
-                || entry.getSbn().getNotification().hasMediaSession()
+                && (entry.getSbn().getNotification().hasMediaSession()
                 || isPeopleNotification(entry)
                 || isMessagingStyle(entry));
     }
 
-    private boolean isImportantOngoing(NotificationEntry entry) {
-        return entry.getSbn().getNotification().isForegroundService()
-                && entry.getRanking().getImportance() >= NotificationManager.IMPORTANCE_LOW;
-    }
-
     private boolean isMessagingStyle(NotificationEntry entry) {
-        return Notification.MessagingStyle.class.equals(
-                entry.getSbn().getNotification().getNotificationStyle());
+        return entry.getSbn().getNotification().isStyle(Notification.MessagingStyle.class);
     }
 
     private boolean isPeopleNotification(NotificationEntry entry) {
-        return mPeopleNotificationIdentifier.getPeopleNotificationType(
-                entry.getSbn(), entry.getRanking()) != PeopleNotificationIdentifier.TYPE_NON_PERSON;
+        return mPeopleNotificationIdentifier.getPeopleNotificationType(entry)
+                != PeopleNotificationIdentifier.TYPE_NON_PERSON;
     }
 
     private boolean hasUserSetImportance(NotificationEntry entry) {

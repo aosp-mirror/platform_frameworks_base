@@ -16,475 +16,440 @@
 
 package com.android.server.pm.permission;
 
-import android.annotation.AppIdInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.content.pm.PackageManager;
+import android.app.AppOpsManager;
 import android.content.pm.PermissionInfo;
 import android.permission.PermissionManagerInternal;
 
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Internal interfaces services.
  *
- * TODO: Should be merged into PermissionManagerInternal, but currently uses internal classes.
+ * TODO: Move into module.
  */
-public abstract class PermissionManagerServiceInternal extends PermissionManagerInternal {
-
+public interface PermissionManagerServiceInternal extends PermissionManagerInternal,
+        LegacyPermissionDataProvider {
     /**
-     * Provider for package names.
-     */
-    public interface PackagesProvider {
-
-        /**
-         * Gets the packages for a given user.
-         * @param userId The user id.
-         * @return The package names.
-         */
-        String[] getPackages(int userId);
-    }
-
-    /**
-     * Provider for package names.
-     */
-    public interface SyncAdapterPackagesProvider {
-
-        /**
-         * Gets the sync adapter packages for given authority and user.
-         * @param authority The authority.
-         * @param userId The user id.
-         * @return The package names.
-         */
-        String[] getPackages(String authority, int userId);
-    }
-
-    /**
-     * Provider for default browser
-     */
-    public interface DefaultBrowserProvider {
-
-        /**
-         * Get the package name of the default browser.
-         *
-         * @param userId the user id
-         *
-         * @return the package name of the default browser, or {@code null} if none
-         */
-        @Nullable
-        String getDefaultBrowser(@UserIdInt int userId);
-
-        /**
-         * Set the package name of the default browser.
-         *
-         * @param packageName package name of the default browser, or {@code null} to remove
-         * @param userId the user id
-         *
-         * @return whether the default browser was successfully set.
-         */
-        boolean setDefaultBrowser(@Nullable String packageName, @UserIdInt int userId);
-
-        /**
-         * Set the package name of the default browser asynchronously.
-         *
-         * @param packageName package name of the default browser, or {@code null} to remove
-         * @param userId the user id
-         */
-        void setDefaultBrowserAsync(@Nullable String packageName, @UserIdInt int userId);
-    }
-
-    /**
-     * Provider for default dialer
-     */
-    public interface DefaultDialerProvider {
-
-        /**
-         * Get the package name of the default dialer.
-         *
-         * @param userId the user id
-         *
-         * @return the package name of the default dialer, or {@code null} if none
-         */
-        @Nullable
-        String getDefaultDialer(@UserIdInt int userId);
-    }
-
-    /**
-     * Provider for default home
-     */
-    public interface DefaultHomeProvider {
-
-        /**
-         * Get the package name of the default home.
-         *
-         * @param userId the user id
-         *
-         * @return the package name of the default home, or {@code null} if none
-         */
-        @Nullable
-        String getDefaultHome(@UserIdInt int userId);
-
-        /**
-         * Set the package name of the default home.
-         *
-         * @param packageName package name of the default home, or {@code null} to remove
-         * @param userId the user id
-         * @param callback the callback made after the default home as been updated
-         */
-        void setDefaultHomeAsync(@Nullable String packageName, @UserIdInt int userId,
-                @NonNull Consumer<Boolean> callback);
-    }
-
-    /**
-     * Callbacks invoked when interesting actions have been taken on a permission.
-     * <p>
-     * NOTE: The current arguments are merely to support the existing use cases. This
-     * needs to be properly thought out with appropriate arguments for each of the
-     * callback methods.
-     */
-    public static class PermissionCallback {
-        public void onGidsChanged(@AppIdInt int appId, @UserIdInt int userId) {
-        }
-        public void onPermissionChanged() {
-        }
-        public void onPermissionGranted(int uid, @UserIdInt int userId) {
-        }
-        public void onInstallPermissionGranted() {
-        }
-        public void onPermissionRevoked(int uid, @UserIdInt int userId, String reason) {
-        }
-        public void onInstallPermissionRevoked() {
-        }
-        public void onPermissionUpdated(@UserIdInt int[] updatedUserIds, boolean sync) {
-        }
-        public void onPermissionUpdatedNotifyListener(@UserIdInt int[] updatedUserIds, boolean sync,
-                int uid) {
-            onPermissionUpdated(updatedUserIds, sync);
-        }
-        public void onPermissionRemoved() {
-        }
-        public void onInstallPermissionUpdated() {
-        }
-        public void onInstallPermissionUpdatedNotifyListener(int uid) {
-            onInstallPermissionUpdated();
-        }
-    }
-
-    public abstract void systemReady();
-
-    public abstract boolean isPermissionsReviewRequired(@NonNull AndroidPackage pkg,
-            @UserIdInt int userId);
-
-    public abstract void grantRequestedRuntimePermissions(
-            @NonNull AndroidPackage pkg, @NonNull int[] userIds,
-            @NonNull String[] grantedPermissions, int callingUid);
-    public abstract void setWhitelistedRestrictedPermissions(
-            @NonNull AndroidPackage pkg, @NonNull int[] userIds,
-            @NonNull List<String> permissions, int callingUid,
-            @PackageManager.PermissionWhitelistFlags int whitelistFlags);
-    /** Sets the allowlisted, restricted permissions for the given package. */
-    public abstract void setWhitelistedRestrictedPermissions(
-            @NonNull String packageName, @NonNull List<String> permissions,
-            @PackageManager.PermissionWhitelistFlags int flags, int userId);
-    public abstract void setAutoRevokeWhitelisted(
-            @NonNull String packageName, boolean whitelisted, int userId);
-
-    /**
-     * Update permissions when a package changed.
+     * Check whether a particular package has been granted a particular permission.
      *
-     * <p><ol>
-     *     <li>Reconsider the ownership of permission</li>
-     *     <li>Update the state (grant, flags) of the permissions</li>
-     * </ol>
-     *
-     * @param packageName The package that is updated
-     * @param pkg The package that is updated, or {@code null} if package is deleted
-     * @param allPackages All currently known packages
-     * @param callback Callback to call after permission changes
+     * @param packageName the name of the package you are checking against
+     * @param permissionName the name of the permission you are checking for
+     * @param userId the user ID
+     * @return {@code PERMISSION_GRANTED} if the permission is granted, or {@code PERMISSION_DENIED}
+     *         otherwise
      */
-    public abstract void updatePermissions(@NonNull String packageName,
-            @Nullable AndroidPackage pkg);
-
-    /**
-     * Update all permissions for all apps.
-     *
-     * <p><ol>
-     *     <li>Reconsider the ownership of permission</li>
-     *     <li>Update the state (grant, flags) of the permissions</li>
-     * </ol>
-     *
-     * @param volumeUuid The volume of the packages to be updated, {@code null} for all volumes
-     * @param allPackages All currently known packages
-     * @param callback Callback to call after permission changes
-     */
-    public abstract void updateAllPermissions(@Nullable String volumeUuid, boolean sdkUpdate);
-
-    /**
-     * Resets any user permission state changes (eg. permissions and flags) of all
-     * packages installed for the given user.
-     *
-     * @see #resetRuntimePermissions(AndroidPackage, int)
-     */
-    public abstract void resetAllRuntimePermissions(@UserIdInt int userId);
-
-    /**
-     * Resets any user permission state changes (eg. permissions and flags) of the
-     * specified package for the given user.
-     */
-    public abstract void resetRuntimePermissions(@NonNull AndroidPackage pkg,
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    int checkPermission(@NonNull String packageName, @NonNull String permissionName,
             @UserIdInt int userId);
 
     /**
-     * We might auto-grant permissions if any permission of the group is already granted. Hence if
-     * the group of a granted permission changes we need to revoke it to avoid having permissions of
-     * the new group auto-granted.
+     * Check whether a particular UID has been granted a particular permission.
      *
-     * @param newPackage The new package that was installed
-     * @param oldPackage The old package that was updated
-     * @param allPackageNames All packages
+     * @param uid the UID
+     * @param permissionName the name of the permission you are checking for
+     * @return {@code PERMISSION_GRANTED} if the permission is granted, or {@code PERMISSION_DENIED}
+     *         otherwise
      */
-    public abstract void revokeRuntimePermissionsIfGroupChanged(
-            @NonNull AndroidPackage newPackage,
-            @NonNull AndroidPackage oldPackage,
-            @NonNull ArrayList<String> allPackageNames);
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    int checkUidPermission(int uid, @NonNull String permissionName);
 
     /**
-     * Some permissions might have been owned by a non-system package, and the system then defined
-     * said permission. Some other permissions may one have been install permissions, but are now
-     * runtime or higher. These permissions should be revoked.
+     * Adds a listener for runtime permission state (permissions or flags) changes.
      *
-     * @param permissionsToRevoke A list of permission names to revoke
-     * @param allPackageNames All packages
+     * @param listener The listener.
      */
-    public abstract void revokeRuntimePermissionsIfPermissionDefinitionChanged(
-            @NonNull List<String> permissionsToRevoke,
-            @NonNull ArrayList<String> allPackageNames);
+    void addOnRuntimePermissionStateChangedListener(
+            @NonNull OnRuntimePermissionStateChangedListener listener);
 
     /**
-     * If the app is updated, and has scoped storage permissions, then it is possible that the
-     * app updated in an attempt to get unscoped storage. If so, revoke all storage permissions.
-     * @param newPackage The new package that was installed
-     * @param oldPackage The old package that was updated
-     */
-    public abstract void revokeStoragePermissionsIfScopeExpanded(
-            @NonNull AndroidPackage newPackage,
-            @NonNull AndroidPackage oldPackage
-    );
-
-    /**
-     * Add all permissions in the given package.
-     * <p>
-     * NOTE: argument {@code groupTEMP} is temporary until mPermissionGroups is moved to
-     * the permission settings.
+     * Removes a listener for runtime permission state (permissions or flags) changes.
      *
-     * @return A list of BasePermissions that were updated, and need to be revoked from packages
+     * @param listener The listener.
      */
-    public abstract List<String> addAllPermissions(@NonNull AndroidPackage pkg, boolean chatty);
-    public abstract void addAllPermissionGroups(@NonNull AndroidPackage pkg, boolean chatty);
-    public abstract void removeAllPermissions(@NonNull AndroidPackage pkg, boolean chatty);
-
-    /** Retrieve the packages that have requested the given app op permission */
-    public abstract @Nullable String[] getAppOpPermissionPackages(
-            @NonNull String permName, int callingUid);
+    void removeOnRuntimePermissionStateChangedListener(
+            @NonNull OnRuntimePermissionStateChangedListener listener);
 
     /**
-     * Enforces the request is from the system or an app that has INTERACT_ACROSS_USERS
-     * or INTERACT_ACROSS_USERS_FULL permissions, if the {@code userid} is not for the caller.
-     * @param checkShell whether to prevent shell from access if there's a debugging restriction
-     * @param message the message to log on security exception
+     * Get whether permission review is required for a package.
+     *
+     * @param packageName the name of the package
+     * @param userId the user ID
+     * @return whether permission review is required
      */
-    public abstract void enforceCrossUserPermission(int callingUid, int userId,
-            boolean requireFullPermission, boolean checkShell, @NonNull String message);
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    boolean isPermissionsReviewRequired(@NonNull String packageName,
+            @UserIdInt int userId);
 
     /**
-     * Similar to {@link #enforceCrossUserPermission(int, int, boolean, boolean, String)}
-     * but also allows INTERACT_ACROSS_PROFILES permission if calling user and {@code userId} are
-     * in the same profile group.
+     * Reset the runtime permission state changes for a package.
+     *
+     * TODO(zhanghai): Turn this into package change callback?
+     *
+     * @param pkg the package
+     * @param userId the user ID
      */
-    public abstract void enforceCrossUserOrProfilePermission(int callingUid, int userId,
-            boolean requireFullPermission, boolean checkShell, @NonNull String message);
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    void resetRuntimePermissions(@NonNull AndroidPackage pkg,
+            @UserIdInt int userId);
 
     /**
-     * @see #enforceCrossUserPermission(int, int, boolean, boolean, String)
-     * @param requirePermissionWhenSameUser When {@code true}, still require the cross user
-     * permission to be held even if the callingUid and userId reference the same user.
+     * Read legacy permission state from package settings.
+     *
+     * TODO(zhanghai): This is a temporary method because we should not expose
+     * {@code PackageSetting} which is a implementation detail that permission should not know.
+     * Instead, it should retrieve the legacy state via a defined API.
      */
-    public abstract void enforceCrossUserPermission(int callingUid, int userId,
-            boolean requireFullPermission, boolean checkShell,
-            boolean requirePermissionWhenSameUser, @NonNull String message);
-    public abstract void enforceGrantRevokeRuntimePermissionPermissions(@NonNull String message);
+    void readLegacyPermissionStateTEMP();
 
-    public abstract @NonNull PermissionSettings getPermissionSettings();
+    /**
+     * Write legacy permission state to package settings.
+     *
+     * TODO(zhanghai): This is a temporary method and should be removed once we migrated persistence
+     * for permission.
+     */
+    void writeLegacyPermissionStateTEMP();
 
-    /** Grants default browser permissions to the given package */
-    public abstract void grantDefaultPermissionsToDefaultBrowser(
-            @NonNull String packageName, @UserIdInt int userId);
+    /**
+     * Get all the permissions granted to a package.
+     *
+     * @param packageName the name of the package
+     * @param userId the user ID
+     * @return the names of the granted permissions
+     */
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    @NonNull
+    Set<String> getGrantedPermissions(@NonNull String packageName, @UserIdInt int userId);
+
+    /**
+     * Get the GIDs of a permission.
+     *
+     * @param permissionName the name of the permission
+     * @param userId the user ID
+     * @return the GIDs of the permission
+     */
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    @NonNull
+    int[] getPermissionGids(@NonNull String permissionName, @UserIdInt int userId);
+
+    /**
+     * Get the packages that have requested an app op permission.
+     *
+     * @param permissionName the name of the app op permission
+     * @return the names of the packages that have requested the app op permission
+     */
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    @NonNull
+    String[] getAppOpPermissionPackages(@NonNull String permissionName);
 
     /** HACK HACK methods to allow for partial migration of data to the PermissionManager class */
-    public abstract @Nullable BasePermission getPermissionTEMP(@NonNull String permName);
+    @Nullable
+    Permission getPermissionTEMP(@NonNull String permName);
 
     /** Get all permissions that have a certain protection */
-    public abstract @NonNull ArrayList<PermissionInfo> getAllPermissionsWithProtection(
+    @NonNull
+    ArrayList<PermissionInfo> getAllPermissionsWithProtection(
             @PermissionInfo.Protection int protection);
 
     /** Get all permissions that have certain protection flags */
-    public abstract @NonNull ArrayList<PermissionInfo> getAllPermissionsWithProtectionFlags(
+    @NonNull ArrayList<PermissionInfo> getAllPermissionsWithProtectionFlags(
             @PermissionInfo.ProtectionFlags int protectionFlags);
 
     /**
-     * Returns the delegate used to influence permission checking.
+     * Start delegate the permission identity of the shell UID to the given UID.
      *
-     * @return The delegate instance.
+     * @param uid the UID to delegate shell permission identity to
+     * @param packageName the name of the package to delegate shell permission identity to
+     * @param permissionNames the names of the permissions to delegate shell permission identity
+     *                       for, or {@code null} for all permissions
      */
-    public abstract @Nullable CheckPermissionDelegate getCheckPermissionDelegate();
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    void startShellPermissionIdentityDelegation(int uid,
+            @NonNull String packageName, @Nullable List<String> permissionNames);
 
     /**
-     * Sets the delegate used to influence permission checking.
+     * Stop delegating the permission identity of the shell UID.
      *
-     * @param delegate A delegate instance or {@code null} to clear.
+     * @see #startShellPermissionIdentityDelegation(int, String, List)
      */
-    public abstract void setCheckPermissionDelegate(@Nullable CheckPermissionDelegate delegate);
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    void stopShellPermissionIdentityDelegation();
 
     /**
-     * Sets the dialer application packages provider.
-     * @param provider The provider.
+     * Get all delegated shell permissions.
      */
-    public abstract void setDialerAppPackagesProvider(PackagesProvider provider);
+    @NonNull List<String> getDelegatedShellPermissions();
 
     /**
-     * Set the location extra packages provider.
-     * @param provider The packages provider.
-     */
-    public abstract  void setLocationExtraPackagesProvider(PackagesProvider provider);
-
-    /**
-     * Sets the location provider packages provider.
-     * @param provider The packages provider.
-     */
-    public abstract void setLocationPackagesProvider(PackagesProvider provider);
-
-    /**
-     * Sets the SIM call manager packages provider.
-     * @param provider The provider.
-     */
-    public abstract void setSimCallManagerPackagesProvider(PackagesProvider provider);
-
-    /**
-     * Sets the SMS application packages provider.
-     * @param provider The provider.
-     */
-    public abstract void setSmsAppPackagesProvider(PackagesProvider provider);
-
-    /**
-     * Sets the sync adapter packages provider.
-     * @param provider The provider.
-     */
-    public abstract void setSyncAdapterPackagesProvider(SyncAdapterPackagesProvider provider);
-
-    /**
-     * Sets the Use Open Wifi packages provider.
-     * @param provider The packages provider.
-     */
-    public abstract void setUseOpenWifiAppPackagesProvider(PackagesProvider provider);
-
-    /**
-     * Sets the voice interaction packages provider.
-     * @param provider The packages provider.
-     */
-    public abstract void setVoiceInteractionPackagesProvider(PackagesProvider provider);
-
-    /**
-     * Sets the default browser provider.
+     * Read legacy permissions from legacy permission settings.
      *
-     * @param provider the provider
+     * TODO(zhanghai): This is a temporary method because we should not expose
+     * {@code LegacyPermissionSettings} which is a implementation detail that permission should not
+     * know. Instead, it should retrieve the legacy permissions via a defined API.
      */
-    public abstract void setDefaultBrowserProvider(@NonNull DefaultBrowserProvider provider);
+    void readLegacyPermissionsTEMP(@NonNull LegacyPermissionSettings legacyPermissionSettings);
 
     /**
-     * Sets the package name of the default browser provider for the given user.
+     * Write legacy permissions to legacy permission settings.
      *
-     * @param packageName The package name of the default browser or {@code null}
-     *          to clear the default browser
-     * @param async If {@code true}, set the default browser asynchronously,
-     *          otherwise set it synchronously
-     * @param doGrant If {@code true} and if {@code packageName} is not {@code null},
-     *          perform default permission grants on the browser, otherwise skip the
-     *          default permission grants.
-     * @param userId The user to set the default browser for.
+     * TODO(zhanghai): This is a temporary method and should be removed once we migrated persistence
+     * for permission.
      */
-    public abstract void setDefaultBrowser(@Nullable String packageName, boolean async,
-            boolean doGrant, @UserIdInt int userId);
+    void writeLegacyPermissionsTEMP(@NonNull LegacyPermissionSettings legacyPermissionSettings);
 
     /**
-     * Sets the default dialer provider.
+     * Callback when the system is ready.
+     */
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    void onSystemReady();
+
+    /**
+     * Callback when a storage volume is mounted, so that all packages on it become available.
      *
-     * @param provider the provider
+     * @param volumeUuid the UUID of the storage volume
+     * @param fingerprintChanged whether the current build fingerprint is different from what it was
+     *                           when this volume was last mounted
      */
-    public abstract void setDefaultDialerProvider(@NonNull DefaultDialerProvider provider);
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    void onStorageVolumeMounted(@NonNull String volumeUuid, boolean fingerprintChanged);
 
     /**
-     * Sets the default home provider.
+     * Callback when a user has been created.
      *
-     * @param provider the provider
+     * @param userId the created user ID
      */
-    public abstract void setDefaultHomeProvider(@NonNull DefaultHomeProvider provider);
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    void onUserCreated(@UserIdInt int userId);
 
     /**
-     * Asynchronously sets the package name of the default home provider for the given user.
+     * Callback when a user has been removed.
      *
-     * @param packageName The package name of the default home or {@code null}
-     *          to clear the default browser
-     * @param userId The user to set the default browser for
-     * @param callback Invoked after the default home has been set
+     * @param userId the removed user ID
      */
-    public abstract void setDefaultHome(@Nullable String packageName, @UserIdInt int userId,
-            @NonNull Consumer<Boolean> callback);
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    void onUserRemoved(@UserIdInt int userId);
 
     /**
-     * Returns the default browser package name for the given user.
+     * Callback when a package has been added.
+     *
+     * @param pkg the added package
+     * @param isInstantApp whether the added package is an instant app
+     * @param oldPkg the old package, or {@code null} if none
+     */
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    void onPackageAdded(@NonNull AndroidPackage pkg, boolean isInstantApp,
+            @Nullable AndroidPackage oldPkg);
+
+    /**
+     * Callback when a package has been installed for a user.
+     *
+     * @param pkg the installed package
+     * @param params the parameters passed in for package installation
+     * @param userId the user ID this package is installed for
+     */
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    void onPackageInstalled(@NonNull AndroidPackage pkg, @NonNull PackageInstalledParams params,
+            @UserIdInt int userId);
+
+    /**
+     * Callback when a package has been removed.
+     *
+     * @param pkg the removed package
+     */
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    void onPackageRemoved(@NonNull AndroidPackage pkg);
+
+    /**
+     * Callback when a package has been uninstalled.
+     * <p>
+     * The package may have been fully removed from the system, or only marked as uninstalled for
+     * this user but still instlaled for other users.
+     *
+     * TODO: Pass PackageState instead.
+     *
+     * @param packageName the name of the uninstalled package
+     * @param appId the app ID of the uninstalled package
+     * @param pkg the uninstalled package, or {@code null} if unavailable
+     * @param sharedUserPkgs the packages that are in the same shared user
+     * @param userId the user ID the package is uninstalled for
+     */
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    void onPackageUninstalled(@NonNull String packageName, int appId, @Nullable AndroidPackage pkg,
+            @NonNull List<AndroidPackage> sharedUserPkgs, @UserIdInt int userId);
+
+    /**
+     * Listener for package permission state (permissions or flags) changes.
+     */
+    interface OnRuntimePermissionStateChangedListener {
+
+        /**
+         * Called when the runtime permission state (permissions or flags) changed.
+         *
+         * @param packageName The package for which the change happened.
+         * @param userId the user id for which the change happened.
+         */
+        @Nullable
+        void onRuntimePermissionStateChanged(@NonNull String packageName,
+                @UserIdInt int userId);
+    }
+
+    /**
+     * The permission-related parameters passed in for package installation.
+     *
+     * @see android.content.pm.PackageInstaller.SessionParams
+     */
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    final class PackageInstalledParams {
+        /**
+         * A static instance whose parameters are all in their default state.
+         */
+        public static final PackageInstalledParams DEFAULT = new Builder().build();
+
+        @NonNull
+        private final List<String> mGrantedPermissions;
+        @NonNull
+        private final List<String> mAllowlistedRestrictedPermissions;
+        @NonNull
+        private final int mAutoRevokePermissionsMode;
+
+        private PackageInstalledParams(@NonNull List<String> grantedPermissions,
+                @NonNull List<String> allowlistedRestrictedPermissions,
+                int autoRevokePermissionsMode) {
+            mGrantedPermissions = grantedPermissions;
+            mAllowlistedRestrictedPermissions = allowlistedRestrictedPermissions;
+            mAutoRevokePermissionsMode = autoRevokePermissionsMode;
+        }
+
+        /**
+         * Get the permissions to be granted.
+         *
+         * @return the permissions to be granted
+         */
+        @NonNull
+        public List<String> getGrantedPermissions() {
+            return mGrantedPermissions;
+        }
+
+        /**
+         * Get the restricted permissions to be allowlisted.
+         *
+         * @return the restricted permissions to be allowlisted
+         */
+        @NonNull
+        public List<String> getAllowlistedRestrictedPermissions() {
+            return mAllowlistedRestrictedPermissions;
+        }
+
+        /**
+         * Get the mode for auto revoking permissions.
+         *
+         * @return the mode for auto revoking permissions
+         */
+        public int getAutoRevokePermissionsMode() {
+            return mAutoRevokePermissionsMode;
+        }
+
+        /**
+         * Builder class for {@link PackageInstalledParams}.
+         */
+        public static final class Builder {
+            @NonNull
+            private List<String> mGrantedPermissions = Collections.emptyList();
+            @NonNull
+            private List<String> mAllowlistedRestrictedPermissions = Collections.emptyList();
+            @NonNull
+            private int mAutoRevokePermissionsMode = AppOpsManager.MODE_DEFAULT;
+
+            /**
+             * Set the permissions to be granted.
+             *
+             * @param grantedPermissions the permissions to be granted
+             *
+             * @see android.content.pm.PackageInstaller.SessionParams#setGrantedRuntimePermissions(
+             *      java.lang.String[])
+             */
+            public void setGrantedPermissions(@NonNull List<String> grantedPermissions) {
+                Objects.requireNonNull(grantedPermissions);
+                mGrantedPermissions = new ArrayList<>(grantedPermissions);
+            }
+
+            /**
+             * Set the restricted permissions to be allowlisted.
+             * <p>
+             * Permissions that are not restricted are ignored, so one can just pass in all
+             * requested permissions of a package to get all its restricted permissions allowlisted.
+             *
+             * @param allowlistedRestrictedPermissions the restricted permissions to be allowlisted
+             *
+             * @see android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)
+             */
+            public void setAllowlistedRestrictedPermissions(
+                    @NonNull List<String> allowlistedRestrictedPermissions) {
+                Objects.requireNonNull(mGrantedPermissions);
+                mAllowlistedRestrictedPermissions = new ArrayList<>(
+                        allowlistedRestrictedPermissions);
+            }
+
+            /**
+             * Set the mode for auto revoking permissions.
+             * <p>
+             * {@link AppOpsManager#MODE_ALLOWED} means the system is allowed to auto revoke
+             * permissions from this package, and {@link AppOpsManager#MODE_IGNORED} means this
+             * package should be ignored when auto revoking permissions.
+             * {@link AppOpsManager#MODE_DEFAULT} means no changes will be made to the auto revoke
+             * mode of this package.
+             *
+             * @param autoRevokePermissionsMode the mode for auto revoking permissions
+             *
+             * @see android.content.pm.PackageInstaller.SessionParams#setAutoRevokePermissionsMode(
+             *      boolean)
+             */
+            public void setAutoRevokePermissionsMode(int autoRevokePermissionsMode) {
+                mAutoRevokePermissionsMode = autoRevokePermissionsMode;
+            }
+
+            /**
+             * Build a new instance of {@link PackageInstalledParams}.
+             *
+             * @return the {@link PackageInstalledParams} built
+             */
+            @NonNull
+            public PackageInstalledParams build() {
+                return new PackageInstalledParams(mGrantedPermissions,
+                        mAllowlistedRestrictedPermissions, mAutoRevokePermissionsMode);
+            }
+        }
+    }
+
+    /**
+     * Sets the provider of the currently active HotwordDetectionService.
+     *
+     * @see HotwordDetectionServiceProvider
+     */
+    void setHotwordDetectionServiceProvider(@Nullable HotwordDetectionServiceProvider provider);
+
+    /**
+     * Gets the provider of the currently active HotwordDetectionService.
+     *
+     * @see HotwordDetectionServiceProvider
      */
     @Nullable
-    public abstract String getDefaultBrowser(@UserIdInt int userId);
+    HotwordDetectionServiceProvider getHotwordDetectionServiceProvider();
 
     /**
-     * Returns the default dialer package name for the given user.
+     * Provides the uid of the currently active
+     * {@link android.service.voice.HotwordDetectionService}, which should be granted RECORD_AUDIO
+     * and CAPTURE_AUDIO_HOTWORD permissions.
      */
-    @Nullable
-    public abstract String getDefaultDialer(@UserIdInt int userId);
-
-    /**
-     * Returns the default home package name for the given user.
-     */
-    @Nullable
-    public abstract String getDefaultHome(@UserIdInt int userId);
-
-    /**
-     * Requests granting of the default permissions to the current default Use Open Wifi app.
-     * @param packageName The default use open wifi package name.
-     * @param userId The user for which to grant the permissions.
-     */
-    public abstract void grantDefaultPermissionsToDefaultSimCallManager(
-            @NonNull String packageName, @UserIdInt int userId);
-
-    /**
-     * Requests granting of the default permissions to the current default Use Open Wifi app.
-     * @param packageName The default use open wifi package name.
-     * @param userId The user for which to grant the permissions.
-     */
-    public abstract void grantDefaultPermissionsToDefaultUseOpenWifiApp(
-            @NonNull String packageName, @UserIdInt int userId);
-
-    /** Called when a new user has been created. */
-    public abstract void onNewUserCreated(@UserIdInt int userId);
-
-    /**
-     * Removes invalid permissions which are not {@link PermissionInfo#FLAG_HARD_RESTRICTED} or
-     * {@link PermissionInfo#FLAG_SOFT_RESTRICTED} from the input.
-     */
-    public abstract void retainHardAndSoftRestrictedPermissions(@NonNull List<String> permissions);
+    interface HotwordDetectionServiceProvider {
+        int getUid();
+    }
 }

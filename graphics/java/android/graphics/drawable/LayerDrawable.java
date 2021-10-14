@@ -1484,7 +1484,6 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         return mLayerState.isStateful();
     }
 
-    /** @hide */
     @Override
     public boolean hasFocusStateSpecified() {
         return mLayerState.hasFocusStateSpecified();

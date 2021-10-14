@@ -238,10 +238,11 @@ public class ContentCaptureEventTest {
         final ContentCaptureEvent event = new ContentCaptureEvent(42, TYPE_VIEW_TEXT_CHANGED)
                 .setText("test");
         final ContentCaptureEvent event2 = new ContentCaptureEvent(43, TYPE_VIEW_TEXT_CHANGED)
-                .setText("empty");
+                .setText("composing").setComposingIndex(0, 1);
 
         event.mergeEvent(event2);
         assertThat(event.getText()).isEqualTo(event2.getText());
+        assertThat(event.hasComposingSpan()).isEqualTo(event2.hasComposingSpan());
     }
 
     @Test
@@ -284,14 +285,16 @@ public class ContentCaptureEventTest {
         final ContentCaptureEvent event = new ContentCaptureEvent(42, TYPE_VIEW_DISAPPEARED)
                 .setText("test").setAutofillId(new AutofillId(1));
         final ContentCaptureEvent event2 = new ContentCaptureEvent(17, TYPE_VIEW_TEXT_CHANGED)
-                .setText("empty").setAutofillId(new AutofillId(2));
+                .setText("composing").setAutofillId(new AutofillId(2)).setComposingIndex(0, 1);
 
         event.mergeEvent(event2);
         assertThat(event.getText()).isEqualTo("test");
+        assertThat(event.hasComposingSpan()).isFalse();
         assertThat(event.getId()).isEqualTo(new AutofillId(1));
 
         event2.mergeEvent(event);
-        assertThat(event2.getText()).isEqualTo("empty");
+        assertThat(event2.getText()).isEqualTo("composing");
+        assertThat(event2.hasComposingSpan()).isTrue();
         assertThat(event2.getId()).isEqualTo(new AutofillId(2));
     }
 

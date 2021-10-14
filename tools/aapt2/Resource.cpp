@@ -78,6 +78,8 @@ StringPiece to_string(ResourceType type) {
       return "interpolator";
     case ResourceType::kLayout:
       return "layout";
+    case ResourceType::kMacro:
+      return "macro";
     case ResourceType::kMenu:
       return "menu";
     case ResourceType::kMipmap:
@@ -119,6 +121,7 @@ static const std::map<StringPiece, ResourceType> sResourceTypeMap{
     {"integer", ResourceType::kInteger},
     {"interpolator", ResourceType::kInterpolator},
     {"layout", ResourceType::kLayout},
+    {"macro", ResourceType::kMacro},
     {"menu", ResourceType::kMenu},
     {"mipmap", ResourceType::kMipmap},
     {"navigation", ResourceType::kNavigation},

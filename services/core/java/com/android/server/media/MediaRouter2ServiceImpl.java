@@ -16,17 +16,23 @@
 
 package com.android.server.media;
 
-import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
+import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE;
+import static android.content.Intent.ACTION_SCREEN_OFF;
+import static android.content.Intent.ACTION_SCREEN_ON;
 import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
 import static android.media.MediaRouter2Utils.getOriginalId;
 import static android.media.MediaRouter2Utils.getProviderId;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.media.IMediaRouter2;
 import android.media.IMediaRouter2Manager;
@@ -41,6 +47,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -62,6 +69,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * Implements features related to {@link android.media.MediaRouter2} and
@@ -74,12 +82,13 @@ class MediaRouter2ServiceImpl {
     // TODO: (In Android S or later) if we add callback methods for generic failures
     //       in MediaRouter2, remove this constant and replace the usages with the real request IDs.
     private static final long DUMMY_REQUEST_ID = -1;
-    private static final int PACKAGE_IMPORTANCE_FOR_DISCOVERY = IMPORTANCE_FOREGROUND;
+    private static final int PACKAGE_IMPORTANCE_FOR_DISCOVERY = IMPORTANCE_FOREGROUND_SERVICE;
 
     private final Context mContext;
     private final Object mLock = new Object();
     final AtomicInteger mNextRouterOrManagerId = new AtomicInteger(1);
     final ActivityManager mActivityManager;
+    final PowerManager mPowerManager;
 
     @GuardedBy("mLock")
     private final SparseArray<UserRecord> mUserRecords = new SparseArray<>();
@@ -100,17 +109,52 @@ class MediaRouter2ServiceImpl {
                 }
             };
 
+    private final BroadcastReceiver mScreenOnOffReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            synchronized (mLock) {
+                final int count = mUserRecords.size();
+                for (int i = 0; i < count; i++) {
+                    UserHandler userHandler = mUserRecords.valueAt(i).mHandler;
+                    userHandler.sendMessage(PooledLambda.obtainMessage(
+                            UserHandler::updateDiscoveryPreferenceOnHandler, userHandler));
+                }
+            }
+        }
+    };
+
     MediaRouter2ServiceImpl(Context context) {
         mContext = context;
         mActivityManager = mContext.getSystemService(ActivityManager.class);
         mActivityManager.addOnUidImportanceListener(mOnUidImportanceListener,
                 PACKAGE_IMPORTANCE_FOR_DISCOVERY);
+        mPowerManager = mContext.getSystemService(PowerManager.class);
+
+        IntentFilter screenOnOffIntentFilter = new IntentFilter();
+        screenOnOffIntentFilter.addAction(ACTION_SCREEN_ON);
+        screenOnOffIntentFilter.addAction(ACTION_SCREEN_OFF);
+
+        mContext.registerReceiver(mScreenOnOffReceiver, screenOnOffIntentFilter);
     }
 
     ////////////////////////////////////////////////////////////////
     ////  Calls from MediaRouter2
     ////   - Should not have @NonNull/@Nullable on any arguments
     ////////////////////////////////////////////////////////////////
+
+    @NonNull
+    public void enforceMediaContentControlPermission() {
+        final int pid = Binder.getCallingPid();
+        final int uid = Binder.getCallingUid();
+        final long token = Binder.clearCallingIdentity();
+
+        try {
+            mContext.enforcePermission(Manifest.permission.MEDIA_CONTENT_CONTROL, pid, uid,
+                    "Must hold MEDIA_CONTENT_CONTROL permission.");
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
 
     @NonNull
     public List<MediaRoute2Info> getSystemRoutes() {
@@ -845,6 +889,9 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
+        mContext.enforcePermission(Manifest.permission.MEDIA_CONTENT_CONTROL, pid, uid,
+                "Must hold MEDIA_CONTENT_CONTROL permission.");
+
         UserRecord userRecord = getOrCreateUserRecordLocked(userId);
         managerRecord = new ManagerRecord(userRecord, manager, uid, pid, packageName);
         try {
@@ -856,9 +903,9 @@ class MediaRouter2ServiceImpl {
         userRecord.mManagerRecords.add(managerRecord);
         mAllManagerRecords.put(binder, managerRecord);
 
-        userRecord.mHandler.sendMessage(obtainMessage(UserHandler::notifyRoutesToManager,
-                userRecord.mHandler, manager));
-
+        // Note: Features should be sent first before the routes. If not, the
+        // RouteCallback#onRoutesAdded() for system MR2 will never be called with initial routes
+        // due to the lack of features.
         for (RouterRecord routerRecord : userRecord.mRouterRecords) {
             // TODO: UserRecord <-> routerRecord, why do they reference each other?
             // How about removing mUserRecord from routerRecord?
@@ -866,6 +913,9 @@ class MediaRouter2ServiceImpl {
                     obtainMessage(UserHandler::notifyPreferredFeaturesChangedToManager,
                         routerRecord.mUserRecord.mHandler, routerRecord, manager));
         }
+
+        userRecord.mHandler.sendMessage(obtainMessage(UserHandler::notifyRoutesToManager,
+                userRecord.mHandler, manager));
     }
 
     private void unregisterManagerLocked(@NonNull IMediaRouter2Manager manager, boolean died) {
@@ -2105,19 +2155,36 @@ class MediaRouter2ServiceImpl {
             if (service == null) {
                 return;
             }
-            List<RouteDiscoveryPreference> discoveryPreferences = new ArrayList<>();
+            List<RouteDiscoveryPreference> discoveryPreferences = Collections.emptyList();
             List<RouterRecord> routerRecords = getRouterRecords();
             List<ManagerRecord> managerRecords = getManagerRecords();
-            boolean isAnyManagerScanning =
-                    managerRecords.stream().anyMatch(manager -> manager.mIsScanning
-                    && service.mActivityManager.getPackageImportance(manager.mPackageName)
-                    <= PACKAGE_IMPORTANCE_FOR_DISCOVERY);
 
-            for (RouterRecord routerRecord : routerRecords) {
-                if (isAnyManagerScanning
-                        || service.mActivityManager.getPackageImportance(routerRecord.mPackageName)
-                        <= PACKAGE_IMPORTANCE_FOR_DISCOVERY) {
-                    discoveryPreferences.add(routerRecord.mDiscoveryPreference);
+            boolean shouldBindProviders = false;
+
+            if (service.mPowerManager.isInteractive()) {
+                boolean isManagerScanning = managerRecords.stream().anyMatch(manager ->
+                        manager.mIsScanning && service.mActivityManager
+                                .getPackageImportance(manager.mPackageName)
+                                <= PACKAGE_IMPORTANCE_FOR_DISCOVERY);
+
+                if (isManagerScanning) {
+                    discoveryPreferences = routerRecords.stream()
+                            .map(record -> record.mDiscoveryPreference)
+                            .collect(Collectors.toList());
+                    shouldBindProviders = true;
+                } else {
+                    discoveryPreferences = routerRecords.stream().filter(record ->
+                            service.mActivityManager.getPackageImportance(record.mPackageName)
+                                    <= PACKAGE_IMPORTANCE_FOR_DISCOVERY)
+                            .map(record -> record.mDiscoveryPreference)
+                            .collect(Collectors.toList());
+                }
+            }
+
+            for (MediaRoute2Provider provider : mRouteProviders) {
+                if (provider instanceof MediaRoute2ProviderServiceProxy) {
+                    ((MediaRoute2ProviderServiceProxy) provider)
+                            .setManagerScanning(shouldBindProviders);
                 }
             }
 

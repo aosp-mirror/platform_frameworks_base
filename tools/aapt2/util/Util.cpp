@@ -38,6 +38,11 @@ using ::android::StringPiece16;
 namespace aapt {
 namespace util {
 
+// Package name and shared user id would be used as a part of the file name.
+// Limits size to 223 and reserves 32 for the OS.
+// See frameworks/base/core/java/android/content/pm/parsing/ParsingPackageUtils.java
+constexpr static const size_t kMaxPackageNameSize = 223;
+
 static std::vector<std::string> SplitAndTransform(
     const StringPiece& str, char sep, const std::function<char(char)>& f) {
   std::vector<std::string> parts;
@@ -169,7 +174,19 @@ static int IsAndroidNameImpl(const StringPiece& str) {
 }
 
 bool IsAndroidPackageName(const StringPiece& str) {
+  if (str.size() > kMaxPackageNameSize) {
+    return false;
+  }
   return IsAndroidNameImpl(str) > 1 || str == "android";
+}
+
+bool IsAndroidSharedUserId(const android::StringPiece& package_name,
+                           const android::StringPiece& shared_user_id) {
+  if (shared_user_id.size() > kMaxPackageNameSize) {
+    return false;
+  }
+  return shared_user_id.empty() || IsAndroidNameImpl(shared_user_id) > 1 ||
+         package_name == "android";
 }
 
 bool IsAndroidSplitName(const StringPiece& str) {

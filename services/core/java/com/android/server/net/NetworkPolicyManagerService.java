@@ -27,6 +27,8 @@ import static android.Manifest.permission.OBSERVE_NETWORK_POLICY;
 import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE;
+import static android.app.PendingIntent.FLAG_IMMUTABLE;
+import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.content.Intent.ACTION_PACKAGE_ADDED;
 import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.ACTION_USER_ADDED;
@@ -207,7 +209,9 @@ import android.os.HandlerThread;
 import android.os.INetworkManagementService;
 import android.os.Message;
 import android.os.MessageQueue.IdleHandler;
+import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
+import android.os.PowerExemptionManager.ReasonCode;
 import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
@@ -216,8 +220,6 @@ import android.os.PowerWhitelistManager;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.os.ResultReceiver;
-import android.os.ShellCallback;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
@@ -248,6 +250,8 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.SparseLongArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.R;
@@ -260,7 +264,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.StatLogger;
 import com.android.internal.util.XmlUtils;
@@ -276,9 +279,7 @@ import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
 import libcore.io.IoUtils;
 
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -289,7 +290,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -443,8 +443,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     /**
      * Message to indicate that reasons for why an uid is blocked changed.
      * arg1 = uid
-     * arg2 = oldBlockedReasons
-     * obj = newBlockedReasons
+     * arg2 = newBlockedReasons
+     * obj = oldBlockedReasons
      */
     private static final int MSG_BLOCKED_REASON_CHANGED = 21;
 
@@ -650,6 +650,20 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     /** List of apps indexed by uid and whether they have the internet permission */
     @GuardedBy("mUidRulesFirstLock")
     private final SparseBooleanArray mInternetPermissionMap = new SparseBooleanArray();
+
+    /**
+     * Map of uid -> UidStateCallbackInfo objects holding the data received from
+     * {@link IUidObserver#onUidStateChanged(int, int, long, int)} callbacks. In order to avoid
+     * creating a new object for every callback received, we hold onto the object created for each
+     * uid and reuse it.
+     *
+     * Note that the lock used for accessing this object should not be used for anything else and we
+     * should not be acquiring new locks or doing any heavy work while this lock is held since this
+     * will be used in the callback from ActivityManagerService.
+     */
+    @GuardedBy("mUidStateCallbackInfos")
+    private final SparseArray<UidStateCallbackInfo> mUidStateCallbackInfos =
+            new SparseArray<>();
 
     private RestrictedModeObserver mRestrictedModeObserver;
 
@@ -920,10 +934,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
             try {
-                // TODO: There shouldn't be a need to receive callback for all changes.
-                mActivityManager.registerUidObserver(mUidObserver,
-                        ActivityManager.UID_OBSERVER_PROCSTATE|ActivityManager.UID_OBSERVER_GONE,
-                        ActivityManager.PROCESS_STATE_UNKNOWN, "android");
+                final int changes = ActivityManager.UID_OBSERVER_PROCSTATE
+                        | ActivityManager.UID_OBSERVER_GONE
+                        | ActivityManager.UID_OBSERVER_CAPABILITY;
+                mActivityManager.registerUidObserver(mUidObserver, changes,
+                        NetworkPolicyManager.FOREGROUND_THRESHOLD_STATE, "android");
                 mNetworkManager.registerObserver(mAlertObserver);
             } catch (RemoteException e) {
                 // ignored; both services live in system_server
@@ -1030,11 +1045,18 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     final private IUidObserver mUidObserver = new IUidObserver.Stub() {
         @Override public void onUidStateChanged(int uid, int procState, long procStateSeq,
                 @ProcessCapability int capability) {
-            // TODO: Avoid creating a new UidStateCallbackInfo object every time
-            // we get a callback for an uid
-            mUidEventHandler.obtainMessage(UID_MSG_STATE_CHANGED,
-                    new UidStateCallbackInfo(uid, procState, procStateSeq, capability))
+            synchronized (mUidStateCallbackInfos) {
+                UidStateCallbackInfo callbackInfo = mUidStateCallbackInfos.get(uid);
+                if (callbackInfo == null) {
+                    callbackInfo = new UidStateCallbackInfo();
+                    mUidStateCallbackInfos.put(uid, callbackInfo);
+                }
+                callbackInfo.update(uid, procState, procStateSeq, capability);
+                if (!callbackInfo.isPending) {
+                    mUidEventHandler.obtainMessage(UID_MSG_STATE_CHANGED, callbackInfo)
                             .sendToTarget();
+                }
+            }
         }
 
         @Override public void onUidGone(int uid, boolean disabled) {
@@ -1052,14 +1074,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     };
 
     private static final class UidStateCallbackInfo {
-        public final int uid;
-        public final int procState;
-        public final long procStateSeq;
+        public int uid;
+        public int procState;
+        public long procStateSeq;
         @ProcessCapability
-        public final int capability;
+        public int capability;
+        public boolean isPending;
 
-        UidStateCallbackInfo(int uid, int procState, long procStateSeq,
-                @ProcessCapability int capability) {
+        public void update(int uid, int procState, long procStateSeq, int capability) {
             this.uid = uid;
             this.procState = procState;
             this.procStateSeq = procStateSeq;
@@ -1213,11 +1235,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     final private BroadcastReceiver mWifiReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            synchronized (mUidRulesFirstLock) {
-                synchronized (mNetworkPoliciesSecondLock) {
-                    upgradeWifiMeteredOverrideAL();
-                }
-            }
+            upgradeWifiMeteredOverride();
             // Only need to perform upgrade logic once
             mContext.unregisterReceiver(this);
         }
@@ -1497,19 +1515,20 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
                 builder.setSmallIcon(R.drawable.stat_notify_error);
 
-                final Intent snoozeIntent = buildSnoozeWarningIntent(policy.template);
+                final Intent snoozeIntent = buildSnoozeWarningIntent(policy.template,
+                        mContext.getPackageName());
                 builder.setDeleteIntent(PendingIntent.getBroadcast(
-                        mContext, 0, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT));
+                        mContext, 0, snoozeIntent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
 
                 final Intent viewIntent = buildViewDataUsageIntent(res, policy.template);
                 // TODO: Resolve to single code path.
                 if (UserManager.isHeadlessSystemUserMode()) {
                     builder.setContentIntent(PendingIntent.getActivityAsUser(
-                            mContext, 0, viewIntent, PendingIntent.FLAG_UPDATE_CURRENT,
+                            mContext, 0, viewIntent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE,
                             /* options= */ null, UserHandle.CURRENT));
                 } else {
                     builder.setContentIntent(PendingIntent.getActivity(
-                            mContext, 0, viewIntent, PendingIntent.FLAG_UPDATE_CURRENT));
+                            mContext, 0, viewIntent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
                 }
                 break;
             }
@@ -1534,11 +1553,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 // TODO: Resolve to single code path.
                 if (UserManager.isHeadlessSystemUserMode()) {
                     builder.setContentIntent(PendingIntent.getActivityAsUser(
-                            mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT,
+                            mContext, 0, intent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE,
                             /* options= */ null, UserHandle.CURRENT));
                 } else {
                     builder.setContentIntent(PendingIntent.getActivity(
-                            mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
+                            mContext, 0, intent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
                 }
                 break;
             }
@@ -1566,11 +1585,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 // TODO: Resolve to single code path.
                 if (UserManager.isHeadlessSystemUserMode()) {
                     builder.setContentIntent(PendingIntent.getActivityAsUser(
-                            mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT,
+                            mContext, 0, intent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE,
                             /* options= */ null, UserHandle.CURRENT));
                 } else {
                     builder.setContentIntent(PendingIntent.getActivity(
-                            mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
+                            mContext, 0, intent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
                 }
                 break;
             }
@@ -1585,19 +1604,20 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
                 builder.setSmallIcon(R.drawable.stat_notify_error);
 
-                final Intent snoozeIntent = buildSnoozeRapidIntent(policy.template);
+                final Intent snoozeIntent = buildSnoozeRapidIntent(policy.template,
+                        mContext.getPackageName());
                 builder.setDeleteIntent(PendingIntent.getBroadcast(
-                        mContext, 0, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT));
+                        mContext, 0, snoozeIntent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
 
                 final Intent viewIntent = buildViewDataUsageIntent(res, policy.template);
                 // TODO: Resolve to single code path.
                 if (UserManager.isHeadlessSystemUserMode()) {
                     builder.setContentIntent(PendingIntent.getActivityAsUser(
-                            mContext, 0, viewIntent, PendingIntent.FLAG_UPDATE_CURRENT,
+                            mContext, 0, viewIntent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE,
                             /* options= */ null, UserHandle.CURRENT));
                 } else {
                     builder.setContentIntent(PendingIntent.getActivity(
-                            mContext, 0, viewIntent, PendingIntent.FLAG_UPDATE_CURRENT));
+                            mContext, 0, viewIntent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
                 }
                 break;
             }
@@ -2344,8 +2364,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         FileInputStream fis = null;
         try {
             fis = mPolicyFile.openRead();
-            final XmlPullParser in = Xml.newPullParser();
-            in.setInput(fis, StandardCharsets.UTF_8.name());
+            final TypedXmlPullParser in = Xml.resolvePullParser(fis);
 
              // Must save the <restrict-background> tags and convert them to <uid-policy> later,
              // to skip UIDs that were explicitly denied.
@@ -2596,34 +2615,43 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * Perform upgrade step of moving any user-defined meterness overrides over
      * into {@link WifiConfiguration}.
      */
-    @GuardedBy({"mNetworkPoliciesSecondLock", "mUidRulesFirstLock"})
-    private void upgradeWifiMeteredOverrideAL() {
-        boolean modified = false;
-        final WifiManager wm = mContext.getSystemService(WifiManager.class);
-        final List<WifiConfiguration> configs = wm.getConfiguredNetworks();
-        for (int i = 0; i < mNetworkPolicy.size(); ) {
-            final NetworkPolicy policy = mNetworkPolicy.valueAt(i);
-            if (policy.template.getMatchRule() == NetworkTemplate.MATCH_WIFI
-                    && !policy.inferred) {
-                mNetworkPolicy.removeAt(i);
-                modified = true;
-
-                final String networkId = resolveNetworkId(policy.template.getNetworkId());
-                for (WifiConfiguration config : configs) {
-                    if (Objects.equals(resolveNetworkId(config), networkId)) {
-                        Slog.d(TAG, "Found network " + networkId + "; upgrading metered hint");
-                        config.meteredOverride = policy.metered
-                                ? WifiConfiguration.METERED_OVERRIDE_METERED
-                                : WifiConfiguration.METERED_OVERRIDE_NOT_METERED;
-                        wm.updateNetwork(config);
-                    }
+    private void upgradeWifiMeteredOverride() {
+        final ArrayMap<String, Boolean> wifiNetworkIds = new ArrayMap<>();
+        synchronized (mNetworkPoliciesSecondLock) {
+            for (int i = 0; i < mNetworkPolicy.size();) {
+                final NetworkPolicy policy = mNetworkPolicy.valueAt(i);
+                if (policy.template.getMatchRule() == NetworkTemplate.MATCH_WIFI
+                        && !policy.inferred) {
+                    mNetworkPolicy.removeAt(i);
+                    wifiNetworkIds.put(policy.template.getNetworkId(), policy.metered);
+                } else {
+                    i++;
                 }
-            } else {
-                i++;
             }
         }
-        if (modified) {
-            writePolicyAL();
+
+        if (wifiNetworkIds.isEmpty()) {
+            return;
+        }
+        final WifiManager wm = mContext.getSystemService(WifiManager.class);
+        final List<WifiConfiguration> configs = wm.getConfiguredNetworks();
+        for (int i = 0; i < configs.size(); ++i) {
+            final WifiConfiguration config = configs.get(i);
+            final String networkId = resolveNetworkId(config);
+            final Boolean metered = wifiNetworkIds.get(networkId);
+            if (metered != null) {
+                Slog.d(TAG, "Found network " + networkId + "; upgrading metered hint");
+                config.meteredOverride = metered
+                        ? WifiConfiguration.METERED_OVERRIDE_METERED
+                        : WifiConfiguration.METERED_OVERRIDE_NOT_METERED;
+                wm.updateNetwork(config);
+            }
+        }
+
+        synchronized (mUidRulesFirstLock) {
+            synchronized (mNetworkPoliciesSecondLock) {
+                writePolicyAL();
+            }
         }
     }
 
@@ -2635,8 +2663,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         try {
             fos = mPolicyFile.startWrite();
 
-            XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(fos, StandardCharsets.UTF_8.name());
+            TypedXmlSerializer out = Xml.resolveSerializer(fos);
             out.startDocument(null, true);
 
             out.startTag(null, TAG_POLICY_LIST);
@@ -3667,10 +3694,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
 
                 fout.println();
-                fout.print("mRestrictBackgroundLowPowerMode: " + mRestrictBackgroundLowPowerMode);
-                fout.print("mRestrictBackgroundBeforeBsm: " + mRestrictBackgroundBeforeBsm);
-                fout.print("mLoadedRestrictBackground: " + mLoadedRestrictBackground);
-                fout.print("mRestrictBackgroundChangedInBsm: " + mRestrictBackgroundChangedInBsm);
+                fout.println("mRestrictBackgroundLowPowerMode: " + mRestrictBackgroundLowPowerMode);
+                fout.println("mRestrictBackgroundBeforeBsm: " + mRestrictBackgroundBeforeBsm);
+                fout.println("mLoadedRestrictBackground: " + mLoadedRestrictBackground);
+                fout.println("mRestrictBackgroundChangedInBsm: " + mRestrictBackgroundChangedInBsm);
 
                 fout.println();
                 fout.println("Network policies:");
@@ -3857,10 +3884,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @Override
-    public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
-            String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
-        (new NetworkPolicyManagerShellCommand(mContext, this)).exec(
-                this, in, out, err, args, callback, resultReceiver);
+    public int handleShellCommand(@NonNull ParcelFileDescriptor in,
+            @NonNull ParcelFileDescriptor out, @NonNull ParcelFileDescriptor err,
+            @NonNull String[] args) {
+        return new NetworkPolicyManagerShellCommand(mContext, this).exec(this,
+                in.getFileDescriptor(), out.getFileDescriptor(), err.getFileDescriptor(), args);
     }
 
     void setDebugUid(int uid) {
@@ -4536,6 +4564,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mPowerSaveTempWhitelistAppIds.delete(uid);
         mAppIdleTempWhitelistAppIds.delete(uid);
         mUidFirewallRestrictedModeRules.delete(uid);
+        synchronized (mUidStateCallbackInfos) {
+            mUidStateCallbackInfos.remove(uid);
+        }
 
         // ...then update iptables asynchronously.
         mHandler.obtainMessage(MSG_RESET_FIREWALL_RULES_BY_UID, uid, 0).sendToTarget();
@@ -4682,7 +4713,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     + ", oldRule=" + uidRulesToString(oldUidRules & MASK_METERED_NETWORKS)
                     + ", newRule=" + uidRulesToString(newUidRules & MASK_METERED_NETWORKS)
                     + ", newUidRules=" + uidRulesToString(newUidRules)
-                    + ", oldUidRules=" + uidRulesToString(oldUidRules));
+                    + ", oldUidRules=" + uidRulesToString(oldUidRules)
+                    + ", oldBlockedMeteredReasons=" + NetworkPolicyManager.blockedReasonsToString(
+                    uidBlockedState.blockedReasons & BLOCKED_METERED_REASON_MASK)
+                    + ", oldBlockedMeteredEffectiveReasons="
+                    + NetworkPolicyManager.blockedReasonsToString(
+                    uidBlockedState.effectiveBlockedReasons & BLOCKED_METERED_REASON_MASK)
+                    + ", oldAllowedMeteredReasons=" + NetworkPolicyManager.blockedReasonsToString(
+                    uidBlockedState.allowedReasons & BLOCKED_METERED_REASON_MASK));
         }
 
         if (newUidRules == RULE_NONE) {
@@ -5169,10 +5207,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 case UID_MSG_STATE_CHANGED: {
                     final UidStateCallbackInfo uidStateCallbackInfo =
                             (UidStateCallbackInfo) msg.obj;
-                    final int uid = uidStateCallbackInfo.uid;
-                    final int procState = uidStateCallbackInfo.procState;
-                    final long procStateSeq = uidStateCallbackInfo.procStateSeq;
-                    final int capability = uidStateCallbackInfo.capability;
+                    final int uid;
+                    final int procState;
+                    final long procStateSeq;
+                    final int capability;
+                    synchronized (mUidStateCallbackInfos) {
+                        uid = uidStateCallbackInfo.uid;
+                        procState = uidStateCallbackInfo.procState;
+                        procStateSeq = uidStateCallbackInfo.procStateSeq;
+                        capability = uidStateCallbackInfo.capability;
+                        uidStateCallbackInfo.isPending = false;
+                    }
 
                     handleUidChanged(uid, procState, procStateSeq, capability);
                     return true;
@@ -5480,17 +5525,19 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return new Intent(ACTION_ALLOW_BACKGROUND);
     }
 
-    private static Intent buildSnoozeWarningIntent(NetworkTemplate template) {
+    private static Intent buildSnoozeWarningIntent(NetworkTemplate template, String targetPackage) {
         final Intent intent = new Intent(ACTION_SNOOZE_WARNING);
         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         intent.putExtra(EXTRA_NETWORK_TEMPLATE, template);
+        intent.setPackage(targetPackage);
         return intent;
     }
 
-    private static Intent buildSnoozeRapidIntent(NetworkTemplate template) {
+    private static Intent buildSnoozeRapidIntent(NetworkTemplate template, String targetPackage) {
         final Intent intent = new Intent(ACTION_SNOOZE_RAPID);
         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         intent.putExtra(EXTRA_NETWORK_TEMPLATE, template);
+        intent.setPackage(targetPackage);
         return intent;
     }
 
@@ -5706,12 +5753,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         @Override
-        public void onTempPowerSaveWhitelistChange(int appId, boolean added) {
+        public void onTempPowerSaveWhitelistChange(int appId, boolean added,
+                @ReasonCode int reasonCode, @Nullable String reason) {
             synchronized (mUidRulesFirstLock) {
                 if (!mSystemReady) {
                     return;
                 }
-                mLogger.tempPowerSaveWlChanged(appId, added);
+                mLogger.tempPowerSaveWlChanged(appId, added, reasonCode, reason);
                 if (added) {
                     mPowerSaveTempWhitelistAppIds.put(appId, true);
                 } else {
@@ -5910,7 +5958,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         void updateEffectiveBlockedReasons() {
+            if (LOGV && blockedReasons == BLOCKED_REASON_NONE) {
+                Log.v(TAG, "updateEffectiveBlockedReasons(): no blocked reasons");
+            }
             effectiveBlockedReasons = getEffectiveBlockedReasons(blockedReasons, allowedReasons);
+            if (LOGV) {
+                Log.v(TAG, "updateEffectiveBlockedReasons()"
+                        + ": blockedReasons=" + Integer.toBinaryString(blockedReasons)
+                        + ", effectiveReasons=" + Integer.toBinaryString(effectiveBlockedReasons));
+            }
         }
 
         @VisibleForTesting

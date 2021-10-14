@@ -256,4 +256,6 @@ public class PinnerServiceTest {
         unpinAll(pinnerService);
     }
 
+    // TODO: Add test to check that the pages we expect to be pinned are actually pinned
+
 }

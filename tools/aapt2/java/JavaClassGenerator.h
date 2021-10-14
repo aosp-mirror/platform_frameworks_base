@@ -105,7 +105,7 @@ class JavaClassGenerator {
   // Writes a styleable resource to the R.java file, optionally writing out a rewrite rule for
   // its package ID if `out_rewrite_method` is not nullptr.
   // `package_name_to_generate` is the package
-  void ProcessStyleable(const ResourceNameRef& name, const ResourceId& id,
+  bool ProcessStyleable(const ResourceNameRef& name, const ResourceId& id,
                         const Styleable& styleable,
                         const android::StringPiece& package_name_to_generate,
                         ClassDefinition* out_class_def, MethodDefinition* out_rewrite_method,

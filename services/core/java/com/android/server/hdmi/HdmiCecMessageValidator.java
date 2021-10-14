@@ -204,7 +204,7 @@ public class HdmiCecMessageValidator {
         addValidationInfo(
                 Constants.MESSAGE_REPORT_POWER_STATUS,
                 new OneByteRangeValidator(0x00, 0x03),
-                DEST_DIRECT);
+                DEST_DIRECT | DEST_BROADCAST);
 
         // Messages for the General Protocol.
         addValidationInfo(Constants.MESSAGE_FEATURE_ABORT,
@@ -230,6 +230,18 @@ public class HdmiCecMessageValidator {
                 Constants.MESSAGE_SET_AUDIO_RATE,
                 new OneByteRangeValidator(0x00, 0x06),
                 DEST_DIRECT);
+
+        // Messages for Feature Discovery.
+        addValidationInfo(Constants.MESSAGE_GIVE_FEATURES, noneValidator,
+                DEST_DIRECT | SRC_UNREGISTERED);
+        addValidationInfo(Constants.MESSAGE_REPORT_FEATURES, new VariableLengthValidator(4, 14),
+                DEST_BROADCAST);
+
+        // Messages for Dynamic Auto Lipsync
+        addValidationInfo(Constants.MESSAGE_REQUEST_CURRENT_LATENCY, physicalAddressValidator,
+                DEST_BROADCAST);
+        addValidationInfo(Constants.MESSAGE_REPORT_CURRENT_LATENCY,
+                new VariableLengthValidator(4, 14), DEST_BROADCAST);
 
         // All Messages for the ARC have no parameters.
 

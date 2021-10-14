@@ -16,7 +16,13 @@
 
 package android.view.inputmethod;
 
+import static android.view.ContentInfo.SOURCE_INPUT_METHOD;
+
 import android.annotation.CallSuper;
+import android.annotation.IntRange;
+import android.annotation.Nullable;
+import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Bundle;
@@ -32,9 +38,12 @@ import android.text.TextUtils;
 import android.text.method.MetaKeyKeyListener;
 import android.util.Log;
 import android.util.LogPrinter;
+import android.view.ContentInfo;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.View;
+
+import com.android.internal.util.Preconditions;
 
 class ComposingText implements NoCopySpan {
 }
@@ -154,11 +163,24 @@ public class BaseInputConnection implements InputConnection {
     }
 
     /**
-     * Default implementation calls {@link #finishComposingText()}.
+     * Called after only the composing region is modified (so it isn't called if the text also
+     * changes).
+     * <p>
+     * Default implementation does nothing.
+     *
+     * @hide
+     */
+    public void endComposingRegionEditInternal() {
+    }
+
+    /**
+     * Default implementation calls {@link #finishComposingText()} and
+     * {@code setImeConsumesInput(false)}.
      */
     @CallSuper
     public void closeConnection() {
         finishComposingText();
+        setImeConsumesInput(false);
     }
 
     /**
@@ -457,6 +479,7 @@ public class BaseInputConnection implements InputConnection {
             // Note: sendCurrentText does nothing unless mFallbackMode is set
             sendCurrentText();
             endBatchEdit();
+            endComposingRegionEditInternal();
         }
         return true;
     }
@@ -495,7 +518,10 @@ public class BaseInputConnection implements InputConnection {
      * The default implementation returns the given amount of text from the
      * current cursor position in the buffer.
      */
-    public CharSequence getTextBeforeCursor(int length, int flags) {
+    @Nullable
+    public CharSequence getTextBeforeCursor(@IntRange(from = 0) int length, int flags) {
+        Preconditions.checkArgumentNonnegative(length);
+
         final Editable content = getEditable();
         if (content == null) return null;
 
@@ -551,7 +577,10 @@ public class BaseInputConnection implements InputConnection {
      * The default implementation returns the given amount of text from the
      * current cursor position in the buffer.
      */
-    public CharSequence getTextAfterCursor(int length, int flags) {
+    @Nullable
+    public CharSequence getTextAfterCursor(@IntRange(from = 0) int length, int flags) {
+        Preconditions.checkArgumentNonnegative(length);
+
         final Editable content = getEditable();
         if (content == null) return null;
 
@@ -578,6 +607,56 @@ public class BaseInputConnection implements InputConnection {
             return content.subSequence(b, b + length);
         }
         return TextUtils.substring(content, b, b + length);
+    }
+
+    /**
+     * The default implementation returns the given amount of text around the current cursor
+     * position in the buffer.
+     */
+    @Nullable
+    public SurroundingText getSurroundingText(
+            @IntRange(from = 0) int beforeLength, @IntRange(from = 0)  int afterLength, int flags) {
+        Preconditions.checkArgumentNonnegative(beforeLength);
+        Preconditions.checkArgumentNonnegative(afterLength);
+
+        final Editable content = getEditable();
+        // If {@link #getEditable()} is null or {@code mEditable} is equal to {@link #getEditable()}
+        // (a.k.a, a fake editable), it means we cannot get valid content from the editable, so
+        // fallback to retrieve surrounding text from other APIs.
+        if (content == null || mEditable == content) {
+            return InputConnection.super.getSurroundingText(beforeLength, afterLength, flags);
+        }
+
+        int selStart = Selection.getSelectionStart(content);
+        int selEnd = Selection.getSelectionEnd(content);
+
+        // Guard against the case where the cursor has not been positioned yet.
+        if (selStart < 0 || selEnd < 0) {
+            return null;
+        }
+
+        if (selStart > selEnd) {
+            int tmp = selStart;
+            selStart = selEnd;
+            selEnd = tmp;
+        }
+
+        int contentLength = content.length();
+        int startPos = selStart - beforeLength;
+        int endPos = selEnd + afterLength;
+
+        // Guards the start and end pos within range [0, contentLength].
+        startPos = Math.max(0, startPos);
+        endPos = Math.min(contentLength, endPos);
+
+        CharSequence surroundingText;
+        if ((flags & GET_TEXT_WITH_STYLES) != 0) {
+            surroundingText = content.subSequence(startPos, endPos);
+        } else {
+            surroundingText = TextUtils.substring(content, startPos, endPos);
+        }
+        return new SurroundingText(
+                surroundingText, selStart - startPos, selEnd - startPos, startPos);
     }
 
     /**
@@ -667,6 +746,7 @@ public class BaseInputConnection implements InputConnection {
             // Note: sendCurrentText does nothing unless mFallbackMode is set
             sendCurrentText();
             endBatchEdit();
+            endComposingRegionEditInternal();
         }
         return true;
     }
@@ -870,9 +950,33 @@ public class BaseInputConnection implements InputConnection {
     }
 
     /**
-     * The default implementation does nothing.
+     * Default implementation which invokes {@link View#performReceiveContent} on the target
+     * view if the view {@link View#getReceiveContentMimeTypes allows} content insertion;
+     * otherwise returns false without any side effects.
      */
     public boolean commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts) {
-        return false;
+        ClipDescription description = inputContentInfo.getDescription();
+        if (mTargetView.getReceiveContentMimeTypes() == null) {
+            if (DEBUG) {
+                Log.d(TAG, "Can't insert content from IME: content=" + description);
+            }
+            return false;
+        }
+        if ((flags & InputConnection.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0) {
+            try {
+                inputContentInfo.requestPermission();
+            } catch (Exception e) {
+                Log.w(TAG, "Can't insert content from IME; requestPermission() failed", e);
+                return false;
+            }
+        }
+        final ClipData clip = new ClipData(inputContentInfo.getDescription(),
+                new ClipData.Item(inputContentInfo.getContentUri()));
+        final ContentInfo payload = new ContentInfo.Builder(clip, SOURCE_INPUT_METHOD)
+                .setLinkUri(inputContentInfo.getLinkUri())
+                .setExtras(opts)
+                .setInputContentInfo(inputContentInfo)
+                .build();
+        return mTargetView.performReceiveContent(payload) == null;
     }
 }

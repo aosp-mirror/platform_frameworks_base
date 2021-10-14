@@ -28,14 +28,16 @@
 #include <cutils/bitops.h>
 #include <utils/Thread.h>
 
+#include <android/content/AttributionSourceState.h>
+
 #include "Visualizer.h"
 
 namespace android {
 
 // ---------------------------------------------------------------------------
 
-Visualizer::Visualizer (const String16& opPackageName)
-        :   AudioEffect(opPackageName)
+Visualizer::Visualizer (const android::content::AttributionSourceState& attributionSource)
+        :   AudioEffect(attributionSource)
 {
 }
 

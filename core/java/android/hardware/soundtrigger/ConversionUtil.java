@@ -32,10 +32,9 @@ import android.media.soundtrigger_middleware.RecognitionMode;
 import android.media.soundtrigger_middleware.SoundModel;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
 import android.media.soundtrigger_middleware.SoundTriggerModuleProperties;
+import android.os.ParcelFileDescriptor;
 import android.os.SharedMemory;
-import android.system.ErrnoException;
 
-import java.io.FileDescriptor;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.UUID;
@@ -109,8 +108,9 @@ class ConversionUtil {
         aidlModel.type = apiModel.getType();
         aidlModel.uuid = api2aidlUuid(apiModel.getUuid());
         aidlModel.vendorUuid = api2aidlUuid(apiModel.getVendorUuid());
-        aidlModel.data = byteArrayToSharedMemory(apiModel.getData(), "SoundTrigger SoundModel");
-        aidlModel.dataSize = apiModel.getData().length;
+        byte[] data = apiModel.getData();
+        aidlModel.data = byteArrayToSharedMemory(data, "SoundTrigger SoundModel");
+        aidlModel.dataSize = data.length;
         return aidlModel;
     }
 
@@ -372,7 +372,7 @@ class ConversionUtil {
         return result;
     }
 
-    private static @Nullable FileDescriptor byteArrayToSharedMemory(byte[] data, String name) {
+    private static @Nullable ParcelFileDescriptor byteArrayToSharedMemory(byte[] data, String name) {
         if (data.length == 0) {
             return null;
         }
@@ -382,8 +382,10 @@ class ConversionUtil {
             ByteBuffer buffer = shmem.mapReadWrite();
             buffer.put(data);
             shmem.unmap(buffer);
-            return shmem.getFileDescriptor();
-        } catch (ErrnoException e) {
+            ParcelFileDescriptor fd = shmem.getFdDup();
+            shmem.close();
+            return fd;
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

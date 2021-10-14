@@ -16,53 +16,53 @@
 
 package com.android.internal.app;
 
-import android.app.PendingIntent;
-import android.content.ComponentName;
-import android.hardware.soundtrigger.IRecognitionStatusCallback;
-import android.hardware.soundtrigger.SoundTrigger;
-import android.hardware.soundtrigger.ModelParams;
-import android.os.Bundle;
-import android.os.ParcelUuid;
+import android.media.permission.Identity;
+import com.android.internal.app.ISoundTriggerSession;
 
 /**
  * Service interface for a generic sound recognition model.
+ *
+ * This interface serves as an entry point to establish a session, associated with a client
+ * identity, which exposes the actual functionality.
+ *
  * @hide
  */
 interface ISoundTriggerService {
+    /**
+     * Creates a new session.
+     *
+     * This version is intended to be used when the caller itself is the originator of the
+     * operations, for authorization purposes.
+     *
+     * The pid/uid fields are ignored and will be replaced by those provided by binder.
+     *
+     * It is good practice to clear the binder calling identity prior to calling this, in case the
+     * caller is ever in the same process as the callee.
+     *
+     * The binder object being passed is used by the server to keep track of client death, in order
+     * to clean-up whenever that happens.
+     */
+    ISoundTriggerSession attachAsOriginator(in Identity originatorIdentity,
+                                            IBinder client);
 
-    SoundTrigger.GenericSoundModel getSoundModel(in ParcelUuid soundModelId);
-
-    void updateSoundModel(in SoundTrigger.GenericSoundModel soundModel);
-
-    void deleteSoundModel(in ParcelUuid soundModelId);
-
-    int startRecognition(in ParcelUuid soundModelId, in IRecognitionStatusCallback callback,
-         in SoundTrigger.RecognitionConfig config);
-
-    int stopRecognition(in ParcelUuid soundModelId, in IRecognitionStatusCallback callback);
-
-    int loadGenericSoundModel(in SoundTrigger.GenericSoundModel soundModel);
-    int loadKeyphraseSoundModel(in SoundTrigger.KeyphraseSoundModel soundModel);
-
-    int startRecognitionForService(in ParcelUuid soundModelId, in Bundle params,
-         in ComponentName callbackIntent,in SoundTrigger.RecognitionConfig config);
-
-    int stopRecognitionForService(in ParcelUuid soundModelId);
-
-    int unloadSoundModel(in ParcelUuid soundModelId);
-
-    /** For both ...Intent and ...Service based usage */
-    boolean isRecognitionActive(in ParcelUuid parcelUuid);
-
-    int getModelState(in ParcelUuid soundModelId);
-
-    @nullable SoundTrigger.ModuleProperties getModuleProperties();
-
-    int setParameter(in ParcelUuid soundModelId, in ModelParams modelParam,
-        int value);
-
-    int getParameter(in ParcelUuid soundModelId, in ModelParams modelParam);
-
-    @nullable SoundTrigger.ModelParamRange queryParameter(in ParcelUuid soundModelId,
-        in ModelParams modelParam);
+    /**
+     * Creates a new session.
+     *
+     * This version is intended to be used when the caller is acting on behalf of a separate entity
+     * (the originator) and the sessions operations are to be accounted against that originator for
+     * authorization purposes.
+     *
+     * The caller must hold the SOUNDTRIGGER_DELEGATE_IDENTITY permission in order to be trusted to
+     * provide a reliable originator identity. It should follow the best practices for reliably and
+     * securely verifying the identity of the originator.
+     *
+     * It is good practice to clear the binder calling identity prior to calling this, in case the
+     * caller is ever in the same process as the callee.
+     *
+     * The binder object being passed is used by the server to keep track of client death, in order
+     * to clean-up whenever that happens.
+     */
+    ISoundTriggerSession attachAsMiddleman(in Identity middlemanIdentity,
+                                           in Identity originatorIdentity,
+                                           IBinder client);
 }

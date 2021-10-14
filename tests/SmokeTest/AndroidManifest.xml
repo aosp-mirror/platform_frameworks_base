@@ -15,18 +15,19 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.smoketest">
+     package="com.android.smoketest">
 
     <application>
-        <uses-library android:name="android.test.runner" />
-        <activity android:name=".SmokeTestActivity" 
-                  android:label="Smoke Tests">
+        <uses-library android:name="android.test.runner"/>
+        <activity android:name=".SmokeTestActivity"
+             android:label="Smoke Tests"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.TEST" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.TEST"/>
             </intent-filter>
         </activity>
 
     </application>
-    
+
 </manifest>

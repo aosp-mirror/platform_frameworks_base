@@ -27,6 +27,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.util.concurrency.FakeExecution;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -54,7 +55,7 @@ public class ProximitySensorSingleTest extends SysuiTestCase {
         mThresholdSensor.setLoaded(true);
 
         mProximitySensor = new ProximitySensor(
-                mThresholdSensor, new FakeThresholdSensor(), mFakeExecutor);
+                mThresholdSensor, new FakeThresholdSensor(), mFakeExecutor, new FakeExecution());
     }
 
     @Test

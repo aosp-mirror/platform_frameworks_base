@@ -222,7 +222,7 @@ public class ClientTransaction implements Parcelable, ObjectPoolItem {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }
@@ -241,6 +241,8 @@ public class ClientTransaction implements Parcelable, ObjectPoolItem {
         int result = 17;
         result = 31 * result + Objects.hashCode(mActivityCallbacks);
         result = 31 * result + Objects.hashCode(mLifecycleStateRequest);
+        result = 31 * result + Objects.hashCode(mClient);
+        result = 31 * result + Objects.hashCode(mActivityToken);
         return result;
     }
 

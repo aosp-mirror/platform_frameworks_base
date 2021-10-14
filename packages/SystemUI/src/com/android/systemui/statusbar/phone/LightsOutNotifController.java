@@ -22,20 +22,21 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.Nullable;
 import android.view.View;
-import android.view.WindowInsetsController;
+import android.view.WindowInsetsController.Appearance;
+import android.view.WindowInsetsController.Behavior;
 import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.view.AppearanceRegion;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Apps can request a low profile mode {@link View.SYSTEM_UI_FLAG_LOW_PROFILE}
@@ -45,14 +46,14 @@ import javax.inject.Singleton;
  * This controller shows and hides the notification dot in the status bar to indicate
  * whether there are notifications when the device is in {@link View.SYSTEM_UI_FLAG_LOW_PROFILE}.
  */
-@Singleton
+@SysUISingleton
 public class LightsOutNotifController {
     private final CommandQueue mCommandQueue;
     private final NotificationEntryManager mEntryManager;
     private final WindowManager mWindowManager;
 
     /** @see android.view.WindowInsetsController#setSystemBarsAppearance(int) */
-    @VisibleForTesting @WindowInsetsController.Appearance int mAppearance;
+    @VisibleForTesting @Appearance int mAppearance;
 
     private int mDisplayId;
     private View mLightsOutNotifView;
@@ -97,7 +98,7 @@ public class LightsOutNotifController {
     }
 
     private boolean hasActiveNotifications() {
-        return mEntryManager.hasVisibleNotifications();
+        return mEntryManager.hasActiveNotifications();
     }
 
     @VisibleForTesting
@@ -146,10 +147,9 @@ public class LightsOutNotifController {
 
     private final CommandQueue.Callbacks mCallback = new CommandQueue.Callbacks() {
         @Override
-        public void onSystemBarAppearanceChanged(int displayId,
-                @WindowInsetsController.Appearance int appearance,
-                AppearanceRegion[] appearanceRegions,
-                boolean navbarColorManagedByIme) {
+        public void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
+                AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
+                @Behavior int behavior, boolean isFullscreen) {
             if (displayId != mDisplayId) {
                 return;
             }

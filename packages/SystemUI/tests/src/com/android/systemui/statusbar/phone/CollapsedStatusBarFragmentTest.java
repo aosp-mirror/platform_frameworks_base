@@ -23,19 +23,30 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
+import android.app.Fragment;
 import android.app.StatusBarManager;
+import android.content.Context;
+import android.os.Bundle;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
+import android.widget.FrameLayout;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.FeatureFlags;
+import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
+import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.statusbar.policy.NetworkController;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -45,10 +56,19 @@ import org.mockito.Mockito;
 @SmallTest
 public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
-    private NotificationIconAreaController mMockNotificiationAreaController;
+    private NotificationIconAreaController mMockNotificationAreaController;
     private View mNotificationAreaInner;
-    private View mCenteredNotificationAreaView;
+    private OngoingCallController mOngoingCallController;
+    private SystemStatusAnimationScheduler mAnimationScheduler;
+    private StatusBarLocationPublisher mLocationPublisher;
+    // Set in instantiate()
+    private StatusBarIconController mStatusBarIconController;
+    private NetworkController mNetworkController;
     private StatusBarStateController mStatusBarStateController;
+    private KeyguardStateController mKeyguardStateController;
+
+    private final StatusBar mStatusBar = mock(StatusBar.class);
+    private final CommandQueue mCommandQueue = mock(CommandQueue.class);
 
     public CollapsedStatusBarFragmentTest() {
         super(CollapsedStatusBarFragment.class);
@@ -56,31 +76,17 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
     @Before
     public void setup() {
-        StatusBar statusBar = mock(StatusBar.class);
-        mDependency.injectTestDependency(StatusBar.class, statusBar);
-        mStatusBarStateController = mDependency
-                .injectMockDependency(StatusBarStateController.class);
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
-        mMockNotificiationAreaController = mock(NotificationIconAreaController.class);
-        mNotificationAreaInner = mock(View.class);
-        mCenteredNotificationAreaView = mock(View.class);
-        when(statusBar.getPanelController()).thenReturn(
+        when(mStatusBar.getPanelController()).thenReturn(
                 mock(NotificationPanelViewController.class));
-        when(mNotificationAreaInner.animate()).thenReturn(mock(ViewPropertyAnimator.class));
-        when(mMockNotificiationAreaController.getNotificationInnerAreaView()).thenReturn(
-                mNotificationAreaInner);
-        when(mCenteredNotificationAreaView.animate()).thenReturn(mock(ViewPropertyAnimator.class));
-        when(mMockNotificiationAreaController.getCenteredNotificationAreaView()).thenReturn(
-                mCenteredNotificationAreaView);
     }
 
     @Test
     public void testDisableNone() throws Exception {
         mFragments.dispatchResume();
         processAllMessages();
-
         CollapsedStatusBarFragment fragment = (CollapsedStatusBarFragment) mFragment;
-        fragment.initNotificationIconArea(mMockNotificiationAreaController);
+
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
         assertEquals(View.VISIBLE, mFragment.getView().findViewById(R.id.system_icon_area)
@@ -93,9 +99,8 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     public void testDisableSystemInfo() throws Exception {
         mFragments.dispatchResume();
         processAllMessages();
-
         CollapsedStatusBarFragment fragment = (CollapsedStatusBarFragment) mFragment;
-        fragment.initNotificationIconArea(mMockNotificiationAreaController);
+
         fragment.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_SYSTEM_INFO, 0, false);
 
         assertEquals(View.INVISIBLE, mFragment.getView().findViewById(R.id.system_icon_area)
@@ -111,12 +116,11 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     public void testDisableNotifications() throws Exception {
         mFragments.dispatchResume();
         processAllMessages();
-
         CollapsedStatusBarFragment fragment = (CollapsedStatusBarFragment) mFragment;
-        fragment.initNotificationIconArea(mMockNotificiationAreaController);
+
         fragment.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NOTIFICATION_ICONS, 0, false);
 
-        Mockito.verify(mNotificationAreaInner).setVisibility(eq(View.INVISIBLE));
+        Mockito.verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.INVISIBLE));
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
@@ -127,9 +131,8 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     public void testDisableClock() throws Exception {
         mFragments.dispatchResume();
         processAllMessages();
-
         CollapsedStatusBarFragment fragment = (CollapsedStatusBarFragment) mFragment;
-        fragment.initNotificationIconArea(mMockNotificiationAreaController);
+
         fragment.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_CLOCK, 0, false);
 
         assertEquals(View.GONE, mFragment.getView().findViewById(R.id.clock).getVisibility());
@@ -140,15 +143,82 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
+    public void disable_noOngoingCall_chipHidden() {
+        mFragments.dispatchResume();
+        processAllMessages();
+        CollapsedStatusBarFragment fragment = (CollapsedStatusBarFragment) mFragment;
+
+        when(mOngoingCallController.hasOngoingCall()).thenReturn(false);
+
+        fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
+
+        assertEquals(View.GONE,
+                mFragment.getView().findViewById(R.id.ongoing_call_chip).getVisibility());
+    }
+
+    @Test
+    public void disable_hasOngoingCall_chipDisplayedAndNotificationIconsHidden() {
+        mFragments.dispatchResume();
+        processAllMessages();
+        CollapsedStatusBarFragment fragment = (CollapsedStatusBarFragment) mFragment;
+
+        when(mOngoingCallController.hasOngoingCall()).thenReturn(true);
+
+        fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
+
+        assertEquals(View.VISIBLE,
+                mFragment.getView().findViewById(R.id.ongoing_call_chip).getVisibility());
+        Mockito.verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.INVISIBLE));
+
+    }
+
+    @Test
+    public void disable_hasOngoingCallButNotificationIconsDisabled_chipHidden() {
+        mFragments.dispatchResume();
+        processAllMessages();
+        CollapsedStatusBarFragment fragment = (CollapsedStatusBarFragment) mFragment;
+
+        when(mOngoingCallController.hasOngoingCall()).thenReturn(true);
+
+        fragment.disable(DEFAULT_DISPLAY,
+                StatusBarManager.DISABLE_NOTIFICATION_ICONS, 0, false);
+
+        assertEquals(View.GONE,
+                mFragment.getView().findViewById(R.id.ongoing_call_chip).getVisibility());
+    }
+
+    @Test
+    public void disable_ongoingCallEnded_chipHidden() {
+        mFragments.dispatchResume();
+        processAllMessages();
+        CollapsedStatusBarFragment fragment = (CollapsedStatusBarFragment) mFragment;
+
+        when(mOngoingCallController.hasOngoingCall()).thenReturn(true);
+
+        // Ongoing call started
+        fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
+        assertEquals(View.VISIBLE,
+                mFragment.getView().findViewById(R.id.ongoing_call_chip).getVisibility());
+
+        // Ongoing call ended
+        when(mOngoingCallController.hasOngoingCall()).thenReturn(false);
+
+        fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
+
+        assertEquals(View.GONE,
+                mFragment.getView().findViewById(R.id.ongoing_call_chip).getVisibility());
+    }
+
+    @Ignore("b/192618546")
+    @Test
     public void testOnDozingChanged() throws Exception {
         mFragments.dispatchResume();
         processAllMessages();
-
         CollapsedStatusBarFragment fragment = (CollapsedStatusBarFragment) mFragment;
-        fragment.initNotificationIconArea(mMockNotificiationAreaController);
+
         fragment.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NOTIFICATION_ICONS, 0, false);
 
-        Mockito.verify(mNotificationAreaInner).setVisibility(eq(View.INVISIBLE));
+        Mockito.verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.INVISIBLE));
 
         reset(mStatusBarStateController);
         when(mStatusBarStateController.isDozing()).thenReturn(true);
@@ -156,5 +226,48 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         Mockito.verify(mStatusBarStateController).isDozing();
         Mockito.verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.VISIBLE));
+    }
+
+    @Override
+    protected Fragment instantiate(Context context, String className, Bundle arguments) {
+        mOngoingCallController = mock(OngoingCallController.class);
+        mAnimationScheduler = mock(SystemStatusAnimationScheduler.class);
+        mLocationPublisher = mock(StatusBarLocationPublisher.class);
+        mStatusBarIconController = mock(StatusBarIconController.class);
+        mNetworkController = mock(NetworkController.class);
+        mStatusBarStateController = mock(StatusBarStateController.class);
+        mKeyguardStateController = mock(KeyguardStateController.class);
+        setUpNotificationIconAreaController();
+        return new CollapsedStatusBarFragment(
+                mOngoingCallController,
+                mAnimationScheduler,
+                mLocationPublisher,
+                mMockNotificationAreaController,
+                mock(FeatureFlags.class),
+                mStatusBarIconController,
+                mKeyguardStateController,
+                mNetworkController,
+                mStatusBarStateController,
+                mStatusBar,
+                mCommandQueue);
+    }
+
+    private void setUpNotificationIconAreaController() {
+        mMockNotificationAreaController = mock(NotificationIconAreaController.class);
+
+        mNotificationAreaInner = mock(View.class);
+        View centeredNotificationAreaView = mock(View.class);
+
+        when(mNotificationAreaInner.getLayoutParams()).thenReturn(
+                new FrameLayout.LayoutParams(100, 100));
+        when(centeredNotificationAreaView.getLayoutParams()).thenReturn(
+               new FrameLayout.LayoutParams(100, 100));
+        when(mNotificationAreaInner.animate()).thenReturn(mock(ViewPropertyAnimator.class));
+        when(centeredNotificationAreaView.animate()).thenReturn(mock(ViewPropertyAnimator.class));
+
+        when(mMockNotificationAreaController.getCenteredNotificationAreaView()).thenReturn(
+                centeredNotificationAreaView);
+        when(mMockNotificationAreaController.getNotificationInnerAreaView()).thenReturn(
+                mNotificationAreaInner);
     }
 }

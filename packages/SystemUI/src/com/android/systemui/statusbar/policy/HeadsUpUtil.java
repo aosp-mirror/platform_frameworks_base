@@ -31,7 +31,7 @@ public final class HeadsUpUtil {
      * @param view The view to be set the flag to.
      * @param clicked True to set as clicked. False to not-clicked.
      */
-    public static void setIsClickedHeadsUpNotification(View view, boolean clicked) {
+    public static void setNeedsHeadsUpDisappearAnimationAfterClick(View view, boolean clicked) {
         view.setTag(TAG_CLICKED_NOTIFICATION, clicked ? true : null);
     }
 

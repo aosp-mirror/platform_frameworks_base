@@ -19,8 +19,8 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.graphics.Color.WHITE;
 import static android.graphics.Color.alpha;
-import static android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-import static android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 import static android.view.WindowManager.LayoutParams.FLAG_IGNORE_CHEEK_PRESSES;
@@ -36,20 +36,20 @@ import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATIO
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 
 import static com.android.internal.policy.DecorView.NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES;
 import static com.android.internal.policy.DecorView.STATUS_BAR_COLOR_VIEW_ATTRIBUTES;
 import static com.android.internal.policy.DecorView.getNavigationBarRect;
-import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
 import static com.android.server.wm.TaskSnapshotController.getSystemBarInsets;
-import static com.android.server.wm.TaskSnapshotController.mergeInsetsSources;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager.TaskDescription;
-import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -57,9 +57,11 @@ import android.graphics.Color;
 import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.hardware.HardwareBuffer;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -67,25 +69,24 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.MergedConfiguration;
 import android.util.Slog;
-import android.view.DisplayCutout;
 import android.view.IWindowSession;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.window.ClientWindowFrames;
+import android.window.TaskSnapshot;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.DecorView;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.view.BaseIWindow;
 import com.android.server.policy.WindowManagerPolicy.StartingSurface;
-import com.android.server.protolog.common.ProtoLog;
 
 /**
  * This class represents a starting window that shows a snapshot.
@@ -101,7 +102,7 @@ class TaskSnapshotSurface implements StartingSurface {
      * with a window with the exact same dimensions etc. However, these flags are not used in layout
      * and might cause other side effects so we exclude them.
      */
-    private static final int FLAG_INHERIT_EXCLUDES = FLAG_NOT_FOCUSABLE
+    static final int FLAG_INHERIT_EXCLUDES = FLAG_NOT_FOCUSABLE
             | FLAG_NOT_TOUCHABLE
             | FLAG_NOT_TOUCH_MODAL
             | FLAG_ALT_FOCUSABLE_IM
@@ -123,14 +124,12 @@ class TaskSnapshotSurface implements StartingSurface {
 
     //tmp vars for unused relayout params
     private static final Point sTmpSurfaceSize = new Point();
-    private static final SurfaceControl sTmpSurfaceControl = new SurfaceControl();
 
     private final Window mWindow;
-    private final Surface mSurface;
-    private SurfaceControl mSurfaceControl;
-    private SurfaceControl mChildSurfaceControl;
+    private final SurfaceControl mSurfaceControl;
     private final IWindowSession mSession;
     private final WindowManagerService mService;
+    private final int mDisplayId;
     private final Rect mTaskBounds;
     private final Rect mFrame = new Rect();
     private final Rect mSystemBarInsets = new Rect();
@@ -153,25 +152,26 @@ class TaskSnapshotSurface implements StartingSurface {
 
     static TaskSnapshotSurface create(WindowManagerService service, ActivityRecord activity,
             TaskSnapshot snapshot) {
+        return create(service, activity, snapshot, WindowManagerGlobal.getWindowSession());
+    }
+
+    @VisibleForTesting
+    static TaskSnapshotSurface create(WindowManagerService service, ActivityRecord activity,
+            TaskSnapshot snapshot, IWindowSession session) {
 
         final WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
         final Window window = new Window();
-        final IWindowSession session = WindowManagerGlobal.getWindowSession();
         window.setSession(session);
         final SurfaceControl surfaceControl = new SurfaceControl();
-        final Rect tmpRect = new Rect();
-        final DisplayCutout.ParcelableWrapper tmpCutout = new DisplayCutout.ParcelableWrapper();
-        final Rect tmpFrame = new Rect();
+        final ClientWindowFrames tmpFrames = new ClientWindowFrames();
         final Rect taskBounds;
-        final Rect tmpContentInsets = new Rect();
-        final Rect tmpStableInsets = new Rect();
         final InsetsState mTmpInsetsState = new InsetsState();
         final InsetsSourceControl[] mTempControls = new InsetsSourceControl[0];
         final MergedConfiguration tmpMergedConfiguration = new MergedConfiguration();
         final TaskDescription taskDescription = new TaskDescription();
         taskDescription.setBackgroundColor(WHITE);
         final WindowState topFullscreenOpaqueWindow;
-        final int sysUiVis;
+        final int appearance;
         final int windowFlags;
         final int windowPrivateFlags;
         final int currentOrientation;
@@ -180,36 +180,12 @@ class TaskSnapshotSurface implements StartingSurface {
         synchronized (service.mGlobalLock) {
             final WindowState mainWindow = activity.findMainWindow();
             final Task task = activity.getTask();
-            if (task == null) {
-                Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find task for activity="
-                        + activity);
-                return null;
-            }
             final ActivityRecord topFullscreenActivity =
                     activity.getTask().getTopFullscreenActivity();
-            if (topFullscreenActivity == null) {
-                Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find top fullscreen for task="
-                        + task);
-                return null;
-            }
+            // Already check the nullity in StartingSurfaceController#createTaskSnapshotSurface
             topFullscreenOpaqueWindow = topFullscreenActivity.getTopFullscreenOpaqueWindow();
-            if (mainWindow == null || topFullscreenOpaqueWindow == null) {
-                Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find main window for activity="
-                        + activity);
-                return null;
-            }
-            if (topFullscreenActivity.getWindowConfiguration().getRotation()
-                    != snapshot.getRotation()) {
-                // The snapshot should have been checked by ActivityRecord#isSnapshotCompatible
-                // that the activity will be updated to the same rotation as the snapshot. Since
-                // the transition is not started yet, fixed rotation transform needs to be applied
-                // earlier to make the snapshot show in a rotated container.
-                activity.mDisplayContent.handleTopActivityLaunchingInDifferentOrientation(
-                        topFullscreenActivity, false /* checkOpening */);
-            }
-
-            sysUiVis = topFullscreenOpaqueWindow.getSystemUiVisibility();
             WindowManager.LayoutParams attrs = topFullscreenOpaqueWindow.mAttrs;
+            appearance = attrs.insetsFlags.appearance;
             windowFlags = attrs.flags;
             windowPrivateFlags = attrs.privateFlags;
 
@@ -217,19 +193,19 @@ class TaskSnapshotSurface implements StartingSurface {
             layoutParams.windowAnimations = mainWindow.getAttrs().windowAnimations;
             layoutParams.dimAmount = mainWindow.getAttrs().dimAmount;
             layoutParams.type = TYPE_APPLICATION_STARTING;
-            layoutParams.format = snapshot.getSnapshot().getFormat();
+            layoutParams.format = snapshot.getHardwareBuffer().getFormat();
             layoutParams.flags = (windowFlags & ~FLAG_INHERIT_EXCLUDES)
                     | FLAG_NOT_FOCUSABLE
                     | FLAG_NOT_TOUCHABLE;
-            layoutParams.privateFlags = windowPrivateFlags & PRIVATE_FLAG_INHERITS;
+            // Setting as trusted overlay to let touches pass through. This is safe because this
+            // window is controlled by the system.
+            layoutParams.privateFlags = (windowPrivateFlags & PRIVATE_FLAG_INHERITS)
+                    | PRIVATE_FLAG_TRUSTED_OVERLAY | PRIVATE_FLAG_USE_BLAST;
             layoutParams.token = activity.token;
             layoutParams.width = LayoutParams.MATCH_PARENT;
             layoutParams.height = LayoutParams.MATCH_PARENT;
-            layoutParams.systemUiVisibility = sysUiVis;
-            layoutParams.insetsFlags.behavior
-                    = topFullscreenOpaqueWindow.mAttrs.insetsFlags.behavior;
-            layoutParams.insetsFlags.appearance
-                    = topFullscreenOpaqueWindow.mAttrs.insetsFlags.appearance;
+            layoutParams.insetsFlags.appearance = appearance;
+            layoutParams.insetsFlags.behavior = attrs.insetsFlags.behavior;
             layoutParams.layoutInDisplayCutoutMode = attrs.layoutInDisplayCutoutMode;
             layoutParams.setFitInsetsTypes(attrs.getFitInsetsTypes());
             layoutParams.setFitInsetsSides(attrs.getFitInsetsSides());
@@ -245,13 +221,13 @@ class TaskSnapshotSurface implements StartingSurface {
             task.getBounds(taskBounds);
             currentOrientation = topFullscreenOpaqueWindow.getConfiguration().orientation;
             activityType = activity.getActivityType();
-            insetsState = new InsetsState(topFullscreenOpaqueWindow.getInsetsState());
-            mergeInsetsSources(insetsState, topFullscreenOpaqueWindow.getRequestedInsetsState());
+            insetsState = topFullscreenOpaqueWindow.getInsetsStateWithVisibilityOverride();
+
         }
+        int displayId = activity.getDisplayContent().getDisplayId();
         try {
-            final int res = session.addToDisplay(window, window.mSeq, layoutParams,
-                    View.GONE, activity.getDisplayContent().getDisplayId(), tmpFrame, tmpRect,
-                    tmpRect, tmpCutout, null, mTmpInsetsState, mTempControls);
+            final int res = session.addToDisplay(window, layoutParams, View.GONE, displayId,
+                    mTmpInsetsState, null /* outInputChannel */, mTmpInsetsState, mTempControls);
             if (res < 0) {
                 Slog.w(TAG, "Failed to add snapshot starting window res=" + res);
                 return null;
@@ -259,33 +235,33 @@ class TaskSnapshotSurface implements StartingSurface {
         } catch (RemoteException e) {
             // Local call.
         }
-        final TaskSnapshotSurface snapshotSurface = new TaskSnapshotSurface(service, window,
-                surfaceControl, snapshot, layoutParams.getTitle(), taskDescription, sysUiVis,
-                windowFlags, windowPrivateFlags, taskBounds, currentOrientation, activityType,
-                insetsState);
+        final TaskSnapshotSurface snapshotSurface = new TaskSnapshotSurface(service, displayId,
+                window, surfaceControl, snapshot, layoutParams.getTitle(), taskDescription,
+                appearance, windowFlags, windowPrivateFlags, taskBounds, currentOrientation,
+                activityType, insetsState);
         window.setOuter(snapshotSurface);
         try {
-            session.relayout(window, window.mSeq, layoutParams, -1, -1, View.VISIBLE, 0, -1,
-                    tmpFrame, tmpContentInsets, tmpRect, tmpStableInsets, tmpRect,
-                    tmpCutout, tmpMergedConfiguration, surfaceControl, mTmpInsetsState,
-                    mTempControls, sTmpSurfaceSize, sTmpSurfaceControl);
+            session.relayout(window, layoutParams, -1, -1, View.VISIBLE, 0, -1,
+                    tmpFrames, tmpMergedConfiguration, surfaceControl, mTmpInsetsState,
+                    mTempControls, sTmpSurfaceSize);
         } catch (RemoteException e) {
             // Local call.
         }
 
-        final Rect systemBarInsets = getSystemBarInsets(tmpFrame, insetsState);
-        snapshotSurface.setFrames(tmpFrame, systemBarInsets);
+        final Rect systemBarInsets = getSystemBarInsets(tmpFrames.frame, insetsState);
+        snapshotSurface.setFrames(tmpFrames.frame, systemBarInsets);
         snapshotSurface.drawSnapshot();
         return snapshotSurface;
     }
 
     @VisibleForTesting
-    TaskSnapshotSurface(WindowManagerService service, Window window, SurfaceControl surfaceControl,
-            TaskSnapshot snapshot, CharSequence title, TaskDescription taskDescription,
-            int sysUiVis, int windowFlags, int windowPrivateFlags, Rect taskBounds,
-            int currentOrientation, int activityType, InsetsState insetsState) {
+    TaskSnapshotSurface(WindowManagerService service, int displayId, Window window,
+            SurfaceControl surfaceControl, TaskSnapshot snapshot, CharSequence title,
+            TaskDescription taskDescription, int appearance, int windowFlags,
+            int windowPrivateFlags, Rect taskBounds, int currentOrientation, int activityType,
+            InsetsState insetsState) {
         mService = service;
-        mSurface = service.mSurfaceFactory.get();
+        mDisplayId = displayId;
         mHandler = new Handler(mService.mH.getLooper());
         mSession = WindowManagerGlobal.getWindowSession();
         mWindow = window;
@@ -296,7 +272,7 @@ class TaskSnapshotSurface implements StartingSurface {
         mBackgroundPaint.setColor(backgroundColor != 0 ? backgroundColor : WHITE);
         mTaskBounds = taskBounds;
         mSystemBarBackgroundPainter = new SystemBarBackgroundPainter(windowFlags,
-                windowPrivateFlags, sysUiVis, taskDescription, 1f, insetsState);
+                windowPrivateFlags, appearance, taskDescription, 1f, insetsState);
         mStatusBarColor = taskDescription.getStatusBarColor();
         mOrientationOnCreation = currentOrientation;
         mActivityType = activityType;
@@ -304,13 +280,14 @@ class TaskSnapshotSurface implements StartingSurface {
     }
 
     @Override
-    public void remove() {
+    public void remove(boolean animate) {
         synchronized (mService.mGlobalLock) {
             final long now = SystemClock.uptimeMillis();
             if (mSizeMismatch && now - mShownTime < SIZE_MISMATCH_MINIMUM_TIME_MS
                     // Show the latest content as soon as possible for unlocking to home.
                     && mActivityType != ACTIVITY_TYPE_HOME) {
-                mHandler.postAtTime(this::remove, mShownTime + SIZE_MISMATCH_MINIMUM_TIME_MS);
+                mHandler.postAtTime(() -> remove(false /* prepareAnimation */),
+                        mShownTime + SIZE_MISMATCH_MINIMUM_TIME_MS);
                 ProtoLog.v(WM_DEBUG_STARTING_WINDOW,
                         "Defer removing snapshot surface in %dms", (now - mShownTime));
 
@@ -329,14 +306,13 @@ class TaskSnapshotSurface implements StartingSurface {
     void setFrames(Rect frame, Rect systemBarInsets) {
         mFrame.set(frame);
         mSystemBarInsets.set(systemBarInsets);
-        mSizeMismatch = (mFrame.width() != mSnapshot.getSnapshot().getWidth()
-                || mFrame.height() != mSnapshot.getSnapshot().getHeight());
+        final HardwareBuffer snapshot = mSnapshot.getHardwareBuffer();
+        mSizeMismatch = (mFrame.width() != snapshot.getWidth()
+                || mFrame.height() != snapshot.getHeight());
         mSystemBarBackgroundPainter.setInsets(systemBarInsets);
     }
 
     private void drawSnapshot() {
-        mSurface.copyFrom(mSurfaceControl);
-
         ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Drawing snapshot surface sizeMismatch=%b",
                 mSizeMismatch);
         if (mSizeMismatch) {
@@ -358,16 +334,15 @@ class TaskSnapshotSurface implements StartingSurface {
     }
 
     private void drawSizeMatchSnapshot() {
-        mSurface.attachAndQueueBufferWithColorSpace(mSnapshot.getSnapshot(),
-                mSnapshot.getColorSpace());
-        mSurface.release();
+        GraphicBuffer graphicBuffer = GraphicBuffer.createFromHardwareBuffer(
+                mSnapshot.getHardwareBuffer());
+        mTransaction.setBuffer(mSurfaceControl, graphicBuffer)
+                .setColorSpace(mSurfaceControl, mSnapshot.getColorSpace())
+                .apply();
     }
 
     private void drawSizeMismatchSnapshot() {
-        if (!mSurface.isValid()) {
-            throw new IllegalStateException("mSurface does not hold a valid surface.");
-        }
-        final GraphicBuffer buffer = mSnapshot.getSnapshot();
+        final HardwareBuffer buffer = mSnapshot.getHardwareBuffer();
         final SurfaceSession session = new SurfaceSession();
         // We consider nearly matched dimensions as there can be rounding errors and the user won't
         // notice very minute differences from scaling one dimension more than the other
@@ -376,26 +351,25 @@ class TaskSnapshotSurface implements StartingSurface {
                 - ((float) mFrame.width() / mFrame.height())) > 0.01f;
 
         // Keep a reference to it such that it doesn't get destroyed when finalized.
-        mChildSurfaceControl = mService.mSurfaceControlFactory.apply(session)
-                .setName(mTitle + " - task-snapshot-surface")
-                .setBufferSize(buffer.getWidth(), buffer.getHeight())
+        final String name = mTitle + " - task-snapshot-surface";
+        SurfaceControl childSurfaceControl = mService.mSurfaceControlFactory.apply(session)
+                .setName(name)
+                .setBLASTLayer()
                 .setFormat(buffer.getFormat())
                 .setParent(mSurfaceControl)
                 .setCallsite("TaskSnapshotSurface.drawSizeMismatchSnapshot")
                 .build();
-        Surface surface = mService.mSurfaceFactory.get();
-        surface.copyFrom(mChildSurfaceControl);
 
         final Rect frame;
         // We can just show the surface here as it will still be hidden as the parent is
         // still hidden.
-        mTransaction.show(mChildSurfaceControl);
+        mTransaction.show(childSurfaceControl);
         if (aspectRatioMismatch) {
             // Clip off ugly navigation bar.
             final Rect crop = calculateSnapshotCrop();
             frame = calculateSnapshotFrame(crop);
-            mTransaction.setWindowCrop(mChildSurfaceControl, crop);
-            mTransaction.setPosition(mChildSurfaceControl, frame.left, frame.top);
+            mTransaction.setWindowCrop(childSurfaceControl, crop);
+            mTransaction.setPosition(childSurfaceControl, frame.left, frame.top);
             mTmpSnapshotSize.set(crop);
             mTmpDstFrame.set(frame);
         } else {
@@ -407,18 +381,29 @@ class TaskSnapshotSurface implements StartingSurface {
 
         // Scale the mismatch dimensions to fill the task bounds
         mSnapshotMatrix.setRectToRect(mTmpSnapshotSize, mTmpDstFrame, Matrix.ScaleToFit.FILL);
-        mTransaction.setMatrix(mChildSurfaceControl, mSnapshotMatrix, mTmpFloat9);
+        mTransaction.setMatrix(childSurfaceControl, mSnapshotMatrix, mTmpFloat9);
 
-        mTransaction.apply();
-        surface.attachAndQueueBufferWithColorSpace(buffer, mSnapshot.getColorSpace());
-        surface.release();
+        GraphicBuffer graphicBuffer = GraphicBuffer.createFromHardwareBuffer(
+                mSnapshot.getHardwareBuffer());
+        mTransaction.setColorSpace(childSurfaceControl, mSnapshot.getColorSpace());
+        mTransaction.setBuffer(childSurfaceControl, graphicBuffer);
+        // This is the way to tell the input system to exclude this surface from occlusion
+        // detection since we don't have a window for it. We do this because this window is
+        // generated by the system as well as its content (the snapshot of the app).
+        InputMonitor.setTrustedOverlayInputInfo(childSurfaceControl, mTransaction, mDisplayId,
+                name);
 
         if (aspectRatioMismatch) {
-            final Canvas c = mSurface.lockCanvas(null);
+            GraphicBuffer background = GraphicBuffer.create(mFrame.width(), mFrame.height(),
+                    PixelFormat.RGBA_8888,
+                    GraphicBuffer.USAGE_HW_TEXTURE | GraphicBuffer.USAGE_HW_COMPOSER
+                            | GraphicBuffer.USAGE_SW_WRITE_RARELY);
+            final Canvas c = background.lockCanvas();
             drawBackgroundAndBars(c, frame);
-            mSurface.unlockCanvasAndPost(c);
-            mSurface.release();
+            background.unlockCanvasAndPost(c);
+            mTransaction.setBuffer(mSurfaceControl, background);
         }
+        mTransaction.apply();
     }
 
     /**
@@ -429,12 +414,12 @@ class TaskSnapshotSurface implements StartingSurface {
     @VisibleForTesting
     Rect calculateSnapshotCrop() {
         final Rect rect = new Rect();
-        rect.set(0, 0, mSnapshot.getSnapshot().getWidth(), mSnapshot.getSnapshot().getHeight());
+        final HardwareBuffer snapshot = mSnapshot.getHardwareBuffer();
+        rect.set(0, 0, snapshot.getWidth(), snapshot.getHeight());
         final Rect insets = mSnapshot.getContentInsets();
 
-        final float scaleX = (float) mSnapshot.getSnapshot().getWidth() / mSnapshot.getTaskSize().x;
-        final float scaleY =
-                (float) mSnapshot.getSnapshot().getHeight() / mSnapshot.getTaskSize().y;
+        final float scaleX = (float) snapshot.getWidth() / mSnapshot.getTaskSize().x;
+        final float scaleY = (float) snapshot.getHeight() / mSnapshot.getTaskSize().y;
 
         // Let's remove all system decorations except the status bar, but only if the task is at the
         // very top of the screen.
@@ -453,9 +438,9 @@ class TaskSnapshotSurface implements StartingSurface {
      */
     @VisibleForTesting
     Rect calculateSnapshotFrame(Rect crop) {
-        final float scaleX = (float) mSnapshot.getSnapshot().getWidth() / mSnapshot.getTaskSize().x;
-        final float scaleY =
-                (float) mSnapshot.getSnapshot().getHeight() / mSnapshot.getTaskSize().y;
+        final HardwareBuffer snapshot = mSnapshot.getHardwareBuffer();
+        final float scaleX = (float) snapshot.getWidth() / mSnapshot.getTaskSize().x;
+        final float scaleY = (float) snapshot.getHeight() / mSnapshot.getTaskSize().y;
 
         // Rescale the frame from snapshot to window coordinate space
         final Rect frame = new Rect(0, 0,
@@ -523,11 +508,9 @@ class TaskSnapshotSurface implements StartingSurface {
         }
 
         @Override
-        public void resized(Rect frame, Rect contentInsets, Rect visibleInsets,
-                Rect stableInsets, boolean reportDraw,
-                MergedConfiguration mergedConfiguration, Rect backDropFrame, boolean forceLayout,
-                boolean alwaysConsumeSystemBars, int displayId,
-                DisplayCutout.ParcelableWrapper displayCutout) {
+        public void resized(ClientWindowFrames frames, boolean reportDraw,
+                MergedConfiguration mergedConfiguration, boolean forceLayout,
+                boolean alwaysConsumeSystemBars, int displayId) {
             if (mergedConfiguration != null && mOuter != null
                     && mOuter.mOrientationOnCreation
                             != mergedConfiguration.getMergedConfiguration().orientation) {
@@ -535,7 +518,7 @@ class TaskSnapshotSurface implements StartingSurface {
                 // The orientation of the screen is changing. We better remove the snapshot ASAP as
                 // we are going to wait on the new window in any case to unfreeze the screen, and
                 // the starting window is not needed anymore.
-                sHandler.post(mOuter::remove);
+                sHandler.post(() -> mOuter.remove(false /* prepareAnimation */));
             }
             if (reportDraw) {
                 sHandler.obtainMessage(MSG_REPORT_DRAW, mOuter).sendToTarget();
@@ -555,28 +538,26 @@ class TaskSnapshotSurface implements StartingSurface {
         private final int mNavigationBarColor;
         private final int mWindowFlags;
         private final int mWindowPrivateFlags;
-        private final int mSysUiVis;
         private final float mScale;
         private final InsetsState mInsetsState;
         private final Rect mSystemBarInsets = new Rect();
 
-        SystemBarBackgroundPainter(int windowFlags, int windowPrivateFlags, int sysUiVis,
+        SystemBarBackgroundPainter(int windowFlags, int windowPrivateFlags, int appearance,
                 TaskDescription taskDescription, float scale, InsetsState insetsState) {
             mWindowFlags = windowFlags;
             mWindowPrivateFlags = windowPrivateFlags;
-            mSysUiVis = sysUiVis;
             mScale = scale;
             final Context context = ActivityThread.currentActivityThread().getSystemUiContext();
             final int semiTransparent = context.getColor(
                     R.color.system_bar_background_semi_transparent);
             mStatusBarColor = DecorView.calculateBarColor(windowFlags, FLAG_TRANSLUCENT_STATUS,
-                    semiTransparent, taskDescription.getStatusBarColor(), sysUiVis,
-                    SYSTEM_UI_FLAG_LIGHT_STATUS_BAR,
+                    semiTransparent, taskDescription.getStatusBarColor(), appearance,
+                    APPEARANCE_LIGHT_STATUS_BARS,
                     taskDescription.getEnsureStatusBarContrastWhenTransparent());
             mNavigationBarColor = DecorView.calculateBarColor(windowFlags,
                     FLAG_TRANSLUCENT_NAVIGATION, semiTransparent,
-                    taskDescription.getNavigationBarColor(), sysUiVis,
-                    SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR,
+                    taskDescription.getNavigationBarColor(), appearance,
+                    APPEARANCE_LIGHT_NAVIGATION_BARS,
                     taskDescription.getEnsureNavigationBarContrastWhenTransparent()
                             && context.getResources().getBoolean(R.bool.config_navBarNeedsScrim));
             mStatusBarPaint.setColor(mStatusBarColor);
@@ -591,11 +572,8 @@ class TaskSnapshotSurface implements StartingSurface {
         int getStatusBarColorViewHeight() {
             final boolean forceBarBackground =
                     (mWindowPrivateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0;
-            if (ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL
-                    ? STATUS_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
-                            mSysUiVis, mStatusBarColor, mWindowFlags, forceBarBackground)
-                    : STATUS_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
-                            mInsetsState, mStatusBarColor, mWindowFlags, forceBarBackground)) {
+            if (STATUS_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
+                    mInsetsState, mStatusBarColor, mWindowFlags, forceBarBackground)) {
                 return (int) (mSystemBarInsets.top * mScale);
             } else {
                 return 0;
@@ -605,11 +583,8 @@ class TaskSnapshotSurface implements StartingSurface {
         private boolean isNavigationBarColorViewVisible() {
             final boolean forceBarBackground =
                     (mWindowPrivateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0;
-            return ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL
-                    ? NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
-                            mSysUiVis, mNavigationBarColor, mWindowFlags, forceBarBackground)
-                    : NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
-                            mInsetsState, mNavigationBarColor, mWindowFlags, forceBarBackground);
+            return NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
+                    mInsetsState, mNavigationBarColor, mWindowFlags, forceBarBackground);
         }
 
         void drawDecors(Canvas c, @Nullable Rect alreadyDrawnFrame) {

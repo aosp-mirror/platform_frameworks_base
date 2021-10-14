@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-#ifndef IDMAP2_INCLUDE_IDMAP2_POLICIES_H_
-#define IDMAP2_INCLUDE_IDMAP2_POLICIES_H_
+#ifndef IDMAP2_LIBIDMAP2_POLICIES_INCLUDE_IDMAP2_POLICIES_H_
+#define IDMAP2_LIBIDMAP2_POLICIES_INCLUDE_IDMAP2_POLICIES_H_
 
 #include <array>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "android-base/stringprintf.h"
@@ -78,4 +79,4 @@ inline static std::string PoliciesToDebugString(PolicyBitmask policies) {
 
 }  // namespace android::idmap2::policy
 
-#endif  // IDMAP2_INCLUDE_IDMAP2_POLICIES_H_
+#endif  // IDMAP2_LIBIDMAP2_POLICIES_INCLUDE_IDMAP2_POLICIES_H_

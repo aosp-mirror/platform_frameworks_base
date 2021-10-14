@@ -19,6 +19,8 @@ package android.media;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 
+import java.util.List;
+
 /**
  * The AudioMixPort is a specialized type of AudioPort
  * describing an audio mix or stream at an input or output stream of the audio
@@ -39,6 +41,12 @@ public class AudioMixPort extends AudioPort {
             int[] formats, AudioGain[] gains) {
         super(handle, role, deviceName, samplingRates, channelMasks, channelIndexMasks,
                 formats, gains);
+        mIoHandle = ioHandle;
+    }
+
+    AudioMixPort(AudioHandle handle, int ioHandle, int role, String deviceName,
+            List<AudioProfile> profiles, AudioGain[] gains) {
+        super(handle, role, deviceName, profiles, gains, null);
         mIoHandle = ioHandle;
     }
 

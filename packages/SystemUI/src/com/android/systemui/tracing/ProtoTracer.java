@@ -25,6 +25,7 @@ import android.os.SystemClock;
 import androidx.annotation.NonNull;
 
 import com.android.systemui.Dumpable;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.shared.tracing.FrameProtoTracer;
 import com.android.systemui.shared.tracing.FrameProtoTracer.ProtoTraceParams;
@@ -42,12 +43,11 @@ import java.util.ArrayList;
 import java.util.Queue;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * Controller for coordinating winscope proto tracing.
  */
-@Singleton
+@SysUISingleton
 public class ProtoTracer implements Dumpable, ProtoTraceParams<MessageNano, SystemUiTraceFileProto,
         SystemUiTraceEntryProto, SystemUiTraceProto> {
 

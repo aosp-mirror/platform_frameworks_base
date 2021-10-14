@@ -33,6 +33,7 @@ license {
 
 android_app {
     name: "PrintSpooler",
+    defaults: ["platform_app_defaults"],
 
     resource_dirs: ["res"],
 

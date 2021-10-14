@@ -54,6 +54,32 @@ public class SignatureTest extends TestCase {
         assertFalse(Signature.areEffectiveMatch(asArray(A, M), asArray(A, B)));
     }
 
+    public void testHashCode_doesNotIncludeFlags() throws Exception {
+        // Some classes rely on the hash code not including the flags / capabilities for the signer
+        // to verify Set membership. This test verifies two signers with the same signature but
+        // different flags have the same hash code.
+        Signature signatureAWithAllCaps = new Signature(A.toCharsString());
+        // There are currently 5 capabilities that can be assigned to a previous signer, although
+        // for the purposes of this test all that matters is that the two flag values are distinct.
+        signatureAWithAllCaps.setFlags(31);
+        Signature signatureAWithNoCaps = new Signature(A.toCharsString());
+        signatureAWithNoCaps.setFlags(0);
+
+        assertEquals(signatureAWithAllCaps.hashCode(), signatureAWithNoCaps.hashCode());
+    }
+
+    public void testEquals_doesNotIncludeFlags() throws Exception {
+        // Similar to above some classes rely on equals only comparing the signature arrays
+        // for equality without including the flags. This test verifies two signers with the
+        // same signature but different flags are still considered equal.
+        Signature signatureAWithAllCaps = new Signature(A.toCharsString());
+        signatureAWithAllCaps.setFlags(31);
+        Signature signatureAWithNoCaps = new Signature(A.toCharsString());
+        signatureAWithNoCaps.setFlags(0);
+
+        assertEquals(signatureAWithAllCaps, signatureAWithNoCaps);
+    }
+
     private static Signature[] asArray(Signature... s) {
         return s;
     }

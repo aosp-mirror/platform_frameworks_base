@@ -20,6 +20,7 @@ import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -63,7 +64,7 @@ public final class Rule implements Parcelable {
     private final @Effect int mEffect;
 
     public Rule(@NonNull IntegrityFormula formula, @Effect int effect) {
-        checkArgument(isValidEffect(effect), String.format("Unknown effect: %d", effect));
+        checkArgument(isValidEffect(effect), "Unknown effect: %d", effect);
         this.mFormula = Objects.requireNonNull(formula);
         this.mEffect = effect;
     }
@@ -113,7 +114,7 @@ public final class Rule implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }

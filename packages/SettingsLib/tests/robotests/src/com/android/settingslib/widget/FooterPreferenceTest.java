@@ -62,4 +62,26 @@ public class FooterPreferenceTest {
 
         assertThat(mFooterPreference.getTitle()).isEqualTo("summary");
     }
+
+    @Test
+    public void setContentDescription_contentSet_shouldGetSameContentDescription() {
+        mFooterPreference.setContentDescription("test");
+
+        assertThat(mFooterPreference.getContentDescription()).isEqualTo("test");
+    }
+
+    @Test
+    public void setLearnMoreContentDescription_contentSet_shouldGetSameContentDescription() {
+        mFooterPreference.setLearnMoreContentDescription("test");
+
+        assertThat(mFooterPreference.getLearnMoreContentDescription()).isEqualTo("test");
+    }
+
+    @Test
+    public void setLearnMoreAction_actionSet_shouldGetAction() {
+        mFooterPreference.setLearnMoreAction(v -> {
+        });
+
+        assertThat(mFooterPreference.mLearnMoreListener).isNotNull();
+    }
 }

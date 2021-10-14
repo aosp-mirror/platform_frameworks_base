@@ -16,6 +16,11 @@
 
 package com.android.server;
 
+import android.annotation.Nullable;
+import android.os.PowerExemptionManager;
+import android.os.PowerExemptionManager.ReasonCode;
+import android.os.PowerExemptionManager.TempAllowListType;
+
 import com.android.server.deviceidle.IDeviceIdleConstraint;
 
 public interface DeviceIdleInternal {
@@ -28,13 +33,35 @@ public interface DeviceIdleInternal {
 
     void exitIdle(String reason);
 
-    // duration in milliseconds
+    /**
+     * Same as {@link #addPowerSaveTempWhitelistApp(int, String, long, int, boolean, int, String)}
+     * with {@link PowerExemptionManager#TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED}.
+     */
     void addPowerSaveTempWhitelistApp(int callingUid, String packageName,
-            long duration, int userId, boolean sync, String reason);
+            long durationMs, int userId, boolean sync, @ReasonCode int reasonCode,
+            @Nullable String reason);
 
-    // duration in milliseconds
-    void addPowerSaveTempWhitelistAppDirect(int uid, long duration, boolean sync,
-            String reason);
+    /**
+     * Put a package in the temp-allowlist.
+     */
+    void addPowerSaveTempWhitelistApp(int callingUid, String packageName,
+            long durationMs, @TempAllowListType int tempAllowListType, int userId, boolean sync,
+            @ReasonCode int reasonCode, @Nullable String reason);
+
+    /**
+     * Called by ActivityManagerService to directly add UID to DeviceIdleController's temp
+     * allowlist.
+     * @param uid
+     * @param duration duration in milliseconds
+     * @param type temp allowlist type defined at {@link TempAllowListType}
+     * @param sync
+     * @param reasonCode one of {@link ReasonCode}
+     * @param reason
+     * @param callingUid UID of app who added this temp-allowlist.
+     */
+    void addPowerSaveTempWhitelistAppDirect(int uid, long duration,
+            @TempAllowListType int type, boolean sync, @ReasonCode int reasonCode,
+            @Nullable String reason, int callingUid);
 
     // duration in milliseconds
     long getNotificationAllowlistDuration();
@@ -69,4 +96,13 @@ public interface DeviceIdleInternal {
      * that the device is stationary or in motion.
      */
     void unregisterStationaryListener(StationaryListener listener);
+
+    /**
+     * Apply some restrictions on temp allowlist type based on the reasonCode.
+     * @param reasonCode temp allowlist reason code.
+     * @param defaultType default temp allowlist type if reasonCode can not decide a type.
+     * @return temp allowlist type based on the reasonCode.
+     */
+    @TempAllowListType int getTempAllowListType(@ReasonCode int reasonCode,
+            @TempAllowListType int defaultType);
 }

@@ -17,6 +17,7 @@
 package android.timezone;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import java.util.Objects;
 
@@ -59,7 +60,7 @@ public final class TelephonyNetwork {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }

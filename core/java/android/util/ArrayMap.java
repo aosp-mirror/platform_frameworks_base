@@ -16,6 +16,7 @@
 
 package android.util;
 
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 
 import com.android.internal.util.ArrayUtils;
@@ -826,7 +827,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      * equal, the method returns false, otherwise it returns true.
      */
     @Override
-    public boolean equals(Object object) {
+    public boolean equals(@Nullable Object object) {
         if (this == object) {
             return true;
         }

@@ -18,8 +18,7 @@ license {
     ],
 }
 
-java_binary {
+sh_binary {
     name: "input",
-    wrapper: "input",
-    srcs: ["**/*.java"],
+    src: "input",
 }

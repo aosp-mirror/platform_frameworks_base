@@ -16,18 +16,31 @@
 
 package com.android.server.apphibernation;
 
+import android.annotation.CurrentTimeMillisLong;
+
+import java.text.SimpleDateFormat;
+
 /**
  * Data class that contains global hibernation state for a package.
  */
 final class GlobalLevelState {
+    // Only show day for privacy purposes.
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+
     public String packageName;
     public boolean hibernated;
+    // The number of saved bytes from the current hibernation. It will be 0 if not in hibernation.
+    public long savedByte;
+    @CurrentTimeMillisLong
+    public long lastUnhibernatedMs;
 
     @Override
     public String toString() {
         return "GlobalLevelState{"
                 + "packageName='" + packageName + '\''
-                + ", hibernated=" + hibernated
+                + ", hibernated=" + hibernated + '\''
+                + ", savedByte=" + savedByte + '\''
+                + ", lastUnhibernated=" + DATE_FORMAT.format(lastUnhibernatedMs)
                 + '}';
     }
 }
