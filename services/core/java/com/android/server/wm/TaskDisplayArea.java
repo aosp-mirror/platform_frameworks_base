@@ -1275,6 +1275,11 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                 }
             }
         }
+        // For better split UX, If task launch by the source task which root task is created by
+        // organizer, it should also launch in that root too.
+        if (sourceTask != null && sourceTask.getRootTask().mCreatedByOrganizer) {
+            return sourceTask.getRootTask();
+        }
         return null;
     }
 
