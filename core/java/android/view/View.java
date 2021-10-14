@@ -27060,7 +27060,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         switch (event.mAction) {
             case DragEvent.ACTION_DRAG_STARTED: {
-                if (result && li.mOnDragListener != null) {
+                if (result && li != null && li.mOnDragListener != null) {
                     sendWindowContentChangedAccessibilityEvent(
                             AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
                 }
@@ -27074,7 +27074,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 refreshDrawableState();
             } break;
             case DragEvent.ACTION_DROP: {
-                if (result && (li.mOnDragListener != null | li.mOnReceiveContentListener != null)) {
+                if (result && li != null && (li.mOnDragListener != null
+                        || li.mOnReceiveContentListener != null)) {
                     sendWindowContentChangedAccessibilityEvent(
                             AccessibilityEvent.CONTENT_CHANGE_TYPE_DRAG_DROPPED);
                 }
