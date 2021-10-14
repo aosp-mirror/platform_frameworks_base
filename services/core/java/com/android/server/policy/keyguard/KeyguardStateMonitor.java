@@ -44,6 +44,7 @@ public class KeyguardStateMonitor extends IKeyguardStateCallback.Stub {
     private volatile boolean mSimSecure = true;
     private volatile boolean mInputRestricted = true;
     private volatile boolean mTrusted = false;
+    private volatile boolean mHasLockscreenWallpaper = false;
 
     private int mCurrentUserId;
 
@@ -78,6 +79,10 @@ public class KeyguardStateMonitor extends IKeyguardStateCallback.Stub {
         return mTrusted;
     }
 
+    public boolean hasLockscreenWallpaper() {
+        return mHasLockscreenWallpaper;
+    }
+
     public int getCurrentUser() {
         return mCurrentUserId;
     }
@@ -109,6 +114,11 @@ public class KeyguardStateMonitor extends IKeyguardStateCallback.Stub {
     public void onTrustedChanged(boolean trusted) {
         mTrusted = trusted;
         mCallback.onTrustedChanged();
+    }
+
+    @Override // Binder interface
+    public void onHasLockscreenWallpaperChanged(boolean hasLockscreenWallpaper) {
+        mHasLockscreenWallpaper = hasLockscreenWallpaper;
     }
 
     public interface StateCallback {
