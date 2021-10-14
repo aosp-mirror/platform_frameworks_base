@@ -20,41 +20,53 @@
 <resources>
     <!-- Keyguard PIN pad styles -->
     <style name="Keyguard.TextView" parent="@android:style/Widget.DeviceDefault.TextView">
-        <item name="android:textColor">?attr/wallpaperTextColorSecondary</item>
         <item name="android:textSize">@dimen/kg_status_line_font_size</item>
     </style>
     <style name="Keyguard.TextView.EmergencyButton" parent="Theme.SystemUI">
-        <item name="android:textColor">?attr/wallpaperTextColorSecondary</item>
+        <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
         <item name="android:textSize">14dp</item>
         <item name="android:background">@drawable/kg_emergency_button_background</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:paddingLeft">12dp</item>
         <item name="android:paddingRight">12dp</item>
+        <item name="android:stateListAnimator">@null</item>
     </style>
-    <style name="Widget.TextView.NumPadKey" parent="@android:style/Widget.TextView">
+    <style name="NumPadKey" parent="Theme.SystemUI">
+      <!-- Studio can't directly reference ?androidprv:attr/colorSurface here, so this value
+           is resolved in {@link NumPadAnimator}. -->
+      <item name="android:colorControlNormal">@null</item>
+      <item name="android:colorControlHighlight">?android:attr/colorAccent</item>
+      <item name="android:background">@drawable/num_pad_key_background</item>
+    </style>
+    <style name="Widget.TextView.NumPadKey.Digit"
+           parent="@android:style/Widget.DeviceDefault.TextView">
         <item name="android:singleLine">true</item>
         <item name="android:gravity">center_horizontal|center_vertical</item>
         <item name="android:background">@null</item>
         <item name="android:textSize">32sp</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-        <item name="android:textColor">?attr/wallpaperTextColor</item>
         <item name="android:paddingBottom">-16dp</item>
     </style>
-    <style name="Keyguard.ImageButton.NumPadDelete" parent="@android:style/Widget.ImageButton">
-        <item name="android:src">@drawable/ic_backspace_black_24dp</item>
-        <item name="android:paddingBottom">11sp</item>
-        <item name="android:tint">@color/pin_delete_color</item>
-        <item name="android:tintMode">src_in</item>
-        <item name="android:src">@drawable/ic_backspace_black_24dp</item>
+    <style name="Widget.TextView.Password" parent="@android:style/Widget.TextView">
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
-    <style name="Keyguard.ImageButton.NumPadEnter" parent="@android:style/Widget.ImageButton">
-        <item name="android:src">@drawable/ic_keyboard_tab_36dp</item>
-        <item name="android:paddingBottom">11sp</item>
+    <style name="NumPadKey.Delete">
+        <item name="android:colorControlNormal">?android:attr/textColorSecondary</item>
+        <item name="android:src">@drawable/ic_backspace_24dp</item>
     </style>
-    <style name="Widget.TextView.NumPadKey.Klondike" parent="Widget.TextView.NumPadKey">
+    <style name="NumPadKey.Enter">
+      <item name="android:colorControlNormal">?android:attr/textColorSecondary</item>
+      <item name="android:src">@drawable/ic_keyboard_tab_36dp</item>
+    </style>
+    <style name="Widget.TextView.NumPadKey.Klondike"
+           parent="@android:style/Widget.DeviceDefault.TextView">
         <item name="android:textSize">12sp</item>
+        <item name="android:background">@null</item>
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
-        <item name="android:textColor">?attr/wallpaperTextColorSecondary</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
         <item name="android:paddingBottom">0dp</item>
     </style>
 
@@ -90,20 +102,10 @@
         <item name="android:shadowRadius">?attr/shadowRadius</item>
     </style>
 
-    <style name="BouncerSecurityContainer">
-        <item name="android:layout_gravity">center_horizontal|bottom</item>
-    </style>
-
     <style name="PasswordTheme" parent="Theme.SystemUI">
-        <item name="android:textColor">?attr/wallpaperTextColor</item>
-        <item name="android:colorControlNormal">?attr/wallpaperTextColor</item>
-        <item name="android:colorControlActivated">?attr/wallpaperTextColor</item>
-    </style>
-
-    <style name="PasswordTheme.Light" parent="Theme.SystemUI.Light">
-        <item name="android:textColor">?attr/wallpaperTextColor</item>
-        <item name="android:colorControlNormal">?attr/wallpaperTextColor</item>
-        <item name="android:colorControlActivated">?attr/wallpaperTextColor</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:colorControlNormal">?android:attr/textColorPrimary</item>
+        <item name="android:colorControlActivated">?android:attr/textColorPrimary</item>
     </style>
 
     <style name="Theme.SystemUI.KeyguardPresentation">
@@ -116,6 +118,7 @@
 
     <style name="TextAppearance.Keyguard">
         <item name="android:textSize">@dimen/widget_title_font_size</item>
+        <item name="android:lineHeight">@dimen/widget_title_line_height</item>
         <item name="android:gravity">center</item>
         <item name="android:ellipsize">end</item>
         <item name="android:maxLines">2</item>
@@ -129,6 +132,7 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:lines">1</item>
         <item name="android:textSize">@dimen/widget_label_font_size</item>
+        <item name="android:lineHeight">@dimen/widget_label_line_height</item>
     </style>
 
     <style name="TextAppearance.Keyguard.BottomArea">
@@ -138,5 +142,4 @@
         <item name="android:shadowColor">@color/keyguard_shadow_color</item>
         <item name="android:shadowRadius">?attr/shadowRadius</item>
     </style>
-
 </resources>

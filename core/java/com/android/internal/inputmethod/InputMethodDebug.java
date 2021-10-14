@@ -226,6 +226,16 @@ public final class InputMethodDebug {
                 return "HIDE_RECENTS_ANIMATION";
             case SoftInputShowHideReason.HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR:
                 return "HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR";
+            case SoftInputShowHideReason.HIDE_REMOVE_CLIENT:
+                return "HIDE_REMOVE_CLIENT";
+            case SoftInputShowHideReason.SHOW_RESTORE_IME_VISIBILITY:
+                return "SHOW_RESTORE_IME_VISIBILITY";
+            case SoftInputShowHideReason.SHOW_TOGGLE_SOFT_INPUT:
+                return "SHOW_TOGGLE_SOFT_INPUT";
+            case SoftInputShowHideReason.HIDE_TOGGLE_SOFT_INPUT:
+                return "HIDE_TOGGLE_SOFT_INPUT";
+            case SoftInputShowHideReason.SHOW_SOFT_INPUT_BY_INSETS_API:
+                return "SHOW_SOFT_INPUT_BY_INSETS_API";
             default:
                 return "Unknown=" + reason;
         }

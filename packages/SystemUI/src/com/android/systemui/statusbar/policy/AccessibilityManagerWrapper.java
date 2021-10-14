@@ -19,13 +19,16 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener;
 
+import androidx.annotation.NonNull;
+
+import com.android.systemui.dagger.SysUISingleton;
+
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * For mocking because AccessibilityManager is final for some reason...
  */
-@Singleton
+@SysUISingleton
 public class AccessibilityManagerWrapper implements
         CallbackController<AccessibilityServicesStateChangeListener> {
 
@@ -37,12 +40,12 @@ public class AccessibilityManagerWrapper implements
     }
 
     @Override
-    public void addCallback(AccessibilityServicesStateChangeListener listener) {
+    public void addCallback(@NonNull AccessibilityServicesStateChangeListener listener) {
         mAccessibilityManager.addAccessibilityServicesStateChangeListener(listener, null);
     }
 
     @Override
-    public void removeCallback(AccessibilityServicesStateChangeListener listener) {
+    public void removeCallback(@NonNull AccessibilityServicesStateChangeListener listener) {
         mAccessibilityManager.removeAccessibilityServicesStateChangeListener(listener);
     }
 

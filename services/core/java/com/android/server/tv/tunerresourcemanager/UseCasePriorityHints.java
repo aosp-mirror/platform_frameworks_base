@@ -20,6 +20,7 @@ import android.media.tv.TvInputService.PriorityHintUseCaseType;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -114,9 +115,7 @@ public class UseCasePriorityHints {
     protected void parseInternal(InputStream in)
             throws IOException, XmlPullParserException {
         try {
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
-            parser.setInput(in, null);
+            TypedXmlPullParser parser = Xml.resolvePullParser(in);
             parser.nextTag();
             readUseCase(parser);
             in.close();
@@ -137,7 +136,7 @@ public class UseCasePriorityHints {
         }
     }
 
-    private void readUseCase(XmlPullParser parser)
+    private void readUseCase(TypedXmlPullParser parser)
             throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, NS, "config");
         while (parser.next() != XmlPullParser.END_TAG) {
@@ -176,7 +175,7 @@ public class UseCasePriorityHints {
         }
     }
 
-    private void skip(XmlPullParser parser) throws XmlPullParserException, IOException {
+    private void skip(TypedXmlPullParser parser) throws XmlPullParserException, IOException {
         if (parser.getEventType() != XmlPullParser.START_TAG) {
             throw new IllegalStateException();
         }
@@ -193,8 +192,9 @@ public class UseCasePriorityHints {
         }
     }
 
-    private int readAttributeToInt(String attributeName, XmlPullParser parser) {
-        return Integer.valueOf(parser.getAttributeValue(null, attributeName));
+    private int readAttributeToInt(String attributeName, TypedXmlPullParser parser)
+            throws XmlPullParserException {
+        return parser.getAttributeInt(null, attributeName);
     }
 
     private void addNewUseCasePriority(int useCase, int fgPriority, int bgPriority) {
@@ -203,7 +203,7 @@ public class UseCasePriorityHints {
     }
 
     @PriorityHintUseCaseType
-    private static int formatTypeToNum(String attributeName, XmlPullParser parser) {
+    private static int formatTypeToNum(String attributeName, TypedXmlPullParser parser) {
         String useCaseName = parser.getAttributeValue(null, attributeName);
         switch (useCaseName) {
             case "USE_CASE_BACKGROUND":

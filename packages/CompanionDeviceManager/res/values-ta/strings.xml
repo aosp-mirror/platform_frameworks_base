@@ -17,6 +17,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"கம்பேனியன் சாதன நிர்வாகி"</string>
-    <string name="chooser_title" msgid="4958797271463138976">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ஆப்ஸுடன் இணைத்தல்"</string>
-    <string name="confirmation_title" msgid="5683126664999349196">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ஆப்ஸை &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; சாதனத்துடன் இணைத்தல்"</string>
+    <string name="chooser_title" msgid="2262294130493605839">"&lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; ஆப்ஸ் நிர்வகிக்கக்கூடிய <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ஐத் தேர்ந்தெடுங்கள்"</string>
+    <string name="profile_name_generic" msgid="6851028682723034988">"சாதனம்"</string>
+    <string name="profile_name_watch" msgid="576290739483672360">"வாட்ச்"</string>
+    <string name="confirmation_title" msgid="8455544820286920304">"உங்கள் &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ஐ நிர்வகிக்க &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ஆப்ஸை அனுமதியுங்கள்"</string>
+    <string name="profile_summary" msgid="2059360676631420073">"உங்கள் <xliff:g id="PROFILE_NAME">%1$s</xliff:g> சுயவிவரத்தை நிர்வகிக்க இந்த ஆப்ஸ் தேவைப்படுகிறது. <xliff:g id="PRIVILEGES_DISCPLAIMER">%2$s</xliff:g>"</string>
+    <string name="consent_yes" msgid="8344487259618762872">"அனுமதி"</string>
+    <string name="consent_no" msgid="2640796915611404382">"அனுமதிக்க வேண்டாம்"</string>
 </resources>

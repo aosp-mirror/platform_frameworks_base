@@ -62,8 +62,13 @@
     <!-- Networking and telephony -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE"
+            android:usesPermissionFlags="neverForLocation" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"
+            android:usesPermissionFlags="neverForLocation" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
+            android:usesPermissionFlags="neverForLocation" />
     <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
@@ -78,6 +83,7 @@
     <uses-permission android:name="android.permission.REQUEST_NETWORK_SCORES" />
     <uses-permission android:name="android.permission.CONTROL_VPN" />
     <uses-permission android:name="android.permission.PEERS_MAC_ADDRESS"/>
+    <uses-permission android:name="android.permission.READ_WIFI_CREDENTIAL"/>
     <!-- Physical hardware -->
     <uses-permission android:name="android.permission.MANAGE_USB" />
     <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS" />
@@ -86,6 +92,7 @@
     <uses-permission android:name="android.permission.MASTER_CLEAR" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.MANAGE_SENSOR_PRIVACY" />
+    <uses-permission android:name="android.permission.OBSERVE_SENSOR_PRIVACY" />
 
     <!-- ActivityManager -->
     <uses-permission android:name="android.permission.REAL_GET_TASKS" />
@@ -99,10 +106,11 @@
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
     <uses-permission android:name="android.permission.GET_TOP_ACTIVITY_INFO" />
-    <uses-permission android:name="android.permission.MANAGE_ACTIVITY_STACKS" />
+    <uses-permission android:name="android.permission.MANAGE_ACTIVITY_TASKS" />
     <uses-permission android:name="android.permission.START_ACTIVITY_AS_CALLER" />
     <uses-permission android:name="android.permission.START_TASKS_FROM_RECENTS" />
     <uses-permission android:name="android.permission.GET_INTENT_SENDER_INTENT" />
+    <uses-permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS" />
 
     <!-- WindowManager -->
     <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW" />
@@ -264,12 +272,19 @@
     <!-- Permission to register process observer -->
     <uses-permission android:name="android.permission.SET_ACTIVITY_WATCHER"/>
 
+    <!-- Be allowed to send commands to Flinger via SurfaceControl. -->
+    <uses-permission android:name="android.permission.ACCESS_SURFACE_FLINGER" />
+
     <!-- Restore settings (used by QS) even if they have been modified -->
     <uses-permission android:name="android.permission.MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE" />
 
     <!-- Permission to make accessibility service access Bubbles -->
     <uses-permission android:name="android.permission.ADD_TRUSTED_DISPLAY" />
 
+    <!-- Permission for Smartspace. -->
+    <uses-permission android:name="android.permission.MANAGE_SMARTSPACE" />
+
+    <uses-permission android:name="android.permission.READ_PEOPLE_DATA" />
 
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
@@ -332,6 +347,12 @@
             </intent-filter>
         </receiver>
 
+        <activity android:name=".screenshot.LongScreenshotActivity"
+                  android:theme="@style/LongScreenshotActivity"
+                  android:process=":screenshot"
+                  android:exported="false"
+                  android:finishOnTaskLaunch="true" />
+
         <activity android:name=".screenrecord.ScreenRecordDialog"
             android:theme="@style/ScreenRecord"
             android:showForAllUsers="true"
@@ -350,14 +371,6 @@
         <service android:name=".ImageWallpaper"
                 android:permission="android.permission.BIND_WALLPAPER"
                 android:exported="true" />
-
-        <activity
-            android:name=".bubbles.BubbleOverflowActivity"
-            android:theme="@style/BubbleOverflow"
-            android:excludeFromRecents="true"
-            android:documentLaunchMode="always"
-            android:resizeableActivity="true">
-        </activity>
 
         <activity android:name=".tuner.TunerActivity"
                   android:enabled="false"
@@ -390,7 +403,7 @@
         </activity-alias>
 
         <activity
-            android:name=".stackdivider.ForcedResizableInfoActivity"
+            android:name="com.android.wm.shell.legacysplitscreen.ForcedResizableInfoActivity"
             android:theme="@style/ForcedResizableTheme"
             android:excludeFromRecents="true"
             android:stateNotNeeded="true"
@@ -437,6 +450,24 @@
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true">
         </activity>
+
+        <!-- started from SensoryPrivacyService -->
+        <activity android:name=".sensorprivacy.SensorUseStartedActivity"
+                  android:exported="true"
+                  android:launchMode="singleTop"
+                  android:permission="android.permission.MANAGE_SENSOR_PRIVACY"
+                  android:theme="@style/Theme.SystemUI.Dialog.Alert"
+                  android:finishOnCloseSystemDialogs="true">
+        </activity>
+
+        <!-- started from SensoryPrivacyService -->
+        <activity android:name=".sensorprivacy.television.TvUnblockSensorActivity"
+                  android:exported="true"
+                  android:permission="android.permission.MANAGE_SENSOR_PRIVACY"
+                  android:theme="@style/BottomSheet"
+                  android:finishOnCloseSystemDialogs="true">
+        </activity>
+
 
         <!-- started from UsbDeviceSettingsManager -->
         <activity android:name=".usb.UsbAccessoryUriActivity"
@@ -516,39 +547,20 @@
             android:excludeFromRecents="true"
             android:visibleToInstantApps="true"/>
 
-        <!-- started from PipUI -->
+        <!-- started from TvNotificationPanel -->
         <activity
-            android:name=".pip.tv.PipMenuActivity"
-            android:permission="com.android.systemui.permission.SELF"
-            android:exported="false"
-            android:theme="@style/PipTheme"
-            android:launchMode="singleTop"
-            android:taskAffinity=""
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|locale|layoutDirection"
-            android:resizeableActivity="true"
-            android:supportsPictureInPicture="true"
-            androidprv:alwaysFocusable="true"
-            android:excludeFromRecents="true" />
-
-        <activity
-            android:name=".pip.phone.PipMenuActivity"
-            android:permission="com.android.systemui.permission.SELF"
-            android:theme="@style/PipPhoneOverlayControlTheme"
-            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
+            android:name=".statusbar.tv.notifications.TvNotificationPanelActivity"
             android:excludeFromRecents="true"
-            android:exported="false"
-            android:resizeableActivity="true"
-            android:supportsPictureInPicture="true"
-            android:stateNotNeeded="true"
-            android:taskAffinity=""
-            android:launchMode="singleTop"
-            androidprv:alwaysFocusable="true" />
+            android:launchMode="singleTask"
+            android:noHistory="true"
+            android:theme="@style/TvSidePanelTheme" />
 
         <!-- started from SliceProvider -->
         <activity android:name=".SlicePermissionActivity"
             android:theme="@style/Theme.SystemUI.Dialog.Alert"
             android:finishOnCloseSystemDialogs="true"
-            android:excludeFromRecents="true">
+            android:excludeFromRecents="true"
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.android.intent.action.REQUEST_SLICE_PERMISSION" />
             </intent-filter>
@@ -585,6 +597,49 @@
             </intent-filter>
         </activity>
 
+        <!-- People Space UI Screen -->
+        <activity android:name=".people.PeopleSpaceActivity"
+            android:label="@string/people_tile_title"
+            android:enabled="true"
+            android:exported="true"
+            android:windowDisablePreview="true"
+            android:theme="@style/Theme.PeopleTileConfigActivity">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".people.widget.LaunchConversationActivity"
+            android:windowDisablePreview="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />
+
+        <!-- People Space Widget -->
+        <receiver
+            android:name=".people.widget.PeopleSpaceWidgetProvider"
+            android:label="@string/people_tile_title"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/people_space_widget_info" />
+        </receiver>
+
+        <receiver android:name=".people.widget.PeopleSpaceWidgetPinnedReceiver"
+            android:enabled="true"/>
+
+        <!-- ContentProvider that returns a People Tile preview for a given shortcut -->
+        <provider
+            android:name="com.android.systemui.people.PeopleProvider"
+            android:authorities="com.android.systemui.people.PeopleProvider"
+            android:exported="true"
+            android:permission="android.permission.GET_PEOPLE_TILE_PREVIEW">
+        </provider>
+
+        <service android:name=".people.PeopleBackupFollowUpJob"
+            android:permission="android.permission.BIND_JOB_SERVICE"/>
+
         <!-- a gallery of delicious treats -->
         <service
             android:name=".DessertCaseDream"
@@ -602,8 +657,7 @@
 
         <service
             android:name=".keyguard.KeyguardService"
-            android:exported="true"
-            android:enabled="@bool/config_enableKeyguardService" />
+            android:exported="true" />
 
         <activity android:name=".keyguard.WorkLockActivity"
                   android:label="@string/accessibility_desc_work_lock"
@@ -618,6 +672,14 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".user.CreateUserActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:finishOnCloseSystemDialogs="true"
+            android:launchMode="singleInstance"
+            android:theme="@style/Theme.CreateUser" />
 
         <activity android:name=".Somnambulator"
             android:label="@string/start_dreams"
@@ -640,9 +702,9 @@
         </activity>
 
         <activity
-            android:name=".settings.BrightnessDialog"
+            android:name=".settings.brightness.BrightnessDialog"
             android:label="@string/quick_settings_brightness_dialog_title"
-            android:theme="@*android:style/Theme.DeviceDefault.QuickSettings.Dialog"
+            android:theme="@style/Theme.SystemUI.QuickSettings.BrightnessDialog"
             android:finishOnCloseSystemDialogs="true"
             android:launchMode="singleInstance"
             android:excludeFromRecents="true"
@@ -657,7 +719,8 @@
             android:process=":fgservices"
             android:excludeFromRecents="true"
             android:launchMode="singleTop"
-            android:theme="@*android:style/Theme.DeviceDefault.Settings.Dialog">
+            android:theme="@*android:style/Theme.DeviceDefault.Settings.Dialog"
+            android:exported="true">
             <intent-filter android:priority="1">
                 <action android:name="android.settings.FOREGROUND_SERVICES_SETTINGS" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -672,7 +735,8 @@
                 android:relinquishTaskIdentity="true"
                 android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
                 android:process=":ui"
-                android:visibleToInstantApps="true">
+                android:visibleToInstantApps="true"
+                android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.CHOOSER" />
                 <category android:name="android.intent.category.VOICE" />
@@ -712,7 +776,31 @@
                   android:visibleToInstantApps="true">
         </activity>
 
-        <receiver android:name=".controls.management.ControlsRequestReceiver">
+        <activity android:name=".controls.ui.ControlsActivity"
+                  android:label="@string/quick_controls_title"
+                  android:theme="@style/Theme.ControlsActivity"
+                  android:excludeFromRecents="true"
+                  android:showWhenLocked="true"
+                  android:showForAllUsers="true"
+                  android:finishOnTaskLaunch="true"
+                  android:launchMode="singleInstance"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden"
+                  android:visibleToInstantApps="true">
+        </activity>
+
+        <activity android:name=".wallet.ui.WalletActivity"
+                  android:label="@string/wallet_title"
+                  android:theme="@style/Wallet.Theme"
+                  android:excludeFromRecents="true"
+                  android:showWhenLocked="true"
+                  android:showForAllUsers="true"
+                  android:launchMode="singleInstance"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
+                  android:visibleToInstantApps="true">
+        </activity>
+
+        <receiver android:name=".controls.management.ControlsRequestReceiver"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.service.controls.action.ADD_CONTROL" />
             </intent-filter>
@@ -774,7 +862,8 @@
         </provider>
 
         <receiver
-            android:name=".statusbar.KeyboardShortcutsReceiver">
+            android:name=".statusbar.KeyboardShortcutsReceiver"
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.android.intent.action.DISMISS_KEYBOARD_SHORTCUTS" />
                 <action android:name="com.android.intent.action.SHOW_KEYBOARD_SHORTCUTS" />

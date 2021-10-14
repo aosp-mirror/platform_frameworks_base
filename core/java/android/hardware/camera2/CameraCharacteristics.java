@@ -24,13 +24,11 @@ import android.hardware.camera2.impl.PublicKey;
 import android.hardware.camera2.impl.SyntheticKey;
 import android.hardware.camera2.params.RecommendedStreamConfigurationMap;
 import android.hardware.camera2.params.SessionConfiguration;
-import android.hardware.camera2.utils.ArrayUtils;
 import android.hardware.camera2.utils.TypeReference;
 import android.os.Build;
 import android.util.Rational;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -641,27 +639,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     @NonNull
     public Set<String> getPhysicalCameraIds() {
-        int[] availableCapabilities = get(REQUEST_AVAILABLE_CAPABILITIES);
-        if (availableCapabilities == null) {
-            throw new AssertionError("android.request.availableCapabilities must be non-null "
-                        + "in the characteristics");
-        }
-
-        if (!ArrayUtils.contains(availableCapabilities,
-                REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA)) {
-            return Collections.emptySet();
-        }
-        byte[] physicalCamIds = get(LOGICAL_MULTI_CAMERA_PHYSICAL_IDS);
-
-        String physicalCamIdString = null;
-        try {
-            physicalCamIdString = new String(physicalCamIds, "UTF-8");
-        } catch (java.io.UnsupportedEncodingException e) {
-            throw new AssertionError("android.logicalCam.physicalIds must be UTF-8 string");
-        }
-        String[] physicalCameraIdArray = physicalCamIdString.split("\0");
-
-        return Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(physicalCameraIdArray)));
+        return mProperties.getPhysicalCameraIds();
     }
 
     /*@O~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
@@ -1181,7 +1159,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>The list of extended scene modes for {@link CaptureRequest#CONTROL_EXTENDED_SCENE_MODE android.control.extendedSceneMode} that
      * are supported by this camera device, and each extended scene mode's capabilities such
      * as maximum streaming size, and supported zoom ratio ranges.</p>
-     * <p>For DISABLED mode, the camera behaves normally with no extended scene mdoe enabled.</p>
+     * <p>For DISABLED mode, the camera behaves normally with no extended scene mode enabled.</p>
      * <p>For BOKEH_STILL_CAPTURE mode, the maximum streaming dimension specifies the limit
      * under which bokeh is effective when capture intent is PREVIEW. Note that when capture
      * intent is PREVIEW, the bokeh effect may not be as high quality compared to STILL_CAPTURE
@@ -1230,6 +1208,25 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @NonNull
     public static final Key<android.util.Range<Float>> CONTROL_ZOOM_RATIO_RANGE =
             new Key<android.util.Range<Float>>("android.control.zoomRatioRange", new TypeReference<android.util.Range<Float>>() {{ }});
+
+    /**
+     * <p>List of available high speed video size, fps range and max batch size configurations
+     * supported by the camera device, in the format of
+     * (width, height, fps_min, fps_max, batch_size_max),
+     * when {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p>Analogous to android.control.availableHighSpeedVideoConfigurations, for configurations
+     * which are applicable when {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p><b>Range of valid values:</b><br></p>
+     * <p>For each configuration, the fps_max &gt;= 120fps.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.HighSpeedVideoConfiguration[]> CONTROL_AVAILABLE_HIGH_SPEED_VIDEO_CONFIGURATIONS_MAXIMUM_RESOLUTION =
+            new Key<android.hardware.camera2.params.HighSpeedVideoConfiguration[]>("android.control.availableHighSpeedVideoConfigurationsMaximumResolution", android.hardware.camera2.params.HighSpeedVideoConfiguration[].class);
 
     /**
      * <p>List of edge enhancement modes for {@link CaptureRequest#EDGE_MODE android.edge.mode} that are supported by this camera
@@ -1467,12 +1464,13 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * to any real physical measurement, but <code>0.0f</code> still represents farthest
      * focus, and {@link CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE android.lens.info.minimumFocusDistance} represents the
      * nearest focus the device can achieve.</p>
-     * <p><b>Possible values:</b>
+     * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #LENS_INFO_FOCUS_DISTANCE_CALIBRATION_UNCALIBRATED UNCALIBRATED}</li>
      *   <li>{@link #LENS_INFO_FOCUS_DISTANCE_CALIBRATION_APPROXIMATE APPROXIMATE}</li>
      *   <li>{@link #LENS_INFO_FOCUS_DISTANCE_CALIBRATION_CALIBRATED CALIBRATED}</li>
-     * </ul></p>
+     * </ul>
+     *
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
@@ -1495,12 +1493,13 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>Direction the camera faces relative to
      * device screen.</p>
-     * <p><b>Possible values:</b>
+     * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #LENS_FACING_FRONT FRONT}</li>
      *   <li>{@link #LENS_FACING_BACK BACK}</li>
      *   <li>{@link #LENS_FACING_EXTERNAL EXTERNAL}</li>
-     * </ul></p>
+     * </ul>
+     *
      * <p>This key is available on all devices.</p>
      * @see #LENS_FACING_FRONT
      * @see #LENS_FACING_BACK
@@ -1726,12 +1725,13 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * {@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation} and {@link CameraCharacteristics#LENS_POSE_ROTATION android.lens.poseRotation}.</p>
      * <p>Different calibration methods and use cases can produce better or worse results
      * depending on the selected coordinate origin.</p>
-     * <p><b>Possible values:</b>
+     * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #LENS_POSE_REFERENCE_PRIMARY_CAMERA PRIMARY_CAMERA}</li>
      *   <li>{@link #LENS_POSE_REFERENCE_GYROSCOPE GYROSCOPE}</li>
      *   <li>{@link #LENS_POSE_REFERENCE_UNDEFINED UNDEFINED}</li>
-     * </ul></p>
+     * </ul>
+     *
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
@@ -1787,6 +1787,48 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @NonNull
     public static final Key<float[]> LENS_DISTORTION =
             new Key<float[]>("android.lens.distortion", float[].class);
+
+    /**
+     * <p>The correction coefficients to correct for this camera device's
+     * radial and tangential lens distortion for a
+     * CaptureRequest with {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p>Analogous to {@link CameraCharacteristics#LENS_DISTORTION android.lens.distortion}, when {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p><b>Units</b>:
+     * Unitless coefficients.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
+     *
+     * @see CameraCharacteristics#LENS_DISTORTION
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<float[]> LENS_DISTORTION_MAXIMUM_RESOLUTION =
+            new Key<float[]>("android.lens.distortionMaximumResolution", float[].class);
+
+    /**
+     * <p>The parameters for this camera device's intrinsic
+     * calibration when {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p>Analogous to {@link CameraCharacteristics#LENS_INTRINSIC_CALIBRATION android.lens.intrinsicCalibration}, when {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p><b>Units</b>:
+     * Pixels in the
+     * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.preCorrectionActiveArraySizeMaximumResolution}
+     * coordinate system.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
+     *
+     * @see CameraCharacteristics#LENS_INTRINSIC_CALIBRATION
+     * @see CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<float[]> LENS_INTRINSIC_CALIBRATION_MAXIMUM_RESOLUTION =
+            new Key<float[]>("android.lens.intrinsicCalibrationMaximumResolution", float[].class);
 
     /**
      * <p>List of noise reduction modes for {@link CaptureRequest#NOISE_REDUCTION_MODE android.noiseReduction.mode} that are supported
@@ -2057,7 +2099,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * </ul>
      * <p>Other capabilities may be available on either FULL or LIMITED
      * devices, but the application should query this key to be sure.</p>
-     * <p><b>Possible values:</b>
+     * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE BACKWARD_COMPATIBLE}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR MANUAL_SENSOR}</li>
@@ -2075,7 +2117,10 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_SECURE_IMAGE_DATA SECURE_IMAGE_DATA}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_SYSTEM_CAMERA SYSTEM_CAMERA}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_OFFLINE_PROCESSING OFFLINE_PROCESSING}</li>
-     * </ul></p>
+     *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR ULTRA_HIGH_RESOLUTION_SENSOR}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_REMOSAIC_REPROCESSING REMOSAIC_REPROCESSING}</li>
+     * </ul>
+     *
      * <p>This key is available on all devices.</p>
      *
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
@@ -2095,6 +2140,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #REQUEST_AVAILABLE_CAPABILITIES_SECURE_IMAGE_DATA
      * @see #REQUEST_AVAILABLE_CAPABILITIES_SYSTEM_CAMERA
      * @see #REQUEST_AVAILABLE_CAPABILITIES_OFFLINE_PROCESSING
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_REMOSAIC_REPROCESSING
      */
     @PublicKey
     @NonNull
@@ -2464,8 +2511,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Not all output formats may be supported in a configuration with
      * an input stream of a particular format. For more details, see
      * android.scaler.availableInputOutputFormatsMap.</p>
-     * <p>The following table describes the minimum required output stream
-     * configurations based on the hardware level
+     * <p>For applications targeting SDK version older than 31, the following table
+     * describes the minimum required output stream configurations based on the hardware level
      * ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel}):</p>
      * <table>
      * <thead>
@@ -2527,6 +2574,83 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * </tr>
      * </tbody>
      * </table>
+     * <p>For applications targeting SDK version 31 or newer, if the mobile device declares to be
+     * {@link android.os.Build.VERSION_CDOES.MEDIA_PERFORMANCE_CLASS media performance class} S,
+     * the primary camera devices (first rear/front camera in the camera ID list) will not
+     * support JPEG sizes smaller than 1080p. If the application configures a JPEG stream
+     * smaller than 1080p, the camera device will round up the JPEG image size to at least
+     * 1080p. The requirements for IMPLEMENTATION_DEFINED and YUV_420_888 stay the same.
+     * This new minimum required output stream configurations are illustrated by the table below:</p>
+     * <table>
+     * <thead>
+     * <tr>
+     * <th align="center">Format</th>
+     * <th align="center">Size</th>
+     * <th align="center">Hardware Level</th>
+     * <th align="center">Notes</th>
+     * </tr>
+     * </thead>
+     * <tbody>
+     * <tr>
+     * <td align="center">JPEG</td>
+     * <td align="center">{@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}</td>
+     * <td align="center">Any</td>
+     * <td align="center"></td>
+     * </tr>
+     * <tr>
+     * <td align="center">JPEG</td>
+     * <td align="center">1920x1080 (1080p)</td>
+     * <td align="center">Any</td>
+     * <td align="center">if 1080p &lt;= activeArraySize</td>
+     * </tr>
+     * <tr>
+     * <td align="center">YUV_420_888</td>
+     * <td align="center">{@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}</td>
+     * <td align="center">FULL</td>
+     * <td align="center"></td>
+     * </tr>
+     * <tr>
+     * <td align="center">YUV_420_888</td>
+     * <td align="center">1920x1080 (1080p)</td>
+     * <td align="center">FULL</td>
+     * <td align="center">if 1080p &lt;= activeArraySize</td>
+     * </tr>
+     * <tr>
+     * <td align="center">YUV_420_888</td>
+     * <td align="center">1280x720 (720)</td>
+     * <td align="center">FULL</td>
+     * <td align="center">if 720p &lt;= activeArraySize</td>
+     * </tr>
+     * <tr>
+     * <td align="center">YUV_420_888</td>
+     * <td align="center">640x480 (480p)</td>
+     * <td align="center">FULL</td>
+     * <td align="center">if 480p &lt;= activeArraySize</td>
+     * </tr>
+     * <tr>
+     * <td align="center">YUV_420_888</td>
+     * <td align="center">320x240 (240p)</td>
+     * <td align="center">FULL</td>
+     * <td align="center">if 240p &lt;= activeArraySize</td>
+     * </tr>
+     * <tr>
+     * <td align="center">YUV_420_888</td>
+     * <td align="center">all output sizes available for FULL hardware level, up to the maximum video size</td>
+     * <td align="center">LIMITED</td>
+     * <td align="center"></td>
+     * </tr>
+     * <tr>
+     * <td align="center">IMPLEMENTATION_DEFINED</td>
+     * <td align="center">same as YUV_420_888</td>
+     * <td align="center">Any</td>
+     * <td align="center"></td>
+     * </tr>
+     * </tbody>
+     * </table>
+     * <p>For applications targeting SDK version 31 or newer, if the mobile device doesn't declare
+     * to be media performance class S, or if the camera device isn't a primary rear/front
+     * camera, the minimum required output stream configurations are the same as for applications
+     * targeting SDK version older than 31.</p>
      * <p>Refer to {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} for additional
      * mandatory stream configurations on a per-capability basis.</p>
      * <p>Exception on 176x144 (QCIF) resolution: camera devices usually have a fixed capability for
@@ -2553,8 +2677,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * set to either OFF or FAST.</p>
      * <p>When multiple streams are used in a request, the minimum frame
      * duration will be max(individual stream min durations).</p>
-     * <p>The minimum frame duration of a stream (of a particular format, size)
-     * is the same regardless of whether the stream is input or output.</p>
      * <p>See {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration} and
      * android.scaler.availableStallDurations for more details about
      * calculating the max frame rate.</p>
@@ -2777,11 +2899,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * array.</li>
      * </ul>
      * <p>LEGACY capability devices will only support CENTER_ONLY cropping.</p>
-     * <p><b>Possible values:</b>
+     * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #SCALER_CROPPING_TYPE_CENTER_ONLY CENTER_ONLY}</li>
      *   <li>{@link #SCALER_CROPPING_TYPE_FREEFORM FREEFORM}</li>
-     * </ul></p>
+     * </ul>
+     *
      * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#CONTROL_ZOOM_RATIO
@@ -2886,18 +3009,265 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<android.hardware.camera2.params.MandatoryStreamCombination[]>("android.scaler.mandatoryConcurrentStreamCombinations", android.hardware.camera2.params.MandatoryStreamCombination[].class);
 
     /**
-     * <p>List of rotate-and-crop modes for android.scaler.rotateAndCrop that are supported by this camera device.</p>
-     * <p>This entry lists the valid modes for android.scaler.rotateAndCrop for this camera device.</p>
-     * <p>Starting at some future API level, all devices will list at least <code>ROTATE_AND_CROP_NONE</code>.
+     * <p>List of rotate-and-crop modes for {@link CaptureRequest#SCALER_ROTATE_AND_CROP android.scaler.rotateAndCrop} that are supported by this camera device.</p>
+     * <p>This entry lists the valid modes for {@link CaptureRequest#SCALER_ROTATE_AND_CROP android.scaler.rotateAndCrop} for this camera device.</p>
+     * <p>Starting with API level 30, all devices will list at least <code>ROTATE_AND_CROP_NONE</code>.
      * Devices with support for rotate-and-crop will additionally list at least
      * <code>ROTATE_AND_CROP_AUTO</code> and <code>ROTATE_AND_CROP_90</code>.</p>
      * <p><b>Range of valid values:</b><br>
-     * Any value listed in android.scaler.rotateAndCrop</p>
+     * Any value listed in {@link CaptureRequest#SCALER_ROTATE_AND_CROP android.scaler.rotateAndCrop}</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
-     * @hide
+     *
+     * @see CaptureRequest#SCALER_ROTATE_AND_CROP
      */
+    @PublicKey
+    @NonNull
     public static final Key<int[]> SCALER_AVAILABLE_ROTATE_AND_CROP_MODES =
             new Key<int[]>("android.scaler.availableRotateAndCropModes", int[].class);
+
+    /**
+     * <p>Default YUV/PRIVATE size to use for requesting secure image buffers.</p>
+     * <p>This entry lists the default size supported in the secure camera mode. This entry is
+     * optional on devices support the SECURE_IMAGE_DATA capability. This entry will be null
+     * if the camera device does not list SECURE_IMAGE_DATA capability.</p>
+     * <p>When the key is present, only a PRIVATE/YUV output of the specified size is guaranteed
+     * to be supported by the camera HAL in the secure camera mode. Any other format or
+     * resolutions might not be supported. Use
+     * {@link CameraDevice#isSessionConfigurationSupported }
+     * API to query if a secure session configuration is supported if the device supports this
+     * API.</p>
+     * <p>If this key returns null on a device with SECURE_IMAGE_DATA capability, the application
+     * can assume all output sizes listed in the
+     * {@link android.hardware.camera2.params.StreamConfigurationMap }
+     * are supported.</p>
+     * <p><b>Units</b>: Pixels</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<android.util.Size> SCALER_DEFAULT_SECURE_IMAGE_SIZE =
+            new Key<android.util.Size>("android.scaler.defaultSecureImageSize", android.util.Size.class);
+
+    /**
+     * <p>The available multi-resolution stream configurations that this
+     * physical camera device supports
+     * (i.e. format, width, height, output/input stream).</p>
+     * <p>This list contains a subset of the parent logical camera's multi-resolution stream
+     * configurations which belong to this physical camera, and it will advertise and will only
+     * advertise the maximum supported resolutions for a particular format.</p>
+     * <p>If this camera device isn't a physical camera device constituting a logical camera,
+     * but a standalone {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
+     * camera, this field represents the multi-resolution input/output stream configurations of
+     * default mode and max resolution modes. The sizes will be the maximum resolution of a
+     * particular format for default mode and max resolution mode.</p>
+     * <p>This field will only be advertised if the device is a physical camera of a
+     * logical multi-camera device or an ultra high resolution sensor camera. For a logical
+     * multi-camera, the camera API will derive the logical camera’s multi-resolution stream
+     * configurations from all physical cameras. For an ultra high resolution sensor camera, this
+     * is used directly as the camera’s multi-resolution stream configurations.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.StreamConfiguration[]> SCALER_PHYSICAL_CAMERA_MULTI_RESOLUTION_STREAM_CONFIGURATIONS =
+            new Key<android.hardware.camera2.params.StreamConfiguration[]>("android.scaler.physicalCameraMultiResolutionStreamConfigurations", android.hardware.camera2.params.StreamConfiguration[].class);
+
+    /**
+     * <p>The multi-resolution stream configurations supported by this logical camera
+     * or ultra high resolution sensor camera device.</p>
+     * <p>Multi-resolution streams can be used by a LOGICAL_MULTI_CAMERA or an
+     * ULTRA_HIGH_RESOLUTION_SENSOR camera where the images sent or received can vary in
+     * resolution per frame. This is useful in cases where the camera device's effective full
+     * resolution changes depending on factors such as the current zoom level, lighting
+     * condition, focus distance, or pixel mode.</p>
+     * <ul>
+     * <li>For a logical multi-camera implementing optical zoom, at different zoom level, a
+     * different physical camera may be active, resulting in different full-resolution image
+     * sizes.</li>
+     * <li>For an ultra high resolution camera, depending on whether the camera operates in default
+     * mode, or maximum resolution mode, the output full-size images may be of either binned
+     * resolution or maximum resolution.</li>
+     * </ul>
+     * <p>To use multi-resolution output streams, the supported formats can be queried by {@link android.hardware.camera2.params.MultiResolutionStreamConfigurationMap#getOutputFormats }.
+     * A {@link android.hardware.camera2.MultiResolutionImageReader } can then be created for a
+     * supported format with the MultiResolutionStreamInfo group queried by {@link android.hardware.camera2.params.MultiResolutionStreamConfigurationMap#getOutputInfo }.</p>
+     * <p>If a camera device supports multi-resolution output streams for a particular format, for
+     * each of its mandatory stream combinations, the camera device will support using a
+     * MultiResolutionImageReader for the MAXIMUM stream of supported formats. Refer to
+     * {@link android.hardware.camera2.CameraDevice#createCaptureSession } for additional details.</p>
+     * <p>To use multi-resolution input streams, the supported formats can be queried by {@link android.hardware.camera2.params.MultiResolutionStreamConfigurationMap#getInputFormats }.
+     * A reprocessable CameraCaptureSession can then be created using an {@link android.hardware.camera2.params.InputConfiguration InputConfiguration} constructed with
+     * the input MultiResolutionStreamInfo group, queried by {@link android.hardware.camera2.params.MultiResolutionStreamConfigurationMap#getInputInfo }.</p>
+     * <p>If a camera device supports multi-resolution {@code YUV} input and multi-resolution
+     * {@code YUV} output, or multi-resolution {@code PRIVATE} input and multi-resolution
+     * {@code PRIVATE} output, {@code JPEG} and {@code YUV} are guaranteed to be supported
+     * multi-resolution output stream formats. Refer to
+     * {@link android.hardware.camera2.CameraDevice#createCaptureSession } for
+     * details about the additional mandatory stream combinations in this case.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     */
+    @PublicKey
+    @NonNull
+    @SyntheticKey
+    public static final Key<android.hardware.camera2.params.MultiResolutionStreamConfigurationMap> SCALER_MULTI_RESOLUTION_STREAM_CONFIGURATION_MAP =
+            new Key<android.hardware.camera2.params.MultiResolutionStreamConfigurationMap>("android.scaler.multiResolutionStreamConfigurationMap", android.hardware.camera2.params.MultiResolutionStreamConfigurationMap.class);
+
+    /**
+     * <p>The available stream configurations that this
+     * camera device supports (i.e. format, width, height, output/input stream) for a
+     * CaptureRequest with {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p>Analogous to android.scaler.availableStreamConfigurations, for configurations
+     * which are applicable when {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p>Not all output formats may be supported in a configuration with
+     * an input stream of a particular format. For more details, see
+     * android.scaler.availableInputOutputFormatsMapMaximumResolution.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.StreamConfiguration[]> SCALER_AVAILABLE_STREAM_CONFIGURATIONS_MAXIMUM_RESOLUTION =
+            new Key<android.hardware.camera2.params.StreamConfiguration[]>("android.scaler.availableStreamConfigurationsMaximumResolution", android.hardware.camera2.params.StreamConfiguration[].class);
+
+    /**
+     * <p>This lists the minimum frame duration for each
+     * format/size combination when the camera device is sent a CaptureRequest with
+     * {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p>Analogous to android.scaler.availableMinFrameDurations, for configurations
+     * which are applicable when {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p>When multiple streams are used in a request (if supported, when {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}
+     * is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }), the
+     * minimum frame duration will be max(individual stream min durations).</p>
+     * <p>See {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration} and
+     * android.scaler.availableStallDurationsMaximumResolution for more details about
+     * calculating the max frame rate.</p>
+     * <p><b>Units</b>: (format, width, height, ns) x n</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#SENSOR_FRAME_DURATION
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> SCALER_AVAILABLE_MIN_FRAME_DURATIONS_MAXIMUM_RESOLUTION =
+            new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.scaler.availableMinFrameDurationsMaximumResolution", android.hardware.camera2.params.StreamConfigurationDuration[].class);
+
+    /**
+     * <p>This lists the maximum stall duration for each
+     * output format/size combination when CaptureRequests are submitted with
+     * {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }</p>
+     * <p>Analogous to android.scaler.availableMinFrameDurations, for configurations
+     * which are applicable when {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p><b>Units</b>: (format, width, height, ns) x n</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> SCALER_AVAILABLE_STALL_DURATIONS_MAXIMUM_RESOLUTION =
+            new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.scaler.availableStallDurationsMaximumResolution", android.hardware.camera2.params.StreamConfigurationDuration[].class);
+
+    /**
+     * <p>The available stream configurations that this
+     * camera device supports when given a CaptureRequest with {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}
+     * set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION };
+     * also includes the minimum frame durations
+     * and the stall durations for each format/size combination.</p>
+     * <p>Analogous to {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap} for CaptureRequests where
+     * {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     */
+    @PublicKey
+    @NonNull
+    @SyntheticKey
+    public static final Key<android.hardware.camera2.params.StreamConfigurationMap> SCALER_STREAM_CONFIGURATION_MAP_MAXIMUM_RESOLUTION =
+            new Key<android.hardware.camera2.params.StreamConfigurationMap>("android.scaler.streamConfigurationMapMaximumResolution", android.hardware.camera2.params.StreamConfigurationMap.class);
+
+    /**
+     * <p>The mapping of image formats that are supported by this
+     * camera device for input streams, to their corresponding output formats, when
+     * {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p>Analogous to android.scaler.availableInputOutputFormatsMap for CaptureRequests where
+     * {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.ReprocessFormatsMap> SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP_MAXIMUM_RESOLUTION =
+            new Key<android.hardware.camera2.params.ReprocessFormatsMap>("android.scaler.availableInputOutputFormatsMapMaximumResolution", android.hardware.camera2.params.ReprocessFormatsMap.class);
+
+    /**
+     * <p>An array of mandatory stream combinations which are applicable when
+     * {@link android.hardware.camera2.CaptureRequest } has {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} set
+     * to {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.
+     * This is an app-readable conversion of the maximum resolution mandatory stream combination
+     * {@link android.hardware.camera2.CameraDevice#createCaptureSession tables}.</p>
+     * <p>The array of
+     * {@link android.hardware.camera2.params.MandatoryStreamCombination combinations} is
+     * generated according to the documented
+     * {@link android.hardware.camera2.CameraDevice#createCaptureSession guideline} for each
+     * device which has the
+     * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
+     * capability.
+     * Clients can use the array as a quick reference to find an appropriate camera stream
+     * combination.
+     * The mandatory stream combination array will be {@code null} in case the device is not an
+     * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
+     * device.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     */
+    @PublicKey
+    @NonNull
+    @SyntheticKey
+    public static final Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_MAXIMUM_RESOLUTION_STREAM_COMBINATIONS =
+            new Key<android.hardware.camera2.params.MandatoryStreamCombination[]>("android.scaler.mandatoryMaximumResolutionStreamCombinations", android.hardware.camera2.params.MandatoryStreamCombination[].class);
+
+    /**
+     * <p>Whether the camera device supports multi-resolution input or output streams</p>
+     * <p>A logical multi-camera or an ultra high resolution camera may support multi-resolution
+     * input or output streams. With multi-resolution output streams, the camera device is able
+     * to output different resolution images depending on the current active physical camera or
+     * pixel mode. With multi-resolution input streams, the camera device can reprocess images
+     * of different resolutions from different physical cameras or sensor pixel modes.</p>
+     * <p>When set to TRUE:
+     * * For a logical multi-camera, the camera framework derives
+     * {@link CameraCharacteristics#SCALER_MULTI_RESOLUTION_STREAM_CONFIGURATION_MAP android.scaler.multiResolutionStreamConfigurationMap} by combining the
+     * android.scaler.physicalCameraMultiResolutionStreamConfigurations from its physical
+     * cameras.
+     * * For an ultra-high resolution sensor camera, the camera framework directly copies
+     * the value of android.scaler.physicalCameraMultiResolutionStreamConfigurations to
+     * {@link CameraCharacteristics#SCALER_MULTI_RESOLUTION_STREAM_CONFIGURATION_MAP android.scaler.multiResolutionStreamConfigurationMap}.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see CameraCharacteristics#SCALER_MULTI_RESOLUTION_STREAM_CONFIGURATION_MAP
+     * @hide
+     */
+    public static final Key<Boolean> SCALER_MULTI_RESOLUTION_STREAM_SUPPORTED =
+            new Key<Boolean>("android.scaler.multiResolutionStreamSupported", boolean.class);
 
     /**
      * <p>The area of the image sensor which corresponds to active pixels after any geometric
@@ -2963,7 +3333,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * represents the colors in the top-left 2x2 section of
      * the sensor, in reading order, for a Bayer camera, or the
      * light spectrum it captures for MONOCHROME camera.</p>
-     * <p><b>Possible values:</b>
+     * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_RGGB RGGB}</li>
      *   <li>{@link #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_GRBG GRBG}</li>
@@ -2972,7 +3342,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_RGB RGB}</li>
      *   <li>{@link #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_MONO MONO}</li>
      *   <li>{@link #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_NIR NIR}</li>
-     * </ul></p>
+     * </ul>
+     *
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Full capability</b> -
      * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
@@ -3114,11 +3485,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * may not based on a time source that can be compared to other system time sources.</p>
      * <p>This characteristic defines the source for the timestamps, and therefore whether they
      * can be compared against other system time sources/timestamps.</p>
-     * <p><b>Possible values:</b>
+     * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #SENSOR_INFO_TIMESTAMP_SOURCE_UNKNOWN UNKNOWN}</li>
      *   <li>{@link #SENSOR_INFO_TIMESTAMP_SOURCE_REALTIME REALTIME}</li>
-     * </ul></p>
+     * </ul>
+     *
      * <p>This key is available on all devices.</p>
      * @see #SENSOR_INFO_TIMESTAMP_SOURCE_UNKNOWN
      * @see #SENSOR_INFO_TIMESTAMP_SOURCE_REALTIME
@@ -3164,7 +3536,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * rectangle, and cropping to the rectangle given in {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.</p>
      * <p>E.g. to calculate position of a pixel, (x,y), in a processed YUV output image with the
      * dimensions in {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize} given the position of a pixel,
-     * (x', y'), in the raw pixel array with dimensions give in
+     * (x', y'), in the raw pixel array with dimensions given in
      * {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize}:</p>
      * <ol>
      * <li>Choose a pixel (x', y') within the active array region of the raw buffer given in
@@ -3213,6 +3585,101 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<android.graphics.Rect>("android.sensor.info.preCorrectionActiveArraySize", android.graphics.Rect.class);
 
     /**
+     * <p>The area of the image sensor which corresponds to active pixels after any geometric
+     * distortion correction has been applied, when the sensor runs in maximum resolution mode.</p>
+     * <p>Analogous to {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}, when {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}
+     * is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.
+     * Refer to {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize} for details, with sensor array related keys
+     * replaced with their
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }
+     * counterparts.
+     * This key will only be present for devices which advertise the
+     * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
+     * capability.</p>
+     * <p><b>Units</b>: Pixel coordinates on the image sensor</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<android.graphics.Rect> SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION =
+            new Key<android.graphics.Rect>("android.sensor.info.activeArraySizeMaximumResolution", android.graphics.Rect.class);
+
+    /**
+     * <p>Dimensions of the full pixel array, possibly
+     * including black calibration pixels, when the sensor runs in maximum resolution mode.
+     * Analogous to {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize}, when {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is
+     * set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p>The pixel count of the full pixel array of the image sensor, which covers
+     * {@link CameraCharacteristics#SENSOR_INFO_PHYSICAL_SIZE android.sensor.info.physicalSize} area. This represents the full pixel dimensions of
+     * the raw buffers produced by this sensor, when it runs in maximum resolution mode. That
+     * is, when {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.
+     * This key will only be present for devices which advertise the
+     * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
+     * capability.</p>
+     * <p><b>Units</b>: Pixels</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#SENSOR_INFO_PHYSICAL_SIZE
+     * @see CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<android.util.Size> SENSOR_INFO_PIXEL_ARRAY_SIZE_MAXIMUM_RESOLUTION =
+            new Key<android.util.Size>("android.sensor.info.pixelArraySizeMaximumResolution", android.util.Size.class);
+
+    /**
+     * <p>The area of the image sensor which corresponds to active pixels prior to the
+     * application of any geometric distortion correction, when the sensor runs in maximum
+     * resolution mode. This key must be used for crop / metering regions, only when
+     * {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p>Analogous to {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize},
+     * when {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.
+     * This key will only be present for devices which advertise the
+     * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
+     * capability.</p>
+     * <p><b>Units</b>: Pixel coordinates on the image sensor</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<android.graphics.Rect> SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION =
+            new Key<android.graphics.Rect>("android.sensor.info.preCorrectionActiveArraySizeMaximumResolution", android.graphics.Rect.class);
+
+    /**
+     * <p>Dimensions of the group of pixels which are under the same color filter.
+     * This specifies the width and height (pair of integers) of the group of pixels which fall
+     * under the same color filter for ULTRA_HIGH_RESOLUTION sensors.</p>
+     * <p>Sensors can have pixels grouped together under the same color filter in order
+     * to improve various aspects of imaging such as noise reduction, low light
+     * performance etc. These groups can be of various sizes such as 2X2 (quad bayer),
+     * 3X3 (nona-bayer). This key specifies the length and width of the pixels grouped under
+     * the same color filter.</p>
+     * <p>This key will not be present if REMOSAIC_REPROCESSING is not supported, since RAW images
+     * will have a regular bayer pattern.</p>
+     * <p>This key will not be present for sensors which don't have the
+     * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
+     * capability.</p>
+     * <p><b>Units</b>: Pixels</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<android.util.Size> SENSOR_INFO_BINNING_FACTOR =
+            new Key<android.util.Size>("android.sensor.info.binningFactor", android.util.Size.class);
+
+    /**
      * <p>The standard reference illuminant used as the scene light source when
      * calculating the {@link CameraCharacteristics#SENSOR_COLOR_TRANSFORM1 android.sensor.colorTransform1},
      * {@link CameraCharacteristics#SENSOR_CALIBRATION_TRANSFORM1 android.sensor.calibrationTransform1}, and
@@ -3228,7 +3695,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * {@link CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2 android.sensor.referenceIlluminant2} and its corresponding matrices.</p>
      * <p>Starting from Android Q, this key will not be present for a MONOCHROME camera, even if
      * the camera device has RAW capability.</p>
-     * <p><b>Possible values:</b>
+     * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #SENSOR_REFERENCE_ILLUMINANT1_DAYLIGHT DAYLIGHT}</li>
      *   <li>{@link #SENSOR_REFERENCE_ILLUMINANT1_FLUORESCENT FLUORESCENT}</li>
@@ -3249,7 +3716,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #SENSOR_REFERENCE_ILLUMINANT1_D75 D75}</li>
      *   <li>{@link #SENSOR_REFERENCE_ILLUMINANT1_D50 D50}</li>
      *   <li>{@link #SENSOR_REFERENCE_ILLUMINANT1_ISO_STUDIO_TUNGSTEN ISO_STUDIO_TUNGSTEN}</li>
-     * </ul></p>
+     * </ul>
+     *
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
@@ -3724,10 +4192,11 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>A list of camera LEDs that are available on this system.</p>
-     * <p><b>Possible values:</b>
+     * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #LED_AVAILABLE_LEDS_TRANSMIT TRANSMIT}</li>
-     * </ul></p>
+     * </ul>
+     *
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * @see #LED_AVAILABLE_LEDS_TRANSMIT
      * @hide
@@ -3796,14 +4265,15 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   ({@link CameraCharacteristics#LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION android.lens.info.availableOpticalStabilization},
      *    {@link CameraCharacteristics#CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES android.control.availableVideoStabilizationModes})</li>
      * </ul>
-     * <p><b>Possible values:</b>
+     * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED LIMITED}</li>
      *   <li>{@link #INFO_SUPPORTED_HARDWARE_LEVEL_FULL FULL}</li>
      *   <li>{@link #INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY LEGACY}</li>
      *   <li>{@link #INFO_SUPPORTED_HARDWARE_LEVEL_3 3}</li>
      *   <li>{@link #INFO_SUPPORTED_HARDWARE_LEVEL_EXTERNAL EXTERNAL}</li>
-     * </ul></p>
+     * </ul>
+     *
      * <p>This key is available on all devices.</p>
      *
      * @see CameraCharacteristics#CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES
@@ -3847,11 +4317,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * must occur before the camera device knows for a fact that the new
      * submitted camera settings have been applied in outgoing frames.</p>
      * <p><b>Units</b>: Frame counts</p>
-     * <p><b>Possible values:</b>
+     * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #SYNC_MAX_LATENCY_PER_FRAME_CONTROL PER_FRAME_CONTROL}</li>
      *   <li>{@link #SYNC_MAX_LATENCY_UNKNOWN UNKNOWN}</li>
-     * </ul></p>
+     * </ul>
+     *
      * <p><b>Available values for this device:</b><br>
      * A positive value, PER_FRAME_CONTROL, or UNKNOWN.</p>
      * <p>This key is available on all devices.</p>
@@ -4067,6 +4538,111 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.depth.availableDynamicDepthStallDurations", android.hardware.camera2.params.StreamConfigurationDuration[].class);
 
     /**
+     * <p>The available depth dataspace stream
+     * configurations that this camera device supports
+     * (i.e. format, width, height, output/input stream) when a CaptureRequest is submitted with
+     * {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p>Analogous to android.depth.availableDepthStreamConfigurations, for configurations which
+     * are applicable when {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.StreamConfiguration[]> DEPTH_AVAILABLE_DEPTH_STREAM_CONFIGURATIONS_MAXIMUM_RESOLUTION =
+            new Key<android.hardware.camera2.params.StreamConfiguration[]>("android.depth.availableDepthStreamConfigurationsMaximumResolution", android.hardware.camera2.params.StreamConfiguration[].class);
+
+    /**
+     * <p>This lists the minimum frame duration for each
+     * format/size combination for depth output formats when a CaptureRequest is submitted with
+     * {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p>Analogous to android.depth.availableDepthMinFrameDurations, for configurations which
+     * are applicable when {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p>See {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration} and
+     * android.scaler.availableStallDurationsMaximumResolution for more details about
+     * calculating the max frame rate.</p>
+     * <p><b>Units</b>: (format, width, height, ns) x n</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#SENSOR_FRAME_DURATION
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> DEPTH_AVAILABLE_DEPTH_MIN_FRAME_DURATIONS_MAXIMUM_RESOLUTION =
+            new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.depth.availableDepthMinFrameDurationsMaximumResolution", android.hardware.camera2.params.StreamConfigurationDuration[].class);
+
+    /**
+     * <p>This lists the maximum stall duration for each
+     * output format/size combination for depth streams for CaptureRequests where
+     * {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p>Analogous to android.depth.availableDepthStallDurations, for configurations which
+     * are applicable when {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p><b>Units</b>: (format, width, height, ns) x n</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> DEPTH_AVAILABLE_DEPTH_STALL_DURATIONS_MAXIMUM_RESOLUTION =
+            new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.depth.availableDepthStallDurationsMaximumResolution", android.hardware.camera2.params.StreamConfigurationDuration[].class);
+
+    /**
+     * <p>The available dynamic depth dataspace stream
+     * configurations that this camera device supports (i.e. format, width, height,
+     * output/input stream) for CaptureRequests where {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p>Analogous to android.depth.availableDynamicDepthStreamConfigurations, for configurations
+     * which are applicable when {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.StreamConfiguration[]> DEPTH_AVAILABLE_DYNAMIC_DEPTH_STREAM_CONFIGURATIONS_MAXIMUM_RESOLUTION =
+            new Key<android.hardware.camera2.params.StreamConfiguration[]>("android.depth.availableDynamicDepthStreamConfigurationsMaximumResolution", android.hardware.camera2.params.StreamConfiguration[].class);
+
+    /**
+     * <p>This lists the minimum frame duration for each
+     * format/size combination for dynamic depth output streams  for CaptureRequests where
+     * {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p>Analogous to android.depth.availableDynamicDepthMinFrameDurations, for configurations
+     * which are applicable when {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p><b>Units</b>: (format, width, height, ns) x n</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> DEPTH_AVAILABLE_DYNAMIC_DEPTH_MIN_FRAME_DURATIONS_MAXIMUM_RESOLUTION =
+            new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.depth.availableDynamicDepthMinFrameDurationsMaximumResolution", android.hardware.camera2.params.StreamConfigurationDuration[].class);
+
+    /**
+     * <p>This lists the maximum stall duration for each
+     * output format/size combination for dynamic depth streams for CaptureRequests where
+     * {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p>Analogous to android.depth.availableDynamicDepthStallDurations, for configurations
+     * which are applicable when {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p><b>Units</b>: (format, width, height, ns) x n</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> DEPTH_AVAILABLE_DYNAMIC_DEPTH_STALL_DURATIONS_MAXIMUM_RESOLUTION =
+            new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.depth.availableDynamicDepthStallDurationsMaximumResolution", android.hardware.camera2.params.StreamConfigurationDuration[].class);
+
+    /**
      * <p>String containing the ids of the underlying physical cameras.</p>
      * <p>For a logical camera, this is concatenation of all underlying physical camera IDs.
      * The null terminator for physical camera ID must be preserved so that the whole string
@@ -4099,11 +4675,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * onCaptureStarted callback.</p>
      * <p>This tag is only applicable if the logical camera device supports concurrent physical
      * streams from different physical cameras.</p>
-     * <p><b>Possible values:</b>
+     * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE_APPROXIMATE APPROXIMATE}</li>
      *   <li>{@link #LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE_CALIBRATED CALIBRATED}</li>
-     * </ul></p>
+     * </ul>
+     *
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
@@ -4201,6 +4778,47 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> HEIC_AVAILABLE_HEIC_STALL_DURATIONS =
             new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.heic.availableHeicStallDurations", android.hardware.camera2.params.StreamConfigurationDuration[].class);
+
+    /**
+     * <p>The available HEIC (ISO/IEC 23008-12) stream
+     * configurations that this camera device supports
+     * (i.e. format, width, height, output/input stream).</p>
+     * <p>Refer to android.heic.availableHeicStreamConfigurations for details.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.StreamConfiguration[]> HEIC_AVAILABLE_HEIC_STREAM_CONFIGURATIONS_MAXIMUM_RESOLUTION =
+            new Key<android.hardware.camera2.params.StreamConfiguration[]>("android.heic.availableHeicStreamConfigurationsMaximumResolution", android.hardware.camera2.params.StreamConfiguration[].class);
+
+    /**
+     * <p>This lists the minimum frame duration for each
+     * format/size combination for HEIC output formats for CaptureRequests where
+     * {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p>Refer to android.heic.availableHeicMinFrameDurations for details.</p>
+     * <p><b>Units</b>: (format, width, height, ns) x n</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> HEIC_AVAILABLE_HEIC_MIN_FRAME_DURATIONS_MAXIMUM_RESOLUTION =
+            new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.heic.availableHeicMinFrameDurationsMaximumResolution", android.hardware.camera2.params.StreamConfigurationDuration[].class);
+
+    /**
+     * <p>This lists the maximum stall duration for each
+     * output format/size combination for HEIC streams for CaptureRequests where
+     * {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p>Refer to android.heic.availableHeicStallDurations for details.</p>
+     * <p><b>Units</b>: (format, width, height, ns) x n</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> HEIC_AVAILABLE_HEIC_STALL_DURATIONS_MAXIMUM_RESOLUTION =
+            new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.heic.availableHeicStallDurationsMaximumResolution", android.hardware.camera2.params.StreamConfigurationDuration[].class);
 
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code

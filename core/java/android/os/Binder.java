@@ -25,6 +25,8 @@ import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.os.BinderCallHeavyHitterWatcher;
+import com.android.internal.os.BinderCallHeavyHitterWatcher.BinderCallHeavyHitterListener;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.BinderInternal.CallSession;
 import com.android.internal.util.FastPrintWriter;
@@ -127,6 +129,10 @@ public class Binder implements IBinder {
                 Binder.class.getClassLoader(), getNativeFinalizer(), NATIVE_ALLOCATION_SIZE);
     }
 
+    /**
+     * The watcher to monitor the heavy hitter from incoming transactions
+     */
+    private static volatile BinderCallHeavyHitterWatcher sHeavyHitterWatcher = null;
 
     // Transaction tracking code.
 
@@ -365,6 +371,7 @@ public class Binder implements IBinder {
      *
      * @see #clearCallingIdentity
      */
+    @CriticalNative
     public static final native void restoreCallingIdentity(long token);
 
     /**
@@ -377,8 +384,8 @@ public class Binder implements IBinder {
      * @hide
      */
     public static final void withCleanCallingIdentity(@NonNull ThrowingRunnable action) {
-        long callingIdentity = clearCallingIdentity();
         Throwable throwableToPropagate = null;
+        final long callingIdentity = clearCallingIdentity();
         try {
             action.runOrThrow();
         } catch (Throwable throwable) {
@@ -401,8 +408,8 @@ public class Binder implements IBinder {
      * @hide
      */
     public static final <T> T withCleanCallingIdentity(@NonNull ThrowingSupplier<T> action) {
-        long callingIdentity = clearCallingIdentity();
         Throwable throwableToPropagate = null;
+        final long callingIdentity = clearCallingIdentity();
         try {
             return action.getOrThrow();
         } catch (Throwable throwable) {
@@ -1155,6 +1162,11 @@ public class Binder implements IBinder {
         // If the call was FLAG_ONEWAY then these exceptions disappear into the ether.
         final boolean tracingEnabled = Binder.isTracingEnabled();
         try {
+            final BinderCallHeavyHitterWatcher heavyHitterWatcher = sHeavyHitterWatcher;
+            if (heavyHitterWatcher != null) {
+                // Notify the heavy hitter watcher, if it's enabled
+                heavyHitterWatcher.onTransaction(callingUid, getClass(), code);
+            }
             if (tracingEnabled) {
                 final String transactionName = getTransactionName(code);
                 Trace.traceBegin(Trace.TRACE_TAG_ALWAYS, getClass().getName() + ":"
@@ -1214,5 +1226,34 @@ public class Binder implements IBinder {
         // way, strict mode begone!
         StrictMode.clearGatheredViolations();
         return res;
+    }
+
+    /**
+     * Set the configuration for the heavy hitter watcher.
+     *
+     * @hide
+     */
+    public static synchronized void setHeavyHitterWatcherConfig(final boolean enabled,
+            final int batchSize, final float threshold,
+            @Nullable final BinderCallHeavyHitterListener listener) {
+        Slog.i(TAG, "Setting heavy hitter watcher config: "
+                + enabled + ", " + batchSize + ", " + threshold);
+        BinderCallHeavyHitterWatcher watcher = sHeavyHitterWatcher;
+        if (enabled) {
+            if (listener == null) {
+                throw new IllegalArgumentException();
+            }
+            boolean newWatcher = false;
+            if (watcher == null) {
+                watcher = BinderCallHeavyHitterWatcher.getInstance();
+                newWatcher = true;
+            }
+            watcher.setConfig(true, batchSize, threshold, listener);
+            if (newWatcher) {
+                sHeavyHitterWatcher = watcher;
+            }
+        } else if (watcher != null) {
+            watcher.setConfig(false, 0, 0.0f, null);
+        }
     }
 }

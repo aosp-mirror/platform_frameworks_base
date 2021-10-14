@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
+import android.os.BadParcelableException;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -482,50 +483,62 @@ public final class VolumeShaper implements AutoCloseable {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            // this needs to match the native VolumeShaper.Configuration parceling
-            dest.writeInt(mType);
-            dest.writeInt(mId);
-            if (mType != TYPE_ID) {
-                dest.writeInt(mOptionFlags);
-                dest.writeDouble(mDurationMs);
-                // this needs to match the native Interpolator parceling
-                dest.writeInt(mInterpolatorType);
-                dest.writeFloat(0.f); // first slope (specifying for native side)
-                dest.writeFloat(0.f); // last slope (specifying for native side)
-                // mTimes and mVolumes should have the same length.
-                dest.writeInt(mTimes.length);
-                for (int i = 0; i < mTimes.length; ++i) {
-                    dest.writeFloat(mTimes[i]);
-                    dest.writeFloat(mVolumes[i]);
-                }
-            }
+            VolumeShaperConfiguration parcelable = toParcelable();
+            parcelable.writeToParcel(dest, flags);
         }
 
-        public static final @android.annotation.NonNull Parcelable.Creator<VolumeShaper.Configuration> CREATOR
-                = new Parcelable.Creator<VolumeShaper.Configuration>() {
-            @Override
-            public VolumeShaper.Configuration createFromParcel(Parcel p) {
-                // this needs to match the native VolumeShaper.Configuration parceling
-                final int type = p.readInt();
-                final int id = p.readInt();
-                if (type == TYPE_ID) {
-                    return new VolumeShaper.Configuration(id);
-                } else {
-                    final int optionFlags = p.readInt();
-                    final double durationMs = p.readDouble();
-                    // this needs to match the native Interpolator parceling
-                    final int interpolatorType = p.readInt();
-                    final float firstSlope = p.readFloat(); // ignored on the Java side
-                    final float lastSlope = p.readFloat();  // ignored on the Java side
-                    final int length = p.readInt();
-                    final float[] times = new float[length];
-                    final float[] volumes = new float[length];
-                    for (int i = 0; i < length; ++i) {
-                        times[i] = p.readFloat();
-                        volumes[i] = p.readFloat();
-                    }
+        /** @hide */
+        public VolumeShaperConfiguration toParcelable() {
+            VolumeShaperConfiguration parcelable = new VolumeShaperConfiguration();
+            parcelable.type = typeToAidl(mType);
+            parcelable.id = mId;
+            if (mType != TYPE_ID) {
+                parcelable.optionFlags = optionFlagsToAidl(mOptionFlags);
+                parcelable.durationMs = mDurationMs;
+                parcelable.interpolatorConfig = toInterpolatorParcelable();
+            }
+            return parcelable;
+        }
 
-                    return new VolumeShaper.Configuration(
+        private InterpolatorConfig toInterpolatorParcelable() {
+            InterpolatorConfig parcelable = new InterpolatorConfig();
+            parcelable.type = interpolatorTypeToAidl(mInterpolatorType);
+            parcelable.firstSlope = 0.f; // first slope (specifying for native side)
+            parcelable.lastSlope = 0.f; // last slope (specifying for native side)
+            parcelable.xy = new float[mTimes.length * 2];
+            for (int i = 0; i < mTimes.length; ++i) {
+                parcelable.xy[i * 2] = mTimes[i];
+                parcelable.xy[i * 2 + 1] = mVolumes[i];
+            }
+            return parcelable;
+        }
+
+        /** @hide */
+        public static Configuration fromParcelable(VolumeShaperConfiguration parcelable) {
+            // this needs to match the native VolumeShaper.Configuration parceling
+            final int type = typeFromAidl(parcelable.type);
+            final int id = parcelable.id;
+            if (type == TYPE_ID) {
+                return new VolumeShaper.Configuration(id);
+            } else {
+                final int optionFlags = optionFlagsFromAidl(parcelable.optionFlags);
+                final double durationMs = parcelable.durationMs;
+                final int interpolatorType = interpolatorTypeFromAidl(
+                        parcelable.interpolatorConfig.type);
+                // parcelable.interpolatorConfig.firstSlope is ignored on the Java side
+                // parcelable.interpolatorConfig.lastSlope is ignored on the Java side
+                final int length = parcelable.interpolatorConfig.xy.length;
+                if (length % 2 != 0) {
+                    throw new android.os.BadParcelableException("xy length must be even");
+                }
+                final float[] times = new float[length / 2];
+                final float[] volumes = new float[length / 2];
+                for (int i = 0; i < length / 2; ++i) {
+                    times[i] = parcelable.interpolatorConfig.xy[i * 2];
+                    volumes[i] = parcelable.interpolatorConfig.xy[i * 2 + 1];
+                }
+
+                return new VolumeShaper.Configuration(
                         type,
                         id,
                         optionFlags,
@@ -533,7 +546,14 @@ public final class VolumeShaper implements AutoCloseable {
                         interpolatorType,
                         times,
                         volumes);
-                }
+            }
+        }
+
+        public static final @android.annotation.NonNull Parcelable.Creator<VolumeShaper.Configuration> CREATOR
+                = new Parcelable.Creator<VolumeShaper.Configuration>() {
+            @Override
+            public VolumeShaper.Configuration createFromParcel(Parcel p) {
+                return fromParcelable(VolumeShaperConfiguration.CREATOR.createFromParcel(p));
             }
 
             @Override
@@ -541,6 +561,84 @@ public final class VolumeShaper implements AutoCloseable {
                 return new VolumeShaper.Configuration[size];
             }
         };
+
+        private static @InterpolatorType
+        int interpolatorTypeFromAidl(@android.media.InterpolatorType int aidl) {
+            switch (aidl) {
+                case android.media.InterpolatorType.STEP:
+                    return INTERPOLATOR_TYPE_STEP;
+                case android.media.InterpolatorType.LINEAR:
+                    return INTERPOLATOR_TYPE_LINEAR;
+                case android.media.InterpolatorType.CUBIC:
+                    return INTERPOLATOR_TYPE_CUBIC;
+                case android.media.InterpolatorType.CUBIC_MONOTONIC:
+                    return INTERPOLATOR_TYPE_CUBIC_MONOTONIC;
+                default:
+                    throw new BadParcelableException("Unknown interpolator type");
+            }
+        }
+
+        private static @android.media.InterpolatorType
+        int interpolatorTypeToAidl(@InterpolatorType int type) {
+            switch (type) {
+                case INTERPOLATOR_TYPE_STEP:
+                    return android.media.InterpolatorType.STEP;
+                case INTERPOLATOR_TYPE_LINEAR:
+                    return android.media.InterpolatorType.LINEAR;
+                case INTERPOLATOR_TYPE_CUBIC:
+                    return android.media.InterpolatorType.CUBIC;
+                case INTERPOLATOR_TYPE_CUBIC_MONOTONIC:
+                    return android.media.InterpolatorType.CUBIC_MONOTONIC;
+                default:
+                    throw new RuntimeException("Unknown interpolator type");
+            }
+        }
+
+        private static @Type
+        int typeFromAidl(@android.media.VolumeShaperConfigurationType int aidl) {
+            switch (aidl) {
+                case VolumeShaperConfigurationType.ID:
+                    return TYPE_ID;
+                case VolumeShaperConfigurationType.SCALE:
+                    return TYPE_SCALE;
+                default:
+                    throw new BadParcelableException("Unknown type");
+            }
+        }
+
+        private static @android.media.VolumeShaperConfigurationType
+        int typeToAidl(@Type int type) {
+            switch (type) {
+                case TYPE_ID:
+                    return VolumeShaperConfigurationType.ID;
+                case TYPE_SCALE:
+                    return VolumeShaperConfigurationType.SCALE;
+                default:
+                    throw new RuntimeException("Unknown type");
+            }
+        }
+
+        private static int optionFlagsFromAidl(int aidl) {
+            int result = 0;
+            if ((aidl & (1 << VolumeShaperConfigurationOptionFlag.VOLUME_IN_DBFS)) != 0) {
+                result |= OPTION_FLAG_VOLUME_IN_DBFS;
+            }
+            if ((aidl & (1 << VolumeShaperConfigurationOptionFlag.CLOCK_TIME)) != 0) {
+                result |= OPTION_FLAG_CLOCK_TIME;
+            }
+            return result;
+        }
+
+        private static int optionFlagsToAidl(int flags) {
+            int result = 0;
+            if ((flags & OPTION_FLAG_VOLUME_IN_DBFS) != 0) {
+                result |= (1 << VolumeShaperConfigurationOptionFlag.VOLUME_IN_DBFS);
+            }
+            if ((flags & OPTION_FLAG_CLOCK_TIME) != 0) {
+                result |= (1 << VolumeShaperConfigurationOptionFlag.CLOCK_TIME);
+            }
+            return result;
+        }
 
         /**
          * @hide
@@ -1172,25 +1270,31 @@ public final class VolumeShaper implements AutoCloseable {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            // this needs to match the native VolumeShaper.Operation parceling
-            dest.writeInt(mFlags);
-            dest.writeInt(mReplaceId);
-            dest.writeFloat(mXOffset);
+            toParcelable().writeToParcel(dest, flags);
+        }
+
+        /** @hide */
+        public VolumeShaperOperation toParcelable() {
+            VolumeShaperOperation result = new VolumeShaperOperation();
+            result.flags = flagsToAidl(mFlags);
+            result.replaceId = mReplaceId;
+            result.xOffset = mXOffset;
+            return result;
+        }
+
+        /** @hide */
+        public static Operation fromParcelable(VolumeShaperOperation parcelable) {
+            return new VolumeShaper.Operation(
+                    flagsFromAidl(parcelable.flags),
+                    parcelable.replaceId,
+                    parcelable.xOffset);
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<VolumeShaper.Operation> CREATOR
                 = new Parcelable.Creator<VolumeShaper.Operation>() {
             @Override
             public VolumeShaper.Operation createFromParcel(Parcel p) {
-                // this needs to match the native VolumeShaper.Operation parceling
-                final int flags = p.readInt();
-                final int replaceId = p.readInt();
-                final float xOffset = p.readFloat();
-
-                return new VolumeShaper.Operation(
-                        flags
-                        , replaceId
-                        , xOffset);
+                return fromParcelable(VolumeShaperOperation.CREATOR.createFromParcel(p));
             }
 
             @Override
@@ -1198,6 +1302,46 @@ public final class VolumeShaper implements AutoCloseable {
                 return new VolumeShaper.Operation[size];
             }
         };
+
+        private static int flagsFromAidl(int aidl) {
+            int result = 0;
+            if ((aidl & (1 << VolumeShaperOperationFlag.REVERSE)) != 0) {
+                result |= FLAG_REVERSE;
+            }
+            if ((aidl & (1 << VolumeShaperOperationFlag.TERMINATE)) != 0) {
+                result |= FLAG_TERMINATE;
+            }
+            if ((aidl & (1 << VolumeShaperOperationFlag.JOIN)) != 0) {
+                result |= FLAG_JOIN;
+            }
+            if ((aidl & (1 << VolumeShaperOperationFlag.DELAY)) != 0) {
+                result |= FLAG_DEFER;
+            }
+            if ((aidl & (1 << VolumeShaperOperationFlag.CREATE_IF_NECESSARY)) != 0) {
+                result |= FLAG_CREATE_IF_NEEDED;
+            }
+            return result;
+        }
+
+        private static int flagsToAidl(int flags) {
+            int result = 0;
+            if ((flags & FLAG_REVERSE) != 0) {
+                result |= (1 << VolumeShaperOperationFlag.REVERSE);
+            }
+            if ((flags & FLAG_TERMINATE) != 0) {
+                result |= (1 << VolumeShaperOperationFlag.TERMINATE);
+            }
+            if ((flags & FLAG_JOIN) != 0) {
+                result |= (1 << VolumeShaperOperationFlag.JOIN);
+            }
+            if ((flags & FLAG_DEFER) != 0) {
+                result |= (1 << VolumeShaperOperationFlag.DELAY);
+            }
+            if ((flags & FLAG_CREATE_IF_NEEDED) != 0) {
+                result |= (1 << VolumeShaperOperationFlag.CREATE_IF_NECESSARY);
+            }
+            return result;
+        }
 
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         private Operation(@Flag int flags, int replaceId, float xOffset) {
@@ -1393,17 +1537,27 @@ public final class VolumeShaper implements AutoCloseable {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeFloat(mVolume);
-            dest.writeFloat(mXOffset);
+            toParcelable().writeToParcel(dest, flags);
+        }
+
+        /** @hide */
+        public VolumeShaperState toParcelable() {
+            VolumeShaperState result = new VolumeShaperState();
+            result.volume = mVolume;
+            result.xOffset = mXOffset;
+            return result;
+        }
+
+        /** @hide */
+        public static State fromParcelable(VolumeShaperState p) {
+            return new VolumeShaper.State(p.volume, p.xOffset);
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<VolumeShaper.State> CREATOR
                 = new Parcelable.Creator<VolumeShaper.State>() {
             @Override
             public VolumeShaper.State createFromParcel(Parcel p) {
-                return new VolumeShaper.State(
-                        p.readFloat()     // volume
-                        , p.readFloat()); // xOffset
+                return fromParcelable(VolumeShaperState.CREATOR.createFromParcel(p));
             }
 
             @Override

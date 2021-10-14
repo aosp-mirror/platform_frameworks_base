@@ -18,6 +18,7 @@ package com.android.server.om;
 
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.content.om.OverlayIdentifier;
 import android.os.UserHandle;
 
 /**
@@ -26,6 +27,7 @@ import android.os.UserHandle;
 public final class DumpState {
     @UserIdInt private int mUserId = UserHandle.USER_ALL;
     @Nullable private String mPackageName;
+    @Nullable private String mOverlayName;
     @Nullable private String mField;
     private boolean mVerbose;
 
@@ -38,14 +40,19 @@ public final class DumpState {
     }
 
     /** Sets the name of the package to dump the state for */
-    public void setPackageName(String packageName) {
-        mPackageName = packageName;
+    public void setOverlyIdentifier(String overlayIdentifier) {
+        final OverlayIdentifier overlay = OverlayIdentifier.fromString(overlayIdentifier);
+        mPackageName = overlay.getPackageName();
+        mOverlayName = overlay.getOverlayName();
     }
     @Nullable public String getPackageName() {
         return mPackageName;
     }
+    @Nullable public String getOverlayName() {
+        return mOverlayName;
+    }
 
-    /** Sets the name of the field to dump the state of */
+    /** Sets the name of the field to dump the state for */
     public void setField(String field) {
         mField = field;
     }

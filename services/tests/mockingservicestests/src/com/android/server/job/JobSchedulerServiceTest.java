@@ -30,6 +30,7 @@ import static com.android.server.job.JobSchedulerService.RARE_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -38,6 +39,7 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.IActivityManager;
+import android.app.UiModeManager;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.app.usage.UsageStatsManagerInternal;
@@ -53,12 +55,18 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.util.Log;
+import android.util.SparseBooleanArray;
+import android.util.SparseLongArray;
 
 import com.android.server.AppStateTracker;
+import com.android.server.AppStateTrackerImpl;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
+import com.android.server.PowerAllowlistInternal;
 import com.android.server.SystemServiceManager;
 import com.android.server.job.controllers.JobStatus;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.usage.AppStandbyInternal;
 
 import org.junit.After;
@@ -71,8 +79,11 @@ import org.mockito.quality.Strictness;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.ZoneOffset;
+import java.util.Random;
 
 public class JobSchedulerServiceTest {
+    private static final String TAG = JobSchedulerServiceTest.class.getSimpleName();
+
     private JobSchedulerService mService;
 
     private MockitoSession mMockingSession;
@@ -84,7 +95,7 @@ public class JobSchedulerServiceTest {
     private class TestJobSchedulerService extends JobSchedulerService {
         TestJobSchedulerService(Context context) {
             super(context);
-            mAppStateTracker = mock(AppStateTracker.class);
+            mAppStateTracker = mock(AppStateTrackerImpl.class);
         }
 
         @Override
@@ -112,7 +123,7 @@ public class JobSchedulerServiceTest {
                 .when(() -> LocalServices.getService(UsageStatsManagerInternal.class));
         when(mContext.getString(anyInt())).thenReturn("some_test_string");
         // Called in BackgroundJobsController constructor.
-        doReturn(mock(AppStateTracker.class))
+        doReturn(mock(AppStateTrackerImpl.class))
                 .when(() -> LocalServices.getService(AppStateTracker.class));
         // Called in BatteryController constructor.
         doReturn(mock(BatteryManagerInternal.class))
@@ -125,6 +136,9 @@ public class JobSchedulerServiceTest {
         // Called in DeviceIdleJobsController constructor.
         doReturn(mock(DeviceIdleInternal.class))
                 .when(() -> LocalServices.getService(DeviceIdleInternal.class));
+        // Used in JobConcurrencyManager.
+        doReturn(mock(UserManagerInternal.class))
+                .when(() -> LocalServices.getService(UserManagerInternal.class));
         // Used in JobStatus.
         doReturn(mock(PackageManagerInternal.class))
                 .when(() -> LocalServices.getService(PackageManagerInternal.class));
@@ -132,6 +146,8 @@ public class JobSchedulerServiceTest {
         when(mContext.getPackageManager()).thenReturn(mock(PackageManager.class));
         when(mContext.getResources()).thenReturn(mock(Resources.class));
         // Called in QuotaController constructor.
+        doReturn(mock(PowerAllowlistInternal.class))
+                .when(() -> LocalServices.getService(PowerAllowlistInternal.class));
         IActivityManager activityManager = ActivityManager.getService();
         spyOn(activityManager);
         try {
@@ -146,6 +162,8 @@ public class JobSchedulerServiceTest {
         JobSchedulerService.sSystemClock = Clock.fixed(Clock.systemUTC().instant(), ZoneOffset.UTC);
         JobSchedulerService.sElapsedRealtimeClock =
                 Clock.fixed(SystemClock.elapsedRealtimeClock().instant(), ZoneOffset.UTC);
+        // Called by DeviceIdlenessTracker
+        when(mContext.getSystemService(UiModeManager.class)).thenReturn(mock(UiModeManager.class));
 
         mService = new TestJobSchedulerService(mContext);
     }
@@ -167,12 +185,21 @@ public class JobSchedulerServiceTest {
     }
 
     private static JobInfo.Builder createJobInfo() {
-        return new JobInfo.Builder(351, new ComponentName("foo", "bar"));
+        return createJobInfo(351);
+    }
+
+    private static JobInfo.Builder createJobInfo(int jobId) {
+        return new JobInfo.Builder(jobId, new ComponentName("foo", "bar"));
     }
 
     private JobStatus createJobStatus(String testTag, JobInfo.Builder jobInfoBuilder) {
+        return createJobStatus(testTag, jobInfoBuilder, 1234);
+    }
+
+    private JobStatus createJobStatus(String testTag, JobInfo.Builder jobInfoBuilder,
+            int callingUid) {
         return JobStatus.createFromJobInfo(
-                jobInfoBuilder.build(), 1234, "com.android.test", 0, testTag);
+                jobInfoBuilder.build(), callingUid, "com.android.test", 0, testTag);
     }
 
     /**
@@ -705,7 +732,7 @@ public class JobSchedulerServiceTest {
             assertEquals(i + 1, maybeQueueFunctor.runnableJobs.size());
             assertEquals(sElapsedRealtimeClock.millis(), job.getFirstForceBatchedTimeElapsed());
         }
-        maybeQueueFunctor.postProcess();
+        maybeQueueFunctor.postProcessLocked();
         assertEquals(0, mService.mPendingJobs.size());
 
         // Enough RARE jobs to run.
@@ -717,7 +744,7 @@ public class JobSchedulerServiceTest {
             assertEquals(i + 1, maybeQueueFunctor.runnableJobs.size());
             assertEquals(sElapsedRealtimeClock.millis(), job.getFirstForceBatchedTimeElapsed());
         }
-        maybeQueueFunctor.postProcess();
+        maybeQueueFunctor.postProcessLocked();
         assertEquals(5, mService.mPendingJobs.size());
 
         // Not enough RARE jobs to run, but a non-batched job saves the day.
@@ -734,7 +761,7 @@ public class JobSchedulerServiceTest {
             assertEquals(sElapsedRealtimeClock.millis(), job.getFirstForceBatchedTimeElapsed());
         }
         maybeQueueFunctor.accept(activeJob);
-        maybeQueueFunctor.postProcess();
+        maybeQueueFunctor.postProcessLocked();
         assertEquals(3, mService.mPendingJobs.size());
 
         // Not enough RARE jobs to run, but an old RARE job saves the day.
@@ -753,7 +780,7 @@ public class JobSchedulerServiceTest {
         }
         maybeQueueFunctor.accept(oldRareJob);
         assertEquals(oldBatchTime, oldRareJob.getFirstForceBatchedTimeElapsed());
-        maybeQueueFunctor.postProcess();
+        maybeQueueFunctor.postProcessLocked();
         assertEquals(3, mService.mPendingJobs.size());
     }
 
@@ -840,6 +867,243 @@ public class JobSchedulerServiceTest {
                     expected,
                     mService.scheduleAsPackage(job, null, 10123, job.getService().getPackageName(),
                             0, ""));
+        }
+    }
+
+    @Test
+    public void testPendingJobSorting() {
+        // First letter in job variable name indicate regular (r) or expedited (e).
+        // Capital letters in job variable name indicate the app/UID.
+        // Numbers in job variable name indicate the enqueue time.
+        // Expected sort order:
+        //   eA7 > rA1 > eB6 > rB2 > eC3 > rD4 > eE5 > eF9 > rF8 > eC11 > rC10 > rG12 > rG13 > eE14
+        // Intentions:
+        //   * A jobs let us test skipping both regular and expedited jobs of other apps
+        //   * B jobs let us test skipping only regular job of another app without going too far
+        //   * C jobs test that regular jobs don't skip over other app's jobs and that EJs only
+        //     skip up to level of the earliest regular job
+        //   * E jobs test that expedited jobs don't skip the line when the app has no regular jobs
+        //   * F jobs test correct expedited/regular ordering doesn't push jobs too high in list
+        //   * G jobs test correct ordering for regular jobs
+        //   * H job tests correct behavior when enqueue times are the same
+        JobStatus rA1 = createJobStatus("testPendingJobSorting", createJobInfo(1), 1);
+        JobStatus rB2 = createJobStatus("testPendingJobSorting", createJobInfo(2), 2);
+        JobStatus eC3 = createJobStatus("testPendingJobSorting",
+                createJobInfo(3).setExpedited(true), 3);
+        JobStatus rD4 = createJobStatus("testPendingJobSorting", createJobInfo(4), 4);
+        JobStatus eE5 = createJobStatus("testPendingJobSorting",
+                createJobInfo(5).setExpedited(true), 5);
+        JobStatus eB6 = createJobStatus("testPendingJobSorting",
+                createJobInfo(6).setExpedited(true), 2);
+        JobStatus eA7 = createJobStatus("testPendingJobSorting",
+                createJobInfo(7).setExpedited(true), 1);
+        JobStatus rH8 = createJobStatus("testPendingJobSorting", createJobInfo(8), 14);
+        JobStatus rF8 = createJobStatus("testPendingJobSorting", createJobInfo(8), 6);
+        JobStatus eF9 = createJobStatus("testPendingJobSorting",
+                createJobInfo(9).setExpedited(true), 6);
+        JobStatus rC10 = createJobStatus("testPendingJobSorting", createJobInfo(10), 3);
+        JobStatus eC11 = createJobStatus("testPendingJobSorting",
+                createJobInfo(11).setExpedited(true), 3);
+        JobStatus rG12 = createJobStatus("testPendingJobSorting", createJobInfo(12), 7);
+        JobStatus rG13 = createJobStatus("testPendingJobSorting", createJobInfo(13), 7);
+        JobStatus eE14 = createJobStatus("testPendingJobSorting",
+                createJobInfo(14).setExpedited(true), 5);
+
+        rA1.enqueueTime = 1;
+        rB2.enqueueTime = 2;
+        eC3.enqueueTime = 3;
+        rD4.enqueueTime = 4;
+        eE5.enqueueTime = 5;
+        eB6.enqueueTime = 6;
+        eA7.enqueueTime = 7;
+        rF8.enqueueTime = 8;
+        rH8.enqueueTime = 8;
+        eF9.enqueueTime = 9;
+        rC10.enqueueTime = 10;
+        eC11.enqueueTime = 11;
+        rG12.enqueueTime = 12;
+        rG13.enqueueTime = 13;
+        eE14.enqueueTime = 14;
+
+        mService.mPendingJobs.clear();
+        // Add in random order so sorting is apparent.
+        mService.mPendingJobs.add(eC3);
+        mService.mPendingJobs.add(eE5);
+        mService.mPendingJobs.add(rA1);
+        mService.mPendingJobs.add(rG13);
+        mService.mPendingJobs.add(rD4);
+        mService.mPendingJobs.add(eA7);
+        mService.mPendingJobs.add(rG12);
+        mService.mPendingJobs.add(rH8);
+        mService.mPendingJobs.add(rF8);
+        mService.mPendingJobs.add(eB6);
+        mService.mPendingJobs.add(eE14);
+        mService.mPendingJobs.add(eF9);
+        mService.mPendingJobs.add(rB2);
+        mService.mPendingJobs.add(rC10);
+        mService.mPendingJobs.add(eC11);
+
+        mService.mPendingJobComparator.refreshLocked();
+        mService.mPendingJobs.sort(mService.mPendingJobComparator);
+
+        final JobStatus[] expectedOrder = new JobStatus[]{
+                eA7, rA1, eB6, rB2, eC3, rD4, eE5, eF9, rH8, rF8, eC11, rC10, rG12, rG13, eE14};
+        for (int i = 0; i < expectedOrder.length; ++i) {
+            assertEquals("List wasn't correctly sorted @ index " + i,
+                    expectedOrder[i].getJobId(), mService.mPendingJobs.get(i).getJobId());
+        }
+    }
+
+    private void checkPendingJobInvariants() {
+        long regJobEnqueueTime = 0;
+        final SparseBooleanArray regJobSeen = new SparseBooleanArray();
+        final SparseLongArray ejEnqueueTimes = new SparseLongArray();
+
+        for (int i = 0; i < mService.mPendingJobs.size(); ++i) {
+            final JobStatus job = mService.mPendingJobs.get(i);
+            final int uid = job.getSourceUid();
+
+            if (!job.isRequestedExpeditedJob()) {
+                // Invariant #1: Regular jobs are sorted by enqueue time.
+                assertTrue("Regular job with earlier enqueue time sorted after a later time: "
+                                + regJobEnqueueTime + " vs " + job.enqueueTime,
+                        regJobEnqueueTime <= job.enqueueTime);
+                regJobEnqueueTime = job.enqueueTime;
+                regJobSeen.put(uid, true);
+            } else {
+                // Invariant #2: EJs should be before regular jobs for an individual app
+                if (regJobSeen.get(uid)) {
+                    fail("UID " + uid + " had an EJ ordered after a regular job");
+                }
+                final long ejEnqueueTime = ejEnqueueTimes.get(uid, 0);
+                // Invariant #3: EJs for an individual app should be sorted by enqueue time.
+                assertTrue("EJ with earlier enqueue time sorted after a later time: "
+                                + ejEnqueueTime + " vs " + job.enqueueTime,
+                        ejEnqueueTime <= job.enqueueTime);
+                ejEnqueueTimes.put(uid, job.enqueueTime);
+            }
+        }
+    }
+
+    private static String sortedJobToString(JobStatus job) {
+        return "testJob " + job.getSourceUid() + "/" + job.getJobId() + "/"
+                + job.isRequestedExpeditedJob() + "@" + job.enqueueTime;
+    }
+
+    @Test
+    public void testPendingJobSorting_Random() {
+        Random random = new Random(1); // Always use the same series of pseudo random values.
+
+        mService.mPendingJobs.clear();
+
+        for (int i = 0; i < 2500; ++i) {
+            JobStatus job = createJobStatus("testPendingJobSorting_Random",
+                    createJobInfo(i).setExpedited(random.nextBoolean()), random.nextInt(250));
+            job.enqueueTime = random.nextInt(1_000_000);
+            mService.mPendingJobs.add(job);
+
+            mService.mPendingJobComparator.refreshLocked();
+            try {
+                mService.mPendingJobs.sort(mService.mPendingJobComparator);
+            } catch (Exception e) {
+                for (JobStatus toDump : mService.mPendingJobs) {
+                    Log.i(TAG, sortedJobToString(toDump));
+                }
+                throw e;
+            }
+            checkPendingJobInvariants();
+        }
+    }
+
+    private int sign(int i) {
+        if (i > 0) {
+            return 1;
+        }
+        if (i < 0) {
+            return -1;
+        }
+        return 0;
+    }
+
+    @Test
+    public void testPendingJobSortingTransitivity() {
+        // Always use the same series of pseudo random values.
+        for (int seed : new int[]{1337, 7357, 606, 6357, 41106010, 3, 2, 1}) {
+            Random random = new Random(seed);
+
+            mService.mPendingJobs.clear();
+
+            for (int i = 0; i < 300; ++i) {
+                JobStatus job = createJobStatus("testPendingJobSortingTransitivity",
+                        createJobInfo(i).setExpedited(random.nextBoolean()), random.nextInt(50));
+                job.enqueueTime = random.nextInt(1_000_000);
+                job.overrideState = random.nextInt(4);
+                mService.mPendingJobs.add(job);
+            }
+
+            verifyPendingJobComparatorTransitivity();
+        }
+    }
+
+    @Test
+    public void testPendingJobSortingTransitivity_Concentrated() {
+        // Always use the same series of pseudo random values.
+        for (int seed : new int[]{1337, 6000, 637739, 6357, 1, 7, 13}) {
+            Random random = new Random(seed);
+
+            mService.mPendingJobs.clear();
+
+            for (int i = 0; i < 300; ++i) {
+                JobStatus job = createJobStatus("testPendingJobSortingTransitivity_Concentrated",
+                        createJobInfo(i).setExpedited(random.nextFloat() < .03),
+                        random.nextInt(20));
+                job.enqueueTime = random.nextInt(250);
+                job.overrideState = random.nextFloat() < .01
+                        ? JobStatus.OVERRIDE_SORTING : JobStatus.OVERRIDE_NONE;
+                mService.mPendingJobs.add(job);
+                Log.d(TAG, sortedJobToString(job));
+            }
+
+            verifyPendingJobComparatorTransitivity();
+        }
+    }
+
+    private void verifyPendingJobComparatorTransitivity() {
+        mService.mPendingJobComparator.refreshLocked();
+
+        for (int i = 0; i < mService.mPendingJobs.size(); ++i) {
+            final JobStatus job1 = mService.mPendingJobs.get(i);
+
+            for (int j = 0; j < mService.mPendingJobs.size(); ++j) {
+                final JobStatus job2 = mService.mPendingJobs.get(j);
+                final int sign12 = sign(mService.mPendingJobComparator.compare(job1, job2));
+                final int sign21 = sign(mService.mPendingJobComparator.compare(job2, job1));
+                if (sign12 != -sign21) {
+                    final String job1String = sortedJobToString(job1);
+                    final String job2String = sortedJobToString(job2);
+                    fail("compare(" + job1String + ", " + job2String + ") != "
+                            + "-compare(" + job2String + ", " + job1String + ")");
+                }
+
+                for (int k = 0; k < mService.mPendingJobs.size(); ++k) {
+                    final JobStatus job3 = mService.mPendingJobs.get(k);
+                    final int sign23 = sign(mService.mPendingJobComparator.compare(job2, job3));
+                    final int sign13 = sign(mService.mPendingJobComparator.compare(job1, job3));
+
+                    // Confirm 1 < 2 < 3 or 1 > 2 > 3 or 1 == 2 == 3
+                    if ((sign12 == sign23 && sign12 != sign13)
+                            // Confirm that if 1 == 2, then (1 < 3 AND 2 < 3) OR (1 > 3 && 2 > 3)
+                            || (sign12 == 0 && sign13 != sign23)) {
+                        final String job1String = sortedJobToString(job1);
+                        final String job2String = sortedJobToString(job2);
+                        final String job3String = sortedJobToString(job3);
+                        fail("Transitivity fail"
+                                + ": compare(" + job1String + ", " + job2String + ")=" + sign12
+                                + ", compare(" + job2String + ", " + job3String + ")=" + sign23
+                                + ", compare(" + job1String + ", " + job3String + ")=" + sign13);
+                    }
+                }
+            }
         }
     }
 }

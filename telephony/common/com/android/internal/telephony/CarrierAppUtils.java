@@ -17,6 +17,7 @@
 package com.android.internal.telephony;
 
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -25,7 +26,7 @@ import android.os.Build;
 import android.os.CarrierAssociatedAppEntry;
 import android.os.SystemConfigManager;
 import android.os.UserHandle;
-import android.permission.PermissionManager;
+import android.permission.LegacyPermissionManager;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
@@ -75,7 +76,7 @@ public final class CarrierAppUtils {
      * privileged apps may have changed.
      */
     public static synchronized void disableCarrierAppsUntilPrivileged(String callingPackage,
-            TelephonyManager telephonyManager, int userId, Context context) {
+            TelephonyManager telephonyManager, @UserIdInt int userId, Context context) {
         if (DEBUG) {
             Log.d(TAG, "disableCarrierAppsUntilPrivileged");
         }
@@ -102,7 +103,7 @@ public final class CarrierAppUtils {
      * Manager can kill it, and this can lead to crashes as the app is in an unexpected state.
      */
     public static synchronized void disableCarrierAppsUntilPrivileged(String callingPackage,
-            int userId, Context context) {
+            @UserIdInt int userId, Context context) {
         if (DEBUG) {
             Log.d(TAG, "disableCarrierAppsUntilPrivileged");
         }
@@ -118,9 +119,9 @@ public final class CarrierAppUtils {
                 systemCarrierAssociatedAppsDisabledUntilUsed, context);
     }
 
-    private static ContentResolver getContentResolverForUser(Context context, int userId) {
-        Context userContext = context.createContextAsUser(UserHandle.getUserHandleForUid(userId),
-                0);
+    private static ContentResolver getContentResolverForUser(Context context,
+            @UserIdInt int userId) {
+        Context userContext = context.createContextAsUser(UserHandle.of(userId), 0);
         return userContext.getContentResolver();
     }
 
@@ -140,8 +141,8 @@ public final class CarrierAppUtils {
             Map<String, List<CarrierAssociatedAppEntry>>
             systemCarrierAssociatedAppsDisabledUntilUsed, Context context) {
         PackageManager packageManager = context.getPackageManager();
-        PermissionManager permissionManager =
-                (PermissionManager) context.getSystemService(Context.PERMISSION_SERVICE);
+        LegacyPermissionManager permissionManager = (LegacyPermissionManager)
+                context.getSystemService(Context.LEGACY_PERMISSION_SERVICE);
         List<ApplicationInfo> candidates = getDefaultCarrierAppCandidatesHelper(
                 userId, systemCarrierAppsDisabledUntilUsed, context);
         if (candidates == null || candidates.isEmpty()) {
@@ -153,7 +154,8 @@ public final class CarrierAppUtils {
 
         List<String> enabledCarrierPackages = new ArrayList<>();
         int carrierAppsHandledSdk =
-                Settings.Secure.getInt(contentResolver, Settings.Secure.CARRIER_APPS_HANDLED, 0);
+                Settings.Secure.getIntForUser(contentResolver, Settings.Secure.CARRIER_APPS_HANDLED,
+                        0, contentResolver.getUserId());
         if (DEBUG) {
             Log.i(TAG, "Last execution SDK: " + carrierAppsHandledSdk);
         }
@@ -305,8 +307,8 @@ public final class CarrierAppUtils {
 
             // Mark the execution so we do not disable apps again on this SDK version.
             if (!hasRunEver || !hasRunForSdk) {
-                Settings.Secure.putInt(contentResolver, Settings.Secure.CARRIER_APPS_HANDLED,
-                        Build.VERSION.SDK_INT);
+                Settings.Secure.putIntForUser(contentResolver, Settings.Secure.CARRIER_APPS_HANDLED,
+                        Build.VERSION.SDK_INT, contentResolver.getUserId());
             }
 
             if (!enabledCarrierPackages.isEmpty()) {

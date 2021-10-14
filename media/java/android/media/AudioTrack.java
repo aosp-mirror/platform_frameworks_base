@@ -26,6 +26,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.media.metrics.LogSessionId;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -46,6 +47,7 @@ import java.nio.ByteOrder;
 import java.nio.NioUtils;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -566,6 +568,12 @@ public class AudioTrack extends PlayerBase
      */
     private int mOffloadPaddingFrames = 0;
 
+    /**
+     * The log session id used for metrics.
+     * {@link LogSessionId#LOG_SESSION_ID_NONE} here means it is not set.
+     */
+    @NonNull private LogSessionId mLogSessionId = LogSessionId.LOG_SESSION_ID_NONE;
+
     //--------------------------------
     // Used exclusively by native code
     //--------------------
@@ -837,7 +845,8 @@ public class AudioTrack extends PlayerBase
             mState = STATE_INITIALIZED;
         }
 
-        baseRegisterPlayer();
+        baseRegisterPlayer(mSessionId);
+        native_setPlayerIId(mPlayerIId); // mPlayerIId now ready to send to native AudioTrack.
     }
 
     /**
@@ -867,7 +876,7 @@ public class AudioTrack extends PlayerBase
 
         // other initialization...
         if (nativeTrackInJavaObj != 0) {
-            baseRegisterPlayer();
+            baseRegisterPlayer(AudioSystem.AUDIO_SESSION_ALLOCATE);
             deferred_connect(nativeTrackInJavaObj);
         } else {
             mState = STATE_UNINITIALIZED;
@@ -1266,7 +1275,8 @@ public class AudioTrack extends PlayerBase
                     throw new UnsupportedOperationException(
                             "Offload and low latency modes are incompatible");
                 }
-                if (!AudioSystem.isOffloadSupported(mFormat, mAttributes)) {
+                if (AudioSystem.getOffloadSupport(mFormat, mAttributes)
+                        == AudioSystem.OFFLOAD_NOT_SUPPORTED) {
                     throw new UnsupportedOperationException(
                             "Cannot create AudioTrack, offload format / attributes not supported");
                 }
@@ -1682,13 +1692,11 @@ public class AudioTrack extends PlayerBase
         }
         mSampleRate = sampleRateInHz;
 
-        // IEC61937 is based on stereo. We could coerce it to stereo.
-        // But the application needs to know the stream is stereo so that
-        // it is encoded and played correctly. So better to just reject it.
         if (audioFormat == AudioFormat.ENCODING_IEC61937
-                && channelConfig != AudioFormat.CHANNEL_OUT_STEREO) {
-            throw new IllegalArgumentException(
-                    "ENCODING_IEC61937 must be configured as CHANNEL_OUT_STEREO");
+                && channelConfig != AudioFormat.CHANNEL_OUT_STEREO
+                && AudioFormat.channelCountFromOutChannelMask(channelConfig) != 8) {
+            Log.w(TAG, "ENCODING_IEC61937 is configured with channel mask as " + channelConfig
+                    + ", which is not 2 or 8 channels");
         }
 
         //--------------
@@ -1872,6 +1880,7 @@ public class AudioTrack extends PlayerBase
 
     @Override
     protected void finalize() {
+        tryToDisableNativeRoutingCallback();
         baseRelease();
         native_finalize();
     }
@@ -2824,9 +2833,16 @@ public class AudioTrack extends PlayerBase
     }
 
     private void startImpl() {
+        synchronized (mRoutingChangeListeners) {
+            if (!mEnableSelfRoutingMonitor) {
+                mEnableSelfRoutingMonitor = testEnableNativeRoutingCallbacksLocked();
+            }
+        }
         synchronized(mPlayStateLock) {
-            baseStart();
+            baseStart(0); // unknown device at this point
             native_start();
+            // FIXME see b/179218630
+            //baseStart(native_getRoutedDeviceId());
             if (mPlayState == PLAYSTATE_PAUSED_STOPPING) {
                 mPlayState = PLAYSTATE_STOPPING;
             } else {
@@ -2864,6 +2880,7 @@ public class AudioTrack extends PlayerBase
                 mPlayStateLock.notify();
             }
         }
+        tryToDisableNativeRoutingCallback();
     }
 
     /**
@@ -3593,33 +3610,49 @@ public class AudioTrack extends PlayerBase
         if (deviceId == 0) {
             return null;
         }
-        AudioDeviceInfo[] devices =
-                AudioManager.getDevicesStatic(AudioManager.GET_DEVICES_OUTPUTS);
-        for (int i = 0; i < devices.length; i++) {
-            if (devices[i].getId() == deviceId) {
-                return devices[i];
+        return AudioManager.getDeviceForPortId(deviceId, AudioManager.GET_DEVICES_OUTPUTS);
+    }
+
+    private void tryToDisableNativeRoutingCallback() {
+        synchronized (mRoutingChangeListeners) {
+            if (mEnableSelfRoutingMonitor) {
+                mEnableSelfRoutingMonitor = false;
+                testDisableNativeRoutingCallbacksLocked();
             }
         }
-        return null;
     }
 
-    /*
-     * Call BEFORE adding a routing callback handler.
+    /**
+     * Call BEFORE adding a routing callback handler and when enabling self routing listener
+     * @return returns true for success, false otherwise.
      */
     @GuardedBy("mRoutingChangeListeners")
-    private void testEnableNativeRoutingCallbacksLocked() {
-        if (mRoutingChangeListeners.size() == 0) {
-            native_enableDeviceCallback();
+    private boolean testEnableNativeRoutingCallbacksLocked() {
+        if (mRoutingChangeListeners.size() == 0 && !mEnableSelfRoutingMonitor) {
+            try {
+                native_enableDeviceCallback();
+                return true;
+            } catch (IllegalStateException e) {
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, "testEnableNativeRoutingCallbacks failed", e);
+                }
+            }
         }
+        return false;
     }
 
     /*
-     * Call AFTER removing a routing callback handler.
+     * Call AFTER removing a routing callback handler and when disabling self routing listener.
      */
     @GuardedBy("mRoutingChangeListeners")
     private void testDisableNativeRoutingCallbacksLocked() {
-        if (mRoutingChangeListeners.size() == 0) {
-            native_disableDeviceCallback();
+        if (mRoutingChangeListeners.size() == 0 && !mEnableSelfRoutingMonitor) {
+            try {
+                native_disableDeviceCallback();
+            } catch (IllegalStateException e) {
+                // Fail silently as track state could have changed in between stop
+                // and disabling routing callback
+            }
         }
     }
 
@@ -3635,6 +3668,9 @@ public class AudioTrack extends PlayerBase
     private ArrayMap<AudioRouting.OnRoutingChangedListener,
             NativeRoutingEventHandlerDelegate> mRoutingChangeListeners = new ArrayMap<>();
 
+    @GuardedBy("mRoutingChangeListeners")
+    private boolean mEnableSelfRoutingMonitor;
+
    /**
     * Adds an {@link AudioRouting.OnRoutingChangedListener} to receive notifications of routing
     * changes on this AudioTrack.
@@ -3649,7 +3685,7 @@ public class AudioTrack extends PlayerBase
             Handler handler) {
         synchronized (mRoutingChangeListeners) {
             if (listener != null && !mRoutingChangeListeners.containsKey(listener)) {
-                testEnableNativeRoutingCallbacksLocked();
+                mEnableSelfRoutingMonitor = testEnableNativeRoutingCallbacksLocked();
                 mRoutingChangeListeners.put(
                         listener, new NativeRoutingEventHandlerDelegate(this, listener,
                                 handler != null ? handler : new Handler(mInitializationLooper)));
@@ -3734,6 +3770,7 @@ public class AudioTrack extends PlayerBase
      */
     private void broadcastRoutingChange() {
         AudioManager.resetAudioPortGeneration();
+        baseUpdateDeviceId(getRoutedDevice());
         synchronized (mRoutingChangeListeners) {
             for (NativeRoutingEventHandlerDelegate delegate : mRoutingChangeListeners.values()) {
                 delegate.notifyClient();
@@ -4044,6 +4081,36 @@ public class AudioTrack extends PlayerBase
         }
     }
 
+    /**
+     * Sets a {@link LogSessionId} instance to this AudioTrack for metrics collection.
+     *
+     * @param logSessionId a {@link LogSessionId} instance which is used to
+     *        identify this object to the metrics service. Proper generated
+     *        Ids must be obtained from the Java metrics service and should
+     *        be considered opaque. Use
+     *        {@link LogSessionId#LOG_SESSION_ID_NONE} to remove the
+     *        logSessionId association.
+     * @throws IllegalStateException if AudioTrack not initialized.
+     *
+     */
+    public void setLogSessionId(@NonNull LogSessionId logSessionId) {
+        Objects.requireNonNull(logSessionId);
+        if (mState == STATE_UNINITIALIZED) {
+            throw new IllegalStateException("track not initialized");
+        }
+        String stringId = logSessionId.getStringId();
+        native_setLogSessionId(stringId);
+        mLogSessionId = logSessionId;
+    }
+
+    /**
+     * Returns the {@link LogSessionId}.
+     */
+    @NonNull
+    public LogSessionId getLogSessionId() {
+        return mLogSessionId;
+    }
+
     //---------------------------------------------------------
     // Inner classes
     //--------------------
@@ -4279,8 +4346,23 @@ public class AudioTrack extends PlayerBase
     private native int native_get_audio_description_mix_level_db(float[] level);
     private native int native_set_dual_mono_mode(int dualMonoMode);
     private native int native_get_dual_mono_mode(int[] dualMonoMode);
+    private native void native_setLogSessionId(@Nullable String logSessionId);
     private native int native_setStartThresholdInFrames(int startThresholdInFrames);
     private native int native_getStartThresholdInFrames();
+
+    /**
+     * Sets the audio service Player Interface Id.
+     *
+     * The playerIId does not change over the lifetime of the client
+     * Java AudioTrack and is set automatically on creation.
+     *
+     * This call informs the native AudioTrack for metrics logging purposes.
+     *
+     * @param id the value reported by AudioManager when registering the track.
+     *           A value of -1 indicates invalid - the playerIId was never set.
+     * @throws IllegalStateException if AudioTrack not initialized.
+     */
+    private native void native_setPlayerIId(int playerIId);
 
     //---------------------------------------------------------
     // Utility methods

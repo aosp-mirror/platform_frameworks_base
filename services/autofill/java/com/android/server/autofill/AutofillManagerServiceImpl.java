@@ -29,8 +29,6 @@ import static com.android.server.autofill.Helper.sVerbose;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
-import android.app.ActivityTaskManager;
-import android.app.IActivityTaskManager;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -55,6 +53,7 @@ import android.service.autofill.FieldClassification;
 import android.service.autofill.FieldClassification.Match;
 import android.service.autofill.FillEventHistory;
 import android.service.autofill.FillEventHistory.Event;
+import android.service.autofill.FillEventHistory.Event.NoSaveReason;
 import android.service.autofill.FillResponse;
 import android.service.autofill.IAutoFillService;
 import android.service.autofill.InlineSuggestionRenderService;
@@ -77,6 +76,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.os.IResultReceiver;
 import com.android.server.LocalServices;
 import com.android.server.autofill.AutofillManagerService.AutofillCompatState;
 import com.android.server.autofill.AutofillManagerService.DisabledInfoCache;
@@ -85,6 +85,7 @@ import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.infra.AbstractPerUserSystemService;
 import com.android.server.inputmethod.InputMethodManagerInternal;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -214,14 +215,14 @@ final class AutofillManagerServiceImpl
     @GuardedBy("mLock")
     @Override // from PerUserSystemService
     protected boolean updateLocked(boolean disabled) {
-        destroySessionsLocked();
+        forceRemoveAllSessionsLocked();
         final boolean enabledChanged = super.updateLocked(disabled);
         if (enabledChanged) {
             if (!isEnabledLocked()) {
                 final int sessionCount = mSessions.size();
                 for (int i = sessionCount - 1; i >= 0; i--) {
                     final Session session = mSessions.valueAt(i);
-                    session.removeSelfLocked();
+                    session.removeFromServiceLocked();
                 }
             }
             sendStateToClients(/* resetClient= */ false);
@@ -307,10 +308,10 @@ final class AutofillManagerServiceImpl
      * {@link AutofillManager#RECEIVER_FLAG_SESSION_FOR_AUGMENTED_AUTOFILL_ONLY}).
      */
     @GuardedBy("mLock")
-    long startSessionLocked(@NonNull IBinder activityToken, int taskId, int uid,
-            @NonNull IBinder appCallbackToken, @NonNull AutofillId autofillId,
+    long startSessionLocked(@NonNull IBinder activityToken, int taskId, int clientUid,
+            @NonNull IBinder clientCallback, @NonNull AutofillId autofillId,
             @NonNull Rect virtualBounds, @Nullable AutofillValue value, boolean hasCallback,
-            @NonNull ComponentName componentName, boolean compatMode,
+            @NonNull ComponentName clientActivity, boolean compatMode,
             boolean bindInstantServiceAllowed, int flags) {
         // FLAG_AUGMENTED_AUTOFILL_REQUEST is set in the flags when standard autofill is disabled
         // but the package is allowlisted for augmented autofill
@@ -320,29 +321,29 @@ final class AutofillManagerServiceImpl
             return 0;
         }
 
-        if (!forAugmentedAutofillOnly && isAutofillDisabledLocked(componentName)) {
+        if (!forAugmentedAutofillOnly && isAutofillDisabledLocked(clientActivity)) {
             // Standard autofill is enabled, but service disabled autofill for this activity; that
             // means no session, unless the activity is allowlisted for augmented autofill
-            if (isWhitelistedForAugmentedAutofillLocked(componentName)) {
+            if (isWhitelistedForAugmentedAutofillLocked(clientActivity)) {
                 if (sDebug) {
-                    Slog.d(TAG, "startSession(" + componentName + "): disabled by service but "
+                    Slog.d(TAG, "startSession(" + clientActivity + "): disabled by service but "
                             + "whitelisted for augmented autofill");
                 }
                 forAugmentedAutofillOnly = true;
 
             } else {
                 if (sDebug) {
-                    Slog.d(TAG, "startSession(" + componentName + "): ignored because "
+                    Slog.d(TAG, "startSession(" + clientActivity + "): ignored because "
                             + "disabled by service and not whitelisted for augmented autofill");
                 }
                 final IAutoFillManagerClient client = IAutoFillManagerClient.Stub
-                        .asInterface(appCallbackToken);
+                        .asInterface(clientCallback);
                 try {
                     client.setSessionFinished(AutofillManager.STATE_DISABLED_BY_SERVICE,
                             /* autofillableIds= */ null);
                 } catch (RemoteException e) {
                     Slog.w(TAG,
-                            "Could not notify " + componentName + " that it's disabled: " + e);
+                            "Could not notify " + clientActivity + " that it's disabled: " + e);
                 }
 
                 return NO_SESSION;
@@ -357,8 +358,8 @@ final class AutofillManagerServiceImpl
         // Occasionally clean up abandoned sessions
         pruneAbandonedSessionsLocked();
 
-        final Session newSession = createSessionByTokenLocked(activityToken, taskId, uid,
-                appCallbackToken, hasCallback, componentName, compatMode,
+        final Session newSession = createSessionByTokenLocked(activityToken, taskId, clientUid,
+                clientCallback, hasCallback, clientActivity, compatMode,
                 bindInstantServiceAllowed, forAugmentedAutofillOnly, flags);
         if (newSession == null) {
             return NO_SESSION;
@@ -367,7 +368,7 @@ final class AutofillManagerServiceImpl
         // Service can be null when it's only for augmented autofill
         String servicePackageName = mInfo == null ? null : mInfo.getServiceInfo().packageName;
         final String historyItem =
-                "id=" + newSession.id + " uid=" + uid + " a=" + componentName.toShortString()
+                "id=" + newSession.id + " uid=" + clientUid + " a=" + clientActivity.toShortString()
                 + " s=" + servicePackageName
                 + " u=" + mUserId + " i=" + autofillId + " b=" + virtualBounds
                 + " hc=" + hasCallback + " f=" + flags + " aa=" + forAugmentedAutofillOnly;
@@ -429,13 +430,19 @@ final class AutofillManagerServiceImpl
             return;
         }
 
-        session.logContextCommitted();
+        final Session.SaveResult saveResult = session.showSaveLocked();
 
-        final boolean finished = session.showSaveLocked();
+        session.logContextCommitted(saveResult.getNoSaveUiReason());
+
+        if (saveResult.isLogSaveShown()) {
+            session.logSaveUiShown();
+        }
+
+        final boolean finished = saveResult.isRemoveSession();
         if (sVerbose) Slog.v(TAG, "finishSessionLocked(): session finished on save? " + finished);
 
         if (finished) {
-            session.removeSelfLocked();
+            session.removeFromServiceLocked();
         }
     }
 
@@ -450,7 +457,7 @@ final class AutofillManagerServiceImpl
             Slog.w(TAG, "cancelSessionLocked(): no session for " + sessionId + "(" + uid + ")");
             return;
         }
-        session.removeSelfLocked();
+        session.removeFromServiceLocked();
     }
 
     @GuardedBy("mLock")
@@ -476,7 +483,7 @@ final class AutofillManagerServiceImpl
                         componentName.getPackageName());
                 Settings.Secure.putStringForUser(getContext().getContentResolver(),
                         Settings.Secure.AUTOFILL_SERVICE, null, mUserId);
-                destroySessionsLocked();
+                forceRemoveAllSessionsLocked();
             } else {
                 Slog.w(TAG, "disableOwnedServices(): ignored because current service ("
                         + serviceInfo + ") does not match Settings (" + autoFillService + ")");
@@ -487,9 +494,9 @@ final class AutofillManagerServiceImpl
     }
 
     @GuardedBy("mLock")
-    private Session createSessionByTokenLocked(@NonNull IBinder activityToken, int taskId, int uid,
-            @NonNull IBinder appCallbackToken, boolean hasCallback,
-            @NonNull ComponentName componentName, boolean compatMode,
+    private Session createSessionByTokenLocked(@NonNull IBinder clientActivityToken, int taskId,
+            int clientUid, @NonNull IBinder clientCallback, boolean hasCallback,
+            @NonNull ComponentName clientActivity, boolean compatMode,
             boolean bindInstantServiceAllowed, boolean forAugmentedAutofillOnly, int flags) {
         // use random ids so that one app cannot know that another app creates sessions
         int sessionId;
@@ -505,15 +512,15 @@ final class AutofillManagerServiceImpl
         } while (sessionId == 0 || sessionId == NO_SESSION
                 || mSessions.indexOfKey(sessionId) >= 0);
 
-        assertCallerLocked(componentName, compatMode);
+        assertCallerLocked(clientActivity, compatMode);
 
         // It's null when the session is just for augmented autofill
         final ComponentName serviceComponentName = mInfo == null ? null
                 : mInfo.getServiceInfo().getComponentName();
         final Session newSession = new Session(this, mUi, getContext(), mHandler, mUserId, mLock,
-                sessionId, taskId, uid, activityToken, appCallbackToken, hasCallback,
+                sessionId, taskId, clientUid, clientActivityToken, clientCallback, hasCallback,
                 mUiLatencyHistory, mWtfHistory, serviceComponentName,
-                componentName, compatMode, bindInstantServiceAllowed, forAugmentedAutofillOnly,
+                clientActivity, compatMode, bindInstantServiceAllowed, forAugmentedAutofillOnly,
                 flags, mInputMethodManagerInternal);
         mSessions.put(newSession.id, newSession);
 
@@ -868,7 +875,9 @@ final class AutofillManagerServiceImpl
             @NonNull ComponentName appComponentName, boolean compatMode) {
         logContextCommittedLocked(sessionId, clientState, selectedDatasets, ignoredDatasets,
                 changedFieldIds, changedDatasetIds, manuallyFilledFieldIds,
-                manuallyFilledDatasetIds, null, null, appComponentName, compatMode);
+                manuallyFilledDatasetIds, /* detectedFieldIdsList= */ null,
+                /* detectedFieldClassificationsList= */ null, appComponentName, compatMode,
+                Event.NO_SAVE_UI_REASON_NONE);
     }
 
     @GuardedBy("mLock")
@@ -881,7 +890,8 @@ final class AutofillManagerServiceImpl
             @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
             @Nullable ArrayList<AutofillId> detectedFieldIdsList,
             @Nullable ArrayList<FieldClassification> detectedFieldClassificationsList,
-            @NonNull ComponentName appComponentName, boolean compatMode) {
+            @NonNull ComponentName appComponentName, boolean compatMode,
+            @NoSaveReason int saveDialogNotShowReason) {
         if (isValidEventLocked("logDatasetNotSelected()", sessionId)) {
             if (sVerbose) {
                 Slog.v(TAG, "logContextCommitted() with FieldClassification: id=" + sessionId
@@ -893,7 +903,8 @@ final class AutofillManagerServiceImpl
                         + ", detectedFieldIds=" + detectedFieldIdsList
                         + ", detectedFieldClassifications=" + detectedFieldClassificationsList
                         + ", appComponentName=" + appComponentName.toShortString()
-                        + ", compatMode=" + compatMode);
+                        + ", compatMode=" + compatMode
+                        + ", saveDialogNotShowReason=" + saveDialogNotShowReason);
             }
             AutofillId[] detectedFieldsIds = null;
             FieldClassification[] detectedFieldClassifications = null;
@@ -929,7 +940,7 @@ final class AutofillManagerServiceImpl
                     clientState, selectedDatasets, ignoredDatasets,
                     changedFieldIds, changedDatasetIds,
                     manuallyFilledFieldIds, manuallyFilledDatasetIds,
-                    detectedFieldsIds, detectedFieldClassifications));
+                    detectedFieldsIds, detectedFieldClassifications, saveDialogNotShowReason));
         }
     }
 
@@ -1044,7 +1055,7 @@ final class AutofillManagerServiceImpl
             pw.println(compatPkgs);
         }
         pw.print(prefix); pw.print("Inline Suggestions Enabled: ");
-        pw.println(isInlineSuggestionsEnabled());
+        pw.println(isInlineSuggestionsEnabledLocked());
         pw.print(prefix); pw.print("Last prune: "); pw.println(mLastPrune);
 
         mDisabledInfoCache.dump(mUserId, prefix, pw);
@@ -1096,35 +1107,41 @@ final class AutofillManagerServiceImpl
     }
 
     @GuardedBy("mLock")
-    void destroySessionsLocked() {
-        if (mSessions.size() == 0) {
+    void forceRemoveAllSessionsLocked() {
+        final int sessionCount = mSessions.size();
+        if (sessionCount == 0) {
             mUi.destroyAll(null, null, false);
             return;
         }
-        while (mSessions.size() > 0) {
-            mSessions.valueAt(0).forceRemoveSelfLocked();
+
+        for (int i = sessionCount - 1; i >= 0; i--) {
+            mSessions.valueAt(i).forceRemoveFromServiceLocked();
         }
     }
 
     @GuardedBy("mLock")
-    void destroySessionsForAugmentedAutofillOnlyLocked() {
+    void forceRemoveForAugmentedOnlySessionsLocked() {
         final int sessionCount = mSessions.size();
         for (int i = sessionCount - 1; i >= 0; i--) {
-            mSessions.valueAt(i).forceRemoveSelfIfForAugmentedAutofillOnlyLocked();
+            mSessions.valueAt(i).forceRemoveFromServiceIfForAugmentedOnlyLocked();
         }
     }
 
+    /**
+     * This method is called exclusively in response to {@code Intent.ACTION_CLOSE_SYSTEM_DIALOGS}.
+     * The method removes all sessions that are finished but showing SaveUI due to how SaveUI is
+     * managed (see b/64940307). Otherwise it will remove any augmented autofill generated windows.
+     */
     // TODO(b/64940307): remove this method if SaveUI is refactored to be attached on activities
     @GuardedBy("mLock")
-    void destroyFinishedSessionsLocked() {
+    void forceRemoveFinishedSessionsLocked() {
         final int sessionCount = mSessions.size();
         for (int i = sessionCount - 1; i >= 0; i--) {
             final Session session = mSessions.valueAt(i);
-            if (session.isSavingLocked()) {
+            if (session.isSaveUiShowingLocked()) {
                 if (sDebug) Slog.d(TAG, "destroyFinishedSessionsLocked(): " + session.id);
-                session.forceRemoveSelfLocked();
-            }
-            else {
+                session.forceRemoveFromServiceLocked();
+            } else {
                 session.destroyAugmentedAutofillWindowsLocked();
             }
         }
@@ -1157,11 +1174,20 @@ final class AutofillManagerServiceImpl
     }
 
     @GuardedBy("mLock")
-    boolean isInlineSuggestionsEnabled() {
+    boolean isInlineSuggestionsEnabledLocked() {
         if (mInfo != null) {
             return mInfo.isInlineSuggestionsEnabled();
         }
         return false;
+    }
+
+    @GuardedBy("mLock")
+    void requestSavedPasswordCount(IResultReceiver receiver) {
+        RemoteFillService remoteService =
+                new RemoteFillService(
+                        getContext(), mInfo.getServiceInfo().getComponentName(), mUserId,
+                        /* callbacks= */ null, mMaster.isInstantServiceAllowed());
+        remoteService.onSavedPasswordCountRequest(receiver);
     }
 
     @GuardedBy("mLock")
@@ -1230,12 +1256,19 @@ final class AutofillManagerServiceImpl
                             mRemoteAugmentedAutofillService = null;
                         }
                     };
+            final int serviceUid = mRemoteAugmentedAutofillServiceInfo.applicationInfo.uid;
             mRemoteAugmentedAutofillService = new RemoteAugmentedAutofillService(getContext(),
-                    componentName, mUserId, callbacks, mMaster.isInstantServiceAllowed(),
+                    serviceUid, componentName,
+                    mUserId, callbacks, mMaster.isInstantServiceAllowed(),
                     mMaster.verbose, mMaster.mAugmentedServiceIdleUnbindTimeoutMs,
                     mMaster.mAugmentedServiceRequestTimeoutMs);
         }
 
+        return mRemoteAugmentedAutofillService;
+    }
+
+    @GuardedBy("mLock")
+    @Nullable RemoteAugmentedAutofillService getRemoteAugmentedAutofillServiceIfCreatedLocked() {
         return mRemoteAugmentedAutofillService;
     }
 
@@ -1250,7 +1283,7 @@ final class AutofillManagerServiceImpl
                     Slog.v(TAG, "updateRemoteAugmentedAutofillService(): "
                             + "destroying old remote service");
                 }
-                destroySessionsForAugmentedAutofillOnlyLocked();
+                forceRemoveForAugmentedOnlySessionsLocked();
                 mRemoteAugmentedAutofillService.unbind();
                 mRemoteAugmentedAutofillService = null;
                 mRemoteAugmentedAutofillServiceInfo = null;
@@ -1482,16 +1515,10 @@ final class AutofillManagerServiceImpl
             final int intDuration = duration > Integer.MAX_VALUE
                     ? Integer.MAX_VALUE
                     : (int) duration;
-            // NOTE: not using Helper.newLogMaker() because we're setting the componentName instead
-            // of package name
-            final LogMaker log = new LogMaker(MetricsEvent.AUTOFILL_SERVICE_DISABLED_ACTIVITY)
-                    .setComponentName(componentName)
-                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, getServicePackageName())
-                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_DURATION, intDuration)
-                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SESSION_ID, sessionId);
-            if (compatMode) {
-                log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_COMPAT_MODE, 1);
-            }
+
+            final LogMaker log = Helper.newLogMaker(MetricsEvent.AUTOFILL_SERVICE_DISABLED_ACTIVITY,
+                    componentName, getServicePackageName(), sessionId, compatMode)
+                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_DURATION, intDuration);
             mMetricsLogger.write(log);
         }
     }
@@ -1621,19 +1648,16 @@ final class AutofillManagerServiceImpl
                 }
             }
 
-            final IActivityTaskManager atm = ActivityTaskManager.getService();
+            final ActivityTaskManagerInternal atmInternal = LocalServices.getService(
+                    ActivityTaskManagerInternal.class);
 
             // Only remove sessions which's activities are not known to the activity manager anymore
             for (int i = 0; i < numSessionsToRemove; i++) {
-                try {
-                    // The activity manager cannot resolve activities that have been removed
-                    if (atm.getActivityClassForToken(sessionsToRemove.valueAt(i)) != null) {
-                        sessionsToRemove.removeAt(i);
-                        i--;
-                        numSessionsToRemove--;
-                    }
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "Cannot figure out if activity is finished", e);
+                // The activity task manager cannot resolve activities that have been removed.
+                if (atmInternal.getActivityName(sessionsToRemove.valueAt(i)) != null) {
+                    sessionsToRemove.removeAt(i);
+                    i--;
+                    numSessionsToRemove--;
                 }
             }
 
@@ -1643,7 +1667,7 @@ final class AutofillManagerServiceImpl
 
                     if (sessionToRemove != null && sessionsToRemove.valueAt(i)
                             == sessionToRemove.getActivityTokenLocked()) {
-                        if (sessionToRemove.isSavingLocked()) {
+                        if (sessionToRemove.isSaveUiShowingLocked()) {
                             if (sVerbose) {
                                 Slog.v(TAG, "Session " + sessionToRemove.id + " is saving");
                             }
@@ -1652,7 +1676,7 @@ final class AutofillManagerServiceImpl
                                 Slog.i(TAG, "Prune session " + sessionToRemove.id + " ("
                                     + sessionToRemove.getActivityTokenLocked() + ")");
                             }
-                            sessionToRemove.removeSelfLocked();
+                            sessionToRemove.removeFromServiceLocked();
                         }
                     }
                 }

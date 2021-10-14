@@ -21,6 +21,8 @@ import static com.google.common.truth.Truth.assertThat;
 import android.app.usage.CacheQuotaHint;
 import android.test.AndroidTestCase;
 import android.util.Pair;
+import android.util.TypedXmlSerializer;
+import android.util.Xml;
 
 import com.android.internal.util.FastXmlSerializer;
 
@@ -37,12 +39,12 @@ import java.util.List;
 @RunWith(JUnit4.class)
 public class CacheQuotaStrategyTest extends AndroidTestCase {
     StringWriter mWriter;
-    FastXmlSerializer mOut;
+    TypedXmlSerializer mOut;
 
     @Before
     public void setUp() throws Exception {
         mWriter = new StringWriter();
-        mOut = new FastXmlSerializer();
+        mOut = Xml.newFastSerializer();
         mOut.setOutput(mWriter);
     }
 

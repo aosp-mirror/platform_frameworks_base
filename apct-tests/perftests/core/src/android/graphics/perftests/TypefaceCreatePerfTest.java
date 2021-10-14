@@ -27,6 +27,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.util.Preconditions;
 import com.android.perftests.core.R;
 
 import org.junit.Rule;
@@ -73,8 +74,29 @@ public class TypefaceCreatePerfTest {
         final AssetManager am = context.getAssets();
 
         while (state.keepRunning()) {
-            Typeface face = Typeface.createFromAsset(am, TEST_FONT_NAME);
+            Typeface face = createFromNonAsset(am, TEST_FONT_NAME);
         }
+    }
+
+    /**
+     * {@link AssetManager#openNonAsset(String)} variant of
+     * {@link Typeface#createFromAsset(AssetManager, String)}.
+     */
+    private static Typeface createFromNonAsset(AssetManager mgr, String path) {
+        Preconditions.checkNotNull(path); // for backward compatibility
+        Preconditions.checkNotNull(mgr);
+
+        Typeface typeface = new Typeface.Builder(mgr, path).build();
+        if (typeface != null) return typeface;
+        // check if the file exists, and throw an exception for backward compatibility
+        //noinspection EmptyTryBlock
+        try (InputStream inputStream = mgr.openNonAsset(path)) {
+            // Purposely empty
+        } catch (IOException e) {
+            throw new RuntimeException("Font asset not found " + path);
+        }
+
+        return Typeface.DEFAULT;
     }
 
     @Test
@@ -90,7 +112,7 @@ public class TypefaceCreatePerfTest {
             throw new RuntimeException(e);
         }
 
-        try (InputStream in = am.open(TEST_FONT_NAME);
+        try (InputStream in = am.openNonAsset(TEST_FONT_NAME);
                 OutputStream out = new FileOutputStream(outFile)) {
             byte[] buf = new byte[1024];
             int n = 0;

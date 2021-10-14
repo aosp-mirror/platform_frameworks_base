@@ -35,8 +35,8 @@ import java.util.function.Consumer;
  * Controls the interaction with the IME for the {@link AutofillInlineSuggestionsRequestSession}s.
  *
  * <p>The class maintains the inline suggestion session with the autofill service. There is at most
- * one active inline suggestion session at any given  corresponding to one focused view.
- * New sessions are created only when {@link #onCreateInlineSuggestionsRequestLocked} is called.</p>
+ * one active inline suggestion session at any given  corresponding to one focused view. New
+ * sessions are created only when {@link #onCreateInlineSuggestionsRequestLocked} is called.</p>
  *
  * <p>The class manages the interaction between the {@link com.android.server.autofill.Session} and
  * the inline suggestion session whenever inline suggestions can be provided. All calls to the
@@ -83,7 +83,6 @@ final class AutofillInlineSessionController {
     @GuardedBy("mLock")
     void onCreateInlineSuggestionsRequestLocked(@NonNull AutofillId autofillId,
             @NonNull Consumer<InlineSuggestionsRequest> requestConsumer, @NonNull Bundle uiExtras) {
-        // TODO(b/151123764): rename the method to better reflect what it does.
         if (mSession != null) {
             // Destroy the existing session.
             mSession.destroySessionLocked();

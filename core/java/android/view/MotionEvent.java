@@ -16,11 +16,13 @@
 
 package android.view;
 
+import static android.os.IInputConstants.INPUT_EVENT_FLAG_IS_ACCESSIBILITY_EVENT;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Matrix;
@@ -474,6 +476,31 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @hide
      */
     public static final int FLAG_IS_GENERATED_GESTURE = 0x8;
+
+    /**
+     * This flag associated with {@link #ACTION_POINTER_UP}, this indicates that the pointer
+     * has been canceled. Typically this is used for palm event when the user has accidental
+     * touches.
+     * @hide
+     */
+    public static final int FLAG_CANCELED = 0x20;
+
+    /**
+     * This flag indicates that the event will not cause a focus change if it is directed to an
+     * unfocused window, even if it an {@link #ACTION_DOWN}. This is typically used with pointer
+     * gestures to allow the user to direct gestures to an unfocused window without bringing the
+     * window into focus.
+     * @hide
+     */
+    public static final int FLAG_NO_FOCUS_CHANGE = 0x40;
+
+    /**
+     * This flag indicates that this event was modified by or generated from an accessibility
+     * service. Value = 0x800
+     * @hide
+     */
+    @TestApi
+    public static final int FLAG_IS_ACCESSIBILITY_EVENT = INPUT_EVENT_FLAG_IS_ACCESSIBILITY_EVENT;
 
     /**
      * Private flag that indicates when the system has detected that this motion event
@@ -1558,6 +1585,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             int axis, int pointerIndex, int historyPos);
     @FastNative
     private static native void nativeTransform(long nativePtr, Matrix matrix);
+    @FastNative
+    private static native void nativeApplyTransform(long nativePtr, Matrix matrix);
 
     // -------------- @CriticalNative ----------------------
 
@@ -3251,6 +3280,21 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
+     * Transforms all of the points in the event directly instead of modifying the event's
+     * internal transform.
+     *
+     * @param matrix The transformation matrix to apply.
+     * @hide
+     */
+    public void applyTransform(Matrix matrix) {
+        if (matrix == null) {
+            throw new IllegalArgumentException("matrix must not be null");
+        }
+
+        nativeApplyTransform(mNativePtr, matrix);
+    }
+
+    /**
      * Add a new movement to the batch of movements in this event.  The event's
      * current location, position and size is updated to the new values.
      * The current values in the event are added to a list of historical values.
@@ -3476,7 +3520,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
                 } else if (newPointerCount == 1) {
                     // The first/last pointer went down/up.
                     newAction = oldActionMasked == ACTION_POINTER_DOWN
-                            ? ACTION_DOWN : ACTION_UP;
+                            ? ACTION_DOWN
+                            : (getFlags() & FLAG_CANCELED) == 0 ? ACTION_UP : ACTION_CANCEL;
                 } else {
                     // A secondary pointer went down/up.
                     newAction = oldActionMasked
@@ -3579,6 +3624,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             msg.append(", deviceId=").append(getDeviceId());
             msg.append(", source=0x").append(Integer.toHexString(getSource()));
             msg.append(", displayId=").append(getDisplayId());
+            msg.append(", eventId=").append(getId());
         }
         msg.append(" }");
         return msg.toString();
@@ -3756,6 +3802,41 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             return false;
         }
         return (getButtonState() & button) == button;
+    }
+
+    /**
+     * Gets a rotation matrix that (when applied to a motionevent) will rotate that motion event
+     * such that the result coordinates end up in the same physical location on a display whose
+     * coordinates are rotated by `rotation`.
+     *
+     * For example, rotating 0,0 by 90 degrees will move a point from the physical top-left to
+     * the bottom-left of the 90-degree-rotated display.
+     *
+     * @hide
+     */
+    public static Matrix createRotateMatrix(
+            @Surface.Rotation int rotation, int displayW, int displayH) {
+        if (rotation == Surface.ROTATION_0) {
+            return new Matrix(Matrix.IDENTITY_MATRIX);
+        }
+        // values is row-major
+        float[] values = null;
+        if (rotation == Surface.ROTATION_90) {
+            values = new float[]{0, 1, 0,
+                    -1, 0, displayH,
+                    0, 0, 1};
+        } else if (rotation == Surface.ROTATION_180) {
+            values = new float[]{-1, 0, displayW,
+                    0, -1, displayH,
+                    0, 0, 1};
+        } else if (rotation == Surface.ROTATION_270) {
+            values = new float[]{0, -1, displayW,
+                    1, 0, 0,
+                    0, 0, 1};
+        }
+        Matrix toOrient = new Matrix();
+        toOrient.setValues(values);
+        return toOrient;
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<MotionEvent> CREATOR
@@ -4160,7 +4241,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             if (other instanceof PointerProperties) {
                 return equals((PointerProperties)other);
             }

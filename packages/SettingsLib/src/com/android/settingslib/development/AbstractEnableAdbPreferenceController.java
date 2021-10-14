@@ -16,10 +16,13 @@
 
 package com.android.settingslib.development;
 
+import static com.android.settingslib.RestrictedLockUtilsInternal.checkIfUsbDataSignalingIsDisabled;
+
 import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -28,9 +31,9 @@ import androidx.annotation.VisibleForTesting;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
-import androidx.preference.SwitchPreference;
 import androidx.preference.TwoStatePreference;
 
+import com.android.settingslib.RestrictedSwitchPreference;
 import com.android.settingslib.core.ConfirmationDialogController;
 
 public abstract class AbstractEnableAdbPreferenceController extends
@@ -44,7 +47,7 @@ public abstract class AbstractEnableAdbPreferenceController extends
     public static final int ADB_SETTING_OFF = 0;
 
 
-    protected SwitchPreference mPreference;
+    protected RestrictedSwitchPreference mPreference;
 
     public AbstractEnableAdbPreferenceController(Context context) {
         super(context);
@@ -54,7 +57,7 @@ public abstract class AbstractEnableAdbPreferenceController extends
     public void displayPreference(PreferenceScreen screen) {
         super.displayPreference(screen);
         if (isAvailable()) {
-            mPreference = (SwitchPreference) screen.findPreference(KEY_ENABLE_ADB);
+            mPreference = (RestrictedSwitchPreference) screen.findPreference(KEY_ENABLE_ADB);
         }
     }
 
@@ -77,6 +80,19 @@ public abstract class AbstractEnableAdbPreferenceController extends
     @Override
     public void updateState(Preference preference) {
         ((TwoStatePreference) preference).setChecked(isAdbEnabled());
+        if (isAvailable()) {
+            ((RestrictedSwitchPreference) preference).setDisabledByAdmin(
+                    checkIfUsbDataSignalingIsDisabled(mContext, UserHandle.myUserId()));
+        }
+    }
+
+    @Override
+    protected void onDeveloperOptionsSwitchEnabled() {
+        super.onDeveloperOptionsSwitchEnabled();
+        if (isAvailable()) {
+            mPreference.setDisabledByAdmin(
+                    checkIfUsbDataSignalingIsDisabled(mContext, UserHandle.myUserId()));
+        }
     }
 
     public void enablePreference(boolean enabled) {

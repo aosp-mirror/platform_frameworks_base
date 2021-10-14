@@ -16,7 +16,16 @@
 
 package android.hardware.camera2.params;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.graphics.ImageFormat.Format;
+import android.hardware.camera2.params.MultiResolutionStreamInfo;
 import android.hardware.camera2.utils.HashCodeHelpers;
+
+import java.util.Collection;
+import java.util.List;
+
+import static com.android.internal.util.Preconditions.*;
 
 /**
  * Immutable class to store an input configuration that is used to create a reprocessable capture
@@ -30,11 +39,12 @@ public final class InputConfiguration {
     private final int mWidth;
     private final int mHeight;
     private final int mFormat;
+    private final boolean mIsMultiResolution;
 
     /**
-     * Create an input configration with the width, height, and user-defined format.
+     * Create an input configuration with the width, height, and user-defined format.
      *
-     * <p>Images of an user-defined format are accessible by applications. Use
+     * <p>Images of a user-defined format are accessible by applications. Use
      * {@link android.hardware.camera2.CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP}
      * to query supported input formats</p>
      *
@@ -50,10 +60,55 @@ public final class InputConfiguration {
         mWidth = width;
         mHeight = height;
         mFormat = format;
+        mIsMultiResolution = false;
     }
 
     /**
-     * Get the width of this input configration.
+     * Create an input configuration with the format and a list of multi-resolution input stream
+     * info.
+     *
+     * <p>Use {@link
+     * android.hardware.camera2.CameraCharacteristics#SCALER_MULTI_RESOLUTION_STREAM_CONFIGURATION_MAP}
+     * to query supported multi-resolution input formats.</p>
+     *
+     * <p>To do reprocessing with variable resolution input, the application calls
+     * {@link android.media.ImageWriter#queueInputImage ImageWriter.queueInputImage}
+     * using an image from an {@link android.media.ImageReader ImageReader} or {@link
+     * android.hardware.camera2.MultiResolutionImageReader MultiResolutionImageReader}. See
+     * {@link android.hardware.camera2.CameraDevice#createReprocessCaptureRequest} for more
+     * details on camera reprocessing.
+     * </p>
+     *
+     * @param multiResolutionInputs A group of multi-resolution input info for the specified format.
+     * @param format Format of the input buffers. One of ImageFormat or PixelFormat constants.
+     *
+     * @see android.graphics.ImageFormat
+     * @see android.graphics.PixelFormat
+     * @see
+     * android.hardware.camera2.CameraCharacteristics#SCALER_MULTI_RESOLUTION_STREAM_CONFIGURATION_MAP
+     */
+    public InputConfiguration(@NonNull Collection<MultiResolutionStreamInfo> multiResolutionInputs,
+            @Format int format) {
+        checkCollectionNotEmpty(multiResolutionInputs, "Input multi-resolution stream info");
+        MultiResolutionStreamInfo info = multiResolutionInputs.iterator().next();
+        mWidth = info.getWidth();
+        mHeight = info.getHeight();
+        mFormat = format;
+        mIsMultiResolution = true;
+    }
+
+    /**
+     * @hide
+     */
+    public InputConfiguration(int width, int height, int format, boolean isMultiResolution) {
+        mWidth = width;
+        mHeight = height;
+        mFormat = format;
+        mIsMultiResolution = isMultiResolution;
+    }
+
+    /**
+     * Get the width of this input configuration.
      *
      * @return width of this input configuration.
      */
@@ -62,7 +117,7 @@ public final class InputConfiguration {
     }
 
     /**
-     * Get the height of this input configration.
+     * Get the height of this input configuration.
      *
      * @return height of this input configuration.
      */
@@ -71,12 +126,24 @@ public final class InputConfiguration {
     }
 
     /**
-     * Get the format of this input configration.
+     * Get the format of this input configuration.
      *
      * @return format of this input configuration.
      */
     public int getFormat() {
         return mFormat;
+    }
+
+    /**
+     * Whether this input configuration is of multi-resolution.
+     *
+     * <p>An multi-resolution InputConfiguration means that the reprocessing session created from it
+     * allows input images of different sizes.</p>
+     *
+     * @return  this input configuration is multi-resolution or not.
+     */
+    public boolean isMultiResolution() {
+        return mIsMultiResolution;
     }
 
     /**
@@ -90,7 +157,7 @@ public final class InputConfiguration {
      * @return {@code true} if the objects were equal, {@code false} otherwise.
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (!(obj instanceof InputConfiguration)) {
             return false;
         }
@@ -99,7 +166,8 @@ public final class InputConfiguration {
 
         if (otherInputConfig.getWidth() == mWidth &&
                 otherInputConfig.getHeight() == mHeight &&
-                otherInputConfig.getFormat() == mFormat) {
+                otherInputConfig.getFormat() == mFormat &&
+                otherInputConfig.isMultiResolution() == mIsMultiResolution) {
             return true;
         }
         return false;
@@ -110,19 +178,21 @@ public final class InputConfiguration {
      */
     @Override
     public int hashCode() {
-        return HashCodeHelpers.hashCode(mWidth, mHeight, mFormat);
+        return HashCodeHelpers.hashCode(mWidth, mHeight, mFormat, mIsMultiResolution ? 1 : 0);
     }
 
     /**
      * Return this {@link InputConfiguration} as a string representation.
      *
-     * <p> {@code "InputConfiguration(w:%d, h:%d, format:%d)"}, where {@code %d} represents
-     * the width, height, and format, respectively.</p>
+     * <p> {@code "InputConfiguration(w:%d, h:%d, format:%d, isMultiResolution:%d)"},
+     * where {@code %d} represents the width, height, format, and multi-resolution flag
+     * respectively.</p>
      *
      * @return string representation of {@link InputConfiguration}
      */
     @Override
     public String toString() {
-        return String.format("InputConfiguration(w:%d, h:%d, format:%d)", mWidth, mHeight, mFormat);
+        return String.format("InputConfiguration(w:%d, h:%d, format:%d, isMultiResolution %b)",
+                mWidth, mHeight, mFormat, mIsMultiResolution);
     }
 }

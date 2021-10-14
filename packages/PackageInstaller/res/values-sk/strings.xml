@@ -18,14 +18,14 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"Nástroj na inštaláciu balíkov"</string>
     <string name="install" msgid="711829760615509273">"Inštalovať"</string>
+    <string name="update" msgid="3932142540719227615">"Aktualizovať"</string>
     <string name="done" msgid="6632441120016885253">"Hotovo"</string>
     <string name="cancel" msgid="1018267193425558088">"Zrušiť"</string>
     <string name="installing" msgid="4921993079741206516">"Inštaluje sa…"</string>
     <string name="installing_app" msgid="1165095864863849422">"Inštaluje sa <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"Aplikácia bola nainštalovaná."</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"Chcete túto aplikáciu nainštalovať?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"Chcete nainštalovať aktualizáciu tejto existujúcej aplikácie? Existujúce údaje sa nestratia."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Chcete nainštalovať aktualizáciu tejto integrovanej aplikácie? Existujúce údaje sa nestratia."</string>
+    <string name="install_confirm_question" msgid="7663733664476363311">"Chcete túto aplikáciu nainštalovať?"</string>
+    <string name="install_confirm_question_update" msgid="3348888852318388584">"Chcete túto aplikáciu aktualizovať?"</string>
     <string name="install_failed" msgid="5777824004474125469">"Aplikácia nebola nainštalovaná."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Inštalácia balíka bola zablokovaná."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Aplikácia sa nenainštalovala, pretože balík je v konflikte s existujúcim balíkom."</string>
@@ -80,9 +80,9 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wear nepodporuje akciu inštalácie/odinštalovania."</string>
     <string name="message_staging" msgid="8032722385658438567">"Aplikácia je zavádzaná po etapách…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Neznáma"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"Váš tablet nemôže z bezpečnostných dôvodov inštalovať neznáme aplikácie z tohto zdroja."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"Váš televízor nemôže z bezpečnostných dôvodov inštalovať neznáme aplikácie z tohto zdroja."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"Váš telefón nemôže z bezpečnostných dôvodov inštalovať neznáme aplikácie z tohto zdroja."</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Váš tablet momentálne nemôže z bezpečnostných dôvodov inštalovať neznáme aplikácie z tohto zdroja. Môžete to zmeniť v Nastaveniach."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Váš televízor momentálne nemôže z bezpečnostných dôvodov inštalovať neznáme aplikácie z tohto zdroja. Môžete to zmeniť v Nastaveniach."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Váš telefón momentálne nemôže z bezpečnostných dôvodov inštalovať neznáme aplikácie z tohto zdroja. Môžete to zmeniť v Nastaveniach."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Váš telefón a osobné údaje sú náchylnejšie na útok z neznámych aplikácií. Inštaláciou tejto aplikácie vyjadrujete súhlas s tým, že nesiete zodpovednosť za akékoľvek poškodenie telefónu alebo stratu údajov, ktoré by mohli nastať pri jej používaní."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Váš tablet a osobné dáta sú náchylnejšie na útok z neznámych aplikácií. Inštaláciou tejto aplikácie vyjadrujete súhlas s tým, že nesiete zodpovednosť za akékoľvek poškodenie tabletu alebo stratu dát, ktoré by mohli nastať pri jej používaní."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Váš televízor a osobné údaje sú náchylnejšie na útok z neznámych aplikácií. Inštaláciou tejto aplikácie vyjadrujete súhlas s tým, že nesiete zodpovednosť za akékoľvek poškodenie televízora alebo stratu údajov, ktoré by mohli nastať pri jej používaní."</string>

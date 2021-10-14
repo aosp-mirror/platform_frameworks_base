@@ -18,11 +18,11 @@
 package android.telephony.data;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.LinkAddress;
-import android.net.LinkProperties;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Annotation.DataFailureCause;
@@ -30,6 +30,7 @@ import android.telephony.DataFailCause;
 import android.telephony.data.ApnSetting.ProtocolType;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -267,13 +268,14 @@ public final class DataCallResponse implements Parcelable {
     public int getCause() { return mCause; }
 
     /**
-     * @return The suggested data retry time in milliseconds.
+     * @return The suggested data retry time in milliseconds. 0 when network does not
+     * suggest a retry time (Note this is different from the replacement
+     * {@link #getRetryDurationMillis()}).
      *
      * @deprecated Use {@link #getRetryDurationMillis()} instead.
      */
     @Deprecated
     public int getSuggestedRetryTime() {
-
         // To match the pre-deprecated getSuggestedRetryTime() behavior.
         if (mSuggestedRetryTime == RETRY_DURATION_UNDEFINED) {
             return 0;
@@ -439,7 +441,7 @@ public final class DataCallResponse implements Parcelable {
            .append(" mtu=").append(getMtu())
            .append(" mtuV4=").append(getMtuV4())
            .append(" mtuV6=").append(getMtuV6())
-           .append(" handoverFailureMode=").append(getHandoverFailureMode())
+           .append(" handoverFailureMode=").append(failureModeToString(mHandoverFailureMode))
            .append(" pduSessionId=").append(getPduSessionId())
            .append(" defaultQos=").append(mDefaultQos)
            .append(" qosBearerSessions=").append(mQosBearerSessions)
@@ -530,10 +532,14 @@ public final class DataCallResponse implements Parcelable {
         dest.writeInt(mMtuV6);
         dest.writeInt(mHandoverFailureMode);
         dest.writeInt(mPduSessionId);
-        if (mDefaultQos.getType() == Qos.QOS_TYPE_EPS) {
-            dest.writeParcelable((EpsQos)mDefaultQos, flags);
+        if (mDefaultQos != null) {
+            if (mDefaultQos.getType() == Qos.QOS_TYPE_EPS) {
+                dest.writeParcelable((EpsQos) mDefaultQos, flags);
+            } else {
+                dest.writeParcelable((NrQos) mDefaultQos, flags);
+            }
         } else {
-            dest.writeParcelable((NrQos)mDefaultQos, flags);
+            dest.writeParcelable(null, flags);
         }
         dest.writeList(mQosBearerSessions);
         dest.writeParcelable(mSliceInfo, flags);
@@ -809,11 +815,19 @@ public final class DataCallResponse implements Parcelable {
 
         /**
          * Set pdu session id.
+         * <p/>
+         * The id must be between 1 and 15 when linked to a pdu session.  If no pdu session
+         * exists for the current data call, the id must be set to {@link PDU_SESSION_ID_NOT_SET}.
          *
          * @param pduSessionId Pdu Session Id of the data call.
          * @return The same instance of the builder.
          */
-        public @NonNull Builder setPduSessionId(int pduSessionId) {
+        public @NonNull Builder setPduSessionId(
+                @IntRange(from = PDU_SESSION_ID_NOT_SET, to = 15) int pduSessionId) {
+            Preconditions.checkArgument(pduSessionId >= PDU_SESSION_ID_NOT_SET,
+                    "pduSessionId must be greater than or equal to" + PDU_SESSION_ID_NOT_SET);
+            Preconditions.checkArgument(pduSessionId <= 15,
+                    "pduSessionId must be less than or equal to 15.");
             mPduSessionId = pduSessionId;
             return this;
         }

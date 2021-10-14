@@ -33,7 +33,6 @@
 #ifndef _WIN32
 #include <binder/IServiceManager.h>
 #endif
-#include <ui/PixelFormat.h>
 
 #include <SkCanvas.h>
 #include <SkImagePriv.h>
@@ -132,15 +131,8 @@ sk_sp<Bitmap> Bitmap::allocateHeapBitmap(size_t size, const SkImageInfo& info, s
     return sk_sp<Bitmap>(new Bitmap(addr, size, info, rowBytes));
 }
 
-void FreePixelRef(void* addr, void* context) {
-    auto pixelRef = (SkPixelRef*)context;
-    pixelRef->unref();
-}
-
 sk_sp<Bitmap> Bitmap::createFrom(const SkImageInfo& info, SkPixelRef& pixelRef) {
-    pixelRef.ref();
-    return sk_sp<Bitmap>(new Bitmap((void*)pixelRef.pixels(), (void*)&pixelRef, FreePixelRef, info,
-                                    pixelRef.rowBytes()));
+    return sk_sp<Bitmap>(new Bitmap(pixelRef, info));
 }
 
 
@@ -230,14 +222,12 @@ Bitmap::Bitmap(void* address, size_t size, const SkImageInfo& info, size_t rowBy
     mPixelStorage.heap.size = size;
 }
 
-Bitmap::Bitmap(void* address, void* context, FreeFunc freeFunc, const SkImageInfo& info,
-               size_t rowBytes)
-        : SkPixelRef(info.width(), info.height(), address, rowBytes)
+Bitmap::Bitmap(SkPixelRef& pixelRef, const SkImageInfo& info)
+        : SkPixelRef(info.width(), info.height(), pixelRef.pixels(), pixelRef.rowBytes())
         , mInfo(validateAlpha(info))
-        , mPixelStorageType(PixelStorageType::External) {
-    mPixelStorage.external.address = address;
-    mPixelStorage.external.context = context;
-    mPixelStorage.external.freeFunc = freeFunc;
+        , mPixelStorageType(PixelStorageType::WrappedPixelRef) {
+    pixelRef.ref();
+    mPixelStorage.wrapped.pixelRef = &pixelRef;
 }
 
 Bitmap::Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info, size_t rowBytes)
@@ -266,9 +256,8 @@ Bitmap::Bitmap(AHardwareBuffer* buffer, const SkImageInfo& info, size_t rowBytes
 
 Bitmap::~Bitmap() {
     switch (mPixelStorageType) {
-        case PixelStorageType::External:
-            mPixelStorage.external.freeFunc(mPixelStorage.external.address,
-                                            mPixelStorage.external.context);
+        case PixelStorageType::WrappedPixelRef:
+            mPixelStorage.wrapped.pixelRef->unref();
             break;
         case PixelStorageType::Ashmem:
 #ifndef _WIN32 // ashmem not implemented on Windows
@@ -298,19 +287,6 @@ bool Bitmap::hasHardwareMipMap() const {
 
 void Bitmap::setHasHardwareMipMap(bool hasMipMap) {
     mHasHardwareMipMap = hasMipMap;
-}
-
-void* Bitmap::getStorage() const {
-    switch (mPixelStorageType) {
-        case PixelStorageType::External:
-            return mPixelStorage.external.address;
-        case PixelStorageType::Ashmem:
-            return mPixelStorage.ashmem.address;
-        case PixelStorageType::Heap:
-            return mPixelStorage.heap.address;
-        case PixelStorageType::Hardware:
-            return nullptr;
-    }
 }
 
 int Bitmap::getAshmemFd() const {

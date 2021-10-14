@@ -16,7 +16,7 @@ filegroup {
 
 java_library_static {
     name: "services.midi",
-    defaults: ["services_defaults"],
+    defaults: ["platform_service_defaults"],
     srcs: [":services.midi-sources"],
     libs: ["services.core"],
 }

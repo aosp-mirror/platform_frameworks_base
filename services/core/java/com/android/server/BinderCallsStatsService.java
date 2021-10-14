@@ -22,8 +22,10 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static com.android.internal.os.BinderCallsStats.SettingsObserver.SETTINGS_COLLECT_LATENCY_DATA_KEY;
 import static com.android.internal.os.BinderCallsStats.SettingsObserver.SETTINGS_DETAILED_TRACKING_KEY;
 import static com.android.internal.os.BinderCallsStats.SettingsObserver.SETTINGS_ENABLED_KEY;
+import static com.android.internal.os.BinderCallsStats.SettingsObserver.SETTINGS_IGNORE_BATTERY_STATUS_KEY;
 import static com.android.internal.os.BinderCallsStats.SettingsObserver.SETTINGS_MAX_CALL_STATS_KEY;
 import static com.android.internal.os.BinderCallsStats.SettingsObserver.SETTINGS_SAMPLING_INTERVAL_KEY;
+import static com.android.internal.os.BinderCallsStats.SettingsObserver.SETTINGS_SHARDING_MODULO_KEY;
 import static com.android.internal.os.BinderCallsStats.SettingsObserver.SETTINGS_TRACK_DIRECT_CALLING_UID_KEY;
 import static com.android.internal.os.BinderCallsStats.SettingsObserver.SETTINGS_TRACK_SCREEN_INTERACTIVE_KEY;
 
@@ -36,7 +38,9 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.BatteryStatsInternal;
 import android.os.Binder;
+import android.os.ParcelFileDescriptor;
 import android.os.Process;
+import android.os.ShellCommand;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -55,6 +59,7 @@ import com.android.internal.util.DumpUtils;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class BinderCallsStatsService extends Binder {
@@ -181,6 +186,13 @@ public class BinderCallsStatsService extends Binder {
             mBinderCallsStats.setTrackDirectCallerUid(
                     mParser.getBoolean(SETTINGS_TRACK_DIRECT_CALLING_UID_KEY,
                     BinderCallsStats.DEFAULT_TRACK_DIRECT_CALLING_UID));
+            mBinderCallsStats.setIgnoreBatteryStatus(
+                    mParser.getBoolean(SETTINGS_IGNORE_BATTERY_STATUS_KEY,
+                    BinderCallsStats.DEFAULT_IGNORE_BATTERY_STATUS));
+            mBinderCallsStats.setShardingModulo(mParser.getInt(
+                    SETTINGS_SHARDING_MODULO_KEY,
+                    BinderCallsStats.SHARDING_MODULO_DEFAULT));
+
             mBinderCallsStats.setCollectLatencyData(
                     mParser.getBoolean(SETTINGS_COLLECT_LATENCY_DATA_KEY,
                     BinderCallsStats.DEFAULT_COLLECT_LATENCY_DATA));
@@ -278,7 +290,19 @@ public class BinderCallsStatsService extends Binder {
 
                 BatteryStatsInternal batteryStatsInternal = getLocalService(
                         BatteryStatsInternal.class);
-                mBinderCallsStats.setCallStatsObserver(batteryStatsInternal::noteBinderCallStats);
+                mBinderCallsStats.setCallStatsObserver(new BinderInternal.CallStatsObserver() {
+                    @Override
+                    public void noteCallStats(int workSourceUid, long incrementalCallCount,
+                            Collection<BinderCallsStats.CallStat> callStats) {
+                        batteryStatsInternal.noteBinderCallStats(workSourceUid,
+                                incrementalCallCount, callStats);
+                    }
+
+                    @Override
+                    public void noteBinderThreadNativeIds(int[] binderThreadNativeTids) {
+                        batteryStatsInternal.noteBinderThreadNativeIds(binderThreadNativeTids);
+                    }
+                });
 
                 // It needs to be called before mService.systemReady to make sure the observer is
                 // initialized before installing it.
@@ -315,50 +339,134 @@ public class BinderCallsStatsService extends Binder {
         }
 
         boolean verbose = false;
+        int worksourceUid = Process.INVALID_UID;
         if (args != null) {
-            for (final String arg : args) {
+            for (int i = 0; i < args.length; i++) {
+                String arg = args[i];
                 if ("-a".equals(arg)) {
                     verbose = true;
-                } else if ("--reset".equals(arg)) {
-                    reset();
-                    pw.println("binder_calls_stats reset.");
-                    return;
-                } else if ("--enable".equals(arg)) {
-                    Binder.setObserver(mBinderCallsStats);
-                    return;
-                } else if ("--disable".equals(arg)) {
-                    Binder.setObserver(null);
-                    return;
-                } else if ("--no-sampling".equals(arg)) {
-                    mBinderCallsStats.setSamplingInterval(1);
-                    return;
-                } else if ("--enable-detailed-tracking".equals(arg)) {
-                    SystemProperties.set(PERSIST_SYS_BINDER_CALLS_DETAILED_TRACKING, "1");
-                    mBinderCallsStats.setDetailedTracking(true);
-                    pw.println("Detailed tracking enabled");
-                    return;
-                } else if ("--disable-detailed-tracking".equals(arg)) {
-                    SystemProperties.set(PERSIST_SYS_BINDER_CALLS_DETAILED_TRACKING, "");
-                    mBinderCallsStats.setDetailedTracking(false);
-                    pw.println("Detailed tracking disabled");
-                    return;
-                } else if ("--dump-worksource-provider".equals(arg)) {
-                    mWorkSourceProvider.dump(pw, AppIdToPackageMap.getSnapshot());
-                    return;
                 } else if ("-h".equals(arg)) {
-                    pw.println("binder_calls_stats commands:");
-                    pw.println("  --reset: Reset stats");
-                    pw.println("  --enable: Enable tracking binder calls");
-                    pw.println("  --disable: Disables tracking binder calls");
-                    pw.println("  --no-sampling: Tracks all calls");
-                    pw.println("  --enable-detailed-tracking: Enables detailed tracking");
-                    pw.println("  --disable-detailed-tracking: Disables detailed tracking");
+                    pw.println("dumpsys binder_calls_stats options:");
+                    pw.println("  -a: Verbose");
+                    pw.println("  --work-source-uid <UID>: Dump binder calls from the UID");
                     return;
-                } else {
-                    pw.println("Unknown option: " + arg);
+                } else if ("--work-source-uid".equals(arg)) {
+                    i++;
+                    if (i >= args.length) {
+                        throw new IllegalArgumentException(
+                                "Argument expected after \"" + arg + "\"");
+                    }
+                    String uidArg = args[i];
+                    try {
+                        worksourceUid = Integer.parseInt(uidArg);
+                    } catch (NumberFormatException e) {
+                        pw.println("Invalid UID: " + uidArg);
+                        return;
+                    }
+                }
+            }
+
+            if (args.length > 0 && worksourceUid == Process.INVALID_UID) {
+                // For compatibility, support "cmd"-style commands when passed to "dumpsys".
+                BinderCallsStatsShellCommand command = new BinderCallsStatsShellCommand(pw);
+                int status = command.exec(this, null, FileDescriptor.out, FileDescriptor.err, args);
+                if (status == 0) {
+                    return;
                 }
             }
         }
-        mBinderCallsStats.dump(pw, AppIdToPackageMap.getSnapshot(), verbose);
+        mBinderCallsStats.dump(pw, AppIdToPackageMap.getSnapshot(), worksourceUid, verbose);
+    }
+
+    @Override
+    public int handleShellCommand(ParcelFileDescriptor in, ParcelFileDescriptor out,
+            ParcelFileDescriptor err, String[] args) {
+        ShellCommand command = new BinderCallsStatsShellCommand(null);
+        int status = command.exec(this, in.getFileDescriptor(), out.getFileDescriptor(),
+                err.getFileDescriptor(), args);
+        if (status != 0) {
+            command.onHelp();
+        }
+        return status;
+    }
+
+    private class BinderCallsStatsShellCommand extends ShellCommand {
+        private final PrintWriter mPrintWriter;
+
+        BinderCallsStatsShellCommand(PrintWriter printWriter) {
+            mPrintWriter = printWriter;
+        }
+
+        @Override
+        public PrintWriter getOutPrintWriter() {
+            if (mPrintWriter != null) {
+                return mPrintWriter;
+            }
+            return super.getOutPrintWriter();
+        }
+
+        @Override
+        public int onCommand(String cmd) {
+            PrintWriter pw = getOutPrintWriter();
+            if (cmd == null) {
+                return -1;
+            }
+
+            switch (cmd) {
+                case "--reset":
+                    reset();
+                    pw.println("binder_calls_stats reset.");
+                    break;
+                case "--enable":
+                    Binder.setObserver(mBinderCallsStats);
+                    break;
+                case "--disable":
+                    Binder.setObserver(null);
+                    break;
+                case "--no-sampling":
+                    mBinderCallsStats.setSamplingInterval(1);
+                    break;
+                case "--enable-detailed-tracking":
+                    SystemProperties.set(PERSIST_SYS_BINDER_CALLS_DETAILED_TRACKING, "1");
+                    mBinderCallsStats.setDetailedTracking(true);
+                    pw.println("Detailed tracking enabled");
+                    break;
+                case "--disable-detailed-tracking":
+                    SystemProperties.set(PERSIST_SYS_BINDER_CALLS_DETAILED_TRACKING, "");
+                    mBinderCallsStats.setDetailedTracking(false);
+                    pw.println("Detailed tracking disabled");
+                    break;
+                case "--dump-worksource-provider":
+                    mBinderCallsStats.setDetailedTracking(true);
+                    mWorkSourceProvider.dump(pw, AppIdToPackageMap.getSnapshot());
+                    break;
+                case "--work-source-uid":
+                    String uidArg = getNextArgRequired();
+                    try {
+                        int uid = Integer.parseInt(uidArg);
+                        mBinderCallsStats.recordAllCallsForWorkSourceUid(uid);
+                    } catch (NumberFormatException e) {
+                        pw.println("Invalid UID: " + uidArg);
+                        return -1;
+                    }
+                    break;
+                default:
+                    return handleDefaultCommands(cmd);
+            }
+            return 0;
+        }
+
+        @Override
+        public void onHelp() {
+            PrintWriter pw = getOutPrintWriter();
+            pw.println("binder_calls_stats commands:");
+            pw.println("  --reset: Reset stats");
+            pw.println("  --enable: Enable tracking binder calls");
+            pw.println("  --disable: Disables tracking binder calls");
+            pw.println("  --no-sampling: Tracks all calls");
+            pw.println("  --enable-detailed-tracking: Enables detailed tracking");
+            pw.println("  --disable-detailed-tracking: Disables detailed tracking");
+            pw.println("  --work-source-uid <UID>: Track all binder calls from the UID");
+        }
     }
 }

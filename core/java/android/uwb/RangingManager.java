@@ -17,6 +17,7 @@
 package android.uwb;
 
 import android.annotation.NonNull;
+import android.content.AttributionSource;
 import android.os.CancellationSignal;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
@@ -42,6 +43,9 @@ public class RangingManager extends android.uwb.IUwbRangingCallbacks.Stub {
     /**
      * Open a new ranging session
      *
+     * @param attributionSource Attribution source to use for the enforcement of
+     *                          {@link android.Manifest.permission#ULTRAWIDEBAND_RANGING} runtime
+     *                          permission.
      * @param params the parameters that define the ranging session
      * @param executor {@link Executor} to run callbacks
      * @param callbacks {@link RangingSession.Callback} to associate with the {@link RangingSession}
@@ -49,7 +53,8 @@ public class RangingManager extends android.uwb.IUwbRangingCallbacks.Stub {
      * @return a {@link CancellationSignal} that may be used to cancel the opening of the
      *         {@link RangingSession}.
      */
-    public CancellationSignal openSession(@NonNull PersistableBundle params,
+    public CancellationSignal openSession(@NonNull AttributionSource attributionSource,
+            @NonNull PersistableBundle params,
             @NonNull Executor executor,
             @NonNull RangingSession.Callback callbacks) {
         synchronized (this) {
@@ -58,7 +63,7 @@ public class RangingManager extends android.uwb.IUwbRangingCallbacks.Stub {
                     new RangingSession(executor, callbacks, mAdapter, sessionHandle);
             mRangingSessionTable.put(sessionHandle, session);
             try {
-                mAdapter.openRanging(sessionHandle, this, params);
+                mAdapter.openRanging(attributionSource, sessionHandle, this, params);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

@@ -110,6 +110,31 @@ static inline std::string getStringField(JNIEnv* env, jobject obj, jfieldID fiel
     return std::string(defaultValue);
 }
 
+static inline JNIEnv* GetJNIEnvironment(JavaVM* vm, jint version = JNI_VERSION_1_4) {
+    JNIEnv* env;
+    if (vm->GetEnv(reinterpret_cast<void**>(&env), version) != JNI_OK) {
+        return nullptr;
+    }
+    return env;
+}
+
+static inline JNIEnv* GetOrAttachJNIEnvironment(JavaVM* jvm, jint version = JNI_VERSION_1_4) {
+    JNIEnv* env = GetJNIEnvironment(jvm, version);
+    if (!env) {
+        int result = jvm->AttachCurrentThread(&env, nullptr);
+        LOG_ALWAYS_FATAL_IF(result != JNI_OK, "JVM thread attach failed.");
+        struct VmDetacher {
+            VmDetacher(JavaVM* vm) : mVm(vm) {}
+            ~VmDetacher() { mVm->DetachCurrentThread(); }
+
+        private:
+            JavaVM* const mVm;
+        };
+        static thread_local VmDetacher detacher(jvm);
+    }
+    return env;
+}
+
 }  // namespace android
 
 #endif  // CORE_JNI_HELPERS

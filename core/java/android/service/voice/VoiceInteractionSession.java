@@ -1220,7 +1220,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * your UI, which will eventually culminate in {@link #onShow}.  This is similar to calling
      * {@link VoiceInteractionService#showSession VoiceInteractionService.showSession}.
      * @param args Arbitrary arguments that will be propagated {@link #onShow}.
-     * @param flags Indicates additional optional behavior that should be performed.  May
+     * @param flags Indicates additional optional behavior that should be performed. May
      * be any combination of
      * {@link VoiceInteractionSession#SHOW_WITH_ASSIST VoiceInteractionSession.SHOW_WITH_ASSIST} and
      * {@link VoiceInteractionSession#SHOW_WITH_SCREENSHOT
@@ -1583,6 +1583,11 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      *
      * @param args The arguments that were supplied to
      * {@link VoiceInteractionService#showSession VoiceInteractionService.showSession}.
+     * Some example keys include : "invocation_type", "invocation_phone_state",
+     * "invocation_time_ms", Intent.EXTRA_TIME ("android.intent.extra.TIME") indicating timing
+     * in milliseconds of the KeyEvent that triggered Assistant and
+     * Intent.EXTRA_ASSIST_INPUT_DEVICE_ID (android.intent.extra.ASSIST_INPUT_DEVICE_ID)
+     *  referring to the device that sent the request.
      * @param showFlags The show flags originally provided to
      * {@link VoiceInteractionService#showSession VoiceInteractionService.showSession}.
      */
@@ -1640,7 +1645,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
 
     /**
      * Called to receive data from the application that the user was currently viewing when
-     * an assist session is started.  If the original show request did not specify
+-     * an assist session is started.  If the original show request did not specify
      * {@link #SHOW_WITH_ASSIST}, this method will not be called.
      *
      * @param data Arbitrary data supplied by the app through
@@ -1665,8 +1670,9 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
 
     /**
      * Called to receive data from the application that the user was currently viewing when
-     * an assist session is started.  If the original show request did not specify
-     * {@link #SHOW_WITH_ASSIST}, this method will not be called.
+     * an assist session is started. If the original show request did not specify
+     * {@link #SHOW_WITH_ASSIST}, {@link AssistState} parameter will only provide
+     * {@link ActivityId}.
      *
      * <p>This method is called for all activities along with an index and count that indicates
      * which activity the data is for. {@code index} will be between 0 and {@code count}-1 and
@@ -1680,7 +1686,10 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * @param state The state object capturing the state of an activity.
      */
     public void onHandleAssist(@NonNull AssistState state) {
-        if (state.getIndex() == 0) {
+        if (state.getAssistData() == null && state.getAssistStructure() == null
+                && state.getAssistContent() == null) {
+            return;
+        } else if (state.getIndex() == 0) {
             onHandleAssist(state.getAssistData(), state.getAssistStructure(),
                     state.getAssistContent());
         } else {
@@ -2005,7 +2014,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
             return mIndex;
         }
 
-        /**s
+        /**
          * @return the total number of activities for which the assist data is
          * being returned.
          */
@@ -2023,7 +2032,8 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         /**
          * @return Arbitrary data supplied by the app through
          * {@link android.app.Activity#onProvideAssistData Activity.onProvideAssistData}.
-         * May be null if assist data has been disabled by the user or device policy.
+         * May be null if assist data has been disabled by the user or device policy; will be null
+         * if the original show request did not specify {@link #SHOW_WITH_ASSIST}.
          */
         public @Nullable Bundle getAssistData() {
             return mData;
@@ -2032,7 +2042,8 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         /**
          * @return If available, the structure definition of all windows currently
          * displayed by the app. May be null if assist data has been disabled by the user
-         * or device policy; will be an empty stub if the application has disabled assist
+         * or device policy; will be null if the original show request did not specify
+         * {@link #SHOW_WITH_ASSIST}; will be an empty stub if the application has disabled assist
          * by marking its window as secure.
          */
         public @Nullable AssistStructure getAssistStructure() {
@@ -2042,9 +2053,10 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         /**
          * @return Additional content data supplied by the app through
          * {@link android.app.Activity#onProvideAssistContent Activity.onProvideAssistContent}.
-         * May be null if assist data has been disabled by the user or device policy; will
-         * not be automatically filled in with data from the app if the app has marked its
-         * window as secure.
+         * May be null if assist data has been disabled by the user or device policy; will be null
+         * if the original show request did not specify {@link #SHOW_WITH_ASSIST}. Will not be
+         * automatically filled in with data from the app if the app has marked its window as
+         * secure.
          */
         public @Nullable AssistContent getAssistContent() {
             return mContent;
@@ -2073,7 +2085,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (this == o) {
                 return true;
             }

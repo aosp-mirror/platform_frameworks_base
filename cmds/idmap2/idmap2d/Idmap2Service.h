@@ -18,11 +18,16 @@
 #define IDMAP2_IDMAP2D_IDMAP2SERVICE_H_
 
 #include <android-base/unique_fd.h>
+#include <android/os/BnIdmap2.h>
+#include <android/os/FabricatedOverlayInfo.h>
 #include <binder/BinderService.h>
+#include <idmap2/ResourceContainer.h>
+#include <idmap2/Result.h>
 
+#include <filesystem>
+#include <memory>
 #include <string>
-
-#include "android/os/BnIdmap2.h"
+#include <vector>
 
 namespace android::os {
 
@@ -32,26 +37,63 @@ class Idmap2Service : public BinderService<Idmap2Service>, public BnIdmap2 {
     return "idmap";
   }
 
-  binder::Status getIdmapPath(const std::string& overlay_apk_path, int32_t user_id,
+  binder::Status getIdmapPath(const std::string& overlay_path, int32_t user_id,
                               std::string* _aidl_return) override;
 
-  binder::Status removeIdmap(const std::string& overlay_apk_path, int32_t user_id,
+  binder::Status removeIdmap(const std::string& overlay_path, int32_t user_id,
                              bool* _aidl_return) override;
 
-  binder::Status verifyIdmap(const std::string& target_apk_path,
-                             const std::string& overlay_apk_path, int32_t fulfilled_policies,
+  binder::Status verifyIdmap(const std::string& target_path, const std::string& overlay_path,
+                             const std::string& overlay_name, int32_t fulfilled_policies,
                              bool enforce_overlayable, int32_t user_id,
                              bool* _aidl_return) override;
 
-  binder::Status createIdmap(const std::string& target_apk_path,
-                             const std::string& overlay_apk_path, int32_t fulfilled_policies,
+  binder::Status createIdmap(const std::string& target_path, const std::string& overlay_path,
+                             const std::string& overlay_name, int32_t fulfilled_policies,
                              bool enforce_overlayable, int32_t user_id,
                              std::optional<std::string>* _aidl_return) override;
 
+  binder::Status createFabricatedOverlay(
+      const os::FabricatedOverlayInternal& overlay,
+      std::optional<os::FabricatedOverlayInfo>* _aidl_return) override;
+
+  binder::Status deleteFabricatedOverlay(const std::string& overlay_path,
+                                         bool* _aidl_return) override;
+
+  binder::Status acquireFabricatedOverlayIterator() override;
+
+  binder::Status releaseFabricatedOverlayIterator() override;
+
+  binder::Status nextFabricatedOverlayInfos(
+      std::vector<os::FabricatedOverlayInfo>* _aidl_return) override;
+
+  binder::Status dumpIdmap(const std::string& overlay_path, std::string* _aidl_return) override;
+
  private:
-  // Cache the crc of the android framework package since the crc cannot change without a reboot.
-  std::optional<uint32_t> android_crc_;
+  // idmap2d is killed after a period of inactivity, so any information stored on this class should
+  // be able to be recalculated if idmap2 dies and restarts.
+  std::unique_ptr<idmap2::TargetResourceContainer> framework_apk_cache_;
+
+  std::optional<std::filesystem::directory_iterator> frro_iter_;
+
+  template <typename T>
+  using MaybeUniquePtr = std::variant<std::unique_ptr<T>, T*>;
+
+  using TargetResourceContainerPtr = MaybeUniquePtr<idmap2::TargetResourceContainer>;
+  idmap2::Result<TargetResourceContainerPtr> GetTargetContainer(const std::string& target_path);
+
+  template <typename T>
+  WARN_UNUSED static const T* GetPointer(const MaybeUniquePtr<T>& ptr);
 };
+
+template <typename T>
+const T* Idmap2Service::GetPointer(const MaybeUniquePtr<T>& ptr) {
+  auto u = std::get_if<T*>(&ptr);
+  if (u != nullptr) {
+    return *u;
+  }
+  return std::get<std::unique_ptr<T>>(ptr).get();
+}
 
 }  // namespace android::os
 

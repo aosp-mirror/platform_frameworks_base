@@ -36,12 +36,14 @@ import android.util.IntArray;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.FastXmlSerializer;
 
 import libcore.io.IoUtils;
 
@@ -50,7 +52,6 @@ import com.google.android.collect.Maps;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -58,7 +59,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -162,18 +162,20 @@ public abstract class RegisteredServicesCache<V> {
         intentFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         intentFilter.addDataScheme("package");
-        mContext.registerReceiverAsUser(mPackageReceiver, UserHandle.ALL, intentFilter, null, null);
+        Handler handler = BackgroundThread.getHandler();
+        mContext.registerReceiverAsUser(
+                mPackageReceiver, UserHandle.ALL, intentFilter, null, handler);
 
         // Register for events related to sdcard installation.
         IntentFilter sdFilter = new IntentFilter();
         sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
         sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
-        mContext.registerReceiver(mExternalReceiver, sdFilter);
+        mContext.registerReceiver(mExternalReceiver, sdFilter, null, handler);
 
         // Register for user-related events
         IntentFilter userFilter = new IntentFilter();
         sdFilter.addAction(Intent.ACTION_USER_REMOVED);
-        mContext.registerReceiver(mUserRemovedReceiver, userFilter);
+        mContext.registerReceiver(mUserRemovedReceiver, userFilter, null, handler);
     }
 
     private void handlePackageEvent(Intent intent, int userId) {
@@ -266,7 +268,7 @@ public abstract class RegisteredServicesCache<V> {
 
     public void setListener(RegisteredServicesCacheListener<V> listener, Handler handler) {
         if (handler == null) {
-            handler = new Handler(mContext.getMainLooper());
+            handler = BackgroundThread.getHandler();
         }
         synchronized (this) {
             mHandler = handler;
@@ -672,8 +674,7 @@ public abstract class RegisteredServicesCache<V> {
      */
     private void readPersistentServicesLocked(InputStream is)
             throws XmlPullParserException, IOException {
-        XmlPullParser parser = Xml.newPullParser();
-        parser.setInput(is, StandardCharsets.UTF_8.name());
+        TypedXmlPullParser parser = Xml.resolvePullParser(is);
         int eventType = parser.getEventType();
         while (eventType != XmlPullParser.START_TAG
                 && eventType != XmlPullParser.END_DOCUMENT) {
@@ -690,8 +691,7 @@ public abstract class RegisteredServicesCache<V> {
                         if (service == null) {
                             break;
                         }
-                        String uidString = parser.getAttributeValue(null, "uid");
-                        final int uid = Integer.parseInt(uidString);
+                        final int uid = parser.getAttributeInt(null, "uid");
                         final int userId = UserHandle.getUserId(uid);
                         final UserServices<V> user = findOrCreateUserLocked(userId,
                                 false /*loadFromFileIfNew*/) ;
@@ -762,14 +762,13 @@ public abstract class RegisteredServicesCache<V> {
         FileOutputStream fos = null;
         try {
             fos = atomicFile.startWrite();
-            XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(fos, StandardCharsets.UTF_8.name());
+            TypedXmlSerializer out = Xml.resolveSerializer(fos);
             out.startDocument(null, true);
             out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
             out.startTag(null, "services");
             for (Map.Entry<V, Integer> service : user.persistentServices.entrySet()) {
                 out.startTag(null, "service");
-                out.attribute(null, "uid", Integer.toString(service.getValue()));
+                out.attributeInt(null, "uid", service.getValue());
                 mSerializerAndParser.writeAsXml(service.getKey(), out);
                 out.endTag(null, "service");
             }
@@ -793,7 +792,7 @@ public abstract class RegisteredServicesCache<V> {
 
     @VisibleForTesting
     protected List<UserInfo> getUsers() {
-        return UserManager.get(mContext).getUsers(true);
+        return UserManager.get(mContext).getAliveUsers();
     }
 
     @VisibleForTesting

@@ -69,7 +69,7 @@ cc_library_shared {
 
     shared_libs: [
         "libui",
-        "libhwui",
+        "libjnigraphics",
         "libEGL",
         "libGLESv1_CM",
         "libgui",

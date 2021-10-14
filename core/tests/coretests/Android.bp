@@ -41,6 +41,7 @@ android_test {
         "frameworks-core-util-lib",
         "mockwebserver",
         "guava",
+        "androidx.core_core",
         "androidx.test.espresso.core",
         "androidx.test.ext.junit",
         "androidx.test.runner",
@@ -52,7 +53,8 @@ android_test {
         "truth-prebuilt",
         "print-test-util-lib",
         "testng",
-        "servicestests-utils"
+        "servicestests-utils",
+        "AppSearchTestUtils",
     ],
 
     libs: [
@@ -64,6 +66,9 @@ android_test {
         "framework",
         "ext",
         "framework-res",
+    ],
+    jni_libs: [
+        "libpowermanagertest_jni",
     ],
 
     platform_apis: true,

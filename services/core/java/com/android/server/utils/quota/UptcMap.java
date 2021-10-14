@@ -31,7 +31,7 @@ import java.util.function.Function;
  * @see Uptc
  */
 class UptcMap<T> {
-    private final SparseArrayMap<ArrayMap<String, T>> mData = new SparseArrayMap<>();
+    private final SparseArrayMap<String, ArrayMap<String, T>> mData = new SparseArrayMap<>();
 
     public void add(int userId, @NonNull String packageName, @Nullable String tag,
             @Nullable T obj) {

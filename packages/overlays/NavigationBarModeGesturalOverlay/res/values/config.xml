@@ -31,7 +31,7 @@
     <bool name="config_navBarTapThrough">true</bool>
 
     <!-- Controls the size of the back gesture inset. -->
-    <dimen name="config_backGestureInset">24dp</dimen>
+    <dimen name="config_backGestureInset">30dp</dimen>
 
     <!-- Controls whether the navbar needs a scrim with
      {@link Window#setEnsuringNavigationBarContrastWhenTransparent}. -->
@@ -54,4 +54,6 @@
          show. -->
     <bool name="config_navBarAlwaysShowOnSideEdgeGesture">true</bool>
 
+    <!-- If true, attach the navigation bar to the app during app transition -->
+    <bool name="config_attachNavBarToAppDuringTransition">true</bool>
 </resources>

@@ -672,7 +672,7 @@ public class DatabaseUtils {
      * @param sb the StringBuilder to print to
      */
     public static void dumpCursor(Cursor cursor, StringBuilder sb) {
-        sb.append(">>>>> Dumping cursor " + cursor + "\n");
+        sb.append(">>>>> Dumping cursor ").append(cursor).append('\n');
         if (cursor != null) {
             int startPos = cursor.getPosition();
 
@@ -739,7 +739,7 @@ public class DatabaseUtils {
      */
     public static void dumpCurrentRow(Cursor cursor, StringBuilder sb) {
         String[] cols = cursor.getColumnNames();
-        sb.append("" + cursor.getPosition() + " {\n");
+        sb.append(cursor.getPosition()).append(" {\n");
         int length = cols.length;
         for (int i = 0; i < length; i++) {
             String value;
@@ -750,7 +750,7 @@ public class DatabaseUtils {
                 // representable by a string, e.g. it is a BLOB.
                 value = "<unprintable>";
             }
-            sb.append("   " + cols[i] + '=' + value + "\n");
+            sb.append("   ").append(cols[i]).append('=').append(value).append('\n');
         }
         sb.append("}\n");
     }

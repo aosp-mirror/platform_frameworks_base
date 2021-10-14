@@ -16,6 +16,8 @@
 
 package android.telephony;
 
+import static android.text.TextUtils.formatSimple;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
@@ -110,17 +112,6 @@ public final class CellIdentityCdma extends CellIdentity {
         updateGlobalCellId();
     }
 
-    /** @hide */
-    public CellIdentityCdma(@NonNull android.hardware.radio.V1_0.CellIdentityCdma cid) {
-        this(cid.networkId, cid.systemId, cid.baseStationId, cid.longitude, cid.latitude, "", "");
-    }
-
-    /** @hide */
-    public CellIdentityCdma(@NonNull android.hardware.radio.V1_2.CellIdentityCdma cid) {
-        this(cid.base.networkId, cid.base.systemId, cid.base.baseStationId, cid.base.longitude,
-                cid.base.latitude, cid.operatorNames.alphaLong, cid.operatorNames.alphaShort);
-    }
-
     private CellIdentityCdma(@NonNull CellIdentityCdma cid) {
         this(cid.mNetworkId, cid.mSystemId, cid.mBasestationId, cid.mLongitude, cid.mLatitude,
                 cid.mAlphaLong, cid.mAlphaShort);
@@ -145,7 +136,7 @@ public final class CellIdentityCdma extends CellIdentity {
         if (mNetworkId == CellInfo.UNAVAILABLE || mSystemId == CellInfo.UNAVAILABLE
                 || mBasestationId == CellInfo.UNAVAILABLE) return;
 
-        mGlobalCellId = String.format("%04x%04x%04x", mSystemId, mNetworkId,  mBasestationId);
+        mGlobalCellId = formatSimple("%04x%04x%04x", mSystemId, mNetworkId,  mBasestationId);
     }
 
     /**

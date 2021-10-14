@@ -13,9 +13,14 @@ android_test {
     srcs: ["src/**/*.java"],
     libs: [
         "android.test.runner",
-        "telephony-common",
         "android.test.base",
+        "telephony-common",
     ],
-    static_libs: ["junit"],
+    static_libs: [
+        "androidx.test.runner",
+        "junit",
+        "platform-test-annotations",
+    ],
     platform_apis: true,
+    test_suites: ["device-tests"],
 }

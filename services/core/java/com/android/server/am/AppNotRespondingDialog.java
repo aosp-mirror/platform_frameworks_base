@@ -63,8 +63,8 @@ final class AppNotRespondingDialog extends BaseErrorDialog implements View.OnCli
                 ? data.aInfo.loadLabel(context.getPackageManager())
                 : null;
         CharSequence name2 = null;
-        if ((mProc.pkgList.size() == 1) &&
-                (name2=context.getPackageManager().getApplicationLabel(mProc.info)) != null) {
+        if (mProc.getPkgList().size() == 1
+                && (name2 = context.getPackageManager().getApplicationLabel(mProc.info)) != null) {
             if (name1 != null) {
                 resid = com.android.internal.R.string.anr_activity_application;
             } else {
@@ -108,7 +108,7 @@ final class AppNotRespondingDialog extends BaseErrorDialog implements View.OnCli
 
         final TextView report = findViewById(com.android.internal.R.id.aerr_report);
         report.setOnClickListener(this);
-        final boolean hasReceiver = mProc.errorReportReceiver != null;
+        final boolean hasReceiver = mProc.mErrorState.getErrorReportReceiver() != null;
         report.setVisibility(hasReceiver ? View.VISIBLE : View.GONE);
         final TextView close = findViewById(com.android.internal.R.id.aerr_close);
         close.setOnClickListener(this);
@@ -152,15 +152,18 @@ final class AppNotRespondingDialog extends BaseErrorDialog implements View.OnCli
                     // Continue waiting for the application.
                     synchronized (mService) {
                         ProcessRecord app = mProc;
+                        final ProcessErrorStateRecord errState = app.mErrorState;
 
                         if (msg.what == WAIT_AND_REPORT) {
-                            appErrorIntent = mService.mAppErrors.createAppErrorIntentLocked(app,
+                            appErrorIntent = mService.mAppErrors.createAppErrorIntentLOSP(app,
                                     System.currentTimeMillis(), null);
                         }
 
-                        app.setNotResponding(false);
-                        app.notRespondingReport = null;
-                        app.getDialogController().clearAnrDialogs();
+                        synchronized (mService.mProcLock) {
+                            errState.setNotResponding(false);
+                            errState.setNotRespondingReport(null);
+                            errState.getDialogController().clearAnrDialogs();
+                        }
                         mService.mServices.scheduleServiceTimeoutLocked(app);
                     }
                     break;
@@ -177,6 +180,11 @@ final class AppNotRespondingDialog extends BaseErrorDialog implements View.OnCli
             dismiss();
         }
     };
+
+    @Override
+    protected void closeDialog() {
+        mHandler.obtainMessage(FORCE_CLOSE).sendToTarget();
+    }
 
     static class Data {
         final ProcessRecord proc;

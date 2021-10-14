@@ -50,6 +50,18 @@ public interface KeyguardStateController extends CallbackController<Callback> {
     boolean canDismissLockScreen();
 
     /**
+     * Whether we can currently perform the shared element SmartSpace transition. This is true if
+     * we're on the lockscreen, it can be dismissed with a swipe, and the Launcher is underneath the
+     * keyguard and displaying a SmartSpace that it has registered with System UI.
+     */
+    boolean canPerformSmartSpaceTransition();
+
+    /**
+     * Whether the keyguard is allowed to rotate, or needs to be locked to the default orientation.
+     */
+    boolean isKeyguardScreenRotationAllowed();
+
+    /**
      * If the device has PIN/pattern/password or a lock screen at all.
      */
     boolean isMethodSecure();
@@ -139,6 +151,38 @@ public interface KeyguardStateController extends CallbackController<Callback> {
      */
     long calculateGoingToFullShadeDelay();
 
+    /**
+     * How much (from 0f to 1f) the keyguard is dismissed, either via a swipe gesture or an
+     * animation.
+     */
+    float getDismissAmount();
+
+    /**
+     * Whether the keyguard is being dismissed due to direct user input, rather than a canned
+     * animation.
+     */
+    boolean isDismissingFromSwipe();
+
+    /**
+     * Whether a fling animation is currently playing on the keyguard, either to dismiss it or to
+     * cancel dismissing it.
+     */
+    boolean isFlingingToDismissKeyguard();
+
+    /**
+     * Whether a fling animation is currently playing on the keyguard, either to dismiss it or to
+     * cancel dismissing it, and that animation started during a swipe gesture. Fling animations
+     * can also be started without a swipe (e.g. activity launch from lock screen notification), so
+     * this is a way to tell them apart for animation purposes.
+     */
+    boolean isFlingingToDismissKeyguardDuringSwipeGesture();
+
+    /**
+     * Whether a fling animation is currently playing on the keyguard to cancel dismissing it, after
+     * the user released their finger during a swipe gesture.
+     */
+    boolean isSnappingKeyguardBackAfterSwipe();
+
     /** **/
     default void setLaunchTransitionFadingAway(boolean b) {}
     /** **/
@@ -147,6 +191,28 @@ public interface KeyguardStateController extends CallbackController<Callback> {
     default void notifyKeyguardDoneFading() {}
     /** **/
     default void notifyKeyguardState(boolean showing, boolean occluded) {}
+
+    /**
+     * Updates the keyguard state to reflect that it's in the process of being dismissed, either by
+     * a swipe gesture on the lock screen or by a canned animation.
+     *
+     * @param dismissAmount 0f means we're not dismissed at all, 1f means we have been completely
+     *                      swiped away.
+     * @param dismissingFromTouch True if this change was caused by direct user interaction, false
+     *                            if it's due to an animation.
+     */
+    default void notifyKeyguardDismissAmountChanged(
+            float dismissAmount, boolean dismissingFromTouch) {}
+
+    /**
+     * Updates the keyguard state to reflect that a dismiss fling gesture has started.
+     *
+     * @param dismiss Whether we're flinging to dismiss (upward) or to cancel a dismiss gesture.
+     */
+    void notifyPanelFlingStart(boolean dismiss);
+
+    /** Updates the keyguard state to reflect that a dismiss fling gesture has ended. */
+    void notifyPanelFlingEnd();
 
     /**
      * Callback for authentication events.
@@ -173,5 +239,11 @@ public interface KeyguardStateController extends CallbackController<Callback> {
          * Triggered when the device was just unlocked and the lock screen is being dismissed.
          */
         default void onKeyguardFadingAwayChanged() {}
+
+        /**
+         * Triggered when the keyguard dismiss amount has changed, via either a swipe gesture or an
+         * animation.
+         */
+        default void onKeyguardDismissAmountChanged() {}
     }
 }

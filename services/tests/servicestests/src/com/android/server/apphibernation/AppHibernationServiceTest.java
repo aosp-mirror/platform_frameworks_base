@@ -16,9 +16,13 @@
 
 package com.android.server.apphibernation;
 
+import static android.app.usage.UsageEvents.Event.ACTIVITY_RESUMED;
+import static android.app.usage.UsageEvents.Event.APP_COMPONENT_USED;
+import static android.app.usage.UsageEvents.Event.USER_INTERACTION;
 import static android.content.pm.PackageManager.MATCH_ANY_USER;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.AdditionalAnswers.returnsArgAt;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,14 +32,21 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.intThat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.IActivityManager;
+import android.app.usage.UsageEvents.Event;
+import android.app.usage.UsageStatsManagerInternal;
+import android.app.usage.UsageStatsManagerInternal.UsageEventListener;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.net.Uri;
@@ -53,7 +64,6 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
@@ -77,18 +87,28 @@ public final class AppHibernationServiceTest {
 
     private AppHibernationService mAppHibernationService;
     private BroadcastReceiver mBroadcastReceiver;
+    private UsageEventListener mUsageEventListener;
+
     @Mock
     private Context mContext;
     @Mock
     private IPackageManager mIPackageManager;
     @Mock
+    private PackageManagerInternal mPackageManagerInternal;
+    @Mock
     private IActivityManager mIActivityManager;
     @Mock
     private UserManager mUserManager;
     @Mock
+    private HibernationStateDiskStore<UserLevelState> mUserLevelDiskStore;
+    @Mock
+    private UsageStatsManagerInternal mUsageStatsManagerInternal;
+    @Mock
     private HibernationStateDiskStore<UserLevelState> mHibernationStateDiskStore;
     @Captor
     private ArgumentCaptor<BroadcastReceiver> mReceiverCaptor;
+    @Captor
+    private ArgumentCaptor<UsageEventListener> mUsageEventListenerCaptor;
 
     @Before
     public void setUp() throws RemoteException {
@@ -102,6 +122,8 @@ public final class AppHibernationServiceTest {
 
         verify(mContext).registerReceiver(mReceiverCaptor.capture(), any());
         mBroadcastReceiver = mReceiverCaptor.getValue();
+        verify(mUsageStatsManagerInternal).registerListener(mUsageEventListenerCaptor.capture());
+        mUsageEventListener = mUsageEventListenerCaptor.getValue();
 
         doReturn(mUserInfos).when(mUserManager).getUsers();
 
@@ -120,7 +142,7 @@ public final class AppHibernationServiceTest {
         doReturn(true).when(mUserManager).isUserUnlockingOrUnlocked(USER_ID_1);
         mAppHibernationService.onUserUnlocking(new SystemService.TargetUser(userInfo));
 
-        mAppHibernationService.mIsServiceEnabled = true;
+        mAppHibernationService.sIsServiceEnabled = true;
     }
 
     @Test
@@ -204,6 +226,163 @@ public final class AppHibernationServiceTest {
         assertTrue(hibernatingPackages.contains(PACKAGE_NAME_2));
     }
 
+    @Test
+    public void testUserLevelStatesInitializedFromDisk() throws RemoteException {
+        // GIVEN states stored on disk that match with package manager's force-stop states
+        List<UserLevelState> diskStates = new ArrayList<>();
+        diskStates.add(makeUserLevelState(PACKAGE_NAME_1, false /* hibernated */));
+        diskStates.add(makeUserLevelState(PACKAGE_NAME_2, true /* hibernated */));
+        doReturn(diskStates).when(mUserLevelDiskStore).readHibernationStates();
+
+        List<PackageInfo> packageInfos = new ArrayList<>();
+        packageInfos.add(makePackageInfo(PACKAGE_NAME_1));
+        PackageInfo stoppedPkg = makePackageInfo(PACKAGE_NAME_2);
+        stoppedPkg.applicationInfo.flags |= ApplicationInfo.FLAG_STOPPED;
+        packageInfos.add(stoppedPkg);
+
+        // WHEN a user is unlocked and the states are initialized
+        UserInfo user2 = addUser(USER_ID_2, packageInfos);
+        doReturn(true).when(mUserManager).isUserUnlockingOrUnlocked(USER_ID_2);
+        mAppHibernationService.onUserUnlocking(new SystemService.TargetUser(user2));
+
+        // THEN the hibernation states are initialized to the disk states
+        assertFalse(mAppHibernationService.isHibernatingForUser(PACKAGE_NAME_1, USER_ID_2));
+        assertTrue(mAppHibernationService.isHibernatingForUser(PACKAGE_NAME_2, USER_ID_2));
+    }
+
+    @Test
+    public void testNonForceStoppedAppsNotHibernatedOnUnlock() throws RemoteException {
+        // GIVEN a package that is hibernated on disk but not force-stopped
+        List<UserLevelState> diskStates = new ArrayList<>();
+        diskStates.add(makeUserLevelState(PACKAGE_NAME_1, true /* hibernated */));
+        doReturn(diskStates).when(mUserLevelDiskStore).readHibernationStates();
+
+        // WHEN a user is unlocked and the states are initialized
+        UserInfo user2 = addUser(USER_ID_2, new String[]{PACKAGE_NAME_1});
+        doReturn(true).when(mUserManager).isUserUnlockingOrUnlocked(USER_ID_2);
+        mAppHibernationService.onUserUnlocking(new SystemService.TargetUser(user2));
+
+        // THEN the app is not hibernating for the user
+        assertFalse(mAppHibernationService.isHibernatingForUser(PACKAGE_NAME_1, USER_ID_2));
+    }
+
+    @Test
+    public void testUnhibernatedPackageForUserUnhibernatesPackageGloballyOnUnlock()
+            throws RemoteException {
+        // GIVEN a package that is globally hibernating
+        mAppHibernationService.setHibernatingGlobally(PACKAGE_NAME_1, true);
+
+        // WHEN a user is unlocked and the package is not hibernating for the user
+        UserInfo user2 = addUser(USER_ID_2);
+        doReturn(true).when(mUserManager).isUserUnlockingOrUnlocked(USER_ID_2);
+        mAppHibernationService.onUserUnlocking(new SystemService.TargetUser(user2));
+
+        // THEN the package is no longer globally hibernating
+        assertFalse(mAppHibernationService.isHibernatingGlobally(PACKAGE_NAME_1));
+    }
+
+    @Test
+    public void testUnhibernatingPackageForUserSendsBootCompleteBroadcast()
+            throws RemoteException {
+        // GIVEN a hibernating package for a user
+        mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_1, USER_ID_1, true);
+
+        // WHEN we unhibernate the package
+        mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_1, USER_ID_1, false);
+
+        // THEN we send the boot complete broadcasts
+        ArgumentCaptor<Intent> intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
+        verify(mIActivityManager, times(2)).broadcastIntentWithFeature(any(), any(),
+                intentArgumentCaptor.capture(), any(), any(), anyInt(), any(), any(), any(), any(),
+                anyInt(), any(), anyBoolean(), anyBoolean(), eq(USER_ID_1));
+        List<Intent> capturedIntents = intentArgumentCaptor.getAllValues();
+        assertEquals(capturedIntents.get(0).getAction(), Intent.ACTION_LOCKED_BOOT_COMPLETED);
+        assertEquals(capturedIntents.get(1).getAction(), Intent.ACTION_BOOT_COMPLETED);
+    }
+
+    @Test
+    public void testHibernatingPackageIsUnhibernatedForUserWhenUserInteracted() {
+        // GIVEN a package that is currently hibernated for a user
+        mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_1, USER_ID_1, true);
+
+        // WHEN the package is interacted with by user
+        generateUsageEvent(USER_INTERACTION);
+
+        // THEN the package is not hibernating anymore
+        assertFalse(mAppHibernationService.isHibernatingForUser(PACKAGE_NAME_1, USER_ID_1));
+    }
+
+    @Test
+    public void testHibernatingPackageIsUnhibernatedForUserWhenActivityResumed() {
+        // GIVEN a package that is currently hibernated for a user
+        mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_1, USER_ID_1, true);
+
+        // WHEN the package has activity resumed
+        generateUsageEvent(ACTIVITY_RESUMED);
+
+        // THEN the package is not hibernating anymore
+        assertFalse(mAppHibernationService.isHibernatingForUser(PACKAGE_NAME_1, USER_ID_1));
+    }
+
+    @Test
+    public void testHibernatingPackageIsUnhibernatedForUserWhenComponentUsed() {
+        // GIVEN a package that is currently hibernated for a user
+        mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_1, USER_ID_1, true);
+
+        // WHEN a package component is used
+        generateUsageEvent(APP_COMPONENT_USED);
+
+        // THEN the package is not hibernating anymore
+        assertFalse(mAppHibernationService.isHibernatingForUser(PACKAGE_NAME_1, USER_ID_1));
+    }
+
+    @Test
+    public void testHibernatingPackageIsUnhibernatedGloballyWhenUserInteracted() {
+        // GIVEN a package that is currently hibernated globally
+        mAppHibernationService.setHibernatingGlobally(PACKAGE_NAME_1, true);
+
+        // WHEN the user interacts with the package
+        generateUsageEvent(USER_INTERACTION);
+
+        // THEN the package is not hibernating globally anymore
+        assertFalse(mAppHibernationService.isHibernatingGlobally(PACKAGE_NAME_1));
+    }
+
+    @Test
+    public void testHibernatingPackageIsUnhibernatedGloballyWhenActivityResumed() {
+        // GIVEN a package that is currently hibernated globally
+        mAppHibernationService.setHibernatingGlobally(PACKAGE_NAME_1, true);
+
+        // WHEN activity in package resumed
+        generateUsageEvent(ACTIVITY_RESUMED);
+
+        // THEN the package is not hibernating globally anymore
+        assertFalse(mAppHibernationService.isHibernatingGlobally(PACKAGE_NAME_1));
+    }
+
+    @Test
+    public void testHibernatingPackageIsUnhibernatedGloballyWhenComponentUsed() {
+        // GIVEN a package that is currently hibernated globally
+        mAppHibernationService.setHibernatingGlobally(PACKAGE_NAME_1, true);
+
+        // WHEN a package component is used
+        generateUsageEvent(APP_COMPONENT_USED);
+
+        // THEN the package is not hibernating globally anymore
+        assertFalse(mAppHibernationService.isHibernatingGlobally(PACKAGE_NAME_1));
+    }
+
+    /**
+     * Mock a usage event occurring.
+     *
+     * @param usageEventId id of a usage event
+     */
+    private void generateUsageEvent(int usageEventId) {
+        Event event = new Event(usageEventId, 0 /* timestamp */);
+        event.mPackage = PACKAGE_NAME_1;
+        mUsageEventListener.onUsageEvent(USER_ID_1, event);
+    }
+
     /**
      * Add a mock user with one package.
      */
@@ -215,12 +394,19 @@ public final class AppHibernationServiceTest {
      * Add a mock user with the packages specified.
      */
     private UserInfo addUser(int userId, String[] packageNames) throws RemoteException {
-        UserInfo userInfo = new UserInfo(userId, "user_" + userId, 0 /* flags */);
-        mUserInfos.add(userInfo);
         List<PackageInfo> userPackages = new ArrayList<>();
         for (String pkgName : packageNames) {
             userPackages.add(makePackageInfo(pkgName));
         }
+        return addUser(userId, userPackages);
+    }
+
+    /**
+     * Add a mock user with the package infos specified.
+     */
+    private UserInfo addUser(int userId, List<PackageInfo> userPackages) throws RemoteException {
+        UserInfo userInfo = new UserInfo(userId, "user_" + userId, 0 /* flags */);
+        mUserInfos.add(userInfo);
         doReturn(new ParceledListSlice<>(userPackages)).when(mIPackageManager)
                 .getInstalledPackages(intThat(arg -> (arg & MATCH_ANY_USER) == 0), eq(userId));
         return userInfo;
@@ -229,7 +415,15 @@ public final class AppHibernationServiceTest {
     private static PackageInfo makePackageInfo(String packageName) {
         PackageInfo pkg = new PackageInfo();
         pkg.packageName = packageName;
+        pkg.applicationInfo = new ApplicationInfo();
         return pkg;
+    }
+
+    private static UserLevelState makeUserLevelState(String packageName, boolean hibernated) {
+        UserLevelState state = new UserLevelState();
+        state.packageName = packageName;
+        state.hibernated = hibernated;
+        return state;
     }
 
     private class MockInjector implements AppHibernationService.Injector {
@@ -255,8 +449,18 @@ public final class AppHibernationServiceTest {
         }
 
         @Override
+        public PackageManagerInternal getPackageManagerInternal() {
+            return mPackageManagerInternal;
+        }
+
+        @Override
         public UserManager getUserManager() {
             return mUserManager;
+        }
+
+        @Override
+        public UsageStatsManagerInternal getUsageStatsManagerInternal() {
+            return mUsageStatsManagerInternal;
         }
 
         @Override
@@ -267,12 +471,17 @@ public final class AppHibernationServiceTest {
 
         @Override
         public HibernationStateDiskStore<GlobalLevelState> getGlobalLevelDiskStore() {
-            return Mockito.mock(HibernationStateDiskStore.class);
+            return mock(HibernationStateDiskStore.class);
         }
 
         @Override
         public HibernationStateDiskStore<UserLevelState> getUserLevelDiskStore(int userId) {
-            return Mockito.mock(HibernationStateDiskStore.class);
+            return mUserLevelDiskStore;
+        }
+
+        @Override
+        public boolean isOatArtifactDeletionEnabled() {
+            return true;
         }
     }
 }

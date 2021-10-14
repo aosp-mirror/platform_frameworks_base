@@ -164,7 +164,7 @@ public class UsageStatsActivity extends ListActivity {
                     intent.putExtra(EXTRA_KEY_TIMEOUT, true);
                     mUsageStatsManager.registerAppUsageObserver(1, packages,
                             60, TimeUnit.SECONDS, PendingIntent.getActivity(UsageStatsActivity.this,
-                                    1, intent, 0));
+                                    1, intent, PendingIntent.FLAG_MUTABLE_UNAUDITED));
                 }
             }
         });
@@ -198,7 +198,7 @@ public class UsageStatsActivity extends ListActivity {
                     intent.putExtra(EXTRA_KEY_TIMEOUT, true);
                     mUsageStatsManager.registerAppUsageLimitObserver(1, packages,
                             Duration.ofSeconds(60), Duration.ofSeconds(0),
-                            PendingIntent.getActivity(UsageStatsActivity.this, 1, intent, 0));
+                            PendingIntent.getActivity(UsageStatsActivity.this, 1, intent, PendingIntent.FLAG_MUTABLE_UNAUDITED));
                 }
             }
         });

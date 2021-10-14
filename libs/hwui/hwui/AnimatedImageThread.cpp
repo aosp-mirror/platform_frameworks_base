@@ -22,13 +22,16 @@ namespace android {
 namespace uirenderer {
 
 AnimatedImageThread& AnimatedImageThread::getInstance() {
-    static AnimatedImageThread* sInstance = new AnimatedImageThread();
+    static sp<AnimatedImageThread> sInstance = []() {
+        sp<AnimatedImageThread> thread = sp<AnimatedImageThread>::make();
+        thread->start("AnimatedImageThread");
+        return thread;
+    }();
     return *sInstance;
 }
 
 AnimatedImageThread::AnimatedImageThread() {
     setpriority(PRIO_PROCESS, 0, PRIORITY_NORMAL + PRIORITY_MORE_FAVORABLE);
-    start("AnimatedImageThread");
 }
 
 std::future<AnimatedImageDrawable::Snapshot> AnimatedImageThread::decodeNextFrame(

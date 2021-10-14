@@ -97,9 +97,9 @@ checking the state before later calling `noteOp` anyway.
 If an operation refers to a time span (e.g. a audio-recording session) the API provider should
 use `AppOpsManager.startOp` and `AppOpsManager.finishOp` instead of `noteOp`.
 
-`noteOp` and `startOp` take a `packageName` and `featureId` parameter. These need to be read from
-the calling apps context as `Context.getOpPackageName` and `Context.getFeatureId`, then send to
-the data provider and then passed on the `noteOp`/`startOp` method.
+`noteOp` and `startOp` take a `packageName` and `attributionTag` parameter. These need to be read
+from the calling app's context as `Context.getOpPackageName` and `Context.getAttributionTag`, then
+send to the data provider and then passed on the `noteOp`/`startOp` method.
 
 #### App-ops and permissions
 
@@ -144,6 +144,30 @@ Uid u0a118:
   capability=6
 ```
 
+## Instantaneous and long running ops
+
+Some events such as reading the last known location as instantaneous ops, i.e. they happen
+without taking any relevant time. The data provider should use `noteOp` to signal to the system
+that such an event happened.
+
+For events that take some time (such as recording a video) the data provider should call `startOp`
+at the beginning of the event and `finishOp` at the end of th event. It is uncommon but possible
+that at a given time multiple such events are in progress and hence this is properly handled.
+While such an event is in progress the app-op is considered `active`.
+
+For some ops both instantaneous and long running ops are recorded, e.g. recoding a video and taking
+a picture.
+
+## Forwarding (==proxying) operations to another process
+
+Some apps are forwarding access to other apps. E.g. an app might get the location from the
+system's location provider and then send the location further to a 3rd app. In this case the
+app passing on the data needs to call `AppOpsManager.noteProxyOp` to signal the access proxying.
+This might also make sense inside of a single app if the access is forwarded between two
+attribution tags of the app. In this case an app-op is noted for the forwarding app (proxy) and
+the app that received the data (proxied). As any app can do it is important to track how much the
+system trusts this proxy-access-tracking. For more details see `AppOpService.noteProxyOperation`.
+
 ## App-ops for tracking
 
 App-ops track many important events, including all accesses to runtime permission protected
@@ -154,21 +178,13 @@ read by system components.
 important to eventually call `noteOp` or `startOp` when providing access to protected operations
 or data.
 
-Some apps are forwarding access to other apps. E.g. an app might get the location from the
-system's location provider and then send the location further to a 3rd app. In this case the
-app passing on the data needs to call `AppOpsManager.noteProxyOp` to signal the access proxying.
-This might also make sense inside of a single app if the access is forwarded between two features of
-the app. In this case an app-op is noted for the forwarding app (proxy) and the app that received
-the data (proxied). As any app can do it is important to track how much the system trusts this
-proxy-access-tracking. For more details see `AppOpService.noteProxyOperation`.
-
-The tracking information can be read from `dumpsys appops` split by feature, proc state and
+The tracking information can be read from `dumpsys appops` split by attribution tag, proc state and
 proxying information with the syntax
 
 ```
 Package THE_PACKAGE_NAME:
   AN_APP_OP (CURRENT_MODE):
-    FEATURE_ID (or null for default feature)=[
+    ATTRIBUTION_TAG (or null for default attribution)=[
       ACCESS_OR_REJECT: [PROC_STATE-PROXYING_TAG] TIME proxy[INFO_ABOUT_PROXY IF_PROXY_ACCESS]
 ```
 
@@ -185,9 +201,9 @@ Package com.google.android.gms:
       Access: [fg-tp] 2020-02-17 14:24:54.721 (-23h14m59s480ms)
     ]
     com.google.android.gms.icing=[
-      Access: [fgsvc-tpd] 2020-02-14 14:26:27.018 (-3d23h13m27s183ms) proxy[uid=10070, pkg=com.android.providers.contacts, feature=null]
-      Access: [fg-tpd] 2020-02-18 02:26:08.711 (-11h13m45s490ms) proxy[uid=10070, pkg=com.android.providers.contacts, feature=null]
-      Access: [bg-tpd] 2020-02-14 14:34:55.310 (-3d23h4m58s891ms) proxy[uid=10070, pkg=com.android.providers.contacts, feature=null]
+      Access: [fgsvc-tpd] 2020-02-14 14:26:27.018 (-3d23h13m27s183ms) proxy[uid=10070, pkg=com.android.providers.contacts, attributionTag=null]
+      Access: [fg-tpd] 2020-02-18 02:26:08.711 (-11h13m45s490ms) proxy[uid=10070, pkg=com.android.providers.contacts, attributionTag=null]
+      Access: [bg-tpd] 2020-02-14 14:34:55.310 (-3d23h4m58s891ms) proxy[uid=10070, pkg=com.android.providers.contacts, attributionTag=null]
     ]
   MANAGE_EXTERNAL_STORAGE (default):
     null=[
@@ -196,11 +212,128 @@ Package com.google.android.gms:
     ]
 ```
 
+For in progress ops above command shows the amount of time the op is already in progress for and
+how many ops have been started and not yet finished for this package.
+
+```
+MONITOR_LOCATION (allow / switch COARSE_LOCATION=allow):
+  null=[
+    Access: [top-s] 2020-06-18 19:22:38.445 (-27s668ms) duration=+27s670ms
+    Running start at: +27s669ms
+    startNesting=2
+  ]
+```
+
 ### Tracking an app's own private data accesses
 
-An app can register an `AppOpsManager.OnOpNotedCallback` to get informed about what accesses the
-system is tracking for it. As each runtime permission has an associated app-op this API is
-particularly useful for an app that want to find unexpected private data accesses.
+An app can register an `AppOpsManager.OnOpNotedCallback` to [get informed about what accesses the
+system is tracking for it](https://developer.android.com/preview/privacy/data-access-auditing).
+As each runtime permission has an associated app-op this API is particularly useful for an app
+that want to find unexpected private data accesses.
+
+#### Implementation
+
+The goal is to trigger a callback to `AppOpsManager.OnOpNotedCallback` any time a data provider
+declares that data was sent to the app (i.e. calls `AppOpsManager.noteOp`). There are four cases
+
+##### Synchronous data accesses
+
+This is the case where the client calls an API and the data is sent back as the return value of this
+API call. E.g. `LocationManager.getLastKnownLocation` returns the last known location as the return
+value of the method call.
+
+In this case
+1. The client calls into a Android API in the Android framework, e.g. `LocationManager`
+2. The framework code calls via a `Binder` call into the data provider, e.g. the
+`LocationManagerService` residing in the system server.
+3. Somewhere in the data provider the data provider calls `AppOpsManager.noteOp` and thereby
+declares that data was accessed. This data access is recorded in
+`AppOpsManager.sAppOpsNotedInThisBinderTransaction`
+4. When the binder call returns the RPC code (`Binder`/`Parcel`) calls
+`AppOpsManager.readAndLogNotedAppops` which checks is the binder return value contained any
+prefix indicating that data was accessed. If so the RPC code calls `onNoted` on the the currently
+registered `OnOpNotedCallback`.
+5. The rest of the implementation is up to the client, but one to use the callbacks is for  the
+client to take a stack trace in the `onNoted` implementation. This stack trace allows to pin point
+where in the app's code the data access came from.
+
+![Syncronous data access by a client via a binder call](sync-data-access.png)
+
+In above graphics you can see that
+1. an app (`com.app.A`, red) is calling into the android framework
+(blue).
+1. The call triggers a RPC call into the data provider (green).
+1. The data provider calls `AppOpsManager.noteOp` (first star)
+1. On the return from the RPC call the framework code (second star) realizes that there was a data
+access and calls `OnOpNotedCallback.onNoted`.
+1. If at this time the code in onNoted would take a stack trace it would get what is in the gray
+box, i.e.
+```
+com.app.A.a
+- com.app.A.b
+  - com.app.A.c
+    - com.app.A.d
+       - android...Manager
+         - several android internal RPC methods
+           - com.app.B.onNoted (extends OnOpNotedCallback.onNoted)
+```
+
+As `onNoted` also reports the attributionTag and the noted op the app can now build a mapping
+indicating what code accesses what private data.
+
+##### Self data accesses
+
+This is similar to the [synchronous data access](#synchronous-data-accesses) case only that the data
+provider and client are in the same process. In this case Android's RPC code is no involved and
+`AppOpsManager.noteOp` directly triggers `OnOpNotedCallback.onSelfNoted`. This should be a uncommon
+case as it is uncommon for an app to provide data, esp. to itself.
+
+If an app takes above suggestion and collects stack traces for synchronous accesses self-accesses
+can be treated in the same way.
+
+##### Async data accesses
+
+There are cases where the data access is not directly triggered via an API. E.g.
+`LocationManager.requestLocationUpdates(listener)` registers a callback. Once the location subsystem
+determines a location it calls the registered listener with the data. There can be quite significant
+time between registering the listener and getting the data. In some cases (e.g. Geo-fencing) it
+might take days and the app registering for the data and the app receiving the data might not even
+be the same process or even version.
+
+Hence above suggestion with taking the stack trace to determine what triggered the data access does
+not work. In this case it is recommended for data providers to come up with a way to help the app
+developer understand why a data access is triggered. E.g. in the case of
+`LocationManager.requestLocationUpdates(listener)` the data provider is setting the `message` field
+in`AppOpsManager.noteOp` to the system-identity hash code of the registered listener. There are
+convenience methods for that, e.g. `AppOpsManager.toReceiverId`. This `message` field is then
+delivered to the app inside the `AsyncNotedAppOp` parameter to `OnOpNotedCallback.onAsyncNoted`.
+
+While this case is not as elegant as the synchronous case, a properly set `message` can often be
+enough for the app to figure out where the data access comes from. Async data accesses are less
+common than synchronous data accesses but they come in more variations. E.g. registered listeners,
+pending-intents, manifest broadcast receivers, activity starts, etc... Hence there is no one perfect
+message format. This is why the message field is a free text string.
+
+It is very highly recommended for data providers to set appropriate `message` parameters for their
+`AppOpsManager.noteOp` calls for all times where there is async data access. If no `message`
+parameter is set, the system defaults to a stack trace of the data provider code which is often slow
+and not useful.
+
+Async data accesses also carry the attribution tag, but this can sometimes not be enough. Again, a
+properly set `message` parameter is the best choice.
+
+##### Data providers implemented in native code
+
+Some data providers (e.g. camera a microphone) are implemented using native code. As of now this is
+not properly hooked up to the Java logic. To make sure to always collect all data accesses all
+`AppOpsManager::noteOp` calls from native code trigger an [async data access](#async-data-accesses),
+no matter if the code is in a synchronous RPC or not.
+
+This is not ideal and should be improved.
+
+### Getting last data accesses via an API
+
+To get the last accesses for an op or package an app can use `AppOpsManager.getPackagesForOps`.
 
 ## Listening to app-op events
 

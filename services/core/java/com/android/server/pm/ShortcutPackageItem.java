@@ -20,16 +20,15 @@ import android.content.pm.PackageInfo;
 import android.content.pm.ShortcutInfo;
 import android.util.AtomicFile;
 import android.util.Slog;
+import android.util.TypedXmlSerializer;
+import android.util.Xml;
 
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -146,7 +145,7 @@ abstract class ShortcutPackageItem {
 
     protected abstract void onRestored(int restoreBlockReason);
 
-    public abstract void saveToXml(@NonNull XmlSerializer out, boolean forBackup)
+    public abstract void saveToXml(@NonNull TypedXmlSerializer out, boolean forBackup)
             throws IOException, XmlPullParserException;
 
     public void saveToFile(File path, boolean forBackup) {
@@ -154,18 +153,21 @@ abstract class ShortcutPackageItem {
         FileOutputStream os = null;
         try {
             os = file.startWrite();
-            final BufferedOutputStream bos = new BufferedOutputStream(os);
 
             // Write to XML
-            XmlSerializer itemOut = new FastXmlSerializer();
-            itemOut.setOutput(bos, StandardCharsets.UTF_8.name());
+            final TypedXmlSerializer itemOut;
+            if (forBackup) {
+                itemOut = Xml.newFastSerializer();
+                itemOut.setOutput(os, StandardCharsets.UTF_8.name());
+            } else {
+                itemOut = Xml.resolveSerializer(os);
+            }
             itemOut.startDocument(null, true);
 
             saveToXml(itemOut, forBackup);
 
             itemOut.endDocument();
 
-            bos.flush();
             os.flush();
             file.finishWrite(os);
         } catch (XmlPullParserException | IOException e) {

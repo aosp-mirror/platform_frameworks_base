@@ -42,10 +42,17 @@ public class DeleteStagedFileOnResult extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        File sourceFile = new File(getIntent().getData().getPath());
-        sourceFile.delete();
-
         setResult(resultCode, data);
         finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (isFinishing()) {
+            File sourceFile = new File(getIntent().getData().getPath());
+            new Thread(sourceFile::delete).start();
+        }
     }
 }

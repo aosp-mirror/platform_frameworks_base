@@ -18,14 +18,14 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"Instalador de paquetes"</string>
     <string name="install" msgid="711829760615509273">"Instalar"</string>
+    <string name="update" msgid="3932142540719227615">"Actualizar"</string>
     <string name="done" msgid="6632441120016885253">"Feito"</string>
     <string name="cancel" msgid="1018267193425558088">"Cancelar"</string>
     <string name="installing" msgid="4921993079741206516">"Instalando…"</string>
     <string name="installing_app" msgid="1165095864863849422">"Instalando <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"Instalouse a aplicación"</string>
-    <string name="install_confirm_question" msgid="8176284075816604590">"Queres instalar esta aplicación?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"Queres instalar unha actualización para esta aplicación? Non se perderán os datos que teñas."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Queres instalar unha actualización para esta aplicación integrada? Non se perderán os datos que teñas."</string>
+    <string name="install_confirm_question" msgid="7663733664476363311">"Queres instalar esta aplicación?"</string>
+    <string name="install_confirm_question_update" msgid="3348888852318388584">"Queres actualizar esta aplicación?"</string>
     <string name="install_failed" msgid="5777824004474125469">"Non se instalou a aplicación"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Bloqueouse a instalación do paquete."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"A aplicación non se instalou porque o paquete presenta un conflito cun paquete que xa hai."</string>
@@ -46,7 +46,7 @@
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Non se puido instalar a aplicación <xliff:g id="APP_NAME">%1$s</xliff:g>. Libera espazo e téntao de novo."</string>
     <string name="app_not_found_dlg_title" msgid="5107924008597470285">"Non se atopou a aplicación"</string>
     <string name="app_not_found_dlg_text" msgid="5219983779377811611">"Non se atopou a aplicación na lista de aplicacións instaladas."</string>
-    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"Permiso non concedido"</string>
+    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"Sen permiso"</string>
     <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"O usuario actual non pode realizar esta desinstalación."</string>
     <string name="generic_error_dlg_title" msgid="5863195085927067752">"Erro"</string>
     <string name="generic_error_dlg_text" msgid="5287861443265795232">"Non se puido desinstalar a aplicación."</string>
@@ -80,9 +80,9 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"As accións de instalar e desinstalar non son compatibles con Wear."</string>
     <string name="message_staging" msgid="8032722385658438567">"Preparando aplicación…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Nome descoñecido"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"Por cuestións de seguranza, na tableta non se poden instalar aplicacións descoñecidas procedentes desta fonte."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"Por cuestións de seguranza, na televisión non se poden instalar aplicacións descoñecidas procedentes desta fonte."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"Por cuestións de seguranza, no teléfono non se poden instalar aplicacións descoñecidas procedentes desta fonte."</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Por cuestións de seguranza, na tableta non se poden instalar actualmente aplicacións descoñecidas procedentes desta fonte. Podes cambiar esta opción en Configuración."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Por cuestións de seguranza, na televisión non se poden instalar actualmente aplicacións descoñecidas procedentes desta fonte. Podes cambiar esta opción en Configuración."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Por cuestións de seguranza, no teléfono non se poden instalar actualmente aplicacións descoñecidas procedentes desta fonte. Podes cambiar esta opción en Configuración."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"O teléfono e os datos persoais son máis vulnerables aos ataques de aplicacións descoñecidas. Ao instalar esta aplicación, aceptas que es responsable dos danos ocasionados no teléfono ou da perda dos datos que se poidan derivar do seu uso."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"A tableta e os datos persoais son máis vulnerables aos ataques de aplicacións descoñecidas. Ao instalar esta aplicación, aceptas que es responsable dos danos ocasionados na tableta ou da perda dos datos que se poidan derivar do seu uso."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"A televisión e os datos persoais son máis vulnerables aos ataques de aplicacións descoñecidas. Ao instalar esta aplicación, aceptas que es responsable dos danos ocasionados na televisión ou da perda dos datos que se poidan derivar do seu uso."</string>

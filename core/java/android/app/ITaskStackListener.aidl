@@ -18,6 +18,7 @@ package android.app;
 
 import android.app.ActivityManager;
 import android.content.ComponentName;
+import android.window.TaskSnapshot;
 
 /** @hide */
 oneway interface ITaskStackListener {
@@ -59,9 +60,9 @@ oneway interface ITaskStackListener {
     void onActivityForcedResizable(String packageName, int taskId, int reason);
 
     /**
-     * Called when we launched an activity that dismissed the docked stack.
+     * Called when we launched an activity that dismissed the docked task.
      */
-    void onActivityDismissingDockedStack();
+    void onActivityDismissingDockedTask();
 
     /**
      * Called when an activity was requested to be launched on a secondary display but was not
@@ -141,19 +142,7 @@ oneway interface ITaskStackListener {
     /**
      * Called when a task snapshot got updated.
      */
-    void onTaskSnapshotChanged(int taskId, in ActivityManager.TaskSnapshot snapshot);
-
-    /**
-     * Called when the resumed activity is in size compatibility mode and its override configuration
-     * is different from the current one of system.
-     *
-     * @param displayId Id of the display where the activity resides.
-     * @param activityToken Token of the size compatibility mode activity. It will be null when
-     *                      switching to a activity that is not in size compatibility mode or the
-     *                      configuration of the activity.
-     * @see com.android.server.wm.ActivityRecord#inSizeCompatMode
-     */
-    void onSizeCompatModeActivityChanged(int displayId, in IBinder activityToken);
+    void onTaskSnapshotChanged(int taskId, in TaskSnapshot snapshot);
 
     /**
      * Reports that an Activity received a back key press when there were no additional activities
@@ -162,21 +151,6 @@ oneway interface ITaskStackListener {
      * @param taskInfo info about the task which received the back press
      */
     void onBackPressedOnTaskRoot(in ActivityManager.RunningTaskInfo taskInfo);
-
-    /*
-     * Called when contents are drawn for the first time on a display which can only contain one
-     * task.
-     *
-     * @param displayId the id of the display on which contents are drawn.
-     */
-    void onSingleTaskDisplayDrawn(int displayId);
-
-    /*
-     * Called when the last task is removed from a display which can only contain one task.
-     *
-     * @param displayId the id of the display from which the window is removed.
-     */
-    void onSingleTaskDisplayEmpty(int displayId);
 
     /**
      * Called when a task is reparented to a stack on a different display.
@@ -228,4 +202,17 @@ oneway interface ITaskStackListener {
      * @param displayId id of the display where activity will rotate
      */
      void onActivityRotation(int displayId);
+
+    /**
+     * Called when a task is moved to the back behind the home stack.
+     *
+     * @param taskInfo info about the task which moved
+     */
+    void onTaskMovedToBack(in ActivityManager.RunningTaskInfo taskInfo);
+
+    /**
+     * Called when the lock task mode changes. See ActivityManager#LOCK_TASK_MODE_* and
+     * LockTaskController.
+     */
+    void onLockTaskModeChanged(int mode);
 }

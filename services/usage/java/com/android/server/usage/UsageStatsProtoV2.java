@@ -19,6 +19,7 @@ import android.app.usage.ConfigurationStats;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.content.res.Configuration;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -30,6 +31,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -89,6 +91,10 @@ final class UsageStatsProtoV2 {
                 case (int) UsageStatsObfuscatedProto.TOTAL_TIME_VISIBLE_MS:
                     stats.mTotalTimeVisible = proto.readLong(
                             UsageStatsObfuscatedProto.TOTAL_TIME_VISIBLE_MS);
+                    break;
+                case (int) UsageStatsObfuscatedProto.LAST_TIME_COMPONENT_USED_MS:
+                    stats.mLastTimeComponentUsed = beginTime + proto.readLong(
+                            UsageStatsObfuscatedProto.LAST_TIME_COMPONENT_USED_MS);
                     break;
                 case ProtoInputStream.NO_MORE_FIELDS:
                     return stats;
@@ -312,6 +318,8 @@ final class UsageStatsProtoV2 {
         writeOffsetTimestamp(proto, UsageStatsObfuscatedProto.LAST_TIME_VISIBLE_MS,
                 stats.mLastTimeVisible, beginTime);
         proto.write(UsageStatsObfuscatedProto.TOTAL_TIME_VISIBLE_MS, stats.mTotalTimeVisible);
+        writeOffsetTimestamp(proto, UsageStatsObfuscatedProto.LAST_TIME_COMPONENT_USED_MS,
+                stats.mLastTimeComponentUsed, beginTime);
         proto.write(UsageStatsObfuscatedProto.APP_LAUNCH_COUNT, stats.mAppLaunchCount);
         try {
             writeChooserCounts(proto, stats);
@@ -805,5 +813,75 @@ final class UsageStatsProtoV2 {
             }
         }
         proto.flush();
+    }
+
+    private static Pair<String, Long> parseGlobalComponentUsage(ProtoInputStream proto)
+            throws IOException {
+        String packageName = "";
+        long time = 0;
+        while (true) {
+            switch (proto.nextField()) {
+                case (int) IntervalStatsObfuscatedProto.PackageUsage.PACKAGE_NAME:
+                    packageName = proto.readString(
+                            IntervalStatsObfuscatedProto.PackageUsage.PACKAGE_NAME);
+                    break;
+                case (int) IntervalStatsObfuscatedProto.PackageUsage.TIME_MS:
+                    time = proto.readLong(IntervalStatsObfuscatedProto.PackageUsage.TIME_MS);
+                    break;
+                case ProtoInputStream.NO_MORE_FIELDS:
+                    return new Pair<>(packageName, time);
+            }
+        }
+    }
+
+    /**
+     * Populates the map of latest package usage from the input stream given.
+     *
+     * @param in the input stream from which to read the package usage.
+     * @param lastTimeComponentUsedGlobal the map of package's global component usage to populate.
+     */
+    static void readGlobalComponentUsage(InputStream in,
+            Map<String, Long> lastTimeComponentUsedGlobal) throws IOException {
+        final ProtoInputStream proto = new ProtoInputStream(in);
+        while (true) {
+            switch (proto.nextField()) {
+                case (int) IntervalStatsObfuscatedProto.PACKAGE_USAGE:
+                    try {
+                        final long token = proto.start(IntervalStatsObfuscatedProto.PACKAGE_USAGE);
+                        final Pair<String, Long> usage = parseGlobalComponentUsage(proto);
+                        proto.end(token);
+                        if (!usage.first.isEmpty() && usage.second > 0) {
+                            lastTimeComponentUsedGlobal.put(usage.first, usage.second);
+                        }
+                    } catch (IOException e) {
+                        Slog.e(TAG, "Unable to parse some package usage from proto.", e);
+                    }
+                    break;
+                case ProtoInputStream.NO_MORE_FIELDS:
+                    return;
+            }
+        }
+    }
+
+    /**
+     * Writes the user-agnostic last time package usage to a ProtoBuf file.
+     *
+     * @param out the output stream to which to write the package usage
+     * @param lastTimeComponentUsedGlobal the map storing the global component usage of packages
+     */
+    static void writeGlobalComponentUsage(OutputStream out,
+            Map<String, Long> lastTimeComponentUsedGlobal) {
+        final ProtoOutputStream proto = new ProtoOutputStream(out);
+        final Map.Entry<String, Long>[] entries =
+                (Map.Entry<String, Long>[]) lastTimeComponentUsedGlobal.entrySet().toArray();
+        final int size = entries.length;
+        for (int i = 0; i < size; ++i) {
+            if (entries[i].getValue() <= 0) continue;
+            final long token = proto.start(IntervalStatsObfuscatedProto.PACKAGE_USAGE);
+            proto.write(IntervalStatsObfuscatedProto.PackageUsage.PACKAGE_NAME,
+                    entries[i].getKey());
+            proto.write(IntervalStatsObfuscatedProto.PackageUsage.TIME_MS, entries[i].getValue());
+            proto.end(token);
+        }
     }
 }

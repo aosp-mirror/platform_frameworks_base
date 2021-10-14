@@ -42,9 +42,9 @@ interface IInputMethodManager {
     InputMethodSubtype getLastInputMethodSubtype();
 
     boolean showSoftInput(in IInputMethodClient client, IBinder windowToken, int flags,
-            in ResultReceiver resultReceiver);
+            in ResultReceiver resultReceiver, int reason);
     boolean hideSoftInput(in IInputMethodClient client, IBinder windowToken, int flags,
-            in ResultReceiver resultReceiver);
+            in ResultReceiver resultReceiver, int reason);
     // If windowToken is null, this just does startInput().  Otherwise this reports that a window
     // has gained focus, and if 'attribute' is non-null then also does startInput.
     // @NonNull
@@ -59,8 +59,8 @@ interface IInputMethodManager {
 
     void showInputMethodPickerFromClient(in IInputMethodClient client,
             int auxiliarySubtypeMode);
-    void showInputMethodPickerFromSystem(in IInputMethodClient client, int auxiliarySubtypeMode,
-            int displayId);
+    void showInputMethodPickerFromSystem(in IInputMethodClient client,
+            int auxiliarySubtypeMode, int displayId);
     void showInputMethodAndSubtypeEnablerFromClient(in IInputMethodClient client, String topId);
     boolean isInputMethodPickerShownForTest();
     InputMethodSubtype getCurrentInputMethodSubtype();
@@ -69,12 +69,16 @@ interface IInputMethodManager {
     // TODO(Bug 113914148): Consider removing this.
     int getInputMethodWindowVisibleHeight();
 
-    void reportActivityView(in IInputMethodClient parentClient, int childDisplayId,
-            in float[] matrixValues);
-
-    oneway void reportPerceptible(in IBinder windowToken, boolean perceptible);
+    oneway void reportPerceptibleAsync(in IBinder windowToken, boolean perceptible);
     /** Remove the IME surface. Requires INTERNAL_SYSTEM_WINDOW permission. */
     void removeImeSurface();
     /** Remove the IME surface. Requires passing the currently focused window. */
-    void removeImeSurfaceFromWindow(in IBinder windowToken);
+    oneway void removeImeSurfaceFromWindowAsync(in IBinder windowToken);
+    void startProtoDump(in byte[] protoDump, int source, String where);
+    boolean isImeTraceEnabled();
+
+    // Starts an ime trace.
+    void startImeTrace();
+    // Stops an ime trace.
+    void stopImeTrace();
 }

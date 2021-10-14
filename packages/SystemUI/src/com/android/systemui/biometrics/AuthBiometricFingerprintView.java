@@ -23,6 +23,8 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import com.android.systemui.R;
 
 public class AuthBiometricFingerprintView extends AuthBiometricView {
@@ -94,9 +96,34 @@ public class AuthBiometricFingerprintView extends AuthBiometricView {
 
         mIconView.setImageDrawable(icon);
 
+        final CharSequence iconContentDescription = getIconContentDescription(newState);
+        if (iconContentDescription != null) {
+            mIconView.setContentDescription(iconContentDescription);
+        }
+
         if (animation != null && shouldAnimateForTransition(lastState, newState)) {
             animation.forceAnimationOnUI();
             animation.start();
+        }
+    }
+
+    @Nullable
+    private CharSequence getIconContentDescription(int newState) {
+        switch (newState) {
+            case STATE_IDLE:
+            case STATE_AUTHENTICATING_ANIMATING_IN:
+            case STATE_AUTHENTICATING:
+            case STATE_PENDING_CONFIRMATION:
+            case STATE_AUTHENTICATED:
+                return mContext.getString(
+                        R.string.accessibility_fingerprint_dialog_fingerprint_icon);
+
+            case STATE_ERROR:
+            case STATE_HELP:
+                return mContext.getString(R.string.biometric_dialog_try_again);
+
+            default:
+                return null;
         }
     }
 

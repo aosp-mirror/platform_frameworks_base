@@ -84,7 +84,7 @@
     <TextView android:id="@+id/empty"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorBackgroundFloating"
+        android:background="?attr/colorBackground"
         android:text="@string/noApplications"
         android:padding="@dimen/chooser_edge_margin_normal"
         android:layout_marginBottom="56dp"
