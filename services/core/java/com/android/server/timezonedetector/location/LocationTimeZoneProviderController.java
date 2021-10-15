@@ -130,6 +130,12 @@ abstract class LocationTimeZoneProviderController implements Dumpable {
         abstract Duration getProviderInitializationTimeoutFuzz();
 
         /**
+         * Returns the value passed to LocationTimeZoneProviders to control rate limiting of
+         * equivalent events.
+         */
+        abstract Duration getProviderEventFilteringAgeThreshold();
+
+        /**
          * Returns the delay allowed after receiving uncertainty from a provider before it should be
          * passed on.
          */

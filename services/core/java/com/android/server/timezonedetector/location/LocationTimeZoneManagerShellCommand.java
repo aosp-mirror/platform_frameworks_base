@@ -26,10 +26,11 @@ import static android.app.time.LocationTimeZoneManager.SHELL_COMMAND_STOP;
 import static android.provider.DeviceConfig.NAMESPACE_SYSTEM_TIME;
 
 import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_UNCERTAINTY_DELAY_MILLIS;
-import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_FUZZ_MILLIS;
-import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_MILLIS;
-import static com.android.server.timedetector.ServerFlags.KEY_PRIMARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE;
-import static com.android.server.timedetector.ServerFlags.KEY_SECONDARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE;
+import static com.android.server.timedetector.ServerFlags.KEY_LTZP_EVENT_FILTERING_AGE_THRESHOLD_MILLIS;
+import static com.android.server.timedetector.ServerFlags.KEY_LTZP_INITIALIZATION_TIMEOUT_FUZZ_MILLIS;
+import static com.android.server.timedetector.ServerFlags.KEY_LTZP_INITIALIZATION_TIMEOUT_MILLIS;
+import static com.android.server.timedetector.ServerFlags.KEY_PRIMARY_LTZP_MODE_OVERRIDE;
+import static com.android.server.timedetector.ServerFlags.KEY_SECONDARY_LTZP_MODE_OVERRIDE;
 import static com.android.server.timezonedetector.ServiceConfigAccessor.PROVIDER_MODE_DISABLED;
 import static com.android.server.timezonedetector.ServiceConfigAccessor.PROVIDER_MODE_ENABLED;
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_DESTROYED;
@@ -126,20 +127,23 @@ class LocationTimeZoneManagerShellCommand extends ShellCommand {
         pw.println();
         pw.printf("This service is also affected by the following device_config flags in the"
                 + " %s namespace:\n", NAMESPACE_SYSTEM_TIME);
-        pw.printf("  %s\n", KEY_PRIMARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE);
+        pw.printf("  %s\n", KEY_PRIMARY_LTZP_MODE_OVERRIDE);
         pw.printf("    Overrides the mode of the primary provider. Values=%s|%s\n",
                 PROVIDER_MODE_DISABLED, PROVIDER_MODE_ENABLED);
-        pw.printf("  %s\n", KEY_SECONDARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE);
+        pw.printf("  %s\n", KEY_SECONDARY_LTZP_MODE_OVERRIDE);
         pw.printf("    Overrides the mode of the secondary provider. Values=%s|%s\n",
                 PROVIDER_MODE_DISABLED, PROVIDER_MODE_ENABLED);
         pw.printf("  %s\n", KEY_LOCATION_TIME_ZONE_DETECTION_UNCERTAINTY_DELAY_MILLIS);
         pw.printf("    Sets the amount of time the service waits when uncertain before making an"
                 + " 'uncertain' suggestion to the time zone detector.\n");
-        pw.printf("  %s\n", KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_MILLIS);
+        pw.printf("  %s\n", KEY_LTZP_INITIALIZATION_TIMEOUT_MILLIS);
         pw.printf("    Sets the initialization time passed to the providers.\n");
-        pw.printf("  %s\n", KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_FUZZ_MILLIS);
+        pw.printf("  %s\n", KEY_LTZP_INITIALIZATION_TIMEOUT_FUZZ_MILLIS);
         pw.printf("    Sets the amount of extra time added to the providers' initialization time."
                 + "\n");
+        pw.printf("  %s\n", KEY_LTZP_EVENT_FILTERING_AGE_THRESHOLD_MILLIS);
+        pw.printf("    Sets the amount of time that must pass between equivalent LTZP events before"
+                + " they will be reported to the system server.\n");
         pw.println();
         pw.printf("Typically, use '%s' to stop the service before setting individual"
                 + " flags and '%s' after to restart it.\n",

@@ -55,10 +55,11 @@ public final class ServerFlags {
      */
     @StringDef(prefix = "KEY_", value = {
             KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED,
-            KEY_PRIMARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE,
-            KEY_SECONDARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE,
-            KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_FUZZ_MILLIS,
-            KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_MILLIS,
+            KEY_PRIMARY_LTZP_MODE_OVERRIDE,
+            KEY_SECONDARY_LTZP_MODE_OVERRIDE,
+            KEY_LTZP_INITIALIZATION_TIMEOUT_FUZZ_MILLIS,
+            KEY_LTZP_INITIALIZATION_TIMEOUT_MILLIS,
+            KEY_LTZP_EVENT_FILTERING_AGE_THRESHOLD_MILLIS,
             KEY_LOCATION_TIME_ZONE_DETECTION_UNCERTAINTY_DELAY_MILLIS,
             KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE,
             KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT,
@@ -82,16 +83,14 @@ public final class ServerFlags {
      * The key for the server flag that can override the device config for whether the primary
      * location time zone provider is enabled, disabled, or (for testing) in simulation mode.
      */
-    public static final @DeviceConfigKey String
-            KEY_PRIMARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE =
+    public static final @DeviceConfigKey String KEY_PRIMARY_LTZP_MODE_OVERRIDE =
             "primary_location_time_zone_provider_mode_override";
 
     /**
      * The key for the server flag that can override the device config for whether the secondary
      * location time zone provider is enabled or disabled, or (for testing) in simulation mode.
      */
-    public static final @DeviceConfigKey String
-            KEY_SECONDARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE =
+    public static final @DeviceConfigKey String KEY_SECONDARY_LTZP_MODE_OVERRIDE =
             "secondary_location_time_zone_provider_mode_override";
 
     /**
@@ -106,18 +105,20 @@ public final class ServerFlags {
      * The key for the timeout passed to a location time zone provider that tells it how long it has
      * to provide an explicit first suggestion without being declared uncertain.
      */
-    public static final @DeviceConfigKey String
-            KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_MILLIS =
-            "ltpz_init_timeout_millis";
+    public static final @DeviceConfigKey String KEY_LTZP_INITIALIZATION_TIMEOUT_MILLIS =
+            "ltzp_init_timeout_millis";
 
     /**
      * The key for the extra time added to {@link
-     * #KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_MILLIS} by the location time zone
+     * #KEY_LTZP_INITIALIZATION_TIMEOUT_MILLIS} by the location time zone
      * manager before the location time zone provider will actually be declared uncertain.
      */
-    public static final @DeviceConfigKey String
-            KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_FUZZ_MILLIS =
-            "ltpz_init_timeout_fuzz_millis";
+    public static final @DeviceConfigKey String KEY_LTZP_INITIALIZATION_TIMEOUT_FUZZ_MILLIS =
+            "ltzp_init_timeout_fuzz_millis";
+
+    /** The key for the setting that controls rate limiting of provider events. */
+    public static final @DeviceConfigKey String KEY_LTZP_EVENT_FILTERING_AGE_THRESHOLD_MILLIS =
+            "ltzp_event_filtering_age_threshold_millis";
 
     /**
      * The key for the server flag that can override location time zone detection being enabled for

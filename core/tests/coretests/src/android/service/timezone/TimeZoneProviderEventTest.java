@@ -33,7 +33,8 @@ public class TimeZoneProviderEventTest {
 
     @Test
     public void isEquivalentToAndEquals() {
-        TimeZoneProviderEvent fail1v1 = TimeZoneProviderEvent.createPermanentFailureEvent("one");
+        TimeZoneProviderEvent fail1v1 =
+                TimeZoneProviderEvent.createPermanentFailureEvent(1111L, "one");
         assertEquals(fail1v1, fail1v1);
         assertIsEquivalentTo(fail1v1, fail1v1);
         assertNotEquals(fail1v1, null);
@@ -41,58 +42,74 @@ public class TimeZoneProviderEventTest {
 
         {
             TimeZoneProviderEvent fail1v2 =
-                    TimeZoneProviderEvent.createPermanentFailureEvent("one");
+                    TimeZoneProviderEvent.createPermanentFailureEvent(1111L, "one");
             assertEquals(fail1v1, fail1v2);
             assertIsEquivalentTo(fail1v1, fail1v2);
 
-            TimeZoneProviderEvent fail2 = TimeZoneProviderEvent.createPermanentFailureEvent("two");
+            TimeZoneProviderEvent fail2 =
+                    TimeZoneProviderEvent.createPermanentFailureEvent(2222L, "two");
             assertNotEquals(fail1v1, fail2);
             assertIsEquivalentTo(fail1v1, fail2);
         }
 
-        TimeZoneProviderEvent uncertain1v1 = TimeZoneProviderEvent.createUncertainEvent();
+        TimeZoneProviderEvent uncertain1v1 = TimeZoneProviderEvent.createUncertainEvent(1111L);
         assertEquals(uncertain1v1, uncertain1v1);
         assertIsEquivalentTo(uncertain1v1, uncertain1v1);
         assertNotEquals(uncertain1v1, null);
         assertNotEquivalentTo(uncertain1v1, null);
 
         {
-            TimeZoneProviderEvent uncertain1v2 = TimeZoneProviderEvent.createUncertainEvent();
+            TimeZoneProviderEvent uncertain1v2 = TimeZoneProviderEvent.createUncertainEvent(1111L);
             assertEquals(uncertain1v1, uncertain1v2);
             assertIsEquivalentTo(uncertain1v1, uncertain1v2);
+
+            TimeZoneProviderEvent uncertain2 = TimeZoneProviderEvent.createUncertainEvent(2222L);
+            assertNotEquals(uncertain1v1, uncertain2);
+            assertIsEquivalentTo(uncertain1v1, uncertain2);
         }
 
         TimeZoneProviderSuggestion suggestion1 = new TimeZoneProviderSuggestion.Builder()
                 .setElapsedRealtimeMillis(1111L)
                 .setTimeZoneIds(Collections.singletonList("Europe/London"))
                 .build();
-        TimeZoneProviderEvent certain1v1 = TimeZoneProviderEvent.createSuggestionEvent(suggestion1);
+        TimeZoneProviderEvent certain1v1 =
+                TimeZoneProviderEvent.createSuggestionEvent(1111L, suggestion1);
         assertEquals(certain1v1, certain1v1);
         assertIsEquivalentTo(certain1v1, certain1v1);
         assertNotEquals(certain1v1, null);
         assertNotEquivalentTo(certain1v1, null);
 
         {
+            // Same suggestion, same time.
             TimeZoneProviderEvent certain1v2 =
-                    TimeZoneProviderEvent.createSuggestionEvent(suggestion1);
+                    TimeZoneProviderEvent.createSuggestionEvent(1111L, suggestion1);
             assertEquals(certain1v1, certain1v2);
             assertIsEquivalentTo(certain1v1, certain1v2);
 
+            // Same suggestion, different time.
+            TimeZoneProviderEvent certain1v3 =
+                    TimeZoneProviderEvent.createSuggestionEvent(2222L, suggestion1);
+            assertNotEquals(certain1v1, certain1v3);
+            assertIsEquivalentTo(certain1v1, certain1v3);
+
+            // suggestion1 is equivalent to suggestion2, but not equal
             TimeZoneProviderSuggestion suggestion2 = new TimeZoneProviderSuggestion.Builder()
                     .setElapsedRealtimeMillis(2222L)
                     .setTimeZoneIds(Collections.singletonList("Europe/London"))
                     .build();
             assertNotEquals(suggestion1, suggestion2);
+            TimeZoneProviderSuggestionTest.assertIsEquivalentTo(suggestion1, suggestion2);
             TimeZoneProviderEvent certain2 =
-                    TimeZoneProviderEvent.createSuggestionEvent(suggestion2);
+                    TimeZoneProviderEvent.createSuggestionEvent(2222L, suggestion2);
             assertNotEquals(certain1v1, certain2);
             assertIsEquivalentTo(certain1v1, certain2);
 
+            // suggestion3 is not equivalent to suggestion1
             TimeZoneProviderSuggestion suggestion3 = new TimeZoneProviderSuggestion.Builder()
                     .setTimeZoneIds(Collections.singletonList("Europe/Paris"))
                     .build();
             TimeZoneProviderEvent certain3 =
-                    TimeZoneProviderEvent.createSuggestionEvent(suggestion3);
+                    TimeZoneProviderEvent.createSuggestionEvent(2222L, suggestion3);
             assertNotEquals(certain1v1, certain3);
             assertNotEquivalentTo(certain1v1, certain3);
         }
@@ -107,13 +124,13 @@ public class TimeZoneProviderEventTest {
     @Test
     public void testParcelable_failureEvent() {
         TimeZoneProviderEvent event =
-                TimeZoneProviderEvent.createPermanentFailureEvent("failure reason");
+                TimeZoneProviderEvent.createPermanentFailureEvent(1111L, "failure reason");
         assertRoundTripParcelable(event);
     }
 
     @Test
     public void testParcelable_uncertain() {
-        TimeZoneProviderEvent event = TimeZoneProviderEvent.createUncertainEvent();
+        TimeZoneProviderEvent event = TimeZoneProviderEvent.createUncertainEvent(1111L);
         assertRoundTripParcelable(event);
     }
 
@@ -122,7 +139,8 @@ public class TimeZoneProviderEventTest {
         TimeZoneProviderSuggestion suggestion = new TimeZoneProviderSuggestion.Builder()
                 .setTimeZoneIds(Arrays.asList("Europe/London", "Europe/Paris"))
                 .build();
-        TimeZoneProviderEvent event = TimeZoneProviderEvent.createSuggestionEvent(suggestion);
+        TimeZoneProviderEvent event =
+                TimeZoneProviderEvent.createSuggestionEvent(1111L, suggestion);
         assertRoundTripParcelable(event);
     }
 

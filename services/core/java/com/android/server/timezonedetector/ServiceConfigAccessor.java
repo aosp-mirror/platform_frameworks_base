@@ -72,17 +72,18 @@ public final class ServiceConfigAccessor {
                     ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED,
                     ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT,
                     ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE,
-                    ServerFlags.KEY_PRIMARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE,
-                    ServerFlags.KEY_SECONDARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE,
-                    ServerFlags.KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_MILLIS,
-                    ServerFlags.KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_FUZZ_MILLIS,
+                    ServerFlags.KEY_PRIMARY_LTZP_MODE_OVERRIDE,
+                    ServerFlags.KEY_SECONDARY_LTZP_MODE_OVERRIDE,
+                    ServerFlags.KEY_LTZP_INITIALIZATION_TIMEOUT_MILLIS,
+                    ServerFlags.KEY_LTZP_INITIALIZATION_TIMEOUT_FUZZ_MILLIS,
+                    ServerFlags.KEY_LTZP_EVENT_FILTERING_AGE_THRESHOLD_MILLIS,
                     ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_UNCERTAINTY_DELAY_MILLIS
             }));
 
-    private static final Duration DEFAULT_PROVIDER_INITIALIZATION_TIMEOUT = Duration.ofMinutes(5);
-    private static final Duration DEFAULT_PROVIDER_INITIALIZATION_TIMEOUT_FUZZ =
-            Duration.ofMinutes(1);
-    private static final Duration DEFAULT_PROVIDER_UNCERTAINTY_DELAY = Duration.ofMinutes(5);
+    private static final Duration DEFAULT_LTZP_INITIALIZATION_TIMEOUT = Duration.ofMinutes(5);
+    private static final Duration DEFAULT_LTZP_INITIALIZATION_TIMEOUT_FUZZ = Duration.ofMinutes(1);
+    private static final Duration DEFAULT_LTZP_UNCERTAINTY_DELAY = Duration.ofMinutes(5);
+    private static final Duration DEFAULT_LTZP_EVENT_FILTER_AGE_THRESHOLD = Duration.ofMinutes(1);
 
     private static final Object SLOCK = new Object();
 
@@ -326,8 +327,7 @@ public final class ServiceConfigAccessor {
             // In test mode: use the test setting value.
             return mTestPrimaryLocationTimeZoneProviderMode;
         }
-        return mServerFlags.getOptionalString(
-                ServerFlags.KEY_PRIMARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE)
+        return mServerFlags.getOptionalString(ServerFlags.KEY_PRIMARY_LTZP_MODE_OVERRIDE)
                 .orElse(getPrimaryLocationTimeZoneProviderModeFromConfig());
     }
 
@@ -346,8 +346,7 @@ public final class ServiceConfigAccessor {
             // In test mode: use the test setting value.
             return mTestSecondaryLocationTimeZoneProviderMode;
         }
-        return mServerFlags.getOptionalString(
-                ServerFlags.KEY_SECONDARY_LOCATION_TIME_ZONE_PROVIDER_MODE_OVERRIDE)
+        return mServerFlags.getOptionalString(ServerFlags.KEY_SECONDARY_LTZP_MODE_OVERRIDE)
                 .orElse(getSecondaryLocationTimeZoneProviderModeFromConfig());
     }
 
@@ -385,8 +384,8 @@ public final class ServiceConfigAccessor {
     @NonNull
     public Duration getLocationTimeZoneProviderInitializationTimeout() {
         return mServerFlags.getDurationFromMillis(
-                ServerFlags.KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_MILLIS,
-                DEFAULT_PROVIDER_INITIALIZATION_TIMEOUT);
+                ServerFlags.KEY_LTZP_INITIALIZATION_TIMEOUT_MILLIS,
+                DEFAULT_LTZP_INITIALIZATION_TIMEOUT);
     }
 
     /**
@@ -396,8 +395,8 @@ public final class ServiceConfigAccessor {
     @NonNull
     public Duration getLocationTimeZoneProviderInitializationTimeoutFuzz() {
         return mServerFlags.getDurationFromMillis(
-                ServerFlags.KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_FUZZ_MILLIS,
-                DEFAULT_PROVIDER_INITIALIZATION_TIMEOUT_FUZZ);
+                ServerFlags.KEY_LTZP_INITIALIZATION_TIMEOUT_FUZZ_MILLIS,
+                DEFAULT_LTZP_INITIALIZATION_TIMEOUT_FUZZ);
     }
 
     /**
@@ -408,7 +407,18 @@ public final class ServiceConfigAccessor {
     public Duration getLocationTimeZoneUncertaintyDelay() {
         return mServerFlags.getDurationFromMillis(
                 ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_UNCERTAINTY_DELAY_MILLIS,
-                DEFAULT_PROVIDER_UNCERTAINTY_DELAY);
+                DEFAULT_LTZP_UNCERTAINTY_DELAY);
+    }
+
+    /**
+     * Returns the time between equivalent events before the provider process will send the event
+     * to the system server.
+     */
+    @NonNull
+    public Duration getLocationTimeZoneProviderEventFilteringAgeThreshold() {
+        return mServerFlags.getDurationFromMillis(
+                ServerFlags.KEY_LTZP_EVENT_FILTERING_AGE_THRESHOLD_MILLIS,
+                DEFAULT_LTZP_EVENT_FILTER_AGE_THRESHOLD);
     }
 
     /** Clears all in-memory test config. */

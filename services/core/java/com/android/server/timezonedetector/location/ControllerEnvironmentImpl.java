@@ -78,4 +78,9 @@ class ControllerEnvironmentImpl extends LocationTimeZoneProviderController.Envir
     Duration getUncertaintyDelay() {
         return mServiceConfigAccessor.getLocationTimeZoneUncertaintyDelay();
     }
+
+    @Override
+    Duration getProviderEventFilteringAgeThreshold() {
+        return mServiceConfigAccessor.getLocationTimeZoneProviderEventFilteringAgeThreshold();
+    }
 }

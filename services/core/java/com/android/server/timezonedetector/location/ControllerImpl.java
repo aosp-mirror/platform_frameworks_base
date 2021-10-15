@@ -283,6 +283,7 @@ class ControllerImpl extends LocationTimeZoneProviderController {
         }
     }
 
+    @GuardedBy("mSharedLock")
     private void tryStartProvider(@NonNull LocationTimeZoneProvider provider,
             @NonNull ConfigurationInternal configuration) {
         ProviderState providerState = provider.getCurrentState();
@@ -291,7 +292,8 @@ class ControllerImpl extends LocationTimeZoneProviderController {
                 debugLog("Enabling " + provider);
                 provider.startUpdates(configuration,
                         mEnvironment.getProviderInitializationTimeout(),
-                        mEnvironment.getProviderInitializationTimeoutFuzz());
+                        mEnvironment.getProviderInitializationTimeoutFuzz(),
+                        mEnvironment.getProviderEventFilteringAgeThreshold());
                 break;
             }
             case PROVIDER_STATE_STARTED_INITIALIZING:
