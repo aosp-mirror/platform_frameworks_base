@@ -4082,12 +4082,6 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public int getBlockedAppCount(int userId) {
-            checkCallerIsSystem();
-            return mPreferencesHelper.getBlockedAppCount(userId);
-        }
-
-        @Override
         public int getAppsBypassingDndCount(int userId) {
             checkCallerIsSystem();
             return mPreferencesHelper.getAppsBypassingDndCount(userId);

@@ -2338,26 +2338,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testGetBlockedAppCount_noApps() {
-        assertEquals(0, mHelper.getBlockedAppCount(0));
-    }
-
-    @Test
-    public void testGetBlockedAppCount_noAppsForUserId() {
-        mHelper.setEnabled(PKG_N_MR1, 100, false);
-        assertEquals(0, mHelper.getBlockedAppCount(9));
-    }
-
-    @Test
-    public void testGetBlockedAppCount_appsForUserId() {
-        mHelper.setEnabled(PKG_N_MR1, 1020, false);
-        mHelper.setEnabled(PKG_N_MR1, 1030, false);
-        mHelper.setEnabled(PKG_N_MR1, 1060, false);
-        mHelper.setEnabled(PKG_N_MR1, 1000, true);
-        assertEquals(3, mHelper.getBlockedAppCount(0));
-    }
-
-    @Test
     public void testAppBlockedLogging() {
         mHelper.setEnabled(PKG_N_MR1, 1020, false);
         assertEquals(1, mLogger.getCalls().size());
