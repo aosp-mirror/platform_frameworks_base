@@ -131,6 +131,7 @@ import static com.android.server.wm.DisplayContentProto.SLEEP_TOKENS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainerChildProto.DISPLAY_CONTENT;
@@ -4014,9 +4015,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // If the IME target is the input target, before it changes, prepare the IME screenshot
         // for the last IME target when its task is applying app transition. This is for the
         // better IME transition to keep IME visibility when transitioning to the next task.
-        if (mImeLayeringTarget != null && mImeLayeringTarget.inAppOrRecentsTransition()
-                && mImeLayeringTarget == mImeInputTarget) {
-            showImeScreenshot();
+        if (mImeLayeringTarget != null && mImeLayeringTarget == mImeInputTarget) {
+            boolean nonAppImeTargetAnimatingExit = mImeLayeringTarget.mAnimatingExit
+                    && mImeLayeringTarget.mAttrs.type != TYPE_BASE_APPLICATION
+                    && mImeLayeringTarget.isSelfAnimating(0, ANIMATION_TYPE_WINDOW_ANIMATION);
+            if (mImeLayeringTarget.inAppOrRecentsTransition() || nonAppImeTargetAnimatingExit) {
+                showImeScreenshot();
+            }
         }
 
         ProtoLog.i(WM_DEBUG_IME, "setInputMethodTarget %s", target);
@@ -4078,6 +4083,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mImeTarget = imeTarget;
         }
 
+        WindowState getImeTarget() {
+            return mImeTarget;
+        }
+
         private SurfaceControl createImeSurface(SurfaceControl.ScreenshotHardwareBuffer b,
                 Transaction t) {
             final HardwareBuffer buffer = b.getHardwareBuffer();
@@ -4088,11 +4097,20 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
             final WindowState imeWindow = mImeTarget.getDisplayContent().mInputMethodWindow;
             final ActivityRecord activity = mImeTarget.mActivityRecord;
+            final SurfaceControl imeParent = mImeTarget.mAttrs.type == TYPE_BASE_APPLICATION
+                    ? activity.getSurfaceControl()
+                    : mImeTarget.getSurfaceControl();
             final SurfaceControl imeSurface = mSurfaceBuilder
                     .setName("IME-snapshot-surface")
                     .setBLASTLayer()
                     .setFormat(buffer.getFormat())
-                    .setParent(activity.getSurfaceControl())
+                    // Attaching IME snapshot to the associated IME layering target on the
+                    // activity when:
+                    // - The target is activity main window: attaching on top of the activity.
+                    // - The target is non-activity main window (e.g. activity overlay or
+                    // dialog-themed activity): attaching on top of the target since the layer has
+                    // already above the activity.
+                    .setParent(imeParent)
                     .setCallsite("DisplayContent.attachAndShowImeScreenshotOnTarget")
                     .build();
             // Make IME snapshot as trusted overlay
@@ -4101,9 +4119,17 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             t.setBuffer(imeSurface, buffer);
             t.setColorSpace(activity.mSurfaceControl, ColorSpace.get(ColorSpace.Named.SRGB));
             t.setLayer(imeSurface, 1);
-            t.setPosition(imeSurface, imeWindow.getFrame().left - mImeTarget.getFrame().left,
-                    imeWindow.getFrame().top - mImeTarget.getFrame().top);
 
+            final Point surfacePosition = new Point(
+                    imeWindow.getFrame().left - mImeTarget.getFrame().left,
+                    imeWindow.getFrame().top - mImeTarget.getFrame().top);
+            if (imeParent == activity.getSurfaceControl()) {
+                t.setPosition(imeSurface, surfacePosition.x, surfacePosition.y);
+            } else {
+                surfacePosition.offset(mImeTarget.mAttrs.surfaceInsets.left,
+                        mImeTarget.mAttrs.surfaceInsets.top);
+                t.setPosition(imeSurface, surfacePosition.x, surfacePosition.y);
+            }
             return imeSurface;
         }
 
@@ -4195,7 +4221,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     /** Removes the IME screenshot immediately. */
     void removeImeSurfaceImmediately() {
         if (mImeScreenshot != null) {
-            if (DEBUG_INPUT_METHOD) Slog.d(TAG, "remove IME snapshot");
             mImeScreenshot.detach(getSyncTransaction());
             mImeScreenshot = null;
         }
@@ -4509,7 +4534,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * hierarchy.
      */
     void onWindowAnimationFinished(@NonNull WindowContainer wc, int type) {
-        if (type == ANIMATION_TYPE_APP_TRANSITION || type == ANIMATION_TYPE_RECENTS) {
+        if (mImeScreenshot != null && (wc == mImeScreenshot.getImeTarget()
+                || wc.getWindow(w -> w == mImeScreenshot.getImeTarget()) != null)
+                && (type & WindowState.EXIT_ANIMATING_TYPES) != 0) {
             removeImeSurfaceImmediately();
         }
     }

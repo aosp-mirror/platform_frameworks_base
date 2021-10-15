@@ -1968,6 +1968,7 @@ public class DisplayContentTests extends WindowTestsBase {
         final WindowState appWin2 = createWindow(null, TYPE_BASE_APPLICATION, act2, "appWin2");
         appWin2.setHasSurface(true);
         assertTrue(appWin2.canBeImeTarget());
+        doReturn(true).when(appWin1).isClosing();
         doReturn(true).when(appWin1).inAppOrRecentsTransition();
 
         // Test step 3: Verify appWin2 will be the next IME target and the IME snapshot surface will
