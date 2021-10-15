@@ -38,6 +38,7 @@ import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Trace;
+import android.util.Log;
 import android.util.PathParser;
 import android.window.SplashScreenView;
 
@@ -49,6 +50,8 @@ import com.android.internal.R;
  * @hide
  */
 public class SplashscreenIconDrawableFactory {
+
+    private static final String TAG = "SplashscreenIconDrawableFactory";
 
     /**
      * @return An array containing the foreground drawable at index 0 and if needed a background
@@ -282,7 +285,12 @@ public class SplashscreenIconDrawableFactory {
                     if (startListener != null) {
                         startListener.run();
                     }
-                    mAnimatableIcon.start();
+                    try {
+                        mAnimatableIcon.start();
+                    } catch (Exception ex) {
+                        Log.e(TAG, "Error while running the splash screen animated icon", ex);
+                        animation.cancel();
+                    }
                 }
 
                 @Override
