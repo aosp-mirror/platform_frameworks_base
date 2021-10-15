@@ -49,25 +49,24 @@ class MainStage extends StageTaskListener {
         return mIsActive;
     }
 
-    void activate(Rect rootBounds, WindowContainerTransaction wct) {
+    void activate(Rect rootBounds, WindowContainerTransaction wct, boolean includingTopTask) {
         if (mIsActive) return;
 
         final WindowContainerToken rootToken = mRootTaskInfo.token;
         wct.setBounds(rootToken, rootBounds)
                 .setWindowingMode(rootToken, WINDOWING_MODE_MULTI_WINDOW)
-                .setLaunchRoot(
-                        rootToken,
-                        CONTROLLED_WINDOWING_MODES,
-                        CONTROLLED_ACTIVITY_TYPES)
-                .reparentTasks(
-                        null /* currentParent */,
-                        rootToken,
-                        CONTROLLED_WINDOWING_MODES,
-                        CONTROLLED_ACTIVITY_TYPES,
-                        true /* onTop */)
                 // Moving the root task to top after the child tasks were re-parented , or the root
                 // task cannot be visible and focused.
                 .reorder(rootToken, true /* onTop */);
+        if (includingTopTask) {
+            wct.reparentTasks(
+                    null /* currentParent */,
+                    rootToken,
+                    CONTROLLED_WINDOWING_MODES,
+                    CONTROLLED_ACTIVITY_TYPES,
+                    true /* onTop */,
+                    true /* reparentTopOnly */);
+        }
 
         mIsActive = true;
     }
