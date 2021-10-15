@@ -21,13 +21,18 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.os.BatteryConsumer;
+import android.os.BatteryStats;
+import android.os.BatteryUsageStatsQuery;
 import android.os.Process;
 import android.os.UidBatteryConsumer;
+import android.util.SparseArray;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -43,11 +48,14 @@ import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@SuppressWarnings("GuardedBy")
 public class CpuPowerCalculatorTest {
     private static final double PRECISION = 0.00001;
 
     private static final int APP_UID1 = Process.FIRST_APPLICATION_UID + 42;
     private static final int APP_UID2 = Process.FIRST_APPLICATION_UID + 272;
+
+    private static final int NUM_CPU_FREQS = 2 + 2;  // 2 clusters * 2 freqs each
 
     @Rule
     public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule()
@@ -79,6 +87,8 @@ public class CpuPowerCalculatorTest {
     private KernelCpuUidTimeReader.KernelCpuUidActiveTimeReader mMockKerneCpuUidActiveTimeReader;
     @Mock
     private SystemServerCpuThreadReader mMockSystemServerCpuThreadReader;
+    @Mock
+    private KernelSingleUidTimeReader mMockKernelSingleUidTimeReader;
 
     @Before
     public void setUp() {
@@ -95,6 +105,7 @@ public class CpuPowerCalculatorTest {
                 .setKernelCpuUidClusterTimeReader(mMockKernelCpuUidClusterTimeReader)
                 .setKernelCpuUidUserSysTimeReader(mMockKernelCpuUidUserSysTimeReader)
                 .setKernelCpuUidActiveTimeReader(mMockKerneCpuUidActiveTimeReader)
+                .setKernelSingleUidTimeReader(mMockKernelSingleUidTimeReader)
                 .setSystemServerCpuThreadReader(mMockSystemServerCpuThreadReader)
                 .initMeasuredEnergyStatsLocked(supportedPowerBuckets, new String[0]);
     }
@@ -133,6 +144,14 @@ public class CpuPowerCalculatorTest {
             return null;
         }).when(mMockKernelCpuUidClusterTimeReader).readDelta(anyBoolean(), any());
 
+        // Per-frequency CPU time
+        doAnswer(invocation -> {
+            final KernelCpuUidTimeReader.Callback<long[]> callback = invocation.getArgument(1);
+            callback.onUidCpuTime(APP_UID1, new long[]{1100, 11, 2200, 22});
+            callback.onUidCpuTime(APP_UID2, new long[]{3300, 33, 4400, 44});
+            return null;
+        }).when(mMockCpuUidFreqTimeReader).readDelta(anyBoolean(), any());
+
         mStatsRule.getBatteryStats().updateCpuTimeLocked(true, true, null);
 
         mStatsRule.getUidStats(APP_UID1).getProcessStatsLocked("foo").addCpuTimeLocked(4321, 1234);
@@ -147,7 +166,7 @@ public class CpuPowerCalculatorTest {
         assertThat(uidConsumer1.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_CPU))
                 .isEqualTo(3333);
         assertThat(uidConsumer1.getConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU))
-                .isWithin(PRECISION).of(1.092233);
+                .isWithin(PRECISION).of(1.031677);
         assertThat(uidConsumer1.getPowerModel(BatteryConsumer.POWER_COMPONENT_CPU))
                 .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
         assertThat(uidConsumer1.getPackageWithHighestDrain()).isEqualTo("bar");
@@ -156,20 +175,20 @@ public class CpuPowerCalculatorTest {
         assertThat(uidConsumer2.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_CPU))
                 .isEqualTo(7777);
         assertThat(uidConsumer2.getConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU))
-                .isWithin(PRECISION).of(2.672322);
+                .isWithin(PRECISION).of(2.489544);
         assertThat(uidConsumer2.getPowerModel(BatteryConsumer.POWER_COMPONENT_CPU))
                 .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
         assertThat(uidConsumer2.getPackageWithHighestDrain()).isNull();
 
         final BatteryConsumer deviceBatteryConsumer = mStatsRule.getDeviceBatteryConsumer();
         assertThat(deviceBatteryConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU))
-                .isWithin(PRECISION).of(3.76455);
+                .isWithin(PRECISION).of(3.52122);
         assertThat(deviceBatteryConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_CPU))
                 .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
 
         final BatteryConsumer appsBatteryConsumer = mStatsRule.getAppsBatteryConsumer();
         assertThat(appsBatteryConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU))
-                .isWithin(PRECISION).of(3.76455);
+                .isWithin(PRECISION).of(3.52122);
         assertThat(appsBatteryConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_CPU))
                 .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
     }
@@ -248,5 +267,190 @@ public class CpuPowerCalculatorTest {
                 .isWithin(PRECISION).of(10.62949);
         assertThat(appsBatteryConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_CPU))
                 .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
+    }
+
+    @Test
+    public void testTimerBasedModel_byProcessState() {
+        mStatsRule.getBatteryStats().setTrackingCpuByProcStateEnabled(true);
+
+        when(mMockUserInfoProvider.exists(anyInt())).thenReturn(true);
+
+        when(mMockCpuUidFreqTimeReader.allUidTimesAvailable()).thenReturn(true);
+        when(mMockCpuUidFreqTimeReader.readFreqs(any())).thenReturn(new long[]{100, 200, 300, 400});
+
+        when(mMockKernelSingleUidTimeReader.singleUidCpuTimesAvailable()).thenReturn(true);
+
+        SparseArray<long[]> allUidCpuFreqTimeMs = new SparseArray<>();
+        allUidCpuFreqTimeMs.put(APP_UID1, new long[0]);
+        allUidCpuFreqTimeMs.put(APP_UID2, new long[0]);
+        when(mMockCpuUidFreqTimeReader.getAllUidCpuFreqTimeMs()).thenReturn(allUidCpuFreqTimeMs);
+
+        mStatsRule.setTime(1000, 1000);
+
+        mStatsRule.getUidStats(APP_UID1).setProcessStateForTest(
+                BatteryStats.Uid.PROCESS_STATE_FOREGROUND, 1000);
+        mStatsRule.getUidStats(APP_UID2).setProcessStateForTest(
+                BatteryStats.Uid.PROCESS_STATE_BACKGROUND, 1000);
+
+        // Initialize time-in-state counts to 0
+        mockSingleUidTimeReader(APP_UID1, new long[NUM_CPU_FREQS]);
+        mockSingleUidTimeReader(APP_UID2, new long[NUM_CPU_FREQS]);
+
+        mStatsRule.getBatteryStats().copyFromAllUidsCpuTimes(true, true);
+
+        mockSingleUidTimeReader(APP_UID1, new long[]{1000, 2000, 3000, 4000});
+        mockSingleUidTimeReader(APP_UID2, new long[]{1111, 2222, 3333, 4444});
+
+        mStatsRule.setTime(2000, 2000);
+        mStatsRule.getBatteryStats().updateCpuTimeLocked(true, true, null);
+        mStatsRule.getBatteryStats().copyFromAllUidsCpuTimes(true, true);
+
+        mockSingleUidTimeReader(APP_UID1, new long[] {5000, 6000, 7000, 8000});
+        mockSingleUidTimeReader(APP_UID2, new long[]{5555, 6666, 7777, 8888});
+
+        mStatsRule.getUidStats(APP_UID1).setProcessStateForTest(
+                BatteryStats.Uid.PROCESS_STATE_FOREGROUND_SERVICE, 2000);
+        mStatsRule.getUidStats(APP_UID2).setProcessStateForTest(
+                BatteryStats.Uid.PROCESS_STATE_TOP, 2000);
+
+        mStatsRule.setTime(3000, 3000);
+        mStatsRule.getBatteryStats().updateCpuTimeLocked(true, true, null);
+        mStatsRule.getBatteryStats().copyFromAllUidsCpuTimes(true, true);
+
+        CpuPowerCalculator calculator =
+                new CpuPowerCalculator(mStatsRule.getPowerProfile());
+
+        mStatsRule.apply(new BatteryUsageStatsQuery.Builder()
+                .powerProfileModeledOnly()
+                .includePowerModels()
+                .includeProcessStateData()
+                .build(), calculator);
+
+        UidBatteryConsumer uidConsumer1 = mStatsRule.getUidBatteryConsumer(APP_UID1);
+        UidBatteryConsumer uidConsumer2 = mStatsRule.getUidBatteryConsumer(APP_UID2);
+
+        final BatteryConsumer.Key foreground = uidConsumer1.getKey(
+                BatteryConsumer.POWER_COMPONENT_CPU,
+                BatteryConsumer.PROCESS_STATE_FOREGROUND);
+        final BatteryConsumer.Key background = uidConsumer1.getKey(
+                BatteryConsumer.POWER_COMPONENT_CPU,
+                BatteryConsumer.PROCESS_STATE_BACKGROUND);
+        final BatteryConsumer.Key fgs = uidConsumer1.getKey(
+                BatteryConsumer.POWER_COMPONENT_CPU,
+                BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE);
+
+        assertThat(uidConsumer1.getConsumedPower(foreground)).isWithin(PRECISION).of(1.388888);
+        assertThat(uidConsumer1.getConsumedPower(background)).isWithin(PRECISION).of(0);
+        assertThat(uidConsumer1.getConsumedPower(fgs)).isWithin(PRECISION).of(2.0);
+        assertThat(uidConsumer2.getConsumedPower(foreground)).isWithin(PRECISION).of(2.222);
+        assertThat(uidConsumer2.getConsumedPower(background)).isWithin(PRECISION).of(1.543055);
+        assertThat(uidConsumer2.getConsumedPower(fgs)).isWithin(PRECISION).of(0);
+    }
+
+    private void mockSingleUidTimeReader(int uid, long[] cpuTimes) {
+        doAnswer(invocation -> {
+            LongArrayMultiStateCounter counter = invocation.getArgument(1);
+            long timestampMs = invocation.getArgument(2);
+            LongArrayMultiStateCounter.LongArrayContainer container =
+                    new LongArrayMultiStateCounter.LongArrayContainer(NUM_CPU_FREQS);
+            container.setValues(cpuTimes);
+            counter.updateValues(container, timestampMs);
+            return null;
+        }).when(mMockKernelSingleUidTimeReader).addDelta(eq(uid),
+                any(LongArrayMultiStateCounter.class), anyLong());
+    }
+
+    @Test
+    public void testMeasuredEnergyBasedModel_perProcessState() {
+        when(mMockUserInfoProvider.exists(anyInt())).thenReturn(true);
+
+        when(mMockKernelCpuSpeedReaders[0].readDelta()).thenReturn(new long[]{1000, 2000});
+        when(mMockKernelCpuSpeedReaders[1].readDelta()).thenReturn(new long[]{3000, 4000});
+
+        when(mMockCpuUidFreqTimeReader.perClusterTimesAvailable()).thenReturn(false);
+
+        mStatsRule.setTime(1000, 1000);
+
+        mStatsRule.getUidStats(APP_UID1).setProcessStateForTest(
+                BatteryStats.Uid.PROCESS_STATE_FOREGROUND, 1000);
+        mStatsRule.getUidStats(APP_UID2).setProcessStateForTest(
+                BatteryStats.Uid.PROCESS_STATE_BACKGROUND, 1000);
+
+        // User/System CPU time
+        doAnswer(invocation -> {
+            final KernelCpuUidTimeReader.Callback<long[]> callback = invocation.getArgument(1);
+            // User/system time in microseconds
+            callback.onUidCpuTime(APP_UID1, new long[]{1111000, 2222000});
+            callback.onUidCpuTime(APP_UID2, new long[]{3333000, 4444000});
+            return null;
+        }).when(mMockKernelCpuUidUserSysTimeReader).readDelta(anyBoolean(), any());
+
+        // Per-frequency CPU time
+        doAnswer(invocation -> {
+            final KernelCpuUidTimeReader.Callback<long[]> callback = invocation.getArgument(1);
+            callback.onUidCpuTime(APP_UID1, new long[]{1100, 11, 2200, 22});
+            callback.onUidCpuTime(APP_UID2, new long[]{3300, 33, 4400, 44});
+            return null;
+        }).when(mMockCpuUidFreqTimeReader).readDelta(anyBoolean(), any());
+
+        mStatsRule.setTime(2000, 2000);
+        final long[] clusterChargesUC = new long[]{13577531, 24688642};
+        mStatsRule.getBatteryStats().updateCpuTimeLocked(true, true, clusterChargesUC);
+
+        mStatsRule.getUidStats(APP_UID1).setProcessStateForTest(
+                BatteryStats.Uid.PROCESS_STATE_FOREGROUND_SERVICE, 2000);
+        mStatsRule.getUidStats(APP_UID2).setProcessStateForTest(
+                BatteryStats.Uid.PROCESS_STATE_TOP, 2000);
+
+        // User/System CPU time
+        doAnswer(invocation -> {
+            final KernelCpuUidTimeReader.Callback<long[]> callback = invocation.getArgument(1);
+            // User/system time in microseconds
+            callback.onUidCpuTime(APP_UID1, new long[]{5555000, 6666000});
+            callback.onUidCpuTime(APP_UID2, new long[]{7777000, 8888000});
+            return null;
+        }).when(mMockKernelCpuUidUserSysTimeReader).readDelta(anyBoolean(), any());
+
+        // Per-frequency CPU time
+        doAnswer(invocation -> {
+            final KernelCpuUidTimeReader.Callback<long[]> callback = invocation.getArgument(1);
+            callback.onUidCpuTime(APP_UID1, new long[]{5500, 55, 6600, 66});
+            callback.onUidCpuTime(APP_UID2, new long[]{7700, 77, 8800, 88});
+            return null;
+        }).when(mMockCpuUidFreqTimeReader).readDelta(anyBoolean(), any());
+
+        mStatsRule.setTime(3000, 3000);
+
+        clusterChargesUC[0] += 10000000;
+        clusterChargesUC[1] += 20000000;
+        mStatsRule.getBatteryStats().updateCpuTimeLocked(true, true, clusterChargesUC);
+
+        CpuPowerCalculator calculator =
+                new CpuPowerCalculator(mStatsRule.getPowerProfile());
+
+        mStatsRule.apply(new BatteryUsageStatsQuery.Builder()
+                .includePowerModels()
+                .includeProcessStateData()
+                .build(), calculator);
+
+        UidBatteryConsumer uidConsumer1 = mStatsRule.getUidBatteryConsumer(APP_UID1);
+        UidBatteryConsumer uidConsumer2 = mStatsRule.getUidBatteryConsumer(APP_UID2);
+
+        final BatteryConsumer.Key foreground = uidConsumer1.getKey(
+                BatteryConsumer.POWER_COMPONENT_CPU,
+                BatteryConsumer.PROCESS_STATE_FOREGROUND);
+        final BatteryConsumer.Key background = uidConsumer1.getKey(
+                BatteryConsumer.POWER_COMPONENT_CPU,
+                BatteryConsumer.PROCESS_STATE_BACKGROUND);
+        final BatteryConsumer.Key fgs = uidConsumer1.getKey(
+                BatteryConsumer.POWER_COMPONENT_CPU,
+                BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE);
+
+        assertThat(uidConsumer1.getConsumedPower(foreground)).isWithin(PRECISION).of(3.18884);
+        assertThat(uidConsumer1.getConsumedPower(background)).isWithin(PRECISION).of(0);
+        assertThat(uidConsumer1.getConsumedPower(fgs)).isWithin(PRECISION).of(8.02273);
+        assertThat(uidConsumer2.getConsumedPower(foreground)).isWithin(PRECISION).of(10.94009);
+        assertThat(uidConsumer2.getConsumedPower(background)).isWithin(PRECISION).of(7.44064);
+        assertThat(uidConsumer2.getConsumedPower(fgs)).isWithin(PRECISION).of(0);
     }
 }
