@@ -45774,7 +45774,7 @@ package android.text.util {
     method public static final boolean addLinks(@NonNull android.text.Spannable, @NonNull java.util.regex.Pattern, @Nullable String, @Nullable android.text.util.Linkify.MatchFilter, @Nullable android.text.util.Linkify.TransformFilter);
     method public static final boolean addLinks(@NonNull android.text.Spannable, @NonNull java.util.regex.Pattern, @Nullable String, @Nullable String[], @Nullable android.text.util.Linkify.MatchFilter, @Nullable android.text.util.Linkify.TransformFilter);
     method public static final boolean addLinks(@NonNull android.text.Spannable, @NonNull java.util.regex.Pattern, @Nullable String, @Nullable String[], @Nullable android.text.util.Linkify.MatchFilter, @Nullable android.text.util.Linkify.TransformFilter, @Nullable java.util.function.Function<java.lang.String,android.text.style.URLSpan>);
-    field public static final int ALL = 15; // 0xf
+    field @Deprecated public static final int ALL = 15; // 0xf
     field public static final int EMAIL_ADDRESSES = 2; // 0x2
     field @Deprecated public static final int MAP_ADDRESSES = 8; // 0x8
     field public static final int PHONE_NUMBERS = 4; // 0x4
