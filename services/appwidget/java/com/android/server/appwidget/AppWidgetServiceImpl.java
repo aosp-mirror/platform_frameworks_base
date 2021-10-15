@@ -147,7 +147,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         OnCrossProfileWidgetProvidersChangeListener {
     private static final String TAG = "AppWidgetServiceImpl";
 
-    private static boolean DEBUG = false;
+    private static final boolean DEBUG = false;
 
     private static final String OLD_KEYGUARD_HOST_PACKAGE = "android";
     private static final String NEW_KEYGUARD_HOST_PACKAGE = "com.android.keyguard";
