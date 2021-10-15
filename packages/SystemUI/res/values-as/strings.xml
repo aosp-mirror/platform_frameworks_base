@@ -1179,4 +1179,5 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"এতিয়া ৱাই-ফাই স্বয়ংক্ৰিয়ভাৱে সংযুক্ত নহ’ব"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"আটাইবোৰ চাওক"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"নেটৱৰ্ক সলনি কৰিবলৈ ইথাৰনেটৰ পৰা সংযোগ বিচ্ছিন্ন কৰক"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"ডিভাইচ ব্যৱহাৰৰ অভিজ্ঞতা উন্নত কৰিবলৈ ৱাই-ফাই অফ থকা অৱস্থাতো এপ্ আৰু সেৱাসমূহে ৱাই-ফাই নেটৱৰ্কবোৰ স্কেন কৰিব পাৰে। আপুনি ৱাই-ফাই স্কেনিঙৰ ছেটিঙত এইটো সলনি কৰিব পাৰে। "<annotation id="link">"সলনি কৰক"</annotation></string>
 </resources>
