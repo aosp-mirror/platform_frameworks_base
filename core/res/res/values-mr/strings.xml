@@ -299,7 +299,7 @@
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"बॅटरी आणि डेटा वापराच्‍या तपशीलांसाठी टॅप करा"</string>
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="8974401416068943888">"सुरक्षित मोड"</string>
-    <string name="android_system_label" msgid="5974767339591067210">"Android सिस्‍टम"</string>
+    <string name="android_system_label" msgid="5974767339591067210">"Android सिस्‍टीम"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"वैयक्तिक प्रोफाइलवर स्विच करा"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"कार्य प्रोफाइलवर स्विच करा"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"संपर्क"</string>
