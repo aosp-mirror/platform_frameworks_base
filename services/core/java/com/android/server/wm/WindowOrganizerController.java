@@ -83,7 +83,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 /**
  * Server side implementation for the interface for organizing windows
@@ -850,7 +849,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
     private int reparentChildrenTasksHierarchyOp(WindowContainerTransaction.HierarchyOp hop,
             @Nullable Transition transition, int syncId) {
-        WindowContainer currentParent = hop.getContainer() != null
+        WindowContainer<?> currentParent = hop.getContainer() != null
                 ? WindowContainer.fromBinder(hop.getContainer()) : null;
         WindowContainer newParent = hop.getNewParent() != null
                 ? WindowContainer.fromBinder(hop.getNewParent()) : null;
@@ -893,7 +892,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         // We want to collect the tasks first before re-parenting to avoid array shifting on us.
         final ArrayList<Task> tasksToReparent = new ArrayList<>();
 
-        currentParent.forAllTasks((Function<Task, Boolean>) task -> {
+        currentParent.forAllTasks(task -> {
             Slog.i(TAG, " Processing task=" + task);
             final boolean reparent;
             if (task.mCreatedByOrganizer || task.getParent() != finalCurrentParent) {
