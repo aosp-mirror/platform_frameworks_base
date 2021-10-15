@@ -29,13 +29,17 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.qs.customize.QSCustomizer;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 /**
  * Wrapper view with background which contains {@link QSPanel} and {@link QuickStatusBarHeader}
  */
-public class QSContainerImpl extends FrameLayout {
+public class QSContainerImpl extends FrameLayout implements Dumpable {
 
     private final Point mSizePoint = new Point();
     private int mFancyClippingTop;
@@ -308,5 +312,12 @@ public class QSContainerImpl extends FrameLayout {
         mFancyClippingPath.addRoundRect(0, mFancyClippingTop, getWidth(),
                 mFancyClippingBottom, mFancyClippingRadii, Path.Direction.CW);
         invalidate();
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println(getClass().getSimpleName() + " updateClippingPath: top("
+                + mFancyClippingTop + ") bottom(" + mFancyClippingBottom  + ") mClippingEnabled("
+                + mClippingEnabled + ")");
     }
 }
