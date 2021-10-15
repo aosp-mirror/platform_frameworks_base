@@ -658,18 +658,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testOnDragDownEvent_horizontalTranslationIsZeroForSplitShade() {
-        when(mNotificationStackScrollLayoutController.getWidth()).thenReturn(350f);
-        when(mView.getWidth()).thenReturn(800);
-        enableSplitShade(/* enabled= */ true);
-
-        onTouchEvent(MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN,
-                200f /* x position */, 0f, 0));
-
-        verify(mQsFrame).setTranslationX(0);
-    }
-
-    @Test
     public void testCanCollapsePanelOnTouch_trueForKeyGuard() {
         mStatusBarStateController.setState(KEYGUARD);
 
