@@ -1090,6 +1090,7 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"再開"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"設定"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g>（アーティスト名: <xliff:g id="ARTIST_NAME">%2$s</xliff:g>）が <xliff:g id="APP_LABEL">%3$s</xliff:g> で再生中"</string>
+    <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g>/<xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"再生"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> を開く"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="SONG_NAME">%1$s</xliff:g>（アーティスト名: <xliff:g id="ARTIST_NAME">%2$s</xliff:g>）を <xliff:g id="APP_LABEL">%3$s</xliff:g> で再生"</string>

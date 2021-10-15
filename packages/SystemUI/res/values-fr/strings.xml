@@ -895,7 +895,7 @@
     <string name="right_icon" msgid="1103955040645237425">"Icône droite"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Faites glisser les blocs pour les ajouter"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Faites glisser les blocs pour les réorganiser"</string>
-    <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Faites glisser les icônes ici pour les supprimer."</string>
+    <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Faites glisser les blocs ici pour les supprimer"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Au minimum <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> tuiles sont nécessaires"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Modifier"</string>
     <string name="tuner_time" msgid="2450785840990529997">"Heure"</string>
@@ -1090,6 +1090,8 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Reprendre"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Paramètres"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> par <xliff:g id="ARTIST_NAME">%2$s</xliff:g> est en cours de lecture depuis <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
+    <!-- no translation found for controls_media_seekbar_description (4389621713616214611) -->
+    <skip />
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Lire"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Ouvre <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Mets <xliff:g id="SONG_NAME">%1$s</xliff:g> par <xliff:g id="ARTIST_NAME">%2$s</xliff:g> depuis <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
