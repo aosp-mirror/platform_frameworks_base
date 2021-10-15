@@ -28,7 +28,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withTagValue;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
-import static com.android.internal.widget.FloatingToolbar.MenuItemRepr;
+import static com.android.internal.widget.FloatingToolbarPopup.MenuItemRepr;
 
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.is;
