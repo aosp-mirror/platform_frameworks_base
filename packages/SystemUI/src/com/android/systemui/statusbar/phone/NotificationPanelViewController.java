@@ -2162,7 +2162,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mQs.setExpanded(mQsExpanded);
     }
 
-    private void setQsExpansion(float height) {
+    void setQsExpansion(float height) {
         height = Math.min(Math.max(height, mQsMinExpansionHeight), mQsMaxExpansionHeight);
         mQsFullyExpanded = height == mQsMaxExpansionHeight && mQsMaxExpansionHeight != 0;
         if (height > mQsMinExpansionHeight && !mQsExpanded && !mStackScrollerOverscrolling
@@ -2206,7 +2206,13 @@ public class NotificationPanelViewController extends PanelViewController {
         int qsPanelBottomY = calculateQsBottomPosition(qsExpansionFraction);
         mScrimController.setQsPosition(qsExpansionFraction, qsPanelBottomY);
         setQSClippingBounds();
-        mNotificationStackScrollLayoutController.setQsExpansionFraction(qsExpansionFraction);
+
+        // Only need to notify the notification stack when we're not in split screen mode. If we
+        // do, then the notification panel starts scrolling along with the QS.
+        if (!mShouldUseSplitNotificationShade) {
+            mNotificationStackScrollLayoutController.setQsExpansionFraction(qsExpansionFraction);
+        }
+
         mDepthController.setQsPanelExpansion(qsExpansionFraction);
     }
 
