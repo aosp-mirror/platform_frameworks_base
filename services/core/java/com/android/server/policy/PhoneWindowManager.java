@@ -3060,7 +3060,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mKeyguardOccludedChanged) {
             if (DEBUG_KEYGUARD) Slog.d(TAG, "transition/occluded changed occluded="
                     + mPendingKeyguardOccluded);
-            mKeyguardOccludedChanged = false;
             if (setKeyguardOccludedLw(mPendingKeyguardOccluded, false /* force */,
                     transitionStarted)) {
                 return FINISH_LAYOUT_REDO_LAYOUT | FINISH_LAYOUT_REDO_WALLPAPER;
@@ -3282,6 +3281,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean setKeyguardOccludedLw(boolean isOccluded, boolean force,
             boolean transitionStarted) {
         if (DEBUG_KEYGUARD) Slog.d(TAG, "setKeyguardOccluded occluded=" + isOccluded);
+        mKeyguardOccludedChanged = false;
         if (isKeyguardOccluded() == isOccluded && !force) {
             return false;
         }
