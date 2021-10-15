@@ -6730,6 +6730,7 @@ package android.app {
   }
 
   public class TaskInfo {
+    method public boolean isVisible();
     field @Nullable public android.content.ComponentName baseActivity;
     field @NonNull public android.content.Intent baseIntent;
     field public boolean isRunning;
