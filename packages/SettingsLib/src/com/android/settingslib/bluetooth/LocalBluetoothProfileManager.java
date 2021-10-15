@@ -24,6 +24,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothHeadsetClient;
 import android.bluetooth.BluetoothHearingAid;
+import android.bluetooth.BluetoothLeAudio;
 import android.bluetooth.BluetoothHidDevice;
 import android.bluetooth.BluetoothHidHost;
 import android.bluetooth.BluetoothMap;
@@ -102,6 +103,7 @@ public class LocalBluetoothProfileManager {
     private PbapServerProfile mPbapProfile;
     private HearingAidProfile mHearingAidProfile;
     private CsipSetCoordinatorProfile mCsipSetCoordinatorProfile;
+    private LeAudioProfile mLeAudioProfile;
     private SapProfile mSapProfile;
     private VolumeControlProfile mVolumeControlProfile;
 
@@ -231,6 +233,14 @@ public class LocalBluetoothProfileManager {
             mVolumeControlProfile = new VolumeControlProfile();
             // Note: no event handler for VCP, only for being connectable.
             mProfileNameMap.put(VolumeControlProfile.NAME, mVolumeControlProfile);
+        }
+        if (mLeAudioProfile == null && supportedList.contains(BluetoothProfile.LE_AUDIO)) {
+            if (DEBUG) {
+                Log.d(TAG, "Adding local LE_AUDIO profile");
+            }
+            mLeAudioProfile = new LeAudioProfile(mContext, mDeviceManager, this);
+            addProfile(mLeAudioProfile, LeAudioProfile.NAME,
+                       BluetoothLeAudio.ACTION_LE_AUDIO_CONNECTION_STATE_CHANGED);
         }
         if (mCsipSetCoordinatorProfile == null
                 && supportedList.contains(BluetoothProfile.CSIP_SET_COORDINATOR)) {
@@ -487,6 +497,10 @@ public class LocalBluetoothProfileManager {
         return mHearingAidProfile;
     }
 
+    public LeAudioProfile getLeAudioProfile() {
+        return mLeAudioProfile;
+    }
+
     SapProfile getSapProfile() {
         return mSapProfile;
     }
@@ -612,6 +626,11 @@ public class LocalBluetoothProfileManager {
         if (ArrayUtils.contains(uuids, BluetoothUuid.HEARING_AID) && mHearingAidProfile != null) {
             profiles.add(mHearingAidProfile);
             removedProfiles.remove(mHearingAidProfile);
+        }
+
+        if (ArrayUtils.contains(uuids, BluetoothUuid.LE_AUDIO) && mLeAudioProfile != null) {
+            profiles.add(mLeAudioProfile);
+            removedProfiles.remove(mLeAudioProfile);
         }
 
         if (mSapProfile != null && ArrayUtils.contains(uuids, BluetoothUuid.SAP)) {
