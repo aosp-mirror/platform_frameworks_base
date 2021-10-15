@@ -394,6 +394,12 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE, wct, remoteTransition, this);
     }
 
+    void evictOccludedChildren(@SplitPosition int position) {
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        (position == mSideStagePosition ? mSideStage : mMainStage).evictOccludedChildren(wct);
+        mTaskOrganizer.applyTransaction(wct);
+    }
+
     Bundle resolveStartStage(@SplitScreen.StageType int stage,
             @SplitPosition int position, @androidx.annotation.Nullable Bundle options,
             @androidx.annotation.Nullable WindowContainerTransaction wct) {
