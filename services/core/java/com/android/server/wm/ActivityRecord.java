@@ -359,7 +359,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -4223,9 +4222,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     @Override
-    boolean forAllActivities(
-            Function<ActivityRecord, Boolean> callback, boolean traverseTopToBottom) {
-        return callback.apply(this);
+    boolean forAllActivities(Predicate<ActivityRecord> callback, boolean traverseTopToBottom) {
+        return callback.test(this);
     }
 
     @Override
