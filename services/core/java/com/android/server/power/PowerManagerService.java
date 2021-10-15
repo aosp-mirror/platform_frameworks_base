@@ -2861,7 +2861,7 @@ public final class PowerManagerService extends SystemService
                             Slog.i(TAG, "Going to sleep now due to long user inactivity");
                         }
                         changed = sleepDisplayGroupNoUpdateLocked(id, time,
-                                PowerManager.GO_TO_SLEEP_REASON_TIMEOUT,
+                                PowerManager.GO_TO_SLEEP_REASON_INATTENTIVE,
                                 PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE, Process.SYSTEM_UID);
                     } else if (shouldNapAtBedTimeLocked()) {
                         changed = dreamDisplayGroupNoUpdateLocked(id, time, Process.SYSTEM_UID);
