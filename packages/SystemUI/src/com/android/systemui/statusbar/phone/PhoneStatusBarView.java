@@ -186,12 +186,6 @@ public class PhoneStatusBarView extends PanelBar {
     }
 
     @Override
-    public void onPanelPeeked() {
-        super.onPanelPeeked();
-        mBar.makeExpandedVisible(false);
-    }
-
-    @Override
     public boolean onTouchEvent(MotionEvent event) {
         mBar.onTouchEvent(event);
         if (mTouchEventHandler == null) {

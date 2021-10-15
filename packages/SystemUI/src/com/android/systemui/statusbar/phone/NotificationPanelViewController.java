@@ -4660,6 +4660,9 @@ public class NotificationPanelViewController extends PanelViewController {
                     if (state == STATE_OPEN && mCurrentState != state) {
                         mView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
                     }
+                    if (state == STATE_OPENING) {
+                        mStatusBar.makeExpandedVisible(false);
+                    }
                     if (state == STATE_CLOSED) {
                         // Close the status bar in the next frame so we can show the end of the
                         // animation.

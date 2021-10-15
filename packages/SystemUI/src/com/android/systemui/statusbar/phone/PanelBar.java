@@ -125,7 +125,6 @@ public abstract class PanelBar extends FrameLayout {
         if (expanded) {
             if (mState == STATE_CLOSED) {
                 go(STATE_OPENING);
-                onPanelPeeked();
             }
             fullyClosed = false;
             fullyOpened = frac >= 1f;
@@ -138,10 +137,6 @@ public abstract class PanelBar extends FrameLayout {
 
         if (SPEW) LOG("panelExpansionChanged: end state=%d [%s%s ]", mState,
                 fullyOpened?" fullyOpened":"", fullyClosed?" fullyClosed":"");
-    }
-
-    public void onPanelPeeked() {
-        if (DEBUG) LOG("onPanelPeeked");
     }
 
     public boolean isClosed() {
