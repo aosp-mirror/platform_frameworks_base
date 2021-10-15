@@ -57,6 +57,7 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
+import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
@@ -118,7 +119,8 @@ public class NavigationBarControllerTest extends SysuiTestCase {
                         mock(NavigationBarA11yHelper.class),
                         mock(TaskbarDelegate.class),
                         mock(UserTracker.class),
-                        mock(DumpManager.class)));
+                        mock(DumpManager.class),
+                        mock(AutoHideController.class)));
         initializeNavigationBars();
     }
 
