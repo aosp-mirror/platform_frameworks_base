@@ -28,8 +28,6 @@ import static org.mockito.Mockito.when;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.testing.AndroidTestingRunner;
@@ -46,7 +44,6 @@ import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.shared.system.InputMonitorCompat;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
-import com.android.systemui.util.sensors.AsyncSensorManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -55,8 +52,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.time.Instant;
-
 import javax.inject.Provider;
 
 @SmallTest
@@ -64,7 +59,6 @@ import javax.inject.Provider;
 public class IdleHostViewControllerTest extends SysuiTestCase {
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
     @Mock private PowerManager mPowerManager;
-    @Mock private AsyncSensorManager mSensorManager;
     @Mock private IdleHostView mIdleHostView;
     @Mock private InputMonitorFactory mInputMonitorFactory;
     @Mock private DelayableExecutor mDelayableExecutor;
@@ -74,12 +68,11 @@ public class IdleHostViewControllerTest extends SysuiTestCase {
     @Mock private Choreographer mChoreographer;
     @Mock private KeyguardStateController mKeyguardStateController;
     @Mock private StatusBarStateController mStatusBarStateController;
-    @Mock private Sensor mSensor;
     @Mock private DreamHelper mDreamHelper;
     @Mock private InputMonitorCompat mInputMonitor;
     @Mock private InputChannelCompat.InputEventReceiver mInputEventReceiver;
+    @Mock private AmbientLightModeMonitor mAmbientLightModeMonitor;
 
-    private final long mTimestamp = Instant.now().toEpochMilli();
     private KeyguardStateController.Callback mKeyguardStateCallback;
     private StatusBarStateController.StateListener mStatusBarStateListener;
     private IdleHostViewController mController;
@@ -90,15 +83,15 @@ public class IdleHostViewControllerTest extends SysuiTestCase {
 
         when(mResources.getBoolean(R.bool.config_enableIdleMode)).thenReturn(true);
         when(mStatusBarStateController.isDozing()).thenReturn(false);
-        when(mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)).thenReturn(mSensor);
         when(mInputMonitorFactory.getInputMonitor("IdleHostViewController"))
                 .thenReturn(mInputMonitor);
         when(mInputMonitor.getInputReceiver(any(), any(), any())).thenReturn(mInputEventReceiver);
 
         mController = new IdleHostViewController(mContext,
-                mBroadcastDispatcher, mPowerManager, mSensorManager, mIdleHostView,
+                mBroadcastDispatcher, mPowerManager, mIdleHostView,
                 mInputMonitorFactory, mDelayableExecutor, mResources, mLooper, mViewProvider,
-                mChoreographer, mKeyguardStateController, mStatusBarStateController, mDreamHelper);
+                mChoreographer, mKeyguardStateController, mStatusBarStateController, mDreamHelper,
+                mAmbientLightModeMonitor);
         mController.init();
         mController.onViewAttached();
 
@@ -122,9 +115,9 @@ public class IdleHostViewControllerTest extends SysuiTestCase {
         mKeyguardStateCallback.onKeyguardShowingChanged();
 
         // Regular ambient lighting.
-        final SensorEvent sensorEvent = new SensorEvent(mSensor, 3, mTimestamp,
-                new float[]{90});
-        mController.onSensorChanged(sensorEvent);
+        final AmbientLightModeMonitor.Callback lightMonitorCallback =
+                captureAmbientLightModeMonitorCallback();
+        lightMonitorCallback.onChange(AmbientLightModeMonitor.AMBIENT_LIGHT_MODE_LIGHT);
 
         // Times out.
         ArgumentCaptor<Runnable> callbackCapture = ArgumentCaptor.forClass(Runnable.class);
@@ -149,9 +142,9 @@ public class IdleHostViewControllerTest extends SysuiTestCase {
         final BroadcastReceiver dreamBroadcastReceiver = dreamBroadcastReceiverCaptor.getValue();
 
         // Low ambient lighting.
-        final SensorEvent sensorEvent = new SensorEvent(mSensor, 3, mTimestamp,
-                new float[]{5});
-        mController.onSensorChanged(sensorEvent);
+        final AmbientLightModeMonitor.Callback lightMonitorCallback =
+                captureAmbientLightModeMonitorCallback();
+        lightMonitorCallback.onChange(AmbientLightModeMonitor.AMBIENT_LIGHT_MODE_DARK);
 
         // Verifies it goes to sleep because of low light.
         verify(mPowerManager).goToSleep(anyLong(), anyInt(), anyInt());
@@ -179,14 +172,14 @@ public class IdleHostViewControllerTest extends SysuiTestCase {
 
     @Test
     public void testTransitionBetweenIdleAndLowLightMode() {
-        // Regular ambient lighting.
-        final SensorEvent sensorEventRegularLight = new SensorEvent(mSensor, 3, mTimestamp,
-                new float[]{90});
-        mController.onSensorChanged(sensorEventRegularLight);
-
         // Keyguard showing.
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         mKeyguardStateCallback.onKeyguardShowingChanged();
+
+        // Regular ambient lighting.
+        final AmbientLightModeMonitor.Callback lightMonitorCallback =
+                captureAmbientLightModeMonitorCallback();
+        lightMonitorCallback.onChange(AmbientLightModeMonitor.AMBIENT_LIGHT_MODE_LIGHT);
 
         // Times out.
         ArgumentCaptor<Runnable> callbackCapture = ArgumentCaptor.forClass(Runnable.class);
@@ -198,15 +191,13 @@ public class IdleHostViewControllerTest extends SysuiTestCase {
         clearInvocations(mDreamHelper);
 
         // Ambient lighting becomes dim.
-        final SensorEvent sensorEventLowLight = new SensorEvent(mSensor, 3, mTimestamp,
-                new float[]{5});
-        mController.onSensorChanged(sensorEventLowLight);
+        lightMonitorCallback.onChange(AmbientLightModeMonitor.AMBIENT_LIGHT_MODE_DARK);
 
         // Verifies in low light mode (dozing).
         verify(mPowerManager).goToSleep(anyLong(), anyInt(), anyInt());
 
         // Ambient lighting becomes bright again.
-        mController.onSensorChanged(sensorEventRegularLight);
+        lightMonitorCallback.onChange(AmbientLightModeMonitor.AMBIENT_LIGHT_MODE_LIGHT);
 
         // Verifies in idle mode (dreaming).
         verify(mDreamHelper).startDreaming(any());
@@ -214,22 +205,20 @@ public class IdleHostViewControllerTest extends SysuiTestCase {
 
     @Test
     public void testStartDozingWhenLowLight() {
-        // Regular ambient lighting.
-        final SensorEvent sensorEventRegularLight = new SensorEvent(mSensor, 3, mTimestamp,
-                new float[]{90});
-        mController.onSensorChanged(sensorEventRegularLight);
-
         // Keyguard showing.
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         mKeyguardStateCallback.onKeyguardShowingChanged();
+
+        // Regular ambient lighting.
+        final AmbientLightModeMonitor.Callback lightMonitorCallback =
+                captureAmbientLightModeMonitorCallback();
+        lightMonitorCallback.onChange(AmbientLightModeMonitor.AMBIENT_LIGHT_MODE_LIGHT);
 
         // Verifies it doesn't go to sleep yet.
         verify(mPowerManager, never()).goToSleep(anyLong(), anyInt(), anyInt());
 
         // Ambient lighting becomes dim.
-        final SensorEvent sensorEventLowLight = new SensorEvent(mSensor, 3, mTimestamp,
-                new float[]{5});
-        mController.onSensorChanged(sensorEventLowLight);
+        lightMonitorCallback.onChange(AmbientLightModeMonitor.AMBIENT_LIGHT_MODE_DARK);
 
         // Verifies it goes to sleep.
         verify(mPowerManager).goToSleep(anyLong(), anyInt(), anyInt());
@@ -250,5 +239,14 @@ public class IdleHostViewControllerTest extends SysuiTestCase {
 
         // Should dispose input event receiver.
         verify(mInputEventReceiver).dispose();
+    }
+
+    // Captures [AmbientLightModeMonitor.Callback] assuming that the ambient light mode monitor
+    // has been started.
+    private AmbientLightModeMonitor.Callback captureAmbientLightModeMonitorCallback() {
+        ArgumentCaptor<AmbientLightModeMonitor.Callback> captor =
+                ArgumentCaptor.forClass(AmbientLightModeMonitor.Callback.class);
+        verify(mAmbientLightModeMonitor).start(captor.capture());
+        return captor.getValue();
     }
 }

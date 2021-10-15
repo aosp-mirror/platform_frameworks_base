@@ -19,6 +19,7 @@ package com.android.server.timezonedetector.location;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.service.timezone.TimeZoneProviderEvent;
 import android.util.IndentingPrintWriter;
 
 /**

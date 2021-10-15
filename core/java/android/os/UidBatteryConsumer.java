@@ -106,14 +106,37 @@ public final class UidBatteryConsumer extends BatteryConsumer {
 
     @Override
     public void dump(PrintWriter pw, boolean skipEmptyComponents) {
-        final double consumedPower = getConsumedPower();
         pw.print("UID ");
         UserHandle.formatUid(pw, getUid());
         pw.print(": ");
-        PowerCalculator.printPowerMah(pw, consumedPower);
+        PowerCalculator.printPowerMah(pw, getConsumedPower());
+
+        if (mData.layout.processStateDataIncluded) {
+            StringBuilder sb = new StringBuilder();
+            appendProcessStateData(sb, BatteryConsumer.PROCESS_STATE_FOREGROUND,
+                    skipEmptyComponents);
+            appendProcessStateData(sb, BatteryConsumer.PROCESS_STATE_BACKGROUND,
+                    skipEmptyComponents);
+            appendProcessStateData(sb, BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE,
+                    skipEmptyComponents);
+            pw.print(sb);
+        }
+
         pw.print(" ( ");
         mPowerComponents.dump(pw, skipEmptyComponents  /* skipTotalPowerComponent */);
         pw.print(" ) ");
+    }
+
+    private void appendProcessStateData(StringBuilder sb, @ProcessState int processState,
+            boolean skipEmptyComponents) {
+        Dimensions dimensions = new Dimensions(POWER_COMPONENT_ANY, processState);
+        final double power = mPowerComponents.getConsumedPower(dimensions);
+        if (power == 0 && skipEmptyComponents) {
+            return;
+        }
+
+        sb.append(" ").append(processStateToString(processState)).append(": ")
+                .append(PowerCalculator.formatCharge(power));
     }
 
     static UidBatteryConsumer create(BatteryConsumerData data) {

@@ -22,13 +22,16 @@ import static com.android.server.tare.TareUtils.appToString;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.hardware.biometrics.face.V1_0.UserHandle;
+import android.content.pm.PackageInfo;
 import android.os.Environment;
+import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.SparseArrayMap;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
@@ -36,8 +39,6 @@ import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.LocalServices;
-import com.android.server.pm.UserManagerInternal;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -47,7 +48,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -161,10 +161,20 @@ public class Scribe {
             return;
         }
 
-        UserManagerInternal userManagerInternal =
-                LocalServices.getService(UserManagerInternal.class);
-        final int[] userIds = userManagerInternal.getUserIds();
-        Arrays.sort(userIds);
+        final SparseArray<ArraySet<String>> installedPackagesPerUser = new SparseArray<>();
+        final List<PackageInfo> installedPackages = mIrs.getInstalledPackages();
+        for (int i = 0; i < installedPackages.size(); ++i) {
+            final PackageInfo packageInfo = installedPackages.get(i);
+            if (packageInfo.applicationInfo != null) {
+                final int userId = UserHandle.getUserId(packageInfo.applicationInfo.uid);
+                ArraySet<String> pkgsForUser = installedPackagesPerUser.get(userId);
+                if (pkgsForUser == null) {
+                    pkgsForUser = new ArraySet<>();
+                    installedPackagesPerUser.put(userId, pkgsForUser);
+                }
+                pkgsForUser.add(packageInfo.packageName);
+            }
+        }
 
         try (FileInputStream fis = mStateFile.openRead()) {
             TypedXmlPullParser parser = Xml.resolvePullParser(fis);
@@ -209,7 +219,8 @@ public class Scribe {
                         break;
                     case XML_TAG_USER:
                         earliestEndTime = Math.min(earliestEndTime,
-                                readUserFromXmlLocked(parser, userIds, endTimeCutoff));
+                                readUserFromXmlLocked(
+                                        parser, installedPackagesPerUser, endTimeCutoff));
                         break;
                     default:
                         Slog.e(TAG, "Unexpected tag: " + tagName);
@@ -280,13 +291,21 @@ public class Scribe {
      */
     @Nullable
     private static Pair<String, Ledger> readLedgerFromXml(TypedXmlPullParser parser,
-            long endTimeCutoff) throws XmlPullParserException, IOException {
+            ArraySet<String> validPackages, long endTimeCutoff)
+            throws XmlPullParserException, IOException {
         final String pkgName;
         final long curBalance;
         final List<Ledger.Transaction> transactions = new ArrayList<>();
 
         pkgName = parser.getAttributeValue(null, XML_ATTR_PACKAGE_NAME);
         curBalance = parser.getAttributeLong(null, XML_ATTR_CURRENT_BALANCE);
+
+        final boolean isInstalled = validPackages.contains(pkgName);
+        if (!isInstalled) {
+            // Don't return early since we need to go through all the transaction tags and get
+            // to the end of the ledger tag.
+            Slog.w(TAG, "Invalid pkg " + pkgName + " is saved to disk");
+        }
 
         for (int eventType = parser.next(); eventType != XmlPullParser.END_DOCUMENT;
                 eventType = parser.next()) {
@@ -298,10 +317,13 @@ public class Scribe {
                 }
                 continue;
             }
-            if (eventType != XmlPullParser.START_TAG || !"transaction".equals(tagName)) {
+            if (eventType != XmlPullParser.START_TAG || !XML_TAG_TRANSACTION.equals(tagName)) {
                 // Expecting only "transaction" tags.
                 Slog.e(TAG, "Unexpected event: (" + eventType + ") " + tagName);
                 return null;
+            }
+            if (!isInstalled) {
+                continue;
             }
             if (DEBUG) {
                 Slog.d(TAG, "Starting ledger tag: " + tagName);
@@ -320,6 +342,9 @@ public class Scribe {
             transactions.add(new Ledger.Transaction(startTime, endTime, eventId, tag, delta));
         }
 
+        if (!isInstalled) {
+            return null;
+        }
         return Pair.create(pkgName, new Ledger(curBalance, transactions));
     }
 
@@ -329,12 +354,14 @@ public class Scribe {
      * @return The earliest valid transaction end time found for the user.
      */
     @GuardedBy("mIrs.getLock()")
-    private long readUserFromXmlLocked(TypedXmlPullParser parser, int[] validUserIds,
+    private long readUserFromXmlLocked(TypedXmlPullParser parser,
+            SparseArray<ArraySet<String>> installedPackagesPerUser,
             long endTimeCutoff) throws XmlPullParserException, IOException {
         int curUser = parser.getAttributeInt(null, XML_ATTR_USER_ID);
-        if (Arrays.binarySearch(validUserIds, curUser) < 0) {
+        final ArraySet<String> installedPackages = installedPackagesPerUser.get(curUser);
+        if (installedPackages == null) {
             Slog.w(TAG, "Invalid user " + curUser + " is saved to disk");
-            curUser = UserHandle.NONE;
+            curUser = UserHandle.USER_NULL;
             // Don't return early since we need to go through all the ledger tags and get to the end
             // of the user tag.
         }
@@ -351,10 +378,14 @@ public class Scribe {
                 continue;
             }
             if (XML_TAG_LEDGER.equals(tagName)) {
-                if (curUser == UserHandle.NONE) {
+                if (curUser == UserHandle.USER_NULL) {
                     continue;
                 }
-                final Pair<String, Ledger> ledgerData = readLedgerFromXml(parser, endTimeCutoff);
+                final Pair<String, Ledger> ledgerData =
+                        readLedgerFromXml(parser, installedPackages, endTimeCutoff);
+                if (ledgerData == null) {
+                    continue;
+                }
                 final Ledger ledger = ledgerData.second;
                 if (ledger != null) {
                     mLedgers.add(curUser, ledgerData.first, ledger);

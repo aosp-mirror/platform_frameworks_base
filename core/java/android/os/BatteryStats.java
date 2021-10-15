@@ -654,6 +654,11 @@ public abstract class BatteryStats implements Parcelable {
     }
 
     /**
+     * Returns true if battery consumption is tracked on a per-process-state basis.
+     */
+    public abstract boolean isProcessStateDataAvailable();
+
+    /**
      * The statistics associated with a particular uid.
      */
     public static abstract class Uid {
@@ -5406,6 +5411,7 @@ public abstract class BatteryStats implements Parcelable {
                 new BatteryUsageStatsQuery.Builder()
                         .setMaxStatsAgeMs(0)
                         .includePowerModels()
+                        .includeProcessStateData()
                         .build());
         stats.dump(pw, prefix);
 

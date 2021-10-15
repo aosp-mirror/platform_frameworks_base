@@ -16,6 +16,10 @@
 
 package com.android.server.timezonedetector.location;
 
+import static android.service.timezone.TimeZoneProviderEvent.EVENT_TYPE_PERMANENT_FAILURE;
+import static android.service.timezone.TimeZoneProviderEvent.EVENT_TYPE_SUGGESTION;
+import static android.service.timezone.TimeZoneProviderEvent.EVENT_TYPE_UNCERTAIN;
+
 import static com.android.server.timezonedetector.location.LocationTimeZoneManagerService.debugLog;
 import static com.android.server.timezonedetector.location.LocationTimeZoneManagerService.warnLog;
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_DESTROYED;
@@ -24,9 +28,6 @@ import static com.android.server.timezonedetector.location.LocationTimeZoneProvi
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_INITIALIZING;
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_UNCERTAIN;
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STOPPED;
-import static com.android.server.timezonedetector.location.TimeZoneProviderEvent.EVENT_TYPE_PERMANENT_FAILURE;
-import static com.android.server.timezonedetector.location.TimeZoneProviderEvent.EVENT_TYPE_SUGGESTION;
-import static com.android.server.timezonedetector.location.TimeZoneProviderEvent.EVENT_TYPE_UNCERTAIN;
 
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
@@ -34,6 +35,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.service.timezone.TimeZoneProviderEvent;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;

@@ -30,6 +30,7 @@ import android.net.Uri
 import android.os.Handler
 import android.os.UserHandle
 import android.provider.Settings
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import com.android.settingslib.Utils
@@ -74,6 +75,10 @@ class LockscreenSmartspaceController @Inject constructor(
     @Main private val handler: Handler,
     optionalPlugin: Optional<BcSmartspaceDataPlugin>
 ) {
+    companion object {
+        private const val TAG = "LockscreenSmartspaceController"
+    }
+
     private var session: SmartspaceSession? = null
     private val plugin: BcSmartspaceDataPlugin? = optionalPlugin.orElse(null)
 
@@ -211,6 +216,7 @@ class LockscreenSmartspaceController @Inject constructor(
 
         val newSession = smartspaceManager.createSmartspaceSession(
                 SmartspaceConfig.Builder(context, "lockscreen").build())
+        Log.d(TAG, "Starting smartspace session for lockscreen")
         newSession.addOnTargetsAvailableListener(uiExecutor, sessionListener)
         this.session = newSession
 
@@ -232,6 +238,8 @@ class LockscreenSmartspaceController @Inject constructor(
      * Disconnects the smartspace view from the smartspace service and cleans up any resources.
      */
     fun disconnect() {
+        if (!smartspaceViews.isEmpty()) return
+
         execution.assertIsMainThread()
 
         if (session == null) {
@@ -249,6 +257,7 @@ class LockscreenSmartspaceController @Inject constructor(
         session = null
 
         plugin?.onTargetsAvailable(emptyList())
+        Log.d(TAG, "Ending smartspace session for lockscreen")
     }
 
     fun addListener(listener: SmartspaceTargetListener) {

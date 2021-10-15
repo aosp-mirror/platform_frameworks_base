@@ -54,7 +54,6 @@ android_test {
         "print-test-util-lib",
         "testng",
         "servicestests-utils",
-        "AppSearchTestUtils",
     ],
 
     libs: [

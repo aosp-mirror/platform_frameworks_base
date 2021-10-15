@@ -136,6 +136,11 @@ public final class StartingWindowInfo implements Parcelable {
     /** @hide */
     public static final int TYPE_PARAMETER_USE_EMPTY_SPLASH_SCREEN = 0x00000020;
     /**
+     * The parameter which indicates if the activity has finished drawing.
+     * @hide
+     */
+    public static final int TYPE_PARAMETER_ACTIVITY_DRAWN = 0x00000040;
+    /**
      * Application is allowed to use the legacy splash screen
      * @hide
      */

@@ -2701,7 +2701,7 @@ public final class PowerManagerService extends SystemService
 
             mHandler.removeMessages(MSG_ATTENTIVE_TIMEOUT);
 
-            if (isBeingKeptFromShowingInattentiveSleepWarningLocked()) {
+            if (isBeingKeptFromInattentiveSleepLocked()) {
                 return;
             }
 
@@ -2717,10 +2717,6 @@ public final class PowerManagerService extends SystemService
                 }
                 mInattentiveSleepWarningOverlayController.show();
                 nextTimeout = goToSleepTime;
-            } else {
-                if (DEBUG && getWakefulnessLocked() != WAKEFULNESS_ASLEEP) {
-                    Slog.i(TAG, "Going to sleep now due to long user inactivity");
-                }
             }
 
             if (nextTimeout >= 0) {
@@ -2739,7 +2735,7 @@ public final class PowerManagerService extends SystemService
         if (getWakefulnessLocked() != WAKEFULNESS_AWAKE) {
             mInattentiveSleepWarningOverlayController.dismiss(false);
             return true;
-        } else if (attentiveTimeout < 0 || isBeingKeptFromShowingInattentiveSleepWarningLocked()
+        } else if (attentiveTimeout < 0 || isBeingKeptFromInattentiveSleepLocked()
                 || now < showWarningTime) {
             mInattentiveSleepWarningOverlayController.dismiss(true);
             return true;
@@ -2861,6 +2857,9 @@ public final class PowerManagerService extends SystemService
                         Slog.d(TAG, "updateWakefulnessLocked: Bed time for group " + id);
                     }
                     if (isAttentiveTimeoutExpired(id, time)) {
+                        if (DEBUG) {
+                            Slog.i(TAG, "Going to sleep now due to long user inactivity");
+                        }
                         changed = sleepDisplayGroupNoUpdateLocked(id, time,
                                 PowerManager.GO_TO_SLEEP_REASON_TIMEOUT,
                                 PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE, Process.SYSTEM_UID);
@@ -2898,7 +2897,7 @@ public final class PowerManagerService extends SystemService
 
         long now = mClock.uptimeMillis();
         if (isAttentiveTimeoutExpired(groupId, now)) {
-            return !isBeingKeptFromInattentiveSleepLocked(groupId);
+            return !isBeingKeptFromInattentiveSleepLocked();
         } else {
             return !isBeingKeptAwakeLocked(groupId);
         }
@@ -2928,13 +2927,7 @@ public final class PowerManagerService extends SystemService
      * a phone call. This function only controls whether the device will go to sleep which is
      * independent of whether it will be allowed to suspend.
      */
-    private boolean isBeingKeptFromInattentiveSleepLocked(int groupId) {
-        return mStayOn || mScreenBrightnessBoostInProgress || mProximityPositive
-                || (mDisplayGroupPowerStateMapper.getUserActivitySummaryLocked(groupId) & (
-                USER_ACTIVITY_SCREEN_BRIGHT | USER_ACTIVITY_SCREEN_DIM)) != 0;
-    }
-
-    private boolean isBeingKeptFromShowingInattentiveSleepWarningLocked() {
+    private boolean isBeingKeptFromInattentiveSleepLocked() {
         return mStayOn || mScreenBrightnessBoostInProgress || mProximityPositive || !mBootCompleted;
     }
 

@@ -26,6 +26,7 @@ import static com.android.server.timezonedetector.location.LocationTimeZoneProvi
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.service.timezone.TimeZoneProviderEvent;
 import android.util.IndentingPrintWriter;
 
 import java.time.Duration;

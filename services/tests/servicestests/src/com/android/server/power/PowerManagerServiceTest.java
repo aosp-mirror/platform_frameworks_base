@@ -889,6 +889,74 @@ public class PowerManagerServiceTest {
     }
 
     @Test
+    public void testInattentiveSleep_wakeLockOnAfterRelease_inattentiveSleepTimeoutNotAffected()
+            throws Exception {
+        final DisplayInfo info = new DisplayInfo();
+        info.displayGroupId = Display.DEFAULT_DISPLAY_GROUP;
+        when(mDisplayManagerInternalMock.getDisplayInfo(Display.DEFAULT_DISPLAY)).thenReturn(info);
+
+        final String pkg = mContextSpy.getOpPackageName();
+        final Binder token = new Binder();
+        final String tag = "testInattentiveSleep_wakeLockOnAfterRelease";
+
+        setMinimumScreenOffTimeoutConfig(5);
+        setAttentiveTimeout(2000);
+        createService();
+        startSystem();
+
+        mService.getBinderServiceInstance().acquireWakeLock(token,
+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE, tag, pkg,
+                null /* workSource */, null /* historyTag */, Display.DEFAULT_DISPLAY);
+
+        advanceTime(1500);
+        mService.getBinderServiceInstance().releaseWakeLock(token, 0 /* flags */);
+
+        advanceTime(520);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
+    }
+
+    @Test
+    public void testInattentiveSleep_userActivityNoChangeLights_inattentiveSleepTimeoutNotAffected()
+            throws Exception {
+        final DisplayInfo info = new DisplayInfo();
+        info.displayGroupId = Display.DEFAULT_DISPLAY_GROUP;
+        when(mDisplayManagerInternalMock.getDisplayInfo(Display.DEFAULT_DISPLAY)).thenReturn(info);
+
+        setMinimumScreenOffTimeoutConfig(5);
+        setAttentiveTimeout(2000);
+        createService();
+        startSystem();
+
+        advanceTime(1500);
+        mService.getBinderServiceInstance().userActivity(Display.DEFAULT_DISPLAY, mClock.now(),
+                PowerManager.USER_ACTIVITY_EVENT_OTHER,
+                PowerManager.USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS);
+
+        advanceTime(520);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
+    }
+
+    @Test
+    public void testInattentiveSleep_userActivity_inattentiveSleepTimeoutExtended()
+            throws Exception {
+        final DisplayInfo info = new DisplayInfo();
+        info.displayGroupId = Display.DEFAULT_DISPLAY_GROUP;
+        when(mDisplayManagerInternalMock.getDisplayInfo(Display.DEFAULT_DISPLAY)).thenReturn(info);
+
+        setMinimumScreenOffTimeoutConfig(5);
+        setAttentiveTimeout(2000);
+        createService();
+        startSystem();
+
+        advanceTime(1500);
+        mService.getBinderServiceInstance().userActivity(Display.DEFAULT_DISPLAY, mClock.now(),
+                PowerManager.USER_ACTIVITY_EVENT_OTHER, 0 /* flags */);
+
+        advanceTime(520);
+        assertThat(mService.getWakefulnessLocked()).isNotEqualTo(WAKEFULNESS_ASLEEP);
+    }
+
+    @Test
     public void testWakeLock_affectsProperDisplayGroup() throws Exception {
         final int nonDefaultDisplayGroupId = Display.DEFAULT_DISPLAY_GROUP + 1;
         final AtomicReference<DisplayManagerInternal.DisplayGroupListener> listener =
