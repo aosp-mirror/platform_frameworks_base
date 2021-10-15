@@ -1134,7 +1134,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     atoken.mEnteringAnimation = false;
                     if (atoken.attachedToProcess()) {
                         try {
-                            atoken.app.getThread().scheduleEnterAnimationComplete(atoken.appToken);
+                            atoken.app.getThread().scheduleEnterAnimationComplete(atoken.token);
                         } catch (RemoteException e) {
                         }
                     }

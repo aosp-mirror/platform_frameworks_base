@@ -225,7 +225,6 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Gravity;
-import android.view.IApplicationToken;
 import android.view.IWindow;
 import android.view.IWindowFocusObserver;
 import android.view.IWindowId;
@@ -1504,11 +1503,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     public int getBaseType() {
         return getTopParentWindow().mAttrs.type;
-    }
-
-    @Override
-    public IApplicationToken getAppToken() {
-        return mActivityRecord != null ? mActivityRecord.appToken : null;
     }
 
     /** Returns true if this window is participating in voice interaction. */
@@ -4771,7 +4765,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         windowInfo.layer = mLayer;
         windowInfo.token = mClient.asBinder();
         if (mActivityRecord != null) {
-            windowInfo.activityToken = mActivityRecord.appToken.asBinder();
+            windowInfo.activityToken = mActivityRecord.token;
         }
         windowInfo.title = mAttrs.accessibilityTitle;
         // Panel windows have no public way to set the a11y title directly. Use the

@@ -158,7 +158,7 @@ class TaskPositioningController {
                     + "win=" + win + ", resize=" + resize + ", preserveOrientation="
                     + preserveOrientation + ", {" + startX + ", " + startY + "}");
 
-        if (win == null || win.getAppToken() == null) {
+        if (win == null || win.mActivityRecord == null) {
             Slog.w(TAG_WM, "startPositioningLocked: Bad window " + win);
             return false;
         }

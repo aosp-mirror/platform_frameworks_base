@@ -470,7 +470,7 @@ public class ActivityStartController {
                         if (started != null && started.getUid() == filterCallingUid) {
                             // Only the started activity which has the same uid as the source caller
                             // can be the caller of next activity.
-                            resultTo = started.appToken;
+                            resultTo = started.token;
                         } else {
                             resultTo = sourceResultTo;
                             // Different apps not adjacent to the caller are forced to be new task.

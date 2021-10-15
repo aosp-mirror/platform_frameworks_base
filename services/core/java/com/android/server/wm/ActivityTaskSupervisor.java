@@ -850,7 +850,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
                 // Create activity launch transaction.
                 final ClientTransaction clientTransaction = ClientTransaction.obtain(
-                        proc.getThread(), r.appToken);
+                        proc.getThread(), r.token);
 
                 final boolean isTransitionForward = r.isTransitionForward();
                 clientTransaction.addCallback(LaunchActivityItem.obtain(new Intent(r.intent),

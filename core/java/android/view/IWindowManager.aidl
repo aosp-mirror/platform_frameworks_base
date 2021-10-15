@@ -34,7 +34,6 @@ import android.os.IRemoteCallback;
 import android.os.ParcelFileDescriptor;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
-import android.view.IApplicationToken;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.ICrossWindowBlurEnabledListener;
 import android.view.IDisplayWindowInsetsController;
