@@ -70,8 +70,8 @@ public class ApkSignatureSchemeV3Verifier {
      */
     public static final int SF_ATTRIBUTE_ANDROID_APK_SIGNED_ID = 3;
 
-    private static final int APK_SIGNATURE_SCHEME_V3_BLOCK_ID = 0xf05368c0;
-    private static final int APK_SIGNATURE_SCHEME_V31_BLOCK_ID = 0x1b93ad61;
+    static final int APK_SIGNATURE_SCHEME_V3_BLOCK_ID = 0xf05368c0;
+    static final int APK_SIGNATURE_SCHEME_V31_BLOCK_ID = 0x1b93ad61;
 
     /**
      * Returns {@code true} if the provided APK contains an APK Signature Scheme V3 signature.
@@ -260,7 +260,8 @@ public class ApkSignatureSchemeV3Verifier {
                     verityDigest, mApk.getChannel().size(), signatureInfo);
         }
 
-        return new VerifiedSigner(result.first, result.second, verityRootHash, contentDigests);
+        return new VerifiedSigner(result.first, result.second, verityRootHash, contentDigests,
+                blockId);
     }
 
     private Pair<X509Certificate[], ApkSigningBlockUtils.VerifiedProofOfRotation>
@@ -572,13 +573,18 @@ public class ApkSignatureSchemeV3Verifier {
         // All these are verified if requested.
         public final Map<Integer, byte[]> contentDigests;
 
+        // ID of the signature block used to verify.
+        public final int blockId;
+
         public VerifiedSigner(X509Certificate[] certs,
                 ApkSigningBlockUtils.VerifiedProofOfRotation por,
-                byte[] verityRootHash, Map<Integer, byte[]> contentDigests) {
+                byte[] verityRootHash, Map<Integer, byte[]> contentDigests,
+                int blockId) {
             this.certs = certs;
             this.por = por;
             this.verityRootHash = verityRootHash;
             this.contentDigests = contentDigests;
+            this.blockId = blockId;
         }
 
     }
