@@ -166,10 +166,21 @@ public final class AudioDeviceAttributes implements Parcelable {
      * @param address the address of the device, or an empty string for devices without one
      */
     public AudioDeviceAttributes(int nativeType, @NonNull String address) {
+        this(nativeType, address, "");
+    }
+
+    /**
+     * @hide
+     * Constructor called from BtHelper to connect or disconnect a Bluetooth device.
+     * @param nativeType the internal device type, as defined in {@link AudioSystem}
+     * @param address the address of the device, or an empty string for devices without one
+     * @param name the name of the device, or an empty string for devices without one
+     */
+    public AudioDeviceAttributes(int nativeType, @NonNull String address, @NonNull String name) {
         mRole = (nativeType & AudioSystem.DEVICE_BIT_IN) != 0 ? ROLE_INPUT : ROLE_OUTPUT;
         mType = AudioDeviceInfo.convertInternalDeviceToDeviceType(nativeType);
         mAddress = address;
-        mName = "";
+        mName = name;
         mNativeType = nativeType;
         mAudioProfiles = new ArrayList<>();
         mAudioDescriptors = new ArrayList<>();

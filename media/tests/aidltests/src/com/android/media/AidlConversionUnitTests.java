@@ -16,8 +16,18 @@
 
 package android.media.audio.common;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+
 import android.media.AudioAttributes;
+import android.media.AudioDescriptor;
+import android.media.AudioDeviceAttributes;
+import android.media.AudioDeviceInfo;
 import android.media.AudioFormat;
+import android.media.AudioProfile;
 import android.media.AudioSystem;
 import android.media.AudioTrack;
 import android.media.MediaFormat;
@@ -25,10 +35,11 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.runner.AndroidJUnit4;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Unit tests for AidlConversion utilities.
@@ -417,10 +428,102 @@ public final class AidlConversionUnitTests {
                 () -> AidlConversion.legacy2aidl_audio_usage_t_AudioUsage(sInvalidValue));
     }
 
+    @Test
+    public void testAudioDescriptorConversion_Default() {
+        ExtraAudioDescriptor aidl = createDefaultDescriptor();
+        AudioDescriptor audioDescriptor =
+                AidlConversion.aidl2api_ExtraAudioDescriptor_AudioDescriptor(aidl);
+        assertEquals(AudioDescriptor.STANDARD_NONE, audioDescriptor.getStandard());
+        assertEquals(
+                AudioProfile.AUDIO_ENCAPSULATION_TYPE_NONE, audioDescriptor.getEncapsulationType());
+        assertTrue(Arrays.equals(new byte[]{}, audioDescriptor.getDescriptor()));
+
+        ExtraAudioDescriptor reconstructedExtraDescriptor =
+                AidlConversion.api2aidl_AudioDescriptor_ExtraAudioDescriptor(audioDescriptor);
+        assertEquals(aidl, reconstructedExtraDescriptor);
+    }
+
+    @Test
+    public void testAudioDescriptorConversion() {
+        ExtraAudioDescriptor aidl = createEncapsulationDescriptor(new byte[]{0x05, 0x18, 0x4A});
+        AudioDescriptor audioDescriptor =
+                AidlConversion.aidl2api_ExtraAudioDescriptor_AudioDescriptor(aidl);
+        assertEquals(AudioDescriptor.STANDARD_EDID, audioDescriptor.getStandard());
+        assertEquals(AudioProfile.AUDIO_ENCAPSULATION_TYPE_IEC61937,
+                audioDescriptor.getEncapsulationType());
+        assertTrue(Arrays.equals(new byte[]{0x05, 0x18, 0x4A}, audioDescriptor.getDescriptor()));
+
+        ExtraAudioDescriptor reconstructedExtraDescriptor =
+                AidlConversion.api2aidl_AudioDescriptor_ExtraAudioDescriptor(audioDescriptor);
+        assertEquals(aidl, reconstructedExtraDescriptor);
+    }
+
+    @Test
+    public void testAudioDeviceAttributesConversion_Default() {
+        AudioDeviceAttributes attributes =
+                new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_DEFAULT, "myAddress");
+        AudioPort port = AidlConversion.api2aidl_AudioDeviceAttributes_AudioPort(attributes);
+        assertEquals("", port.name);
+        assertEquals(0, port.extraAudioDescriptors.length);
+        assertEquals("myAddress", port.ext.getDevice().device.address.getId());
+        assertEquals("", port.ext.getDevice().device.type.connection);
+        assertEquals(AudioDeviceType.OUT_DEFAULT, port.ext.getDevice().device.type.type);
+    }
+
+    @Test
+    public void testAudioDeviceAttributesConversion() {
+        AudioDescriptor audioDescriptor1 =
+                AidlConversion.aidl2api_ExtraAudioDescriptor_AudioDescriptor(
+                        createEncapsulationDescriptor(new byte[]{0x05, 0x18, 0x4A}));
+
+        AudioDescriptor audioDescriptor2 =
+                AidlConversion.aidl2api_ExtraAudioDescriptor_AudioDescriptor(
+                        createDefaultDescriptor());
+
+        AudioDeviceAttributes attributes =
+                new AudioDeviceAttributes(AudioDeviceAttributes.ROLE_OUTPUT,
+                        AudioDeviceInfo.TYPE_HDMI_ARC, "myAddress", "myName", new ArrayList<>(),
+                        new ArrayList<>(Arrays.asList(audioDescriptor1, audioDescriptor2)));
+        AudioPort port = AidlConversion.api2aidl_AudioDeviceAttributes_AudioPort(
+                attributes);
+        assertEquals("myName", port.name);
+        assertEquals(2, port.extraAudioDescriptors.length);
+        assertEquals(AudioStandard.EDID, port.extraAudioDescriptors[0].standard);
+        assertEquals(AudioEncapsulationType.IEC61937,
+                port.extraAudioDescriptors[0].encapsulationType);
+        assertTrue(Arrays.equals(new byte[]{0x05, 0x18, 0x4A},
+                port.extraAudioDescriptors[0].audioDescriptor));
+        assertEquals(AudioStandard.NONE, port.extraAudioDescriptors[1].standard);
+        assertEquals(AudioEncapsulationType.NONE,
+                port.extraAudioDescriptors[1].encapsulationType);
+        assertTrue(Arrays.equals(new byte[]{},
+                port.extraAudioDescriptors[1].audioDescriptor));
+        assertEquals("myAddress", port.ext.getDevice().device.address.getId());
+        assertEquals(AudioDeviceDescription.CONNECTION_HDMI_ARC,
+                port.ext.getDevice().device.type.connection);
+        assertEquals(AudioDeviceType.OUT_DEVICE, port.ext.getDevice().device.type.type);
+    }
+
     private static AudioFormatDescription createPcm16FormatAidl() {
         final AudioFormatDescription aidl = new AudioFormatDescription();
         aidl.type = AudioFormatType.PCM;
         aidl.pcm = PcmType.INT_16_BIT;
         return aidl;
+    }
+
+    private static ExtraAudioDescriptor createDefaultDescriptor() {
+        ExtraAudioDescriptor extraDescriptor = new ExtraAudioDescriptor();
+        extraDescriptor.standard = AudioStandard.NONE;
+        extraDescriptor.encapsulationType = AudioEncapsulationType.NONE;
+        extraDescriptor.audioDescriptor = new byte[]{};
+        return extraDescriptor;
+    }
+
+    private static ExtraAudioDescriptor createEncapsulationDescriptor(byte[] audioDescriptor) {
+        ExtraAudioDescriptor extraDescriptor = new ExtraAudioDescriptor();
+        extraDescriptor.standard = AudioStandard.EDID;
+        extraDescriptor.encapsulationType = AudioEncapsulationType.IEC61937;
+        extraDescriptor.audioDescriptor = audioDescriptor;
+        return extraDescriptor;
     }
 }
