@@ -256,6 +256,13 @@ public class UdfpsController implements DozeReceiver {
         @Override
         public void hideUdfpsOverlay(int sensorId) {
             mFgExecutor.execute(() -> {
+                if (mKeyguardUpdateMonitor.isFingerprintDetectionRunning()) {
+                    // if we get here, we expect keyguardUpdateMonitor's fingerprintRunningState
+                    // to be updated shortly afterwards
+                    Log.d(TAG, "hiding udfps overlay when "
+                            + "mKeyguardUpdateMonitor.isFingerprintDetectionRunning()=true");
+                }
+
                 mServerRequest = null;
                 updateOverlay();
             });
