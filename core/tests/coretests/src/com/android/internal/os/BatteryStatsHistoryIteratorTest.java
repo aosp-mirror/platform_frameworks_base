@@ -18,14 +18,14 @@ package com.android.internal.os;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.content.Context;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.Process;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import libcore.testing.io.TestIoUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -43,16 +43,8 @@ public class BatteryStatsHistoryIteratorTest {
 
     @Before
     public void setup() {
-        Context context = InstrumentationRegistry.getContext();
-
-        File historyDir = new File(context.getDataDir(), BatteryStatsHistory.HISTORY_DIR);
-        String[] files = historyDir.list();
-        if (files != null) {
-            for (int i = 0; i < files.length; i++) {
-                new File(historyDir, files[i]).delete();
-            }
-        }
-        historyDir.delete();
+        final File historyDir =
+                TestIoUtils.createTemporaryDirectory(getClass().getSimpleName());
         mBatteryStats = new MockBatteryStatsImpl(mMockClock, historyDir);
     }
 

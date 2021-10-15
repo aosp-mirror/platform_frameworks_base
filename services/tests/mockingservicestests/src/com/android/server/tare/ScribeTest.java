@@ -17,7 +17,6 @@
 package com.android.server.tare;
 
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 
 import static org.junit.Assert.assertEquals;
@@ -26,6 +25,9 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.os.UserHandle;
 import android.util.Log;
 import android.util.SparseArrayMap;
 
@@ -34,7 +36,6 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.LocalServices;
-import com.android.server.pm.UserManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
@@ -45,6 +46,7 @@ import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -63,11 +65,10 @@ public class ScribeTest {
     private MockitoSession mMockingSession;
     private Scribe mScribeUnderTest;
     private File mTestFileDir;
+    private final List<PackageInfo> mInstalledPackages = new ArrayList<>();
 
     @Mock
     private InternalResourceService mIrs;
-    @Mock
-    private UserManagerInternal mUserManagerInternal;
 
     private Context getContext() {
         return InstrumentationRegistry.getContext();
@@ -80,16 +81,16 @@ public class ScribeTest {
                 .strictness(Strictness.LENIENT)
                 .mockStatic(LocalServices.class)
                 .startMocking();
-        doReturn(mUserManagerInternal)
-                .when(() -> LocalServices.getService(UserManagerInternal.class));
         when(mIrs.getLock()).thenReturn(new Object());
         when(mIrs.isEnabled()).thenReturn(true);
-        when(mUserManagerInternal.getUserIds()).thenReturn(new int[]{TEST_USER_ID});
+        when(mIrs.getInstalledPackages()).thenReturn(mInstalledPackages);
         mTestFileDir = new File(getContext().getFilesDir(), "scribe_test");
         //noinspection ResultOfMethodCallIgnored
         mTestFileDir.mkdirs();
         Log.d(TAG, "Saving data to '" + mTestFileDir + "'");
         mScribeUnderTest = new Scribe(mIrs, mTestFileDir);
+
+        addInstalledPackage(TEST_USER_ID, TEST_PACKAGE);
     }
 
     @After
@@ -148,13 +149,11 @@ public class ScribeTest {
         final SparseArrayMap<String, Ledger> ledgers = new SparseArrayMap<>();
         final int numUsers = 3;
         final int numLedgers = 5;
-        final int[] userIds = new int[numUsers];
-        when(mUserManagerInternal.getUserIds()).thenReturn(userIds);
         for (int u = 0; u < numUsers; ++u) {
             final int userId = TEST_USER_ID + u;
-            userIds[u] = userId;
             for (int l = 0; l < numLedgers; ++l) {
                 final String pkgName = TEST_PACKAGE + l;
+                addInstalledPackage(userId, pkgName);
                 final Ledger ledger = mScribeUnderTest.getLedgerLocked(userId, pkgName);
                 ledger.recordTransaction(new Ledger.Transaction(
                         0, 1000L * u + l, 1, null, 51L * u + l));
@@ -192,6 +191,34 @@ public class ScribeTest {
                 mScribeUnderTest.getLedgerLocked(TEST_USER_ID, TEST_PACKAGE));
     }
 
+    @Test
+    public void testLoadingMissingPackageFromDisk() {
+        final String pkgName = TEST_PACKAGE + ".uninstalled";
+        final Ledger ogLedger = mScribeUnderTest.getLedgerLocked(TEST_USER_ID, pkgName);
+        ogLedger.recordTransaction(new Ledger.Transaction(0, 1000, 1, null, 51));
+        ogLedger.recordTransaction(new Ledger.Transaction(1500, 2000, 2, "green", 52));
+        ogLedger.recordTransaction(new Ledger.Transaction(2500, 3000, 3, "blue", 3));
+        mScribeUnderTest.writeImmediatelyForTesting();
+
+        // Package isn't installed, so make sure it's not saved to memory after loading.
+        mScribeUnderTest.loadFromDiskLocked();
+        assertLedgersEqual(new Ledger(), mScribeUnderTest.getLedgerLocked(TEST_USER_ID, pkgName));
+    }
+
+    @Test
+    public void testLoadingMissingUserFromDisk() {
+        final int userId = TEST_USER_ID + 1;
+        final Ledger ogLedger = mScribeUnderTest.getLedgerLocked(userId, TEST_PACKAGE);
+        ogLedger.recordTransaction(new Ledger.Transaction(0, 1000, 1, null, 51));
+        ogLedger.recordTransaction(new Ledger.Transaction(1500, 2000, 2, "green", 52));
+        ogLedger.recordTransaction(new Ledger.Transaction(2500, 3000, 3, "blue", 3));
+        mScribeUnderTest.writeImmediatelyForTesting();
+
+        // User doesn't show up with any packages, so make sure nothing is saved after loading.
+        mScribeUnderTest.loadFromDiskLocked();
+        assertLedgersEqual(new Ledger(), mScribeUnderTest.getLedgerLocked(userId, TEST_PACKAGE));
+    }
+
     private void assertLedgersEqual(Ledger expected, Ledger actual) {
         if (expected == null) {
             assertNull(actual);
@@ -218,5 +245,14 @@ public class ScribeTest {
         assertEquals(expected.eventId, actual.eventId);
         assertEquals(expected.tag, actual.tag);
         assertEquals(expected.delta, actual.delta);
+    }
+
+    private void addInstalledPackage(int userId, String pkgName) {
+        PackageInfo pkgInfo = new PackageInfo();
+        pkgInfo.packageName = pkgName;
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.uid = UserHandle.getUid(userId, Math.abs(pkgName.hashCode()));
+        pkgInfo.applicationInfo = applicationInfo;
+        mInstalledPackages.add(pkgInfo);
     }
 }

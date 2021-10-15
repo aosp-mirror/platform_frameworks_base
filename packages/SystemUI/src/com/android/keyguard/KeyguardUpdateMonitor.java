@@ -71,7 +71,6 @@ import android.os.ServiceManager;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
@@ -86,7 +85,6 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
-import androidx.annotation.Nullable;
 import androidx.lifecycle.Observer;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -98,7 +96,6 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.biometrics.AuthController;
-import com.android.systemui.biometrics.UdfpsController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -191,9 +188,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private static final int MSG_TIME_FORMAT_UPDATE = 344;
     private static final int MSG_REQUIRE_NFC_UNLOCK = 345;
 
-    public static final int LOCK_SCREEN_MODE_NORMAL = 0;
-    public static final int LOCK_SCREEN_MODE_LAYOUT_1 = 1;
-
     /** Biometric authentication state: Not listening. */
     private static final int BIOMETRIC_STATE_STOPPED = 0;
 
@@ -277,7 +271,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private boolean mBouncer; // true if bouncerIsOrWillBeShowing
     private boolean mAuthInterruptActive;
     private boolean mNeedsSlowUnlockTransition;
-    private boolean mHasLockscreenWallpaper;
     private boolean mAssistantVisible;
     private boolean mKeyguardOccluded;
     private boolean mOccludingAppRequestingFp;
@@ -285,9 +278,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private boolean mSecureCameraLaunched;
     @VisibleForTesting
     protected boolean mTelephonyCapable;
-
-    private final boolean mAcquiredHapticEnabled = false;
-    @Nullable private final Vibrator mVibrator;
 
     // Device provisioning state
     private boolean mDeviceProvisioned;
@@ -1407,7 +1397,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     @VisibleForTesting
     final FingerprintManager.AuthenticationCallback mFingerprintAuthenticationCallback
             = new AuthenticationCallback() {
-                private boolean mPlayedAcquiredHaptic;
 
                 @Override
                 public void onAuthenticationFailed() {
@@ -1419,11 +1408,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     Trace.beginSection("KeyguardUpdateMonitor#onAuthenticationSucceeded");
                     handleFingerprintAuthenticated(result.getUserId(), result.isStrongBiometric());
                     Trace.endSection();
-
-                    // on auth success, we sometimes never received an acquired haptic
-                    if (!mPlayedAcquiredHaptic && isUdfpsEnrolled()) {
-                        playAcquiredHaptic();
-                    }
                 }
 
                 @Override
@@ -1439,17 +1423,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 @Override
                 public void onAuthenticationAcquired(int acquireInfo) {
                     handleFingerprintAcquired(acquireInfo);
-                    if (acquireInfo == FingerprintManager.FINGERPRINT_ACQUIRED_GOOD
-                            && isUdfpsEnrolled()) {
-                        mPlayedAcquiredHaptic = true;
-                        playAcquiredHaptic();
-                    }
                 }
 
                 @Override
                 public void onUdfpsPointerDown(int sensorId) {
                     Log.d(TAG, "onUdfpsPointerDown, sensorId: " + sensorId);
-                    mPlayedAcquiredHaptic = false;
                 }
 
                 @Override
@@ -1457,17 +1435,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     Log.d(TAG, "onUdfpsPointerUp, sensorId: " + sensorId);
                 }
             };
-
-    /**
-     * Play haptic to signal udfps fingeprrint acquired.
-     */
-    @VisibleForTesting
-    public void playAcquiredHaptic() {
-        if (mAcquiredHapticEnabled && mVibrator != null) {
-            mVibrator.vibrate(UdfpsController.EFFECT_CLICK,
-                    UdfpsController.VIBRATION_SONIFICATION_ATTRIBUTES);
-        }
-    }
 
     private final FaceManager.FaceDetectionCallback mFaceDetectionCallback
             = (sensorId, userId, isStrongBiometric) -> {
@@ -1772,8 +1739,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             AuthController authController,
             TelephonyListenerManager telephonyListenerManager,
             FeatureFlags featureFlags,
-            InteractionJankMonitor interactionJankMonitor,
-            @Nullable Vibrator vibrator) {
+            InteractionJankMonitor interactionJankMonitor
+    ) {
         mContext = context;
         mSubscriptionManager = SubscriptionManager.from(context);
         mTelephonyListenerManager = telephonyListenerManager;
@@ -1789,7 +1756,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mLockPatternUtils = lockPatternUtils;
         mAuthController = authController;
         dumpManager.registerDumpable(getClass().getName(), this);
-        mVibrator = vibrator;
 
         mHandler = new Handler(mainLooper) {
             @Override
@@ -1897,9 +1863,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         break;
                     case MSG_KEYGUARD_GOING_AWAY:
                         handleKeyguardGoingAway((boolean) msg.obj);
-                        break;
-                    case MSG_LOCK_SCREEN_MODE:
-                        handleLockScreenMode();
                         break;
                     case MSG_TIME_FORMAT_UPDATE:
                         handleTimeFormatUpdate((String) msg.obj);
@@ -2042,8 +2005,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             }
         }
 
-        updateLockScreenMode(featureFlags.isKeyguardLayoutEnabled());
-
         mTimeFormatChangeObserver = new ContentObserver(mHandler) {
             @Override
             public void onChange(boolean selfChange) {
@@ -2057,14 +2018,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.TIME_12_24),
                 false, mTimeFormatChangeObserver, UserHandle.USER_ALL);
-    }
-
-    private void updateLockScreenMode(boolean isEnabled) {
-        final int newMode = isEnabled ? LOCK_SCREEN_MODE_LAYOUT_1 : LOCK_SCREEN_MODE_NORMAL;
-        if (newMode != mLockScreenMode) {
-            mLockScreenMode = newMode;
-            mHandler.sendEmptyMessage(MSG_LOCK_SCREEN_MODE);
-        }
     }
 
     private void updateUdfpsEnrolled(int userId) {
@@ -2579,31 +2532,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     /**
-     * Update the state whether Keyguard currently has a lockscreen wallpaper.
-     *
-     * @param hasLockscreenWallpaper Whether Keyguard has a lockscreen wallpaper.
-     */
-    public void setHasLockscreenWallpaper(boolean hasLockscreenWallpaper) {
-        Assert.isMainThread();
-        if (hasLockscreenWallpaper != mHasLockscreenWallpaper) {
-            mHasLockscreenWallpaper = hasLockscreenWallpaper;
-            for (int i = 0; i < mCallbacks.size(); i++) {
-                KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
-                if (cb != null) {
-                    cb.onHasLockscreenWallpaperChanged(hasLockscreenWallpaper);
-                }
-            }
-        }
-    }
-
-    /**
-     * @return Whether Keyguard has a lockscreen wallpaper.
-     */
-    public boolean hasLockscreenWallpaper() {
-        return mHasLockscreenWallpaper;
-    }
-
-    /**
      * Handle {@link #MSG_DPM_STATE_CHANGED}
      */
     private void handleDevicePolicyManagerStateChanged(int userId) {
@@ -2717,20 +2645,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
                 cb.onTimeChanged();
-            }
-        }
-    }
-
-    /**
-     * Handle {@link #MSG_LOCK_SCREEN_MODE}
-     */
-    private void handleLockScreenMode() {
-        Assert.isMainThread();
-        if (DEBUG) Log.d(TAG, "handleLockScreenMode(" + mLockScreenMode + ")");
-        for (int i = 0; i < mCallbacks.size(); i++) {
-            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
-            if (cb != null) {
-                cb.onLockScreenModeChanged(mLockScreenMode);
             }
         }
     }
@@ -3113,7 +3027,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         callback.onKeyguardOccludedChanged(mKeyguardOccluded);
         callback.onKeyguardVisibilityChangedRaw(mKeyguardIsVisible);
         callback.onTelephonyCapable(mTelephonyCapable);
-        callback.onLockScreenModeChanged(mLockScreenMode);
 
         for (Entry<Integer, SimData> data : mSimDatas.entrySet()) {
             final SimData state = data.getValue();

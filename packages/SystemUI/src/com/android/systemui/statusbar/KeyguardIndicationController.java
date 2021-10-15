@@ -147,7 +147,6 @@ public class KeyguardIndicationController {
     private boolean mBatteryPresent = true;
     private long mChargingTimeRemaining;
     private String mMessageToShowOnScreenOn;
-    protected int mLockScreenMode;
     private boolean mInited;
 
     private KeyguardUpdateMonitorCallback mUpdateMonitorCallback;
@@ -861,11 +860,6 @@ public class KeyguardIndicationController {
 
     protected class BaseKeyguardCallback extends KeyguardUpdateMonitorCallback {
         public static final int HIDE_DELAY_MS = 5000;
-
-        @Override
-        public void onLockScreenModeChanged(int mode) {
-            mLockScreenMode = mode;
-        }
 
         @Override
         public void onRefreshBatteryInfo(BatteryStatus status) {

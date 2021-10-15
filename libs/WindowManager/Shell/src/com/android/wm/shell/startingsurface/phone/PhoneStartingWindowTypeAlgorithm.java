@@ -23,6 +23,7 @@ import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_NONE;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SNAPSHOT;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_CREATED;
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_DRAWN;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_LEGACY_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_NEW_TASK;
@@ -41,7 +42,7 @@ import com.android.wm.shell.startingsurface.StartingWindowTypeAlgorithm;
 
 /**
  * Algorithm for determining the type of a new starting window on handheld devices.
- * At the moment also used on Android Auto.
+ * At the moment also used on Android Auto and Wear OS.
  */
 public class PhoneStartingWindowTypeAlgorithm implements StartingWindowTypeAlgorithm {
     private static final String TAG = PhoneStartingWindowTypeAlgorithm.class.getSimpleName();
@@ -58,6 +59,7 @@ public class PhoneStartingWindowTypeAlgorithm implements StartingWindowTypeAlgor
                 (parameter & TYPE_PARAMETER_USE_EMPTY_SPLASH_SCREEN) != 0;
         final boolean legacySplashScreen =
                 ((parameter & TYPE_PARAMETER_LEGACY_SPLASH_SCREEN) != 0);
+        final boolean activityDrawn = (parameter & TYPE_PARAMETER_ACTIVITY_DRAWN) != 0;
         final boolean topIsHome = windowInfo.taskInfo.topActivityType == ACTIVITY_TYPE_HOME;
 
         if (DEBUG_SPLASH_SCREEN || DEBUG_TASK_SNAPSHOT) {
@@ -68,11 +70,14 @@ public class PhoneStartingWindowTypeAlgorithm implements StartingWindowTypeAlgor
                     + " activityCreated:" + activityCreated
                     + " useEmptySplashScreen:" + useEmptySplashScreen
                     + " legacySplashScreen:" + legacySplashScreen
+                    + " activityDrawn:" + activityDrawn
                     + " topIsHome:" + topIsHome);
         }
 
         if (!topIsHome) {
-            if (!processRunning || newTask || (taskSwitch && !activityCreated)) {
+            if (!processRunning
+                    || newTask
+                    || (taskSwitch && (!activityCreated || !activityDrawn))) {
                 return useEmptySplashScreen
                         ? STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN
                         : legacySplashScreen

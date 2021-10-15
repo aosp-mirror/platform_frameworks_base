@@ -19,6 +19,7 @@ package com.android.server.timezonedetector.location;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import android.platform.test.annotations.Presubmit;
+import android.service.timezone.TimeZoneProviderEvent;
 import android.service.timezone.TimeZoneProviderSuggestion;
 
 import org.junit.Test;

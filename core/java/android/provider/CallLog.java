@@ -706,6 +706,25 @@ public class CallLog {
 
     /**
      * Contains the recent calls.
+     * <p>
+     * Note: If you want to query the call log and limit the results to a single value, you should
+     * append the {@link #LIMIT_PARAM_KEY} parameter to the content URI.  For example:
+     * <pre>
+     * {@code
+     * getContentResolver().query(
+     *                 Calls.CONTENT_URI.buildUpon().appendQueryParameter(LIMIT_PARAM_KEY, "1")
+     *                 .build(),
+     *                 null, null, null, null);
+     * }
+     * </pre>
+     * <p>
+     * The call log provider enforces strict SQL grammar, so you CANNOT append "LIMIT" to the SQL
+     * query as below:
+     * <pre>
+     * {@code
+     * getContentResolver().query(Calls.CONTENT_URI, null, "LIMIT 1", null, null);
+     * }
+     * </pre>
      */
     public static class Calls implements BaseColumns {
         /**

@@ -24,9 +24,6 @@
 
     <bool name="flag_monet">true</bool>
 
-    <!-- AOD/Lockscreen alternate layout -->
-    <bool name="flag_keyguard_layout">true</bool>
-
     <!-- People Tile flag -->
     <bool name="flag_conversations">false</bool>
 
@@ -51,7 +48,7 @@
 
     <bool name="flag_ongoing_call_status_bar_chip">true</bool>
 
-    <bool name="flag_ongoing_call_in_immersive">false</bool>
+    <bool name="flag_ongoing_call_in_immersive">true</bool>
 
     <bool name="flag_ongoing_call_in_immersive_chip_tap">true</bool>
 

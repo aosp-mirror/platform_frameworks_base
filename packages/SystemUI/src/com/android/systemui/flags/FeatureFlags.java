@@ -94,10 +94,6 @@ public class FeatureFlags {
         return mFlagReader.isEnabled(R.bool.flag_notification_pipeline2_rendering);
     }
 
-    public boolean isKeyguardLayoutEnabled() {
-        return mFlagReader.isEnabled(R.bool.flag_keyguard_layout);
-    }
-
     /** */
     public boolean useNewLockscreenAnimations() {
         return mFlagReader.isEnabled(R.bool.flag_lockscreen_animations);

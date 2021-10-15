@@ -88,7 +88,7 @@ public class KeyguardStatusView extends GridLayout {
             mClockView.setAccessibilityDelegate(new KeyguardClockAccessibilityDelegate(mContext));
         }
 
-        mKeyguardSlice = findViewById(R.id.keyguard_status_area);
+        mKeyguardSlice = findViewById(R.id.keyguard_slice_view);
         mTextColor = mClockView.getCurrentTextColor();
 
         mKeyguardSlice.setContentChangeListener(this::onSliceContentChanged);

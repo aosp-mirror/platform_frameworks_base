@@ -77,9 +77,8 @@ final class RampDownAdapter implements VibrationEffectAdapters.SegmentsAdapter<V
      */
     private int addRampDownToZeroAmplitudeSegments(List<VibrationEffectSegment> segments,
             int repeatIndex) {
-        int newRepeatIndex = repeatIndex;
-        int newSegmentCount = segments.size();
-        for (int i = 1; i < newSegmentCount; i++) {
+        int segmentCount = segments.size();
+        for (int i = 1; i < segmentCount; i++) {
             VibrationEffectSegment previousSegment = segments.get(i - 1);
             if (!isOffSegment(segments.get(i))
                     || !endsWithNonZeroAmplitude(previousSegment)) {
@@ -116,16 +115,23 @@ final class RampDownAdapter implements VibrationEffectAdapters.SegmentsAdapter<V
             if (replacementSegments != null) {
                 int segmentsAdded = replacementSegments.size() - 1;
 
-                segments.remove(i);
+                VibrationEffectSegment originalOffSegment = segments.remove(i);
                 segments.addAll(i, replacementSegments);
-                if (repeatIndex > i) {
-                    newRepeatIndex += segmentsAdded;
+                if (repeatIndex >= i) {
+                    if (repeatIndex == i) {
+                        // This effect is repeating to the removed off segment: add it back at the
+                        // end of the vibration so the loop timings are preserved, and skip it.
+                        segments.add(originalOffSegment);
+                        repeatIndex++;
+                        segmentCount++;
+                    }
+                    repeatIndex += segmentsAdded;
                 }
                 i += segmentsAdded;
-                newSegmentCount += segmentsAdded;
+                segmentCount += segmentsAdded;
             }
         }
-        return newRepeatIndex;
+        return repeatIndex;
     }
 
     /**

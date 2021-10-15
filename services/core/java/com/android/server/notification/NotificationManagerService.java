@@ -36,6 +36,7 @@ import static android.app.NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
 import static android.app.NotificationManager.EXTRA_AUTOMATIC_ZEN_RULE_ID;
 import static android.app.NotificationManager.EXTRA_AUTOMATIC_ZEN_RULE_STATUS;
+import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
@@ -291,6 +292,7 @@ import com.android.server.notification.toast.CustomToastRecord;
 import com.android.server.notification.toast.TextToastRecord;
 import com.android.server.notification.toast.ToastRecord;
 import com.android.server.pm.PackageManagerService;
+import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.utils.quota.MultiRateLimiter;
@@ -489,6 +491,7 @@ public class NotificationManagerService extends SystemService {
     private UserManager mUm;
     private IPlatformCompat mPlatformCompat;
     private ShortcutHelper mShortcutHelper;
+    private PermissionHelper mPermissionHelper;
 
     final IBinder mForegroundToken = new Binder();
     private WorkerHandler mHandler;
@@ -606,6 +609,7 @@ public class NotificationManagerService extends SystemService {
 
     private int mWarnRemoteViewsSizeBytes;
     private int mStripRemoteViewsSizeBytes;
+    final boolean mEnableAppSettingMigration;
 
     private MetricsLogger mMetricsLogger;
     private TriPredicate<String, Integer, String> mAllowedManagedServicePackages;
@@ -2003,6 +2007,12 @@ public class NotificationManagerService extends SystemService {
         mNotificationRecordLogger = notificationRecordLogger;
         mNotificationInstanceIdSequence = notificationInstanceIdSequence;
         Notification.processAllowlistToken = ALLOWLIST_TOKEN;
+        // TODO (b/194833441): remove when OS is ready for migration. This flag is checked once
+        // rather than having a settings observer because some of the behaviors (e.g. readXml) only
+        // happen on reboot
+        mEnableAppSettingMigration = Settings.Secure.getIntForUser(
+                getContext().getContentResolver(),
+                Settings.Secure.NOTIFICATION_PERMISSION_ENABLED, 0, USER_SYSTEM) == 1;
     }
 
     // TODO - replace these methods with new fields in the VisibleForTesting constructor
@@ -2169,7 +2179,7 @@ public class NotificationManagerService extends SystemService {
             UriGrantsManagerInternal ugmInternal, AppOpsManager appOps, UserManager userManager,
             NotificationHistoryManager historyManager, StatsManager statsManager,
             TelephonyManager telephonyManager, ActivityManagerInternal ami,
-            MultiRateLimiter toastRateLimiter) {
+            MultiRateLimiter toastRateLimiter, PermissionHelper permissionHelper) {
         mHandler = handler;
         Resources resources = getContext().getResources();
         mMaxPackageEnqueueRate = Settings.Global.getFloat(getContext().getContentResolver(),
@@ -2275,6 +2285,7 @@ public class NotificationManagerService extends SystemService {
         mGroupHelper = groupHelper;
         mVibratorHelper = new VibratorHelper(getContext());
         mHistoryManager = historyManager;
+        mPermissionHelper = permissionHelper;
 
         // This is a ManagedServices object that keeps track of the listeners.
         mListeners = notificationListeners;
@@ -2480,7 +2491,9 @@ public class NotificationManagerService extends SystemService {
                         Context.STATS_MANAGER),
                 getContext().getSystemService(TelephonyManager.class),
                 LocalServices.getService(ActivityManagerInternal.class),
-                createToastRateLimiter());
+                createToastRateLimiter(), new PermissionHelper(LocalServices.getService(
+                        PermissionManagerServiceInternal.class), AppGlobals.getPackageManager(),
+                        AppGlobals.getPermissionManager(), mEnableAppSettingMigration));
 
         publishBinderService(Context.NOTIFICATION_SERVICE, mService, /* allowIsolated= */ false,
                 DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PRIORITY_NORMAL);
@@ -3411,17 +3424,24 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void setNotificationsEnabledForPackage(String pkg, int uid, boolean enabled) {
             enforceSystemOrSystemUI("setNotificationsEnabledForPackage");
-
-            synchronized (mNotificationLock) {
-                boolean wasEnabled = mPreferencesHelper.getImportance(pkg, uid)
-                        != NotificationManager.IMPORTANCE_NONE;
-
+            if (mEnableAppSettingMigration) {
+                boolean wasEnabled = mPermissionHelper.hasPermission(uid);
                 if (wasEnabled == enabled) {
                     return;
                 }
-            }
+                mPermissionHelper.setNotificationPermission(pkg, uid, enabled, true);
+            } else {
+                synchronized (mNotificationLock) {
+                    boolean wasEnabled = mPreferencesHelper.getImportance(pkg, uid)
+                            != NotificationManager.IMPORTANCE_NONE;
 
-            mPreferencesHelper.setEnabled(pkg, uid, enabled);
+                    if (wasEnabled == enabled) {
+                        return;
+                    }
+                }
+
+                mPreferencesHelper.setEnabled(pkg, uid, enabled);
+            }
             mMetricsLogger.write(new LogMaker(MetricsEvent.ACTION_BAN_APP_NOTES)
                     .setType(MetricsEvent.TYPE_ACTION)
                     .setPackageName(pkg)
@@ -3489,7 +3509,11 @@ public class NotificationManagerService extends SystemService {
                         "canNotifyAsPackage for uid " + uid);
             }
 
-            return mPreferencesHelper.getImportance(pkg, uid) != IMPORTANCE_NONE;
+            if (mEnableAppSettingMigration) {
+                return mPermissionHelper.hasPermission(uid);
+            } else {
+                return mPreferencesHelper.getImportance(pkg, uid) != IMPORTANCE_NONE;
+            }
         }
 
         /**
@@ -3581,7 +3605,15 @@ public class NotificationManagerService extends SystemService {
         @Override
         public int getPackageImportance(String pkg) {
             checkCallerIsSystemOrSameApp(pkg);
-            return mPreferencesHelper.getImportance(pkg, Binder.getCallingUid());
+            if (mEnableAppSettingMigration) {
+                if (mPermissionHelper.hasPermission(Binder.getCallingUid())) {
+                    return IMPORTANCE_DEFAULT;
+                } else {
+                    return IMPORTANCE_NONE;
+                }
+            } else {
+                return mPreferencesHelper.getImportance(pkg, Binder.getCallingUid());
+            }
         }
 
         @Override
@@ -6253,11 +6285,17 @@ public class NotificationManagerService extends SystemService {
                     + ", notificationUid=" + notificationUid
                     + ", notification=" + notification;
             Slog.e(TAG, noChannelStr);
-            boolean appNotificationsOff = mPreferencesHelper.getImportance(pkg, notificationUid)
-                    == NotificationManager.IMPORTANCE_NONE;
+            boolean appNotificationsOff;
+            if (mEnableAppSettingMigration) {
+                appNotificationsOff = !mPermissionHelper.hasPermission(notificationUid);
+            } else {
+                appNotificationsOff = mPreferencesHelper.getImportance(pkg, notificationUid)
+                        == NotificationManager.IMPORTANCE_NONE;
+            }
 
             if (!appNotificationsOff) {
-                doChannelWarningToast("Developer warning for package \"" + pkg + "\"\n" +
+                doChannelWarningToast(notificationUid,
+                        "Developer warning for package \"" + pkg + "\"\n" +
                         "Failed to post notification on channel \"" + channelId + "\"\n" +
                         "See log for more details");
             }
@@ -6503,7 +6541,7 @@ public class NotificationManagerService extends SystemService {
                 }
             };
 
-    private void doChannelWarningToast(CharSequence toastText) {
+    protected void doChannelWarningToast(int forUid, CharSequence toastText) {
         Binder.withCleanCallingIdentity(() -> {
             final int defaultWarningEnabled = Build.IS_DEBUGGABLE ? 1 : 0;
             final boolean warningEnabled = Settings.Global.getInt(getContext().getContentResolver(),
@@ -10876,7 +10914,7 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-
+    // TODO (b/194833441): remove when we've fully migrated to a permission
     class RoleObserver implements OnRoleHoldersChangedListener {
         // Role name : user id : list of approved packages
         private ArrayMap<String, ArrayMap<Integer, ArraySet<String>>> mNonBlockableDefaultApps;

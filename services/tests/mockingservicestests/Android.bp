@@ -45,7 +45,6 @@ android_test {
         "service-jobscheduler",
         "service-permission.impl",
         "service-blobstore",
-        "service-appsearch",
         "androidx.test.core",
         "androidx.test.runner",
         "androidx.test.ext.truth",
