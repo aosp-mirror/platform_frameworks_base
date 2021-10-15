@@ -21,8 +21,6 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
-import android.system.ErrnoException;
-import android.system.Os;
 
 import java.io.Closeable;
 import java.io.FileDescriptor;
@@ -205,22 +203,19 @@ public class AssetFileDescriptor implements Parcelable, Closeable {
      */
     public static class AutoCloseInputStream
             extends ParcelFileDescriptor.AutoCloseInputStream {
-        private long mTotalSize;
-        private final long mFileOffset;
-        private long mOffset;
+        private long mRemaining;
         
         public AutoCloseInputStream(AssetFileDescriptor fd) throws IOException {
             super(fd.getParcelFileDescriptor());
-            mTotalSize = fd.getLength();
-            mFileOffset = fd.getStartOffset();
+            super.skip(fd.getStartOffset());
+            mRemaining = (int)fd.getLength();
         }
 
         @Override
         public int available() throws IOException {
-            long available = mTotalSize - mOffset;
-            return available >= 0
-                    ? (available < 0x7fffffff ? (int) available : 0x7fffffff)
-                    : 0;
+            return mRemaining >= 0
+                    ? (mRemaining < 0x7fffffff ? (int)mRemaining : 0x7fffffff)
+                    : super.available();
         }
 
         @Override
@@ -232,21 +227,15 @@ public class AssetFileDescriptor implements Parcelable, Closeable {
 
         @Override
         public int read(byte[] buffer, int offset, int count) throws IOException {
-            int available = available();
-            if (available <= 0) {
-                return -1;
-            }
-
-            if (count > available) count = available;
-            try {
-                int res = Os.pread(getFD(), buffer, offset, count, mFileOffset + mOffset);
-                // pread returns 0 at end of file, while java's InputStream interface requires -1
-                if (res == 0) res = -1;
-                if (res >= 0) mOffset += res;
+            if (mRemaining >= 0) {
+                if (mRemaining == 0) return -1;
+                if (count > mRemaining) count = (int)mRemaining;
+                int res = super.read(buffer, offset, count);
+                if (res >= 0) mRemaining -= res;
                 return res;
-            } catch (ErrnoException e) {
-                throw new IOException(e);
             }
+            
+            return super.read(buffer, offset, count);
         }
 
         @Override
@@ -256,31 +245,41 @@ public class AssetFileDescriptor implements Parcelable, Closeable {
 
         @Override
         public long skip(long count) throws IOException {
-            int available = available();
-            if (available <= 0) {
-                return -1;
+            if (mRemaining >= 0) {
+                if (mRemaining == 0) return -1;
+                if (count > mRemaining) count = mRemaining;
+                long res = super.skip(count);
+                if (res >= 0) mRemaining -= res;
+                return res;
             }
-
-            if (count > available) count = available;
-            mOffset += count;
-            return count;
+            
+            return super.skip(count);
         }
 
         @Override
         public void mark(int readlimit) {
-            // Not supported.
-            return;
+            if (mRemaining >= 0) {
+                // Not supported.
+                return;
+            }
+            super.mark(readlimit);
         }
 
         @Override
         public boolean markSupported() {
-            return false;
+            if (mRemaining >= 0) {
+                return false;
+            }
+            return super.markSupported();
         }
 
         @Override
         public synchronized void reset() throws IOException {
-            // Not supported.
-            return;
+            if (mRemaining >= 0) {
+                // Not supported.
+                return;
+            }
+            super.reset();
         }
     }
 
