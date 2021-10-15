@@ -107,7 +107,6 @@ public class StagingManager {
     private final PowerManager mPowerManager;
     private final Context mContext;
     @VisibleForTesting
-    final PreRebootVerificationHandler mPreRebootVerificationHandler;
     private final Supplier<PackageParser2> mPackageParserSupplier;
 
     private final File mFailureReasonFile = new File("/metadata/staged-install/failure_reason.txt");
@@ -173,7 +172,6 @@ public class StagingManager {
 
         mApexManager = apexManager;
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-        mPreRebootVerificationHandler = new PreRebootVerificationHandler(looper);
 
         if (mFailureReasonFile.exists()) {
             try (BufferedReader reader = new BufferedReader(new FileReader(mFailureReasonFile))) {
@@ -663,10 +661,16 @@ public class StagingManager {
         }
     }
 
+    @VisibleForTesting
     void commitSession(@NonNull StagedSession session) {
-        // Store this parent session which will be used to check overlapping later
         createSession(session);
-        mPreRebootVerificationHandler.startPreRebootVerification(session);
+        handleCommittedSession(session);
+    }
+
+    private void handleCommittedSession(@NonNull StagedSession session) {
+        if (session.isSessionReady() && session.containsApexSession()) {
+            notifyStagedApexObservers();
+        }
     }
 
     private int getSessionIdForParentOrSelf(StagedSession session) {
@@ -1230,239 +1234,6 @@ public class StagingManager {
                     observer.onApexStaged(event);
                 } catch (RemoteException re) {
                     Slog.w(TAG, "Failed to contact the observer " + re.getMessage());
-                }
-            }
-        }
-    }
-
-    @VisibleForTesting
-    final class PreRebootVerificationHandler extends Handler {
-
-        PreRebootVerificationHandler(Looper looper) {
-            super(looper);
-        }
-
-        /**
-         * Handler for states of pre reboot verification. The states are arranged linearly (shown
-         * below) with each state either calling the next state, or calling some other method that
-         * eventually calls the next state.
-         *
-         * <p><ul>
-         *     <li>MSG_PRE_REBOOT_VERIFICATION_START</li>
-         *     <li>MSG_PRE_REBOOT_VERIFICATION_APEX</li>
-         *     <li>MSG_PRE_REBOOT_VERIFICATION_END</li>
-         * </ul></p>
-         *
-         * Details about each of state can be found in corresponding handler of node.
-         */
-        private static final int MSG_PRE_REBOOT_VERIFICATION_START = 1;
-        private static final int MSG_PRE_REBOOT_VERIFICATION_APEX = 2;
-        @VisibleForTesting
-        static final int MSG_PRE_REBOOT_VERIFICATION_END = 3;
-
-        @Override
-        public void handleMessage(Message msg) {
-            final int sessionId = msg.arg1;
-            final int rollbackId = msg.arg2;
-            final StagedSession session = (StagedSession) msg.obj;
-            if (session.isDestroyed() || session.isSessionFailed()) {
-                // No point in running verification on a destroyed/failed session
-                onPreRebootVerificationComplete(session);
-                return;
-            }
-            try {
-                switch (msg.what) {
-                    case MSG_PRE_REBOOT_VERIFICATION_START:
-                        handlePreRebootVerification_Start(session);
-                        break;
-                    case MSG_PRE_REBOOT_VERIFICATION_APEX:
-                        handlePreRebootVerification_Apex(session, rollbackId);
-                        break;
-                    case MSG_PRE_REBOOT_VERIFICATION_END:
-                        handlePreRebootVerification_End(session);
-                        break;
-                }
-            } catch (Exception e) {
-                Slog.e(TAG, "Pre-reboot verification failed due to unhandled exception", e);
-                onPreRebootVerificationFailure(session,
-                        SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
-                        "Pre-reboot verification failed due to unhandled exception: " + e);
-            }
-        }
-
-        // Method for starting the pre-reboot verification
-        private synchronized void startPreRebootVerification(
-                @NonNull StagedSession session) {
-            mBootCompleted.thenRun(() -> {
-                int sessionId = session.sessionId();
-                Slog.d(TAG, "Starting preRebootVerification for session " + sessionId);
-                obtainMessage(MSG_PRE_REBOOT_VERIFICATION_START, sessionId, -1, session)
-                        .sendToTarget();
-            });
-        }
-
-        private void onPreRebootVerificationFailure(StagedSession session,
-                @SessionInfo.StagedSessionErrorCode int errorCode, String errorMessage) {
-            if (!ensureActiveApexSessionIsAborted(session)) {
-                Slog.e(TAG, "Failed to abort apex session " + session.sessionId());
-                // Safe to ignore active apex session abortion failure since session will be marked
-                // failed on next step and staging directory for session will be deleted.
-            }
-            session.setSessionFailed(errorCode, errorMessage);
-            onPreRebootVerificationComplete(session);
-        }
-
-        // Things to do when pre-reboot verification completes for a particular sessionId
-        private void onPreRebootVerificationComplete(StagedSession session) {
-            int sessionId = session.sessionId();
-            Slog.d(TAG, "Stopping preRebootVerification for session " + sessionId);
-            session.notifyEndPreRebootVerification();
-        }
-
-        private void notifyPreRebootVerification_Start_Complete(
-                @NonNull StagedSession session, int rollbackId) {
-            obtainMessage(MSG_PRE_REBOOT_VERIFICATION_APEX, session.sessionId(), rollbackId,
-                    session).sendToTarget();
-        }
-
-        private void notifyPreRebootVerification_Apex_Complete(
-                @NonNull StagedSession session) {
-            obtainMessage(MSG_PRE_REBOOT_VERIFICATION_END, session.sessionId(), -1, session)
-                    .sendToTarget();
-        }
-
-        /**
-         * A placeholder state for starting the pre reboot verification.
-         *
-         * See {@link PreRebootVerificationHandler} to see all nodes of pre reboot verification
-         */
-        private void handlePreRebootVerification_Start(@NonNull StagedSession session) {
-            try {
-                if (session.isMultiPackage()) {
-                    for (StagedSession s : session.getChildSessions()) {
-                        checkNonOverlappingWithStagedSessions(s);
-                    }
-                } else {
-                    checkNonOverlappingWithStagedSessions(session);
-                }
-            } catch (PackageManagerException e) {
-                onPreRebootVerificationFailure(session, e.error, e.getMessage());
-                return;
-            }
-
-            int rollbackId = -1;
-            if ((session.sessionParams().installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK)
-                    != 0) {
-                // If rollback is enabled for this session, we call through to the RollbackManager
-                // with the list of sessions it must enable rollback for. Note that
-                // notifyStagedSession is a synchronous operation.
-                final RollbackManagerInternal rm =
-                        LocalServices.getService(RollbackManagerInternal.class);
-                try {
-                    // NOTE: To stay consistent with the non-staged install flow, we don't fail the
-                    // entire install if rollbacks can't be enabled.
-                    rollbackId = rm.notifyStagedSession(session.sessionId());
-                } catch (RuntimeException re) {
-                    Slog.e(TAG, "Failed to notifyStagedSession for session: "
-                            + session.sessionId(), re);
-                }
-            } else if (session.sessionParams().installReason
-                    == PackageManager.INSTALL_REASON_ROLLBACK) {
-                try {
-                    rollbackId = retrieveRollbackIdForCommitSession(session.sessionId());
-                } catch (PackageManagerException e) {
-                    onPreRebootVerificationFailure(session, e.error, e.getMessage());
-                    return;
-                }
-            }
-
-            notifyPreRebootVerification_Start_Complete(session, rollbackId);
-        }
-
-        /**
-         * Pre-reboot verification state for apex files:
-         *
-         * <p><ul>
-         *     <li>submits session to apex service</li>
-         *     <li>validates signatures of apex files</li>
-         * </ul></p>
-         */
-        private void handlePreRebootVerification_Apex(
-                @NonNull StagedSession session, int rollbackId) {
-            final boolean hasApex = session.containsApexSession();
-
-            // APEX checks. For single-package sessions, check if they contain an APEX. For
-            // multi-package sessions, find all the child sessions that contain an APEX.
-            if (hasApex) {
-                final List<PackageInfo> apexPackages;
-                try {
-                    apexPackages = submitSessionToApexService(session, rollbackId);
-                    for (int i = 0, size = apexPackages.size(); i < size; i++) {
-                        validateApexSignature(apexPackages.get(i));
-                    }
-                } catch (PackageManagerException e) {
-                    onPreRebootVerificationFailure(session, e.error, e.getMessage());
-                    return;
-                }
-
-                final PackageManagerInternal packageManagerInternal =
-                        LocalServices.getService(PackageManagerInternal.class);
-                packageManagerInternal.pruneCachedApksInApex(apexPackages);
-            }
-
-            notifyPreRebootVerification_Apex_Complete(session);
-        }
-
-        /**
-         * Pre-reboot verification state for wrapping up:
-         * <p><ul>
-         *     <li>enables rollback if required</li>
-         *     <li>marks session as ready</li>
-         * </ul></p>
-         */
-        private void handlePreRebootVerification_End(@NonNull StagedSession session) {
-            // Before marking the session as ready, start checkpoint service if available
-            try {
-                if (PackageHelper.getStorageManager().supportsCheckpoint()) {
-                    PackageHelper.getStorageManager().startCheckpoint(2);
-                }
-            } catch (Exception e) {
-                // Failed to get hold of StorageManager
-                Slog.e(TAG, "Failed to get hold of StorageManager", e);
-                onPreRebootVerificationFailure(session, SessionInfo.STAGED_SESSION_UNKNOWN,
-                        "Failed to get hold of StorageManager");
-                return;
-            }
-
-            // Stop pre-reboot verification before marking session ready. From this point on, if we
-            // abandon the session then it will be cleaned up immediately. If session is abandoned
-            // after this point, then even if for some reason system tries to install the session
-            // or activate its apex, there won't be any files to work with as they will be cleaned
-            // up by the system as part of abandonment. If session is abandoned before this point,
-            // then the session is already destroyed and cannot be marked ready anymore.
-            onPreRebootVerificationComplete(session);
-
-            // Proactively mark session as ready before calling apexd. Although this call order
-            // looks counter-intuitive, this is the easiest way to ensure that session won't end up
-            // in the inconsistent state:
-            //  - If device gets rebooted right before call to apexd, then apexd will never activate
-            //      apex files of this staged session. This will result in StagingManager failing
-            //      the session.
-            // On the other hand, if the order of the calls was inverted (first call apexd, then
-            // mark session as ready), then if a device gets rebooted right after the call to apexd,
-            // only apex part of the train will be applied, leaving device in an inconsistent state.
-            Slog.d(TAG, "Marking session " + session.sessionId() + " as ready");
-            session.setSessionReady();
-            if (session.isSessionReady()) {
-                final boolean hasApex = session.containsApexSession();
-                if (hasApex) {
-                    try {
-                        mApexManager.markStagedSessionReady(session.sessionId());
-                        notifyStagedApexObservers();
-                    } catch (PackageManagerException e) {
-                        session.setSessionFailed(e.error, e.getMessage());
-                        return;
-                    }
                 }
             }
         }

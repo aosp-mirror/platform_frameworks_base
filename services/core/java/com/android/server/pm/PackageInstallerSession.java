@@ -2692,7 +2692,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // staged session or not. For a staged session, we will hand it over to the staging
         // manager to complete the installation.
         if (isStaged()) {
-            mStagingManager.commitSession(mStagedSession);
+            mSessionProvider.getSessionVerifier().verifyStaged(mStagedSession, (error, msg) -> {
+                mStagedSession.notifyEndPreRebootVerification();
+                if (error == SessionInfo.STAGED_SESSION_NO_ERROR) {
+                    mStagingManager.commitSession(mStagedSession);
+                }
+            });
             return;
         }
 

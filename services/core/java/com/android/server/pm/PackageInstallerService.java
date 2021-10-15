@@ -174,6 +174,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     private final File mSessionsDir;
 
     private final InternalCallback mInternalCallback = new InternalCallback();
+    private final PackageSessionVerifier mSessionVerifier;
 
     /**
      * Used for generating session IDs. Since this is created at boot time,
@@ -259,6 +260,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         mApexManager = ApexManager.getInstance();
         mStagingManager = new StagingManager(context, apexParserSupplier,
                 mInstallThread.getLooper());
+        mSessionVerifier = new PackageSessionVerifier(context, mPm, mApexManager,
+                apexParserSupplier, mInstallThread.getLooper());
 
         LocalServices.getService(SystemServiceManager.class).startService(
                 new Lifecycle(context, this));
@@ -1157,6 +1160,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         synchronized (mSessions) {
             return mSessions.get(sessionId);
         }
+    }
+
+    @Override
+    public PackageSessionVerifier getSessionVerifier() {
+        return mSessionVerifier;
     }
 
     @Override

@@ -726,10 +726,9 @@ public class StagingManagerTest {
         {
             FakeStagedSession session = new FakeStagedSession(239);
             session.setIsApex(true);
-            mStagingManager.createSession(session);
-
+            session.setSessionReady();
             mockApexManagerGetStagedApexInfoWithSessionId();
-            triggerEndOfPreRebootVerification(session);
+            mStagingManager.commitSession(session);
 
             assertThat(session.isSessionReady()).isTrue();
             ArgumentCaptor<ApexStagedEvent> argumentCaptor = ArgumentCaptor.forClass(
@@ -744,9 +743,8 @@ public class StagingManagerTest {
             Mockito.clearInvocations(observer);
             FakeStagedSession session = new FakeStagedSession(240);
             session.setIsApex(true);
-            mStagingManager.createSession(session);
-
-            triggerEndOfPreRebootVerification(session);
+            session.setSessionReady();
+            mStagingManager.commitSession(session);
 
             assertThat(session.isSessionReady()).isTrue();
             ArgumentCaptor<ApexStagedEvent> argumentCaptor = ArgumentCaptor.forClass(
@@ -762,9 +760,8 @@ public class StagingManagerTest {
             Mockito.clearInvocations(observer);
             FakeStagedSession session = new FakeStagedSession(241);
             session.setIsApex(true);
-            mStagingManager.createSession(session);
-
-            triggerEndOfPreRebootVerification(session);
+            session.setSessionReady();
+            mStagingManager.commitSession(session);
 
             assertThat(session.isSessionReady()).isTrue();
             verify(observer, never()).onApexStaged(any());
@@ -800,19 +797,11 @@ public class StagingManagerTest {
 
         //  Trigger end of pre-reboot verification
         FakeStagedSession session = new FakeStagedSession(239);
-        mStagingManager.createSession(session);
+        session.setSessionReady();
+        mStagingManager.commitSession(session);
 
-        triggerEndOfPreRebootVerification(session);
         assertThat(session.isSessionReady()).isTrue();
         verify(observer, never()).onApexStaged(any());
-    }
-
-    private void triggerEndOfPreRebootVerification(StagingManager.StagedSession session) {
-        StagingManager.PreRebootVerificationHandler handler =
-                mStagingManager.mPreRebootVerificationHandler;
-        Message msg =  handler.obtainMessage(
-                handler.MSG_PRE_REBOOT_VERIFICATION_END, session.sessionId(), -1, session);
-        handler.handleMessage(msg);
     }
 
     private StagingManager.StagedSession createSession(int sessionId, String packageName,
