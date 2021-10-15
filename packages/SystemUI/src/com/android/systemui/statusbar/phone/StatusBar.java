@@ -3292,6 +3292,9 @@ public class StatusBar extends SystemUI implements
         final boolean lockDarkText = mColorExtractor.getNeutralColors().supportsDarkText();
         final int themeResId = lockDarkText ? R.style.Theme_SystemUI_LightWallpaper
                 : R.style.Theme_SystemUI;
+        if (mContext.getThemeResId() == themeResId) {
+            return;
+        }
         mContext.setTheme(themeResId);
         mConfigurationController.notifyThemeChanged();
     }
