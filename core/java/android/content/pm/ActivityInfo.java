@@ -994,9 +994,10 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * OVERRIDE_MIN_ASPECT_RATIO_MEDIUM
      * OVERRIDE_MIN_ASPECT_RATIO_LARGE
      *
-     * If OVERRIDE_MIN_ASPECT_RATIO is applied, the min aspect ratio given in the app's
-     * manifest will be overridden to the largest enabled aspect ratio treatment unless the app's
-     * manifest value is higher.
+     * If OVERRIDE_MIN_ASPECT_RATIO is applied, and the activity's orientation is fixed to
+     * portrait, the min aspect ratio given in the app's manifest will be overridden to the
+     * largest enabled aspect ratio treatment unless the app's manifest value is higher.
+     * TODO(b/203647190): add OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY instead of portrait by default
      * @hide
      */
     @ChangeId
@@ -1232,8 +1233,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * Returns true if the activity has maximum or minimum aspect ratio.
      * @hide
      */
-    public boolean hasFixedAspectRatio() {
-        return getMaxAspectRatio() != 0 || getMinAspectRatio() != 0;
+    public boolean hasFixedAspectRatio(@ScreenOrientation int orientation) {
+        return getMaxAspectRatio() != 0 || getMinAspectRatio(orientation) != 0;
     }
 
     /**
@@ -1392,10 +1393,14 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * {@code getManifestMinAspectRatio}.
      * @hide
      */
-    public float getMinAspectRatio() {
+    public float getMinAspectRatio(@ScreenOrientation int orientation) {
+        // TODO(b/203647190): check orientation only if OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY
+        // In case the activity's orientation isn't fixed to portrait, OVERRIDE_MIN_ASPECT_RATIO
+        // shouldn't be applied.
         if (applicationInfo == null || !CompatChanges.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO,
                 applicationInfo.packageName,
-                UserHandle.getUserHandleForUid(applicationInfo.uid))) {
+                UserHandle.getUserHandleForUid(applicationInfo.uid))
+                || !isFixedOrientationPortrait(orientation)) {
             return mMinAspectRatio;
         }
 
@@ -1521,9 +1526,10 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         if (getMaxAspectRatio() != 0) {
             pw.println(prefix + "maxAspectRatio=" + getMaxAspectRatio());
         }
-        if (getMinAspectRatio() != 0) {
-            pw.println(prefix + "minAspectRatio=" + getMinAspectRatio());
-            if (getManifestMinAspectRatio() !=  getMinAspectRatio()) {
+        final float minAspectRatio = getMinAspectRatio(screenOrientation);
+        if (minAspectRatio != 0) {
+            pw.println(prefix + "minAspectRatio=" + minAspectRatio);
+            if (getManifestMinAspectRatio() !=  minAspectRatio) {
                 pw.println(prefix + "getManifestMinAspectRatio=" + getManifestMinAspectRatio());
             }
         }
