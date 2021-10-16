@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -178,6 +179,10 @@ public abstract class TimeZoneProviderService extends Service {
     @Nullable
     private ITimeZoneProviderManager mManager;
 
+    /** Set by {@link #mHandler} thread. */
+    @GuardedBy("mLock")
+    private long mEventFilteringAgeThresholdMillis;
+
     /**
      * The type of the last suggestion sent to the system server. Used to de-dupe suggestions client
      * side and avoid calling into the system server unnecessarily. {@code null} means no previous
@@ -206,8 +211,9 @@ public abstract class TimeZoneProviderService extends Service {
                 if (manager != null) {
                     try {
                         TimeZoneProviderEvent thisEvent =
-                                TimeZoneProviderEvent.createSuggestionEvent(suggestion);
-                        if (!thisEvent.isEquivalentTo(mLastEventSent)) {
+                                TimeZoneProviderEvent.createSuggestionEvent(
+                                        SystemClock.elapsedRealtime(), suggestion);
+                        if (shouldSendEvent(thisEvent)) {
                             manager.onTimeZoneProviderEvent(thisEvent);
                             mLastEventSent = thisEvent;
                         }
@@ -231,8 +237,9 @@ public abstract class TimeZoneProviderService extends Service {
                 if (manager != null) {
                     try {
                         TimeZoneProviderEvent thisEvent =
-                                TimeZoneProviderEvent.createUncertainEvent();
-                        if (!thisEvent.isEquivalentTo(mLastEventSent)) {
+                                TimeZoneProviderEvent.createUncertainEvent(
+                                        SystemClock.elapsedRealtime());
+                        if (shouldSendEvent(thisEvent)) {
                             manager.onTimeZoneProviderEvent(thisEvent);
                             mLastEventSent = thisEvent;
                         }
@@ -258,8 +265,9 @@ public abstract class TimeZoneProviderService extends Service {
                     try {
                         String causeString = cause.getMessage();
                         TimeZoneProviderEvent thisEvent =
-                                TimeZoneProviderEvent.createPermanentFailureEvent(causeString);
-                        if (!thisEvent.isEquivalentTo(mLastEventSent)) {
+                                TimeZoneProviderEvent.createPermanentFailureEvent(
+                                        SystemClock.elapsedRealtime(), causeString);
+                        if (shouldSendEvent(thisEvent)) {
                             manager.onTimeZoneProviderEvent(thisEvent);
                             mLastEventSent = thisEvent;
                         }
@@ -271,10 +279,33 @@ public abstract class TimeZoneProviderService extends Service {
         });
     }
 
+    @GuardedBy("mLock")
+    private boolean shouldSendEvent(TimeZoneProviderEvent newEvent) {
+        // Always send an event if it indicates a state or suggestion change.
+        if (!newEvent.isEquivalentTo(mLastEventSent)) {
+            return true;
+        }
+
+        // Guard against implementations that generate a lot of uninteresting events in a short
+        // space of time and would cause the time_zone_detector to evaluate time zone suggestions
+        // too frequently.
+        //
+        // If the new event and last event sent are equivalent, the client will still send an update
+        // if their creation times are sufficiently different. This enables the time_zone_detector
+        // to better understand how recently the location time zone provider was certain /
+        // uncertain, which can be useful when working out ordering of events, e.g. to work out
+        // whether a suggestion was generated before or after a device left airplane mode.
+        long timeSinceLastEventMillis =
+                newEvent.getCreationElapsedMillis() - mLastEventSent.getCreationElapsedMillis();
+        return timeSinceLastEventMillis > mEventFilteringAgeThresholdMillis;
+    }
+
     private void onStartUpdatesInternal(@NonNull ITimeZoneProviderManager manager,
-            @DurationMillisLong long initializationTimeoutMillis) {
+            @DurationMillisLong long initializationTimeoutMillis,
+            @DurationMillisLong long eventFilteringAgeThresholdMillis) {
         synchronized (mLock) {
             mManager = manager;
+            mEventFilteringAgeThresholdMillis =  eventFilteringAgeThresholdMillis;
             mLastEventSent = null;
             onStartUpdates(initializationTimeoutMillis);
         }
@@ -332,9 +363,11 @@ public abstract class TimeZoneProviderService extends Service {
     private class TimeZoneProviderServiceWrapper extends ITimeZoneProvider.Stub {
 
         public void startUpdates(@NonNull ITimeZoneProviderManager manager,
-                @DurationMillisLong long initializationTimeoutMillis) {
+                @DurationMillisLong long initializationTimeoutMillis,
+                @DurationMillisLong long eventFilteringAgeThresholdMillis) {
             Objects.requireNonNull(manager);
-            mHandler.post(() -> onStartUpdatesInternal(manager, initializationTimeoutMillis));
+            mHandler.post(() -> onStartUpdatesInternal(
+                    manager, initializationTimeoutMillis, eventFilteringAgeThresholdMillis));
         }
 
         public void stopUpdates() {

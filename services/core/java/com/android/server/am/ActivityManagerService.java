@@ -188,6 +188,7 @@ import android.app.SyncNotedAppOp;
 import android.app.WaitResult;
 import android.app.backup.BackupManager.OperationType;
 import android.app.backup.IBackupManager;
+import android.app.compat.CompatChanges;
 import android.app.job.JobParameters;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageEvents.Event;
@@ -195,7 +196,6 @@ import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetManagerInternal;
-import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.AttributionSource;
@@ -12517,11 +12517,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         ProcessRecord callerApp = null;
         final boolean visibleToInstantApps
                 = (flags & Context.RECEIVER_VISIBLE_TO_INSTANT_APPS) != 0;
-        // Dynamic receivers are exported by default for versions prior to T
-        final boolean exported =
-                ((flags & Context.RECEIVER_EXPORTED) != 0
-                        || (!Compatibility.isChangeEnabled(
-                                DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED)));
 
         int callingUid;
         int callingPid;
@@ -12594,8 +12589,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             // If the caller is registering for a sticky broadcast with a null receiver, we won't
             // require a flag
             if (!onlyProtectedBroadcasts && receiver != null && (
-                    Compatibility.isChangeEnabled(
-                            DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED)
+                    CompatChanges.isChangeEnabled(
+                            DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED, callingUid)
                             && (flags & (Context.RECEIVER_EXPORTED | Context.RECEIVER_NOT_EXPORTED))
                             == 0)) {
                 Slog.e(TAG,
@@ -12609,6 +12604,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 + "flag");
             }
         }
+
+        // Dynamic receivers are exported by default for versions prior to T
+        final boolean exported =
+                ((flags & Context.RECEIVER_EXPORTED) != 0
+                        || (!CompatChanges.isChangeEnabled(
+                        DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED, callingUid)));
 
         ArrayList<Intent> allSticky = null;
         if (stickyIntents != null) {

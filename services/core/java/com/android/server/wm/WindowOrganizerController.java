@@ -83,7 +83,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 /**
  * Server side implementation for the interface for organizing windows
@@ -850,7 +849,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
     private int reparentChildrenTasksHierarchyOp(WindowContainerTransaction.HierarchyOp hop,
             @Nullable Transition transition, int syncId) {
-        WindowContainer currentParent = hop.getContainer() != null
+        WindowContainer<?> currentParent = hop.getContainer() != null
                 ? WindowContainer.fromBinder(hop.getContainer()) : null;
         WindowContainer newParent = hop.getNewParent() != null
                 ? WindowContainer.fromBinder(hop.getNewParent()) : null;
@@ -893,24 +892,31 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         // We want to collect the tasks first before re-parenting to avoid array shifting on us.
         final ArrayList<Task> tasksToReparent = new ArrayList<>();
 
-        currentParent.forAllTasks((Consumer<Task>) (task) -> {
+        currentParent.forAllTasks(task -> {
             Slog.i(TAG, " Processing task=" + task);
-            if (task.mCreatedByOrganizer
-                    || task.getParent() != finalCurrentParent) {
+            final boolean reparent;
+            if (task.mCreatedByOrganizer || task.getParent() != finalCurrentParent) {
                 // We only care about non-organized task that are direct children of the thing we
                 // are reparenting from.
-                return;
+                return false;
             }
             if (newParentInMultiWindow && !task.supportsMultiWindowInDisplayArea(newParentTda)) {
                 Slog.e(TAG, "reparentChildrenTasksHierarchyOp non-resizeable task to multi window,"
                         + " task=" + task);
-                return;
+                return false;
             }
-            if (!ArrayUtils.contains(hop.getActivityTypes(), task.getActivityType())) return;
-            if (!ArrayUtils.contains(hop.getWindowingModes(), task.getWindowingMode())) return;
+            if (!ArrayUtils.contains(hop.getActivityTypes(), task.getActivityType())
+                    || !ArrayUtils.contains(hop.getWindowingModes(), task.getWindowingMode())) {
+                return false;
+            }
 
-            tasksToReparent.add(task);
-        }, !hop.getToTop());
+            if (hop.getToTop()) {
+                tasksToReparent.add(0, task);
+            } else {
+                tasksToReparent.add(task);
+            }
+            return hop.getReparentTopOnly() && tasksToReparent.size() == 1;
+        });
 
         final int count = tasksToReparent.size();
         for (int i = 0; i < count; ++i) {

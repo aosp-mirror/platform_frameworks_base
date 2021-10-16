@@ -332,7 +332,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     }
 
     @Override
-    boolean forAllTaskDisplayAreas(Function<TaskDisplayArea, Boolean> callback,
+    boolean forAllTaskDisplayAreas(Predicate<TaskDisplayArea> callback,
             boolean traverseTopToBottom) {
         // Only DisplayArea of Type.ANY may contain TaskDisplayArea as children.
         if (mType != DisplayArea.Type.ANY) {

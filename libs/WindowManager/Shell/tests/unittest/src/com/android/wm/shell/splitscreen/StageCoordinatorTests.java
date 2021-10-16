@@ -18,9 +18,11 @@ package com.android.wm.shell.splitscreen;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.view.Display.DEFAULT_DISPLAY;
+
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__RETURN_HOME;
 import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_TOP_OR_LEFT;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
@@ -111,7 +113,8 @@ public class StageCoordinatorTests extends ShellTestCase {
 
         mStageCoordinator.moveToSideStage(task, SPLIT_POSITION_BOTTOM_OR_RIGHT);
 
-        verify(mMainStage).activate(any(Rect.class), any(WindowContainerTransaction.class));
+        verify(mMainStage).activate(any(Rect.class), any(WindowContainerTransaction.class),
+                eq(true /* includingTopTask */));
         verify(mSideStage).addTask(eq(task), any(Rect.class),
                 any(WindowContainerTransaction.class));
     }

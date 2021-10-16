@@ -152,7 +152,9 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy im
         mServiceWatcher.runOnBinder(binder -> {
             ITimeZoneProvider service = ITimeZoneProvider.Stub.asInterface(binder);
             if (request.sendUpdates()) {
-                service.startUpdates(managerProxy, request.getInitializationTimeout().toMillis());
+                service.startUpdates(managerProxy,
+                        request.getInitializationTimeout().toMillis(),
+                        request.getEventFilteringAgeThreshold().toMillis());
             } else {
                 service.stopUpdates();
             }

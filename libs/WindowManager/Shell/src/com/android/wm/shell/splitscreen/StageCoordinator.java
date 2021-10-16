@@ -263,7 +263,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             @SplitPosition int sideStagePosition) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         setSideStagePosition(sideStagePosition, wct);
-        mMainStage.activate(getMainStageBounds(), wct);
+        mMainStage.activate(getMainStageBounds(), wct, true /* reparent */);
         mSideStage.addTask(task, getSideStageBounds(), wct);
         mSyncQueue.queue(wct);
         mSyncQueue.runInSync(t -> updateSurfaceBounds(null /* layout */, t));
@@ -299,7 +299,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         // Build a request WCT that will launch both apps such that task 0 is on the main stage
         // while task 1 is on the side stage.
-        mMainStage.activate(getMainStageBounds(), wct);
+        mMainStage.activate(getMainStageBounds(), wct, false /* reparent */);
         mSideStage.setBounds(getSideStageBounds(), wct);
 
         // Make sure the launch options will put tasks in the corresponding split roots
@@ -368,7 +368,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         // Build a request WCT that will launch both apps such that task 0 is on the main stage
         // while task 1 is on the side stage.
-        mMainStage.activate(getMainStageBounds(), wct);
+        mMainStage.activate(getMainStageBounds(), wct, false /* reparent */);
         mSideStage.setBounds(getSideStageBounds(), wct);
 
         // Make sure the launch options will put tasks in the corresponding split roots
@@ -756,7 +756,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         } else if (isSideStage) {
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             // Make sure the main stage is active.
-            mMainStage.activate(getMainStageBounds(), wct);
+            mMainStage.activate(getMainStageBounds(), wct, true /* reparent */);
             mSideStage.setBounds(getSideStageBounds(), wct);
             mTaskOrganizer.applyTransaction(wct);
         }

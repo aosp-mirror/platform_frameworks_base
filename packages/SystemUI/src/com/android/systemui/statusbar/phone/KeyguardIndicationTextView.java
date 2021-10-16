@@ -95,44 +95,85 @@ public class KeyguardIndicationTextView extends TextView {
     }
 
     /**
-     * Changes the text with an animation and makes sure a single indication is shown long enough.
+     * Changes the text with an animation. Makes sure a single indication is shown long enough.
+     */
+    public void switchIndication(CharSequence text, KeyguardIndication indication) {
+        switchIndication(text, indication, true, null);
+    }
+
+    /**
+     * Changes the text with an optional animation. For animating text, makes sure a single
+     * indication is shown long enough.
      *
      * @param text The text to show.
      * @param indication optional display information for the text
+     * @param animate whether to animate this indication in - we may not want this on AOD
+     * @param onAnimationEndCallback runnable called after this indication is animated in
      */
-    public void switchIndication(CharSequence text, KeyguardIndication indication) {
+    public void switchIndication(CharSequence text, KeyguardIndication indication,
+            boolean animate, Runnable onAnimationEndCallback) {
         if (text == null) text = "";
 
         CharSequence lastPendingMessage = mMessages.peekLast();
         if (TextUtils.equals(lastPendingMessage, text)
                 || (lastPendingMessage == null && TextUtils.equals(text, getText()))) {
+            if (onAnimationEndCallback != null) {
+                onAnimationEndCallback.run();
+            }
             return;
         }
         mMessages.add(text);
         mKeyguardIndicationInfo.add(indication);
 
-        final boolean hasIcon = indication != null && indication.getIcon() != null;
-        final AnimatorSet animSet = new AnimatorSet();
-        final AnimatorSet.Builder animSetBuilder = animSet.play(getOutAnimator());
+        if (animate) {
+            final boolean hasIcon = indication != null && indication.getIcon() != null;
+            final AnimatorSet animator = new AnimatorSet();
+            // Make sure each animation is visible for a minimum amount of time, while not worrying
+            // about fading in blank text
+            long timeInMillis = System.currentTimeMillis();
+            long delay = Math.max(0, mNextAnimationTime - timeInMillis);
+            setNextAnimationTime(timeInMillis + delay + getFadeOutDuration());
+            final long minDurationMillis =
+                    (indication != null && indication.getMinVisibilityMillis() != null)
+                            ? indication.getMinVisibilityMillis()
+                            : MSG_MIN_DURATION_MILLIS_DEFAULT;
+            if (!text.equals("") || hasIcon) {
+                setNextAnimationTime(mNextAnimationTime + minDurationMillis);
+                Animator inAnimator = getInAnimator();
+                inAnimator.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        if (onAnimationEndCallback != null) {
+                            onAnimationEndCallback.run();
+                        }
+                    }
+                });
+                animator.playSequentially(getOutAnimator(), inAnimator);
+            } else {
+                Animator outAnimator = getOutAnimator();
+                outAnimator.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        if (onAnimationEndCallback != null) {
+                            onAnimationEndCallback.run();
+                        }
+                    }
+                });
+                animator.play(outAnimator);
+            }
 
-        // Make sure each animation is visible for a minimum amount of time, while not worrying
-        // about fading in blank text
-        long timeInMillis = System.currentTimeMillis();
-        long delay = Math.max(0, mNextAnimationTime - timeInMillis);
-        setNextAnimationTime(timeInMillis + delay + getFadeOutDuration());
-
-        final long minDurationMillis =
-                (indication != null && indication.getMinVisibilityMillis() != null)
-                    ? indication.getMinVisibilityMillis()
-                    : MSG_MIN_DURATION_MILLIS_DEFAULT;
-
-        if (!text.equals("") || hasIcon) {
-            setNextAnimationTime(mNextAnimationTime + minDurationMillis);
-            animSetBuilder.before(getInAnimator());
+            animator.setStartDelay(delay);
+            animator.start();
+        } else {
+            setAlpha(1f);
+            setTranslationY(0f);
+            setNextIndication();
+            if (onAnimationEndCallback != null) {
+                onAnimationEndCallback.run();
+            }
         }
-
-        animSet.setStartDelay(delay);
-        animSet.start();
     }
 
     private AnimatorSet getOutAnimator() {
@@ -143,29 +184,8 @@ public class KeyguardIndicationTextView extends TextView {
         fadeOut.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animator) {
-                KeyguardIndication info = mKeyguardIndicationInfo.poll();
-                if (info != null) {
-                    // First, update the style.
-                    // If a background is set on the text, we don't want shadow on the text
-                    if (info.getBackground() != null) {
-                        setTextAppearance(sButtonStyleId);
-                    } else {
-                        setTextAppearance(sStyleId);
-                    }
-                    setBackground(info.getBackground());
-                    setTextColor(info.getTextColor());
-                    setOnClickListener(info.getClickListener());
-                    setClickable(info.getClickListener() != null);
-                    final Drawable icon = info.getIcon();
-                    if (icon != null) {
-                        icon.setTint(getCurrentTextColor());
-                        if (icon instanceof AnimatedVectorDrawable) {
-                            ((AnimatedVectorDrawable) icon).start();
-                        }
-                    }
-                    setCompoundDrawablesRelativeWithIntrinsicBounds(icon, null, null, null);
-                }
-                setText(mMessages.poll());
+                super.onAnimationEnd(animator);
+                setNextIndication();
             }
         });
 
@@ -175,6 +195,32 @@ public class KeyguardIndicationTextView extends TextView {
         animatorSet.playTogether(fadeOut, yTranslate);
 
         return animatorSet;
+    }
+
+    private void setNextIndication() {
+        KeyguardIndication info = mKeyguardIndicationInfo.poll();
+        if (info != null) {
+            // First, update the style.
+            // If a background is set on the text, we don't want shadow on the text
+            if (info.getBackground() != null) {
+                setTextAppearance(sButtonStyleId);
+            } else {
+                setTextAppearance(sStyleId);
+            }
+            setBackground(info.getBackground());
+            setTextColor(info.getTextColor());
+            setOnClickListener(info.getClickListener());
+            setClickable(info.getClickListener() != null);
+            final Drawable icon = info.getIcon();
+            if (icon != null) {
+                icon.setTint(getCurrentTextColor());
+                if (icon instanceof AnimatedVectorDrawable) {
+                    ((AnimatedVectorDrawable) icon).start();
+                }
+            }
+            setCompoundDrawablesRelativeWithIntrinsicBounds(icon, null, null, null);
+        }
+        setText(mMessages.poll());
     }
 
     private AnimatorSet getInAnimator() {
@@ -190,6 +236,7 @@ public class KeyguardIndicationTextView extends TextView {
         yTranslate.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationCancel(Animator animation) {
+                super.onAnimationCancel(animation);
                 setTranslationY(0);
             }
         });

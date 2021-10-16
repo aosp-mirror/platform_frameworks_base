@@ -68,7 +68,6 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.util.function.pooled.PooledConsumer;
-import com.android.internal.util.function.pooled.PooledFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.inputmethod.InputMethodManagerInternal;
@@ -1152,13 +1151,7 @@ public class RecentsAnimationController implements DeathRecipient {
 
     private boolean isAnimatingApp(ActivityRecord activity) {
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
-            final Task task = mPendingAnimations.get(i).mTask;
-            final PooledFunction f = PooledLambda.obtainFunction(
-                    (a, b) -> a == b, activity,
-                    PooledLambda.__(ActivityRecord.class));
-            boolean isAnimatingApp = task.forAllActivities(f);
-            f.recycle();
-            if (isAnimatingApp) {
+            if (activity.isDescendantOf(mPendingAnimations.get(i).mTask)) {
                 return true;
             }
         }

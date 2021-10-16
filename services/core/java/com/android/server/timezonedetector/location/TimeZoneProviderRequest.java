@@ -31,23 +31,32 @@ final class TimeZoneProviderRequest {
     private static final TimeZoneProviderRequest STOP_UPDATES =
             new TimeZoneProviderRequest(
                     false /* sendUpdates */,
-                    null /* initializationTimeout */);
+                    null /* initializationTimeout */,
+                    null /* eventFilteringAgeThreshold */);
 
     private final boolean mSendUpdates;
 
     @Nullable
     private final Duration mInitializationTimeout;
 
+    @Nullable
+    private final Duration mEventFilteringAgeThreshold;
+
     private TimeZoneProviderRequest(
-            boolean sendUpdates, @Nullable Duration initializationTimeout) {
+            boolean sendUpdates, @Nullable Duration initializationTimeout,
+            @Nullable Duration eventFilteringAgeThreshold) {
         mSendUpdates = sendUpdates;
         mInitializationTimeout = initializationTimeout;
+        mEventFilteringAgeThreshold = eventFilteringAgeThreshold;
     }
 
     /** Creates a request to start updates with the specified timeout. */
     public static TimeZoneProviderRequest createStartUpdatesRequest(
-            @NonNull Duration initializationTimeout) {
-        return new TimeZoneProviderRequest(true, Objects.requireNonNull(initializationTimeout));
+            @NonNull Duration initializationTimeout,
+            @NonNull Duration eventFilteringAgeThreshold) {
+        return new TimeZoneProviderRequest(true,
+                Objects.requireNonNull(initializationTimeout),
+                Objects.requireNonNull(eventFilteringAgeThreshold));
     }
 
     /** Creates a request to stop updates. */
@@ -74,6 +83,17 @@ final class TimeZoneProviderRequest {
         return mInitializationTimeout;
     }
 
+    /**
+     * Returns the threshold the remote process is to use to filter equivalent events. Only valid
+     * when {@link #sendUpdates()} is {@code true}.
+     *
+     * <p>Guaranteed to be set when {@link #sendUpdates()} returns {@code true}.
+     */
+    @NonNull
+    public Duration getEventFilteringAgeThreshold() {
+        return mEventFilteringAgeThreshold;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -82,15 +102,15 @@ final class TimeZoneProviderRequest {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        TimeZoneProviderRequest
-                that = (TimeZoneProviderRequest) o;
+        TimeZoneProviderRequest that = (TimeZoneProviderRequest) o;
         return mSendUpdates == that.mSendUpdates
-                && mInitializationTimeout == that.mInitializationTimeout;
+                && Objects.equals(mInitializationTimeout, that.mInitializationTimeout)
+                && Objects.equals(mEventFilteringAgeThreshold, that.mEventFilteringAgeThreshold);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mSendUpdates, mInitializationTimeout);
+        return Objects.hash(mSendUpdates, mInitializationTimeout, mEventFilteringAgeThreshold);
     }
 
     @Override
@@ -98,6 +118,7 @@ final class TimeZoneProviderRequest {
         return "TimeZoneProviderRequest{"
                 + "mSendUpdates=" + mSendUpdates
                 + ", mInitializationTimeout=" + mInitializationTimeout
+                + ", mEventFilteringAgeThreshold=" + mEventFilteringAgeThreshold
                 + "}";
     }
 }

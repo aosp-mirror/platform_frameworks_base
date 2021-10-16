@@ -54,14 +54,17 @@ public class ZoneInfoDbTimeZoneProviderEventPreProcessorTest {
         for (String timeZone : nonExistingTimeZones) {
             TimeZoneProviderEvent event = timeZoneProviderEvent(timeZone);
 
+            TimeZoneProviderEvent expectedResultEvent =
+                    TimeZoneProviderEvent.createUncertainEvent(event.getCreationElapsedMillis());
             assertWithMessage(timeZone + " is not a valid time zone")
                     .that(mPreProcessor.preProcess(event))
-                    .isEqualTo(TimeZoneProviderEvent.createUncertainEvent());
+                    .isEqualTo(expectedResultEvent);
         }
     }
 
     private static TimeZoneProviderEvent timeZoneProviderEvent(String... timeZoneIds) {
         return TimeZoneProviderEvent.createSuggestionEvent(
+                ARBITRARY_TIME_MILLIS,
                 new TimeZoneProviderSuggestion.Builder()
                         .setTimeZoneIds(Arrays.asList(timeZoneIds))
                         .setElapsedRealtimeMillis(ARBITRARY_TIME_MILLIS)

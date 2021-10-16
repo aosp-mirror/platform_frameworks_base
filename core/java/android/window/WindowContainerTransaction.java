@@ -295,6 +295,36 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * Reparent's all children tasks or the top task of {@param currentParent} in the specified
+     * {@param windowingMode} and {@param activityType} to {@param newParent} in their current
+     * z-order.
+     *
+     * @param currentParent of the tasks to perform the operation no.
+     *                      {@code null} will perform the operation on the display.
+     * @param newParent for the tasks. {@code null} will perform the operation on the display.
+     * @param windowingModes of the tasks to reparent.
+     * @param activityTypes of the tasks to reparent.
+     * @param onTop When {@code true}, the child goes to the top of parent; otherwise it goes to
+     *              the bottom.
+     * @param reparentTopOnly When {@code true}, only reparent the top task which fit windowingModes
+     *                        and activityTypes.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction reparentTasks(@Nullable WindowContainerToken currentParent,
+            @Nullable WindowContainerToken newParent, @Nullable int[] windowingModes,
+            @Nullable int[] activityTypes, boolean onTop, boolean reparentTopOnly) {
+        mHierarchyOps.add(HierarchyOp.createForChildrenTasksReparent(
+                currentParent != null ? currentParent.asBinder() : null,
+                newParent != null ? newParent.asBinder() : null,
+                windowingModes,
+                activityTypes,
+                onTop,
+                reparentTopOnly));
+        return this;
+    }
+
+    /**
      * Reparent's all children tasks of {@param currentParent} in the specified
      * {@param windowingMode} and {@param activityType} to {@param newParent} in their current
      * z-order.
@@ -311,13 +341,8 @@ public final class WindowContainerTransaction implements Parcelable {
     public WindowContainerTransaction reparentTasks(@Nullable WindowContainerToken currentParent,
             @Nullable WindowContainerToken newParent, @Nullable int[] windowingModes,
             @Nullable int[] activityTypes, boolean onTop) {
-        mHierarchyOps.add(HierarchyOp.createForChildrenTasksReparent(
-                currentParent != null ? currentParent.asBinder() : null,
-                newParent != null ? newParent.asBinder() : null,
-                windowingModes,
-                activityTypes,
-                onTop));
-        return this;
+        return reparentTasks(currentParent, newParent, windowingModes, activityTypes, onTop,
+                false /* reparentTopOnly */);
     }
 
     /**
@@ -948,6 +973,8 @@ public final class WindowContainerTransaction implements Parcelable {
         // Moves/reparents to top of parent when {@code true}, otherwise moves/reparents to bottom.
         private boolean mToTop;
 
+        private boolean mReparentTopOnly;
+
         @Nullable
         private int[]  mWindowingModes;
 
@@ -985,13 +1012,15 @@ public final class WindowContainerTransaction implements Parcelable {
         }
 
         public static HierarchyOp createForChildrenTasksReparent(IBinder currentParent,
-                IBinder newParent, int[] windowingModes, int[] activityTypes, boolean onTop) {
+                IBinder newParent, int[] windowingModes, int[] activityTypes, boolean onTop,
+                boolean reparentTopOnly) {
             return new HierarchyOp.Builder(HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT)
                     .setContainer(currentParent)
                     .setReparentContainer(newParent)
                     .setWindowingModes(windowingModes)
                     .setActivityTypes(activityTypes)
                     .setToTop(onTop)
+                    .setReparentTopOnly(reparentTopOnly)
                     .build();
         }
 
@@ -1040,6 +1069,7 @@ public final class WindowContainerTransaction implements Parcelable {
             mContainer = copy.mContainer;
             mReparent = copy.mReparent;
             mToTop = copy.mToTop;
+            mReparentTopOnly = copy.mReparentTopOnly;
             mWindowingModes = copy.mWindowingModes;
             mActivityTypes = copy.mActivityTypes;
             mLaunchOptions = copy.mLaunchOptions;
@@ -1053,6 +1083,7 @@ public final class WindowContainerTransaction implements Parcelable {
             mContainer = in.readStrongBinder();
             mReparent = in.readStrongBinder();
             mToTop = in.readBoolean();
+            mReparentTopOnly = in.readBoolean();
             mWindowingModes = in.createIntArray();
             mActivityTypes = in.createIntArray();
             mLaunchOptions = in.readBundle();
@@ -1093,6 +1124,10 @@ public final class WindowContainerTransaction implements Parcelable {
             return mToTop;
         }
 
+        public boolean getReparentTopOnly() {
+            return mReparentTopOnly;
+        }
+
         public int[] getWindowingModes() {
             return mWindowingModes;
         }
@@ -1126,12 +1161,13 @@ public final class WindowContainerTransaction implements Parcelable {
             switch (mType) {
                 case HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT:
                     return "{ChildrenTasksReparent: from=" + mContainer + " to=" + mReparent
-                            + " mToTop=" + mToTop + " mWindowingMode=" + mWindowingModes
-                            + " mActivityType=" + mActivityTypes + "}";
+                            + " mToTop=" + mToTop + " mReparentTopOnly=" + mReparentTopOnly
+                            + " mWindowingMode=" + Arrays.toString(mWindowingModes)
+                            + " mActivityType=" + Arrays.toString(mActivityTypes) + "}";
                 case HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT:
                     return "{SetLaunchRoot: container=" + mContainer
-                            + " mWindowingMode=" + mWindowingModes
-                            + " mActivityType=" + mActivityTypes + "}";
+                            + " mWindowingMode=" + Arrays.toString(mWindowingModes)
+                            + " mActivityType=" + Arrays.toString(mActivityTypes) + "}";
                 case HIERARCHY_OP_TYPE_REPARENT:
                     return "{reparent: " + mContainer + " to " + (mToTop ? "top of " : "bottom of ")
                             + mReparent + "}";
@@ -1163,8 +1199,9 @@ public final class WindowContainerTransaction implements Parcelable {
                             + " adjacentContainer=" + mReparent + "}";
                 default:
                     return "{mType=" + mType + " container=" + mContainer + " reparent=" + mReparent
-                            + " mToTop=" + mToTop + " mWindowingMode=" + mWindowingModes
-                            + " mActivityType=" + mActivityTypes + "}";
+                            + " mToTop=" + mToTop
+                            + " mWindowingMode=" + Arrays.toString(mWindowingModes)
+                            + " mActivityType=" + Arrays.toString(mActivityTypes) + "}";
             }
         }
 
@@ -1174,6 +1211,7 @@ public final class WindowContainerTransaction implements Parcelable {
             dest.writeStrongBinder(mContainer);
             dest.writeStrongBinder(mReparent);
             dest.writeBoolean(mToTop);
+            dest.writeBoolean(mReparentTopOnly);
             dest.writeIntArray(mWindowingModes);
             dest.writeIntArray(mActivityTypes);
             dest.writeBundle(mLaunchOptions);
@@ -1211,6 +1249,8 @@ public final class WindowContainerTransaction implements Parcelable {
 
             private boolean mToTop;
 
+            private boolean mReparentTopOnly;
+
             @Nullable
             private int[]  mWindowingModes;
 
@@ -1245,6 +1285,11 @@ public final class WindowContainerTransaction implements Parcelable {
 
             Builder setToTop(boolean toTop) {
                 mToTop = toTop;
+                return this;
+            }
+
+            Builder setReparentTopOnly(boolean reparentTopOnly) {
+                mReparentTopOnly = reparentTopOnly;
                 return this;
             }
 
@@ -1290,6 +1335,7 @@ public final class WindowContainerTransaction implements Parcelable {
                         ? Arrays.copyOf(mActivityTypes, mActivityTypes.length)
                         : null;
                 hierarchyOp.mToTop = mToTop;
+                hierarchyOp.mReparentTopOnly = mReparentTopOnly;
                 hierarchyOp.mLaunchOptions = mLaunchOptions;
                 hierarchyOp.mActivityIntent = mActivityIntent;
                 hierarchyOp.mPendingIntent = mPendingIntent;

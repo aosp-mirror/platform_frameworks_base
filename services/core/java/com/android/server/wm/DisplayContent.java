@@ -223,7 +223,6 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.util.function.TriConsumer;
 import com.android.internal.util.function.pooled.PooledConsumer;
-import com.android.internal.util.function.pooled.PooledFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
 import com.android.server.inputmethod.InputMethodManagerInternal;
@@ -4665,7 +4664,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 || mWmService.mPolicy.okToAnimate(ignoreScreenOn));
     }
 
-    static final class TaskForResizePointSearchResult {
+    static final class TaskForResizePointSearchResult implements Predicate<Task> {
         private Task taskForResize;
         private int x;
         private int y;
@@ -4678,16 +4677,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             this.y = y;
             this.delta = delta;
             mTmpRect.setEmpty();
-
-            final PooledFunction f = PooledLambda.obtainFunction(
-                    TaskForResizePointSearchResult::processTask, this, PooledLambda.__(Task.class));
-            root.forAllTasks(f);
-            f.recycle();
+            root.forAllTasks(this);
 
             return taskForResize;
         }
 
-        private boolean processTask(Task task) {
+        @Override
+        public boolean test(Task task) {
             if (!task.getRootTask().getWindowConfiguration().canResizeTask()) {
                 return true;
             }

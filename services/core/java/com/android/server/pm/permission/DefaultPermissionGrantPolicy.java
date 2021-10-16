@@ -213,6 +213,7 @@ final class DefaultPermissionGrantPolicy {
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_CONNECT);
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_SCAN);
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.UWB_RANGING);
+        NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.NEARBY_WIFI_DEVICES);
     }
 
     private static final int MSG_READ_DEFAULT_PERMISSION_EXCEPTIONS = 1;
@@ -915,6 +916,11 @@ final class DefaultPermissionGrantPolicy {
         }
         grantPermissionsToSystemPackage(pm, dialerPackage, userId,
                 CONTACTS_PERMISSIONS, SMS_PERMISSIONS, MICROPHONE_PERMISSIONS, CAMERA_PERMISSIONS);
+        boolean isAndroidAutomotive =
+                mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE, 0);
+        if (isAndroidAutomotive) {
+            grantPermissionsToSystemPackage(pm, dialerPackage, userId, NEARBY_DEVICES_PERMISSIONS);
+        }
     }
 
     private void grantDefaultPermissionsToDefaultSystemSmsApp(PackageManagerWrapper pm,

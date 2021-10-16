@@ -195,7 +195,6 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.pooled.PooledConsumer;
-import com.android.internal.util.function.pooled.PooledFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
 import com.android.server.Watchdog;
@@ -538,26 +537,23 @@ class Task extends TaskFragment {
     private static final ResetTargetTaskHelper sResetTargetTaskHelper = new ResetTargetTaskHelper();
 
     private final FindRootHelper mFindRootHelper = new FindRootHelper();
-    private class FindRootHelper {
+    private class FindRootHelper implements Predicate<ActivityRecord> {
         private ActivityRecord mRoot;
-
-        private void clear() {
-            mRoot = null;
-        }
+        private boolean mIgnoreRelinquishIdentity;
+        private boolean mSetToBottomIfNone;
 
         ActivityRecord findRoot(boolean ignoreRelinquishIdentity, boolean setToBottomIfNone) {
-            final PooledFunction f = PooledLambda.obtainFunction(FindRootHelper::processActivity,
-                    this, PooledLambda.__(ActivityRecord.class), ignoreRelinquishIdentity,
-                    setToBottomIfNone);
-            clear();
-            forAllActivities(f, false /*traverseTopToBottom*/);
-            f.recycle();
-            return mRoot;
+            mIgnoreRelinquishIdentity = ignoreRelinquishIdentity;
+            mSetToBottomIfNone = setToBottomIfNone;
+            forAllActivities(this, false /* traverseTopToBottom */);
+            final ActivityRecord root = mRoot;
+            mRoot = null;
+            return root;
         }
 
-        private boolean processActivity(ActivityRecord r,
-                boolean ignoreRelinquishIdentity, boolean setToBottomIfNone) {
-            if (mRoot == null && setToBottomIfNone) {
+        @Override
+        public boolean test(ActivityRecord r) {
+            if (mRoot == null && mSetToBottomIfNone) {
                 // This is the first activity we are process. Set it as the candidate root in case
                 // we don't find a better one.
                 mRoot = r;
@@ -569,7 +565,7 @@ class Task extends TaskFragment {
             mRoot = r;
 
             // Only end search if we are ignore relinquishing identity or we are not relinquishing.
-            return ignoreRelinquishIdentity
+            return mIgnoreRelinquishIdentity
                     || mNeverRelinquishIdentity
                     || (r.info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0;
         }
@@ -1641,7 +1637,7 @@ class Task extends TaskFragment {
         final ActivityRecord r = findActivityInHistory(newR.mActivityComponent);
         if (r == null) return null;
 
-        final PooledFunction f = PooledLambda.obtainFunction(Task::finishActivityAbove,
+        final PooledPredicate f = PooledLambda.obtainPredicate(Task::finishActivityAbove,
                 PooledLambda.__(ActivityRecord.class), r);
         forAllActivities(f);
         f.recycle();
@@ -1791,7 +1787,7 @@ class Task extends TaskFragment {
         if (root == null) return;
 
         final TaskDescription taskDescription = new TaskDescription();
-        final PooledFunction f = PooledLambda.obtainFunction(
+        final PooledPredicate f = PooledLambda.obtainPredicate(
                 Task::setTaskDescriptionFromActivityAboveRoot,
                 PooledLambda.__(ActivityRecord.class), root, taskDescription);
         forAllActivities(f);
@@ -1926,6 +1922,7 @@ class Task extends TaskFragment {
             final ActivityRecord r = topRunningActivity();
             if (r != null && mDisplayContent.isFixedRotationLaunchingApp(r)) {
                 getSyncTransaction().setWindowCrop(mSurfaceControl, null)
+                        .setCornerRadius(mSurfaceControl, 0f)
                         .setMatrix(mSurfaceControl, Matrix.IDENTITY_MATRIX, new float[9]);
             }
         }
@@ -3148,13 +3145,13 @@ class Task extends TaskFragment {
     }
 
     @Override
-    boolean forAllTasks(Function<Task, Boolean> callback) {
+    boolean forAllTasks(Predicate<Task> callback) {
         if (super.forAllTasks(callback)) return true;
-        return callback.apply(this);
+        return callback.test(this);
     }
 
     @Override
-    boolean forAllLeafTasks(Function<Task, Boolean> callback) {
+    boolean forAllLeafTasks(Predicate<Task> callback) {
         boolean isLeafTask = true;
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final Task child = mChildren.get(i).asTask();
@@ -3166,7 +3163,7 @@ class Task extends TaskFragment {
             }
         }
         if (isLeafTask) {
-            return callback.apply(this);
+            return callback.test(this);
         }
         return false;
     }
@@ -3207,8 +3204,8 @@ class Task extends TaskFragment {
     }
 
     @Override
-    boolean forAllRootTasks(Function<Task, Boolean> callback, boolean traverseTopToBottom) {
-        return isRootTask() ? callback.apply(this) : false;
+    boolean forAllRootTasks(Predicate<Task> callback, boolean traverseTopToBottom) {
+        return isRootTask() ? callback.test(this) : false;
     }
 
     @Override
@@ -3789,7 +3786,7 @@ class Task extends TaskFragment {
         }
 
         sTmpException = null;
-        final PooledFunction f = PooledLambda.obtainFunction(Task::saveActivityToXml,
+        final PooledPredicate f = PooledLambda.obtainPredicate(Task::saveActivityToXml,
                 PooledLambda.__(ActivityRecord.class), getBottomMostActivity(), out);
         forAllActivities(f);
         f.recycle();
@@ -5253,7 +5250,7 @@ class Task extends TaskFragment {
             });
         } else {
             // Check if any of the activities are using voice
-            final PooledFunction f = PooledLambda.obtainFunction(
+            final PooledPredicate f = PooledLambda.obtainPredicate(
                     Task::finishIfVoiceActivity, PooledLambda.__(ActivityRecord.class),
                     binder);
             tr.forAllActivities(f);
