@@ -47,13 +47,13 @@ public class AmbientDisplayPowerCalculatorTest {
 
         stats.updateDisplayMeasuredEnergyStatsLocked(300_000_000, Display.STATE_ON, 0);
 
-        stats.noteScreenStateLocked(Display.STATE_DOZE, 30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS,
+        stats.noteScreenStateLocked(0, Display.STATE_DOZE, 30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS,
                 30 * MINUTE_IN_MS);
 
         stats.updateDisplayMeasuredEnergyStatsLocked(200_000_000, Display.STATE_DOZE,
                 30 * MINUTE_IN_MS);
 
-        stats.noteScreenStateLocked(Display.STATE_OFF, 120 * MINUTE_IN_MS, 120 * MINUTE_IN_MS,
+        stats.noteScreenStateLocked(0, Display.STATE_OFF, 120 * MINUTE_IN_MS, 120 * MINUTE_IN_MS,
                 120 * MINUTE_IN_MS);
 
         stats.updateDisplayMeasuredEnergyStatsLocked(100_000_000, Display.STATE_OFF,
@@ -78,9 +78,9 @@ public class AmbientDisplayPowerCalculatorTest {
     public void testPowerProfileBasedModel() {
         BatteryStatsImpl stats = mStatsRule.getBatteryStats();
 
-        stats.noteScreenStateLocked(Display.STATE_DOZE, 30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS,
+        stats.noteScreenStateLocked(0, Display.STATE_DOZE, 30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS,
                 30 * MINUTE_IN_MS);
-        stats.noteScreenStateLocked(Display.STATE_OFF, 120 * MINUTE_IN_MS, 120 * MINUTE_IN_MS,
+        stats.noteScreenStateLocked(0, Display.STATE_OFF, 120 * MINUTE_IN_MS, 120 * MINUTE_IN_MS,
                 120 * MINUTE_IN_MS);
 
         AmbientDisplayPowerCalculator calculator =
