@@ -70,6 +70,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_STOP_RECORDING = 21;
     private static final int DO_PAUSE_RECORDING = 22;
     private static final int DO_RESUME_RECORDING = 23;
+    private static final int DO_REQUEST_BROADCAST_INFO = 24;
 
     private final boolean mIsRecordingSession;
     private final HandlerCaller mCaller;
@@ -234,6 +235,10 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 mTvInputRecordingSessionImpl.resumeRecording((Bundle) msg.obj);
                 break;
             }
+            case DO_REQUEST_BROADCAST_INFO: {
+                mTvInputSessionImpl.requestBroadcastInfo((BroadcastInfoRequest) msg.obj);
+                break;
+            }
             default: {
                 Log.w(TAG, "Unhandled message code: " + msg.what);
                 break;
@@ -381,6 +386,11 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     @Override
     public void resumeRecording(@Nullable Bundle params) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_RESUME_RECORDING, params));
+    }
+
+    @Override
+    public void requestBroadcastInfo(BroadcastInfoRequest request) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_REQUEST_BROADCAST_INFO, request));
     }
 
     private final class TvInputEventReceiver extends InputEventReceiver {

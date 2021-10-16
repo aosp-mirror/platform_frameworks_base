@@ -656,6 +656,13 @@ public final class TvInputManager {
          */
         void onError(Session session, @TvInputManager.RecordingError int error) {
         }
+
+        /**
+         * @param session
+         * @param response
+         */
+        public void onBroadcastInfoResponse(Session session, BroadcastInfoResponse response) {
+        }
     }
 
     private static final class SessionCallbackRecord {
@@ -832,6 +839,15 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mSessionCallback.onError(mSession, error);
+                }
+            });
+        }
+
+        void postBroadcastInfoResponse(final BroadcastInfoResponse response) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onBroadcastInfoResponse(mSession, response);
                 }
             });
         }
@@ -1231,6 +1247,18 @@ public final class TvInputManager {
                         return;
                     }
                     record.postError(error);
+                }
+            }
+
+            @Override
+            public void onBroadcastInfoResponse(BroadcastInfoResponse response, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postBroadcastInfoResponse(response);
                 }
             }
         };
@@ -2837,6 +2865,19 @@ public final class TvInputManager {
             synchronized (mSessionCallbackRecordMap) {
                 mSessionCallbackRecordMap.delete(mSeq);
             }
+        }
+
+        public void requestBroadcastInfo(BroadcastInfoRequest request) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.requestBroadcastInfo(mToken, request, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+
         }
 
         private final class InputEventHandler extends Handler {

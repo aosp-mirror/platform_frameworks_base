@@ -20,6 +20,7 @@ import android.media.tv.ITvInputSession;
 import android.net.Uri;
 import android.media.tv.TvTrackInfo;
 import android.os.Bundle;
+import android.media.tv.BroadcastInfoResponse;
 
 /**
  * Helper interface for ITvInputSession to allow the TV input to notify the system service when a
@@ -45,4 +46,7 @@ oneway interface ITvInputSessionCallback {
     void onTuned(in Uri channelUri);
     void onRecordingStopped(in Uri recordedProgramUri);
     void onError(int error);
+
+    // For broadcast info
+    void onBroadcastInfoResponse(in BroadcastInfoResponse response);
 }

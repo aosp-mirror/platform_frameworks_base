@@ -22,6 +22,7 @@ import android.media.tv.TvTrackInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Surface;
+import android.media.tv.BroadcastInfoRequest;
 
 /**
  * Sub-interface of ITvInputService which is created per session and has its own context.
@@ -60,4 +61,7 @@ oneway interface ITvInputSession {
     void stopRecording();
     void pauseRecording(in Bundle params);
     void resumeRecording(in Bundle params);
+
+    // For broadcast info
+    void requestBroadcastInfo(in BroadcastInfoRequest request);
 }
