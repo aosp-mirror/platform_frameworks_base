@@ -30,7 +30,8 @@ public final class FakeTimeZoneProviderEventPreProcessor
     @Override
     public TimeZoneProviderEvent preProcess(TimeZoneProviderEvent timeZoneProviderEvent) {
         if (mIsUncertain) {
-            return TimeZoneProviderEvent.createUncertainEvent();
+            return TimeZoneProviderEvent.createUncertainEvent(
+                    timeZoneProviderEvent.getCreationElapsedMillis());
         }
         return timeZoneProviderEvent;
     }

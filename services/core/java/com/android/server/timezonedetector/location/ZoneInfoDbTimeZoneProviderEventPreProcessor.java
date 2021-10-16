@@ -53,7 +53,7 @@ public class ZoneInfoDbTimeZoneProviderEventPreProcessor
         // enables immediate failover to a secondary provider, one that might provide valid IDs for
         // the same location, which should provide better behavior than just ignoring the event.
         if (hasInvalidZones(event)) {
-            return TimeZoneProviderEvent.createUncertainEvent();
+            return TimeZoneProviderEvent.createUncertainEvent(event.getCreationElapsedMillis());
         }
 
         return event;

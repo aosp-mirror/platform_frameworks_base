@@ -866,6 +866,8 @@ public class PowerManagerServiceTest {
         startSystem();
         advanceTime(20);
         assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
+        assertThat(mService.getBinderServiceInstance().getLastSleepReason()).isEqualTo(
+                PowerManager.GO_TO_SLEEP_REASON_INATTENTIVE);
     }
 
     @Test
@@ -886,6 +888,8 @@ public class PowerManagerServiceTest {
         assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
         advanceTime(60);
         assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
+        assertThat(mService.getBinderServiceInstance().getLastSleepReason()).isEqualTo(
+                PowerManager.GO_TO_SLEEP_REASON_INATTENTIVE);
     }
 
     @Test
@@ -913,6 +917,8 @@ public class PowerManagerServiceTest {
 
         advanceTime(520);
         assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
+        assertThat(mService.getBinderServiceInstance().getLastSleepReason()).isEqualTo(
+                PowerManager.GO_TO_SLEEP_REASON_INATTENTIVE);
     }
 
     @Test
@@ -934,6 +940,8 @@ public class PowerManagerServiceTest {
 
         advanceTime(520);
         assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
+        assertThat(mService.getBinderServiceInstance().getLastSleepReason()).isEqualTo(
+                PowerManager.GO_TO_SLEEP_REASON_INATTENTIVE);
     }
 
     @Test

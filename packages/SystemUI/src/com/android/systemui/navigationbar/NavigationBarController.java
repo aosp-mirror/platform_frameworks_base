@@ -61,6 +61,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
+import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -160,7 +161,8 @@ public class NavigationBarController implements
             NavigationBarA11yHelper navigationBarA11yHelper,
             TaskbarDelegate taskbarDelegate,
             UserTracker userTracker,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            AutoHideController autoHideController) {
         mContext = context;
         mWindowManager = windowManager;
         mAssistManagerLazy = assistManagerLazy;
@@ -194,9 +196,9 @@ public class NavigationBarController implements
         mNavMode = mNavigationModeController.addListener(this);
         mNavigationModeController.addListener(this);
         mTaskbarDelegate = taskbarDelegate;
-        mTaskbarDelegate.setOverviewProxyService(commandQueue, overviewProxyService,
+        mTaskbarDelegate.setDependencies(commandQueue, overviewProxyService,
                 navigationBarA11yHelper, navigationModeController, sysUiFlagsContainer,
-                dumpManager);
+                dumpManager, autoHideController);
         mIsTablet = isTablet(mContext);
         mUserTracker = userTracker;
 
