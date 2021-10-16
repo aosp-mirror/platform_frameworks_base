@@ -64,6 +64,8 @@ import org.junit.runners.Suite;
         KernelSingleProcessCpuThreadReaderTest.class,
         KernelSingleUidTimeReaderTest.class,
         KernelWakelockReaderTest.class,
+        LongArrayMultiStateCounterTest.class,
+        LongMultiStateCounterTest.class,
         LongSamplingCounterTest.class,
         LongSamplingCounterArrayTest.class,
         MobileRadioPowerCalculatorTest.class,
