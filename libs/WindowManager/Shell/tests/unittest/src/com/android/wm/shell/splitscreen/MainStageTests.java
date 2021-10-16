@@ -62,7 +62,8 @@ public class MainStageTests {
 
     @Test
     public void testActiveDeactivate() {
-        mMainStage.activate(mRootTaskInfo.configuration.windowConfiguration.getBounds(), mWct);
+        mMainStage.activate(mRootTaskInfo.configuration.windowConfiguration.getBounds(), mWct,
+                true /* reparent */);
         assertThat(mMainStage.isActive()).isTrue();
 
         mMainStage.deactivate(mWct);
