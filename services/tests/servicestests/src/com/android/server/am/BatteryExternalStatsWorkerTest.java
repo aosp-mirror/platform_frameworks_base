@@ -202,6 +202,7 @@ public class BatteryExternalStatsWorkerTest {
     public class TestBatteryStatsImpl extends BatteryStatsImpl {
         public TestBatteryStatsImpl(Context context) {
             mPowerProfile = new PowerProfile(context, true /* forTest */);
+            initTimersAndCounters();
         }
     }
 
