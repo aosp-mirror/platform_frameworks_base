@@ -75,28 +75,6 @@ public final class CellSignalStrengthTdscdma extends CellSignalStrength implemen
     }
 
     /** @hide */
-    public CellSignalStrengthTdscdma(android.hardware.radio.V1_0.TdScdmaSignalStrength tdscdma) {
-        // Convert from HAL values as part of construction.
-        this(CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
-                tdscdma.rscp != CellInfo.UNAVAILABLE ? -tdscdma.rscp : tdscdma.rscp);
-
-        if (mRssi == CellInfo.UNAVAILABLE && mRscp == CellInfo.UNAVAILABLE) {
-            setDefaultValues();
-        }
-    }
-
-    /** @hide */
-    public CellSignalStrengthTdscdma(android.hardware.radio.V1_2.TdscdmaSignalStrength tdscdma) {
-        // Convert from HAL values as part of construction.
-        this(getRssiDbmFromAsu(tdscdma.signalStrength),
-                tdscdma.bitErrorRate, getRscpDbmFromAsu(tdscdma.rscp));
-
-        if (mRssi == CellInfo.UNAVAILABLE && mRscp == CellInfo.UNAVAILABLE) {
-            setDefaultValues();
-        }
-    }
-
-    /** @hide */
     public CellSignalStrengthTdscdma(CellSignalStrengthTdscdma s) {
         copyFrom(s);
     }
