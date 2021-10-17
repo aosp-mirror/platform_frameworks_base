@@ -535,7 +535,7 @@ class InsetsSourceProvider {
 
         @Override
         public void startAnimation(SurfaceControl animationLeash, Transaction t,
-                @AnimationType int type, OnAnimationFinishedCallback finishCallback) {
+                @AnimationType int type, @NonNull OnAnimationFinishedCallback finishCallback) {
             // TODO(b/166736352): Check if we still need to control the IME visibility here.
             if (mSource.getType() == ITYPE_IME) {
                 // TODO: use 0 alpha and remove t.hide() once b/138459974 is fixed.
