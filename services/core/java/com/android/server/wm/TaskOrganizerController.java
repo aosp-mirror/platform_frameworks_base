@@ -22,6 +22,7 @@ import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_STARTING_REVEAL;
 import static com.android.server.wm.WindowOrganizerController.configurationsAreEqualForOrganizer;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
@@ -431,7 +432,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
         @Override
         public void startAnimation(SurfaceControl animationLeash, SurfaceControl.Transaction t,
-                int type, SurfaceAnimator.OnAnimationFinishedCallback finishCallback) {
+                int type, @NonNull SurfaceAnimator.OnAnimationFinishedCallback finishCallback) {
             mAnimationLeash = animationLeash;
         }
 
