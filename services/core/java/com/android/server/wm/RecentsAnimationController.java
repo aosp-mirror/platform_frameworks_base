@@ -1313,7 +1313,7 @@ public class RecentsAnimationController implements DeathRecipient {
 
         @Override
         public void startAnimation(SurfaceControl animationLeash, Transaction t,
-                @AnimationType int type, OnAnimationFinishedCallback finishCallback) {
+                @AnimationType int type, @NonNull OnAnimationFinishedCallback finishCallback) {
             // Restore position and root task crop until client has a chance to modify it.
             t.setPosition(animationLeash, mLocalBounds.left, mLocalBounds.top);
             mTmpRect.set(mLocalBounds);
