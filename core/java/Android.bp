@@ -158,10 +158,7 @@ filegroup {
         "android/util/LocalLog.java",
         // This should be android.util.IndentingPrintWriter, but it's not available in all branches.
         "com/android/internal/util/IndentingPrintWriter.java",
-        "com/android/internal/util/IState.java",
         "com/android/internal/util/MessageUtils.java",
-        "com/android/internal/util/State.java",
-        "com/android/internal/util/StateMachine.java",
         "com/android/internal/util/WakeupMessage.java",
     ],
 }
