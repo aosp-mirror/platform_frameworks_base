@@ -43,7 +43,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -69,6 +68,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.SingleInstanceRemoteListener;
 import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.onehanded.OneHandedController;
@@ -117,12 +117,27 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private final Rect mTmpInsetBounds = new Rect();
 
     private boolean mIsInFixedRotation;
-    private IPipAnimationListener mPinnedStackAnimationRecentsCallback;
+    private PipAnimationListener mPinnedStackAnimationRecentsCallback;
 
     protected PhonePipMenuController mMenuController;
     protected PipTaskOrganizer mPipTaskOrganizer;
     protected PinnedStackListenerForwarder.PinnedTaskListener mPinnedTaskListener =
             new PipControllerPinnedTaskListener();
+
+    private interface PipAnimationListener {
+        /**
+         * Notifies the listener that the Pip animation is started.
+         */
+        void onPipAnimationStarted();
+
+        /**
+         * Notifies the listener about PiP round corner radius changes.
+         * Listener can expect an immediate callback the first time they attach.
+         *
+         * @param cornerRadius the pixel value of the corner radius, zero means it's disabled.
+         */
+        void onPipCornerRadiusChanged(int cornerRadius);
+    }
 
     /**
      * Handler for display rotation changes.
@@ -551,7 +566,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 animationType == PipAnimationController.ANIM_TYPE_BOUNDS);
     }
 
-    private void setPinnedStackAnimationListener(IPipAnimationListener callback) {
+    private void setPinnedStackAnimationListener(PipAnimationListener callback) {
         mPinnedStackAnimationRecentsCallback = callback;
         onPipCornerRadiusChanged();
     }
@@ -560,11 +575,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         if (mPinnedStackAnimationRecentsCallback != null) {
             final int cornerRadius =
                     mContext.getResources().getDimensionPixelSize(R.dimen.pip_corner_radius);
-            try {
-                mPinnedStackAnimationRecentsCallback.onPipCornerRadiusChanged(cornerRadius);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Failed to call onPipCornerRadiusChanged", e);
-            }
+            mPinnedStackAnimationRecentsCallback.onPipCornerRadiusChanged(cornerRadius);
         }
     }
 
@@ -623,11 +634,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         // Disable touches while the animation is running
         mTouchHandler.setTouchEnabled(false);
         if (mPinnedStackAnimationRecentsCallback != null) {
-            try {
-                mPinnedStackAnimationRecentsCallback.onPipAnimationStarted();
-            } catch (RemoteException e) {
-                Log.e(TAG, "Failed to call onPinnedStackAnimationStarted()", e);
-            }
+            mPinnedStackAnimationRecentsCallback.onPipAnimationStarted();
         }
     }
 
@@ -866,22 +873,25 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     @BinderThread
     private static class IPipImpl extends IPip.Stub {
         private PipController mController;
-        private IPipAnimationListener mListener;
-        private final IBinder.DeathRecipient mListenerDeathRecipient =
-                new IBinder.DeathRecipient() {
-                    @Override
-                    @BinderThread
-                    public void binderDied() {
-                        final PipController controller = mController;
-                        controller.getRemoteCallExecutor().execute(() -> {
-                            mListener = null;
-                            controller.setPinnedStackAnimationListener(null);
-                        });
-                    }
-                };
+        private final SingleInstanceRemoteListener<PipController,
+                IPipAnimationListener> mListener;
+        private final PipAnimationListener mPipAnimationListener = new PipAnimationListener() {
+            @Override
+            public void onPipAnimationStarted() {
+                mListener.call(l -> l.onPipAnimationStarted());
+            }
+
+            @Override
+            public void onPipCornerRadiusChanged(int cornerRadius) {
+                mListener.call(l -> l.onPipCornerRadiusChanged(cornerRadius));
+            }
+        };
 
         IPipImpl(PipController controller) {
             mController = controller;
+            mListener = new SingleInstanceRemoteListener<>(mController,
+                    c -> c.setPinnedStackAnimationListener(mPipAnimationListener),
+                    c -> c.setPinnedStackAnimationListener(null));
         }
 
         /**
@@ -925,23 +935,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         public void setPinnedStackAnimationListener(IPipAnimationListener listener) {
             executeRemoteCallWithTaskPermission(mController, "setPinnedStackAnimationListener",
                     (controller) -> {
-                        if (mListener != null) {
-                            // Reset the old death recipient
-                            mListener.asBinder().unlinkToDeath(mListenerDeathRecipient,
-                                    0 /* flags */);
-                        }
                         if (listener != null) {
-                            // Register the death recipient for the new listener to clear the listener
-                            try {
-                                listener.asBinder().linkToDeath(mListenerDeathRecipient,
-                                        0 /* flags */);
-                            } catch (RemoteException e) {
-                                Slog.e(TAG, "Failed to link to death");
-                                return;
-                            }
+                            mListener.register(listener);
+                        } else {
+                            mListener.unregister();
                         }
-                        mListener = listener;
-                        controller.setPinnedStackAnimationListener(listener);
                     });
         }
     }
