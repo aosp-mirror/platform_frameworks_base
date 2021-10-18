@@ -50,9 +50,13 @@ public class FeatureFlagUtils {
             = "settings_use_new_backup_eligibility_rules";
     /** @hide */
     public static final String SETTINGS_ENABLE_SECURITY_HUB = "settings_enable_security_hub";
-
     /** @hide */
     public static final String SETTINGS_SUPPORT_LARGE_SCREEN = "settings_support_large_screen";
+    /**
+     * Support per app's language selection
+     * @hide
+     */
+    public static final String SETTINGS_APP_LANGUAGE_SELECTION = "settings_app_language_selection";
 
     private static final Map<String, String> DEFAULT_FLAGS;
 
@@ -76,11 +80,13 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_USE_NEW_BACKUP_ELIGIBILITY_RULES, "true");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_SECURITY_HUB, "true");
         DEFAULT_FLAGS.put(SETTINGS_SUPPORT_LARGE_SCREEN, "false");
+        DEFAULT_FLAGS.put(SETTINGS_APP_LANGUAGE_SELECTION, "false");
     }
 
     private static final Set<String> PERSISTENT_FLAGS;
     static {
         PERSISTENT_FLAGS = new HashSet<>();
+        PERSISTENT_FLAGS.add(SETTINGS_APP_LANGUAGE_SELECTION);
         PERSISTENT_FLAGS.add(SETTINGS_PROVIDER_MODEL);
         PERSISTENT_FLAGS.add(SETTINGS_SUPPORT_LARGE_SCREEN);
     }
