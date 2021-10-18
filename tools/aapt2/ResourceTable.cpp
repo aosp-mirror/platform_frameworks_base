@@ -440,8 +440,8 @@ ResourceTableView ResourceTable::GetPartitionedView(const ResourceTableViewOptio
 
       // Move the type into a new package
       auto& other_package = new_packages[index];
-      type_inserter.Insert(other_package.types, std::move(type));
       type_new_package_index[type.type] = index + 1;
+      type_inserter.Insert(other_package.types, std::move(type));
       type_it = package.types.erase(type_it);
     }
   }
