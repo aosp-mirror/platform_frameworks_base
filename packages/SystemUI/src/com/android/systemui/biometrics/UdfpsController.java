@@ -882,6 +882,7 @@ public class UdfpsController implements DozeReceiver {
         }
 
         if (!mKeyguardUpdateMonitor.isFingerprintDetectionRunning()) {
+            mKeyguardViewManager.showBouncer(true);
             return;
         }
 
