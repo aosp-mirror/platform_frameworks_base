@@ -207,62 +207,65 @@ public class JobInfo implements Parcelable {
     public static final int DEFAULT_BACKOFF_POLICY = BACKOFF_POLICY_EXPONENTIAL;
 
     /**
-     * Default of {@link #getPriority}.
+     * Default of {@link #getBias}.
      * @hide
      */
-    public static final int PRIORITY_DEFAULT = 0;
+    public static final int BIAS_DEFAULT = 0;
 
     /**
-     * Value of {@link #getPriority} for expedited syncs.
+     * Value of {@link #getBias} for expedited syncs.
      * @hide
      */
-    public static final int PRIORITY_SYNC_EXPEDITED = 10;
+    public static final int BIAS_SYNC_EXPEDITED = 10;
 
     /**
-     * Value of {@link #getPriority} for first time initialization syncs.
+     * Value of {@link #getBias} for first time initialization syncs.
      * @hide
      */
-    public static final int PRIORITY_SYNC_INITIALIZATION = 20;
+    public static final int BIAS_SYNC_INITIALIZATION = 20;
 
     /**
-     * Value of {@link #getPriority} for a BFGS app (overrides the supplied
-     * JobInfo priority if it is smaller).
+     * Value of {@link #getBias} for a BFGS app (overrides the supplied
+     * JobInfo bias if it is smaller).
      * @hide
      */
-    public static final int PRIORITY_BOUND_FOREGROUND_SERVICE = 30;
+    public static final int BIAS_BOUND_FOREGROUND_SERVICE = 30;
 
     /** @hide For backward compatibility. */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int PRIORITY_FOREGROUND_APP = PRIORITY_BOUND_FOREGROUND_SERVICE;
+    public static final int PRIORITY_FOREGROUND_APP = BIAS_BOUND_FOREGROUND_SERVICE;
 
     /**
-     * Value of {@link #getPriority} for a FG service app (overrides the supplied
-     * JobInfo priority if it is smaller).
+     * Value of {@link #getBias} for a FG service app (overrides the supplied
+     * JobInfo bias if it is smaller).
      * @hide
      */
+    public static final int BIAS_FOREGROUND_SERVICE = 35;
+
+    /** @hide For backward compatibility. */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int PRIORITY_FOREGROUND_SERVICE = 35;
+    public static final int PRIORITY_FOREGROUND_SERVICE = BIAS_FOREGROUND_SERVICE;
 
     /**
-     * Value of {@link #getPriority} for the current top app (overrides the supplied
-     * JobInfo priority if it is smaller).
+     * Value of {@link #getBias} for the current top app (overrides the supplied
+     * JobInfo bias if it is smaller).
      * @hide
      */
-    public static final int PRIORITY_TOP_APP = 40;
+    public static final int BIAS_TOP_APP = 40;
 
     /**
-     * Adjustment of {@link #getPriority} if the app has often (50% or more of the time)
+     * Adjustment of {@link #getBias} if the app has often (50% or more of the time)
      * been running jobs.
      * @hide
      */
-    public static final int PRIORITY_ADJ_OFTEN_RUNNING = -40;
+    public static final int BIAS_ADJ_OFTEN_RUNNING = -40;
 
     /**
-     * Adjustment of {@link #getPriority} if the app has always (90% or more of the time)
+     * Adjustment of {@link #getBias} if the app has always (90% or more of the time)
      * been running jobs.
      * @hide
      */
-    public static final int PRIORITY_ADJ_ALWAYS_RUNNING = -80;
+    public static final int BIAS_ADJ_ALWAYS_RUNNING = -80;
 
     /**
      * Indicates that the implementation of this job will be using
@@ -355,7 +358,7 @@ public class JobInfo implements Parcelable {
     private final long flexMillis;
     private final long initialBackoffMillis;
     private final int backoffPolicy;
-    private final int priority;
+    private final int mBias;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final int flags;
 
@@ -403,8 +406,8 @@ public class JobInfo implements Parcelable {
     }
 
     /** @hide */
-    public int getPriority() {
-        return priority;
+    public int getBias() {
+        return mBias;
     }
 
     /** @hide */
@@ -740,7 +743,7 @@ public class JobInfo implements Parcelable {
         if (backoffPolicy != j.backoffPolicy) {
             return false;
         }
-        if (priority != j.priority) {
+        if (mBias != j.mBias) {
             return false;
         }
         if (flags != j.flags) {
@@ -787,7 +790,7 @@ public class JobInfo implements Parcelable {
         hashCode = 31 * hashCode + Long.hashCode(flexMillis);
         hashCode = 31 * hashCode + Long.hashCode(initialBackoffMillis);
         hashCode = 31 * hashCode + backoffPolicy;
-        hashCode = 31 * hashCode + priority;
+        hashCode = 31 * hashCode + mBias;
         hashCode = 31 * hashCode + flags;
         return hashCode;
     }
@@ -826,7 +829,7 @@ public class JobInfo implements Parcelable {
         backoffPolicy = in.readInt();
         hasEarlyConstraint = in.readInt() == 1;
         hasLateConstraint = in.readInt() == 1;
-        priority = in.readInt();
+        mBias = in.readInt();
         flags = in.readInt();
     }
 
@@ -857,7 +860,7 @@ public class JobInfo implements Parcelable {
         backoffPolicy = b.mBackoffPolicy;
         hasEarlyConstraint = b.mHasEarlyConstraint;
         hasLateConstraint = b.mHasLateConstraint;
-        priority = b.mPriority;
+        mBias = b.mBias;
         flags = b.mFlags;
     }
 
@@ -902,7 +905,7 @@ public class JobInfo implements Parcelable {
         out.writeInt(backoffPolicy);
         out.writeInt(hasEarlyConstraint ? 1 : 0);
         out.writeInt(hasLateConstraint ? 1 : 0);
-        out.writeInt(priority);
+        out.writeInt(mBias);
         out.writeInt(this.flags);
     }
 
@@ -1020,7 +1023,7 @@ public class JobInfo implements Parcelable {
         private Bundle mTransientExtras = Bundle.EMPTY;
         private ClipData mClipData;
         private int mClipGrantFlags;
-        private int mPriority = PRIORITY_DEFAULT;
+        private int mBias = BIAS_DEFAULT;
         private int mFlags;
         // Requirements.
         private int mConstraintFlags;
@@ -1074,7 +1077,7 @@ public class JobInfo implements Parcelable {
             mTransientExtras = job.getTransientExtras();
             mClipData = job.getClipData();
             mClipGrantFlags = job.getClipGrantFlags();
-            mPriority = job.getPriority();
+            mBias = job.getBias();
             mFlags = job.getFlags();
             mConstraintFlags = job.getConstraintFlags();
             mNetworkRequest = job.getRequiredNetwork();
@@ -1100,9 +1103,17 @@ public class JobInfo implements Parcelable {
         }
 
         /** @hide */
+        @NonNull
+        public Builder setBias(int bias) {
+            mBias = bias;
+            return this;
+        }
+
+        /** @hide */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public Builder setPriority(int priority) {
-            mPriority = priority;
+            // No-op for invalid calls. This wasn't a supported API before Tiramisu, so anyone
+            // calling this that isn't targeting T isn't guaranteed a behavior change.
             return this;
         }
 
@@ -1829,27 +1840,27 @@ public class JobInfo implements Parcelable {
     }
 
     /**
-     * Convert a priority integer into a human readable string for debugging.
+     * Convert a bias integer into a human readable string for debugging.
      * @hide
      */
-    public static String getPriorityString(int priority) {
-        switch (priority) {
-            case PRIORITY_DEFAULT:
-                return PRIORITY_DEFAULT + " [DEFAULT]";
-            case PRIORITY_SYNC_EXPEDITED:
-                return PRIORITY_SYNC_EXPEDITED + " [SYNC_EXPEDITED]";
-            case PRIORITY_SYNC_INITIALIZATION:
-                return PRIORITY_SYNC_INITIALIZATION + " [SYNC_INITIALIZATION]";
-            case PRIORITY_BOUND_FOREGROUND_SERVICE:
-                return PRIORITY_BOUND_FOREGROUND_SERVICE + " [BFGS_APP]";
-            case PRIORITY_FOREGROUND_SERVICE:
-                return PRIORITY_FOREGROUND_SERVICE + " [FGS_APP]";
-            case PRIORITY_TOP_APP:
-                return PRIORITY_TOP_APP + " [TOP_APP]";
+    public static String getBiasString(int bias) {
+        switch (bias) {
+            case BIAS_DEFAULT:
+                return BIAS_DEFAULT + " [DEFAULT]";
+            case BIAS_SYNC_EXPEDITED:
+                return BIAS_SYNC_EXPEDITED + " [SYNC_EXPEDITED]";
+            case BIAS_SYNC_INITIALIZATION:
+                return BIAS_SYNC_INITIALIZATION + " [SYNC_INITIALIZATION]";
+            case BIAS_BOUND_FOREGROUND_SERVICE:
+                return BIAS_BOUND_FOREGROUND_SERVICE + " [BFGS_APP]";
+            case BIAS_FOREGROUND_SERVICE:
+                return BIAS_FOREGROUND_SERVICE + " [FGS_APP]";
+            case BIAS_TOP_APP:
+                return BIAS_TOP_APP + " [TOP_APP]";
 
-                // PRIORITY_ADJ_* are adjustments and not used as real priorities.
+                // BIAS_ADJ_* are adjustments and not used as real priorities.
                 // No need to convert to strings.
         }
-        return priority + " [UNKNOWN]";
+        return bias + " [UNKNOWN]";
     }
 }
