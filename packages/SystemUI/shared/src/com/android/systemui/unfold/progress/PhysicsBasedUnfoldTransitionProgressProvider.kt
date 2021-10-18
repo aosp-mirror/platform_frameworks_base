@@ -16,6 +16,7 @@
 package com.android.systemui.unfold.progress
 
 import android.os.Handler
+import android.util.Log
 import android.util.MathUtils.saturate
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.FloatPropertyCompat
@@ -92,7 +93,14 @@ internal class PhysicsBasedUnfoldTransitionProgressProvider(
                 }
             }
             FOLD_UPDATE_FINISH_FULL_OPEN -> {
-                cancelTransition(endValue = 1f, animate = true)
+                // Do not cancel if we haven't started the transition yet.
+                // This could happen when we fully unfolded the device before the screen
+                // became available. In this case we start and immediately cancel the animation
+                // in FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE event handler, so we don't need to
+                // cancel it here.
+                if (isTransitionRunning) {
+                    cancelTransition(endValue = 1f, animate = true)
+                }
             }
             FOLD_UPDATE_FINISH_CLOSED -> {
                 cancelTransition(endValue = 0f, animate = false)
@@ -100,6 +108,10 @@ internal class PhysicsBasedUnfoldTransitionProgressProvider(
             FOLD_UPDATE_START_CLOSING -> {
                 startTransition(startValue = 1f)
             }
+        }
+
+        if (DEBUG) {
+            Log.d(TAG, "onFoldUpdate = $update")
         }
     }
 
@@ -117,6 +129,10 @@ internal class PhysicsBasedUnfoldTransitionProgressProvider(
 
             listeners.forEach {
                 it.onTransitionFinished()
+            }
+
+            if (DEBUG) {
+                Log.d(TAG, "onTransitionFinished")
             }
         }
     }
@@ -137,6 +153,10 @@ internal class PhysicsBasedUnfoldTransitionProgressProvider(
             it.onTransitionStarted()
         }
         isTransitionRunning = true
+
+        if (DEBUG) {
+            Log.d(TAG, "onTransitionStarted")
+        }
     }
 
     private fun startTransition(startValue: Float) {
@@ -188,6 +208,9 @@ internal class PhysicsBasedUnfoldTransitionProgressProvider(
             provider.transitionProgress
     }
 }
+
+private const val TAG = "PhysicsBasedUnfoldTransitionProgressProvider"
+private const val DEBUG = true
 
 private const val TRANSITION_TIMEOUT_MILLIS = 2000L
 private const val SPRING_STIFFNESS = 200.0f

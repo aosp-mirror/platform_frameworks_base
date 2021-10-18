@@ -232,7 +232,7 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
 
             if (mSplitLayout != null
                     && mSplitLayout.updateConfiguration(mRootTaskInfo.configuration)) {
-                onLayoutChanged(mSplitLayout);
+                onLayoutSizeChanged(mSplitLayout);
             }
         } else if (taskInfo.taskId == getTaskId1()) {
             mTaskInfo1 = taskInfo;
@@ -313,13 +313,19 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
     }
 
     @Override
-    public void onLayoutChanging(SplitLayout layout) {
+    public void onLayoutPositionChanging(SplitLayout layout) {
         mSyncQueue.runInSync(t ->
                 layout.applySurfaceChanges(t, mTaskLeash1, mTaskLeash2, mDimLayer1, mDimLayer2));
     }
 
     @Override
-    public void onLayoutChanged(SplitLayout layout) {
+    public void onLayoutSizeChanging(SplitLayout layout) {
+        mSyncQueue.runInSync(t ->
+                layout.applySurfaceChanges(t, mTaskLeash1, mTaskLeash2, mDimLayer1, mDimLayer2));
+    }
+
+    @Override
+    public void onLayoutSizeChanged(SplitLayout layout) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         layout.applyTaskChanges(wct, mTaskInfo1, mTaskInfo2);
         mSyncQueue.queue(wct);
@@ -328,9 +334,9 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
     }
 
     @Override
-    public void onLayoutShifted(int offsetX, int offsetY, SplitLayout layout) {
+    public void setLayoutOffsetTarget(int offsetX, int offsetY, SplitLayout layout) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
-        layout.applyLayoutShifted(wct, offsetX, offsetY, mTaskInfo1, mTaskInfo2);
+        layout.applyLayoutOffsetTarget(wct, offsetX, offsetY, mTaskInfo1, mTaskInfo2);
         mController.getTaskOrganizer().applyTransaction(wct);
     }
 }
