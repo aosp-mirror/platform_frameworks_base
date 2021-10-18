@@ -550,7 +550,6 @@ public class IorapForwardingService extends SystemService {
 
             JobInfo.Builder builder = new JobInfo.Builder(JOB_ID_IORAPD, IORAPD_COMPONENT_NAME);
             builder.setPeriodic(JOB_INTERVAL_MS);
-            builder.setPrefetch(true);
 
             builder.setRequiresCharging(true);
             builder.setRequiresDeviceIdle(true);
