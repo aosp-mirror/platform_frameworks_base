@@ -1090,6 +1090,7 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Շարունակել"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Կարգավորումներ"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"Այժմ նվագարկվում է <xliff:g id="SONG_NAME">%1$s</xliff:g> երգը <xliff:g id="ARTIST_NAME">%2$s</xliff:g>-ի կատարմամբ <xliff:g id="APP_LABEL">%3$s</xliff:g> հավելվածից"</string>
+    <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g>՝ <xliff:g id="TOTAL_TIME">%2$s</xliff:g>-ից"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Նվագարկել"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Բացեք <xliff:g id="APP_LABEL">%1$s</xliff:g> հավելվածը"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Նվագարկել <xliff:g id="SONG_NAME">%1$s</xliff:g> երգը <xliff:g id="ARTIST_NAME">%2$s</xliff:g>-ի կատարմամբ <xliff:g id="APP_LABEL">%3$s</xliff:g> հավելվածից"</string>

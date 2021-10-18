@@ -1096,6 +1096,7 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Atsākt"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Iestatījumi"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"Tiek atskaņots fails “<xliff:g id="SONG_NAME">%1$s</xliff:g>” (izpildītājs: <xliff:g id="ARTIST_NAME">%2$s</xliff:g>) no lietotnes <xliff:g id="APP_LABEL">%3$s</xliff:g>."</string>
+    <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> no <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Atskaņot"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Atveriet lietotni <xliff:g id="APP_LABEL">%1$s</xliff:g>."</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Atskaņojiet failu “<xliff:g id="SONG_NAME">%1$s</xliff:g>” (izpildītājs: <xliff:g id="ARTIST_NAME">%2$s</xliff:g>) no lietotnes <xliff:g id="APP_LABEL">%3$s</xliff:g>."</string>

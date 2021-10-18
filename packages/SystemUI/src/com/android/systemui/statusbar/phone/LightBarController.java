@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 
@@ -101,7 +102,9 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
             mNavigationMode = mode;
         });
 
-        dumpManager.registerDumpable(getClass().getSimpleName(), this);
+        if (ctx.getDisplayId() == DEFAULT_DISPLAY) {
+            dumpManager.registerDumpable(getClass().getSimpleName(), this);
+        }
     }
 
     public void setNavigationBar(LightBarTransitionsController navigationBar) {
@@ -296,6 +299,35 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
             pw.println(" NavigationBarTransitionsController:");
             mNavigationBarController.dump(fd, pw, args);
             pw.println();
+        }
+    }
+
+    /**
+     * Injectable factory for creating a {@link LightBarController}.
+     */
+    public static class Factory {
+        private final DarkIconDispatcher mDarkIconDispatcher;
+        private final BatteryController mBatteryController;
+        private final NavigationModeController mNavModeController;
+        private final DumpManager mDumpManager;
+
+        @Inject
+        public Factory(
+                DarkIconDispatcher darkIconDispatcher,
+                BatteryController batteryController,
+                NavigationModeController navModeController,
+                DumpManager dumpManager) {
+
+            mDarkIconDispatcher = darkIconDispatcher;
+            mBatteryController = batteryController;
+            mNavModeController = navModeController;
+            mDumpManager = dumpManager;
+        }
+
+        /** Create an {@link LightBarController} */
+        public LightBarController create(Context context) {
+            return new LightBarController(context, mDarkIconDispatcher, mBatteryController,
+                    mNavModeController, mDumpManager);
         }
     }
 }

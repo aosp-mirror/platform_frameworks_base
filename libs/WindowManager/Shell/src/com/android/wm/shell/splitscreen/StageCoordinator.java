@@ -394,6 +394,12 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE, wct, remoteTransition, this);
     }
 
+    void evictOccludedChildren(@SplitPosition int position) {
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        (position == mSideStagePosition ? mSideStage : mMainStage).evictOccludedChildren(wct);
+        mTaskOrganizer.applyTransaction(wct);
+    }
+
     Bundle resolveStartStage(@SplitScreen.StageType int stage,
             @SplitPosition int position, @androidx.annotation.Nullable Bundle options,
             @androidx.annotation.Nullable WindowContainerTransaction wct) {
@@ -471,7 +477,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (mSideStageListener.mVisible && updateBounds) {
             if (wct == null) {
                 // onLayoutChanged builds/applies a wct with the contents of updateWindowBounds.
-                onLayoutChanged(mSplitLayout);
+                onLayoutSizeChanged(mSplitLayout);
             } else {
                 updateWindowBounds(mSplitLayout, wct);
                 updateUnfoldBounds();
@@ -799,13 +805,18 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     @Override
-    public void onLayoutChanging(SplitLayout layout) {
+    public void onLayoutPositionChanging(SplitLayout layout) {
+        mSyncQueue.runInSync(t -> updateSurfaceBounds(layout, t));
+    }
+
+    @Override
+    public void onLayoutSizeChanging(SplitLayout layout) {
         mSyncQueue.runInSync(t -> updateSurfaceBounds(layout, t));
         mSideStage.setOutlineVisibility(false);
     }
 
     @Override
-    public void onLayoutChanged(SplitLayout layout) {
+    public void onLayoutSizeChanged(SplitLayout layout) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         updateWindowBounds(layout, wct);
         updateUnfoldBounds();
@@ -859,13 +870,13 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     @Override
-    public void onLayoutShifted(int offsetX, int offsetY, SplitLayout layout) {
+    public void setLayoutOffsetTarget(int offsetX, int offsetY, SplitLayout layout) {
         final StageTaskListener topLeftStage =
                 mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT ? mSideStage : mMainStage;
         final StageTaskListener bottomRightStage =
                 mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT ? mMainStage : mSideStage;
         final WindowContainerTransaction wct = new WindowContainerTransaction();
-        layout.applyLayoutShifted(wct, offsetX, offsetY, topLeftStage.mRootTaskInfo,
+        layout.applyLayoutOffsetTarget(wct, offsetX, offsetY, topLeftStage.mRootTaskInfo,
                 bottomRightStage.mRootTaskInfo);
         mTaskOrganizer.applyTransaction(wct);
     }
@@ -897,7 +908,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (mSplitLayout != null
                 && mSplitLayout.updateConfiguration(mDisplayAreaInfo.configuration)
                 && mMainStage.isActive()) {
-            onLayoutChanged(mSplitLayout);
+            onLayoutSizeChanged(mSplitLayout);
         }
     }
 

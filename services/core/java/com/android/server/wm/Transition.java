@@ -789,7 +789,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             }
         }
         if ((flags & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0) {
-            mController.mAtm.mWindowManager.mPolicy.applyKeyguardOcclusionChange();
+            mController.mAtm.mWindowManager.mPolicy.applyKeyguardOcclusionChange(
+                    true /* keyguardOccludingStarted */);
         }
     }
 

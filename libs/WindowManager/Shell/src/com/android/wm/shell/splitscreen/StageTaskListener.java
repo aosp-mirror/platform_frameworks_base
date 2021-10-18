@@ -68,6 +68,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         void onChildTaskStatusChanged(int taskId, boolean present, boolean visible);
 
         void onRootTaskVanished();
+
         void onNoLongerSupportMultiWindow();
     }
 
@@ -245,6 +246,15 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             return;
         }
         wct.reorder(mChildrenTaskInfo.get(taskId).token, onTop /* onTop */);
+    }
+
+    void evictOccludedChildren(WindowContainerTransaction wct) {
+        for (int i = mChildrenTaskInfo.size() - 1; i >= 0; i--) {
+            final ActivityManager.RunningTaskInfo taskInfo = mChildrenTaskInfo.valueAt(i);
+            if (!taskInfo.isVisible) {
+                wct.reparent(taskInfo.token, null /* parent */, false /* onTop */);
+            }
+        }
     }
 
     void setVisibility(boolean visible, WindowContainerTransaction wct) {
