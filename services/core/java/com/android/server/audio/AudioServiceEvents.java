@@ -155,6 +155,7 @@ public class AudioServiceEvents {
         static final int VOL_MODE_CHANGE_HEARING_AID = 7;
         static final int VOL_SET_GROUP_VOL = 8;
         static final int VOL_MUTE_STREAM_INT = 9;
+        static final int VOL_SET_LE_AUDIO_VOL = 10;
 
         final int mOp;
         final int mStream;
@@ -310,6 +311,13 @@ public class AudioServiceEvents {
                             .set(MediaMetrics.Property.INDEX, mVal1)
                             .record();
                     return;
+                case VOL_SET_LE_AUDIO_VOL:
+                    new MediaMetrics.Item(mMetricsId)
+                            .set(MediaMetrics.Property.EVENT, "setLeAudioVolume")
+                            .set(MediaMetrics.Property.INDEX, mVal1)
+                            .set(MediaMetrics.Property.MAX_INDEX, mVal2)
+                            .record();
+                    return;
                 case VOL_SET_AVRCP_VOL:
                     new MediaMetrics.Item(mMetricsId)
                             .set(MediaMetrics.Property.EVENT, "setAvrcpVolume")
@@ -379,6 +387,11 @@ public class AudioServiceEvents {
                             .toString();
                 case VOL_SET_HEARING_AID_VOL:
                     return new StringBuilder("setHearingAidVolume:")
+                            .append(" index:").append(mVal1)
+                            .append(" gain dB:").append(mVal2)
+                            .toString();
+                case VOL_SET_LE_AUDIO_VOL:
+                    return new StringBuilder("setLeAudioVolume:")
                             .append(" index:").append(mVal1)
                             .append(" gain dB:").append(mVal2)
                             .toString();
