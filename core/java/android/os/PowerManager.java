@@ -25,6 +25,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -2094,19 +2095,31 @@ public final class PowerManager {
      * Returns true if the device is currently in light idle mode.  This happens when a device
      * has had its screen off for a short time, switching it into a batching mode where we
      * execute jobs, syncs, networking on a batching schedule.  You can monitor for changes to
-     * this state with {@link #ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED}.
+     * this state with {@link #ACTION_DEVICE_LIGHT_IDLE_MODE_CHANGED}.
      *
-     * @return Returns true if currently in active light device idle mode, else false.  This is
+     * @return Returns true if currently in active device light idle mode, else false.  This is
      * when light idle mode restrictions are being actively applied; it will return false if the
      * device is in a long-term idle mode but currently running a maintenance window where
      * restrictions have been lifted.
      */
-    public boolean isLightDeviceIdleMode() {
+    public boolean isDeviceLightIdleMode() {
         try {
             return mService.isLightDeviceIdleMode();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * @see #isDeviceLightIdleMode()
+     * @deprecated
+     * @hide
+     */
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.S,
+            publicAlternatives = "Use {@link #isDeviceLightIdleMode()} instead.")
+    public boolean isLightDeviceIdleMode() {
+        return isDeviceLightIdleMode();
     }
 
     /**
@@ -2559,12 +2572,26 @@ public final class PowerManager {
             = "android.os.action.DEVICE_IDLE_MODE_CHANGED";
 
     /**
-     * Intent that is broadcast when the state of {@link #isLightDeviceIdleMode()} changes.
+     * Intent that is broadcast when the state of {@link #isDeviceLightIdleMode()} changes.
      * This broadcast is only sent to registered receivers.
      */
+    @SuppressLint("ActionValue") // Need to do "LIGHT_DEVICE_IDLE..." for legacy reasons
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED
-            = "android.os.action.LIGHT_DEVICE_IDLE_MODE_CHANGED";
+    public static final String ACTION_DEVICE_LIGHT_IDLE_MODE_CHANGED =
+            // Use the old string so we don't break legacy apps.
+            "android.os.action.LIGHT_DEVICE_IDLE_MODE_CHANGED";
+
+    /**
+     * @see #ACTION_DEVICE_LIGHT_IDLE_MODE_CHANGED
+     * @deprecated
+     * @hide
+     */
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553,
+            publicAlternatives = "Use {@link #ACTION_DEVICE_LIGHT_IDLE_MODE_CHANGED} instead")
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED =
+            ACTION_DEVICE_LIGHT_IDLE_MODE_CHANGED;
 
     /**
      * @hide Intent that is broadcast when the set of power save allowlist apps has changed.
