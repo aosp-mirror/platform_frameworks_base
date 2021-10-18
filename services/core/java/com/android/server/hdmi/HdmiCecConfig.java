@@ -22,17 +22,11 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.database.ContentObserver;
 import android.hardware.hdmi.HdmiControlManager;
-import android.net.Uri;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.SystemProperties;
-import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.util.ArrayMap;
 
@@ -88,8 +82,6 @@ public class HdmiCecConfig {
     @GuardedBy("mLock")
     private final ArrayMap<Setting, ArrayMap<SettingChangeListener, Executor>>
             mSettingChangeListeners = new ArrayMap<>();
-
-    private SettingsObserver mSettingsObserver;
 
     private LinkedHashMap<String, Setting> mSettings = new LinkedHashMap<>();
 
@@ -183,18 +175,6 @@ public class HdmiCecConfig {
         public void storeSharedPref(@NonNull String storageKey,
                                     @NonNull String value) {
             mSharedPrefs.edit().putString(storageKey, value).apply();
-        }
-    }
-
-    private class SettingsObserver extends ContentObserver {
-        SettingsObserver(Handler handler) {
-            super(handler);
-        }
-
-        @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            String setting = uri.getLastPathSegment();
-            HdmiCecConfig.this.notifyGlobalSettingChanged(setting);
         }
     }
 
@@ -518,7 +498,7 @@ public class HdmiCecConfig {
     private int getStorage(@NonNull Setting setting) {
         switch (setting.getName()) {
             case HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED:
-                return STORAGE_GLOBAL_SETTINGS;
+                return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION:
                 return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_ROUTING_CONTROL:
@@ -536,7 +516,7 @@ public class HdmiCecConfig {
             case HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY:
                 return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP:
-                return STORAGE_GLOBAL_SETTINGS;
+                return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_TV:
                 return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_ROOT_MENU:
@@ -559,7 +539,7 @@ public class HdmiCecConfig {
     private String getStorageKey(@NonNull Setting setting) {
         switch (setting.getName()) {
             case HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED:
-                return Global.HDMI_CONTROL_ENABLED;
+                return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION:
                 return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_ROUTING_CONTROL:
@@ -577,7 +557,7 @@ public class HdmiCecConfig {
             case HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY:
                 return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP:
-                return Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED;
+                return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_TV:
                 return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_ROOT_MENU:
@@ -629,17 +609,6 @@ public class HdmiCecConfig {
         }
     }
 
-    private void notifyGlobalSettingChanged(String setting) {
-        switch (setting) {
-            case Global.HDMI_CONTROL_ENABLED:
-                notifySettingChanged(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED);
-                break;
-            case Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED:
-                notifySettingChanged(HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP);
-                break;
-        }
-    }
-
     private void notifySettingChanged(@NonNull @CecSettingName String name) {
         Setting setting = getSetting(name);
         if (setting == null) {
@@ -666,32 +635,6 @@ public class HdmiCecConfig {
                 });
             }
         }
-    }
-
-    /**
-     * This method registers Global Setting change observer.
-     * Needs to be called once after initialization of HdmiCecConfig.
-     */
-    public void registerGlobalSettingsObserver(Looper looper) {
-        Handler handler = new Handler(looper);
-        mSettingsObserver = new SettingsObserver(handler);
-        ContentResolver resolver = mContext.getContentResolver();
-        String[] settings = new String[] {
-                Global.HDMI_CONTROL_ENABLED,
-                Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
-        };
-        for (String setting: settings) {
-            resolver.registerContentObserver(Global.getUriFor(setting), false,
-                                             mSettingsObserver, UserHandle.USER_ALL);
-        }
-    }
-
-    /**
-     * This method unregisters Global Setting change observer.
-     */
-    public void unregisterGlobalSettingsObserver() {
-        ContentResolver resolver = mContext.getContentResolver();
-        resolver.unregisterContentObserver(mSettingsObserver);
     }
 
     /**
