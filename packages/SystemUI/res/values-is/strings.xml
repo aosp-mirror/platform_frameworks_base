@@ -1090,6 +1090,7 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Halda áfram"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Stillingar"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> með <xliff:g id="ARTIST_NAME">%2$s</xliff:g> er í spilun á <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
+    <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> af <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Spila"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Opna <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Spila <xliff:g id="SONG_NAME">%1$s</xliff:g> með <xliff:g id="ARTIST_NAME">%2$s</xliff:g> í <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
