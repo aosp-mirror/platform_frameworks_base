@@ -29,6 +29,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -177,9 +178,7 @@ public class SensorModule {
         // length and index of sensorMap correspond to DevicePostureController.DevicePostureInt:
         final ThresholdSensor[] sensorMap =
                 new ThresholdSensor[DevicePostureController.SUPPORTED_POSTURES_SIZE];
-        for (int i = 0; i < DevicePostureController.SUPPORTED_POSTURES_SIZE; i++) {
-            sensorMap[i] = noProxSensor;
-        }
+        Arrays.fill(sensorMap, noProxSensor);
 
         if (!hasPostureSupport(sensorTypes)) {
             Log.e("SensorModule", "config doesn't support postures,"
