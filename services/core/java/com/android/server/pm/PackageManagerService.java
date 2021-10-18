@@ -1487,7 +1487,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 new DefaultSystemWrapper(),
                 LocalServices::getService,
                 context::getSystemService,
-                (i, pm) -> new BackgroundDexOptService(i.getContext(), i.getDexManager()));
+                (i, pm) -> new BackgroundDexOptService(i.getContext(), i.getDexManager(), pm));
 
         if (Build.VERSION.SDK_INT <= 0) {
             Slog.w(TAG, "**** ro.build.version.sdk not set!");
