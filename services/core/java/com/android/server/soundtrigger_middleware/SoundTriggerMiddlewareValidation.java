@@ -731,7 +731,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                     int captureSession) {
                 synchronized (SoundTriggerMiddlewareValidation.this) {
                     ModelState modelState = mLoadedModels.get(modelHandle);
-                    if (event.status != RecognitionStatus.FORCED) {
+                    if (!event.recognitionStillActive) {
                         modelState.activityState = ModelState.Activity.LOADED;
                     }
                 }
@@ -760,7 +760,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                     @NonNull PhraseRecognitionEvent event, int captureSession) {
                 synchronized (SoundTriggerMiddlewareValidation.this) {
                     ModelState modelState = mLoadedModels.get(modelHandle);
-                    if (event.common.status != RecognitionStatus.FORCED) {
+                    if (!event.common.recognitionStillActive) {
                         modelState.activityState = ModelState.Activity.LOADED;
                     }
                 }
@@ -772,7 +772,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                     Log.w(TAG, "Client callback exception.", e);
                     synchronized (SoundTriggerMiddlewareValidation.this) {
                         ModelState modelState = mLoadedModels.get(modelHandle);
-                        if (event.common.status != RecognitionStatus.FORCED) {
+                        if (!event.common.recognitionStillActive) {
                             modelState.activityState = ModelState.Activity.INTERCEPTED;
                             // If we failed to deliver an actual event to the client, they would
                             // never know to restart it whenever circumstances change. Thus, we

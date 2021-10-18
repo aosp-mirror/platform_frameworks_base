@@ -26,6 +26,7 @@ import android.media.soundtrigger.PhraseSoundModel;
 import android.media.soundtrigger.Properties;
 import android.media.soundtrigger.RecognitionConfig;
 import android.media.soundtrigger.RecognitionEvent;
+import android.media.soundtrigger.RecognitionStatus;
 import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger.Status;
 import android.os.IBinder;
@@ -221,11 +222,15 @@ public class SoundTriggerHw3Compat implements ISoundTriggerHal {
 
         @Override
         public void phraseRecognitionCallback(int model, PhraseRecognitionEvent event) {
+            // A FORCED status implies that recognition is still active after the event.
+            event.common.recognitionStillActive |= event.common.status == RecognitionStatus.FORCED;
             mDelegate.phraseRecognitionCallback(model, event);
         }
 
         @Override
         public void recognitionCallback(int model, RecognitionEvent event) {
+            // A FORCED status implies that recognition is still active after the event.
+            event.recognitionStillActive |= event.status == RecognitionStatus.FORCED;
             mDelegate.recognitionCallback(model, event);
         }
     }

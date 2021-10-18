@@ -43,4 +43,5 @@ parcelable RecognitionEvent {
   boolean triggerInData;
   @nullable android.media.audio.common.AudioConfig audioConfig;
   byte[] data;
+  boolean recognitionStillActive;
 }

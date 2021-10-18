@@ -830,7 +830,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             return;
         }
 
-        if (event.status != SoundTrigger.RECOGNITION_STATUS_GET_STATE_RESPONSE) {
+        if (!event.recognitionStillActive) {
             model.setStopped();
         }
 
@@ -971,7 +971,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             return;
         }
 
-        if (event.status != SoundTrigger.RECOGNITION_STATUS_GET_STATE_RESPONSE) {
+        if (!event.recognitionStillActive) {
             modelData.setStopped();
         }
 
