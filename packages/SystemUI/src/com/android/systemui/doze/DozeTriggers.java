@@ -99,8 +99,6 @@ public class DozeTriggers implements DozeMachine.Part {
     private final UiEventLogger mUiEventLogger;
     private final DevicePostureController mDevicePostureController;
 
-    private @DevicePostureController.DevicePostureInt int mDevicePosture;
-
     private long mNotificationPulseTime;
     private boolean mPulsePending;
     private Runnable mAodInterruptRunnable;
@@ -197,11 +195,12 @@ public class DozeTriggers implements DozeMachine.Part {
         mSensorManager = sensorManager;
         mWakeLock = wakeLock;
         mAllowPulseTriggers = true;
+
         mDevicePostureController = devicePostureController;
-        mDevicePosture = devicePostureController.getDevicePosture();
         mDozeSensors = new DozeSensors(context, mSensorManager, dozeParameters,
                 config, wakeLock, this::onSensor, this::onProximityFar, dozeLog, proximitySensor,
-                secureSettings, authController, mDevicePosture);
+                secureSettings, authController, devicePostureController);
+
         mUiModeManager = mContext.getSystemService(UiModeManager.class);
         mDockManager = dockManager;
         mProxCheck = proxCheck;
@@ -212,6 +211,10 @@ public class DozeTriggers implements DozeMachine.Part {
         mUiEventLogger = uiEventLogger;
         mKeyguardStateController = keyguardStateController;
     }
+    private final DevicePostureController.Callback mDevicePostureCallback =
+            posture -> {
+
+            };
 
     @Override
     public void setDozeMachine(DozeMachine dozeMachine) {
@@ -284,8 +287,8 @@ public class DozeTriggers implements DozeMachine.Part {
         boolean isTap = pulseReason == DozeLog.REASON_SENSOR_TAP;
         boolean isPickup = pulseReason == DozeLog.REASON_SENSOR_PICKUP;
         boolean isLongPress = pulseReason == DozeLog.PULSE_REASON_SENSOR_LONG_PRESS;
-        boolean isWakeOnPresence = pulseReason == DozeLog.REASON_SENSOR_WAKE_UP;
-        boolean isWakeOnReach = pulseReason == DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN;
+        boolean isWakeOnPresence = pulseReason == DozeLog.REASON_SENSOR_WAKE_UP_PRESENCE;
+        boolean isWakeOnReach = pulseReason == DozeLog.PULSE_REASON_SENSOR_WAKE_REACH;
         boolean isUdfpsLongPress = pulseReason == DozeLog.REASON_SENSOR_UDFPS_LONG_PRESS;
         boolean isQuickPickup = pulseReason == DozeLog.REASON_SENSOR_QUICK_PICKUP;
         boolean isWakeDisplayEvent = isQuickPickup || ((isWakeOnPresence || isWakeOnReach)
@@ -455,7 +458,7 @@ public class DozeTriggers implements DozeMachine.Part {
                 mWantSensors = true;
                 mWantTouchScreenSensors = true;
                 if (newState == DozeMachine.State.DOZE_AOD && !sWakeDisplaySensorState) {
-                    onWakeScreen(false, newState, DozeLog.REASON_SENSOR_WAKE_UP);
+                    onWakeScreen(false, newState, DozeLog.REASON_SENSOR_WAKE_UP_PRESENCE);
                 }
                 break;
             case DOZE_AOD_PAUSED:
@@ -524,7 +527,7 @@ public class DozeTriggers implements DozeMachine.Part {
         // When already pulsing we're allowed to show the wallpaper directly without
         // requesting a new pulse.
         if (dozeState == DozeMachine.State.DOZE_PULSING
-                && reason == DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN) {
+                && reason == DozeLog.PULSE_REASON_SENSOR_WAKE_REACH) {
             mMachine.requestState(DozeMachine.State.DOZE_PULSING_BRIGHT);
             return;
         }

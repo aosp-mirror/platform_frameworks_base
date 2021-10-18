@@ -43,6 +43,9 @@ import com.android.systemui.util.sensors.AsyncSensorManager;
 import com.android.systemui.util.wakelock.DelayedWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import dagger.Module;
@@ -94,16 +97,43 @@ public abstract class DozeModule {
 
     @Provides
     @BrightnessSensor
-    static Optional<Sensor> providesBrightnessSensor(
+    static Optional<Sensor>[] providesBrightnessSensors(
             AsyncSensorManager sensorManager,
             Context context,
-            DozeParameters dozeParameters,
-            DevicePostureController devicePostureController) {
-        return Optional.ofNullable(
-                DozeSensors.findSensor(
-                        sensorManager,
-                        context.getString(R.string.doze_brightness_sensor_type),
-                        dozeParameters.brightnessName(devicePostureController.getDevicePosture())
-                ));
+            DozeParameters dozeParameters) {
+        String[] sensorNames = dozeParameters.brightnessNames();
+        if (sensorNames.length == 0 || sensorNames == null) {
+            // if no brightness names are specified, just use the brightness sensor type
+            return new Optional[]{
+                    Optional.ofNullable(DozeSensors.findSensor(
+                            sensorManager,
+                            context.getString(R.string.doze_brightness_sensor_type),
+                            null
+                    ))
+            };
+        }
+
+        // length and index of brightnessMap correspond to DevicePostureController.DevicePostureInt:
+        final Optional<Sensor>[] brightnessSensorMap =
+                new Optional[DevicePostureController.SUPPORTED_POSTURES_SIZE];
+        Arrays.fill(brightnessSensorMap, Optional.empty());
+
+        // Map of sensorName => Sensor, so we reuse the same sensor if it's the same between
+        // postures
+        Map<String, Optional<Sensor>> nameToSensorMap = new HashMap<>();
+        for (int i = 0; i < sensorNames.length; i++) {
+            final String sensorName = sensorNames[i];
+            if (!nameToSensorMap.containsKey(sensorName)) {
+                nameToSensorMap.put(sensorName,
+                        Optional.ofNullable(
+                                DozeSensors.findSensor(
+                                        sensorManager,
+                                        context.getString(R.string.doze_brightness_sensor_type),
+                                        sensorNames[i]
+                                )));
+            }
+            brightnessSensorMap[i] = nameToSensorMap.get(sensorName);
+        }
+        return brightnessSensorMap;
     }
 }
