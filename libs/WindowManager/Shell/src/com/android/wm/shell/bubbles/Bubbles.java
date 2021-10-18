@@ -284,6 +284,8 @@ public interface Bubbles {
 
         void onStackExpandChanged(boolean shouldExpand);
 
+        void onManageMenuExpandChanged(boolean menuExpanded);
+
         void onUnbubbleConversation(String key);
     }
 }
