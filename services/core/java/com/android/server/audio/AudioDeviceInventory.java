@@ -887,6 +887,28 @@ public class AudioDeviceInventory {
         }
     }
 
+     /*package*/ void disconnectLeAudio() {
+        synchronized (mDevicesLock) {
+            final ArraySet<String> toRemove = new ArraySet<>();
+            // Disconnect ALL DEVICE_OUT_BLE_HEADSET devices
+            mConnectedDevices.values().forEach(deviceInfo -> {
+                if (deviceInfo.mDeviceType == AudioSystem.DEVICE_OUT_BLE_HEADSET) {
+                    toRemove.add(deviceInfo.mDeviceAddress);
+                }
+            });
+            new MediaMetrics.Item(mMetricsId + "disconnectLeAudio")
+                    .record();
+            if (toRemove.size() > 0) {
+                final int delay = checkSendBecomingNoisyIntentInt(
+                        AudioSystem.DEVICE_OUT_BLE_HEADSET, 0, AudioSystem.DEVICE_NONE);
+                toRemove.stream().forEach(deviceAddress ->
+                        makeLeAudioDeviceUnavailable(deviceAddress,
+                            AudioSystem.DEVICE_OUT_BLE_HEADSET)
+                );
+            }
+        }
+    }
+
     // must be called before removing the device from mConnectedDevices
     // musicDevice argument is used when not AudioSystem.DEVICE_NONE instead of querying
     // from AudioSystem
@@ -1195,6 +1217,10 @@ public class AudioDeviceInventory {
             return;
         }
 
+        final int leAudioVolIndex = mDeviceBroker.getVssVolumeForDevice(streamType,
+                                    AudioSystem.DEVICE_OUT_BLE_HEADSET);
+        final int maxIndex = mDeviceBroker.getMaxVssVolumeForStream(streamType);
+        mDeviceBroker.postSetLeAudioVolumeIndex(leAudioVolIndex, maxIndex, streamType);
         mDeviceBroker.postApplyVolumeOnDevice(streamType, device, "makeLeAudioDeviceAvailable");
     }
 
@@ -1243,6 +1269,7 @@ public class AudioDeviceInventory {
         BECOMING_NOISY_INTENT_DEVICES_SET.add(AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET);
         BECOMING_NOISY_INTENT_DEVICES_SET.add(AudioSystem.DEVICE_OUT_LINE);
         BECOMING_NOISY_INTENT_DEVICES_SET.add(AudioSystem.DEVICE_OUT_HEARING_AID);
+        BECOMING_NOISY_INTENT_DEVICES_SET.add(AudioSystem.DEVICE_OUT_BLE_HEADSET);
         BECOMING_NOISY_INTENT_DEVICES_SET.addAll(AudioSystem.DEVICE_OUT_ALL_A2DP_SET);
         BECOMING_NOISY_INTENT_DEVICES_SET.addAll(AudioSystem.DEVICE_OUT_ALL_USB_SET);
         BECOMING_NOISY_INTENT_DEVICES_SET.addAll(AudioSystem.DEVICE_OUT_ALL_BLE_SET);
