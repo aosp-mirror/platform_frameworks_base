@@ -1621,21 +1621,6 @@ public class PreferencesHelper implements RankingConfig {
         }
     }
 
-    public int getBlockedAppCount(int userId) {
-        int count = 0;
-        synchronized (mPackagePreferences) {
-            final int N = mPackagePreferences.size();
-            for (int i = 0; i < N; i++) {
-                final PackagePreferences r = mPackagePreferences.valueAt(i);
-                if (userId == UserHandle.getUserId(r.uid)
-                        && r.importance == IMPORTANCE_NONE) {
-                    count++;
-                }
-            }
-        }
-        return count;
-    }
-
     /**
      * Returns the number of apps that have at least one notification channel that can bypass DND
      * for given particular user
