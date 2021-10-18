@@ -291,13 +291,13 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     void updateDivideBounds(int position) {
         updateBounds(position);
         mSplitWindowManager.setResizingSplits(true);
-        mSplitLayoutHandler.onLayoutChanging(this);
+        mSplitLayoutHandler.onLayoutSizeChanging(this);
     }
 
     void setDividePosition(int position) {
         mDividePosition = position;
         updateBounds(mDividePosition);
-        mSplitLayoutHandler.onLayoutChanged(this);
+        mSplitLayoutHandler.onLayoutSizeChanged(this);
         mSplitWindowManager.setResizingSplits(false);
     }
 
@@ -451,7 +451,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
      * Shift configuration bounds to prevent client apps get configuration changed or relaunch. And
      * restore shifted configuration bounds if it's no longer shifted.
      */
-    public void applyLayoutShifted(WindowContainerTransaction wct, int offsetX, int offsetY,
+    public void applyLayoutOffsetTarget(WindowContainerTransaction wct, int offsetX, int offsetY,
             ActivityManager.RunningTaskInfo taskInfo1, ActivityManager.RunningTaskInfo taskInfo2) {
         if (offsetX == 0 && offsetY == 0) {
             wct.setBounds(taskInfo1.token, mBounds1);
@@ -492,19 +492,43 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         /** Calls when dismissing split. */
         void onSnappedToDismiss(boolean snappedToEnd);
 
-        /** Calls when the bounds is changing due to animation or dragging divider bar. */
-        void onLayoutChanging(SplitLayout layout);
-
-        /** Calls when the target bounds changed. */
-        void onLayoutChanged(SplitLayout layout);
+        /**
+         * Calls when resizing the split bounds.
+         *
+         * @see #applySurfaceChanges(SurfaceControl.Transaction, SurfaceControl, SurfaceControl,
+         * SurfaceControl, SurfaceControl)
+         */
+        void onLayoutSizeChanging(SplitLayout layout);
 
         /**
-         * Notifies when the layout shifted. So the layout handler can shift configuration
-         * bounds correspondingly to make sure client apps won't get configuration changed or
-         * relaunch. If the layout is no longer shifted, layout handler should restore shifted
-         * configuration bounds.
+         * Calls when finish resizing the split bounds.
+         *
+         * @see #applyTaskChanges(WindowContainerTransaction, ActivityManager.RunningTaskInfo,
+         * ActivityManager.RunningTaskInfo)
+         * @see #applySurfaceChanges(SurfaceControl.Transaction, SurfaceControl, SurfaceControl,
+         * SurfaceControl, SurfaceControl)
          */
-        void onLayoutShifted(int offsetX, int offsetY, SplitLayout layout);
+        void onLayoutSizeChanged(SplitLayout layout);
+
+        /**
+         * Calls when re-positioning the split bounds. Like moving split bounds while showing IME
+         * panel.
+         *
+         * @see #applySurfaceChanges(SurfaceControl.Transaction, SurfaceControl, SurfaceControl,
+         * SurfaceControl, SurfaceControl)
+         */
+        void onLayoutPositionChanging(SplitLayout layout);
+
+        /**
+         * Notifies the target offset for shifting layout. So layout handler can shift configuration
+         * bounds correspondingly to make sure client apps won't get configuration changed or
+         * relaunched. If the layout is no longer shifted, layout handler should restore shifted
+         * configuration bounds.
+         *
+         * @see #applyLayoutOffsetTarget(WindowContainerTransaction, int, int,
+         * ActivityManager.RunningTaskInfo, ActivityManager.RunningTaskInfo)
+         */
+        void setLayoutOffsetTarget(int offsetX, int offsetY, SplitLayout layout);
 
         /** Calls when user double tapped on the divider bar. */
         default void onDoubleTappedDivider() {
@@ -674,9 +698,9 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                 // changed or relaunch. This is required to make sure client apps will calculate
                 // insets properly after layout shifted.
                 if (mTargetYOffset == 0) {
-                    mSplitLayoutHandler.onLayoutShifted(0, 0, SplitLayout.this);
+                    mSplitLayoutHandler.setLayoutOffsetTarget(0, 0, SplitLayout.this);
                 } else {
-                    mSplitLayoutHandler.onLayoutShifted(0, mTargetYOffset - mLastYOffset,
+                    mSplitLayoutHandler.setLayoutOffsetTarget(0, mTargetYOffset - mLastYOffset,
                             SplitLayout.this);
                 }
             }
@@ -695,7 +719,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         public void onImePositionChanged(int displayId, int imeTop, SurfaceControl.Transaction t) {
             if (displayId != mDisplayId) return;
             onProgress(getProgress(imeTop));
-            mSplitLayoutHandler.onLayoutChanging(SplitLayout.this);
+            mSplitLayoutHandler.onLayoutPositionChanging(SplitLayout.this);
         }
 
         @Override
@@ -703,7 +727,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                 SurfaceControl.Transaction t) {
             if (displayId != mDisplayId || cancel) return;
             onProgress(1.0f);
-            mSplitLayoutHandler.onLayoutChanging(SplitLayout.this);
+            mSplitLayoutHandler.onLayoutPositionChanging(SplitLayout.this);
         }
 
         @Override
@@ -713,7 +737,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             if (!controlling && mImeShown) {
                 reset();
                 mSplitWindowManager.setInteractive(true);
-                mSplitLayoutHandler.onLayoutChanging(SplitLayout.this);
+                mSplitLayoutHandler.onLayoutPositionChanging(SplitLayout.this);
             }
         }
 
