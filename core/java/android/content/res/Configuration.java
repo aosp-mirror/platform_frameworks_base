@@ -1736,35 +1736,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * object and the given one.  Does not change the values of either.  Any
      * undefined fields in <var>delta</var> are ignored.
      * @return Returns a bit mask indicating which configuration
-     * values has changed, containing any combination of
-     * {@link android.content.pm.ActivityInfo#CONFIG_FONT_SCALE
-     * PackageManager.ActivityInfo.CONFIG_FONT_SCALE},
-     * {@link android.content.pm.ActivityInfo#CONFIG_MCC
-     * PackageManager.ActivityInfo.CONFIG_MCC},
-     * {@link android.content.pm.ActivityInfo#CONFIG_MNC
-     * PackageManager.ActivityInfo.CONFIG_MNC},
-     * {@link android.content.pm.ActivityInfo#CONFIG_LOCALE
-     * PackageManager.ActivityInfo.CONFIG_LOCALE},
-     * {@link android.content.pm.ActivityInfo#CONFIG_TOUCHSCREEN
-     * PackageManager.ActivityInfo.CONFIG_TOUCHSCREEN},
-     * {@link android.content.pm.ActivityInfo#CONFIG_KEYBOARD
-     * PackageManager.ActivityInfo.CONFIG_KEYBOARD},
-     * {@link android.content.pm.ActivityInfo#CONFIG_NAVIGATION
-     * PackageManager.ActivityInfo.CONFIG_NAVIGATION},
-     * {@link android.content.pm.ActivityInfo#CONFIG_ORIENTATION
-     * PackageManager.ActivityInfo.CONFIG_ORIENTATION},
-     * {@link android.content.pm.ActivityInfo#CONFIG_SCREEN_LAYOUT
-     * PackageManager.ActivityInfo.CONFIG_SCREEN_LAYOUT}, or
-     * {@link android.content.pm.ActivityInfo#CONFIG_SCREEN_SIZE
-     * PackageManager.ActivityInfo.CONFIG_SCREEN_SIZE}, or
-     * {@link android.content.pm.ActivityInfo#CONFIG_SMALLEST_SCREEN_SIZE
-     * PackageManager.ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE}.
-     * {@link android.content.pm.ActivityInfo#CONFIG_LAYOUT_DIRECTION
-     * PackageManager.ActivityInfo.CONFIG_LAYOUT_DIRECTION}.
-     * {@link android.content.pm.ActivityInfo#CONFIG_FONT_WEIGHT_ADJUSTMENT
-     *  PackageManager.ActivityInfo.CONFIG_FONT_WEIGHT_ADJUSTMENT.
+     * values have changed.
      */
-    public int diff(Configuration delta) {
+    public @Config int diff(Configuration delta) {
         return diff(delta, false /* compareUndefined */, false /* publicOnly */);
     }
 
