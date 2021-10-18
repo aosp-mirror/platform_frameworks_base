@@ -872,7 +872,7 @@ class Task extends TaskFragment {
             // entrance of the new window to be properly animated.
             // Note here we always set the replacing window first, as the flags might be needed
             // during the relaunch. If we end up not doing any relaunch, we clear the flags later.
-            windowManager.setWillReplaceWindow(topActivity.appToken, animate);
+            windowManager.setWillReplaceWindow(topActivity.token, animate);
         }
 
         mAtmService.deferWindowLayout();
@@ -929,7 +929,7 @@ class Task extends TaskFragment {
             // If we didn't actual do a relaunch (indicated by kept==true meaning we kept the old
             // window), we need to clear the replace window settings. Otherwise, we schedule a
             // timeout to remove the old window if the replacing window is not coming in time.
-            windowManager.scheduleClearWillReplaceWindows(topActivity.appToken, !kept);
+            windowManager.scheduleClearWillReplaceWindows(topActivity.token, !kept);
         }
 
         if (!deferResume) {
@@ -3029,7 +3029,7 @@ class Task extends TaskFragment {
     }
 
     private static boolean isTopRunning(ActivityRecord r, int taskId, IBinder notTop) {
-        return r.getTask().mTaskId != taskId && r.appToken != notTop && r.canBeTopRunning();
+        return r.getTask().mTaskId != taskId && r.token != notTop && r.canBeTopRunning();
     }
 
     ActivityRecord getTopFullscreenActivity() {
@@ -4835,11 +4835,11 @@ class Task extends TaskFragment {
             mHandler.removeMessages(TRANSLUCENT_TIMEOUT_MSG);
 
             if (waitingActivity != null) {
-                mWmService.setWindowOpaqueLocked(waitingActivity.appToken, false);
+                mWmService.setWindowOpaqueLocked(waitingActivity.token, false);
                 if (waitingActivity.attachedToProcess()) {
                     try {
                         waitingActivity.app.getThread().scheduleTranslucentConversionComplete(
-                                waitingActivity.appToken, r != null);
+                                waitingActivity.token, r != null);
                     } catch (RemoteException e) {
                     }
                 }
@@ -5245,7 +5245,7 @@ class Task extends TaskFragment {
         // Inform of cancellation
         r.clearVoiceSessionLocked();
         try {
-            r.app.getThread().scheduleLocalVoiceInteractionStarted(r.appToken, null);
+            r.app.getThread().scheduleLocalVoiceInteractionStarted(r.token, null);
         } catch (RemoteException re) {
             // Ok Boomer...
         }
@@ -5341,7 +5341,7 @@ class Task extends TaskFragment {
         // We should consolidate.
         IActivityController controller = mAtmService.mController;
         if (controller != null) {
-            ActivityRecord next = topRunningActivity(srec.appToken, INVALID_TASK_ID);
+            ActivityRecord next = topRunningActivity(srec.token, INVALID_TASK_ID);
             if (next != null) {
                 // ask watcher if this is allowed
                 boolean resumeOK = true;
@@ -5398,7 +5398,7 @@ class Task extends TaskFragment {
                             .obtainStarter(destIntent, "navigateUpTo")
                             .setCaller(srec.app.getThread())
                             .setActivityInfo(aInfo)
-                            .setResultTo(parent.appToken)
+                            .setResultTo(parent.token)
                             .setCallingPid(-1)
                             .setCallingUid(callingUid)
                             .setCallingPackage(srec.packageName)

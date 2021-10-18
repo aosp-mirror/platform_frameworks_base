@@ -236,7 +236,7 @@ public abstract class ActivityTaskManagerInternal {
 
     /**
      * Set focus on an activity.
-     * @param token The IApplicationToken for the activity
+     * @param token The activity token.
      */
     public abstract void setFocusedActivity(IBinder token);
 

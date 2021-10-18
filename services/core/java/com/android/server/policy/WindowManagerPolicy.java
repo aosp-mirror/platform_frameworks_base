@@ -27,6 +27,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVE
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
 import static android.view.WindowManager.LayoutParams.TYPE_DISPLAY_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
@@ -78,7 +79,6 @@ import android.os.RemoteException;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
-import android.view.IApplicationToken;
 import android.view.IDisplayFoldListener;
 import android.view.IWindowManager;
 import android.view.KeyEvent;
@@ -201,14 +201,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * @return the base type of the parent window if attached or its own type otherwise
          */
         public int getBaseType();
-
-        /**
-         * Return the token for the application (actually activity) that owns
-         * this window.  May return null for system windows.
-         *
-         * @return An IApplicationToken identifying the owning activity.
-         */
-        public IApplicationToken getAppToken();
 
         /**
          * Return true if this window (or a window it is attached to, but not
@@ -676,7 +668,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      */
     default boolean canBeHiddenByKeyguardLw(WindowState win) {
         // Keyguard visibility of window from activities are determined over activity visibility.
-        if (win.getAppToken() != null) {
+        if (win.getBaseType() == TYPE_BASE_APPLICATION) {
             return false;
         }
         switch (win.getAttrs().type) {
