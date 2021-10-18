@@ -24,7 +24,7 @@ import com.android.systemui.statusbar.policy.CallbackController
  * Allows to subscribe to main events related to fold/unfold process such as hinge angle update,
  * start folding/unfolding, screen availability
  */
-internal interface FoldStateProvider : CallbackController<FoldUpdatesListener> {
+interface FoldStateProvider : CallbackController<FoldUpdatesListener> {
     fun start()
     fun stop()
 
