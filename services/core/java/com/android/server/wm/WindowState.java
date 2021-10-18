@@ -2491,7 +2491,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Cancel the remove starting window animation on shell. The main window might changed
             // during animating, checking for all windows would be safer.
             if (mActivityRecord != null) {
-                mActivityRecord.forAllWindowsUnchecked(w -> {
+                mActivityRecord.forAllWindows(w -> {
                     if (w.isSelfAnimating(0, ANIMATION_TYPE_STARTING_REVEAL)) {
                         w.cancelAnimation();
                         return true;

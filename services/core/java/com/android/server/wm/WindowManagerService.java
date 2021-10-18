@@ -2069,26 +2069,14 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         final WindowToken token = win.mToken;
-        final ActivityRecord activity = win.mActivityRecord;
         ProtoLog.v(WM_DEBUG_ADD_REMOVE, "Removing %s from %s", win, token);
         // Window will already be removed from token before this post clean-up method is called.
-        if (token.isEmpty()) {
-            if (!token.mPersistOnEmpty) {
-                token.removeImmediately();
-            } else if (activity != null) {
-                // TODO: Should this be moved into ActivityRecord.removeWindow? Might go away after
-                // re-factor.
-                activity.firstWindowDrawn = false;
-                activity.clearAllDrawn();
-                final Task rootTask = activity.getRootTask();
-                if (rootTask != null) {
-                    rootTask.mExitingActivities.remove(activity);
-                }
-            }
+        if (token.isEmpty() && !token.mPersistOnEmpty) {
+            token.removeImmediately();
         }
 
-        if (activity != null) {
-            activity.postWindowRemoveStartingWindowCleanup(win);
+        if (win.mActivityRecord != null) {
+            win.mActivityRecord.postWindowRemoveStartingWindowCleanup(win);
         }
 
         if (win.mAttrs.type == TYPE_WALLPAPER) {
