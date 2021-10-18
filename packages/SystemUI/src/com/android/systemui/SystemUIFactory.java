@@ -118,6 +118,7 @@ public class SystemUIFactory {
                     .setTaskViewFactory(mWMComponent.getTaskViewFactory())
                     .setTransitions(mWMComponent.getTransitions())
                     .setStartingSurface(mWMComponent.getStartingSurface())
+                    .setDisplayAreaHelper(mWMComponent.getDisplayAreaHelper())
                     .setTaskSurfaceHelper(mWMComponent.getTaskSurfaceHelper());
         } else {
             // TODO: Call on prepareSysUIComponentBuilder but not with real components. Other option
@@ -133,6 +134,7 @@ public class SystemUIFactory {
                     .setAppPairs(Optional.ofNullable(null))
                     .setTaskViewFactory(Optional.ofNullable(null))
                     .setTransitions(Transitions.createEmptyForTesting())
+                    .setDisplayAreaHelper(Optional.ofNullable(null))
                     .setStartingSurface(Optional.ofNullable(null))
                     .setTaskSurfaceHelper(Optional.ofNullable(null));
         }
