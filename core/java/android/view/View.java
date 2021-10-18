@@ -22357,6 +22357,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * If an attached view draws to a HW canvas, it may use its RenderNode + DisplayList.
+     *
+     * If a view is dettached, its DisplayList shouldn't exist. If the canvas isn't
+     * HW accelerated, it can't handle drawing RenderNodes.
+     *
+     * @hide
+     */
+    protected final boolean drawsWithRenderNode(Canvas canvas) {
+        return mAttachInfo != null
+                && mAttachInfo.mHardwareAccelerated
+                && canvas.isHardwareAccelerated();
+    }
+
+    /**
      * This method is called by ViewGroup.drawChild() to have each child view draw itself.
      *
      * This is where the View specializes rendering behavior based on layer type,
@@ -22365,14 +22379,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     boolean draw(Canvas canvas, ViewGroup parent, long drawingTime) {
 
         final boolean hardwareAcceleratedCanvas = canvas.isHardwareAccelerated();
-        /* If an attached view draws to a HW canvas, it may use its RenderNode + DisplayList.
-         *
-         * If a view is dettached, its DisplayList shouldn't exist. If the canvas isn't
-         * HW accelerated, it can't handle drawing RenderNodes.
-         */
-        boolean drawingWithRenderNode = mAttachInfo != null
-                && mAttachInfo.mHardwareAccelerated
-                && hardwareAcceleratedCanvas;
+
+        boolean drawingWithRenderNode = drawsWithRenderNode(canvas);
 
         boolean more = false;
         final boolean childHasIdentityMatrix = hasIdentityMatrix();

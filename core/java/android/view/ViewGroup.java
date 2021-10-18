@@ -4266,7 +4266,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         int transientIndex = transientCount != 0 ? 0 : -1;
         // Only use the preordered list if not HW accelerated, since the HW pipeline will do the
         // draw reordering internally
-        final ArrayList<View> preorderedList = isHardwareAccelerated()
+        final ArrayList<View> preorderedList = drawsWithRenderNode(canvas)
                 ? null : buildOrderedChildList();
         final boolean customOrder = preorderedList == null
                 && isChildrenDrawingOrderEnabled();
