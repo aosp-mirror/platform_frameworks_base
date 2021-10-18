@@ -24,7 +24,6 @@ import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -38,11 +37,8 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 class PhoneStatusBarViewControllerTest : SysuiTestCase() {
 
-    private val stateChangeListener = TestStateChangedListener()
     private val touchEventHandler = TestTouchEventHandler()
 
-    @Mock
-    private lateinit var commandQueue: CommandQueue
     @Mock
     private lateinit var panelViewController: PanelViewController
     @Mock
@@ -73,7 +69,6 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
         controller = PhoneStatusBarViewController(
                 view,
                 null,
-                stateChangeListener,
                 touchEventHandler,
         )
     }
@@ -90,29 +85,10 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     @Test
     fun constructor_moveFromCenterAnimationIsNotNull_moveFromCenterAnimationInitialized() {
         controller = PhoneStatusBarViewController(
-                view, moveFromCenterAnimation, stateChangeListener, touchEventHandler
+                view, moveFromCenterAnimation, touchEventHandler
         )
 
         verify(moveFromCenterAnimation).init(any(), any())
-    }
-
-    @Test
-    fun constructor_setsExpansionStateChangedListenerOnView() {
-        assertThat(stateChangeListener.stateChangeCalled).isFalse()
-
-        // If the constructor correctly set the listener, then it should be used when
-        // [PhoneStatusBarView.panelExpansionChanged] is called.
-        view.panelExpansionChanged(0f, false)
-
-        assertThat(stateChangeListener.stateChangeCalled).isTrue()
-    }
-
-    private class TestStateChangedListener : PhoneStatusBarView.PanelExpansionStateChangedListener {
-        var stateChangeCalled: Boolean = false
-
-        override fun onPanelExpansionStateChanged() {
-            stateChangeCalled = true
-        }
     }
 
     private class TestTouchEventHandler : PhoneStatusBarView.TouchEventHandler {

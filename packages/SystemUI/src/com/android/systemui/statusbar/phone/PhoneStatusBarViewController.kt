@@ -27,7 +27,6 @@ import com.android.systemui.util.ViewController
 class PhoneStatusBarViewController(
     view: PhoneStatusBarView,
     statusBarMoveFromCenterAnimationController: StatusBarMoveFromCenterAnimationController?,
-    panelExpansionStateChangedListener: PhoneStatusBarView.PanelExpansionStateChangedListener,
     touchEventHandler: PhoneStatusBarView.TouchEventHandler,
 ) : ViewController<PhoneStatusBarView>(view) {
 
@@ -36,7 +35,6 @@ class PhoneStatusBarViewController(
 
     init {
         mView.setTouchEventHandler(touchEventHandler)
-        mView.setPanelExpansionStateChangedListener(panelExpansionStateChangedListener)
 
         statusBarMoveFromCenterAnimationController?.let { animationController ->
             val statusBarLeftSide: View = mView.findViewById(R.id.status_bar_left_side)

@@ -902,6 +902,7 @@ public class StatusBar extends SystemUI implements
         mExpansionChangedListeners = new ArrayList<>();
         addExpansionChangedListener(
                 (expansion, expanded) -> mScrimController.setRawPanelExpansionFraction(expansion));
+        addExpansionChangedListener(this::onPanelExpansionChanged);
 
         mBubbleExpandListener =
                 (isExpanding, key) -> mContext.getMainExecutor().execute(() -> {
@@ -1185,7 +1186,6 @@ public class StatusBar extends SystemUI implements
                             new PhoneStatusBarViewController(
                                     mStatusBarView,
                                     moveFromCenterAnimation,
-                                    this::onPanelExpansionStateChanged,
                                     mNotificationPanelViewController.getStatusBarTouchEventHandler()
                             );
                     mPhoneStatusBarViewController.init();
@@ -1456,12 +1456,14 @@ public class StatusBar extends SystemUI implements
         }
     }
 
-    private void onPanelExpansionStateChanged() {
-        if (getNavigationBarView() != null) {
-            getNavigationBarView().onStatusBarPanelStateChanged();
-        }
-        if (getNotificationPanelViewController() != null) {
-            getNotificationPanelViewController().updateSystemUiStateFlags();
+    private void onPanelExpansionChanged(float frac, boolean expanded) {
+        if (frac == 0 || frac == 1) {
+            if (getNavigationBarView() != null) {
+                getNavigationBarView().onStatusBarPanelStateChanged();
+            }
+            if (getNotificationPanelViewController() != null) {
+                getNotificationPanelViewController().updateSystemUiStateFlags();
+            }
         }
     }
 

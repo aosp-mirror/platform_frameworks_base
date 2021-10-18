@@ -54,37 +54,20 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
     }
 
     @Test
-    fun panelExpansionChanged_fracZero_stateChangeListenerNotified() {
-        val listener = TestExpansionStateChangedListener()
-        view.setPanelExpansionStateChangedListener(listener)
+    fun panelExpansionChanged_expansionChangeListenerNotified() {
+        val listener = TestExpansionChangedListener()
+        view.setExpansionChangedListeners(listOf(listener))
+        val fraction = 0.4f
+        val isExpanded = true
 
-        view.panelExpansionChanged(0f, false)
+        view.panelExpansionChanged(fraction, isExpanded)
 
-        assertThat(listener.stateChangeCalled).isTrue()
+        assertThat(listener.fraction).isEqualTo(fraction)
+        assertThat(listener.isExpanded).isEqualTo(isExpanded)
     }
 
     @Test
-    fun panelExpansionChanged_fracOne_stateChangeListenerNotified() {
-        val listener = TestExpansionStateChangedListener()
-        view.setPanelExpansionStateChangedListener(listener)
-
-        view.panelExpansionChanged(1f, false)
-
-        assertThat(listener.stateChangeCalled).isTrue()
-    }
-
-    @Test
-    fun panelExpansionChanged_fracHalf_stateChangeListenerNotNotified() {
-        val listener = TestExpansionStateChangedListener()
-        view.setPanelExpansionStateChangedListener(listener)
-
-        view.panelExpansionChanged(0.5f, false)
-
-        assertThat(listener.stateChangeCalled).isFalse()
-    }
-
-    @Test
-    fun panelExpansionChanged_noStateChangeListener_noCrash() {
+    fun panelExpansionChanged_noListeners_noCrash() {
         view.panelExpansionChanged(1f, false)
         // No assert needed, just testing no crash
     }
@@ -121,12 +104,6 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
         view.panelExpansionChanged(0f, false)
 
         assertThat(listener.state).isEqualTo(PanelBar.STATE_CLOSED)
-    }
-
-    @Test
-    fun panelStateChanged_noListener_noCrash() {
-        view.panelExpansionChanged(1f, true)
-        // No assert needed, just testing no crash
     }
 
     @Test
@@ -168,12 +145,14 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
         // No assert needed, just testing no crash
     }
 
-    private class TestExpansionStateChangedListener
-        : PhoneStatusBarView.PanelExpansionStateChangedListener {
-        var stateChangeCalled: Boolean = false
+    private class TestExpansionChangedListener
+        : StatusBar.ExpansionChangedListener {
+        var fraction: Float = 0f
+        var isExpanded: Boolean = false
 
-        override fun onPanelExpansionStateChanged() {
-            stateChangeCalled = true
+        override fun onExpansionChanged(expansion: Float, expanded: Boolean) {
+            this.fraction = expansion
+            this.isExpanded = expanded
         }
     }
 

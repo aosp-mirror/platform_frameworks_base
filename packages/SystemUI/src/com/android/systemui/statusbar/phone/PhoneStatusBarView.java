@@ -66,8 +66,6 @@ public class PhoneStatusBarView extends PanelBar {
     @Nullable
     private List<StatusBar.ExpansionChangedListener> mExpansionChangedListeners;
     @Nullable
-    private PanelExpansionStateChangedListener mPanelExpansionStateChangedListener;
-    @Nullable
     private TouchEventHandler mTouchEventHandler;
 
     /**
@@ -87,10 +85,6 @@ public class PhoneStatusBarView extends PanelBar {
     public void setExpansionChangedListeners(
             @Nullable List<StatusBar.ExpansionChangedListener> listeners) {
         mExpansionChangedListeners = listeners;
-    }
-
-    void setPanelExpansionStateChangedListener(PanelExpansionStateChangedListener listener) {
-        mPanelExpansionStateChangedListener = listener;
     }
 
     void setTouchEventHandler(TouchEventHandler handler) {
@@ -211,14 +205,6 @@ public class PhoneStatusBarView extends PanelBar {
     @Override
     public void panelExpansionChanged(float frac, boolean expanded) {
         super.panelExpansionChanged(frac, expanded);
-        if ((frac == 0 || frac == 1)) {
-            if (mPanelExpansionStateChangedListener != null) {
-                mPanelExpansionStateChangedListener.onPanelExpansionStateChanged();
-            } else {
-                Log.w(TAG, "No PanelExpansionStateChangedListener provided.");
-            }
-        }
-
         if (mExpansionChangedListeners != null) {
             for (StatusBar.ExpansionChangedListener listener : mExpansionChangedListeners) {
                 listener.onExpansionChanged(frac, expanded);
@@ -303,12 +289,6 @@ public class PhoneStatusBarView extends PanelBar {
                 getPaddingTop(),
                 size.x - contentRect.right,
                 getPaddingBottom());
-    }
-
-    /** A listener that will be notified when a panel's expansion state may have changed. */
-    public interface PanelExpansionStateChangedListener {
-        /** Called when a panel's expansion state may have changed. */
-        void onPanelExpansionStateChanged();
     }
 
     /**
