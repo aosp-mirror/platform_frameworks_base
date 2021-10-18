@@ -39,6 +39,7 @@ import android.util.Slog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.RingBuffer;
 import com.android.server.am.ProcessList;
+import com.android.server.net.NetworkPolicyManagerService.UidBlockedState;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -72,16 +73,6 @@ public class NetworkPolicyLogger {
     private static final int EVENT_UPDATE_METERED_RESTRICTED_PKGS = 13;
     private static final int EVENT_APP_IDLE_WL_CHANGED = 14;
 
-    static final int NTWK_BLOCKED_POWER = 0;
-    static final int NTWK_ALLOWED_NON_METERED = 1;
-    static final int NTWK_BLOCKED_DENYLIST = 2;
-    static final int NTWK_ALLOWED_ALLOWLIST = 3;
-    static final int NTWK_ALLOWED_TMP_ALLOWLIST = 4;
-    static final int NTWK_BLOCKED_BG_RESTRICT = 5;
-    static final int NTWK_ALLOWED_DEFAULT = 6;
-    static final int NTWK_ALLOWED_SYSTEM = 7;
-    static final int NTWK_BLOCKED_RESTRICTED_MODE = 8;
-
     private final LogBuffer mNetworkBlockedBuffer = new LogBuffer(MAX_NETWORK_BLOCKED_LOG_SIZE);
     private final LogBuffer mUidStateChangeBuffer = new LogBuffer(MAX_LOG_SIZE);
     private final LogBuffer mEventsBuffer = new LogBuffer(MAX_LOG_SIZE);
@@ -90,12 +81,13 @@ public class NetworkPolicyLogger {
 
     private final Object mLock = new Object();
 
-    void networkBlocked(int uid, int reason) {
+    void networkBlocked(int uid, UidBlockedState uidBlockedState) {
         synchronized (mLock) {
             if (LOGD || uid == mDebugUid) {
-                Slog.d(TAG, uid + " is " + getBlockedReason(reason));
+                Slog.d(TAG, "Blocked state of uid: " + uidBlockedState.toString());
             }
-            mNetworkBlockedBuffer.networkBlocked(uid, reason);
+            mNetworkBlockedBuffer.networkBlocked(uid, uidBlockedState.blockedReasons,
+                    uidBlockedState.allowedReasons, uidBlockedState.effectiveBlockedReasons);
         }
     }
 
@@ -269,29 +261,6 @@ public class NetworkPolicyLogger {
         }
     }
 
-    private static String getBlockedReason(int reason) {
-        switch (reason) {
-            case NTWK_BLOCKED_POWER:
-                return "blocked by power restrictions";
-            case NTWK_ALLOWED_NON_METERED:
-                return "allowed on unmetered network";
-            case NTWK_BLOCKED_DENYLIST:
-                return "denylisted on metered network";
-            case NTWK_ALLOWED_ALLOWLIST:
-                return "allowlisted on metered network";
-            case NTWK_ALLOWED_TMP_ALLOWLIST:
-                return "temporary allowlisted on metered network";
-            case NTWK_BLOCKED_BG_RESTRICT:
-                return "blocked when background is restricted";
-            case NTWK_ALLOWED_DEFAULT:
-                return "allowed by default";
-            case NTWK_BLOCKED_RESTRICTED_MODE:
-                return "blocked by restricted networking mode";
-            default:
-                return String.valueOf(reason);
-        }
-    }
-
     private static String getPolicyChangedLog(int uid, int oldPolicy, int newPolicy) {
         return "Policy for " + uid + " changed from "
                 + NetworkPolicyManager.uidPoliciesToString(oldPolicy) + " to "
@@ -402,14 +371,17 @@ public class NetworkPolicyLogger {
             data.timeStamp = System.currentTimeMillis();
         }
 
-        public void networkBlocked(int uid, int reason) {
+        public void networkBlocked(int uid, int blockedReasons, int allowedReasons,
+                int effectiveBlockedReasons) {
             final Data data = getNextSlot();
             if (data == null) return;
 
             data.reset();
             data.type = EVENT_NETWORK_BLOCKED;
             data.ifield1 = uid;
-            data.ifield2 = reason;
+            data.ifield2 = blockedReasons;
+            data.ifield3 = allowedReasons;
+            data.ifield4 = effectiveBlockedReasons;
             data.timeStamp = System.currentTimeMillis();
         }
 
@@ -554,7 +526,8 @@ public class NetworkPolicyLogger {
                 case EVENT_TYPE_GENERIC:
                     return data.sfield1;
                 case EVENT_NETWORK_BLOCKED:
-                    return data.ifield1 + "-" + getBlockedReason(data.ifield2);
+                    return data.ifield1 + "-" + UidBlockedState.toString(
+                            data.ifield2, data.ifield3, data.ifield4);
                 case EVENT_UID_STATE_CHANGED:
                     return data.ifield1 + ":" + ProcessList.makeProcStateString(data.ifield2)
                             + ":" + ActivityManager.getCapabilitiesSummary(data.ifield3)
@@ -593,17 +566,18 @@ public class NetworkPolicyLogger {
         }
     }
 
-    public final static class Data {
-        int type;
-        long timeStamp;
+    private static final class Data {
+        public int type;
+        public long timeStamp;
 
-        int ifield1;
-        int ifield2;
-        int ifield3;
-        long lfield1;
-        boolean bfield1;
-        boolean bfield2;
-        String sfield1;
+        public int ifield1;
+        public int ifield2;
+        public int ifield3;
+        public int ifield4;
+        public long lfield1;
+        public boolean bfield1;
+        public boolean bfield2;
+        public String sfield1;
 
         public void reset(){
             sfield1 = null;
