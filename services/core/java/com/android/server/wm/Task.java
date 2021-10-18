@@ -994,7 +994,6 @@ class Task extends TaskFragment {
             mCallingPackage = r.launchedFromPackage;
             mCallingFeatureId = r.launchedFromFeatureId;
             setIntent(intent != null ? intent : r.intent, info != null ? info : r.info);
-            return;
         }
         setLockTaskAuth(r);
     }
