@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.splitscreen;
 
+import static android.app.ActivityManager.START_SUCCESS;
+import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 
@@ -213,7 +215,11 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         options = mStageCoordinator.resolveStartStage(stage, position, options, null /* wct */);
 
         try {
-            ActivityTaskManager.getService().startActivityFromRecents(taskId, options);
+            final int result =
+                    ActivityTaskManager.getService().startActivityFromRecents(taskId, options);
+            if (result == START_SUCCESS || result == START_TASK_TO_FRONT) {
+                mStageCoordinator.evictOccludedChildren(position);
+            }
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to launch task", e);
         }
@@ -229,6 +235,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                     mContext.getSystemService(LauncherApps.class);
             launcherApps.startShortcut(packageName, shortcutId, null /* sourceBounds */,
                     options, user);
+            mStageCoordinator.evictOccludedChildren(position);
         } catch (ActivityNotFoundException e) {
             Slog.e(TAG, "Failed to launch shortcut", e);
         }
@@ -272,6 +279,10 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                         Slog.e(TAG, "Error finishing legacy transition: ", e);
                     }
                 }
+
+                // Launching a new app into a specific split evicts tasks previously in the same
+                // split.
+                mStageCoordinator.evictOccludedChildren(position);
             }
         };
         WindowContainerTransaction wct = new WindowContainerTransaction();
