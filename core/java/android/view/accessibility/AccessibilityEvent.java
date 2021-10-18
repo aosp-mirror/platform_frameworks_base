@@ -740,7 +740,10 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                     CONTENT_CHANGE_TYPE_STATE_DESCRIPTION,
                     CONTENT_CHANGE_TYPE_PANE_TITLE,
                     CONTENT_CHANGE_TYPE_PANE_APPEARED,
-                    CONTENT_CHANGE_TYPE_PANE_DISAPPEARED
+                    CONTENT_CHANGE_TYPE_PANE_DISAPPEARED,
+                    CONTENT_CHANGE_TYPE_DRAG_STARTED,
+                    CONTENT_CHANGE_TYPE_DRAG_DROPPED,
+                    CONTENT_CHANGE_TYPE_DRAG_CANCELLED
             })
     public @interface ContentChangeTypes {}
 
@@ -989,6 +992,9 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
             case CONTENT_CHANGE_TYPE_PANE_APPEARED: return "CONTENT_CHANGE_TYPE_PANE_APPEARED";
             case CONTENT_CHANGE_TYPE_PANE_DISAPPEARED:
                 return "CONTENT_CHANGE_TYPE_PANE_DISAPPEARED";
+            case CONTENT_CHANGE_TYPE_DRAG_STARTED: return "CONTENT_CHANGE_TYPE_DRAG_STARTED";
+            case CONTENT_CHANGE_TYPE_DRAG_DROPPED: return "CONTENT_CHANGE_TYPE_DRAG_DROPPED";
+            case CONTENT_CHANGE_TYPE_DRAG_CANCELLED: return "CONTENT_CHANGE_TYPE_DRAG_CANCELLED";
             default: return Integer.toHexString(type);
         }
     }
@@ -1047,6 +1053,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     /**
      * Sets the event type.
      *
+     * <b>Note: An event must represent a single event type.</b>
      * @param eventType The event type.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
