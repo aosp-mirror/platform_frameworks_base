@@ -37,7 +37,6 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
@@ -187,9 +186,6 @@ public class InternetDialog extends SystemUIDialog implements
         final Window window = getWindow();
         window.setContentView(mDialogView);
 
-        // Only fix the width for large screen or tablet.
-        window.setLayout(mContext.getResources().getDimensionPixelSize(
-                R.dimen.large_dialog_width), ViewGroup.LayoutParams.WRAP_CONTENT);
         window.setWindowAnimations(R.style.Animation_InternetDialog);
 
         mInternetDialogLayout = mDialogView.requireViewById(R.id.internet_connectivity_dialog);

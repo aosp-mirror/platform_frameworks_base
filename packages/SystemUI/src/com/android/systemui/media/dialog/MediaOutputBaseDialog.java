@@ -104,8 +104,6 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         lp.setFitInsetsIgnoringVisibility(true);
         window.setAttributes(lp);
         window.setContentView(mDialogView);
-        window.setLayout(mContext.getResources().getDimensionPixelSize(R.dimen.large_dialog_width),
-                ViewGroup.LayoutParams.WRAP_CONTENT);
 
         mHeaderTitle = mDialogView.requireViewById(R.id.header_title);
         mHeaderSubtitle = mDialogView.requireViewById(R.id.header_subtitle);
