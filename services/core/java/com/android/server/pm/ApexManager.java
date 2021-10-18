@@ -1035,17 +1035,6 @@ public abstract class ApexManager {
             }
         }
 
-        private void checkDowngrade(PackageInfo existingApexPkg, PackageInfo newApexPkg)
-                throws PackageManagerException {
-            final long currentVersionCode = existingApexPkg.applicationInfo.longVersionCode;
-            final long newVersionCode = newApexPkg.applicationInfo.longVersionCode;
-            if (currentVersionCode > newVersionCode) {
-                throw new PackageManagerException(PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE,
-                          "Downgrade of APEX package " + newApexPkg.packageName
-                                  + " is not allowed");
-            }
-        }
-
         @Override
         void installPackage(File apexFile, PackageParser2 packageParser)
                 throws PackageManagerException {
@@ -1069,7 +1058,6 @@ public abstract class ApexManager {
                             "It is forbidden to install new APEX packages");
                 }
                 checkApexSignature(existingApexPkg, newApexPkg);
-                checkDowngrade(existingApexPkg, newApexPkg);
                 ApexInfo apexInfo = waitForApexService().installAndActivatePackage(
                         apexFile.getAbsolutePath());
                 final ParsedPackage parsedPackage2 = packageParser.parsePackage(
