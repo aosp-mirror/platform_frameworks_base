@@ -59,6 +59,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.util.LatencyTracker;
 import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.systemui.Dumpable;
 import com.android.systemui.GuestResumeSessionReceiver;
@@ -128,6 +129,7 @@ public class UserSwitcherController implements Dumpable {
     private final TelephonyListenerManager mTelephonyListenerManager;
     private final IActivityTaskManager mActivityTaskManager;
     private final InteractionJankMonitor mInteractionJankMonitor;
+    private final LatencyTracker mLatencyTracker;
 
     private ArrayList<UserRecord> mUsers = new ArrayList<>();
     @VisibleForTesting
@@ -174,6 +176,7 @@ public class UserSwitcherController implements Dumpable {
             SecureSettings secureSettings,
             @Background Executor bgExecutor,
             InteractionJankMonitor interactionJankMonitor,
+            LatencyTracker latencyTracker,
             DumpManager dumpManager) {
         mContext = context;
         mActivityManager = activityManager;
@@ -184,6 +187,7 @@ public class UserSwitcherController implements Dumpable {
         mUiEventLogger = uiEventLogger;
         mFalsingManager = falsingManager;
         mInteractionJankMonitor = interactionJankMonitor;
+        mLatencyTracker = latencyTracker;
         mGuestResumeSessionReceiver = new GuestResumeSessionReceiver(
                 this, mUserTracker, mUiEventLogger, secureSettings);
         mUserDetailAdapter = userDetailAdapter;
@@ -499,6 +503,7 @@ public class UserSwitcherController implements Dumpable {
             mInteractionJankMonitor.begin(InteractionJankMonitor.Configuration.Builder
                     .withView(InteractionJankMonitor.CUJ_USER_SWITCH, mRootView)
                     .setTimeout(MULTI_USER_JOURNEY_TIMEOUT));
+            mLatencyTracker.onActionStart(LatencyTracker.ACTION_USER_SWITCH);
             pauseRefreshUsers();
             mActivityManager.switchUser(id);
         } catch (RemoteException e) {
