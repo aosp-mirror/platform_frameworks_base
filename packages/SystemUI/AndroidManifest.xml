@@ -149,6 +149,9 @@
     <uses-permission android:name="android.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.GET_RUNTIME_PERMISSIONS" />
 
+    <!-- Communal mode -->
+    <uses-permission android:name="android.permission.WRITE_COMMUNAL_STATE" />
+
     <!-- Needed for WallpaperManager.clear in ImageWallpaper.updateWallpaperLocked -->
     <uses-permission android:name="android.permission.SET_WALLPAPER"/>
 

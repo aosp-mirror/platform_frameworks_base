@@ -17,6 +17,9 @@
 package com.android.systemui.communal;
 
 import android.annotation.NonNull;
+import android.app.communal.CommunalManager;
+import android.content.Context;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.SysUISingleton;
@@ -33,7 +36,9 @@ import javax.inject.Inject;
 @SysUISingleton
 public class CommunalStateController implements
         CallbackController<CommunalStateController.Callback> {
+    private static final String TAG = CommunalStateController.class.getSimpleName();
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
+    private final CommunalManager mCommunalManager;
     private boolean mCommunalViewOccluded;
     private boolean mCommunalViewShowing;
 
@@ -56,7 +61,8 @@ public class CommunalStateController implements
 
     @VisibleForTesting
     @Inject
-    public CommunalStateController() {
+    public CommunalStateController(Context context) {
+        mCommunalManager = context.getSystemService(CommunalManager.class);
     }
 
     /**
@@ -69,6 +75,12 @@ public class CommunalStateController implements
         }
 
         mCommunalViewShowing = communalViewShowing;
+
+        try {
+            mCommunalManager.setCommunalViewShowing(communalViewShowing);
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Error updating communal manager service state", e);
+        }
 
         final ArrayList<Callback> callbacks = new ArrayList<>(mCallbacks);
         for (Callback callback : callbacks) {
