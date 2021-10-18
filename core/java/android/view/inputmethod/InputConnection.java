@@ -545,6 +545,33 @@ public interface InputConnection {
     boolean setComposingText(CharSequence text, int newCursorPosition);
 
     /**
+     * The variant of {@link #setComposingText(CharSequence, int)}. This method is
+     * used to allow the IME to provide extra information while setting up composing text.
+     *
+     * @param text The composing text with styles if necessary. If no style
+     *        object attached to the text, the default style for composing text
+     *        is used. See {@link android.text.Spanned} for how to attach style
+     *        object to the text. {@link android.text.SpannableString} and
+     *        {@link android.text.SpannableStringBuilder} are two
+     *        implementations of the interface {@link android.text.Spanned}.
+     * @param newCursorPosition The new cursor position around the text. If
+     *        > 0, this is relative to the end of the text - 1; if <= 0, this
+     *        is relative to the start of the text. So a value of 1 will
+     *        always advance you to the position after the full text being
+     *        inserted. Note that this means you can't position the cursor
+     *        within the text, because the editor can make modifications to
+     *        the text you are providing so it is not possible to correctly
+     *        specify locations there.
+     * @param textAttribute The extra information about the text.
+     * @return true on success, false if the input connection is no longer
+     *
+     */
+    default boolean setComposingText(@NonNull CharSequence text, int newCursorPosition,
+            @Nullable TextAttribute textAttribute) {
+        return setComposingText(text, newCursorPosition);
+    }
+
+    /**
      * Mark a certain region of text as composing text. If there was a
      * composing region, the characters are left as they were and the
      * composing span removed, as if {@link #finishComposingText()}
@@ -577,6 +604,22 @@ public interface InputConnection {
      *         the target application does not implement this method.
      */
     boolean setComposingRegion(int start, int end);
+
+    /**
+     * The variant of {@link InputConnection#setComposingRegion(int, int)}. This method is
+     * used to allow the IME to provide extra information while setting up text.
+     *
+     * @param start the position in the text at which the composing region begins
+     * @param end the position in the text at which the composing region ends
+     * @param textAttribute The extra information about the text.
+     * @return {@code true} on success, {@code false} if the input connection is no longer valid.
+     *         Since Android {@link android.os.Build.VERSION_CODES#N} until
+     *         {@link android.os.Build.VERSION_CODES#TIRAMISU}, this API returned {@code false} when
+     *         the target application does not implement this method.
+     */
+    default boolean setComposingRegion(int start, int end, @Nullable TextAttribute textAttribute) {
+        return setComposingRegion(start, end);
+    }
 
     /**
      * Have the text editor finish whatever composing text is
@@ -632,6 +675,28 @@ public interface InputConnection {
      * valid.
      */
     boolean commitText(CharSequence text, int newCursorPosition);
+
+    /**
+     * The variant of {@link InputConnection#commitText(CharSequence, int)}. This method is
+     * used to allow the IME to provide extra information while setting up text.
+     *
+     * @param text The text to commit. This may include styles.
+     * @param newCursorPosition The new cursor position around the text,
+     *        in Java characters. If > 0, this is relative to the end
+     *        of the text - 1; if <= 0, this is relative to the start
+     *        of the text. So a value of 1 will always advance the cursor
+     *        to the position after the full text being inserted. Note that
+     *        this means you can't position the cursor within the text,
+     *        because the editor can make modifications to the text
+     *        you are providing so it is not possible to correctly specify
+     *        locations there.
+     * @param textAttribute The extra information about the text.
+     * @return true on success, false if the input connection is no longer
+     */
+    default boolean commitText(@NonNull CharSequence text, int newCursorPosition,
+            @Nullable TextAttribute textAttribute) {
+        return commitText(text, newCursorPosition);
+    }
 
     /**
      * Commit a completion the user has selected from the possible ones

@@ -52183,6 +52183,7 @@ package android.view.inputmethod {
     method public boolean commitContent(@NonNull android.view.inputmethod.InputContentInfo, int, @Nullable android.os.Bundle);
     method public boolean commitCorrection(android.view.inputmethod.CorrectionInfo);
     method public boolean commitText(CharSequence, int);
+    method public default boolean commitText(@NonNull CharSequence, int, @Nullable android.view.inputmethod.TextAttribute);
     method public boolean deleteSurroundingText(int, int);
     method public boolean deleteSurroundingTextInCodePoints(int, int);
     method public boolean endBatchEdit();
@@ -52202,7 +52203,9 @@ package android.view.inputmethod {
     method public boolean requestCursorUpdates(int);
     method public boolean sendKeyEvent(android.view.KeyEvent);
     method public boolean setComposingRegion(int, int);
+    method public default boolean setComposingRegion(int, int, @Nullable android.view.inputmethod.TextAttribute);
     method public boolean setComposingText(CharSequence, int);
+    method public default boolean setComposingText(@NonNull CharSequence, int, @Nullable android.view.inputmethod.TextAttribute);
     method public default boolean setImeConsumesInput(boolean);
     method public boolean setSelection(int, int);
     method @Nullable public default android.view.inputmethod.TextSnapshot takeSnapshot();
@@ -52416,6 +52419,21 @@ package android.view.inputmethod {
     method @NonNull public CharSequence getText();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.SurroundingText> CREATOR;
+  }
+
+  public final class TextAttribute implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.os.PersistableBundle getExtras();
+    method @NonNull public java.util.List<java.lang.String> getTextConversionSuggestions();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.TextAttribute> CREATOR;
+  }
+
+  public static final class TextAttribute.TextAttributeBuilder {
+    ctor public TextAttribute.TextAttributeBuilder();
+    method @NonNull public android.view.inputmethod.TextAttribute build();
+    method @NonNull public android.view.inputmethod.TextAttribute.TextAttributeBuilder setExtras(@NonNull android.os.PersistableBundle);
+    method @NonNull public android.view.inputmethod.TextAttribute.TextAttributeBuilder setTextConversionSuggestions(@NonNull java.util.List<java.lang.String>);
   }
 
   public final class TextSnapshot {

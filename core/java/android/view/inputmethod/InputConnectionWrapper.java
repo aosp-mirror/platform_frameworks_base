@@ -17,6 +17,7 @@
 package android.view.inputmethod;
 
 import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -158,8 +159,27 @@ public class InputConnectionWrapper implements InputConnection {
      * @throws NullPointerException if the target is {@code null}.
      */
     @Override
+    public boolean setComposingText(@NonNull CharSequence text,
+            int newCursorPosition, @Nullable TextAttribute textAttribute) {
+        return mTarget.setComposingText(text, newCursorPosition, textAttribute);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @throws NullPointerException if the target is {@code null}.
+     */
+    @Override
     public boolean setComposingRegion(int start, int end) {
         return mTarget.setComposingRegion(start, end);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @throws NullPointerException if the target is {@code null}.
+     */
+    @Override
+    public boolean setComposingRegion(int start, int end, @Nullable TextAttribute textAttribute) {
+        return mTarget.setComposingRegion(start, end, textAttribute);
     }
 
     /**
@@ -178,6 +198,16 @@ public class InputConnectionWrapper implements InputConnection {
     @Override
     public boolean commitText(CharSequence text, int newCursorPosition) {
         return mTarget.commitText(text, newCursorPosition);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @throws NullPointerException if the target is {@code null}.
+     */
+    @Override
+    public boolean commitText(@NonNull CharSequence text, int newCursorPosition,
+            @Nullable TextAttribute textAttribute) {
+        return mTarget.commitText(text, newCursorPosition, textAttribute);
     }
 
     /**
