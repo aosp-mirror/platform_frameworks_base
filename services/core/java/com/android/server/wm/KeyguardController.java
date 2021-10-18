@@ -80,14 +80,14 @@ class KeyguardController {
     private final SparseArray<KeyguardDisplayState> mDisplayStates = new SparseArray<>();
     private final ActivityTaskManagerService mService;
     private RootWindowContainer mRootWindowContainer;
-    private final ActivityTaskManagerService.SleepTokenAcquirer mSleepTokenAcquirer;
+    private final ActivityTaskManagerInternal.SleepTokenAcquirer mSleepTokenAcquirer;
 
 
     KeyguardController(ActivityTaskManagerService service,
             ActivityTaskSupervisor taskSupervisor) {
         mService = service;
         mTaskSupervisor = taskSupervisor;
-        mSleepTokenAcquirer = mService.new SleepTokenAcquirer(KEYGUARD_SLEEP_TOKEN_TAG);
+        mSleepTokenAcquirer = mService.new SleepTokenAcquirerImpl(KEYGUARD_SLEEP_TOKEN_TAG);
     }
 
     void setWindowManager(WindowManagerService windowManager) {
@@ -521,10 +521,10 @@ class KeyguardController {
 
         private boolean mRequestDismissKeyguard;
         private final ActivityTaskManagerService mService;
-        private final ActivityTaskManagerService.SleepTokenAcquirer mSleepTokenAcquirer;
+        private final ActivityTaskManagerInternal.SleepTokenAcquirer mSleepTokenAcquirer;
 
         KeyguardDisplayState(ActivityTaskManagerService service, int displayId,
-                ActivityTaskManagerService.SleepTokenAcquirer acquirer) {
+                ActivityTaskManagerInternal.SleepTokenAcquirer acquirer) {
             mService = service;
             mDisplayId = displayId;
             mSleepTokenAcquirer = acquirer;

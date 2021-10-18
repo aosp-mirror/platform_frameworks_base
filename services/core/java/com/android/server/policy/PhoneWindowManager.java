@@ -507,6 +507,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mPendingKeyguardOccluded;
     private boolean mKeyguardOccludedChanged;
 
+    private ActivityTaskManagerInternal.SleepTokenAcquirer mScreenOffSleepTokenAcquirer;
     Intent mHomeIntent;
     Intent mCarDockIntent;
     Intent mDeskDockIntent;
@@ -1621,6 +1622,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mAccessibilityShortcutController =
                 new AccessibilityShortcutController(mContext, new Handler(), mCurrentUserId);
         mLogger = new MetricsLogger();
+
+        mScreenOffSleepTokenAcquirer = mActivityTaskManagerInternal
+                .createSleepTokenAcquirer("ScreenOff");
 
         Resources res = mContext.getResources();
         mWakeOnDpadKeyPress =
@@ -4381,6 +4385,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (DEBUG_WAKEUP) Slog.i(TAG, "Display" + displayId + " turned off...");
 
         if (displayId == DEFAULT_DISPLAY) {
+            updateScreenOffSleepToken(true);
             mRequestedOrSleepingDefaultDisplay = false;
             mDefaultDisplayPolicy.screenTurnedOff();
             synchronized (mLock) {
@@ -4413,6 +4418,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (displayId == DEFAULT_DISPLAY) {
             Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "screenTurningOn",
                     0 /* cookie */);
+            updateScreenOffSleepToken(false);
             mDefaultDisplayPolicy.screenTurnedOn(screenOnListener);
             mBootAnimationDismissable = false;
 
@@ -4924,6 +4930,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 mLockScreenTimerActive = enable;
             }
+        }
+    }
+
+    // TODO (multidisplay): Support multiple displays in WindowManagerPolicy.
+    private void updateScreenOffSleepToken(boolean acquire) {
+        if (acquire) {
+            mScreenOffSleepTokenAcquirer.acquire(DEFAULT_DISPLAY);
+        } else {
+            mScreenOffSleepTokenAcquirer.release(DEFAULT_DISPLAY);
         }
     }
 

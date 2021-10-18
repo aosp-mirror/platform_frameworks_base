@@ -225,7 +225,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     private static final String DISPLAY_OFF_SLEEP_TOKEN_TAG = "Display-off";
 
     /** The token acquirer to put root tasks on the displays to sleep */
-    final ActivityTaskManagerService.SleepTokenAcquirer mDisplayOffTokenAcquirer;
+    final ActivityTaskManagerInternal.SleepTokenAcquirer mDisplayOffTokenAcquirer;
 
     /**
      * The modes which affect which tasks are returned when calling
@@ -471,7 +471,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mService = service.mAtmService;
         mTaskSupervisor = mService.mTaskSupervisor;
         mTaskSupervisor.mRootWindowContainer = this;
-        mDisplayOffTokenAcquirer = mService.new SleepTokenAcquirer(DISPLAY_OFF_SLEEP_TOKEN_TAG);
+        mDisplayOffTokenAcquirer = mService.new SleepTokenAcquirerImpl(DISPLAY_OFF_SLEEP_TOKEN_TAG);
     }
 
     boolean updateFocusedWindowLocked(int mode, boolean updateInputWindows) {
