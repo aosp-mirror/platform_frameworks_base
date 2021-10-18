@@ -234,13 +234,6 @@ public class KeyguardServiceDelegate {
         return false;
     }
 
-    public boolean hasLockscreenWallpaper() {
-        if (mKeyguardService != null) {
-            return mKeyguardService.hasLockscreenWallpaper();
-        }
-        return false;
-    }
-
     public boolean hasKeyguard() {
         return mKeyguardState.deviceHasKeyguard;
     }

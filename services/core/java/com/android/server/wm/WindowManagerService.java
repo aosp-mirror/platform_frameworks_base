@@ -2572,13 +2572,17 @@ public class WindowManagerService extends IWindowManager.Stub
             // an exit.
             win.mAnimatingExit = true;
         } else if (win.mDisplayContent.okToAnimate()
-                && win.mDisplayContent.mWallpaperController.isWallpaperTarget(win)) {
-            // If the wallpaper is currently behind this
-            // window, we need to change both of them inside
-            // of a transaction to avoid artifacts.
+                && win.mDisplayContent.mWallpaperController.isWallpaperTarget(win)
+                && win.mAttrs.type != TYPE_NOTIFICATION_SHADE) {
+            // If the wallpaper is currently behind this app window, we need to change both of them
+            // inside of a transaction to avoid artifacts.
+            // For NotificationShade, sysui is in charge of running window animation and it updates
+            // the client view visibility only after both NotificationShade and the wallpaper are
+            // hidden. So we don't need to care about exit animation, but can destroy its surface
+            // immediately.
             win.mAnimatingExit = true;
         } else {
-            boolean stopped = win.mActivityRecord != null ? win.mActivityRecord.mAppStopped : true;
+            boolean stopped = win.mActivityRecord == null || win.mActivityRecord.mAppStopped;
             // We set mDestroying=true so ActivityRecord#notifyAppStopped in-to destroy surfaces
             // will later actually destroy the surface if we do not do so here. Normally we leave
             // this to the exit animation.
