@@ -801,6 +801,18 @@ class WallpaperController {
                 wallpaperBuffer.getHardwareBuffer(), wallpaperBuffer.getColorSpace());
     }
 
+    /**
+     * Mirrors the visible wallpaper if it's available.
+     *
+     * @return A SurfaceControl for the parent of the mirrored wallpaper.
+     */
+    SurfaceControl mirrorWallpaperSurface() {
+        final WindowState wallpaperWindowState = getTopVisibleWallpaper();
+        return wallpaperWindowState != null
+                ? SurfaceControl.mirrorSurface(wallpaperWindowState.getSurfaceControl())
+                : null;
+    }
+
     WindowState getTopVisibleWallpaper() {
         mTmpTopWallpaper = null;
 
