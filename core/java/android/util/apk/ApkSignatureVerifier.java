@@ -22,6 +22,7 @@ import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTEN
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
+import static android.util.apk.ApkSignatureSchemeV4Verifier.APK_SIGNATURE_SCHEME_DEFAULT;
 
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
@@ -31,6 +32,7 @@ import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
 import android.os.Build;
 import android.os.Trace;
+import android.os.incremental.V4Signature;
 import android.util.jar.StrictJarFile;
 
 import com.android.internal.util.ArrayUtils;
@@ -189,45 +191,51 @@ public class ApkSignatureVerifier {
             boolean verifyFull) throws SignatureNotFoundException {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, verifyFull ? "verifyV4" : "certsOnlyV4");
         try {
-            ApkSignatureSchemeV4Verifier.VerifiedSigner vSigner =
-                    ApkSignatureSchemeV4Verifier.extractCertificates(apkPath);
-            Certificate[][] signerCerts = new Certificate[][]{vSigner.certs};
-            Signature[] signerSigs = convertToSignatures(signerCerts);
+            final V4Signature v4Signature = ApkSignatureSchemeV4Verifier.extractSignature(apkPath);
+
             Signature[] pastSignerSigs = null;
 
-            if (verifyFull) {
-                Map<Integer, byte[]> nonstreamingDigests;
-                Certificate[][] nonstreamingCerts;
+            Map<Integer, byte[]> nonstreamingDigests;
+            Certificate[][] nonstreamingCerts;
 
-                try {
-                    // v4 is an add-on and requires v2 or v3 signature to validate against its
-                    // certificate and digest
-                    ApkSignatureSchemeV3Verifier.VerifiedSigner v3Signer =
-                            ApkSignatureSchemeV3Verifier.unsafeGetCertsWithoutVerification(apkPath);
-                    nonstreamingDigests = v3Signer.contentDigests;
-                    nonstreamingCerts = new Certificate[][]{v3Signer.certs};
-                    if (v3Signer.por != null) {
-                        // populate proof-of-rotation information
-                        pastSignerSigs = new Signature[v3Signer.por.certs.size()];
-                        for (int i = 0; i < pastSignerSigs.length; i++) {
-                            pastSignerSigs[i] = new Signature(
-                                    v3Signer.por.certs.get(i).getEncoded());
-                            pastSignerSigs[i].setFlags(v3Signer.por.flagsList.get(i));
-                        }
-                    }
-                } catch (SignatureNotFoundException e) {
-                    try {
-                        ApkSignatureSchemeV2Verifier.VerifiedSigner v2Signer =
-                                ApkSignatureSchemeV2Verifier.verify(apkPath, false);
-                        nonstreamingDigests = v2Signer.contentDigests;
-                        nonstreamingCerts = v2Signer.certs;
-                    } catch (SignatureNotFoundException ee) {
-                        throw new SecurityException(
-                                "V4 verification failed to collect V2/V3 certificates from : "
-                                        + apkPath, ee);
+            int v3BlockId = APK_SIGNATURE_SCHEME_DEFAULT;
+
+            try {
+                // v4 is an add-on and requires v2 or v3 signature to validate against its
+                // certificate and digest
+                ApkSignatureSchemeV3Verifier.VerifiedSigner v3Signer =
+                        ApkSignatureSchemeV3Verifier.unsafeGetCertsWithoutVerification(apkPath);
+                nonstreamingDigests = v3Signer.contentDigests;
+                nonstreamingCerts = new Certificate[][]{v3Signer.certs};
+                if (v3Signer.por != null) {
+                    // populate proof-of-rotation information
+                    pastSignerSigs = new Signature[v3Signer.por.certs.size()];
+                    for (int i = 0; i < pastSignerSigs.length; i++) {
+                        pastSignerSigs[i] = new Signature(
+                                v3Signer.por.certs.get(i).getEncoded());
+                        pastSignerSigs[i].setFlags(v3Signer.por.flagsList.get(i));
                     }
                 }
+                v3BlockId = v3Signer.blockId;
+            } catch (SignatureNotFoundException e) {
+                try {
+                    ApkSignatureSchemeV2Verifier.VerifiedSigner v2Signer =
+                            ApkSignatureSchemeV2Verifier.verify(apkPath, false);
+                    nonstreamingDigests = v2Signer.contentDigests;
+                    nonstreamingCerts = v2Signer.certs;
+                } catch (SignatureNotFoundException ee) {
+                    throw new SecurityException(
+                            "V4 verification failed to collect V2/V3 certificates from : "
+                                    + apkPath, ee);
+                }
+            }
 
+            ApkSignatureSchemeV4Verifier.VerifiedSigner vSigner =
+                    ApkSignatureSchemeV4Verifier.verify(apkPath, v4Signature, v3BlockId);
+            Certificate[][] signerCerts = new Certificate[][]{vSigner.certs};
+            Signature[] signerSigs = convertToSignatures(signerCerts);
+
+            if (verifyFull) {
                 Signature[] nonstreamingSigs = convertToSignatures(nonstreamingCerts);
                 if (nonstreamingSigs.length != signerSigs.length) {
                     throw new SecurityException(
@@ -260,7 +268,7 @@ public class ApkSignatureVerifier {
         } catch (SignatureNotFoundException e) {
             throw e;
         } catch (Exception e) {
-            // APK Signature Scheme v4 signature found but did not verify
+            // APK Signature Scheme v4 signature found but did not verify.
             return input.error(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
                     "Failed to collect certificates from " + apkPath
                             + " using APK Signature Scheme v4", e);
