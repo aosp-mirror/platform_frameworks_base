@@ -17,6 +17,7 @@
 package com.android.server.notification;
 
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
+import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.Notification.FLAG_AUTOGROUP_SUMMARY;
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
@@ -259,6 +260,8 @@ import android.widget.Toast;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.IAppOpsCallback;
+import com.android.internal.app.IAppOpsService;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.logging.InstanceId;
@@ -559,6 +562,7 @@ public class NotificationManagerService extends SystemService {
     ArrayList<String> mLights = new ArrayList<>();
 
     private AppOpsManager mAppOps;
+    private IAppOpsService mAppOpsService;
     private UsageStatsManagerInternal mAppUsageStats;
     private DevicePolicyManagerInternal mDpm;
     private StatsManager mStatsManager;
@@ -1667,6 +1671,18 @@ public class NotificationManagerService extends SystemService {
         }
     };
 
+    @VisibleForTesting
+    final IAppOpsCallback mAppOpsCallback = new IAppOpsCallback.Stub() {
+        @Override public void opChanged(int op, int uid, String packageName) {
+            if (mEnableAppSettingMigration) {
+                int opValue = mAppOps.checkOpNoThrow(
+                        AppOpsManager.OP_POST_NOTIFICATION, uid, packageName);
+                boolean blocked = op != MODE_ALLOWED;
+                sendAppBlockStateChangedBroadcast(packageName, uid, blocked);
+            }
+        }
+    };
+
     private final BroadcastReceiver mPackageIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -2176,7 +2192,8 @@ public class NotificationManagerService extends SystemService {
             ActivityManager activityManager, GroupHelper groupHelper, IActivityManager am,
             ActivityTaskManagerInternal atm, UsageStatsManagerInternal appUsageStats,
             DevicePolicyManagerInternal dpm, IUriGrantsManager ugm,
-            UriGrantsManagerInternal ugmInternal, AppOpsManager appOps, UserManager userManager,
+            UriGrantsManagerInternal ugmInternal, AppOpsManager appOps, IAppOpsService iAppOps,
+            UserManager userManager,
             NotificationHistoryManager historyManager, StatsManager statsManager,
             TelephonyManager telephonyManager, ActivityManagerInternal ami,
             MultiRateLimiter toastRateLimiter, PermissionHelper permissionHelper) {
@@ -2196,6 +2213,13 @@ public class NotificationManagerService extends SystemService {
         mPackageManager = packageManager;
         mPackageManagerClient = packageManagerClient;
         mAppOps = appOps;
+        mAppOpsService = iAppOps;
+        try {
+            mAppOpsService.startWatchingMode(
+                    AppOpsManager.OP_POST_NOTIFICATION, null, mAppOpsCallback);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Could not register OP_POST_NOTIFICATION listener");
+        }
         mAppUsageStats = appUsageStats;
         mAlarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
         mCompanionManager = companionManager;
@@ -2484,7 +2508,8 @@ public class NotificationManagerService extends SystemService {
                 LocalServices.getService(DevicePolicyManagerInternal.class),
                 UriGrantsManager.getService(),
                 LocalServices.getService(UriGrantsManagerInternal.class),
-                (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE),
+                getContext().getSystemService(AppOpsManager.class),
+                IAppOpsService.Stub.asInterface(ServiceManager.getService(Context.APP_OPS_SERVICE)),
                 getContext().getSystemService(UserManager.class),
                 new NotificationHistoryManager(getContext(), handler),
                 mStatsManager = (StatsManager) getContext().getSystemService(
@@ -2720,6 +2745,19 @@ public class NotificationManagerService extends SystemService {
                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
             }
         });
+    }
+
+    private void sendAppBlockStateChangedBroadcast(String pkg, int uid, boolean blocked) {
+        try {
+            getContext().sendBroadcastAsUser(
+                    new Intent(ACTION_APP_BLOCK_STATE_CHANGED)
+                            .putExtra(NotificationManager.EXTRA_BLOCKED_STATE, blocked)
+                            .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+                            .setPackage(pkg),
+                    UserHandle.of(UserHandle.getUserId(uid)), null);
+        } catch (SecurityException e) {
+            Slog.w(TAG, "Can't notify app about app block change", e);
+        }
     }
 
     @Override
@@ -3429,7 +3467,8 @@ public class NotificationManagerService extends SystemService {
                 if (wasEnabled == enabled) {
                     return;
                 }
-                mPermissionHelper.setNotificationPermission(pkg, uid, enabled, true);
+                mPermissionHelper.setNotificationPermission(
+                        pkg, UserHandle.getUserId(uid), enabled, true);
             } else {
                 synchronized (mNotificationLock) {
                     boolean wasEnabled = mPreferencesHelper.getImportance(pkg, uid)
@@ -3441,6 +3480,12 @@ public class NotificationManagerService extends SystemService {
                 }
 
                 mPreferencesHelper.setEnabled(pkg, uid, enabled);
+                // TODO (b/194833441): this is being ignored by app ops now that the permission
+                // exists
+                mAppOps.setMode(AppOpsManager.OP_POST_NOTIFICATION, uid, pkg,
+                        enabled ? MODE_ALLOWED : AppOpsManager.MODE_IGNORED);
+
+                sendAppBlockStateChangedBroadcast(pkg, uid, !enabled);
             }
             mMetricsLogger.write(new LogMaker(MetricsEvent.ACTION_BAN_APP_NOTES)
                     .setType(MetricsEvent.TYPE_ACTION)
@@ -3450,19 +3495,6 @@ public class NotificationManagerService extends SystemService {
             if (!enabled) {
                 cancelAllNotificationsInt(MY_UID, MY_PID, pkg, null, 0, 0, true,
                         UserHandle.getUserId(uid), REASON_PACKAGE_BANNED, null);
-            }
-
-            mAppOps.setMode(AppOpsManager.OP_POST_NOTIFICATION, uid, pkg,
-                    enabled ? AppOpsManager.MODE_ALLOWED : AppOpsManager.MODE_IGNORED);
-            try {
-                getContext().sendBroadcastAsUser(
-                        new Intent(ACTION_APP_BLOCK_STATE_CHANGED)
-                                .putExtra(NotificationManager.EXTRA_BLOCKED_STATE, !enabled)
-                                .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
-                                .setPackage(pkg),
-                        UserHandle.of(UserHandle.getUserId(uid)), null);
-            } catch (SecurityException e) {
-                Slog.w(TAG, "Can't notify app about app block change", e);
             }
 
             handleSavePolicyFile();
@@ -4198,7 +4230,7 @@ public class NotificationManagerService extends SystemService {
             // noteOp will check to make sure the callingPkg matches the uid
             if (mAppOps.noteOpNoThrow(AppOpsManager.OP_ACCESS_NOTIFICATIONS, uid, callingPkg,
                     callingAttributionTag, null)
-                    == AppOpsManager.MODE_ALLOWED) {
+                    == MODE_ALLOWED) {
                 synchronized (mNotificationLock) {
                     tmp = new StatusBarNotification[mNotificationList.size()];
                     final int N = mNotificationList.size();
@@ -4314,7 +4346,7 @@ public class NotificationManagerService extends SystemService {
             // noteOp will check to make sure the callingPkg matches the uid
             if (mAppOps.noteOpNoThrow(AppOpsManager.OP_ACCESS_NOTIFICATIONS, uid, callingPkg,
                     callingAttributionTag, null)
-                    == AppOpsManager.MODE_ALLOWED) {
+                    == MODE_ALLOWED) {
                 synchronized (mArchive) {
                     tmp = mArchive.getArray(count, includeSnoozed);
                 }
@@ -4340,7 +4372,7 @@ public class NotificationManagerService extends SystemService {
             // noteOp will check to make sure the callingPkg matches the uid
             if (mAppOps.noteOpNoThrow(AppOpsManager.OP_ACCESS_NOTIFICATIONS, uid, callingPkg,
                     callingAttributionTag, null)
-                    == AppOpsManager.MODE_ALLOWED) {
+                    == MODE_ALLOWED) {
                 IntArray currentUserIds = mUserProfiles.getCurrentProfileIds();
                 Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "notifHistoryReadHistory");
                 try {
