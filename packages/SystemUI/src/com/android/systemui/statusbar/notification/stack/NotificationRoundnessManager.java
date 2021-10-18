@@ -21,6 +21,8 @@ import android.util.MathUtils;
 
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
@@ -39,6 +41,7 @@ public class NotificationRoundnessManager {
     private final ExpandableView[] mLastInSectionViews;
     private final ExpandableView[] mTmpFirstInSectionViews;
     private final ExpandableView[] mTmpLastInSectionViews;
+    private final FeatureFlags mFeatureFlags;
     private boolean mExpanded;
     private HashSet<ExpandableView> mAnimatedChildren;
     private Runnable mRoundingChangedCallback;
@@ -52,7 +55,10 @@ public class NotificationRoundnessManager {
     private ExpandableView mViewAfterSwipedView = null;
 
     @Inject
-    NotificationRoundnessManager(NotificationSectionsFeatureManager sectionsFeatureManager) {
+    NotificationRoundnessManager(
+            NotificationSectionsFeatureManager sectionsFeatureManager,
+            FeatureFlags featureFlags) {
+        mFeatureFlags = featureFlags;
         int numberOfSections = sectionsFeatureManager.getNumberOfBuckets();
         mFirstInSectionViews = new ExpandableView[numberOfSections];
         mLastInSectionViews = new ExpandableView[numberOfSections];
@@ -118,9 +124,8 @@ public class NotificationRoundnessManager {
     void setViewsAffectedBySwipe(
             ExpandableView viewBefore,
             ExpandableView viewSwiped,
-            ExpandableView viewAfter,
-            boolean cornerAnimationsEnabled) {
-        if (!cornerAnimationsEnabled) {
+            ExpandableView viewAfter) {
+        if (!mFeatureFlags.isEnabled(Flags.NOTIFICATION_UPDATES)) {
             return;
         }
         final boolean animate = true;
