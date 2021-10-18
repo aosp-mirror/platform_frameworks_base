@@ -779,10 +779,6 @@ public class DisplayPolicy {
 
     public void setAwake(boolean awake) {
         mAwake = awake;
-        // The screen off token for non-default display is controlled by DisplayContent.
-        if (mDisplayContent.isDefaultDisplay) {
-            mDisplayContent.acquireScreenOffToken(!awake);
-        }
     }
 
     public boolean isAwake() {
