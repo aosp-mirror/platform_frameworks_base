@@ -119,12 +119,15 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
+import com.android.systemui.unfold.config.UnfoldTransitionConfig;
 import com.android.systemui.util.DeviceConfigProxy;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import dagger.Lazy;
 
@@ -815,6 +818,10 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
     private DeviceConfigProxy mDeviceConfig;
     private DozeParameters mDozeParameters;
 
+    private final UnfoldTransitionConfig mUnfoldTransitionConfig;
+    private final Lazy<UnfoldLightRevealOverlayAnimation> mUnfoldLightRevealAnimation;
+    private final AtomicInteger mPendingDrawnTasks = new AtomicInteger();
+
     private final KeyguardStateController mKeyguardStateController;
     private final Lazy<KeyguardUnlockAnimationController> mKeyguardUnlockAnimationControllerLazy;
     private boolean mWallpaperSupportsAmbientMode;
@@ -837,6 +844,8 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
             NavigationModeController navigationModeController,
             KeyguardDisplayManager keyguardDisplayManager,
             DozeParameters dozeParameters,
+            UnfoldTransitionConfig unfoldTransitionConfig,
+            Lazy<UnfoldLightRevealOverlayAnimation> unfoldLightRevealOverlayAnimation,
             SysuiStatusBarStateController statusBarStateController,
             KeyguardStateController keyguardStateController,
             Lazy<KeyguardUnlockAnimationController> keyguardUnlockAnimationControllerLazy,
@@ -870,6 +879,8 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                     mInGestureNavigationMode = QuickStepContract.isGesturalMode(mode);
                 }));
         mDozeParameters = dozeParameters;
+        mUnfoldTransitionConfig = unfoldTransitionConfig;
+        mUnfoldLightRevealAnimation = unfoldLightRevealOverlayAnimation;
         mStatusBarStateController = statusBarStateController;
         statusBarStateController.addCallback(this);
 
@@ -2552,6 +2563,24 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
         Trace.beginSection("KeyguardViewMediator#handleNotifyScreenTurningOn");
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleNotifyScreenTurningOn");
+
+            if (mUnfoldTransitionConfig.isEnabled()) {
+                mPendingDrawnTasks.set(2); // unfold overlay and keyguard drawn
+
+                mUnfoldLightRevealAnimation.get()
+                        .onScreenTurningOn(() -> {
+                            if (mPendingDrawnTasks.decrementAndGet() == 0) {
+                                try {
+                                    callback.onDrawn();
+                                } catch (RemoteException e) {
+                                    Slog.w(TAG, "Exception calling onDrawn():", e);
+                                }
+                            }
+                        });
+            } else {
+                mPendingDrawnTasks.set(1); // only keyguard drawn
+            }
+
             mKeyguardViewControllerLazy.get().onScreenTurningOn();
             if (callback != null) {
                 if (mWakeAndUnlocking) {
@@ -2582,10 +2611,12 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
 
     private void notifyDrawn(final IKeyguardDrawnCallback callback) {
         Trace.beginSection("KeyguardViewMediator#notifyDrawn");
-        try {
-            callback.onDrawn();
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Exception calling onDrawn():", e);
+        if (mPendingDrawnTasks.decrementAndGet() == 0) {
+            try {
+                callback.onDrawn();
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Exception calling onDrawn():", e);
+            }
         }
         Trace.endSection();
     }
@@ -2738,6 +2769,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
         pw.print("  mHideAnimationRun: "); pw.println(mHideAnimationRun);
         pw.print("  mPendingReset: "); pw.println(mPendingReset);
         pw.print("  mPendingLock: "); pw.println(mPendingLock);
+        pw.print("  mPendingDrawnTasks: "); pw.println(mPendingDrawnTasks.get());
         pw.print("  mWakeAndUnlocking: "); pw.println(mWakeAndUnlocking);
         pw.print("  mDrawnCallback: "); pw.println(mDrawnCallback);
     }

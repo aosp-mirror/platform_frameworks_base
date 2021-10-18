@@ -30,6 +30,7 @@ import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.TaskViewFactory;
 import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.bubbles.Bubbles;
+import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.onehanded.OneHanded;
@@ -94,6 +95,9 @@ public interface SysUIComponent {
 
         @BindsInstance
         Builder setStartingSurface(Optional<StartingSurface> s);
+
+        @BindsInstance
+        Builder setDisplayAreaHelper(Optional<DisplayAreaHelper> h);
 
         @BindsInstance
         Builder setTaskSurfaceHelper(Optional<TaskSurfaceHelper> t);

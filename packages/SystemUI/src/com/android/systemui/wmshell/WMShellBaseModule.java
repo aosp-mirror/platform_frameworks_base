@@ -28,6 +28,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.dagger.WMSingleton;
+import com.android.wm.shell.RootDisplayAreaOrganizer;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.ShellCommandHandlerImpl;
@@ -54,6 +55,8 @@ import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ShellAnimationThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.common.annotations.ShellSplashscreenThread;
+import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
+import com.android.wm.shell.displayareahelper.DisplayAreaHelperController;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.freeform.FreeformTaskListener;
 import com.android.wm.shell.fullscreen.FullscreenTaskListener;
@@ -342,11 +345,19 @@ public abstract class WMShellBaseModule {
         return taskSurfaceController.map((controller) -> controller.asTaskSurfaceHelper());
     }
 
-    @WMSingleton
     @Provides
     static Optional<TaskSurfaceHelperController> provideTaskSurfaceHelperController(
             ShellTaskOrganizer taskOrganizer, @ShellMainThread ShellExecutor mainExecutor) {
         return Optional.ofNullable(new TaskSurfaceHelperController(taskOrganizer, mainExecutor));
+    }
+
+    @WMSingleton
+    @Provides
+    static Optional<DisplayAreaHelper> provideDisplayAreaHelper(
+            @ShellMainThread ShellExecutor mainExecutor,
+            RootDisplayAreaOrganizer rootDisplayAreaOrganizer) {
+        return Optional.ofNullable(new DisplayAreaHelperController(mainExecutor,
+                rootDisplayAreaOrganizer));
     }
 
     //
@@ -420,6 +431,13 @@ public abstract class WMShellBaseModule {
     static RootTaskDisplayAreaOrganizer provideRootTaskDisplayAreaOrganizer(
             @ShellMainThread ShellExecutor mainExecutor, Context context) {
         return new RootTaskDisplayAreaOrganizer(mainExecutor, context);
+    }
+
+    @WMSingleton
+    @Provides
+    static RootDisplayAreaOrganizer provideRootDisplayAreaOrganizer(
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return new RootDisplayAreaOrganizer(mainExecutor);
     }
 
     @WMSingleton
