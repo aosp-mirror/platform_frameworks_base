@@ -22,7 +22,6 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.ServiceManager
 import android.view.Surface
-import androidx.test.filters.FlakyTest
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiObject2
@@ -34,7 +33,6 @@ import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.SYSTEMUI_PACKAGE
 import com.android.server.wm.flicker.repetitions
 import com.android.wm.shell.flicker.helpers.LaunchBubbleHelper
-import org.junit.Test
 import org.junit.runners.Parameterized
 
 /**
@@ -86,14 +84,6 @@ abstract class BaseBubbleScreen(protected val testSpec: FlickerTestParameter) {
         }
     }
 
-    @FlakyTest
-    @Test
-    fun testAppIsAlwaysVisible() {
-        testSpec.assertLayers {
-            this.isVisible(testApp.component)
-        }
-    }
-
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
@@ -112,6 +102,7 @@ abstract class BaseBubbleScreen(protected val testSpec: FlickerTestParameter) {
         }
 
         const val FIND_OBJECT_TIMEOUT = 2000L
+        const val WINDOW_UPDAT_TIMEOUT = 2000L
         const val SYSTEM_UI_PACKAGE = SYSTEMUI_PACKAGE
         const val BUBBLE_RES_NAME = "bubble_view"
     }

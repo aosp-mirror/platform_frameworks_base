@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.bubble
 
+import android.os.SystemClock
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.By
@@ -31,37 +32,44 @@ import org.junit.runners.Parameterized
 /**
  * Test launching a new activity from bubble.
  *
- * To run this test: `atest WMShellFlickerTests:ExpandBubbleScreen`
+ * To run this test: `atest WMShellFlickerTests:LaunchBubbleFromLockScreen`
  *
  * Actions:
- *     Launch an app and enable app's bubble notification
- *     Send a bubble notification
- *     The activity for the bubble is launched
+ *     Launch an bubble from notification on lock screen
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @Group4
-class ExpandBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(testSpec) {
+class LaunchBubbleFromLockScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(testSpec) {
 
     override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = buildTransition() {
             setup {
-                test {
-                    addBubbleBtn?.run { addBubbleBtn.click() } ?: error("Bubble widget not found")
+                eachRun {
+                    addBubbleBtn?.click() ?: error("Bubble widget not found")
+                    device.sleep()
+                    SystemClock.sleep(2000)
+                    device.wakeUp()
                 }
             }
             transitions {
+                val notification = device.wait(Until.findObject(
+                    By.text("BubbleChat")), FIND_OBJECT_TIMEOUT)
+                notification?.click() ?: error("Notification not found")
+                instrumentation.getUiAutomation().syncInputTransactions()
                 val showBubble = device.wait(Until.findObject(
                         By.res("com.android.systemui", "bubble_view")), FIND_OBJECT_TIMEOUT)
-                showBubble?.run { showBubble.click() } ?: error("Bubble notify not found")
+                showBubble?.click() ?: error("Bubble notify not found")
+                instrumentation.getUiAutomation().syncInputTransactions()
+                cancelAllBtn?.click() ?: error("Cancel widget not found")
             }
         }
 
     @FlakyTest
     @Test
-    fun testAppIsAlwaysVisible() {
-        testSpec.assertLayers {
+    fun testAppisVisibleAtEnd() {
+        testSpec.assertLayersEnd {
             this.isVisible(testApp.component)
         }
     }
