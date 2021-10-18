@@ -1179,4 +1179,5 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"ప్రస్తుతానికి Wi-Fi ఆటోమేటిక్‌గా కనెక్ట్ అవ్వదు"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"అన్నీ చూడండి"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"నెట్‌వర్క్‌లను మార్చడానికి, ఈథర్‌నెట్‌ను డిస్‌కనెక్ట్ చేయండి"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"పరికర అనుభవాన్ని మెరుగుపరచడానికి, Wi‑Fi ఆఫ్‌లో ఉన్నప్పుడు కూడా, ఏ సమయంలో అయినా ఇప్పటికీ Wi‑Fi నెట్‌వర్క్‌ల కోసం యాప్‌లు, సర్వీస్‌లు స్కాన్ చేయగలవు. మీరు దీనిని Wi‑Fi స్కానింగ్ సెట్టింగ్‌లలో మార్చవచ్చు. "<annotation id="link">"మార్చండి"</annotation></string>
 </resources>
