@@ -179,6 +179,96 @@ public class TunerResourceManager {
     }
 
     /**
+     * Checks if there is an unused frontend resource available.
+     *
+     * @param frontendType The frontend type for the query to be done for.
+     */
+    public boolean hasUnusedFrontend(int frontendType) {
+        boolean result = false;
+        try {
+            result = mService.hasUnusedFrontend(frontendType);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return result;
+    }
+
+    /**
+     * Checks if the client has the lowest priority among the clients that are holding
+     * the frontend resource of the specified type.
+     *
+     * <p> When this function returns false, it means that there is at least one client with the
+     * strictly lower priority (than clientId) that is reclaimable by the system.
+     *
+     * @param clientId The client ID to be checked the priority for.
+     * @param frontendType The specific frontend type to be checked for.
+     *
+     * @return false if there is another client holding the frontend resource of the specified type
+     * that can be reclaimed. Otherwise true.
+     */
+    public boolean isLowestPriority(int clientId, int frontendType) {
+        boolean result = false;
+        try {
+            result = mService.isLowestPriority(clientId, frontendType);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return result;
+    }
+
+    /**
+     * Stores the frontend resource map if it was stored before.
+     *
+     * <p>This API is only for testing purpose and should be used in pair with
+     * restoreResourceMap(), which allows testing of {@link Tuner} APIs
+     * that behave differently based on different sets of resource map.
+     *
+     * @param resourceType The resource type to store the map for.
+     */
+    public void storeResourceMap(int resourceType) {
+        try {
+            mService.storeResourceMap(resourceType);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Clears the frontend resource map.
+     *
+     * <p>This API is only for testing purpose and should be called right after
+     * storeResourceMap(), so TRMService#removeFrontendResource() does not
+     * get called in TRMService#setFrontendInfoListInternal() for custom frontend
+     * resource map creation.
+     *
+     * @param resourceType The resource type to clear the map for.
+     */
+    public void clearResourceMap(int resourceType) {
+        try {
+            mService.clearResourceMap(resourceType);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Restores Frontend resource map for the later restore.
+     *
+     * <p>This API is only for testing purpose and should be used in pair with
+     * storeResourceMap(), which allows testing of {@link Tuner} APIs
+     * that behave differently based on different sets of resource map.
+     *
+     * @param resourceType The resource type to restore the map for.
+     */
+    public void restoreResourceMap(int resourceType) {
+        try {
+            mService.restoreResourceMap(resourceType);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Updates the current TRM of the TunerHAL Frontend information.
      *
      * <p><strong>Note:</strong> This update must happen before the first

@@ -83,6 +83,30 @@ interface ITunerResourceManager {
     boolean updateClientPriority(in int clientId, in int priority, in int niceValue);
 
     /*
+     * Checks if there is any unused frontend resource of the specified type.
+     *
+     * @param frontendType the specific type of frontend resource to be checked for.
+     *
+     * @return true if there is any unused resource of the specified type.
+     */
+    boolean hasUnusedFrontend(in int frontendType);
+
+    /*
+     * Checks if the client has the lowest priority among the clients that are holding
+     * the frontend resource of the specified type.
+     *
+     * <p> When this function returns false, it means that there is at least one client with the
+     * strictly lower priority (than clientId) that is reclaimable by the system.
+     *
+     * @param clientId The client ID to be checked the priority for.
+     * @param frontendType The specific frontend type to be checked for.
+     *
+     * @return false if there is another client holding the frontend resource of the specified type
+     * that can be reclaimed. Otherwise true.
+     */
+    boolean isLowestPriority(in int clientId, in int frontendType);
+
+    /*
      * Updates the available Frontend resources information on the current device.
      *
      * <p><strong>Note:</strong> This update must happen before the first
@@ -354,4 +378,38 @@ interface ITunerResourceManager {
      */
     boolean isHigherPriority(in ResourceClientProfile challengerProfile,
             in ResourceClientProfile holderProfile);
+
+    /*
+     * Stores Frontend resource map for the later restore.
+     *
+     * <p>This is API is only for testing purpose and should be used in pair with
+     * restoreResourceMap(), which allows testing of {@link Tuner} APIs
+     * that behave differently based on different sets of resource map.
+     *
+     * @param resourceType The resource type to store the map for.
+     */
+    void storeResourceMap(in int resourceType);
+
+    /*
+     * Clears the frontend resource map.
+     *
+     * <p>This is API is only for testing purpose and should be called right after
+     * storeResourceMap(), so TRMService#removeFrontendResource() does not
+     * get called in TRMService#setFrontendInfoListInternal() for custom frontend
+     * resource map creation.
+     *
+     * @param resourceType The resource type to clear the map for.
+     */
+    void clearResourceMap(in int resourceType);
+
+    /*
+     * Restores Frontend resource map if it was stored before.
+     *
+     * <p>This is API is only for testing purpose and should be used in pair with
+     * storeResourceMap(), which allows testing of {@link Tuner} APIs
+     * that behave differently based on different sets of resource map.
+     *
+     * @param resourceType The resource type to restore the map for.
+     */
+    void restoreResourceMap(in int resourceType);
 }
