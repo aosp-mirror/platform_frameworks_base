@@ -3584,6 +3584,23 @@ public final class Telephony {
                 "content://telephony/carriers/enforce_managed");
 
         /**
+         * The {@code content://} style URL for the perferred APN used for internet.
+         *
+         * @hide
+         */
+        public static final Uri PREFERRED_APN_URI = Uri.parse(
+                "content://telephony/carriers/preferapn/subId/");
+
+        /**
+         * The {@code content://} style URL for the perferred APN set id.
+         *
+         * @hide
+         */
+        public static final Uri PREFERRED_APN_SET_URI = Uri.parse(
+                "content://telephony/carriers/preferapnset/subId/");
+
+
+        /**
          * The column name for ENFORCE_MANAGED_URI, indicates whether DPC-owned APNs are enforced.
          * @hide
          */
