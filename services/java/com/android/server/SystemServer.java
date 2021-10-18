@@ -150,7 +150,6 @@ import com.android.server.os.DeviceIdentifiersPolicyService;
 import com.android.server.os.NativeTombstoneManagerService;
 import com.android.server.os.SchedulingPolicyService;
 import com.android.server.people.PeopleService;
-import com.android.server.pm.BackgroundDexOptService;
 import com.android.server.pm.CrossProfileAppsService;
 import com.android.server.pm.DataLoaderManagerService;
 import com.android.server.pm.DynamicCodeLoggingService;
@@ -2407,15 +2406,6 @@ public final class SystemServer implements Dumpable {
 
             t.traceBegin("StartAuthService");
             mSystemServiceManager.startService(AuthService.class);
-            t.traceEnd();
-
-
-            t.traceBegin("StartBackgroundDexOptService");
-            try {
-                BackgroundDexOptService.schedule(context);
-            } catch (Throwable e) {
-                reportWtf("starting StartBackgroundDexOptService", e);
-            }
             t.traceEnd();
 
             if (!isWatch) {
