@@ -25,6 +25,7 @@ import android.bluetooth.BluetoothCodecStatus;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothHearingAid;
+import android.bluetooth.BluetoothLeAudio;
 import android.bluetooth.BluetoothProfile;
 import android.content.Intent;
 import android.media.AudioDeviceAttributes;
@@ -62,6 +63,8 @@ public class BtHelper {
     private @Nullable BluetoothDevice mBluetoothHeadsetDevice;
 
     private @Nullable BluetoothHearingAid mHearingAid;
+
+    private @Nullable BluetoothLeAudio mLeAudio;
 
     // Reference to BluetoothA2dp to query for AbsoluteVolume.
     private @Nullable BluetoothA2dp mA2dp;
@@ -106,6 +109,8 @@ public class BtHelper {
     private static final int SCO_MODE_MAX = 2;
 
     private static final int BT_HEARING_AID_GAIN_MIN = -128;
+    private static final int BT_LE_AUDIO_MIN_VOL = 0;
+    private static final int BT_LE_AUDIO_MAX_VOL = 255;
 
     /**
      * Returns a string representation of the scoAudioMode.
@@ -235,6 +240,8 @@ public class BtHelper {
                     mBluetoothProfileServiceListener, BluetoothProfile.A2DP);
             adapter.getProfileProxy(mDeviceBroker.getContext(),
                     mBluetoothProfileServiceListener, BluetoothProfile.HEARING_AID);
+            adapter.getProfileProxy(mDeviceBroker.getContext(),
+                    mBluetoothProfileServiceListener, BluetoothProfile.LE_AUDIO);
         }
     }
 
@@ -389,6 +396,26 @@ public class BtHelper {
         return requestScoState(BluetoothHeadset.STATE_AUDIO_DISCONNECTED, SCO_MODE_VIRTUAL_CALL);
     }
 
+    /*package*/ synchronized void setLeAudioVolume(int index, int maxIndex, int streamType) {
+        if (mLeAudio == null) {
+            if (AudioService.DEBUG_VOL) {
+                Log.i(TAG, "setLeAudioVolume: null mLeAudio");
+            }
+            return;
+        }
+        /* leaudio expect volume value in range 0 to 255
+         */
+        int volume = (index * (BT_LE_AUDIO_MAX_VOL - BT_LE_AUDIO_MIN_VOL)) / maxIndex ;
+
+        if (AudioService.DEBUG_VOL) {
+            Log.i(TAG, "setLeAudioVolume: calling mLeAudio.setVolume idx="
+                    + index + " volume=" + volume);
+        }
+        AudioService.sVolumeLogger.log(new AudioServiceEvents.VolumeEvent(
+                AudioServiceEvents.VolumeEvent.VOL_SET_LE_AUDIO_VOL, index, maxIndex));
+        mLeAudio.setVolume(volume);
+    }
+
     /*package*/ synchronized void setHearingAidVolume(int index, int streamType) {
         if (mHearingAid == null) {
             if (AudioService.DEBUG_VOL) {
@@ -428,6 +455,7 @@ public class BtHelper {
         mDeviceBroker.postDisconnectA2dpSink();
         mDeviceBroker.postDisconnectHeadset();
         mDeviceBroker.postDisconnectHearingAid();
+        mDeviceBroker.postDisconnectLeAudio();
     }
 
     // @GuardedBy("AudioDeviceBroker.mSetModeLock")
@@ -485,6 +513,23 @@ public class BtHelper {
                 btDevice, state,
                 /*suppressNoisyIntent*/ false,
                 /*musicDevice*/ android.media.AudioSystem.DEVICE_NONE,
+                /*eventSource*/ "mBluetoothProfileServiceListener");
+    }
+
+    /*package*/ synchronized void onLeAudioProfileConnected(BluetoothLeAudio leAudio) {
+        mLeAudio = leAudio;
+        final List<BluetoothDevice> deviceList = mLeAudio.getConnectedDevices();
+        if (deviceList.isEmpty()) {
+            return;
+        }
+
+        final BluetoothDevice btDevice = deviceList.get(0);
+        final @BluetoothProfile.BtProfileState int state =
+        mLeAudio.getConnectionState(btDevice);
+        mDeviceBroker.postBluetoothLeAudioOutDeviceConnectionState(
+                btDevice, state,
+                /*suppressNoisyIntent*/ false,
+                /*musicDevice android.media.AudioSystem.DEVICE_NONE,*/
                 /*eventSource*/ "mBluetoothProfileServiceListener");
     }
 
@@ -655,6 +700,13 @@ public class BtHelper {
                             mDeviceBroker.postBtHearingAidProfileConnected(
                                     (BluetoothHearingAid) proxy);
                             break;
+
+                        case BluetoothProfile.LE_AUDIO:
+                            AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
+                                    "BT profile service: connecting LE_AUDIO profile"));
+                            mDeviceBroker.postBtLeAudioProfileConnected(
+                                    (BluetoothLeAudio) proxy);
+                            break;
                         default:
                             break;
                     }
@@ -676,6 +728,9 @@ public class BtHelper {
 
                         case BluetoothProfile.HEARING_AID:
                             mDeviceBroker.postDisconnectHearingAid();
+                            break;
+                        case BluetoothProfile.LE_AUDIO:
+                            mDeviceBroker.postDisconnectLeAudio();
                             break;
 
                         default:
@@ -899,6 +954,7 @@ public class BtHelper {
         pw.println(prefix + "mScoAudioState: " + scoAudioStateToString(mScoAudioState));
         pw.println(prefix + "mScoAudioMode: " + scoAudioModeToString(mScoAudioMode));
         pw.println("\n" + prefix + "mHearingAid: " + mHearingAid);
+        pw.println("\n" + prefix + "mLeAudio: " + mLeAudio);
         pw.println(prefix + "mA2dp: " + mA2dp);
         pw.println(prefix + "mAvrcpAbsVolSupported: " + mAvrcpAbsVolSupported);
     }
