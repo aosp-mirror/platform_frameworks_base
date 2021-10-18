@@ -33,8 +33,10 @@ import static org.junit.Assert.fail;
 
 import static java.util.Arrays.asList;
 
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.service.timezone.TimeZoneProviderEvent;
 import android.service.timezone.TimeZoneProviderSuggestion;
@@ -287,8 +289,8 @@ public class ControllerImplTest {
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
-        mTestCallback.assertSuggestionMadeAndCommit(
-                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1.getSuggestion().getTimeZoneIds());
+        mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
+                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
         assertFalse(controllerImpl.isUncertaintyTimeoutSet());
     }
 
@@ -326,8 +328,8 @@ public class ControllerImplTest {
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
-        mTestCallback.assertSuggestionMadeAndCommit(
-                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1.getSuggestion().getTimeZoneIds());
+        mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
+                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
         assertFalse(controllerImpl.isUncertaintyTimeoutSet());
     }
 
@@ -366,8 +368,8 @@ public class ControllerImplTest {
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
-        mTestCallback.assertSuggestionMadeAndCommit(
-                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1.getSuggestion().getTimeZoneIds());
+        mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
+                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
         assertFalse(controllerImpl.isUncertaintyTimeoutSet());
     }
 
@@ -395,8 +397,8 @@ public class ControllerImplTest {
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
-        mTestCallback.assertSuggestionMadeAndCommit(
-                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1.getSuggestion().getTimeZoneIds());
+        mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
+                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
         assertFalse(controllerImpl.isUncertaintyTimeoutSet());
 
         // A second, identical event should not cause another suggestion.
@@ -416,8 +418,8 @@ public class ControllerImplTest {
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
-        mTestCallback.assertSuggestionMadeAndCommit(
-                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT2.getSuggestion().getTimeZoneIds());
+        mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
+                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT2);
         assertFalse(controllerImpl.isUncertaintyTimeoutSet());
     }
 
@@ -456,8 +458,8 @@ public class ControllerImplTest {
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
-        mTestCallback.assertSuggestionMadeAndCommit(
-                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1.getSuggestion().getTimeZoneIds());
+        mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
+                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
         assertFalse(controllerImpl.isUncertaintyTimeoutSet());
 
         // A second, identical event should not cause another suggestion.
@@ -479,8 +481,8 @@ public class ControllerImplTest {
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
-        mTestCallback.assertSuggestionMadeAndCommit(
-                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT2.getSuggestion().getTimeZoneIds());
+        mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
+                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT2);
         assertFalse(controllerImpl.isUncertaintyTimeoutSet());
     }
 
@@ -508,8 +510,8 @@ public class ControllerImplTest {
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
-        mTestCallback.assertSuggestionMadeAndCommit(
-                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1.getSuggestion().getTimeZoneIds());
+        mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
+                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
         assertFalse(controllerImpl.isUncertaintyTimeoutSet());
 
         // Simulate an uncertain event being received from the primary provider. This should not
@@ -535,8 +537,8 @@ public class ControllerImplTest {
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
-        mTestCallback.assertSuggestionMadeAndCommit(
-                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT2.getSuggestion().getTimeZoneIds());
+        mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
+                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT2);
         assertFalse(controllerImpl.isUncertaintyTimeoutSet());
 
         // Simulate an uncertain event being received from the secondary provider. This should not
@@ -560,7 +562,8 @@ public class ControllerImplTest {
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_UNCERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
-        mTestCallback.assertUncertainSuggestionMadeAndCommit();
+        mTestCallback.assertUncertainSuggestionMadeFromEventAndCommit(
+                USER1_UNCERTAIN_LOCATION_TIME_ZONE_EVENT);
         assertFalse(controllerImpl.isUncertaintyTimeoutSet());
     }
 
@@ -588,8 +591,8 @@ public class ControllerImplTest {
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
-        mTestCallback.assertSuggestionMadeAndCommit(
-                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1.getSuggestion().getTimeZoneIds());
+        mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
+                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
         assertFalse(controllerImpl.isUncertaintyTimeoutSet());
 
         // Uncertainty should not cause a suggestion to be made straight away, but the uncertainty
@@ -613,8 +616,8 @@ public class ControllerImplTest {
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
-        mTestCallback.assertSuggestionMadeAndCommit(
-                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT2.getSuggestion().getTimeZoneIds());
+        mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
+                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT2);
         assertFalse(controllerImpl.isUncertaintyTimeoutSet());
     }
 
@@ -682,8 +685,8 @@ public class ControllerImplTest {
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
-        mTestCallback.assertSuggestionMadeAndCommit(
-                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1.getSuggestion().getTimeZoneIds());
+        mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
+                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
         assertFalse(controllerImpl.isUncertaintyTimeoutSet());
 
         // Now signal a config change so that geo detection is disabled.
@@ -723,8 +726,8 @@ public class ControllerImplTest {
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
-        mTestCallback.assertSuggestionMadeAndCommit(
-                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1.getSuggestion().getTimeZoneIds());
+        mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
+                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
         assertFalse(controllerImpl.isUncertaintyTimeoutSet());
 
         // Simulate the user change (but geo detection still enabled).
@@ -789,8 +792,8 @@ public class ControllerImplTest {
         mTestPrimaryLocationTimeZoneProvider.assertIsPermFailedAndCommit();
         mTestSecondaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
-        mTestCallback.assertSuggestionMadeAndCommit(
-                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT2.getSuggestion().getTimeZoneIds());
+        mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
+                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT2);
         assertFalse(controllerImpl.isUncertaintyTimeoutSet());
 
         // Simulate uncertainty from the secondary.
@@ -896,8 +899,8 @@ public class ControllerImplTest {
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsPermFailedAndCommit();
-        mTestCallback.assertSuggestionMadeAndCommit(
-                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT2.getSuggestion().getTimeZoneIds());
+        mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
+                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT2);
         assertFalse(controllerImpl.isUncertaintyTimeoutSet());
 
         // Simulate uncertainty from the primary. The secondary cannot be started.
@@ -1098,8 +1101,8 @@ public class ControllerImplTest {
         mTestPrimaryLocationTimeZoneProvider.assertStateEnumAndConfigAndCommit(
                 PROVIDER_STATE_STARTED_CERTAIN, USER1_CONFIG_GEO_DETECTION_ENABLED);
         mTestSecondaryLocationTimeZoneProvider.assertIsStoppedAndCommit();
-        mTestCallback.assertSuggestionMadeAndCommit(
-                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1.getSuggestion().getTimeZoneIds());
+        mTestCallback.assertCertainSuggestionMadeFromEventAndCommit(
+                USER1_SUCCESS_LOCATION_TIME_ZONE_EVENT1);
         assertFalse(controllerImpl.isUncertaintyTimeoutSet());
 
         // Trigger destroy().
@@ -1186,6 +1189,13 @@ public class ControllerImplTest {
             return UNCERTAINTY_DELAY;
         }
 
+        @Override
+        long elapsedRealtimeMillis() {
+            // The properties of the real clock will also work for tests, i.e. it doesn't go
+            // backwards.
+            return SystemClock.elapsedRealtime();
+        }
+
         void simulateConfigChange(ConfigurationInternal newConfig) {
             ConfigurationInternal oldConfig = mConfigurationInternal;
             mConfigurationInternal = Objects.requireNonNull(newConfig);
@@ -1209,19 +1219,52 @@ public class ControllerImplTest {
             mLatestSuggestion.set(suggestion);
         }
 
-        void assertSuggestionMadeAndCommit(@Nullable List<String> expectedZoneIds) {
-            mLatestSuggestion.assertHasBeenSet();
-            assertEquals(expectedZoneIds, mLatestSuggestion.getLatest().getZoneIds());
-            mLatestSuggestion.commitLatest();
+        void assertCertainSuggestionMadeFromEventAndCommit(TimeZoneProviderEvent event) {
+            // Test coding error if this fails.
+            assertEquals(TimeZoneProviderEvent.EVENT_TYPE_SUGGESTION, event.getType());
+
+            TimeZoneProviderSuggestion suggestion = event.getSuggestion();
+            assertSuggestionMadeAndCommit(
+                    suggestion.getElapsedRealtimeMillis(),
+                    suggestion.getTimeZoneIds());
         }
 
         void assertNoSuggestionMade() {
             mLatestSuggestion.assertHasNotBeenSet();
         }
 
+        /** Asserts that an uncertain suggestion has been made from the supplied event. */
+        void assertUncertainSuggestionMadeFromEventAndCommit(TimeZoneProviderEvent event) {
+            // Test coding error if this fails.
+            assertEquals(TimeZoneProviderEvent.EVENT_TYPE_UNCERTAIN, event.getType());
+
+            assertSuggestionMadeAndCommit(event.getCreationElapsedMillis(), null);
+        }
+
+        /**
+         * Asserts that an uncertain suggestion has been made.
+         * Ignores the suggestion's effectiveFromElapsedMillis.
+         */
         void assertUncertainSuggestionMadeAndCommit() {
             // An "uncertain" suggestion has null time zone IDs.
-            assertSuggestionMadeAndCommit(null);
+            assertSuggestionMadeAndCommit(null, null);
+        }
+
+        /**
+         * Asserts that a suggestion has been made and some properties of that suggestion.
+         * When expectedEffectiveFromElapsedMillis is null then its value isn't checked.
+         */
+        private void assertSuggestionMadeAndCommit(
+                @Nullable @ElapsedRealtimeLong Long expectedEffectiveFromElapsedMillis,
+                @Nullable List<String> expectedZoneIds) {
+            mLatestSuggestion.assertHasBeenSet();
+            if (expectedEffectiveFromElapsedMillis != null) {
+                assertEquals(
+                        expectedEffectiveFromElapsedMillis.longValue(),
+                        mLatestSuggestion.getLatest().getEffectiveFromElapsedMillis());
+            }
+            assertEquals(expectedZoneIds, mLatestSuggestion.getLatest().getZoneIds());
+            mLatestSuggestion.commitLatest();
         }
     }
 

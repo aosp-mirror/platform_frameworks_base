@@ -33,10 +33,13 @@ import static com.android.server.timezonedetector.TimeZoneDetectorStrategyImpl.T
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.annotation.ElapsedRealtimeLong;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.time.TimeZoneConfiguration;
@@ -171,6 +174,8 @@ public class TimeZoneDetectorStrategyImplTest {
     private FakeEnvironment mFakeEnvironment;
     private MockConfigChangeListener mMockConfigChangeListener;
 
+    // A fake source of time for suggestions. This will typically be incremented after every use.
+    @ElapsedRealtimeLong private long mElapsedRealtimeMillis;
 
     @Before
     public void setUp() {
@@ -487,7 +492,7 @@ public class TimeZoneDetectorStrategyImplTest {
          */
 
         // Each test case will have the same or lower score than the last.
-        List<TelephonyTestCase> descendingCasesByScore = list(TELEPHONY_TEST_CASES);
+        List<TelephonyTestCase> descendingCasesByScore = Arrays.asList(TELEPHONY_TEST_CASES);
         Collections.reverse(descendingCasesByScore);
 
         for (TelephonyTestCase testCase : descendingCasesByScore) {
@@ -750,7 +755,7 @@ public class TimeZoneDetectorStrategyImplTest {
         Script script = new Script().initializeConfig(CONFIG_INT_AUTO_ENABLED_GEO_ENABLED)
                 .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID);
 
-        GeolocationTimeZoneSuggestion uncertainSuggestion = createUncertainGeoLocationSuggestion();
+        GeolocationTimeZoneSuggestion uncertainSuggestion = createUncertainGeolocationSuggestion();
 
         script.simulateGeolocationTimeZoneSuggestion(uncertainSuggestion)
                 .verifyTimeZoneNotChanged();
@@ -766,7 +771,7 @@ public class TimeZoneDetectorStrategyImplTest {
                 .initializeConfig(CONFIG_INT_AUTO_ENABLED_GEO_ENABLED)
                 .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID);
 
-        GeolocationTimeZoneSuggestion noZonesSuggestion = createGeoLocationSuggestion(list());
+        GeolocationTimeZoneSuggestion noZonesSuggestion = createCertainGeolocationSuggestion();
 
         script.simulateGeolocationTimeZoneSuggestion(noZonesSuggestion)
                 .verifyTimeZoneNotChanged();
@@ -778,7 +783,7 @@ public class TimeZoneDetectorStrategyImplTest {
     @Test
     public void testGeoSuggestion_oneZone() {
         GeolocationTimeZoneSuggestion suggestion =
-                createGeoLocationSuggestion(list("Europe/London"));
+                createCertainGeolocationSuggestion("Europe/London");
 
         Script script = new Script()
                 .initializeConfig(CONFIG_INT_AUTO_ENABLED_GEO_ENABLED)
@@ -799,11 +804,11 @@ public class TimeZoneDetectorStrategyImplTest {
     @Test
     public void testGeoSuggestion_multiZone() {
         GeolocationTimeZoneSuggestion londonOnlySuggestion =
-                createGeoLocationSuggestion(list("Europe/London"));
+                createCertainGeolocationSuggestion("Europe/London");
         GeolocationTimeZoneSuggestion londonOrParisSuggestion =
-                createGeoLocationSuggestion(list("Europe/Paris", "Europe/London"));
+                createCertainGeolocationSuggestion("Europe/Paris", "Europe/London");
         GeolocationTimeZoneSuggestion parisOnlySuggestion =
-                createGeoLocationSuggestion(list("Europe/Paris"));
+                createCertainGeolocationSuggestion("Europe/Paris");
 
         Script script = new Script()
                 .initializeConfig(CONFIG_INT_AUTO_ENABLED_GEO_ENABLED)
@@ -836,7 +841,7 @@ public class TimeZoneDetectorStrategyImplTest {
     @Test
     public void testGeoSuggestion_togglingGeoDetectionClearsLastSuggestion() {
         GeolocationTimeZoneSuggestion suggestion =
-                createGeoLocationSuggestion(list("Europe/London"));
+                createCertainGeolocationSuggestion("Europe/London");
 
         Script script = new Script()
                 .initializeConfig(CONFIG_INT_AUTO_ENABLED_GEO_ENABLED)
@@ -863,7 +868,7 @@ public class TimeZoneDetectorStrategyImplTest {
     @Test
     public void testChangingGeoDetectionEnabled() {
         GeolocationTimeZoneSuggestion geolocationSuggestion =
-                createGeoLocationSuggestion(list("Europe/London"));
+                createCertainGeolocationSuggestion("Europe/London");
         TelephonyTimeZoneSuggestion telephonySuggestion = createTelephonySuggestion(
                 SLOT_INDEX1, MATCH_TYPE_NETWORK_COUNTRY_AND_OFFSET, QUALITY_SINGLE_ZONE,
                 "Europe/Paris");
@@ -960,7 +965,7 @@ public class TimeZoneDetectorStrategyImplTest {
                 createTelephonySuggestion(0 /* slotIndex */, MATCH_TYPE_NETWORK_COUNTRY_ONLY,
                         QUALITY_SINGLE_ZONE, "Zone2");
         GeolocationTimeZoneSuggestion geolocationTimeZoneSuggestion =
-                createGeoLocationSuggestion(Arrays.asList("Zone3", "Zone2"));
+                createCertainGeolocationSuggestion("Zone3", "Zone2");
         script.simulateTelephonyTimeZoneSuggestion(telephonySuggestion)
                 .verifyTimeZoneNotChanged()
                 .simulateGeolocationTimeZoneSuggestion(geolocationTimeZoneSuggestion)
@@ -1052,13 +1057,18 @@ public class TimeZoneDetectorStrategyImplTest {
         return new TelephonyTimeZoneSuggestion.Builder(SLOT_INDEX2).build();
     }
 
-    private static GeolocationTimeZoneSuggestion createUncertainGeoLocationSuggestion() {
-        return createGeoLocationSuggestion(null);
+    private GeolocationTimeZoneSuggestion createUncertainGeolocationSuggestion() {
+        return GeolocationTimeZoneSuggestion.createCertainSuggestion(
+                mElapsedRealtimeMillis++, null);
     }
 
-    private static GeolocationTimeZoneSuggestion createGeoLocationSuggestion(
-            @Nullable List<String> zoneIds) {
-        GeolocationTimeZoneSuggestion suggestion = new GeolocationTimeZoneSuggestion(zoneIds);
+    private GeolocationTimeZoneSuggestion createCertainGeolocationSuggestion(
+            @NonNull String... zoneIds) {
+        assertNotNull(zoneIds);
+
+        GeolocationTimeZoneSuggestion suggestion =
+                GeolocationTimeZoneSuggestion.createCertainSuggestion(
+                        mElapsedRealtimeMillis++, Arrays.asList(zoneIds));
         suggestion.addDebugInfo("Test suggestion");
         return suggestion;
     }
@@ -1320,9 +1330,5 @@ public class TimeZoneDetectorStrategyImplTest {
         void reset() {
             mOnChangeCalled = false;
         }
-    }
-
-    private static <T> List<T> list(T... values) {
-        return Arrays.asList(values);
     }
 }
