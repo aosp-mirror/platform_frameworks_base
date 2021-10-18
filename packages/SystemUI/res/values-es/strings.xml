@@ -662,8 +662,8 @@
     <string name="status_bar" msgid="4357390266055077437">"Barra de estado"</string>
     <string name="overview" msgid="3522318590458536816">"Aplicaciones recientes"</string>
     <string name="demo_mode" msgid="263484519766901593">"Modo de demostración de UI del sistema"</string>
-    <string name="enable_demo_mode" msgid="3180345364745966431">"Habilitar modo de demostración"</string>
-    <string name="show_demo_mode" msgid="3677956462273059726">"Mostrar modo de demostración"</string>
+    <string name="enable_demo_mode" msgid="3180345364745966431">"Habilitar modo demo"</string>
+    <string name="show_demo_mode" msgid="3677956462273059726">"Mostrar modo demo"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarma"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
