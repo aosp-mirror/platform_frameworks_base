@@ -899,6 +899,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final ArtManagerService mArtManagerService;
 
     final PackageDexOptimizer mPackageDexOptimizer;
+    final BackgroundDexOptService mBackgroundDexOptService;
     // DexManager handles the usage of dex files (e.g. secondary files, whether or not a package
     // is used by other apps).
     private final DexManager mDexManager;
@@ -1531,7 +1532,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 },
                 new DefaultSystemWrapper(),
                 LocalServices::getService,
-                context::getSystemService);
+                context::getSystemService,
+                (i, pm) -> new BackgroundDexOptService(i.getContext(), i.getDexManager()));
 
         if (Build.VERSION.SDK_INT <= 0) {
             Slog.w(TAG, "**** ro.build.version.sdk not set!");
@@ -1676,6 +1678,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mApexManager = testParams.apexManager;
         mArtManagerService = testParams.artManagerService;
         mAvailableFeatures = testParams.availableFeatures;
+        mBackgroundDexOptService = testParams.backgroundDexOptService;
         mDefParseFlags = testParams.defParseFlags;
         mDefaultAppProvider = testParams.defaultAppProvider;
         mLegacyPermissionManager = testParams.legacyPermissionManagerInternal;
@@ -1852,6 +1855,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         mPackageDexOptimizer = injector.getPackageDexOptimizer();
         mDexManager = injector.getDexManager();
+        mBackgroundDexOptService = injector.getBackgroundDexOptService();
         mArtManagerService = injector.getArtManagerService();
         mMoveCallbacks = new MovePackageHelper.MoveCallbacks(FgThread.get().getLooper());
         mViewCompiler = injector.getViewCompiler();
@@ -6140,6 +6144,10 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    /*package*/ void controlDexOptBlocking(boolean block) {
+        mPackageDexOptimizer.controlDexOptBlocking(block);
+    }
+
     /**
      * Perform dexopt on the given package and return one of following result:
      *  {@link PackageDexOptimizer#DEX_OPT_SKIPPED}
@@ -6274,23 +6282,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     /*package*/ DexManager getDexManager() {
         return mDexManager;
-    }
-
-    /**
-     * Execute the background dexopt job immediately.
-     */
-    @Override
-    public boolean runBackgroundDexoptJob(@Nullable List<String> packageNames) {
-        if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
-            return false;
-        }
-        enforceSystemOrRootOrShell("runBackgroundDexoptJob");
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            return BackgroundDexOptService.runIdleOptimizationsNow(this, mContext, packageNames);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
     }
 
     private static List<SharedLibraryInfo> findSharedLibraries(PackageSetting pkgSetting) {
@@ -11468,6 +11459,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         mPerUidReadTimeoutsCache = null;
                     }
                 });
+
+        mBackgroundDexOptService.systemReady();
     }
 
     public void waitForAppDataPrepared() {

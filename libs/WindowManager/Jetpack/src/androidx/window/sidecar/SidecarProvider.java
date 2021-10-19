@@ -28,7 +28,7 @@ public class SidecarProvider {
      * an OEM by overriding this method.
      */
     public static SidecarInterface getSidecarImpl(Context context) {
-        return new SampleSidecarImpl(context);
+        return new SampleSidecarImpl(context.getApplicationContext());
     }
 
     /**

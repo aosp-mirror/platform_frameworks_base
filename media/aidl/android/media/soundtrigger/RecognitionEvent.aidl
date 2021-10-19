@@ -48,4 +48,13 @@ parcelable RecognitionEvent {
     @nullable AudioConfig audioConfig;
     /** Additional data. */
     byte[] data;
+    /**
+     * If true, recognition is still active after this event.
+     * For compatibility with earlier versions of this data type, when the status field is set to
+     * RecognitionStatus.FORCED, the value of this field should be treated as 'true', regardless of
+     * the actual value.
+     * When the status is RecognitionStatus.ABORTED or RecognitionStatus.FAILURE, this must be set
+     * to false.
+     */
+     boolean recognitionStillActive;
 }

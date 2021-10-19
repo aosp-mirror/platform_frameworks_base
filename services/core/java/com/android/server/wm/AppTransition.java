@@ -443,6 +443,7 @@ public class AppTransition implements Dump {
 
         int redoLayout = notifyAppTransitionStartingLocked(
                 AppTransition.isKeyguardGoingAwayTransitOld(transit),
+                AppTransition.isKeyguardOccludeTransitOld(transit),
                 topOpeningAnim != null ? topOpeningAnim.getDurationHint() : 0,
                 topOpeningAnim != null
                         ? topOpeningAnim.getStatusBarTransitionsStartTime()
@@ -557,12 +558,14 @@ public class AppTransition implements Dump {
         }
     }
 
-    private int notifyAppTransitionStartingLocked(boolean keyguardGoingAway, long duration,
-            long statusBarAnimationStartTime, long statusBarAnimationDuration) {
+    private int notifyAppTransitionStartingLocked(boolean keyguardGoingAway,
+            boolean keyguardOcclude, long duration, long statusBarAnimationStartTime,
+            long statusBarAnimationDuration) {
         int redoLayout = 0;
         for (int i = 0; i < mListeners.size(); i++) {
             redoLayout |= mListeners.get(i).onAppTransitionStartingLocked(keyguardGoingAway,
-                    duration, statusBarAnimationStartTime, statusBarAnimationDuration);
+                    keyguardOcclude, duration, statusBarAnimationStartTime,
+                    statusBarAnimationDuration);
         }
         return redoLayout;
     }

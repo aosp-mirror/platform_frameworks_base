@@ -20,6 +20,7 @@ import android.content.Context
 import android.graphics.Point
 import android.util.DisplayMetrics
 import android.view.WindowManager
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
@@ -28,6 +29,7 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import org.junit.runner.RunWith
+import org.junit.Test
 import org.junit.runners.Parameterized
 
 /**
@@ -62,4 +64,12 @@ class DismissBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(tes
                 showBubble?.run { drag(dist, 1000) } ?: error("Show bubble not found")
             }
         }
+
+    @FlakyTest
+    @Test
+    fun testAppIsAlwaysVisible() {
+        testSpec.assertLayers {
+            this.isVisible(testApp.component)
+        }
+    }
 }

@@ -310,6 +310,7 @@ class ConversionUtil {
         for (int i = 0; i < aidlEvent.data.length; ++i) {
             aidlEvent.data[i] = hidlEvent.data.get(i);
         }
+        aidlEvent.recognitionStillActive = aidlEvent.status == RecognitionStatus.FORCED;
         return aidlEvent;
     }
 

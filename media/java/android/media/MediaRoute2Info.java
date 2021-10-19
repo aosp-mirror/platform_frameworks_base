@@ -106,7 +106,7 @@ public final class MediaRoute2Info implements Parcelable {
     @IntDef({
             TYPE_UNKNOWN, TYPE_BUILTIN_SPEAKER, TYPE_WIRED_HEADSET,
             TYPE_WIRED_HEADPHONES, TYPE_BLUETOOTH_A2DP, TYPE_HDMI, TYPE_USB_DEVICE,
-            TYPE_USB_ACCESSORY, TYPE_DOCK, TYPE_USB_HEADSET, TYPE_HEARING_AID,
+            TYPE_USB_ACCESSORY, TYPE_DOCK, TYPE_USB_HEADSET, TYPE_HEARING_AID, TYPE_BLE_HEADSET,
             TYPE_REMOTE_TV, TYPE_REMOTE_SPEAKER, TYPE_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Type {}
@@ -200,6 +200,14 @@ public final class MediaRoute2Info implements Parcelable {
      * @hide
      */
     public static final int TYPE_HEARING_AID = AudioDeviceInfo.TYPE_HEARING_AID;
+
+    /**
+     * A route type describing a BLE HEADSET.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_BLE_HEADSET = AudioDeviceInfo.TYPE_BLE_HEADSET;
 
     /**
      * A route type indicating the presentation of the media is happening on a TV.

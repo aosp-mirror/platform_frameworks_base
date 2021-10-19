@@ -133,11 +133,11 @@ public abstract class StateController {
     }
 
     /**
-     * Called when a UID's base priority has changed. The more positive the priority, the more
+     * Called when a UID's base bias has changed. The more positive the bias, the more
      * important the UID is.
      */
     @GuardedBy("mLock")
-    public void onUidPriorityChangedLocked(int uid, int newPriority) {
+    public void onUidBiasChangedLocked(int uid, int newBias) {
     }
 
     protected boolean wouldBeReadyWithConstraintLocked(JobStatus jobStatus, int constraint) {

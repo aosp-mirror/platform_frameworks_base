@@ -530,7 +530,8 @@ public final class JobStore {
             }
         }
 
-        /** Write out a tag with data comprising the required fields and priority of this job and
+        /**
+         * Write out a tag with data comprising the required fields and bias of this job and
          * its client.
          */
         private void addAttributesToJobTag(XmlSerializer out, JobStatus jobStatus)
@@ -546,7 +547,7 @@ public final class JobStore {
             }
             out.attribute(null, "sourceUserId", String.valueOf(jobStatus.getSourceUserId()));
             out.attribute(null, "uid", Integer.toString(jobStatus.getUid()));
-            out.attribute(null, "priority", String.valueOf(jobStatus.getPriority()));
+            out.attribute(null, "bias", String.valueOf(jobStatus.getBias()));
             out.attribute(null, "flags", String.valueOf(jobStatus.getFlags()));
             if (jobStatus.getInternalFlags() != 0) {
                 out.attribute(null, "internalFlags", String.valueOf(jobStatus.getInternalFlags()));
@@ -819,15 +820,18 @@ public final class JobStore {
             long lastFailedRunTime;
             int internalFlags = 0;
 
-            // Read out job identifier attributes and priority.
+            // Read out job identifier attributes and bias.
             try {
                 jobBuilder = buildBuilderFromXml(parser);
                 jobBuilder.setPersisted(true);
                 uid = Integer.parseInt(parser.getAttributeValue(null, "uid"));
 
-                String val = parser.getAttributeValue(null, "priority");
+                String val = parser.getAttributeValue(null, "bias");
+                if (val == null) {
+                    val = parser.getAttributeValue(null, "priority");
+                }
                 if (val != null) {
-                    jobBuilder.setPriority(Integer.parseInt(val));
+                    jobBuilder.setBias(Integer.parseInt(val));
                 }
                 val = parser.getAttributeValue(null, "flags");
                 if (val != null) {

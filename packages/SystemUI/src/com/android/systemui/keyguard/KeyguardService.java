@@ -358,7 +358,7 @@ public class KeyguardService extends Service {
                 if (transit == TRANSIT_OLD_KEYGUARD_OCCLUDE) {
                     mBinder.setOccluded(true /* isOccluded */, true /* animate */);
                 } else if (transit == TRANSIT_OLD_KEYGUARD_UNOCCLUDE) {
-                    mBinder.setOccluded(false /* isOccluded */, true /* animate */);
+                    mBinder.setOccluded(false /* isOccluded */, false /* animate */);
                 }
                 // TODO(bc-unlock): Implement (un)occlude animation.
                 finishedCallback.onAnimationFinished();

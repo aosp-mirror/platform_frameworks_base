@@ -264,7 +264,7 @@ public class ActivityStarterTests extends WindowTestsBase {
 
         final IBinder resultTo = containsConditions(preconditions, PRECONDITION_SOURCE_PRESENT)
                 || containsConditions(preconditions, PRECONDITION_SOURCE_VOICE_SESSION)
-                ? source.appToken : null;
+                ? source.token : null;
 
         final int requestCode = containsConditions(preconditions, PRECONDITION_REQUEST_CODE)
                 ? 1 : 0;

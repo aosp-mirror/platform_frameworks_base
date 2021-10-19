@@ -1234,7 +1234,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
             try {
                 final ClientTransaction transaction =
-                        ClientTransaction.obtain(next.app.getThread(), next.appToken);
+                        ClientTransaction.obtain(next.app.getThread(), next.token);
                 // Deliver all pending results.
                 ArrayList<ResultInfo> a = next.results;
                 if (a != null) {
@@ -1483,7 +1483,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                     prev.shortComponentName, "userLeaving=" + userLeaving, reason);
 
             mAtmService.getLifecycleManager().scheduleTransaction(prev.app.getThread(),
-                    prev.appToken, PauseActivityItem.obtain(prev.finishing, userLeaving,
+                    prev.token, PauseActivityItem.obtain(prev.finishing, userLeaving,
                             prev.configChangeFlags, pauseImmediately));
         } catch (Exception e) {
             // Ignore exception, if process died other code will cleanup.
@@ -2164,7 +2164,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                     && wc.asActivityRecord() != null
                     && wc.asActivityRecord().getPid() == mTaskFragmentOrganizerPid) {
                 // Only includes Activities that belong to the organizer process for security.
-                childActivities.add(wc.asActivityRecord().appToken);
+                childActivities.add(wc.asActivityRecord().token);
             }
         }
         final Point positionInParent = new Point();

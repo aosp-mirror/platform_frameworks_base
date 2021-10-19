@@ -411,7 +411,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 .build();
         mAtm.mWindowOrganizerController.mLaunchTaskFragments
                 .put(mFragmentToken, mTaskFragment);
-        mTransaction.reparentActivityToTaskFragment(mFragmentToken, activity.appToken);
+        mTransaction.reparentActivityToTaskFragment(mFragmentToken, activity.token);
         clearInvocations(mAtm.mRootWindowContainer);
 
         mAtm.getWindowOrganizerController().applyTransaction(mTransaction);

@@ -5786,6 +5786,16 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.app.CommunalManager} for interacting with the global system state.
+     *
+     * @see #getSystemService(String)
+     * @see android.app.CommunalManager
+     * @hide
+     */
+    public static final String COMMUNAL_MANAGER_SERVICE = "communal_manager";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.app.LocaleManager}.
      *
      * @see #getSystemService(String)

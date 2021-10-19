@@ -225,7 +225,6 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Gravity;
-import android.view.IApplicationToken;
 import android.view.IWindow;
 import android.view.IWindowFocusObserver;
 import android.view.IWindowId;
@@ -1506,11 +1505,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return getTopParentWindow().mAttrs.type;
     }
 
-    @Override
-    public IApplicationToken getAppToken() {
-        return mActivityRecord != null ? mActivityRecord.appToken : null;
-    }
-
     /** Returns true if this window is participating in voice interaction. */
     boolean isVoiceInteraction() {
         return mActivityRecord != null && mActivityRecord.mVoiceInteraction;
@@ -2491,7 +2485,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Cancel the remove starting window animation on shell. The main window might changed
             // during animating, checking for all windows would be safer.
             if (mActivityRecord != null) {
-                mActivityRecord.forAllWindowsUnchecked(w -> {
+                mActivityRecord.forAllWindows(w -> {
                     if (w.isSelfAnimating(0, ANIMATION_TYPE_STARTING_REVEAL)) {
                         w.cancelAnimation();
                         return true;
@@ -4771,7 +4765,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         windowInfo.layer = mLayer;
         windowInfo.token = mClient.asBinder();
         if (mActivityRecord != null) {
-            windowInfo.activityToken = mActivityRecord.appToken.asBinder();
+            windowInfo.activityToken = mActivityRecord.token;
         }
         windowInfo.title = mAttrs.accessibilityTitle;
         // Panel windows have no public way to set the a11y title directly. Use the

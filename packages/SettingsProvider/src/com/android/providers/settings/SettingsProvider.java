@@ -4948,16 +4948,7 @@ public class SettingsProvider extends ContentProvider {
 
                 if (currentVersion == 190) {
                     // Version 190: get HDMI auto device off from overlay
-                    final SettingsState globalSettings = getGlobalSettingsLocked();
-                    final Setting currentSetting = globalSettings.getSettingLocked(
-                            Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED);
-                    if (currentSetting.isNull()) {
-                        globalSettings.insertSettingLocked(
-                                Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
-                                getContext().getResources().getBoolean(
-                                        R.bool.def_hdmiControlAutoDeviceOff) ? "1" : "0",
-                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
-                    }
+                    // HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED settings option was removed
                     currentVersion = 191;
                 }
 

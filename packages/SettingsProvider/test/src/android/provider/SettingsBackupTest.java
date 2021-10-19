@@ -299,8 +299,6 @@ public class SettingsBackupTest {
                     Settings.Global.GNSS_HAL_LOCATION_REQUEST_DURATION_MILLIS,
                     Settings.Global.GNSS_SATELLITE_BLOCKLIST,
                     Settings.Global.GPRS_REGISTER_CHECK_PERIOD_MS,
-                    Settings.Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
-                    Settings.Global.HDMI_CONTROL_ENABLED,
                     Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED,
                     Settings.Global.HIDDEN_API_POLICY,
                     Settings.Global.FORCE_NON_DEBUGGABLE_FINAL_BUILD_FOR_COMPAT,

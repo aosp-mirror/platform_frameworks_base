@@ -133,7 +133,7 @@ public class StageCoordinatorTests extends ShellTestCase {
         mStageCoordinator.setSideStagePosition(SPLIT_POSITION_TOP_OR_LEFT, null);
         clearInvocations(mMainUnfoldController, mSideUnfoldController);
 
-        mStageCoordinator.onLayoutChanged(mSplitLayout);
+        mStageCoordinator.onLayoutSizeChanged(mSplitLayout);
 
         verify(mMainUnfoldController).onLayoutChanged(mBounds2);
         verify(mSideUnfoldController).onLayoutChanged(mBounds1);
@@ -145,7 +145,7 @@ public class StageCoordinatorTests extends ShellTestCase {
         mStageCoordinator.setSideStagePosition(SPLIT_POSITION_BOTTOM_OR_RIGHT, null);
         clearInvocations(mMainUnfoldController, mSideUnfoldController);
 
-        mStageCoordinator.onLayoutChanged(mSplitLayout);
+        mStageCoordinator.onLayoutSizeChanged(mSplitLayout);
 
         verify(mMainUnfoldController).onLayoutChanged(mBounds1);
         verify(mSideUnfoldController).onLayoutChanged(mBounds2);

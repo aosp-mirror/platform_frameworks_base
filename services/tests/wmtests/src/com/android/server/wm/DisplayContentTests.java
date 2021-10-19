@@ -174,25 +174,31 @@ public class DisplayContentTests extends WindowTestsBase {
         final WindowState exitingAppWindow = createWindow(null, TYPE_BASE_APPLICATION,
                 mDisplayContent, "exiting app");
         final ActivityRecord exitingApp = exitingAppWindow.mActivityRecord;
-        // Wait until everything in animation handler get executed to prevent the exiting window
-        // from being removed during WindowSurfacePlacer Traversal.
-        waitUntilHandlersIdle();
-
+        exitingApp.startAnimation(exitingApp.getPendingTransaction(), mock(AnimationAdapter.class),
+                false /* hidden */, SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION);
         exitingApp.mIsExiting = true;
-        exitingApp.getTask().getRootTask().mExitingActivities.add(exitingApp);
+        // If the activity is animating, its window should not be removed.
+        mDisplayContent.handleCompleteDeferredRemoval();
 
-        assertForAllWindowsOrder(Arrays.asList(
+        final ArrayList<WindowState> windows = new ArrayList<>(Arrays.asList(
                 mWallpaperWindow,
-                exitingAppWindow,
                 mChildAppWindowBelow,
                 mAppWindow,
                 mChildAppWindowAbove,
+                exitingAppWindow,
                 mDockedDividerWindow,
                 mImeWindow,
                 mImeDialogWindow,
                 mStatusBarWindow,
                 mNotificationShadeWindow,
                 mNavBarWindow));
+        assertForAllWindowsOrder(windows);
+
+        exitingApp.cancelAnimation();
+        // The exiting window will be removed because its parent is no longer animating.
+        mDisplayContent.handleCompleteDeferredRemoval();
+        windows.remove(exitingAppWindow);
+        assertForAllWindowsOrder(windows);
     }
 
     @UseTestDisplay(addAllCommonWindows = true)

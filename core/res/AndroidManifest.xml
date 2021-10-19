@@ -5406,6 +5406,12 @@
     <permission android:name="android.permission.VIEW_INSTANT_APPS"
                 android:protectionLevel="signature|preinstalled" />
 
+    <!-- Allows an application to interact with the currently active
+        {@link com.android.server.communal.CommunalManagerService}.
+        @hide -->
+    <permission android:name="android.permission.WRITE_COMMUNAL_STATE"
+                android:protectionLevel="signature" />
+
     <!-- Allows the holder to manage whether the system can bind to services
          provided by instant apps. This permission is intended to protect
          test/development fucntionality and should be used only in such cases.
@@ -6112,6 +6118,12 @@
                 android:process=":ui">
         </activity>
 
+        <activity android:name="com.android.internal.app.LaunchAfterAuthenticationActivity"
+                  android:theme="@style/Theme.Translucent.NoTitleBar"
+                  android:excludeFromRecents="true"
+                  android:process=":ui">
+        </activity>
+
         <activity android:name="com.android.settings.notification.NotificationAccessConfirmationActivity"
                   android:theme="@style/Theme.Dialog.Confirmation"
                   android:excludeFromRecents="true">
@@ -6299,7 +6311,7 @@
                  android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
 
-        <service android:name="com.android.server.pm.BackgroundDexOptService"
+        <service android:name="com.android.server.pm.BackgroundDexOptJobService"
                  android:exported="true"
                  android:permission="android.permission.BIND_JOB_SERVICE">
         </service>

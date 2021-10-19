@@ -22,7 +22,6 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Point;
-import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.MathUtils;
 import android.view.MotionEvent;
@@ -111,7 +110,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private Interpolator mCurrentAppearInterpolator;
 
     NotificationBackgroundView mBackgroundNormal;
-    private RectF mAppearAnimationRect = new RectF();
     private float mAnimationTranslationY;
     private boolean mDrawingAppearAnimation;
     private ValueAnimator mAppearAnimator;
@@ -123,13 +121,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private long mLastActionUpTime;
 
     private float mNormalBackgroundVisibilityAmount;
-    private ValueAnimator.AnimatorUpdateListener mBackgroundVisibilityUpdater
-            = new ValueAnimator.AnimatorUpdateListener() {
-        @Override
-        public void onAnimationUpdate(ValueAnimator animation) {
-            setNormalBackgroundVisibilityAmount(mBackgroundNormal.getAlpha());
-        }
-    };
     private FakeShadowView mFakeShadow;
     private int mCurrentBackgroundTint;
     private int mTargetTint;
@@ -138,11 +129,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private float mOverrideAmount;
     private boolean mShadowHidden;
     private boolean mIsHeadsUpAnimation;
-    private int mHeadsUpAddStartLocation;
-    private float mHeadsUpLocation;
     /* In order to track headsup longpress coorindate. */
     protected Point mTargetPoint;
-    private boolean mIsAppearing;
     private boolean mDismissed;
     private boolean mRefocusOnDismiss;
     private AccessibilityManager mAccessibilityManager;
@@ -154,7 +142,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         setClipChildren(false);
         setClipToPadding(false);
         updateColors();
-        initDimens();
     }
 
     private void updateColors() {
@@ -164,17 +151,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 R.color.notification_ripple_tinted_color);
         mNormalRippleColor = mContext.getColor(
                 R.color.notification_ripple_untinted_color);
-    }
-
-    private void initDimens() {
-        mHeadsUpAddStartLocation = getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.notification_content_margin_start);
-    }
-
-    @Override
-    public void onDensityOrFontScaleChanged() {
-        super.onDensityOrFontScaleChanged();
-        initDimens();
     }
 
     /**
@@ -438,7 +414,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             Runnable onFinishedRunnable, AnimatorListenerAdapter animationListener) {
         enableAppearDrawing(true);
         mIsHeadsUpAnimation = isHeadsUpAnimation;
-        mHeadsUpLocation = endLocation;
         if (mDrawingAppearAnimation) {
             startAppearAnimation(false /* isAppearing */, translationDirection,
                     delay, duration, onFinishedRunnable, animationListener);
@@ -452,7 +427,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     public void performAddAnimation(long delay, long duration, boolean isHeadsUpAppear) {
         enableAppearDrawing(true);
         mIsHeadsUpAnimation = isHeadsUpAppear;
-        mHeadsUpLocation = mHeadsUpAddStartLocation;
         if (mDrawingAppearAnimation) {
             startAppearAnimation(true /* isAppearing */, isHeadsUpAppear ? 0.0f : -1.0f, delay,
                     duration, null, null);
@@ -474,7 +448,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 mAppearAnimationTranslation = 0;
             }
         }
-        mIsAppearing = isAppearing;
 
         float targetValue;
         if (isAppearing) {
@@ -781,9 +754,5 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     public interface OnActivatedListener {
         void onActivated(ActivatableNotificationView view);
         void onActivationReset(ActivatableNotificationView view);
-    }
-
-    interface OnDimmedListener {
-        void onSetDimmed(boolean dimmed);
     }
 }

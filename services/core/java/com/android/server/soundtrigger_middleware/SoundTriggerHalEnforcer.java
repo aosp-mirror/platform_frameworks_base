@@ -55,8 +55,7 @@ public class SoundTriggerHalEnforcer implements ISoundTriggerHal {
     private final ISoundTriggerHal mUnderlying;
     private final Map<Integer, ModelState> mModelStates = new HashMap<>();
 
-    public SoundTriggerHalEnforcer(
-            ISoundTriggerHal underlying) {
+    public SoundTriggerHalEnforcer(ISoundTriggerHal underlying) {
         mUnderlying = underlying;
     }
 
@@ -239,15 +238,12 @@ public class SoundTriggerHalEnforcer implements ISoundTriggerHal {
     private class ModelCallbackEnforcer implements ModelCallback {
         private final ModelCallback mUnderlying;
 
-        private ModelCallbackEnforcer(
-                ModelCallback underlying) {
+        private ModelCallbackEnforcer(ModelCallback underlying) {
             mUnderlying = underlying;
         }
 
         @Override
         public void recognitionCallback(int model, RecognitionEvent event) {
-            int status = event.status;
-
             synchronized (mModelStates) {
                 ModelState state = mModelStates.get(model);
                 if (state == null || state == ModelState.INACTIVE) {
@@ -255,7 +251,15 @@ public class SoundTriggerHalEnforcer implements ISoundTriggerHal {
                     reboot();
                     return;
                 }
-                if (status != RecognitionStatus.FORCED) {
+                if (event.recognitionStillActive && event.status != RecognitionStatus.SUCCESS
+                        && event.status != RecognitionStatus.FORCED) {
+                    Log.wtfStack(TAG,
+                            "recognitionStillActive is only allowed when the recognition status "
+                                    + "is SUCCESS");
+                    reboot();
+                    return;
+                }
+                if (!event.recognitionStillActive) {
                     mModelStates.replace(model, ModelState.INACTIVE);
                 }
             }
@@ -265,7 +269,6 @@ public class SoundTriggerHalEnforcer implements ISoundTriggerHal {
 
         @Override
         public void phraseRecognitionCallback(int model, PhraseRecognitionEvent event) {
-            int status = event.common.status;
             synchronized (mModelStates) {
                 ModelState state = mModelStates.get(model);
                 if (state == null || state == ModelState.INACTIVE) {
@@ -273,7 +276,16 @@ public class SoundTriggerHalEnforcer implements ISoundTriggerHal {
                     reboot();
                     return;
                 }
-                if (status != RecognitionStatus.FORCED) {
+                if (event.common.recognitionStillActive
+                        && event.common.status != RecognitionStatus.SUCCESS
+                        && event.common.status != RecognitionStatus.FORCED) {
+                    Log.wtfStack(TAG,
+                            "recognitionStillActive is only allowed when the recognition status "
+                                    + "is SUCCESS");
+                    reboot();
+                    return;
+                }
+                if (!event.common.recognitionStillActive) {
                     mModelStates.replace(model, ModelState.INACTIVE);
                 }
             }

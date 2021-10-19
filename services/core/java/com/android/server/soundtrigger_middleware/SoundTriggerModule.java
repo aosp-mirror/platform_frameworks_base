@@ -24,7 +24,6 @@ import android.media.soundtrigger.PhraseSoundModel;
 import android.media.soundtrigger.Properties;
 import android.media.soundtrigger.RecognitionConfig;
 import android.media.soundtrigger.RecognitionEvent;
-import android.media.soundtrigger.RecognitionStatus;
 import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger.Status;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
@@ -461,7 +460,7 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
                     @NonNull RecognitionEvent recognitionEvent) {
                 ISoundTriggerCallback callback;
                 synchronized (SoundTriggerModule.this) {
-                    if (recognitionEvent.status != RecognitionStatus.FORCED) {
+                    if (!recognitionEvent.recognitionStillActive) {
                         setState(ModelState.LOADED);
                     }
                     callback = mCallback;
@@ -482,7 +481,7 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
                     @NonNull PhraseRecognitionEvent phraseRecognitionEvent) {
                 ISoundTriggerCallback callback;
                 synchronized (SoundTriggerModule.this) {
-                    if (phraseRecognitionEvent.common.status != RecognitionStatus.FORCED) {
+                    if (!phraseRecognitionEvent.common.recognitionStillActive) {
                         setState(ModelState.LOADED);
                     }
                     callback = mCallback;

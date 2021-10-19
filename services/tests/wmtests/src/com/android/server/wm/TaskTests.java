@@ -1056,9 +1056,9 @@ public class TaskTests extends WindowTestsBase {
         final ActivityRecord activity1 = task1.getBottomMostActivity();
 
         assertEquals(task0.mTaskId,
-                ActivityRecord.getTaskForActivityLocked(activity0.appToken, false /* onlyRoot */));
+                ActivityRecord.getTaskForActivityLocked(activity0.token, false /* onlyRoot */));
         assertEquals(task1.mTaskId,
-                ActivityRecord.getTaskForActivityLocked(activity1.appToken,  false /* onlyRoot */));
+                ActivityRecord.getTaskForActivityLocked(activity1.token,  false /* onlyRoot */));
     }
 
     /**
@@ -1077,11 +1077,11 @@ public class TaskTests extends WindowTestsBase {
         final ActivityRecord activity2 = new ActivityBuilder(mAtm).setTask(task).build();
 
         assertEquals(task.mTaskId,
-                ActivityRecord.getTaskForActivityLocked(activity0.appToken, true /* onlyRoot */));
+                ActivityRecord.getTaskForActivityLocked(activity0.token, true /* onlyRoot */));
         assertEquals(task.mTaskId,
-                ActivityRecord.getTaskForActivityLocked(activity1.appToken, true /* onlyRoot */));
+                ActivityRecord.getTaskForActivityLocked(activity1.token, true /* onlyRoot */));
         assertEquals("No task must be reported for activity that is above root", INVALID_TASK_ID,
-                ActivityRecord.getTaskForActivityLocked(activity2.appToken, true /* onlyRoot */));
+                ActivityRecord.getTaskForActivityLocked(activity2.token, true /* onlyRoot */));
     }
 
     /**
@@ -1100,11 +1100,11 @@ public class TaskTests extends WindowTestsBase {
         final ActivityRecord activity2 = new ActivityBuilder(mAtm).setTask(task).build();
 
         assertEquals(task.mTaskId,
-                ActivityRecord.getTaskForActivityLocked(activity0.appToken, true /* onlyRoot */));
+                ActivityRecord.getTaskForActivityLocked(activity0.token, true /* onlyRoot */));
         assertEquals("No task must be reported for activity that is above root", INVALID_TASK_ID,
-                ActivityRecord.getTaskForActivityLocked(activity1.appToken, true /* onlyRoot */));
+                ActivityRecord.getTaskForActivityLocked(activity1.token, true /* onlyRoot */));
         assertEquals("No task must be reported for activity that is above root", INVALID_TASK_ID,
-                ActivityRecord.getTaskForActivityLocked(activity2.appToken, true /* onlyRoot */));
+                ActivityRecord.getTaskForActivityLocked(activity2.token, true /* onlyRoot */));
     }
 
     /**
@@ -1126,11 +1126,11 @@ public class TaskTests extends WindowTestsBase {
         final ActivityRecord activity2 = new ActivityBuilder(mAtm).setTask(task).build();
 
         assertEquals(task.mTaskId,
-                ActivityRecord.getTaskForActivityLocked(activity0.appToken, false /* onlyRoot */));
+                ActivityRecord.getTaskForActivityLocked(activity0.token, false /* onlyRoot */));
         assertEquals(task.mTaskId,
-                ActivityRecord.getTaskForActivityLocked(activity1.appToken, false /* onlyRoot */));
+                ActivityRecord.getTaskForActivityLocked(activity1.token, false /* onlyRoot */));
         assertEquals(task.mTaskId,
-                ActivityRecord.getTaskForActivityLocked(activity2.appToken, false /* onlyRoot */));
+                ActivityRecord.getTaskForActivityLocked(activity2.token, false /* onlyRoot */));
     }
 
     /**

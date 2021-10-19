@@ -27,6 +27,7 @@ import com.android.wm.shell.ShellInit;
 import com.android.wm.shell.TaskViewFactory;
 import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.bubbles.Bubbles;
+import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.onehanded.OneHanded;
@@ -103,6 +104,9 @@ public interface WMComponent {
 
     @WMSingleton
     Optional<StartingSurface> getStartingSurface();
+
+    @WMSingleton
+    Optional<DisplayAreaHelper> getDisplayAreaHelper();
 
     @WMSingleton
     Optional<TaskSurfaceHelper> getTaskSurfaceHelper();

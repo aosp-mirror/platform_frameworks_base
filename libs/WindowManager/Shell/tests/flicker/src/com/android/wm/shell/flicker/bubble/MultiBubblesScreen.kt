@@ -17,6 +17,7 @@
 package com.android.wm.shell.flicker.bubble
 
 import android.os.SystemClock
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
@@ -25,6 +26,7 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import org.junit.runner.RunWith
+import org.junit.Test
 import org.junit.runners.Parameterized
 
 /**
@@ -63,4 +65,12 @@ class MultiBubblesScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(test
                 }
             }
         }
+
+    @FlakyTest
+    @Test
+    fun testAppIsAlwaysVisible() {
+        testSpec.assertLayers {
+            this.isVisible(testApp.component)
+        }
+    }
 }

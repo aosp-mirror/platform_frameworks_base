@@ -204,7 +204,7 @@ class ConversionUtil {
                 aidlEvent.status,
                 modelHandle, aidlEvent.captureAvailable, captureSession,
                 aidlEvent.captureDelayMs, aidlEvent.capturePreambleMs, aidlEvent.triggerInData,
-                audioFormat, aidlEvent.data);
+                audioFormat, aidlEvent.data, aidlEvent.recognitionStillActive);
     }
 
     public static SoundTrigger.RecognitionEvent aidl2apiPhraseRecognitionEvent(

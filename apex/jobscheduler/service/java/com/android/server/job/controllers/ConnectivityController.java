@@ -176,8 +176,8 @@ public final class ConnectivityController extends RestrictingController implemen
             }
             // Prioritize the top app. If neither are top apps, then use a later prioritization
             // check.
-            final int topPriority = prioritizeExistenceOver(JobInfo.PRIORITY_TOP_APP - 1,
-                    us1.basePriority, us2.basePriority);
+            final int topPriority = prioritizeExistenceOver(JobInfo.BIAS_TOP_APP - 1,
+                    us1.baseBias, us2.baseBias);
             if (topPriority != 0) {
                 return topPriority;
             }
@@ -190,8 +190,8 @@ public final class ConnectivityController extends RestrictingController implemen
             // They both have runnable EJs.
             // Prioritize an FGS+ app. If neither are FGS+ apps, then use a later prioritization
             // check.
-            final int fgsPriority = prioritizeExistenceOver(JobInfo.PRIORITY_FOREGROUND_SERVICE - 1,
-                    us1.basePriority, us2.basePriority);
+            final int fgsPriority = prioritizeExistenceOver(JobInfo.BIAS_FOREGROUND_SERVICE - 1,
+                    us1.baseBias, us2.baseBias);
             if (fgsPriority != 0) {
                 return fgsPriority;
             }
@@ -202,8 +202,8 @@ public final class ConnectivityController extends RestrictingController implemen
                 return 1;
             }
             // Order by any latent important proc states.
-            if (us1.basePriority != us2.basePriority) {
-                return us2.basePriority - us1.basePriority;
+            if (us1.baseBias != us2.baseBias) {
+                return us2.baseBias - us1.baseBias;
             }
             // Order by enqueue time.
             if (us1.earliestEnqueueTime < us2.earliestEnqueueTime) {
@@ -527,10 +527,10 @@ public final class ConnectivityController extends RestrictingController implemen
 
     @GuardedBy("mLock")
     @Override
-    public void onUidPriorityChangedLocked(int uid, int newPriority) {
+    public void onUidBiasChangedLocked(int uid, int newBias) {
         UidStats uidStats = mUidStats.get(uid);
-        if (uidStats != null && uidStats.basePriority != newPriority) {
-            uidStats.basePriority = newPriority;
+        if (uidStats != null && uidStats.baseBias != newBias) {
+            uidStats.baseBias = newBias;
             postAdjustCallbacks();
         }
     }
@@ -928,7 +928,7 @@ public final class ConnectivityController extends RestrictingController implemen
         final int unbypassableBlockedReasons;
         // TOP will probably have fewer reasons, so we may not have to worry about returning
         // BG_BLOCKED for a TOP app. However, better safe than sorry.
-        if (uidStats.basePriority >= JobInfo.PRIORITY_BOUND_FOREGROUND_SERVICE
+        if (uidStats.baseBias >= JobInfo.BIAS_BOUND_FOREGROUND_SERVICE
                 || (jobStatus.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0) {
             if (DEBUG) {
                 Slog.d(TAG, "Using FG bypass for " + jobStatus.getSourceUid());
@@ -1281,7 +1281,7 @@ public final class ConnectivityController extends RestrictingController implemen
 
     private static class UidStats {
         public final int uid;
-        public int basePriority;
+        public int baseBias;
         public final ArraySet<JobStatus> runningJobs = new ArraySet<>();
         public int numReadyWithConnectivity;
         public int numRequestedNetworkAvailable;
@@ -1298,7 +1298,7 @@ public final class ConnectivityController extends RestrictingController implemen
         private void dumpLocked(IndentingPrintWriter pw, final long nowElapsed) {
             pw.print("UidStats{");
             pw.print("uid", uid);
-            pw.print("pri", basePriority);
+            pw.print("pri", baseBias);
             pw.print("#run", runningJobs.size());
             pw.print("#readyWithConn", numReadyWithConnectivity);
             pw.print("#netAvail", numRequestedNetworkAvailable);

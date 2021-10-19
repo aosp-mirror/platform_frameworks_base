@@ -33,7 +33,14 @@ class UnfoldTransitionWallpaperController @Inject constructor(
 
     private inner class TransitionListener : TransitionProgressListener {
         override fun onTransitionProgress(progress: Float) {
-            wallpaperController.setUnfoldTransitionZoom(progress)
+            // Fully zoomed in when fully unfolded
+            wallpaperController.setUnfoldTransitionZoom(1 - progress)
+        }
+
+        override fun onTransitionFinished() {
+            // Resets wallpaper zoom-out to 0f when fully folded
+            // When fully unfolded it is set to 0f by onTransitionProgress
+            wallpaperController.setUnfoldTransitionZoom(0f)
         }
     }
 }

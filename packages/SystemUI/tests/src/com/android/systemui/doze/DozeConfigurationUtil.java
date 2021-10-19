@@ -67,7 +67,8 @@ public class DozeConfigurationUtil {
 
         when(config.tapGestureEnabled(anyInt())).thenReturn(true);
         when(config.tapSensorAvailable()).thenReturn(true);
-        when(config.tapSensorType(anyInt())).thenReturn(FakeSensorManager.TAP_SENSOR_TYPE);
+        when(config.tapSensorTypeMapping()).thenReturn(
+                new String[]{FakeSensorManager.TAP_SENSOR_TYPE});
 
         when(config.dozePickupSensorAvailable()).thenReturn(false);
         when(config.wakeScreenGestureAvailable()).thenReturn(false);

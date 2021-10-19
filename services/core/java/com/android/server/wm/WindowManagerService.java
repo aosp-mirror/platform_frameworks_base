@@ -1134,7 +1134,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     atoken.mEnteringAnimation = false;
                     if (atoken.attachedToProcess()) {
                         try {
-                            atoken.app.getThread().scheduleEnterAnimationComplete(atoken.appToken);
+                            atoken.app.getThread().scheduleEnterAnimationComplete(atoken.token);
                         } catch (RemoteException e) {
                         }
                     }
@@ -2069,26 +2069,14 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         final WindowToken token = win.mToken;
-        final ActivityRecord activity = win.mActivityRecord;
         ProtoLog.v(WM_DEBUG_ADD_REMOVE, "Removing %s from %s", win, token);
         // Window will already be removed from token before this post clean-up method is called.
-        if (token.isEmpty()) {
-            if (!token.mPersistOnEmpty) {
-                token.removeImmediately();
-            } else if (activity != null) {
-                // TODO: Should this be moved into ActivityRecord.removeWindow? Might go away after
-                // re-factor.
-                activity.firstWindowDrawn = false;
-                activity.clearAllDrawn();
-                final Task rootTask = activity.getRootTask();
-                if (rootTask != null) {
-                    rootTask.mExitingActivities.remove(activity);
-                }
-            }
+        if (token.isEmpty() && !token.mPersistOnEmpty) {
+            token.removeImmediately();
         }
 
-        if (activity != null) {
-            activity.postWindowRemoveStartingWindowCleanup(win);
+        if (win.mActivityRecord != null) {
+            win.mActivityRecord.postWindowRemoveStartingWindowCleanup(win);
         }
 
         if (win.mAttrs.type == TYPE_WALLPAPER) {
@@ -2584,13 +2572,17 @@ public class WindowManagerService extends IWindowManager.Stub
             // an exit.
             win.mAnimatingExit = true;
         } else if (win.mDisplayContent.okToAnimate()
-                && win.mDisplayContent.mWallpaperController.isWallpaperTarget(win)) {
-            // If the wallpaper is currently behind this
-            // window, we need to change both of them inside
-            // of a transaction to avoid artifacts.
+                && win.mDisplayContent.mWallpaperController.isWallpaperTarget(win)
+                && win.mAttrs.type != TYPE_NOTIFICATION_SHADE) {
+            // If the wallpaper is currently behind this app window, we need to change both of them
+            // inside of a transaction to avoid artifacts.
+            // For NotificationShade, sysui is in charge of running window animation and it updates
+            // the client view visibility only after both NotificationShade and the wallpaper are
+            // hidden. So we don't need to care about exit animation, but can destroy its surface
+            // immediately.
             win.mAnimatingExit = true;
         } else {
-            boolean stopped = win.mActivityRecord != null ? win.mActivityRecord.mAppStopped : true;
+            boolean stopped = win.mActivityRecord == null || win.mActivityRecord.mAppStopped;
             // We set mDestroying=true so ActivityRecord#notifyAppStopped in-to destroy surfaces
             // will later actually destroy the surface if we do not do so here. Normally we leave
             // this to the exit animation.

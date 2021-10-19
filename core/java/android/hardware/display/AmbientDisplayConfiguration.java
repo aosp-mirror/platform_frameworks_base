@@ -22,11 +22,9 @@ import android.os.Build;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.Log;
-
-import java.util.Arrays;
 
 import com.android.internal.R;
+import com.android.internal.util.ArrayUtils;
 
 /**
  * AmbientDisplayConfiguration encapsulates reading access to the configuration of ambient display.
@@ -90,7 +88,12 @@ public class AmbientDisplayConfiguration {
 
     /** {@hide} */
     public boolean tapSensorAvailable() {
-        return !TextUtils.isEmpty(tapSensorType());
+        for (String tapType : tapSensorTypeMapping()) {
+            if (!TextUtils.isEmpty(tapType)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** {@hide} */
@@ -143,18 +146,18 @@ public class AmbientDisplayConfiguration {
         return mContext.getResources().getString(R.string.config_dozeDoubleTapSensorType);
     }
 
-    /** {@hide} */
-    private String tapSensorType() {
-        return mContext.getResources().getString(R.string.config_dozeTapSensorType);
-    }
-
-    /** {@hide} */
-    public String tapSensorType(int posture) {
-        return getSensorFromPostureMapping(
-                mContext.getResources().getStringArray(R.array.config_dozeTapSensorPostureMapping),
-                tapSensorType(),
-                posture
-        );
+    /** {@hide}
+     * May support multiple postures.
+     */
+    public String[] tapSensorTypeMapping() {
+        String[] postureMapping =
+                mContext.getResources().getStringArray(R.array.config_dozeTapSensorPostureMapping);
+        if (ArrayUtils.isEmpty(postureMapping)) {
+            return new String[] {
+                    mContext.getResources().getString(R.string.config_dozeTapSensorType)
+            };
+        }
+        return postureMapping;
     }
 
     /** {@hide} */
@@ -252,21 +255,5 @@ public class AmbientDisplayConfiguration {
 
     private boolean boolSetting(String name, int user, int def) {
         return Settings.Secure.getIntForUser(mContext.getContentResolver(), name, def, user) != 0;
-    }
-
-    /** {@hide} */
-    public static String getSensorFromPostureMapping(
-            String[] postureMapping,
-            String defaultValue,
-            int posture) {
-        String sensorType = defaultValue;
-        if (postureMapping != null && posture < postureMapping.length) {
-            sensorType = postureMapping[posture];
-        } else {
-            Log.e(TAG, "Unsupported doze posture " + posture
-                  + " postureMapping=" + Arrays.toString(postureMapping));
-        }
-
-        return TextUtils.isEmpty(sensorType) ? defaultValue : sensorType;
     }
 }

@@ -22,6 +22,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothProfile;
+import android.bluetooth.BluetoothLeAudio;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -503,6 +504,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
         }
     }
 
+    /*package*/ static final class BleVolumeInfo {
+        final int mIndex;
+        final int mMaxIndex;
+        final int mStreamType;
+
+        BleVolumeInfo(int index, int maxIndex, int streamType) {
+            mIndex = index;
+            mMaxIndex = maxIndex;
+            mStreamType = streamType;
+        }
+    };
+
     /*package*/ static final class BtDeviceConnectionInfo {
         final @NonNull BluetoothDevice mDevice;
         final @AudioService.BtProfileConnectionState int mState;
@@ -711,6 +724,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
         sendIIMsgNoDelay(MSG_II_SET_HEARING_AID_VOLUME, SENDMSG_REPLACE, index, streamType);
     }
 
+     /*package*/ void postSetLeAudioVolumeIndex(int index, int maxIndex, int streamType) {
+        BleVolumeInfo info = new BleVolumeInfo(index, maxIndex, streamType);
+        sendLMsgNoDelay(MSG_II_SET_LE_AUDIO_OUT_VOLUME, SENDMSG_REPLACE, info);
+    }
+
     /*package*/ void postSetModeOwnerPid(int pid, int mode) {
         sendIIMsgNoDelay(MSG_I_SET_MODE_OWNER_PID, SENDMSG_REPLACE, pid, mode);
     }
@@ -851,6 +869,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
         return mAudioService.getVssVolumeForDevice(streamType, device);
     }
 
+    /*package*/ int getMaxVssVolumeForStream(int streamType) {
+        return mAudioService.getMaxVssVolumeForStream(streamType);
+    }
+
     /*package*/ int getDeviceForStream(int streamType) {
         return mAudioService.getDeviceForStream(streamType);
     }
@@ -962,6 +984,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
         sendMsgNoDelay(MSG_DISCONNECT_BT_HEARING_AID, SENDMSG_QUEUE);
     }
 
+    /*package*/ void postDisconnectLeAudio() {
+        sendMsgNoDelay(MSG_DISCONNECT_BT_LE_AUDIO, SENDMSG_QUEUE);
+    }
+
     /*package*/ void postDisconnectHeadset() {
         sendMsgNoDelay(MSG_DISCONNECT_BT_HEADSET, SENDMSG_QUEUE);
     }
@@ -981,6 +1007,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
     /*package*/ void postBtHearingAidProfileConnected(BluetoothHearingAid hearingAidProfile) {
         sendLMsgNoDelay(MSG_L_BT_SERVICE_CONNECTED_PROFILE_HEARING_AID, SENDMSG_QUEUE,
                 hearingAidProfile);
+    }
+
+    /*package*/ void postBtLeAudioProfileConnected(BluetoothLeAudio leAudioProfile) {
+        sendLMsgNoDelay(MSG_L_BT_SERVICE_CONNECTED_PROFILE_LE_AUDIO, SENDMSG_QUEUE,
+                leAudioProfile);
     }
 
     /*package*/ void postCommunicationRouteClientDied(CommunicationRouteClient client) {
@@ -1321,6 +1352,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
                         mBtHelper.setHearingAidVolume(msg.arg1, msg.arg2);
                     }
                     break;
+                case MSG_II_SET_LE_AUDIO_OUT_VOLUME: {
+                    final BleVolumeInfo info = (BleVolumeInfo) msg.obj;
+                    synchronized (mDeviceStateLock) {
+                        mBtHelper.setLeAudioVolume(info.mIndex, info.mMaxIndex, info.mStreamType);
+                    }
+                } break;
                 case MSG_I_SET_AVRCP_ABSOLUTE_VOLUME:
                     synchronized (mDeviceStateLock) {
                         mBtHelper.setAvrcpAbsoluteVolumeIndex(msg.arg1);
@@ -1384,6 +1421,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
                         }
                     }
                     break;
+                case MSG_DISCONNECT_BT_LE_AUDIO:
+                    synchronized(mDeviceStateLock) {
+                        mDeviceInventory.disconnectLeAudio();
+                    }
+                    break;
                 case MSG_L_BT_SERVICE_CONNECTED_PROFILE_A2DP:
                     synchronized (mDeviceStateLock) {
                         mBtHelper.onA2dpProfileConnected((BluetoothA2dp) msg.obj);
@@ -1397,6 +1439,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
                 case MSG_L_BT_SERVICE_CONNECTED_PROFILE_HEARING_AID:
                     synchronized (mDeviceStateLock) {
                         mBtHelper.onHearingAidProfileConnected((BluetoothHearingAid) msg.obj);
+                    }
+                    break;
+
+                case MSG_L_BT_SERVICE_CONNECTED_PROFILE_LE_AUDIO:
+                    synchronized(mDeviceStateLock) {
+                        mBtHelper.onLeAudioProfileConnected((BluetoothLeAudio) msg.obj);
                     }
                     break;
                 case MSG_L_BT_SERVICE_CONNECTED_PROFILE_HEADSET:
@@ -1586,6 +1634,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
     private static final int MSG_IL_SET_LE_AUDIO_IN_CONNECTION_STATE = 43;
     private static final int MSG_L_LE_AUDIO_DEVICE_OUT_CONNECTION_CHANGE_EXT = 44;
     private static final int MSG_L_LE_AUDIO_DEVICE_IN_CONNECTION_CHANGE_EXT = 45;
+    // process set volume for Le Audio, obj is BleVolumeInfo
+    private static final int MSG_II_SET_LE_AUDIO_OUT_VOLUME = 46;
+
+    private static final int MSG_L_BT_SERVICE_CONNECTED_PROFILE_LE_AUDIO = 47;
+    private static final int MSG_DISCONNECT_BT_LE_AUDIO = 48;
 
     private static boolean isMessageHandledUnderWakelock(int msgId) {
         switch(msgId) {

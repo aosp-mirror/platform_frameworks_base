@@ -476,6 +476,18 @@ public class StagedInstallInternalTest {
         assertThat(captor.getValue().stagedApexModuleNames).hasLength(0);
     }
 
+    @Test
+    public void testRebootlessDowngrade() throws Exception {
+        final String packageName = "test.apex.rebootless";
+        assertThat(InstallUtils.getInstalledVersion(packageName)).isEqualTo(2);
+        TestApp apex1 = new TestApp("TestRebootlessApexV1", packageName, 1,
+                /* isApex= */ true, "test.rebootless_apex_v1.apex");
+        InstallUtils.commitExpectingFailure(AssertionError.class,
+                "INSTALL_FAILED_VERSION_DOWNGRADE", Install.single(apex1));
+        Install.single(apex1).setRequestDowngrade().commit();
+        assertThat(InstallUtils.getInstalledVersion(packageName)).isEqualTo(1);
+    }
+
     private IPackageManagerNative getPackageManagerNative() {
         IBinder binder = ServiceManager.waitForService("package_native");
         assertThat(binder).isNotNull();

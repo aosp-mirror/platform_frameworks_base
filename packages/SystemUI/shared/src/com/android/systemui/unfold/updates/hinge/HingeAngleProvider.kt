@@ -9,7 +9,7 @@ import com.android.systemui.statusbar.policy.CallbackController
  * For foldable devices usually 0 corresponds to fully closed (folded) state and
  * 180 degrees corresponds to fully open (flat) state
  */
-internal interface HingeAngleProvider : CallbackController<Consumer<Float>> {
+interface HingeAngleProvider : CallbackController<Consumer<Float>> {
     fun start()
     fun stop()
 }

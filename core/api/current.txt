@@ -4381,6 +4381,7 @@ package android.app {
     method @Nullable public android.graphics.Rect getLaunchBounds();
     method public int getLaunchDisplayId();
     method public boolean getLockTaskMode();
+    method public boolean isPendingIntentBackgroundActivityLaunchAllowed();
     method public static android.app.ActivityOptions makeBasic();
     method public static android.app.ActivityOptions makeClipRevealAnimation(android.view.View, int, int, int, int);
     method public static android.app.ActivityOptions makeCustomAnimation(android.content.Context, int, int);
@@ -4394,6 +4395,7 @@ package android.app {
     method public android.app.ActivityOptions setLaunchBounds(@Nullable android.graphics.Rect);
     method public android.app.ActivityOptions setLaunchDisplayId(int);
     method public android.app.ActivityOptions setLockTaskEnabled(boolean);
+    method public void setPendingIntentBackgroundActivityLaunchAllowed(boolean);
     method public android.os.Bundle toBundle();
     method public void update(android.app.ActivityOptions);
     field public static final String EXTRA_USAGE_TIME_REPORT = "android.activity.usage_time";
@@ -31814,9 +31816,9 @@ package android.os {
     method public float getThermalHeadroom(@IntRange(from=0, to=60) int);
     method public boolean isBatteryDischargePredictionPersonalized();
     method public boolean isDeviceIdleMode();
+    method public boolean isDeviceLightIdleMode();
     method public boolean isIgnoringBatteryOptimizations(String);
     method public boolean isInteractive();
-    method public boolean isLightDeviceIdleMode();
     method public boolean isPowerSaveMode();
     method public boolean isRebootingUserspaceSupported();
     method @Deprecated public boolean isScreenOn();
@@ -31827,7 +31829,7 @@ package android.os {
     method public void removeThermalStatusListener(@NonNull android.os.PowerManager.OnThermalStatusChangedListener);
     field public static final int ACQUIRE_CAUSES_WAKEUP = 268435456; // 0x10000000
     field public static final String ACTION_DEVICE_IDLE_MODE_CHANGED = "android.os.action.DEVICE_IDLE_MODE_CHANGED";
-    field public static final String ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED = "android.os.action.LIGHT_DEVICE_IDLE_MODE_CHANGED";
+    field public static final String ACTION_DEVICE_LIGHT_IDLE_MODE_CHANGED = "android.os.action.LIGHT_DEVICE_IDLE_MODE_CHANGED";
     field public static final String ACTION_POWER_SAVE_MODE_CHANGED = "android.os.action.POWER_SAVE_MODE_CHANGED";
     field @Deprecated public static final int FULL_WAKE_LOCK = 26; // 0x1a
     field public static final int LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF = 2; // 0x2
