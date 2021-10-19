@@ -31,7 +31,7 @@ import android.view.animation.PathInterpolator;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
+import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
@@ -168,8 +168,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
             viewState.clipTopAmount = 0;
 
             if (ambientState.isExpansionChanging() && !ambientState.isOnKeyguard()) {
-                viewState.alpha = Interpolators.getNotificationScrimAlpha(
-                        ambientState.getExpansionFraction(), true /* notification */);
+                float expansion = ambientState.getExpansionFraction();
+                viewState.alpha = ShadeInterpolation.getContentAlpha(expansion);
             } else {
                 viewState.alpha = 1f - ambientState.getHideAmount();
             }

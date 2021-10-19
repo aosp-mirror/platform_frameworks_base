@@ -32,6 +32,7 @@ import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.systemui.Dumpable
 import com.android.systemui.animation.Interpolators
+import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -184,12 +185,12 @@ class NotificationShadeDepthController @Inject constructor(
         val animationRadius = MathUtils.constrain(shadeAnimation.radius,
                 blurUtils.minBlurRadius.toFloat(), blurUtils.maxBlurRadius.toFloat())
         val expansionRadius = blurUtils.blurRadiusOfRatio(
-                Interpolators.getNotificationScrimAlpha(
-                        if (shouldApplyShadeBlur()) shadeExpansion else 0f, false))
+                ShadeInterpolation.getNotificationScrimAlpha(
+                        if (shouldApplyShadeBlur()) shadeExpansion else 0f))
         var combinedBlur = (expansionRadius * INTERACTION_BLUR_FRACTION +
                 animationRadius * ANIMATION_BLUR_FRACTION)
-        val qsExpandedRatio = Interpolators.getNotificationScrimAlpha(qsPanelExpansion,
-                false /* notification */) * shadeExpansion
+        val qsExpandedRatio = ShadeInterpolation.getNotificationScrimAlpha(qsPanelExpansion) *
+                shadeExpansion
         combinedBlur = max(combinedBlur, blurUtils.blurRadiusOfRatio(qsExpandedRatio))
         combinedBlur = max(combinedBlur, blurUtils.blurRadiusOfRatio(transitionToFullShadeProgress))
         var shadeRadius = max(combinedBlur, wakeAndUnlockBlurRadius)
