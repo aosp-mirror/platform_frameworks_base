@@ -6050,7 +6050,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     boolean isSyncFinished() {
-        if (mSyncState == SYNC_STATE_WAITING_FOR_DRAW && mViewVisibility == View.GONE) {
+        if (mSyncState == SYNC_STATE_WAITING_FOR_DRAW && mViewVisibility == View.GONE
+                && !isVisibleRequested()) {
             // Don't wait for GONE windows. However, we don't alter the state in case the window
             // becomes un-gone while the syncset is still active.
             return true;
