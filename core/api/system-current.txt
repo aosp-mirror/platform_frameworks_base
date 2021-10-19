@@ -9261,6 +9261,7 @@ package android.provider {
     field public static final String NAMESPACE_MEDIA = "media";
     field public static final String NAMESPACE_MEDIA_NATIVE = "media_native";
     field public static final String NAMESPACE_NETD_NATIVE = "netd_native";
+    field public static final String NAMESPACE_NNAPI_NATIVE = "nnapi_native";
     field public static final String NAMESPACE_OTA = "ota";
     field public static final String NAMESPACE_PACKAGE_MANAGER_SERVICE = "package_manager_service";
     field public static final String NAMESPACE_PERMISSIONS = "permissions";

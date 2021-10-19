@@ -306,6 +306,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_NETD_NATIVE = "netd_native";
 
     /**
+     * Namespace for all Android NNAPI related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_NNAPI_NATIVE = "nnapi_native";
+
+    /**
      * Namespace for features related to the Package Manager Service.
      *
      * @hide
