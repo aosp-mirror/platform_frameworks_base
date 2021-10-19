@@ -4694,6 +4694,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (app != null) {
             mTaskSupervisor.onProcessActivityStateChanged(app, false /* forceBatch */);
         }
+        logAppCompatState();
     }
 
     /**
@@ -4721,7 +4722,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 ActivityTaskManagerService.LAYOUT_REASON_VISIBILITY_CHANGED);
         mTaskSupervisor.getActivityMetricsLogger().notifyVisibilityChanged(this);
         mTaskSupervisor.mAppVisibilitiesChangedSinceLastPause = true;
-        logAppCompatState();
     }
 
     @VisibleForTesting
