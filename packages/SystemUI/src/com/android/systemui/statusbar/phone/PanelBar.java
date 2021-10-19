@@ -25,7 +25,6 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
@@ -53,10 +52,17 @@ public abstract class PanelBar extends FrameLayout {
     public static final int STATE_OPENING = 1;
     public static final int STATE_OPEN = 2;
 
-    private PanelViewController mPanel;
     @Nullable private PanelStateChangeListener mPanelStateChangeListener;
     private int mState = STATE_CLOSED;
     private boolean mTracking;
+
+    /** Updates the panel state if necessary. */
+    public void updateState(@PanelState int state) {
+        if (DEBUG) LOG("update state: %d -> %d", mState, state);
+        if (mState != state) {
+            go(state);
+        }
+    }
 
     private void go(@PanelState int state) {
         if (DEBUG) LOG("go state: %d -> %d", mState, state);
@@ -97,52 +103,9 @@ public abstract class PanelBar extends FrameLayout {
         super.onFinishInflate();
     }
 
-    /** Set the PanelViewController */
-    public void setPanel(PanelViewController pv) {
-        mPanel = pv;
-        pv.setBar(this);
-    }
-
     /** Sets the listener that will be notified of panel state changes. */
     public void setPanelStateChangeListener(PanelStateChangeListener listener) {
         mPanelStateChangeListener = listener;
-    }
-
-    public boolean panelEnabled() {
-        return true;
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        // Allow subclasses to implement enable/disable semantics
-        if (!panelEnabled()) {
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                Log.v(TAG, String.format("onTouch: all panels disabled, ignoring touch at (%d,%d)",
-                        (int) event.getX(), (int) event.getY()));
-            }
-            return false;
-        }
-
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            final PanelViewController panel = mPanel;
-            if (panel == null) {
-                // panel is not there, so we'll eat the gesture
-                Log.v(TAG, String.format("onTouch: no panel for touch at (%d,%d)",
-                        (int) event.getX(), (int) event.getY()));
-                return true;
-            }
-            boolean enabled = panel.isEnabled();
-            if (DEBUG) LOG("PanelBar.onTouch: state=%d ACTION_DOWN: panel %s %s", mState, panel,
-                    (enabled ? "" : " (disabled)"));
-            if (!enabled) {
-                // panel is disabled, so we'll eat the gesture
-                Log.v(TAG, String.format(
-                        "onTouch: panel (%s) is disabled, ignoring touch at (%d,%d)",
-                        panel, (int) event.getX(), (int) event.getY()));
-                return true;
-            }
-        }
-        return mPanel == null || mPanel.getView().dispatchTouchEvent(event);
     }
 
     /**
@@ -162,7 +125,6 @@ public abstract class PanelBar extends FrameLayout {
         if (expanded) {
             if (mState == STATE_CLOSED) {
                 go(STATE_OPENING);
-                onPanelPeeked();
             }
             fullyClosed = false;
             fullyOpened = frac >= 1f;
@@ -171,42 +133,14 @@ public abstract class PanelBar extends FrameLayout {
             go(STATE_OPEN);
         } else if (fullyClosed && !mTracking && mState != STATE_CLOSED) {
             go(STATE_CLOSED);
-            onPanelCollapsed();
         }
 
         if (SPEW) LOG("panelExpansionChanged: end state=%d [%s%s ]", mState,
                 fullyOpened?" fullyOpened":"", fullyClosed?" fullyClosed":"");
     }
 
-    public void collapsePanel(boolean animate, boolean delayed, float speedUpFactor) {
-        boolean waiting = false;
-        PanelViewController pv = mPanel;
-        if (animate && !pv.isFullyCollapsed()) {
-            pv.collapse(delayed, speedUpFactor);
-            waiting = true;
-        } else {
-            pv.resetViews(false /* animate */);
-            pv.setExpandedFraction(0); // just in case
-        }
-        if (DEBUG) LOG("collapsePanel: animate=%s waiting=%s", animate, waiting);
-        if (!waiting && mState != STATE_CLOSED) {
-            // it's possible that nothing animated, so we replicate the termination
-            // conditions of panelExpansionChanged here
-            go(STATE_CLOSED);
-            onPanelCollapsed();
-        }
-    }
-
-    public void onPanelPeeked() {
-        if (DEBUG) LOG("onPanelPeeked");
-    }
-
     public boolean isClosed() {
         return mState == STATE_CLOSED;
-    }
-
-    public void onPanelCollapsed() {
-        if (DEBUG) LOG("onPanelCollapsed");
     }
 
     public void onTrackingStarted() {
@@ -215,14 +149,6 @@ public abstract class PanelBar extends FrameLayout {
 
     public void onTrackingStopped(boolean expand) {
         mTracking = false;
-    }
-
-    public void onExpandingFinished() {
-        if (DEBUG) LOG("onExpandingFinished");
-    }
-
-    public void onClosingFinished() {
-
     }
 
     /** An interface that will be notified of panel state changes. */

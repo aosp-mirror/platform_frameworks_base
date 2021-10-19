@@ -77,6 +77,7 @@ import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityRecord.State.STARTED;
 import static com.android.server.wm.ActivityRecord.State.STOPPED;
 import static com.android.server.wm.ActivityRecord.State.STOPPING;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_INVISIBLE;
 import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_VISIBLE;
 import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
@@ -3026,6 +3027,10 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Because the app is waiting for transition, it should not hide the surface.
         assertTrue(app.mActivityRecord.isSurfaceShowing());
+
+        // Ensure onAnimationFinished will callback when the closing animation is finished.
+        verify(app.mActivityRecord).onAnimationFinished(eq(ANIMATION_TYPE_APP_TRANSITION),
+                eq(null));
     }
 
     private void assertHasStartingWindow(ActivityRecord atoken) {

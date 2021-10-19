@@ -79,6 +79,7 @@ import androidx.lifecycle.Observer;
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor.BiometricAuthenticated;
@@ -172,6 +173,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private FeatureFlags mFeatureFlags;
     @Mock
     private InteractionJankMonitor mInteractionJankMonitor;
+    @Mock
+    private LatencyTracker mLatencyTracker;
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStatusBarStateListenerCaptor;
     // Direct executor
@@ -741,7 +744,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
             public void sendResult(Bundle data) {} // do nothing
         };
         mKeyguardUpdateMonitor.handleUserSwitchComplete(10 /* user */);
-        verify(mInteractionJankMonitor).end(eq(InteractionJankMonitor.CUJ_USER_SWITCH));
+        verify(mInteractionJankMonitor).end(InteractionJankMonitor.CUJ_USER_SWITCH);
+        verify(mLatencyTracker).onActionEnd(LatencyTracker.ACTION_USER_SWITCH);
     }
 
     @Test
@@ -1059,7 +1063,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                     mRingerModeTracker, mBackgroundExecutor,
                     mStatusBarStateController, mLockPatternUtils,
                     mAuthController, mTelephonyListenerManager, mFeatureFlags,
-                    mInteractionJankMonitor);
+                    mInteractionJankMonitor, mLatencyTracker);
             setStrongAuthTracker(KeyguardUpdateMonitorTest.this.mStrongAuthTracker);
         }
 

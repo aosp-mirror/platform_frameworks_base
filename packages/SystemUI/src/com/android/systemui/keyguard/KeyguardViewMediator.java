@@ -673,13 +673,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                 }
             }
         }
-
-        @Override
-        public void onHasLockscreenWallpaperChanged(boolean hasLockscreenWallpaper) {
-            synchronized (KeyguardViewMediator.this) {
-                notifyHasLockscreenWallpaperChanged(hasLockscreenWallpaper);
-            }
-        }
     };
 
     ViewMediatorCallback mViewMediatorCallback = new ViewMediatorCallback() {
@@ -2899,21 +2892,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
         }
     }
 
-    private void notifyHasLockscreenWallpaperChanged(boolean hasLockscreenWallpaper) {
-        int size = mKeyguardStateCallbacks.size();
-        for (int i = size - 1; i >= 0; i--) {
-            try {
-                mKeyguardStateCallbacks.get(i).onHasLockscreenWallpaperChanged(
-                        hasLockscreenWallpaper);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Failed to call onHasLockscreenWallpaperChanged", e);
-                if (e instanceof DeadObjectException) {
-                    mKeyguardStateCallbacks.remove(i);
-                }
-            }
-        }
-    }
-
     public void addStateMonitorCallback(IKeyguardStateCallback callback) {
         synchronized (this) {
             mKeyguardStateCallbacks.add(callback);
@@ -2923,7 +2901,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                 callback.onInputRestrictedStateChanged(mInputRestricted);
                 callback.onTrustedChanged(mUpdateMonitor.getUserHasTrust(
                         KeyguardUpdateMonitor.getCurrentUser()));
-                callback.onHasLockscreenWallpaperChanged(mUpdateMonitor.hasLockscreenWallpaper());
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to call to IKeyguardStateCallback", e);
             }
