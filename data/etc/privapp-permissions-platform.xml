@@ -501,6 +501,8 @@ applications that come with the platform
         <permission name="android.permission.UPDATE_DEVICE_STATS" />
         <!-- Permission required for GTS test - PendingSystemUpdateTest -->
         <permission name="android.permission.NOTIFY_PENDING_SYSTEM_UPDATE" />
+        <!-- Permission required for GTS test - GtsAssistIntentTestCases -->
+        <permission name="android.permission.MANAGE_VOICE_KEYPHRASES" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

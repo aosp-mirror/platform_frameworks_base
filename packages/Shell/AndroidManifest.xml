@@ -583,6 +583,9 @@
     <uses-permission android:name="android.permission.MANAGE_VIRTUAL_MACHINE" />
     <uses-permission android:name="android.permission.DEBUG_VIRTUAL_MACHINE" />
 
+    <!-- Permission required to run GtsAssistantTestCases -->
+    <uses-permission android:name="android.permission.MANAGE_VOICE_KEYPHRASES" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"
