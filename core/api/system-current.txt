@@ -2292,7 +2292,7 @@ package android.bluetooth.le {
 package android.companion {
 
   public final class AssociationRequest implements android.os.Parcelable {
-    field public static final String DEVICE_PROFILE_APP_STREAMING = "android.app.role.COMPANION_DEVICE_APP_STREAMING";
+    field @RequiresPermission(android.Manifest.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING) public static final String DEVICE_PROFILE_APP_STREAMING = "android.app.role.COMPANION_DEVICE_APP_STREAMING";
   }
 
   public final class CompanionDeviceManager {
