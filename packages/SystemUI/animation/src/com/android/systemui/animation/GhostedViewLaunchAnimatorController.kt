@@ -209,8 +209,13 @@ open class GhostedViewLaunchAnimatorController(
         val heightRatio = state.height.toFloat() / ghostedViewState.height
         val scale = min(widthRatio, heightRatio)
 
+        if (ghostedView.parent is ViewGroup) {
+            // Recalculate the matrix in case the ghosted view moved. We ensure that the ghosted
+            // view is still attached to a ViewGroup, otherwise calculateMatrix will throw.
+            GhostView.calculateMatrix(ghostedView, launchContainer, ghostViewMatrix)
+        }
+
         launchContainer.getLocationOnScreen(launchContainerLocation)
-        GhostView.calculateMatrix(ghostedView, launchContainer, ghostViewMatrix)
         ghostViewMatrix.postScale(
             scale, scale,
             ghostedViewState.centerX - launchContainerLocation[0],
