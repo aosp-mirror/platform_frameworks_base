@@ -1313,9 +1313,23 @@ public class AppOpsManager {
     public static final int OP_RECORD_INCOMING_PHONE_AUDIO =
             AppProtoEnums.APP_OP_RECORD_INCOMING_PHONE_AUDIO;
 
+    /**
+     * VPN app establishes a connection through the VpnService API.
+     *
+     * @hide
+     */
+    public static final int OP_ESTABLISH_VPN_SERVICE = AppProtoEnums.APP_OP_ESTABLISH_VPN_SERVICE;
+
+    /**
+     * VPN app establishes a connection through the VpnManager API.
+     *
+     * @hide
+     */
+    public static final int OP_ESTABLISH_VPN_MANAGER = AppProtoEnums.APP_OP_ESTABLISH_VPN_MANAGER;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 117;
+    public static final int _NUM_OP = 119;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1754,6 +1768,22 @@ public class AppOpsManager {
     public static final String OPSTR_RECORD_INCOMING_PHONE_AUDIO =
             "android:record_incoming_phone_audio";
 
+    /**
+     * VPN app establishes a connection through the VpnService API.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String OPSTR_ESTABLISH_VPN_SERVICE = "android:establish_vpn_service";
+
+    /**
+     * VPN app establishes a connection through the VpnManager API.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String OPSTR_ESTABLISH_VPN_MANAGER = "android:establish_vpn_manager";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -1970,6 +2000,8 @@ public class AppOpsManager {
             OP_BLUETOOTH_ADVERTISE,             // OP_BLUETOOTH_ADVERTISE
             OP_RECORD_INCOMING_PHONE_AUDIO,     // OP_RECORD_INCOMING_PHONE_AUDIO
             OP_NEARBY_WIFI_DEVICES,             // OP_NEARBY_WIFI_DEVICES
+            OP_ESTABLISH_VPN_SERVICE,           // OP_ESTABLISH_VPN_SERVICE
+            OP_ESTABLISH_VPN_MANAGER,           // OP_ESTABLISH_VPN_MANAGER
     };
 
     /**
@@ -2093,6 +2125,8 @@ public class AppOpsManager {
             OPSTR_BLUETOOTH_ADVERTISE,
             OPSTR_RECORD_INCOMING_PHONE_AUDIO,
             OPSTR_NEARBY_WIFI_DEVICES,
+            OPSTR_ESTABLISH_VPN_SERVICE,
+            OPSTR_ESTABLISH_VPN_MANAGER,
     };
 
     /**
@@ -2216,7 +2250,9 @@ public class AppOpsManager {
             "ACTIVITY_RECOGNITION_SOURCE",
             "BLUETOOTH_ADVERTISE",
             "RECORD_INCOMING_PHONE_AUDIO",
-            "NEARBY_WIFI_DEVICES"
+            "NEARBY_WIFI_DEVICES",
+            "ESTABLISH_VPN_SERVICE",
+            "ESTABLISH_VPN_MANAGER",
     };
 
     /**
@@ -2342,6 +2378,8 @@ public class AppOpsManager {
             Manifest.permission.BLUETOOTH_ADVERTISE,
             null, // no permission for OP_RECORD_INCOMING_PHONE_AUDIO,
             Manifest.permission.NEARBY_WIFI_DEVICES,
+            null, // no permission for OP_ESTABLISH_VPN_SERVICE
+            null, // no permission for OP_ESTABLISH_VPN_MANAGER
     };
 
     /**
@@ -2467,6 +2505,8 @@ public class AppOpsManager {
             null, // BLUETOOTH_ADVERTISE
             null, // RECORD_INCOMING_PHONE_AUDIO
             null, // NEARBY_WIFI_DEVICES
+            null, // ESTABLISH_VPN_SERVICE
+            null, // ESTABLISH_VPN_MANAGER
     };
 
     /**
@@ -2591,6 +2631,8 @@ public class AppOpsManager {
             null, // BLUETOOTH_ADVERTISE
             null, // RECORD_INCOMING_PHONE_AUDIO
             null, // NEARBY_WIFI_DEVICES
+            null, // ESTABLISH_VPN_SERVICE
+            null, // ESTABLISH_VPN_MANAGER
     };
 
     /**
@@ -2714,6 +2756,8 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED, // BLUETOOTH_ADVERTISE
             AppOpsManager.MODE_ALLOWED, // RECORD_INCOMING_PHONE_AUDIO
             AppOpsManager.MODE_ALLOWED, // NEARBY_WIFI_DEVICES
+            AppOpsManager.MODE_ALLOWED, // ESTABLISH_VPN_SERVICE
+            AppOpsManager.MODE_ALLOWED, // ESTABLISH_VPN_MANAGER
     };
 
     /**
@@ -2841,6 +2885,8 @@ public class AppOpsManager {
             false, // BLUETOOTH_ADVERTISE
             false, // RECORD_INCOMING_PHONE_AUDIO
             false, // NEARBY_WIFI_DEVICES
+            false, // OP_ESTABLISH_VPN_SERVICE
+            false, // OP_ESTABLISH_VPN_MANAGER
     };
 
     /**

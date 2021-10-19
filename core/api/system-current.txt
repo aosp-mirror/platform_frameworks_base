@@ -475,6 +475,8 @@ package android.app {
     field public static final String OPSTR_AUTO_REVOKE_PERMISSIONS_IF_UNUSED = "android:auto_revoke_permissions_if_unused";
     field public static final String OPSTR_BIND_ACCESSIBILITY_SERVICE = "android:bind_accessibility_service";
     field public static final String OPSTR_CHANGE_WIFI_STATE = "android:change_wifi_state";
+    field public static final String OPSTR_ESTABLISH_VPN_MANAGER = "android:establish_vpn_manager";
+    field public static final String OPSTR_ESTABLISH_VPN_SERVICE = "android:establish_vpn_service";
     field public static final String OPSTR_GET_ACCOUNTS = "android:get_accounts";
     field public static final String OPSTR_GPS = "android:gps";
     field public static final String OPSTR_INSTANT_APP_START_FOREGROUND = "android:instant_app_start_foreground";
