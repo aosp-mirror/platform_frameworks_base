@@ -281,7 +281,7 @@ public final class CompanionDeviceManager {
      * Wi-Fi MAC address for a given user.
      *
      * <p>This is a system API protected by the
-     * {@link andrioid.Manifest.permission#MANAGE_COMPANION_DEVICES} permission, that’s currently
+     * {@link android.Manifest.permission#MANAGE_COMPANION_DEVICES} permission, that’s currently
      * called by the Android Wi-Fi stack to determine whether user consent is required to connect
      * to a Wi-Fi network. Devices that have been pre-registered as companion devices will not
      * require user consent to connect.</p>
