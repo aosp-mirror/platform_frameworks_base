@@ -24,7 +24,7 @@ import android.view.View
 import android.view.ViewRootImpl
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.Interpolators
+import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.phone.BiometricUnlockController
@@ -208,7 +208,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
         notificationShadeDepthController.onPanelExpansionChanged(1f, tracking = false)
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
         verify(wallpaperController).setNotificationShadeZoom(
-                eq(Interpolators.getNotificationScrimAlpha(0.25f, false /* notifications */)))
+                eq(ShadeInterpolation.getNotificationScrimAlpha(0.25f)))
     }
 
     @Test

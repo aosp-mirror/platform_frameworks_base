@@ -47,7 +47,7 @@ import com.android.settingslib.Utils;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
+import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
@@ -579,8 +579,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         if (isNaN(expansionFraction)) {
             return;
         }
-        expansionFraction = Interpolators
-                .getNotificationScrimAlpha(expansionFraction, false /* notification */);
+        expansionFraction = ShadeInterpolation.getNotificationScrimAlpha(expansionFraction);
         boolean qsBottomVisible = qsPanelBottomY > 0;
         if (mQsExpansion != expansionFraction || mQsBottomVisible != qsBottomVisible) {
             mQsExpansion = expansionFraction;
@@ -915,8 +914,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     }
 
     private float getInterpolatedFraction() {
-        return Interpolators.getNotificationScrimAlpha(
-                mPanelExpansionFraction, false /* notification */);
+        return ShadeInterpolation.getNotificationScrimAlpha(mPanelExpansionFraction);
     }
 
     private void setScrimAlpha(ScrimView scrim, float alpha) {
