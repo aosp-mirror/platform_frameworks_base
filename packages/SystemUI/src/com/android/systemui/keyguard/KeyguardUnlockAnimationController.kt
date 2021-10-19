@@ -62,7 +62,7 @@ const val SURFACE_BEHIND_SCALE_PIVOT_Y = 0.66f
  * The dismiss amount is the inverse of the notification panel expansion, which decreases as the
  * lock screen is swiped away.
  */
-const val DISMISS_AMOUNT_SHOW_SURFACE_THRESHOLD = 0.1f
+const val DISMISS_AMOUNT_SHOW_SURFACE_THRESHOLD = 0.25f
 
 /**
  * Dismiss amount at which to complete the keyguard exit animation and hide the keyguard.
@@ -70,7 +70,7 @@ const val DISMISS_AMOUNT_SHOW_SURFACE_THRESHOLD = 0.1f
  * The dismiss amount is the inverse of the notification panel expansion, which decreases as the
  * lock screen is swiped away.
  */
-const val DISMISS_AMOUNT_EXIT_KEYGUARD_THRESHOLD = 0.3f
+const val DISMISS_AMOUNT_EXIT_KEYGUARD_THRESHOLD = 0.4f
 
 /**
  * Initiates, controls, and ends the keyguard unlock animation.
