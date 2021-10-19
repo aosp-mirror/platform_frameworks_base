@@ -4973,7 +4973,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     private void postApplyAnimation(boolean visible) {
         final boolean usingShellTransitions = mTransitionController.isShellTransitionsEnabled();
-        final boolean delayed = isAnimating(TRANSITION | PARENTS | CHILDREN,
+        final boolean delayed = isAnimating(PARENTS | CHILDREN,
                 ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_WINDOW_ANIMATION
                         | ANIMATION_TYPE_RECENTS);
         if (!delayed && !usingShellTransitions) {
