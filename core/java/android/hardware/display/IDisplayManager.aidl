@@ -164,7 +164,7 @@ interface IDisplayManager {
     int getPreferredWideGamutColorSpaceId();
 
     // Sets the user preferred display mode.
-    // Requires WRITE_SECURE_SETTINGS permission.
+    // Requires MODIFY_USER_PREFERRED_DISPLAY_MODE permission.
     void setUserPreferredDisplayMode(in Mode mode);
     Mode getUserPreferredDisplayMode();
 
