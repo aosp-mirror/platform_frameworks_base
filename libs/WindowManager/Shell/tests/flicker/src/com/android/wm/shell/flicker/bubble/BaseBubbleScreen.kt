@@ -26,6 +26,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
+import com.android.server.wm.flicker.Flicker
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
@@ -47,12 +48,8 @@ abstract class BaseBubbleScreen(protected val testSpec: FlickerTestParameter) {
     protected val notifyManager = INotificationManager.Stub.asInterface(
             ServiceManager.getService(Context.NOTIFICATION_SERVICE))
 
-    protected val packageManager = context.getPackageManager()
-    protected val uid = packageManager.getApplicationInfo(
+    protected val uid = context.packageManager.getApplicationInfo(
             testApp.component.packageName, 0).uid
-
-    protected lateinit var addBubbleBtn: UiObject2
-    protected lateinit var cancelAllBtn: UiObject2
 
     protected abstract val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
 
@@ -67,10 +64,8 @@ abstract class BaseBubbleScreen(protected val testSpec: FlickerTestParameter) {
                     notifyManager.setBubblesAllowed(testApp.component.packageName,
                             uid, NotificationManager.BUBBLE_PREFERENCE_ALL)
                     testApp.launchViaIntent(wmHelper)
-                    addBubbleBtn = device.wait(Until.findObject(
-                            By.text("Add Bubble")), FIND_OBJECT_TIMEOUT)
-                    cancelAllBtn = device.wait(Until.findObject(
-                            By.text("Cancel All Bubble")), FIND_OBJECT_TIMEOUT)
+                    waitAndGetAddBubbleBtn()
+                    waitAndGetCancelAllBtn()
                 }
             }
 
@@ -83,6 +78,11 @@ abstract class BaseBubbleScreen(protected val testSpec: FlickerTestParameter) {
             extraSpec(this, configuration)
         }
     }
+
+    protected fun Flicker.waitAndGetAddBubbleBtn(): UiObject2? = device.wait(Until.findObject(
+            By.text("Add Bubble")), FIND_OBJECT_TIMEOUT)
+    protected fun Flicker.waitAndGetCancelAllBtn(): UiObject2? = device.wait(Until.findObject(
+            By.text("Cancel All Bubble")), FIND_OBJECT_TIMEOUT)
 
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
@@ -102,7 +102,6 @@ abstract class BaseBubbleScreen(protected val testSpec: FlickerTestParameter) {
         }
 
         const val FIND_OBJECT_TIMEOUT = 2000L
-        const val WINDOW_UPDAT_TIMEOUT = 2000L
         const val SYSTEM_UI_PACKAGE = SYSTEMUI_PACKAGE
         const val BUBBLE_RES_NAME = "bubble_view"
     }

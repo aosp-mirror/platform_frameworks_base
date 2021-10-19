@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.bubble
 
-import android.os.SystemClock
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.By
@@ -44,31 +43,33 @@ import org.junit.runners.Parameterized
 class LaunchBubbleFromLockScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(testSpec) {
 
     override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = buildTransition() {
+        get() = buildTransition {
             setup {
                 eachRun {
+                    val addBubbleBtn = waitAndGetAddBubbleBtn()
                     addBubbleBtn?.click() ?: error("Bubble widget not found")
-                    device.sleep()
-                    SystemClock.sleep(2000)
-                    device.wakeUp()
+                    wmHelper.waitFor("noAppWindowsOnTop") {
+                        it.wmState.topVisibleAppWindow.isEmpty()
+                    }
                 }
             }
             transitions {
                 val notification = device.wait(Until.findObject(
                     By.text("BubbleChat")), FIND_OBJECT_TIMEOUT)
                 notification?.click() ?: error("Notification not found")
-                instrumentation.getUiAutomation().syncInputTransactions()
+                instrumentation.uiAutomation.syncInputTransactions()
                 val showBubble = device.wait(Until.findObject(
                         By.res("com.android.systemui", "bubble_view")), FIND_OBJECT_TIMEOUT)
                 showBubble?.click() ?: error("Bubble notify not found")
-                instrumentation.getUiAutomation().syncInputTransactions()
+                instrumentation.uiAutomation.syncInputTransactions()
+                val cancelAllBtn = waitAndGetCancelAllBtn()
                 cancelAllBtn?.click() ?: error("Cancel widget not found")
             }
         }
 
     @FlakyTest
     @Test
-    fun testAppisVisibleAtEnd() {
+    fun testAppIsVisibleAtEnd() {
         testSpec.assertLayersEnd {
             this.isVisible(testApp.component)
         }
