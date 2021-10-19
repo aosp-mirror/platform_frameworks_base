@@ -26,7 +26,6 @@ import android.view.WindowManager;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.launcher3.icons.IconProvider;
 import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.dagger.WMSingleton;
 import com.android.wm.shell.RootDisplayAreaOrganizer;
@@ -168,12 +167,6 @@ public abstract class WMShellBaseModule {
     static SystemWindows provideSystemWindows(DisplayController displayController,
             IWindowManager wmService) {
         return new SystemWindows(displayController, wmService);
-    }
-
-    @WMSingleton
-    @Provides
-    static IconProvider provideIconProvider(Context context) {
-        return new IconProvider(context);
     }
 
     // We currently dedupe multiple messages, so we use the shell main handler directly
@@ -511,10 +504,9 @@ public abstract class WMShellBaseModule {
     @Provides
     static StartingWindowController provideStartingWindowController(Context context,
             @ShellSplashscreenThread ShellExecutor splashScreenExecutor,
-            StartingWindowTypeAlgorithm startingWindowTypeAlgorithm, IconProvider iconProvider,
-            TransactionPool pool) {
+            StartingWindowTypeAlgorithm startingWindowTypeAlgorithm, TransactionPool pool) {
         return new StartingWindowController(context, splashScreenExecutor,
-                startingWindowTypeAlgorithm, iconProvider, pool);
+                startingWindowTypeAlgorithm, pool);
     }
 
     //
