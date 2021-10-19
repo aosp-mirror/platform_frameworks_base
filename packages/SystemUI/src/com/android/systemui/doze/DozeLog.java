@@ -26,6 +26,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.statusbar.policy.DevicePostureController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -268,6 +269,16 @@ public class DozeLog implements Dumpable {
     }
 
     /**
+     * Appends doze updates due to a posture change.
+     */
+    public void tracePostureChanged(
+            @DevicePostureController.DevicePostureInt int posture,
+            String partUpdated
+    ) {
+        mLogger.logPostureChanged(posture, partUpdated);
+    }
+
+    /**
      * Appends pulse dropped event to logs
      */
     public void tracePulseDropped(boolean pulsePending, DozeMachine.State state, boolean blocked) {
@@ -391,8 +402,8 @@ public class DozeLog implements Dumpable {
             case REASON_SENSOR_DOUBLE_TAP: return "doubletap";
             case PULSE_REASON_SENSOR_LONG_PRESS: return "longpress";
             case PULSE_REASON_DOCKING: return "docking";
-            case PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN: return "reach-wakelockscreen";
-            case REASON_SENSOR_WAKE_UP: return "presence-wakeup";
+            case PULSE_REASON_SENSOR_WAKE_REACH: return "reach-wakelockscreen";
+            case REASON_SENSOR_WAKE_UP_PRESENCE: return "presence-wakeup";
             case REASON_SENSOR_TAP: return "tap";
             case REASON_SENSOR_UDFPS_LONG_PRESS: return "udfps";
             case REASON_SENSOR_QUICK_PICKUP: return "quickPickup";
@@ -403,8 +414,8 @@ public class DozeLog implements Dumpable {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({PULSE_REASON_NONE, PULSE_REASON_INTENT, PULSE_REASON_NOTIFICATION,
             PULSE_REASON_SENSOR_SIGMOTION, REASON_SENSOR_PICKUP, REASON_SENSOR_DOUBLE_TAP,
-            PULSE_REASON_SENSOR_LONG_PRESS, PULSE_REASON_DOCKING, REASON_SENSOR_WAKE_UP,
-            PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN, REASON_SENSOR_TAP,
+            PULSE_REASON_SENSOR_LONG_PRESS, PULSE_REASON_DOCKING, REASON_SENSOR_WAKE_UP_PRESENCE,
+            PULSE_REASON_SENSOR_WAKE_REACH, REASON_SENSOR_TAP,
             REASON_SENSOR_UDFPS_LONG_PRESS, REASON_SENSOR_QUICK_PICKUP})
     public @interface Reason {}
     public static final int PULSE_REASON_NONE = -1;
@@ -415,8 +426,8 @@ public class DozeLog implements Dumpable {
     public static final int REASON_SENSOR_DOUBLE_TAP = 4;
     public static final int PULSE_REASON_SENSOR_LONG_PRESS = 5;
     public static final int PULSE_REASON_DOCKING = 6;
-    public static final int REASON_SENSOR_WAKE_UP = 7;
-    public static final int PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN = 8;
+    public static final int REASON_SENSOR_WAKE_UP_PRESENCE = 7;
+    public static final int PULSE_REASON_SENSOR_WAKE_REACH = 8;
     public static final int REASON_SENSOR_TAP = 9;
     public static final int REASON_SENSOR_UDFPS_LONG_PRESS = 10;
     public static final int REASON_SENSOR_QUICK_PICKUP = 11;

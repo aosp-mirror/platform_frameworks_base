@@ -321,9 +321,9 @@ public class JobSchedulerService extends com.android.server.SystemService
     private final long[] mLastCompletedJobTimeElapsed = new long[NUM_COMPLETED_JOB_HISTORY];
 
     /**
-     * A mapping of which uids are currently in the foreground to their effective priority.
+     * A mapping of which uids are currently in the foreground to their effective bias.
      */
-    final SparseIntArray mUidPriorityOverride = new SparseIntArray();
+    final SparseIntArray mUidBiasOverride = new SparseIntArray();
 
     /**
      * Which uids are currently performing backups, so we shouldn't allow their jobs to run.
@@ -1431,27 +1431,26 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     void updateUidState(int uid, int procState) {
         synchronized (mLock) {
-            final int prevPriority = mUidPriorityOverride.get(uid, JobInfo.PRIORITY_DEFAULT);
+            final int prevBias = mUidBiasOverride.get(uid, JobInfo.BIAS_DEFAULT);
             if (procState == ActivityManager.PROCESS_STATE_TOP) {
                 // Only use this if we are exactly the top app.  All others can live
-                // with just the foreground priority.  This means that persistent processes
-                // can never be the top app priority...  that is fine.
-                mUidPriorityOverride.put(uid, JobInfo.PRIORITY_TOP_APP);
+                // with just the foreground bias.  This means that persistent processes
+                // can never have the top app bias...  that is fine.
+                mUidBiasOverride.put(uid, JobInfo.BIAS_TOP_APP);
             } else if (procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
-                mUidPriorityOverride.put(uid, JobInfo.PRIORITY_FOREGROUND_SERVICE);
+                mUidBiasOverride.put(uid, JobInfo.BIAS_FOREGROUND_SERVICE);
             } else if (procState <= ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE) {
-                mUidPriorityOverride.put(uid, JobInfo.PRIORITY_BOUND_FOREGROUND_SERVICE);
+                mUidBiasOverride.put(uid, JobInfo.BIAS_BOUND_FOREGROUND_SERVICE);
             } else {
-                mUidPriorityOverride.delete(uid);
+                mUidBiasOverride.delete(uid);
             }
-            final int newPriority = mUidPriorityOverride.get(uid, JobInfo.PRIORITY_DEFAULT);
-            if (prevPriority != newPriority) {
+            final int newBias = mUidBiasOverride.get(uid, JobInfo.BIAS_DEFAULT);
+            if (prevBias != newBias) {
                 if (DEBUG) {
-                    Slog.d(TAG, "UID " + uid + " priority changed from " + prevPriority
-                            + " to " + newPriority);
+                    Slog.d(TAG, "UID " + uid + " bias changed from " + prevBias + " to " + newBias);
                 }
                 for (int c = 0; c < mControllers.size(); ++c) {
-                    mControllers.get(c).onUidPriorityChangedLocked(uid, newPriority);
+                    mControllers.get(c).onUidBiasChangedLocked(uid, newBias);
                 }
             }
         }
@@ -2202,17 +2201,17 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     /**
      * Check if a job is restricted by any of the declared {@link JobRestriction}s.
-     * Note, that the jobs with {@link JobInfo#PRIORITY_FOREGROUND_APP} priority or higher may not
+     * Note, that the jobs with {@link JobInfo#BIAS_FOREGROUND_SERVICE} bias or higher may not
      * be restricted, thus we won't even perform the check, but simply return null early.
      *
      * @param job to be checked
      * @return the first {@link JobRestriction} restricting the given job that has been found; null
-     * - if passes all the restrictions or has priority {@link JobInfo#PRIORITY_FOREGROUND_APP}
+     * - if passes all the restrictions or has {@link JobInfo#BIAS_FOREGROUND_SERVICE} bias
      * or higher.
      */
     private JobRestriction checkIfRestricted(JobStatus job) {
-        if (evaluateJobPriorityLocked(job) >= JobInfo.PRIORITY_FOREGROUND_APP) {
-            // Jobs with PRIORITY_FOREGROUND_APP or higher should not be restricted
+        if (evaluateJobBiasLocked(job) >= JobInfo.BIAS_FOREGROUND_SERVICE) {
+            // Jobs with BIAS_FOREGROUND_SERVICE or higher should not be restricted
             return null;
         }
         for (int i = mJobRestrictions.size() - 1; i >= 0; i--) {
@@ -2683,28 +2682,28 @@ public class JobSchedulerService extends com.android.server.SystemService
         reportActiveLocked();
     }
 
-    private int adjustJobPriority(int curPriority, JobStatus job) {
-        if (curPriority < JobInfo.PRIORITY_TOP_APP) {
+    private int adjustJobBias(int curBias, JobStatus job) {
+        if (curBias < JobInfo.BIAS_TOP_APP) {
             float factor = mJobPackageTracker.getLoadFactor(job);
             if (factor >= mConstants.HEAVY_USE_FACTOR) {
-                curPriority += JobInfo.PRIORITY_ADJ_ALWAYS_RUNNING;
+                curBias += JobInfo.BIAS_ADJ_ALWAYS_RUNNING;
             } else if (factor >= mConstants.MODERATE_USE_FACTOR) {
-                curPriority += JobInfo.PRIORITY_ADJ_OFTEN_RUNNING;
+                curBias += JobInfo.BIAS_ADJ_OFTEN_RUNNING;
             }
         }
-        return curPriority;
+        return curBias;
     }
 
-    int evaluateJobPriorityLocked(JobStatus job) {
-        int priority = job.getPriority();
-        if (priority >= JobInfo.PRIORITY_BOUND_FOREGROUND_SERVICE) {
-            return adjustJobPriority(priority, job);
+    int evaluateJobBiasLocked(JobStatus job) {
+        int bias = job.getBias();
+        if (bias >= JobInfo.BIAS_BOUND_FOREGROUND_SERVICE) {
+            return adjustJobBias(bias, job);
         }
-        int override = mUidPriorityOverride.get(job.getSourceUid(), 0);
+        int override = mUidBiasOverride.get(job.getSourceUid(), 0);
         if (override != 0) {
-            return adjustJobPriority(override, job);
+            return adjustJobBias(override, job);
         }
-        return adjustJobPriority(priority, job);
+        return adjustJobBias(bias, job);
     }
 
     final class LocalService implements JobSchedulerInternal {
@@ -3576,17 +3575,17 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
 
             boolean overridePrinted = false;
-            for (int i = 0; i < mUidPriorityOverride.size(); i++) {
-                int uid = mUidPriorityOverride.keyAt(i);
+            for (int i = 0; i < mUidBiasOverride.size(); i++) {
+                int uid = mUidBiasOverride.keyAt(i);
                 if (filterAppId == -1 || filterAppId == UserHandle.getAppId(uid)) {
                     if (!overridePrinted) {
                         overridePrinted = true;
                         pw.println();
-                        pw.println("Uid priority overrides:");
+                        pw.println("Uid bias overrides:");
                         pw.increaseIndent();
                     }
                     pw.print(UserHandle.formatUid(uid));
-                    pw.print(": "); pw.println(mUidPriorityOverride.valueAt(i));
+                    pw.print(": "); pw.println(mUidBiasOverride.valueAt(i));
                 }
             }
             if (overridePrinted) {
@@ -3657,9 +3656,9 @@ public class JobSchedulerService extends com.android.server.SystemService
 
                 pw.increaseIndent();
                 job.dump(pw, false, nowElapsed);
-                int priority = evaluateJobPriorityLocked(job);
-                pw.print("Evaluated priority: ");
-                pw.println(JobInfo.getPriorityString(priority));
+                int bias = evaluateJobBiasLocked(job);
+                pw.print("Evaluated bias: ");
+                pw.println(JobInfo.getBiasString(bias));
 
                 pw.print("Tag: "); pw.println(job.getTag());
                 pw.print("Enq: ");
@@ -3693,8 +3692,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     job.dump(pw, false, nowElapsed);
                     pw.decreaseIndent();
 
-                    pw.print("Evaluated priority: ");
-                    pw.println(JobInfo.getPriorityString(job.lastEvaluatedPriority));
+                    pw.print("Evaluated bias: ");
+                    pw.println(JobInfo.getBiasString(job.lastEvaluatedBias));
 
                     pw.print("Active at ");
                     TimeUtils.formatDuration(job.madeActive - nowUptime, pw);
@@ -3832,13 +3831,13 @@ public class JobSchedulerService extends com.android.server.SystemService
                 controller.dumpControllerStateLocked(
                         proto, JobSchedulerServiceDumpProto.CONTROLLERS, predicate);
             }
-            for (int i = 0; i < mUidPriorityOverride.size(); i++) {
-                int uid = mUidPriorityOverride.keyAt(i);
+            for (int i = 0; i < mUidBiasOverride.size(); i++) {
+                int uid = mUidBiasOverride.keyAt(i);
                 if (filterAppId == -1 || filterAppId == UserHandle.getAppId(uid)) {
                     long pToken = proto.start(JobSchedulerServiceDumpProto.PRIORITY_OVERRIDES);
                     proto.write(JobSchedulerServiceDumpProto.PriorityOverride.UID, uid);
                     proto.write(JobSchedulerServiceDumpProto.PriorityOverride.OVERRIDE_VALUE,
-                            mUidPriorityOverride.valueAt(i));
+                            mUidBiasOverride.valueAt(i));
                     proto.end(pToken);
                 }
             }
@@ -3859,7 +3858,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
                 job.writeToShortProto(proto, PendingJob.INFO);
                 job.dump(proto, PendingJob.DUMP, false, nowElapsed);
-                proto.write(PendingJob.EVALUATED_PRIORITY, evaluateJobPriorityLocked(job));
+                proto.write(PendingJob.EVALUATED_PRIORITY, evaluateJobBiasLocked(job));
                 proto.write(PendingJob.PENDING_DURATION_MS, nowUptime - job.madePending);
 
                 proto.end(pjToken);
@@ -3892,7 +3891,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     job.dump(proto, ActiveJob.RunningJob.DUMP, false, nowElapsed);
 
                     proto.write(ActiveJob.RunningJob.EVALUATED_PRIORITY,
-                            evaluateJobPriorityLocked(job));
+                            evaluateJobBiasLocked(job));
 
                     proto.write(ActiveJob.RunningJob.TIME_SINCE_MADE_ACTIVE_MS,
                             nowUptime - job.madeActive);

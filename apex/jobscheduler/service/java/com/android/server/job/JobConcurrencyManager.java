@@ -86,7 +86,7 @@ class JobConcurrencyManager {
 
     /**
      * Set of possible execution types that a job can have. The actual type(s) of a job are based
-     * on the {@link JobStatus#lastEvaluatedPriority}, which is typically evaluated right before
+     * on the {@link JobStatus#lastEvaluatedBias}, which is typically evaluated right before
      * execution (when we're trying to determine which jobs to run next) and won't change after the
      * job has started executing.
      *
@@ -527,9 +527,8 @@ class JobConcurrencyManager {
 
     /**
      * Takes jobs from pending queue and runs them on available contexts.
-     * If no contexts are available, preempts lower priority jobs to
-     * run higher priority ones.
-     * Lock on mJobs before calling this function.
+     * If no contexts are available, preempts lower bias jobs to run higher bias ones.
+     * Lock on mLock before calling this function.
      */
     @GuardedBy("mLock")
     void assignJobsToContextsLocked() {
@@ -596,9 +595,9 @@ class JobConcurrencyManager {
             }
 
             // Find an available slot for nextPending. The context should be available OR
-            // it should have lowest priority among all running jobs
+            // it should have the lowest bias among all running jobs
             // (sharing the same Uid as nextPending)
-            int minPriorityForPreemption = Integer.MAX_VALUE;
+            int minBiasForPreemption = Integer.MAX_VALUE;
             int selectedContextId = -1;
             int allWorkTypes = getJobWorkTypes(nextPending);
             int workType = mWorkCountTracker.canJobStart(allWorkTypes);
@@ -631,7 +630,7 @@ class JobConcurrencyManager {
                     // Maybe stop the job if it has had its day in the sun. Don't let a different
                     // app preempt jobs started for TOP apps though.
                     final String reason = shouldStopJobReason[j];
-                    if (job.lastEvaluatedPriority < JobInfo.PRIORITY_TOP_APP
+                    if (job.lastEvaluatedBias < JobInfo.BIAS_TOP_APP
                             && reason != null && mWorkCountTracker.canJobStart(allWorkTypes,
                             activeServices.get(j).getRunningJobWorkType()) != WORK_TYPE_NONE) {
                         // Right now, the way the code is set up, we don't need to explicitly
@@ -643,19 +642,19 @@ class JobConcurrencyManager {
                     continue;
                 }
 
-                final int jobPriority = mService.evaluateJobPriorityLocked(job);
-                if (jobPriority >= nextPending.lastEvaluatedPriority) {
+                final int jobBias = mService.evaluateJobBiasLocked(job);
+                if (jobBias >= nextPending.lastEvaluatedBias) {
                     continue;
                 }
 
-                if (minPriorityForPreemption > jobPriority) {
+                if (minBiasForPreemption > jobBias) {
                     // Step down the preemption threshold - wind up replacing
-                    // the lowest-priority running job
-                    minPriorityForPreemption = jobPriority;
+                    // the lowest-bias running job
+                    minBiasForPreemption = jobBias;
                     selectedContextId = j;
-                    preemptReason = "higher priority job found";
+                    preemptReason = "higher bias job found";
                     preemptReasonCode = JobParameters.STOP_REASON_PREEMPT;
-                    // In this case, we're just going to preempt a low priority job, we're not
+                    // In this case, we're just going to preempt a low bias job, we're not
                     // actually starting a job, so don't set startingJob.
                 }
             }
@@ -749,7 +748,7 @@ class JobConcurrencyManager {
                 continue;
             }
 
-            pending.lastEvaluatedPriority = mService.evaluateJobPriorityLocked(pending);
+            pending.lastEvaluatedBias = mService.evaluateJobBiasLocked(pending);
 
             if (updateCounter) {
                 mWorkCountTracker.incrementPendingJobCount(getJobWorkTypes(pending));
@@ -773,7 +772,7 @@ class JobConcurrencyManager {
 
     @GuardedBy("mLock")
     private boolean isPkgConcurrencyLimitedLocked(@NonNull JobStatus jobStatus) {
-        if (jobStatus.lastEvaluatedPriority >= JobInfo.PRIORITY_TOP_APP) {
+        if (jobStatus.lastEvaluatedBias >= JobInfo.BIAS_TOP_APP) {
             // Don't restrict top apps' concurrency. The work type limits will make sure
             // background jobs have slots to run if the system has resources.
             return false;
@@ -866,9 +865,9 @@ class JobConcurrencyManager {
             // Preemption case needs special care.
             updateNonRunningPrioritiesLocked(pendingJobs, false);
 
-            JobStatus highestPriorityJob = null;
-            int highPriWorkType = workType;
-            int highPriAllWorkTypes = workType;
+            JobStatus highestBiasJob = null;
+            int highBiasWorkType = workType;
+            int highBiasAllWorkTypes = workType;
             JobStatus backupJob = null;
             int backupWorkType = WORK_TYPE_NONE;
             int backupAllWorkTypes = WORK_TYPE_NONE;
@@ -893,40 +892,39 @@ class JobConcurrencyManager {
                 }
 
                 // Only bypass the concurrent limit if we had preempted the job due to a higher
-                // priority job.
-                if (nextPending.lastEvaluatedPriority <= jobStatus.lastEvaluatedPriority
+                // bias job.
+                if (nextPending.lastEvaluatedBias <= jobStatus.lastEvaluatedBias
                         && isPkgConcurrencyLimitedLocked(nextPending)) {
                     continue;
                 }
 
-                if (highestPriorityJob == null
-                        || highestPriorityJob.lastEvaluatedPriority
-                        < nextPending.lastEvaluatedPriority) {
-                    highestPriorityJob = nextPending;
+                if (highestBiasJob == null
+                        || highestBiasJob.lastEvaluatedBias < nextPending.lastEvaluatedBias) {
+                    highestBiasJob = nextPending;
                 } else {
                     continue;
                 }
 
                 // In this path, we pre-empted an existing job. We don't fully care about the
-                // reserved slots. We should just run the highest priority job we can find,
+                // reserved slots. We should just run the highest bias job we can find,
                 // though it would be ideal to use an available WorkType slot instead of
                 // overloading slots.
-                highPriAllWorkTypes = getJobWorkTypes(nextPending);
-                final int workAsType = mWorkCountTracker.canJobStart(highPriAllWorkTypes);
+                highBiasAllWorkTypes = getJobWorkTypes(nextPending);
+                final int workAsType = mWorkCountTracker.canJobStart(highBiasAllWorkTypes);
                 if (workAsType == WORK_TYPE_NONE) {
                     // Just use the preempted job's work type since this new one is technically
                     // replacing it anyway.
-                    highPriWorkType = workType;
+                    highBiasWorkType = workType;
                 } else {
-                    highPriWorkType = workAsType;
+                    highBiasWorkType = workAsType;
                 }
             }
-            if (highestPriorityJob != null) {
+            if (highestBiasJob != null) {
                 if (DEBUG) {
                     Slog.d(TAG, "Running job " + jobStatus + " as preemption");
                 }
-                mWorkCountTracker.stageJob(highPriWorkType, highPriAllWorkTypes);
-                startJobLocked(worker, highestPriorityJob, highPriWorkType);
+                mWorkCountTracker.stageJob(highBiasWorkType, highBiasAllWorkTypes);
+                startJobLocked(worker, highestBiasJob, highBiasWorkType);
             } else {
                 if (DEBUG) {
                     Slog.d(TAG, "Couldn't find preemption job for uid " + worker.getPreferredUid());
@@ -944,11 +942,10 @@ class JobConcurrencyManager {
             updateCounterConfigLocked();
             updateNonRunningPrioritiesLocked(pendingJobs, false);
 
-            // This slot is now free and we have pending jobs. Start the highest priority job we
-            // find.
-            JobStatus highestPriorityJob = null;
-            int highPriWorkType = workType;
-            int highPriAllWorkTypes = workType;
+            // This slot is now free and we have pending jobs. Start the highest bias job we find.
+            JobStatus highestBiasJob = null;
+            int highBiasWorkType = workType;
+            int highBiasAllWorkTypes = workType;
             for (int i = 0; i < pendingJobs.size(); i++) {
                 final JobStatus nextPending = pendingJobs.get(i);
 
@@ -965,23 +962,22 @@ class JobConcurrencyManager {
                 if (workAsType == WORK_TYPE_NONE) {
                     continue;
                 }
-                if (highestPriorityJob == null
-                        || highestPriorityJob.lastEvaluatedPriority
-                        < nextPending.lastEvaluatedPriority) {
-                    highestPriorityJob = nextPending;
-                    highPriWorkType = workAsType;
-                    highPriAllWorkTypes = allWorkTypes;
+                if (highestBiasJob == null
+                        || highestBiasJob.lastEvaluatedBias < nextPending.lastEvaluatedBias) {
+                    highestBiasJob = nextPending;
+                    highBiasWorkType = workAsType;
+                    highBiasAllWorkTypes = allWorkTypes;
                 }
             }
 
-            if (highestPriorityJob != null) {
+            if (highestBiasJob != null) {
                 // This slot is free, and we haven't yet hit the limit on
                 // concurrent jobs...  we can just throw the job in to here.
                 if (DEBUG) {
                     Slog.d(TAG, "About to run job: " + jobStatus);
                 }
-                mWorkCountTracker.stageJob(highPriWorkType, highPriAllWorkTypes);
-                startJobLocked(worker, highestPriorityJob, highPriWorkType);
+                mWorkCountTracker.stageJob(highBiasWorkType, highBiasAllWorkTypes);
+                startJobLocked(worker, highestBiasJob, highBiasWorkType);
             }
         }
 
@@ -1255,9 +1251,9 @@ class JobConcurrencyManager {
         int classification = 0;
 
         if (shouldRunAsFgUserJob(js)) {
-            if (js.lastEvaluatedPriority >= JobInfo.PRIORITY_TOP_APP) {
+            if (js.lastEvaluatedBias >= JobInfo.BIAS_TOP_APP) {
                 classification |= WORK_TYPE_TOP;
-            } else if (js.lastEvaluatedPriority >= JobInfo.PRIORITY_FOREGROUND_SERVICE) {
+            } else if (js.lastEvaluatedBias >= JobInfo.BIAS_FOREGROUND_SERVICE) {
                 classification |= WORK_TYPE_FGS;
             } else {
                 classification |= WORK_TYPE_BG;
@@ -1267,7 +1263,7 @@ class JobConcurrencyManager {
                 classification |= WORK_TYPE_EJ;
             }
         } else {
-            if (js.lastEvaluatedPriority >= JobInfo.PRIORITY_FOREGROUND_SERVICE
+            if (js.lastEvaluatedBias >= JobInfo.BIAS_FOREGROUND_SERVICE
                     || js.shouldTreatAsExpeditedJob()) {
                 classification |= WORK_TYPE_BGUSER_IMPORTANT;
             }
@@ -1630,7 +1626,7 @@ class JobConcurrencyManager {
                 for (int i = 0; i < mNumActuallyReservedSlots.size(); ++i) {
                     int wt = mNumActuallyReservedSlots.keyAt(i);
                     if (assignWorkType == WORK_TYPE_NONE || wt < assignWorkType) {
-                        // Try to give this slot to the highest priority one within its limits.
+                        // Try to give this slot to the highest bias one within its limits.
                         int total = mNumRunningJobs.get(wt) + mNumStartingJobs.get(wt)
                                 + mNumPendingJobs.get(wt);
                         if (mNumActuallyReservedSlots.valueAt(i) < mConfigAbsoluteMaxSlots.get(wt)

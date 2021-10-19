@@ -449,6 +449,43 @@ public class Tuner implements AutoCloseable  {
         mTunerResourceManager.updateClientPriority(mClientId, priority, niceValue);
     }
 
+    /**
+     * Checks if there is an unused frontend resource available.
+     *
+     * @param frontendType {@link android.media.tv.tuner.frontend.FrontendSettings.Type} for the
+     * query to be done for.
+     */
+    public boolean hasUnusedFrontend(int frontendType) {
+        return mTunerResourceManager.hasUnusedFrontend(frontendType);
+    }
+
+    /**
+     * Checks if the calling Tuner object has the lowest priority as a client to
+     * {@link TunerResourceManager}
+     *
+     * <p>The priority comparison is done against the current holders of the frontend resource.
+     *
+     * <p>The behavior of this function is independent of the availability of unused resources.
+     *
+     * <p>The function returns {@code true} in any of the following sceanrios:
+     * <ul>
+     * <li>The caller has the priority <= other clients</li>
+     * <li>No one is holding the frontend resource of the specified type</li>
+     * <li>The caller is the only one who is holding the resource</li>
+     * <li>The frontend resource of the specified type does not exist</li>
+     *
+     * </ul>
+     * @param frontendType {@link android.media.tv.tuner.frontend.FrontendSettings.Type} for the
+     * query to be done for.
+     *
+     * @return {@code false} only if someone else with strictly lower priority is holding the
+     *         resourece.
+     *         {@code true} otherwise.
+     */
+    public boolean isLowestPriority(int frontendType) {
+        return mTunerResourceManager.isLowestPriority(mClientId, frontendType);
+    }
+
     private long mNativeContext; // used by native jMediaTuner
 
     /**
@@ -1614,5 +1651,10 @@ public class Tuner implements AutoCloseable  {
             mLnbHandle = null;
         }
         mLnb = null;
+    }
+
+    /** @hide */
+    public int getClientId() {
+        return mClientId;
     }
 }

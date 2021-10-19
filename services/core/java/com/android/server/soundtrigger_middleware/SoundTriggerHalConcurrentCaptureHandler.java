@@ -226,8 +226,7 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
         public void recognitionCallback(int modelHandle, RecognitionEvent event) {
             // A recognition event must be the last one for its model, unless it is a forced one
             // (those leave the model active).
-            mCallbackThread.pushWithDedupe(modelHandle,
-                    event.status != RecognitionStatus.FORCED,
+            mCallbackThread.pushWithDedupe(modelHandle, !event.recognitionStillActive,
                     () -> mDelegateCallback.recognitionCallback(modelHandle, event));
         }
 
@@ -235,8 +234,7 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
         public void phraseRecognitionCallback(int modelHandle, PhraseRecognitionEvent event) {
             // A recognition event must be the last one for its model, unless it is a forced one
             // (those leave the model active).
-            mCallbackThread.pushWithDedupe(modelHandle,
-                    event.common.status != RecognitionStatus.FORCED,
+            mCallbackThread.pushWithDedupe(modelHandle, !event.common.recognitionStillActive,
                     () -> mDelegateCallback.phraseRecognitionCallback(modelHandle, event));
         }
 

@@ -1973,7 +1973,7 @@ final class InstallParams extends HandlerParams {
             // If this is an update of a package which used to fail to compile,
             // BackgroundDexOptService will remove it from its denylist.
             // TODO: Layering violation
-            BackgroundDexOptService.notifyPackageChanged(packageName);
+            BackgroundDexOptService.getService().notifyPackageChanged(packageName);
 
             notifyPackageChangeObserversOnUpdate(reconciledPkg);
         }

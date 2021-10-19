@@ -29,8 +29,8 @@ import com.android.server.job.controllers.JobStatus;
  * should be scheduled or not based on the state of the system/device.
  * Every restriction is associated with exactly one stop reason, which could be retrieved using
  * {@link #getReason()} (and the internal reason via {@link #getInternalReason()}).
- * Note, that this is not taken into account for the jobs that have priority
- * {@link JobInfo#PRIORITY_FOREGROUND_APP} or higher.
+ * Note, that this is not taken into account for the jobs that have
+ * {@link JobInfo#BIAS_FOREGROUND_SERVICE} bias or higher.
  */
 public abstract class JobRestriction {
 

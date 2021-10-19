@@ -4274,7 +4274,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     void setIntrinsicPadding(int intrinsicPadding) {
         mIntrinsicPadding = intrinsicPadding;
-        mAmbientState.setIntrinsicPadding(intrinsicPadding);
     }
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
@@ -5299,10 +5298,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             }
         }
         mController.getNoticationRoundessManager()
-                .setViewsAffectedBySwipe((ExpandableView) viewBefore,
+                .setViewsAffectedBySwipe(
+                        (ExpandableView) viewBefore,
                         (ExpandableView) viewSwiped,
-                        (ExpandableView) viewAfter,
-                        getResources().getBoolean(R.bool.flag_notif_updates));
+                        (ExpandableView) viewAfter);
 
         updateFirstAndLastBackgroundViews();
         requestDisallowInterceptTouchEvent(true);
@@ -5314,8 +5313,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     void onSwipeEnd() {
         updateFirstAndLastBackgroundViews();
         mController.getNoticationRoundessManager()
-                .setViewsAffectedBySwipe(null, null, null,
-                        getResources().getBoolean(R.bool.flag_notif_updates));
+                .setViewsAffectedBySwipe(null, null, null);
         // Round bottom corners for notification right before shelf.
         mShelf.updateAppearance();
     }

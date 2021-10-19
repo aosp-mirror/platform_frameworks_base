@@ -16,12 +16,14 @@
 
 package com.android.wm.shell.flicker.bubble
 
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import org.junit.runner.RunWith
+import org.junit.Test
 import org.junit.runners.Parameterized
 
 /**
@@ -45,4 +47,12 @@ class LaunchBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(test
                 addBubbleBtn?.run { addBubbleBtn.click() } ?: error("Bubble widget not found")
             }
         }
+
+    @FlakyTest
+    @Test
+    fun testAppIsAlwaysVisible() {
+        testSpec.assertLayers {
+            this.isVisible(testApp.component)
+        }
+    }
 }

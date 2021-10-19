@@ -226,6 +226,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runForceDexOpt();
                 case "bg-dexopt-job":
                     return runDexoptJob();
+                case "cancel-bg-dexopt-job":
+                    return cancelBgDexOptJob();
                 case "dump-profiles":
                     return runDumpProfiles();
                 case "snapshot-profile":
@@ -1863,10 +1865,16 @@ class PackageManagerShellCommand extends ShellCommand {
         while ((arg = getNextArg()) != null) {
             packageNames.add(arg);
         }
-        boolean result = mInterface.runBackgroundDexoptJob(packageNames.isEmpty() ? null :
-                packageNames);
+        boolean result = BackgroundDexOptService.getService().runBackgroundDexoptJob(
+                packageNames.isEmpty() ? null : packageNames);
         getOutPrintWriter().println(result ? "Success" : "Failure");
         return result ? 0 : -1;
+    }
+
+    private int cancelBgDexOptJob() throws RemoteException {
+        BackgroundDexOptService.getService().cancelBackgroundDexoptJob();
+        getOutPrintWriter().println("Success");
+        return 0;
     }
 
     private int runDumpProfiles() throws RemoteException {
@@ -3940,6 +3948,11 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("    overlap with the actual job but the job scheduler will not be able to");
         pw.println("    cancel it. It will also run even if the device is not in the idle");
         pw.println("    maintenance mode.");
+        pw.println("  cancel-bg-dexopt-job");
+        pw.println("    Cancels currently running background optimizations immediately.");
+        pw.println("    This cancels optimizations run from bg-dexopt-job or from JobScjeduler.");
+        pw.println("    Note that cancelling currently running bg-dexopt-job command requires");
+        pw.println("    running this command from separate adb shell.");
         pw.println("");
         pw.println("  reconcile-secondary-dex-files TARGET-PACKAGE");
         pw.println("    Reconciles the package secondary dex files with the generated oat files.");

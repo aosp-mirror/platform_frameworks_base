@@ -104,12 +104,12 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
         assertTrue("Activity must be finished", mAtm.mActivityClientController.finishActivity(
-                activity.appToken, 0 /* resultCode */, null /* resultData */,
+                activity.token, 0 /* resultCode */, null /* resultData */,
                 Activity.DONT_FINISH_TASK_WITH_ACTIVITY));
         assertTrue(activity.finishing);
 
         assertTrue("Duplicate activity finish request must also return 'true'",
-                mAtm.mActivityClientController.finishActivity(activity.appToken, 0 /* resultCode */,
+                mAtm.mActivityClientController.finishActivity(activity.token, 0 /* resultCode */,
                         null /* resultData */, Activity.DONT_FINISH_TASK_WITH_ACTIVITY));
     }
 

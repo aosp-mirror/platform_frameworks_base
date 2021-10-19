@@ -348,24 +348,6 @@ public class ApexManagerTest {
     }
 
     @Test
-    public void testInstallPackageDowngrade() throws Exception {
-        File activeApex = extractResource("test.apex_rebootless_v2",
-                "test.rebootless_apex_v2.apex");
-        ApexInfo activeApexInfo = createApexInfo("test.apex_rebootless", 2, /* isActive= */ true,
-                /* isFactory= */ false, activeApex);
-        when(mApexService.getAllPackages()).thenReturn(new ApexInfo[]{activeApexInfo});
-        mApexManager.scanApexPackagesTraced(mPackageParser2,
-                ParallelPackageParser.makeExecutorService());
-
-        File installedApex = extractResource("test.apex_rebootless_v1",
-                "test.rebootless_apex_v1.apex");
-        PackageManagerException e = expectThrows(PackageManagerException.class,
-                () -> mApexManager.installPackage(installedApex, mPackageParser2));
-        assertThat(e).hasMessageThat().contains(
-                "Downgrade of APEX package test.apex.rebootless is not allowed");
-    }
-
-    @Test
     public void testInstallPackage_activeOnSystem() throws Exception {
         ApexInfo activeApexInfo = createApexInfo("test.apex_rebootless", 1, /* isActive= */ true,
                 /* isFactory= */ true, extractResource("test.apex_rebootless_v1",

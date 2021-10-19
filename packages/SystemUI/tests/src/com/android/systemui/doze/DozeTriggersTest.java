@@ -204,7 +204,7 @@ public class DozeTriggersTest extends SysuiTestCase {
     public void testProximitySensorNotAvailablel() {
         mProximitySensor.setSensorAvailable(false);
         mTriggers.onSensor(DozeLog.PULSE_REASON_SENSOR_LONG_PRESS, 100, 100, null);
-        mTriggers.onSensor(DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN, 100, 100,
+        mTriggers.onSensor(DozeLog.PULSE_REASON_SENSOR_WAKE_REACH, 100, 100,
                 new float[]{1});
         mTriggers.onSensor(DozeLog.REASON_SENSOR_TAP, 100, 100, null);
     }

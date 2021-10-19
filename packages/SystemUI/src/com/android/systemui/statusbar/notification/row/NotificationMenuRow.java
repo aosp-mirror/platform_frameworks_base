@@ -41,8 +41,11 @@ import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.AlphaOptimizedImageView;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -305,7 +308,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         final int showDismissSetting =  Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.SHOW_NEW_NOTIF_DISMISS, -1);
         final boolean newFlowHideShelf = showDismissSetting == -1
-                ? mContext.getResources().getBoolean(R.bool.flag_notif_updates)
+                ? Dependency.get(FeatureFlags.class).isEnabled(Flags.NOTIFICATION_UPDATES)
                 : showDismissSetting == 1;
         if (newFlowHideShelf) {
             return;

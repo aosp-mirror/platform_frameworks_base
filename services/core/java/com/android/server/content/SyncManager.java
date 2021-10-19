@@ -1625,7 +1625,7 @@ public class SyncManager {
             Slog.v(TAG, "scheduling sync operation " + syncOperation.toString());
         }
 
-        int priority = syncOperation.findPriority();
+        int bias = syncOperation.getJobBias();
 
         final int networkType = syncOperation.isNotAllowedOnMetered() ?
                 JobInfo.NETWORK_TYPE_UNMETERED : JobInfo.NETWORK_TYPE_ANY;
@@ -1641,7 +1641,7 @@ public class SyncManager {
                 .setRequiredNetworkType(networkType)
                 .setRequiresStorageNotLow(true)
                 .setPersisted(true)
-                .setPriority(priority)
+                .setBias(bias)
                 .setFlags(jobFlags);
 
         if (syncOperation.isPeriodic) {
@@ -3228,7 +3228,7 @@ public class SyncManager {
                 if (asc.mSyncOperation.isConflict(op)) {
                     // If the provided SyncOperation conflicts with a running one, the lower
                     // priority sync is pre-empted.
-                    if (asc.mSyncOperation.findPriority() >= op.findPriority()) {
+                    if (asc.mSyncOperation.getJobBias() >= op.getJobBias()) {
                         if (isLoggable) {
                             Slog.v(TAG, "Rescheduling sync due to conflict " + op.toString());
                         }

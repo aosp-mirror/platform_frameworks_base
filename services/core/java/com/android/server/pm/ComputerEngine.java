@@ -179,6 +179,7 @@ public class ComputerEngine implements Computer {
     private final PackageDexOptimizer mPackageDexOptimizer;
     private final DexManager mDexManager;
     private final CompilerStats mCompilerStats;
+    private final BackgroundDexOptService mBackgroundDexOptService;
 
     // PackageManagerService attributes that are primitives are referenced through the
     // pms object directly.  Primitives are the only attributes so referenced.
@@ -228,6 +229,7 @@ public class ComputerEngine implements Computer {
         mPackageDexOptimizer = args.service.mPackageDexOptimizer;
         mDexManager = args.service.getDexManager();
         mCompilerStats = args.service.mCompilerStats;
+        mBackgroundDexOptService = args.service.mBackgroundDexOptService;
 
         // Used to reference PMS attributes that are primitives and which are not
         // updated under control of the PMS lock.
@@ -2929,6 +2931,10 @@ public class ComputerEngine implements Computer {
                             mDexManager.getPackageUseInfoOrDefault(pkgName));
                     ipw.decreaseIndent();
                 }
+                ipw.println("BgDexopt state:");
+                ipw.increaseIndent();
+                mBackgroundDexOptService.dump(ipw);
+                ipw.decreaseIndent();
                 break;
             }
 

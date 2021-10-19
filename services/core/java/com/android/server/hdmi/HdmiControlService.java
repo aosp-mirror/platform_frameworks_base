@@ -601,7 +601,6 @@ public class HdmiControlService extends SystemService {
         if (mMessageValidator == null) {
             mMessageValidator = new HdmiCecMessageValidator(this);
         }
-        mHdmiCecConfig.registerGlobalSettingsObserver(mHandler.getLooper());
         mHdmiCecConfig.registerChangeListener(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
                 new HdmiCecConfig.SettingChangeListener() {
                     @Override

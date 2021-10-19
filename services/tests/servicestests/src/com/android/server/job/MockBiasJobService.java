@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.job;
@@ -24,8 +24,8 @@ import android.util.Log;
 import java.util.ArrayList;
 
 @TargetApi(24)
-public class MockPriorityJobService extends JobService {
-    private static final String TAG = "MockPriorityJobService";
+public class MockBiasJobService extends JobService {
+    private static final String TAG = "MockBiasJobService";
 
     @Override
     public void onCreate() {
@@ -36,7 +36,7 @@ public class MockPriorityJobService extends JobService {
     @Override
     public boolean onStartJob(JobParameters params) {
         Log.i(TAG, "Test job executing: " + params.getJobId());
-        TestEnvironment.getTestEnvironment().executedEvents.add(
+        TestEnvironment.getTestEnvironment().mExecutedEvents.add(
                 new TestEnvironment.Event(TestEnvironment.EVENT_START_JOB, params.getJobId()));
         return true;  // Job not finished
     }
@@ -51,7 +51,7 @@ public class MockPriorityJobService extends JobService {
             event = TestEnvironment.EVENT_PREEMPT_JOB;
             Log.d(TAG, "preempted " + String.valueOf(params.getJobId()));
         }
-        TestEnvironment.getTestEnvironment().executedEvents
+        TestEnvironment.getTestEnvironment().mExecutedEvents
                 .add(new TestEnvironment.Event(event, params.getJobId()));
         return false;  // Do not reschedule
     }
@@ -62,15 +62,15 @@ public class MockPriorityJobService extends JobService {
         public static final int EVENT_PREEMPT_JOB = 1;
         public static final int EVENT_STOP_JOB = 2;
 
-        private static TestEnvironment kTestEnvironment;
+        private static TestEnvironment sTestEnvironment;
 
-        private ArrayList<Event> executedEvents = new ArrayList<Event>();
+        private final ArrayList<Event> mExecutedEvents = new ArrayList<>();
 
         public static TestEnvironment getTestEnvironment() {
-            if (kTestEnvironment == null) {
-                kTestEnvironment = new TestEnvironment();
+            if (sTestEnvironment == null) {
+                sTestEnvironment = new TestEnvironment();
             }
-            return kTestEnvironment;
+            return sTestEnvironment;
         }
 
         public static class Event {
@@ -96,11 +96,11 @@ public class MockPriorityJobService extends JobService {
         }
 
         public void setUp() {
-            executedEvents.clear();
+            mExecutedEvents.clear();
         }
 
         public ArrayList<Event> getExecutedEvents() {
-            return executedEvents;
+            return mExecutedEvents;
         }
     }
 }

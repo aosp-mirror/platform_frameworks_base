@@ -508,7 +508,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityConfigurationChangeItem expected =
                 ActivityConfigurationChangeItem.obtain(newConfig);
         verify(mAtm.getLifecycleManager()).scheduleTransaction(eq(activity.app.getThread()),
-                eq(activity.appToken), eq(expected));
+                eq(activity.token), eq(expected));
     }
 
     @Test
@@ -723,7 +723,7 @@ public class ActivityRecordTests extends WindowTestsBase {
             final ActivityConfigurationChangeItem expected =
                     ActivityConfigurationChangeItem.obtain(newConfig);
             verify(mAtm.getLifecycleManager()).scheduleTransaction(
-                    eq(activity.app.getThread()), eq(activity.appToken), eq(expected));
+                    eq(activity.app.getThread()), eq(activity.token), eq(expected));
         } finally {
             stack.getDisplayArea().removeChild(stack);
         }
@@ -787,7 +787,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord activity = createActivityWithTask();
         assertTrue(activity.hasSavedState());
 
-        ActivityRecord.activityResumedLocked(activity.appToken, false /* handleSplashScreenExit */);
+        ActivityRecord.activityResumedLocked(activity.token, false /* handleSplashScreenExit */);
         assertFalse(activity.hasSavedState());
         assertNull(activity.getSavedState());
     }
@@ -1610,7 +1610,7 @@ public class ActivityRecordTests extends WindowTestsBase {
             setup.accept(activity);
             activity.getTask().removeImmediately("test");
             try {
-                verify(mAtm.getLifecycleManager()).scheduleTransaction(any(), eq(activity.appToken),
+                verify(mAtm.getLifecycleManager()).scheduleTransaction(any(), eq(activity.token),
                         isA(DestroyActivityItem.class));
             } catch (RemoteException ignored) {
             }
@@ -2999,7 +2999,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertTrue(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
 
         // Expect IME insets frozen state will reset when the activity has no IME focusable window.
-        app.mActivityRecord.forAllWindowsUnchecked(w -> {
+        app.mActivityRecord.forAllWindows(w -> {
             w.mAttrs.flags |= FLAG_ALT_FOCUSABLE_IM;
             return true;
         }, true);

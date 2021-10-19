@@ -283,14 +283,12 @@ public class DozeParameters implements
     }
 
     /**
-     * Sensor to use for brightness changes.
+     * Gets the brightness string array per posture. Brightness names along with
+     * doze_brightness_sensor_type is used to determine the brightness sensor to use for
+     * the current posture.
      */
-    public String brightnessName(@DevicePostureController.DevicePostureInt int posture) {
-        return AmbientDisplayConfiguration.getSensorFromPostureMapping(
-                mResources.getStringArray(R.array.doze_brightness_sensor_name_posture_mapping),
-                null /* defaultValue */,
-                posture
-        );
+    public String[] brightnessNames() {
+        return mResources.getStringArray(R.array.doze_brightness_sensor_name_posture_mapping);
     }
 
     /**

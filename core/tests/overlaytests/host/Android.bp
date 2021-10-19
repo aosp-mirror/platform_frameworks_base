@@ -27,7 +27,6 @@ java_test_host {
     libs: ["tradefed"],
     test_suites: [
         "device-tests",
-        "general-tests",
     ],
     target_required: [
         "OverlayHostTests_NonPlatformSignatureOverlay",
