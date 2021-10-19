@@ -76,6 +76,7 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.AccessPointController;
 import com.android.systemui.toast.SystemUIToast;
@@ -150,6 +151,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
     private WindowManager mWindowManager;
     private ToastFactory mToastFactory;
     private SignalDrawable mSignalDrawable;
+    private LocationController mLocationController;
 
     @VisibleForTesting
     static final float TOAST_PARAMS_HORIZONTAL_WEIGHT = 1.0f;
@@ -199,7 +201,8 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
             GlobalSettings globalSettings, KeyguardStateController keyguardStateController,
             WindowManager windowManager, ToastFactory toastFactory,
             @Background Handler workerHandler,
-            CarrierConfigTracker carrierConfigTracker) {
+            CarrierConfigTracker carrierConfigTracker,
+            LocationController locationController) {
         if (DEBUG) {
             Log.d(TAG, "Init InternetDialogController");
         }
@@ -227,6 +230,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         mWindowManager = windowManager;
         mToastFactory = toastFactory;
         mSignalDrawable = new SignalDrawable(mContext);
+        mLocationController = locationController;
     }
 
     void onStart(@NonNull InternetDialogCallback callback, boolean canConfigWifi) {
@@ -786,6 +790,14 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         }
         ap.connect(new WifiEntryConnectCallback(mActivityStarter, ap, this));
         return false;
+    }
+
+    @WorkerThread
+    boolean isWifiScanEnabled() {
+        if (!mLocationController.isLocationEnabled()) {
+            return false;
+        }
+        return mWifiManager.isScanAlwaysAvailable();
     }
 
     static class WifiEntryConnectCallback implements WifiEntry.ConnectCallback {

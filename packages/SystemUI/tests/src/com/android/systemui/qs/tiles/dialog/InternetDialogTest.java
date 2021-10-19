@@ -282,7 +282,7 @@ public class InternetDialogTest extends SysuiTestCase {
     @Test
     public void updateDialog_wifiOffAndWifiScanOff_hideWifiScanNotify() {
         when(mWifiManager.isWifiEnabled()).thenReturn(false);
-        when(mWifiManager.isScanAlwaysAvailable()).thenReturn(false);
+        when(mInternetDialogController.isWifiScanEnabled()).thenReturn(false);
 
         mInternetDialog.updateDialog(false);
 
@@ -292,7 +292,7 @@ public class InternetDialogTest extends SysuiTestCase {
     @Test
     public void updateDialog_wifiOffAndWifiScanOnAndDeviceLocked_hideWifiScanNotify() {
         when(mWifiManager.isWifiEnabled()).thenReturn(false);
-        when(mWifiManager.isScanAlwaysAvailable()).thenReturn(true);
+        when(mInternetDialogController.isWifiScanEnabled()).thenReturn(true);
         when(mInternetDialogController.isDeviceLocked()).thenReturn(true);
 
         mInternetDialog.updateDialog(false);
@@ -303,7 +303,7 @@ public class InternetDialogTest extends SysuiTestCase {
     @Test
     public void updateDialog_wifiOffAndWifiScanOnAndDeviceUnlocked_showWifiScanNotify() {
         when(mWifiManager.isWifiEnabled()).thenReturn(false);
-        when(mWifiManager.isScanAlwaysAvailable()).thenReturn(true);
+        when(mInternetDialogController.isWifiScanEnabled()).thenReturn(true);
         when(mInternetDialogController.isDeviceLocked()).thenReturn(false);
 
         mInternetDialog.updateDialog(false);
