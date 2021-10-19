@@ -33,7 +33,7 @@ import javax.inject.Inject;
 /**
  * Class to manage simple DeviceConfig-based feature flags.
  *
- * See {@link FeatureFlagReader} for instructions on defining and flipping flags.
+ * See {@link Flags} for instructions on defining new flags.
  */
 @SysUISingleton
 public class FeatureFlags {
@@ -87,67 +87,70 @@ public class FeatureFlags {
     }
 
     public boolean isNewNotifPipelineEnabled() {
-        return mFlagReader.isEnabled(R.bool.flag_notification_pipeline2);
+        return isEnabled(Flags.NEW_NOTIFICATION_PIPELINE);
     }
 
     public boolean isNewNotifPipelineRenderingEnabled() {
-        return mFlagReader.isEnabled(R.bool.flag_notification_pipeline2_rendering);
+        return isEnabled(Flags.NEW_NOTIFICATION_PIPELINE_RENDERING);
     }
 
     /** */
     public boolean useNewLockscreenAnimations() {
-        return mFlagReader.isEnabled(R.bool.flag_lockscreen_animations);
+        return isEnabled(Flags.LOCKSCREEN_ANIMATIONS);
     }
 
     public boolean isPeopleTileEnabled() {
+        // TODO(b/202860494): different resource overlays have different values.
         return mFlagReader.isEnabled(R.bool.flag_conversations);
     }
 
     public boolean isMonetEnabled() {
+        // TODO(b/202860494): used in wallpaper picker. Always true, maybe delete.
         return mFlagReader.isEnabled(R.bool.flag_monet);
     }
 
     public boolean isPMLiteEnabled() {
-        return mFlagReader.isEnabled(R.bool.flag_pm_lite);
+        return isEnabled(Flags.POWER_MENU_LITE);
     }
 
     public boolean isChargingRippleEnabled() {
+        // TODO(b/202860494): different resource overlays have different values.
         return mFlagReader.isEnabled(R.bool.flag_charging_ripple);
     }
 
     public boolean isOngoingCallStatusBarChipEnabled() {
-        return mFlagReader.isEnabled(R.bool.flag_ongoing_call_status_bar_chip);
+        return isEnabled(Flags.ONGOING_CALL_STATUS_BAR_CHIP);
     }
 
     public boolean isOngoingCallInImmersiveEnabled() {
-        return isOngoingCallStatusBarChipEnabled()
-                && mFlagReader.isEnabled(R.bool.flag_ongoing_call_in_immersive);
+        return isOngoingCallStatusBarChipEnabled() && isEnabled(Flags.ONGOING_CALL_IN_IMMERSIVE);
     }
 
     public boolean isOngoingCallInImmersiveChipTapEnabled() {
         return isOngoingCallInImmersiveEnabled()
-                && mFlagReader.isEnabled(R.bool.flag_ongoing_call_in_immersive_chip_tap);
+                && isEnabled(Flags.ONGOING_CALL_IN_IMMERSIVE_CHIP_TAP);
     }
 
     public boolean isSmartspaceEnabled() {
+        // TODO(b/202860494): different resource overlays have different values.
         return mFlagReader.isEnabled(R.bool.flag_smartspace);
     }
 
     public boolean isSmartspaceDedupingEnabled() {
-        return isSmartspaceEnabled() && mFlagReader.isEnabled(R.bool.flag_smartspace_deduping);
+        return isSmartspaceEnabled() && isEnabled(Flags.SMARTSPACE_DEDUPING);
     }
 
     public boolean isNewKeyguardSwipeAnimationEnabled() {
-        return mFlagReader.isEnabled(R.bool.flag_new_unlock_swipe_animation);
+        return isEnabled(Flags.NEW_UNLOCK_SWIPE_ANIMATION);
     }
 
     public boolean isSmartSpaceSharedElementTransitionEnabled() {
-        return mFlagReader.isEnabled(R.bool.flag_smartspace_shared_element_transition);
+        return isEnabled(Flags.SMARTSPACE_SHARED_ELEMENT_TRANSITION_ENABLED);
     }
 
     /** Whether or not to use the provider model behavior for the status bar icons */
     public boolean isCombinedStatusBarSignalIconsEnabled() {
-        return mFlagReader.isEnabled(R.bool.flag_combined_status_bar_signal_icons);
+        return isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS);
     }
 
     /** System setting for provider model behavior */
@@ -159,7 +162,7 @@ public class FeatureFlags {
      * Use the new version of the user switcher
      */
     public boolean useNewUserSwitcher() {
-        return mFlagReader.isEnabled(R.bool.flag_new_user_switcher);
+        return isEnabled(Flags.NEW_USER_SWITCHER);
     }
 
     /** static method for the system setting */
