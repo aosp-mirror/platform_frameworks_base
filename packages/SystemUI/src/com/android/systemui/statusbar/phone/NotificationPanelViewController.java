@@ -1360,6 +1360,7 @@ public class NotificationPanelViewController extends PanelViewController {
             stackScrollerPadding = mClockPositionResult.stackScrollerPaddingExpanded;
         }
 
+        mSplitShadeHeaderController.setShadeExpandedFraction(getExpandedFraction());
         mNotificationStackScrollLayoutController.setIntrinsicPadding(stackScrollerPadding);
         mKeyguardBottomArea.setAntiBurnInOffsetX(mClockPositionResult.clockX);
 

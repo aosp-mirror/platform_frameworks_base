@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone
 
 import android.view.View
 import com.android.systemui.R
+import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.flags.FeatureFlags
@@ -51,6 +52,14 @@ class SplitShadeHeaderController @Inject constructor(
         set(value) {
             field = value
             updateVisibility()
+        }
+
+    var shadeExpandedFraction = -1f
+        set(value) {
+            if (visible && field != value) {
+                statusBar.alpha = ShadeInterpolation.getContentAlpha(value)
+                field = value
+            }
         }
 
     init {
