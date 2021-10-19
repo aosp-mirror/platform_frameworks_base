@@ -509,6 +509,8 @@ nsecs_t CanvasContext::draw() {
     Frame frame = mRenderPipeline->getFrame();
     SkRect windowDirty = computeDirtyRect(frame, &dirty);
 
+    ATRACE_FORMAT("Drawing " RECT_STRING, SK_RECT_ARGS(dirty));
+
     bool drew = mRenderPipeline->draw(frame, windowDirty, dirty, mLightGeometry, &mLayerUpdateQueue,
                                       mContentDrawBounds, mOpaque, mLightInfo, mRenderNodes,
                                       &(profiler()));
