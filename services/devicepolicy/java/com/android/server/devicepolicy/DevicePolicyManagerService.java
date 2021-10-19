@@ -161,6 +161,7 @@ import android.app.StatusBarManager;
 import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyCache;
+import android.app.admin.DevicePolicyDrawableResource;
 import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManager.DeviceOwnerType;
@@ -177,6 +178,7 @@ import android.app.admin.FullyManagedDeviceProvisioningParams;
 import android.app.admin.ManagedProfileProvisioningParams;
 import android.app.admin.NetworkEvent;
 import android.app.admin.ParcelableGranteeMap;
+import android.app.admin.ParcelableResource;
 import android.app.admin.PasswordMetrics;
 import android.app.admin.PasswordPolicy;
 import android.app.admin.SecurityLog;
@@ -715,6 +717,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      */
     // Guarded by mHandler
     private @UserIdInt int mNetworkLoggingNotificationUserId = UserHandle.USER_NULL;
+
+    private final DeviceManagementResourcesProvider mDeviceManagementResourcesProvider;
 
     private static final boolean ENABLE_LOCK_GUARD = true;
 
@@ -1740,6 +1744,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         void setDevicePolicySafetyChecker(DevicePolicySafetyChecker safetyChecker) {
             mSafetyChecker = safetyChecker;
         }
+
+        DeviceManagementResourcesProvider getDeviceManagementResourcesProvider() {
+            return new DeviceManagementResourcesProvider();
+        }
     }
 
     /**
@@ -1792,6 +1800,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mTransferOwnershipMetadataManager = mInjector.newTransferOwnershipMetadataManager();
         mBugreportCollectionManager = new RemoteBugreportManager(this, mInjector);
 
+        mDeviceManagementResourcesProvider = mInjector.getDeviceManagementResourcesProvider();
+
         // "Lite" interface is available even when the device doesn't have the feature
         LocalServices.addService(DevicePolicyManagerLiteInternal.class, mLocalService);
         if (!mHasFeature) {
@@ -1838,6 +1848,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         loadOwners();
 
         performPolicyVersionUpgrade();
+
+        mDeviceManagementResourcesProvider.load();
     }
 
     /**
@@ -17955,5 +17967,38 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mInjector.getUsbManager() != null
                         && mInjector.getUsbManager().getUsbHalVersion() >= UsbManager.USB_HAL_V1_3
         );
+    }
+
+    @Override
+    public void setDrawables(@NonNull List<DevicePolicyDrawableResource> drawables) {
+        Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(
+                android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES));
+
+        Objects.requireNonNull(drawables, "drawables must be provided.");
+
+        // TODO(b/203548565): add new broadcast to indicate a resource has changed
+        mInjector.binderWithCleanCallingIdentity(() ->
+                mDeviceManagementResourcesProvider.updateDrawables(drawables));
+    }
+
+
+    @Override
+    public void resetDrawables(@NonNull int[] drawableIds) {
+        Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(
+                android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES));
+
+        Objects.requireNonNull(drawableIds, "drawableIds must be provided.");
+
+        // TODO(b/203548565): add new broadcast to indicate a resource has changed
+        mInjector.binderWithCleanCallingIdentity(() ->
+                mDeviceManagementResourcesProvider.removeDrawables(drawableIds));
+    }
+
+    @Override
+    public ParcelableResource getDrawable(
+            int drawableId, int drawableStyle, int drawableSource) {
+        return mInjector.binderWithCleanCallingIdentity(() ->
+                mDeviceManagementResourcesProvider.getDrawable(
+                        drawableId, drawableStyle, drawableSource));
     }
 }
