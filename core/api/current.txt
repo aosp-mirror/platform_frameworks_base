@@ -13462,7 +13462,7 @@ package android.content.res {
     method public float getFloat(@DimenRes int);
     method @NonNull public android.graphics.Typeface getFont(@FontRes int) throws android.content.res.Resources.NotFoundException;
     method public float getFraction(@FractionRes int, int, int);
-    method public int getIdentifier(String, String, String);
+    method @Discouraged(message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(\"bar\", \"foo\", null)`).") public int getIdentifier(String, String, String);
     method @NonNull public int[] getIntArray(@ArrayRes int) throws android.content.res.Resources.NotFoundException;
     method public int getInteger(@IntegerRes int) throws android.content.res.Resources.NotFoundException;
     method @NonNull public android.content.res.XmlResourceParser getLayout(@LayoutRes int) throws android.content.res.Resources.NotFoundException;
@@ -13482,7 +13482,7 @@ package android.content.res {
     method public CharSequence getText(@StringRes int, CharSequence);
     method @NonNull public CharSequence[] getTextArray(@ArrayRes int) throws android.content.res.Resources.NotFoundException;
     method public void getValue(@AnyRes int, android.util.TypedValue, boolean) throws android.content.res.Resources.NotFoundException;
-    method public void getValue(String, android.util.TypedValue, boolean) throws android.content.res.Resources.NotFoundException;
+    method @Discouraged(message="Use of this function is discouraged because it makes internal calls to `getIdentifier()`, which uses resource reflection. Reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resource values by identifier (e.g. `getValue(R.foo.bar, outValue, true)`) than by name (e.g. `getValue(\"foo\", outvalue, true)`).") public void getValue(String, android.util.TypedValue, boolean) throws android.content.res.Resources.NotFoundException;
     method public void getValueForDensity(@AnyRes int, int, android.util.TypedValue, boolean) throws android.content.res.Resources.NotFoundException;
     method @NonNull public android.content.res.XmlResourceParser getXml(@XmlRes int) throws android.content.res.Resources.NotFoundException;
     method public final android.content.res.Resources.Theme newTheme();
