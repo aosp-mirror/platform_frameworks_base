@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.flicker.bubble
 
-import androidx.test.filters.FlakyTest
+import android.platform.test.annotations.Postsubmit
 import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
@@ -58,7 +58,7 @@ class ExpandBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(test
             }
         }
 
-    @FlakyTest
+    @Postsubmit
     @Test
     fun testAppIsAlwaysVisible() {
         testSpec.assertLayers {
