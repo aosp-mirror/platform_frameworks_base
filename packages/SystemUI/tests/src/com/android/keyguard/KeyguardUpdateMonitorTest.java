@@ -1056,6 +1056,16 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         verify(callback, atLeastOnce()).onRequireUnlockForNfc();
     }
 
+    @Test
+    public void testFaceDoesNotAuth_afterPinAttempt() {
+        mTestableLooper.processAllMessages();
+        mKeyguardUpdateMonitor.setCredentialAttempted();
+        verify(mFingerprintManager, never()).authenticate(any(), any(), any(),
+                any(), anyInt());
+        verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt(),
+                anyBoolean());
+    }
+
     private void setKeyguardBouncerVisibility(boolean isVisible) {
         mKeyguardUpdateMonitor.sendKeyguardBouncerChanged(isVisible);
         mTestableLooper.processAllMessages();
