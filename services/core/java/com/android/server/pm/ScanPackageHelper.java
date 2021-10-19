@@ -115,12 +115,22 @@ import java.util.UUID;
 /**
  * Helper class that handles package scanning logic
  */
-public final class ScanPackageHelper {
+final class ScanPackageHelper {
     final PackageManagerService mPm;
+    final InstallPackageHelper mInstallPackageHelper;
+    final PackageManagerServiceInjector mInjector;
 
     // TODO(b/198166813): remove PMS dependency
     public ScanPackageHelper(PackageManagerService pm) {
         mPm = pm;
+        mInjector = pm.mInjector;
+        mInstallPackageHelper = new InstallPackageHelper(mPm, mInjector);
+    }
+
+    ScanPackageHelper(PackageManagerService pm, PackageManagerServiceInjector injector) {
+        mPm = pm;
+        mInjector = injector;
+        mInstallPackageHelper = new InstallPackageHelper(mPm, injector);
     }
 
     /**
@@ -197,7 +207,7 @@ public final class ScanPackageHelper {
 
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "parsePackage");
         final ParsedPackage parsedPackage;
-        try (PackageParser2 pp = mPm.mInjector.getScanningPackageParser()) {
+        try (PackageParser2 pp = mInjector.getScanningPackageParser()) {
             parsedPackage = pp.parsePackage(scanFile, parseFlags, false);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
@@ -271,7 +281,7 @@ public final class ScanPackageHelper {
                     originalPkgSetting, realPkgName, parseFlags, scanFlags,
                     Objects.equals(parsedPackage.getPackageName(), platformPackageName), user,
                     cpuAbiOverride);
-            return scanPackageOnlyLI(request, mPm.mInjector, mPm.mFactoryTest, currentTime);
+            return scanPackageOnlyLI(request, mInjector, mPm.mFactoryTest, currentTime);
         }
     }
 
@@ -824,7 +834,7 @@ public final class ScanPackageHelper {
                     applyPolicy(parsedPackage, scanFlags,
                             platformPackage, true);
                     final ScanResult scanResult =
-                            scanPackageOnlyLI(request, mPm.mInjector,
+                            scanPackageOnlyLI(request, mInjector,
                                     mPm.mFactoryTest, -1L);
                     if (scanResult.mExistingSettingCopied
                             && scanResult.mRequest.mPkgSetting != null) {
@@ -858,9 +868,9 @@ public final class ScanPackageHelper {
                             + "; " + pkgSetting.getPathString()
                             + " --> " + parsedPackage.getPath());
 
-            final InstallArgs args = mPm.createInstallArgsForExisting(
+            final InstallArgs args = new FileInstallArgs(
                     pkgSetting.getPathString(), getAppDexInstructionSets(
-                            pkgSetting.getPrimaryCpuAbi(), pkgSetting.getSecondaryCpuAbi()));
+                            pkgSetting.getPrimaryCpuAbi(), pkgSetting.getSecondaryCpuAbi()), mPm);
             args.cleanUpResourcesLI();
             synchronized (mPm.mLock) {
                 mPm.mSettings.enableSystemPackageLPw(pkgSetting.getPackageName());
@@ -944,9 +954,10 @@ public final class ScanPackageHelper {
                                 + parsedPackage.getLongVersionCode()
                                 + "; " + pkgSetting.getPathString() + " --> "
                                 + parsedPackage.getPath());
-                InstallArgs args = mPm.createInstallArgsForExisting(
+                InstallArgs args = new FileInstallArgs(
                         pkgSetting.getPathString(), getAppDexInstructionSets(
-                                pkgSetting.getPrimaryCpuAbi(), pkgSetting.getSecondaryCpuAbi()));
+                                pkgSetting.getPrimaryCpuAbi(), pkgSetting.getSecondaryCpuAbi()),
+                        mPm);
                 synchronized (mPm.mInstallLock) {
                     args.cleanUpResourcesLI();
                 }
@@ -973,7 +984,7 @@ public final class ScanPackageHelper {
                 try {
                     final String pkgName = scanResult.mPkgSetting.getPackageName();
                     final Map<String, ReconciledPackage> reconcileResult =
-                            mPm.reconcilePackagesLocked(
+                            mInstallPackageHelper.reconcilePackagesLocked(
                                     new ReconcileRequest(
                                             Collections.singletonMap(pkgName, scanResult),
                                             mPm.mSharedLibraries,
@@ -985,9 +996,9 @@ public final class ScanPackageHelper {
                                             Collections.singletonMap(pkgName,
                                                     mPm.getSharedLibLatestVersionSetting(
                                                             scanResult))),
-                                    mPm.mSettings.getKeySetManagerService(), mPm.mInjector);
+                                    mPm.mSettings.getKeySetManagerService(), mInjector);
                     appIdCreated = optimisticallyRegisterAppId(scanResult);
-                    mPm.commitReconciledScanResultLocked(
+                    mInstallPackageHelper.commitReconciledScanResultLocked(
                             reconcileResult.get(pkgName), mPm.mUserManager.getUserIds());
                 } catch (PackageManagerException e) {
                     if (appIdCreated) {
@@ -1075,9 +1086,9 @@ public final class ScanPackageHelper {
         if (ps != null && !forceCollect
                 && ps.getPathString().equals(parsedPackage.getPath())
                 && ps.getLastModifiedTime() == lastModifiedTime
-                && !PackageManagerService.isCompatSignatureUpdateNeeded(settingsVersionForPackage)
-                && !PackageManagerService.isRecoverSignatureUpdateNeeded(
-                settingsVersionForPackage)) {
+                && !InstallPackageHelper.isCompatSignatureUpdateNeeded(settingsVersionForPackage)
+                && !InstallPackageHelper.isRecoverSignatureUpdateNeeded(
+                        settingsVersionForPackage)) {
             if (ps.getSigningDetails().getSignatures() != null
                     && ps.getSigningDetails().getSignatures().length != 0
                     && ps.getSigningDetails().getSignatureSchemeVersion()

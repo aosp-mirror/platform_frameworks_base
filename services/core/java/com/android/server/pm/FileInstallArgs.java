@@ -71,7 +71,10 @@ class FileInstallArgs extends InstallArgs {
         super(params);
     }
 
-    /** Existing install */
+    /**
+     * Create args that describe an existing installed package. Typically used
+     * when cleaning up old installs, or used as a move source.
+     */
     FileInstallArgs(String codePath, String[] instructionSets, PackageManagerService pm) {
         super(OriginInfo.fromNothing(), null, null, 0, InstallSource.EMPTY,
                 null, null, instructionSets, null, null, null, MODE_DEFAULT, null, 0,
