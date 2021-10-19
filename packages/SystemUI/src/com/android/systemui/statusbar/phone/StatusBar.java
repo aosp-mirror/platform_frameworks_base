@@ -249,7 +249,6 @@ import com.android.wm.shell.startingsurface.StartingSurface;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -441,10 +440,6 @@ public class StatusBar extends SystemUI implements
         mCommandQueueCallbacks.animateCollapsePanels(flags, force);
     }
 
-    public interface ExpansionChangedListener {
-        void onExpansionChanged(float expansion, boolean expanded);
-    }
-
     /**
      * The {@link StatusBarState} of the status bar.
      */
@@ -557,8 +552,6 @@ public class StatusBar extends SystemUI implements
     private final WallpaperManager mWallpaperManager;
     private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     private final TunerService mTunerService;
-
-    private final List<ExpansionChangedListener> mExpansionChangedListeners;
 
     // Flags for disabling the status bar
     // Two variables becaseu the first one evidently ran out of room for new flags.
@@ -911,7 +904,6 @@ public class StatusBar extends SystemUI implements
         mStartingSurfaceOptional = startingSurfaceOptional;
         lockscreenShadeTransitionController.setStatusbar(this);
 
-        mExpansionChangedListeners = new ArrayList<>();
         mPanelExpansionStateManager.addListener(this::onPanelExpansionChanged);
 
         mBubbleExpandListener =
@@ -1178,10 +1170,6 @@ public class StatusBar extends SystemUI implements
                     mStatusBarView.setPanelStateChangeListener(
                             mNotificationPanelViewController.getPanelStateChangeListener());
                     mStatusBarView.setScrimController(mScrimController);
-                    mStatusBarView.setExpansionChangedListeners(mExpansionChangedListeners);
-                    for (ExpansionChangedListener listener : mExpansionChangedListeners) {
-                        sendInitialExpansionAmount(listener);
-                    }
 
                     mNotificationPanelViewController.setBar(mStatusBarView);
 
@@ -1409,12 +1397,6 @@ public class StatusBar extends SystemUI implements
         // listen for USER_SETUP_COMPLETE setting (per-user)
         mDeviceProvisionedController.addCallback(mUserSetupObserver);
         mUserSetupObserver.onUserSetupChanged();
-
-        for (ExpansionChangedListener listener : mExpansionChangedListeners) {
-            // The initial expansion amount comes from mNotificationPanelViewController, so we
-            // should send the amount once we've fully set up that controller.
-            sendInitialExpansionAmount(listener);
-        }
 
         // disable profiling bars, since they overlap and clutter the output on app windows
         ThreadedRenderer.overrideProperty("disableProfileBars", "true");
@@ -4270,24 +4252,6 @@ public class StatusBar extends SystemUI implements
 
     boolean isTransientShown() {
         return mTransientShown;
-    }
-
-
-    public void addExpansionChangedListener(@NonNull ExpansionChangedListener listener) {
-        mExpansionChangedListeners.add(listener);
-        sendInitialExpansionAmount(listener);
-    }
-
-    private void sendInitialExpansionAmount(ExpansionChangedListener expansionChangedListener) {
-        if (mNotificationPanelViewController != null) {
-            expansionChangedListener.onExpansionChanged(
-                    mNotificationPanelViewController.getExpandedFraction(),
-                    mNotificationPanelViewController.isExpanded());
-        }
-    }
-
-    public void removeExpansionChangedListener(@NonNull ExpansionChangedListener listener) {
-        mExpansionChangedListeners.remove(listener);
     }
 
     private void updateLightRevealScrimVisibility() {
