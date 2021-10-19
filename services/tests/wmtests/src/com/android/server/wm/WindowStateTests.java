@@ -78,6 +78,7 @@ import static org.mockito.Mockito.when;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -563,7 +564,7 @@ public class WindowStateTests extends WindowTestsBase {
         final WindowState child = createWindow(w, TYPE_APPLICATION_PANEL, "child");
 
         assertTrue(w.hasCompatScale());
-        assertFalse(child.hasCompatScale());
+        assertTrue(child.hasCompatScale());
 
         makeWindowVisible(w, child);
         w.setRequestedSize(100, 200);
@@ -574,21 +575,26 @@ public class WindowStateTests extends WindowTestsBase {
         w.mAttrs.gravity = Gravity.TOP | Gravity.LEFT;
         child.mAttrs.gravity = Gravity.CENTER;
         DisplayContentTests.performLayout(mDisplayContent);
+        final Rect parentFrame = w.getFrame();
+        final Rect childFrame = child.getFrame();
 
         // Frame on screen = 200x400 (200, 200 - 400, 600). Compat frame on client = 100x200.
         final Rect unscaledCompatFrame = new Rect(w.getWindowFrames().mCompatFrame);
         unscaledCompatFrame.scale(overrideScale);
-        final Rect parentFrame = w.getFrame();
-        assertEquals(w.getWindowFrames().mFrame, unscaledCompatFrame);
+        assertEquals(parentFrame, unscaledCompatFrame);
 
-        final Rect childFrame = child.getFrame();
-        assertEquals(childFrame, child.getWindowFrames().mCompatFrame);
-        // Child frame = 50x100 (225, 250 - 275, 350) according to Gravity.CENTER.
-        final int childX = parentFrame.left + child.mRequestedWidth / 2;
-        final int childY = parentFrame.top + child.mRequestedHeight / 2;
-        final Rect expectedChildFrame = new Rect(childX, childY, childX + child.mRequestedWidth,
-                childY + child.mRequestedHeight);
-        assertEquals(expectedChildFrame, childFrame);
+        // Frame on screen = 100x200 (250, 300 - 350, 500). Compat frame on client = 50x100.
+        unscaledCompatFrame.set(child.getWindowFrames().mCompatFrame);
+        unscaledCompatFrame.scale(overrideScale);
+        assertEquals(childFrame, unscaledCompatFrame);
+
+        // The position of child is relative to parent. So the local coordinates should be scaled.
+        final Point expectedChildPos = new Point(
+                (int) ((childFrame.left - parentFrame.left) / overrideScale),
+                (int) ((childFrame.top - parentFrame.top) / overrideScale));
+        final Point childPos = new Point();
+        child.transformFrameToSurfacePosition(childFrame.left, childFrame.top, childPos);
+        assertEquals(expectedChildPos, childPos);
 
         // Surface should apply the scale.
         w.prepareSurfaces();
