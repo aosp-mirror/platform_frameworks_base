@@ -674,6 +674,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 }
                 mInFrontAlpha = 0;
             }
+        } else if (mState == ScrimState.AUTH_SCRIMMED_SHADE) {
+            float behindFraction = getInterpolatedFraction();
+            behindFraction = (float) Math.pow(behindFraction, 0.8f);
+
+            mBehindAlpha = behindFraction * mDefaultScrimAlpha;
+            mNotificationsAlpha = mBehindAlpha;
         } else if (mState == ScrimState.KEYGUARD || mState == ScrimState.SHADE_LOCKED
                 || mState == ScrimState.PULSING) {
             Pair<Integer, Float> result = calculateBackStateForState(mState);

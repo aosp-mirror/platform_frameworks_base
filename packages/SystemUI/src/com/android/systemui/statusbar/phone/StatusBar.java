@@ -3837,7 +3837,11 @@ public class StatusBar extends SystemUI implements
         mScrimController.setLaunchingAffordanceWithPreview(launchingAffordanceWithPreview);
 
         if (mStatusBarKeyguardViewManager.isShowingAlternateAuth()) {
-            mScrimController.transitionTo(ScrimState.AUTH_SCRIMMED);
+            if (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED) {
+                mScrimController.transitionTo(ScrimState.AUTH_SCRIMMED_SHADE);
+            } else {
+                mScrimController.transitionTo(ScrimState.AUTH_SCRIMMED);
+            }
         } else if (mBouncerShowing) {
             // Bouncer needs the front scrim when it's on top of an activity,
             // tapping on a notification, editing QS or being dismissed by

@@ -1063,7 +1063,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         HashSet<ScrimState> regularStates = new HashSet<>(Arrays.asList(
                 ScrimState.UNINITIALIZED, ScrimState.KEYGUARD, ScrimState.BOUNCER,
                 ScrimState.BOUNCER_SCRIMMED, ScrimState.BRIGHTNESS_MIRROR, ScrimState.UNLOCKED,
-                ScrimState.SHADE_LOCKED, ScrimState.AUTH_SCRIMMED));
+                ScrimState.SHADE_LOCKED, ScrimState.AUTH_SCRIMMED, ScrimState.AUTH_SCRIMMED_SHADE));
 
         for (ScrimState state : ScrimState.values()) {
             if (!lowPowerModeStates.contains(state) && !regularStates.contains(state)) {
@@ -1084,6 +1084,44 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mScrimBehind.getViewAlpha(), 1, 0.0);
         assertEquals("Notifications scrim should be opaque",
                 mNotificationsScrim.getViewAlpha(), 1, 0.0);
+    }
+
+    @Test
+    public void testAuthScrim_notifScrimOpaque_whenShadeFullyExpanded() {
+        // GIVEN device has an activity showing ('UNLOCKED' state can occur on the lock screen
+        // with the camera app occluding the keyguard)
+        mScrimController.transitionTo(ScrimState.UNLOCKED);
+        mScrimController.setRawPanelExpansionFraction(1);
+        // notifications scrim alpha change require calling setQsPosition
+        mScrimController.setQsPosition(0, 300);
+        finishAnimationsImmediately();
+
+        // WHEN the user triggers the auth bouncer
+        mScrimController.transitionTo(ScrimState.AUTH_SCRIMMED_SHADE);
+        finishAnimationsImmediately();
+
+        assertEquals("Behind scrim should be opaque",
+                mScrimBehind.getViewAlpha(), 1, 0.0);
+        assertEquals("Notifications scrim should be opaque",
+                mNotificationsScrim.getViewAlpha(), 1, 0.0);
+    }
+
+    @Test
+    public void testAuthScrimKeyguard() {
+        // GIVEN device is on the keyguard
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+        finishAnimationsImmediately();
+
+        // WHEN the user triggers the auth bouncer
+        mScrimController.transitionTo(ScrimState.AUTH_SCRIMMED);
+        finishAnimationsImmediately();
+
+        // THEN the front scrim is updated and the KEYGUARD scrims are the same as the
+        // KEYGUARD scrim state
+        assertScrimAlpha(Map.of(
+                mScrimInFront, SEMI_TRANSPARENT,
+                mScrimBehind, SEMI_TRANSPARENT,
+                mNotificationsScrim, TRANSPARENT));
     }
 
     @Test
