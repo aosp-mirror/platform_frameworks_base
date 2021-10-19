@@ -9660,6 +9660,23 @@ public final class Settings {
         public static final String INSTANT_APPS_ENABLED = "instant_apps_enabled";
 
         /**
+         * Whether qr code scanner should be accessible from the lockscreen
+         *
+         * @hide
+         */
+        public static final String LOCK_SCREEN_SHOW_QR_CODE_SCANNER =
+                "lock_screen_show_qr_code_scanner";
+
+        /**
+         * Whether or not to enable qr code code scanner setting to enable/disable lockscreen
+         * entry point. Any value apart from null means setting needs to be enabled
+         *
+         * @hide
+         */
+        public static final String SHOW_QR_CODE_SCANNER_SETTING =
+                "show_qr_code_scanner_setting";
+
+        /**
          * Has this pairable device been paired or upgraded from a previously paired system.
          * @hide
          */
