@@ -1196,6 +1196,12 @@
     <!-- Overflow menu item label to open the lockscreen settings in wallet activity. [CHAR LIMIT=NONE] -->
     <string name="wallet_lockscreen_settings_label">Lock screen settings</string>
 
+    <!-- QR Code Scanner label, title [CHAR LIMIT=32] -->
+    <string name="qr_code_scanner_title">Scan QR</string>
+
+    <!-- QR Code Scanner description [CHAR LIMIT=NONE] -->
+    <string name="qr_code_scanner_description">Click to scan a QR code</string>
+
     <!-- Name of the work status bar icon. -->
     <string name="status_bar_work">Work profile</string>
 
