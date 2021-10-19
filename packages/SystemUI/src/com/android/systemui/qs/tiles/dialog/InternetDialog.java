@@ -331,7 +331,7 @@ public class InternetDialog extends SystemUIDialog implements
         showProgressBar();
         final boolean isDeviceLocked = mInternetDialogController.isDeviceLocked();
         final boolean isWifiEnabled = mWifiManager.isWifiEnabled();
-        final boolean isWifiScanEnabled = mWifiManager.isScanAlwaysAvailable();
+        final boolean isWifiScanEnabled = mInternetDialogController.isWifiScanEnabled();
         updateWifiToggle(isWifiEnabled, isDeviceLocked);
         updateConnectedWifi(isWifiEnabled, isDeviceLocked);
         updateWifiScanNotify(isWifiEnabled, isWifiScanEnabled, isDeviceLocked);
