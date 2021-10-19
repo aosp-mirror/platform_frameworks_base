@@ -219,6 +219,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.phone.dagger.StatusBarPhoneModule;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -537,6 +538,7 @@ public class StatusBar extends SystemUI implements
     private final NotificationGutsManager mGutsManager;
     private final NotificationLogger mNotificationLogger;
     private final NotificationViewHierarchyManager mViewHierarchyManager;
+    private final PanelExpansionStateManager mPanelExpansionStateManager;
     private final KeyguardViewMediator mKeyguardViewMediator;
     protected final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private final BrightnessSlider.Factory mBrightnessSliderFactory;
@@ -721,6 +723,7 @@ public class StatusBar extends SystemUI implements
             NotificationLogger notificationLogger,
             NotificationInterruptStateProvider notificationInterruptStateProvider,
             NotificationViewHierarchyManager notificationViewHierarchyManager,
+            PanelExpansionStateManager panelExpansionStateManager,
             KeyguardViewMediator keyguardViewMediator,
             DisplayMetrics displayMetrics,
             MetricsLogger metricsLogger,
@@ -824,6 +827,7 @@ public class StatusBar extends SystemUI implements
         mNotificationLogger = notificationLogger;
         mNotificationInterruptStateProvider = notificationInterruptStateProvider;
         mViewHierarchyManager = notificationViewHierarchyManager;
+        mPanelExpansionStateManager = panelExpansionStateManager;
         mKeyguardViewMediator = keyguardViewMediator;
         mDisplayMetrics = displayMetrics;
         mMetricsLogger = metricsLogger;
@@ -1151,8 +1155,8 @@ public class StatusBar extends SystemUI implements
         mNotificationLogger.setUpWithContainer(notifListContainer);
 
         mNotificationIconAreaController.setupShelf(mNotificationShelfController);
-        mNotificationPanelViewController.addExpansionListener(mWakeUpCoordinator);
-        mNotificationPanelViewController.addExpansionListener(
+        mPanelExpansionStateManager.addListener(mWakeUpCoordinator);
+        mPanelExpansionStateManager.addListener(
                 this::dispatchPanelExpansionForKeyguardDismiss);
 
         mUserSwitcherController.init(mNotificationShadeWindowView);
@@ -1667,8 +1671,11 @@ public class StatusBar extends SystemUI implements
                 });
         mStatusBarKeyguardViewManager.registerStatusBar(
                 /* statusBar= */ this,
-                mNotificationPanelViewController, mBiometricUnlockController,
-                mStackScroller, mKeyguardBypassController);
+                mNotificationPanelViewController,
+                mPanelExpansionStateManager,
+                mBiometricUnlockController,
+                mStackScroller,
+                mKeyguardBypassController);
         mKeyguardIndicationController
                 .setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mBiometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);

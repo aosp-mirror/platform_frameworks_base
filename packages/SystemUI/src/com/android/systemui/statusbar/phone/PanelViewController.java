@@ -59,12 +59,12 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
 public abstract class PanelViewController {
     public static final boolean DEBUG = PanelBar.DEBUG;
@@ -86,7 +86,6 @@ public abstract class PanelViewController {
     private boolean mVibrateOnOpening;
     protected boolean mIsLaunchAnimationRunning;
     private int mFixedDuration = NO_FIXED_DURATION;
-    protected ArrayList<PanelExpansionListener> mExpansionListeners = new ArrayList<>();
     protected float mOverExpansion;
 
     /**
@@ -185,6 +184,7 @@ public abstract class PanelViewController {
     protected final SysuiStatusBarStateController mStatusBarStateController;
     protected final AmbientState mAmbientState;
     protected final LockscreenGestureLogger mLockscreenGestureLogger;
+    private final PanelExpansionStateManager mPanelExpansionStateManager;
     private final TouchHandler mTouchHandler;
 
     protected abstract void onExpandingFinished();
@@ -211,20 +211,25 @@ public abstract class PanelViewController {
         return mAmbientState;
     }
 
-    public PanelViewController(PanelView view,
-            FalsingManager falsingManager, DozeLog dozeLog,
+    public PanelViewController(
+            PanelView view,
+            FalsingManager falsingManager,
+            DozeLog dozeLog,
             KeyguardStateController keyguardStateController,
-            SysuiStatusBarStateController statusBarStateController, VibratorHelper vibratorHelper,
+            SysuiStatusBarStateController statusBarStateController,
+            VibratorHelper vibratorHelper,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             LatencyTracker latencyTracker,
             FlingAnimationUtils.Builder flingAnimationUtilsBuilder,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
             LockscreenGestureLogger lockscreenGestureLogger,
+            PanelExpansionStateManager panelExpansionStateManager,
             AmbientState ambientState) {
         mAmbientState = ambientState;
         mView = view;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mLockscreenGestureLogger = lockscreenGestureLogger;
+        mPanelExpansionStateManager = panelExpansionStateManager;
         mTouchHandler = createTouchHandler();
         mView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
@@ -1088,9 +1093,7 @@ public abstract class PanelViewController {
             mBar.panelExpansionChanged(mExpandedFraction, isExpanded());
         }
         updateVisibility();
-        for (int i = 0; i < mExpansionListeners.size(); i++) {
-            mExpansionListeners.get(i).onPanelExpansionChanged(mExpandedFraction, mTracking);
-        }
+        mPanelExpansionStateManager.onPanelExpansionChanged(mExpandedFraction, mTracking);
     }
 
     public boolean isExpanded() {
@@ -1100,10 +1103,6 @@ public abstract class PanelViewController {
                 || mTracking
                 || mHeightAnimator != null
                 && !mIsSpringBackAnimation;
-    }
-
-    public void addExpansionListener(PanelExpansionListener panelExpansionListener) {
-        mExpansionListeners.add(panelExpansionListener);
     }
 
     protected abstract boolean isPanelVisibleBecauseOfHeadsUp();

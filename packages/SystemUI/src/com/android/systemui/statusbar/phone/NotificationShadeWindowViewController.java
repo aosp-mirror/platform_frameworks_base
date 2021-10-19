@@ -54,6 +54,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.InjectionInflationController;
@@ -107,6 +108,7 @@ public class NotificationShadeWindowViewController {
     private boolean mExpandingBelowNotch;
     private final DockManager mDockManager;
     private final NotificationPanelViewController mNotificationPanelViewController;
+    private final PanelExpansionStateManager mPanelExpansionStateManager;
     private final StatusBarWindowView mStatusBarWindowView;
 
     // Used for determining view / touch intersection
@@ -137,6 +139,7 @@ public class NotificationShadeWindowViewController {
             NotificationShadeDepthController depthController,
             NotificationShadeWindowView notificationShadeWindowView,
             NotificationPanelViewController notificationPanelViewController,
+            PanelExpansionStateManager panelExpansionStateManager,
             StatusBarWindowView statusBarWindowView,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
@@ -161,6 +164,7 @@ public class NotificationShadeWindowViewController {
         mShadeController = shadeController;
         mDockManager = dockManager;
         mNotificationPanelViewController = notificationPanelViewController;
+        mPanelExpansionStateManager = panelExpansionStateManager;
         mDepthController = depthController;
         mStatusBarWindowView = statusBarWindowView;
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
@@ -446,7 +450,7 @@ public class NotificationShadeWindowViewController {
         setDragDownHelper(mLockscreenShadeTransitionController.getTouchHelper());
 
         mDepthController.setRoot(mView);
-        mNotificationPanelViewController.addExpansionListener(mDepthController);
+        mPanelExpansionStateManager.addListener(mDepthController);
     }
 
     public NotificationShadeWindowView getView() {
