@@ -2346,6 +2346,26 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_MANAGE_PERMISSION_USAGE =
             "android.intent.action.MANAGE_PERMISSION_USAGE";
 
+    /**
+     * Activity action: Launch UI to view the app's feature's information.
+     *
+     * <p>
+     * Output: Nothing.
+     * </p>
+     * <p class="note">
+     * You must protect the activity that handles this action with the
+     * {@link android.Manifest.permission#START_VIEW_APP_FEATURES} permission to ensure that
+     * only the system can launch this activity. The system will not launch activities
+     * that are not properly protected.
+     * </p>
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.START_VIEW_APP_FEATURES)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_VIEW_APP_FEATURES =
+            "android.intent.action.VIEW_APP_FEATURES";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent broadcast actions (see action variable).

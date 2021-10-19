@@ -2453,6 +2453,7 @@ package android.content {
     field public static final String ACTION_UPGRADE_SETUP = "android.intent.action.UPGRADE_SETUP";
     field public static final String ACTION_USER_ADDED = "android.intent.action.USER_ADDED";
     field public static final String ACTION_USER_REMOVED = "android.intent.action.USER_REMOVED";
+    field @RequiresPermission(android.Manifest.permission.START_VIEW_APP_FEATURES) public static final String ACTION_VIEW_APP_FEATURES = "android.intent.action.VIEW_APP_FEATURES";
     field public static final String ACTION_VOICE_ASSIST = "android.intent.action.VOICE_ASSIST";
     field public static final String CATEGORY_LEANBACK_SETTINGS = "android.intent.category.LEANBACK_SETTINGS";
     field public static final String EXTRA_CALLING_PACKAGE = "android.intent.extra.CALLING_PACKAGE";

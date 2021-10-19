@@ -5344,6 +5344,15 @@
         android:description="@string/permdesc_startViewPermissionUsage"
         android:protectionLevel="signature|installer" />
 
+    <!--
+        Allows the holder to start the screen with a list of app features.
+        <p>Protection level: signature|installer
+    -->
+    <permission android:name="android.permission.START_VIEW_APP_FEATURES"
+                android:label="@string/permlab_startViewAppFeatures"
+                android:description="@string/permdesc_startViewAppFeatures"
+                android:protectionLevel="signature|installer" />
+
     <!-- Allows an application to query whether DO_NOT_ASK_CREDENTIALS_ON_BOOT
          flag is set.
          @hide -->

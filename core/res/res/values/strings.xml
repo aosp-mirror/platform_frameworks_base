@@ -1926,6 +1926,11 @@
     <string name="permdesc_startViewPermissionUsage">Allows the holder to start the permission usage for an app. Should never be needed for normal apps.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permlab_startViewAppFeatures">start view app features</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permdesc_startViewAppFeatures">Allows the holder to start viewing the features info for an app.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
     <string name="permlab_highSamplingRateSensors">access sensor data at a high sampling rate</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this.[CHAR_LIMIT=NONE] -->
     <string name="permdesc_highSamplingRateSensors">Allows the app to sample sensor data at a rate greater than 200 Hz</string>
