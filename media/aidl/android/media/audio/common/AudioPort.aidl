@@ -17,6 +17,7 @@
 package android.media.audio.common;
 
 import android.media.audio.common.AudioGain;
+import android.media.audio.common.AudioIoFlags;
 import android.media.audio.common.AudioPortConfig;
 import android.media.audio.common.AudioPortExt;
 import android.media.audio.common.AudioProfile;
@@ -44,6 +45,10 @@ parcelable AudioPort {
      * AudioProfiles supported by this port: format, rates, channels.
      */
     AudioProfile[] profiles;
+    /**
+     * I/O feature flags.
+     */
+    AudioIoFlags flags;
     /**
      * ExtraAudioDescriptors supported by this port. Used for formats not
      * recognized by the platform. The audio capability is described by a

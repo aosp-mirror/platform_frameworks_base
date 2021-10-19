@@ -33,11 +33,14 @@
 
 package android.media.audio.common;
 /* @hide */
-@JavaDerive(equals=true, toString=true) @VintfStability
-parcelable AudioPortMixExt {
-  int handle;
-  android.media.audio.common.AudioPortMixExtUseCase usecase;
-  int maxOpenStreamCount;
-  int maxActiveStreamCount;
-  int recommendedMuteDurationMs;
+@Backing(type="int") @VintfStability
+enum AudioInputFlags {
+  FAST = 0,
+  HW_HOTWORD = 1,
+  RAW = 2,
+  SYNC = 3,
+  MMAP_NOIRQ = 4,
+  VOIP_TX = 5,
+  HW_AV_SYNC = 6,
+  DIRECT = 7,
 }

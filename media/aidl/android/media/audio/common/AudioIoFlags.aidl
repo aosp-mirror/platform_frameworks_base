@@ -16,24 +16,16 @@
 
 package android.media.audio.common;
 
-import android.media.audio.common.AudioPortDeviceExt;
-import android.media.audio.common.AudioPortMixExt;
-
 /**
- * Extra parameters of an AudioPort/AudioPortConfig that depend on
- * the actual port role.
+ * Stores a bitmask of input or output flags.
  *
  * {@hide}
  */
 @JavaDerive(equals=true, toString=true)
 @VintfStability
-union AudioPortExt {
-    /** Represents an empty union. Value is ignored. */
-    boolean unspecified;
-    /** Information specific to device ports. */
-    AudioPortDeviceExt device;
-    /** Information specific to mix ports. */
-    AudioPortMixExt mix;
-    /** Audio session identifier. */
-    int session;
+union AudioIoFlags {
+    /** Bitmask indexed by AudioInputFlags. */
+    int input;
+    /** Bitmask indexed by AudioOutputFlags. */
+    int output;
 }

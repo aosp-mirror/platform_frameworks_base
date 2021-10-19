@@ -16,24 +16,23 @@
 
 package android.media.audio.common;
 
-import android.media.audio.common.AudioPortDeviceExt;
-import android.media.audio.common.AudioPortMixExt;
+import android.media.audio.common.AudioDevice;
+import android.media.audio.common.AudioFormatDescription;
 
 /**
- * Extra parameters of an AudioPort/AudioPortConfig that depend on
- * the actual port role.
+ * Extra parameters which are specified when the audio port is in the device role.
  *
  * {@hide}
  */
 @JavaDerive(equals=true, toString=true)
 @VintfStability
-union AudioPortExt {
-    /** Represents an empty union. Value is ignored. */
-    boolean unspecified;
-    /** Information specific to device ports. */
-    AudioPortDeviceExt device;
-    /** Information specific to mix ports. */
-    AudioPortMixExt mix;
-    /** Audio session identifier. */
-    int session;
+parcelable AudioPortDeviceExt {
+    /** Audio device specification. */
+    AudioDevice device;
+    /**
+     * List of supported encoded formats. Specified for ports that perform
+     * hardware-accelerated decoding or transcoding, or connected to external
+     * hardware.
+     */
+    AudioFormatDescription[] encodedFormats;
 }
