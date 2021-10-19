@@ -7443,7 +7443,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     /**
      * Adjusts horizontal position of resolved bounds if they doesn't fill the parent using gravity
      * requested in the config or via an ADB command. For more context see {@link
-     * WindowManagerService#getLetterboxHorizontalPositionMultiplier}.
+     * LetterboxUiController#getHorizontalPositionMultiplier(Configuration)}.
      */
     private void updateResolvedBoundsHorizontalPosition(Configuration newParentConfiguration) {
         final Configuration resolvedConfig = getResolvedOverrideConfiguration();
@@ -7780,7 +7780,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Below figure is an example that puts an activity which was launched in a larger container
         // into a smaller container.
         //   The outermost rectangle is the real display bounds.
-        //   "@" is the container app bounds (parent bounds or fixed orientation bouds)
+        //   "@" is the container app bounds (parent bounds or fixed orientation bounds)
         //   "#" is the {@code resolvedBounds} that applies to application.
         //   "*" is the {@code mSizeCompatBounds} that used to show on screen if scaled.
         // ------------------------------
@@ -7823,12 +7823,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mSizeCompatBounds = null;
         }
 
-        // Align to top of parent (bounds) - this is a UX choice and exclude the horizontal decor
-        // if needed. Horizontal position is adjusted in updateResolvedBoundsHorizontalPosition.
+        // Vertically center within parent (bounds) - this is a UX choice and exclude the horizontal
+        // decor if needed. Horizontal position is adjusted in
+        // updateResolvedBoundsHorizontalPosition.
         // Above coordinates are in "@" space, now place "*" and "#" to screen space.
         final boolean fillContainer = resolvedBounds.equals(containingBounds);
         final int screenPosX = fillContainer ? containerBounds.left : containerAppBounds.left;
-        final int screenPosY = containerBounds.top;
+        final int screenPosY = mSizeCompatBounds == null
+                ? (containerBounds.height() - resolvedBounds.height()) / 2
+                : (containerBounds.height() - mSizeCompatBounds.height()) / 2;
         if (screenPosX != 0 || screenPosY != 0) {
             if (mSizeCompatBounds != null) {
                 mSizeCompatBounds.offset(screenPosX, screenPosY);
