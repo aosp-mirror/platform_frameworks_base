@@ -24,6 +24,9 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
 
 public class Timestamp64Test {
 
@@ -203,6 +206,96 @@ public class Timestamp64Test {
         long actualNanos = instant.getNano();
         assertTrue("expectedNanos=" + expectedNanos + ",  actualNanos=" + actualNanos,
                 actualNanos == expectedNanos || actualNanos == expectedNanos - 1);
+    }
+
+    @Test
+    public void testMillisRandomizationConstant() {
+        // Mathematically, we can say that to represent 1000 different values, we need 10 binary
+        // digits (2^10 = 1024). The same is true whether we're dealing with integers or fractions.
+        // Unfortunately, for fractions those 1024 values do not correspond to discrete decimal
+        // values. Discrete millisecond values as fractions (e.g. 0.001 - 0.999) cannot be
+        // represented exactly except where the value can also be represented as some combination of
+        // powers of -2. When we convert back and forth, we truncate, so millisecond decimal
+        // fraction N represented as a binary fraction will always be equal to or lower than N. If
+        // we are truncating correctly it will never be as low as (N-0.001). N -> [N-0.001, N].
+
+        // We need to keep 10 bits to hold millis (inaccurately, since there are numbers that
+        // cannot be represented exactly), leaving us able to randomize the remaining 22 bits of the
+        // fraction part without significantly affecting the number represented.
+        assertEquals(22, Timestamp64.SUB_MILLIS_BITS_TO_RANDOMIZE);
+
+        // Brute force proof that randomization logic will keep the timestamp within the range
+        // [N-0.001, N] where x is in milliseconds.
+        int smallFractionRandomizedLow = 0;
+        int smallFractionRandomizedHigh = 0b00000000_00111111_11111111_11111111;
+        int largeFractionRandomizedLow = 0b11111111_11000000_00000000_00000000;
+        int largeFractionRandomizedHigh = 0b11111111_11111111_11111111_11111111;
+
+        long smallLowNanos = Timestamp64.fromComponents(
+                0, smallFractionRandomizedLow).toInstant(0).getNano();
+        long smallHighNanos = Timestamp64.fromComponents(
+                0, smallFractionRandomizedHigh).toInstant(0).getNano();
+        long smallDelta = smallHighNanos - smallLowNanos;
+        long millisInNanos = 1_000_000_000 / 1_000;
+        assertTrue(smallDelta >= 0 && smallDelta < millisInNanos);
+
+        long largeLowNanos = Timestamp64.fromComponents(
+                0, largeFractionRandomizedLow).toInstant(0).getNano();
+        long largeHighNanos = Timestamp64.fromComponents(
+                0, largeFractionRandomizedHigh).toInstant(0).getNano();
+        long largeDelta = largeHighNanos - largeLowNanos;
+        assertTrue(largeDelta >= 0 && largeDelta < millisInNanos);
+
+        PredictableRandom random = new PredictableRandom();
+        random.setIntSequence(new int[] { 0xFFFF_FFFF });
+        Timestamp64 zero = Timestamp64.fromComponents(0, 0);
+        Timestamp64 zeroWithFractionRandomized = zero.randomizeSubMillis(random);
+        assertEquals(zero.getEraSeconds(), zeroWithFractionRandomized.getEraSeconds());
+        assertEquals(smallFractionRandomizedHigh, zeroWithFractionRandomized.getFractionBits());
+    }
+
+    @Test
+    public void testRandomizeLowestBits() {
+        Random random = new Random(1);
+        {
+            int fractionBits = 0;
+            expectIllegalArgumentException(
+                    () -> Timestamp64.randomizeLowestBits(random, fractionBits, -1));
+            expectIllegalArgumentException(
+                    () -> Timestamp64.randomizeLowestBits(random, fractionBits, 0));
+            expectIllegalArgumentException(
+                    () -> Timestamp64.randomizeLowestBits(random, fractionBits, Integer.SIZE));
+            expectIllegalArgumentException(
+                    () -> Timestamp64.randomizeLowestBits(random, fractionBits, Integer.SIZE + 1));
+        }
+
+        // Check the behavior looks correct from a probabilistic point of view.
+        for (int input : new int[] { 0, 0xFFFFFFFF }) {
+            for (int bitCount = 1; bitCount < Integer.SIZE; bitCount++) {
+                int upperBitMask = 0xFFFFFFFF << bitCount;
+                int expectedUpperBits = input & upperBitMask;
+
+                Set<Integer> values = new HashSet<>();
+                values.add(input);
+
+                int trials = 100;
+                for (int i = 0; i < trials; i++) {
+                    int outputFractionBits =
+                            Timestamp64.randomizeLowestBits(random, input, bitCount);
+
+                    // Record the output value for later analysis.
+                    values.add(outputFractionBits);
+
+                    // Check upper bits did not change.
+                    assertEquals(expectedUpperBits, outputFractionBits & upperBitMask);
+                }
+
+                // It's possible to be more rigorous here, perhaps with a histogram. As bitCount
+                // rises, values.size() quickly trend towards the value of trials + 1. For now, this
+                // mostly just guards against a no-op implementation.
+                assertTrue(bitCount + ":" + values.size(), values.size() > 1);
+            }
+        }
     }
 
     private static void expectIllegalArgumentException(Runnable r) {
