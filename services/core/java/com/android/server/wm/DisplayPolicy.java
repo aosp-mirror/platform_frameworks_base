@@ -29,7 +29,6 @@ import static android.view.InsetsState.ITYPE_BOTTOM_TAPPABLE_ELEMENT;
 import static android.view.InsetsState.ITYPE_CAPTION_BAR;
 import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
 import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_LEFT_GESTURES;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_RIGHT_GESTURES;
@@ -37,7 +36,6 @@ import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.InsetsState.ITYPE_TOP_MANDATORY_GESTURES;
 import static android.view.InsetsState.ITYPE_TOP_TAPPABLE_ELEMENT;
 import static android.view.ViewRootImpl.INSETS_LAYOUT_GENERALIZATION;
-import static android.view.ViewRootImpl.computeWindowBounds;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
@@ -50,21 +48,15 @@ import static android.view.WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN;
-import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
-import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
-import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
-import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
@@ -147,6 +139,7 @@ import android.view.View;
 import android.view.ViewDebug;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
+import android.view.WindowLayout;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerGlobal;
@@ -356,14 +349,14 @@ public class DisplayPolicy {
     // If nonzero, a panic gesture was performed at that time in uptime millis and is still pending.
     private long mPendingPanicGestureUptime;
 
-    private static final Rect sTmpDisplayCutoutSafeExceptMaybeBarsRect = new Rect();
     private static final Rect sTmpRect = new Rect();
     private static final Rect sTmpNavFrame = new Rect();
     private static final Rect sTmpStatusFrame = new Rect();
     private static final Rect sTmpDecorFrame = new Rect();
-    private static final Rect sTmpScreenDecorFrame = new Rect();
     private static final Rect sTmpLastParentFrame = new Rect();
     private static final Rect sTmpDisplayFrameBounds = new Rect();
+
+    private final WindowLayout mWindowLayout = new WindowLayout();
 
     private WindowState mTopFullscreenOpaqueWindowState;
     private boolean mTopIsFullscreen;
@@ -1484,7 +1477,7 @@ public class DisplayPolicy {
      * @param outInsetsState The insets state of this display from the client's perspective.
      * @param localClient Whether the client is from the our process.
      * @return Whether to always consume the system bars.
-     *         See {@link #areSystemBarsForcedShownLw(WindowState)}.
+     *         See {@link #areSystemBarsForcedShownLw()}.
      */
     boolean getLayoutHint(LayoutParams attrs, WindowToken windowToken, InsetsState outInsetsState,
             boolean localClient) {
@@ -1721,108 +1714,24 @@ public class DisplayPolicy {
 
         final int type = attrs.type;
         final int fl = attrs.flags;
-        final int pfl = attrs.privateFlags;
         final int sim = attrs.softInputMode;
 
         displayFrames = win.getDisplayFrames(displayFrames);
         final WindowFrames windowFrames = win.getLayoutingWindowFrames();
 
-        sTmpLastParentFrame.set(windowFrames.mParentFrame);
         final Rect pf = windowFrames.mParentFrame;
         final Rect df = windowFrames.mDisplayFrame;
-        windowFrames.setParentFrameWasClippedByDisplayCutout(false);
+        final Rect attachedWindowFrame = attached != null ? attached.getFrame() : null;
+        sTmpLastParentFrame.set(pf);
 
-        final boolean layoutInScreen = (fl & FLAG_LAYOUT_IN_SCREEN) == FLAG_LAYOUT_IN_SCREEN;
-        final boolean layoutInsetDecor = (fl & FLAG_LAYOUT_INSET_DECOR) == FLAG_LAYOUT_INSET_DECOR;
+        // Override the bounds in window token has many side effects. Directly use the display
+        // frame set for the simulated layout for this case.
+        final Rect winBounds = windowFrames.mIsSimulatingDecorWindow ? df : win.getBounds();
 
-        final InsetsState state = win.getInsetsState();
-        if (windowFrames.mIsSimulatingDecorWindow && INSETS_LAYOUT_GENERALIZATION) {
-            // Override the bounds in window token has many side effects. Directly use the display
-            // frame set for the simulated layout for this case.
-            computeWindowBounds(attrs, state, df, df);
-        } else {
-            computeWindowBounds(attrs, state, win.getBounds(), df);
-        }
-        if (attached == null) {
-            pf.set(df);
-            if ((pfl & PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME) != 0) {
-                final InsetsSource source = state.peekSource(ITYPE_IME);
-                if (source != null) {
-                    pf.inset(source.calculateInsets(pf, false /* ignoreVisibility */));
-                }
-            }
-        } else {
-            pf.set((fl & FLAG_LAYOUT_IN_SCREEN) == 0 ? attached.getFrame() : df);
-        }
-
-        final int cutoutMode = attrs.layoutInDisplayCutoutMode;
-        // Ensure that windows with a DEFAULT or NEVER display cutout mode are laid out in
-        // the cutout safe zone.
-        if (cutoutMode != LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS) {
-            final boolean attachedInParent = attached != null && !layoutInScreen;
-            final boolean requestedFullscreen = !win.getRequestedVisibility(ITYPE_STATUS_BAR);
-            final boolean requestedHideNavigation =
-                    !win.getRequestedVisibility(ITYPE_NAVIGATION_BAR);
-
-            // TYPE_BASE_APPLICATION windows are never considered floating here because they don't
-            // get cropped / shifted to the displayFrame in WindowState.
-            final boolean floatingInScreenWindow = !attrs.isFullscreen() && layoutInScreen
-                    && type != TYPE_BASE_APPLICATION;
-            final Rect displayCutoutSafeExceptMaybeBars = sTmpDisplayCutoutSafeExceptMaybeBarsRect;
-            displayCutoutSafeExceptMaybeBars.set(displayFrames.mDisplayCutoutSafe);
-            if (cutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES) {
-                if (displayFrames.mDisplayWidth < displayFrames.mDisplayHeight) {
-                    displayCutoutSafeExceptMaybeBars.top = Integer.MIN_VALUE;
-                    displayCutoutSafeExceptMaybeBars.bottom = Integer.MAX_VALUE;
-                } else {
-                    displayCutoutSafeExceptMaybeBars.left = Integer.MIN_VALUE;
-                    displayCutoutSafeExceptMaybeBars.right = Integer.MAX_VALUE;
-                }
-            }
-
-            if (layoutInScreen && layoutInsetDecor && !requestedFullscreen
-                    && (cutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
-                    || cutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES)) {
-                // At the top we have the status bar, so apps that are
-                // LAYOUT_IN_SCREEN | LAYOUT_INSET_DECOR but not FULLSCREEN
-                // already expect that there's an inset there and we don't need to exclude
-                // the window from that area.
-                displayCutoutSafeExceptMaybeBars.top = Integer.MIN_VALUE;
-            }
-            if (layoutInScreen && layoutInsetDecor && !requestedHideNavigation
-                    && (cutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
-                    || cutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES)) {
-                // Same for the navigation bar.
-                switch (mNavigationBarPosition) {
-                    case NAV_BAR_BOTTOM:
-                        displayCutoutSafeExceptMaybeBars.bottom = Integer.MAX_VALUE;
-                        break;
-                    case NAV_BAR_RIGHT:
-                        displayCutoutSafeExceptMaybeBars.right = Integer.MAX_VALUE;
-                        break;
-                    case NAV_BAR_LEFT:
-                        displayCutoutSafeExceptMaybeBars.left = Integer.MIN_VALUE;
-                        break;
-                }
-            }
-            if (type == TYPE_INPUT_METHOD && mNavigationBarPosition == NAV_BAR_BOTTOM) {
-                // The IME can always extend under the bottom cutout if the navbar is there.
-                displayCutoutSafeExceptMaybeBars.bottom = Integer.MAX_VALUE;
-            }
-            // Windows that are attached to a parent and laid out in said parent already avoid
-            // the cutout according to that parent and don't need to be further constrained.
-            // Floating IN_SCREEN windows get what they ask for and lay out in the full screen.
-            // They will later be cropped or shifted using the displayFrame in WindowState,
-            // which prevents overlap with the DisplayCutout.
-            if (!attachedInParent && !floatingInScreenWindow) {
-                sTmpRect.set(pf);
-                pf.intersectUnchecked(displayCutoutSafeExceptMaybeBars);
-                windowFrames.setParentFrameWasClippedByDisplayCutout(!sTmpRect.equals(pf));
-            }
-            // Make sure that NO_LIMITS windows clipped to the display don't extend under the
-            // cutout.
-            df.intersectUnchecked(displayCutoutSafeExceptMaybeBars);
-        }
+        final boolean clippedByDisplayCutout = mWindowLayout.computeWindowFrames(attrs,
+                win.getInsetsState(), displayFrames.mDisplayCutoutSafe, winBounds,
+                win.getRequestedVisibilities(), attachedWindowFrame, df, pf);
+        windowFrames.setParentFrameWasClippedByDisplayCutout(clippedByDisplayCutout);
 
         // TYPE_SYSTEM_ERROR is above the NavigationBar so it can't be allowed to extend over it.
         // Also, we don't allow windows in multi-window mode to extend out of the screen.
@@ -1843,16 +1752,6 @@ public class DisplayPolicy {
         }
 
         win.computeFrameAndUpdateSourceFrame(displayFrames);
-        if (INSETS_LAYOUT_GENERALIZATION && attrs.type == TYPE_STATUS_BAR) {
-            if (displayFrames.mDisplayCutoutSafe.top > displayFrames.mUnrestricted.top) {
-                // Make sure that the zone we're avoiding for the cutout is at least as tall as the
-                // status bar; otherwise fullscreen apps will end up cutting halfway into the status
-                // bar.
-                displayFrames.mDisplayCutoutSafe.top = Math.max(
-                        displayFrames.mDisplayCutoutSafe.top,
-                        windowFrames.mFrame.bottom);
-            }
-        }
     }
 
     WindowState getTopFullscreenOpaqueWindow() {
