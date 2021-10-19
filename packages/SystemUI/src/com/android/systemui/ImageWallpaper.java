@@ -127,7 +127,12 @@ public class ImageWallpaper extends WallpaperService {
             setFixedSizeAllowed(true);
             updateSurfaceSize();
 
-            mRenderer.setOnBitmapChanged(this::updateMiniBitmap);
+            mRenderer.setOnBitmapChanged(b -> {
+                mLocalColorsToAdd.addAll(mColorAreas);
+                if (mLocalColorsToAdd.size() > 0) {
+                    updateMiniBitmapAndNotify(b);
+                }
+            });
             getDisplayContext().getSystemService(DisplayManager.class)
                     .registerDisplayListener(this, mWorker.getThreadHandler());
             Trace.endSection();
@@ -171,7 +176,7 @@ public class ImageWallpaper extends WallpaperService {
                     computeAndNotifyLocalColors(new ArrayList<>(mColorAreas), mMiniBitmap));
         }
 
-        private void updateMiniBitmap(Bitmap b) {
+        private void updateMiniBitmapAndNotify(Bitmap b) {
             if (b == null) return;
             int size = Math.min(b.getWidth(), b.getHeight());
             float scale = 1.0f;
@@ -233,6 +238,9 @@ public class ImageWallpaper extends WallpaperService {
                 Bitmap bitmap = mMiniBitmap;
                 if (bitmap == null) {
                     mLocalColorsToAdd.addAll(regions);
+                    mRenderer.use(b -> {
+                        updateMiniBitmapAndNotify(b);
+                    });
                 } else {
                     computeAndNotifyLocalColors(regions, bitmap);
                 }
