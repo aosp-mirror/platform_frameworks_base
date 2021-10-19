@@ -266,6 +266,8 @@
     <string name="accessibility_voice_assist_button">Voice Assist</string>
     <!-- Content description of the wallet button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_wallet_button">Wallet</string>
+    <!-- Content description of the QR Code scanner for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_qr_code_scanner_button">QR Code Scanner</string>
     <!-- Content description of the unlock button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_unlock_button">Unlock</string>
     <!-- Content description of the lock icon for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
