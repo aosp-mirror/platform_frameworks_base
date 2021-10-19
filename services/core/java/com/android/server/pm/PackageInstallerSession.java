@@ -732,11 +732,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         /**
-         * Notified by the staging manager or PIS that pre-reboot verification has ended.
+         * Called when pre-reboot verification has ended.
          * Now it is safe to clean up the session if {@link #abandon()} has been called previously.
          */
-        @Override
-        public void notifyEndPreRebootVerification() {
+        private void notifyEndPreRebootVerification() {
             synchronized (mLock) {
                 if (!mInPreRebootVerification) {
                     throw new IllegalStateException("Pre-reboot verification not started");

@@ -43,7 +43,6 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageInstaller.SessionInfo.StagedSessionErrorCode;
 import android.content.pm.StagedApexInfo;
-import android.os.Message;
 import android.os.SystemProperties;
 import android.os.storage.IStorageManager;
 import android.platform.test.annotations.Presubmit;
@@ -113,7 +112,7 @@ public class StagingManagerTest {
         when(SystemProperties.get(eq("ro.apex.updatable"), anyString())).thenReturn("true");
 
         mTmpDir = mTemporaryFolder.newFolder("StagingManagerTest");
-        mStagingManager = new StagingManager(mContext, null, mApexManager);
+        mStagingManager = new StagingManager(mContext, mApexManager);
     }
 
     @After
@@ -121,32 +120,6 @@ public class StagingManagerTest {
         if (mMockitoSession != null) {
             mMockitoSession.finishMocking();
         }
-    }
-
-    /**
-     * Tests that sessions committed later shouldn't cause earlier ones to fail the overlapping
-     * check.
-     */
-    @Test
-    public void checkNonOverlappingWithStagedSessions_laterSessionShouldNotFailEarlierOnes()
-            throws Exception {
-        // Create 2 sessions with overlapping packages
-        StagingManager.StagedSession session1 = createSession(111, "com.foo", 1);
-        StagingManager.StagedSession session2 = createSession(222, "com.foo", 2);
-
-        mStagingManager.createSession(session1);
-        mStagingManager.createSession(session2);
-        // Session1 should not fail in spite of the overlapping packages
-        mStagingManager.checkNonOverlappingWithStagedSessions(session1);
-        // setSessionFailed() should've been called when doing overlapping checks on session1
-        verify(session2, times(1)).setSessionFailed(anyInt(), anyString());
-
-        // Yet another session with overlapping packages
-        StagingManager.StagedSession session3 = createSession(333, "com.foo", 3);
-        mStagingManager.createSession(session3);
-        assertThrows(PackageManagerException.class,
-                () -> mStagingManager.checkNonOverlappingWithStagedSessions(session3));
-        verify(session3, never()).setSessionFailed(anyInt(), anyString());
     }
 
     @Test
@@ -1058,9 +1031,6 @@ public class StagingManagerTest {
         public void abandon() {
             mIsAbandonded = true;
         }
-
-        @Override
-        public void notifyEndPreRebootVerification() {}
 
         @Override
         public void verifySession() {

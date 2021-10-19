@@ -19,7 +19,6 @@ package com.android.server.pm;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.apex.ApexInfo;
-import android.apex.ApexInfoList;
 import android.apex.ApexSessionInfo;
 import android.apex.ApexSessionParams;
 import android.content.BroadcastReceiver;
@@ -31,25 +30,14 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.ApexStagedEvent;
 import android.content.pm.IStagedApexObserver;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageInstaller.SessionInfo.StagedSessionErrorCode;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.SigningDetails;
-import android.content.pm.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.StagedApexInfo;
-import android.content.pm.parsing.PackageInfoWithoutStateUtils;
-import android.content.pm.parsing.result.ParseResult;
-import android.content.pm.parsing.result.ParseTypeImpl;
-import android.content.rollback.RollbackInfo;
-import android.content.rollback.RollbackManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
-import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -62,7 +50,6 @@ import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimingsTraceLog;
-import android.util.apk.ApkSignatureVerifier;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -72,10 +59,8 @@ import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
-import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.rollback.RollbackManagerInternal;
 import com.android.server.rollback.WatchdogRollbackLogger;
 
@@ -93,7 +78,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 /**
  * This class handles staged install sessions, i.e. install sessions that require packages to
@@ -106,8 +90,6 @@ public class StagingManager {
     private final ApexManager mApexManager;
     private final PowerManager mPowerManager;
     private final Context mContext;
-    @VisibleForTesting
-    private final Supplier<PackageParser2> mPackageParserSupplier;
 
     private final File mFailureReasonFile = new File("/metadata/staged-install/failure_reason.txt");
     private String mFailureReason;
@@ -151,24 +133,16 @@ public class StagingManager {
         boolean hasParentSessionId();
         long getCommittedMillis();
         void abandon();
-        void notifyEndPreRebootVerification();
         void verifySession();
     }
 
-    StagingManager(Context context, Supplier<PackageParser2> packageParserSupplier, Looper looper) {
-        this(context, packageParserSupplier, ApexManager.getInstance(), looper);
+    StagingManager(Context context) {
+        this(context, ApexManager.getInstance());
     }
 
     @VisibleForTesting
-    StagingManager(Context context, Supplier<PackageParser2> packageParserSupplier,
-            ApexManager apexManager) {
-        this(context, packageParserSupplier, apexManager, BackgroundThread.get().getLooper());
-    }
-
-    StagingManager(Context context, Supplier<PackageParser2> packageParserSupplier,
-            ApexManager apexManager, Looper looper) {
+    StagingManager(Context context, ApexManager apexManager) {
         mContext = context;
-        mPackageParserSupplier = packageParserSupplier;
 
         mApexManager = apexManager;
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
@@ -240,128 +214,6 @@ public class StagingManager {
         synchronized (mStagedApexObservers) {
             mStagedApexObservers.remove(observer);
         }
-    }
-
-    /**
-     * Validates the signature used to sign the container of the new apex package
-     *
-     * @param newApexPkg The new apex package that is being installed
-     */
-    private void validateApexSignature(PackageInfo newApexPkg)
-            throws PackageManagerException {
-        // Get signing details of the new package
-        final String apexPath = newApexPkg.applicationInfo.sourceDir;
-        final String packageName = newApexPkg.packageName;
-        int minSignatureScheme = ApkSignatureVerifier.getMinimumSignatureSchemeVersionForTargetSdk(
-                newApexPkg.applicationInfo.targetSdkVersion);
-
-        final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
-        final ParseResult<SigningDetails> newResult = ApkSignatureVerifier.verify(
-                input.reset(), apexPath, minSignatureScheme);
-        if (newResult.isError()) {
-            throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                    "Failed to parse APEX package " + apexPath + " : "
-                            + newResult.getException(), newResult.getException());
-        }
-        final SigningDetails newSigningDetails = newResult.getResult();
-
-        // Get signing details of the existing package
-        final PackageInfo existingApexPkg = mApexManager.getPackageInfo(packageName,
-                ApexManager.MATCH_ACTIVE_PACKAGE);
-        if (existingApexPkg == null) {
-            // This should never happen, because submitSessionToApexService ensures that no new
-            // apexes were installed.
-            throw new IllegalStateException("Unknown apex package " + packageName);
-        }
-
-        final ParseResult<SigningDetails> existingResult = ApkSignatureVerifier.verify(
-                input.reset(), existingApexPkg.applicationInfo.sourceDir,
-                SignatureSchemeVersion.JAR);
-        if (existingResult.isError()) {
-            throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                    "Failed to parse APEX package " + existingApexPkg.applicationInfo.sourceDir
-                            + " : " + existingResult.getException(), existingResult.getException());
-        }
-        final SigningDetails existingSigningDetails = existingResult.getResult();
-
-        // Verify signing details for upgrade
-        if (newSigningDetails.checkCapability(existingSigningDetails,
-                SigningDetails.CertCapabilities.INSTALLED_DATA)
-                || existingSigningDetails.checkCapability(newSigningDetails,
-                SigningDetails.CertCapabilities.ROLLBACK)) {
-            return;
-        }
-
-        throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                "APK-container signature of APEX package " + packageName + " with version "
-                        + newApexPkg.versionCodeMajor + " and path " + apexPath + " is not"
-                        + " compatible with the one currently installed on device");
-    }
-
-    private List<PackageInfo> submitSessionToApexService(@NonNull StagedSession session,
-            int rollbackId) throws PackageManagerException {
-        final IntArray childSessionIds = new IntArray();
-        if (session.isMultiPackage()) {
-            for (StagedSession s : session.getChildSessions()) {
-                if (s.isApexSession()) {
-                    childSessionIds.add(s.sessionId());
-                }
-            }
-        }
-        ApexSessionParams apexSessionParams = new ApexSessionParams();
-        apexSessionParams.sessionId = session.sessionId();
-        apexSessionParams.childSessionIds = childSessionIds.toArray();
-        if (session.sessionParams().installReason == PackageManager.INSTALL_REASON_ROLLBACK) {
-            apexSessionParams.isRollback = true;
-            apexSessionParams.rollbackId = rollbackId;
-        } else {
-            if (rollbackId != -1) {
-                apexSessionParams.hasRollbackEnabled = true;
-                apexSessionParams.rollbackId = rollbackId;
-            }
-        }
-        // submitStagedSession will throw a PackageManagerException if apexd verification fails,
-        // which will be propagated to populate stagedSessionErrorMessage of this session.
-        final ApexInfoList apexInfoList = mApexManager.submitStagedSession(apexSessionParams);
-        final List<PackageInfo> result = new ArrayList<>();
-        final List<String> apexPackageNames = new ArrayList<>();
-        for (ApexInfo apexInfo : apexInfoList.apexInfos) {
-            final PackageInfo packageInfo;
-            final int flags = PackageManager.GET_META_DATA;
-            try (PackageParser2 packageParser = mPackageParserSupplier.get()) {
-                File apexFile = new File(apexInfo.modulePath);
-                final ParsedPackage parsedPackage = packageParser.parsePackage(
-                        apexFile, flags, false);
-                packageInfo = PackageInfoWithoutStateUtils.generate(parsedPackage, apexInfo, flags);
-                if (packageInfo == null) {
-                    throw new PackageManagerException(
-                            SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                            "Unable to generate package info: " + apexInfo.modulePath);
-                }
-            } catch (PackageManagerException e) {
-                throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                        "Failed to parse APEX package " + apexInfo.modulePath + " : " + e, e);
-            }
-            result.add(packageInfo);
-            apexPackageNames.add(packageInfo.packageName);
-        }
-        Slog.d(TAG, "Session " + session.sessionId() + " has following APEX packages: "
-                + apexPackageNames);
-        return result;
-    }
-
-    private int retrieveRollbackIdForCommitSession(int sessionId) throws PackageManagerException {
-        RollbackManager rm = mContext.getSystemService(RollbackManager.class);
-
-        final List<RollbackInfo> rollbacks = rm.getRecentlyCommittedRollbacks();
-        for (int i = 0, size = rollbacks.size(); i < size; i++) {
-            final RollbackInfo rollback = rollbacks.get(i);
-            if (rollback.getCommittedSessionId() == sessionId) {
-                return rollback.getRollbackId();
-            }
-        }
-        throw new PackageManagerException(
-                "Could not find rollback id for commit session: " + sessionId);
     }
 
     // Reverts apex sessions and user data (if checkpoint is supported). Also reboots the device.
@@ -670,126 +522,6 @@ public class StagingManager {
     private void handleCommittedSession(@NonNull StagedSession session) {
         if (session.isSessionReady() && session.containsApexSession()) {
             notifyStagedApexObservers();
-        }
-    }
-
-    private int getSessionIdForParentOrSelf(StagedSession session) {
-        return session.hasParentSessionId() ? session.getParentSessionId() : session.sessionId();
-    }
-
-    private StagedSession getParentSessionOrSelf(StagedSession session) {
-        return session.hasParentSessionId()
-                ? getStagedSession(session.getParentSessionId())
-                : session;
-    }
-
-    private boolean isRollback(StagedSession session) {
-        final StagedSession root = getParentSessionOrSelf(session);
-        return root.sessionParams().installReason == PackageManager.INSTALL_REASON_ROLLBACK;
-    }
-
-    /**
-     * <p> Check if the session provided is non-overlapping with the active staged sessions.
-     *
-     * <p> A session is non-overlapping if it meets one of the following conditions: </p>
-     * <ul>
-     *     <li>It is a parent session</li>
-     *     <li>It is already one of the active sessions</li>
-     *     <li>Its package name is not same as any of the active sessions</li>
-     * </ul>
-     * @throws PackageManagerException if session fails the check
-     */
-    // TODO(b/192625695): Rename this method which checks rollbacks in addition to overlapping
-    @VisibleForTesting
-    void checkNonOverlappingWithStagedSessions(@NonNull StagedSession session)
-            throws PackageManagerException {
-        if (session.isMultiPackage()) {
-            // We cannot say a parent session overlaps until we process its children
-            return;
-        }
-
-        String packageName = session.getPackageName();
-        if (packageName == null) {
-            throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                    "Cannot stage session " + session.sessionId() + " with package name null");
-        }
-
-        boolean supportsCheckpoint;
-        try {
-            supportsCheckpoint = PackageHelper.getStorageManager().supportsCheckpoint();
-        } catch (RemoteException e) {
-            throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                    "Can't query fs-checkpoint status : " + e);
-        }
-
-        final boolean isRollback = isRollback(session);
-
-        synchronized (mStagedSessions) {
-            for (int i = 0; i < mStagedSessions.size(); i++) {
-                final StagedSession stagedSession = mStagedSessions.valueAt(i);
-                if (stagedSession.hasParentSessionId() || !stagedSession.isCommitted()
-                        || stagedSession.isInTerminalState()
-                        || stagedSession.isDestroyed()) {
-                    continue;
-                }
-
-                // From here on, stagedSession is a parent active staged session
-
-                // Check if session is one of the active sessions
-                if (getSessionIdForParentOrSelf(session) == stagedSession.sessionId()) {
-                    Slog.w(TAG, "Session " + session.sessionId() + " is already staged");
-                    continue;
-                }
-
-                if (isRollback && !isRollback(stagedSession)) {
-                    // If the new session is a rollback, then it gets priority. The existing
-                    // session is failed to reduce risk and avoid an SDK extension dependency
-                    // violation.
-                    final StagedSession root = stagedSession;
-                    if (!ensureActiveApexSessionIsAborted(root)) {
-                        Slog.e(TAG, "Failed to abort apex session " + root.sessionId());
-                        // Safe to ignore active apex session abort failure since session
-                        // will be marked failed on next step and staging directory for session
-                        // will be deleted.
-                    }
-                    root.setSessionFailed(
-                            SessionInfo.STAGED_SESSION_CONFLICT,
-                            "Session was failed by rollback session: " + session.sessionId());
-                    Slog.i(TAG, "Session " + root.sessionId() + " is marked failed due to "
-                            + "rollback session: " + session.sessionId());
-                } else if (!isRollback && isRollback(stagedSession)) {
-                    throw new PackageManagerException(
-                            SessionInfo.STAGED_SESSION_CONFLICT,
-                            "Session was failed by rollback session: " + stagedSession.sessionId());
-                } else if (stagedSession.sessionContains(
-                        s -> s.getPackageName().equals(packageName))) {
-                    // Fail the session committed later when there are overlapping packages
-                    if (stagedSession.getCommittedMillis() < session.getCommittedMillis()) {
-                        throw new PackageManagerException(
-                                SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                                "Package: " + session.getPackageName() + " in session: "
-                                        + session.sessionId()
-                                        + " has been staged already by session: "
-                                        + stagedSession.sessionId(), null);
-                    } else {
-                        stagedSession.setSessionFailed(
-                                SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                                "Package: " + packageName + " in session: "
-                                        + stagedSession.sessionId()
-                                        + " has been staged already by session: "
-                                        + session.sessionId());
-                    }
-                }
-
-                // Staging multiple root sessions is not allowed if device doesn't support
-                // checkpoint. If session and stagedSession do not have common ancestor, they are
-                // from two different root sessions.
-                if (!supportsCheckpoint) {
-                    throw new PackageManagerException(
-                            SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                            "Cannot stage multiple sessions without checkpoint support", null);
-                }
-            }
         }
     }
 
