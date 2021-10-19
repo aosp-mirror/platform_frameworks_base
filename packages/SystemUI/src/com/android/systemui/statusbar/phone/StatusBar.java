@@ -902,6 +902,7 @@ public class StatusBar extends SystemUI implements
         mExpansionChangedListeners = new ArrayList<>();
         addExpansionChangedListener(
                 (expansion, expanded) -> mScrimController.setRawPanelExpansionFraction(expansion));
+        addExpansionChangedListener(this::onPanelExpansionChanged);
 
         mBubbleExpandListener =
                 (isExpanding, key) -> mContext.getMainExecutor().execute(() -> {
@@ -1167,7 +1168,6 @@ public class StatusBar extends SystemUI implements
                     PhoneStatusBarView oldStatusBarView = mStatusBarView;
                     mStatusBarView = (PhoneStatusBarView) statusBarFragment.getView();
                     mStatusBarView.setBar(this);
-                    mStatusBarView.setPanel(mNotificationPanelViewController);
                     mStatusBarView.setPanelStateChangeListener(
                             mNotificationPanelViewController.getPanelStateChangeListener());
                     mStatusBarView.setScrimController(mScrimController);
@@ -1176,6 +1176,8 @@ public class StatusBar extends SystemUI implements
                         sendInitialExpansionAmount(listener);
                     }
 
+                    mNotificationPanelViewController.setBar(mStatusBarView);
+
                     StatusBarMoveFromCenterAnimationController moveFromCenterAnimation = null;
                     if (mUnfoldTransitionConfig.isEnabled()) {
                         moveFromCenterAnimation = mMoveFromCenterAnimation.get();
@@ -1183,9 +1185,9 @@ public class StatusBar extends SystemUI implements
                     mPhoneStatusBarViewController =
                             new PhoneStatusBarViewController(
                                     mStatusBarView,
-                                    mCommandQueue,
                                     moveFromCenterAnimation,
-                                    this::onPanelExpansionStateChanged);
+                                    mNotificationPanelViewController.getStatusBarTouchEventHandler()
+                            );
                     mPhoneStatusBarViewController.init();
 
                     mBatteryMeterViewController = new BatteryMeterViewController(
@@ -1316,6 +1318,7 @@ public class StatusBar extends SystemUI implements
 
         mNotificationPanelViewController.initDependencies(
                 this,
+                this::makeExpandedInvisible,
                 mNotificationShelfController);
 
         BackDropView backdrop = mNotificationShadeWindowView.findViewById(R.id.backdrop);
@@ -1453,12 +1456,14 @@ public class StatusBar extends SystemUI implements
         }
     }
 
-    private void onPanelExpansionStateChanged() {
-        if (getNavigationBarView() != null) {
-            getNavigationBarView().onStatusBarPanelStateChanged();
-        }
-        if (getNotificationPanelViewController() != null) {
-            getNotificationPanelViewController().updateSystemUiStateFlags();
+    private void onPanelExpansionChanged(float frac, boolean expanded) {
+        if (frac == 0 || frac == 1) {
+            if (getNavigationBarView() != null) {
+                getNavigationBarView().onStatusBarPanelStateChanged();
+            }
+            if (getNotificationPanelViewController() != null) {
+                getNotificationPanelViewController().updateSystemUiStateFlags();
+            }
         }
     }
 
@@ -2157,7 +2162,8 @@ public class StatusBar extends SystemUI implements
 
     public void animateCollapseQuickSettings() {
         if (mState == StatusBarState.SHADE) {
-            mStatusBarView.collapsePanel(true, false /* delayed */, 1.0f /* speedUpFactor */);
+            mNotificationPanelViewController.collapsePanel(
+                    true, false /* delayed */, 1.0f /* speedUpFactor */);
         }
     }
 
@@ -2170,7 +2176,7 @@ public class StatusBar extends SystemUI implements
         }
 
         // Ensure the panel is fully collapsed (just in case; bug 6765842, 7260868)
-        mStatusBarView.collapsePanel(/*animate=*/ false, false /* delayed*/,
+        mNotificationPanelViewController.collapsePanel(/*animate=*/ false, false /* delayed*/,
                 1.0f /* speedUpFactor */);
 
         mNotificationPanelViewController.closeQs();
@@ -2204,7 +2210,10 @@ public class StatusBar extends SystemUI implements
         }
     }
 
-    public boolean interceptTouchEvent(MotionEvent event) {
+    /** Called when a touch event occurred on {@link PhoneStatusBarView}. */
+    public void onTouchEvent(MotionEvent event) {
+        // TODO(b/202981994): Move this touch debugging to a central location. (Right now, it's
+        //   split between NotificationPanelViewController and here.)
         if (DEBUG_GESTURES) {
             if (event.getActionMasked() != MotionEvent.ACTION_MOVE) {
                 EventLog.writeEvent(EventLogTags.SYSUI_STATUSBAR_TOUCH,
@@ -2236,7 +2245,6 @@ public class StatusBar extends SystemUI implements
                     event.getAction() == MotionEvent.ACTION_CANCEL;
             setInteracting(StatusBarManager.WINDOW_STATUS_BAR, !upOrCancel || mExpandedVisible);
         }
-        return false;
     }
 
     boolean isSameStatusBarState(int state) {
@@ -3837,7 +3845,11 @@ public class StatusBar extends SystemUI implements
         mScrimController.setLaunchingAffordanceWithPreview(launchingAffordanceWithPreview);
 
         if (mStatusBarKeyguardViewManager.isShowingAlternateAuth()) {
-            mScrimController.transitionTo(ScrimState.AUTH_SCRIMMED);
+            if (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED) {
+                mScrimController.transitionTo(ScrimState.AUTH_SCRIMMED_SHADE);
+            } else {
+                mScrimController.transitionTo(ScrimState.AUTH_SCRIMMED);
+            }
         } else if (mBouncerShowing) {
             // Bouncer needs the front scrim when it's on top of an activity,
             // tapping on a notification, editing QS or being dismissed by
@@ -4460,7 +4472,7 @@ public class StatusBar extends SystemUI implements
                     mNavigationBarController.touchAutoDim(mDisplayId);
                     Trace.beginSection("StatusBar#updateKeyguardState");
                     if (mState == StatusBarState.KEYGUARD && mStatusBarView != null) {
-                        mStatusBarView.removePendingHideExpandedRunnables();
+                        mNotificationPanelViewController.cancelPendingPanelCollapse();
                     }
                     updateDozingState();
                     checkBarModes();

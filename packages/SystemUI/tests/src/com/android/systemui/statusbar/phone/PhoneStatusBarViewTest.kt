@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone
 
+import android.view.MotionEvent
 import android.view.ViewGroup
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -48,63 +49,25 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
         `when`(panelViewController.view).thenReturn(panelView)
 
         view = PhoneStatusBarView(mContext, null)
-        view.setPanel(panelViewController)
         view.setScrimController(scrimController)
         view.setBar(statusBar)
     }
 
     @Test
-    fun panelEnabled_providerReturnsTrue_returnsTrue() {
-        view.setPanelEnabledProvider { true }
+    fun panelExpansionChanged_expansionChangeListenerNotified() {
+        val listener = TestExpansionChangedListener()
+        view.setExpansionChangedListeners(listOf(listener))
+        val fraction = 0.4f
+        val isExpanded = true
 
-        assertThat(view.panelEnabled()).isTrue()
+        view.panelExpansionChanged(fraction, isExpanded)
+
+        assertThat(listener.fraction).isEqualTo(fraction)
+        assertThat(listener.isExpanded).isEqualTo(isExpanded)
     }
 
     @Test
-    fun panelEnabled_providerReturnsFalse_returnsFalse() {
-        view.setPanelEnabledProvider { false }
-
-        assertThat(view.panelEnabled()).isFalse()
-    }
-
-    @Test
-    fun panelEnabled_noProvider_noCrash() {
-        view.panelEnabled()
-        // No assert needed, just testing no crash
-    }
-
-    @Test
-    fun panelExpansionChanged_fracZero_stateChangeListenerNotified() {
-        val listener = TestExpansionStateChangedListener()
-        view.setPanelExpansionStateChangedListener(listener)
-
-        view.panelExpansionChanged(0f, false)
-
-        assertThat(listener.stateChangeCalled).isTrue()
-    }
-
-    @Test
-    fun panelExpansionChanged_fracOne_stateChangeListenerNotified() {
-        val listener = TestExpansionStateChangedListener()
-        view.setPanelExpansionStateChangedListener(listener)
-
-        view.panelExpansionChanged(1f, false)
-
-        assertThat(listener.stateChangeCalled).isTrue()
-    }
-
-    @Test
-    fun panelExpansionChanged_fracHalf_stateChangeListenerNotNotified() {
-        val listener = TestExpansionStateChangedListener()
-        view.setPanelExpansionStateChangedListener(listener)
-
-        view.panelExpansionChanged(0.5f, false)
-
-        assertThat(listener.stateChangeCalled).isFalse()
-    }
-
-    @Test
-    fun panelExpansionChanged_noStateChangeListener_noCrash() {
+    fun panelExpansionChanged_noListeners_noCrash() {
         view.panelExpansionChanged(1f, false)
         // No assert needed, just testing no crash
     }
@@ -144,17 +107,52 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
     }
 
     @Test
-    fun panelStateChanged_noListener_noCrash() {
-        view.panelExpansionChanged(1f, true)
+    fun onTouchEvent_listenerNotified() {
+        val handler = TestTouchEventHandler()
+        view.setTouchEventHandler(handler)
+
+        val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
+        view.onTouchEvent(event)
+
+        assertThat(handler.lastEvent).isEqualTo(event)
+    }
+
+    @Test
+    fun onTouchEvent_listenerReturnsTrue_viewReturnsTrue() {
+        val handler = TestTouchEventHandler()
+        view.setTouchEventHandler(handler)
+        val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
+
+        handler.returnValue = true
+
+        assertThat(view.onTouchEvent(event)).isTrue()
+    }
+
+    @Test
+    fun onTouchEvent_listenerReturnsFalse_viewReturnsFalse() {
+        val handler = TestTouchEventHandler()
+        view.setTouchEventHandler(handler)
+        val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
+
+        handler.returnValue = false
+
+        assertThat(view.onTouchEvent(event)).isFalse()
+    }
+
+    @Test
+    fun onTouchEvent_noListener_noCrash() {
+        view.onTouchEvent(MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0))
         // No assert needed, just testing no crash
     }
 
-    private class TestExpansionStateChangedListener
-        : PhoneStatusBarView.PanelExpansionStateChangedListener {
-        var stateChangeCalled: Boolean = false
+    private class TestExpansionChangedListener
+        : StatusBar.ExpansionChangedListener {
+        var fraction: Float = 0f
+        var isExpanded: Boolean = false
 
-        override fun onPanelExpansionStateChanged() {
-            stateChangeCalled = true
+        override fun onExpansionChanged(expansion: Float, expanded: Boolean) {
+            this.fraction = expansion
+            this.isExpanded = expanded
         }
     }
 
@@ -162,6 +160,15 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
         var state: Int = 0
         override fun onStateChanged(state: Int) {
             this.state = state
+        }
+    }
+
+    private class TestTouchEventHandler : PhoneStatusBarView.TouchEventHandler {
+        var lastEvent: MotionEvent? = null
+        var returnValue: Boolean = false
+        override fun handleTouchEvent(event: MotionEvent?): Boolean {
+            lastEvent = event
+            return returnValue
         }
     }
 }

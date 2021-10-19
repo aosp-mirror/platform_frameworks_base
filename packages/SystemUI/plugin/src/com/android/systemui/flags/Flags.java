@@ -23,14 +23,75 @@ import java.util.Map;
 /**
  * List of {@link Flag} objects for use in SystemUI.
  *
- * Flag Ids are integers. They must be unique.
+ * Flag Ids are integers.
+ * Ids must be unique. This is enforced in a unit test.
+ * Ids need not be sequential. Flags can "claim" a chunk of ids for flags in related featurs with
+ * a comment. This is purely for organizational purposes.
  *
  * On public release builds, flags will always return their default value. There is no way to
  * change their value on release builds.
+ *
+ * See {@link FeatureFlagManager} for instructions on flipping the flags via adb.
  */
 public class Flags {
-    public static final BooleanFlag THE_FIRST_FLAG = new BooleanFlag(1, false);
+    public static final BooleanFlag TEAMFOOD = new BooleanFlag(1, false);
 
+    /***************************************/
+    // 100 - notification
+    public static final BooleanFlag NEW_NOTIFICATION_PIPELINE =
+            new BooleanFlag(100, true);
+
+    public static final BooleanFlag NEW_NOTIFICATION_PIPELINE_RENDERING =
+            new BooleanFlag(101, false);
+
+    public static final BooleanFlag NOTIFICATION_UPDATES =
+            new BooleanFlag(102, true);
+
+
+    /***************************************/
+    // 200 - keyguard/lockscreen
+    public static final BooleanFlag KEYGUARD_LAYOUT =
+            new BooleanFlag(200, true);
+
+    public static final BooleanFlag LOCKSCREEN_ANIMATIONS =
+            new BooleanFlag(201, true);
+
+    public static final BooleanFlag NEW_UNLOCK_SWIPE_ANIMATION =
+            new BooleanFlag(202, true);
+
+    /***************************************/
+    // 300 - power menu
+    public static final BooleanFlag POWER_MENU_LITE =
+            new BooleanFlag(300, true);
+
+    /***************************************/
+    // 400 - smartspace
+    public static final BooleanFlag SMARTSPACE_DEDUPING =
+            new BooleanFlag(400, true);
+
+    public static final BooleanFlag SMARTSPACE_SHARED_ELEMENT_TRANSITION_ENABLED =
+            new BooleanFlag(401, false);
+
+    /***************************************/
+    // 500 - quick settings
+    public static final BooleanFlag NEW_USER_SWITCHER =
+            new BooleanFlag(500, true);
+
+    /***************************************/
+    // 600- status bar
+    public static final BooleanFlag COMBINED_STATUS_BAR_SIGNAL_ICONS =
+            new BooleanFlag(501, false);
+
+    /***************************************/
+    // 700 - dialer/calls
+    public static final BooleanFlag ONGOING_CALL_STATUS_BAR_CHIP =
+            new BooleanFlag(600, true);
+
+    public static final BooleanFlag ONGOING_CALL_IN_IMMERSIVE =
+            new BooleanFlag(601, true);
+
+    public static final BooleanFlag ONGOING_CALL_IN_IMMERSIVE_CHIP_TAP =
+            new BooleanFlag(602, true);
 
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================

@@ -120,8 +120,6 @@ public class BubbleStackView extends FrameLayout
 
     private static final int EXPANDED_VIEW_ALPHA_ANIMATION_DURATION = 150;
 
-    private static final int MANAGE_MENU_SCRIM_ANIM_DURATION = 150;
-
     private static final float SCRIM_ALPHA = 0.6f;
 
     /**
@@ -894,6 +892,7 @@ public class BubbleStackView extends FrameLayout
                         updatePointerPosition(false /* forIme */);
                         mExpandedAnimationController.expandFromStack(() -> {
                             afterExpandedViewAnimation();
+                            showManageMenu(mShowingManage);
                         } /* after */);
                         final float translationY = mPositioner.getExpandedViewY(mExpandedBubble,
                                 getBubbleIndex(mExpandedBubble));
@@ -1253,9 +1252,6 @@ public class BubbleStackView extends FrameLayout
         mRelativeStackPositionBeforeRotation = new RelativeStackPosition(
                 mPositioner.getRestingPosition(),
                 mStackAnimationController.getAllowableStackPositionRegion());
-        mManageMenu.setVisibility(View.INVISIBLE);
-        mShowingManage = false;
-
         addOnLayoutChangeListener(mOrientationChangedListener);
         hideFlyoutImmediate();
     }
@@ -2555,16 +2551,19 @@ public class BubbleStackView extends FrameLayout
         invalidate();
     }
 
-    private void showManageMenu(boolean show) {
+    /** Hide or show the manage menu for the currently expanded bubble. */
+    @VisibleForTesting
+    public void showManageMenu(boolean show) {
         mShowingManage = show;
 
         // This should not happen, since the manage menu is only visible when there's an expanded
         // bubble. If we end up in this state, just hide the menu immediately.
         if (mExpandedBubble == null || mExpandedBubble.getExpandedView() == null) {
             mManageMenu.setVisibility(View.INVISIBLE);
+            mManageMenuScrim.setVisibility(INVISIBLE);
+            mBubbleController.getSysuiProxy().onManageMenuExpandChanged(false /* show */);
             return;
         }
-
         if (show) {
             mManageMenuScrim.setVisibility(VISIBLE);
             mManageMenuScrim.setTranslationZ(mManageMenu.getElevation() - 1f);
@@ -2576,8 +2575,8 @@ public class BubbleStackView extends FrameLayout
             }
         };
 
+        mBubbleController.getSysuiProxy().onManageMenuExpandChanged(show);
         mManageMenuScrim.animate()
-                .setDuration(MANAGE_MENU_SCRIM_ANIM_DURATION)
                 .setInterpolator(show ? ALPHA_IN : ALPHA_OUT)
                 .alpha(show ? SCRIM_ALPHA : 0f)
                 .withEndAction(endAction)

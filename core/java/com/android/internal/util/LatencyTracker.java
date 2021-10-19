@@ -117,6 +117,11 @@ public class LatencyTracker {
      */
     public static final int ACTION_LOCKSCREEN_UNLOCK = 11;
 
+    /**
+     * Time it takes to switch users.
+     */
+    public static final int ACTION_USER_SWITCH = 12;
+
     private static final int[] ACTIONS_ALL = {
         ACTION_EXPAND_PANEL,
         ACTION_TOGGLE_RECENTS,
@@ -129,7 +134,8 @@ public class LatencyTracker {
         ACTION_START_RECENTS_ANIMATION,
         ACTION_ROTATE_SCREEN_SENSOR,
         ACTION_ROTATE_SCREEN_CAMERA_CHECK,
-        ACTION_LOCKSCREEN_UNLOCK
+        ACTION_LOCKSCREEN_UNLOCK,
+        ACTION_USER_SWITCH
     };
 
     /** @hide */
@@ -145,7 +151,8 @@ public class LatencyTracker {
         ACTION_START_RECENTS_ANIMATION,
         ACTION_ROTATE_SCREEN_SENSOR,
         ACTION_ROTATE_SCREEN_CAMERA_CHECK,
-        ACTION_LOCKSCREEN_UNLOCK
+        ACTION_LOCKSCREEN_UNLOCK,
+        ACTION_USER_SWITCH
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Action {
@@ -163,7 +170,8 @@ public class LatencyTracker {
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_START_RECENTS_ANIMATION,
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN_SENSOR,
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN_CAMERA_CHECK,
-            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOCKSCREEN_UNLOCK
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOCKSCREEN_UNLOCK,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_USER_SWITCH
     };
 
     private static LatencyTracker sLatencyTracker;
@@ -247,6 +255,8 @@ public class LatencyTracker {
                 return "ACTION_ROTATE_SCREEN_SENSOR";
             case 12:
                 return "ACTION_LOCKSCREEN_UNLOCK";
+            case 13:
+                return "ACTION_USER_SWITCH";
             default:
                 throw new IllegalArgumentException("Invalid action");
         }
@@ -424,7 +434,7 @@ public class LatencyTracker {
             // start counting timeout.
             mTimeoutRunnable = timeoutAction;
             BackgroundThread.getHandler()
-                    .postDelayed(mTimeoutRunnable, TimeUnit.SECONDS.toMillis(2));
+                    .postDelayed(mTimeoutRunnable, TimeUnit.SECONDS.toMillis(15));
         }
 
         void end() {

@@ -121,7 +121,7 @@ public class Bubble implements BubbleViewProvider {
     @Nullable
     private Icon mIcon;
     private boolean mIsBubble;
-    private boolean mIsVisuallyInterruptive;
+    private boolean mIsTextChanged;
     private boolean mIsClearable;
     private boolean mShouldSuppressNotificationDot;
     private boolean mShouldSuppressNotificationList;
@@ -342,12 +342,12 @@ public class Bubble implements BubbleViewProvider {
     }
 
     /**
-     * Sets whether this bubble is considered visually interruptive. This method is purely for
+     * Sets whether this bubble is considered text changed. This method is purely for
      * testing.
      */
     @VisibleForTesting
-    void setVisuallyInterruptiveForTest(boolean visuallyInterruptive) {
-        mIsVisuallyInterruptive = visuallyInterruptive;
+    void setTextChangedForTest(boolean textChanged) {
+        mIsTextChanged = textChanged;
     }
 
     /**
@@ -454,7 +454,7 @@ public class Bubble implements BubbleViewProvider {
         mFlyoutMessage = extractFlyoutMessage(entry);
         if (entry.getRanking() != null) {
             mShortcutInfo = entry.getRanking().getConversationShortcutInfo();
-            mIsVisuallyInterruptive = entry.getRanking().visuallyInterruptive();
+            mIsTextChanged = entry.getRanking().isTextChanged();
             if (entry.getRanking().getChannel() != null) {
                 mIsImportantConversation =
                         entry.getRanking().getChannel().isImportantConversation();
@@ -495,8 +495,8 @@ public class Bubble implements BubbleViewProvider {
         return mIcon;
     }
 
-    boolean isVisuallyInterruptive() {
-        return mIsVisuallyInterruptive;
+    boolean isTextChanged() {
+        return mIsTextChanged;
     }
 
     /**

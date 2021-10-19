@@ -377,8 +377,22 @@ public class BubblesManager implements Dumpable {
                 sysuiMainExecutor.execute(() -> {
                     sysUiState.setFlag(QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED, shouldExpand)
                             .commitUpdate(mContext.getDisplayId());
+                    if (!shouldExpand) {
+                        sysUiState.setFlag(
+                                QuickStepContract.SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED,
+                                false).commitUpdate(mContext.getDisplayId());
+                    }
                 });
             }
+
+            @Override
+            public void onManageMenuExpandChanged(boolean menuExpanded) {
+                sysuiMainExecutor.execute(() -> {
+                    sysUiState.setFlag(QuickStepContract.SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED,
+                            menuExpanded).commitUpdate(mContext.getDisplayId());
+                });
+            }
+
 
             @Override
             public void onUnbubbleConversation(String key) {
