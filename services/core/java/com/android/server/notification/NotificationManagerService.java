@@ -7076,7 +7076,6 @@ public class NotificationManagerService extends SystemService {
                         r.isUpdate = true;
                         final boolean isInterruptive = isVisuallyInterruptive(old, r);
                         r.setTextChanged(isInterruptive);
-                        r.setInterruptive(isInterruptive);
                     }
 
                     mNotificationsByKey.put(n.getKey(), r);
@@ -9424,7 +9423,7 @@ public class NotificationManagerService extends SystemService {
                     record.getSystemGeneratedSmartActions(),
                     record.getSmartReplies(),
                     record.canBubble(),
-                    record.isInterruptive(),
+                    record.isTextChanged(),
                     record.isConversation(),
                     record.getShortcutInfo(),
                     record.getRankingScore() == 0
