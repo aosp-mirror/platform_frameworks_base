@@ -119,7 +119,6 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
         LoaderResult result = loadBitmap(mCurrentUserId, mSelectedUser);
         if (result.success) {
             mCached = true;
-            mUpdateMonitor.setHasLockscreenWallpaper(result.bitmap != null);
             mCache = result.bitmap;
         }
         return mCache;
@@ -235,7 +234,6 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
                 if (result.success) {
                     mCached = true;
                     mCache = result.bitmap;
-                    mUpdateMonitor.setHasLockscreenWallpaper(result.bitmap != null);
                     mMediaManager.updateMediaMetaData(
                             true /* metaDataChanged */, true /* allowEnterAnimation */);
                 }

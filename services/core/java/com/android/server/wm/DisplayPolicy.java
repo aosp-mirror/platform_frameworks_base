@@ -899,15 +899,6 @@ public class DisplayPolicy {
                 // letterboxed. Hence always let them extend under the cutout.
                 attrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
                 break;
-            case TYPE_NOTIFICATION_SHADE:
-                // If the Keyguard is in a hidden state (occluded by another window), we force to
-                // remove the wallpaper and keyguard flag so that any change in-flight after setting
-                // the keyguard as occluded wouldn't set these flags again.
-                // See {@link #processKeyguardSetHiddenResultLw}.
-                if (mService.mPolicy.isKeyguardOccluded()) {
-                    attrs.flags &= ~WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
-                }
-                break;
 
             case TYPE_TOAST:
                 // While apps should use the dedicated toast APIs to add such windows
