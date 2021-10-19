@@ -560,4 +560,21 @@ const char DumpBadgerCommand::kBadgerData[2925] = {
     32,  32,  32,  32,  32,  32,  32,  32,  32,  46,  32,  32,  46,  32,  32,  32,  32,  32,  32,
     32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  10};
 
+int DumpChunks::Dump(LoadedApk* apk) {
+  auto file = apk->GetFileCollection()->FindFile("resources.arsc");
+  if (!file) {
+    GetDiagnostics()->Error(DiagMessage() << "Failed to find resources.arsc in APK");
+    return 1;
+  }
+
+  auto data = file->OpenAsData();
+  if (!data) {
+    GetDiagnostics()->Error(DiagMessage() << "Failed to open resources.arsc ");
+    return 1;
+  }
+
+  Debug::DumpChunks(data->data(), data->size(), GetPrinter(), GetDiagnostics());
+  return 0;
+}
+
 }  // namespace aapt
