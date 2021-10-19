@@ -1051,6 +1051,39 @@
     -->
     <integer name="config_shortPressOnSleepBehavior">0</integer>
 
+    <!-- Control the behavior when the user long presses the stem primary button.
+         Stem primary button is only used on watch form factor. If a device is not
+         a watch, setting this config is no-op.
+            0 - Nothing
+            1 - Launch voice assistant
+    -->
+    <integer name="config_longPressOnStemPrimaryBehavior">0</integer>
+
+    <!-- Control the behavior when the user double presses the stem primary button.
+         Stem primary button is only used on watch form factor. If a device is not
+         a watch, setting this config is no-op.
+            0 - Nothing
+            1 - Switch to the recent app
+    -->
+    <integer name="config_doublePressOnStemPrimaryBehavior">0</integer>
+
+    <!-- Control the behavior when the user triple presses the stem primary button.
+         Stem primary button is only used on watch form factor. If a device is not
+         a watch, setting this config is no-op.
+            0 - Nothing
+            1 - Toggle accessibility
+    -->
+    <integer name="config_triplePressOnStemPrimaryBehavior">0</integer>
+
+    <!-- Control the behavior when the user short presses the stem primary button.
+        Stem primary button is only used on watch form factor. If a device is not
+        a watch, setting this config is no-op.
+           0 - Nothing
+           1 - Go to launch all apps
+    -->
+    <integer name="config_shortPressOnStemPrimaryBehavior">0</integer>
+
+
     <!-- Time to wait while a button is pressed before triggering a very long press. -->
     <integer name="config_veryLongPressTimeout">3500</integer>
 

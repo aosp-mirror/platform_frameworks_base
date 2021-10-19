@@ -19,6 +19,7 @@ package com.android.server.wm;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.app.AppProtoEnums;
 import android.app.IActivityManager;
 import android.app.IApplicationThread;
@@ -688,4 +689,7 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void registerActivityStartInterceptor(
             @ActivityInterceptorCallback.OrderedId int id,
             ActivityInterceptorCallback callback);
+
+    /** Get the most recent task excluding the first running task (the one on the front most). */
+    public abstract ActivityManager.RecentTaskInfo getMostRecentTaskFromBackground();
 }
