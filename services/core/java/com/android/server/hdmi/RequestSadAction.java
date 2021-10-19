@@ -16,10 +16,10 @@
 
 package com.android.server.hdmi;
 
+import android.hardware.hdmi.HdmiControlManager;
 import android.util.Slog;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,27 +35,11 @@ final class RequestSadAction extends HdmiCecFeatureAction {
 
     // State in which the action is waiting for <Report Short Audio Descriptor>.
     private static final int STATE_WAITING_FOR_REPORT_SAD = 1;
-
-    private static final List<Integer> ALL_CEC_CODECS = new ArrayList<Integer>(Arrays.asList(
-            Constants.AUDIO_CODEC_LPCM,
-            Constants.AUDIO_CODEC_DD,
-            Constants.AUDIO_CODEC_MPEG1,
-            Constants.AUDIO_CODEC_MP3,
-            Constants.AUDIO_CODEC_MPEG2,
-            Constants.AUDIO_CODEC_AAC,
-            Constants.AUDIO_CODEC_DTS,
-            Constants.AUDIO_CODEC_ATRAC,
-            Constants.AUDIO_CODEC_ONEBITAUDIO,
-            Constants.AUDIO_CODEC_DDP,
-            Constants.AUDIO_CODEC_DTSHD,
-            Constants.AUDIO_CODEC_TRUEHD,
-            Constants.AUDIO_CODEC_DST,
-            Constants.AUDIO_CODEC_WMAPRO,
-            Constants.AUDIO_CODEC_MAX));
     private static final int MAX_SAD_PER_REQUEST = 4;
     private static final int RETRY_COUNTER_MAX = 1;
     private final int mTargetAddress;
     private final RequestSadCallback mCallback;
+    private final List<Integer> mCecCodecsToQuery = new ArrayList<>();
     // List of all valid SADs reported by the target device. Not parsed nor deduplicated.
     private final List<byte[]> mSupportedSads = new ArrayList<>();
     private int mQueriedSadCount = 0; // Number of SADs queries that has already been completed
@@ -71,8 +55,83 @@ final class RequestSadAction extends HdmiCecFeatureAction {
         super(source);
         mTargetAddress = targetAddress;
         mCallback = Objects.requireNonNull(callback);
+        HdmiCecConfig hdmiCecConfig = localDevice().mService.getHdmiCecConfig();
+        if (hdmiCecConfig.getIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_LPCM)
+                == HdmiControlManager.QUERY_SAD_ENABLED) {
+            mCecCodecsToQuery.add(Constants.AUDIO_CODEC_LPCM);
+        }
+        if (hdmiCecConfig.getIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DD)
+                == HdmiControlManager.QUERY_SAD_ENABLED) {
+            mCecCodecsToQuery.add(Constants.AUDIO_CODEC_DD);
+        }
+        if (hdmiCecConfig.getIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MPEG1)
+                == HdmiControlManager.QUERY_SAD_ENABLED) {
+            mCecCodecsToQuery.add(Constants.AUDIO_CODEC_MPEG1);
+        }
+        if (hdmiCecConfig.getIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MP3)
+                == HdmiControlManager.QUERY_SAD_ENABLED) {
+            mCecCodecsToQuery.add(Constants.AUDIO_CODEC_MP3);
+        }
+        if (hdmiCecConfig.getIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MPEG2)
+                == HdmiControlManager.QUERY_SAD_ENABLED) {
+            mCecCodecsToQuery.add(Constants.AUDIO_CODEC_MPEG2);
+        }
+        if (hdmiCecConfig.getIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_AAC)
+                == HdmiControlManager.QUERY_SAD_ENABLED) {
+            mCecCodecsToQuery.add(Constants.AUDIO_CODEC_AAC);
+        }
+        if (hdmiCecConfig.getIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DTS)
+                == HdmiControlManager.QUERY_SAD_ENABLED) {
+            mCecCodecsToQuery.add(Constants.AUDIO_CODEC_DTS);
+        }
+        if (hdmiCecConfig.getIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_ATRAC)
+                == HdmiControlManager.QUERY_SAD_ENABLED) {
+            mCecCodecsToQuery.add(Constants.AUDIO_CODEC_ATRAC);
+        }
+        if (hdmiCecConfig.getIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_ONEBITAUDIO)
+                == HdmiControlManager.QUERY_SAD_ENABLED) {
+            mCecCodecsToQuery.add(Constants.AUDIO_CODEC_ONEBITAUDIO);
+        }
+        if (hdmiCecConfig.getIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DDP)
+                == HdmiControlManager.QUERY_SAD_ENABLED) {
+            mCecCodecsToQuery.add(Constants.AUDIO_CODEC_DDP);
+        }
+        if (hdmiCecConfig.getIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DTSHD)
+                == HdmiControlManager.QUERY_SAD_ENABLED) {
+            mCecCodecsToQuery.add(Constants.AUDIO_CODEC_DTSHD);
+        }
+        if (hdmiCecConfig.getIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_TRUEHD)
+                == HdmiControlManager.QUERY_SAD_ENABLED) {
+            mCecCodecsToQuery.add(Constants.AUDIO_CODEC_TRUEHD);
+        }
+        if (hdmiCecConfig.getIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DST)
+                == HdmiControlManager.QUERY_SAD_ENABLED) {
+            mCecCodecsToQuery.add(Constants.AUDIO_CODEC_DST);
+        }
+        if (hdmiCecConfig.getIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_WMAPRO)
+                == HdmiControlManager.QUERY_SAD_ENABLED) {
+            mCecCodecsToQuery.add(Constants.AUDIO_CODEC_WMAPRO);
+        }
+        if (hdmiCecConfig.getIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MAX)
+                == HdmiControlManager.QUERY_SAD_ENABLED) {
+            mCecCodecsToQuery.add(Constants.AUDIO_CODEC_MAX);
+        }
     }
-
 
     @Override
     boolean start() {
@@ -81,13 +140,13 @@ final class RequestSadAction extends HdmiCecFeatureAction {
     }
 
     private void querySad() {
-        if (mQueriedSadCount >= ALL_CEC_CODECS.size()) {
+        if (mQueriedSadCount >= mCecCodecsToQuery.size()) {
             wrapUpAndFinish();
             return;
         }
-        int[] codecsToQuery = ALL_CEC_CODECS.subList(mQueriedSadCount,
-                Math.min(ALL_CEC_CODECS.size(), mQueriedSadCount + MAX_SAD_PER_REQUEST))
-                    .stream().mapToInt(i -> i).toArray();
+        int[] codecsToQuery = mCecCodecsToQuery.subList(mQueriedSadCount,
+                Math.min(mCecCodecsToQuery.size(), mQueriedSadCount + MAX_SAD_PER_REQUEST))
+                .stream().mapToInt(i -> i).toArray();
         sendCommand(HdmiCecMessageBuilder.buildRequestShortAudioDescriptor(getSourceAddress(),
                 mTargetAddress, codecsToQuery));
         mState = STATE_WAITING_FOR_REPORT_SAD;
@@ -111,9 +170,10 @@ final class RequestSadAction extends HdmiCecFeatureAction {
                     byte[] sad = new byte[]{cmd.getParams()[i], cmd.getParams()[i + 1],
                             cmd.getParams()[i + 2]};
                     updateResult(sad);
+                } else {
+                    // Don't include invalid codecs in the result. Don't query again.
+                    Slog.w(TAG, "Dropped invalid codec " + cmd.getParams()[i] + ".");
                 }
-                // Don't include invalid codecs in the result. Don't query again.
-                Slog.w(TAG, "Received invalid codec " + cmd.getParams()[i] + ".");
             }
             mQueriedSadCount += MAX_SAD_PER_REQUEST;
             mTimeoutRetry = 0;

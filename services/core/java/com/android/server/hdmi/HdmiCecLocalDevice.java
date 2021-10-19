@@ -151,6 +151,7 @@ abstract class HdmiCecLocalDevice {
     private int mActiveRoutingPath;
 
     protected final HdmiCecMessageCache mCecMessageCache = new HdmiCecMessageCache();
+    @VisibleForTesting
     protected final Object mLock;
 
     // A collection of FeatureAction.

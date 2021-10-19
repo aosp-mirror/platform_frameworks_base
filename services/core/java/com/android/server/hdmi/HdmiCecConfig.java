@@ -408,11 +408,11 @@ public class HdmiCecConfig {
                 HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_ROOT_MENU,
                 R.bool.config_cecRcProfileSourceRootMenu_userConfigurable);
         rcProfileSourceRootMenu.registerValue(
-                HdmiControlManager.RC_PROFILE_SOURCE_ROOT_MENU_HANDLED,
+                HdmiControlManager.RC_PROFILE_SOURCE_MENU_HANDLED,
                 R.bool.config_cecRcProfileSourceRootMenuHandled_allowed,
                 R.bool.config_cecRcProfileSourceRootMenuHandled_default);
         rcProfileSourceRootMenu.registerValue(
-                HdmiControlManager.RC_PROFILE_SOURCE_ROOT_MENU_NOT_HANDLED,
+                HdmiControlManager.RC_PROFILE_SOURCE_MENU_NOT_HANDLED,
                 R.bool.config_cecRcProfileSourceRootMenuNotHandled_allowed,
                 R.bool.config_cecRcProfileSourceRootMenuNotHandled_default);
 
@@ -420,11 +420,11 @@ public class HdmiCecConfig {
                 HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_SETUP_MENU,
                 R.bool.config_cecRcProfileSourceSetupMenu_userConfigurable);
         rcProfileSourceSetupMenu.registerValue(
-                HdmiControlManager.RC_PROFILE_SOURCE_SETUP_MENU_HANDLED,
+                HdmiControlManager.RC_PROFILE_SOURCE_MENU_HANDLED,
                 R.bool.config_cecRcProfileSourceSetupMenuHandled_allowed,
                 R.bool.config_cecRcProfileSourceSetupMenuHandled_default);
         rcProfileSourceSetupMenu.registerValue(
-                HdmiControlManager.RC_PROFILE_SOURCE_SETUP_MENU_NOT_HANDLED,
+                HdmiControlManager.RC_PROFILE_SOURCE_MENU_NOT_HANDLED,
                 R.bool.config_cecRcProfileSourceSetupMenuNotHandled_allowed,
                 R.bool.config_cecRcProfileSourceSetupMenuNotHandled_default);
 
@@ -432,11 +432,11 @@ public class HdmiCecConfig {
                 HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_CONTENTS_MENU,
                 R.bool.config_cecRcProfileSourceContentsMenu_userConfigurable);
         rcProfileSourceContentsMenu.registerValue(
-                HdmiControlManager.RC_PROFILE_SOURCE_CONTENTS_MENU_HANDLED,
+                HdmiControlManager.RC_PROFILE_SOURCE_MENU_HANDLED,
                 R.bool.config_cecRcProfileSourceContentsMenuHandled_allowed,
                 R.bool.config_cecRcProfileSourceContentsMenuHandled_default);
         rcProfileSourceContentsMenu.registerValue(
-                HdmiControlManager.RC_PROFILE_SOURCE_CONTENTS_MENU_NOT_HANDLED,
+                HdmiControlManager.RC_PROFILE_SOURCE_MENU_NOT_HANDLED,
                 R.bool.config_cecRcProfileSourceContentsMenuNotHandled_allowed,
                 R.bool.config_cecRcProfileSourceContentsMenuNotHandled_default);
 
@@ -444,11 +444,11 @@ public class HdmiCecConfig {
                 HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_TOP_MENU,
                 R.bool.config_cecRcProfileSourceTopMenu_userConfigurable);
         rcProfileSourceTopMenu.registerValue(
-                HdmiControlManager.RC_PROFILE_SOURCE_TOP_MENU_HANDLED,
+                HdmiControlManager.RC_PROFILE_SOURCE_MENU_HANDLED,
                 R.bool.config_cecRcProfileSourceTopMenuHandled_allowed,
                 R.bool.config_cecRcProfileSourceTopMenuHandled_default);
         rcProfileSourceTopMenu.registerValue(
-                HdmiControlManager.RC_PROFILE_SOURCE_TOP_MENU_NOT_HANDLED,
+                HdmiControlManager.RC_PROFILE_SOURCE_MENU_NOT_HANDLED,
                 R.bool.config_cecRcProfileSourceTopMenuNotHandled_allowed,
                 R.bool.config_cecRcProfileSourceTopMenuNotHandled_default);
 
@@ -457,13 +457,193 @@ public class HdmiCecConfig {
                     .CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU,
                 R.bool.config_cecRcProfileSourceMediaContextSensitiveMenu_userConfigurable);
         rcProfileSourceMediaContextSensitiveMenu.registerValue(
-                HdmiControlManager.RC_PROFILE_SOURCE_MEDIA_CONTEXT_SENSITIVE_MENU_HANDLED,
+                HdmiControlManager.RC_PROFILE_SOURCE_MENU_HANDLED,
                 R.bool.config_cecRcProfileSourceMediaContextSensitiveMenuHandled_allowed,
                 R.bool.config_cecRcProfileSourceMediaContextSensitiveMenuHandled_default);
         rcProfileSourceMediaContextSensitiveMenu.registerValue(
-                HdmiControlManager.RC_PROFILE_SOURCE_MEDIA_CONTEXT_SENSITIVE_MENU_NOT_HANDLED,
+                HdmiControlManager.RC_PROFILE_SOURCE_MENU_NOT_HANDLED,
                 R.bool.config_cecRcProfileSourceMediaContextSensitiveMenuNotHandled_allowed,
                 R.bool.config_cecRcProfileSourceMediaContextSensitiveMenuNotHandled_default);
+
+        Setting querySadLpcm = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_LPCM,
+                R.bool.config_cecQuerySadLpcm_userConfigurable);
+        querySadLpcm.registerValue(
+                HdmiControlManager.QUERY_SAD_ENABLED,
+                R.bool.config_cecQuerySadLpcmEnabled_allowed,
+                R.bool.config_cecQuerySadLpcmEnabled_default);
+        querySadLpcm.registerValue(
+                HdmiControlManager.QUERY_SAD_DISABLED,
+                R.bool.config_cecQuerySadLpcmDisabled_allowed,
+                R.bool.config_cecQuerySadLpcmDisabled_default);
+
+        Setting querySadDd = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DD,
+                R.bool.config_cecQuerySadDd_userConfigurable);
+        querySadDd.registerValue(
+                HdmiControlManager.QUERY_SAD_ENABLED,
+                R.bool.config_cecQuerySadDdEnabled_allowed,
+                R.bool.config_cecQuerySadDdEnabled_default);
+        querySadDd.registerValue(
+                HdmiControlManager.QUERY_SAD_DISABLED,
+                R.bool.config_cecQuerySadDdDisabled_allowed,
+                R.bool.config_cecQuerySadDdDisabled_default);
+
+        Setting querySadMpeg1 = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MPEG1,
+                R.bool.config_cecQuerySadMpeg1_userConfigurable);
+        querySadMpeg1.registerValue(
+                HdmiControlManager.QUERY_SAD_ENABLED,
+                R.bool.config_cecQuerySadMpeg1Enabled_allowed,
+                R.bool.config_cecQuerySadMpeg1Enabled_default);
+        querySadMpeg1.registerValue(
+                HdmiControlManager.QUERY_SAD_DISABLED,
+                R.bool.config_cecQuerySadMpeg1Disabled_allowed,
+                R.bool.config_cecQuerySadMpeg1Disabled_default);
+
+        Setting querySadMp3 = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MP3,
+                R.bool.config_cecQuerySadMp3_userConfigurable);
+        querySadMp3.registerValue(
+                HdmiControlManager.QUERY_SAD_ENABLED,
+                R.bool.config_cecQuerySadMp3Enabled_allowed,
+                R.bool.config_cecQuerySadMp3Enabled_default);
+        querySadMp3.registerValue(
+                HdmiControlManager.QUERY_SAD_DISABLED,
+                R.bool.config_cecQuerySadMp3Disabled_allowed,
+                R.bool.config_cecQuerySadMp3Disabled_default);
+
+        Setting querySadMpeg2 = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MPEG2,
+                R.bool.config_cecQuerySadMpeg2_userConfigurable);
+        querySadMpeg2.registerValue(
+                HdmiControlManager.QUERY_SAD_ENABLED,
+                R.bool.config_cecQuerySadMpeg2Enabled_allowed,
+                R.bool.config_cecQuerySadMpeg2Enabled_default);
+        querySadMpeg2.registerValue(
+                HdmiControlManager.QUERY_SAD_DISABLED,
+                R.bool.config_cecQuerySadMpeg2Disabled_allowed,
+                R.bool.config_cecQuerySadMpeg2Disabled_default);
+
+        Setting querySadAac = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_AAC,
+                R.bool.config_cecQuerySadAac_userConfigurable);
+        querySadAac.registerValue(
+                HdmiControlManager.QUERY_SAD_ENABLED,
+                R.bool.config_cecQuerySadAacEnabled_allowed,
+                R.bool.config_cecQuerySadAacEnabled_default);
+        querySadAac.registerValue(
+                HdmiControlManager.QUERY_SAD_DISABLED,
+                R.bool.config_cecQuerySadAacDisabled_allowed,
+                R.bool.config_cecQuerySadAacDisabled_default);
+
+        Setting querySadDts = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DTS,
+                R.bool.config_cecQuerySadDts_userConfigurable);
+        querySadDts.registerValue(
+                HdmiControlManager.QUERY_SAD_ENABLED,
+                R.bool.config_cecQuerySadDtsEnabled_allowed,
+                R.bool.config_cecQuerySadDtsEnabled_default);
+        querySadDts.registerValue(
+                HdmiControlManager.QUERY_SAD_DISABLED,
+                R.bool.config_cecQuerySadDtsDisabled_allowed,
+                R.bool.config_cecQuerySadDtsDisabled_default);
+
+        Setting querySadAtrac = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_ATRAC,
+                R.bool.config_cecQuerySadAtrac_userConfigurable);
+        querySadAtrac.registerValue(
+                HdmiControlManager.QUERY_SAD_ENABLED,
+                R.bool.config_cecQuerySadAtracEnabled_allowed,
+                R.bool.config_cecQuerySadAtracEnabled_default);
+        querySadAtrac.registerValue(
+                HdmiControlManager.QUERY_SAD_DISABLED,
+                R.bool.config_cecQuerySadAtracDisabled_allowed,
+                R.bool.config_cecQuerySadAtracDisabled_default);
+
+        Setting querySadOnebitaudio = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_ONEBITAUDIO,
+                R.bool.config_cecQuerySadOnebitaudio_userConfigurable);
+        querySadOnebitaudio.registerValue(
+                HdmiControlManager.QUERY_SAD_ENABLED,
+                R.bool.config_cecQuerySadOnebitaudioEnabled_allowed,
+                R.bool.config_cecQuerySadOnebitaudioEnabled_default);
+        querySadOnebitaudio.registerValue(
+                HdmiControlManager.QUERY_SAD_DISABLED,
+                R.bool.config_cecQuerySadOnebitaudioDisabled_allowed,
+                R.bool.config_cecQuerySadOnebitaudioDisabled_default);
+
+        Setting querySadDdp = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DDP,
+                R.bool.config_cecQuerySadDdp_userConfigurable);
+        querySadDdp.registerValue(
+                HdmiControlManager.QUERY_SAD_ENABLED,
+                R.bool.config_cecQuerySadDdpEnabled_allowed,
+                R.bool.config_cecQuerySadDdpEnabled_default);
+        querySadDdp.registerValue(
+                HdmiControlManager.QUERY_SAD_DISABLED,
+                R.bool.config_cecQuerySadDdpDisabled_allowed,
+                R.bool.config_cecQuerySadDdpDisabled_default);
+
+        Setting querySadDtshd = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DTSHD,
+                R.bool.config_cecQuerySadDtshd_userConfigurable);
+        querySadDtshd.registerValue(
+                HdmiControlManager.QUERY_SAD_ENABLED,
+                R.bool.config_cecQuerySadDtshdEnabled_allowed,
+                R.bool.config_cecQuerySadDtshdEnabled_default);
+        querySadDtshd.registerValue(
+                HdmiControlManager.QUERY_SAD_DISABLED,
+                R.bool.config_cecQuerySadDtshdDisabled_allowed,
+                R.bool.config_cecQuerySadDtshdDisabled_default);
+
+        Setting querySadTruehd = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_TRUEHD,
+                R.bool.config_cecQuerySadTruehd_userConfigurable);
+        querySadTruehd.registerValue(
+                HdmiControlManager.QUERY_SAD_ENABLED,
+                R.bool.config_cecQuerySadTruehdEnabled_allowed,
+                R.bool.config_cecQuerySadTruehdEnabled_default);
+        querySadTruehd.registerValue(
+                HdmiControlManager.QUERY_SAD_DISABLED,
+                R.bool.config_cecQuerySadTruehdDisabled_allowed,
+                R.bool.config_cecQuerySadTruehdDisabled_default);
+
+        Setting querySadDst = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DST,
+                R.bool.config_cecQuerySadDst_userConfigurable);
+        querySadDst.registerValue(
+                HdmiControlManager.QUERY_SAD_ENABLED,
+                R.bool.config_cecQuerySadDstEnabled_allowed,
+                R.bool.config_cecQuerySadDstEnabled_default);
+        querySadDst.registerValue(
+                HdmiControlManager.QUERY_SAD_DISABLED,
+                R.bool.config_cecQuerySadDstDisabled_allowed,
+                R.bool.config_cecQuerySadDstDisabled_default);
+
+        Setting querySadWmapro = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_WMAPRO,
+                R.bool.config_cecQuerySadWmapro_userConfigurable);
+        querySadWmapro.registerValue(
+                HdmiControlManager.QUERY_SAD_ENABLED,
+                R.bool.config_cecQuerySadWmaproEnabled_allowed,
+                R.bool.config_cecQuerySadWmaproEnabled_default);
+        querySadWmapro.registerValue(
+                HdmiControlManager.QUERY_SAD_DISABLED,
+                R.bool.config_cecQuerySadWmaproDisabled_allowed,
+                R.bool.config_cecQuerySadWmaproDisabled_default);
+
+        Setting querySadMax = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MAX,
+                R.bool.config_cecQuerySadMax_userConfigurable);
+        querySadMax.registerValue(
+                HdmiControlManager.QUERY_SAD_ENABLED,
+                R.bool.config_cecQuerySadMaxEnabled_allowed,
+                R.bool.config_cecQuerySadMaxEnabled_default);
+        querySadMax.registerValue(
+                HdmiControlManager.QUERY_SAD_DISABLED,
+                R.bool.config_cecQuerySadMaxDisabled_allowed,
+                R.bool.config_cecQuerySadMaxDisabled_default);
 
         verifySettings();
     }
@@ -530,6 +710,36 @@ public class HdmiCecConfig {
             case HdmiControlManager
                     .CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU:
                 return STORAGE_SHARED_PREFS;
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_LPCM:
+                return STORAGE_SHARED_PREFS;
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DD:
+                return STORAGE_SHARED_PREFS;
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MPEG1:
+                return STORAGE_SHARED_PREFS;
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MP3:
+                return STORAGE_SHARED_PREFS;
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MPEG2:
+                return STORAGE_SHARED_PREFS;
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_AAC:
+                return STORAGE_SHARED_PREFS;
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DTS:
+                return STORAGE_SHARED_PREFS;
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_ATRAC:
+                return STORAGE_SHARED_PREFS;
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_ONEBITAUDIO:
+                return STORAGE_SHARED_PREFS;
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DDP:
+                return STORAGE_SHARED_PREFS;
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DTSHD:
+                return STORAGE_SHARED_PREFS;
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_TRUEHD:
+                return STORAGE_SHARED_PREFS;
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DST:
+                return STORAGE_SHARED_PREFS;
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_WMAPRO:
+                return STORAGE_SHARED_PREFS;
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MAX:
+                return STORAGE_SHARED_PREFS;
             default:
                 throw new VerificationException("Invalid CEC setting '" + setting.getName()
                         + "' storage.");
@@ -570,6 +780,36 @@ public class HdmiCecConfig {
                 return setting.getName();
             case HdmiControlManager
                     .CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU:
+                return setting.getName();
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_LPCM:
+                return setting.getName();
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DD:
+                return setting.getName();
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MPEG1:
+                return setting.getName();
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MP3:
+                return setting.getName();
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MPEG2:
+                return setting.getName();
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_AAC:
+                return setting.getName();
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DTS:
+                return setting.getName();
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_ATRAC:
+                return setting.getName();
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_ONEBITAUDIO:
+                return setting.getName();
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DDP:
+                return setting.getName();
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DTSHD:
+                return setting.getName();
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_TRUEHD:
+                return setting.getName();
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_DST:
+                return setting.getName();
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_WMAPRO:
+                return setting.getName();
+            case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MAX:
                 return setting.getName();
             default:
                 throw new VerificationException("Invalid CEC setting '" + setting.getName()

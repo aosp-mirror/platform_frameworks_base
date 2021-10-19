@@ -5104,6 +5104,97 @@
     <bool name="config_cecRcProfileSourceMediaContextSensitiveMenuNotHandled_allowed">true</bool>
     <bool name="config_cecRcProfileSourceMediaContextSensitiveMenuNotHandled_default">true</bool>
 
+    <!-- Which Short Audio Descriptors a TV should query via CEC -->
+    <bool name="config_cecQuerySadLpcm_userConfigurable">true</bool>
+    <bool name="config_cecQuerySadLpcmEnabled_allowed">true</bool>
+    <bool name="config_cecQuerySadLpcmEnabled_default">true</bool>
+    <bool name="config_cecQuerySadLpcmDisabled_allowed">true</bool>
+    <bool name="config_cecQuerySadLpcmDisabled_default">false</bool>
+
+    <bool name="config_cecQuerySadDd_userConfigurable">true</bool>
+    <bool name="config_cecQuerySadDdEnabled_allowed">true</bool>
+    <bool name="config_cecQuerySadDdEnabled_default">true</bool>
+    <bool name="config_cecQuerySadDdDisabled_allowed">true</bool>
+    <bool name="config_cecQuerySadDdDisabled_default">false</bool>
+
+    <bool name="config_cecQuerySadMpeg1_userConfigurable">true</bool>
+    <bool name="config_cecQuerySadMpeg1Enabled_allowed">true</bool>
+    <bool name="config_cecQuerySadMpeg1Enabled_default">true</bool>
+    <bool name="config_cecQuerySadMpeg1Disabled_allowed">true</bool>
+    <bool name="config_cecQuerySadMpeg1Disabled_default">false</bool>
+
+    <bool name="config_cecQuerySadMp3_userConfigurable">true</bool>
+    <bool name="config_cecQuerySadMp3Enabled_allowed">true</bool>
+    <bool name="config_cecQuerySadMp3Enabled_default">true</bool>
+    <bool name="config_cecQuerySadMp3Disabled_allowed">true</bool>
+    <bool name="config_cecQuerySadMp3Disabled_default">false</bool>
+
+    <bool name="config_cecQuerySadMpeg2_userConfigurable">true</bool>
+    <bool name="config_cecQuerySadMpeg2Enabled_allowed">true</bool>
+    <bool name="config_cecQuerySadMpeg2Enabled_default">true</bool>
+    <bool name="config_cecQuerySadMpeg2Disabled_allowed">true</bool>
+    <bool name="config_cecQuerySadMpeg2Disabled_default">false</bool>
+
+    <bool name="config_cecQuerySadAac_userConfigurable">true</bool>
+    <bool name="config_cecQuerySadAacEnabled_allowed">true</bool>
+    <bool name="config_cecQuerySadAacEnabled_default">true</bool>
+    <bool name="config_cecQuerySadAacDisabled_allowed">true</bool>
+    <bool name="config_cecQuerySadAacDisabled_default">false</bool>
+
+    <bool name="config_cecQuerySadDts_userConfigurable">true</bool>
+    <bool name="config_cecQuerySadDtsEnabled_allowed">true</bool>
+    <bool name="config_cecQuerySadDtsEnabled_default">true</bool>
+    <bool name="config_cecQuerySadDtsDisabled_allowed">true</bool>
+    <bool name="config_cecQuerySadDtsDisabled_default">false</bool>
+
+    <bool name="config_cecQuerySadAtrac_userConfigurable">true</bool>
+    <bool name="config_cecQuerySadAtracEnabled_allowed">true</bool>
+    <bool name="config_cecQuerySadAtracEnabled_default">true</bool>
+    <bool name="config_cecQuerySadAtracDisabled_allowed">true</bool>
+    <bool name="config_cecQuerySadAtracDisabled_default">false</bool>
+
+    <bool name="config_cecQuerySadOnebitaudio_userConfigurable">true</bool>
+    <bool name="config_cecQuerySadOnebitaudioEnabled_allowed">true</bool>
+    <bool name="config_cecQuerySadOnebitaudioEnabled_default">true</bool>
+    <bool name="config_cecQuerySadOnebitaudioDisabled_allowed">true</bool>
+    <bool name="config_cecQuerySadOnebitaudioDisabled_default">false</bool>
+
+    <bool name="config_cecQuerySadDdp_userConfigurable">true</bool>
+    <bool name="config_cecQuerySadDdpEnabled_allowed">true</bool>
+    <bool name="config_cecQuerySadDdpEnabled_default">true</bool>
+    <bool name="config_cecQuerySadDdpDisabled_allowed">true</bool>
+    <bool name="config_cecQuerySadDdpDisabled_default">false</bool>
+
+    <bool name="config_cecQuerySadDtshd_userConfigurable">true</bool>
+    <bool name="config_cecQuerySadDtshdEnabled_allowed">true</bool>
+    <bool name="config_cecQuerySadDtshdEnabled_default">true</bool>
+    <bool name="config_cecQuerySadDtshdDisabled_allowed">true</bool>
+    <bool name="config_cecQuerySadDtshdDisabled_default">false</bool>
+
+    <bool name="config_cecQuerySadTruehd_userConfigurable">true</bool>
+    <bool name="config_cecQuerySadTruehdEnabled_allowed">true</bool>
+    <bool name="config_cecQuerySadTruehdEnabled_default">true</bool>
+    <bool name="config_cecQuerySadTruehdDisabled_allowed">true</bool>
+    <bool name="config_cecQuerySadTruehdDisabled_default">false</bool>
+
+    <bool name="config_cecQuerySadDst_userConfigurable">true</bool>
+    <bool name="config_cecQuerySadDstEnabled_allowed">true</bool>
+    <bool name="config_cecQuerySadDstEnabled_default">true</bool>
+    <bool name="config_cecQuerySadDstDisabled_allowed">true</bool>
+    <bool name="config_cecQuerySadDstDisabled_default">false</bool>
+
+    <bool name="config_cecQuerySadWmapro_userConfigurable">true</bool>
+    <bool name="config_cecQuerySadWmaproEnabled_allowed">true</bool>
+    <bool name="config_cecQuerySadWmaproEnabled_default">true</bool>
+    <bool name="config_cecQuerySadWmaproDisabled_allowed">true</bool>
+    <bool name="config_cecQuerySadWmaproDisabled_default">false</bool>
+
+    <bool name="config_cecQuerySadMax_userConfigurable">true</bool>
+    <bool name="config_cecQuerySadMaxEnabled_allowed">true</bool>
+    <bool name="config_cecQuerySadMaxEnabled_default">true</bool>
+    <bool name="config_cecQuerySadMaxDisabled_allowed">true</bool>
+    <bool name="config_cecQuerySadMaxDisabled_default">false</bool>
+
     <!-- Whether app hibernation deletes OAT artifact files as part of global hibernation. -->
     <bool name="config_hibernationDeletesOatArtifactsEnabled">true</bool>
 
