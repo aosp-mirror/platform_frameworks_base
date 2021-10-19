@@ -215,8 +215,11 @@
     <!-- TV picture-in-picture -->
     <uses-permission android:name="android.permission.RECEIVE_MEDIA_RESOURCE_USAGE" />
 
-    <!-- DND access -->
+    <!-- notifications & DND access -->
     <uses-permission android:name="android.permission.MANAGE_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.GRANT_RUNTIME_PERMISSIONS" />
+    <uses-permission android:name="android.permission.REVOKE_RUNTIME_PERMISSIONS" />
+    <uses-permission android:name="android.permission.GET_RUNTIME_PERMISSIONS" />
 
     <!-- It's like, reality, but, you know, virtual -->
     <uses-permission android:name="android.permission.ACCESS_VR_MANAGER" />
