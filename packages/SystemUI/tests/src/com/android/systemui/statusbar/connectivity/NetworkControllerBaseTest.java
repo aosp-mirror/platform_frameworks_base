@@ -216,7 +216,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         mCallbackHandler = mock(CallbackHandler.class);
 
         mMockProvisionController = mock(DeviceProvisionedController.class);
-        when(mMockProvisionController.isUserSetup(anyInt())).thenReturn(true);
+        when(mMockProvisionController.isCurrentUserSetup()).thenReturn(true);
         doAnswer(invocation -> {
             mUserCallback = (DeviceProvisionedListener) invocation.getArguments()[0];
             mUserCallback.onUserSetupChanged();
