@@ -5635,7 +5635,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         /**
-         * Marks the the input event as finished then forwards it to the next stage.
+         * Marks the input event as finished then forwards it to the next stage.
          */
         protected void finish(QueuedInputEvent q, boolean handled) {
             q.mFlags |= QueuedInputEvent.FLAG_FINISHED;
