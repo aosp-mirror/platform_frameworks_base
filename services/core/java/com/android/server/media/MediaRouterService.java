@@ -338,6 +338,25 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
+    public void setBluetoothA2dpOn(IMediaRouterClient client, boolean on) {
+        if (client == null) {
+            throw new IllegalArgumentException("client must not be null");
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLock) {
+                mAudioService.setBluetoothA2dpOn(on);
+            }
+        } catch (RemoteException ex) {
+            Slog.w(TAG, "RemoteException while calling setBluetoothA2dpOn. on=" + on);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    // Binder call
+    @Override
     public void setDiscoveryRequest(IMediaRouterClient client,
             int routeTypes, boolean activeScan) {
         if (client == null) {
