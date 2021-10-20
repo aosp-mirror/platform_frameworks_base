@@ -3786,6 +3786,14 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
+    public SurfaceControl mirrorWallpaperSurface(int displayId) {
+        synchronized (mGlobalLock) {
+            final DisplayContent dc = mRoot.getDisplayContent(displayId);
+            return dc.mWallpaperController.mirrorWallpaperSurface();
+        }
+    }
+
     /**
      * Takes a snapshot of the screen.  In landscape mode this grabs the whole screen.
      * In portrait mode, it grabs the upper region of the screen based on the vertical dimension
