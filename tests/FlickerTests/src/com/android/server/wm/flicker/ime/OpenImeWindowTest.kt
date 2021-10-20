@@ -17,6 +17,7 @@
 package com.android.server.wm.flicker.ime
 
 import android.app.Instrumentation
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
@@ -34,10 +35,12 @@ import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.rules.WMFlickerServiceRuleForTestSpec
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import org.junit.FixMethodOrder
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -53,6 +56,9 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group2
 class OpenImeWindowTest(private val testSpec: FlickerTestParameter) {
+    @get:Rule
+    val flickerRule = WMFlickerServiceRuleForTestSpec(testSpec)
+
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val testApp = ImeAppHelper(instrumentation)
 
@@ -144,6 +150,24 @@ class OpenImeWindowTest(private val testSpec: FlickerTestParameter) {
         testSpec.assertWm {
             this.visibleWindowsShownMoreThanOneConsecutiveEntry()
         }
+    }
+
+    @Postsubmit
+    @Test
+    fun runPresubmitAssertion() {
+        flickerRule.checkPresubmitAssertions()
+    }
+
+    @Postsubmit
+    @Test
+    fun runPostsubmitAssertion() {
+        flickerRule.checkPostsubmitAssertions()
+    }
+
+    @FlakyTest
+    @Test
+    fun runFlakyAssertion() {
+        flickerRule.checkFlakyAssertions()
     }
 
     companion object {
