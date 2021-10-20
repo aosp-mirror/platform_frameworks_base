@@ -44,6 +44,7 @@ import android.window.ITransitionPlayer;
 import android.window.RemoteTransition;
 import android.window.TransitionFilter;
 import android.window.TransitionInfo;
+import android.window.TransitionMetrics;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
 import android.window.WindowContainerTransactionCallback;
@@ -192,6 +193,8 @@ public class Transitions implements RemoteCallable<Transitions> {
     public void register(ShellTaskOrganizer taskOrganizer) {
         if (mPlayerImpl == null) return;
         taskOrganizer.registerTransitionPlayer(mPlayerImpl);
+        // Pre-load the instance.
+        TransitionMetrics.getInstance();
     }
 
     /**

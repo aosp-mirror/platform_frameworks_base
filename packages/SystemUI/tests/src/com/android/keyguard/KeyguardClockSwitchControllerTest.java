@@ -194,7 +194,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         verifyAttachment(times(1));
 
         listenerArgumentCaptor.getValue().onViewDetachedFromWindow(mView);
-
+        verify(mView).onViewDetached();
         verify(mColorExtractor).removeOnColorsChangedListener(
                 any(ColorExtractor.OnColorsChangedListener.class));
     }

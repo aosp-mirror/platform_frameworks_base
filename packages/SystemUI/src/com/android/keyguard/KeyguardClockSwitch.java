@@ -89,6 +89,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     private int mClockSwitchYAmount;
     @VisibleForTesting boolean mChildrenAreLaidOut = false;
+    private OnPreDrawListener mPreDrawListener;
 
     public KeyguardClockSwitch(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -284,15 +285,14 @@ public class KeyguardClockSwitch extends RelativeLayout {
         if (mChildrenAreLaidOut) {
             animateClockChange(clockSize == LARGE);
             mDisplayedClockSize = clockSize;
-        } else {
-            getViewTreeObserver().addOnPreDrawListener(new OnPreDrawListener() {
-                @Override
-                public boolean onPreDraw() {
-                    switchToClock(clockSize);
-                    getViewTreeObserver().removeOnPreDrawListener(this);
-                    return true;
-                }
-            });
+        } else if (mPreDrawListener == null) {
+            mPreDrawListener = () -> {
+                switchToClock(clockSize);
+                getViewTreeObserver().removeOnPreDrawListener(mPreDrawListener);
+                mPreDrawListener = null;
+                return true;
+            };
+            getViewTreeObserver().addOnPreDrawListener(mPreDrawListener);
         }
         return true;
     }
@@ -301,6 +301,13 @@ public class KeyguardClockSwitch extends RelativeLayout {
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
         mChildrenAreLaidOut = true;
+    }
+
+    void onViewDetached() {
+        if (mPreDrawListener != null) {
+            getViewTreeObserver().removeOnPreDrawListener(mPreDrawListener);
+            mPreDrawListener = null;
+        }
     }
 
     public Paint getPaint() {

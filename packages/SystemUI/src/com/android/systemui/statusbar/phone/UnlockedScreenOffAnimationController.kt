@@ -226,6 +226,12 @@ class UnlockedScreenOffAnimationController @Inject constructor(
             return false
         }
 
+        // If animations are disabled system-wide, don't play this one either.
+        if (Settings.Global.getString(
+                context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE) == "0") {
+            return false
+        }
+
         // We only play the unlocked screen off animation if we are... unlocked.
         if (statusBarStateControllerImpl.state != StatusBarState.SHADE) {
             return false

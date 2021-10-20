@@ -66,6 +66,7 @@ import android.window.IDisplayAreaOrganizerController;
 import android.window.ITaskFragmentOrganizer;
 import android.window.ITaskFragmentOrganizerController;
 import android.window.ITaskOrganizerController;
+import android.window.ITransitionMetricsReporter;
 import android.window.ITransitionPlayer;
 import android.window.IWindowContainerTransactionCallback;
 import android.window.IWindowOrganizerController;
@@ -1038,6 +1039,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+    }
+
+    @Override
+    public ITransitionMetricsReporter getTransitionMetricsReporter() {
+        return mTransitionController.mTransitionMetricsReporter;
     }
 
     /** Whether the configuration changes are important to report back to an organizer. */

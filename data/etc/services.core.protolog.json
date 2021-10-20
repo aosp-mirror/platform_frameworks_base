@@ -1141,6 +1141,12 @@
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-863438038": {
+      "message": "Aborting Transition: %d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
     "-861859917": {
       "message": "Attempted to add window to a display that does not exist: %d. Aborting.",
       "level": "WARN",
