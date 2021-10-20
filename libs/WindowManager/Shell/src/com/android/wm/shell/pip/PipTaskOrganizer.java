@@ -282,6 +282,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mMainExecutor.execute(() -> {
             mTaskOrganizer.addListenerForType(this, TASK_LISTENER_TYPE_PIP);
         });
+        mPipTransitionController.setPipOrganizer(this);
         displayController.addDisplayWindowListener(this);
     }
 
@@ -347,6 +348,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             mPipBoundsState.setBounds(destinationBounds);
             mSwipePipToHomeOverlay = overlay;
         }
+    }
+
+    public ActivityManager.RunningTaskInfo getTaskInfo() {
+        return mTaskInfo;
     }
 
     public SurfaceControl getSurfaceControl() {
@@ -716,6 +721,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             mOnDisplayIdChangeCallback.accept(Display.DEFAULT_DISPLAY);
         }
 
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            mPipTransitionController.forceFinishTransition();
+        }
         final PipAnimationController.PipTransitionAnimator<?> animator =
                 mPipAnimationController.getCurrentAnimator();
         if (animator != null) {
