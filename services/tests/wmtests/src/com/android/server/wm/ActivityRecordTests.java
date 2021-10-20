@@ -1752,6 +1752,11 @@ public class ActivityRecordTests extends WindowTestsBase {
                 anyInt() /* orientation */, anyInt() /* lastRotation */);
         // Set to visible so the activity can freeze the screen.
         activity.setVisibility(true);
+        // Update the display policy to make the screen fully turned on so the freeze is allowed
+        display.getDisplayPolicy().screenTurnedOn(null);
+        display.getDisplayPolicy().finishKeyguardDrawn();
+        display.getDisplayPolicy().finishWindowsDrawn();
+        display.getDisplayPolicy().finishScreenTurningOn();
 
         display.rotateInDifferentOrientationIfNeeded(activity);
         display.setFixedRotationLaunchingAppUnchecked(activity);
