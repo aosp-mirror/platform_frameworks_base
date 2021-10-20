@@ -479,6 +479,7 @@ public class NotificationManagerService extends SystemService {
     private ActivityManagerInternal mAmi;
     private IPackageManager mPackageManager;
     private PackageManager mPackageManagerClient;
+    private PackageManagerInternal mPackageManagerInternal;
     AudioManager mAudioManager;
     AudioManagerInternal mAudioManagerInternal;
     // Can be null for wear
@@ -2212,6 +2213,7 @@ public class NotificationManagerService extends SystemService {
         mUgmInternal = ugmInternal;
         mPackageManager = packageManager;
         mPackageManagerClient = packageManagerClient;
+        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mAppOps = appOps;
         mAppOpsService = iAppOps;
         try {
@@ -2292,10 +2294,12 @@ public class NotificationManagerService extends SystemService {
                 });
             }
         });
+        mPermissionHelper = permissionHelper;
         mPreferencesHelper = new PreferencesHelper(getContext(),
                 mPackageManagerClient,
                 mRankingHandler,
                 mZenModeHelper,
+                mPermissionHelper,
                 new NotificationChannelLoggerImpl(),
                 mAppOps,
                 new SysUiStatsEvent.BuilderFactory());
@@ -2309,7 +2313,6 @@ public class NotificationManagerService extends SystemService {
         mGroupHelper = groupHelper;
         mVibratorHelper = new VibratorHelper(getContext());
         mHistoryManager = historyManager;
-        mPermissionHelper = permissionHelper;
 
         // This is a ManagedServices object that keeps track of the listeners.
         mListeners = notificationListeners;
@@ -3481,7 +3484,7 @@ public class NotificationManagerService extends SystemService {
 
                 mPreferencesHelper.setEnabled(pkg, uid, enabled);
                 // TODO (b/194833441): this is being ignored by app ops now that the permission
-                // exists
+                // exists, so send the broadcast manually
                 mAppOps.setMode(AppOpsManager.OP_POST_NOTIFICATION, uid, pkg,
                         enabled ? MODE_ALLOWED : AppOpsManager.MODE_IGNORED);
 
@@ -4082,15 +4085,13 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public int getAppsBypassingDndCount(int userId) {
-            checkCallerIsSystem();
-            return mPreferencesHelper.getAppsBypassingDndCount(userId);
-        }
-
-        @Override
         public ParceledListSlice<NotificationChannel> getNotificationChannelsBypassingDnd(
                 String pkg, int userId) {
             checkCallerIsSystem();
+            if (!areNotificationsEnabledForPackage(pkg,
+                    mPackageManagerInternal.getPackageUid(pkg, 0, userId))) {
+                return ParceledListSlice.emptyList();
+            }
             return mPreferencesHelper.getNotificationChannelsBypassingDnd(pkg, userId);
         }
 

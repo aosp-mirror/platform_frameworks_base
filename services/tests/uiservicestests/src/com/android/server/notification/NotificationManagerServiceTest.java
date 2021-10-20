@@ -132,6 +132,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutServiceInternal;
@@ -247,6 +248,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     private IPackageManager mPackageManager;
     @Mock
     private PackageManager mPackageManagerClient;
+    @Mock
+    private PackageManagerInternal mPackageManagerInternal;
     @Mock
     private WindowManagerInternal mWindowManagerInternal;
     @Mock
@@ -375,6 +378,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         LocalServices.addService(DeviceIdleInternal.class, deviceIdleInternal);
         LocalServices.removeServiceForTest(ActivityManagerInternal.class);
         LocalServices.addService(ActivityManagerInternal.class, mAmi);
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
+        LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternal);
         mContext.addMockSystemService(Context.ALARM_SERVICE, mAlarmManager);
 
         doNothing().when(mContext).sendBroadcastAsUser(any(), any(), any());
@@ -8306,5 +8311,16 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testMigrationDisabledByDefault() {
         assertThat(mService.mEnableAppSettingMigration).isFalse();
+    }
+
+    @Test
+    public void testGetNotificationChannelsBypassingDnd_blocked() throws RemoteException {
+        mService.setPreferencesHelper(mPreferencesHelper);
+        when(mPreferencesHelper.getImportance(PKG, mUid)).thenReturn(IMPORTANCE_NONE);
+
+        assertThat(mBinderService.getNotificationChannelsBypassingDnd(PKG, mUid).getList())
+                .isEmpty();
+        verify(mPermissionHelper, never()).hasPermission(anyInt());
+        verify(mPreferencesHelper, never()).getNotificationChannelsBypassingDnd(PKG, mUid);
     }
 }

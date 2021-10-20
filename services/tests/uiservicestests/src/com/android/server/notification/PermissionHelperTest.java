@@ -62,6 +62,7 @@ import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -91,7 +92,8 @@ public class PermissionHelperTest extends UiServiceTestCase {
 
         Method[] allMethods = PermissionHelper.class.getDeclaredMethods();
         for (Method method : allMethods) {
-            if (Modifier.isPublic(method.getModifiers())) {
+            if (Modifier.isPublic(method.getModifiers()) &&
+                    !Objects.equals("isMigrationEnabled", method.getName())) {
                 Parameter[] params = method.getParameters();
                 List<Object> args = Lists.newArrayListWithCapacity(params.length);
                 for (int i = 0; i < params.length; i++) {
