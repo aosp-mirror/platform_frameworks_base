@@ -249,46 +249,38 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
         }
 
         // Ask the view to scroll as needed to bring this area into view.
-        ScrollResult scrollResult = mViewHelper.onScrollRequested(view, session.getScrollBounds(),
-                requestRect);
+        mViewHelper.onScrollRequested(view, session.getScrollBounds(), requestRect, signal,
+                (result) -> onScrollResult(result, view, signal, onComplete));
+    }
+
+    private void onScrollResult(ScrollResult scrollResult, V view, CancellationSignal signal,
+            Consumer<Rect> onComplete) {
+
+        if (signal.isCanceled()) {
+            Log.w(TAG, "onScrollCaptureImageRequest: cancelled! skipping render.");
+            return;
+        }
 
         if (scrollResult.availableArea.isEmpty()) {
             onComplete.accept(scrollResult.availableArea);
             return;
         }
 
-        // For image capture, shift back by scrollDelta to arrive at the location within the view
-        // where the requested content will be drawn
+        // For image capture, shift back by scrollDelta to arrive at the location
+        // within the view where the requested content will be drawn
         Rect viewCaptureArea = new Rect(scrollResult.availableArea);
         viewCaptureArea.offset(0, -scrollResult.scrollDelta);
 
-        Runnable captureAction = () -> {
-            if (signal.isCanceled()) {
-                Log.w(TAG, "onScrollCaptureImageRequest: cancelled! skipping render.");
-            } else {
-                int result = mRenderer.renderView(view, viewCaptureArea);
-                switch (result) {
-                    case HardwareRenderer.SYNC_OK:
-                    case HardwareRenderer.SYNC_REDRAW_REQUESTED:
-                        /* Frame synced, buffer will be produced... notify client. */
-                        onComplete.accept(new Rect(scrollResult.availableArea));
-                        return;
-                    case HardwareRenderer.SYNC_FRAME_DROPPED:
-                        Log.e(TAG, "syncAndDraw(): SYNC_FRAME_DROPPED !");
-                        break;
-                    case HardwareRenderer.SYNC_LOST_SURFACE_REWARD_IF_FOUND:
-                        Log.e(TAG, "syncAndDraw(): SYNC_LOST_SURFACE !");
-                        break;
-                    case HardwareRenderer.SYNC_CONTEXT_IS_STOPPED:
-                        Log.e(TAG, "syncAndDraw(): SYNC_CONTEXT_IS_STOPPED !");
-                        break;
-                }
-                // No buffer will be produced.
-                onComplete.accept(new Rect(/* empty */));
-            }
-        };
-
-        view.postOnAnimationDelayed(captureAction, mPostScrollDelayMillis);
+        int result = mRenderer.renderView(view, viewCaptureArea);
+        if (result == HardwareRenderer.SYNC_OK
+                || result == HardwareRenderer.SYNC_REDRAW_REQUESTED) {
+            /* Frame synced, buffer will be produced... notify client. */
+            onComplete.accept(new Rect(scrollResult.availableArea));
+        } else {
+            // No buffer will be produced.
+            Log.e(TAG, "syncAndDraw(): SyncAndDrawResult = " + result);
+            onComplete.accept(new Rect(/* empty */));
+        }
     }
 
     @Override
