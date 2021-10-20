@@ -736,46 +736,19 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /**
-     * This is only used when the UI thread is paused due to {@link #mNextDrawUseBlastSync} being
-     * set. Specifically, it's only used when calling
-     * {@link BLASTBufferQueue#setNextTransaction(Transaction)} and then merged with
-     * {@link #mSurfaceChangedTransaction}. It doesn't need to be thread safe since it's only
-     * accessed when the UI thread is paused.
+     * This is only used on the RenderThread when handling a blast sync. Specifically, it's only
+     * used when calling {@link BLASTBufferQueue#setNextTransaction(Transaction)} and then merged
+     * with a tmp transaction on the Render Thread. The tmp transaction is then merged into
+     * {@link #mSurfaceChangedTransaction} on the UI Thread, avoiding any threading issues.
      */
     private final SurfaceControl.Transaction mRtBLASTSyncTransaction =
             new SurfaceControl.Transaction();
-
-    /**
-     * Keeps track of whether the WM requested to use BLAST Sync when calling relayout. When set,
-     * we pause the UI thread to ensure we don't get overlapping requests. We then send a
-     * transaction to {@link BLASTBufferQueue#setNextTransaction(Transaction)}, which is then sent
-     * back to WM to synchronize.
-     *
-     * This flag is set to false only after the synchronized transaction that contains the buffer
-     * has been sent to SurfaceFlinger.
-     */
-    private boolean mNextDrawUseBlastSync = false;
-
-    /**
-     * Wait for the blast sync transaction complete callback before drawing and queuing up more
-     * frames. This will prevent out of order buffers submissions when WM has requested to
-     * synchronize with the client.
-     */
-    private boolean mWaitForBlastSyncComplete = false;
 
     /**
      * Keeps track of the last frame number that was attempted to draw. Should only be accessed on
      * the RenderThread.
      */
     private long mRtLastAttemptedDrawFrameNum = 0;
-
-    /**
-     * Keeps track of whether a traverse was triggered while the UI thread was paused. This can
-     * occur when the client is waiting on another process to submit the transaction that
-     * contains the buffer. The UI thread needs to wait on the callback before it can submit
-     * another buffer.
-     */
-    private boolean mRequestedTraverseWhilePaused = false;
 
     private HashSet<ScrollCaptureCallback> mRootScrollCaptureCallbacks;
 
@@ -1601,7 +1574,7 @@ public final class ViewRootImpl implements ViewParent,
         mForceNextWindowRelayout = forceNextWindowRelayout;
         mPendingAlwaysConsumeSystemBars = args.argi2 != 0;
 
-        if (msg == MSG_RESIZED_REPORT && !mNextDrawUseBlastSync) {
+        if (msg == MSG_RESIZED_REPORT) {
             reportNextDraw();
         }
 
@@ -2496,23 +2469,6 @@ public final class ViewRootImpl implements ViewParent,
             return;
         }
 
-        // This is to ensure we don't end up queueing new frames while waiting on a previous frame
-        // to get latched. This can happen when there's been a sync request for this window. The
-        // frame could be in a transaction that's passed to different processes to ensure
-        // synchronization. It continues to block until ViewRootImpl receives a callback that the
-        // transaction containing the buffer has been sent to SurfaceFlinger. Once we receive, that
-        // signal, we know it's safe to start queuing new buffers.
-        //
-        // When the callback is invoked, it will trigger a traversal request if
-        // mRequestedTraverseWhilePaused is set so there's no need to attempt a retry here.
-        if (mWaitForBlastSyncComplete) {
-            if (DEBUG_BLAST) {
-                Log.w(mTag, "Can't perform draw while waiting for a transaction complete");
-            }
-            mRequestedTraverseWhilePaused = true;
-            return;
-        }
-
         mIsInTraversal = true;
         mWillDrawSoon = true;
         boolean windowSizeMayChange = false;
@@ -2756,6 +2712,7 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
         final boolean wasReportNextDraw = mReportNextDraw;
+        boolean useBlastSync = false;
 
         if (mFirst || windowShouldResize || viewVisibilityChanged || params != null
                 || mForceNextWindowRelayout) {
@@ -2808,7 +2765,7 @@ public final class ViewRootImpl implements ViewParent,
                     }
                     reportNextDraw();
                     if (isHardwareEnabled()) {
-                        mNextDrawUseBlastSync = true;
+                        useBlastSync = true;
                     }
                 }
 
@@ -3282,7 +3239,7 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 mPendingTransitions.clear();
             }
-            performDraw();
+            performDraw(useBlastSync);
         } else {
             if (isViewVisible) {
                 // Try again
@@ -3968,34 +3925,19 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /**
-     * Only call this on the UI Thread.
-     */
-    void clearBlastSync() {
-        mNextDrawUseBlastSync = false;
-        mWaitForBlastSyncComplete = false;
-        if (DEBUG_BLAST) {
-            Log.d(mTag, "Scheduling a traversal=" + mRequestedTraverseWhilePaused
-                    + " due to a previous skipped traversal.");
-        }
-        if (mRequestedTraverseWhilePaused) {
-            mRequestedTraverseWhilePaused = false;
-            scheduleTraversals();
-        }
-    }
-
-    /**
      * @hide
      */
     public boolean isHardwareEnabled() {
         return mAttachInfo.mThreadedRenderer != null && mAttachInfo.mThreadedRenderer.isEnabled();
     }
 
-    private boolean addFrameCompleteCallbackIfNeeded(boolean reportNextDraw) {
+    private boolean addFrameCompleteCallbackIfNeeded(boolean useBlastSync,
+            boolean reportNextDraw) {
         if (!isHardwareEnabled()) {
             return false;
         }
 
-        if (!mNextDrawUseBlastSync && !reportNextDraw) {
+        if (!useBlastSync && !reportNextDraw) {
             return false;
         }
 
@@ -4017,29 +3959,21 @@ public final class ViewRootImpl implements ViewParent,
             // for the current draw attempt.
             if (frameWasNotDrawn) {
                 mBlastBufferQueue.setNextTransaction(null);
-                mBlastBufferQueue.setTransactionCompleteCallback(mRtLastAttemptedDrawFrameNum,
-                        null);
                 // Apply the transactions that were sent to mergeWithNextTransaction since the
                 // frame didn't draw on this vsync. It's possible the frame will draw later, but
                 // it's better to not be sync than to block on a frame that may never come.
                 mBlastBufferQueue.applyPendingTransactions(mRtLastAttemptedDrawFrameNum);
             }
 
+            Transaction tmpTransaction = new Transaction();
+            tmpTransaction.merge(mRtBLASTSyncTransaction);
             mHandler.postAtFrontOfQueue(() -> {
-                if (mNextDrawUseBlastSync) {
-                    // We don't need to synchronize mRtBLASTSyncTransaction here since we're
-                    // guaranteed that this is called after onFrameDraw and mNextDrawUseBlastSync
-                    // is only true when the UI thread is paused. Therefore, no one should be
-                    // modifying this object until the next vsync.
-                    mSurfaceChangedTransaction.merge(mRtBLASTSyncTransaction);
+                if (useBlastSync) {
+                    mSurfaceChangedTransaction.merge(tmpTransaction);
                 }
 
                 if (reportNextDraw) {
                     pendingDrawFinished();
-                }
-
-                if (frameWasNotDrawn) {
-                    clearBlastSync();
                 }
             });
         });
@@ -4076,21 +4010,19 @@ public final class ViewRootImpl implements ViewParent,
         });
     }
 
-    private void addFrameCallbackIfNeeded() {
-        final boolean nextDrawUseBlastSync = mNextDrawUseBlastSync;
+    private void addFrameCallbackIfNeeded(boolean useBlastSync) {
         final boolean hasBlurUpdates = mBlurRegionAggregator.hasUpdates();
         final boolean needsCallbackForBlur = hasBlurUpdates || mBlurRegionAggregator.hasRegions();
 
-        if (!nextDrawUseBlastSync && !needsCallbackForBlur) {
+        if (!useBlastSync && !needsCallbackForBlur) {
             return;
         }
 
         if (DEBUG_BLAST) {
             Log.d(mTag, "Creating frameDrawingCallback"
-                    + " nextDrawUseBlastSync=" + nextDrawUseBlastSync
+                    + " nextDrawUseBlastSync=" + useBlastSync
                     + " hasBlurUpdates=" + hasBlurUpdates);
         }
-        mWaitForBlastSyncComplete = nextDrawUseBlastSync;
         final BackgroundBlurDrawable.BlurRegion[] blurRegionsForFrame =
                 needsCallbackForBlur ?  mBlurRegionAggregator.getBlurRegionsCopyForRT() : null;
 
@@ -4098,7 +4030,7 @@ public final class ViewRootImpl implements ViewParent,
         HardwareRenderer.FrameDrawingCallback frameDrawingCallback = frame -> {
             if (DEBUG_BLAST) {
                 Log.d(mTag, "Received frameDrawingCallback frameNum=" + frame + "."
-                        + " Creating transactionCompleteCallback=" + nextDrawUseBlastSync);
+                        + " Creating transactionCompleteCallback=" + useBlastSync);
             }
 
             mRtLastAttemptedDrawFrameNum = frame;
@@ -4112,7 +4044,7 @@ public final class ViewRootImpl implements ViewParent,
                 return;
             }
 
-            if (nextDrawUseBlastSync) {
+            if (useBlastSync) {
                 // Frame callbacks will always occur after submitting draw requests and before
                 // the draw actually occurs. This will ensure that we set the next transaction
                 // for the frame that's about to get drawn and not on a previous frame that.
@@ -4120,35 +4052,27 @@ public final class ViewRootImpl implements ViewParent,
                 // We don't need to synchronize mRtBLASTSyncTransaction here since it's not
                 // being modified and only sent to BlastBufferQueue.
                 mBlastBufferQueue.setNextTransaction(mRtBLASTSyncTransaction);
-
-                mBlastBufferQueue.setTransactionCompleteCallback(frame, frameNumber -> {
-                    if (DEBUG_BLAST) {
-                        Log.d(mTag, "Received transactionCompleteCallback frameNum=" + frame);
-                    }
-                    mHandler.postAtFrontOfQueue(this::clearBlastSync);
-                });
             }
         };
         registerRtFrameCallback(frameDrawingCallback);
     }
 
-    private void performDraw() {
+    private void performDraw(boolean useBlastSync) {
         if (mAttachInfo.mDisplayState == Display.STATE_OFF && !mReportNextDraw) {
             return;
         } else if (mView == null) {
             return;
         }
 
-        final boolean fullRedrawNeeded =
-                mFullRedrawNeeded || mReportNextDraw || mNextDrawUseBlastSync;
+        final boolean fullRedrawNeeded = mFullRedrawNeeded || mReportNextDraw || useBlastSync;
         mFullRedrawNeeded = false;
 
         mIsDrawing = true;
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "draw");
 
-        addFrameCallbackIfNeeded();
+        addFrameCallbackIfNeeded(useBlastSync);
         addFrameCommitCallbackIfNeeded();
-        boolean usingAsyncReport = addFrameCompleteCallbackIfNeeded(mReportNextDraw);
+        boolean usingAsyncReport = addFrameCompleteCallbackIfNeeded(useBlastSync, mReportNextDraw);
 
         try {
             boolean canUseAsync = draw(fullRedrawNeeded);
@@ -4393,7 +4317,7 @@ public final class ViewRootImpl implements ViewParent,
                 mChoreographer.getFrameTimeNanos() / TimeUtils.NANOS_PER_MS;
 
         boolean useAsyncReport = false;
-        if (!dirty.isEmpty() || mIsAnimating || accessibilityFocusDirty || mNextDrawUseBlastSync) {
+        if (!dirty.isEmpty() || mIsAnimating || accessibilityFocusDirty) {
             if (isHardwareEnabled()) {
                 // If accessibility focus moved, always invalidate the root.
                 boolean invalidateRoot = accessibilityFocusDirty || mInvalidateRootRequested;
