@@ -96,7 +96,6 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ShellCallback;
-import android.os.ShellCommand;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.permission.PermissionControllerManager;
@@ -104,7 +103,6 @@ import android.text.BidiFormatter;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.ExceptionUtils;
-import android.util.Log;
 import android.util.PackageUtils;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -706,7 +704,10 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
                 String[] args, ShellCallback callback, ResultReceiver resultReceiver)
                 throws RemoteException {
-            new ShellCmd().exec(this, in, out, err, args, callback, resultReceiver);
+            getContext().enforceCallingOrSelfPermission(
+                    android.Manifest.permission.MANAGE_COMPANION_DEVICES, null);
+            new CompanionDeviceShellCommand(CompanionDeviceManagerService.this)
+                    .exec(this, in, out, err, args, callback, resultReceiver);
         }
 
         @Override
@@ -769,7 +770,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         return Binder.getCallingUid() == Process.SYSTEM_UID;
     }
 
-    private void createAssociationInternal(
+    void createAssociationInternal(
             int userId, String deviceMacAddress, String packageName, String deviceProfile) {
         final Association association = new Association(
                 getNewAssociationIdForPackage(userId, packageName),
@@ -1082,7 +1083,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         }
     }
 
-    private @NonNull Set<Association> getAllAssociations(int userId) {
+    @NonNull Set<Association> getAllAssociations(int userId) {
         synchronized (mLock) {
             readPersistedStateForUserIfNeededLocked(userId);
             // This returns non-null, because the readAssociationsInfoForUserIfNeededLocked() method
@@ -1469,75 +1470,6 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
     static int getLastAssociationIdForUser(@UserIdInt int userId) {
         return (userId + 1) * ASSOCIATIONS_IDS_PER_USER_RANGE;
-    }
-
-    private class ShellCmd extends ShellCommand {
-        public static final String USAGE = "help\n"
-                + "list USER_ID\n"
-                + "associate USER_ID PACKAGE MAC_ADDRESS\n"
-                + "disassociate USER_ID PACKAGE MAC_ADDRESS";
-
-        ShellCmd() {
-            getContext().enforceCallingOrSelfPermission(
-                    android.Manifest.permission.MANAGE_COMPANION_DEVICES, "ShellCmd");
-        }
-
-        @Override
-        public int onCommand(String cmd) {
-            try {
-                switch (cmd) {
-                    case "list": {
-                        forEach(
-                                getAllAssociations(getNextArgInt()),
-                                a -> getOutPrintWriter()
-                                        .println(a.getPackageName() + " "
-                                                + a.getDeviceMacAddress()));
-                    }
-                    break;
-
-                    case "associate": {
-                        int userId = getNextArgInt();
-                        String packageName = getNextArgRequired();
-                        String address = getNextArgRequired();
-                        createAssociationInternal(userId, address, packageName, null);
-                    }
-                    break;
-
-                    case "disassociate": {
-                        removeAssociation(getNextArgInt(), getNextArgRequired(),
-                                getNextArgRequired());
-                    }
-                    break;
-
-                    case "simulate_connect": {
-                        onDeviceConnected(getNextArgRequired());
-                    }
-                    break;
-
-                    case "simulate_disconnect": {
-                        onDeviceDisconnected(getNextArgRequired());
-                    }
-                    break;
-
-                    default:
-                        return handleDefaultCommands(cmd);
-                }
-                return 0;
-            } catch (Throwable t) {
-                Slog.e(LOG_TAG, "Error running a command: $ " + cmd, t);
-                getErrPrintWriter().println(Log.getStackTraceString(t));
-                return 1;
-            }
-        }
-
-        private int getNextArgInt() {
-            return Integer.parseInt(getNextArgRequired());
-        }
-
-        @Override
-        public void onHelp() {
-            getOutPrintWriter().println(USAGE);
-        }
     }
 
     private class BluetoothDeviceConnectedListener
