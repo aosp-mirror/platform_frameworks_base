@@ -49,6 +49,7 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     protected final Transitions mTransitions;
     private final Handler mMainHandler;
     private final List<PipTransitionCallback> mPipTransitionCallbacks = new ArrayList<>();
+    protected PipTaskOrganizer mPipOrganizer;
 
     protected final PipAnimationController.PipAnimationCallback mPipAnimationCallback =
             new PipAnimationController.PipAnimationCallback() {
@@ -103,6 +104,13 @@ public abstract class PipTransitionController implements Transitions.TransitionH
         // Default implementation does nothing.
     }
 
+    /**
+     * Called when the transition animation can't continue (eg. task is removed during
+     * animation)
+     */
+    public void forceFinishTransition() {
+    }
+
     public PipTransitionController(PipBoundsState pipBoundsState,
             PipMenuController pipMenuController, PipBoundsAlgorithm pipBoundsAlgorithm,
             PipAnimationController pipAnimationController, Transitions transitions,
@@ -117,6 +125,10 @@ public abstract class PipTransitionController implements Transitions.TransitionH
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             transitions.addHandler(this);
         }
+    }
+
+    void setPipOrganizer(PipTaskOrganizer pto) {
+        mPipOrganizer = pto;
     }
 
     /**
