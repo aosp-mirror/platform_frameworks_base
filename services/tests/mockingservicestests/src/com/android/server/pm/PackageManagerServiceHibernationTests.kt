@@ -105,7 +105,7 @@ class PackageManagerServiceHibernationTests {
         rule.system().validateFinalState()
         whenever(appHibernationManager.isHibernatingGlobally(TEST_PACKAGE_2_NAME)).thenReturn(true)
 
-        val optimizablePkgs = pm.optimizablePackages
+        val optimizablePkgs = DexOptHelper(pm).optimizablePackages
 
         assertTrue(optimizablePkgs.contains(TEST_PACKAGE_NAME))
         assertFalse(optimizablePkgs.contains(TEST_PACKAGE_2_NAME))

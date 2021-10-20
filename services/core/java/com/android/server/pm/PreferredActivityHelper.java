@@ -135,7 +135,7 @@ final class PreferredActivityHelper {
             Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName()
                     + " is holding mLock", new Throwable());
         }
-        if (!mPm.mSystemReady) {
+        if (!mPm.isSystemReady()) {
             // We might get called before system is ready because of package changes etc, but
             // finding preferred activity depends on settings provider, so we ignore the update
             // before that.

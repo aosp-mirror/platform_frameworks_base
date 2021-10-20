@@ -128,7 +128,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                 PLATFORM_PACKAGE_NAME.equals(pkgSetting.getPkg().getPackageName());
         synchronized (mPackageManagerService.mLock) {
             // Important: the packages we need to run with ab-ota compiler-reason.
-            important = PackageManagerServiceUtils.getPackagesForDexopt(
+            important = DexOptHelper.getPackagesForDexopt(
                     mPackageManagerService.mSettings.getPackagesLocked().values(),
                     mPackageManagerService, DEBUG_DEXOPT);
             // Remove Platform Package from A/B OTA b/160735835.
@@ -160,7 +160,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         long spaceAvailable = getAvailableSpace();
         if (spaceAvailable < BULK_DELETE_THRESHOLD) {
             Log.i(TAG, "Low on space, deleting oat files in an attempt to free up space: "
-                    + PackageManagerServiceUtils.packagesToString(others));
+                    + DexOptHelper.packagesToString(others));
             for (PackageSetting pkg : others) {
                 mPackageManagerService.deleteOatArtifactsOfPackage(pkg.getPackageName());
             }

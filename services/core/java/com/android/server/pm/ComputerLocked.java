@@ -61,7 +61,7 @@ public final class ComputerLocked extends ComputerEngine {
         return mService.mInstantAppInstallerActivity;
     }
     protected ApplicationInfo androidApplication() {
-        return mService.mAndroidApplication;
+        return mService.getCoreAndroidApplication();
     }
 
     public @NonNull List<ResolveInfo> queryIntentServicesInternalBody(Intent intent,

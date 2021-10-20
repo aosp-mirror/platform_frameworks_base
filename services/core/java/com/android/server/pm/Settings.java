@@ -3002,17 +3002,6 @@ public final class Settings implements Watchable, Snappable {
             }
         }
 
-        // If the build is setup to drop runtime permissions
-        // on update drop the files before loading them.
-        if (PackageManagerService.CLEAR_RUNTIME_PERMISSIONS_ON_UPGRADE) {
-            final VersionInfo internal = getInternalVersion();
-            if (!Build.FINGERPRINT.equals(internal.fingerprint)) {
-                for (UserInfo user : users) {
-                    mRuntimePermissionsPersistence.deleteUserRuntimePermissionsFile(user.id);
-                }
-            }
-        }
-
         final int N = mPendingPackages.size();
 
         for (int i = 0; i < N; i++) {
