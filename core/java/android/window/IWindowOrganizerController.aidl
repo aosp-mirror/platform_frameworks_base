@@ -23,6 +23,7 @@ import android.view.RemoteAnimationAdapter;
 import android.window.IDisplayAreaOrganizerController;
 import android.window.ITaskFragmentOrganizerController;
 import android.window.ITaskOrganizerController;
+import android.window.ITransitionMetricsReporter;
 import android.window.ITransitionPlayer;
 import android.window.IWindowContainerTransactionCallback;
 import android.window.WindowContainerToken;
@@ -98,4 +99,7 @@ interface IWindowOrganizerController {
      * this will replace the existing one if set.
      */
     void registerTransitionPlayer(in ITransitionPlayer player);
+
+    /** @return An interface enabling the transition players to report its metrics. */
+    ITransitionMetricsReporter getTransitionMetricsReporter();
 }
