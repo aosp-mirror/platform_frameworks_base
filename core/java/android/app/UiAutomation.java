@@ -1174,7 +1174,9 @@ public final class UiAutomation {
      * @see android.view.WindowAnimationFrameStats
      * @see #getWindowAnimationFrameStats()
      * @see android.R.styleable#WindowAnimation
+     * @deprecated animation-frames are no-longer used.
      */
+    @Deprecated
     public void clearWindowAnimationFrameStats() {
         try {
             if (DEBUG) {
@@ -1213,7 +1215,9 @@ public final class UiAutomation {
      * @see android.view.WindowAnimationFrameStats
      * @see #clearWindowAnimationFrameStats()
      * @see android.R.styleable#WindowAnimation
+     * @deprecated animation-frames are no-longer used.
      */
+    @Deprecated
     public WindowAnimationFrameStats getWindowAnimationFrameStats() {
         try {
             if (DEBUG) {
