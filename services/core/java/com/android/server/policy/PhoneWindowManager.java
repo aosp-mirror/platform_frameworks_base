@@ -404,7 +404,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private AccessibilityShortcutController mAccessibilityShortcutController;
 
     boolean mSafeMode;
-    private WindowState mKeyguardCandidate = null;
 
     // Whether to allow dock apps with METADATA_DOCK_HOME to temporarily take over the Home key.
     // This is for car dock and this is updated from resource.
@@ -3269,14 +3268,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void setNavBarVirtualKeyHapticFeedbackEnabledLw(boolean enabled) {
         mNavBarVirtualKeyHapticFeedbackEnabled = enabled;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setKeyguardCandidateLw(WindowState win) {
-        mKeyguardCandidate = win;
-        setKeyguardOccludedLw(isKeyguardOccluded(), true /* force */,
-                false /* keyguardOccludingStarted */);
     }
 
     /**
