@@ -17,6 +17,7 @@
 package com.android.systemui.util.sensors;
 
 import android.hardware.SensorManager;
+import android.os.Build;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -56,7 +57,7 @@ import javax.inject.Inject;
  */
 class ProximitySensorImpl implements ProximitySensor {
     private static final String TAG = "ProxSensor";
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG) || Build.IS_DEBUGGABLE;
     private static final long SECONDARY_PING_INTERVAL_MS = 5000;
 
     ThresholdSensor mPrimaryThresholdSensor;
