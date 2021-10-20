@@ -89,6 +89,8 @@ public class ScanTests {
     PackageManagerServiceInjector mMockInjector;
     @Mock
     PackageManagerService mMockPackageManager;
+    @Mock
+    Installer mMockInstaller;
 
     @Before
     public void setupInjector() {
@@ -103,6 +105,7 @@ public class ScanTests {
 
         when(mMockInjector.getDomainVerificationManagerInternal())
                 .thenReturn(domainVerificationManager);
+        when(mMockInjector.getInstaller()).thenReturn(mMockInstaller);
     }
 
     @Before
@@ -434,7 +437,8 @@ public class ScanTests {
         final ParsingPackage basicPackage = createBasicPackage(DUMMY_PACKAGE_NAME)
                 .addUsesPermission(new ParsedUsesPermission(Manifest.permission.FACTORY_TEST, 0));
 
-        final ScanPackageHelper scanPackageHelper = new ScanPackageHelper(mMockPackageManager);
+        final ScanPackageHelper scanPackageHelper = new ScanPackageHelper(
+                mMockPackageManager, mMockInjector);
         final ScanResult scanResult = scanPackageHelper.scanPackageOnlyLI(
                 createBasicScanRequestBuilder(basicPackage).build(),
                 mMockInjector,
@@ -483,7 +487,8 @@ public class ScanTests {
 
     private ScanResult executeScan(
             ScanRequest scanRequest) throws PackageManagerException {
-        final ScanPackageHelper scanPackageHelper = new ScanPackageHelper(mMockPackageManager);
+        final ScanPackageHelper scanPackageHelper = new ScanPackageHelper(
+                mMockPackageManager, mMockInjector);
         ScanResult result = scanPackageHelper.scanPackageOnlyLI(
                 scanRequest,
                 mMockInjector,

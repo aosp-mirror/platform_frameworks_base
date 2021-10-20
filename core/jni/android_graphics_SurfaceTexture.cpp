@@ -147,8 +147,7 @@ public:
     virtual void onFrameAvailable(const BufferItem& item);
 
 private:
-    static JNIEnv* getJNIEnv(bool* needsDetach);
-    static void detachJNI();
+    static JNIEnv* getJNIEnv();
 
     jobject mWeakThiz;
     jclass mClazz;
@@ -160,57 +159,39 @@ JNISurfaceTextureContext::JNISurfaceTextureContext(JNIEnv* env,
     mClazz((jclass)env->NewGlobalRef(clazz))
 {}
 
-JNIEnv* JNISurfaceTextureContext::getJNIEnv(bool* needsDetach) {
-    *needsDetach = false;
+JNIEnv* JNISurfaceTextureContext::getJNIEnv() {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     if (env == NULL) {
         JavaVMAttachArgs args = {
             JNI_VERSION_1_4, "JNISurfaceTextureContext", NULL };
         JavaVM* vm = AndroidRuntime::getJavaVM();
-        int result = vm->AttachCurrentThread(&env, (void*) &args);
+        int result = vm->AttachCurrentThreadAsDaemon(&env, (void*)&args);
         if (result != JNI_OK) {
             ALOGE("thread attach failed: %#x", result);
             return NULL;
         }
-        *needsDetach = true;
     }
     return env;
 }
 
-void JNISurfaceTextureContext::detachJNI() {
-    JavaVM* vm = AndroidRuntime::getJavaVM();
-    int result = vm->DetachCurrentThread();
-    if (result != JNI_OK) {
-        ALOGE("thread detach failed: %#x", result);
-    }
-}
-
 JNISurfaceTextureContext::~JNISurfaceTextureContext()
 {
-    bool needsDetach = false;
-    JNIEnv* env = getJNIEnv(&needsDetach);
+    JNIEnv* env = getJNIEnv();
     if (env != NULL) {
         env->DeleteGlobalRef(mWeakThiz);
         env->DeleteGlobalRef(mClazz);
     } else {
         ALOGW("leaking JNI object references");
     }
-    if (needsDetach) {
-        detachJNI();
-    }
 }
 
 void JNISurfaceTextureContext::onFrameAvailable(const BufferItem& /* item */)
 {
-    bool needsDetach = false;
-    JNIEnv* env = getJNIEnv(&needsDetach);
+    JNIEnv* env = getJNIEnv();
     if (env != NULL) {
         env->CallStaticVoidMethod(mClazz, fields.postEvent, mWeakThiz);
     } else {
         ALOGW("onFrameAvailable event will not posted");
-    }
-    if (needsDetach) {
-        detachJNI();
     }
 }
 

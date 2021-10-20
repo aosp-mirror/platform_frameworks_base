@@ -504,8 +504,22 @@ public class AudioMixingRule {
         /**
          * Sets target mix role of the mixing rule.
          *
-         * <p>The mix role indicates playback streams will be captured or recording source will be
-         * injected. If not specified, the mix role will be decided automatically when
+         * As each mixing rule is intended to be associated with an {@link AudioMix},
+         * explicitly setting the role of a mixing rule allows this {@link Builder} to
+         * verify validity of the mixing rules to be validated.<br>
+         * The mix role allows distinguishing between:
+         * <ul>
+         * <li>audio framework mixers that will mix / sample-rate convert / reformat the audio
+         *     signal of any audio player (e.g. a {@link android.media.MediaPlayer}) that matches
+         *     the selection rules defined in the object being built. Use
+         *     {@link AudioMixingRule#MIX_ROLE_PLAYERS} for such an {@code AudioMixingRule}</li>
+         * <li>audio framework mixers that will be used as the injection point (after sample-rate
+         *     conversion and reformatting of the audio signal) into any audio recorder (e.g. a
+         *     {@link android.media.AudioRecord}) that matches the selection rule defined in the
+         *     object being built. Use {@link AudioMixingRule#MIX_ROLE_INJECTOR} for such an
+         *     {@code AudioMixingRule}.</li>
+         * </ul>
+         * <p>If not specified, the mix role will be decided automatically when
          * {@link #addRule(AudioAttributes, int)} or {@link #addMixRule(int, Object)} be called.
          *
          * @param mixRole integer value of {@link #MIX_ROLE_PLAYERS} or {@link #MIX_ROLE_INJECTOR}

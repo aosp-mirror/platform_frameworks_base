@@ -58,6 +58,7 @@ import java.util.concurrent.TimeUnit;
 public class StagedRollbackTest {
     private static final String PROPERTY_WATCHDOG_TRIGGER_FAILURE_COUNT =
             "watchdog_trigger_failure_count";
+    private static final String REBOOTLESS_APEX_NAME = "test.apex.rebootless";
 
     /**
      * Adopts common shell permissions needed for rollback tests.
@@ -242,7 +243,7 @@ public class StagedRollbackTest {
 
     @Test
     public void testRollbackRebootlessApex() throws Exception {
-        final String packageName = "test.apex.rebootless";
+        final String packageName = REBOOTLESS_APEX_NAME;
         assertThat(InstallUtils.getInstalledVersion(packageName)).isEqualTo(1);
 
         // install
@@ -265,6 +266,28 @@ public class StagedRollbackTest {
         // rollback
         RollbackUtils.rollback(rollback.getRollbackId());
         assertThat(InstallUtils.getInstalledVersion(packageName)).isEqualTo(1);
+    }
+
+    @Test
+    public void testNativeWatchdogTriggersRebootlessApexRollback_Phase1_Install() throws Exception {
+        assertThat(InstallUtils.getInstalledVersion(REBOOTLESS_APEX_NAME)).isEqualTo(1);
+
+        TestApp apex2 = new TestApp("TestRebootlessApexV2", REBOOTLESS_APEX_NAME, 2,
+                /* isApex= */ true, "test.rebootless_apex_v2.apex");
+        Install.single(apex2).setEnableRollback(PackageManager.ROLLBACK_DATA_POLICY_RETAIN)
+                .commit();
+        Install.single(TestApp.A1).commit();
+        Install.single(TestApp.A2).setEnableRollback().commit();
+
+        RollbackUtils.waitForAvailableRollback(TestApp.A);
+        RollbackUtils.waitForAvailableRollback(REBOOTLESS_APEX_NAME);
+    }
+
+    @Test
+    public void testNativeWatchdogTriggersRebootlessApexRollback_Phase2_Verify() throws Exception {
+        // Check only rebootless apex is rolled back. Other rollbacks should remain unchanged.
+        assertThat(RollbackUtils.getCommittedRollback(REBOOTLESS_APEX_NAME)).isNotNull();
+        assertThat(RollbackUtils.getAvailableRollback(TestApp.A)).isNotNull();
     }
 
     @Test

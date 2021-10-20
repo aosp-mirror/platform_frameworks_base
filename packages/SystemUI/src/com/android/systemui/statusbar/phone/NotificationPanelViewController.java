@@ -1360,6 +1360,7 @@ public class NotificationPanelViewController extends PanelViewController {
             stackScrollerPadding = mClockPositionResult.stackScrollerPaddingExpanded;
         }
 
+        mSplitShadeHeaderController.setShadeExpandedFraction(getExpandedFraction());
         mNotificationStackScrollLayoutController.setIntrinsicPadding(stackScrollerPadding);
         mKeyguardBottomArea.setAntiBurnInOffsetX(mClockPositionResult.clockX);
 
@@ -1665,6 +1666,24 @@ public class NotificationPanelViewController extends PanelViewController {
         mNotificationStackScrollLayoutController.setOverScrollAmount(0f, true /* onTop */, animate,
                 !animate /* cancelAnimators */);
         mNotificationStackScrollLayoutController.resetScrollPosition();
+    }
+
+    /** Collapses the panel. */
+    public void collapsePanel(boolean animate, boolean delayed, float speedUpFactor) {
+        boolean waiting = false;
+        if (animate && !isFullyCollapsed()) {
+            collapse(delayed, speedUpFactor);
+            waiting = true;
+        } else {
+            resetViews(false /* animate */);
+            setExpandedFraction(0); // just in case
+        }
+        if (!waiting) {
+            // it's possible that nothing animated, so we replicate the termination
+            // conditions of panelExpansionChanged here
+            // TODO(b/200063118): This can likely go away in a future refactor CL.
+            mBar.updateState(STATE_CLOSED);
+        }
     }
 
     @Override
@@ -3117,7 +3136,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
     @Override
     protected void onExpandingFinished() {
-        super.onExpandingFinished();
+        mScrimController.onExpandingFinished();
         mNotificationStackScrollLayoutController.onExpansionStopped();
         mHeadsUpManager.onExpandingFinished();
         mConversationNotificationManager.onNotificationPanelExpandStateChanged(isFullyCollapsed());
@@ -3192,6 +3211,7 @@ public class NotificationPanelViewController extends PanelViewController {
     protected void onTrackingStarted() {
         mFalsingCollector.onTrackingStarted(!mKeyguardStateController.canDismissLockScreen());
         super.onTrackingStarted();
+        mScrimController.onTrackingStarted();
         if (mQsFullyExpanded) {
             mQsExpandImmediate = true;
             if (!mShouldUseSplitNotificationShade) {
@@ -3202,6 +3222,7 @@ public class NotificationPanelViewController extends PanelViewController {
             mAffordanceHelper.animateHideLeftRightIcon();
         }
         mNotificationStackScrollLayoutController.onPanelTrackingStarted();
+        cancelPendingPanelCollapse();
     }
 
     @Override
@@ -3391,7 +3412,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
     @Override
     protected void onClosingFinished() {
-        super.onClosingFinished();
+        mStatusBar.onClosingFinished();
         setClosingWithAlphaFadeout(false);
         mMediaHierarchyManager.closeGuts();
     }
@@ -3822,13 +3843,27 @@ public class NotificationPanelViewController extends PanelViewController {
         mNotificationStackScrollLayoutController.setScrollingEnabled(b);
     }
 
+    private Runnable mHideExpandedRunnable;
+    private final Runnable mMaybeHideExpandedRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (getExpansionFraction() == 0.0f) {
+                mView.post(mHideExpandedRunnable);
+            }
+        }
+    };
+
     /**
      * Initialize objects instead of injecting to avoid circular dependencies.
+     *
+     * @param hideExpandedRunnable a runnable to run when we need to hide the expanded panel.
      */
     public void initDependencies(
             StatusBar statusBar,
+            Runnable hideExpandedRunnable,
             NotificationShelfController notificationShelfController) {
         setStatusBar(statusBar);
+        mHideExpandedRunnable = hideExpandedRunnable;
         mNotificationStackScrollLayoutController.setShelfController(notificationShelfController);
         mNotificationShelfController = notificationShelfController;
         mLockscreenShadeTransitionController.bindController(notificationShelfController);
@@ -3885,6 +3920,45 @@ public class NotificationPanelViewController extends PanelViewController {
             private long mLastTouchDownTime = -1L;
 
             @Override
+            public boolean onTouchForwardedFromStatusBar(MotionEvent event) {
+                // TODO(b/202981994): Move the touch debugging in this method to a central location.
+                //  (Right now, it's split between StatusBar and here.)
+
+                // If panels aren't enabled, ignore the gesture and don't pass it down to the
+                // panel view.
+                if (!mCommandQueue.panelsEnabled()) {
+                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                        Log.v(
+                                TAG,
+                                String.format(
+                                        "onTouchForwardedFromStatusBar: "
+                                                + "panel disabled, ignoring touch at (%d,%d)",
+                                        (int) event.getX(),
+                                        (int) event.getY()
+                                )
+                        );
+                    }
+                    return false;
+                }
+
+                // If the view that would receive the touch is disabled, just have status bar eat
+                // the gesture.
+                if (event.getAction() == MotionEvent.ACTION_DOWN && !mView.isEnabled()) {
+                    Log.v(TAG,
+                            String.format(
+                                    "onTouchForwardedFromStatusBar: "
+                                            + "panel view disabled, eating touch at (%d,%d)",
+                                    (int) event.getX(),
+                                    (int) event.getY()
+                            )
+                    );
+                    return true;
+                }
+
+                return mView.dispatchTouchEvent(event);
+            }
+
+            @Override
             public boolean onInterceptTouchEvent(MotionEvent event) {
                 if (mBlockTouches || mQs.disallowPanelTouches()) {
                     return false;
@@ -3895,7 +3969,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 if (mStatusBar.isBouncerShowing()) {
                     return true;
                 }
-                if (mBar.panelEnabled()
+                if (mCommandQueue.panelsEnabled()
                         && !mNotificationStackScrollLayoutController.isLongPressInProgress()
                         && mHeadsUpTouchHelper.onInterceptTouchEvent(event)) {
                     mMetricsLogger.count(COUNTER_PANEL_OPEN, 1);
@@ -4753,6 +4827,11 @@ public class NotificationPanelViewController extends PanelViewController {
         }
     }
 
+    /** Removes any pending runnables that would collapse the panel. */
+    public void cancelPendingPanelCollapse() {
+        mView.removeCallbacks(mMaybeHideExpandedRunnable);
+    }
+
     private final PanelBar.PanelStateChangeListener mPanelStateChangeListener =
             new PanelBar.PanelStateChangeListener() {
 
@@ -4767,11 +4846,25 @@ public class NotificationPanelViewController extends PanelViewController {
                     if (state == STATE_OPEN && mCurrentState != state) {
                         mView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
                     }
+                    if (state == STATE_OPENING) {
+                        mStatusBar.makeExpandedVisible(false);
+                    }
+                    if (state == STATE_CLOSED) {
+                        // Close the status bar in the next frame so we can show the end of the
+                        // animation.
+                        mView.post(mMaybeHideExpandedRunnable);
+                    }
                     mCurrentState = state;
                 }
             };
 
     public PanelBar.PanelStateChangeListener getPanelStateChangeListener() {
         return mPanelStateChangeListener;
+    }
+
+
+    /** Returns the handler that the status bar should forward touches to. */
+    public PhoneStatusBarView.TouchEventHandler getStatusBarTouchEventHandler() {
+        return getTouchHandler()::onTouchForwardedFromStatusBar;
     }
 }

@@ -185,10 +185,9 @@ public abstract class PanelViewController {
     protected final SysuiStatusBarStateController mStatusBarStateController;
     protected final AmbientState mAmbientState;
     protected final LockscreenGestureLogger mLockscreenGestureLogger;
+    private final TouchHandler mTouchHandler;
 
-    protected void onExpandingFinished() {
-        mBar.onExpandingFinished();
-    }
+    protected abstract void onExpandingFinished();
 
     protected void onExpandingStarted() {
     }
@@ -226,6 +225,7 @@ public abstract class PanelViewController {
         mView = view;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mLockscreenGestureLogger = lockscreenGestureLogger;
+        mTouchHandler = createTouchHandler();
         mView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View v) {
@@ -238,7 +238,7 @@ public abstract class PanelViewController {
         });
 
         mView.addOnLayoutChangeListener(createLayoutChangeListener());
-        mView.setOnTouchListener(createTouchHandler());
+        mView.setOnTouchListener(mTouchHandler);
         mView.setOnConfigurationChangedListener(createOnConfigurationChangedListener());
 
         mResources = mView.getResources();
@@ -287,6 +287,10 @@ public abstract class PanelViewController {
         return event.getClassification() == MotionEvent.CLASSIFICATION_AMBIGUOUS_GESTURE
                 ? mTouchSlop * mSlopMultiplier
                 : mTouchSlop;
+    }
+
+    protected TouchHandler getTouchHandler() {
+        return mTouchHandler;
     }
 
     private void addMovement(MotionEvent event) {
@@ -448,6 +452,7 @@ public abstract class PanelViewController {
     protected void onTrackingStopped(boolean expand) {
         mTracking = false;
         mBar.onTrackingStopped(expand);
+        mStatusBar.onTrackingStopped(expand);
         updatePanelExpansionAndVisibility();
     }
 
@@ -455,6 +460,7 @@ public abstract class PanelViewController {
         endClosing();
         mTracking = true;
         mBar.onTrackingStarted();
+        mStatusBar.onTrackingStarted();
         notifyExpandingStarted();
         updatePanelExpansionAndVisibility();
     }
@@ -927,10 +933,7 @@ public abstract class PanelViewController {
         mView.removeCallbacks(mFlingCollapseRunnable);
     }
 
-    protected void onClosingFinished() {
-        mBar.onClosingFinished();
-    }
-
+    protected abstract void onClosingFinished();
 
     protected void startUnlockHintAnimation() {
 
@@ -1153,23 +1156,28 @@ public abstract class PanelViewController {
         return mView;
     }
 
-    public boolean isEnabled() {
-        return mView.isEnabled();
-    }
-
     public OnLayoutChangeListener createLayoutChangeListener() {
         return new OnLayoutChangeListener();
     }
 
-    protected TouchHandler createTouchHandler() {
-        return new TouchHandler();
-    }
+    protected abstract TouchHandler createTouchHandler();
 
     protected OnConfigurationChangedListener createOnConfigurationChangedListener() {
         return new OnConfigurationChangedListener();
     }
 
-    public class TouchHandler implements View.OnTouchListener {
+    public abstract class TouchHandler implements View.OnTouchListener {
+        /**
+         * Method called when a touch has occurred on {@link PhoneStatusBarView}.
+         *
+         * Touches that occur on the status bar view may have ramifications for the notification
+         * panel (e.g. a touch that pulls down the shade could start on the status bar), so we need
+         * to notify the panel controller when these touches occur.
+         *
+         * Returns true if the event was handled and false otherwise.
+         */
+        public abstract boolean onTouchForwardedFromStatusBar(MotionEvent event);
+
         public boolean onInterceptTouchEvent(MotionEvent event) {
             if (mInstantExpanding || !mNotificationsDragEnabled || mTouchDisabled || (mMotionAborted
                     && event.getActionMasked() != MotionEvent.ACTION_DOWN)) {
@@ -1434,5 +1442,9 @@ public abstract class PanelViewController {
 
     private void cancelJankMonitoring(int cuj) {
         InteractionJankMonitor.getInstance().cancel(cuj);
+    }
+
+    protected float getExpansionFraction() {
+        return mExpandedFraction;
     }
 }

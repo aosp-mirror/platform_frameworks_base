@@ -24,7 +24,6 @@ import android.app.smartspace.SmartspaceTarget
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
-import android.content.pm.UserInfo
 import android.database.ContentObserver
 import android.net.Uri
 import android.os.Handler
@@ -203,7 +202,7 @@ class LockscreenSmartspaceController @Inject constructor(
     }
 
     private fun connectSession() {
-        if (plugin == null || session != null) {
+        if (plugin == null || session != null || smartspaceViews.isEmpty()) {
             return
         }
 

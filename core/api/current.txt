@@ -100,7 +100,7 @@ package android {
     field public static final String INTERACT_ACROSS_PROFILES = "android.permission.INTERACT_ACROSS_PROFILES";
     field public static final String INTERNET = "android.permission.INTERNET";
     field public static final String KILL_BACKGROUND_PROCESSES = "android.permission.KILL_BACKGROUND_PROCESSES";
-    field public static final String LAUNCH_TWO_PANE_SETTINGS_DEEP_LINK = "android.permission.LAUNCH_TWO_PANE_SETTINGS_DEEP_LINK";
+    field public static final String LAUNCH_MULTI_PANE_SETTINGS_DEEP_LINK = "android.permission.LAUNCH_MULTI_PANE_SETTINGS_DEEP_LINK";
     field public static final String LOADER_USAGE_STATS = "android.permission.LOADER_USAGE_STATS";
     field public static final String LOCATION_HARDWARE = "android.permission.LOCATION_HARDWARE";
     field public static final String MANAGE_DOCUMENTS = "android.permission.MANAGE_DOCUMENTS";
@@ -169,6 +169,7 @@ package android {
     field public static final String SIGNAL_PERSISTENT_PROCESSES = "android.permission.SIGNAL_PERSISTENT_PROCESSES";
     field @Deprecated public static final String SMS_FINANCIAL_TRANSACTIONS = "android.permission.SMS_FINANCIAL_TRANSACTIONS";
     field public static final String START_FOREGROUND_SERVICES_FROM_BACKGROUND = "android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND";
+    field public static final String START_VIEW_APP_FEATURES = "android.permission.START_VIEW_APP_FEATURES";
     field public static final String START_VIEW_PERMISSION_USAGE = "android.permission.START_VIEW_PERMISSION_USAGE";
     field public static final String STATUS_BAR = "android.permission.STATUS_BAR";
     field public static final String SYSTEM_ALERT_WINDOW = "android.permission.SYSTEM_ALERT_WINDOW";
@@ -2040,6 +2041,10 @@ package android {
     field public static final int accessibilityActionSetProgress = 16908349; // 0x102003d
     field public static final int accessibilityActionShowOnScreen = 16908342; // 0x1020036
     field public static final int accessibilityActionShowTooltip = 16908356; // 0x1020044
+    field public static final int accessibilityActionSwipeDown;
+    field public static final int accessibilityActionSwipeLeft;
+    field public static final int accessibilityActionSwipeRight;
+    field public static final int accessibilityActionSwipeUp;
     field public static final int accessibilitySystemActionBack = 16908363; // 0x102004b
     field public static final int accessibilitySystemActionHome = 16908364; // 0x102004c
     field public static final int accessibilitySystemActionLockScreen = 16908370; // 0x1020052
@@ -4381,7 +4386,6 @@ package android.app {
     method @Nullable public android.graphics.Rect getLaunchBounds();
     method public int getLaunchDisplayId();
     method public boolean getLockTaskMode();
-    method public boolean isPendingIntentBackgroundActivityLaunchAllowed();
     method public static android.app.ActivityOptions makeBasic();
     method public static android.app.ActivityOptions makeClipRevealAnimation(android.view.View, int, int, int, int);
     method public static android.app.ActivityOptions makeCustomAnimation(android.content.Context, int, int);
@@ -4395,7 +4399,6 @@ package android.app {
     method public android.app.ActivityOptions setLaunchBounds(@Nullable android.graphics.Rect);
     method public android.app.ActivityOptions setLaunchDisplayId(int);
     method public android.app.ActivityOptions setLockTaskEnabled(boolean);
-    method public void setPendingIntentBackgroundActivityLaunchAllowed(boolean);
     method public android.os.Bundle toBundle();
     method public void update(android.app.ActivityOptions);
     field public static final String EXTRA_USAGE_TIME_REPORT = "android.activity.usage_time";
@@ -13459,7 +13462,7 @@ package android.content.res {
     method public float getFloat(@DimenRes int);
     method @NonNull public android.graphics.Typeface getFont(@FontRes int) throws android.content.res.Resources.NotFoundException;
     method public float getFraction(@FractionRes int, int, int);
-    method public int getIdentifier(String, String, String);
+    method @Discouraged(message="Use of this function is discouraged because resource reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resources by identifier (e.g. `R.foo.bar`) than by name (e.g. `getIdentifier(\"bar\", \"foo\", null)`).") public int getIdentifier(String, String, String);
     method @NonNull public int[] getIntArray(@ArrayRes int) throws android.content.res.Resources.NotFoundException;
     method public int getInteger(@IntegerRes int) throws android.content.res.Resources.NotFoundException;
     method @NonNull public android.content.res.XmlResourceParser getLayout(@LayoutRes int) throws android.content.res.Resources.NotFoundException;
@@ -13479,7 +13482,7 @@ package android.content.res {
     method public CharSequence getText(@StringRes int, CharSequence);
     method @NonNull public CharSequence[] getTextArray(@ArrayRes int) throws android.content.res.Resources.NotFoundException;
     method public void getValue(@AnyRes int, android.util.TypedValue, boolean) throws android.content.res.Resources.NotFoundException;
-    method public void getValue(String, android.util.TypedValue, boolean) throws android.content.res.Resources.NotFoundException;
+    method @Discouraged(message="Use of this function is discouraged because it makes internal calls to `getIdentifier()`, which uses resource reflection. Reflection makes it harder to perform build optimizations and compile-time verification of code. It is much more efficient to retrieve resource values by identifier (e.g. `getValue(R.foo.bar, outValue, true)`) than by name (e.g. `getValue(\"foo\", outvalue, true)`).") public void getValue(String, android.util.TypedValue, boolean) throws android.content.res.Resources.NotFoundException;
     method public void getValueForDensity(@AnyRes int, int, android.util.TypedValue, boolean) throws android.content.res.Resources.NotFoundException;
     method @NonNull public android.content.res.XmlResourceParser getXml(@XmlRes int) throws android.content.res.Resources.NotFoundException;
     method public final android.content.res.Resources.Theme newTheme();
@@ -35366,7 +35369,7 @@ package android.provider {
     field public static final String ACTION_SEARCH_SETTINGS = "android.search.action.SEARCH_SETTINGS";
     field public static final String ACTION_SECURITY_SETTINGS = "android.settings.SECURITY_SETTINGS";
     field public static final String ACTION_SETTINGS = "android.settings.SETTINGS";
-    field public static final String ACTION_SETTINGS_LARGE_SCREEN_DEEP_LINK = "android.settings.SETTINGS_LARGE_SCREEN_DEEP_LINK";
+    field public static final String ACTION_SETTINGS_EMBED_DEEP_LINK_ACTIVITY = "android.settings.SETTINGS_EMBED_DEEP_LINK_ACTIVITY";
     field public static final String ACTION_SHOW_REGULATORY_INFO = "android.settings.SHOW_REGULATORY_INFO";
     field public static final String ACTION_SHOW_WORK_POLICY_INFO = "android.settings.SHOW_WORK_POLICY_INFO";
     field public static final String ACTION_SOUND_SETTINGS = "android.settings.SOUND_SETTINGS";
@@ -35407,8 +35410,8 @@ package android.provider {
     field public static final String EXTRA_EASY_CONNECT_ERROR_CODE = "android.provider.extra.EASY_CONNECT_ERROR_CODE";
     field public static final String EXTRA_INPUT_METHOD_ID = "input_method_id";
     field public static final String EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME = "android.provider.extra.NOTIFICATION_LISTENER_COMPONENT_NAME";
-    field public static final String EXTRA_SETTINGS_LARGE_SCREEN_DEEP_LINK_INTENT_URI = "android.provider.extra.SETTINGS_LARGE_SCREEN_DEEP_LINK_INTENT_URI";
-    field public static final String EXTRA_SETTINGS_LARGE_SCREEN_HIGHLIGHT_MENU_KEY = "android.provider.extra.SETTINGS_LARGE_SCREEN_HIGHLIGHT_MENU_KEY";
+    field public static final String EXTRA_SETTINGS_EMBEDDED_DEEP_LINK_HIGHLIGHT_MENU_KEY = "android.provider.extra.SETTINGS_EMBEDDED_DEEP_LINK_HIGHLIGHT_MENU_KEY";
+    field public static final String EXTRA_SETTINGS_EMBEDDED_DEEP_LINK_INTENT_URI = "android.provider.extra.SETTINGS_EMBEDDED_DEEP_LINK_INTENT_URI";
     field public static final String EXTRA_SUB_ID = "android.provider.extra.SUB_ID";
     field public static final String EXTRA_WIFI_NETWORK_LIST = "android.provider.extra.WIFI_NETWORK_LIST";
     field public static final String EXTRA_WIFI_NETWORK_RESULT_LIST = "android.provider.extra.WIFI_NETWORK_RESULT_LIST";
@@ -51185,6 +51188,10 @@ package android.view.accessibility {
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SET_TEXT;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SHOW_ON_SCREEN;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SHOW_TOOLTIP;
+    field @NonNull public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SWIPE_DOWN;
+    field @NonNull public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SWIPE_LEFT;
+    field @NonNull public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SWIPE_RIGHT;
+    field @NonNull public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SWIPE_UP;
     field @NonNull public static final android.os.Parcelable.Creator<android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction> CREATOR;
   }
 

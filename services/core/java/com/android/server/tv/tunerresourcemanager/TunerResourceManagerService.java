@@ -893,7 +893,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
                 } else if (grantingFrontendHandle == TunerResourceManager.INVALID_RESOURCE_HANDLE) {
                     // Record the frontend id with the lowest client priority among all the
                     // in use frontends when no available frontend has been found.
-                    int priority = updateAndGetOwnerClientPriority(fr.getOwnerClientId());
+                    int priority = getFrontendHighestClientPriority(fr.getOwnerClientId());
                     if (currentLowestPriority > priority) {
                         inUseLowestPriorityFrHandle = fr.getHandle();
                         currentLowestPriority = priority;
@@ -1369,6 +1369,33 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         return profile.getPriority();
     }
 
+    /**
+     * Update the owner and sharee clients' priority and get the highest priority
+     * for frontend resource
+     *
+     * @param clientId the owner client id.
+     * @return the highest priority among all the clients holding the same frontend resource.
+     */
+    private int getFrontendHighestClientPriority(int clientId) {
+        // Check if the owner profile exists
+        ClientProfile ownerClient = getClientProfile(clientId);
+        if (ownerClient == null) {
+            return 0;
+        }
+
+        // Update and get the priority of the owner client
+        int highestPriority = updateAndGetOwnerClientPriority(clientId);
+
+        // Update and get all the client IDs of frontend resource holders
+        for (int shareeId : ownerClient.getShareFeClientIds()) {
+            int priority = updateAndGetOwnerClientPriority(shareeId);
+            if (priority > highestPriority) {
+                highestPriority = priority;
+            }
+        }
+        return highestPriority;
+    }
+
     @VisibleForTesting
     @Nullable
     protected FrontendResource getFrontendResource(int frontendHandle) {
@@ -1546,6 +1573,9 @@ public class TunerResourceManagerService extends SystemService implements IBinde
     }
 
     private void clearAllResourcesAndClientMapping(ClientProfile profile) {
+        if (profile == null) {
+            return;
+        }
         // Clear Lnb
         for (Integer lnbHandle : profile.getInUseLnbHandles()) {
             getLnbResource(lnbHandle).removeOwner();

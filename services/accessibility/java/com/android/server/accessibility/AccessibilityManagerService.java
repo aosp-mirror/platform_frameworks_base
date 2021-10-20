@@ -2575,7 +2575,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         final boolean connect = (userState.isShortcutMagnificationEnabledLocked()
                 || userState.isDisplayMagnificationEnabledLocked())
                 && (userState.getMagnificationCapabilitiesLocked()
-                != Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+                != Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN)
+                || userHasMagnificationServicesLocked(userState);
         getWindowMagnificationMgr().requestConnection(connect);
     }
 
@@ -3564,7 +3565,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
         }
 
-        ArrayList<Display> getValidDisplayList() {
+        /**
+         * Gets all currently valid logical displays.
+         *
+         * @return An array list containing all valid logical displays.
+         */
+        public ArrayList<Display> getValidDisplayList() {
             synchronized (mLock) {
                 return mDisplaysList;
             }

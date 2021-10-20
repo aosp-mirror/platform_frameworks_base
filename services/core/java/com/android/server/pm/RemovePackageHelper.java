@@ -29,7 +29,10 @@ import static com.android.server.pm.PackageManagerService.TAG;
 
 import android.annotation.NonNull;
 import android.content.pm.PackageManager;
+import android.content.pm.SharedLibraryInfo;
+import android.content.pm.VersionedPackage;
 import android.content.pm.parsing.component.ParsedInstrumentation;
+import android.os.Process;
 import android.os.UserHandle;
 import android.os.incremental.IncrementalManager;
 import android.util.Log;
@@ -42,6 +45,7 @@ import com.android.server.pm.parsing.PackageCacher;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
+import com.android.server.utils.WatchedLongSparseArray;
 
 import java.io.File;
 import java.util.Collections;
@@ -168,7 +172,7 @@ final class RemovePackageHelper {
             final int libraryNamesSize = pkg.getLibraryNames().size();
             for (i = 0; i < libraryNamesSize; i++) {
                 String name = pkg.getLibraryNames().get(i);
-                if (mPm.removeSharedLibraryLPw(name, 0)) {
+                if (removeSharedLibraryLPw(name, 0)) {
                     if (DEBUG_REMOVE && chatty) {
                         if (r == null) {
                             r = new StringBuilder(256);
@@ -185,7 +189,7 @@ final class RemovePackageHelper {
 
         // Any package can hold static shared libraries.
         if (pkg.getStaticSharedLibName() != null) {
-            if (mPm.removeSharedLibraryLPw(pkg.getStaticSharedLibName(),
+            if (removeSharedLibraryLPw(pkg.getStaticSharedLibName(),
                     pkg.getStaticSharedLibVersion())) {
                 if (DEBUG_REMOVE && chatty) {
                     if (r == null) {
@@ -201,6 +205,44 @@ final class RemovePackageHelper {
         if (r != null) {
             if (DEBUG_REMOVE) Log.d(TAG, "  Libraries: " + r);
         }
+    }
+
+    private boolean removeSharedLibraryLPw(String name, long version) {
+        WatchedLongSparseArray<SharedLibraryInfo> versionedLib = mPm.mSharedLibraries.get(name);
+        if (versionedLib == null) {
+            return false;
+        }
+        final int libIdx = versionedLib.indexOfKey(version);
+        if (libIdx < 0) {
+            return false;
+        }
+        SharedLibraryInfo libraryInfo = versionedLib.valueAt(libIdx);
+
+        // Remove the shared library overlays from its dependent packages.
+        for (int currentUserId : UserManagerService.getInstance().getUserIds()) {
+            final List<VersionedPackage> dependents = mPm.getPackagesUsingSharedLibraryLPr(
+                    libraryInfo, 0, Process.SYSTEM_UID, currentUserId);
+            if (dependents == null) {
+                continue;
+            }
+            for (VersionedPackage dependentPackage : dependents) {
+                final PackageSetting ps = mPm.mSettings.getPackageLPr(
+                        dependentPackage.getPackageName());
+                if (ps != null) {
+                    ps.setOverlayPathsForLibrary(libraryInfo.getName(), null, currentUserId);
+                }
+            }
+        }
+
+        versionedLib.remove(version);
+        if (versionedLib.size() <= 0) {
+            mPm.mSharedLibraries.remove(name);
+            if (libraryInfo.getType() == SharedLibraryInfo.TYPE_STATIC) {
+                mPm.mStaticLibsByDeclaringPackage.remove(libraryInfo.getDeclaringPackage()
+                        .getPackageName());
+            }
+        }
+        return true;
     }
 
     /*
@@ -274,7 +316,9 @@ final class RemovePackageHelper {
                 mPm.mSettings.removeRenamedPackageLPw(deletedPs.getRealName());
             }
             if (changedUsers.size() > 0) {
-                mPm.updateDefaultHomeNotLocked(changedUsers);
+                final PreferredActivityHelper preferredActivityHelper =
+                        new PreferredActivityHelper(mPm);
+                preferredActivityHelper.updateDefaultHomeNotLocked(changedUsers);
                 mPm.postPreferredActivityChangedBroadcast(UserHandle.USER_ALL);
             }
         }

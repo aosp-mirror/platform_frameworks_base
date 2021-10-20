@@ -34,7 +34,7 @@ import android.os.PowerExemptionManager.TempAllowListType;
  * {@hide}
  */
 @SystemApi
-public class BroadcastOptions extends ComponentOptions {
+public class BroadcastOptions {
     private long mTemporaryAppAllowlistDuration;
     private @TempAllowListType int mTemporaryAppAllowlistType;
     private @ReasonCode int mTemporaryAppAllowlistReasonCode;
@@ -43,6 +43,7 @@ public class BroadcastOptions extends ComponentOptions {
     private int mMaxManifestReceiverApiLevel = Build.VERSION_CODES.CUR_DEVELOPMENT;
     private boolean mDontSendToRestrictedApps = false;
     private boolean mAllowBackgroundActivityStarts;
+    private boolean mPendingIntentBalAllowed = ActivityOptions.PENDING_INTENT_BAL_ALLOWED_DEFAULT;
 
     /**
      * How long to temporarily put an app on the power allowlist when executing this broadcast
@@ -79,6 +80,16 @@ public class BroadcastOptions extends ComponentOptions {
             "android:broadcast.dontSendToRestrictedApps";
 
     /**
+     * PendingIntent caller allows activity start even if PendingIntent creator is in background.
+     * This only works if the PendingIntent caller is allowed to start background activities,
+     * for example if it's in the foreground, or has BAL permission.
+     * TODO: Merge it with ActivityOptions.
+     * @hide
+     */
+    public static final String KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED =
+            "android.pendingIntent.backgroundActivityAllowed";
+
+    /**
      * Corresponds to {@link #setBackgroundActivityStartsAllowed}.
      */
     private static final String KEY_ALLOW_BACKGROUND_ACTIVITY_STARTS =
@@ -108,14 +119,12 @@ public class BroadcastOptions extends ComponentOptions {
     }
 
     private BroadcastOptions() {
-        super();
         resetTemporaryAppAllowlist();
     }
 
     /** @hide */
     @TestApi
     public BroadcastOptions(@NonNull Bundle opts) {
-        super(opts);
         // Match the logic in toBundle().
         if (opts.containsKey(KEY_TEMPORARY_APP_ALLOWLIST_DURATION)) {
             mTemporaryAppAllowlistDuration = opts.getLong(KEY_TEMPORARY_APP_ALLOWLIST_DURATION);
@@ -132,6 +141,8 @@ public class BroadcastOptions extends ComponentOptions {
         mDontSendToRestrictedApps = opts.getBoolean(KEY_DONT_SEND_TO_RESTRICTED_APPS, false);
         mAllowBackgroundActivityStarts = opts.getBoolean(KEY_ALLOW_BACKGROUND_ACTIVITY_STARTS,
                 false);
+        mPendingIntentBalAllowed = opts.getBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED,
+                ActivityOptions.PENDING_INTENT_BAL_ALLOWED_DEFAULT);
     }
 
     /**
@@ -303,6 +314,26 @@ public class BroadcastOptions extends ComponentOptions {
     }
 
     /**
+     * Set PendingIntent activity is allowed to be started in the background if the caller
+     * can start background activities.
+     * TODO: Merge it with ActivityOptions.
+     * @hide
+     */
+    public void setPendingIntentBackgroundActivityLaunchAllowed(boolean allowed) {
+        mPendingIntentBalAllowed = allowed;
+    }
+
+    /**
+     * Get PendingIntent activity is allowed to be started in the background if the caller
+     * can start background activities.
+     * TODO: Merge it with ActivityOptions.
+     * @hide
+     */
+    public boolean isPendingIntentBackgroundActivityLaunchAllowed() {
+        return mPendingIntentBalAllowed;
+    }
+
+    /**
      * Returns the created options as a Bundle, which can be passed to
      * {@link android.content.Context#sendBroadcast(android.content.Intent)
      * Context.sendBroadcast(Intent)} and related methods.
@@ -310,9 +341,8 @@ public class BroadcastOptions extends ComponentOptions {
      * object; you must not modify it, but can supply it to the sendBroadcast
      * methods that take an options Bundle.
      */
-    @Override
     public Bundle toBundle() {
-        Bundle b = super.toBundle();
+        Bundle b = new Bundle();
         if (isTemporaryAppAllowlistSet()) {
             b.putLong(KEY_TEMPORARY_APP_ALLOWLIST_DURATION, mTemporaryAppAllowlistDuration);
             b.putInt(KEY_TEMPORARY_APP_ALLOWLIST_TYPE, mTemporaryAppAllowlistType);
@@ -331,6 +361,8 @@ public class BroadcastOptions extends ComponentOptions {
         if (mAllowBackgroundActivityStarts) {
             b.putBoolean(KEY_ALLOW_BACKGROUND_ACTIVITY_STARTS, true);
         }
+        // TODO: Add API for BroadcastOptions and have a shared base class with ActivityOptions.
+        b.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED, mPendingIntentBalAllowed);
         return b.isEmpty() ? null : b;
     }
 }

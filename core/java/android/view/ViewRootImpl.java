@@ -140,7 +140,6 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.sysprop.DisplayProperties;
 import android.util.AndroidRuntimeException;
-import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.IndentingPrintWriter;
@@ -160,7 +159,6 @@ import android.view.View.AttachInfo;
 import android.view.View.FocusDirection;
 import android.view.View.MeasureSpec;
 import android.view.Window.OnContentApplyWindowInsetsListener;
-import android.view.WindowInsets.Side.InsetsSide;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
@@ -511,9 +509,11 @@ public final class ViewRootImpl implements ViewParent,
     private final Point mSurfaceSize = new Point();
     private final Point mLastSurfaceSize = new Point();
 
-    final Rect mTempRect; // used in the transaction to not thrash the heap.
-    final Rect mVisRect; // used to retrieve visible rect of focused view.
-    private final Rect mTempBoundsRect = new Rect(); // used to set the size of the bounds surface.
+    private final Rect mVisRect = new Rect(); // used to retrieve visible rect of focused view.
+    private final Rect mTempRect = new Rect();
+    private final Rect mTempRect2 = new Rect();
+
+    private final WindowLayout mWindowLayout = new WindowLayout();
 
     // This is used to reduce the race between window focus changes being dispatched from
     // the window manager and input events coming through the input system.
@@ -809,8 +809,6 @@ public final class ViewRootImpl implements ViewParent,
         mWidth = -1;
         mHeight = -1;
         mDirty = new Rect();
-        mTempRect = new Rect();
-        mVisRect = new Rect();
         mWinFrame = new Rect();
         mWindow = new W(this);
         mLeashToken = new Binder();
@@ -985,29 +983,6 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    // TODO(b/161810301): Make this private after window layout is moved to the client side.
-    public static void computeWindowBounds(WindowManager.LayoutParams attrs, InsetsState state,
-            Rect displayFrame, Rect outBounds) {
-        final @InsetsType int typesToFit = attrs.getFitInsetsTypes();
-        final @InsetsSide int sidesToFit = attrs.getFitInsetsSides();
-        final ArraySet<Integer> types = InsetsState.toInternalType(typesToFit);
-        final Rect df = displayFrame;
-        Insets insets = Insets.of(0, 0, 0, 0);
-        for (int i = types.size() - 1; i >= 0; i--) {
-            final InsetsSource source = state.peekSource(types.valueAt(i));
-            if (source == null) {
-                continue;
-            }
-            insets = Insets.max(insets, source.calculateInsets(
-                    df, attrs.isFitInsetsIgnoringVisibility()));
-        }
-        final int left = (sidesToFit & WindowInsets.Side.LEFT) != 0 ? insets.left : 0;
-        final int top = (sidesToFit & WindowInsets.Side.TOP) != 0 ? insets.top : 0;
-        final int right = (sidesToFit & WindowInsets.Side.RIGHT) != 0 ? insets.right : 0;
-        final int bottom = (sidesToFit & WindowInsets.Side.BOTTOM) != 0 ? insets.bottom : 0;
-        outBounds.set(df.left + left, df.top + top, df.right - right, df.bottom - bottom);
-    }
-
     private Configuration getConfiguration() {
         return mContext.getResources().getConfiguration();
     }
@@ -1168,8 +1143,13 @@ public final class ViewRootImpl implements ViewParent,
                 mPendingAlwaysConsumeSystemBars = mAttachInfo.mAlwaysConsumeSystemBars;
                 mInsetsController.onStateChanged(mTempInsets);
                 mInsetsController.onControlsChanged(mTempControls);
-                computeWindowBounds(mWindowAttributes, mInsetsController.getState(),
-                        getConfiguration().windowConfiguration.getBounds(), mTmpFrames.frame);
+                final InsetsState state = mInsetsController.getState();
+                final Rect displayCutoutSafe = mTempRect;
+                state.getDisplayCutoutSafe(displayCutoutSafe);
+                mWindowLayout.computeWindowFrames(mWindowAttributes, state,
+                        displayCutoutSafe, getConfiguration().windowConfiguration.getBounds(),
+                        mInsetsController.getRequestedVisibilities(),
+                        null /* attachedWindowFrame */, mTmpFrames.frame, mTempRect2);
                 setFrame(mTmpFrames.frame);
                 if (DEBUG_LAYOUT) Log.v(mTag, "Added window " + mWindow);
                 if (res < WindowManagerGlobal.ADD_OKAY) {
@@ -1966,11 +1946,11 @@ public final class ViewRootImpl implements ViewParent,
     private void setBoundsLayerCrop(Transaction t) {
         // Adjust of insets and update the bounds layer so child surfaces do not draw into
         // the surface inset region.
-        mTempBoundsRect.set(0, 0, mSurfaceSize.x, mSurfaceSize.y);
-        mTempBoundsRect.inset(mWindowAttributes.surfaceInsets.left,
+        mTempRect.set(0, 0, mSurfaceSize.x, mSurfaceSize.y);
+        mTempRect.inset(mWindowAttributes.surfaceInsets.left,
                 mWindowAttributes.surfaceInsets.top,
                 mWindowAttributes.surfaceInsets.right, mWindowAttributes.surfaceInsets.bottom);
-        t.setWindowCrop(mBoundsLayer, mTempBoundsRect);
+        t.setWindowCrop(mBoundsLayer, mTempRect);
     }
 
     /**

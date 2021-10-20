@@ -17657,40 +17657,42 @@ public final class Settings {
             "android.settings.MANAGE_APP_ALL_FILES_ACCESS_PERMISSION";
 
     /**
-     * Activity Action: For system or preinstalled apps to show their {@link Activity} in 2-pane
-     * mode in Settings app on large screen devices.
+     * Activity Action: For system or preinstalled apps to show their {@link Activity} embedded
+     * in Settings app on large screen devices.
      * <p>
-     *     Input: {@link #EXTRA_SETTINGS_LARGE_SCREEN_DEEP_LINK_INTENT_URI} must be included to
-     * specify the intent for the activity which will be displayed in 2-pane mode in Settings app.
+     *     Input: {@link #EXTRA_SETTINGS_EMBEDDED_DEEP_LINK_INTENT_URI} must be included to
+     * specify the intent for the activity which will be embedded in Settings app.
      * It's an intent URI string from {@code intent.toUri(Intent.URI_INTENT_SCHEME)}.
      *
-     *     Input: {@link #EXTRA_SETTINGS_LARGE_SCREEN_HIGHLIGHT_MENU_KEY} must be included to
+     *     Input: {@link #EXTRA_SETTINGS_EMBEDDED_DEEP_LINK_HIGHLIGHT_MENU_KEY} must be included to
      * specify a key that indicates the menu item which will be highlighted on settings home menu.
      * <p>
      * Output: Nothing.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_SETTINGS_LARGE_SCREEN_DEEP_LINK =
-            "android.settings.SETTINGS_LARGE_SCREEN_DEEP_LINK";
+    public static final String ACTION_SETTINGS_EMBED_DEEP_LINK_ACTIVITY =
+            "android.settings.SETTINGS_EMBED_DEEP_LINK_ACTIVITY";
 
     /**
-     * Activity Extra: Specify the intent for the {@link Activity} which will be displayed in 2-pane
-     * mode in Settings app. It's an intent URI string from
+     * Activity Extra: Specify the intent for the {@link Activity} which will be embedded in
+     * Settings app. It's an intent URI string from
      * {@code intent.toUri(Intent.URI_INTENT_SCHEME)}.
      * <p>
-     * This must be passed as an extra field to {@link #ACTION_SETTINGS_LARGE_SCREEN_DEEP_LINK}.
+     * This must be passed as an extra field to
+     * {@link #ACTION_SETTINGS_EMBED_DEEP_LINK_ACTIVITY}.
      */
-    public static final String EXTRA_SETTINGS_LARGE_SCREEN_DEEP_LINK_INTENT_URI =
-            "android.provider.extra.SETTINGS_LARGE_SCREEN_DEEP_LINK_INTENT_URI";
+    public static final String EXTRA_SETTINGS_EMBEDDED_DEEP_LINK_INTENT_URI =
+            "android.provider.extra.SETTINGS_EMBEDDED_DEEP_LINK_INTENT_URI";
 
     /**
      * Activity Extra: Specify a key that indicates the menu item which should be highlighted on
      * settings home menu.
      * <p>
-     * This must be passed as an extra field to {@link #ACTION_SETTINGS_LARGE_SCREEN_DEEP_LINK}.
+     * This must be passed as an extra field to
+     * {@link #ACTION_SETTINGS_EMBED_DEEP_LINK_ACTIVITY}.
      */
-    public static final String EXTRA_SETTINGS_LARGE_SCREEN_HIGHLIGHT_MENU_KEY =
-            "android.provider.extra.SETTINGS_LARGE_SCREEN_HIGHLIGHT_MENU_KEY";
+    public static final String EXTRA_SETTINGS_EMBEDDED_DEEP_LINK_HIGHLIGHT_MENU_KEY =
+            "android.provider.extra.SETTINGS_EMBEDDED_DEEP_LINK_HIGHLIGHT_MENU_KEY";
 
     /**
      * Performs a strict and comprehensive check of whether a calling package is allowed to
