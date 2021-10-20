@@ -5207,7 +5207,7 @@ public final class ContactsContract {
         @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
         @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
         public static @NonNull Map<String, List<ContentValues>> queryRawContactEntity(
-                @NonNull Context context, long contactId) {
+                @NonNull ContentResolver contentResolver, long contactId) {
             Uri uri = RawContactsEntity.CONTENT_URI;
             long realContactId = contactId;
 
@@ -5225,7 +5225,7 @@ public final class ContactsContract {
                 final String selection = Data.CONTACT_ID + "=?";
                 final String[] selectionArgs = new String[] {String.valueOf(realContactId)};
 
-                entityIterator = RawContacts.newEntityIterator(context.getContentResolver().query(
+                entityIterator = RawContacts.newEntityIterator(contentResolver.query(
                             uri, null, selection, selectionArgs, null));
 
                 if (entityIterator == null) {
