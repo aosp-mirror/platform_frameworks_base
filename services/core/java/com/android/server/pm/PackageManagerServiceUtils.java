@@ -989,11 +989,11 @@ public class PackageManagerServiceUtils {
     }
 
     public static boolean isSystemApp(PackageSetting ps) {
-        return (ps.pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0;
+        return (ps.getFlags() & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
 
     public static boolean isUpdatedSystemApp(PackageSetting ps) {
-        return (ps.pkgFlags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
+        return (ps.getFlags() & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
     }
 
     // Static to give access to ComputeEngine

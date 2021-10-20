@@ -2071,7 +2071,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 int size = packageSettings.size();
                 for (int i = 0; i < size; i++) {
                     final PackageSetting ps = packageSettings.valueAt(i);
-                    if ((ps.pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                    if ((ps.getFlags() & ApplicationInfo.FLAG_SYSTEM) != 0) {
                         continue;
                     }
                     ps.disableComponentLPw(PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME,
@@ -3370,11 +3370,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
             final String libName = libInfo.getName();
             if (libInfo.isStatic()) {
-                final int libIdx = ArrayUtils.indexOf(ps.usesStaticLibraries, libName);
+                final int libIdx = ArrayUtils.indexOf(ps.getUsesStaticLibraries(), libName);
                 if (libIdx < 0) {
                     continue;
                 }
-                if (ps.usesStaticLibrariesVersions[libIdx] != libInfo.getLongVersion()) {
+                if (ps.getUsesStaticLibrariesVersions()[libIdx] != libInfo.getLongVersion()) {
                     continue;
                 }
                 if (shouldFilterApplicationLocked(ps, callingUid, userId)) {
@@ -4046,13 +4046,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (shouldFilterApplicationLocked(sus, callingUid, callingUserId)) {
                     return 0;
                 }
-                return sus.pkgFlags;
+                return sus.getFlags();
             } else if (obj instanceof PackageSetting) {
                 final PackageSetting ps = (PackageSetting) obj;
                 if (shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
                     return 0;
                 }
-                return ps.pkgFlags;
+                return ps.getFlags();
             }
         }
         return 0;
@@ -4073,13 +4073,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (shouldFilterApplicationLocked(sus, callingUid, callingUserId)) {
                     return 0;
                 }
-                return sus.pkgPrivateFlags;
+                return sus.getPrivateFlags();
             } else if (obj instanceof PackageSetting) {
                 final PackageSetting ps = (PackageSetting) obj;
                 if (shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
                     return 0;
                 }
-                return ps.pkgPrivateFlags;
+                return ps.getPrivateFlags();
             }
         }
         return 0;
@@ -6867,9 +6867,11 @@ public class PackageManagerService extends IPackageManager.Stub
                 return false;
             }
             if (systemUserApp) {
-                ps.pkgPrivateFlags |= ApplicationInfo.PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER;
+                ps.setPrivateFlags(ps.getPrivateFlags()
+                        | ApplicationInfo.PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER);
             } else {
-                ps.pkgPrivateFlags &= ~ApplicationInfo.PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER;
+                ps.setPrivateFlags(ps.getPrivateFlags()
+                        & ~ApplicationInfo.PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER);
             }
             writeSettingsLPrTEMP();
         }
@@ -7800,7 +7802,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             : "Unknown package: " + packageName);
                 }
                 if (callingUid == Process.SHELL_UID
-                        && (pkgSetting.pkgFlags & ApplicationInfo.FLAG_TEST_ONLY) == 0) {
+                        && (pkgSetting.getFlags() & ApplicationInfo.FLAG_TEST_ONLY) == 0) {
                     // Shell can only change whole packages between ENABLED and DISABLED_USER states
                     // unless it is a test package.
                     final int oldState = pkgSetting.getEnabled(userId);
