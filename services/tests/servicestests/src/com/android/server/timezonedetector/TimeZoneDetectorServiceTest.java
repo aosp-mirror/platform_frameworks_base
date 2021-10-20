@@ -50,11 +50,14 @@ import org.junit.runner.RunWith;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
+import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 public class TimeZoneDetectorServiceTest {
 
     private static final int ARBITRARY_USER_ID = 9999;
+    private static final List<String> ARBITRARY_TIME_ZONE_IDS = Arrays.asList("TestZoneId");
+    private static final long ARBITRARY_ELAPSED_REALTIME_MILLIS = 1234L;
 
     private Context mMockContext;
     private FakeTimeZoneDetectorStrategy mFakeTimeZoneDetectorStrategy;
@@ -374,7 +377,8 @@ public class TimeZoneDetectorServiceTest {
     }
 
     private static GeolocationTimeZoneSuggestion createGeolocationTimeZoneSuggestion() {
-        return new GeolocationTimeZoneSuggestion(Arrays.asList("TestZoneId"));
+        return GeolocationTimeZoneSuggestion.createCertainSuggestion(
+                ARBITRARY_ELAPSED_REALTIME_MILLIS, ARBITRARY_TIME_ZONE_IDS);
     }
 
     private static ManualTimeZoneSuggestion createManualTimeZoneSuggestion() {
