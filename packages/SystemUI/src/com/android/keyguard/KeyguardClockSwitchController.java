@@ -238,6 +238,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         }
         mColorExtractor.removeOnColorsChangedListener(mColorsListener);
         mView.setClockPlugin(null, mStatusBarStateController.getState());
+        mView.onViewDetached();
     }
 
     /**
