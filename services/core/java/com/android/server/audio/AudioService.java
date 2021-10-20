@@ -6185,6 +6185,11 @@ public class AudioService extends IAudioService.Stub
         if (pkgName == null) {
             pkgName = "";
         }
+        if (device.getType() == AudioDeviceInfo.TYPE_BLUETOOTH_A2DP) {
+            avrcpSupportsAbsoluteVolume(device.getAddress(),
+                    deviceVolumeBehavior == AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE);
+            return;
+        }
 
         int audioSystemDeviceOut = AudioDeviceInfo.convertDeviceTypeToInternalDevice(
                 device.getType());
@@ -7862,7 +7867,7 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    public void avrcpSupportsAbsoluteVolume(String address, boolean support) {
+    private void avrcpSupportsAbsoluteVolume(String address, boolean support) {
         // address is not used for now, but may be used when multiple a2dp devices are supported
         sVolumeLogger.log(new AudioEventLogger.StringEvent("avrcpSupportsAbsoluteVolume addr="
                 + address + " support=" + support));

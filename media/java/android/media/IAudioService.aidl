@@ -176,8 +176,6 @@ interface IAudioService {
 
     int getEncodedSurroundMode(int targetSdkVersion);
 
-    oneway void avrcpSupportsAbsoluteVolume(String address, boolean support);
-
     void setSpeakerphoneOn(IBinder cb, boolean on);
 
     boolean isSpeakerphoneOn();
