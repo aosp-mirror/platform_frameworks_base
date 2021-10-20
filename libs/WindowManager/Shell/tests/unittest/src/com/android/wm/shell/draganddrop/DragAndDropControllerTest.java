@@ -30,7 +30,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
+import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.ShellExecutor;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -59,8 +61,8 @@ public class DragAndDropControllerTest {
     @Before
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
-
-        mController = new DragAndDropController(mContext, mDisplayController, mUiEventLogger);
+        mController = new DragAndDropController(mContext, mDisplayController, mUiEventLogger,
+                mock(IconProvider.class), mock(ShellExecutor.class));
     }
 
     @Test

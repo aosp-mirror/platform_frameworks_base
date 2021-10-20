@@ -56,6 +56,7 @@ import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.common.annotations.ShellSplashscreenThread;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelperController;
+import com.android.wm.shell.draganddrop.DragAndDrop;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.freeform.FreeformTaskListener;
 import com.android.wm.shell.fullscreen.FullscreenTaskListener;
@@ -156,8 +157,16 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static DragAndDropController provideDragAndDropController(Context context,
-            DisplayController displayController, UiEventLogger uiEventLogger) {
-        return new DragAndDropController(context, displayController, uiEventLogger);
+            DisplayController displayController, UiEventLogger uiEventLogger,
+            IconProvider iconProvider, @ShellMainThread ShellExecutor mainExecutor) {
+        return new DragAndDropController(context, displayController, uiEventLogger, iconProvider,
+                mainExecutor);
+    }
+
+    @WMSingleton
+    @Provides
+    static DragAndDrop provideDragAndDrop(DragAndDropController dragAndDropController) {
+        return dragAndDropController.asDragAndDrop();
     }
 
     @WMSingleton

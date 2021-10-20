@@ -678,6 +678,16 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         outBottomOrRightBounds.set(mSplitLayout.getBounds2());
     }
 
+    @SplitPosition
+    int getSplitPosition(int taskId) {
+        if (mSideStage.getTopVisibleChildTaskId() == taskId) {
+            return getSideStagePosition();
+        } else if (mMainStage.getTopVisibleChildTaskId() == taskId) {
+            return getMainStagePosition();
+        }
+        return SPLIT_POSITION_UNDEFINED;
+    }
+
     private void addActivityOptions(Bundle opts, StageTaskListener stage) {
         opts.putParcelable(KEY_LAUNCH_ROOT_TASK_TOKEN, stage.mRootTaskInfo.token);
     }
