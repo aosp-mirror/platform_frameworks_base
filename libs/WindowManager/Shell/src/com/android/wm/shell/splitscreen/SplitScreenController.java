@@ -215,10 +215,12 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         options = mStageCoordinator.resolveStartStage(stage, position, options, null /* wct */);
 
         try {
+            final WindowContainerTransaction evictWct = new WindowContainerTransaction();
+            mStageCoordinator.prepareEvictChildTasks(position, evictWct);
             final int result =
                     ActivityTaskManager.getService().startActivityFromRecents(taskId, options);
             if (result == START_SUCCESS || result == START_TASK_TO_FRONT) {
-                mStageCoordinator.evictOccludedChildren(position);
+                mSyncQueue.queue(evictWct);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to launch task", e);
@@ -229,13 +231,15 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             @SplitScreen.StageType int stage, @SplitPosition int position,
             @Nullable Bundle options, UserHandle user) {
         options = mStageCoordinator.resolveStartStage(stage, position, options, null /* wct */);
+        final WindowContainerTransaction evictWct = new WindowContainerTransaction();
+        mStageCoordinator.prepareEvictChildTasks(position, evictWct);
 
         try {
             LauncherApps launcherApps =
                     mContext.getSystemService(LauncherApps.class);
             launcherApps.startShortcut(packageName, shortcutId, null /* sourceBounds */,
                     options, user);
-            mStageCoordinator.evictOccludedChildren(position);
+            mSyncQueue.queue(evictWct);
         } catch (ActivityNotFoundException e) {
             Slog.e(TAG, "Failed to launch shortcut", e);
         }
@@ -255,6 +259,9 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     private void startIntentLegacy(PendingIntent intent, Intent fillInIntent,
             @SplitScreen.StageType int stage, @SplitPosition int position,
             @Nullable Bundle options) {
+        final WindowContainerTransaction evictWct = new WindowContainerTransaction();
+        mStageCoordinator.prepareEvictChildTasks(position, evictWct);
+
         LegacyTransitions.ILegacyTransition transition = new LegacyTransitions.ILegacyTransition() {
             @Override
             public void onAnimationStart(int transit, RemoteAnimationTarget[] apps,
@@ -280,12 +287,11 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                     }
                 }
 
-                // Launching a new app into a specific split evicts tasks previously in the same
-                // split.
-                mStageCoordinator.evictOccludedChildren(position);
+                mSyncQueue.queue(evictWct);
             }
         };
-        WindowContainerTransaction wct = new WindowContainerTransaction();
+
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
         options = mStageCoordinator.resolveStartStage(stage, position, options, wct);
         wct.sendPendingIntent(intent, fillInIntent, options);
         mSyncQueue.queue(transition, WindowManager.TRANSIT_OPEN, wct);

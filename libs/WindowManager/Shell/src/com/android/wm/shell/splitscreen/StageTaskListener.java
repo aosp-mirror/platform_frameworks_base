@@ -248,12 +248,11 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         wct.reorder(mChildrenTaskInfo.get(taskId).token, onTop /* onTop */);
     }
 
-    void evictOccludedChildren(WindowContainerTransaction wct) {
+    /** Collects all the current child tasks and prepares transaction to evict them to display. */
+    void evictAllChildren(WindowContainerTransaction wct) {
         for (int i = mChildrenTaskInfo.size() - 1; i >= 0; i--) {
             final ActivityManager.RunningTaskInfo taskInfo = mChildrenTaskInfo.valueAt(i);
-            if (!taskInfo.isVisible) {
-                wct.reparent(taskInfo.token, null /* parent */, false /* onTop */);
-            }
+            wct.reparent(taskInfo.token, null /* parent */, false /* onTop */);
         }
     }
 
