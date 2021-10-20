@@ -1789,6 +1789,13 @@ public class DisplayPolicy {
      */
     public void applyPostLayoutPolicyLw(WindowState win, WindowManager.LayoutParams attrs,
             WindowState attached, WindowState imeTarget) {
+        if (INSETS_LAYOUT_GENERALIZATION && attrs.type == TYPE_NAVIGATION_BAR) {
+            // Keep mNavigationBarPosition updated to make sure the transient detection and bar
+            // color control is working correctly.
+            final DisplayFrames displayFrames = mDisplayContent.mDisplayFrames;
+            mNavigationBarPosition = navigationBarPosition(displayFrames.mDisplayWidth,
+                    displayFrames.mDisplayHeight, displayFrames.mRotation);
+        }
         final boolean affectsSystemUi = win.canAffectSystemUiFlags();
         if (DEBUG_LAYOUT) Slog.i(TAG, "Win " + win + ": affectsSystemUi=" + affectsSystemUi);
         applyKeyguardPolicy(win, imeTarget);
