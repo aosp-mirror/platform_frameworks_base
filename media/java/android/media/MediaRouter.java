@@ -1070,7 +1070,8 @@ public class MediaRouter {
                 && (types & ROUTE_TYPE_LIVE_AUDIO) != 0
                 && (route.isBluetooth() || route.isDefault())) {
             try {
-                sStatic.mAudioService.setBluetoothA2dpOn(route.isBluetooth());
+                sStatic.mMediaRouterService.setBluetoothA2dpOn(sStatic.mClient,
+                        route.isBluetooth());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error changing Bluetooth A2DP state", e);
             }
