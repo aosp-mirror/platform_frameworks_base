@@ -56,6 +56,7 @@ public class NotificationEntryBuilder {
 
     /* If set, use this creation time instead of mClock.uptimeMillis */
     private long mCreationTime = -1;
+    private int mStableIndex = -1;
 
     public NotificationEntryBuilder() {
         mSbnBuilder = new SbnBuilder();
@@ -102,6 +103,7 @@ public class NotificationEntryBuilder {
 
         /* ListEntry properties */
         entry.setParent(mParent);
+        entry.getAttachState().setStableIndex(mStableIndex);
         return entry;
     }
 
@@ -119,6 +121,11 @@ public class NotificationEntryBuilder {
      */
     public NotificationEntryBuilder setSbn(@Nullable StatusBarNotification sbn) {
         mSbn = sbn;
+        return this;
+    }
+
+    public NotificationEntryBuilder setStableIndex(int index) {
+        mStableIndex = index;
         return this;
     }
 

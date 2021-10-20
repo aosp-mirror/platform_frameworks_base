@@ -31,6 +31,11 @@ data class ListAttachState private constructor(
     var parent: GroupEntry?,
 
     /**
+     * Identifies the notification order in the entire notification list
+     */
+    var stableIndex: Int = -1,
+
+    /**
      * The section that this ListEntry was sorted into. If the child of the group, this will be the
      * parent's section. Null if not attached to the list.
      */
@@ -58,6 +63,7 @@ data class ListAttachState private constructor(
     /** Copies the state of another instance. */
     fun clone(other: ListAttachState) {
         parent = other.parent
+        stableIndex = other.stableIndex
         section = other.section
         excludingFilter = other.excludingFilter
         promoter = other.promoter
@@ -70,6 +76,7 @@ data class ListAttachState private constructor(
         section = null
         excludingFilter = null
         promoter = null
+        stableIndex = -1
         suppressedChanges.reset()
     }
 
@@ -78,6 +85,7 @@ data class ListAttachState private constructor(
         fun create(): ListAttachState {
             return ListAttachState(
                     null,
+                    -1,
                     null,
                     null,
                     null,

@@ -27,6 +27,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
+import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifStabilityManager;
@@ -98,7 +99,9 @@ public class VisualStabilityCoordinator implements Coordinator {
 
         pipeline.setVisualStabilityManager(mNotifStabilityManager);
     }
-
+    // TODO(b/203828145): Ensure stability manager handles minimized state changes
+    // TODO(b/203826051): Ensure stability manager can allow reordering off-screen
+    //  HUNs to the top of the shade
     private final NotifStabilityManager mNotifStabilityManager =
             new NotifStabilityManager("VisualStabilityCoordinator") {
                 @Override
@@ -125,6 +128,11 @@ public class VisualStabilityCoordinator implements Coordinator {
                         mEntriesWithSuppressedSectionChange.add(entry.getKey());
                     }
                     return isSectionChangeAllowedForEntry;
+                }
+
+                @Override
+                public boolean isEntryReorderingAllowed(ListEntry section) {
+                    return mReorderingAllowed;
                 }
             };
 
