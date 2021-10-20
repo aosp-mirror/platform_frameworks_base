@@ -424,7 +424,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private AccessibilityShortcutController mAccessibilityShortcutController;
 
     boolean mSafeMode;
-    private WindowState mKeyguardCandidate = null;
 
     // Whether to allow dock apps with METADATA_DOCK_HOME to temporarily take over the Home key.
     // This is for car dock and this is updated from resource.
@@ -3309,7 +3308,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mKeyguardOccludedChanged) {
             if (DEBUG_KEYGUARD) Slog.d(TAG, "transition/occluded changed occluded="
                     + mPendingKeyguardOccluded);
-            mKeyguardOccludedChanged = false;
             if (setKeyguardOccludedLw(mPendingKeyguardOccluded, false /* force */,
                     transitionStarted)) {
                 return FINISH_LAYOUT_REDO_LAYOUT | FINISH_LAYOUT_REDO_WALLPAPER;
@@ -3519,14 +3517,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mNavBarVirtualKeyHapticFeedbackEnabled = enabled;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void setKeyguardCandidateLw(WindowState win) {
-        mKeyguardCandidate = win;
-        setKeyguardOccludedLw(isKeyguardOccluded(), true /* force */,
-                false /* keyguardOccludingStarted */);
-    }
-
     /**
      * Updates the occluded state of the Keyguard.
      *
@@ -3539,6 +3529,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean setKeyguardOccludedLw(boolean isOccluded, boolean force,
             boolean transitionStarted) {
         if (DEBUG_KEYGUARD) Slog.d(TAG, "setKeyguardOccluded occluded=" + isOccluded);
+        mKeyguardOccludedChanged = false;
         if (isKeyguardOccluded() == isOccluded && !force) {
             return false;
         }
