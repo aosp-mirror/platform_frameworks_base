@@ -17,10 +17,9 @@
 package android.media.tv.interactive;
 
 /**
- * Sub-interface of ITvIAppService.aidl which is created per session and has its own context.
+ * Helper interface for ITvIAppService to allow the TvIAppService to notify the
+ * TvIAppManagerService.
  * @hide
  */
-oneway interface ITvIAppSession {
-    void startIApp();
-    void release();
+oneway interface ITvIAppServiceCallback {
 }

@@ -17,10 +17,11 @@
 package android.media.tv.interactive;
 
 /**
- * Sub-interface of ITvIAppService.aidl which is created per session and has its own context.
+ * Interface a client of the ITvIAppManager implements, to identify itself and receive information
+ * about changes to the state of each TV interactive application service.
  * @hide
  */
-oneway interface ITvIAppSession {
-    void startIApp();
-    void release();
+oneway interface ITvIAppClient {
+    void onSessionCreated(in String iAppServiceId, IBinder token, int seq);
+    void onSessionReleased(int seq);
 }

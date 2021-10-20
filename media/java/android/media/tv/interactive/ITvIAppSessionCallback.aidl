@@ -16,11 +16,13 @@
 
 package android.media.tv.interactive;
 
+import android.media.tv.interactive.ITvIAppSession;
+
 /**
- * Sub-interface of ITvIAppService.aidl which is created per session and has its own context.
+ * Helper interface for ITvIAppSession to allow TvIAppService to notify the system service when
+ * there is a related event.
  * @hide
  */
-oneway interface ITvIAppSession {
-    void startIApp();
-    void release();
+oneway interface ITvIAppSessionCallback {
+    void onSessionCreated(in ITvIAppSession session);
 }
