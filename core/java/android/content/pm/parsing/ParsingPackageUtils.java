@@ -49,8 +49,10 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.Property;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
+import android.content.pm.parsing.component.ComponentMutateUtils;
 import android.content.pm.parsing.component.ComponentParseUtils;
 import android.content.pm.parsing.component.ParsedActivity;
+import android.content.pm.parsing.component.ParsedActivityImpl;
 import android.content.pm.parsing.component.ParsedActivityUtils;
 import android.content.pm.parsing.component.ParsedAttribution;
 import android.content.pm.parsing.component.ParsedAttributionUtils;
@@ -70,6 +72,7 @@ import android.content.pm.parsing.component.ParsedProviderUtils;
 import android.content.pm.parsing.component.ParsedService;
 import android.content.pm.parsing.component.ParsedServiceUtils;
 import android.content.pm.parsing.component.ParsedUsesPermission;
+import android.content.pm.parsing.component.ParsedUsesPermissionImpl;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseInput.DeferredError;
 import android.content.pm.parsing.result.ParseResult;
@@ -267,27 +270,27 @@ public class ParsingPackageUtils {
             boolean collectCertificates) {
         ParseResult<ParsingPackage> result;
 
-        ParsingPackageUtils parser = new ParsingPackageUtils(false, null, null, splitPermissions,
-                new Callback() {
-                    @Override
-                    public boolean hasFeature(String feature) {
-                        // Assume the device doesn't support anything. This will affect permission
-                        // parsing and will force <uses-permission/> declarations to include all
-                        // requiredNotFeature permissions and exclude all requiredFeature
-                        // permissions. This mirrors the old behavior.
-                        return false;
-                    }
+        ParsingPackageUtils parser = new ParsingPackageUtils(false, null /*separateProcesses*/,
+                null /*displayMetrics*/, splitPermissions, new Callback() {
+            @Override
+            public boolean hasFeature(String feature) {
+                // Assume the device doesn't support anything. This will affect permission
+                // parsing and will force <uses-permission/> declarations to include all
+                // requiredNotFeature permissions and exclude all requiredFeature
+                // permissions. This mirrors the old behavior.
+                return false;
+            }
 
-                    @Override
-                    public ParsingPackage startParsingPackage(
-                            @NonNull String packageName,
-                            @NonNull String baseApkPath,
-                            @NonNull String path,
-                            @NonNull TypedArray manifestArray, boolean isCoreApp) {
-                        return new ParsingPackageImpl(packageName, baseApkPath, path,
-                                manifestArray);
-                    }
-                });
+            @Override
+            public ParsingPackage startParsingPackage(
+                    @NonNull String packageName,
+                    @NonNull String baseApkPath,
+                    @NonNull String path,
+                    @NonNull TypedArray manifestArray, boolean isCoreApp) {
+                return new ParsingPackageImpl(packageName, baseApkPath, path,
+                        manifestArray);
+            }
+        });
         result = parser.parsePackage(input, file, parseFlags);
         if (result.isError()) {
             return input.error(result);
@@ -625,8 +628,8 @@ public class ParsingPackageUtils {
 
         final TypedArray manifestArray = res.obtainAttributes(parser, R.styleable.AndroidManifest);
         try {
-            final boolean isCoreApp =
-                    parser.getAttributeBooleanValue(null, "coreApp", false);
+            final boolean isCoreApp = parser.getAttributeBooleanValue(null /*namespace*/,
+                    "coreApp",false);
             final ParsingPackage pkg = mCallback.startParsingPackage(
                     pkgName, apkPath, codePath, manifestArray, isCoreApp);
             final ParseResult<ParsingPackage> result =
@@ -732,6 +735,13 @@ public class ParsingPackageUtils {
         } finally {
             sa.recycle();
         }
+
+        // If the loaded component did not specify a split, inherit the split name
+        // based on the split it is defined in.
+        // This is used to later load the correct split when starting this
+        // component.
+        String defaultSplitName = pkg.getSplitNames()[splitIndex];
+
         final int depth = parser.getDepth();
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -753,8 +763,7 @@ public class ParsingPackageUtils {
                 case "receiver":
                     ParseResult<ParsedActivity> activityResult =
                             ParsedActivityUtils.parseActivityOrReceiver(mSeparateProcesses, pkg,
-                                    res,
-                                    parser, flags, sUseRoundIcon, input);
+                                    res, parser, flags, sUseRoundIcon, defaultSplitName, input);
                     if (activityResult.isSuccess()) {
                         ParsedActivity activity = activityResult.getResult();
                         if (isActivity) {
@@ -768,8 +777,8 @@ public class ParsingPackageUtils {
                     break;
                 case "service":
                     ParseResult<ParsedService> serviceResult = ParsedServiceUtils.parseService(
-                            mSeparateProcesses, pkg, res, parser, flags,
-                            sUseRoundIcon, input);
+                            mSeparateProcesses, pkg, res, parser, flags, sUseRoundIcon,
+                            defaultSplitName, input);
                     if (serviceResult.isSuccess()) {
                         ParsedService service = serviceResult.getResult();
                         pkg.addService(service);
@@ -780,7 +789,7 @@ public class ParsingPackageUtils {
                 case "provider":
                     ParseResult<ParsedProvider> providerResult =
                             ParsedProviderUtils.parseProvider(mSeparateProcesses, pkg, res, parser,
-                                    flags, sUseRoundIcon, input);
+                                    flags, sUseRoundIcon, defaultSplitName, input);
                     if (providerResult.isSuccess()) {
                         ParsedProvider provider = providerResult.getResult();
                         pkg.addProvider(provider);
@@ -790,7 +799,7 @@ public class ParsingPackageUtils {
                     break;
                 case "activity-alias":
                     activityResult = ParsedActivityUtils.parseActivityAlias(pkg, res, parser,
-                            sUseRoundIcon, input);
+                            sUseRoundIcon, defaultSplitName, input);
                     if (activityResult.isSuccess()) {
                         ParsedActivity activity = activityResult.getResult();
                         pkg.addActivity(activity);
@@ -806,14 +815,6 @@ public class ParsingPackageUtils {
 
             if (result.isError()) {
                 return input.error(result);
-            }
-
-            if (mainComponent != null && mainComponent.getSplitName() == null) {
-                // If the loaded component did not specify a split, inherit the split name
-                // based on the split it is defined in.
-                // This is used to later load the correct split when starting this
-                // component.
-                mainComponent.setSplitName(pkg.getSplitNames()[splitIndex]);
             }
         }
 
@@ -832,15 +833,15 @@ public class ParsingPackageUtils {
                 // note: application meta-data is stored off to the side, so it can
                 // remain null in the primary copy (we like to avoid extra copies because
                 // it can be large)
-                ParseResult<Property> metaDataResult = parseMetaData(pkg, null, res,
-                        parser, "<meta-data>", input);
+                ParseResult<Property> metaDataResult = parseMetaData(pkg, null /*component*/,
+                        res, parser, "<meta-data>", input);
                 if (metaDataResult.isSuccess() && metaDataResult.getResult() != null) {
                     pkg.setMetaData(metaDataResult.getResult().toBundle(pkg.getMetaData()));
                 }
                 return metaDataResult;
             case "property":
-                ParseResult<Property> propertyResult = parseMetaData(pkg, null, res,
-                        parser, "<property>", input);
+                ParseResult<Property> propertyResult = parseMetaData(pkg, null /*component*/,
+                        res, parser, "<property>", input);
                 if (propertyResult.isSuccess()) {
                     pkg.addProperty(propertyResult.getResult());
                 }
@@ -919,7 +920,7 @@ public class ParsingPackageUtils {
             }
         }
 
-        if (!ParsedAttribution.isCombinationValid(pkg.getAttributions())) {
+        if (!ParsedAttributionUtils.isCombinationValid(pkg.getAttributions())) {
             return input.error(
                     INSTALL_PARSE_FAILED_BAD_MANIFEST,
                     "Combination <attribution> tags are not valid"
@@ -1339,7 +1340,7 @@ public class ParsingPackageUtils {
             }
 
             if (!found) {
-                pkg.addUsesPermission(new ParsedUsesPermission(name, usesPermissionFlags));
+                pkg.addUsesPermission(new ParsedUsesPermissionImpl(name, usesPermissionFlags));
             }
             return success;
         } finally {
@@ -1807,13 +1808,14 @@ public class ParsingPackageUtils {
                 continue;
             }
             if (parser.getName().equals("intent")) {
-                ParseResult<ParsedIntentInfo> result = ParsedIntentInfoUtils.parseIntentInfo(null,
-                        pkg, res, parser, true /*allowGlobs*/, true /*allowAutoVerify*/, input);
+                ParseResult<ParsedIntentInfo> result = ParsedIntentInfoUtils.parseIntentInfo(
+                        null /*className*/, pkg, res, parser, true /*allowGlobs*/,
+                        true /*allowAutoVerify*/, input);
                 if (result.isError()) {
                     return input.error(result);
                 }
 
-                ParsedIntentInfo intentInfo = result.getResult();
+                IntentFilter intentInfo = result.getResult().getIntentFilter();
 
                 Uri data = null;
                 String dataType = null;
@@ -2077,7 +2079,7 @@ public class ParsingPackageUtils {
                         R.styleable.AndroidManifestApplication_process);
             }
             ParseResult<String> processNameResult = ComponentParseUtils.buildProcessName(
-                    pkgName, null, pname, flags, mSeparateProcesses, input);
+                    pkgName, null /*defProc*/, pname, flags, mSeparateProcesses, input);
             if (processNameResult.isError()) {
                 return input.error(processNameResult);
             }
@@ -2146,7 +2148,8 @@ public class ParsingPackageUtils {
                 case "receiver":
                     ParseResult<ParsedActivity> activityResult =
                             ParsedActivityUtils.parseActivityOrReceiver(mSeparateProcesses, pkg,
-                                    res, parser, flags, sUseRoundIcon, input);
+                                    res, parser, flags, sUseRoundIcon, null /*defaultSplitName*/,
+                                    input);
 
                     if (activityResult.isSuccess()) {
                         ParsedActivity activity = activityResult.getResult();
@@ -2164,7 +2167,8 @@ public class ParsingPackageUtils {
                 case "service":
                     ParseResult<ParsedService> serviceResult =
                             ParsedServiceUtils.parseService(mSeparateProcesses, pkg, res, parser,
-                                    flags, sUseRoundIcon, input);
+                                    flags, sUseRoundIcon, null /*defaultSplitName*/,
+                                    input);
                     if (serviceResult.isSuccess()) {
                         ParsedService service = serviceResult.getResult();
                         hasServiceOrder |= (service.getOrder() != 0);
@@ -2176,7 +2180,8 @@ public class ParsingPackageUtils {
                 case "provider":
                     ParseResult<ParsedProvider> providerResult =
                             ParsedProviderUtils.parseProvider(mSeparateProcesses, pkg, res, parser,
-                                    flags, sUseRoundIcon, input);
+                                    flags, sUseRoundIcon, null /*defaultSplitName*/,
+                                    input);
                     if (providerResult.isSuccess()) {
                         pkg.addProvider(providerResult.getResult());
                     }
@@ -2185,7 +2190,8 @@ public class ParsingPackageUtils {
                     break;
                 case "activity-alias":
                     activityResult = ParsedActivityUtils.parseActivityAlias(pkg, res,
-                            parser, sUseRoundIcon, input);
+                            parser, sUseRoundIcon, null /*defaultSplitName*/,
+                            input);
                     if (activityResult.isSuccess()) {
                         ParsedActivity activity = activityResult.getResult();
                         hasActivityOrder |= (activity.getOrder() != 0);
@@ -2327,15 +2333,15 @@ public class ParsingPackageUtils {
                 // note: application meta-data is stored off to the side, so it can
                 // remain null in the primary copy (we like to avoid extra copies because
                 // it can be large)
-                final ParseResult<Property> metaDataResult = parseMetaData(pkg, null, res,
-                        parser, "<meta-data>", input);
+                final ParseResult<Property> metaDataResult = parseMetaData(pkg, null /*component*/,
+                        res, parser, "<meta-data>", input);
                 if (metaDataResult.isSuccess() && metaDataResult.getResult() != null) {
                     pkg.setMetaData(metaDataResult.getResult().toBundle(pkg.getMetaData()));
                 }
                 return metaDataResult;
             case "property":
-                final ParseResult<Property> propertyResult = parseMetaData(pkg, null, res,
-                        parser, "<property>", input);
+                final ParseResult<Property> propertyResult = parseMetaData(pkg, null /*component*/,
+                        res, parser, "<property>", input);
                 if (propertyResult.isSuccess()) {
                     pkg.addProperty(propertyResult.getResult());
                 }
@@ -2647,7 +2653,7 @@ public class ParsingPackageUtils {
             List<ParsedIntentInfo> filters = activity.getIntents();
             final int filtersSize = filters.size();
             for (int filtersIndex = 0; filtersIndex < filtersSize; filtersIndex++) {
-                ParsedIntentInfo aii = filters.get(filtersIndex);
+                IntentFilter aii = filters.get(filtersIndex).getIntentFilter();
                 if (!aii.hasAction(Intent.ACTION_VIEW)) continue;
                 if (!aii.hasAction(Intent.ACTION_DEFAULT)) continue;
                 if (aii.hasDataScheme(IntentFilter.SCHEME_HTTP) ||
@@ -2697,7 +2703,8 @@ public class ParsingPackageUtils {
                     ? activity.getMetaData().getFloat(METADATA_MAX_ASPECT_RATIO, maxAspectRatio)
                     : maxAspectRatio;
 
-            activity.setMaxAspectRatio(activity.getResizeMode(), activityAspectRatio);
+            ComponentMutateUtils.setMaxAspectRatio(activity, activity.getResizeMode(),
+                    activityAspectRatio);
         }
     }
 
@@ -2714,7 +2721,8 @@ public class ParsingPackageUtils {
         for (int index = 0; index < activitiesSize; index++) {
             ParsedActivity activity = activities.get(index);
             if (activity.getMinAspectRatio() == ASPECT_RATIO_NOT_SET) {
-                activity.setMinAspectRatio(activity.getResizeMode(), minAspectRatio);
+                ComponentMutateUtils.setMinAspectRatio(activity, activity.getResizeMode(),
+                        minAspectRatio);
             }
         }
     }
@@ -2731,7 +2739,7 @@ public class ParsingPackageUtils {
             if (supportsSizeChanges || (activity.getMetaData() != null
                     && activity.getMetaData().getBoolean(
                             METADATA_SUPPORTS_SIZE_CHANGES, false))) {
-                activity.setSupportsSizeChanges(true);
+                ComponentMutateUtils.setSupportsSizeChanges(activity, true);
             }
         }
     }
@@ -2871,7 +2879,7 @@ public class ParsingPackageUtils {
     private static void convertCompatPermissions(ParsingPackage pkg) {
         for (int i = 0, size = CompatibilityPermissionInfo.COMPAT_PERMS.length; i < size; i++) {
             final CompatibilityPermissionInfo info = CompatibilityPermissionInfo.COMPAT_PERMS[i];
-            if (pkg.getTargetSdkVersion() >= info.sdkVersion) {
+            if (pkg.getTargetSdkVersion() >= info.getSdkVersion()) {
                 break;
             }
             if (!pkg.getRequestedPermissions().contains(info.getName())) {
@@ -2910,8 +2918,9 @@ public class ParsingPackageUtils {
         int activitiesSize = activities.size();
         for (int index = 0; index < activitiesSize; index++) {
             ParsedActivity activity = activities.get(index);
-            activity.setResizeMode(RESIZE_MODE_UNRESIZEABLE)
-                    .setFlags(activity.getFlags() & ~FLAG_SUPPORTS_PICTURE_IN_PICTURE);
+            ComponentMutateUtils.setResizeMode(activity, RESIZE_MODE_UNRESIZEABLE);
+            ComponentMutateUtils.setExactFlags(activity,
+                    activity.getFlags() & ~FLAG_SUPPORTS_PICTURE_IN_PICTURE);
         }
     }
 

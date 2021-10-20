@@ -35,9 +35,13 @@ import android.content.pm.SigningDetails;
 import android.content.pm.UserInfo;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.component.ParsedActivity;
+import android.content.pm.parsing.component.ParsedActivityImpl;
 import android.content.pm.parsing.component.ParsedInstrumentation;
+import android.content.pm.parsing.component.ParsedInstrumentationImpl;
 import android.content.pm.parsing.component.ParsedIntentInfo;
+import android.content.pm.parsing.component.ParsedIntentInfoImpl;
 import android.content.pm.parsing.component.ParsedProvider;
+import android.content.pm.parsing.component.ParsedProviderImpl;
 import android.os.Build;
 import android.os.Process;
 import android.os.UserHandle;
@@ -154,21 +158,22 @@ public class AppsFilterTest {
     }
 
     private static ParsedActivity createActivity(String packageName, IntentFilter[] filters) {
-        ParsedActivity activity = new ParsedActivity();
+        ParsedActivityImpl activity = new ParsedActivityImpl();
         activity.setPackageName(packageName);
         for (IntentFilter filter : filters) {
-            final ParsedIntentInfo info = new ParsedIntentInfo();
+            final ParsedIntentInfoImpl info = new ParsedIntentInfoImpl();
+            final IntentFilter intentInfoFilter = info.getIntentFilter();
             if (filter.countActions() > 0) {
-                filter.actionsIterator().forEachRemaining(info::addAction);
+                filter.actionsIterator().forEachRemaining(intentInfoFilter::addAction);
             }
             if (filter.countCategories() > 0) {
-                filter.actionsIterator().forEachRemaining(info::addAction);
+                filter.actionsIterator().forEachRemaining(intentInfoFilter::addAction);
             }
             if (filter.countDataAuthorities() > 0) {
-                filter.authoritiesIterator().forEachRemaining(info::addDataAuthority);
+                filter.authoritiesIterator().forEachRemaining(intentInfoFilter::addDataAuthority);
             }
             if (filter.countDataSchemes() > 0) {
-                filter.schemesIterator().forEachRemaining(info::addDataScheme);
+                filter.schemesIterator().forEachRemaining(intentInfoFilter::addDataScheme);
             }
             activity.addIntent(info);
             activity.setExported(true);
@@ -178,13 +183,13 @@ public class AppsFilterTest {
 
     private static ParsingPackage pkgWithInstrumentation(
             String packageName, String instrumentationTargetPackage) {
-        ParsedInstrumentation instrumentation = new ParsedInstrumentation();
+        ParsedInstrumentationImpl instrumentation = new ParsedInstrumentationImpl();
         instrumentation.setTargetPackage(instrumentationTargetPackage);
         return pkg(packageName).addInstrumentation(instrumentation);
     }
 
     private static ParsingPackage pkgWithProvider(String packageName, String authority) {
-        ParsedProvider provider = new ParsedProvider();
+        ParsedProviderImpl provider = new ParsedProviderImpl();
         provider.setPackageName(packageName);
         provider.setExported(true);
         provider.setAuthority(authority);

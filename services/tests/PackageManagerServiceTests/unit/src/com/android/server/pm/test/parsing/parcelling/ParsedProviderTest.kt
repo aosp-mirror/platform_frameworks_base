@@ -18,14 +18,15 @@ package com.android.server.pm.test.parsing.parcelling
 
 import android.content.pm.PathPermission
 import android.content.pm.parsing.component.ParsedProvider
+import android.content.pm.parsing.component.ParsedProviderImpl
 import android.os.PatternMatcher
 import kotlin.contracts.ExperimentalContracts
 
 @ExperimentalContracts
-class ParsedProviderTest : ParsedMainComponentTest(ParsedProvider::class) {
+class ParsedProviderTest : ParsedMainComponentTest(ParsedProvider::class, ParsedProviderImpl::class) {
 
-    override val defaultImpl = ParsedProvider()
-    override val creator = ParsedProvider.CREATOR
+    override val defaultImpl = ParsedProviderImpl()
+    override val creator = ParsedProviderImpl.CREATOR
 
     override val mainComponentSubclassBaseParams = listOf(
         ParsedProvider::getAuthority,
@@ -41,7 +42,7 @@ class ParsedProviderTest : ParsedMainComponentTest(ParsedProvider::class) {
     override fun mainComponentSubclassExtraParams() = listOf(
         getSetByValue(
             ParsedProvider::getUriPermissionPatterns,
-            ParsedProvider::setUriPermissionPatterns,
+            ParsedProviderImpl::setUriPermissionPatterns,
             PatternMatcher("testPattern", PatternMatcher.PATTERN_LITERAL),
             transformGet = { it?.singleOrNull() },
             transformSet = { arrayOf(it) },
@@ -55,7 +56,7 @@ class ParsedProviderTest : ParsedMainComponentTest(ParsedProvider::class) {
         ),
         getSetByValue(
             ParsedProvider::getPathPermissions,
-            ParsedProvider::setPathPermissions,
+            ParsedProviderImpl::setPathPermissions,
             PathPermission(
                 "testPermissionPattern",
                 PatternMatcher.PATTERN_LITERAL,

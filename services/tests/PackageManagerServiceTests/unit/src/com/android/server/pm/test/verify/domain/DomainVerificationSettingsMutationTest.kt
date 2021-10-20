@@ -19,9 +19,8 @@ package com.android.server.pm.test.verify.domain
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.pm.parsing.component.ParsedActivity
-import android.content.pm.parsing.component.ParsedIntentInfo
-import android.content.pm.pkg.PackageUserState
+import android.content.pm.parsing.component.ParsedActivityImpl
+import android.content.pm.parsing.component.ParsedIntentInfoImpl
 import android.content.pm.pkg.PackageUserStateInternal
 import android.content.pm.verify.domain.DomainVerificationState
 import android.os.Build
@@ -196,15 +195,17 @@ class DomainVerificationSettingsMutationTest {
             whenever(isEnabled) { true }
             whenever(activities) {
                 listOf(
-                    ParsedActivity().apply {
+                    ParsedActivityImpl().apply {
                         addIntent(
-                            ParsedIntentInfo().apply {
-                                autoVerify = true
-                                addAction(Intent.ACTION_VIEW)
-                                addCategory(Intent.CATEGORY_BROWSABLE)
-                                addCategory(Intent.CATEGORY_DEFAULT)
-                                addDataScheme("https")
-                                addDataAuthority("example.com", null)
+                            ParsedIntentInfoImpl().apply {
+                                intentFilter.apply {
+                                    autoVerify = true
+                                    addAction(Intent.ACTION_VIEW)
+                                    addCategory(Intent.CATEGORY_BROWSABLE)
+                                    addCategory(Intent.CATEGORY_DEFAULT)
+                                    addDataScheme("https")
+                                    addDataAuthority("example.com", null)
+                                }
                             }
                         )
                     }

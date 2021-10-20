@@ -1169,13 +1169,14 @@ public class PackageManagerServiceUtils {
             }
 
             final boolean match = comp.getIntents().stream().anyMatch(
-                    f -> IntentResolver.intentMatchesFilter(f, intent, resolvedType));
+                    f -> IntentResolver.intentMatchesFilter(f.getIntentFilter(), intent,
+                            resolvedType));
             if (!match) {
                 Slog.w(TAG, "Intent does not match component's intent filter: " + intent);
                 Slog.w(TAG, "Access blocked: " + comp.getComponentName());
                 if (DEBUG_INTENT_MATCHING) {
                     Slog.v(TAG, "Component intent filters:");
-                    comp.getIntents().forEach(f -> f.dump(logPrinter, "  "));
+                    comp.getIntents().forEach(f -> f.getIntentFilter().dump(logPrinter, "  "));
                     Slog.v(TAG, "-----------------------------");
                 }
                 resolveInfos.remove(i);

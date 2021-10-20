@@ -39,13 +39,13 @@ public class ParsedInstrumentationUtils {
     public static ParseResult<ParsedInstrumentation> parseInstrumentation(ParsingPackage pkg,
             Resources res, XmlResourceParser parser, boolean useRoundIcon,
             ParseInput input) throws IOException, XmlPullParserException {
-        ParsedInstrumentation
-                instrumentation = new ParsedInstrumentation();
+        ParsedInstrumentationImpl
+                instrumentation = new ParsedInstrumentationImpl();
         String tag = "<" + parser.getName() + ">";
 
         TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestInstrumentation);
         try {
-            ParseResult<ParsedInstrumentation> result = ParsedComponentUtils.parseComponent(
+            ParseResult<ParsedInstrumentationImpl> result = ParsedComponentUtils.parseComponent(
                     instrumentation, tag, pkg, sa, useRoundIcon, input,
                     R.styleable.AndroidManifestInstrumentation_banner,
                     NOT_SET /*descriptionAttr*/,
@@ -55,7 +55,7 @@ public class ParsedInstrumentationUtils {
                     R.styleable.AndroidManifestInstrumentation_name,
                     R.styleable.AndroidManifestInstrumentation_roundIcon);
             if (result.isError()) {
-                return result;
+                return input.error(result);
             }
 
             // @formatter:off
@@ -70,7 +70,13 @@ public class ParsedInstrumentationUtils {
             sa.recycle();
         }
 
-        return ComponentParseUtils.parseAllMetaData(pkg, res, parser, tag, instrumentation,
-                input);
+        ParseResult<ParsedInstrumentationImpl> result =
+                ComponentParseUtils.parseAllMetaData(pkg, res, parser, tag, instrumentation, input);
+
+        if (result.isError()) {
+            return input.error(result);
+        }
+
+        return input.success(result.getResult());
     }
 }

@@ -51,6 +51,7 @@ import android.content.pm.SharedLibraryInfo;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.ParsingPackageUtils;
+import android.content.pm.parsing.component.ComponentMutateUtils;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.pkg.PackageUserState;
 import android.os.Binder;
@@ -603,7 +604,7 @@ final class InstallPackageHelper {
             int i;
             for (i = 0; i < collectionSize; i++) {
                 ParsedInstrumentation a = pkg.getInstrumentations().get(i);
-                a.setPackageName(pkg.getPackageName());
+                ComponentMutateUtils.setPackageName(a, pkg.getPackageName());
                 mPm.addInstrumentation(a.getComponentName(), a);
                 if (chatty) {
                     if (r == null) {
