@@ -360,6 +360,43 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
         }
     }
 
+    /**
+     * Only call this method on interfaces where lockout does not come from onError, I.E. the
+     * old HIDL implementation.
+     */
+    protected void onLockoutTimed(long durationMillis) {
+        final ClientMonitorCallbackConverter listener = getListener();
+        final CoexCoordinator coordinator = CoexCoordinator.getInstance();
+        coordinator.onAuthenticationError(this, BiometricConstants.BIOMETRIC_ERROR_LOCKOUT,
+                new CoexCoordinator.ErrorCallback() {
+            @Override
+            public void sendHapticFeedback() {
+                if (listener != null && mShouldVibrate) {
+                    vibrateError();
+                }
+            }
+        });
+    }
+
+    /**
+     * Only call this method on interfaces where lockout does not come from onError, I.E. the
+     * old HIDL implementation.
+     */
+    protected void onLockoutPermanent() {
+        final ClientMonitorCallbackConverter listener = getListener();
+        final CoexCoordinator coordinator = CoexCoordinator.getInstance();
+        coordinator.onAuthenticationError(this,
+                BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT,
+                new CoexCoordinator.ErrorCallback() {
+            @Override
+            public void sendHapticFeedback() {
+                if (listener != null && mShouldVibrate) {
+                    vibrateError();
+                }
+            }
+        });
+    }
+
     private void sendCancelOnly(@Nullable ClientMonitorCallbackConverter listener) {
         if (listener == null) {
             Slog.e(TAG, "Unable to sendAuthenticationCanceled, listener null");
