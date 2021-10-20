@@ -384,8 +384,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         when(mView.findViewById(R.id.notification_stack_scroller))
                 .thenReturn(mNotificationStackScrollLayout);
         when(mView.findViewById(R.id.communal_host)).thenReturn(mCommunalHostView);
-        when(mNotificationStackScrollLayout.getController())
-                .thenReturn(mNotificationStackScrollLayoutController);
         when(mNotificationStackScrollLayoutController.getHeight()).thenReturn(1000);
         when(mNotificationStackScrollLayoutController.getHeadsUpCallback())
                 .thenReturn(mHeadsUpCallback);
