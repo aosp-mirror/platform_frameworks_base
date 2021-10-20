@@ -15,6 +15,7 @@
  */
 package com.android.server.camera;
 
+import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.os.Build.VERSION_CODES.M;
 
 import android.annotation.IntDef;
@@ -39,7 +40,9 @@ import android.hardware.CameraSessionStats;
 import android.hardware.CameraStreamStats;
 import android.hardware.ICameraService;
 import android.hardware.ICameraServiceProxy;
+import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.CaptureRequest;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.devicestate.DeviceStateManager.FoldStateListener;
 import android.hardware.display.DisplayManager;
@@ -346,13 +349,13 @@ public class CameraServiceProxy extends SystemService
 
     private final TaskStateHandler mTaskStackListener = new TaskStateHandler();
 
-    private final class TaskInfo {
-        private int frontTaskId;
-        private boolean isResizeable;
-        private boolean isFixedOrientationLandscape;
-        private boolean isFixedOrientationPortrait;
-        private int displayId;
-        private int userId;
+    public static final class TaskInfo {
+        public int frontTaskId;
+        public boolean isResizeable;
+        public boolean isFixedOrientationLandscape;
+        public boolean isFixedOrientationPortrait;
+        public int displayId;
+        public int userId;
     }
 
     private final class TaskStateHandler extends TaskStackListener {
@@ -367,7 +370,8 @@ public class CameraServiceProxy extends SystemService
             synchronized (mMapLock) {
                 TaskInfo info = new TaskInfo();
                 info.frontTaskId = taskInfo.taskId;
-                info.isResizeable = taskInfo.isResizeable;
+                info.isResizeable =
+                        (taskInfo.topActivityInfo.resizeMode != RESIZE_MODE_UNRESIZEABLE);
                 info.displayId = taskInfo.displayId;
                 info.userId = taskInfo.userId;
                 info.isFixedOrientationLandscape = ActivityInfo.isFixedOrientationLandscape(
@@ -427,97 +431,108 @@ public class CameraServiceProxy extends SystemService
         }
     };
 
-    private final ICameraServiceProxy.Stub mCameraServiceProxy = new ICameraServiceProxy.Stub() {
-        private boolean isMOrBelow(Context ctx, String packageName) {
-            try {
-                return ctx.getPackageManager().getPackageInfo(
-                        packageName, 0).applicationInfo.targetSdkVersion <= M;
-            } catch (PackageManager.NameNotFoundException e) {
-                Slog.e(TAG,"Package name not found!");
-            }
-            return false;
+    private static boolean isMOrBelow(Context ctx, String packageName) {
+        try {
+            return ctx.getPackageManager().getPackageInfo(
+                    packageName, 0).applicationInfo.targetSdkVersion <= M;
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.e(TAG,"Package name not found!");
+        }
+        return false;
+    }
+
+    /**
+     * Estimate the app crop-rotate-scale compensation value.
+     */
+    public static int getCropRotateScale(@NonNull Context ctx, @NonNull String packageName,
+            @Nullable TaskInfo taskInfo, int displayRotation, int lensFacing,
+            boolean ignoreResizableAndSdkCheck) {
+        if (taskInfo == null) {
+            return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE;
         }
 
-        /**
-         * Gets whether crop-rotate-scale is needed.
-         */
-        private boolean getNeedCropRotateScale(@NonNull Context ctx, @NonNull String packageName,
-                @Nullable TaskInfo taskInfo, int sensorOrientation, int lensFacing,
-                boolean ignoreResizableAndSdkCheck) {
-            if (taskInfo == null) {
-                return false;
-            }
+        // External cameras do not need crop-rotate-scale.
+        if (lensFacing != CameraMetadata.LENS_FACING_FRONT
+                && lensFacing != CameraMetadata.LENS_FACING_BACK) {
+            Log.v(TAG, "lensFacing=" + lensFacing + ". Crop-rotate-scale is disabled.");
+            return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE;
+        }
 
-            // External cameras do not need crop-rotate-scale.
-            if (lensFacing != CameraMetadata.LENS_FACING_FRONT
-                    && lensFacing != CameraMetadata.LENS_FACING_BACK) {
-                Log.v(TAG, "lensFacing=" + lensFacing + ". Crop-rotate-scale is disabled.");
-                return false;
-            }
-
-            // In case the activity behavior is not explicitly overridden, enable the
-            // crop-rotate-scale workaround if the app targets M (or below) or is not
-            // resizeable.
-            if (!ignoreResizableAndSdkCheck && !isMOrBelow(ctx, packageName) &&
-                    taskInfo.isResizeable) {
-                Slog.v(TAG,
-                        "The activity is N or above and claims to support resizeable-activity. "
-                                + "Crop-rotate-scale is disabled.");
-                return false;
-            }
-
-            DisplayManager displayManager = ctx.getSystemService(DisplayManager.class);
-            int rotationDegree = 0;
-            if (displayManager != null) {
-                Display display = displayManager.getDisplay(taskInfo.displayId);
-                if (display == null) {
-                    Slog.e(TAG, "Invalid display id: " + taskInfo.displayId);
-                    return false;
-                }
-
-                int rotation = display.getRotation();
-                switch (rotation) {
-                    case Surface.ROTATION_0:
-                        rotationDegree = 0;
-                        break;
-                    case Surface.ROTATION_90:
-                        rotationDegree = 90;
-                        break;
-                    case Surface.ROTATION_180:
-                        rotationDegree = 180;
-                        break;
-                    case Surface.ROTATION_270:
-                        rotationDegree = 270;
-                        break;
-                }
-            } else {
-                Slog.e(TAG, "Failed to query display manager!");
-                return false;
-            }
-
-            // Here we only need to know whether the camera is landscape or portrait. Therefore we
-            // don't need to consider whether it is a front or back camera. The formula works for
-            // both.
-            boolean landscapeCamera = ((rotationDegree + sensorOrientation) % 180 == 0);
+        // In case the activity behavior is not explicitly overridden, enable the
+        // crop-rotate-scale workaround if the app targets M (or below) or is not
+        // resizeable.
+        if (!ignoreResizableAndSdkCheck && !isMOrBelow(ctx, packageName) &&
+                taskInfo.isResizeable) {
             Slog.v(TAG,
-                    "Display.getRotation()=" + rotationDegree
-                            + " CameraCharacteristics.SENSOR_ORIENTATION=" + sensorOrientation
-                            + " isFixedOrientationPortrait=" + taskInfo.isFixedOrientationPortrait
-                            + " isFixedOrientationLandscape=" +
-                            taskInfo.isFixedOrientationLandscape);
-            // We need to do crop-rotate-scale when camera is landscape and activity is portrait or
-            // vice versa.
-            return (taskInfo.isFixedOrientationPortrait && landscapeCamera)
-                    || (taskInfo.isFixedOrientationLandscape && !landscapeCamera);
+                    "The activity is N or above and claims to support resizeable-activity. "
+                            + "Crop-rotate-scale is disabled.");
+            return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE;
         }
 
+        if (!taskInfo.isFixedOrientationPortrait && !taskInfo.isFixedOrientationLandscape) {
+            Log.v(TAG, "Non-fixed orientation activity. Crop-rotate-scale is disabled.");
+            return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE;
+        }
+
+        int rotationDegree;
+        switch (displayRotation) {
+            case Surface.ROTATION_0:
+                rotationDegree = 0;
+                break;
+            case Surface.ROTATION_90:
+                rotationDegree = 90;
+                break;
+            case Surface.ROTATION_180:
+                rotationDegree = 180;
+                break;
+            case Surface.ROTATION_270:
+                rotationDegree = 270;
+                break;
+            default:
+                Log.e(TAG, "Unsupported display rotation: " + displayRotation);
+                return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE;
+        }
+
+        Slog.v(TAG,
+                "Display.getRotation()=" + rotationDegree
+                        + " isFixedOrientationPortrait=" + taskInfo.isFixedOrientationPortrait
+                        + " isFixedOrientationLandscape=" +
+                        taskInfo.isFixedOrientationLandscape);
+        // We are trying to estimate the necessary rotation compensation for clients that
+        // don't handle various display orientations.
+        // The logic that is missing on client side is similar to the reference code
+        // in {@link android.hardware.Camera#setDisplayOrientation} where "info.orientation"
+        // is already applied in "CameraUtils::getRotationTransform".
+        // Care should be taken to reverse the rotation direction depending on the camera
+        // lens facing.
+        if (rotationDegree == 0) {
+            return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE;
+        }
+        if (lensFacing == CameraCharacteristics.LENS_FACING_FRONT) {
+            // Switch direction for front facing cameras
+            rotationDegree = 360 - rotationDegree;
+        }
+
+        switch (rotationDegree) {
+            case 90:
+                return CaptureRequest.SCALER_ROTATE_AND_CROP_90;
+            case 270:
+                return CaptureRequest.SCALER_ROTATE_AND_CROP_270;
+            case 180:
+                return CaptureRequest.SCALER_ROTATE_AND_CROP_180;
+            case 0:
+            default:
+                return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE;
+        }
+    }
+
+    private final ICameraServiceProxy.Stub mCameraServiceProxy = new ICameraServiceProxy.Stub() {
         @Override
-        public boolean isRotateAndCropOverrideNeeded(String packageName, int sensorOrientation,
-                int lensFacing) {
+        public int getRotateAndCropOverride(String packageName, int lensFacing) {
             if (Binder.getCallingUid() != Process.CAMERASERVER_UID) {
                 Slog.e(TAG, "Calling UID: " + Binder.getCallingUid() + " doesn't match expected " +
                         " camera service UID!");
-                return false;
+                return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE;
             }
 
             // TODO: Modify the sensor orientation in camera characteristics along with any 3A
@@ -531,10 +546,10 @@ public class CameraServiceProxy extends SystemService
                 if (CompatChanges.isChangeEnabled(OVERRIDE_CAMERA_ROTATE_AND_CROP, packageName,
                         UserHandle.getUserHandleForUid(taskInfo.userId))) {
                     Slog.v(TAG, "OVERRIDE_CAMERA_ROTATE_AND_CROP enabled!");
-                    return true;
+                    return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE;
                 } else {
                     Slog.v(TAG, "OVERRIDE_CAMERA_ROTATE_AND_CROP disabled!");
-                    return false;
+                    return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE;
                 }
             }
             boolean ignoreResizableAndSdkCheck = false;
@@ -544,7 +559,23 @@ public class CameraServiceProxy extends SystemService
                 Slog.v(TAG, "OVERRIDE_CAMERA_RESIZABLE_AND_SDK_CHECK enabled!");
                 ignoreResizableAndSdkCheck = true;
             }
-            return getNeedCropRotateScale(mContext, packageName, taskInfo, sensorOrientation,
+
+            DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
+            int displayRotation;
+            if (displayManager != null) {
+                Display display = displayManager.getDisplay(taskInfo.displayId);
+                if (display == null) {
+                    Slog.e(TAG, "Invalid display id: " + taskInfo.displayId);
+                    return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE;
+                }
+
+                displayRotation = display.getRotation();
+            } else {
+                Slog.e(TAG, "Failed to query display manager!");
+                return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE;
+            }
+
+            return getCropRotateScale(mContext, packageName, taskInfo, displayRotation,
                     lensFacing, ignoreResizableAndSdkCheck);
         }
 
