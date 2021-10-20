@@ -50,4 +50,5 @@ enum AudioSource {
   ECHO_REFERENCE = 1997,
   FM_TUNER = 1998,
   HOTWORD = 1999,
+  ULTRASOUND = 2000,
 }
