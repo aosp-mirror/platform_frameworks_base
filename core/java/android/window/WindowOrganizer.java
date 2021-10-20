@@ -159,7 +159,19 @@ public class WindowOrganizer {
         }
     }
 
-    IWindowOrganizerController getWindowOrganizerController() {
+    /**
+     * @see TransitionMetrics
+     * @hide
+     */
+    public static ITransitionMetricsReporter getTransitionMetricsReporter() {
+        try {
+            return getWindowOrganizerController().getTransitionMetricsReporter();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    static IWindowOrganizerController getWindowOrganizerController() {
         return IWindowOrganizerControllerSingleton.get();
     }
 
