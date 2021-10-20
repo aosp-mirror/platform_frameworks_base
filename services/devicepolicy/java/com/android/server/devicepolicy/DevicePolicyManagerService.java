@@ -12647,6 +12647,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         @Override
+        public @Nullable ComponentName getProfileOwnerOrDeviceOwnerSupervisionComponent(
+                @NonNull UserHandle userHandle) {
+            return DevicePolicyManagerService.this.getProfileOwnerOrDeviceOwnerSupervisionComponent(
+                    userHandle);
+        }
+
+        @Override
         public boolean isActiveDeviceOwner(int uid) {
             return isDeviceOwner(new CallerIdentity(uid, null, null));
         }

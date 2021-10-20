@@ -72,7 +72,7 @@ public class UserUsageStatsServiceTest {
         HashMap<String, Long> installedPkgs = new HashMap<>();
         installedPkgs.put(TEST_PACKAGE_NAME, System.currentTimeMillis());
 
-        mService.init(System.currentTimeMillis(), installedPkgs);
+        mService.init(System.currentTimeMillis(), installedPkgs, true);
     }
 
     @After
