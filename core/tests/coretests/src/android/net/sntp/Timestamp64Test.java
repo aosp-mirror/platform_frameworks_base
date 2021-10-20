@@ -21,13 +21,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import androidx.test.runner.AndroidJUnit4;
+
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
+@RunWith(AndroidJUnit4.class)
 public class Timestamp64Test {
 
     @Test
@@ -191,6 +195,7 @@ public class Timestamp64Test {
         }
     }
 
+    @SuppressWarnings("JavaInstantGetSecondsGetNano")
     private static void assertInstantCreationOnlyFractionExact(
             int fractionBits, long expectedNanos) {
         Timestamp64 timestamp64 = Timestamp64.fromComponents(0, fractionBits);
@@ -201,6 +206,7 @@ public class Timestamp64Test {
         assertEquals(expectedNanos, instant.getNano());
     }
 
+    @SuppressWarnings("JavaInstantGetSecondsGetNano")
     private static void assertNanosWithTruncationAllowed(long expectedNanos, Instant instant) {
         // Allow for < 1ns difference due to truncation.
         long actualNanos = instant.getNano();
@@ -208,6 +214,7 @@ public class Timestamp64Test {
                 actualNanos == expectedNanos || actualNanos == expectedNanos - 1);
     }
 
+    @SuppressWarnings("JavaInstantGetSecondsGetNano")
     @Test
     public void testMillisRandomizationConstant() {
         // Mathematically, we can say that to represent 1000 different values, we need 10 binary
