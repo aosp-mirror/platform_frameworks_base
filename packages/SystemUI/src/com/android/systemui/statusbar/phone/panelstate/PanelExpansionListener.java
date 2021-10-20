@@ -24,7 +24,8 @@ public interface PanelExpansionListener {
      * lock screen and swiping to pull down the notification shade.
      *
      * @param fraction 0 when collapsed, 1 when fully expanded.
+     * @param expanded true if the panel should be considered expanded.
      * @param tracking {@code true} when the user is actively dragging the panel.
      */
-    void onPanelExpansionChanged(float fraction, boolean tracking);
+    void onPanelExpansionChanged(float fraction, boolean expanded, boolean tracking);
 }

@@ -912,7 +912,7 @@ public class StatusBar extends SystemUI implements
         lockscreenShadeTransitionController.setStatusbar(this);
 
         mExpansionChangedListeners = new ArrayList<>();
-        addExpansionChangedListener(this::onPanelExpansionChanged);
+        mPanelExpansionStateManager.addListener(this::onPanelExpansionChanged);
 
         mBubbleExpandListener =
                 (isExpanding, key) -> mContext.getMainExecutor().execute(() -> {
@@ -1161,8 +1161,6 @@ public class StatusBar extends SystemUI implements
 
         mNotificationIconAreaController.setupShelf(mNotificationShelfController);
         mPanelExpansionStateManager.addListener(mWakeUpCoordinator);
-        mPanelExpansionStateManager.addListener(
-                this::dispatchPanelExpansionForKeyguardDismiss);
 
         mUserSwitcherController.init(mNotificationShadeWindowView);
 
@@ -1427,15 +1425,15 @@ public class StatusBar extends SystemUI implements
 
 
     /**
-     * When swiping up to dismiss the lock screen, the panel expansion goes from 1f to 0f. This
-     * results in the clock/notifications/other content disappearing off the top of the screen.
+     * When swiping up to dismiss the lock screen, the panel expansion fraction goes from 1f to 0f.
+     * This results in the clock/notifications/other content disappearing off the top of the screen.
      *
-     * We also use the expansion amount to animate in the app/launcher surface from the bottom of
+     * We also use the expansion fraction to animate in the app/launcher surface from the bottom of
      * the screen, 'pushing' off the notifications and other content. To do this, we dispatch the
-     * expansion amount to the KeyguardViewMediator if we're in the process of dismissing the
+     * expansion fraction to the KeyguardViewMediator if we're in the process of dismissing the
      * keyguard.
      */
-    private void dispatchPanelExpansionForKeyguardDismiss(float expansion, boolean trackingTouch) {
+    private void dispatchPanelExpansionForKeyguardDismiss(float fraction, boolean trackingTouch) {
         // Things that mean we're not dismissing the keyguard, and should ignore this expansion:
         // - Keyguard isn't even visible.
         // - Keyguard is visible, but can't be dismissed (swiping up will show PIN/password prompt).
@@ -1454,12 +1452,14 @@ public class StatusBar extends SystemUI implements
                 || mKeyguardViewMediator.isAnimatingBetweenKeyguardAndSurfaceBehindOrWillBe()
                 || mKeyguardUnlockAnimationController.isUnlockingWithSmartSpaceTransition()) {
             mKeyguardStateController.notifyKeyguardDismissAmountChanged(
-                    1f - expansion, trackingTouch);
+                    1f - fraction, trackingTouch);
         }
     }
 
-    private void onPanelExpansionChanged(float frac, boolean expanded) {
-        if (frac == 0 || frac == 1) {
+    private void onPanelExpansionChanged(float fraction, boolean expanded, boolean tracking) {
+        dispatchPanelExpansionForKeyguardDismiss(fraction, tracking);
+
+        if (fraction == 0 || fraction == 1) {
             if (getNavigationBarView() != null) {
                 getNavigationBarView().onStatusBarPanelStateChanged();
             }
