@@ -35,6 +35,7 @@ import android.view.SurfaceControl;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.recents.RecentTasksController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -52,6 +53,8 @@ public class FullscreenTaskListenerTest {
     @Mock
     private FullscreenUnfoldController mUnfoldController;
     @Mock
+    private RecentTasksController mRecentTasksController;
+    @Mock
     private SurfaceControl mSurfaceControl;
 
     private Optional<FullscreenUnfoldController> mFullscreenUnfoldController;
@@ -62,7 +65,8 @@ public class FullscreenTaskListenerTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mFullscreenUnfoldController = Optional.of(mUnfoldController);
-        mListener = new FullscreenTaskListener(mSyncQueue, mFullscreenUnfoldController);
+        mListener = new FullscreenTaskListener(mSyncQueue, mFullscreenUnfoldController,
+                Optional.empty());
     }
 
     @Test
