@@ -238,9 +238,7 @@ public class ImageWallpaper extends WallpaperService {
                 Bitmap bitmap = mMiniBitmap;
                 if (bitmap == null) {
                     mLocalColorsToAdd.addAll(regions);
-                    mRenderer.use(b -> {
-                        updateMiniBitmapAndNotify(b);
-                    });
+                    if (mRenderer != null) mRenderer.use(this::updateMiniBitmapAndNotify);
                 } else {
                     computeAndNotifyLocalColors(regions, bitmap);
                 }
