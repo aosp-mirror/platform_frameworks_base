@@ -19,12 +19,14 @@ package com.android.server;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.os.Build;
 import android.os.Environment;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.IndentingPrintWriter;
@@ -45,6 +47,9 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Manages creating, starting, and other lifecycle events of
@@ -66,6 +71,19 @@ public final class SystemServiceManager implements Dumpable {
     private static final String USER_SWITCHING = "Switch"; // Logged as onSwitchUser
     private static final String USER_STOPPING = "Stop"; // Logged as onStopUser
     private static final String USER_STOPPED = "Cleanup"; // Logged as onCleanupUser
+
+    // Whether to use multiple threads to run user lifecycle phases in parallel.
+    private static boolean sUseLifecycleThreadPool = false;
+    // The default number of threads to use if lifecycle thread pool is enabled.
+    private static final int DEFAULT_MAX_USER_POOL_THREADS = 3;
+    // The number of threads to use if lifecycle thread pool is enabled, dependent on the number of
+    // available cores on the device.
+    private final int mNumUserPoolThreads;
+    // Maximum time to wait for a particular lifecycle phase to finish.
+    private static final long USER_POOL_SHUTDOWN_TIMEOUT_SECONDS = 30;
+    // Indirectly indicates how many services belong in the bootstrap and core service categories.
+    // This is used to decide which services the user lifecycle phases should be parallelized for.
+    private static volatile int sOtherServicesStartIndex;
 
     private static File sSystemDir;
     private final Context mContext;
@@ -100,6 +118,11 @@ public final class SystemServiceManager implements Dumpable {
 
     SystemServiceManager(Context context) {
         mContext = context;
+        // Disable using the thread pool for low ram devices
+        sUseLifecycleThreadPool = sUseLifecycleThreadPool
+                                    && !ActivityManager.isLowRamDeviceStatic();
+        mNumUserPoolThreads = Math.min(Runtime.getRuntime().availableProcessors(),
+                                       DEFAULT_MAX_USER_POOL_THREADS);
     }
 
     /**
@@ -261,6 +284,18 @@ public final class SystemServiceManager implements Dumpable {
     }
 
     /**
+     * Called from SystemServer to indicate that services in the other category are now starting.
+     * This is used to keep track of how many services are in the bootstrap and core service
+     * categories for the purposes of user lifecycle parallelization.
+     */
+    public void updateOtherServicesStartIndex() {
+        // Only update the index if the boot phase has not been completed yet
+        if (!isBootCompleted()) {
+            sOtherServicesStartIndex = mServices.size();
+        }
+    }
+
+    /**
      * Called at the beginning of {@code ActivityManagerService.systemReady()}.
      */
     public void preSystemReady() {
@@ -373,6 +408,13 @@ public final class SystemServiceManager implements Dumpable {
         Slog.i(TAG, "Calling on" + onWhat + "User " + curUserId
                 + (prevUser != null ? " (from " + prevUser + ")" : ""));
         final int serviceLen = mServices.size();
+        // Limit the lifecycle parallelization to all users other than the system user
+        // and only for the user start lifecycle phase for now.
+        final boolean useThreadPool = sUseLifecycleThreadPool
+                                        && curUserId != UserHandle.USER_SYSTEM
+                                        && onWhat.equals(USER_STARTING);
+        final ExecutorService threadPool =
+                useThreadPool ? Executors.newFixedThreadPool(mNumUserPoolThreads) : null;
         for (int i = 0; i < serviceLen; i++) {
             final SystemService service = mServices.get(i);
             final String serviceName = service.getClass().getName();
@@ -395,7 +437,11 @@ public final class SystemServiceManager implements Dumpable {
                 }
                 continue;
             }
-            t.traceBegin("ssm.on" + onWhat + "User-" + curUserId + "_" + serviceName);
+            // Only submit this service to the thread pool if it's in the "other" category.
+            final boolean submitToThreadPool = useThreadPool && i >= sOtherServicesStartIndex;
+            if (!submitToThreadPool) {
+                t.traceBegin("ssm.on" + onWhat + "User-" + curUserId + "_" + serviceName);
+            }
             long time = SystemClock.elapsedRealtime();
             try {
                 switch (onWhat) {
@@ -403,7 +449,11 @@ public final class SystemServiceManager implements Dumpable {
                         service.onUserSwitching(prevUser, curUser);
                         break;
                     case USER_STARTING:
-                        service.onUserStarting(curUser);
+                        if (submitToThreadPool) {
+                            threadPool.submit(getOnStartUserRunnable(t, service, curUser));
+                        } else {
+                            service.onUserStarting(curUser);
+                        }
                         break;
                     case USER_UNLOCKING:
                         service.onUserUnlocking(curUser);
@@ -424,11 +474,52 @@ public final class SystemServiceManager implements Dumpable {
                 Slog.wtf(TAG, "Failure reporting " + onWhat + " of user " + curUser
                         + " to service " + serviceName, ex);
             }
-            warnIfTooLong(SystemClock.elapsedRealtime() - time, service,
-                    "on" + onWhat + "User-" + curUserId);
-            t.traceEnd(); // what on service
+            if (!submitToThreadPool) {
+                warnIfTooLong(SystemClock.elapsedRealtime() - time, service,
+                        "on" + onWhat + "User-" + curUserId);
+                t.traceEnd(); // what on service
+            }
+        }
+        if (useThreadPool) {
+            boolean terminated = false;
+            threadPool.shutdown();
+            try {
+                terminated = threadPool.awaitTermination(
+                        USER_POOL_SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Slog.wtf(TAG, "User lifecycle thread pool was interrupted while awaiting completion"
+                        + " of " + onWhat + " of user " + curUser, e);
+                Slog.e(TAG, "Couldn't terminate, disabling thread pool. "
+                        + "Please capture a bug report.");
+                sUseLifecycleThreadPool = false;
+            }
+            if (!terminated) {
+                Slog.wtf(TAG, "User lifecycle thread pool was not terminated.");
+            }
         }
         t.traceEnd(); // main entry
+    }
+
+    private Runnable getOnStartUserRunnable(TimingsTraceAndSlog oldTrace, SystemService service,
+            TargetUser curUser) {
+        return () -> {
+            final TimingsTraceAndSlog t = new TimingsTraceAndSlog(oldTrace);
+            final String serviceName = service.getClass().getName();
+            try {
+                final int curUserId = curUser.getUserIdentifier();
+                t.traceBegin("ssm.on" + USER_STARTING + "User-" + curUserId + "_" + serviceName);
+                long time = SystemClock.elapsedRealtime();
+                service.onUserStarting(curUser);
+                warnIfTooLong(SystemClock.elapsedRealtime() - time, service,
+                        "on" + USER_STARTING + "User-" + curUserId);
+                t.traceEnd();
+            } catch (Exception e) {
+                Slog.wtf(TAG, "Failure reporting " + USER_STARTING + " of user " + curUser
+                        + " to service " + serviceName, e);
+                Slog.e(TAG, "Disabling thread pool - please capture a bug report.");
+                sUseLifecycleThreadPool = false;
+            }
+        };
     }
 
     /** Sets the safe mode flag for services to query. */
