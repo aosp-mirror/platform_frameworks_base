@@ -53,6 +53,7 @@ public final class SingleKeyGestureDetector {
     // Key code of current key down event, reset when key up.
     private int mDownKeyCode = KeyEvent.KEYCODE_UNKNOWN;
     private volatile boolean mHandledByLongPress = false;
+    private volatile boolean mHandledByMultiPress = false;
     private final Handler mHandler;
     private long mLastDownTime = 0;
     private static final long MULTI_PRESS_TIMEOUT = ViewConfiguration.getMultiPressTimeout();
@@ -271,6 +272,7 @@ public final class SingleKeyGestureDetector {
                         mKeyPressCounter + 1, mActiveRule);
                 msg.setAsynchronous(true);
                 mHandler.sendMessage(msg);
+                mHandledByMultiPress = true;
                 mKeyPressCounter = 0;
             }
         }
@@ -284,8 +286,9 @@ public final class SingleKeyGestureDetector {
             return false;
         }
 
-        if (mHandledByLongPress) {
+        if (mHandledByLongPress || mHandledByMultiPress) {
             mHandledByLongPress = false;
+            mHandledByMultiPress = false;
             mKeyPressCounter = 0;
             return true;
         }
@@ -339,6 +342,7 @@ public final class SingleKeyGestureDetector {
         }
 
         mHandledByLongPress = false;
+        mHandledByMultiPress = false;
         mDownKeyCode = KeyEvent.KEYCODE_UNKNOWN;
     }
 

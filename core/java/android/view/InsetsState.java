@@ -317,6 +317,26 @@ public class InsetsState implements Parcelable {
         return insets;
     }
 
+    public Insets calculateInsets(Rect frame, @InsetsType int types,
+            InsetsVisibilities overrideVisibilities) {
+        Insets insets = Insets.NONE;
+        for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
+            InsetsSource source = mSources[type];
+            if (source == null) {
+                continue;
+            }
+            int publicType = InsetsState.toPublicType(type);
+            if ((publicType & types) == 0) {
+                continue;
+            }
+            if (!overrideVisibilities.getVisibility(type)) {
+                continue;
+            }
+            insets = Insets.max(source.calculateInsets(frame, true), insets);
+        }
+        return insets;
+    }
+
     public Insets calculateVisibleInsets(Rect frame, @SoftInputModeFlags int softInputMode) {
         Insets insets = Insets.NONE;
         for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
@@ -480,6 +500,26 @@ public class InsetsState implements Parcelable {
 
     public DisplayCutout getDisplayCutout() {
         return mDisplayCutout.get();
+    }
+
+    public void getDisplayCutoutSafe(Rect outBounds) {
+        outBounds.set(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
+        final DisplayCutout cutout = mDisplayCutout.get();
+        final Rect displayFrame = mDisplayFrame;
+        if (!cutout.isEmpty()) {
+            if (cutout.getSafeInsetLeft() > 0) {
+                outBounds.left = displayFrame.left + cutout.getSafeInsetLeft();
+            }
+            if (cutout.getSafeInsetTop() > 0) {
+                outBounds.top = displayFrame.top + cutout.getSafeInsetTop();
+            }
+            if (cutout.getSafeInsetRight() > 0) {
+                outBounds.right = displayFrame.right - cutout.getSafeInsetRight();
+            }
+            if (cutout.getSafeInsetBottom() > 0) {
+                outBounds.bottom = displayFrame.bottom - cutout.getSafeInsetBottom();
+            }
+        }
     }
 
     public void setRoundedCorners(RoundedCorners roundedCorners) {

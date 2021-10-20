@@ -459,6 +459,10 @@
   <java-symbol type="integer" name="config_toastDefaultGravity" />
   <java-symbol type="integer" name="config_triplePressOnPowerBehavior" />
   <java-symbol type="integer" name="config_shortPressOnSleepBehavior" />
+  <java-symbol type="integer" name="config_longPressOnStemPrimaryBehavior" />
+  <java-symbol type="integer" name="config_shortPressOnStemPrimaryBehavior" />
+  <java-symbol type="integer" name="config_doublePressOnStemPrimaryBehavior" />
+  <java-symbol type="integer" name="config_triplePressOnStemPrimaryBehavior" />
   <java-symbol type="integer" name="config_windowOutsetBottom" />
   <java-symbol type="integer" name="db_connection_pool_size" />
   <java-symbol type="integer" name="db_journal_size_limit" />
@@ -4431,6 +4435,97 @@
   <java-symbol type="bool" name="config_cecRcProfileSourceMediaContextSensitiveMenuHandled_default" />
   <java-symbol type="bool" name="config_cecRcProfileSourceMediaContextSensitiveMenuNotHandled_allowed" />
   <java-symbol type="bool" name="config_cecRcProfileSourceMediaContextSensitiveMenuNotHandled_default" />
+
+  <!-- Which Short Audio Descriptors a TV should query via CEC -->
+  <java-symbol type="bool" name="config_cecQuerySadLpcm_userConfigurable" />
+  <java-symbol type="bool" name="config_cecQuerySadLpcmEnabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadLpcmEnabled_default" />
+  <java-symbol type="bool" name="config_cecQuerySadLpcmDisabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadLpcmDisabled_default" />
+
+  <java-symbol type="bool" name="config_cecQuerySadDd_userConfigurable" />
+  <java-symbol type="bool" name="config_cecQuerySadDdEnabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadDdEnabled_default" />
+  <java-symbol type="bool" name="config_cecQuerySadDdDisabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadDdDisabled_default" />
+
+  <java-symbol type="bool" name="config_cecQuerySadMpeg1_userConfigurable" />
+  <java-symbol type="bool" name="config_cecQuerySadMpeg1Enabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadMpeg1Enabled_default" />
+  <java-symbol type="bool" name="config_cecQuerySadMpeg1Disabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadMpeg1Disabled_default" />
+
+  <java-symbol type="bool" name="config_cecQuerySadMp3_userConfigurable" />
+  <java-symbol type="bool" name="config_cecQuerySadMp3Enabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadMp3Enabled_default" />
+  <java-symbol type="bool" name="config_cecQuerySadMp3Disabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadMp3Disabled_default" />
+
+  <java-symbol type="bool" name="config_cecQuerySadMpeg2_userConfigurable" />
+  <java-symbol type="bool" name="config_cecQuerySadMpeg2Enabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadMpeg2Enabled_default" />
+  <java-symbol type="bool" name="config_cecQuerySadMpeg2Disabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadMpeg2Disabled_default" />
+
+  <java-symbol type="bool" name="config_cecQuerySadAac_userConfigurable" />
+  <java-symbol type="bool" name="config_cecQuerySadAacEnabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadAacEnabled_default" />
+  <java-symbol type="bool" name="config_cecQuerySadAacDisabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadAacDisabled_default" />
+
+  <java-symbol type="bool" name="config_cecQuerySadDts_userConfigurable" />
+  <java-symbol type="bool" name="config_cecQuerySadDtsEnabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadDtsEnabled_default" />
+  <java-symbol type="bool" name="config_cecQuerySadDtsDisabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadDtsDisabled_default" />
+
+  <java-symbol type="bool" name="config_cecQuerySadAtrac_userConfigurable" />
+  <java-symbol type="bool" name="config_cecQuerySadAtracEnabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadAtracEnabled_default" />
+  <java-symbol type="bool" name="config_cecQuerySadAtracDisabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadAtracDisabled_default" />
+
+  <java-symbol type="bool" name="config_cecQuerySadOnebitaudio_userConfigurable" />
+  <java-symbol type="bool" name="config_cecQuerySadOnebitaudioEnabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadOnebitaudioEnabled_default" />
+  <java-symbol type="bool" name="config_cecQuerySadOnebitaudioDisabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadOnebitaudioDisabled_default" />
+
+  <java-symbol type="bool" name="config_cecQuerySadDdp_userConfigurable" />
+  <java-symbol type="bool" name="config_cecQuerySadDdpEnabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadDdpEnabled_default" />
+  <java-symbol type="bool" name="config_cecQuerySadDdpDisabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadDdpDisabled_default" />
+
+  <java-symbol type="bool" name="config_cecQuerySadDtshd_userConfigurable" />
+  <java-symbol type="bool" name="config_cecQuerySadDtshdEnabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadDtshdEnabled_default" />
+  <java-symbol type="bool" name="config_cecQuerySadDtshdDisabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadDtshdDisabled_default" />
+
+  <java-symbol type="bool" name="config_cecQuerySadTruehd_userConfigurable" />
+  <java-symbol type="bool" name="config_cecQuerySadTruehdEnabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadTruehdEnabled_default" />
+  <java-symbol type="bool" name="config_cecQuerySadTruehdDisabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadTruehdDisabled_default" />
+
+  <java-symbol type="bool" name="config_cecQuerySadDst_userConfigurable" />
+  <java-symbol type="bool" name="config_cecQuerySadDstEnabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadDstEnabled_default" />
+  <java-symbol type="bool" name="config_cecQuerySadDstDisabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadDstDisabled_default" />
+
+  <java-symbol type="bool" name="config_cecQuerySadWmapro_userConfigurable" />
+  <java-symbol type="bool" name="config_cecQuerySadWmaproEnabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadWmaproEnabled_default" />
+  <java-symbol type="bool" name="config_cecQuerySadWmaproDisabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadWmaproDisabled_default" />
+
+  <java-symbol type="bool" name="config_cecQuerySadMax_userConfigurable" />
+  <java-symbol type="bool" name="config_cecQuerySadMaxEnabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadMaxEnabled_default" />
+  <java-symbol type="bool" name="config_cecQuerySadMaxDisabled_allowed" />
+  <java-symbol type="bool" name="config_cecQuerySadMaxDisabled_default" />
 
   <!-- Ids for RemoteViews -->
   <java-symbol type="id" name="remote_views_next_child" />

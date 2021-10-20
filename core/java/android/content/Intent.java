@@ -32,7 +32,6 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
-import android.bluetooth.BluetoothDevice;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -2346,6 +2345,26 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MANAGE_PERMISSION_USAGE =
             "android.intent.action.MANAGE_PERMISSION_USAGE";
+
+    /**
+     * Activity action: Launch UI to view the app's feature's information.
+     *
+     * <p>
+     * Output: Nothing.
+     * </p>
+     * <p class="note">
+     * You must protect the activity that handles this action with the
+     * {@link android.Manifest.permission#START_VIEW_APP_FEATURES} permission to ensure that
+     * only the system can launch this activity. The system will not launch activities
+     * that are not properly protected.
+     * </p>
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.START_VIEW_APP_FEATURES)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_VIEW_APP_FEATURES =
+            "android.intent.action.VIEW_APP_FEATURES";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
@@ -11668,16 +11687,6 @@ public class Intent implements Parcelable, Cloneable {
 
         if (fromProtectedComponent) {
             mLocalFlags |= LOCAL_FLAG_FROM_PROTECTED_COMPONENT;
-        }
-
-        // Special attribution fix-up logic for any BluetoothDevice extras
-        // passed via Bluetooth intents
-        if (mAction != null && mAction.startsWith("android.bluetooth.")
-                && hasExtra(BluetoothDevice.EXTRA_DEVICE)) {
-            final BluetoothDevice device = getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-            if (device != null) {
-                device.prepareToEnterProcess(source);
-            }
         }
     }
 

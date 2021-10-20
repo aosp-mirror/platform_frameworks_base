@@ -3816,6 +3816,27 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testVisuallyInterruptive_notSeen() throws Exception {
+        NotificationRecord original = generateNotificationRecord(mTestNotificationChannel);
+        mService.addNotification(original);
+
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, original.getSbn().getId(),
+                original.getSbn().getTag(), mUid, 0,
+                new Notification.Builder(mContext, mTestNotificationChannel.getId())
+                        .setContentTitle("new title").build(),
+                UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord update = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+        mService.addEnqueuedNotification(update);
+
+        NotificationManagerService.PostNotificationRunnable runnable =
+                mService.new PostNotificationRunnable(update.getKey());
+        runnable.run();
+        waitForIdle();
+
+        assertFalse(update.isInterruptive());
+    }
+
+    @Test
     public void testApplyAdjustmentMultiUser() throws Exception {
         final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         mService.addNotification(r);

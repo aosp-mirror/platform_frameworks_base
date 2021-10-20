@@ -27,7 +27,7 @@ import android.view.ViewGroup;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
+import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -408,8 +408,8 @@ public class StackScrollAlgorithm {
             viewState.alpha = 1f - ambientState.getHideAmount();
         } else if (ambientState.isExpansionChanging()) {
             // Adjust alpha for shade open & close.
-            viewState.alpha = Interpolators.getNotificationScrimAlpha(
-                    ambientState.getExpansionFraction(), true /* notification */);
+            float expansion = ambientState.getExpansionFraction();
+            viewState.alpha = ShadeInterpolation.getContentAlpha(expansion);
         }
 
         if (ambientState.isShadeExpanded() && view.mustStayOnScreen()

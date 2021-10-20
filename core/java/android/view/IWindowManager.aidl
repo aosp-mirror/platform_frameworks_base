@@ -60,6 +60,7 @@ import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.IInputFilter;
 import android.view.AppTransitionAnimationSpec;
+import android.view.TaskTransitionSpec;
 import android.view.WindowContentFrameStats;
 import android.view.WindowManager;
 import android.view.SurfaceControl;
@@ -883,4 +884,17 @@ interface IWindowManager
      * @hide
      */
     void setTaskSnapshotEnabled(boolean enabled);
+
+    /**
+     * Customized the task transition animation with a task transition spec.
+     *
+     * @param spec the spec that will be used to customize the task animations
+     */
+    void setTaskTransitionSpec(in TaskTransitionSpec spec);
+
+    /**
+     * Clears any task transition spec that has been previously set and
+     * reverts to using the default task transition with no spec changes.
+     */
+    void clearTaskTransitionSpec();
 }

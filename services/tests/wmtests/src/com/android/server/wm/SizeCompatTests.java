@@ -174,7 +174,9 @@ public class SizeCompatTests extends WindowTestsBase {
 
         // The activity should be able to accept negative x position [-150, 100 - 150, 600].
         final int dx = bounds.left + bounds.width() / 2;
-        mTask.setBounds(bounds.left - dx, bounds.top, bounds.right - dx, bounds.bottom);
+        final int dy = bounds.top + bounds.height() / 2;
+        mTask.setBounds(bounds.left - dx, bounds.top - dy, bounds.right - dx, bounds.bottom - dy);
+        // expected:<Rect(-150, 100 - 150, 600)> but was:<Rect(-150, 0 - 150, 500)>
         assertEquals(mTask.getBounds(), mActivity.getBounds());
 
         final int density = mActivity.getConfiguration().densityDpi;
@@ -1850,7 +1852,7 @@ public class SizeCompatTests extends WindowTestsBase {
                 // At launch.
                 /* fixedOrientationLetterbox */ new Rect(0, 0, 700, 1400),
                 // After 90 degree rotation.
-                /* sizeCompatUnscaled */ new Rect(0, 0, 700, 1400),
+                /* sizeCompatUnscaled */ new Rect(0, 700, 700, 2100),
                 // After the display is resized to (700, 1400).
                 /* sizeCompatScaled */ new Rect(0, 0, 350, 700));
     }
@@ -1863,7 +1865,7 @@ public class SizeCompatTests extends WindowTestsBase {
                 // At launch.
                 /* fixedOrientationLetterbox */ new Rect(1050, 0, 1750, 1400),
                 // After 90 degree rotation.
-                /* sizeCompatUnscaled */ new Rect(350, 0, 1050, 1400),
+                /* sizeCompatUnscaled */ new Rect(350, 700, 1050, 2100),
                 // After the display is resized to (700, 1400).
                 /* sizeCompatScaled */ new Rect(525, 0, 875, 700));
     }
@@ -1878,7 +1880,7 @@ public class SizeCompatTests extends WindowTestsBase {
                 // At launch.
                 /* fixedOrientationLetterbox */ new Rect(1050, 0, 1750, 1400),
                 // After 90 degree rotation.
-                /* sizeCompatUnscaled */ new Rect(350, 0, 1050, 1400),
+                /* sizeCompatUnscaled */ new Rect(350, 700, 1050, 2100),
                 // After the display is resized to (700, 1400).
                 /* sizeCompatScaled */ new Rect(525, 0, 875, 700));
 
@@ -1888,7 +1890,7 @@ public class SizeCompatTests extends WindowTestsBase {
                 // At launch.
                 /* fixedOrientationLetterbox */ new Rect(1050, 0, 1750, 1400),
                 // After 90 degree rotation.
-                /* sizeCompatUnscaled */ new Rect(350, 0, 1050, 1400),
+                /* sizeCompatUnscaled */ new Rect(350, 700, 1050, 2100),
                 // After the display is resized to (700, 1400).
                 /* sizeCompatScaled */ new Rect(525, 0, 875, 700));
     }
@@ -1901,7 +1903,7 @@ public class SizeCompatTests extends WindowTestsBase {
                 // At launch.
                 /* fixedOrientationLetterbox */ new Rect(2100, 0, 2800, 1400),
                 // After 90 degree rotation.
-                /* sizeCompatUnscaled */ new Rect(700, 0, 1400, 1400),
+                /* sizeCompatUnscaled */ new Rect(700, 700, 1400, 2100),
                 // After the display is resized to (700, 1400).
                 /* sizeCompatScaled */ new Rect(1050, 0, 1400, 700));
     }
@@ -2093,7 +2095,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
         assertTrue(mActivity.inSizeCompatMode());
         // Activity is in size compat mode but not scaled.
-        assertEquals(new Rect(0, 0, 1400, 700), mActivity.getBounds());
+        assertEquals(new Rect(0, 1050, 1400, 1750), mActivity.getBounds());
     }
 
     private static WindowState addWindowToActivity(ActivityRecord activity) {

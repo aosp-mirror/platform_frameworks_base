@@ -26,7 +26,7 @@ import java.time.Duration;
  *
  * @hide
  */
-public class Duration64 {
+public final class Duration64 {
 
     public static final Duration64 ZERO = new Duration64(0);
     private final long mBits;

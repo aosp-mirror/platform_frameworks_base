@@ -26,19 +26,15 @@ import com.android.systemui.util.ViewController
 /** Controller for [PhoneStatusBarView].  */
 class PhoneStatusBarViewController(
     view: PhoneStatusBarView,
-    commandQueue: CommandQueue,
     statusBarMoveFromCenterAnimationController: StatusBarMoveFromCenterAnimationController?,
-    panelExpansionStateChangedListener: PhoneStatusBarView.PanelExpansionStateChangedListener,
+    touchEventHandler: PhoneStatusBarView.TouchEventHandler,
 ) : ViewController<PhoneStatusBarView>(view) {
 
     override fun onViewAttached() {}
     override fun onViewDetached() {}
 
     init {
-        mView.setPanelEnabledProvider {
-            commandQueue.panelsEnabled()
-        }
-        mView.setPanelExpansionStateChangedListener(panelExpansionStateChangedListener)
+        mView.setTouchEventHandler(touchEventHandler)
 
         statusBarMoveFromCenterAnimationController?.let { animationController ->
             val statusBarLeftSide: View = mView.findViewById(R.id.status_bar_left_side)

@@ -128,7 +128,8 @@ public class ShadeControllerImpl implements ShadeController {
             mNotificationShadeWindowController.setNotificationShadeFocusable(false);
 
             getStatusBar().getNotificationShadeWindowViewController().cancelExpandHelper();
-            getStatusBarView().collapsePanel(true /* animate */, delayed, speedUpFactor);
+            getNotificationPanelViewController()
+                    .collapsePanel(true /* animate */, delayed, speedUpFactor);
         } else if (mBubblesOptional.isPresent()) {
             mBubblesOptional.get().collapseStack();
         }

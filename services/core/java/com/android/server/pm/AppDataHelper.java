@@ -62,12 +62,21 @@ final class AppDataHelper {
     private final PackageManagerService mPm;
     private final Installer mInstaller;
     private final ArtManagerService mArtManagerService;
+    private final PackageManagerServiceInjector mInjector;
 
     // TODO(b/198166813): remove PMS dependency
     AppDataHelper(PackageManagerService pm) {
         mPm = pm;
-        mInstaller = mPm.mInjector.getInstaller();
-        mArtManagerService = mPm.mInjector.getArtManagerService();
+        mInjector = mPm.mInjector;
+        mInstaller = mInjector.getInstaller();
+        mArtManagerService = mInjector.getArtManagerService();
+    }
+
+    AppDataHelper(PackageManagerService pm, PackageManagerServiceInjector injector) {
+        mPm = pm;
+        mInjector = injector;
+        mInstaller = injector.getInstaller();
+        mArtManagerService = injector.getArtManagerService();
     }
 
     /**
@@ -90,8 +99,8 @@ final class AppDataHelper {
         }
 
         Installer.Batch batch = new Installer.Batch();
-        UserManagerInternal umInternal = mPm.mInjector.getUserManagerInternal();
-        StorageManagerInternal smInternal = mPm.mInjector.getLocalService(
+        UserManagerInternal umInternal = mInjector.getUserManagerInternal();
+        StorageManagerInternal smInternal = mInjector.getLocalService(
                 StorageManagerInternal.class);
         for (UserInfo user : umInternal.getUsers(false /*excludeDying*/)) {
             final int flags;
@@ -313,7 +322,7 @@ final class AppDataHelper {
      */
     @NonNull
     public void reconcileAppsData(int userId, int flags, boolean migrateAppsData) {
-        final StorageManager storage = mPm.mInjector.getSystemService(StorageManager.class);
+        final StorageManager storage = mInjector.getSystemService(StorageManager.class);
         for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
             final String volumeUuid = vol.getFsUuid();
             synchronized (mPm.mInstallLock) {

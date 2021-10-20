@@ -1115,9 +1115,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
     @Override
     public void installExistingPackage(String packageName, int installFlags, int installReason,
-            IntentSender statusReceiver, int userId, List<String> whiteListedPermissions) {
-        mPm.installExistingPackageAsUser(packageName, userId, installFlags, installReason,
-                whiteListedPermissions, statusReceiver);
+            IntentSender statusReceiver, int userId, List<String> allowListedPermissions) {
+        final InstallPackageHelper installPackageHelper = new InstallPackageHelper(mPm);
+        installPackageHelper.installExistingPackageAsUser(packageName, userId, installFlags,
+                installReason, allowListedPermissions, statusReceiver);
     }
 
     @Override
