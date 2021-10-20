@@ -5233,21 +5233,6 @@ public class AudioManager {
         }
     }
 
-    /**
-     * @hide
-     * Notifies AudioService that it is connected to an A2DP device that supports absolute volume,
-     * so that AudioService can send volume change events to the A2DP device, rather than handling
-     * them.
-     */
-    public void avrcpSupportsAbsoluteVolume(String address, boolean support) {
-        final IAudioService service = getService();
-        try {
-            service.avrcpSupportsAbsoluteVolume(address, support);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
      /**
       * {@hide}
       */
