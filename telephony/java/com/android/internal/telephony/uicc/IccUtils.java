@@ -43,6 +43,10 @@ public class IccUtils {
     @VisibleForTesting
     static final int FPLMN_BYTE_SIZE = 3;
 
+    // ICCID used for tests by some OEMs
+    // TODO(b/159354974): Replace the constant here with UiccPortInfo.ICCID_REDACTED once ready
+    private static final String TEST_ICCID = "FFFFFFFFFFFFFFFFFFFF";
+
     // A table mapping from a number to a hex character for fast encoding hex strings.
     private static final char[] HEX_CHARS = {
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
@@ -923,6 +927,9 @@ public class IccUtils {
      * Strip all the trailing 'F' characters of a string, e.g., an ICCID.
      */
     public static String stripTrailingFs(String s) {
+        if (TEST_ICCID.equals(s)) {
+            return s;
+        }
         return s == null ? null : s.replaceAll("(?i)f*$", "");
     }
 
