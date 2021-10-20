@@ -1052,11 +1052,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
         assert(state != Display.STATE_UNKNOWN);
 
-        // Initialize things the first time the power state is changed.
-        if (mustInitialize) {
-            initialize(state);
-        }
-
         // Apply the proximity sensor.
         if (mProximitySensor != null) {
             if (mPowerRequest.useProximitySensor && state != Display.STATE_OFF) {
@@ -1105,6 +1100,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 || mLogicalDisplay.getPhase() == LogicalDisplay.DISPLAY_PHASE_LAYOUT_TRANSITION
                 || mScreenOffBecauseOfProximity) {
             state = Display.STATE_OFF;
+        }
+
+        // Initialize things the first time the power state is changed.
+        if (mustInitialize) {
+            initialize(state);
         }
 
         // Animate the screen state change unless already animating.
