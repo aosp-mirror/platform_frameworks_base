@@ -165,7 +165,11 @@ public abstract class Vibrator {
         return ctx != null ? ctx.getResources().getFloat(resId) : defaultValue;
     }
 
-    /** @hide */
+    /**
+     * Get the info describing this vibrator.
+     *
+     * @hide
+     */
     protected VibratorInfo getInfo() {
         return VibratorInfo.EMPTY_VIBRATOR_INFO;
     }

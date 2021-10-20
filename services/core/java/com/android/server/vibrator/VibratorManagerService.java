@@ -128,6 +128,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     private VibrationThread mNextVibration;
     @GuardedBy("mLock")
     private ExternalVibrationHolder mCurrentExternalVibration;
+    @GuardedBy("mLock")
+    private boolean mServiceReady;
 
     private final VibrationSettings mVibrationSettings;
     private final VibrationScaler mVibrationScaler;
@@ -201,6 +203,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*vibrator*");
         mWakeLock.setReferenceCounted(true);
 
+        // Load vibrator hardware info. The vibrator ids and manager capabilities are loaded only
+        // once and assumed unchanged for the lifecycle of this service. Each individual vibrator
+        // can still retry loading each individual vibrator hardware spec once more at systemReady.
         mCapabilities = mNativeWrapper.getCapabilities();
         int[] vibratorIds = mNativeWrapper.getVibratorIds();
         if (vibratorIds == null) {
@@ -235,6 +240,11 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         Slog.v(TAG, "Initializing VibratorManager service...");
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "systemReady");
         try {
+            // Will retry to load each vibrator's info, if any request have failed.
+            for (int i = 0; i < mVibrators.size(); i++) {
+                mVibrators.valueAt(i).reloadVibratorInfoIfNeeded();
+            }
+
             mVibrationSettings.onSystemReady();
             mInputDeviceDelegate.onSystemReady();
 
@@ -243,6 +253,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             // Will update settings and input devices.
             updateServiceState();
         } finally {
+            synchronized (mLock) {
+                mServiceReady = true;
+            }
             Slog.v(TAG, "VibratorManager service initialized");
             Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
@@ -256,8 +269,19 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     @Override // Binder call
     @Nullable
     public VibratorInfo getVibratorInfo(int vibratorId) {
-        VibratorController controller = mVibrators.get(vibratorId);
-        return controller == null ? null : controller.getVibratorInfo();
+        final VibratorController controller = mVibrators.get(vibratorId);
+        if (controller == null) {
+            return null;
+        }
+        final VibratorInfo info = controller.getVibratorInfo();
+        synchronized (mLock) {
+            if (mServiceReady) {
+                return info;
+            }
+        }
+        // If the service is not ready and the load was unsuccessful then return null while waiting
+        // for the service to be ready. It will retry to load the complete info from the HAL.
+        return controller.isVibratorInfoLoadSuccessful() ? info : null;
     }
 
     @Override // Binder call
