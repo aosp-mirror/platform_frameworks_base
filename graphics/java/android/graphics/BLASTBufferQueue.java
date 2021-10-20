@@ -36,21 +36,8 @@ public final class BLASTBufferQueue {
             int format, long transactionPtr);
     private static native void nativeMergeWithNextTransaction(long ptr, long transactionPtr,
                                                               long frameNumber);
-    private static native void nativeSetTransactionCompleteCallback(long ptr, long frameNumber,
-            TransactionCompleteCallback callback);
     private static native long nativeGetLastAcquiredFrameNum(long ptr);
     private static native void nativeApplyPendingTransactions(long ptr, long frameNumber);
-
-    /**
-     * Callback sent to {@link #setTransactionCompleteCallback(long, TransactionCompleteCallback)}
-     */
-    public interface TransactionCompleteCallback {
-        /**
-         * Invoked when the transaction has completed.
-         * @param frameNumber The frame number of the buffer that was in that transaction
-         */
-        void onTransactionComplete(long frameNumber);
-    }
 
     /** Create a new connection with the surface flinger. */
     public BLASTBufferQueue(String name, SurfaceControl sc, int width, int height,
@@ -102,16 +89,6 @@ public final class BLASTBufferQueue {
 
     public void update(SurfaceControl sc, int width, int height, @PixelFormat.Format int format) {
         nativeUpdate(mNativeObject, sc.mNativeObject, width, height, format, 0);
-    }
-
-    /**
-     * Set a callback when the transaction with the frame number has been completed.
-     * @param frameNumber The frame number to get the transaction complete callback for
-     * @param completeCallback The callback that should be invoked.
-     */
-    public void setTransactionCompleteCallback(long frameNumber,
-            @Nullable TransactionCompleteCallback completeCallback) {
-        nativeSetTransactionCompleteCallback(mNativeObject, frameNumber, completeCallback);
     }
 
     @Override
