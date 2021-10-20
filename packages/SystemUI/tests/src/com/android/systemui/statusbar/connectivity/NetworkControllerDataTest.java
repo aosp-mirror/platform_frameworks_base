@@ -21,7 +21,6 @@ import static android.telephony.NetworkRegistrationInfo.DOMAIN_PS;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -211,7 +210,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         updateDataConnectionState(TelephonyManager.DATA_DISCONNECTED, 0);
         setConnectivityViaCallbackInNetworkController(
                 NetworkCapabilities.TRANSPORT_CELLULAR, false, false, null);
-        when(mMockProvisionController.isUserSetup(anyInt())).thenReturn(false);
+        when(mMockProvisionController.isCurrentUserSetup()).thenReturn(false);
         mUserCallback.onUserSetupChanged();
         TestableLooper.get(this).processAllMessages();
 
