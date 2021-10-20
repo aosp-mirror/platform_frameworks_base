@@ -4750,6 +4750,16 @@ public interface WindowManager extends ViewManager {
                     return Integer.toString(inputFeature);
             }
         }
+
+        /**
+         * True if the window should consume all pointer events itself, regardless of whether they
+         * are inside of the window. If the window is modal, its touchable region will expand to the
+         * size of its task.
+         * @hide
+         */
+        public boolean isModal() {
+            return (flags & (FLAG_NOT_TOUCH_MODAL | FLAG_NOT_FOCUSABLE)) == 0;
+        }
     }
 
     /**
