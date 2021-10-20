@@ -347,6 +347,14 @@ interface IWindowManager
     Bitmap screenshotWallpaper();
 
     /**
+     * Mirrors the wallpaper for the given display.
+     *
+     * @param displayId ID of the display for the wallpaper.
+     * @return A SurfaceControl for the parent of the mirrored wallpaper.
+     */
+    SurfaceControl mirrorWallpaperSurface(int displayId);
+
+    /**
      * Registers a wallpaper visibility listener.
      * @return Current visibility.
      */
