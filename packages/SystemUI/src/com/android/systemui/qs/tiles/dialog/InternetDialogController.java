@@ -149,6 +149,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
     private ConnectivityManager.NetworkCallback mConnectivityManagerNetworkCallback;
     private WindowManager mWindowManager;
     private ToastFactory mToastFactory;
+    private SignalDrawable mSignalDrawable;
 
     @VisibleForTesting
     static final float TOAST_PARAMS_HORIZONTAL_WEIGHT = 1.0f;
@@ -225,6 +226,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         mConnectivityManagerNetworkCallback = new DataConnectivityListener();
         mWindowManager = windowManager;
         mToastFactory = toastFactory;
+        mSignalDrawable = new SignalDrawable(mContext);
     }
 
     void onStart(@NonNull InternetDialogCallback callback, boolean canConfigWifi) {
@@ -431,10 +433,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
 
     Drawable getSignalStrengthIcon(Context context, int level, int numLevels,
             int iconType, boolean cutOut) {
-        Log.d(TAG, "getSignalStrengthIcon");
-        final SignalDrawable signalDrawable = new SignalDrawable(context);
-        signalDrawable.setLevel(
-                SignalDrawable.getState(level, numLevels, cutOut));
+        mSignalDrawable.setLevel(SignalDrawable.getState(level, numLevels, cutOut));
 
         // Make the network type drawable
         final Drawable networkDrawable =
@@ -443,7 +442,7 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
                         : context.getResources().getDrawable(iconType, context.getTheme());
 
         // Overlay the two drawables
-        final Drawable[] layers = {networkDrawable, signalDrawable};
+        final Drawable[] layers = {networkDrawable, mSignalDrawable};
         final int iconSize =
                 context.getResources().getDimensionPixelSize(R.dimen.signal_strength_icon_size);
 
@@ -892,7 +891,8 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
             TelephonyCallback.DataConnectionStateListener,
             TelephonyCallback.DisplayInfoListener,
             TelephonyCallback.ServiceStateListener,
-            TelephonyCallback.SignalStrengthsListener {
+            TelephonyCallback.SignalStrengthsListener,
+            TelephonyCallback.UserMobileDataStateListener {
 
         @Override
         public void onServiceStateChanged(@NonNull ServiceState serviceState) {
@@ -913,6 +913,11 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         public void onDisplayInfoChanged(@NonNull TelephonyDisplayInfo telephonyDisplayInfo) {
             mTelephonyDisplayInfo = telephonyDisplayInfo;
             mCallback.onDisplayInfoChanged(telephonyDisplayInfo);
+        }
+
+        @Override
+        public void onUserMobileDataStateChanged(boolean enabled) {
+            mCallback.onUserMobileDataStateChanged(enabled);
         }
     }
 
@@ -1017,6 +1022,8 @@ public class InternetDialogController implements WifiEntry.DisconnectCallback,
         void onDataConnectionStateChanged(int state, int networkType);
 
         void onSignalStrengthsChanged(SignalStrength signalStrength);
+
+        void onUserMobileDataStateChanged(boolean enabled);
 
         void onDisplayInfoChanged(TelephonyDisplayInfo telephonyDisplayInfo);
 
