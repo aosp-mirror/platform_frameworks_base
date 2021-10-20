@@ -39,7 +39,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.CarrierText;
 import com.android.systemui.Dependency;
-import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
@@ -63,7 +62,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.tuner.TunerService;
-import com.android.systemui.util.InjectionInflationController;
 import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
@@ -177,10 +175,6 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         return new QSFragment(
                 new RemoteInputQuickSettingsDisabler(context, mock(ConfigurationController.class),
                         commandQueue),
-                new InjectionInflationController(
-                        SystemUIFactory.getInstance()
-                                .getSysUIComponent()
-                                .createViewInstanceCreatorFactory()),
                 mock(QSTileHost.class),
                 mock(StatusBarStateController.class),
                 commandQueue,

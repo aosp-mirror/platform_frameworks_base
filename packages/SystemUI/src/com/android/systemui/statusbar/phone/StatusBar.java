@@ -1218,7 +1218,7 @@ public class StatusBar extends SystemUI implements
                     // TODO (b/136993073) Separate notification shade and status bar
                     mHeadsUpAppearanceController = new HeadsUpAppearanceController(
                             mNotificationIconAreaController, mHeadsUpManager,
-                            mStackScroller.getController(),
+                            mStackScrollerController,
                             mStatusBarStateController, mKeyguardBypassController,
                             mKeyguardStateController, mWakeUpCoordinator, mCommandQueue,
                             mNotificationPanelViewController, mStatusBarView);

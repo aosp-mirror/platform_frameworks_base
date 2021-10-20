@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.notification.stack;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_SCROLL_FLING;
 import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_SILENT;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_SWIPE;
-import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 import static com.android.systemui.util.Utils.shouldUseSplitNotificationShade;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -120,9 +119,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-
-import javax.inject.Inject;
-import javax.inject.Named;
 
 /**
  * A layout which handles a dynamic amount of notifications and presents them in a scrollable stack.
@@ -567,9 +563,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @Nullable
     private OnClickListener mManageButtonClickListener;
 
-    // TODO(b/149942757): Remove the @Inject
-    @Inject
-    public NotificationStackScrollLayout(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs) {
+    public NotificationStackScrollLayout(Context context, AttributeSet attrs) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
         mSectionsManager = Dependency.get(NotificationSectionsManager.class);
@@ -5272,10 +5266,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             NotificationStackScrollLayoutController notificationStackScrollLayoutController) {
         mController = notificationStackScrollLayoutController;
         mController.getNoticationRoundessManager().setAnimatedChildren(mChildrenToAddAnimated);
-    }
-
-    public NotificationStackScrollLayoutController getController() {
-        return mController;
     }
 
     void addSwipedOutView(View v) {
