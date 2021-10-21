@@ -182,7 +182,6 @@ import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.widget.RemoteViews;
 
-import androidx.annotation.Nullable;
 import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.app.IAppOpsService;
@@ -1040,7 +1039,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationRecord r = generateNotificationRecord(channel);
 
         // isBlocked is only used for user blocking, not app suspension
-        assertFalse(mService.isBlocked(r, mUsageStats));
+        assertFalse(mService.isRecordBlockedLocked(r));
     }
 
     @Test
@@ -1050,8 +1049,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationChannel channel = new NotificationChannel("id", "name",
                 NotificationManager.IMPORTANCE_NONE);
         NotificationRecord r = generateNotificationRecord(channel);
-        assertTrue(mService.isBlocked(r, mUsageStats));
-        verify(mUsageStats, times(1)).registerBlocked(eq(r));
+        assertTrue(mService.isRecordBlockedLocked(r));
 
         mBinderService.createNotificationChannels(
                 PKG, new ParceledListSlice(Arrays.asList(channel)));
@@ -1148,8 +1146,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 NotificationManager.IMPORTANCE_HIGH);
         channel.setGroup("something");
         NotificationRecord r = generateNotificationRecord(channel);
-        assertTrue(mService.isBlocked(r, mUsageStats));
-        verify(mUsageStats, times(1)).registerBlocked(eq(r));
+        assertTrue(mService.isRecordBlockedLocked(r));
     }
 
     @Test
@@ -1284,6 +1281,40 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         waitForIdle();
 
         verify(mUsageStats, never()).registerPostedByApp(any());
+    }
+
+    @Test
+    public void testBlockedNotifications_blockedByUser() throws Exception {
+        mService.setPreferencesHelper(mPreferencesHelper);
+        when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(false);
+        when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
+
+        NotificationChannel channel = new NotificationChannel("id", "name",
+                NotificationManager.IMPORTANCE_HIGH);
+        NotificationRecord r = generateNotificationRecord(channel);
+        mService.addEnqueuedNotification(r);
+
+        when(mPreferencesHelper.getImportance(anyString(), anyInt())).thenReturn(IMPORTANCE_NONE);
+
+        NotificationManagerService.PostNotificationRunnable runnable =
+                mService.new PostNotificationRunnable(r.getKey());
+        runnable.run();
+        waitForIdle();
+
+        verify(mUsageStats).registerBlocked(any());
+        verify(mUsageStats, never()).registerPostedByApp(any());
+    }
+
+    @Test
+    public void testEnqueueNotification_appBlocked() throws Exception {
+        mBinderService.setNotificationsEnabledForPackage(PKG, mUid, false);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testEnqueueNotification_appBlocked", 0,
+                generateNotificationRecord(null).getNotification(), 0);
+        waitForIdle();
+        verify(mWorkerHandler, never()).post(
+                any(NotificationManagerService.EnqueueNotificationRunnable.class));
     }
 
     @Test

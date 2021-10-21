@@ -3544,11 +3544,7 @@ public class NotificationManagerService extends SystemService {
                         "canNotifyAsPackage for uid " + uid);
             }
 
-            if (mEnableAppSettingMigration) {
-                return mPermissionHelper.hasPermission(uid);
-            } else {
-                return mPreferencesHelper.getImportance(pkg, uid) != IMPORTANCE_NONE;
-            }
+            return areNotificationsEnabledForPackageInt(pkg, uid);
         }
 
         /**
@@ -6732,11 +6728,28 @@ public class NotificationManagerService extends SystemService {
 
 
         // blocked apps
-        if (isBlocked(r, mUsageStats)) {
+        boolean isBlocked = !areNotificationsEnabledForPackageInt(pkg, uid);
+        synchronized (mNotificationLock) {
+            isBlocked |= isRecordBlockedLocked(r);
+        }
+        if (isBlocked) {
+            if (DBG) {
+                Slog.e(TAG, "Suppressing notification from package " + r.getSbn().getPackageName()
+                        + " by user request.");
+            }
+            mUsageStats.registerBlocked(r);
             return false;
         }
 
         return true;
+    }
+
+    private boolean areNotificationsEnabledForPackageInt(String pkg, int uid) {
+        if (mEnableAppSettingMigration) {
+            return mPermissionHelper.hasPermission(uid);
+        } else {
+            return mPreferencesHelper.getImportance(pkg, uid) != IMPORTANCE_NONE;
+        }
     }
 
     protected int getNotificationCount(String pkg, int userId, int excludedId,
@@ -6767,24 +6780,15 @@ public class NotificationManagerService extends SystemService {
         return count;
     }
 
-    protected boolean isBlocked(NotificationRecord r, NotificationUsageStats usageStats) {
-        if (isBlocked(r)) {
-            if (DBG) {
-                Slog.e(TAG, "Suppressing notification from package " + r.getSbn().getPackageName()
-                        + " by user request.");
-            }
-            usageStats.registerBlocked(r);
-            return true;
-        }
-        return false;
-    }
-
-    private boolean isBlocked(NotificationRecord r) {
+    /**
+     * Checks whether a notification is banned at a group or channel level or if the NAS or system
+     * has blocked the notification.
+     */
+    @GuardedBy("mNotificationLock")
+    boolean isRecordBlockedLocked(NotificationRecord r) {
         final String pkg = r.getSbn().getPackageName();
         final int callingUid = r.getSbn().getUid();
         return mPreferencesHelper.isGroupBlocked(pkg, callingUid, r.getChannel().getGroup())
-                || mPreferencesHelper.getImportance(pkg, callingUid)
-                == NotificationManager.IMPORTANCE_NONE
                 || r.getImportance() == NotificationManager.IMPORTANCE_NONE;
     }
 
@@ -7095,6 +7099,9 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void run() {
+            String pkg = StatusBarNotification.getPkgFromKey(key);
+            int uid = StatusBarNotification.getUidFromKey(key);
+            boolean appBanned = !areNotificationsEnabledForPackageInt(pkg, uid);
             synchronized (mNotificationLock) {
                 try {
                     NotificationRecord r = null;
@@ -7111,8 +7118,11 @@ public class NotificationManagerService extends SystemService {
                         return;
                     }
 
-                    if (isBlocked(r)) {
-                        Slog.i(TAG, "notification blocked by assistant request");
+                    if (appBanned || isRecordBlockedLocked(r)) {
+                        mUsageStats.registerBlocked(r);
+                        if (DBG) {
+                            Slog.e(TAG, "Suppressing notification from package " + pkg);
+                        }
                         return;
                     }
 

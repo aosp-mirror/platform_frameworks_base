@@ -630,4 +630,37 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
         verify(mPreferencesHelper, never()).getImportance(anyString(), anyInt());
         verify(mPreferencesHelper, never()).getNotificationChannelsBypassingDnd(PKG, mUid);
     }
+
+    @Test
+    public void testBlockedNotifications_blockedByUser() throws Exception {
+        when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(false);
+        when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
+
+        NotificationChannel channel = new NotificationChannel("id", "name",
+                NotificationManager.IMPORTANCE_HIGH);
+        NotificationRecord r = generateNotificationRecord(channel);
+        mService.addEnqueuedNotification(r);
+
+        when(mPermissionHelper.hasPermission(anyInt())).thenReturn(false);
+
+        NotificationManagerService.PostNotificationRunnable runnable =
+                mService.new PostNotificationRunnable(r.getKey());
+        runnable.run();
+        waitForIdle();
+
+        verify(mUsageStats).registerBlocked(any());
+        verify(mUsageStats, never()).registerPostedByApp(any());
+    }
+
+    @Test
+    public void testEnqueueNotification_appBlocked() throws Exception {
+        when(mPermissionHelper.hasPermission(mUid)).thenReturn(false);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testEnqueueNotification_appBlocked", 0,
+                generateNotificationRecord(null).getNotification(), 0);
+        waitForIdle();
+        verify(mWorkerHandler, never()).post(
+                any(NotificationManagerService.EnqueueNotificationRunnable.class));
+    }
 }
