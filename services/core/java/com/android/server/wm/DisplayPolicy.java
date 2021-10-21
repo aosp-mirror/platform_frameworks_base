@@ -43,12 +43,12 @@ import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_NAVIGATION_B
 import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_SEMI_TRANSPARENT_STATUS_BARS;
+import static android.view.WindowLayout.UNSPECIFIED_LENGTH;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN;
-import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
@@ -65,7 +65,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
-import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
@@ -1704,10 +1703,6 @@ public class DisplayPolicy {
             layoutStatusBar(displayFrames, mBarContentFrames.get(TYPE_STATUS_BAR));
             return;
         }
-        if (win.mActivityRecord != null && win.mActivityRecord.mWaitForEnteringPinnedMode) {
-            // Skip layout of the window when in transition to pip mode.
-            return;
-        }
         final WindowManager.LayoutParams attrs = win.getLayoutingAttrs(displayFrames.mRotation);
 
         final int type = attrs.type;
@@ -1719,37 +1714,50 @@ public class DisplayPolicy {
 
         final Rect pf = windowFrames.mParentFrame;
         final Rect df = windowFrames.mDisplayFrame;
+        final Rect f = windowFrames.mFrame;
         final Rect attachedWindowFrame = attached != null ? attached.getFrame() : null;
         sTmpLastParentFrame.set(pf);
 
-        // Override the bounds in window token has many side effects. Directly use the display
-        // frame set for the simulated layout for this case.
-        final Rect winBounds = windowFrames.mIsSimulatingDecorWindow ? df : win.getBounds();
+        final Rect winBounds;
+        final int requestedWidth;
+        final int requestedHeight;
+        if (windowFrames.mIsSimulatingDecorWindow) {
+            // Override the bounds in window token has many side effects. Directly use the display
+            // frame set for the simulated layout.
+            winBounds = df;
+
+            // The view hierarchy has not been measured in the simulated layout. Use
+            // UNSPECIFIED_LENGTH as the requested width and height so that WindowLayout will choose
+            // the proper values in this case.
+            requestedWidth = UNSPECIFIED_LENGTH;
+            requestedHeight = UNSPECIFIED_LENGTH;
+        } else {
+            winBounds = win.getBounds();
+            requestedWidth = win.mRequestedWidth;
+            requestedHeight = win.mRequestedHeight;
+        }
 
         final boolean clippedByDisplayCutout = mWindowLayout.computeWindowFrames(attrs,
-                win.getInsetsState(), displayFrames.mDisplayCutoutSafe, winBounds,
-                win.getRequestedVisibilities(), attachedWindowFrame, df, pf);
+                win.getInsetsState(), displayFrames.mDisplayCutoutSafe,
+                winBounds, win.getWindowingMode(), requestedWidth, requestedHeight,
+                win.getRequestedVisibilities(), attachedWindowFrame, win.mGlobalScale,
+                df, pf, f);
         windowFrames.setParentFrameWasClippedByDisplayCutout(clippedByDisplayCutout);
-
-        // TYPE_SYSTEM_ERROR is above the NavigationBar so it can't be allowed to extend over it.
-        // Also, we don't allow windows in multi-window mode to extend out of the screen.
-        if ((fl & FLAG_LAYOUT_NO_LIMITS) != 0 && type != TYPE_SYSTEM_ERROR
-                && !win.inMultiWindowMode()) {
-            df.left = df.top = -10000;
-            df.right = df.bottom = 10000;
-        }
 
         if (DEBUG_LAYOUT) Slog.v(TAG, "Compute frame " + attrs.getTitle()
                 + ": sim=#" + Integer.toHexString(sim)
                 + " attach=" + attached + " type=" + type
-                + String.format(" flags=0x%08x", fl)
-                + " pf=" + pf.toShortString() + " df=" + df.toShortString());
+                + " flags=" + ViewDebug.flagsToString(LayoutParams.class, "flags", fl)
+                + " pf=" + pf.toShortString() + " df=" + df.toShortString()
+                + " f=" + f.toShortString());
 
         if (!sTmpLastParentFrame.equals(pf)) {
             windowFrames.setContentChanged(true);
         }
 
-        win.computeFrameAndUpdateSourceFrame(displayFrames);
+        if (!windowFrames.mIsSimulatingDecorWindow) {
+            win.setFrame();
+        }
     }
 
     WindowState getTopFullscreenOpaqueWindow() {

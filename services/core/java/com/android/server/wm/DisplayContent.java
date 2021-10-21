@@ -802,13 +802,16 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     };
 
     private final Consumer<WindowState> mPerformLayout = w -> {
+        if (w.mLayoutAttached || w.skipLayout()) {
+            return;
+        }
+
         // Don't do layout of a window if it is not visible, or soon won't be visible, to avoid
         // wasting time and funky changes while a window is animating away.
         final boolean gone = w.isGoneForLayout();
 
-        if (DEBUG_LAYOUT && !w.mLayoutAttached) {
+        if (DEBUG_LAYOUT) {
             Slog.v(TAG, "1ST PASS " + w + ": gone=" + gone + " mHaveFrame=" + w.mHaveFrame
-                    + " mLayoutAttached=" + w.mLayoutAttached
                     + " config reported=" + w.isLastConfigReportedToClient());
             final ActivityRecord activity = w.mActivityRecord;
             if (gone) Slog.v(TAG, "  GONE: mViewVisibility=" + w.mViewVisibility
@@ -824,7 +827,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // If this view is GONE, then skip it -- keep the current frame, and let the caller know
         // so they can ignore it if they want.  (We do the normal layout for INVISIBLE windows,
         // since that means "perform layout as normal, just don't display").
-        if ((!gone || !w.mHaveFrame || w.mLayoutNeeded) && !w.mLayoutAttached) {
+        if (!gone || !w.mHaveFrame || w.mLayoutNeeded) {
             if (mTmpInitial) {
                 w.resetContentChanged();
             }
@@ -851,34 +854,34 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
 
             if (DEBUG_LAYOUT) Slog.v(TAG, "  LAYOUT: mFrame=" + w.getFrame()
-                    + " mContainingFrame=" + w.getContainingFrame()
+                    + " mParentFrame=" + w.getParentFrame()
                     + " mDisplayFrame=" + w.getDisplayFrame());
         }
     };
 
     private final Consumer<WindowState> mPerformLayoutAttached = w -> {
-        if (w.mLayoutAttached) {
-            if (DEBUG_LAYOUT) Slog.v(TAG, "2ND PASS " + w + " mHaveFrame=" + w.mHaveFrame
-                    + " mViewVisibility=" + w.mViewVisibility
-                    + " mRelayoutCalled=" + w.mRelayoutCalled);
-            // If this view is GONE, then skip it -- keep the current frame, and let the caller
-            // know so they can ignore it if they want.  (We do the normal layout for INVISIBLE
-            // windows, since that means "perform layout as normal, just don't display").
-            if ((w.mViewVisibility != GONE && w.mRelayoutCalled) || !w.mHaveFrame
-                    || w.mLayoutNeeded) {
-                if (mTmpInitial) {
-                    //Slog.i(TAG, "Window " + this + " clearing mContentChanged - initial");
-                    w.resetContentChanged();
-                }
-                w.mSurfacePlacementNeeded = true;
-                w.mLayoutNeeded = false;
-                w.prelayout();
-                getDisplayPolicy().layoutWindowLw(w, w.getParentWindow(), mDisplayFrames);
-                w.mLayoutSeq = mLayoutSeq;
-                if (DEBUG_LAYOUT) Slog.v(TAG, " LAYOUT: mFrame=" + w.getFrame()
-                        + " mContainingFrame=" + w.getContainingFrame()
-                        + " mDisplayFrame=" + w.getDisplayFrame());
+        if (!w.mLayoutAttached || w.skipLayout()) {
+            return;
+        }
+        if (DEBUG_LAYOUT) Slog.v(TAG, "2ND PASS " + w + " mHaveFrame=" + w.mHaveFrame
+                + " mViewVisibility=" + w.mViewVisibility
+                + " mRelayoutCalled=" + w.mRelayoutCalled);
+        // If this view is GONE, then skip it -- keep the current frame, and let the caller
+        // know so they can ignore it if they want.  (We do the normal layout for INVISIBLE
+        // windows, since that means "perform layout as normal, just don't display").
+        if ((w.mViewVisibility != GONE && w.mRelayoutCalled) || !w.mHaveFrame
+                || w.mLayoutNeeded) {
+            if (mTmpInitial) {
+                w.resetContentChanged();
             }
+            w.mSurfacePlacementNeeded = true;
+            w.mLayoutNeeded = false;
+            w.prelayout();
+            getDisplayPolicy().layoutWindowLw(w, w.getParentWindow(), mDisplayFrames);
+            w.mLayoutSeq = mLayoutSeq;
+            if (DEBUG_LAYOUT) Slog.v(TAG, " LAYOUT: mFrame=" + w.getFrame()
+                    + " mParentFrame=" + w.getParentFrame()
+                    + " mDisplayFrame=" + w.getDisplayFrame());
         }
     };
 

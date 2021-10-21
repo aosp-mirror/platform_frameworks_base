@@ -527,7 +527,7 @@ message ConfigurationContainerProto {
 message WindowFramesProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional .android.graphics.RectProto containing_frame = 1;
+    optional .android.graphics.RectProto containing_frame = 1 [deprecated=true];
     optional .android.graphics.RectProto content_frame = 2 [deprecated=true];
     optional .android.graphics.RectProto decor_frame = 3 [deprecated=true];
     optional .android.graphics.RectProto display_frame = 4;
