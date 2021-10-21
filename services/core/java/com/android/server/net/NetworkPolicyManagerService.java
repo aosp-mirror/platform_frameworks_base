@@ -4073,7 +4073,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (hasRestrictedModeAccess(uid)) {
             uidBlockedState.allowedReasons |= ALLOWED_REASON_RESTRICTED_MODE_PERMISSIONS;
         } else {
-            uidBlockedState.allowedReasons &= ALLOWED_REASON_RESTRICTED_MODE_PERMISSIONS;
+            uidBlockedState.allowedReasons &= ~ALLOWED_REASON_RESTRICTED_MODE_PERMISSIONS;
         }
         uidBlockedState.updateEffectiveBlockedReasons();
         if (oldEffectiveBlockedReasons != uidBlockedState.effectiveBlockedReasons) {

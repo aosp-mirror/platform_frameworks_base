@@ -29,6 +29,7 @@ import static android.media.MediaRoute2Info.TYPE_USB_DEVICE;
 import static android.media.MediaRoute2Info.TYPE_USB_HEADSET;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
+import static android.media.MediaRoute2Info.TYPE_BLE_HEADSET;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -122,6 +123,7 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
                 break;
             case TYPE_HEARING_AID:
             case TYPE_BLUETOOTH_A2DP:
+            case TYPE_BLE_HEADSET:
                 mType = MediaDeviceType.TYPE_BLUETOOTH_DEVICE;
                 break;
             case TYPE_UNKNOWN:

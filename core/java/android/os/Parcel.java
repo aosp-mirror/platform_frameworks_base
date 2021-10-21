@@ -401,7 +401,7 @@ public final class Parcel {
     private static final int WRITE_EXCEPTION_STACK_TRACE_THRESHOLD_MS = 1000;
 
     @CriticalNative
-    private static native long nativeGetBlobAshmemSize(long nativePtr);
+    private static native long nativeGetOpenAshmemSize(long nativePtr);
 
     public final static Parcelable.Creator<String> STRING_CREATOR
              = new Parcelable.Creator<String>() {
@@ -2891,9 +2891,11 @@ public final class Parcel {
 
     /**
      * Same as {@link #readList(List, ClassLoader)} but accepts {@code clazz} parameter as
-     * the type required for each item. If the item to be deserialized is not an instance
-     * of that class or any of its children class
-     * a {@link BadParcelableException} will be thrown.
+     * the type required for each item.
+     *
+     * @throws BadParcelableException Throws BadParcelableException if the item to be deserialized
+     * is not an instance of that class or any of its children classes or there was an error
+     * trying to instantiate an element.
      */
     public <T> void readList(@NonNull List<? super T> outVal,
             @Nullable ClassLoader loader, @NonNull Class<T> clazz) {
@@ -3894,8 +3896,11 @@ public final class Parcel {
 
     /**
      * Same as {@link #readParcelable(ClassLoader)} but accepts {@code clazz} parameter as the type
-     * required for each item. If the item to be deserialized is not an instance of that class or
-     * any of its children classes a {@link BadParcelableException} will be thrown.
+     * required for each item.
+     *
+     * @throws BadParcelableException Throws BadParcelableException if the item to be deserialized
+     * is not an instance of that class or any of its children classes or there was an error
+     * trying to instantiate an element.
      */
     @Nullable
     public <T extends Parcelable> T readParcelable(@Nullable ClassLoader loader,
@@ -3961,8 +3966,11 @@ public final class Parcel {
 
     /**
      * Same as {@link #readParcelableCreator(ClassLoader)} but accepts {@code clazz} parameter
-     * as the required type. If the item to be deserialized is not an instance of that class
-     * or any of its children classes a {@link BadParcelableException} will be thrown.
+     * as the required type.
+     *
+     * @throws BadParcelableException Throws BadParcelableException if the item to be deserialized
+     * is not an instance of that class or any of its children class or there there was an error
+     * trying to read the {@link Parcelable.Creator}.
      */
     @Nullable
     public <T> Parcelable.Creator<T> readParcelableCreator(
@@ -4373,8 +4381,8 @@ public final class Parcel {
     /**
      * @hide For testing
      */
-    public long getBlobAshmemSize() {
-        return nativeGetBlobAshmemSize(mNativePtr);
+    public long getOpenAshmemSize() {
+        return nativeGetOpenAshmemSize(mNativePtr);
     }
 
     private static String valueTypeToString(int type) {
