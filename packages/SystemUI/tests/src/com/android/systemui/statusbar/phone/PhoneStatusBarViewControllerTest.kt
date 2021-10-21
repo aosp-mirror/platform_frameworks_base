@@ -19,19 +19,25 @@ package com.android.systemui.statusbar.phone
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
+import android.view.ViewTreeObserver.OnPreDrawListener
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.unfold.config.UnfoldTransitionConfig
+import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
+import org.mockito.ArgumentCaptor
 import org.mockito.Mock
+import org.mockito.Mockito.spy
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.mock
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -48,9 +54,13 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
 
     @Mock
     private lateinit var moveFromCenterAnimation: StatusBarMoveFromCenterAnimationController
+    @Mock
+    private lateinit var progressProvider: ScopedUnfoldTransitionProgressProvider
 
     private lateinit var view: PhoneStatusBarView
     private lateinit var controller: PhoneStatusBarViewController
+
+    private val unfoldConfig = UnfoldConfig()
 
     @Before
     fun setUp() {
@@ -66,11 +76,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
             view.setBar(mock(StatusBar::class.java))
         }
 
-        controller = PhoneStatusBarViewController(
-                view,
-                null,
-                touchEventHandler,
-        )
+        controller = createController(view)
     }
 
     @Test
@@ -83,12 +89,38 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun constructor_moveFromCenterAnimationIsNotNull_moveFromCenterAnimationInitialized() {
-        controller = PhoneStatusBarViewController(
-                view, moveFromCenterAnimation, touchEventHandler
-        )
+    fun onViewAttachedAndDrawn_moveFromCenterAnimationEnabled_moveFromCenterAnimationInitialized() {
+        val view = createViewMock()
+        val argumentCaptor = ArgumentCaptor.forClass(OnPreDrawListener::class.java)
+        unfoldConfig.isEnabled = true
+        controller = createController(view)
+        controller.init()
 
-        verify(moveFromCenterAnimation).init(any(), any())
+        verify(view.viewTreeObserver).addOnPreDrawListener(argumentCaptor.capture())
+        argumentCaptor.value.onPreDraw()
+
+        verify(moveFromCenterAnimation).onViewsReady(any(), any())
+    }
+
+    private fun createViewMock(): PhoneStatusBarView {
+        val view = spy(view)
+        val viewTreeObserver = mock(ViewTreeObserver::class.java)
+        `when`(view.viewTreeObserver).thenReturn(viewTreeObserver)
+        `when`(view.isAttachedToWindow).thenReturn(true)
+        return view
+    }
+
+    private fun createController(view: PhoneStatusBarView): PhoneStatusBarViewController {
+        return PhoneStatusBarViewController.Factory(
+            { progressProvider },
+            { moveFromCenterAnimation },
+            unfoldConfig
+        ).create(view, touchEventHandler)
+    }
+
+    private class UnfoldConfig : UnfoldTransitionConfig {
+        override var isEnabled: Boolean = false
+        override var isHingeAngleEnabled: Boolean = false
     }
 
     private class TestTouchEventHandler : PhoneStatusBarView.TouchEventHandler {
@@ -97,6 +129,5 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
             lastEvent = event
             return false
         }
-
     }
 }
