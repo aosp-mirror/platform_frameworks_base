@@ -546,6 +546,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Дозвољава апликацији да се оглашава на Bluetooth уређајима у близини"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"одређивање раздаљине између уређаја ултра-широког појаса у близини"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Дозвољава апликацији да одређује релативну раздаљину између уређаја ултра-широког појаса у близини"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"интеракција са WiFi уређајима у близини"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Дозвољава апликацији да се оглашава, повезује и утврђује релативну позицију WiFi уређаја у близини"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Информације о жељеној NFC услузи за плаћање"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дозвољава апликацији да преузима информације о жељеној NFC услузи за плаћање, попут регистрованих идентификатора апликација и одредишта преусмеравања."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контрола комуникације у ужем пољу (Near Field Communication)"</string>
@@ -729,6 +731,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Дозвољава апликацији да чита и уписује конфигурацију подешавања Не узнемиравај."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"почетак коришћења дозволе за преглед"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Дозвољава власнику да започне коришћење дозволе за апликацију. Никада не би требало да буде потребна за уобичајене апликације."</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"покретање приказа функција апликације"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Дозвољава кориснику да започне прегледање информација о функцијама апликације."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"приступ подацима сензора при великој брзини узорковања"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Дозвољава апликацији да узима узорак података сензора при брзини већој од 200 Hz"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Подешавање правила за лозинку"</string>

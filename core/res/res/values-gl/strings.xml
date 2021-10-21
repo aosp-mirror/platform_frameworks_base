@@ -543,6 +543,10 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Permite que a aplicación envíe anuncios a dispositivos Bluetooth próximos"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"determinar posición entre dispositivos próximos"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Permite que a aplicación determine a posición relativa entre os dispositivos próximos que usen banda ultralarga"</string>
+    <!-- no translation found for permlab_nearby_wifi_devices (392774237063608500) -->
+    <skip />
+    <!-- no translation found for permdesc_nearby_wifi_devices (3054307728646332906) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Información do servizo de pago de NFC preferido"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite que a aplicación obteña información do servizo de pago de NFC preferido, como as axudas rexistradas e o destino da ruta."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlar Near Field Communication"</string>
@@ -726,6 +730,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Permite á aplicación ler e escribir a configuración do modo Non molestar."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"iniciar uso de permiso de vista"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Permite ao propietario iniciar o uso de permisos dunha aplicación. As aplicacións normais non deberían precisalo nunca."</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"comezar a ver as funcións da aplicación"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Permite que o propietario comece a ver a información das funcións dunha aplicación."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"acceder aos datos dos sensores usando unha taxa de mostraxe alta"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Permite que a aplicación recompile mostras dos datos dos sensores cunha taxa superior a 200 Hz"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Establecer as normas de contrasinal"</string>

@@ -543,6 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"අවට ඇති බ්ලූටූත් උපාංගවලට වෙළඳ ප්‍රචාරණය කිරීමට යෙදුමට ඉඩ දෙයි"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"අවට අල්ට්‍රා-වයිඩ්බෑන්ඩ් උපාංග අතර සාපේක්ෂ පිහිටීම නිර්ණය"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"අවට ඇති අල්ට්‍රා-වයිඩ්බෑන්ඩ් උපාංග අතර සාපේක්ෂ පිහිටීම නිර්ණය කිරීමට යෙදුමට ඉඩ දීම"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"අවට Wi‑Fi උපාංග සමග අන්තර්ක්‍රියා කරන්න"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"වෙළඳ දැන්වීම් පළ කිරීමට, සම්බන්ධ වීමට සහ අවට ඇති Wi-Fi උපාංගවල සාපේක්ෂ පිහිටීම නිර්ණය කිරීමට යෙදුමට ඉඩ දෙයි"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"කැමති NFC ගෙවීම් සේවා තොරතුරු"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ලියාපදිංචි කළ ආධාර සහ ගමන් මාර්ග ගමනාන්ත වැනි කැමති nfc ගෙවීම් සේවා තොරතුරු ලබා ගැනීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ආසන්න ක්ෂේත්‍ර සන්නිවේදනය පාලනය කරන්න"</string>
@@ -726,6 +728,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"බාධා නොකරන්න වින්‍යාස කිරීම කියවීමට සහ ලිවීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"අවසර භාවිතය බැලීමට ආරම්භ කරන්න"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"තබා සිටින්නාට යෙදුමක් සඳහා අවසර භාවිතය ආරම්භ කිරීමට ඉඩ දෙයි. සාමාන්‍ය යෙදුම් සඳහා කිසි විටෙක අවශ්‍ය නොවිය යුතු ය."</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"යෙදුම බලන්න විශේෂාංග ආරම්භ කරන්න"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"යෙදුමක් සඳහා විශේෂාංග තොරතුරු බැලීම ආරම්භ කිරීමට දරන්නාට ඉඩ දෙන්න."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ඉහළ නියැදි කිරීමේ වේගයකින් සංවේදක දත්ත වෙත පිවිසෙන්න"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"200 Hz ට වඩා වැඩි වේගයකින් සංවේදක දත්ත නියැදි කිරීමට යෙදුමට ඉඩ දෙයි"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"මුරපද නීති සකස් කිරීම"</string>

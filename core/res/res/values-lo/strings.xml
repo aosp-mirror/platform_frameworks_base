@@ -543,6 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"ອະນຸຍາດໃຫ້ແອັບໂຄສະນາຫາອຸປະກອນ Bluetooth ທີ່ຢູ່ໃກ້ຄຽງໄດ້"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"ກຳນົດຕຳແໜ່ງທີ່ສຳພັນກັນລະຫວ່າງອຸປະກອນ Ultra-Wideband ທີ່ຢູ່ໃກ້ຄຽງ"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"ອະນຸຍາດໃຫ້ແອັບກຳນົດຕຳແໜ່ງທີ່ສຳພັນກັນລະຫວ່າງອຸປະກອນ Ultra-Wideband ທີ່ຢູ່ໃກ້ຄຽງ"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"ໂຕ້ຕອບກັບອຸປະກອນ Wi‑Fi ທີ່ຢູ່ໃກ້ຄຽງ"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"ອະນຸຍາດໃຫ້ແອັບໂຄສະນາ, ເຊື່ອມຕໍ່ ແລະ ກຳນົດຕຳແໜ່ງສຳພັນຂອງອຸປະກອນ Wi-Fi ທີ່ຢູ່ໃກ້ຄຽງໄດ້"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ຂໍ້ມູນບໍລິການການຈ່າຍເງິນ NFC ທີ່ຕ້ອງການ"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ອະນຸຍາດໃຫ້ແອັບຮັບຂໍ້ມູນບໍລິການການຈ່າຍເງິນ NFC ທີ່ຕ້ອງການໄດ້ ເຊັ່ນ: ການຊ່ວຍເຫຼືອແບບລົງທະບຽນ ແລະ ປາຍທາງເສັ້ນທາງ."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ຄວບຄຸມ Near Field Communication"</string>
@@ -726,6 +728,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"ອະນຸຍາດ​​ໃຫ້​ແອັບ​ອ່ານ​ ​ແລະ​ຂຽນການກນຳ​ດຄ່າ ບໍ່​ລົບ​ກວນ."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"ເລີ່ມການໃຊ້ສິດອະນຸຍາດການເບິ່ງ"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"ອະນຸຍາດໃຫ້ຜູ້ຖືເລີ່ມການໃຊ້ສິດອະນຸຍາດສຳລັບແອັບໃດໜຶ່ງໄດ້. ແອັບປົກກະຕິບໍ່ຄວນຕ້ອງໃຊ້."</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"ເລີ່ມເບິ່ງຄຸນສົມບັດແອັບ"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ອະນຸຍາດໃຫ້ຜູ້ຖືເລີ່ມການເບິ່ງຂໍ້ມູນຄຸນສົມບັດສຳລັບແອັບໃດໜຶ່ງ."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ເຂົ້າເຖິງຂໍ້ມູນເຊັນເຊີໃນອັດຕາຕົວຢ່າງສູງ"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"ອະນຸຍາດໃຫ້ແອັບສຸ່ມຕົວຢ່າງຂໍ້ມູນເຊັນເຊີໃນອັດຕາທີ່ຫຼາຍກວ່າ 200 Hz"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"ຕັ້ງຄ່າກົດຂອງລະຫັດຜ່ານ"</string>

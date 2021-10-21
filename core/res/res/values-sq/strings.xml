@@ -543,6 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Lejon që aplikacioni të reklamojë në pajisjet me Bluetooth në afërsi"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"të përcaktojë pozicionin e përafërt mes pajisjeve në afërsi me brezin ultra të gjerë"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Lejo që aplikacioni të përcaktojë pozicionin e përafërt mes pajisjeve në afërsi me brezin ultra të gjerë"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"të ndërveprojë me pajisjet Wi-Fi në afërsi"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Lejon që aplikacioni të reklamojë, të lidhet dhe të përcaktojë pozicionin relativ të pajisjeve Wi-Fi në afërsi"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informacionet për shërbimin e preferuar të pagesës me NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Lejon aplikacionin të marrë informacione për shërbimin e preferuar të pagesës me NFC si p.sh. ndihmat e regjistruara dhe destinacionin e itinerarit."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrollo \"Komunikimin e fushës në afërsi\" NFC"</string>
@@ -726,6 +728,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Lejon aplikacionin të lexojë dhe shkruajë konfigurimin e \"Mos shqetëso\"."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"nis përdorimin e lejes për shikimin"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Lejon që mbajtësi të nisë përdorimin e lejeve për një aplikacion. Nuk duhet të nevojitet asnjëherë për aplikacionet normale."</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"fillojë shikimin e veçorive të aplikacionit"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Lejon që zotëruesi të fillojë të shikojë informacionin e veçorive për një aplikacion."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"qasu te të dhënat e sensorit me një shpejtësi kampionimi më të lartë"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Lejon aplikacionin të mbledhë shembujt e të dhënave të sensorit me shpejtësi më të lartë se 200 Hz"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Cakto rregullat e fjalëkalimit"</string>

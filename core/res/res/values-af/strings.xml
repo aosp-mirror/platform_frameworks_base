@@ -543,6 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Laat die program toe om op Bluetooth-toestelle in die omtrek te adverteer"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"bepaal relatiewe posisie tussen ultrabreëbandtoestelle in die omtrek"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Laat die program toe om relatiewe posisie tussen ultrabreëbandtoestelle in die omtrek te bepaal"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interaksie met wi‑fi-toestelle in die omtrek te hê"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Laat die program toe om op toestelle in die omtrek te adverteer, aan hulle te koppel en hul relatiewe posisie te bepaal"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Voorkeur-NFC-betalingdiensinligting"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Laat die program toe om voorkeur-NFC-betalingdiensinligting soos geregistreerde hulpmiddels en roetebestemming te kry."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"beheer kortveldkommunikasie"</string>
@@ -726,6 +728,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Laat die program toe om Moenie Steur Nie-opstelling te lees en skryf."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"begin kyk van toestemminggebruik"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Laat die houer toe om die toestemminggebruik vir \'n program te begin. Behoort nooit vir normale programme nodig te wees nie."</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"begin Bekyk Programkenmerke"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Laat die houer toe om die kenmerke-inligting vir \'n program te begin bekyk."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"kry toegang tot sensordata teen \'n hoë monsternemingkoers"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Laat die program toe om monsters van sensordata teen \'n hoër koers as 200 Hz te neem"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Stel wagwoordreëls"</string>

@@ -549,6 +549,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Додаток зможе показувати рекламу на пристроях із Bluetooth поблизу"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"визначення відстані між пристроями поблизу з надширокосмуговим зв’язком"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"З цим дозволом додаток може визначати відстань між розташованими поблизу пристроями з надширокосмуговим зв’язком"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"взаємодіяти з пристроями Wi‑Fi поблизу"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Додаток може виявляти пристрої Wi‑Fi поблизу, підключатися до них і визначати їх відносне розташування"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Використання інформації з платіжного NFC-сервісу"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дозволяє додатку отримувати доступ до інформації потрібного платіжного NFC-сервісу (наприклад, пов\'язаних ідентифікаторів чи даних про маршрутизацію трансакцій)."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контрол. Near Field Communication"</string>
@@ -732,6 +734,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Додаток зможе переглядати та змінювати конфігурацію режиму \"Не турбувати\"."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"перегляньте дані про використання дозволів"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Власник зможе використовувати дозволи для цього додатка. Цей дозвіл не потрібен для звичайних додатків."</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"почати перегляд функцій додатка"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Дозволяє додатку почати перегляд інформації про функції іншого додатка."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"доступ до даних датчиків із високою частотою дикретизації"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Додаток зможе дискретизувати дані даних датчиків із частотою понад 200 Гц"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Устан. правила пароля"</string>

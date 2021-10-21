@@ -543,6 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"앱에서 근처의 블루투스 기기로 광고하도록 허용"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"근처 초광대역 기기 간 상대적 위치 파악"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"앱이 근처의 초광대역 기기 간 상대적 위치를 파악하도록 허용"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"근처 Wi‑Fi 기기와 상호작용"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"앱이 광역 신호를 보내 근처에 있는 Wi‑Fi 기기의 상대적인 위치를 확인하고 연결할 수 있도록 허용합니다."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"기본 NFC 결제 서비스 정보"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"앱이 등록된 AID와 경로 목적지 같은 기본 NFC 결제 서비스 정보를 확인하도록 허용합니다."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"NFC(Near Field Communication) 제어"</string>
@@ -726,6 +728,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"앱에서 방해 금지 모드 설정을 읽고 작성하도록 허용합니다."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"권한 사용 보기 시작"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"앱의 권한 사용을 시작하려면 보유자를 허용하세요. 일반 앱에는 필요하지 않습니다."</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"앱 기능 보기"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"권한을 보유한 앱에서 앱의 기능 정보를 보도록 허용합니다."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"더 높은 샘플링 레이트로 센서 데이터 액세스"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"앱에서 200Hz보다 빠른 속도로 센서 데이터를 샘플링하도록 허용합니다."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"비밀번호 규칙 설정"</string>

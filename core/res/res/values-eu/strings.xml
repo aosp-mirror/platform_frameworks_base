@@ -543,6 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Inguruko Bluetooth bidezko gailuetan informazioa iragartzeko baimena ematen die aplikazioei"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"banda ultrazabala darabilten inguruko gailuen arteko distantzia erlatiboa zehaztu"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Banda ultrazabala darabilten inguruko gailuen arteko distantzia erlatiboa zehazteko baimena ematen dio aplikazioari"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"inguruko wifi-gailuekin interakzioan jardun"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Inguruko wifi-gailuetan iragartzeko, haiekin konektatzeko eta haien kokapena zehazteko baimena ematen die aplikazioei"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"NFC bidezko ordainketa-zerbitzu lehenetsiari buruzko informazioa"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"NFC bidezko ordainketa-zerbitzu lehenetsiari buruzko informazioa jasotzeko baimena ematen die aplikazioei, hala nola erregistratutako laguntzaileak eta ibilbidearen helmuga."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrolatu Near Field Communication komunikazioa"</string>
@@ -726,6 +728,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Ez molestatzeko moduaren konfigurazioa irakurtzeko eta bertan idazteko baimena ematen die aplikazioei."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"hasi ikusteko baimena erabiltzen"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Aplikazioaren baimena erabiltzen hasteko baimena ematen die titularrei. Aplikazio normalek ez lukete beharko."</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"hasi aplikazioaren eginbideak ikusten"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Aplikazio baten eginbideei buruzko informazioa ikusten hasteko baimena ematen die titularrei."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"atzitu sentsoreen datuen laginak abiadura handian"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Aplikazioak 200 Hz-tik gorako abiaduran hartu ahal izango ditu sentsoreen datuen laginak"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Ezarri pasahitzen arauak"</string>

@@ -543,6 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Hiermee kan de app adverteren op bluetooth-apparaten in de buurt"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"relatieve positie tussen ultrabreedbandapparaten in de buurt bepalen"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"De app toestaan om de relatieve positie tussen ultrabreedbandapparaten in de buurt te bepalen"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interactie met wifi-apparaten in de buurt"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Hiermee kan de app adverteren op, verbinding maken met en de relatieve positie bepalen van wifi-apparaten in de buurt"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informatie over voorkeursservice voor NFC-betaling"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Hiermee kun je zorgen dat de app informatie krijgt over de voorkeursservice voor NFC-betaling, zoals geregistreerde hulpmiddelen en routebestemmingen."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Near Field Communication regelen"</string>
@@ -726,6 +728,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Hiermee kan de app configuratie voor Niet storen lezen en schrijven."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"rechtengebruik starten"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Hiermee kan de houder het rechtengebruik voor een app starten. Nooit vereist voor normale apps."</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"app-functies bekijken"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Hiermee kan de houder informatie over functies bekijken voor een app."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"toegang krijgen tot sensorgegevens met een hoge samplingsnelheid"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Hiermee kan de app sensorgegevens samplen met een snelheid die hoger is dan 200 Hz"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Wachtwoordregels instellen"</string>

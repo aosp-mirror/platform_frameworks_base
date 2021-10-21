@@ -546,6 +546,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Atļauj lietotnei veikt reklamēšanu tuvumā esošās Bluetooth ierīcēs"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"novietojums starp tuvējām ultraplatjoslas ierīcēm"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Atļaut lietotnei noteikt relatīvo atrašanās vietu starp tuvumā esošām ultraplatjoslas ierīcēm"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"Mijiedarbība ar tuvumā esošām Wi‑Fi ierīcēm"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Atļauj lietotnei nodot datus tuvumā esošām Wi‑Fi ierīcē, izveidot savienojumu ar tām un noteikt to relatīvo pozīciju."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informācija par vēlamo NFC maksājumu pakalpojumu"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Ļauj lietotnei iegūt informāciju par vēlamo NFC maksājumu pakalpojumu, piemēram, par reģistrētajiem lietojumprogrammu ID un maršruta galamērķi."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrolē tuvlauka saziņu"</string>
@@ -729,6 +731,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Ļauj lietotnei lasīt un rakstīt režīma “Netraucēt” konfigurāciju."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"Datu skatīšana par izmantojamajām atļaujām"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Ļauj atļaujas īpašniekam sākt lietotnes atļauju izmantošanu. Parastām lietotnēm tas nekad nav nepieciešams."</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"Skatīt lietotnes funkcijas"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Lietotne ar šo atļauju var skatīt informāciju par citas lietotnes funkcijām."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"piekļuve sensoru datiem, izmantojot augstu iztveršanas frekvenci"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Ļauj lietotnei iztvert sensoru datus, izmantojot frekvenci, kas ir augstāka par 200 Hz."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Paroles kārtulu iestatīšana"</string>

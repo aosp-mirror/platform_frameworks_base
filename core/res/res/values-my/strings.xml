@@ -543,6 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"အနီးတစ်ဝိုက်ရှိ ဘလူးတုသ်သုံးစက်များတွင် ကြော်ငြာရန် အက်ပ်အား ခွင့်ပြုမည်"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"အနီးတစ်ဝိုက်ရှိ ‘အလွန်ကျယ်ပြန့်သော လှိုင်းအလျားသုံးစက်များ’ ကြား ဆက်စပ်နေရာကို သတ်မှတ်ခြင်း"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"အနီးတစ်ဝိုက်ရှိ ‘အလွန်ကျယ်ပြန့်သော လှိုင်းအလျားသုံးစက်များ’ ကြား ဆက်စပ်နေရာကို သတ်မှတ်ရန် အက်ပ်ကို ခွင့်ပြုမည်"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"အနီးရှိ Wi-Fi စက်များနှင့် ပြန်လှန်တုံ့ပြန်ခြင်း"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"အက်ပ်ကို ကြော်ငြာရန်၊ ချိတ်ဆက်ရန်နှင့် အနီးတစ်ဝိုက်ရှိ Wi-Fi စက်များ၏ ဆက်စပ်နေရာကို သတ်မှတ်ရန် ခွင့်ပြုနိုင်သည်"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ဦးစားပေး NFC ငွေပေးချေမှုဆိုင်ရာ ဝန်ဆောင်မှု အချက်အလက်များ"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"အက်ပ်အား ဦစားပေး NFC ငွေပေးချေမှုဆိုင်ရာ ဝန်ဆောင်မှု အချက်အလက်များဖြစ်သည့် မှတ်ပုံတင်ထားသော အကူအညီများနှင့် သွားလာရာ လမ်းကြောင်းတို့ကို ရယူရန် ခွင့်ပြုသည်။"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Near Field Communicationအား ထိန်းချုပ်ရန်"</string>
@@ -726,6 +728,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"မနှောင့်ယှက်ရန် ချိန်ညှိမှုကို အပ်ဖ်များ ဖတ်ခြင်း ပြင်ခြင်းပြုလုပ်နိုင်ရန် ခွင့်ပြုမည်။"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"အစမြင်ကွင်း ခွင့်ပြုချက် အသုံးပြုမှု"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"အက်ပ်တစ်ခုအတွက် ခွင့်ပြုချက်စတင်အသုံးပြုမှုကို ကိုင်ဆောင်သူအား ခွင့်ပြုသည်။ ပုံမှန်အက်ပ်များအတွက် ဘယ်သောအခါမျှ မလိုအပ်ပါ။"</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"အက်ပ်ဝန်ဆောင်မှုများကို စတင်ကြည့်ခြင်း"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ဝန်ဆောင်မှုအချက်အလက်ကိုများကို ခွင့်ပြုချက်ရထားသည့် အက်ပ်အား စတင်ကြည့်နိုင်ရန် ခွင့်ပြုသည်။"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"နမူနာနှုန်းမြင့်သော အာရုံခံစနစ်ဒေတာကို သုံးပါ"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"၂၀၀ Hz နှုန်းထက်ပိုများသော အာရုံခံစနစ်ဒေတာကို နမူနာယူရန် အက်ပ်အား ခွင့်ပြုပါ"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"စကားဝှက်စည်းမျဥ်းကိုသတ်မှတ်ရန်"</string>

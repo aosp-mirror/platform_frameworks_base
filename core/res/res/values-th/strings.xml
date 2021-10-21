@@ -543,6 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"อนุญาตให้แอปประกาศไปยังอุปกรณ์บลูทูธใกล้เคียง"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"ระบุตำแหน่งสัมพันธ์ระหว่างอุปกรณ์ที่ใช้แถบความถี่กว้างยิ่งยวดซึ่งอยู่ใกล้เคียง"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"อนุญาตให้แอประบุตำแหน่งสัมพันธ์ระหว่างอุปกรณ์ที่ใช้แถบความถี่กว้างยิ่งยวดซึ่งอยู่ใกล้เคียง"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"โต้ตอบกับอุปกรณ์ Wi-Fi ที่อยู่ใกล้เคียง"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"อนุญาตให้แอปแสดงข้อมูล เชื่อมต่อ และระบุตำแหน่งซึ่งสัมพันธ์กับอุปกรณ์ Wi-Fi ที่อยู่ใกล้เคียง"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ข้อมูลบริการชำระเงิน NFC ที่ต้องการ"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"อนุญาตให้แอปรับข้อมูลบริการชำระเงิน NFC ที่ต้องการ เช่น รหัสแอป (AID) ที่ลงทะเบียนและปลายทางของเส้นทาง"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ควบคุม Near Field Communication"</string>
@@ -726,6 +728,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"อนุญาตให้แอปอ่านและเขียนการกำหนดค่าโหมดห้ามรบกวน"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"เริ่มการใช้สิทธิ์การดู"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"อนุญาตให้เจ้าของเริ่มการใช้สิทธิ์ของแอป ไม่จำเป็นสำหรับแอปทั่วไป"</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"เริ่มดูฟีเจอร์ของแอป"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"อนุญาตให้เจ้าของเริ่มดูข้อมูลฟีเจอร์สำหรับแอป"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"เข้าถึงข้อมูลเซ็นเซอร์ที่อัตราการสุ่มตัวอย่างสูง"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"อนุญาตให้แอปสุ่มตัวอย่างข้อมูลเซ็นเซอร์ที่อัตราสูงกว่า 200 Hz"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"ตั้งค่ากฎรหัสผ่าน"</string>
