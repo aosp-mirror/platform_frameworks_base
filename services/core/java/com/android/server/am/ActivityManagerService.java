@@ -13302,7 +13302,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                         mAtmInternal.removeRecentTasksByPackageName(ssp, userId);
 
                                         mServices.forceStopPackageLocked(ssp, userId);
-                                        mAtmInternal.onPackageUninstalled(ssp);
+                                        mAtmInternal.onPackageUninstalled(ssp, userId);
                                         mBatteryStatsService.notePackageUninstalled(ssp);
                                     }
                                 } else {
@@ -13387,7 +13387,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Uri data = intent.getData();
                     String ssp;
                     if (data != null && (ssp = data.getSchemeSpecificPart()) != null) {
-                        mAtmInternal.onPackageDataCleared(ssp);
+                        mAtmInternal.onPackageDataCleared(ssp, userId);
                     }
                     break;
                 }

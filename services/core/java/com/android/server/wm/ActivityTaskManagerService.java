@@ -5656,19 +5656,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void onPackageDataCleared(String name) {
+        public void onPackageDataCleared(String name, int userId) {
             synchronized (mGlobalLock) {
                 mCompatModePackages.handlePackageDataClearedLocked(name);
                 mAppWarnings.onPackageDataCleared(name);
+                mPackageConfigPersister.onPackageDataCleared(name, userId);
             }
         }
 
         @Override
-        public void onPackageUninstalled(String name) {
+        public void onPackageUninstalled(String name, int userId) {
             synchronized (mGlobalLock) {
                 mAppWarnings.onPackageUninstalled(name);
                 mCompatModePackages.handlePackageUninstalledLocked(name);
-                mPackageConfigPersister.onPackageUninstall(name);
+                mPackageConfigPersister.onPackageUninstall(name, userId);
             }
         }
 
