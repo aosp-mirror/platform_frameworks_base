@@ -22,6 +22,7 @@ import android.net.Uri;
 import android.media.tv.TvTrackInfo;
 import android.os.Bundle;
 import android.view.InputChannel;
+import android.media.tv.BroadcastInfoResponse;
 
 /**
  * Interface a client of the ITvInputManager implements, to identify itself and receive information
@@ -48,4 +49,7 @@ oneway interface ITvInputClient {
     void onTuned(int seq, in Uri channelUri);
     void onRecordingStopped(in Uri recordedProgramUri, int seq);
     void onError(int error, int seq);
+
+    // For broadcast info
+    void onBroadcastInfoResponse(in BroadcastInfoResponse response, int seq);
 }

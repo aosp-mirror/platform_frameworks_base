@@ -35,6 +35,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.view.Surface;
+import android.media.tv.BroadcastInfoRequest;
 
 /**
  * Interface to the TV input manager service.
@@ -96,6 +97,9 @@ interface ITvInputManager {
     void stopRecording(in IBinder sessionToken, int userId);
     void pauseRecording(in IBinder sessionToken, in Bundle params, int userId);
     void resumeRecording(in IBinder sessionToken, in Bundle params, int userId);
+
+    // For broadcast info
+    void requestBroadcastInfo(in IBinder sessionToken, in BroadcastInfoRequest request, int userId);
 
     // For TV input hardware binding
     List<TvInputHardwareInfo> getHardwareList();

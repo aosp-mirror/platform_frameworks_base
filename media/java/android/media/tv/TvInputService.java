@@ -769,6 +769,29 @@ public abstract class TvInputService extends Service {
             });
         }
 
+        /**
+         * Notifies response for broadcast info.
+         *
+         * @param response
+         * @hide
+         */
+        public void notifyBroadcastInfoResponse(@NonNull final BroadcastInfoResponse response) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "notifyBroadcastInfoResponse");
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onBroadcastInfoResponse(response);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifyBroadcastInfoResponse", e);
+                    }
+                }
+            });
+        }
+
         private void notifyTimeShiftStartPositionChanged(final long timeMs) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
@@ -915,6 +938,13 @@ public abstract class TvInputService extends Service {
          * @param volume A volume value between {@code 0.0f} to {@code 1.0f}.
          */
         public abstract void onSetStreamVolume(@FloatRange(from = 0.0, to = 1.0) float volume);
+
+        /**
+         * @param request broadcast info request
+         * @hide
+         */
+        public void onRequestBroadcastInfo(@NonNull BroadcastInfoRequest request) {
+        }
 
         /**
          * Tunes to a given channel.
@@ -1504,6 +1534,10 @@ public abstract class TvInputService extends Service {
                 mOverlayViewCleanUpTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
                         overlayViewParent);
             }
+        }
+
+        void requestBroadcastInfo(BroadcastInfoRequest request) {
+            onRequestBroadcastInfo(request);
         }
 
         /**
