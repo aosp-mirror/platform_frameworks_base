@@ -16,6 +16,8 @@
 
 package com.android.server.power;
 
+import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
+import static android.app.ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
 import static android.os.PowerManagerInternal.WAKEFULNESS_ASLEEP;
 import static android.os.PowerManagerInternal.WAKEFULNESS_AWAKE;
 import static android.os.PowerManagerInternal.WAKEFULNESS_DOZING;
@@ -65,6 +67,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.PowerSaveState;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.test.TestLooper;
 import android.provider.Settings;
@@ -86,6 +89,7 @@ import com.android.server.power.PowerManagerService.BinderService;
 import com.android.server.power.PowerManagerService.Injector;
 import com.android.server.power.PowerManagerService.NativeWrapper;
 import com.android.server.power.PowerManagerService.UserSwitchedReceiver;
+import com.android.server.power.PowerManagerService.WakeLock;
 import com.android.server.power.batterysaver.BatterySaverController;
 import com.android.server.power.batterysaver.BatterySaverPolicy;
 import com.android.server.power.batterysaver.BatterySaverStateMachine;
@@ -282,6 +286,13 @@ public class PowerManagerServiceTest {
             @Override
             void invalidateIsInteractiveCaches() {
                 // Avoids an SELinux failure.
+            }
+
+            @Override
+            LowPowerStandbyController createLowPowerStandbyController(Context context,
+                    Looper looper) {
+                return new LowPowerStandbyController(context, mTestLooper.getLooper(),
+                        SystemClock::elapsedRealtime);
             }
         });
         return mService;
@@ -1574,5 +1585,48 @@ public class PowerManagerServiceTest {
         assertThat(mService.getBinderServiceInstance()
                 .setFullPowerSavePolicy(mockSetPolicyConfig)).isTrue();
         verify(mBatterySaverStateMachineMock).setFullBatterySaverPolicy(eq(mockSetPolicyConfig));
+    }
+
+    @Test
+    public void testLowPowerStandby_whenInactive_FgsWakeLockEnabled() {
+        createService();
+        mService.systemReady();
+        WakeLock wakeLock = acquireWakeLock("fgsWakeLock", PowerManager.PARTIAL_WAKE_LOCK);
+        mService.updateUidProcStateInternal(wakeLock.mOwnerUid, PROCESS_STATE_FOREGROUND_SERVICE);
+        mService.setDeviceIdleModeInternal(true);
+
+        assertThat(wakeLock.mDisabled).isFalse();
+    }
+
+    @Test
+    public void testLowPowerStandby_whenActive_FgsWakeLockDisabled() {
+        createService();
+        mService.systemReady();
+        WakeLock wakeLock = acquireWakeLock("fgsWakeLock", PowerManager.PARTIAL_WAKE_LOCK);
+        mService.updateUidProcStateInternal(wakeLock.mOwnerUid, PROCESS_STATE_FOREGROUND_SERVICE);
+        mService.setDeviceIdleModeInternal(true);
+        mService.setLowPowerStandbyActiveInternal(true);
+
+        assertThat(wakeLock.mDisabled).isTrue();
+    }
+
+    @Test
+    public void testLowPowerStandby_whenActive_BoundTopWakeLockDisabled() {
+        createService();
+        mService.systemReady();
+        WakeLock wakeLock = acquireWakeLock("BoundTopWakeLock", PowerManager.PARTIAL_WAKE_LOCK);
+        mService.updateUidProcStateInternal(wakeLock.mOwnerUid, PROCESS_STATE_BOUND_TOP);
+        mService.setDeviceIdleModeInternal(true);
+        mService.setLowPowerStandbyActiveInternal(true);
+
+        assertThat(wakeLock.mDisabled).isFalse();
+    }
+
+    private WakeLock acquireWakeLock(String tag, int flags) {
+        IBinder token = new Binder();
+        String packageName = "pkg.name";
+        mService.getBinderServiceInstance().acquireWakeLock(token, flags, tag, packageName,
+                null /* workSource */, null /* historyTag */, Display.INVALID_DISPLAY);
+        return mService.findWakeLockLocked(token);
     }
 }

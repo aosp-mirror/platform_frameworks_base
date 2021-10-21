@@ -65,6 +65,9 @@ interface IPowerManager
     boolean isBatteryDischargePredictionPersonalized();
     boolean isDeviceIdleMode();
     boolean isLightDeviceIdleMode();
+    boolean isLowPowerStandbySupported();
+    boolean isLowPowerStandbyEnabled();
+    void setLowPowerStandbyEnabled(boolean enabled);
 
     @UnsupportedAppUsage
     void reboot(boolean confirm, String reason, boolean wait);
