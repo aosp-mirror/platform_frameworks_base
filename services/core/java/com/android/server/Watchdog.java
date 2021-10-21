@@ -45,8 +45,8 @@ import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.ZygoteConnectionConstants;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.am.ActivityManagerService;
-import com.android.server.am.CriticalEventLog;
 import com.android.server.am.TraceErrorLogger;
+import com.android.server.criticalevents.CriticalEventLog;
 import com.android.server.wm.SurfaceAnimationThread;
 
 import java.io.BufferedReader;

@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.server.am;
+package com.android.server.criticalevents;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import com.android.framework.protobuf.nano.MessageNano;
-import com.android.server.am.CriticalEventLog.ILogLoader;
-import com.android.server.am.CriticalEventLog.LogLoader;
-import com.android.server.am.nano.CriticalEventLogProto;
-import com.android.server.am.nano.CriticalEventLogStorageProto;
-import com.android.server.am.nano.CriticalEventProto;
-import com.android.server.am.nano.CriticalEventProto.HalfWatchdog;
-import com.android.server.am.nano.CriticalEventProto.Watchdog;
+import com.android.server.criticalevents.CriticalEventLog.ILogLoader;
+import com.android.server.criticalevents.CriticalEventLog.LogLoader;
+import com.android.server.criticalevents.nano.CriticalEventLogProto;
+import com.android.server.criticalevents.nano.CriticalEventLogStorageProto;
+import com.android.server.criticalevents.nano.CriticalEventProto;
+import com.android.server.criticalevents.nano.CriticalEventProto.HalfWatchdog;
+import com.android.server.criticalevents.nano.CriticalEventProto.Watchdog;
 
 import org.junit.Before;
 import org.junit.Rule;
