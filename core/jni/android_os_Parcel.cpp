@@ -641,7 +641,7 @@ static jboolean android_os_Parcel_hasFileDescriptorsInRange(JNIEnv* env, jclass 
     Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
     if (parcel != NULL) {
         bool result;
-        status_t err = parcel->hasFileDescriptorsInRange(offset, length, result);
+        status_t err = parcel->hasFileDescriptorsInRange(offset, length, &result);
         if (err != NO_ERROR) {
             signalExceptionForError(env, clazz, err);
             return JNI_FALSE;
