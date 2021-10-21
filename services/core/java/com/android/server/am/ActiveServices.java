@@ -4906,7 +4906,9 @@ public final class ActiveServices {
             sr.setProcess(null, null, 0, null);
             sr.isolatedProc = null;
             sr.executeNesting = 0;
-            sr.forceClearTracker();
+            synchronized (mAm.mProcessStats.mLock) {
+                sr.forceClearTracker();
+            }
             if (mDestroyingServices.remove(sr)) {
                 if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "killServices remove destroying " + sr);
             }
@@ -5056,7 +5058,9 @@ public final class ActiveServices {
             i--;
             ServiceRecord sr = mDestroyingServices.get(i);
             if (sr.app == app) {
-                sr.forceClearTracker();
+                synchronized (mAm.mProcessStats.mLock) {
+                    sr.forceClearTracker();
+                }
                 mDestroyingServices.remove(i);
                 if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "killServices remove destroying " + sr);
             }
