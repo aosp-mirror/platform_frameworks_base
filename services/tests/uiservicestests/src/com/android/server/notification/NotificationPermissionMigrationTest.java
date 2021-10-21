@@ -21,6 +21,7 @@ import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.NotificationManager.EXTRA_BLOCKED_STATE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
+import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.UserHandle.USER_SYSTEM;
@@ -123,6 +124,7 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -662,5 +664,18 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
         waitForIdle();
         verify(mWorkerHandler, never()).post(
                 any(NotificationManagerService.EnqueueNotificationRunnable.class));
+    }
+
+    @Test
+    public void testDefaultChannelDoesNotUpdateApp_postMigrationToPermissions() throws Exception {
+        final NotificationChannel defaultChannel = mBinderService.getNotificationChannel(
+                PKG_N_MR1, ActivityManager.getCurrentUser(), PKG_N_MR1,
+                NotificationChannel.DEFAULT_CHANNEL_ID);
+        defaultChannel.setImportance(IMPORTANCE_NONE);
+
+        mBinderService.updateNotificationChannelForPackage(PKG_N_MR1, mUid, defaultChannel);
+
+        verify(mPermissionHelper).setNotificationPermission(
+                PKG_N_MR1, ActivityManager.getCurrentUser(), false, true);
     }
 }

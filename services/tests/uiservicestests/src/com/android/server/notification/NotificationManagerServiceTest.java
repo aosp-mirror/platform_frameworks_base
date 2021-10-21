@@ -3708,6 +3708,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         assertEquals(IMPORTANCE_LOW,
                 mService.getNotificationRecord(sbn.getKey()).getImportance());
+        assertEquals(IMPORTANCE_UNSPECIFIED, mBinderService.getPackageImportance(
+                sbn.getPackageName()));
 
         nb = new Notification.Builder(mContext)
                 .setContentTitle("foo")

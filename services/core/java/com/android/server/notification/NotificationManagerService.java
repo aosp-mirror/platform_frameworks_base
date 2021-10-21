@@ -2824,6 +2824,12 @@ public class NotificationManagerService extends SystemService {
                 mPreferencesHelper.getNotificationChannel(pkg, uid, channel.getId(), true);
 
         mPreferencesHelper.updateNotificationChannel(pkg, uid, channel, true);
+        if (mEnableAppSettingMigration) {
+            if (mPreferencesHelper.onlyHasDefaultChannel(pkg, uid)) {
+                mPermissionHelper.setNotificationPermission(pkg, UserHandle.getUserId(uid),
+                        channel.getImportance() != IMPORTANCE_NONE, true);
+            }
+        }
         maybeNotifyChannelOwner(pkg, uid, preUpdate, channel);
 
         if (!fromListener) {
