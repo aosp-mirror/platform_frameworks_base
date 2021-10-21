@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.navigationbar.gestural;
+package com.android.systemui.shared.rotation;
 
+import android.annotation.StringRes;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.graphics.drawable.AnimatedVectorDrawable;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,28 +29,25 @@ import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
 
-import com.android.systemui.R;
-import com.android.systemui.navigationbar.RotationButton;
-import com.android.systemui.navigationbar.RotationButtonController;
-import com.android.systemui.navigationbar.buttons.KeyButtonDrawable;
-import com.android.systemui.navigationbar.buttons.KeyButtonView;
-import com.android.systemui.navigationbar.gestural.FloatingRotationButtonPositionCalculator.Position;
+import androidx.core.view.OneShotPreDrawListener;
+
+import com.android.systemui.shared.R;
+import com.android.systemui.shared.rotation.FloatingRotationButtonPositionCalculator.Position;
 
 /**
  * Containing logic for the rotation button on the physical left bottom corner of the screen.
  */
 public class FloatingRotationButton implements RotationButton {
 
-    private static final float BACKGROUND_ALPHA = 0.92f;
     private static final int MARGIN_ANIMATION_DURATION_MILLIS = 300;
 
     private final WindowManager mWindowManager;
     private final ViewGroup mKeyButtonContainer;
-    private final KeyButtonView mKeyButtonView;
+    private final FloatingRotationButtonView mKeyButtonView;
 
     private final int mContainerSize;
 
-    private KeyButtonDrawable mKeyButtonDrawable;
+    private AnimatedVectorDrawable mAnimatedDrawable;
     private boolean mIsShowing;
     private boolean mCanShow = true;
     private int mDisplayRotation;
@@ -62,12 +61,13 @@ public class FloatingRotationButton implements RotationButton {
     private RotationButtonUpdatesCallback mUpdatesCallback;
     private Position mPosition;
 
-    public FloatingRotationButton(Context context) {
+    public FloatingRotationButton(Context context, @StringRes int contentDescription) {
         mWindowManager = context.getSystemService(WindowManager.class);
         mKeyButtonContainer = (ViewGroup) LayoutInflater.from(context).inflate(
                 R.layout.rotate_suggestion, null);
         mKeyButtonView = mKeyButtonContainer.findViewById(R.id.rotate_suggestion);
         mKeyButtonView.setVisibility(View.VISIBLE);
+        mKeyButtonView.setContentDescription(context.getString(contentDescription));
 
         Resources res = context.getResources();
 
@@ -113,6 +113,10 @@ public class FloatingRotationButton implements RotationButton {
 
         mIsShowing = true;
         int flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+
+        // TODO(b/200103245): add new window type that has z-index above
+        //  TYPE_NAVIGATION_BAR_PANEL as currently it could be below the taskbar which has
+        //  the same window type
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 mContainerSize,
                 mContainerSize,
@@ -134,14 +138,18 @@ public class FloatingRotationButton implements RotationButton {
         updateTranslation(mPosition, /* animate */ false);
 
         mWindowManager.addView(mKeyButtonContainer, lp);
-        if (mKeyButtonDrawable != null && mKeyButtonDrawable.canAnimate()) {
-            mKeyButtonDrawable.resetAnimation();
-            mKeyButtonDrawable.startAnimation();
+        if (mAnimatedDrawable != null) {
+            mAnimatedDrawable.reset();
+            mAnimatedDrawable.start();
         }
 
-        if (mUpdatesCallback != null) {
-            mUpdatesCallback.onVisibilityChanged(true);
-        }
+        // Notify about visibility only after first traversal so we can properly calculate
+        // the touch region for the button
+        OneShotPreDrawListener.add(mKeyButtonView, () -> {
+            if (mIsShowing && mUpdatesCallback != null) {
+                mUpdatesCallback.onVisibilityChanged(true);
+            }
+        });
 
         return true;
     }
@@ -166,12 +174,10 @@ public class FloatingRotationButton implements RotationButton {
 
     @Override
     public void updateIcon(int lightIconColor, int darkIconColor) {
-        Color ovalBackgroundColor = Color.valueOf(Color.red(darkIconColor),
-                Color.green(darkIconColor), Color.blue(darkIconColor), BACKGROUND_ALPHA);
-        mKeyButtonDrawable = KeyButtonDrawable.create(mRotationButtonController.getContext(),
-                lightIconColor, darkIconColor, mRotationButtonController.getIconResId(),
-                false /* shadow */, ovalBackgroundColor);
-        mKeyButtonView.setImageDrawable(mKeyButtonDrawable);
+        mAnimatedDrawable = (AnimatedVectorDrawable) mKeyButtonView.getContext()
+                .getDrawable(mRotationButtonController.getIconResId());
+        mKeyButtonView.setImageDrawable(mAnimatedDrawable);
+        mKeyButtonView.setColors(lightIconColor, darkIconColor);
     }
 
     @Override
@@ -185,8 +191,8 @@ public class FloatingRotationButton implements RotationButton {
     }
 
     @Override
-    public KeyButtonDrawable getImageDrawable() {
-        return mKeyButtonDrawable;
+    public Drawable getImageDrawable() {
+        return mAnimatedDrawable;
     }
 
     @Override
@@ -202,6 +208,7 @@ public class FloatingRotationButton implements RotationButton {
         }
     }
 
+    @Override
     public void onTaskbarStateChanged(boolean taskbarVisible, boolean taskbarStashed) {
         mIsTaskbarVisible = taskbarVisible;
         mIsTaskbarStashed = taskbarStashed;
