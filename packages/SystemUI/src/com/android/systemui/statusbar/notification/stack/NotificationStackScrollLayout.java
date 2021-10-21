@@ -74,6 +74,7 @@ import com.android.internal.graphics.ColorUtils;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.keyguard.KeyguardSliceView;
 import com.android.settingslib.Utils;
+import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
@@ -566,24 +567,19 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @Nullable
     private OnClickListener mManageButtonClickListener;
 
+    // TODO(b/149942757): Remove the @Inject
     @Inject
-    public NotificationStackScrollLayout(
-            @Named(VIEW_CONTEXT) Context context,
-            AttributeSet attrs,
-            NotificationSectionsManager notificationSectionsManager,
-            GroupMembershipManager groupMembershipManager,
-            GroupExpansionManager groupExpansionManager,
-            AmbientState ambientState,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
+    public NotificationStackScrollLayout(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
-        mSectionsManager = notificationSectionsManager;
-        mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
+        mSectionsManager = Dependency.get(NotificationSectionsManager.class);
+        mUnlockedScreenOffAnimationController =
+                Dependency.get(UnlockedScreenOffAnimationController.class);
         updateSplitNotificationShade();
         mSectionsManager.initialize(this, LayoutInflater.from(context));
         mSections = mSectionsManager.createSectionsForBuckets();
 
-        mAmbientState = ambientState;
+        mAmbientState = Dependency.get(AmbientState.class);
         mBgColor = Utils.getColorAttr(mContext, android.R.attr.colorBackgroundFloating)
                 .getDefaultColor();
         int minHeight = res.getDimensionPixelSize(R.dimen.notification_min_height);
@@ -609,8 +605,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mDebugPaint.setTextSize(25f);
         }
         mClearAllEnabled = res.getBoolean(R.bool.config_enableNotificationsClearAll);
-        mGroupMembershipManager = groupMembershipManager;
-        mGroupExpansionManager = groupExpansionManager;
+        mGroupMembershipManager = Dependency.get(GroupMembershipManager.class);
+        mGroupExpansionManager = Dependency.get(GroupExpansionManager.class);
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
     }
 
