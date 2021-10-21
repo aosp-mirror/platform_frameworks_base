@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.notification.stack;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_SCROLL_FLING;
 import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_SILENT;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_SWIPE;
-import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 import static com.android.systemui.util.Utils.shouldUseSplitNotificationShade;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -74,6 +73,7 @@ import com.android.internal.graphics.ColorUtils;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.keyguard.KeyguardSliceView;
 import com.android.settingslib.Utils;
+import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
@@ -119,9 +119,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-
-import javax.inject.Inject;
-import javax.inject.Named;
 
 /**
  * A layout which handles a dynamic amount of notifications and presents them in a scrollable stack.
@@ -566,24 +563,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @Nullable
     private OnClickListener mManageButtonClickListener;
 
-    @Inject
-    public NotificationStackScrollLayout(
-            @Named(VIEW_CONTEXT) Context context,
-            AttributeSet attrs,
-            NotificationSectionsManager notificationSectionsManager,
-            GroupMembershipManager groupMembershipManager,
-            GroupExpansionManager groupExpansionManager,
-            AmbientState ambientState,
-            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
+    public NotificationStackScrollLayout(Context context, AttributeSet attrs) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
-        mSectionsManager = notificationSectionsManager;
-        mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
+        mSectionsManager = Dependency.get(NotificationSectionsManager.class);
+        mUnlockedScreenOffAnimationController =
+                Dependency.get(UnlockedScreenOffAnimationController.class);
         updateSplitNotificationShade();
         mSectionsManager.initialize(this, LayoutInflater.from(context));
         mSections = mSectionsManager.createSectionsForBuckets();
 
-        mAmbientState = ambientState;
+        mAmbientState = Dependency.get(AmbientState.class);
         mBgColor = Utils.getColorAttr(mContext, android.R.attr.colorBackgroundFloating)
                 .getDefaultColor();
         int minHeight = res.getDimensionPixelSize(R.dimen.notification_min_height);
@@ -609,8 +599,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mDebugPaint.setTextSize(25f);
         }
         mClearAllEnabled = res.getBoolean(R.bool.config_enableNotificationsClearAll);
-        mGroupMembershipManager = groupMembershipManager;
-        mGroupExpansionManager = groupExpansionManager;
+        mGroupMembershipManager = Dependency.get(GroupMembershipManager.class);
+        mGroupExpansionManager = Dependency.get(GroupExpansionManager.class);
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
     }
 
@@ -5276,10 +5266,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             NotificationStackScrollLayoutController notificationStackScrollLayoutController) {
         mController = notificationStackScrollLayoutController;
         mController.getNoticationRoundessManager().setAnimatedChildren(mChildrenToAddAnimated);
-    }
-
-    public NotificationStackScrollLayoutController getController() {
-        return mController;
     }
 
     void addSwipedOutView(View v) {

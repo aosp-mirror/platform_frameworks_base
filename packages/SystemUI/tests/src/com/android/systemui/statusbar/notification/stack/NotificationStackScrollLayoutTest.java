@@ -58,6 +58,8 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
+import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
+import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.FooterView;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -110,9 +112,20 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         Settings.Secure.putIntForUser(mContext.getContentResolver(), NOTIFICATION_HISTORY_ENABLED,
                 1, UserHandle.USER_CURRENT);
 
+
+        // Interact with real instance of AmbientState.
+        mAmbientState = new AmbientState(mContext, mNotificationSectionsManager, mBypassController);
+
         // Inject dependencies before initializing the layout
         mDependency.injectTestDependency(SysuiStatusBarStateController.class, mBarState);
         mDependency.injectMockDependency(ShadeController.class);
+        mDependency.injectTestDependency(
+                NotificationSectionsManager.class, mNotificationSectionsManager);
+        mDependency.injectTestDependency(GroupMembershipManager.class, mGroupMembershipManger);
+        mDependency.injectTestDependency(GroupExpansionManager.class, mGroupExpansionManager);
+        mDependency.injectTestDependency(AmbientState.class, mAmbientState);
+        mDependency.injectTestDependency(
+                UnlockedScreenOffAnimationController.class, mUnlockedScreenOffAnimationController);
 
         NotificationShelfController notificationShelfController =
                 mock(NotificationShelfController.class);
@@ -123,22 +136,12 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                         mNotificationSection
                 });
 
-        // Interact with real instance of AmbientState.
-        mAmbientState = new AmbientState(mContext, mNotificationSectionsManager, mBypassController);
-
         // The actual class under test.  You may need to work with this class directly when
         // testing anonymous class members of mStackScroller, like mMenuEventListener,
         // which refer to members of NotificationStackScrollLayout. The spy
         // holds a copy of the CUT's instances of these KeyguardBypassController, so they still
         // refer to the CUT's member variables, not the spy's member variables.
-        mStackScrollerInternal = new NotificationStackScrollLayout(
-                getContext(),
-                null,
-                mNotificationSectionsManager,
-                mGroupMembershipManger,
-                mGroupExpansionManager,
-                mAmbientState,
-                mUnlockedScreenOffAnimationController);
+        mStackScrollerInternal = new NotificationStackScrollLayout(getContext(), null);
         mStackScrollerInternal.initView(getContext(), mNotificationSwipeHelper);
         mStackScroller = spy(mStackScrollerInternal);
         mStackScroller.setShelfController(notificationShelfController);

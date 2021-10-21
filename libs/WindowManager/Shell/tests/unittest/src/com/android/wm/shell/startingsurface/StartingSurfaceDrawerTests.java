@@ -69,6 +69,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.common.HandlerExecutor;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
@@ -93,6 +94,8 @@ public class StartingSurfaceDrawerTests {
     @Mock
     private WindowManager mMockWindowManager;
     @Mock
+    private IconProvider mIconProvider;
+    @Mock
     private TransactionPool mTransactionPool;
 
     private final Handler mTestHandler = new Handler(Looper.getMainLooper());
@@ -105,8 +108,8 @@ public class StartingSurfaceDrawerTests {
         int mAddWindowForTask = 0;
 
         TestStartingSurfaceDrawer(Context context, ShellExecutor splashScreenExecutor,
-                TransactionPool pool) {
-            super(context, splashScreenExecutor, pool);
+                IconProvider iconProvider, TransactionPool pool) {
+            super(context, splashScreenExecutor, iconProvider, pool);
         }
 
         @Override
@@ -156,7 +159,8 @@ public class StartingSurfaceDrawerTests {
         doNothing().when(mMockWindowManager).addView(any(), any());
         mTestExecutor = new HandlerExecutor(mTestHandler);
         mStartingSurfaceDrawer = spy(
-                new TestStartingSurfaceDrawer(mTestContext, mTestExecutor, mTransactionPool));
+                new TestStartingSurfaceDrawer(mTestContext, mTestExecutor, mIconProvider,
+                        mTransactionPool));
     }
 
     @Test

@@ -75,7 +75,6 @@ import com.android.systemui.statusbar.policy.dagger.SmartRepliesInflationModule;
 import com.android.systemui.statusbar.policy.dagger.StatusBarPolicyModule;
 import com.android.systemui.tuner.dagger.TunerModule;
 import com.android.systemui.user.UserModule;
-import com.android.systemui.util.InjectionInflationController;
 import com.android.systemui.util.concurrency.SysUIConcurrencyModule;
 import com.android.systemui.util.dagger.UtilModule;
 import com.android.systemui.util.sensors.SensorModule;
@@ -216,11 +215,9 @@ public abstract class SystemUIModule {
 
     @Provides
     @SysUISingleton
-    static StatusBarWindowView providesStatusBarWindowView(Context context,
-            InjectionInflationController injectionInflationController) {
+    static StatusBarWindowView providesStatusBarWindowView(LayoutInflater layoutInflater) {
         StatusBarWindowView view =
-                (StatusBarWindowView) injectionInflationController.injectable(
-                        LayoutInflater.from(context)).inflate(R.layout.super_status_bar,
+                (StatusBarWindowView) layoutInflater.inflate(R.layout.super_status_bar,
                         /* root= */ null);
         if (view == null) {
             throw new IllegalStateException(

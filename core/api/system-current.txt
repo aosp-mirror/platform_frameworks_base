@@ -437,6 +437,11 @@ package android.app {
     method public void onUidImportance(int, int);
   }
 
+  public class ActivityOptions {
+    method public int getLaunchTaskId();
+    method @RequiresPermission("android.permission.START_TASKS_FROM_RECENTS") public void setLaunchTaskId(int);
+  }
+
   public class AlarmManager {
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void set(int, long, long, long, android.app.PendingIntent, android.os.WorkSource);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void set(int, long, long, long, android.app.AlarmManager.OnAlarmListener, android.os.Handler, android.os.WorkSource);
