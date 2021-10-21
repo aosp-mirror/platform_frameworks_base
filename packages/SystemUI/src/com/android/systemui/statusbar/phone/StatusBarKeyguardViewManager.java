@@ -51,7 +51,6 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dock.DockManager;
-import com.android.systemui.keyguard.FaceAuthScreenBrightnessController;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
@@ -70,7 +69,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -109,7 +107,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final ConfigurationController mConfigurationController;
     private final NavigationModeController mNavigationModeController;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
-    private final Optional<FaceAuthScreenBrightnessController> mFaceAuthScreenBrightnessController;
     private final KeyguardBouncer.Factory mKeyguardBouncerFactory;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
     private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
@@ -242,7 +239,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             DockManager dockManager,
             NotificationShadeWindowController notificationShadeWindowController,
             KeyguardStateController keyguardStateController,
-            Optional<FaceAuthScreenBrightnessController> faceAuthScreenBrightnessController,
             NotificationMediaManager notificationMediaManager,
             KeyguardBouncer.Factory keyguardBouncerFactory,
             WakefulnessLifecycle wakefulnessLifecycle,
@@ -260,7 +256,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mKeyguardUpdateManager = keyguardUpdateMonitor;
         mStatusBarStateController = sysuiStatusBarStateController;
         mDockManager = dockManager;
-        mFaceAuthScreenBrightnessController = faceAuthScreenBrightnessController;
         mKeyguardBouncerFactory = keyguardBouncerFactory;
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
@@ -285,11 +280,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mNotificationContainer = notificationContainer;
         mKeyguardMessageAreaController = mKeyguardMessageAreaFactory.create(
             KeyguardMessageArea.findSecurityMessageDisplay(container));
-        mFaceAuthScreenBrightnessController.ifPresent((it) -> {
-            View overlay = new View(mContext);
-            container.addView(overlay);
-            it.attach(overlay);
-        });
 
         registerListeners();
     }
