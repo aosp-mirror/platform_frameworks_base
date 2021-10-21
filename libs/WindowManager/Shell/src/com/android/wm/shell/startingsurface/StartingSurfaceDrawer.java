@@ -61,6 +61,7 @@ import android.window.TaskSnapshot;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ShellSplashscreenThread;
@@ -123,11 +124,11 @@ public class StartingSurfaceDrawer {
      * @param splashScreenExecutor The thread used to control add and remove starting window.
      */
     public StartingSurfaceDrawer(Context context, ShellExecutor splashScreenExecutor,
-            TransactionPool pool) {
+            IconProvider iconProvider, TransactionPool pool) {
         mContext = context;
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
         mSplashScreenExecutor = splashScreenExecutor;
-        mSplashscreenContentDrawer = new SplashscreenContentDrawer(mContext, pool);
+        mSplashscreenContentDrawer = new SplashscreenContentDrawer(mContext, iconProvider, pool);
         mSplashScreenExecutor.execute(() -> mChoreographer = Choreographer.getInstance());
         mWindowManagerGlobal = WindowManagerGlobal.getInstance();
         mDisplayManager.getDisplay(DEFAULT_DISPLAY);

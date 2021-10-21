@@ -2045,7 +2045,11 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     /**
      * Registers a callback that will be notified when visible activities have been changed.
      *
-     * @param executor The handler to receive the callback.
+     * Note: The {@link VisibleActivityCallback#onVisible(VisibleActivityInfo)} will be called
+     * immediately with current visible activities when the callback is registered for the first
+     * time. If the callback is already registered, this method does nothing.
+     *
+     * @param executor The executor which will be used to invoke the callback.
      * @param callback The callback to receive the response.
      *
      * @throws IllegalStateException if calling this method before onCreate().

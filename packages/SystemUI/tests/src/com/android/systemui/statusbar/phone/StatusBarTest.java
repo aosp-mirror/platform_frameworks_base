@@ -144,6 +144,7 @@ import com.android.systemui.tuner.TunerService;
 import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
 import com.android.systemui.unfold.UnfoldTransitionWallpaperController;
 import com.android.systemui.unfold.config.UnfoldTransitionConfig;
+import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider;
 import com.android.systemui.util.WallpaperController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.concurrency.MessageRouterImpl;
@@ -259,7 +260,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private BrightnessSlider.Factory mBrightnessSliderFactory;
     @Mock private UnfoldTransitionConfig mUnfoldTransitionConfig;
     @Mock private Lazy<UnfoldLightRevealOverlayAnimation> mUnfoldLightRevealOverlayAnimationLazy;
-    @Mock private Lazy<StatusBarMoveFromCenterAnimationController> mMoveFromCenterAnimationLazy;
+    @Mock private Lazy<NaturalRotationUnfoldProgressProvider> mNaturalRotationProgressProvider;
     @Mock private Lazy<UnfoldTransitionWallpaperController> mUnfoldWallpaperController;
     @Mock private WallpaperController mWallpaperController;
     @Mock private OngoingCallController mOngoingCallController;
@@ -276,6 +277,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private StartingSurface mStartingSurface;
     @Mock private OperatorNameViewController mOperatorNameViewController;
     @Mock private OperatorNameViewController.Factory mOperatorNameViewControllerFactory;
+    @Mock private PhoneStatusBarViewController.Factory mPhoneStatusBarViewControllerFactory;
     @Mock private ActivityLaunchAnimator mActivityLaunchAnimator;
     @Mock private DialogLaunchAnimator mDialogLaunchAnimator;
     private ShadeController mShadeController;
@@ -314,7 +316,6 @@ public class StatusBarTest extends SysuiTestCase {
 
         mContext.setTheme(R.style.Theme_SystemUI_LightWallpaper);
 
-        when(mStackScroller.getController()).thenReturn(mStackScrollerController);
         when(mStackScrollerController.getView()).thenReturn(mStackScroller);
         when(mStackScrollerController.getNotificationListContainer()).thenReturn(
                 mNotificationListContainer);
@@ -430,6 +431,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mExtensionController,
                 mUserInfoControllerImpl,
                 mOperatorNameViewControllerFactory,
+                mPhoneStatusBarViewControllerFactory,
                 mPhoneStatusBarPolicy,
                 mKeyguardIndicationController,
                 mDemoModeController,
@@ -440,7 +442,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mUnfoldTransitionConfig,
                 mUnfoldLightRevealOverlayAnimationLazy,
                 mUnfoldWallpaperController,
-                mMoveFromCenterAnimationLazy,
+                mNaturalRotationProgressProvider,
                 mWallpaperController,
                 mOngoingCallController,
                 mAnimationScheduler,
