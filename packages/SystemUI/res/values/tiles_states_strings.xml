@@ -291,4 +291,11 @@
         <item>Off</item>
         <item>On</item>
     </string-array>
+
+    <!-- State names for One-handed mode tile: unavailable, off, on [CHAR LIMIT=32] -->
+    <string-array name="tile_states_onehanded">
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
+    </string-array>
 </resources>
