@@ -2524,34 +2524,25 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private void verifyNonStaged()
             throws PackageManagerException {
-        final VerificationParams verifyingSession = prepareForVerification();
-        if (isMultiPackage()) {
-            final List<PackageInstallerSession> childSessions = getChildSessions();
-            List<VerificationParams> verifyingChildSessions =
-                    new ArrayList<>(childSessions.size());
-            boolean success = true;
-            PackageManagerException failure = null;
-            for (int i = 0; i < childSessions.size(); ++i) {
-                final PackageInstallerSession session = childSessions.get(i);
-                try {
-                    final VerificationParams verifyingChildSession =
-                            session.prepareForVerification();
-                    verifyingChildSessions.add(verifyingChildSession);
-                } catch (PackageManagerException e) {
-                    failure = e;
-                    success = false;
-                }
+        synchronized (mLock) {
+            if (mDestroyed) {
+                throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                        "Session destroyed");
             }
-            if (!success) {
-                sendOnPackageInstalled(mContext, getRemoteStatusReceiver(), sessionId,
-                        isInstallerDeviceOwnerOrAffiliatedProfileOwner(), userId, null,
-                        failure.error, failure.getLocalizedMessage(), null);
-                return;
-            }
-            verifyingSession.verifyStage(verifyingChildSessions);
-        } else {
-            verifyingSession.verifyStage();
+            // TODO(b/161121612): merge mRelinquished and mInPreRebootVerification as they serve
+            //   the same purpose to prevent staging files from being deleted while verification
+            //   is in progress.
+            mRelinquished = true;
         }
+        mSessionProvider.getSessionVerifier().verifyNonStaged(this, (error, msg) -> {
+            mHandler.post(() -> {
+                if (error == INSTALL_SUCCEEDED) {
+                    onVerificationComplete();
+                } else {
+                    onSessionVerificationFailure(error, msg);
+                }
+            });
+        });
     }
 
     private void install() {
@@ -2600,32 +2591,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
-    /**
-     * Stages this session for verification and returns a
-     * {@link VerificationParams} representing this new staged state or null
-     * in case permissions need to be requested before verification can proceed.
-     */
-    @NonNull
-    private VerificationParams prepareForVerification() throws PackageManagerException {
-        assertNotLocked("makeSessionActive");
-
-        synchronized (mLock) {
-            if (mRelinquished) {
-                throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                        "Session relinquished");
-            }
-            if (mDestroyed) {
-                throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                        "Session destroyed");
-            }
-            if (!mSealed) {
-                throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                        "Session not sealed");
-            }
-            return makeVerificationParamsLocked();
-        }
-    }
-
     private void sendPendingUserActionIntent() {
         // User needs to confirm installation;
         // give installer an intent they can use to involve
@@ -2639,50 +2604,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // Commit was keeping session marked as active until now; release
         // that extra refcount so session appears idle.
         closeInternal(false);
-    }
-
-    @GuardedBy("mLock")
-    @Nullable
-    /**
-     * Returns a {@link com.android.server.pm.VerificationParams}
-     */
-    private VerificationParams makeVerificationParamsLocked() {
-        final IPackageInstallObserver2 localObserver;
-        if (!hasParentSessionId()) {
-            // Avoid attaching this observer to child session since they won't use it.
-            localObserver = new IPackageInstallObserver2.Stub() {
-                @Override
-                public void onUserActionRequired(Intent intent) {
-                    throw new IllegalStateException();
-                }
-
-                @Override
-                public void onPackageInstalled(String basePackageName, int returnCode, String msg,
-                        Bundle extras) {
-                    mHandler.post(() -> {
-                        if (returnCode == INSTALL_SUCCEEDED) {
-                            onVerificationComplete();
-                        } else {
-                            onSessionVerificationFailure(returnCode, msg);
-                        }
-                    });
-                }
-            };
-        } else {
-            localObserver = null;
-        }
-
-        final UserHandle user;
-        if ((params.installFlags & PackageManager.INSTALL_ALL_USERS) != 0) {
-            user = UserHandle.ALL;
-        } else {
-            user = new UserHandle(userId);
-        }
-
-        mRelinquished = true;
-
-        return new VerificationParams(user, stageDir, localObserver, params,
-                mInstallSource, mInstallerUid, mSigningDetails, sessionId, mPackageLite, mPm);
     }
 
     @WorkerThread
@@ -3607,6 +3528,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     InstallSource getInstallSource() {
         synchronized (mLock) {
             return mInstallSource;
+        }
+    }
+
+    SigningDetails getSigningDetails() {
+        synchronized (mLock) {
+            return mSigningDetails;
+        }
+    }
+
+    PackageLite getPackageLite() {
+        synchronized (mLock) {
+            return mPackageLite;
         }
     }
 

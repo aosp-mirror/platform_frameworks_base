@@ -21,6 +21,8 @@ import android.apex.ApexInfoList;
 import android.apex.ApexSessionInfo;
 import android.apex.ApexSessionParams;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageManager;
@@ -31,9 +33,11 @@ import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.IntArray;
 import android.util.Slog;
 import android.util.apk.ApkSignatureVerifier;
@@ -74,6 +78,62 @@ final class PackageSessionVerifier {
         mApexManager = apexManager;
         mPackageParserSupplier = packageParserSupplier;
         mHandler = new Handler(looper);
+    }
+
+    /**
+     * Runs verifications that are common to both staged and non-staged sessions.
+     */
+    public void verifyNonStaged(PackageInstallerSession session, Callback callback) {
+        mHandler.post(() -> {
+            try {
+                verifyAPK(session, callback);
+            } catch (PackageManagerException e) {
+                callback.onResult(e.error, e.getMessage());
+            }
+        });
+    }
+
+    /**
+     * Runs verifications particular to APK. This includes APEX sessions since an APEX can also
+     * be treated as APK.
+     */
+    private void verifyAPK(PackageInstallerSession session, Callback callback)
+            throws PackageManagerException {
+        final IPackageInstallObserver2 observer = new IPackageInstallObserver2.Stub() {
+            @Override
+            public void onUserActionRequired(Intent intent) {
+                throw new IllegalStateException();
+            }
+            @Override
+            public void onPackageInstalled(String basePackageName, int returnCode, String msg,
+                    Bundle extras) {
+                callback.onResult(returnCode, msg);
+            }
+        };
+        final VerificationParams verifyingSession = makeVerificationParams(session, observer);
+        if (session.isMultiPackage()) {
+            final List<PackageInstallerSession> childSessions = session.getChildSessions();
+            List<VerificationParams> verifyingChildSessions = new ArrayList<>(childSessions.size());
+            for (PackageInstallerSession child : childSessions) {
+                verifyingChildSessions.add(makeVerificationParams(child, null));
+            }
+            verifyingSession.verifyStage(verifyingChildSessions);
+        } else {
+            verifyingSession.verifyStage();
+        }
+    }
+
+    private VerificationParams makeVerificationParams(
+            PackageInstallerSession session, IPackageInstallObserver2 observer) {
+        final UserHandle user;
+        if ((session.params.installFlags & PackageManager.INSTALL_ALL_USERS) != 0) {
+            user = UserHandle.ALL;
+        } else {
+            user = new UserHandle(session.userId);
+        }
+        return new VerificationParams(user, session.stageDir, observer, session.params,
+                session.getInstallSource(), session.getInstallerUid(), session.getSigningDetails(),
+                session.sessionId, session.getPackageLite(), mPm);
     }
 
     /**
