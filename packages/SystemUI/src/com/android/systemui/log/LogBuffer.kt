@@ -61,7 +61,7 @@ import java.util.Locale
  *
  * @param name The name of this buffer
  * @param maxLogs The maximum number of messages to keep in memory at any one time, including the
- * unused pool.
+ * unused pool. Must be >= [poolSize].
  * @param poolSize The maximum amount that the size of the buffer is allowed to flex in response to
  * sequential calls to [document] that aren't immediately followed by a matching call to [push].
  */
@@ -71,6 +71,13 @@ class LogBuffer(
     private val poolSize: Int,
     private val logcatEchoTracker: LogcatEchoTracker
 ) {
+    init {
+        if (maxLogs < poolSize) {
+            throw IllegalArgumentException("maxLogs must be greater than or equal to poolSize, " +
+                    "but maxLogs=$maxLogs < $poolSize=poolSize")
+        }
+    }
+
     private val buffer: ArrayDeque<LogMessageImpl> = ArrayDeque()
 
     var frozen = false
