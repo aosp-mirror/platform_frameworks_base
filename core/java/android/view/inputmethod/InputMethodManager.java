@@ -696,7 +696,7 @@ public final class InputMethodManager {
         @Override
         public void finishComposingText() {
             if (mServedInputConnection != null) {
-                mServedInputConnection.finishComposingText();
+                mServedInputConnection.finishComposingTextFromImm();
             }
         }
 
@@ -919,7 +919,7 @@ public final class InputMethodManager {
                             mRestartOnNextWindowFocus = true;
                             // Note that finishComposingText() is allowed to run
                             // even when we are not active.
-                            mFallbackInputConnection.finishComposingText();
+                            mFallbackInputConnection.finishComposingTextFromImm();
                         }
                         // Check focus again in case that "onWindowFocus" is called before
                         // handling this message.
