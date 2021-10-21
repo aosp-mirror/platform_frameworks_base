@@ -278,6 +278,7 @@ interface IActivityManager {
     List<ActivityManager.ProcessErrorStateInfo> getProcessesInErrorState();
     boolean clearApplicationUserData(in String packageName, boolean keepState,
             in IPackageDataObserver observer, int userId);
+    void makeServicesNonForeground(in String packageName, int userId);
     @UnsupportedAppUsage
     void forceStopPackage(in String packageName, int userId);
     boolean killPids(in int[] pids, in String reason, boolean secure);

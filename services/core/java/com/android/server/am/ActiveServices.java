@@ -5110,6 +5110,29 @@ public final class ActiveServices {
         return didSomething;
     }
 
+    void makeServicesNonForegroundLocked(final String pkg, final @UserIdInt int userId) {
+        final ServiceMap smap = mServiceMap.get(userId);
+        if (smap != null) {
+            ArrayList<ServiceRecord> fgsList = new ArrayList<>();
+            for (int i = 0; i < smap.mServicesByInstanceName.size(); i++) {
+                final ServiceRecord sr = smap.mServicesByInstanceName.valueAt(i);
+                if (sr.appInfo.packageName.equals(pkg) && sr.isForeground) {
+                    fgsList.add(sr);
+                }
+            }
+
+            final int numServices = fgsList.size();
+            if (DEBUG_FOREGROUND_SERVICE) {
+                Slog.i(TAG_SERVICE, "Forcing " + numServices + " services out of foreground in u"
+                        + userId + "/" + pkg);
+            }
+            for (int i = 0; i < numServices; i++) {
+                final ServiceRecord sr = fgsList.get(i);
+                setServiceForegroundInnerLocked(sr, 0, null, Service.STOP_FOREGROUND_REMOVE, 0);
+            }
+        }
+    }
+
     void forceStopPackageLocked(String packageName, int userId) {
         ServiceMap smap = mServiceMap.get(userId);
         if (smap != null && smap.mActiveForegroundApps.size() > 0) {
