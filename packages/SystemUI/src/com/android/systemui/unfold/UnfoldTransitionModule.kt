@@ -20,15 +20,19 @@ import android.content.Context
 import android.hardware.SensorManager
 import android.hardware.devicestate.DeviceStateManager
 import android.os.Handler
+import android.view.IWindowManager
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.LifecycleScreenStatusProvider
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
+import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider
+import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider
 import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import java.util.Optional
 import java.util.concurrent.Executor
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -62,6 +66,27 @@ class UnfoldTransitionModule {
 
     @Provides
     @Singleton
+    fun provideNaturalRotationProgressProvider(
+        context: Context,
+        windowManager: IWindowManager,
+        unfoldTransitionProgressProvider: UnfoldTransitionProgressProvider
+    ): NaturalRotationUnfoldProgressProvider =
+        NaturalRotationUnfoldProgressProvider(
+            context,
+            windowManager,
+            unfoldTransitionProgressProvider
+        )
+
+    @Provides
+    @Named(UNFOLD_STATUS_BAR)
+    @Singleton
+    fun provideStatusBarScopedTransitionProvider(
+        source: NaturalRotationUnfoldProgressProvider
+    ): ScopedUnfoldTransitionProgressProvider =
+        ScopedUnfoldTransitionProgressProvider(source)
+
+    @Provides
+    @Singleton
     fun provideShellProgressProvider(
         config: UnfoldTransitionConfig,
         provider: Lazy<UnfoldTransitionProgressProvider>
@@ -72,3 +97,5 @@ class UnfoldTransitionModule {
             Optional.empty()
         }
 }
+
+const val UNFOLD_STATUS_BAR = "unfold_status_bar"

@@ -233,6 +233,7 @@ import com.android.systemui.tuner.TunerService;
 import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation;
 import com.android.systemui.unfold.UnfoldTransitionWallpaperController;
 import com.android.systemui.unfold.config.UnfoldTransitionConfig;
+import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider;
 import com.android.systemui.util.WallpaperController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.MessageRouter;
@@ -525,6 +526,7 @@ public class StatusBar extends SystemUI implements
     private QSPanelController mQSPanelController;
 
     private final OperatorNameViewController.Factory mOperatorNameViewControllerFactory;
+    private final PhoneStatusBarViewController.Factory mPhoneStatusBarViewControllerFactory;
     KeyguardIndicationController mKeyguardIndicationController;
 
     private View mReportRejectedTouch;
@@ -543,8 +545,8 @@ public class StatusBar extends SystemUI implements
     private final FeatureFlags mFeatureFlags;
     private final UnfoldTransitionConfig mUnfoldTransitionConfig;
     private final Lazy<UnfoldLightRevealOverlayAnimation> mUnfoldLightRevealOverlayAnimation;
+    private final Lazy<NaturalRotationUnfoldProgressProvider> mNaturalUnfoldProgressProvider;
     private final Lazy<UnfoldTransitionWallpaperController> mUnfoldWallpaperController;
-    private final Lazy<StatusBarMoveFromCenterAnimationController> mMoveFromCenterAnimation;
     private final WallpaperController mWallpaperController;
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private final MessageRouter mMessageRouter;
@@ -772,6 +774,7 @@ public class StatusBar extends SystemUI implements
             ExtensionController extensionController,
             UserInfoControllerImpl userInfoControllerImpl,
             OperatorNameViewController.Factory operatorNameViewControllerFactory,
+            PhoneStatusBarViewController.Factory phoneStatusBarViewControllerFactory,
             PhoneStatusBarPolicy phoneStatusBarPolicy,
             KeyguardIndicationController keyguardIndicationController,
             DemoModeController demoModeController,
@@ -782,7 +785,7 @@ public class StatusBar extends SystemUI implements
             UnfoldTransitionConfig unfoldTransitionConfig,
             Lazy<UnfoldLightRevealOverlayAnimation> unfoldLightRevealOverlayAnimation,
             Lazy<UnfoldTransitionWallpaperController> unfoldTransitionWallpaperController,
-            Lazy<StatusBarMoveFromCenterAnimationController> statusBarUnfoldAnimationController,
+            Lazy<NaturalRotationUnfoldProgressProvider> naturalRotationUnfoldProgressProvider,
             WallpaperController wallpaperController,
             OngoingCallController ongoingCallController,
             SystemStatusAnimationScheduler animationScheduler,
@@ -812,6 +815,7 @@ public class StatusBar extends SystemUI implements
         mKeyguardStateController = keyguardStateController;
         mHeadsUpManager = headsUpManagerPhone;
         mOperatorNameViewControllerFactory = operatorNameViewControllerFactory;
+        mPhoneStatusBarViewControllerFactory = phoneStatusBarViewControllerFactory;
         mKeyguardIndicationController = keyguardIndicationController;
         mStatusBarTouchableRegionManager = statusBarTouchableRegionManager;
         mDynamicPrivacyController = dynamicPrivacyController;
@@ -879,9 +883,9 @@ public class StatusBar extends SystemUI implements
         mBrightnessSliderFactory = brightnessSliderFactory;
         mUnfoldTransitionConfig = unfoldTransitionConfig;
         mUnfoldLightRevealOverlayAnimation = unfoldLightRevealOverlayAnimation;
+        mNaturalUnfoldProgressProvider = naturalRotationUnfoldProgressProvider;
         mUnfoldWallpaperController = unfoldTransitionWallpaperController;
         mWallpaperController = wallpaperController;
-        mMoveFromCenterAnimation = statusBarUnfoldAnimationController;
         mOngoingCallController = ongoingCallController;
         mAnimationScheduler = animationScheduler;
         mStatusBarLocationPublisher = locationPublisher;
@@ -1077,6 +1081,7 @@ public class StatusBar extends SystemUI implements
         if (mUnfoldTransitionConfig.isEnabled()) {
             mUnfoldLightRevealOverlayAnimation.get().init();
             mUnfoldWallpaperController.get().init();
+            mNaturalUnfoldProgressProvider.get().init();
         }
 
         mPluginManager.addPluginListener(
@@ -1178,16 +1183,9 @@ public class StatusBar extends SystemUI implements
 
                     mNotificationPanelViewController.setBar(mStatusBarView);
 
-                    StatusBarMoveFromCenterAnimationController moveFromCenterAnimation = null;
-                    if (mUnfoldTransitionConfig.isEnabled()) {
-                        moveFromCenterAnimation = mMoveFromCenterAnimation.get();
-                    }
-                    mPhoneStatusBarViewController =
-                            new PhoneStatusBarViewController(
-                                    mStatusBarView,
-                                    moveFromCenterAnimation,
-                                    mNotificationPanelViewController.getStatusBarTouchEventHandler()
-                            );
+                    mPhoneStatusBarViewController = mPhoneStatusBarViewControllerFactory
+                            .create(mStatusBarView, mNotificationPanelViewController
+                                    .getStatusBarTouchEventHandler());
                     mPhoneStatusBarViewController.init();
 
                     mBatteryMeterViewController = new BatteryMeterViewController(
