@@ -2351,21 +2351,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     return;
                 }
             }
-
-            if (!params.isStaged) {
-                // For non-staged APEX installs also check if there is a staged session that
-                // contains the same APEX. If that's the case, we should fail this session.
-                synchronized (mLock) {
-                    int sessionId = mStagingManager.getSessionIdByPackageName(mPackageName);
-                    if (sessionId != -1) {
-                        onSessionValidationFailure(
-                                PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
-                                "Staged session " + sessionId + " already contains "
-                                        + mPackageName);
-                        return;
-                    }
-                }
-            }
         }
 
         if (params.isStaged) {

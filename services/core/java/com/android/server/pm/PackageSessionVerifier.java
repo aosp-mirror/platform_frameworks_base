@@ -86,6 +86,14 @@ final class PackageSessionVerifier {
     public void verifyNonStaged(PackageInstallerSession session, Callback callback) {
         mHandler.post(() -> {
             try {
+                storeSession(session.mStagedSession);
+                if (session.isMultiPackage()) {
+                    for (PackageInstallerSession child : session.getChildSessions()) {
+                        checkRebootlessApex(child);
+                    }
+                } else {
+                    checkRebootlessApex(session);
+                }
                 verifyAPK(session, callback);
             } catch (PackageManagerException e) {
                 callback.onResult(e.error, e.getMessage());
@@ -154,7 +162,6 @@ final class PackageSessionVerifier {
         Slog.d(TAG, "Starting preRebootVerification for session " + session.sessionId());
         mHandler.post(() -> {
             try {
-                storeSession(session);
                 checkActiveSessions();
                 checkRollbacks(session);
                 if (session.isMultiPackage()) {
@@ -175,7 +182,9 @@ final class PackageSessionVerifier {
      * Stores staged-sessions for checking package overlapping and rollback conflicts.
      */
     private void storeSession(StagingManager.StagedSession session) {
-        mStagedSessions.add(session);
+        if (session != null) {
+            mStagedSessions.add(session);
+        }
     }
 
     private void onVerificationSuccess(StagingManager.StagedSession session, Callback callback) {
@@ -439,6 +448,34 @@ final class PackageSessionVerifier {
             return true;
         }
         return mApexManager.abortStagedSession(sessionId);
+    }
+
+    /**
+     * Fails this rebootless APEX session if the same package name found in any staged sessions.
+     */
+    private void checkRebootlessApex(PackageInstallerSession session)
+            throws PackageManagerException {
+        if (session.isStaged() || !session.isApexSession()) {
+            return;
+        }
+        String packageName = session.getPackageName();
+        if (packageName == null) {
+            throw new PackageManagerException(
+                    PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
+                    "Invalid session " + session.sessionId + " with package name null");
+        }
+        for (StagingManager.StagedSession stagedSession : mStagedSessions) {
+            if (stagedSession.isDestroyed() || stagedSession.isInTerminalState()) {
+                continue;
+            }
+            if (stagedSession.sessionContains(s -> packageName.equals(s.getPackageName()))) {
+                // Staged-sessions take priority over rebootless APEX
+                throw new PackageManagerException(
+                        PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
+                        "Staged session " + stagedSession.sessionId() + " already contains "
+                                + packageName);
+            }
+        }
     }
 
     /**
