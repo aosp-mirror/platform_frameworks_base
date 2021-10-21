@@ -32,6 +32,7 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.any
 import org.mockito.Mockito.eq
+import org.mockito.Mockito.never
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
@@ -88,6 +89,17 @@ class AmbientLightModeMonitorTest : SysuiTestCase() {
         ambientLightModeMonitor.stop()
 
         verify(algorithm).stop()
+    }
+
+    @Test
+    fun shouldNotRegisterForSensorUpdatesIfSensorNotAvailable() {
+        `when`(sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)).thenReturn(null)
+        val ambientLightModeMonitor = AmbientLightModeMonitor(algorithm, sensorManager)
+
+        val callback = mock(AmbientLightModeMonitor.Callback::class.java)
+        ambientLightModeMonitor.start(callback)
+
+        verify(sensorManager, never()).registerListener(any(), any(Sensor::class.java), anyInt())
     }
 
     // Captures [SensorEventListener], assuming it has been registered with [sensorManager].
