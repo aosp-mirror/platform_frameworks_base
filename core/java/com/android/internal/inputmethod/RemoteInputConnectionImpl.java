@@ -430,6 +430,34 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
         });
     }
 
+    /**
+     * Dispatches {@link InputConnection#finishComposingText()}.
+     *
+     * <p>This method is intended to be called only from {@link InputMethodManager}.</p>
+     */
+    public void finishComposingTextFromImm() {
+        dispatchWithTracing("finishComposingTextFromImm", () -> {
+            if (isFinished()) {
+                // In this case, #finishComposingText() is guaranteed to be called already.
+                // There should be no negative impact if we ignore this call silently.
+                if (DEBUG) {
+                    Log.w(TAG, "Bug 35301295: Redundant finishComposingTextFromImm.");
+                }
+                return;
+            }
+            InputConnection ic = getInputConnection();
+            // Note we do NOT check isActive() here, because this is safe
+            // for an IME to call at any time, and we need to allow it
+            // through to clean up our state after the IME has switched to
+            // another client.
+            if (ic == null) {
+                Log.w(TAG, "finishComposingTextFromImm on inactive InputConnection");
+                return;
+            }
+            ic.finishComposingText();
+        });
+    }
+
     @Override
     public void finishComposingText() {
         dispatchWithTracing("finishComposingText", () -> {
