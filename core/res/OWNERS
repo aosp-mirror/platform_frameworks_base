@@ -25,3 +25,9 @@ svetoslavganov@google.com
 toddke@google.com
 tsuji@google.com
 yamasani@google.com
+
+# Multiuser
+per-file res/xml/config_user_types.xml = file:/MULTIUSER_OWNERS
+
+# Car
+per-file res/values/dimens_car.xml = file:/platform/packages/services/Car:/OWNERS
