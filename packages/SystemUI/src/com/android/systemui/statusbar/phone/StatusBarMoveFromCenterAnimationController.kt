@@ -63,5 +63,11 @@ class StatusBarMoveFromCenterAnimationController @Inject constructor(
         override fun onTransitionProgress(progress: Float) {
             moveFromCenterAnimator?.onTransitionProgress(progress)
         }
+
+        override fun onTransitionFinished() {
+            // Reset translations when transition is stopped/cancelled
+            // (e.g. the transition could be cancelled mid-way when rotating the screen)
+            moveFromCenterAnimator?.onTransitionProgress(1f)
+        }
     }
 }
