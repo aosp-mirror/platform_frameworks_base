@@ -28,7 +28,7 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.statusBarWindowIsVisible
+import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.traces.common.FlickerComponentName
 import com.google.common.truth.Truth
 import org.junit.FixMethodOrder
@@ -170,6 +170,37 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
     @FlakyTest
     @Test
     override fun statusBarWindowIsVisible() = super.statusBarWindowIsVisible()
+
+    /**
+     * Checks that the status bar layer is visible at the end of the trace
+     *
+     * It is not possible to check at the start because the animation is working differently
+     * in devices with and without blur (b/202936526)
+     */
+    @Presubmit
+    @Test
+    override fun statusBarLayerIsVisible() {
+        testSpec.assertLayersEnd {
+            this.isVisible(FlickerComponentName.STATUS_BAR)
+        }
+    }
+
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 202936526)
+    @Test
+    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    fun statusBarLayerPositionAtEnd() {
+        testSpec.assertLayersEnd {
+            val display = this.entry.displays.minByOrNull { it.id }
+                ?: throw RuntimeException("There is no display!")
+            this.visibleRegion(FlickerComponentName.STATUS_BAR)
+                .coversExactly(WindowUtils.getStatusBarPosition(display))
+        }
+    }
 
     /** {@inheritDoc} */
     @FlakyTest
