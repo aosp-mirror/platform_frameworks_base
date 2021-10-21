@@ -225,7 +225,7 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void getTextAfterCursor(int length, int flags,
+    public void getTextAfterCursor(InputConnectionCommandHeader header, int length, int flags,
             AndroidFuture future /* T=CharSequence */) {
         dispatchWithTracing("getTextAfterCursor", future, () -> {
             final InputConnection ic = getInputConnection();
@@ -243,7 +243,7 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void getTextBeforeCursor(int length, int flags,
+    public void getTextBeforeCursor(InputConnectionCommandHeader header, int length, int flags,
             AndroidFuture future /* T=CharSequence */) {
         dispatchWithTracing("getTextBeforeCursor", future, () -> {
             final InputConnection ic = getInputConnection();
@@ -261,7 +261,8 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void getSelectedText(int flags, AndroidFuture future /* T=CharSequence */) {
+    public void getSelectedText(InputConnectionCommandHeader header, int flags,
+            AndroidFuture future /* T=CharSequence */) {
         dispatchWithTracing("getSelectedText", future, () -> {
             final InputConnection ic = getInputConnection();
             if (ic == null || !isActive()) {
@@ -278,8 +279,8 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void getSurroundingText(int beforeLength, int afterLength, int flags,
-            AndroidFuture future /* T=SurroundingText */) {
+    public void getSurroundingText(InputConnectionCommandHeader header, int beforeLength,
+            int afterLength, int flags, AndroidFuture future /* T=SurroundingText */) {
         dispatchWithTracing("getSurroundingText", future, () -> {
             final InputConnection ic = getInputConnection();
             if (ic == null || !isActive()) {
@@ -302,7 +303,8 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void getCursorCapsMode(int reqModes, AndroidFuture future /* T=Integer */) {
+    public void getCursorCapsMode(InputConnectionCommandHeader header, int reqModes,
+            AndroidFuture future /* T=Integer */) {
         dispatchWithTracing("getCursorCapsMode", future, () -> {
             final InputConnection ic = getInputConnection();
             if (ic == null || !isActive()) {
@@ -314,8 +316,8 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void getExtractedText(ExtractedTextRequest request, int flags,
-            AndroidFuture future /* T=ExtractedText */) {
+    public void getExtractedText(InputConnectionCommandHeader header, ExtractedTextRequest request,
+            int flags, AndroidFuture future /* T=ExtractedText */) {
         dispatchWithTracing("getExtractedText", future, () -> {
             final InputConnection ic = getInputConnection();
             if (ic == null || !isActive()) {
@@ -327,7 +329,8 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void commitText(CharSequence text, int newCursorPosition) {
+    public void commitText(InputConnectionCommandHeader header, CharSequence text,
+            int newCursorPosition) {
         dispatchWithTracing("commitText", () -> {
             InputConnection ic = getInputConnection();
             if (ic == null || !isActive()) {
@@ -339,7 +342,7 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void commitCompletion(CompletionInfo text) {
+    public void commitCompletion(InputConnectionCommandHeader header, CompletionInfo text) {
         dispatchWithTracing("commitCompletion", () -> {
             InputConnection ic = getInputConnection();
             if (ic == null || !isActive()) {
@@ -351,7 +354,7 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void commitCorrection(CorrectionInfo info) {
+    public void commitCorrection(InputConnectionCommandHeader header, CorrectionInfo info) {
         dispatchWithTracing("commitCorrection", () -> {
             InputConnection ic = getInputConnection();
             if (ic == null || !isActive()) {
@@ -367,7 +370,7 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void setSelection(int start, int end) {
+    public void setSelection(InputConnectionCommandHeader header, int start, int end) {
         dispatchWithTracing("setSelection", () -> {
             InputConnection ic = getInputConnection();
             if (ic == null || !isActive()) {
@@ -379,7 +382,7 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void performEditorAction(int id) {
+    public void performEditorAction(InputConnectionCommandHeader header, int id) {
         dispatchWithTracing("performEditorAction", () -> {
             InputConnection ic = getInputConnection();
             if (ic == null || !isActive()) {
@@ -391,7 +394,7 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void performContextMenuAction(int id) {
+    public void performContextMenuAction(InputConnectionCommandHeader header, int id) {
         dispatchWithTracing("performContextMenuAction", () -> {
             InputConnection ic = getInputConnection();
             if (ic == null || !isActive()) {
@@ -403,7 +406,7 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void setComposingRegion(int start, int end) {
+    public void setComposingRegion(InputConnectionCommandHeader header, int start, int end) {
         dispatchWithTracing("setComposingRegion", () -> {
             InputConnection ic = getInputConnection();
             if (ic == null || !isActive()) {
@@ -419,7 +422,8 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void setComposingText(CharSequence text, int newCursorPosition) {
+    public void setComposingText(InputConnectionCommandHeader header, CharSequence text,
+            int newCursorPosition) {
         dispatchWithTracing("setComposingText", () -> {
             InputConnection ic = getInputConnection();
             if (ic == null || !isActive()) {
@@ -459,7 +463,7 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void finishComposingText() {
+    public void finishComposingText(InputConnectionCommandHeader header) {
         dispatchWithTracing("finishComposingText", () -> {
             if (isFinished()) {
                 // In this case, #finishComposingText() is guaranteed to be called already.
@@ -483,7 +487,7 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void sendKeyEvent(KeyEvent event) {
+    public void sendKeyEvent(InputConnectionCommandHeader header, KeyEvent event) {
         dispatchWithTracing("sendKeyEvent", () -> {
             InputConnection ic = getInputConnection();
             if (ic == null || !isActive()) {
@@ -495,7 +499,7 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void clearMetaKeyStates(int states) {
+    public void clearMetaKeyStates(InputConnectionCommandHeader header, int states) {
         dispatchWithTracing("clearMetaKeyStates", () -> {
             InputConnection ic = getInputConnection();
             if (ic == null || !isActive()) {
@@ -507,7 +511,8 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void deleteSurroundingText(int beforeLength, int afterLength) {
+    public void deleteSurroundingText(InputConnectionCommandHeader header, int beforeLength,
+            int afterLength) {
         dispatchWithTracing("deleteSurroundingText", () -> {
             InputConnection ic = getInputConnection();
             if (ic == null || !isActive()) {
@@ -519,7 +524,8 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void deleteSurroundingTextInCodePoints(int beforeLength, int afterLength) {
+    public void deleteSurroundingTextInCodePoints(InputConnectionCommandHeader header,
+            int beforeLength, int afterLength) {
         dispatchWithTracing("deleteSurroundingTextInCodePoints", () -> {
             InputConnection ic = getInputConnection();
             if (ic == null || !isActive()) {
@@ -535,7 +541,7 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void beginBatchEdit() {
+    public void beginBatchEdit(InputConnectionCommandHeader header) {
         dispatchWithTracing("beginBatchEdit", () -> {
             InputConnection ic = getInputConnection();
             if (ic == null || !isActive()) {
@@ -547,7 +553,7 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void endBatchEdit() {
+    public void endBatchEdit(InputConnectionCommandHeader header) {
         dispatchWithTracing("endBatchEdit", () -> {
             InputConnection ic = getInputConnection();
             if (ic == null || !isActive()) {
@@ -559,7 +565,7 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void performSpellCheck() {
+    public void performSpellCheck(InputConnectionCommandHeader header) {
         dispatchWithTracing("performSpellCheck", () -> {
             InputConnection ic = getInputConnection();
             if (ic == null || !isActive()) {
@@ -571,7 +577,8 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void performPrivateCommand(String action, Bundle data) {
+    public void performPrivateCommand(InputConnectionCommandHeader header, String action,
+            Bundle data) {
         dispatchWithTracing("performPrivateCommand", () -> {
             InputConnection ic = getInputConnection();
             if (ic == null || !isActive()) {
@@ -583,8 +590,8 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void requestCursorUpdates(int cursorUpdateMode, int imeDisplayId,
-            AndroidFuture future /* T=Boolean */) {
+    public void requestCursorUpdates(InputConnectionCommandHeader header, int cursorUpdateMode,
+            int imeDisplayId, AndroidFuture future /* T=Boolean */) {
         dispatchWithTracing("requestCursorUpdates", future, () -> {
             final InputConnection ic = getInputConnection();
             if (ic == null || !isActive()) {
@@ -605,7 +612,8 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts,
+    public void commitContent(InputConnectionCommandHeader header,
+            InputContentInfo inputContentInfo, int flags, Bundle opts,
             AndroidFuture future /* T=Boolean */) {
         dispatchWithTracing("commitContent", future, () -> {
             final InputConnection ic = getInputConnection();
@@ -627,7 +635,7 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
     }
 
     @Override
-    public void setImeConsumesInput(boolean imeConsumesInput) {
+    public void setImeConsumesInput(InputConnectionCommandHeader header, boolean imeConsumesInput) {
         dispatchWithTracing("setImeConsumesInput", () -> {
             InputConnection ic = getInputConnection();
             if (ic == null || !isActive()) {
