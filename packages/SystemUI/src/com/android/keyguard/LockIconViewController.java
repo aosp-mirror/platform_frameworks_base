@@ -695,8 +695,11 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private final AuthController.Callback mAuthControllerCallback = new AuthController.Callback() {
         @Override
         public void onAllAuthenticatorsRegistered() {
-            updateIsUdfpsEnrolled();
-            updateConfiguration();
+            // must be called from the main thread since it may update the views
+            mExecutor.execute(() -> {
+                updateIsUdfpsEnrolled();
+                updateConfiguration();
+            });
         }
     };
 }
