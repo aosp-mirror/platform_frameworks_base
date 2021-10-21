@@ -1529,7 +1529,8 @@ public class ActivityOptions extends ComponentOptions {
      * Sets the task the activity will be launched in.
      * @hide
      */
-    @TestApi
+    @RequiresPermission(START_TASKS_FROM_RECENTS)
+    @SystemApi
     public void setLaunchTaskId(int taskId) {
         mLaunchTaskId = taskId;
     }
@@ -1537,6 +1538,7 @@ public class ActivityOptions extends ComponentOptions {
     /**
      * @hide
      */
+    @SystemApi
     public int getLaunchTaskId() {
         return mLaunchTaskId;
     }
