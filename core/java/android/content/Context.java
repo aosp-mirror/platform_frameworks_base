@@ -3777,6 +3777,7 @@ public abstract class Context {
             PRINT_SERVICE,
             CONSUMER_IR_SERVICE,
             //@hide: TRUST_SERVICE,
+            TV_IAPP_SERVICE,
             TV_INPUT_SERVICE,
             //@hide: TV_TUNER_RESOURCE_MGR_SERVICE,
             //@hide: NETWORK_SCORE_SERVICE,
@@ -5288,6 +5289,16 @@ public abstract class Context {
      * @hide
      */
     public static final String TRUST_SERVICE = "trust";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.media.tv.interactive.TvIAppManager} for interacting with TV interactive
+     * applications (TV iApp) on the device.
+     *
+     * @see #getSystemService(String)
+     * @see android.media.tv.interactive.TvIAppManager
+     */
+    public static final String TV_IAPP_SERVICE = "tv_iapp";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a

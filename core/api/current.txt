@@ -10748,6 +10748,7 @@ package android.content {
     field public static final String TELEPHONY_SUBSCRIPTION_SERVICE = "telephony_subscription_service";
     field public static final String TEXT_CLASSIFICATION_SERVICE = "textclassification";
     field public static final String TEXT_SERVICES_MANAGER_SERVICE = "textservices";
+    field public static final String TV_IAPP_SERVICE = "tv_iapp";
     field public static final String TV_INPUT_SERVICE = "tv_input";
     field public static final String UI_MODE_SERVICE = "uimode";
     field public static final String USAGE_STATS_SERVICE = "usagestats";
@@ -26240,6 +26241,13 @@ package android.media.tv {
     method public void onVideoAvailable(String);
     method public void onVideoSizeChanged(String, int, int);
     method public void onVideoUnavailable(String, int);
+  }
+
+}
+
+package android.media.tv.interactive {
+
+  public final class TvIAppManager {
   }
 
 }
