@@ -37,7 +37,6 @@ import android.widget.ImageView;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.animation.ShadeInterpolation;
@@ -55,7 +54,6 @@ import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
-import com.android.systemui.util.InjectionInflationController;
 import com.android.systemui.util.LifecycleFragment;
 import com.android.systemui.util.Utils;
 
@@ -96,7 +94,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private ImageView mQsDragHandler;
 
     private final RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
-    private final InjectionInflationController mInjectionInflater;
     private final CommandQueue mCommandQueue;
     private final QSDetailDisplayer mQsDetailDisplayer;
     private final MediaHost mQsMediaHost;
@@ -146,7 +143,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
     @Inject
     public QSFragment(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
-            InjectionInflationController injectionInflater, QSTileHost qsTileHost,
+            QSTileHost qsTileHost,
             StatusBarStateController statusBarStateController, CommandQueue commandQueue,
             QSDetailDisplayer qsDetailDisplayer, @Named(QS_PANEL) MediaHost qsMediaHost,
             @Named(QUICK_QS_PANEL) MediaHost qqsMediaHost,
@@ -154,7 +151,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             QSFragmentComponent.Factory qsComponentFactory,
             FalsingManager falsingManager, DumpManager dumpManager) {
         mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
-        mInjectionInflater = injectionInflater;
         mCommandQueue = commandQueue;
         mQsDetailDisplayer = qsDetailDisplayer;
         mQsMediaHost = qsMediaHost;
@@ -171,9 +167,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
             Bundle savedInstanceState) {
-        inflater = mInjectionInflater.injectable(
-                inflater.cloneInContext(new ContextThemeWrapper(getContext(),
-                        R.style.Theme_SystemUI_QuickSettings)));
+        inflater = inflater.cloneInContext(new ContextThemeWrapper(getContext(),
+                R.style.Theme_SystemUI_QuickSettings));
         return inflater.inflate(R.layout.qs_panel, container, false);
     }
 
