@@ -2326,10 +2326,6 @@
     <!-- Type of the ambient tap sensor per device posture (defined by WM Jetpack posture).
          Unspecified values use config_dozeTapSensor -->
     <string-array name="config_dozeTapSensorPostureMapping" translatable="false">
-        <item></item> <!-- UNKNOWN -->
-        <item></item> <!-- CLOSED -->
-        <item></item> <!-- HALF_OPENED -->
-        <item></item> <!-- OPENED -->
     </string-array>
 
     <!-- Type of the long press sensor. Empty if long press is not supported. -->
