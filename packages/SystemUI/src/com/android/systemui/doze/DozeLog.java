@@ -115,12 +115,20 @@ public class DozeLog implements Dumpable {
     }
 
     /**
-     * Appends dozing event to the logs
+     * Appends dozing event to the logs. Logs current dozing state when entering/exiting AOD.
      * @param dozing true if dozing, else false
      */
     public void traceDozing(boolean dozing) {
         mLogger.logDozing(dozing);
         mPulsing = false;
+    }
+
+    /**
+     * Appends dozing event to the logs when dozing has changed in AOD.
+     * @param dozing true if we're now dozing, else false
+     */
+    public void traceDozingChanged(boolean dozing) {
+        mLogger.logDozingChanged(dozing);
     }
 
     /**
