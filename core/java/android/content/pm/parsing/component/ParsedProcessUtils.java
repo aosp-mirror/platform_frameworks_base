@@ -81,7 +81,7 @@ public class ParsedProcessUtils {
     private static ParseResult<ParsedProcess> parseProcess(Set<String> perms, String[] separateProcesses,
             ParsingPackage pkg, Resources res, XmlResourceParser parser, int flags,
             ParseInput input) throws IOException, XmlPullParserException {
-        ParsedProcess proc = new ParsedProcess();
+        ParsedProcessImpl proc = new ParsedProcessImpl();
         TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestProcess);
         try {
             if (perms != null) {

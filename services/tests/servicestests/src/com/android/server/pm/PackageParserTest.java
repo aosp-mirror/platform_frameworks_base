@@ -45,14 +45,24 @@ import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.component.ParsedActivity;
+import android.content.pm.parsing.component.ParsedActivityImpl;
 import android.content.pm.parsing.component.ParsedComponent;
 import android.content.pm.parsing.component.ParsedInstrumentation;
+import android.content.pm.parsing.component.ParsedInstrumentationImpl;
 import android.content.pm.parsing.component.ParsedIntentInfo;
+import android.content.pm.parsing.component.ParsedIntentInfoImpl;
 import android.content.pm.parsing.component.ParsedPermission;
 import android.content.pm.parsing.component.ParsedPermissionGroup;
+import android.content.pm.parsing.component.ParsedPermissionGroupImpl;
+import android.content.pm.parsing.component.ParsedPermissionImpl;
+import android.content.pm.parsing.component.ParsedPermissionUtils;
 import android.content.pm.parsing.component.ParsedProvider;
+import android.content.pm.parsing.component.ParsedProviderImpl;
 import android.content.pm.parsing.component.ParsedService;
+import android.content.pm.parsing.component.ParsedServiceImpl;
 import android.content.pm.parsing.component.ParsedUsesPermission;
+import android.content.pm.parsing.component.ParsedUsesPermissionImpl;
+import android.content.pm.permission.CompatibilityPermissionInfo;
 import android.content.pm.pkg.PackageUserState;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -522,7 +532,7 @@ public class PackageParserTest {
             final ParsedPackage pkg = new TestPackageParser2()
                     .parsePackage(testFile, 0 /*flags*/, false /*useCaches*/);
             final List<String> compatPermissions =
-                    Arrays.stream(COMPAT_PERMS).map(ParsedUsesPermission::getName)
+                    Arrays.stream(COMPAT_PERMS).map(CompatibilityPermissionInfo::getName)
                             .collect(toList());
             assertWithMessage(
                     "Compatibility permissions shouldn't be added into uses permissions.")
@@ -548,19 +558,19 @@ public class PackageParserTest {
                     .parsePackage(testFile, 0 /*flags*/, false /*useCaches*/);
             assertWithMessage(
                     "Compatibility permissions should be added into uses permissions.")
-                    .that(Arrays.stream(COMPAT_PERMS).map(ParsedUsesPermission::getName)
+                    .that(Arrays.stream(COMPAT_PERMS).map(CompatibilityPermissionInfo::getName)
                             .allMatch(pkg.getUsesPermissions().stream()
                                     .map(ParsedUsesPermission::getName)
                             .collect(toList())::contains))
                     .isTrue();
             assertWithMessage(
                     "Compatibility permissions should be added into requested permissions.")
-                    .that(Arrays.stream(COMPAT_PERMS).map(ParsedUsesPermission::getName)
+                    .that(Arrays.stream(COMPAT_PERMS).map(CompatibilityPermissionInfo::getName)
                             .allMatch(pkg.getRequestedPermissions()::contains))
                     .isTrue();
             assertWithMessage(
                     "Compatibility permissions should be added into implicit permissions.")
-                    .that(Arrays.stream(COMPAT_PERMS).map(ParsedUsesPermission::getName)
+                    .that(Arrays.stream(COMPAT_PERMS).map(CompatibilityPermissionInfo::getName)
                             .allMatch(pkg.getImplicitPermissions()::contains))
                     .isTrue();
         } finally {
@@ -770,7 +780,8 @@ public class PackageParserTest {
         // Verify basic flags in PermissionInfo to make sure they're consistent. We don't perform
         // a full structural equality here because the code that serializes them isn't parser
         // specific and is tested elsewhere.
-        assertEquals(a.getProtection(), b.getProtection());
+        assertEquals(ParsedPermissionUtils.getProtection(a),
+                ParsedPermissionUtils.getProtection(b));
         assertEquals(a.getGroup(), b.getGroup());
         assertEquals(a.getFlags(), b.getFlags());
 
@@ -895,8 +906,8 @@ public class PackageParserTest {
         Bundle bundle = new Bundle();
         bundle.putString("key", "value");
 
-        ParsedPermission permission = new ParsedPermission();
-        permission.setParsedPermissionGroup(new ParsedPermissionGroup());
+        ParsedPermissionImpl permission = new ParsedPermissionImpl();
+        permission.setParsedPermissionGroup(new ParsedPermissionGroupImpl());
 
         ((ParsedPackage) pkg.setBaseRevisionCode(100)
                 .setBaseHardwareAccelerated(true)
@@ -912,13 +923,13 @@ public class PackageParserTest {
                 .setUse32BitAbi(true)
                 .setVolumeUuid("d52ef59a-7def-4541-bf21-4c28ed4b65a0")
                 .addPermission(permission)
-                .addPermissionGroup(new ParsedPermissionGroup())
-                .addActivity(new ParsedActivity())
-                .addReceiver(new ParsedActivity())
-                .addProvider(new ParsedProvider())
-                .addService(new ParsedService())
-                .addInstrumentation(new ParsedInstrumentation())
-                .addUsesPermission(new ParsedUsesPermission("foo7", 0))
+                .addPermissionGroup(new ParsedPermissionGroupImpl())
+                .addActivity(new ParsedActivityImpl())
+                .addReceiver(new ParsedActivityImpl())
+                .addProvider(new ParsedProviderImpl())
+                .addService(new ParsedServiceImpl())
+                .addInstrumentation(new ParsedInstrumentationImpl())
+                .addUsesPermission(new ParsedUsesPermissionImpl("foo7", 0))
                 .addImplicitPermission("foo25")
                 .addProtectedBroadcast("foo8")
                 .setStaticSharedLibName("foo23")
@@ -946,7 +957,7 @@ public class PackageParserTest {
                 .setOverlayTarget("foo21")
                 .setOverlayPriority(100)
                 .setUpgradeKeySets(new ArraySet<>())
-                .addPreferredActivityFilter("className", new ParsedIntentInfo())
+                .addPreferredActivityFilter("className", new ParsedIntentInfoImpl())
                 .addConfigPreference(new ConfigurationInfo())
                 .addReqFeature(new FeatureInfo())
                 .addFeatureGroup(new FeatureGroupInfo())

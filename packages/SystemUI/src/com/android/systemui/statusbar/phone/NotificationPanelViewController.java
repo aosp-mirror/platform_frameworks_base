@@ -4541,9 +4541,16 @@ public class NotificationPanelViewController extends PanelViewController {
                     }
                 }
             } else {
-                mKeyguardStatusBarViewController.updateViewState(
-                        /* alpha= */ 1f,
-                        keyguardShowing ? View.VISIBLE : View.INVISIBLE);
+                final boolean animatingUnlockedShadeToKeyguard = oldState == SHADE
+                        && statusBarState == KEYGUARD
+                        && mUnlockedScreenOffAnimationController.isScreenOffAnimationPlaying();
+                if (!animatingUnlockedShadeToKeyguard) {
+                    // Only make the status bar visible if we're not animating the screen off, since
+                    // we only want to be showing the clock/notifications during the animation.
+                    mKeyguardStatusBarViewController.updateViewState(
+                            /* alpha= */ 1f,
+                            keyguardShowing ? View.VISIBLE : View.INVISIBLE);
+                }
                 if (keyguardShowing && oldState != mBarState) {
                     if (mQs != null) {
                         mQs.hideImmediately();

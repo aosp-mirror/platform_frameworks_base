@@ -65,7 +65,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
-import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
 
@@ -78,7 +78,7 @@ import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 final class VerificationParams extends HandlerParams {
     /**
@@ -688,7 +688,7 @@ final class VerificationParams extends HandlerParams {
 
     private void sendVerificationCompleteNotification() {
         if (mParentVerificationParams != null) {
-            mParentVerificationParams.trySendVerificationCompleteNotification(this, mRet);
+            mParentVerificationParams.trySendVerificationCompleteNotification(this);
         } else {
             try {
                 mObserver.onPackageInstalled(null, mRet, mErrorMessage,
@@ -717,7 +717,7 @@ final class VerificationParams extends HandlerParams {
     static final class MultiPackageVerificationParams extends HandlerParams {
         private final IPackageInstallObserver2 mObserver;
         private final List<VerificationParams> mChildParams;
-        private final Map<VerificationParams, Integer> mVerificationState;
+        private final Set<VerificationParams> mVerificationState;
 
         MultiPackageVerificationParams(VerificationParams parent, List<VerificationParams> children,
                 PackageManagerService pm) throws PackageManagerException {
@@ -731,7 +731,7 @@ final class VerificationParams extends HandlerParams {
                 final VerificationParams childParams = children.get(i);
                 childParams.mParentVerificationParams = this;
             }
-            mVerificationState = new ArrayMap<>(mChildParams.size());
+            mVerificationState = new ArraySet<>(mChildParams.size());
             mObserver = parent.mObserver;
         }
 
@@ -749,18 +749,16 @@ final class VerificationParams extends HandlerParams {
             }
         }
 
-        void trySendVerificationCompleteNotification(VerificationParams child, int currentStatus) {
-            mVerificationState.put(child, currentStatus);
+        void trySendVerificationCompleteNotification(VerificationParams child) {
+            mVerificationState.add(child);
             if (mVerificationState.size() != mChildParams.size()) {
                 return;
             }
             int completeStatus = PackageManager.INSTALL_SUCCEEDED;
             String errorMsg = null;
-            for (VerificationParams params : mVerificationState.keySet()) {
+            for (VerificationParams params : mVerificationState) {
                 int status = params.mRet;
-                if (status == PackageManager.INSTALL_UNKNOWN) {
-                    return;
-                } else if (status != PackageManager.INSTALL_SUCCEEDED) {
+                if (status != PackageManager.INSTALL_SUCCEEDED) {
                     completeStatus = status;
                     errorMsg = params.mErrorMessage;
                     break;

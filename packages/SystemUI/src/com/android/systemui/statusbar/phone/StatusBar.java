@@ -4340,10 +4340,9 @@ public class StatusBar extends SystemUI implements
     private final DeviceProvisionedListener mUserSetupObserver = new DeviceProvisionedListener() {
         @Override
         public void onUserSetupChanged() {
-            final boolean userSetup = mDeviceProvisionedController.isUserSetup(
-                    mDeviceProvisionedController.getCurrentUser());
-            Log.d(TAG, "mUserSetupObserver - DeviceProvisionedListener called for user "
-                    + mDeviceProvisionedController.getCurrentUser());
+            final boolean userSetup = mDeviceProvisionedController.isCurrentUserSetup();
+            Log.d(TAG, "mUserSetupObserver - DeviceProvisionedListener called for "
+                    + "current user");
             if (MULTIUSER_DEBUG) {
                 Log.d(TAG, String.format("User setup changed: userSetup=%s mUserSetup=%s",
                         userSetup, mUserSetup));

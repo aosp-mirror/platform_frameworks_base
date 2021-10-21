@@ -44,10 +44,11 @@ import org.junit.runners.Parameterized
 class MultiBubblesScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(testSpec) {
 
     override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = buildTransition() {
+        get() = buildTransition {
             setup {
                 test {
                     for (i in 1..3) {
+                        val addBubbleBtn = waitAndGetAddBubbleBtn()
                         addBubbleBtn?.run { addBubbleBtn.click() } ?: error("Add Bubble not found")
                     }
                     val showBubble = device.wait(Until.findObject(

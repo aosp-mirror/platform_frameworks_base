@@ -31,10 +31,11 @@ import static com.android.server.timezonedetector.location.LocationTimeZoneProvi
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STOPPED;
 
 import android.annotation.DurationMillisLong;
-import android.annotation.IntRange;
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.service.timezone.TimeZoneProviderEvent;
+import android.service.timezone.TimeZoneProviderSuggestion;
 import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.GuardedBy;
@@ -43,7 +44,6 @@ import com.android.server.timezonedetector.GeolocationTimeZoneSuggestion;
 import com.android.server.timezonedetector.location.ThreadingDomain.SingleRunnableQueue;
 
 import java.time.Duration;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -184,7 +184,7 @@ class ControllerImpl extends LocationTimeZoneProviderController {
         // re-started).
         if (mLastSuggestion != null && mLastSuggestion.getZoneIds() != null) {
             GeolocationTimeZoneSuggestion suggestion = createUncertainSuggestion(
-                    "Providers are stopping");
+                    mEnvironment.elapsedRealtimeMillis(), "Providers are stopping");
             makeSuggestion(suggestion);
         }
     }
@@ -272,6 +272,7 @@ class ControllerImpl extends LocationTimeZoneProviderController {
                     // If both providers are {perm failed} then the controller immediately
                     // becomes uncertain.
                     GeolocationTimeZoneSuggestion suggestion = createUncertainSuggestion(
+                            mEnvironment.elapsedRealtimeMillis(),
                             "Providers are failed:"
                                     + " primary=" + mPrimaryProvider.getCurrentState()
                                     + " secondary=" + mPrimaryProvider.getCurrentState());
@@ -410,6 +411,7 @@ class ControllerImpl extends LocationTimeZoneProviderController {
             // If both providers are now terminated, then a suggestion must be sent informing the
             // time zone detector that there are no further updates coming in future.
             GeolocationTimeZoneSuggestion suggestion = createUncertainSuggestion(
+                    mEnvironment.elapsedRealtimeMillis(),
                     "Both providers are terminated:"
                             + " primary=" + primaryCurrentState.provider
                             + ", secondary=" + secondaryCurrentState.provider);
@@ -432,8 +434,9 @@ class ControllerImpl extends LocationTimeZoneProviderController {
             // the loss of a binder-based provider, or initialization took too long. This is treated
             // the same as explicit uncertainty, i.e. where the provider has explicitly told this
             // process it is uncertain.
-            handleProviderUncertainty(provider, "provider=" + provider
-                    + ", implicit uncertainty, event=null");
+            long uncertaintyStartedElapsedMillis = mEnvironment.elapsedRealtimeMillis();
+            handleProviderUncertainty(provider, uncertaintyStartedElapsedMillis,
+                    "provider=" + provider + ", implicit uncertainty, event=null");
             return;
         }
 
@@ -448,18 +451,17 @@ class ControllerImpl extends LocationTimeZoneProviderController {
         switch (event.getType()) {
             case EVENT_TYPE_PERMANENT_FAILURE: {
                 // This shouldn't happen. A provider cannot be started and have this event type.
-                warnLog("Provider=" + provider
-                        + " is started, but event suggests it shouldn't be");
+                warnLog("Provider=" + provider + " is started, but event suggests it shouldn't be");
                 break;
             }
             case EVENT_TYPE_UNCERTAIN: {
-                handleProviderUncertainty(provider, "provider=" + provider
-                        + ", explicit uncertainty. event=" + event);
+                long uncertaintyStartedElapsedMillis = event.getCreationElapsedMillis();
+                handleProviderUncertainty(provider, uncertaintyStartedElapsedMillis,
+                        "provider=" + provider + ", explicit uncertainty. event=" + event);
                 break;
             }
             case EVENT_TYPE_SUGGESTION: {
-                handleProviderSuggestion(provider, event.getSuggestion().getTimeZoneIds(),
-                        "Event received provider=" + provider + ", event=" + event);
+                handleProviderSuggestion(provider, event);
                 break;
             }
             default: {
@@ -475,8 +477,8 @@ class ControllerImpl extends LocationTimeZoneProviderController {
     @GuardedBy("mSharedLock")
     private void handleProviderSuggestion(
             @NonNull LocationTimeZoneProvider provider,
-            @Nullable List<String> timeZoneIds,
-            @NonNull String reason) {
+            @NonNull TimeZoneProviderEvent providerEvent) {
+
         // By definition, the controller is now certain.
         cancelUncertaintyTimeout();
 
@@ -484,10 +486,25 @@ class ControllerImpl extends LocationTimeZoneProviderController {
             stopProviderIfStarted(mSecondaryProvider);
         }
 
-        GeolocationTimeZoneSuggestion suggestion = new GeolocationTimeZoneSuggestion(timeZoneIds);
-        suggestion.addDebugInfo(reason);
-        // Rely on the receiver to dedupe suggestions. It is better to over-communicate.
-        makeSuggestion(suggestion);
+        TimeZoneProviderSuggestion providerSuggestion = providerEvent.getSuggestion();
+
+        // For the suggestion's effectiveFromElapsedMillis, use the time embedded in the provider's
+        // suggestion (which indicates the time when the provider detected the location used to
+        // establish the time zone).
+        //
+        // An alternative would be to use the current time or the providerEvent creation time, but
+        // this would hinder the ability for the time_zone_detector to judge which suggestions are
+        // based on newer information when comparing suggestions between different sources.
+        long effectiveFromElapsedMillis = providerSuggestion.getElapsedRealtimeMillis();
+        GeolocationTimeZoneSuggestion geoSuggestion =
+                GeolocationTimeZoneSuggestion.createCertainSuggestion(
+                        effectiveFromElapsedMillis, providerSuggestion.getTimeZoneIds());
+
+        String debugInfo = "Event received provider=" + provider
+                + ", providerEvent=" + providerEvent
+                + ", suggestionCreationTime=" + mEnvironment.elapsedRealtimeMillis();
+        geoSuggestion.addDebugInfo(debugInfo);
+        makeSuggestion(geoSuggestion);
     }
 
     @Override
@@ -551,7 +568,9 @@ class ControllerImpl extends LocationTimeZoneProviderController {
      */
     @GuardedBy("mSharedLock")
     void handleProviderUncertainty(
-            @NonNull LocationTimeZoneProvider provider, @NonNull String reason) {
+            @NonNull LocationTimeZoneProvider provider,
+            @ElapsedRealtimeLong long uncertaintyStartedElapsedMillis,
+            @NonNull String reason) {
         Objects.requireNonNull(provider);
 
         // Start the uncertainty timeout if needed to ensure the controller will eventually make an
@@ -559,9 +578,11 @@ class ControllerImpl extends LocationTimeZoneProviderController {
         if (!mUncertaintyTimeoutQueue.hasQueued()) {
             debugLog("Starting uncertainty timeout: reason=" + reason);
 
-            Duration delay = mEnvironment.getUncertaintyDelay();
-            mUncertaintyTimeoutQueue.runDelayed(() -> onProviderUncertaintyTimeout(provider),
-                    delay.toMillis());
+            Duration uncertaintyDelay = mEnvironment.getUncertaintyDelay();
+            mUncertaintyTimeoutQueue.runDelayed(
+                    () -> onProviderUncertaintyTimeout(
+                            provider, uncertaintyStartedElapsedMillis, uncertaintyDelay),
+                    uncertaintyDelay.toMillis());
         }
 
         if (provider == mPrimaryProvider) {
@@ -573,21 +594,45 @@ class ControllerImpl extends LocationTimeZoneProviderController {
         }
     }
 
-    private void onProviderUncertaintyTimeout(@NonNull LocationTimeZoneProvider provider) {
+    private void onProviderUncertaintyTimeout(
+            @NonNull LocationTimeZoneProvider provider,
+            @ElapsedRealtimeLong long uncertaintyStartedElapsedMillis,
+            @NonNull Duration uncertaintyDelay) {
         mThreadingDomain.assertCurrentThread();
 
         synchronized (mSharedLock) {
+            long afterUncertaintyTimeoutElapsedMillis = mEnvironment.elapsedRealtimeMillis();
+
+            // For the effectiveFromElapsedMillis suggestion property, use the
+            // uncertaintyStartedElapsedMillis. This is the time when the provider first reported
+            // uncertainty, i.e. before the uncertainty timeout.
+            //
+            // afterUncertaintyTimeoutElapsedMillis could be used instead, which is the time when
+            // the location_time_zone_manager finally confirms that the time zone was uncertain,
+            // but the suggestion property allows the information to be back-dated, which should
+            // help when comparing suggestions from different sources.
             GeolocationTimeZoneSuggestion suggestion = createUncertainSuggestion(
+                    uncertaintyStartedElapsedMillis,
                     "Uncertainty timeout triggered for " + provider.getName() + ":"
                             + " primary=" + mPrimaryProvider
-                            + ", secondary=" + mSecondaryProvider);
+                            + ", secondary=" + mSecondaryProvider
+                            + ", uncertaintyStarted="
+                            + Duration.ofMillis(uncertaintyStartedElapsedMillis)
+                            + ", afterUncertaintyTimeout="
+                            + Duration.ofMillis(afterUncertaintyTimeoutElapsedMillis)
+                            + ", uncertaintyDelay=" + uncertaintyDelay
+            );
             makeSuggestion(suggestion);
         }
     }
 
     @NonNull
-    private static GeolocationTimeZoneSuggestion createUncertainSuggestion(@NonNull String reason) {
-        GeolocationTimeZoneSuggestion suggestion = new GeolocationTimeZoneSuggestion(null);
+    private static GeolocationTimeZoneSuggestion createUncertainSuggestion(
+            @ElapsedRealtimeLong long effectiveFromElapsedMillis,
+            @NonNull String reason) {
+        GeolocationTimeZoneSuggestion suggestion =
+                GeolocationTimeZoneSuggestion.createUncertainSuggestion(
+                        effectiveFromElapsedMillis);
         suggestion.addDebugInfo(reason);
         return suggestion;
     }
@@ -621,20 +666,5 @@ class ControllerImpl extends LocationTimeZoneProviderController {
                     .setSecondaryProviderStateChanges(mSecondaryProvider.getRecordedStates());
             return builder.build();
         }
-    }
-
-    @Nullable
-    private LocationTimeZoneProvider getLocationTimeZoneProvider(
-            @IntRange(from = 0, to = 1) int providerIndex) {
-        LocationTimeZoneProvider targetProvider;
-        if (providerIndex == 0) {
-            targetProvider = mPrimaryProvider;
-        } else if (providerIndex == 1) {
-            targetProvider = mSecondaryProvider;
-        } else {
-            warnLog("Bad providerIndex=" + providerIndex);
-            targetProvider = null;
-        }
-        return targetProvider;
     }
 }

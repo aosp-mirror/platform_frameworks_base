@@ -32,7 +32,7 @@ import android.util.SparseArray;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 
-public final class PackageRemovedInfo {
+final class PackageRemovedInfo {
     final PackageSender mPackageSender;
     String mRemovedPackage;
     String mInstallerPackageName;

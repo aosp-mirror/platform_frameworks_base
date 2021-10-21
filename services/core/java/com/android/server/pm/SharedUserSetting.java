@@ -18,7 +18,9 @@ package com.android.server.pm;
 
 import android.annotation.NonNull;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.parsing.component.ComponentMutateUtils;
 import android.content.pm.parsing.component.ParsedProcess;
+import android.content.pm.parsing.component.ParsedProcessImpl;
 import android.service.pm.PackageServiceDumpProto;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -126,15 +128,14 @@ public final class SharedUserSetting extends SettingBase {
 
     void addProcesses(Map<String, ParsedProcess> newProcs) {
         if (newProcs != null) {
-            final int numProcs = newProcs.size();
             for (String key : newProcs.keySet()) {
                 ParsedProcess newProc = newProcs.get(key);
                 ParsedProcess proc = processes.get(newProc.getName());
                 if (proc == null) {
-                    proc = new ParsedProcess(newProc);
+                    proc = new ParsedProcessImpl(newProc);
                     processes.put(newProc.getName(), proc);
                 } else {
-                    proc.addStateFrom(newProc);
+                    ComponentMutateUtils.addStateFrom(proc, newProc);
                 }
             }
             onChanged();
@@ -280,8 +281,7 @@ public final class SharedUserSetting extends SettingBase {
             this.processes.clear();
             this.processes.ensureCapacity(numProcs);
             for (int i = 0; i < numProcs; i++) {
-                ParsedProcess proc =
-                        new ParsedProcess(sharedUser.processes.valueAt(i));
+                ParsedProcess proc = new ParsedProcessImpl(sharedUser.processes.valueAt(i));
                 this.processes.put(proc.getName(), proc);
             }
         } else {

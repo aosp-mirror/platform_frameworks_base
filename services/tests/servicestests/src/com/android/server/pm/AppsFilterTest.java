@@ -35,9 +35,13 @@ import android.content.pm.SigningDetails;
 import android.content.pm.UserInfo;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.component.ParsedActivity;
+import android.content.pm.parsing.component.ParsedActivityImpl;
 import android.content.pm.parsing.component.ParsedInstrumentation;
+import android.content.pm.parsing.component.ParsedInstrumentationImpl;
 import android.content.pm.parsing.component.ParsedIntentInfo;
+import android.content.pm.parsing.component.ParsedIntentInfoImpl;
 import android.content.pm.parsing.component.ParsedProvider;
+import android.content.pm.parsing.component.ParsedProviderImpl;
 import android.os.Build;
 import android.os.Process;
 import android.os.UserHandle;
@@ -82,9 +86,17 @@ public class AppsFilterTest {
     private static final int DUMMY_OVERLAY_APPID = 10756;
     private static final int SYSTEM_USER = 0;
     private static final int SECONDARY_USER = 10;
+    private static final int ADDED_USER = 11;
     private static final int[] USER_ARRAY = {SYSTEM_USER, SECONDARY_USER};
-    private static final UserInfo[] USER_INFO_LIST = Arrays.stream(USER_ARRAY).mapToObj(
-            id -> new UserInfo(id, Integer.toString(id), 0)).toArray(UserInfo[]::new);
+    private static final int[] USER_ARRAY_WITH_ADDED = {SYSTEM_USER, SECONDARY_USER, ADDED_USER};
+    private static final UserInfo[] USER_INFO_LIST = toUserInfos(USER_ARRAY);
+    private static final UserInfo[] USER_INFO_LIST_WITH_ADDED = toUserInfos(USER_ARRAY_WITH_ADDED);
+
+    private static UserInfo[] toUserInfos(int[] userIds) {
+        return Arrays.stream(userIds)
+                .mapToObj(id -> new UserInfo(id, Integer.toString(id), 0))
+                .toArray(UserInfo[]::new);
+    }
 
     @Mock
     AppsFilter.FeatureConfig mFeatureConfigMock;
@@ -146,21 +158,22 @@ public class AppsFilterTest {
     }
 
     private static ParsedActivity createActivity(String packageName, IntentFilter[] filters) {
-        ParsedActivity activity = new ParsedActivity();
+        ParsedActivityImpl activity = new ParsedActivityImpl();
         activity.setPackageName(packageName);
         for (IntentFilter filter : filters) {
-            final ParsedIntentInfo info = new ParsedIntentInfo();
+            final ParsedIntentInfoImpl info = new ParsedIntentInfoImpl();
+            final IntentFilter intentInfoFilter = info.getIntentFilter();
             if (filter.countActions() > 0) {
-                filter.actionsIterator().forEachRemaining(info::addAction);
+                filter.actionsIterator().forEachRemaining(intentInfoFilter::addAction);
             }
             if (filter.countCategories() > 0) {
-                filter.actionsIterator().forEachRemaining(info::addAction);
+                filter.actionsIterator().forEachRemaining(intentInfoFilter::addAction);
             }
             if (filter.countDataAuthorities() > 0) {
-                filter.authoritiesIterator().forEachRemaining(info::addDataAuthority);
+                filter.authoritiesIterator().forEachRemaining(intentInfoFilter::addDataAuthority);
             }
             if (filter.countDataSchemes() > 0) {
-                filter.schemesIterator().forEachRemaining(info::addDataScheme);
+                filter.schemesIterator().forEachRemaining(intentInfoFilter::addDataScheme);
             }
             activity.addIntent(info);
             activity.setExported(true);
@@ -170,13 +183,13 @@ public class AppsFilterTest {
 
     private static ParsingPackage pkgWithInstrumentation(
             String packageName, String instrumentationTargetPackage) {
-        ParsedInstrumentation instrumentation = new ParsedInstrumentation();
+        ParsedInstrumentationImpl instrumentation = new ParsedInstrumentationImpl();
         instrumentation.setTargetPackage(instrumentationTargetPackage);
         return pkg(packageName).addInstrumentation(instrumentation);
     }
 
     private static ParsingPackage pkgWithProvider(String packageName, String authority) {
-        ParsedProvider provider = new ParsedProvider();
+        ParsedProviderImpl provider = new ParsedProviderImpl();
         provider.setPackageName(packageName);
         provider.setExported(true);
         provider.setAuthority(authority);
@@ -315,6 +328,64 @@ public class AppsFilterTest {
         assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_APPID, calling, target,
                 SYSTEM_USER));
         watcher.verifyNoChangeReported("shouldFilterApplication");
+    }
+
+    @Test
+    public void testOnUserUpdated_FilterMatches() throws Exception {
+        final AppsFilter appsFilter =
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null,
+                        mMockExecutor);
+        simulateAddBasicAndroid(appsFilter);
+
+        appsFilter.onSystemReady();
+
+        PackageSetting target = simulateAddPackage(appsFilter,
+                pkgWithProvider("com.some.package", "com.some.authority"), DUMMY_TARGET_APPID);
+        PackageSetting calling = simulateAddPackage(appsFilter,
+                pkgQueriesProvider("com.some.other.package", "com.some.authority"),
+                DUMMY_CALLING_APPID);
+
+        for (int subjectUserId : USER_ARRAY) {
+            for (int otherUserId : USER_ARRAY) {
+                assertFalse(appsFilter.shouldFilterApplication(
+                        UserHandle.getUid(DUMMY_CALLING_APPID, subjectUserId), calling, target,
+                        otherUserId));
+            }
+        }
+
+        // adds new user
+        doAnswer(invocation -> {
+            ((AppsFilter.StateProvider.CurrentStateCallback) invocation.getArgument(0))
+                    .currentState(mExisting, USER_INFO_LIST_WITH_ADDED);
+            return new Object();
+        }).when(mStateProvider)
+                .runWithState(any(AppsFilter.StateProvider.CurrentStateCallback.class));
+        appsFilter.onUserCreated(ADDED_USER);
+
+        for (int subjectUserId : USER_ARRAY_WITH_ADDED) {
+            for (int otherUserId : USER_ARRAY_WITH_ADDED) {
+                assertFalse(appsFilter.shouldFilterApplication(
+                        UserHandle.getUid(DUMMY_CALLING_APPID, subjectUserId), calling, target,
+                        otherUserId));
+            }
+        }
+
+        // delete user
+        doAnswer(invocation -> {
+            ((AppsFilter.StateProvider.CurrentStateCallback) invocation.getArgument(0))
+                    .currentState(mExisting, USER_INFO_LIST);
+            return new Object();
+        }).when(mStateProvider)
+                .runWithState(any(AppsFilter.StateProvider.CurrentStateCallback.class));
+        appsFilter.onUserDeleted(ADDED_USER);
+
+        for (int subjectUserId : USER_ARRAY) {
+            for (int otherUserId : USER_ARRAY) {
+                assertFalse(appsFilter.shouldFilterApplication(
+                        UserHandle.getUid(DUMMY_CALLING_APPID, subjectUserId), calling, target,
+                        otherUserId));
+            }
+        }
     }
 
     @Test

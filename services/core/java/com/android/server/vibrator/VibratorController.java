@@ -41,12 +41,11 @@ final class VibratorController {
 
     private final Object mLock = new Object();
     private final NativeWrapper mNativeWrapper;
-    private final VibratorInfo.Builder mVibratorInfoBuilder;
 
     @GuardedBy("mLock")
     private VibratorInfo mVibratorInfo;
     @GuardedBy("mLock")
-    private boolean mVibratorInfoLoaded;
+    private boolean mVibratorInfoLoadSuccessful;
     @GuardedBy("mLock")
     private final RemoteCallbackList<IVibratorStateListener> mVibratorStateListeners =
             new RemoteCallbackList<>();
@@ -73,10 +72,16 @@ final class VibratorController {
             NativeWrapper nativeWrapper) {
         mNativeWrapper = nativeWrapper;
         mNativeWrapper.init(vibratorId, listener);
-        mVibratorInfoBuilder = new VibratorInfo.Builder(vibratorId);
-        mVibratorInfoLoaded = mNativeWrapper.getInfo(SUGGESTED_FREQUENCY_SAFE_RANGE,
-                mVibratorInfoBuilder);
-        mVibratorInfo = mVibratorInfoBuilder.build();
+        VibratorInfo.Builder vibratorInfoBuilder = new VibratorInfo.Builder(vibratorId);
+        mVibratorInfoLoadSuccessful = mNativeWrapper.getInfo(SUGGESTED_FREQUENCY_SAFE_RANGE,
+                vibratorInfoBuilder);
+        mVibratorInfo = vibratorInfoBuilder.build();
+
+        if (!mVibratorInfoLoadSuccessful) {
+            Slog.e(TAG,
+                    "Vibrator controller initialization failed to load some HAL info for vibrator "
+                            + vibratorId);
+        }
     }
 
     /** Register state listener for this vibrator. */
@@ -108,15 +113,33 @@ final class VibratorController {
         }
     }
 
+    /** Reruns the query to the vibrator to load the {@link VibratorInfo}, if not yet successful. */
+    public void reloadVibratorInfoIfNeeded() {
+        synchronized (mLock) {
+            if (mVibratorInfoLoadSuccessful) {
+                return;
+            }
+            int vibratorId = mVibratorInfo.getId();
+            VibratorInfo.Builder vibratorInfoBuilder = new VibratorInfo.Builder(vibratorId);
+            mVibratorInfoLoadSuccessful = mNativeWrapper.getInfo(SUGGESTED_FREQUENCY_SAFE_RANGE,
+                    vibratorInfoBuilder);
+            mVibratorInfo = vibratorInfoBuilder.build();
+            if (!mVibratorInfoLoadSuccessful) {
+                Slog.e(TAG, "Failed retry of HAL getInfo for vibrator " + vibratorId);
+            }
+        }
+    }
+
+    /** Checks if the {@link VibratorInfo} was loaded from the vibrator hardware successfully. */
+    boolean isVibratorInfoLoadSuccessful() {
+        synchronized (mLock) {
+            return mVibratorInfoLoadSuccessful;
+        }
+    }
+
     /** Return the {@link VibratorInfo} representing the vibrator controlled by this instance. */
     public VibratorInfo getVibratorInfo() {
         synchronized (mLock) {
-            if (!mVibratorInfoLoaded) {
-                // Try to load the vibrator metadata that has failed in the last attempt.
-                mVibratorInfoLoaded = mNativeWrapper.getInfo(SUGGESTED_FREQUENCY_SAFE_RANGE,
-                        mVibratorInfoBuilder);
-                mVibratorInfo = mVibratorInfoBuilder.build();
-            }
             return mVibratorInfo;
         }
     }
@@ -164,7 +187,9 @@ final class VibratorController {
      * @return true if this vibrator has this capability, false otherwise
      */
     public boolean hasCapability(long capability) {
-        return mVibratorInfo.hasCapability(capability);
+        synchronized (mLock) {
+            return mVibratorInfo.hasCapability(capability);
+        }
     }
 
     /** Return {@code true} if the underlying vibrator is currently available, false otherwise. */
@@ -178,10 +203,10 @@ final class VibratorController {
      * <p>This will affect the state of {@link #isUnderExternalControl()}.
      */
     public void setExternalControl(boolean externalControl) {
-        if (!mVibratorInfo.hasCapability(IVibrator.CAP_EXTERNAL_CONTROL)) {
-            return;
-        }
         synchronized (mLock) {
+            if (!mVibratorInfo.hasCapability(IVibrator.CAP_EXTERNAL_CONTROL)) {
+                return;
+            }
             mIsUnderExternalControl = externalControl;
             mNativeWrapper.setExternalControl(externalControl);
         }
@@ -192,10 +217,10 @@ final class VibratorController {
      * if given {@code effect} is {@code null}.
      */
     public void updateAlwaysOn(int id, @Nullable PrebakedSegment prebaked) {
-        if (!mVibratorInfo.hasCapability(IVibrator.CAP_ALWAYS_ON_CONTROL)) {
-            return;
-        }
         synchronized (mLock) {
+            if (!mVibratorInfo.hasCapability(IVibrator.CAP_ALWAYS_ON_CONTROL)) {
+                return;
+            }
             if (prebaked == null) {
                 mNativeWrapper.alwaysOnDisable(id);
             } else {
@@ -268,10 +293,10 @@ final class VibratorController {
      * do not support the input or a negative number if the operation failed.
      */
     public long on(PrimitiveSegment[] primitives, long vibrationId) {
-        if (!mVibratorInfo.hasCapability(IVibrator.CAP_COMPOSE_EFFECTS)) {
-            return 0;
-        }
         synchronized (mLock) {
+            if (!mVibratorInfo.hasCapability(IVibrator.CAP_COMPOSE_EFFECTS)) {
+                return 0;
+            }
             long duration = mNativeWrapper.compose(primitives, vibrationId);
             if (duration > 0) {
                 mCurrentAmplitude = -1;
@@ -290,10 +315,10 @@ final class VibratorController {
      * @return The duration of the effect playing, or 0 if unsupported.
      */
     public long on(RampSegment[] primitives, long vibrationId) {
-        if (!mVibratorInfo.hasCapability(IVibrator.CAP_COMPOSE_PWLE_EFFECTS)) {
-            return 0;
-        }
         synchronized (mLock) {
+            if (!mVibratorInfo.hasCapability(IVibrator.CAP_COMPOSE_PWLE_EFFECTS)) {
+                return 0;
+            }
             int braking = mVibratorInfo.getDefaultBraking();
             long duration = mNativeWrapper.composePwle(primitives, braking, vibrationId);
             if (duration > 0) {
@@ -327,6 +352,7 @@ final class VibratorController {
         synchronized (mLock) {
             return "VibratorController{"
                     + "mVibratorInfo=" + mVibratorInfo
+                    + ", mVibratorInfoLoadSuccessful=" + mVibratorInfoLoadSuccessful
                     + ", mIsVibrating=" + mIsVibrating
                     + ", mCurrentAmplitude=" + mCurrentAmplitude
                     + ", mIsUnderExternalControl=" + mIsUnderExternalControl
@@ -393,10 +419,15 @@ final class VibratorController {
          * allocated and returned by {@link #nativeInit(int, OnVibrationCompleteListener)}.
          */
         private static native long getNativeFinalizer();
+
         private static native boolean isAvailable(long nativePtr);
+
         private static native long on(long nativePtr, long milliseconds, long vibrationId);
+
         private static native void off(long nativePtr);
+
         private static native void setAmplitude(long nativePtr, float amplitude);
+
         private static native long performEffect(long nativePtr, long effect, long strength,
                 long vibrationId);
 

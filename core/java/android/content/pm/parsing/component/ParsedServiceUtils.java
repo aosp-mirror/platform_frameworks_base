@@ -19,6 +19,8 @@ package android.content.pm.parsing.component;
 import static android.content.pm.parsing.component.ComponentParseUtils.flag;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.parsing.ParsingPackage;
@@ -45,19 +47,20 @@ public class ParsedServiceUtils {
     @NonNull
     public static ParseResult<ParsedService> parseService(String[] separateProcesses,
             ParsingPackage pkg, Resources res, XmlResourceParser parser, int flags,
-            boolean useRoundIcon, ParseInput input)
+            boolean useRoundIcon, @Nullable String defaultSplitName, @NonNull ParseInput input)
             throws XmlPullParserException, IOException {
         boolean visibleToEphemeral;
         boolean setExported;
 
         final String packageName = pkg.getPackageName();
-        final ParsedService service = new ParsedService();
+        final ParsedServiceImpl service = new ParsedServiceImpl();
         String tag = parser.getName();
 
         TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestService);
         try {
-            ParseResult<ParsedService> result = ParsedMainComponentUtils.parseMainComponent(
-                    service, tag, separateProcesses, pkg, sa, flags, useRoundIcon, input,
+            ParseResult<ParsedServiceImpl> result = ParsedMainComponentUtils.parseMainComponent(
+                    service, tag, separateProcesses, pkg, sa, flags, useRoundIcon, defaultSplitName,
+                    input,
                     R.styleable.AndroidManifestService_banner,
                     R.styleable.AndroidManifestService_description,
                     R.styleable.AndroidManifestService_directBootAware,
@@ -73,7 +76,7 @@ public class ParsedServiceUtils {
             );
 
             if (result.isError()) {
-                return result;
+                return input.error(result);
             }
 
             setExported = sa.hasValue(R.styleable.AndroidManifestService_exported);
@@ -138,7 +141,8 @@ public class ParsedServiceUtils {
                     parseResult = intentResult;
                     if (intentResult.isSuccess()) {
                         ParsedIntentInfo intent = intentResult.getResult();
-                        service.setOrder(Math.max(intent.getOrder(), service.getOrder()));
+                        IntentFilter intentFilter = intent.getIntentFilter();
+                        service.setOrder(Math.max(intentFilter.getOrder(), service.getOrder()));
                         service.addIntent(intent);
                     }
                     break;

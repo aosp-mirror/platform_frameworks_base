@@ -1104,9 +1104,6 @@ public class DisplayPolicy {
         switch (attrs.type) {
             case TYPE_NOTIFICATION_SHADE:
                 mNotificationShade = win;
-                if (mDisplayContent.isDefaultDisplay) {
-                    mService.mPolicy.setKeyguardCandidateLw(win);
-                }
                 break;
             case TYPE_STATUS_BAR:
                 mStatusBar = win;
@@ -1302,9 +1299,6 @@ public class DisplayPolicy {
             mDisplayContent.setInsetProvider(ITYPE_NAVIGATION_BAR, null, null);
         } else if (mNotificationShade == win) {
             mNotificationShade = null;
-            if (mDisplayContent.isDefaultDisplay) {
-                mService.mPolicy.setKeyguardCandidateLw(null);
-            }
         } else if (mClimateBarAlt == win) {
             mClimateBarAlt = null;
             mDisplayContent.setInsetProvider(ITYPE_CLIMATE_BAR, null, null);
@@ -1789,6 +1783,13 @@ public class DisplayPolicy {
      */
     public void applyPostLayoutPolicyLw(WindowState win, WindowManager.LayoutParams attrs,
             WindowState attached, WindowState imeTarget) {
+        if (INSETS_LAYOUT_GENERALIZATION && attrs.type == TYPE_NAVIGATION_BAR) {
+            // Keep mNavigationBarPosition updated to make sure the transient detection and bar
+            // color control is working correctly.
+            final DisplayFrames displayFrames = mDisplayContent.mDisplayFrames;
+            mNavigationBarPosition = navigationBarPosition(displayFrames.mDisplayWidth,
+                    displayFrames.mDisplayHeight, displayFrames.mRotation);
+        }
         final boolean affectsSystemUi = win.canAffectSystemUiFlags();
         if (DEBUG_LAYOUT) Slog.i(TAG, "Win " + win + ": affectsSystemUi=" + affectsSystemUi);
         applyKeyguardPolicy(win, imeTarget);

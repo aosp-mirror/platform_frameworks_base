@@ -2394,7 +2394,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     private void start() {
         removeAllProcessGroups();
 
-        CriticalEventLog.init();
         mBatteryStatsService.publish();
         mAppOpsService.publish();
         Slog.d("AppOps", "AppOpsService published");
@@ -2404,6 +2403,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mActivityTaskManager.onActivityManagerInternalAdded();
         mPendingIntentController.onActivityManagerInternalAdded();
         mAppProfiler.onActivityManagerInternalAdded();
+        CriticalEventLog.init();
     }
 
     public void initPowerManagement() {

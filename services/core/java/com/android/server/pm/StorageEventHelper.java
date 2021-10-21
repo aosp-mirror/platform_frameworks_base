@@ -132,7 +132,7 @@ public final class StorageEventHelper extends StorageEventListener {
         final AppDataHelper appDataHelper = new AppDataHelper(mPm);
         final ArrayList<PackageFreezer> freezers = new ArrayList<>();
         final ArrayList<AndroidPackage> loaded = new ArrayList<>();
-        final int parseFlags = mPm.mDefParseFlags | ParsingPackageUtils.PARSE_EXTERNAL_STORAGE;
+        final int parseFlags = mPm.getDefParseFlags() | ParsingPackageUtils.PARSE_EXTERNAL_STORAGE;
 
         final Settings.VersionInfo ver;
         final List<PackageSetting> packages;

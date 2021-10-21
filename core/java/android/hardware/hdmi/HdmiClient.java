@@ -63,6 +63,9 @@ public abstract class HdmiClient {
         if (listener == null) {
             throw new IllegalArgumentException("listener must not be null.");
         }
+        if (executor == null) {
+            throw new IllegalArgumentException("executor must not be null.");
+        }
         try {
             mService.deviceSelect(logicalAddress,
                     getCallbackWrapper(logicalAddress, executor, listener));

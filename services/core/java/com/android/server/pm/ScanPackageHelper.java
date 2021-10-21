@@ -65,6 +65,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.ParsingPackageUtils;
+import android.content.pm.parsing.component.ComponentMutateUtils;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedMainComponent;
 import android.content.pm.parsing.component.ParsedProcess;
@@ -218,8 +219,7 @@ final class ScanPackageHelper {
             PackageManagerService.renameStaticSharedLibraryPackage(parsedPackage);
         }
 
-        return addForInitLI(parsedPackage, parseFlags, scanFlags, currentTime, user,
-                mPm.mPlatformPackage, mPm.mIsUpgrade, mPm.mIsPreNMR1Upgrade);
+        return addForInitLI(parsedPackage, parseFlags, scanFlags, currentTime, user);
     }
 
     // TODO(b/199937291): scanPackageNewLI() and scanPackageOnlyLI() should be merged.
@@ -258,7 +258,7 @@ final class ScanPackageHelper {
             } else {
                 isUpdatedSystemApp = disabledPkgSetting != null;
             }
-            applyPolicy(parsedPackage, scanFlags, mPm.mPlatformPackage, isUpdatedSystemApp);
+            applyPolicy(parsedPackage, scanFlags, mPm.getPlatformPackage(), isUpdatedSystemApp);
             assertPackageIsValid(parsedPackage, parseFlags, scanFlags);
 
             SharedUserSetting sharedUserSetting = null;
@@ -274,8 +274,8 @@ final class ScanPackageHelper {
                     }
                 }
             }
-            String platformPackageName = mPm.mPlatformPackage == null
-                    ? null : mPm.mPlatformPackage.getPackageName();
+            String platformPackageName = mPm.getPlatformPackage() == null
+                    ? null : mPm.getPlatformPackage().getPackageName();
             final ScanRequest request = new ScanRequest(parsedPackage, sharedUserSetting,
                     pkgSetting == null ? null : pkgSetting.getPkg(), pkgSetting, disabledPkgSetting,
                     originalPkgSetting, realPkgName, parseFlags, scanFlags,
@@ -766,8 +766,7 @@ final class ScanPackageHelper {
     public AndroidPackage addForInitLI(ParsedPackage parsedPackage,
             @ParsingPackageUtils.ParseFlags int parseFlags,
             @PackageManagerService.ScanFlags int scanFlags, long currentTime,
-            @Nullable UserHandle user, AndroidPackage platformPackage, boolean isUpgrade,
-            boolean isPreNMR1Upgrade) throws PackageManagerException {
+            @Nullable UserHandle user) throws PackageManagerException {
         final boolean scanSystemPartition =
                 (parseFlags & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR) != 0;
         final String renamedPkgName;
@@ -775,8 +774,11 @@ final class ScanPackageHelper {
         final boolean isSystemPkgUpdated;
         final boolean pkgAlreadyExists;
         PackageSetting pkgSetting;
+        AndroidPackage platformPackage;
+        final boolean isUpgrade = mPm.isDeviceUpgrading();
 
         synchronized (mPm.mLock) {
+            platformPackage = mPm.getPlatformPackage();
             renamedPkgName = mPm.mSettings.getRenamedPackageLPr(
                     AndroidPackageUtils.getRealPackageOrNull(parsedPackage));
             final String realPkgName = getRealPackageName(parsedPackage,
@@ -825,8 +827,8 @@ final class ScanPackageHelper {
                 if (isSystemPkgUpdated) {
                     // we're updating the disabled package, so, scan it as the package setting
                     boolean isPlatformPackage = platformPackage != null
-                            && Objects.equals(platformPackage.getPackageName(),
-                            parsedPackage.getPackageName());
+                            && platformPackage.getPackageName().equals(
+                                    parsedPackage.getPackageName());
                     final ScanRequest request = new ScanRequest(parsedPackage, sharedUserSetting,
                             null, disabledPkgSetting /* pkgSetting */,
                             null /* disabledPkgSetting */, null /* originalPkgSetting */,
@@ -910,8 +912,7 @@ final class ScanPackageHelper {
         // TODO(b/136132412): skip for Incremental installation
         final boolean skipVerify = scanSystemPartition
                 || (forceCollect && canSkipForcedPackageVerification(parsedPackage));
-        collectCertificatesLI(pkgSetting, parsedPackage, forceCollect, skipVerify,
-                isPreNMR1Upgrade);
+        collectCertificatesLI(pkgSetting, parsedPackage, forceCollect, skipVerify);
 
         // Reset profile if the application version is changed
         maybeClearProfilesForUpgradesLI(pkgSetting, parsedPackage);
@@ -1074,11 +1075,10 @@ final class ScanPackageHelper {
     }
 
     private void collectCertificatesLI(PackageSetting ps, ParsedPackage parsedPackage,
-            boolean forceCollect, boolean skipVerify, boolean mIsPreNMR1Upgrade)
-            throws PackageManagerException {
+            boolean forceCollect, boolean skipVerify) throws PackageManagerException {
         // When upgrading from pre-N MR1, verify the package time stamp using the package
         // directory and not the APK file.
-        final long lastModifiedTime = mIsPreNMR1Upgrade
+        final long lastModifiedTime = mPm.isPreNMR1Upgrade()
                 ? new File(parsedPackage.getPath()).lastModified()
                 : getLastModifiedTime(parsedPackage);
         final Settings.VersionInfo settingsVersionForPackage =
@@ -1249,7 +1249,7 @@ final class ScanPackageHelper {
         synchronized (mPm.mLock) {
             // The special "android" package can only be defined once
             if (pkg.getPackageName().equals("android")) {
-                if (mPm.mAndroidApplication != null) {
+                if (mPm.getCoreAndroidApplication() != null) {
                     Slog.w(TAG, "*************************************************");
                     Slog.w(TAG, "Core android package being redefined.  Skipping.");
                     Slog.w(TAG, " codePath=" + pkg.getPath());
@@ -1400,7 +1400,7 @@ final class ScanPackageHelper {
             // to the user-installed location. If we don't allow this change, any newer,
             // user-installed version of the application will be ignored.
             if ((scanFlags & SCAN_REQUIRE_KNOWN) != 0) {
-                if (mPm.mExpectingBetter.containsKey(pkg.getPackageName())) {
+                if (mPm.isExpectingBetter(pkg.getPackageName())) {
                     Slog.w(TAG, "Relax SCAN_REQUIRE_KNOWN requirement for package "
                             + pkg.getPackageName());
                 } else {
@@ -1481,9 +1481,7 @@ final class ScanPackageHelper {
                     if ((parseFlags & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR) == 0) {
                         // This must be an update to a system overlay. Immutable overlays cannot be
                         // upgraded.
-                        Objects.requireNonNull(mPm.mOverlayConfig,
-                                "Parsing non-system dir before overlay configs are initialized");
-                        if (!mPm.mOverlayConfig.isMutable(pkg.getPackageName())) {
+                        if (!mPm.isOverlayMutable(pkg.getPackageName())) {
                             throw new PackageManagerException("Overlay "
                                     + pkg.getPackageName()
                                     + " is static and cannot be upgraded.");
@@ -1797,7 +1795,7 @@ final class ScanPackageHelper {
             final ParsedActivity component = pkg.getActivities().get(i);
             final Boolean enabled = componentsEnabledStates.get(component.getName());
             if (enabled != null) {
-                component.setEnabled(enabled);
+                ComponentMutateUtils.setEnabled(component, enabled);
             }
         }
 
@@ -1805,7 +1803,7 @@ final class ScanPackageHelper {
             final ParsedActivity component = pkg.getReceivers().get(i);
             final Boolean enabled = componentsEnabledStates.get(component.getName());
             if (enabled != null) {
-                component.setEnabled(enabled);
+                ComponentMutateUtils.setEnabled(component, enabled);
             }
         }
 
@@ -1813,7 +1811,7 @@ final class ScanPackageHelper {
             final ParsedProvider component = pkg.getProviders().get(i);
             final Boolean enabled = componentsEnabledStates.get(component.getName());
             if (enabled != null) {
-                component.setEnabled(enabled);
+                ComponentMutateUtils.setEnabled(component, enabled);
             }
         }
 
@@ -1821,7 +1819,7 @@ final class ScanPackageHelper {
             final ParsedService component = pkg.getServices().get(i);
             final Boolean enabled = componentsEnabledStates.get(component.getName());
             if (enabled != null) {
-                component.setEnabled(enabled);
+                ComponentMutateUtils.setEnabled(component, enabled);
             }
         }
     }

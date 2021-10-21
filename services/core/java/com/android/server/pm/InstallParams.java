@@ -87,6 +87,7 @@ import android.content.pm.SigningDetails;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.ParsingPackageUtils;
+import android.content.pm.parsing.component.ComponentMutateUtils;
 import android.content.pm.parsing.component.ParsedPermission;
 import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.parsing.result.ParseResult;
@@ -733,7 +734,7 @@ final class InstallParams extends HandlerParams {
 
         // Retrieve PackageSettings and parse package
         @ParsingPackageUtils.ParseFlags final int parseFlags =
-                mPm.mDefParseFlags | ParsingPackageUtils.PARSE_CHATTY
+                mPm.getDefParseFlags() | ParsingPackageUtils.PARSE_CHATTY
                 | ParsingPackageUtils.PARSE_ENFORCE_CODE
                 | (onExternal ? ParsingPackageUtils.PARSE_EXTERNAL_STORAGE : 0);
 
@@ -948,7 +949,7 @@ final class InstallParams extends HandlerParams {
                     Slog.w(TAG, "Non-System package " + parsedPackage.getPackageName()
                             + " attempting to delcare ephemeral permission "
                             + perm.getName() + "; Removing ephemeral.");
-                    perm.setProtectionLevel(
+                    ComponentMutateUtils.setProtectionLevel(perm,
                             perm.getProtectionLevel() & ~PermissionInfo.PROTECTION_FLAG_INSTANT);
                 }
 
@@ -988,7 +989,8 @@ final class InstallParams extends HandlerParams {
                                         + " trying to change a non-runtime permission "
                                         + perm.getName()
                                         + " to runtime; keeping old protection level");
-                                perm.setProtectionLevel(bp.getProtectionLevel());
+                                ComponentMutateUtils.setProtectionLevel(perm,
+                                        bp.getProtectionLevel());
                             }
                         }
                     }

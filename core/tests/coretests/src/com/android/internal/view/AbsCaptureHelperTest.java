@@ -31,6 +31,7 @@ import android.app.Instrumentation;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.os.CancellationSignal;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -38,7 +39,6 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
-import androidx.test.annotation.UiThreadTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.view.ScrollCaptureViewHelper.ScrollResult;
@@ -46,6 +46,10 @@ import com.android.internal.view.ScrollCaptureViewHelper.ScrollResult;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This test contains a set of operations designed to verify the behavior of a
@@ -88,6 +92,7 @@ public abstract class AbsCaptureHelperTest<T extends View, H extends ScrollCaptu
     private T mTarget;
     private Rect mScrollBounds;
     private H mHelper;
+    private CancellationSignal mCancellationSignal;
 
     private Instrumentation mInstrumentation;
 
@@ -96,6 +101,7 @@ public abstract class AbsCaptureHelperTest<T extends View, H extends ScrollCaptu
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
         Context context = mInstrumentation.getTargetContext();
         mWm = context.getSystemService(WindowManager.class);
+        mCancellationSignal = new CancellationSignal();
 
         // Instantiate parent view on the main thread
         mInstrumentation.runOnMainSync(() -> mContentRoot = new FrameLayout(context));
@@ -157,7 +163,6 @@ public abstract class AbsCaptureHelperTest<T extends View, H extends ScrollCaptu
     }
 
     @Test
-    @UiThreadTest
     public void onScrollRequested_up_fromTop() {
         initHelper(ScrollPosition.TOP);
 
@@ -168,7 +173,6 @@ public abstract class AbsCaptureHelperTest<T extends View, H extends ScrollCaptu
     }
 
     @Test
-    @UiThreadTest
     public void onScrollRequested_down_fromTop() {
         initHelper(ScrollPosition.TOP);
         Rect request = new Rect(0, WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT + CAPTURE_HEIGHT);
@@ -182,7 +186,6 @@ public abstract class AbsCaptureHelperTest<T extends View, H extends ScrollCaptu
     }
 
     @Test
-    @UiThreadTest
     public void onScrollRequested_up_fromMiddle() {
         initHelper(ScrollPosition.MIDDLE);
 
@@ -197,7 +200,6 @@ public abstract class AbsCaptureHelperTest<T extends View, H extends ScrollCaptu
     }
 
     @Test
-    @UiThreadTest
     public void onScrollRequested_down_fromMiddle() {
         initHelper(ScrollPosition.MIDDLE);
 
@@ -212,7 +214,6 @@ public abstract class AbsCaptureHelperTest<T extends View, H extends ScrollCaptu
     }
 
     @Test
-    @UiThreadTest
     public void onScrollRequested_up_fromBottom() {
         initHelper(ScrollPosition.BOTTOM);
 
@@ -227,7 +228,6 @@ public abstract class AbsCaptureHelperTest<T extends View, H extends ScrollCaptu
     }
 
     @Test
-    @UiThreadTest
     public void onScrollRequested_down_fromBottom() {
         initHelper(ScrollPosition.BOTTOM);
 
@@ -242,7 +242,6 @@ public abstract class AbsCaptureHelperTest<T extends View, H extends ScrollCaptu
     }
 
     @Test
-    @UiThreadTest
     public void onScrollRequested_offTopEdge() {
         initHelper(ScrollPosition.TOP);
 
@@ -262,7 +261,6 @@ public abstract class AbsCaptureHelperTest<T extends View, H extends ScrollCaptu
     }
 
     @Test
-    @UiThreadTest
     public void onScrollRequested_offBottomEdge() {
         initHelper(ScrollPosition.BOTTOM);
 
@@ -279,7 +277,7 @@ public abstract class AbsCaptureHelperTest<T extends View, H extends ScrollCaptu
     }
 
     @After
-    public final void removeWindow() throws InterruptedException {
+    public final void removeWindow() {
         mInstrumentation.runOnMainSync(() -> {
             if (mContentRoot != null && mContentRoot.isAttachedToWindow()) {
                 mWm.removeViewImmediate(mContentRoot);
@@ -288,17 +286,36 @@ public abstract class AbsCaptureHelperTest<T extends View, H extends ScrollCaptu
     }
 
     private void initHelper(ScrollPosition position) {
-        setInitialScrollPosition(mTarget, position);
         mHelper = createHelper();
-        mScrollBounds = mHelper.onComputeScrollBounds(mTarget);
-        mHelper.onPrepareForStart(mTarget, mScrollBounds);
+        mInstrumentation.runOnMainSync(() -> {
+            setInitialScrollPosition(mTarget, position);
+            mScrollBounds = mHelper.onComputeScrollBounds(mTarget);
+            mHelper.onPrepareForStart(mTarget, mScrollBounds);
+        });
     }
 
     @NonNull
-    private ScrollResult requestScrollSync(H helper, Rect scrollBounds, Rect request) {
-        helper.onPrepareForStart(mTarget, scrollBounds);
-        ScrollResult result = helper.onScrollRequested(mTarget, scrollBounds, request);
-
+    private ScrollResult requestScrollSync(H helper, Rect scrollBounds, Rect request)  {
+        AtomicReference<ScrollResult> resultRef = new AtomicReference<>();
+        CountDownLatch latch = new CountDownLatch(1);
+        mInstrumentation.runOnMainSync(() -> {
+            helper.onPrepareForStart(mTarget, scrollBounds);
+            helper.onScrollRequested(mTarget, scrollBounds, request, mCancellationSignal,
+                    (result) -> {
+                        resultRef.set(result);
+                        latch.countDown();
+                    });
+        });
+        try {
+            if (!latch.await(5, TimeUnit.SECONDS)) {
+                mCancellationSignal.cancel();
+                fail("Timeout waiting for ScrollResult");
+            }
+        } catch (InterruptedException e) {
+            mCancellationSignal.cancel();
+            fail("Interrupted!");
+        }
+        ScrollResult result = resultRef.get();
         assertNotNull(result);
         return result;
     }

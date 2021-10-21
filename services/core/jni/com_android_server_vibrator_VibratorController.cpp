@@ -443,7 +443,7 @@ static jboolean vibratorGetInfo(JNIEnv* env, jclass /* clazz */, jlong ptr,
     env->CallObjectMethod(vibratorInfoBuilder, sVibratorInfoBuilderClassInfo.setFrequencyMapping,
                           frequencyMapping);
 
-    return info.checkAndLogFailure("vibratorGetInfo") ? JNI_FALSE : JNI_TRUE;
+    return info.isFailedLogged("vibratorGetInfo") ? JNI_FALSE : JNI_TRUE;
 }
 
 static const JNINativeMethod method_table[] = {

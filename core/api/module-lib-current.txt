@@ -333,7 +333,7 @@ package android.os.storage {
 package android.provider {
 
   public static final class ContactsContract.RawContactsEntity implements android.provider.BaseColumns android.provider.ContactsContract.DataColumns android.provider.ContactsContract.RawContactsColumns {
-    method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public static java.util.Map<java.lang.String,java.util.List<android.content.ContentValues>> queryRawContactEntity(@NonNull android.content.Context, long);
+    method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public static java.util.Map<java.lang.String,java.util.List<android.content.ContentValues>> queryRawContactEntity(@NonNull android.content.ContentResolver, long);
   }
 
   public final class DeviceConfig {

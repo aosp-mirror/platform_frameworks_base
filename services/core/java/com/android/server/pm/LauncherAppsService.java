@@ -1263,7 +1263,7 @@ public class LauncherAppsService extends SystemService {
 
         /** Returns whether or not the given appId is in allow list */
         private static boolean isCallingAppIdAllowed(int[] appIdAllowList, @AppIdInt int appId) {
-            if (appIdAllowList == null) {
+            if (appIdAllowList == null || appId < Process.FIRST_APPLICATION_UID) {
                 return true;
             }
             return Arrays.binarySearch(appIdAllowList, appId) > -1;

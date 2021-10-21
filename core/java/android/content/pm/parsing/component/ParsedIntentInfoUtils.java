@@ -53,11 +53,13 @@ public class ParsedIntentInfoUtils {
             ParsingPackage pkg, Resources res, XmlResourceParser parser, boolean allowGlobs,
             boolean allowAutoVerify, ParseInput input)
             throws XmlPullParserException, IOException {
-        ParsedIntentInfo intentInfo = new ParsedIntentInfo();
+        ParsedIntentInfoImpl intentInfo = new ParsedIntentInfoImpl();
+        IntentFilter intentFilter = intentInfo.getIntentFilter();
         TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestIntentFilter);
         try {
-            intentInfo.setPriority(sa.getInt(R.styleable.AndroidManifestIntentFilter_priority, 0));
-            intentInfo.setOrder(sa.getInt(R.styleable.AndroidManifestIntentFilter_order, 0));
+            intentFilter.setPriority(
+                    sa.getInt(R.styleable.AndroidManifestIntentFilter_priority, 0));
+            intentFilter.setOrder(sa.getInt(R.styleable.AndroidManifestIntentFilter_order, 0));
 
             TypedValue v = sa.peekValue(R.styleable.AndroidManifestIntentFilter_label);
             if (v != null) {
@@ -78,7 +80,7 @@ public class ParsedIntentInfoUtils {
             }
 
             if (allowAutoVerify) {
-                intentInfo.setAutoVerify(sa.getBoolean(
+                intentFilter.setAutoVerify(sa.getBoolean(
                         R.styleable.AndroidManifestIntentFilter_autoVerify,
                         false));
             }
@@ -102,12 +104,12 @@ public class ParsedIntentInfoUtils {
                     if (value == null) {
                         result = input.error("No value supplied for <android:name>");
                     } else if (value.isEmpty()) {
-                        intentInfo.addAction(value);
+                        intentFilter.addAction(value);
                         // Prior to R, this was not a failure
                         result = input.deferError("No value supplied for <android:name>",
                                 ParseInput.DeferredError.EMPTY_INTENT_ACTION_CATEGORY);
                     } else {
-                        intentInfo.addAction(value);
+                        intentFilter.addAction(value);
                         result = input.success(null);
                     }
                     break;
@@ -117,12 +119,12 @@ public class ParsedIntentInfoUtils {
                     if (value == null) {
                         result = input.error("No value supplied for <android:name>");
                     } else if (value.isEmpty()) {
-                        intentInfo.addCategory(value);
+                        intentFilter.addCategory(value);
                         // Prior to R, this was not a failure
                         result = input.deferError("No value supplied for <android:name>",
                                 ParseInput.DeferredError.EMPTY_INTENT_ACTION_CATEGORY);
                     } else {
-                        intentInfo.addCategory(value);
+                        intentFilter.addCategory(value);
                         result = input.success(null);
                     }
                     break;
@@ -140,14 +142,14 @@ public class ParsedIntentInfoUtils {
             }
         }
 
-        intentInfo.setHasDefault(intentInfo.hasCategory(Intent.CATEGORY_DEFAULT));
+        intentInfo.setHasDefault(intentFilter.hasCategory(Intent.CATEGORY_DEFAULT));
 
         if (DEBUG) {
             final StringBuilder cats = new StringBuilder("Intent d=");
             cats.append(intentInfo.isHasDefault());
             cats.append(", cat=");
 
-            final Iterator<String> it = intentInfo.categoriesIterator();
+            final Iterator<String> it = intentFilter.categoriesIterator();
             if (it != null) {
                 while (it.hasNext()) {
                     cats.append(' ');
@@ -163,13 +165,14 @@ public class ParsedIntentInfoUtils {
     @NonNull
     private static ParseResult<ParsedIntentInfo> parseData(ParsedIntentInfo intentInfo,
             Resources resources, XmlResourceParser parser, boolean allowGlobs, ParseInput input) {
+        IntentFilter intentFilter = intentInfo.getIntentFilter();
         TypedArray sa = resources.obtainAttributes(parser, R.styleable.AndroidManifestData);
         try {
             String str = sa.getNonConfigurationString(
                     R.styleable.AndroidManifestData_mimeType, 0);
             if (str != null) {
                 try {
-                    intentInfo.addDataType(str);
+                    intentFilter.addDataType(str);
                 } catch (IntentFilter.MalformedMimeTypeException e) {
                     return input.error(e.toString());
                 }
@@ -178,26 +181,26 @@ public class ParsedIntentInfoUtils {
             str = sa.getNonConfigurationString(
                     R.styleable.AndroidManifestData_mimeGroup, 0);
             if (str != null) {
-                intentInfo.addMimeGroup(str);
+                intentFilter.addMimeGroup(str);
             }
 
             str = sa.getNonConfigurationString(
                     R.styleable.AndroidManifestData_scheme, 0);
             if (str != null) {
-                intentInfo.addDataScheme(str);
+                intentFilter.addDataScheme(str);
             }
 
             str = sa.getNonConfigurationString(
                     R.styleable.AndroidManifestData_ssp, 0);
             if (str != null) {
-                intentInfo.addDataSchemeSpecificPart(str,
+                intentFilter.addDataSchemeSpecificPart(str,
                         PatternMatcher.PATTERN_LITERAL);
             }
 
             str = sa.getNonConfigurationString(
                     R.styleable.AndroidManifestData_sspPrefix, 0);
             if (str != null) {
-                intentInfo.addDataSchemeSpecificPart(str,
+                intentFilter.addDataSchemeSpecificPart(str,
                         PatternMatcher.PATTERN_PREFIX);
             }
 
@@ -208,7 +211,7 @@ public class ParsedIntentInfoUtils {
                     return input.error(
                             "sspPattern not allowed here; ssp must be literal");
                 }
-                intentInfo.addDataSchemeSpecificPart(str,
+                intentFilter.addDataSchemeSpecificPart(str,
                         PatternMatcher.PATTERN_SIMPLE_GLOB);
             }
 
@@ -219,14 +222,14 @@ public class ParsedIntentInfoUtils {
                     return input.error(
                             "sspAdvancedPattern not allowed here; ssp must be literal");
                 }
-                intentInfo.addDataSchemeSpecificPart(str,
+                intentFilter.addDataSchemeSpecificPart(str,
                         PatternMatcher.PATTERN_ADVANCED_GLOB);
             }
 
             str = sa.getNonConfigurationString(
                     R.styleable.AndroidManifestData_sspSuffix, 0);
             if (str != null) {
-                intentInfo.addDataSchemeSpecificPart(str,
+                intentFilter.addDataSchemeSpecificPart(str,
                         PatternMatcher.PATTERN_SUFFIX);
             }
 
@@ -236,19 +239,19 @@ public class ParsedIntentInfoUtils {
             String port = sa.getNonConfigurationString(
                     R.styleable.AndroidManifestData_port, 0);
             if (host != null) {
-                intentInfo.addDataAuthority(host, port);
+                intentFilter.addDataAuthority(host, port);
             }
 
             str = sa.getNonConfigurationString(
                     R.styleable.AndroidManifestData_path, 0);
             if (str != null) {
-                intentInfo.addDataPath(str, PatternMatcher.PATTERN_LITERAL);
+                intentFilter.addDataPath(str, PatternMatcher.PATTERN_LITERAL);
             }
 
             str = sa.getNonConfigurationString(
                     R.styleable.AndroidManifestData_pathPrefix, 0);
             if (str != null) {
-                intentInfo.addDataPath(str, PatternMatcher.PATTERN_PREFIX);
+                intentFilter.addDataPath(str, PatternMatcher.PATTERN_PREFIX);
             }
 
             str = sa.getNonConfigurationString(
@@ -258,7 +261,7 @@ public class ParsedIntentInfoUtils {
                     return input.error(
                             "pathPattern not allowed here; path must be literal");
                 }
-                intentInfo.addDataPath(str, PatternMatcher.PATTERN_SIMPLE_GLOB);
+                intentFilter.addDataPath(str, PatternMatcher.PATTERN_SIMPLE_GLOB);
             }
 
             str = sa.getNonConfigurationString(
@@ -268,13 +271,13 @@ public class ParsedIntentInfoUtils {
                     return input.error(
                             "pathAdvancedPattern not allowed here; path must be literal");
                 }
-                intentInfo.addDataPath(str, PatternMatcher.PATTERN_ADVANCED_GLOB);
+                intentFilter.addDataPath(str, PatternMatcher.PATTERN_ADVANCED_GLOB);
             }
 
             str = sa.getNonConfigurationString(
                     R.styleable.AndroidManifestData_pathSuffix, 0);
             if (str != null) {
-                intentInfo.addDataPath(str, PatternMatcher.PATTERN_SUFFIX);
+                intentFilter.addDataPath(str, PatternMatcher.PATTERN_SUFFIX);
             }
 
 

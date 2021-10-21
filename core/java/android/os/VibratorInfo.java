@@ -461,7 +461,8 @@ public class VibratorInfo implements Parcelable {
         int supportedPrimitivesCount = mSupportedPrimitives.size();
         String[] names = new String[supportedPrimitivesCount];
         for (int i = 0; i < supportedPrimitivesCount; i++) {
-            names[i] = VibrationEffect.Composition.primitiveToString(mSupportedPrimitives.keyAt(i));
+            names[i] = VibrationEffect.Composition.primitiveToString(mSupportedPrimitives.keyAt(i))
+                    + "(" + mSupportedPrimitives.valueAt(i) + "ms)";
         }
         return names;
     }

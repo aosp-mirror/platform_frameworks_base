@@ -180,9 +180,13 @@ public abstract class TvSystemUIModule {
         return new Recents(context, recentsImplementation, commandQueue);
     }
 
-    @Binds
-    abstract DeviceProvisionedController bindDeviceProvisionedController(
-            DeviceProvisionedControllerImpl deviceProvisionedController);
+    @SysUISingleton
+    @Provides
+    static DeviceProvisionedController providesDeviceProvisionedController(
+            DeviceProvisionedControllerImpl deviceProvisionedController) {
+        deviceProvisionedController.init();
+        return deviceProvisionedController;
+    }
 
     @Binds
     abstract KeyguardViewController bindKeyguardViewController(

@@ -17,11 +17,13 @@
 package android.content.pm.parsing.component;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.util.ArraySet;
 
 import com.android.internal.R;
 
@@ -106,6 +108,54 @@ public class ParsedAttributionUtils {
             ((ArrayList) inheritFrom).trimToSize();
         }
 
-        return input.success(new ParsedAttribution(attributionTag, label, inheritFrom));
+        return input.success(new ParsedAttributionImpl(attributionTag, label, inheritFrom));
+    }
+
+    /**
+     * @return Is this set of attributions a valid combination for a single package?
+     */
+    public static boolean isCombinationValid(@Nullable List<ParsedAttribution> attributions) {
+        if (attributions == null) {
+            return true;
+        }
+
+        ArraySet<String> attributionTags = new ArraySet<>(attributions.size());
+        ArraySet<String> inheritFromAttributionTags = new ArraySet<>();
+
+        int numAttributions = attributions.size();
+        if (numAttributions > ParsedAttributionImpl.MAX_NUM_ATTRIBUTIONS) {
+            return false;
+        }
+
+        for (int attributionNum = 0; attributionNum < numAttributions; attributionNum++) {
+            boolean wasAdded = attributionTags.add(attributions.get(attributionNum).getTag());
+            if (!wasAdded) {
+                // feature id is not unique
+                return false;
+            }
+        }
+
+        for (int attributionNum = 0; attributionNum < numAttributions; attributionNum++) {
+            ParsedAttribution feature = attributions.get(attributionNum);
+
+            final List<String> inheritFromList = feature.getInheritFrom();
+            int numInheritFrom = inheritFromList.size();
+            for (int inheritFromNum = 0; inheritFromNum < numInheritFrom; inheritFromNum++) {
+                String inheritFrom = inheritFromList.get(inheritFromNum);
+
+                if (attributionTags.contains(inheritFrom)) {
+                    // Cannot inherit from a attribution that is still defined
+                    return false;
+                }
+
+                boolean wasAdded = inheritFromAttributionTags.add(inheritFrom);
+                if (!wasAdded) {
+                    // inheritFrom is not unique
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 }

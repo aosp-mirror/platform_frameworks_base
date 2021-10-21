@@ -91,8 +91,10 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.SigningDetails;
+import android.content.pm.parsing.component.ComponentMutateUtils;
 import android.content.pm.parsing.component.ParsedPermission;
 import android.content.pm.parsing.component.ParsedPermissionGroup;
+import android.content.pm.parsing.component.ParsedPermissionUtils;
 import android.content.pm.permission.CompatibilityPermissionInfo;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.metrics.LogMaker;
@@ -2287,7 +2289,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 newPermissionNum++) {
             final ParsedPermission newPermission =
                     newPackage.getPermissions().get(newPermissionNum);
-            final int newProtection = newPermission.getProtection();
+            final int newProtection = ParsedPermissionUtils.getProtection(newPermission);
 
             if ((newProtection & PermissionInfo.PROTECTION_DANGEROUS) != 0) {
                 final String permissionName = newPermission.getName();
@@ -2403,7 +2405,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             ParsedPermission p = pkg.getPermissions().get(i);
 
             // Assume by default that we did not install this permission into the system.
-            p.setFlags(p.getFlags() & ~PermissionInfo.FLAG_INSTALLED);
+            ComponentMutateUtils.setExactFlags(p, p.getFlags() & ~PermissionInfo.FLAG_INSTALLED);
 
             final PermissionInfo permissionInfo;
             final Permission oldPermission;
@@ -2413,7 +2415,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 // permissions for one app being granted to someone just because they happen
                 // to be in a group defined by another app (before this had no implications).
                 if (pkg.getTargetSdkVersion() > Build.VERSION_CODES.LOLLIPOP_MR1) {
-                    p.setParsedPermissionGroup(mRegistry.getPermissionGroup(p.getGroup()));
+                    ComponentMutateUtils.setParsedPermissionGroup(p,
+                            mRegistry.getPermissionGroup(p.getGroup()));
                     // Warn for a permission in an unknown group.
                     if (DEBUG_PERMISSIONS
                             && p.getGroup() != null && p.getParsedPermissionGroup() == null) {
@@ -2441,7 +2444,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     mRegistry.addPermission(permission);
                 }
                 if (permission.isInstalled()) {
-                    p.setFlags(p.getFlags() | PermissionInfo.FLAG_INSTALLED);
+                    ComponentMutateUtils.setExactFlags(p,
+                            p.getFlags() | PermissionInfo.FLAG_INSTALLED);
                 }
                 if (permission.isDefinitionChanged()) {
                     definitionChangedPermissions.add(p.getName());
@@ -2516,7 +2520,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         r.append(p.getName());
                     }
                 }
-                if (p.isAppOp()) {
+                if (ParsedPermissionUtils.isAppOp(p)) {
                     // TODO(zhanghai): Should we just remove the entry for this permission directly?
                     mRegistry.removeAppOpPermissionPackage(p.getName(), pkg.getPackageName());
                 }
@@ -3451,7 +3455,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         for (int i = 0, size = CompatibilityPermissionInfo.COMPAT_PERMS.length; i < size; i++) {
             final CompatibilityPermissionInfo info = CompatibilityPermissionInfo.COMPAT_PERMS[i];
             if (info.getName().equals(perm)
-                    && pkg.getTargetSdkVersion() < info.sdkVersion) {
+                    && pkg.getTargetSdkVersion() < info.getSdkVersion()) {
                 allowed = true;
                 Log.i(TAG, "Auto-granting " + perm + " to old pkg "
                         + pkg.getPackageName());

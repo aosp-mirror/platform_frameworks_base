@@ -3002,17 +3002,6 @@ public final class Settings implements Watchable, Snappable {
             }
         }
 
-        // If the build is setup to drop runtime permissions
-        // on update drop the files before loading them.
-        if (PackageManagerService.CLEAR_RUNTIME_PERMISSIONS_ON_UPGRADE) {
-            final VersionInfo internal = getInternalVersion();
-            if (!Build.FINGERPRINT.equals(internal.fingerprint)) {
-                for (UserInfo user : users) {
-                    mRuntimePermissionsPersistence.deleteUserRuntimePermissionsFile(user.id);
-                }
-            }
-        }
-
         final int N = mPendingPackages.size();
 
         for (int i = 0; i < N; i++) {
@@ -3092,7 +3081,7 @@ public final class Settings implements Watchable, Snappable {
                 for (int i=0; i<intents.size(); i++) {
                     Pair<String, ParsedIntentInfo> pair = intents.get(i);
                     applyDefaultPreferredActivityLPw(pmInternal,
-                            new WatchedIntentFilter(pair.second),
+                            pair.second.getIntentFilter(),
                             new ComponentName(ps.getPackageName(), pair.first), userId);
                 }
             }
@@ -3178,7 +3167,7 @@ public final class Settings implements Watchable, Snappable {
     }
 
     private void applyDefaultPreferredActivityLPw(PackageManagerInternal pmInternal,
-            WatchedIntentFilter tmpPa, ComponentName cn, int userId) {
+            IntentFilter tmpPa, ComponentName cn, int userId) {
         // The initial preferences only specify the target activity
         // component and intent-filter, not the set of matches.  So we
         // now need to query for the matches to build the correct
@@ -3422,7 +3411,7 @@ public final class Settings implements Watchable, Snappable {
                 PreferredActivity tmpPa = new PreferredActivity(parser);
                 if (tmpPa.mPref.getParseError() == null) {
                     applyDefaultPreferredActivityLPw(
-                            pmInternal, tmpPa, tmpPa.mPref.mComponent, userId);
+                            pmInternal, tmpPa.getIntentFilter(), tmpPa.mPref.mComponent, userId);
                 } else {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
                             "Error in package manager settings: <preferred-activity> "
