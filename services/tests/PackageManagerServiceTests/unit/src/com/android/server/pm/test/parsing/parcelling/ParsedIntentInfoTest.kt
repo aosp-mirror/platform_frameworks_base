@@ -17,102 +17,23 @@
 package com.android.server.pm.test.parsing.parcelling
 
 import android.content.pm.parsing.component.ParsedIntentInfo
-import android.os.Parcel
+import android.content.pm.parsing.component.ParsedIntentInfoImpl
 import android.os.Parcelable
 import android.os.PatternMatcher
 import kotlin.contracts.ExperimentalContracts
 
 @ExperimentalContracts
-class ParsedIntentInfoTest : ParcelableComponentTest(ParsedIntentInfo::class) {
+class ParsedIntentInfoTest : ParcelableComponentTest(
+    ParsedIntentInfo::class,
+    ParsedIntentInfoImpl::class,
+) {
 
-    override val defaultImpl = ParsedIntentInfo()
-
-    override val creator = object : Parcelable.Creator<ParsedIntentInfo> {
-        override fun createFromParcel(source: Parcel) = ParsedIntentInfo(source)
-        override fun newArray(size: Int) = Array<ParsedIntentInfo?>(size) { null }
-    }
+    override val defaultImpl = ParsedIntentInfoImpl()
+    override val creator = ParsedIntentInfoImpl.CREATOR
 
     override val excludedMethods = listOf(
-        // Used to parcel
-        "writeIntentInfoToParcel",
-        // All remaining IntentFilter methods, which are out of scope
-        "hasDataPath",
-        "hasDataSchemeSpecificPart",
-        "matchAction",
-        "matchData",
-        "actionsIterator",
-        "addAction",
-        "addCategory",
-        "addDataAuthority",
-        "addDataPath",
-        "addDataScheme",
-        "addDataSchemeSpecificPart",
-        "addDataType",
-        "addDynamicDataType",
-        "addMimeGroup",
-        "asPredicate",
-        "asPredicateWithTypeResolution",
-        "authoritiesIterator",
-        "categoriesIterator",
-        "clearDynamicDataTypes",
-        "countActions",
-        "countCategories",
-        "countDataAuthorities",
-        "countDataPaths",
-        "countDataSchemeSpecificParts",
-        "countDataSchemes",
-        "countDataTypes",
-        "countMimeGroups",
-        "countStaticDataTypes",
-        "dataTypes",
-        "debugCheck",
-        "dump",
-        "dumpDebug",
-        "getAction",
-        "getAutoVerify",
-        "getCategory",
-        "getDataAuthority",
-        "getDataPath",
-        "getDataScheme",
-        "getDataSchemeSpecificPart",
-        "getDataType",
-        "getHosts",
-        "getHostsList",
-        "getMimeGroup",
-        "getOrder",
-        "getPriority",
-        "getVisibilityToInstantApp",
-        "handleAllWebDataURI",
-        "handlesWebUris",
-        "hasAction",
-        "hasCategory",
-        "hasDataAuthority",
-        "hasDataScheme",
-        "hasDataType",
-        "hasExactDataType",
-        "hasExactDynamicDataType",
-        "hasExactStaticDataType",
-        "hasMimeGroup",
-        "isExplicitlyVisibleToInstantApp",
-        "isImplicitlyVisibleToInstantApp",
-        "isVerified",
-        "isVisibleToInstantApp",
-        "match",
-        "matchCategories",
-        "matchDataAuthority",
-        "mimeGroupsIterator",
-        "needsVerification",
-        "pathsIterator",
-        "readFromXml",
-        "schemeSpecificPartsIterator",
-        "schemesIterator",
-        "setAutoVerify",
-        "setOrder",
-        "setPriority",
-        "setVerified",
-        "setVisibilityToInstantApp",
-        "typesIterator",
-        "writeToXml",
+        // Tested through extraAssertions, since this isn't a settable field
+        "getIntentFilter"
     )
 
     override val baseParams = listOf(
@@ -122,31 +43,30 @@ class ParsedIntentInfoTest : ParcelableComponentTest(ParsedIntentInfo::class) {
         ParsedIntentInfo::getNonLocalizedLabel,
     )
 
-    override fun initialObject() = ParsedIntentInfo().apply {
-        addAction("test.ACTION")
-        addDataAuthority("testAuthority", "404")
-        addCategory("test.CATEGORY")
-        addMimeGroup("testMime")
-        addDataPath("testPath", PatternMatcher.PATTERN_LITERAL)
+    override fun initialObject() = ParsedIntentInfoImpl().apply {
+        intentFilter.apply {
+            addAction("test.ACTION")
+            addDataAuthority("testAuthority", "404")
+            addCategory("test.CATEGORY")
+            addMimeGroup("testMime")
+            addDataPath("testPath", PatternMatcher.PATTERN_LITERAL)
+        }
     }
 
     override fun extraAssertions(before: Parcelable, after: Parcelable) {
         super.extraAssertions(before, after)
-        after as ParsedIntentInfo
-        expect.that(after.actionsIterator().asSequence().singleOrNull())
+        val intentFilter = (after as ParsedIntentInfo).intentFilter
+        expect.that(intentFilter.actionsIterator().asSequence().singleOrNull())
             .isEqualTo("test.ACTION")
 
-        val authority = after.authoritiesIterator().asSequence().singleOrNull()
+        val authority = intentFilter.authoritiesIterator().asSequence().singleOrNull()
         expect.that(authority?.host).isEqualTo("testAuthority")
         expect.that(authority?.port).isEqualTo(404)
 
-        expect.that(after.categoriesIterator().asSequence().singleOrNull())
+        expect.that(intentFilter.categoriesIterator().asSequence().singleOrNull())
             .isEqualTo("test.CATEGORY")
-        expect.that(after.mimeGroupsIterator().asSequence().singleOrNull())
+        expect.that(intentFilter.mimeGroupsIterator().asSequence().singleOrNull())
             .isEqualTo("testMime")
-        expect.that(after.hasDataPath("testPath")).isTrue()
+        expect.that(intentFilter.hasDataPath("testPath")).isTrue()
     }
-
-    override fun writeToParcel(parcel: Parcel, value: Parcelable) =
-        ParsedIntentInfo.PARCELER.parcel(value as ParsedIntentInfo, parcel, 0)
 }

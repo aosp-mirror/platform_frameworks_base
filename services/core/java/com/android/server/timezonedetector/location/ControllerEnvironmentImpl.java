@@ -16,7 +16,9 @@
 
 package com.android.server.timezonedetector.location;
 
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
+import android.os.SystemClock;
 
 import com.android.server.LocalServices;
 import com.android.server.timezonedetector.ConfigurationChangeListener;
@@ -82,5 +84,10 @@ class ControllerEnvironmentImpl extends LocationTimeZoneProviderController.Envir
     @Override
     Duration getProviderEventFilteringAgeThreshold() {
         return mServiceConfigAccessor.getLocationTimeZoneProviderEventFilteringAgeThreshold();
+    }
+
+    @Override
+    @ElapsedRealtimeLong long elapsedRealtimeMillis() {
+        return SystemClock.elapsedRealtime();
     }
 }

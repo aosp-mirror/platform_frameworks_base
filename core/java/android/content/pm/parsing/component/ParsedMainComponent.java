@@ -16,157 +16,30 @@
 
 package android.content.pm.parsing.component;
 
-import static android.content.pm.parsing.ParsingPackageImpl.sForInternedString;
-
 import android.annotation.Nullable;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.text.TextUtils;
-
-import com.android.internal.util.DataClass;
-import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 
 /** @hide */
-public class ParsedMainComponent extends ParsedComponent {
+public interface ParsedMainComponent extends ParsedComponent {
 
     @Nullable
-    @DataClass.ParcelWith(ForInternedString.class)
-    protected String processName;
-    protected boolean directBootAware;
-    protected boolean enabled = true;
-    protected boolean exported;
-    protected int order;
-
-    @Nullable
-    protected String splitName;
-    @Nullable
-    protected String[] attributionTags;
-
-    public ParsedMainComponent() {
-    }
-
-    public ParsedMainComponent(ParsedMainComponent other) {
-        super(other);
-        this.processName = other.processName;
-        this.directBootAware = other.directBootAware;
-        this.enabled = other.enabled;
-        this.exported = other.exported;
-        this.order = other.order;
-        this.splitName = other.splitName;
-        this.attributionTags = other.attributionTags;
-    }
-
-    public ParsedMainComponent setOrder(int order) {
-        this.order = order;
-        return this;
-    }
-
-    public ParsedMainComponent setProcessName(String processName) {
-        this.processName = TextUtils.safeIntern(processName);
-        return this;
-    }
-
-    public ParsedMainComponent setEnabled(boolean enabled) {
-        this.enabled = enabled;
-        return this;
-    }
+    String[] getAttributionTags();
 
     /**
      * A main component's name is a class name. This makes code slightly more readable.
      */
-    public String getClassName() {
-        return getName();
-    }
+    String getClassName();
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
+    boolean isDirectBootAware();
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-        sForInternedString.parcel(this.processName, dest, flags);
-        dest.writeBoolean(this.directBootAware);
-        dest.writeBoolean(this.enabled);
-        dest.writeBoolean(this.exported);
-        dest.writeInt(this.order);
-        dest.writeString(this.splitName);
-        dest.writeString8Array(this.attributionTags);
-    }
+    boolean isEnabled();
 
-    protected ParsedMainComponent(Parcel in) {
-        super(in);
-        this.processName = sForInternedString.unparcel(in);
-        this.directBootAware = in.readBoolean();
-        this.enabled = in.readBoolean();
-        this.exported = in.readBoolean();
-        this.order = in.readInt();
-        this.splitName = in.readString();
-        this.attributionTags = in.createString8Array();
-    }
+    boolean isExported();
 
-    public static final Parcelable.Creator<ParsedMainComponent> CREATOR =
-            new Parcelable.Creator<ParsedMainComponent>() {
-                @Override
-                public ParsedMainComponent createFromParcel(Parcel source) {
-                    return new ParsedMainComponent(source);
-                }
-
-                @Override
-                public ParsedMainComponent[] newArray(int size) {
-                    return new ParsedMainComponent[size];
-                }
-            };
+    int getOrder();
 
     @Nullable
-    public String getProcessName() {
-        return processName;
-    }
-
-    public boolean isDirectBootAware() {
-        return directBootAware;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public boolean isExported() {
-        return exported;
-    }
-
-    public int getOrder() {
-        return order;
-    }
+    String getProcessName();
 
     @Nullable
-    public String getSplitName() {
-        return splitName;
-    }
-
-    @Nullable
-    public String[] getAttributionTags() {
-        return attributionTags;
-    }
-
-    public ParsedMainComponent setDirectBootAware(boolean value) {
-        directBootAware = value;
-        return this;
-    }
-
-    public ParsedMainComponent setExported(boolean value) {
-        exported = value;
-        return this;
-    }
-
-    public ParsedMainComponent setSplitName(@Nullable String value) {
-        splitName = value;
-        return this;
-    }
-
-    public ParsedMainComponent setAttributionTags(@Nullable String[] value) {
-        attributionTags = value;
-        return this;
-    }
+    String getSplitName();
 }

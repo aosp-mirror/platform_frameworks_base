@@ -26,6 +26,7 @@ import android.content.pm.SELinuxUtil;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingPackageImpl;
+import android.content.pm.parsing.component.ComponentMutateUtils;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.content.pm.parsing.component.ParsedService;
@@ -314,37 +315,37 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
 
         int permissionsSize = permissions.size();
         for (int index = 0; index < permissionsSize; index++) {
-            permissions.get(index).setPackageName(this.packageName);
+            ComponentMutateUtils.setPackageName(permissions.get(index), this.packageName);
         }
 
         int permissionGroupsSize = permissionGroups.size();
         for (int index = 0; index < permissionGroupsSize; index++) {
-            permissionGroups.get(index).setPackageName(this.packageName);
+            ComponentMutateUtils.setPackageName(permissionGroups.get(index), this.packageName);
         }
 
         int activitiesSize = activities.size();
         for (int index = 0; index < activitiesSize; index++) {
-            activities.get(index).setPackageName(this.packageName);
+            ComponentMutateUtils.setPackageName(activities.get(index), this.packageName);
         }
 
         int receiversSize = receivers.size();
         for (int index = 0; index < receiversSize; index++) {
-            receivers.get(index).setPackageName(this.packageName);
+            ComponentMutateUtils.setPackageName(receivers.get(index), this.packageName);
         }
 
         int providersSize = providers.size();
         for (int index = 0; index < providersSize; index++) {
-            providers.get(index).setPackageName(this.packageName);
+            ComponentMutateUtils.setPackageName(providers.get(index), this.packageName);
         }
 
         int servicesSize = services.size();
         for (int index = 0; index < servicesSize; index++) {
-            services.get(index).setPackageName(this.packageName);
+            ComponentMutateUtils.setPackageName(services.get(index), this.packageName);
         }
 
         int instrumentationsSize = instrumentations.size();
         for (int index = 0; index < instrumentationsSize; index++) {
-            instrumentations.get(index).setPackageName(this.packageName);
+            ComponentMutateUtils.setPackageName(instrumentations.get(index), this.packageName);
         }
 
         return this;
@@ -354,22 +355,26 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
     public PackageImpl setAllComponentsDirectBootAware(boolean allComponentsDirectBootAware) {
         int activitiesSize = activities.size();
         for (int index = 0; index < activitiesSize; index++) {
-            activities.get(index).setDirectBootAware(allComponentsDirectBootAware);
+            ComponentMutateUtils.setDirectBootAware(activities.get(index),
+                    allComponentsDirectBootAware);
         }
 
         int receiversSize = receivers.size();
         for (int index = 0; index < receiversSize; index++) {
-            receivers.get(index).setDirectBootAware(allComponentsDirectBootAware);
+            ComponentMutateUtils.setDirectBootAware(receivers.get(index),
+                    allComponentsDirectBootAware);
         }
 
         int providersSize = providers.size();
         for (int index = 0; index < providersSize; index++) {
-            providers.get(index).setDirectBootAware(allComponentsDirectBootAware);
+            ComponentMutateUtils.setDirectBootAware(providers.get(index),
+                    allComponentsDirectBootAware);
         }
 
         int servicesSize = services.size();
         for (int index = 0; index < servicesSize; index++) {
-            services.get(index).setDirectBootAware(allComponentsDirectBootAware);
+            ComponentMutateUtils.setDirectBootAware(services.get(index),
+                    allComponentsDirectBootAware);
         }
 
         return this;
@@ -434,7 +439,7 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
         int size = permissionGroups.size();
         for (int index = size - 1; index >= 0; --index) {
             // TODO(b/135203078): Builder/immutability
-            permissionGroups.get(index).setPriority(0);
+            ComponentMutateUtils.setPriority(permissionGroups.get(index), 0);
         }
         return this;
     }
@@ -446,7 +451,7 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
         for (int index = 0; index < receiversSize; index++) {
             ParsedActivity receiver = receivers.get(index);
             if ((receiver.getFlags() & ActivityInfo.FLAG_SINGLE_USER) != 0) {
-                receiver.setExported(false);
+                ComponentMutateUtils.setExported(receiver, false);
             }
         }
 
@@ -455,7 +460,7 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
         for (int index = 0; index < servicesSize; index++) {
             ParsedService service = services.get(index);
             if ((service.getFlags() & ActivityInfo.FLAG_SINGLE_USER) != 0) {
-                service.setExported(false);
+                ComponentMutateUtils.setExported(service, false);
             }
         }
 
@@ -464,7 +469,7 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
         for (int index = 0; index < providersSize; index++) {
             ParsedProvider provider = providers.get(index);
             if ((provider.getFlags() & ActivityInfo.FLAG_SINGLE_USER) != 0) {
-                provider.setExported(false);
+                ComponentMutateUtils.setExported(provider, false);
             }
         }
 

@@ -287,7 +287,26 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
-    public void getVibratorInfo_withExistingVibratorId_returnsHalInfoForVibrator() {
+    public void getVibratorInfo_vibratorFailedLoadBeforeSystemReady_returnsNull() {
+        mockVibrators(1);
+        mVibratorProviders.get(1).setVibratorInfoLoadSuccessful(false);
+        assertNull(createService().getVibratorInfo(1));
+    }
+
+    @Test
+    public void getVibratorInfo_vibratorFailedLoadAfterSystemReady_returnsInfoForVibrator() {
+        mockVibrators(1);
+        mVibratorProviders.get(1).setVibratorInfoLoadSuccessful(false);
+        mVibratorProviders.get(1).setResonantFrequency(123.f);
+        VibratorInfo info = createSystemReadyService().getVibratorInfo(1);
+
+        assertNotNull(info);
+        assertEquals(1, info.getId());
+        assertEquals(123.f, info.getResonantFrequency(), 0.01 /*tolerance*/);
+    }
+
+    @Test
+    public void getVibratorInfo_vibratorSuccessfulLoadBeforeSystemReady_returnsInfoForVibrator() {
         mockVibrators(1);
         FakeVibratorControllerProvider vibrator = mVibratorProviders.get(1);
         vibrator.setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS, IVibrator.CAP_AMPLITUDE_CONTROL);
@@ -295,7 +314,7 @@ public class VibratorManagerServiceTest {
         vibrator.setSupportedPrimitives(VibrationEffect.Composition.PRIMITIVE_CLICK);
         vibrator.setResonantFrequency(123.f);
         vibrator.setQFactor(Float.NaN);
-        VibratorInfo info = createSystemReadyService().getVibratorInfo(1);
+        VibratorInfo info = createService().getVibratorInfo(1);
 
         assertNotNull(info);
         assertEquals(1, info.getId());
@@ -310,6 +329,24 @@ public class VibratorManagerServiceTest {
         assertFalse(info.isPrimitiveSupported(VibrationEffect.Composition.PRIMITIVE_TICK));
         assertEquals(123.f, info.getResonantFrequency(), 0.01 /*tolerance*/);
         assertTrue(Float.isNaN(info.getQFactor()));
+    }
+
+    @Test
+    public void getVibratorInfo_vibratorFailedThenSuccessfulLoad_returnsNullThenInfo() {
+        mockVibrators(1);
+        mVibratorProviders.get(1).setVibratorInfoLoadSuccessful(false);
+
+        VibratorManagerService service = createService();
+        assertNull(createService().getVibratorInfo(1));
+
+        mVibratorProviders.get(1).setVibratorInfoLoadSuccessful(true);
+        mVibratorProviders.get(1).setResonantFrequency(123.f);
+        service.systemReady();
+
+        VibratorInfo info = createService().getVibratorInfo(1);
+        assertNotNull(info);
+        assertEquals(1, info.getId());
+        assertEquals(123.f, info.getResonantFrequency(), 0.01 /*tolerance*/);
     }
 
     @Test

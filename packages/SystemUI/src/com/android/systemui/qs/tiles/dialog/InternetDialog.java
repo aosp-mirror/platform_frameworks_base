@@ -36,6 +36,7 @@ import android.telephony.TelephonyDisplayInfo;
 import android.telephony.TelephonyManager;
 import android.text.Html;
 import android.text.TextUtils;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -63,12 +64,15 @@ import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
+import com.android.systemui.accessibility.floatingmenu.AnnotationLinkSpan;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.wifitrackerlib.WifiEntry;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Dialog for showing mobile network, connected Wi-Fi network and Wi-Fi networks.
@@ -82,6 +86,7 @@ public class InternetDialog extends SystemUIDialog implements
     static final long PROGRESS_DELAY_MS = 2000L;
 
     private final Handler mHandler;
+    private final Executor mBackgroundExecutor;
     private final LinearLayoutManager mLayoutManager;
 
     @VisibleForTesting
@@ -110,6 +115,8 @@ public class InternetDialog extends SystemUIDialog implements
     private LinearLayout mTurnWifiOnLayout;
     private LinearLayout mEthernetLayout;
     private TextView mWifiToggleTitleText;
+    private LinearLayout mWifiScanNotifyLayout;
+    private TextView mWifiScanNotifyText;
     private LinearLayout mSeeAllLayout;
     private RecyclerView mWifiRecyclerView;
     private ImageView mConnectedWifiIcon;
@@ -154,13 +161,14 @@ public class InternetDialog extends SystemUIDialog implements
     public InternetDialog(Context context, InternetDialogFactory internetDialogFactory,
             InternetDialogController internetDialogController, boolean canConfigMobileData,
             boolean canConfigWifi, boolean aboveStatusBar, UiEventLogger uiEventLogger,
-            @Main Handler handler) {
+            @Main Handler handler, @Background Executor executor) {
         super(context, R.style.Theme_SystemUI_Dialog_Internet);
         if (DEBUG) {
             Log.d(TAG, "Init InternetDialog");
         }
         mContext = context;
         mHandler = handler;
+        mBackgroundExecutor = executor;
         mInternetDialogFactory = internetDialogFactory;
         mInternetDialogController = internetDialogController;
         mSubscriptionManager = mInternetDialogController.getSubscriptionManager();
@@ -220,6 +228,8 @@ public class InternetDialog extends SystemUIDialog implements
         mMobileNetworkLayout = mDialogView.requireViewById(R.id.mobile_network_layout);
         mTurnWifiOnLayout = mDialogView.requireViewById(R.id.turn_on_wifi_layout);
         mWifiToggleTitleText = mDialogView.requireViewById(R.id.wifi_toggle_title);
+        mWifiScanNotifyLayout = mDialogView.requireViewById(R.id.wifi_scan_notify_layout);
+        mWifiScanNotifyText = mDialogView.requireViewById(R.id.wifi_scan_notify_text);
         mConnectedWifListLayout = mDialogView.requireViewById(R.id.wifi_connected_layout);
         mConnectedWifiIcon = mDialogView.requireViewById(R.id.wifi_connected_icon);
         mConnectedWifiTitleText = mDialogView.requireViewById(R.id.wifi_connected_title);
@@ -293,7 +303,13 @@ public class InternetDialog extends SystemUIDialog implements
         dismiss();
     }
 
-    void updateDialog() {
+    /**
+     * Update the internet dialog when receiving the callback.
+     *
+     * @param shouldUpdateMobileNetwork {@code true} for update the mobile network layout,
+     * otherwise {@code false}.
+     */
+    void updateDialog(boolean shouldUpdateMobileNetwork) {
         if (DEBUG) {
             Log.d(TAG, "updateDialog");
         }
@@ -303,8 +319,10 @@ public class InternetDialog extends SystemUIDialog implements
             mInternetDialogSubTitle.setText(getSubtitleText());
         }
         updateEthernet();
-        setMobileDataLayout(mInternetDialogController.activeNetworkIsCellular()
-                || mInternetDialogController.isCarrierNetworkActive());
+        if (shouldUpdateMobileNetwork) {
+            setMobileDataLayout(mInternetDialogController.activeNetworkIsCellular()
+                    || mInternetDialogController.isCarrierNetworkActive());
+        }
 
         if (!mCanConfigWifi) {
             return;
@@ -313,8 +331,10 @@ public class InternetDialog extends SystemUIDialog implements
         showProgressBar();
         final boolean isDeviceLocked = mInternetDialogController.isDeviceLocked();
         final boolean isWifiEnabled = mWifiManager.isWifiEnabled();
+        final boolean isWifiScanEnabled = mWifiManager.isScanAlwaysAvailable();
         updateWifiToggle(isWifiEnabled, isDeviceLocked);
         updateConnectedWifi(isWifiEnabled, isDeviceLocked);
+        updateWifiScanNotify(isWifiEnabled, isWifiScanEnabled, isDeviceLocked);
 
         final int visibility = (isDeviceLocked || !isWifiEnabled || mWifiEntriesCount <= 0)
                 ? View.GONE : View.VISIBLE;
@@ -371,7 +391,13 @@ public class InternetDialog extends SystemUIDialog implements
             } else {
                 mMobileSummaryText.setVisibility(View.GONE);
             }
-            mSignalIcon.setImageDrawable(getSignalStrengthDrawable());
+
+            mBackgroundExecutor.execute(() -> {
+                Drawable drawable = getSignalStrengthDrawable();
+                mHandler.post(() -> {
+                    mSignalIcon.setImageDrawable(drawable);
+                });
+            });
             mMobileTitleText.setTextAppearance(isCarrierNetworkConnected
                     ? R.style.TextAppearance_InternetDialog_Active
                     : R.style.TextAppearance_InternetDialog);
@@ -409,6 +435,24 @@ public class InternetDialog extends SystemUIDialog implements
                 mInternetDialogController.getInternetWifiDrawable(mConnectedWifiEntry));
         mWifiSettingsIcon.setColorFilter(
                 mContext.getColor(R.color.connected_network_primary_color));
+    }
+
+    @MainThread
+    private void updateWifiScanNotify(boolean isWifiEnabled, boolean isWifiScanEnabled,
+            boolean isDeviceLocked) {
+        if (isWifiEnabled || !isWifiScanEnabled || isDeviceLocked) {
+            mWifiScanNotifyLayout.setVisibility(View.GONE);
+            return;
+        }
+        if (TextUtils.isEmpty(mWifiScanNotifyText.getText())) {
+            final AnnotationLinkSpan.LinkInfo linkInfo = new AnnotationLinkSpan.LinkInfo(
+                    AnnotationLinkSpan.LinkInfo.DEFAULT_ANNOTATION,
+                    v -> mInternetDialogController.launchWifiScanningSetting());
+            mWifiScanNotifyText.setText(AnnotationLinkSpan.linkify(
+                    getContext().getText(R.string.wifi_scan_notify_message), linkInfo));
+            mWifiScanNotifyText.setMovementMethod(LinkMovementMethod.getInstance());
+        }
+        mWifiScanNotifyLayout.setVisibility(View.VISIBLE);
     }
 
     void onClickConnectedWifi() {
@@ -508,52 +552,57 @@ public class InternetDialog extends SystemUIDialog implements
 
     @Override
     public void onRefreshCarrierInfo() {
-        mHandler.post(() -> updateDialog());
+        mHandler.post(() -> updateDialog(true /* shouldUpdateMobileNetwork */));
     }
 
     @Override
     public void onSimStateChanged() {
-        mHandler.post(() -> updateDialog());
+        mHandler.post(() -> updateDialog(true /* shouldUpdateMobileNetwork */));
     }
 
     @Override
     @WorkerThread
     public void onCapabilitiesChanged(Network network, NetworkCapabilities networkCapabilities) {
-        mHandler.post(() -> updateDialog());
+        mHandler.post(() -> updateDialog(true /* shouldUpdateMobileNetwork */));
     }
 
     @Override
     @WorkerThread
     public void onLost(Network network) {
-        mHandler.post(() -> updateDialog());
+        mHandler.post(() -> updateDialog(true /* shouldUpdateMobileNetwork */));
     }
 
     @Override
     public void onSubscriptionsChanged(int defaultDataSubId) {
         mDefaultDataSubId = defaultDataSubId;
         mTelephonyManager = mTelephonyManager.createForSubscriptionId(mDefaultDataSubId);
-        mHandler.post(() -> updateDialog());
+        mHandler.post(() -> updateDialog(true /* shouldUpdateMobileNetwork */));
+    }
+
+    @Override
+    public void onUserMobileDataStateChanged(boolean enabled) {
+        mHandler.post(() -> updateDialog(true /* shouldUpdateMobileNetwork */));
     }
 
     @Override
     public void onServiceStateChanged(ServiceState serviceState) {
-        mHandler.post(() -> updateDialog());
+        mHandler.post(() -> updateDialog(true /* shouldUpdateMobileNetwork */));
     }
 
     @Override
     @WorkerThread
     public void onDataConnectionStateChanged(int state, int networkType) {
-        mHandler.post(() -> updateDialog());
+        mHandler.post(() -> updateDialog(true /* shouldUpdateMobileNetwork */));
     }
 
     @Override
     public void onSignalStrengthsChanged(SignalStrength signalStrength) {
-        mHandler.post(() -> updateDialog());
+        mHandler.post(() -> updateDialog(true /* shouldUpdateMobileNetwork */));
     }
 
     @Override
     public void onDisplayInfoChanged(TelephonyDisplayInfo telephonyDisplayInfo) {
-        mHandler.post(() -> updateDialog());
+        mHandler.post(() -> updateDialog(true /* shouldUpdateMobileNetwork */));
     }
 
     @Override
@@ -565,7 +614,7 @@ public class InternetDialog extends SystemUIDialog implements
         mAdapter.setWifiEntries(wifiEntries, mWifiEntriesCount);
         mHandler.post(() -> {
             mAdapter.notifyDataSetChanged();
-            updateDialog();
+            updateDialog(false /* shouldUpdateMobileNetwork */);
         });
     }
 

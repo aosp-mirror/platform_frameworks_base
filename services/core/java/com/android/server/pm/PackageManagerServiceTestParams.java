@@ -102,4 +102,12 @@ public final class PackageManagerServiceTestParams {
     public int sdkInt = Build.VERSION.SDK_INT;
     public BackgroundDexOptService backgroundDexOptService;
     public final String incrementalVersion = Build.VERSION.INCREMENTAL;
+    public BroadcastHelper broadcastHelper;
+    public AppDataHelper appDataHelper;
+    public RemovePackageHelper removePackageHelper;
+    public InitAndSystemPackageHelper initAndSystemPackageHelper;
+    public DeletePackageHelper deletePackageHelper;
+    public PreferredActivityHelper preferredActivityHelper;
+    public ResolveIntentHelper resolveIntentHelper;
+    public DexOptHelper dexOptHelper;
 }

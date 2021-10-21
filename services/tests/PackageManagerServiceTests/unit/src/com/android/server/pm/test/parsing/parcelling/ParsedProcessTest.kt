@@ -17,13 +17,14 @@
 package com.android.server.pm.test.parsing.parcelling
 
 import android.content.pm.parsing.component.ParsedProcess
+import android.content.pm.parsing.component.ParsedProcessImpl
 import kotlin.contracts.ExperimentalContracts
 
 @ExperimentalContracts
-class ParsedProcessTest : ParcelableComponentTest(ParsedProcess::class) {
+class ParsedProcessTest : ParcelableComponentTest(ParsedProcess::class, ParsedProcessImpl::class) {
 
-    override val defaultImpl = ParsedProcess()
-    override val creator = ParsedProcess.CREATOR
+    override val defaultImpl = ParsedProcessImpl()
+    override val creator = ParsedProcessImpl.CREATOR
 
     override val excludedMethods = listOf(
         // Copying method

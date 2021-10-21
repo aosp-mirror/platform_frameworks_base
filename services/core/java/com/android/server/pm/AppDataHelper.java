@@ -242,7 +242,8 @@ final class AppDataHelper {
                     // #performDexOptUpgrade. When we do that we should have a
                     // more granular check here and only update the existing
                     // profiles.
-                    if (mPm.mIsUpgrade || mPm.mFirstBoot || (userId != UserHandle.USER_SYSTEM)) {
+                    if (mPm.isDeviceUpgrading() || mPm.isFirstBoot()
+                            || (userId != UserHandle.USER_SYSTEM)) {
                         mArtManagerService.prepareAppProfiles(pkg, userId,
                                 /* updateReferenceProfileContent= */ false);
                     }

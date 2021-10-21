@@ -45,10 +45,9 @@ public class ParsedPermissionUtils {
             XmlResourceParser parser, boolean useRoundIcon, ParseInput input)
             throws IOException, XmlPullParserException {
         String packageName = pkg.getPackageName();
-        ParsedPermission
-                permission = new ParsedPermission();
+        ParsedPermissionImpl permission = new ParsedPermissionImpl();
         String tag = "<" + parser.getName() + ">";
-        final ParseResult<ParsedPermission> result;
+        ParseResult<ParsedPermissionImpl> result;
 
         TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestPermission);
         try {
@@ -62,7 +61,7 @@ public class ParsedPermissionUtils {
                     R.styleable.AndroidManifestPermission_name,
                     R.styleable.AndroidManifestPermission_roundIcon);
             if (result.isError()) {
-                return result;
+                return input.error(result);
             }
 
             if (sa.hasValue(
@@ -121,7 +120,7 @@ public class ParsedPermissionUtils {
             }
 
             // For now only platform runtime permissions can be restricted
-            if (!permission.isRuntime() || !"android".equals(permission.getPackageName())) {
+            if (!isRuntime(permission) || !"android".equals(permission.getPackageName())) {
                 permission.setFlags(permission.getFlags() & ~PermissionInfo.FLAG_HARD_RESTRICTED);
                 permission.setFlags(permission.getFlags() & ~PermissionInfo.FLAG_SOFT_RESTRICTED);
             } else {
@@ -139,26 +138,31 @@ public class ParsedPermissionUtils {
         permission.setProtectionLevel(
                 PermissionInfo.fixProtectionLevel(permission.getProtectionLevel()));
 
-        final int otherProtectionFlags = permission.getProtectionFlags()
+        final int otherProtectionFlags = getProtectionFlags(permission)
                 & ~(PermissionInfo.PROTECTION_FLAG_APPOP | PermissionInfo.PROTECTION_FLAG_INSTANT
                 | PermissionInfo.PROTECTION_FLAG_RUNTIME_ONLY);
         if (otherProtectionFlags != 0
-                && permission.getProtection() != PermissionInfo.PROTECTION_SIGNATURE
-                && permission.getProtection() != PermissionInfo.PROTECTION_INTERNAL) {
+                && getProtection(permission) != PermissionInfo.PROTECTION_SIGNATURE
+                && getProtection(permission) != PermissionInfo.PROTECTION_INTERNAL) {
             return input.error("<permission> protectionLevel specifies a non-instant, non-appop,"
                     + " non-runtimeOnly flag but is not based on signature or internal type");
         }
 
-        return ComponentParseUtils.parseAllMetaData(pkg, res, parser, tag, permission, input);
+        result = ComponentParseUtils.parseAllMetaData(pkg, res, parser, tag, permission, input);
+        if (result.isError()) {
+            return input.error(result);
+        }
+
+        return input.success(result.getResult());
     }
 
     @NonNull
     public static ParseResult<ParsedPermission> parsePermissionTree(ParsingPackage pkg, Resources res,
             XmlResourceParser parser, boolean useRoundIcon, ParseInput input)
             throws IOException, XmlPullParserException {
-        ParsedPermission permission = new ParsedPermission();
+        ParsedPermissionImpl permission = new ParsedPermissionImpl();
         String tag = "<" + parser.getName() + ">";
-        final ParseResult<ParsedPermission> result;
+        ParseResult<ParsedPermissionImpl> result;
 
         TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestPermissionTree);
         try {
@@ -172,7 +176,7 @@ public class ParsedPermissionUtils {
                     R.styleable.AndroidManifestPermissionTree_name,
                     R.styleable.AndroidManifestPermissionTree_roundIcon);
             if (result.isError()) {
-                return result;
+                return input.error(result);
             }
         } finally {
             sa.recycle();
@@ -190,21 +194,25 @@ public class ParsedPermissionUtils {
         permission.setProtectionLevel(PermissionInfo.PROTECTION_NORMAL)
                 .setTree(true);
 
-        return ComponentParseUtils.parseAllMetaData(pkg, res, parser, tag, permission,
-                input);
+        result = ComponentParseUtils.parseAllMetaData(pkg, res, parser, tag, permission, input);
+        if (result.isError()) {
+            return input.error(result);
+        }
+
+        return input.success(result.getResult());
     }
 
     @NonNull
     public static ParseResult<ParsedPermissionGroup> parsePermissionGroup(ParsingPackage pkg,
             Resources res, XmlResourceParser parser, boolean useRoundIcon, ParseInput input)
             throws IOException, XmlPullParserException {
-        ParsedPermissionGroup
-                permissionGroup = new ParsedPermissionGroup();
+        ParsedPermissionGroupImpl
+                permissionGroup = new ParsedPermissionGroupImpl();
         String tag = "<" + parser.getName() + ">";
 
         TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestPermissionGroup);
         try {
-            ParseResult<ParsedPermissionGroup> result = ParsedComponentUtils.parseComponent(
+            ParseResult<ParsedPermissionGroupImpl> result = ParsedComponentUtils.parseComponent(
                     permissionGroup, tag, pkg, sa, useRoundIcon, input,
                     R.styleable.AndroidManifestPermissionGroup_banner,
                     R.styleable.AndroidManifestPermissionGroup_description,
@@ -214,7 +222,7 @@ public class ParsedPermissionUtils {
                     R.styleable.AndroidManifestPermissionGroup_name,
                     R.styleable.AndroidManifestPermissionGroup_roundIcon);
             if (result.isError()) {
-                return result;
+                return input.error(result);
             }
 
             // @formatter:off
@@ -229,7 +237,38 @@ public class ParsedPermissionUtils {
             sa.recycle();
         }
 
-        return ComponentParseUtils.parseAllMetaData(pkg, res, parser, tag, permissionGroup,
-                input);
+        ParseResult<ParsedPermissionGroupImpl> result = ComponentParseUtils.parseAllMetaData(pkg,
+                res, parser, tag, permissionGroup, input);
+        if (result.isError()) {
+            return input.error(result);
+        }
+
+        return input.success(result.getResult());
+    }
+
+    public static boolean isRuntime(@NonNull ParsedPermission permission) {
+        return getProtection(permission) == PermissionInfo.PROTECTION_DANGEROUS;
+    }
+
+    public static boolean isAppOp(@NonNull ParsedPermission permission) {
+        return (permission.getProtectionLevel() & PermissionInfo.PROTECTION_FLAG_APPOP) != 0;
+    }
+
+    @PermissionInfo.Protection
+    public static int getProtection(@NonNull ParsedPermission permission) {
+        return permission.getProtectionLevel() & PermissionInfo.PROTECTION_MASK_BASE;
+    }
+
+    public static int getProtectionFlags(@NonNull ParsedPermission permission) {
+        return permission.getProtectionLevel() & ~PermissionInfo.PROTECTION_MASK_BASE;
+    }
+
+    public static int calculateFootprint(@NonNull ParsedPermission permission) {
+        int size = permission.getName().length();
+        CharSequence nonLocalizedLabel = permission.getNonLocalizedLabel();
+        if (nonLocalizedLabel != null) {
+            size += nonLocalizedLabel.length();
+        }
+        return size;
     }
 }

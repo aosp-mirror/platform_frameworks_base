@@ -683,12 +683,10 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
             if (measuredEnergyDeltas != null) {
                 final long[] displayChargeUC = measuredEnergyDeltas.displayChargeUC;
                 if (displayChargeUC != null && displayChargeUC.length > 0) {
-                    // TODO (b/194107383): pass all display ordinals to mStats with
-                    //  displayScreenStates
-                    final long primaryDisplayChargeUC = displayChargeUC[0];
-                    // If updating, pass in what BatteryExternalStatsWorker thinks screenState is.
-                    mStats.updateDisplayMeasuredEnergyStatsLocked(primaryDisplayChargeUC,
-                            screenState, elapsedRealtime);
+                    // If updating, pass in what BatteryExternalStatsWorker thinks
+                    // displayScreenStates is.
+                    mStats.updateDisplayMeasuredEnergyStatsLocked(displayChargeUC,
+                            displayScreenStates, elapsedRealtime);
                 }
 
                 final long gnssChargeUC = measuredEnergyDeltas.gnssChargeUC;

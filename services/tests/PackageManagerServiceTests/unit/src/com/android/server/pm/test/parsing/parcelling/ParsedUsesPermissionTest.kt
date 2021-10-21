@@ -17,19 +17,22 @@
 package com.android.server.pm.test.parsing.parcelling
 
 import android.content.pm.parsing.component.ParsedUsesPermission
-import android.os.Parcelable
+import android.content.pm.parsing.component.ParsedUsesPermissionImpl
 import kotlin.contracts.ExperimentalContracts
 
 @ExperimentalContracts
-class ParsedUsesPermissionTest : ParcelableComponentTest(ParsedUsesPermission::class) {
+class ParsedUsesPermissionTest : ParcelableComponentTest(
+    ParsedUsesPermission::class,
+    ParsedUsesPermissionImpl::class
+) {
 
-    override val defaultImpl = ParsedUsesPermission("", 0)
-    override val creator = ParsedUsesPermission.CREATOR
+    override val defaultImpl = ParsedUsesPermissionImpl("", 0)
+    override val creator = ParsedUsesPermissionImpl.CREATOR
 
     override val baseParams = listOf(
         ParsedUsesPermission::getName,
         ParsedUsesPermission::getUsesPermissionFlags
     )
 
-    override fun initialObject() = ParsedUsesPermission("", 0)
+    override fun initialObject() = ParsedUsesPermissionImpl("", 0)
 }

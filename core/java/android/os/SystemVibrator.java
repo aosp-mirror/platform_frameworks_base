@@ -51,6 +51,7 @@ public class SystemVibrator extends Vibrator {
             mRegisteredListeners = new ArrayMap<>();
 
     private final Object mLock = new Object();
+    @GuardedBy("mLock")
     private AllVibratorsInfo mVibratorInfo;
 
     @UnsupportedAppUsage
@@ -73,7 +74,15 @@ public class SystemVibrator extends Vibrator {
             int[] vibratorIds = mVibratorManager.getVibratorIds();
             VibratorInfo[] vibratorInfos = new VibratorInfo[vibratorIds.length];
             for (int i = 0; i < vibratorIds.length; i++) {
-                vibratorInfos[i] = mVibratorManager.getVibrator(vibratorIds[i]).getInfo();
+                Vibrator vibrator = mVibratorManager.getVibrator(vibratorIds[i]);
+                if (vibrator instanceof NullVibrator) {
+                    Log.w(TAG, "Vibrator manager service not ready; "
+                            + "Info not yet available for vibrator: " + vibratorIds[i]);
+                    // This should never happen after the vibrator manager service is ready.
+                    // Skip caching this vibrator until then.
+                    return VibratorInfo.EMPTY_VIBRATOR_INFO;
+                }
+                vibratorInfos[i] = vibrator.getInfo();
             }
             return mVibratorInfo = new AllVibratorsInfo(vibratorInfos);
         }

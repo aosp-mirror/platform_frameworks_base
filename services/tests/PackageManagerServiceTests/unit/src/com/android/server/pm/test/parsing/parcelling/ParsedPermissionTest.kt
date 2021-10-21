@@ -18,13 +18,18 @@ package com.android.server.pm.test.parsing.parcelling
 
 import android.content.pm.parsing.component.ParsedPermission
 import android.content.pm.parsing.component.ParsedPermissionGroup
+import android.content.pm.parsing.component.ParsedPermissionGroupImpl
+import android.content.pm.parsing.component.ParsedPermissionImpl
 import kotlin.contracts.ExperimentalContracts
 
 @ExperimentalContracts
-class ParsedPermissionTest : ParsedComponentTest(ParsedPermission::class) {
+class ParsedPermissionTest : ParsedComponentTest(
+    ParsedPermission::class,
+    ParsedPermissionImpl::class
+) {
 
-    override val defaultImpl = ParsedPermission()
-    override val creator = ParsedPermission.CREATOR
+    override val defaultImpl = ParsedPermissionImpl()
+    override val creator = ParsedPermissionImpl.CREATOR
 
     override val subclassExcludedMethods = listOf(
         // Utility methods
@@ -47,8 +52,8 @@ class ParsedPermissionTest : ParsedComponentTest(ParsedPermission::class) {
         getter(ParsedPermission::getKnownCerts, setOf("testCert")),
         getSetByValue(
             ParsedPermission::getParsedPermissionGroup,
-            ParsedPermission::setParsedPermissionGroup,
-            ParsedPermissionGroup().apply { name = "test.permission.group" },
+            ParsedPermissionImpl::setParsedPermissionGroup,
+            ParsedPermissionGroupImpl().apply { name = "test.permission.group" },
             compare = { first, second -> equalBy(first, second, ParsedPermissionGroup::getName) }
         ),
     )

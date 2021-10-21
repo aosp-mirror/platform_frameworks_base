@@ -17,6 +17,8 @@
 package com.android.server.pm;
 
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
+import static android.os.UserHandle.USER_ALL;
+import static android.os.UserHandle.USER_NULL;
 import static android.provider.DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
@@ -24,6 +26,7 @@ import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIV
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -624,7 +627,7 @@ public class AppsFilter implements Watchable, Snappable {
             Set<String> protectedBroadcasts) {
         List<ParsedIntentInfo> intents = component.getIntents();
         for (int i = ArrayUtils.size(intents) - 1; i >= 0; i--) {
-            IntentFilter intentFilter = intents.get(i);
+            IntentFilter intentFilter = intents.get(i).getIntentFilter();
             if (matchesIntentFilter(intent, intentFilter, protectedBroadcasts)) {
                 return true;
             }
@@ -701,7 +704,7 @@ public class AppsFilter implements Watchable, Snappable {
                 synchronized (mCacheLock) {
                     if (mShouldFilterCache != null) {
                         updateShouldFilterCacheForPackage(mShouldFilterCache, null, newPkgSetting,
-                                settings, users, settings.size());
+                                settings, users, USER_ALL, settings.size());
                         if (additionalChangedPackages != null) {
                             for (int index = 0; index < additionalChangedPackages.size(); index++) {
                                 String changedPackage = additionalChangedPackages.valueAt(index);
@@ -714,7 +717,8 @@ public class AppsFilter implements Watchable, Snappable {
                                 }
 
                                 updateShouldFilterCacheForPackage(mShouldFilterCache, null,
-                                        changedPkgSetting, settings, users, settings.size());
+                                        changedPkgSetting, settings, users, USER_ALL,
+                                        settings.size());
                             }
                         }
                     } // else, rebuild entire cache when system is ready
@@ -851,9 +855,25 @@ public class AppsFilter implements Watchable, Snappable {
     }
 
     private void updateEntireShouldFilterCache() {
+        updateEntireShouldFilterCache(USER_ALL);
+    }
+
+    private void updateEntireShouldFilterCache(int subjectUserId) {
         mStateProvider.runWithState((settings, users) -> {
+            int userId = USER_NULL;
+            for (int u = 0; u < users.length; u++) {
+                if (subjectUserId == users[u].id) {
+                    userId = subjectUserId;
+                    break;
+                }
+            }
+            if (userId == USER_NULL) {
+                Slog.e(TAG, "We encountered a new user that isn't a member of known users, "
+                        + "updating the whole cache");
+                userId = USER_ALL;
+            }
             WatchedSparseBooleanMatrix cache =
-                    updateEntireShouldFilterCacheInner(settings, users);
+                    updateEntireShouldFilterCacheInner(settings, users, userId);
             synchronized (mCacheLock) {
                 mShouldFilterCache = cache;
             }
@@ -861,12 +881,19 @@ public class AppsFilter implements Watchable, Snappable {
     }
 
     private WatchedSparseBooleanMatrix updateEntireShouldFilterCacheInner(
-            ArrayMap<String, PackageSetting> settings, UserInfo[] users) {
-        WatchedSparseBooleanMatrix cache =
-                new WatchedSparseBooleanMatrix(users.length * settings.size());
+            ArrayMap<String, PackageSetting> settings, UserInfo[] users, int subjectUserId) {
+        final WatchedSparseBooleanMatrix cache;
+        if (subjectUserId == USER_ALL) {
+            cache = new WatchedSparseBooleanMatrix(users.length * settings.size());
+        } else {
+            synchronized (mCacheLock) {
+                cache = mShouldFilterCache.snapshot();
+            }
+            cache.setCapacity(users.length * settings.size());
+        }
         for (int i = settings.size() - 1; i >= 0; i--) {
             updateShouldFilterCacheForPackage(cache,
-                    null /*skipPackage*/, settings.valueAt(i), settings, users, i);
+                    null /*skipPackage*/, settings.valueAt(i), settings, users, subjectUserId, i);
         }
         return cache;
     }
@@ -887,8 +914,8 @@ public class AppsFilter implements Watchable, Snappable {
                     packagesCache.put(settings.keyAt(i), pkg);
                 }
             });
-            WatchedSparseBooleanMatrix cache =
-                    updateEntireShouldFilterCacheInner(settingsCopy, usersRef[0]);
+            WatchedSparseBooleanMatrix cache = updateEntireShouldFilterCacheInner(
+                    settingsCopy, usersRef[0], USER_ALL);
             boolean[] changed = new boolean[1];
             // We have a cache, let's make sure the world hasn't changed out from under us.
             mStateProvider.runWithState((settings, users) -> {
@@ -918,10 +945,19 @@ public class AppsFilter implements Watchable, Snappable {
         });
     }
 
-    public void onUsersChanged() {
+    public void onUserCreated(int newUserId) {
         synchronized (mCacheLock) {
             if (mShouldFilterCache != null) {
-                updateEntireShouldFilterCache();
+                updateEntireShouldFilterCache(newUserId);
+                onChanged();
+            }
+        }
+    }
+
+    public void onUserDeleted(@UserIdInt int userId) {
+        synchronized (mCacheLock) {
+            if (mShouldFilterCache != null) {
+                removeShouldFilterCacheForUser(userId);
                 onChanged();
             }
         }
@@ -934,7 +970,7 @@ public class AppsFilter implements Watchable, Snappable {
                     return;
                 }
                 updateShouldFilterCacheForPackage(mShouldFilterCache, null /* skipPackage */,
-                        settings.get(packageName), settings, users,
+                        settings.get(packageName), settings, users, USER_ALL,
                         settings.size() /*maxIndex*/);
             }
         });
@@ -942,7 +978,7 @@ public class AppsFilter implements Watchable, Snappable {
 
     private void updateShouldFilterCacheForPackage(WatchedSparseBooleanMatrix cache,
             @Nullable String skipPackageName, PackageSetting subjectSetting, ArrayMap<String,
-            PackageSetting> allSettings, UserInfo[] allUsers, int maxIndex) {
+            PackageSetting> allSettings, UserInfo[] allUsers, int subjectUserId, int maxIndex) {
         for (int i = Math.min(maxIndex, allSettings.size() - 1); i >= 0; i--) {
             PackageSetting otherSetting = allSettings.valueAt(i);
             if (subjectSetting.getAppId() == otherSetting.getAppId()) {
@@ -953,23 +989,55 @@ public class AppsFilter implements Watchable, Snappable {
                     == skipPackageName) {
                 continue;
             }
-            final int userCount = allUsers.length;
-            final int appxUidCount = userCount * allSettings.size();
-            for (int su = 0; su < userCount; su++) {
-                int subjectUser = allUsers[su].id;
-                for (int ou = 0; ou < userCount; ou++) {
-                    int otherUser = allUsers[ou].id;
-                    int subjectUid = UserHandle.getUid(subjectUser, subjectSetting.getAppId());
-                    int otherUid = UserHandle.getUid(otherUser, otherSetting.getAppId());
-                    cache.put(subjectUid, otherUid,
-                            shouldFilterApplicationInternal(
-                                    subjectUid, subjectSetting, otherSetting, otherUser));
-                    cache.put(otherUid, subjectUid,
-                            shouldFilterApplicationInternal(
-                                    otherUid, otherSetting, subjectSetting, subjectUser));
+            if (subjectUserId == USER_ALL) {
+                for (int su = 0; su < allUsers.length; su++) {
+                    updateShouldFilterCacheForUser(cache, subjectSetting, allUsers, otherSetting,
+                            allUsers[su].id);
                 }
+            } else {
+                updateShouldFilterCacheForUser(cache, subjectSetting, allUsers, otherSetting,
+                        subjectUserId);
             }
         }
+    }
+
+    private void updateShouldFilterCacheForUser(WatchedSparseBooleanMatrix cache,
+            PackageSetting subjectSetting, UserInfo[] allUsers, PackageSetting otherSetting,
+            int subjectUserId) {
+        for (int ou = 0; ou < allUsers.length; ou++) {
+            int otherUser = allUsers[ou].id;
+            int subjectUid = UserHandle.getUid(subjectUserId, subjectSetting.getAppId());
+            int otherUid = UserHandle.getUid(otherUser, otherSetting.getAppId());
+            cache.put(subjectUid, otherUid,
+                    shouldFilterApplicationInternal(
+                            subjectUid, subjectSetting, otherSetting, otherUser));
+            cache.put(otherUid, subjectUid,
+                    shouldFilterApplicationInternal(
+                            otherUid, otherSetting, subjectSetting, subjectUserId));
+        }
+    }
+
+    @GuardedBy("mCacheLock")
+    private void removeShouldFilterCacheForUser(int userId) {
+        // Sorted uids with the ascending order
+        final int[] cacheUids = mShouldFilterCache.keys();
+        final int size = cacheUids.length;
+        int pos = Arrays.binarySearch(cacheUids, UserHandle.getUid(userId, 0));
+        final int fromIndex = (pos >= 0 ? pos : ~pos);
+        if (fromIndex >= size || UserHandle.getUserId(cacheUids[fromIndex]) != userId) {
+            Slog.w(TAG, "Failed to remove should filter cache for user " + userId
+                    + ", fromIndex=" + fromIndex);
+            return;
+        }
+        pos = Arrays.binarySearch(cacheUids, UserHandle.getUid(userId + 1, 0) - 1);
+        final int toIndex = (pos >= 0 ? pos + 1 : ~pos);
+        if (fromIndex >= toIndex || UserHandle.getUserId(cacheUids[toIndex - 1]) != userId) {
+            Slog.w(TAG, "Failed to remove should filter cache for user " + userId
+                    + ", fromIndex=" + fromIndex + ", toIndex=" + toIndex);
+            return;
+        }
+        mShouldFilterCache.removeRange(fromIndex, toIndex);
+        mShouldFilterCache.compact();
     }
 
     private static boolean isSystemSigned(@NonNull SigningDetails sysSigningDetails,
@@ -1181,8 +1249,8 @@ public class AppsFilter implements Watchable, Snappable {
                             continue;
                         }
                         updateShouldFilterCacheForPackage(mShouldFilterCache,
-                                setting.getPackageName(),
-                                siblingSetting, settings, users, settings.size());
+                                setting.getPackageName(), siblingSetting, settings, users,
+                                USER_ALL, settings.size());
                     }
                 }
 
@@ -1199,7 +1267,7 @@ public class AppsFilter implements Watchable, Snappable {
                             }
 
                             updateShouldFilterCacheForPackage(mShouldFilterCache, null,
-                                    changedPkgSetting, settings, users, settings.size());
+                                    changedPkgSetting, settings, users, USER_ALL, settings.size());
                         }
                     }
                 }

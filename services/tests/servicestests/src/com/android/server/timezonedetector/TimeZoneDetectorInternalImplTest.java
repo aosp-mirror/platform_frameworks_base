@@ -35,6 +35,7 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 public class TimeZoneDetectorInternalImplTest {
 
+    private static final long ARBITRARY_ELAPSED_REALTIME_MILLIS = 1234L;
     private static final List<String> ARBITRARY_ZONE_IDS = Arrays.asList("TestZoneId");
 
     private Context mMockContext;
@@ -99,6 +100,7 @@ public class TimeZoneDetectorInternalImplTest {
     }
 
     private static GeolocationTimeZoneSuggestion createGeolocationTimeZoneSuggestion() {
-        return new GeolocationTimeZoneSuggestion(ARBITRARY_ZONE_IDS);
+        return GeolocationTimeZoneSuggestion.createCertainSuggestion(
+                ARBITRARY_ELAPSED_REALTIME_MILLIS, ARBITRARY_ZONE_IDS);
     }
 }

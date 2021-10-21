@@ -436,7 +436,7 @@ public class WindowManagerService extends IWindowManager.Stub
             "persist.wm.enable_remote_keyguard_animation";
 
     private static final int sEnableRemoteKeyguardAnimation =
-            SystemProperties.getInt(ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY, 0);
+            SystemProperties.getInt(ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY, 1);
 
     /**
      * @see #ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY
@@ -3786,6 +3786,14 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
+    public SurfaceControl mirrorWallpaperSurface(int displayId) {
+        synchronized (mGlobalLock) {
+            final DisplayContent dc = mRoot.getDisplayContent(displayId);
+            return dc.mWallpaperController.mirrorWallpaperSurface();
+        }
+    }
+
     /**
      * Takes a snapshot of the screen.  In landscape mode this grabs the whole screen.
      * In portrait mode, it grabs the upper region of the screen based on the vertical dimension
@@ -5822,7 +5830,9 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
-        if (!displayContent.isReady() || !mPolicy.isScreenOn() || !displayContent.okToAnimate()) {
+        if (!displayContent.isReady() || !displayContent.getDisplayPolicy().isScreenOnFully()
+                || displayContent.getDisplayInfo().state == Display.STATE_OFF
+                || !displayContent.okToAnimate()) {
             // No need to freeze the screen before the display is ready,  if the screen is off,
             // or we can't currently animate.
             return;

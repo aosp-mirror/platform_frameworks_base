@@ -18,7 +18,9 @@ package com.android.server.pm.test.parsing.parcelling
 
 import android.content.pm.PackageManager
 import android.content.pm.parsing.component.ParsedComponent
+import android.content.pm.parsing.component.ParsedComponentImpl
 import android.content.pm.parsing.component.ParsedIntentInfo
+import android.content.pm.parsing.component.ParsedIntentInfoImpl
 import android.os.Bundle
 import android.os.Parcelable
 import kotlin.contracts.ExperimentalContracts
@@ -26,8 +28,11 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KFunction1
 
 @ExperimentalContracts
-abstract class ParsedComponentTest(kClass: KClass<out Parcelable>) :
-    ParcelableComponentTest(kClass) {
+abstract class ParsedComponentTest(getterType: KClass<*>, setterType: KClass<out Parcelable>) :
+    ParcelableComponentTest(getterType, setterType) {
+
+    constructor(getterAndSetterType: KClass<out Parcelable>) :
+            this(getterAndSetterType, getterAndSetterType)
 
     final override val excludedMethods
         get() = subclassExcludedMethods + listOf(
@@ -57,14 +62,14 @@ abstract class ParsedComponentTest(kClass: KClass<out Parcelable>) :
     final override fun extraParams() = subclassExtraParams() + listOf(
         getSetByValue(
             ParsedComponent::getIntents,
-            ParsedComponent::addIntent,
+            ParsedComponentImpl::addIntent,
             "TestLabel",
             transformGet = { it.singleOrNull()?.nonLocalizedLabel },
-            transformSet = { ParsedIntentInfo().setNonLocalizedLabel(it) },
+            transformSet = { ParsedIntentInfoImpl().setNonLocalizedLabel(it!!) },
         ),
         getSetByValue(
             ParsedComponent::getProperties,
-            ParsedComponent::addProperty,
+            ParsedComponentImpl::addProperty,
             PackageManager.Property(
                 "testPropertyName",
                 "testPropertyValue",
@@ -84,7 +89,7 @@ abstract class ParsedComponentTest(kClass: KClass<out Parcelable>) :
         ),
         getSetByValue(
             ParsedComponent::getMetaData,
-            ParsedComponent::setMetaData,
+            ParsedComponentImpl::setMetaData,
             "testBundleKey" to "testBundleValue",
             transformGet = { "testBundleKey" to it?.getString("testBundleKey") },
             transformSet = { Bundle().apply { putString(it.first, it.second) } }

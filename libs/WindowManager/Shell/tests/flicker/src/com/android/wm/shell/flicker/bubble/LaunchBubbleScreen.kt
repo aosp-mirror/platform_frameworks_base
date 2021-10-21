@@ -42,9 +42,10 @@ import org.junit.runners.Parameterized
 class LaunchBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(testSpec) {
 
     override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = buildTransition() {
+        get() = buildTransition {
             transitions {
-                addBubbleBtn?.run { addBubbleBtn.click() } ?: error("Bubble widget not found")
+                val addBubbleBtn = waitAndGetAddBubbleBtn()
+                addBubbleBtn?.click() ?: error("Bubble widget not found")
             }
         }
 

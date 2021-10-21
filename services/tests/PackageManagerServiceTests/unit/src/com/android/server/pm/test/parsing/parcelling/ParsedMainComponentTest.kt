@@ -17,6 +17,7 @@
 package com.android.server.pm.test.parsing.parcelling
 
 import android.content.pm.parsing.component.ParsedMainComponent
+import android.content.pm.parsing.component.ParsedMainComponentImpl
 import android.content.pm.parsing.component.ParsedService
 import android.os.Parcelable
 import java.util.Arrays
@@ -25,8 +26,11 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KFunction1
 
 @ExperimentalContracts
-abstract class ParsedMainComponentTest(kClass: KClass<out Parcelable>) :
-    ParsedComponentTest(kClass) {
+abstract class ParsedMainComponentTest(getterType: KClass<*>, setterType: KClass<out Parcelable>) :
+    ParsedComponentTest(getterType, setterType) {
+
+    constructor(getterAndSetterType: KClass<out Parcelable>) :
+            this(getterAndSetterType, getterAndSetterType)
 
     final override val subclassBaseParams
         get() = mainComponentSubclassBaseParams + listOf(
@@ -42,8 +46,8 @@ abstract class ParsedMainComponentTest(kClass: KClass<out Parcelable>) :
 
     final override fun subclassExtraParams() = mainComponentSubclassExtraParams() + listOf(
         getSetByValue(
-            ParsedService::getAttributionTags,
-            ParsedService::setAttributionTags,
+            ParsedMainComponent::getAttributionTags,
+            ParsedMainComponentImpl::setAttributionTags,
             arrayOf("testAttributionTag"),
             compare = Arrays::equals
         ),

@@ -19,6 +19,7 @@ package android.content.pm.parsing.component;
 import static android.content.pm.parsing.ParsingUtils.NOT_SET;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.IntentFilter;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingUtils;
@@ -44,12 +45,12 @@ class ParsedMainComponentUtils {
 
     @NonNull
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-    static <Component extends ParsedMainComponent> ParseResult<Component> parseMainComponent(
+    static <Component extends ParsedMainComponentImpl> ParseResult<Component> parseMainComponent(
             Component component, String tag, String[] separateProcesses, ParsingPackage pkg,
-            TypedArray array, int flags, boolean useRoundIcon, ParseInput input, int bannerAttr,
-            int descriptionAttr, int directBootAwareAttr, int enabledAttr, int iconAttr,
-            int labelAttr, int logoAttr, int nameAttr, int processAttr, int roundIconAttr,
-            int splitNameAttr, int attributionTagsAttr) {
+            TypedArray array, int flags, boolean useRoundIcon,  @Nullable String defaultSplitName,
+            @NonNull ParseInput input, int bannerAttr, int descriptionAttr, int directBootAwareAttr,
+            int enabledAttr, int iconAttr, int labelAttr, int logoAttr, int nameAttr,
+            int processAttr, int roundIconAttr, int splitNameAttr, int attributionTagsAttr) {
         ParseResult<Component> result = ParsedComponentUtils.parseComponent(component, tag, pkg,
                 array, useRoundIcon, input, bannerAttr, descriptionAttr, iconAttr, labelAttr,
                 logoAttr, nameAttr, roundIconAttr);
@@ -95,6 +96,10 @@ class ParsedMainComponentUtils {
             component.setSplitName(array.getNonConfigurationString(splitNameAttr, 0));
         }
 
+        if (defaultSplitName != null && component.getSplitName() == null) {
+            component.setSplitName(defaultSplitName);
+        }
+
         if (attributionTagsAttr != NOT_SET) {
             final String attributionTags = array.getNonConfigurationString(attributionTagsAttr, 0);
             if (attributionTags != null) {
@@ -119,7 +124,8 @@ class ParsedMainComponentUtils {
         }
 
         ParsedIntentInfo intent = intentResult.getResult();
-        int actionCount = intent.countActions();
+        IntentFilter intentFilter = intent.getIntentFilter();
+        int actionCount = intentFilter.countActions();
         if (actionCount == 0 && failOnNoActions) {
             Slog.w(TAG, "No actions in " + parser.getName() + " at " + pkg.getBaseApkPath() + " "
                     + parser.getPositionDescription());
@@ -136,7 +142,7 @@ class ParsedMainComponentUtils {
         } else {
             intentVisibility = IntentFilter.VISIBILITY_NONE;
         }
-        intent.setVisibilityToInstantApp(intentVisibility);
+        intentFilter.setVisibilityToInstantApp(intentVisibility);
 
         return input.success(intentResult.getResult());
     }

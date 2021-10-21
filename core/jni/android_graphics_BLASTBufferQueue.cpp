@@ -30,43 +30,6 @@
 
 namespace android {
 
-struct {
-    jmethodID onTransactionComplete;
-} gTransactionCompleteCallback;
-
-class TransactionCompleteCallbackWrapper : public LightRefBase<TransactionCompleteCallbackWrapper> {
-public:
-    explicit TransactionCompleteCallbackWrapper(JNIEnv* env, jobject jobject) {
-        env->GetJavaVM(&mVm);
-        mTransactionCompleteObject = env->NewGlobalRef(jobject);
-        LOG_ALWAYS_FATAL_IF(!mTransactionCompleteObject, "Failed to make global ref");
-    }
-
-    ~TransactionCompleteCallbackWrapper() {
-        if (mTransactionCompleteObject) {
-            getenv()->DeleteGlobalRef(mTransactionCompleteObject);
-            mTransactionCompleteObject = nullptr;
-        }
-    }
-
-    void onTransactionComplete(int64_t frameNr) {
-        if (mTransactionCompleteObject) {
-            getenv()->CallVoidMethod(mTransactionCompleteObject,
-                                     gTransactionCompleteCallback.onTransactionComplete, frameNr);
-        }
-    }
-
-private:
-    JavaVM* mVm;
-    jobject mTransactionCompleteObject;
-
-    JNIEnv* getenv() {
-        JNIEnv* env;
-        mVm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6);
-        return env;
-    }
-};
-
 static jlong nativeCreate(JNIEnv* env, jclass clazz, jstring jName, jlong surfaceControl,
                           jlong width, jlong height, jint format) {
     String8 str8;
@@ -119,21 +82,6 @@ static void nativeMergeWithNextTransaction(JNIEnv*, jclass clazz, jlong ptr, jlo
     queue->mergeWithNextTransaction(transaction, framenumber);
 }
 
-static void nativeSetTransactionCompleteCallback(JNIEnv* env, jclass clazz, jlong ptr,
-                                                 jlong frameNumber,
-                                                 jobject transactionCompleteCallback) {
-    sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
-    if (transactionCompleteCallback == nullptr) {
-        queue->setTransactionCompleteCallback(frameNumber, nullptr);
-    } else {
-        sp<TransactionCompleteCallbackWrapper> wrapper =
-                new TransactionCompleteCallbackWrapper{env, transactionCompleteCallback};
-        queue->setTransactionCompleteCallback(frameNumber, [wrapper](int64_t frameNr) {
-            wrapper->onTransactionComplete(frameNr);
-        });
-    }
-}
-
 static jlong nativeGetLastAcquiredFrameNum(JNIEnv* env, jclass clazz, jlong ptr) {
     sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
     return queue->getLastAcquiredFrameNum();
@@ -153,9 +101,6 @@ static const JNINativeMethod gMethods[] = {
         {"nativeSetNextTransaction", "(JJ)V", (void*)nativeSetNextTransaction},
         {"nativeUpdate", "(JJJJIJ)V", (void*)nativeUpdate},
         {"nativeMergeWithNextTransaction", "(JJJ)V", (void*)nativeMergeWithNextTransaction},
-        {"nativeSetTransactionCompleteCallback",
-                "(JJLandroid/graphics/BLASTBufferQueue$TransactionCompleteCallback;)V",
-                (void*)nativeSetTransactionCompleteCallback},
         {"nativeGetLastAcquiredFrameNum", "(J)J", (void*)nativeGetLastAcquiredFrameNum},
         {"nativeApplyPendingTransactions", "(JJ)V", (void*)nativeApplyPendingTransactions},
         // clang-format on
@@ -165,11 +110,6 @@ int register_android_graphics_BLASTBufferQueue(JNIEnv* env) {
     int res = jniRegisterNativeMethods(env, "android/graphics/BLASTBufferQueue",
             gMethods, NELEM(gMethods));
     LOG_ALWAYS_FATAL_IF(res < 0, "Unable to register native methods.");
-
-    jclass transactionCompleteClass =
-            FindClassOrDie(env, "android/graphics/BLASTBufferQueue$TransactionCompleteCallback");
-    gTransactionCompleteCallback.onTransactionComplete =
-            GetMethodIDOrDie(env, transactionCompleteClass, "onTransactionComplete", "(J)V");
     return 0;
 }
 
