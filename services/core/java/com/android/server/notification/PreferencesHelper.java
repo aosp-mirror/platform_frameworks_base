@@ -169,6 +169,7 @@ public class PreferencesHelper implements RankingConfig {
     private final PackageManager mPm;
     private final RankingHandler mRankingHandler;
     private final ZenModeHelper mZenModeHelper;
+    private final PermissionHelper mPermissionHelper;
     private final NotificationChannelLogger mNotificationChannelLogger;
     private final AppOpsManager mAppOps;
 
@@ -187,12 +188,14 @@ public class PreferencesHelper implements RankingConfig {
     private int mCurrentUserId = UserHandle.USER_NULL;
 
     public PreferencesHelper(Context context, PackageManager pm, RankingHandler rankingHandler,
-            ZenModeHelper zenHelper, NotificationChannelLogger notificationChannelLogger,
+            ZenModeHelper zenHelper, PermissionHelper permHelper,
+            NotificationChannelLogger notificationChannelLogger,
             AppOpsManager appOpsManager,
             SysUiStatsEvent.BuilderFactory statsEventBuilderFactory) {
         mContext = context;
         mZenModeHelper = zenHelper;
         mRankingHandler = rankingHandler;
+        mPermissionHelper = permHelper;
         mPm = pm;
         mNotificationChannelLogger = notificationChannelLogger;
         mAppOps = appOpsManager;
@@ -791,6 +794,7 @@ public class PreferencesHelper implements RankingConfig {
         Objects.requireNonNull(group);
         Objects.requireNonNull(group.getId());
         Objects.requireNonNull(!TextUtils.isEmpty(group.getName()));
+        boolean needsDndChange = false;
         synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
             if (r == null) {
@@ -809,7 +813,7 @@ public class PreferencesHelper implements RankingConfig {
                     // but the system can
                     if (group.isBlocked() != oldGroup.isBlocked()) {
                         group.lockFields(NotificationChannelGroup.USER_LOCKED_BLOCKED_STATE);
-                        updateChannelsBypassingDnd();
+                        needsDndChange = true;
                     }
                 }
             }
@@ -822,6 +826,9 @@ public class PreferencesHelper implements RankingConfig {
             }
             r.groups.put(group.getId(), group);
         }
+        if (needsDndChange) {
+            updateChannelsBypassingDnd();
+        }
     }
 
     @Override
@@ -831,7 +838,7 @@ public class PreferencesHelper implements RankingConfig {
         Objects.requireNonNull(channel);
         Objects.requireNonNull(channel.getId());
         Preconditions.checkArgument(!TextUtils.isEmpty(channel.getName()));
-        boolean needsPolicyFileChange = false, wasUndeleted = false;
+        boolean needsPolicyFileChange = false, wasUndeleted = false, needsDndChange = false;
         synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
             if (r == null) {
@@ -897,7 +904,7 @@ public class PreferencesHelper implements RankingConfig {
 
                         if (bypassDnd != mAreChannelsBypassingDnd
                                 || previousExistingImportance != existing.getImportance()) {
-                            updateChannelsBypassingDnd();
+                            needsDndChange = true;
                         }
                     }
                 }
@@ -912,60 +919,64 @@ public class PreferencesHelper implements RankingConfig {
                     mNotificationChannelLogger.logNotificationChannelModified(existing, uid, pkg,
                             previousLoggingImportance, false);
                 }
-                return needsPolicyFileChange;
-            }
-
-            if (r.channels.size() >= NOTIFICATION_CHANNEL_COUNT_LIMIT) {
-                throw new IllegalStateException("Limit exceed; cannot create more channels");
-            }
-
-            needsPolicyFileChange = true;
-
-            if (channel.getImportance() < IMPORTANCE_NONE
-                    || channel.getImportance() > NotificationManager.IMPORTANCE_MAX) {
-                throw new IllegalArgumentException("Invalid importance level");
-            }
-
-            // Reset fields that apps aren't allowed to set.
-            if (fromTargetApp && !hasDndAccess) {
-                channel.setBypassDnd(r.priority == Notification.PRIORITY_MAX);
-            }
-            if (fromTargetApp) {
-                channel.setLockscreenVisibility(r.visibility);
-                channel.setAllowBubbles(existing != null
-                        ? existing.getAllowBubbles()
-                        : NotificationChannel.DEFAULT_ALLOW_BUBBLE);
-            }
-            clearLockedFieldsLocked(channel);
-            channel.setImportanceLockedByOEM(r.oemLockedImportance);
-            if (!channel.isImportanceLockedByOEM()) {
-                if (r.oemLockedChannels.contains(channel.getId())) {
-                    channel.setImportanceLockedByOEM(true);
+            } else {
+                if (r.channels.size() >= NOTIFICATION_CHANNEL_COUNT_LIMIT) {
+                    throw new IllegalStateException("Limit exceed; cannot create more channels");
                 }
-            }
-            channel.setImportanceLockedByCriticalDeviceFunction(r.defaultAppLockedImportance);
-            if (channel.getLockscreenVisibility() == Notification.VISIBILITY_PUBLIC) {
-                channel.setLockscreenVisibility(
-                        NotificationListenerService.Ranking.VISIBILITY_NO_OVERRIDE);
-            }
-            if (!r.showBadge) {
-                channel.setShowBadge(false);
-            }
-            channel.setOriginalImportance(channel.getImportance());
 
-            // validate parent
-            if (channel.getParentChannelId() != null) {
-                Preconditions.checkArgument(r.channels.containsKey(channel.getParentChannelId()),
-                        "Tried to create a conversation channel without a preexisting parent");
-            }
+                needsPolicyFileChange = true;
 
-            r.channels.put(channel.getId(), channel);
-            if (channel.canBypassDnd() != mAreChannelsBypassingDnd) {
-                updateChannelsBypassingDnd();
+                if (channel.getImportance() < IMPORTANCE_NONE
+                        || channel.getImportance() > NotificationManager.IMPORTANCE_MAX) {
+                    throw new IllegalArgumentException("Invalid importance level");
+                }
+
+                // Reset fields that apps aren't allowed to set.
+                if (fromTargetApp && !hasDndAccess) {
+                    channel.setBypassDnd(r.priority == Notification.PRIORITY_MAX);
+                }
+                if (fromTargetApp) {
+                    channel.setLockscreenVisibility(r.visibility);
+                    channel.setAllowBubbles(existing != null
+                            ? existing.getAllowBubbles()
+                            : NotificationChannel.DEFAULT_ALLOW_BUBBLE);
+                }
+                clearLockedFieldsLocked(channel);
+                channel.setImportanceLockedByOEM(r.oemLockedImportance);
+                if (!channel.isImportanceLockedByOEM()) {
+                    if (r.oemLockedChannels.contains(channel.getId())) {
+                        channel.setImportanceLockedByOEM(true);
+                    }
+                }
+                channel.setImportanceLockedByCriticalDeviceFunction(r.defaultAppLockedImportance);
+                if (channel.getLockscreenVisibility() == Notification.VISIBILITY_PUBLIC) {
+                    channel.setLockscreenVisibility(
+                            NotificationListenerService.Ranking.VISIBILITY_NO_OVERRIDE);
+                }
+                if (!r.showBadge) {
+                    channel.setShowBadge(false);
+                }
+                channel.setOriginalImportance(channel.getImportance());
+
+                // validate parent
+                if (channel.getParentChannelId() != null) {
+                    Preconditions.checkArgument(
+                            r.channels.containsKey(channel.getParentChannelId()),
+                            "Tried to create a conversation channel without a preexisting parent");
+                }
+
+                r.channels.put(channel.getId(), channel);
+                if (channel.canBypassDnd() != mAreChannelsBypassingDnd) {
+                    needsDndChange = true;
+                }
+                MetricsLogger.action(getChannelLog(channel, pkg).setType(
+                        com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_OPEN));
+                mNotificationChannelLogger.logNotificationChannelCreated(channel, uid, pkg);
             }
-            MetricsLogger.action(getChannelLog(channel, pkg).setType(
-                    com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_OPEN));
-            mNotificationChannelLogger.logNotificationChannelCreated(channel, uid, pkg);
+        }
+
+        if (needsDndChange) {
+            updateChannelsBypassingDnd();
         }
 
         return needsPolicyFileChange;
@@ -997,6 +1008,7 @@ public class PreferencesHelper implements RankingConfig {
             boolean fromUser) {
         Objects.requireNonNull(updatedChannel);
         Objects.requireNonNull(updatedChannel.getId());
+        boolean needsDndChange = false;
         synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
             if (r == null) {
@@ -1050,8 +1062,11 @@ public class PreferencesHelper implements RankingConfig {
 
             if (updatedChannel.canBypassDnd() != mAreChannelsBypassingDnd
                     || channel.getImportance() != updatedChannel.getImportance()) {
-                updateChannelsBypassingDnd();
+                needsDndChange = true;
             }
+        }
+        if (needsDndChange) {
+            updateChannelsBypassingDnd();
         }
         updateConfig();
     }
@@ -1126,6 +1141,8 @@ public class PreferencesHelper implements RankingConfig {
 
     @Override
     public boolean deleteNotificationChannel(String pkg, int uid, String channelId) {
+        boolean deletedChannel = false;
+        boolean channelBypassedDnd = false;
         synchronized (mPackagePreferences) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
             if (r == null) {
@@ -1133,13 +1150,18 @@ public class PreferencesHelper implements RankingConfig {
             }
             NotificationChannel channel = r.channels.get(channelId);
             if (channel != null) {
-                return deleteNotificationChannelLocked(channel, pkg, uid);
+                channelBypassedDnd = channel.canBypassDnd();
+                deletedChannel = deleteNotificationChannelLocked(channel, pkg, uid);
             }
-            return false;
         }
+        if (channelBypassedDnd) {
+            updateChannelsBypassingDnd();
+        }
+        return deletedChannel;
     }
 
-    private boolean deleteNotificationChannelLocked(NotificationChannel channel, String pkg, int uid) {
+    private boolean deleteNotificationChannelLocked(NotificationChannel channel, String pkg,
+            int uid) {
         if (!channel.isDeleted()) {
             channel.setDeleted(true);
             channel.setDeletedTimeMs(System.currentTimeMillis());
@@ -1147,10 +1169,6 @@ public class PreferencesHelper implements RankingConfig {
             lm.setType(com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_CLOSE);
             MetricsLogger.action(lm);
             mNotificationChannelLogger.logNotificationChannelDeleted(channel, uid, pkg);
-
-            if (mAreChannelsBypassingDnd && channel.canBypassDnd()) {
-                updateChannelsBypassingDnd();
-            }
             return true;
         }
         return false;
@@ -1352,6 +1370,7 @@ public class PreferencesHelper implements RankingConfig {
     public List<NotificationChannel> deleteNotificationChannelGroup(String pkg, int uid,
             String groupId) {
         List<NotificationChannel> deletedChannels = new ArrayList<>();
+        boolean groupBypassedDnd = false;
         synchronized (mPackagePreferences) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
             if (r == null || TextUtils.isEmpty(groupId)) {
@@ -1368,10 +1387,14 @@ public class PreferencesHelper implements RankingConfig {
             for (int i = 0; i < N; i++) {
                 final NotificationChannel nc = r.channels.valueAt(i);
                 if (groupId.equals(nc.getGroup())) {
+                    groupBypassedDnd |= nc.canBypassDnd();
                     deleteNotificationChannelLocked(nc, pkg, uid);
                     deletedChannels.add(nc);
                 }
             }
+        }
+        if (groupBypassedDnd) {
+            updateChannelsBypassingDnd();
         }
         return deletedChannels;
     }
@@ -1495,8 +1518,8 @@ public class PreferencesHelper implements RankingConfig {
 
     public @NonNull List<String> deleteConversations(String pkg, int uid,
             Set<String> conversationIds) {
+        List<String> deletedChannelIds = new ArrayList<>();
         synchronized (mPackagePreferences) {
-            List<String> deletedChannelIds = new ArrayList<>();
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
             if (r == null) {
                 return deletedChannelIds;
@@ -1517,11 +1540,11 @@ public class PreferencesHelper implements RankingConfig {
                     deletedChannelIds.add(nc.getId());
                 }
             }
-            if (!deletedChannelIds.isEmpty() && mAreChannelsBypassingDnd) {
-                updateChannelsBypassingDnd();
-            }
-            return deletedChannelIds;
         }
+        if (!deletedChannelIds.isEmpty() && mAreChannelsBypassingDnd) {
+            updateChannelsBypassingDnd();
+        }
+        return deletedChannelIds;
     }
 
     @Override
@@ -1554,8 +1577,7 @@ public class PreferencesHelper implements RankingConfig {
         synchronized (mPackagePreferences) {
             final PackagePreferences r = mPackagePreferences.get(
                     packagePreferencesKey(pkg, userId));
-            // notifications from this package aren't blocked
-            if (r != null && r.importance != IMPORTANCE_NONE) {
+            if (r != null) {
                 for (NotificationChannel channel : r.channels.values()) {
                     if (channelIsLiveLocked(r, channel) && channel.canBypassDnd()) {
                         channels.add(channel);
@@ -1622,74 +1644,62 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     /**
-     * Returns the number of apps that have at least one notification channel that can bypass DND
-     * for given particular user
-     */
-    public int getAppsBypassingDndCount(int userId) {
-        int count = 0;
-        synchronized (mPackagePreferences) {
-            final int numPackagePreferences = mPackagePreferences.size();
-            for (int i = 0; i < numPackagePreferences; i++) {
-                final PackagePreferences r = mPackagePreferences.valueAt(i);
-                // Package isn't associated with this userId or notifications from this package are
-                // blocked
-                if (userId != UserHandle.getUserId(r.uid) || r.importance == IMPORTANCE_NONE) {
-                    continue;
-                }
-
-                for (NotificationChannel channel : r.channels.values()) {
-                    if (channelIsLiveLocked(r, channel) && channel.canBypassDnd()) {
-                        count++;
-                        break;
-                    }
-                }
-            }
-        }
-        return count;
-    }
-
-    /**
      * Syncs {@link #mAreChannelsBypassingDnd} with the current user's notification policy before
      * updating
      */
     private void syncChannelsBypassingDnd() {
         mAreChannelsBypassingDnd = (mZenModeHelper.getNotificationPolicy().state
                 & NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND) == 1;
+
         updateChannelsBypassingDnd();
     }
 
     /**
      * Updates the user's NotificationPolicy based on whether the current userId
      * has channels bypassing DND
-     * @param userId
      */
     private void updateChannelsBypassingDnd() {
+        ArraySet<Pair<String, Integer>> candidatePkgs = new ArraySet<>();
+
         synchronized (mPackagePreferences) {
             final int numPackagePreferences = mPackagePreferences.size();
             for (int i = 0; i < numPackagePreferences; i++) {
                 final PackagePreferences r = mPackagePreferences.valueAt(i);
-                // Package isn't associated with the current userId or notifications from this
-                // package are blocked
-                if (mCurrentUserId != UserHandle.getUserId(r.uid)
-                        || r.importance == IMPORTANCE_NONE) {
+                // Package isn't associated with the current userId
+                if (mCurrentUserId != UserHandle.getUserId(r.uid)) {
                     continue;
                 }
 
                 for (NotificationChannel channel : r.channels.values()) {
                     if (channelIsLiveLocked(r, channel) && channel.canBypassDnd()) {
-                        if (!mAreChannelsBypassingDnd) {
-                            mAreChannelsBypassingDnd = true;
-                            updateZenPolicy(true);
-                        }
-                        return;
+                        candidatePkgs.add(new Pair(r.pkg, r.uid));
+                        break;
                     }
                 }
             }
         }
-        // If no channels bypass DND, update the zen policy once to disable DND bypass.
-        if (mAreChannelsBypassingDnd) {
-            mAreChannelsBypassingDnd = false;
-            updateZenPolicy(false);
+        for (int i = candidatePkgs.size() - 1; i >= 0; i--) {
+            Pair<String, Integer> app = candidatePkgs.valueAt(i);
+            if (mPermissionHelper.isMigrationEnabled()) {
+                if (!mPermissionHelper.hasPermission(app.second)) {
+                    candidatePkgs.removeAt(i);
+                }
+            } else {
+                synchronized (mPackagePreferences) {
+                    PackagePreferences r = getPackagePreferencesLocked(app.first, app.second);
+                    if (r == null) {
+                        continue;
+                    }
+                    if (r.importance == IMPORTANCE_NONE) {
+                        candidatePkgs.removeAt(i);
+                    }
+                }
+            }
+        }
+        boolean haveBypassingApps = candidatePkgs.size() > 0;
+        if (mAreChannelsBypassingDnd != haveBypassingApps) {
+            mAreChannelsBypassingDnd = haveBypassingApps;
+            updateZenPolicy(mAreChannelsBypassingDnd);
         }
     }
 
