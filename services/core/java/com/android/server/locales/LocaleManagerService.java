@@ -175,7 +175,7 @@ public class LocaleManagerService extends SystemService {
     }
 
     private void enforceChangeConfigurationPermission() {
-        mContext.enforceCallingPermission(
+        mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_CONFIGURATION, "setApplicationLocales");
     }
 
@@ -231,7 +231,7 @@ public class LocaleManagerService extends SystemService {
     }
 
     private void enforceReadAppSpecificLocalesPermission() {
-        mContext.enforceCallingPermission(
+        mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.READ_APP_SPECIFIC_LOCALES,
                 "getApplicationLocales");
     }
