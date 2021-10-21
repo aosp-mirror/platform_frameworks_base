@@ -26,6 +26,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.ExitTransitionCoordinator.ActivityExitTransitionCallbacks;
 import android.app.ExitTransitionCoordinator.ExitTransitionCallbacks;
@@ -1521,7 +1522,8 @@ public class ActivityOptions {
      * Sets the task the activity will be launched in.
      * @hide
      */
-    @TestApi
+    @RequiresPermission(START_TASKS_FROM_RECENTS)
+    @SystemApi
     public void setLaunchTaskId(int taskId) {
         mLaunchTaskId = taskId;
     }
@@ -1529,6 +1531,7 @@ public class ActivityOptions {
     /**
      * @hide
      */
+    @SystemApi
     public int getLaunchTaskId() {
         return mLaunchTaskId;
     }
