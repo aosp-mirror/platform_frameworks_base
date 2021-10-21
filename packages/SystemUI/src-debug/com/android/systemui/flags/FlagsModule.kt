@@ -14,27 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.flags;
+package com.android.systemui.flags
 
+import android.content.Context
+import dagger.Module
+import dagger.Provides
 
-/**
- * Plugin for loading flag values
- */
-public interface FlagReader {
-    /** Returns a boolean value for the given flag. */
-    default boolean isEnabled(int id, boolean def) {
-        return def;
-    }
-
-    /** Add a listener to be alerted when any flag changes. */
-    default void addListener(Listener listener) {}
-
-    /** Remove a listener to be alerted when any flag changes. */
-    default void removeListener(Listener listener) {}
-
-    /** A simple listener to be alerted when a flag changes. */
-    interface Listener {
-        /** */
-        void onFlagChanged(int id);
+@Module
+object FlagsModule {
+    @JvmStatic
+    @Provides
+    fun provideFlagManager(context: Context): FlagManager {
+        return FlagManager(context)
     }
 }
