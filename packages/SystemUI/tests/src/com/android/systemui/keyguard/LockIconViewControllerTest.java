@@ -62,7 +62,8 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.util.concurrency.DelayableExecutor;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import com.airbnb.lottie.LottieAnimationView;
 
@@ -97,11 +98,11 @@ public class LockIconViewControllerTest extends SysuiTestCase {
     private @Mock DumpManager mDumpManager;
     private @Mock AccessibilityManager mAccessibilityManager;
     private @Mock ConfigurationController mConfigurationController;
-    private @Mock DelayableExecutor mDelayableExecutor;
     private @Mock Vibrator mVibrator;
     private @Mock AuthRippleController mAuthRippleController;
     private @Mock LottieAnimationView mAodFp;
     private @Mock LayoutInflater mLayoutInflater;
+    private FakeExecutor mDelayableExecutor = new FakeExecutor(new FakeSystemClock());
 
     private LockIconViewController mLockIconViewController;
 
@@ -223,6 +224,7 @@ public class LockIconViewControllerTest extends SysuiTestCase {
 
         // WHEN all authenticators are registered
         mAuthControllerCallback.onAllAuthenticatorsRegistered();
+        mDelayableExecutor.runAllReady();
 
         // THEN lock icon view location is updated with the same coordinates as fpProps
         verify(mLockIconView).setCenterLocation(mPointCaptor.capture(), eq(udfps.first));

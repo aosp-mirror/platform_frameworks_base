@@ -16,10 +16,15 @@
 
 package android.media.tv.interactive;
 
+import android.media.tv.interactive.ITvIAppClient;
+
 /**
  * Interface to the TV interactive app service.
  * @hide
  */
 interface ITvIAppManager {
     void startIApp(in IBinder sessionToken, int userId);
+    void createSession(
+            in ITvIAppClient client, in String iAppServiceId, int type, int seq, int userId);
+    void releaseSession(in IBinder sessionToken, int userId);
 }

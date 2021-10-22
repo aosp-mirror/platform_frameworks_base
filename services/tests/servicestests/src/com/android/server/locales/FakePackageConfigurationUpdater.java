@@ -43,7 +43,9 @@ class FakePackageConfigurationUpdater implements PackageConfigurationUpdater {
     }
 
     @Override
-    public void commit() {}
+    public boolean commit() {
+        return mLocales != null;
+    }
 
     /**
      * Returns the locales that were stored during the test run. Returns {@code null} if no locales

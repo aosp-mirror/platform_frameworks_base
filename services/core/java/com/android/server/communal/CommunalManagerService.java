@@ -129,17 +129,19 @@ public final class CommunalManagerService extends SystemService {
     }
 
     private boolean isActivityAllowed(ActivityInfo activityInfo) {
-        if (!mCommunalViewIsShowing.get() || !mKeyguardManager.isKeyguardLocked()) return true;
-
-        // If the activity doesn't have showWhenLocked enabled, disallow the activity.
-        final boolean showWhenLocked =
-                (activityInfo.flags & ActivityInfo.FLAG_SHOW_WHEN_LOCKED) != 0;
-        if (!showWhenLocked) {
-            return false;
-        }
-
-        // Check the cached user preferences to see if the user has allowed this app.
-        return mEnabledApps.contains(activityInfo.applicationInfo.packageName);
+        return true;
+        // TODO(b/191994709): Uncomment the lines below once Dreams and Assistant have been fixed.
+//        if (!mCommunalViewIsShowing.get() || !mKeyguardManager.isKeyguardLocked()) return true;
+//
+//        // If the activity doesn't have showWhenLocked enabled, disallow the activity.
+//        final boolean showWhenLocked =
+//                (activityInfo.flags & ActivityInfo.FLAG_SHOW_WHEN_LOCKED) != 0;
+//        if (!showWhenLocked) {
+//            return false;
+//        }
+//
+//        // Check the cached user preferences to see if the user has allowed this app.
+//        return mEnabledApps.contains(activityInfo.applicationInfo.packageName);
     }
 
     private final class SettingsObserver extends ContentObserver {

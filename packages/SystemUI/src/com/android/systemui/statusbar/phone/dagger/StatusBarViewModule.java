@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.phone.dagger;
 
 import android.annotation.Nullable;
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -33,7 +32,6 @@ import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
 import com.android.systemui.statusbar.phone.TapAgainView;
-import com.android.systemui.util.InjectionInflationController;
 
 import javax.inject.Named;
 
@@ -49,12 +47,9 @@ public abstract class StatusBarViewModule {
     @Provides
     @StatusBarComponent.StatusBarScope
     public static NotificationShadeWindowView providesNotificationShadeWindowView(
-            InjectionInflationController injectionInflationController,
-            Context context) {
+            LayoutInflater layoutInflater) {
         NotificationShadeWindowView notificationShadeWindowView = (NotificationShadeWindowView)
-                injectionInflationController.injectable(
-                        LayoutInflater.from(context)).inflate(R.layout.super_notification_shade,
-                        /* root= */ null);
+                layoutInflater.inflate(R.layout.super_notification_shade, /* root= */ null);
         if (notificationShadeWindowView == null) {
             throw new IllegalStateException(
                     "R.layout.super_notification_shade could not be properly inflated");

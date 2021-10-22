@@ -15,7 +15,7 @@
  */
 
 syntax = "proto2";
-package com.android.server.am;
+package com.android.server.criticalevents;
 
 option java_multiple_files = true;
 

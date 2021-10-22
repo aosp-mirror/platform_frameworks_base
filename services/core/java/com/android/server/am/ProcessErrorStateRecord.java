@@ -49,6 +49,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.MemoryPressureUtil;
+import com.android.server.criticalevents.CriticalEventLog;
 import com.android.server.wm.WindowProcessController;
 
 import java.io.File;

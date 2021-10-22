@@ -89,8 +89,12 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager.Keyg
 import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
+import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
+import com.android.systemui.statusbar.notification.stack.AmbientState;
+import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
@@ -102,6 +106,7 @@ import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
+import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -360,6 +365,11 @@ public class Dependency {
     @Inject Lazy<StatusBarContentInsetsProvider> mContentInsetsProviderLazy;
     @Inject Lazy<InternetDialogFactory> mInternetDialogFactory;
     @Inject Lazy<FeatureFlags> mFeatureFlagsLazy;
+    @Inject Lazy<NotificationSectionsManager> mNotificationSectionsManagerLazy;
+    @Inject Lazy<UnlockedScreenOffAnimationController> mUnlockedScreenOffAnimationControllerLazy;
+    @Inject Lazy<AmbientState> mAmbientStateLazy;
+    @Inject Lazy<GroupMembershipManager> mGroupMembershipManagerLazy;
+    @Inject Lazy<GroupExpansionManager> mGroupExpansionManagerLazy;
 
     @Inject
     public Dependency() {
@@ -574,6 +584,12 @@ public class Dependency {
         mProviders.put(UiEventLogger.class, mUiEventLogger::get);
         mProviders.put(FeatureFlags.class, mFeatureFlagsLazy::get);
         mProviders.put(StatusBarContentInsetsProvider.class, mContentInsetsProviderLazy::get);
+        mProviders.put(NotificationSectionsManager.class, mNotificationSectionsManagerLazy::get);
+        mProviders.put(UnlockedScreenOffAnimationController.class,
+                mUnlockedScreenOffAnimationControllerLazy::get);
+        mProviders.put(AmbientState.class, mAmbientStateLazy::get);
+        mProviders.put(GroupMembershipManager.class, mGroupMembershipManagerLazy::get);
+        mProviders.put(GroupExpansionManager.class, mGroupExpansionManagerLazy::get);
 
         Dependency.setInstance(this);
     }

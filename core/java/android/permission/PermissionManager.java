@@ -219,6 +219,39 @@ public final class PermissionManager {
 
     /**
      * Checks whether a given data access chain described by the given {@link AttributionSource}
+     * has a given permission. Call this method if you are the datasource which would not blame you
+     * for access to the data since you are the data.
+     *
+     * <strong>NOTE:</strong> Use this method only for permission checks at the
+     * point where you will deliver the permission protected data to clients.
+     *
+     * <p>For example, if an app registers a location listener it should have the location
+     * permission but no data is actually sent to the app at the moment of registration
+     * and you should use {@link #checkPermissionForPreflight(String, AttributionSource)}
+     * to determine if the app has or may have location permission (if app has only foreground
+     * location the grant state depends on the app's fg/gb state) and this check will not
+     * leave a trace that permission protected data was delivered. When you are about to
+     * deliver the location data to a registered listener you should use this method which
+     * will evaluate the permission access based on the current fg/bg state of the app and
+     * leave a record that the data was accessed.
+     *
+     * @param permission The permission to check.
+     * @param attributionSource the permission identity
+     * @param message A message describing the reason the permission was checked
+     * @return The permission check result which is either {@link #PERMISSION_GRANTED}
+     *     or {@link #PERMISSION_SOFT_DENIED} or {@link #PERMISSION_HARD_DENIED}.
+     *
+     * @see #checkPermissionForPreflight(String, AttributionSource)
+     */
+    @PermissionCheckerManager.PermissionResult
+    public int checkPermissionForDataDeliveryFromDataSource(@NonNull String permission,
+            @NonNull AttributionSource attributionSource, @Nullable String message) {
+        return PermissionChecker.checkPermissionForDataDeliveryFromDataSource(mContext, permission,
+                PermissionChecker.PID_UNKNOWN, attributionSource, message);
+    }
+
+    /**
+     * Checks whether a given data access chain described by the given {@link AttributionSource}
      * has a given permission.
      *
      * <strong>NOTE:</strong> Use this method only for permission checks at the

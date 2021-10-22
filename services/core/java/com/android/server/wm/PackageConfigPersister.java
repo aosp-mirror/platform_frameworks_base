@@ -172,7 +172,7 @@ public class PackageConfigPersister {
     }
 
     @GuardedBy("mLock")
-    void updateFromImpl(String packageName, int userId,
+    boolean updateFromImpl(String packageName, int userId,
             PackageConfigurationUpdaterImpl impl) {
         synchronized (mLock) {
             PackageConfigRecord record = findRecordOrCreate(mModified, packageName, userId);
@@ -198,7 +198,7 @@ public class PackageConfigPersister {
                 }
 
                 if (!updateNightMode(record, writeRecord) && !updateLocales(record, writeRecord)) {
-                    return;
+                    return false;
                 }
 
                 if (DEBUG) {
@@ -206,6 +206,7 @@ public class PackageConfigPersister {
                 }
                 mPersisterQueue.addItem(new WriteProcessItem(writeRecord), false /* flush */);
             }
+            return true;
         }
     }
 

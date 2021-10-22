@@ -174,7 +174,8 @@ public class SystemActions extends SystemUI {
                 mReceiver,
                 mReceiver.createIntentFilter(),
                 PERMISSION_SELF,
-                null);
+                null,
+                Context.RECEIVER_EXPORTED);
         registerActions();
     }
 

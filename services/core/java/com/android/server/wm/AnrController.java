@@ -31,7 +31,7 @@ import android.util.SparseArray;
 import android.view.InputApplicationHandle;
 
 import com.android.server.am.ActivityManagerService;
-import com.android.server.am.CriticalEventLog;
+import com.android.server.criticalevents.CriticalEventLog;
 
 import java.io.File;
 import java.util.ArrayList;

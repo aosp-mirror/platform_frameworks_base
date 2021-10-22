@@ -58,6 +58,10 @@ public final class PermissionHelper {
         mMigrationEnabled = migrationEnabled;
     }
 
+    public boolean isMigrationEnabled() {
+        return mMigrationEnabled;
+    }
+
     /**
      * Returns whether the given uid holds the notification permission. Must not be called
      * with a lock held.

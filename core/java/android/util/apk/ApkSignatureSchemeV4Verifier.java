@@ -61,14 +61,15 @@ public class ApkSignatureSchemeV4Verifier {
      */
     public static VerifiedSigner extractCertificates(String apkFile)
             throws SignatureNotFoundException, SecurityException {
-        V4Signature signature = extractSignature(apkFile);
-        return verify(apkFile, signature, APK_SIGNATURE_SCHEME_DEFAULT);
+        Pair<V4Signature.HashingInfo, V4Signature.SigningInfos> pair = extractSignature(apkFile);
+        return verify(apkFile, pair.first, pair.second, APK_SIGNATURE_SCHEME_DEFAULT);
     }
 
     /**
      * Extracts APK Signature Scheme v4 signature of the provided APK.
      */
-    public static V4Signature extractSignature(String apkFile) throws SignatureNotFoundException {
+    public static Pair<V4Signature.HashingInfo, V4Signature.SigningInfos> extractSignature(
+            String apkFile) throws SignatureNotFoundException {
         final File apk = new File(apkFile);
         final byte[] signatureBytes = IncrementalManager.unsafeGetFileSignature(
                 apk.getAbsolutePath());
@@ -81,7 +82,11 @@ public class ApkSignatureSchemeV4Verifier {
                 throw new SecurityException(
                         "v4 signature version " + signature.version + " is not supported");
             }
-            return signature;
+            final V4Signature.HashingInfo hashingInfo = V4Signature.HashingInfo.fromByteArray(
+                    signature.hashingInfo);
+            final V4Signature.SigningInfos signingInfos = V4Signature.SigningInfos.fromByteArray(
+                    signature.signingInfos);
+            return Pair.create(hashingInfo, signingInfos);
         } catch (IOException e) {
             throw new SignatureNotFoundException("Failed to read V4 signature.", e);
         }
@@ -91,17 +96,9 @@ public class ApkSignatureSchemeV4Verifier {
      * Verifies APK Signature Scheme v4 signature and returns the
      * certificates associated with each signer.
      */
-    public static VerifiedSigner verify(String apkFile, final V4Signature signature,
-            final int v3BlockId) throws SignatureNotFoundException, SecurityException {
-        final V4Signature.HashingInfo hashingInfo;
-        final V4Signature.SigningInfos signingInfos;
-        try {
-            hashingInfo = V4Signature.HashingInfo.fromByteArray(signature.hashingInfo);
-            signingInfos = V4Signature.SigningInfos.fromByteArray(signature.signingInfos);
-        } catch (IOException e) {
-            throw new SignatureNotFoundException("Failed to read V4 signature.", e);
-        }
-
+    public static VerifiedSigner verify(String apkFile, final V4Signature.HashingInfo hashingInfo,
+            final V4Signature.SigningInfos signingInfos, final int v3BlockId)
+            throws SignatureNotFoundException, SecurityException {
         final V4Signature.SigningInfo signingInfo = findSigningInfoForBlockId(signingInfos,
                 v3BlockId);
 
