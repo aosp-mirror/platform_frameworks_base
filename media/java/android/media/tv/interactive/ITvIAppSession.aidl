@@ -17,9 +17,10 @@
 package android.media.tv.interactive;
 
 /**
- * Sub-interface of ITvIAppService which is created per session and has its own context.
+ * Sub-interface of ITvIAppService.aidl which is created per session and has its own context.
  * @hide
  */
 oneway interface ITvIAppSession {
     void startIApp();
+    void release();
 }

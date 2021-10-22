@@ -112,6 +112,7 @@ public class UsbResolverActivity extends ResolverActivity {
                 mOtherProfileIntent.putParcelableArrayListExtra(EXTRA_RESOLVE_INFOS,
                         rListOtherProfile);
             } else {
+                mOtherProfileIntent = new Intent();
                 mOtherProfileIntent.setComponent(ComponentName.unflattenFromString(
                         this.getResources().getString(
                                 com.android.internal.R.string.config_usbConfirmActivity)));

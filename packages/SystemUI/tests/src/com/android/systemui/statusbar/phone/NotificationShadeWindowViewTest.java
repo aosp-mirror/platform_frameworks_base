@@ -34,7 +34,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.LockIconViewController;
 import com.android.systemui.R;
-import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.dock.DockManager;
@@ -55,7 +54,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.tuner.TunerService;
-import com.android.systemui.util.InjectionInflationController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -117,10 +115,6 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
         when(mDockManager.isDocked()).thenReturn(false);
 
         mController = new NotificationShadeWindowViewController(
-                new InjectionInflationController(
-                        SystemUIFactory.getInstance()
-                                .getSysUIComponent()
-                                .createViewInstanceCreatorFactory()),
                 mCoordinator,
                 mPulseExpansionHandler,
                 mDynamicPrivacyController,

@@ -44,6 +44,8 @@ import android.graphics.Rect;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.media.PlaybackParams;
+import android.media.tv.BroadcastInfoRequest;
+import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.DvbDeviceInfo;
 import android.media.tv.ITvInputClient;
 import android.media.tv.ITvInputHardware;
@@ -2327,6 +2329,29 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
+        public void requestBroadcastInfo(IBinder sessionToken, BroadcastInfoRequest request,
+                int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
+            final int resolvedUserId = resolveCallingUserId(callingPid, callingUid,
+                    userId, "requestBroadcastInfo");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        SessionState sessionState = getSessionStateLocked(sessionToken, callingUid,
+                                resolvedUserId);
+                        getSessionLocked(sessionState).requestBroadcastInfo(request);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slog.e(TAG, "error in requestBroadcastInfo", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            };
+        }
+
+        @Override
         public int getClientPid(String sessionId) {
             ensureTunerResourceAccessPermission();
             final long identity = Binder.clearCallingIdentity();
@@ -3339,6 +3364,23 @@ public final class TvInputManagerService extends SystemService {
                     mSessionState.client.onError(error, mSessionState.seq);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "error in onError", e);
+                }
+            }
+        }
+
+        @Override
+        public void onBroadcastInfoResponse (BroadcastInfoResponse response) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slog.d(TAG, "onBroadcastInfoResponse()");
+                }
+                if (mSessionState.session == null || mSessionState.client == null) {
+                    return;
+                }
+                try {
+                    mSessionState.client.onBroadcastInfoResponse(response, mSessionState.seq);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "error in onBroadcastInfoResponse", e);
                 }
             }
         }

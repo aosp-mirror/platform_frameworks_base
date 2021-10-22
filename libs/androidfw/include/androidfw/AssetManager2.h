@@ -486,6 +486,12 @@ class AssetManager2 {
 
     // Steps taken to resolve last resource.
     std::vector<Step> steps;
+
+    // The configuration name of the best resource found.
+    String8 best_config_name;
+
+    // The package name of the best resource found.
+    String8 best_package_name;
   };
 
   // Record of the last resolved resource's resolution path.

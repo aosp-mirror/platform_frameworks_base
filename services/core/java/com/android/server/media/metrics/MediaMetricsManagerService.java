@@ -306,6 +306,7 @@ public final class MediaMetricsManagerService extends SystemService {
                     return LOGGING_LEVEL_EVERYTHING;
                 }
                 if (mMode == MEDIA_METRICS_MODE_OFF) {
+                    Slog.v(TAG, "Logging level blocked: MEDIA_METRICS_MODE_OFF");
                     return LOGGING_LEVEL_BLOCKED;
                 }
 
@@ -326,6 +327,8 @@ public final class MediaMetricsManagerService extends SystemService {
                         mBlockList = getListLocked(PLAYER_METRICS_APP_BLOCKLIST);
                         if (mBlockList == null) {
                             // failed to get the blocklist. Block it.
+                            Slog.v(TAG, "Logging level blocked: Failed to get "
+                                    + "PLAYER_METRICS_APP_BLOCKLIST.");
                             return LOGGING_LEVEL_BLOCKED;
                         }
                     }
@@ -339,6 +342,8 @@ public final class MediaMetricsManagerService extends SystemService {
                                 getListLocked(PLAYER_METRICS_PER_APP_ATTRIBUTION_BLOCKLIST);
                         if (mNoUidBlocklist == null) {
                             // failed to get the blocklist. Block it.
+                            Slog.v(TAG, "Logging level blocked: Failed to get "
+                                    + "PLAYER_METRICS_PER_APP_ATTRIBUTION_BLOCKLIST.");
                             return LOGGING_LEVEL_BLOCKED;
                         }
                     }
@@ -358,6 +363,8 @@ public final class MediaMetricsManagerService extends SystemService {
                                 getListLocked(PLAYER_METRICS_PER_APP_ATTRIBUTION_ALLOWLIST);
                         if (mNoUidAllowlist == null) {
                             // failed to get the allowlist. Block it.
+                            Slog.v(TAG, "Logging level blocked: Failed to get "
+                                    + "PLAYER_METRICS_PER_APP_ATTRIBUTION_ALLOWLIST.");
                             return LOGGING_LEVEL_BLOCKED;
                         }
                     }
@@ -372,6 +379,8 @@ public final class MediaMetricsManagerService extends SystemService {
                         mAllowlist = getListLocked(PLAYER_METRICS_APP_ALLOWLIST);
                         if (mAllowlist == null) {
                             // failed to get the allowlist. Block it.
+                            Slog.v(TAG, "Logging level blocked: Failed to get "
+                                    + "PLAYER_METRICS_APP_ALLOWLIST.");
                             return LOGGING_LEVEL_BLOCKED;
                         }
                     }
@@ -381,10 +390,12 @@ public final class MediaMetricsManagerService extends SystemService {
                         return level;
                     }
                     // Not detected in any allowlist. Block.
+                    Slog.v(TAG, "Logging level blocked: Not detected in any allowlist.");
                     return LOGGING_LEVEL_BLOCKED;
                 }
             }
             // Blocked by default.
+            Slog.v(TAG, "Logging level blocked: Blocked by default.");
             return LOGGING_LEVEL_BLOCKED;
         }
 

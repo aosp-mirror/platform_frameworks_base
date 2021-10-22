@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.am;
+package com.android.server.criticalevents;
 
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -23,11 +23,11 @@ import android.util.Slog;
 import com.android.framework.protobuf.nano.MessageNanoPrinter;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.RingBuffer;
-import com.android.server.am.nano.CriticalEventLogProto;
-import com.android.server.am.nano.CriticalEventLogStorageProto;
-import com.android.server.am.nano.CriticalEventProto;
-import com.android.server.am.nano.CriticalEventProto.HalfWatchdog;
-import com.android.server.am.nano.CriticalEventProto.Watchdog;
+import com.android.server.criticalevents.nano.CriticalEventLogProto;
+import com.android.server.criticalevents.nano.CriticalEventLogStorageProto;
+import com.android.server.criticalevents.nano.CriticalEventProto;
+import com.android.server.criticalevents.nano.CriticalEventProto.HalfWatchdog;
+import com.android.server.criticalevents.nano.CriticalEventProto.Watchdog;
 
 import java.io.File;
 import java.io.FileOutputStream;

@@ -56,7 +56,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.tuner.TunerService;
-import com.android.systemui.util.InjectionInflationController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -68,7 +67,6 @@ import javax.inject.Inject;
  */
 public class NotificationShadeWindowViewController {
     private static final String TAG = "NotifShadeWindowVC";
-    private final InjectionInflationController mInjectionInflationController;
     private final NotificationWakeUpCoordinator mCoordinator;
     private final PulseExpansionHandler mPulseExpansionHandler;
     private final DynamicPrivacyController mDynamicPrivacyController;
@@ -116,7 +114,6 @@ public class NotificationShadeWindowViewController {
 
     @Inject
     public NotificationShadeWindowViewController(
-            InjectionInflationController injectionInflationController,
             NotificationWakeUpCoordinator coordinator,
             PulseExpansionHandler pulseExpansionHandler,
             DynamicPrivacyController dynamicPrivacyController,
@@ -141,7 +138,6 @@ public class NotificationShadeWindowViewController {
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             LockIconViewController lockIconViewController) {
-        mInjectionInflationController = injectionInflationController;
         mCoordinator = coordinator;
         mPulseExpansionHandler = pulseExpansionHandler;
         mDynamicPrivacyController = dynamicPrivacyController;

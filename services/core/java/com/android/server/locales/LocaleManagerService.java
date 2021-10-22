@@ -18,11 +18,14 @@ package com.android.server.locales;
 
 import static java.util.Objects.requireNonNull;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.app.ILocaleManager;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
 import android.os.LocaleList;
@@ -142,7 +145,6 @@ public class LocaleManagerService extends SystemService {
         }
     }
 
-
     private void setApplicationLocalesUnchecked(@NonNull String appPackageName,
             @UserIdInt int userId, @NonNull LocaleList locales) {
         if (DEBUG) {
@@ -152,9 +154,76 @@ public class LocaleManagerService extends SystemService {
         final ActivityTaskManagerInternal.PackageConfigurationUpdater updater =
                 mActivityTaskManagerInternal.createPackageConfigurationUpdater(appPackageName,
                         userId);
-        updater.setLocales(locales).commit();
+        boolean isSuccess = updater.setLocales(locales).commit();
+
+        //We want to send the broadcasts only if config was actually updated on commit.
+        if (isSuccess) {
+            notifyAppWhoseLocaleChanged(appPackageName, userId, locales);
+            notifyInstallerOfAppWhoseLocaleChanged(appPackageName, userId, locales);
+            notifyRegisteredReceivers(appPackageName, userId, locales);
+        }
     }
 
+    /**
+     * Sends an implicit broadcast with action
+     * {@link android.content.Intent#ACTION_APPLICATION_LOCALE_CHANGED}
+     * to receivers with {@link android.Manifest.permission#READ_APP_SPECIFIC_LOCALES}.
+     */
+    private void notifyRegisteredReceivers(String appPackageName, int userId,
+            LocaleList locales) {
+        Intent intent = createBaseIntent(Intent.ACTION_APPLICATION_LOCALE_CHANGED,
+                appPackageName, locales);
+        mContext.sendBroadcastAsUser(intent, UserHandle.of(userId),
+                Manifest.permission.READ_APP_SPECIFIC_LOCALES);
+    }
+
+    /**
+     * Sends an explicit broadcast with action
+     * {@link android.content.Intent#ACTION_APPLICATION_LOCALE_CHANGED} to
+     * the installer (as per {@link android.content.pm.InstallSourceInfo#getInstallingPackageName})
+     * of app whose locale has changed.
+     *
+     * <p><b>Note:</b> This is can be used by installers to deal with cases such as
+     * language-based APK Splits.
+     */
+    private void notifyInstallerOfAppWhoseLocaleChanged(String appPackageName, int userId,
+            LocaleList locales) {
+        try {
+            String installingPackageName = mContext.getPackageManager()
+                    .getInstallSourceInfo(appPackageName).getInstallingPackageName();
+            if (installingPackageName != null) {
+                Intent intent = createBaseIntent(Intent.ACTION_APPLICATION_LOCALE_CHANGED,
+                        appPackageName, locales);
+                //Set package name to ensure that only installer of the app receives this intent.
+                intent.setPackage(installingPackageName);
+                mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.w(TAG, "Package not found " + appPackageName);
+        }
+    }
+
+    /**
+     * Sends an explicit broadcast with action {@link android.content.Intent#ACTION_LOCALE_CHANGED}
+     * to the app whose locale has changed.
+     */
+    private void notifyAppWhoseLocaleChanged(String appPackageName, int userId,
+            LocaleList locales) {
+        Intent intent = createBaseIntent(Intent.ACTION_LOCALE_CHANGED, appPackageName, locales);
+        //Set package name to ensure that only the app whose locale changed receives this intent.
+        intent.setPackage(appPackageName);
+        intent.addFlags(Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
+        mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
+    }
+
+    private static Intent createBaseIntent(String intentAction, String appPackageName,
+            LocaleList locales) {
+        return new Intent(intentAction)
+                .putExtra(Intent.EXTRA_PACKAGE_NAME, appPackageName)
+                .putExtra(Intent.EXTRA_LOCALE_LIST, locales)
+                .addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND
+                        | Intent.FLAG_RECEIVER_FOREGROUND);
+    }
 
     /**
      * Checks if the package is owned by the calling app or not for the given user id.
@@ -175,7 +244,7 @@ public class LocaleManagerService extends SystemService {
     }
 
     private void enforceChangeConfigurationPermission() {
-        mContext.enforceCallingPermission(
+        mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_CONFIGURATION, "setApplicationLocales");
     }
 
@@ -231,7 +300,7 @@ public class LocaleManagerService extends SystemService {
     }
 
     private void enforceReadAppSpecificLocalesPermission() {
-        mContext.enforceCallingPermission(
+        mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.READ_APP_SPECIFIC_LOCALES,
                 "getApplicationLocales");
     }

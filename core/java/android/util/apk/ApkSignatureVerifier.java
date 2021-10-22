@@ -33,6 +33,7 @@ import android.content.pm.parsing.result.ParseResult;
 import android.os.Build;
 import android.os.Trace;
 import android.os.incremental.V4Signature;
+import android.util.Pair;
 import android.util.jar.StrictJarFile;
 
 import com.android.internal.util.ArrayUtils;
@@ -191,47 +192,53 @@ public class ApkSignatureVerifier {
             boolean verifyFull) throws SignatureNotFoundException {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, verifyFull ? "verifyV4" : "certsOnlyV4");
         try {
-            final V4Signature v4Signature = ApkSignatureSchemeV4Verifier.extractSignature(apkPath);
+            final Pair<V4Signature.HashingInfo, V4Signature.SigningInfos> v4Pair =
+                    ApkSignatureSchemeV4Verifier.extractSignature(apkPath);
+            final V4Signature.HashingInfo hashingInfo = v4Pair.first;
+            final V4Signature.SigningInfos signingInfos = v4Pair.second;
 
             Signature[] pastSignerSigs = null;
-
-            Map<Integer, byte[]> nonstreamingDigests;
-            Certificate[][] nonstreamingCerts;
+            Map<Integer, byte[]> nonstreamingDigests = null;
+            Certificate[][] nonstreamingCerts = null;
 
             int v3BlockId = APK_SIGNATURE_SCHEME_DEFAULT;
-
-            try {
-                // v4 is an add-on and requires v2 or v3 signature to validate against its
-                // certificate and digest
-                ApkSignatureSchemeV3Verifier.VerifiedSigner v3Signer =
-                        ApkSignatureSchemeV3Verifier.unsafeGetCertsWithoutVerification(apkPath);
-                nonstreamingDigests = v3Signer.contentDigests;
-                nonstreamingCerts = new Certificate[][]{v3Signer.certs};
-                if (v3Signer.por != null) {
-                    // populate proof-of-rotation information
-                    pastSignerSigs = new Signature[v3Signer.por.certs.size()];
-                    for (int i = 0; i < pastSignerSigs.length; i++) {
-                        pastSignerSigs[i] = new Signature(
-                                v3Signer.por.certs.get(i).getEncoded());
-                        pastSignerSigs[i].setFlags(v3Signer.por.flagsList.get(i));
-                    }
-                }
-                v3BlockId = v3Signer.blockId;
-            } catch (SignatureNotFoundException e) {
+            // If V4 contains additional signing blocks then we need to always run v2/v3 verifier
+            // to figure out which block they use.
+            if (verifyFull || signingInfos.signingInfoBlocks.length > 0) {
                 try {
-                    ApkSignatureSchemeV2Verifier.VerifiedSigner v2Signer =
-                            ApkSignatureSchemeV2Verifier.verify(apkPath, false);
-                    nonstreamingDigests = v2Signer.contentDigests;
-                    nonstreamingCerts = v2Signer.certs;
-                } catch (SignatureNotFoundException ee) {
-                    throw new SecurityException(
-                            "V4 verification failed to collect V2/V3 certificates from : "
-                                    + apkPath, ee);
+                    // v4 is an add-on and requires v2 or v3 signature to validate against its
+                    // certificate and digest
+                    ApkSignatureSchemeV3Verifier.VerifiedSigner v3Signer =
+                            ApkSignatureSchemeV3Verifier.unsafeGetCertsWithoutVerification(apkPath);
+                    nonstreamingDigests = v3Signer.contentDigests;
+                    nonstreamingCerts = new Certificate[][]{v3Signer.certs};
+                    if (v3Signer.por != null) {
+                        // populate proof-of-rotation information
+                        pastSignerSigs = new Signature[v3Signer.por.certs.size()];
+                        for (int i = 0; i < pastSignerSigs.length; i++) {
+                            pastSignerSigs[i] = new Signature(
+                                    v3Signer.por.certs.get(i).getEncoded());
+                            pastSignerSigs[i].setFlags(v3Signer.por.flagsList.get(i));
+                        }
+                    }
+                    v3BlockId = v3Signer.blockId;
+                } catch (SignatureNotFoundException e) {
+                    try {
+                        ApkSignatureSchemeV2Verifier.VerifiedSigner v2Signer =
+                                ApkSignatureSchemeV2Verifier.verify(apkPath, false);
+                        nonstreamingDigests = v2Signer.contentDigests;
+                        nonstreamingCerts = v2Signer.certs;
+                    } catch (SignatureNotFoundException ee) {
+                        throw new SecurityException(
+                                "V4 verification failed to collect V2/V3 certificates from : "
+                                        + apkPath, ee);
+                    }
                 }
             }
 
             ApkSignatureSchemeV4Verifier.VerifiedSigner vSigner =
-                    ApkSignatureSchemeV4Verifier.verify(apkPath, v4Signature, v3BlockId);
+                    ApkSignatureSchemeV4Verifier.verify(apkPath, hashingInfo, signingInfos,
+                            v3BlockId);
             Certificate[][] signerCerts = new Certificate[][]{vSigner.certs};
             Signature[] signerSigs = convertToSignatures(signerCerts);
 
