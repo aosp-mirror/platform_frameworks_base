@@ -24,19 +24,19 @@
     <string name="status_bar_no_notifications_title" msgid="7812479124981107507">"কোনো জাননী নাই"</string>
     <string name="status_bar_ongoing_events_title" msgid="3986169317496615446">"চলিত"</string>
     <string name="status_bar_latest_events_title" msgid="202755896454005436">"জাননীসমূহ"</string>
-    <string name="battery_low_title" msgid="6891106956328275225">"বেটাৰি অতি সোনকালে শেষ হ\'ব পাৰে"</string>
+    <string name="battery_low_title" msgid="6891106956328275225">"বেটাৰী অতি সোনকালে শেষ হ\'ব পাৰে"</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> বাকী আছে"</string>
     <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> অৱশিষ্ট আছে, আপোনাৰ ব্যৱহাৰক ভিত্তি কৰি প্ৰায় <xliff:g id="TIME">%2$s</xliff:g> বাকী আছে"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="5917433188456218857">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> অৱশিষ্ট আছে, প্ৰায় <xliff:g id="TIME">%2$s</xliff:g> বাকী"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"<xliff:g id="PERCENTAGE">%s</xliff:g> বাকী আছে। বেটাৰি সঞ্চয়কাৰী অন হৈ আছে।"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"<xliff:g id="PERCENTAGE">%s</xliff:g> বাকী আছে। বেটাৰী সঞ্চয়কাৰী অন হৈ আছে।"</string>
     <string name="invalid_charger" msgid="4370074072117767416">"ইউএছবি জৰিয়তে চ্চাৰ্জ কৰিব নোৱাৰি। আপোনাৰ ডিভাইচৰ লগত পোৱা চ্চাৰ্জাৰটো ব্যৱহাৰ কৰক।"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"ইউএছবি জৰিয়তে চ্চাৰ্জ কৰিব নোৱাৰি"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"আপোনাৰ ডিভাইচৰ লগত পোৱা চ্চাৰ্জাৰটো ব্যৱহাৰ কৰক।"</string>
     <string name="battery_low_why" msgid="2056750982959359863">"ছেটিং"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"বেটাৰি সঞ্চয়কাৰী অন কৰেনে?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"বেটাৰী সঞ্চয়কাৰী অন কৰেনে?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"বেটাৰী সঞ্চয়কাৰীৰ বিষয়ে"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"অন কৰক"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"বেটাৰি সঞ্চয়কাৰী অন কৰক"</string>
+    <string name="battery_saver_start_action" msgid="4553256017945469937">"বেটাৰী সঞ্চয়কাৰী অন কৰক"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"ছেটিং"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"ৱাই-ফাই"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"স্বয়ং-ঘূৰ্ণন স্ক্ৰীন"</string>
@@ -192,11 +192,11 @@
     <string name="accessibility_compatibility_zoom_example" msgid="2617218726091234073">"স্ক্ৰীনৰ আকাৰ ডাঙৰ কৰিবলৈ জুম কৰক।"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ব্লুটুথ সংযোগ হ’ল।"</string>
     <string name="accessibility_bluetooth_disconnected" msgid="7195823280221275929">"ব্লুটুথ সংযোগ বিচ্ছিন্ন কৰা হ’ল।"</string>
-    <string name="accessibility_no_battery" msgid="3789287732041910804">"বেটাৰি শেষ"</string>
-    <string name="accessibility_battery_one_bar" msgid="8868347318237585329">"বেটাৰিৰ এডাল দণ্ড।"</string>
-    <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"বেটাৰিৰ দুডাল দণ্ড।"</string>
-    <string name="accessibility_battery_three_bars" msgid="118341923832368291">"বেটাৰিৰ তিনিডাল দণ্ড।"</string>
-    <string name="accessibility_battery_full" msgid="1480463938961288494">"বেটাৰি পূৰাকৈ চ্চাৰ্জ হৈছে।"</string>
+    <string name="accessibility_no_battery" msgid="3789287732041910804">"বেটাৰী শেষ"</string>
+    <string name="accessibility_battery_one_bar" msgid="8868347318237585329">"বেটাৰীৰ এডাল দণ্ড।"</string>
+    <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"বেটাৰীৰ দুডাল দণ্ড।"</string>
+    <string name="accessibility_battery_three_bars" msgid="118341923832368291">"বেটাৰীৰ তিনিডাল দণ্ড।"</string>
+    <string name="accessibility_battery_full" msgid="1480463938961288494">"বেটাৰী পূৰাকৈ চাৰ্জ হৈছে।"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"বেটাৰীৰ চাৰ্জৰ শতাংশ অজ্ঞাত।"</string>
     <string name="accessibility_wifi_name" msgid="4863440268606851734">"<xliff:g id="WIFI">%s</xliff:g>ৰ লগত সংযোগ কৰা হ’ল।"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g>ৰ লগত সংযোগ কৰা হ’ল।"</string>
@@ -228,10 +228,10 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"এয়াৰপ্লে’ন ম’ড।"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"ভিপিএন অন অৱস্থাত আছে।"</string>
     <string name="accessibility_no_sims" msgid="5711270400476534667">"কোনো ছিম কাৰ্ড নাই"</string>
-    <string name="accessibility_battery_details" msgid="6184390274150865789">"বেটাৰিৰ বিৱৰণসমূহ খোলক"</string>
-    <string name="accessibility_battery_level" msgid="5143715405241138822">"<xliff:g id="NUMBER">%d</xliff:g> শতাংশ বেটাৰি।"</string>
+    <string name="accessibility_battery_details" msgid="6184390274150865789">"বেটাৰীৰ বিৱৰণসমূহ খোলক"</string>
+    <string name="accessibility_battery_level" msgid="5143715405241138822">"<xliff:g id="NUMBER">%d</xliff:g> শতাংশ বেটাৰী।"</string>
     <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"আপোনাৰ ব্যৱহাৰৰ ওপৰত ভিত্তি কৰি বেটাৰী <xliff:g id="PERCENTAGE">%1$s</xliff:g> শতাংশ, প্ৰায় <xliff:g id="TIME">%2$s</xliff:g> বাকী আছে"</string>
-    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"বেটাৰি চাৰ্জ হৈ আছে, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> শতাংশ।"</string>
+    <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"বেটাৰী চাৰ্জ হৈ আছে, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> শতাংশ।"</string>
     <string name="accessibility_settings_button" msgid="2197034218538913880">"ছিষ্টেমৰ ছেটিং৷"</string>
     <string name="accessibility_notifications_button" msgid="3960913924189228831">"জাননীসমূহ।"</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"সকলো জাননীবোৰ চাওক"</string>
@@ -257,7 +257,7 @@
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"ৱাই-ফাই অফ কৰা হ’ল।"</string>
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="1490362586009027611">"ৱাই-ফাই অন কৰা হ’ল।"</string>
     <string name="accessibility_quick_settings_mobile" msgid="1817825313718492906">"ম’বাইল <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_battery" msgid="533594896310663853">"বেটাৰি <xliff:g id="STATE">%s</xliff:g>।"</string>
+    <string name="accessibility_quick_settings_battery" msgid="533594896310663853">"বেটাৰী <xliff:g id="STATE">%s</xliff:g>।"</string>
     <string name="accessibility_quick_settings_airplane_off" msgid="1275658769368793228">"এয়াৰপ্লেইন ম\'ড অফ হৈ আছে৷"</string>
     <string name="accessibility_quick_settings_airplane_on" msgid="8106176561295294255">"এয়াৰপ্লেইন ম\'ড অন হৈ আছে৷"</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"এয়াৰপ্লেইন ম\'ড অফ কৰা হ’ল।"</string>
@@ -337,7 +337,7 @@
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="6595808498429809855">"ব্লুটুথ (<xliff:g id="NUMBER">%d</xliff:g>টা ডিভাইচ)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="6375098046500790870">"ব্লুটুথ বন্ধ অৱস্থাত আছে"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"কোনো যোৰা লগোৱা ডিভাইচ উপলব্ধ নহয়।"</string>
-    <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"বেটাৰি <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
+    <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"বেটাৰী <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"অডিঅ’"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"হেডছেট"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"ইনপুট"</string>
@@ -390,7 +390,7 @@
     <string name="quick_settings_done" msgid="2163641301648855793">"সম্পন্ন কৰা হ’ল"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"বন্ধ কৰক"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"সংযোগ কৰা হ’ল"</string>
-    <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"সংযুক্ত, বেটাৰি <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"সংযুক্ত, বেটাৰী <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"সংযোগ কৰি থকা হৈছে..."</string>
     <string name="quick_settings_tethering_label" msgid="5257299852322475780">"টেডাৰ কৰি থকা হৈছে"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"হটস্পট"</string>
@@ -503,9 +503,9 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"ব্যৱহাৰকাৰীক আঁতৰাবনে?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"এই ব্যৱহাৰকাৰীৰ সকলো এপ্ আৰু ডেটা মচা হ\'ব।"</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"আঁতৰাওক"</string>
-    <string name="battery_saver_notification_title" msgid="8419266546034372562">"বেটাৰি সঞ্চয়কাৰী অন হৈ আছে"</string>
+    <string name="battery_saver_notification_title" msgid="8419266546034372562">"বেটাৰী সঞ্চয়কাৰী অন হৈ আছে"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"কাৰ্যদক্ষতা আৰু নেপথ্য ডেটা হ্ৰাস কৰে"</string>
-    <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"বেটাৰি সঞ্চয়কাৰী অফ কৰক"</string>
+    <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"বেটাৰী সঞ্চয়কাৰী অফ কৰক"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>এ আপোনাৰ স্ক্ৰীনত দৃশ্যমান হোৱা অথবা ৰেকর্ডিং অথবা কাষ্টিঙৰ সময়ত আপোনাৰ ডিভাইচত প্লে\' কৰা সকলো তথ্যলৈ এক্সেছ পাব। এইটোত পাছৱর্ড, পৰিশোধৰ সবিশেষ, ফট\', বার্তাসমূহ আৰু আপুনি প্লে\' কৰা অডিঅ\'ৰ দৰে তথ্য অন্তর্ভুক্ত হয়।"</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"এই সুবিধাটো প্ৰদান কৰা সেৱাটোৱে আপোনাৰ স্ক্ৰীনত দৃশ্যমান হোৱা অথবা ৰেকর্ডিং অথবা কাষ্টিংৰ সময়ত আপোনাৰ ডিভাইচত প্লে\' কৰা সকলো তথ্যলৈ এক্সেছ পাব। এইটোত পাছৱর্ড, পৰিশোধৰ সবিশেষ, ফট\', বার্তাসমূহ আৰু আপুনি প্লে\' কৰা অডিঅ\'ৰ দৰে তথ্য অন্তর্ভুক্ত হয়।"</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ৰেকর্ডিং অথবা কাষ্টিং আৰম্ভ কৰিবনে?"</string>
@@ -656,8 +656,8 @@
     <string name="output_service_wifi" msgid="9003667810868222134">"ৱাই-ফাই"</string>
     <string name="output_service_bt_wifi" msgid="7186882540475524124">"ব্লুটুথ আৰু ৱাই-ফাই"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
-    <string name="show_battery_percentage" msgid="6235377891802910455">"সংযুক্ত বেটাৰিৰ কিমান শতাংশ বাকী আছে দেখুওৱাক"</string>
-    <string name="show_battery_percentage_summary" msgid="9053024758304102915">"চাৰ্জ হৈ নথকা অৱস্থাত বেটাৰি কিমান শতাংশ বাকী স্থিতি দণ্ডৰ ভিতৰত দেখুৱাওক"</string>
+    <string name="show_battery_percentage" msgid="6235377891802910455">"সংযুক্ত বেটাৰীৰ কিমান শতাংশ বাকী আছে দেখুওৱাক"</string>
+    <string name="show_battery_percentage_summary" msgid="9053024758304102915">"চাৰ্জ হৈ নথকা অৱস্থাত বেটাৰী কিমান শতাংশ বাকী স্থিতি দণ্ডৰ ভিতৰত দেখুৱাওক"</string>
     <string name="quick_settings" msgid="6211774484997470203">"ক্ষিপ্ৰ ছেটিং"</string>
     <string name="status_bar" msgid="4357390266055077437">"স্থিতি দণ্ড"</string>
     <string name="overview" msgid="3522318590458536816">"অৱলোকন"</string>
@@ -695,7 +695,7 @@
     <string name="remove_from_settings_prompt" msgid="551565437265615426">"ছেটিঙৰ পৰা System UI Tuner আঁতৰাই ইয়াৰ সুবিধাসমূহ ব্যৱহাৰ কৰাটো বন্ধ কৰিবনে?"</string>
     <string name="activity_not_found" msgid="8711661533828200293">"আপোনাৰ ডিভাইচত এপ্লিকেশ্বনটো ইনষ্টল কৰা হোৱা নাই"</string>
     <string name="clock_seconds" msgid="8709189470828542071">"ঘড়ীৰ ছেকেণ্ড দেখুৱাওক"</string>
-    <string name="clock_seconds_desc" msgid="2415312788902144817">"স্থিতি দণ্ডত ঘড়ীৰ ছেকেণ্ড দেখুৱাওক। এই কার্যই বেটাৰিৰ অৱস্থাত প্ৰভাৱ পেলাব পাৰে।"</string>
+    <string name="clock_seconds_desc" msgid="2415312788902144817">"স্থিতি দণ্ডত ঘড়ীৰ ছেকেণ্ড দেখুৱাওক। এই কার্যই বেটাৰীৰ জীৱনকালত প্ৰভাৱ পেলাব পাৰে।"</string>
     <string name="qs_rearrange" msgid="484816665478662911">"ক্ষিপ্ৰ ছেটিং পুনৰ সজাওক"</string>
     <string name="show_brightness" msgid="6700267491672470007">"দ্ৰুত ছেটিঙত উজ্জ্বলতা দেখুৱাওক"</string>
     <string name="experimental" msgid="3549865454812314826">"পৰীক্ষামূলক"</string>
@@ -801,8 +801,8 @@
       <item quantity="one"> %d মিনিট</item>
       <item quantity="other"> %d মিনিট</item>
     </plurals>
-    <string name="battery_panel_title" msgid="5931157246673665963">"বেটাৰিৰ ব্যৱহাৰ"</string>
-    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"চ্চাৰ্জ কৰি থকাৰ সময়ত বেটাৰি সঞ্চয়কাৰী উপলব্ধ নহয়।"</string>
+    <string name="battery_panel_title" msgid="5931157246673665963">"বেটাৰীৰ ব্যৱহাৰ"</string>
+    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"চাৰ্জ কৰি থকাৰ সময়ত বেটাৰী সঞ্চয়কাৰী উপলব্ধ নহয়।"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"বেটাৰী সঞ্চয়কাৰী"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"কাৰ্যদক্ষতা আৰু নেপথ্য ডেটা হ্ৰাস কৰে"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g> বুটাম"</string>
@@ -852,7 +852,7 @@
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"অসুবিধা নিদিব"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"ভলিউম বুটামসমূহৰ শ্বৰ্টকাট"</string>
     <string name="volume_up_silent" msgid="1035180298885717790">"ভলিউম বঢ়োৱা বুটাম ব্যৱহাৰ কৰি অসুবিধা নিদিব নিষ্ক্ৰিয় কৰক"</string>
-    <string name="battery" msgid="769686279459897127">"বেটাৰি"</string>
+    <string name="battery" msgid="769686279459897127">"বেটাৰী"</string>
     <string name="clock" msgid="8978017607326790204">"ঘড়ী"</string>
     <string name="headset" msgid="4485892374984466437">"হেডছেট"</string>
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"ছেটিং খোলক"</string>
@@ -961,7 +961,7 @@
     <string name="tuner_menu" msgid="363690665924769420">"মেনু"</string>
     <string name="tuner_app" msgid="6949280415826686972">"<xliff:g id="APP">%1$s</xliff:g> এপ্"</string>
     <string name="notification_channel_alerts" msgid="3385787053375150046">"সতৰ্কবার্তাসমূহ"</string>
-    <string name="notification_channel_battery" msgid="9219995638046695106">"বেটাৰি"</string>
+    <string name="notification_channel_battery" msgid="9219995638046695106">"বেটাৰী"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"স্ক্ৰীণশ্বটসমূহ"</string>
     <string name="notification_channel_general" msgid="4384774889645929705">"সাধাৰণ বার্তাসমূহ"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"ষ্ট\'ৰেজ"</string>
@@ -985,7 +985,7 @@
     <string name="qs_dnd_keep" msgid="3829697305432866434">"Keep"</string>
     <string name="qs_dnd_replace" msgid="7712119051407052689">"সলনি কৰক"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"নেপথ্যত চলি থকা এপসমূহ"</string>
-    <string name="running_foreground_services_msg" msgid="3009459259222695385">"বেটাৰি আৰু ডেটাৰ ব্যৱহাৰৰ বিষয়ে বিশদভাৱে জানিবলৈ টিপক"</string>
+    <string name="running_foreground_services_msg" msgid="3009459259222695385">"বেটাৰী আৰু ডেটাৰ ব্যৱহাৰৰ বিষয়ে সবিশেষ জানিবলৈ টিপক"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"ম’বাইল ডেটা অফ কৰিবনে?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"আপুনি <xliff:g id="CARRIER">%s</xliff:g>ৰ জৰিয়তে ডেটা সংযোগ বা ইণ্টাৰনেট সংযোগ নাপাব। কেৱল ৱাই-ফাইৰ যোগেৰে ইণ্টাৰনেট উপলব্ধ হ\'ব।"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"আপোনাৰ বাহক"</string>
@@ -996,11 +996,11 @@
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"<xliff:g id="APP">%1$s</xliff:g>ক যিকোনো এপৰ অংশ দেখুওৱাবলৈ অনুমতি দিয়ক"</string>
     <string name="slice_permission_allow" msgid="6340449521277951123">"অনুমতি দিয়ক"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"অস্বীকাৰ কৰক"</string>
-    <string name="auto_saver_title" msgid="6873691178754086596">"বেটাৰি সঞ্চয়কাৰীৰ সময়সূচী সক্ৰিয় কৰিবলৈ টিপক"</string>
-    <string name="auto_saver_text" msgid="3214960308353838764">"বেটাৰি শেষ হোৱাৰ সম্ভাৱনা থাকিলে অন কৰক"</string>
+    <string name="auto_saver_title" msgid="6873691178754086596">"বেটাৰী সঞ্চয়কাৰীৰ সময়সূচী সক্ৰিয় কৰিবলৈ টিপক"</string>
+    <string name="auto_saver_text" msgid="3214960308353838764">"বেটাৰী শেষ হোৱাৰ সম্ভাৱনা থাকিলে অন কৰক"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"নালাগে, ধন্যবাদ"</string>
-    <string name="auto_saver_enabled_title" msgid="4294726198280286333">"বেটাৰি সঞ্চয়কাৰীৰ সময়সূচী অন কৰা অৱস্থাত আছে"</string>
-    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"বেটাৰি চ্চাৰ্জৰ স্তৰ <xliff:g id="PERCENTAGE">%d</xliff:g>%%তকৈ কম হোৱাৰ লগে লগে বেটাৰি সঞ্চয়কাৰী স্বয়ংক্ৰিয়ভাৱে অন হ’ব।"</string>
+    <string name="auto_saver_enabled_title" msgid="4294726198280286333">"বেটাৰী সঞ্চয়কাৰীৰ সময়সূচী অন কৰা অৱস্থাত আছে"</string>
+    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"বেটাৰী চাৰ্জৰ স্তৰ <xliff:g id="PERCENTAGE">%d</xliff:g>%%তকৈ কম হোৱাৰ লগে লগে বেটাৰী সঞ্চয়কাৰী স্বয়ংক্ৰিয়ভাৱে অন হ’ব।"</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"ছেটিং"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"বুজি পালোঁ"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"SysUI হীপ ডাম্প কৰক"</string>
