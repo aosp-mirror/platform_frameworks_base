@@ -394,10 +394,16 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE, wct, remoteTransition, this);
     }
 
-    void evictOccludedChildren(@SplitPosition int position) {
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
-        (position == mSideStagePosition ? mSideStage : mMainStage).evictOccludedChildren(wct);
-        mTaskOrganizer.applyTransaction(wct);
+    /**
+     * Collects all the current child tasks of a specific split and prepares transaction to evict
+     * them to display.
+     */
+    void prepareEvictChildTasks(@SplitPosition int position, WindowContainerTransaction wct) {
+        if (position == mSideStagePosition) {
+            mSideStage.evictAllChildren(wct);
+        } else {
+            mMainStage.evictAllChildren(wct);
+        }
     }
 
     Bundle resolveStartStage(@SplitScreen.StageType int stage,
