@@ -47,7 +47,7 @@ class AmbientLightModeMonitor @Inject constructor(
     }
 
     // Light sensor used to detect ambient lighting conditions.
-    private val lightSensor: Sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
+    private val lightSensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
 
     // Represents all ambient light modes.
     @Retention(AnnotationRetention.SOURCE)
@@ -61,6 +61,11 @@ class AmbientLightModeMonitor @Inject constructor(
      */
     fun start(callback: Callback) {
         if (DEBUG) Log.d(TAG, "start monitoring ambient light mode")
+
+        if (lightSensor == null) {
+            if (DEBUG) Log.w(TAG, "light sensor not available")
+            return
+        }
 
         algorithm.start(callback)
         sensorManager.registerListener(mSensorEventListener, lightSensor,
