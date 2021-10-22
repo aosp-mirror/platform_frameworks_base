@@ -723,6 +723,30 @@
     <!-- Timeout to idle mode duration in milliseconds. -->
     <integer name="config_idleModeTimeout">10000</integer>
 
+    <!-- This value is used when calculating whether the device is in ambient light mode. It is
+        light mode when the light sensor sample value exceeds above this value. -->
+    <integer name="config_ambientLightModeThreshold">5</integer>
+
+    <!-- This value is used when calculating whether the device is in ambient dark mode. It is
+        dark mode when the light sensor sample value drops below this value. -->
+    <integer name="config_ambientDarkModeThreshold">2</integer>
+
+    <!-- This value is used when calculating whether the device is in ambient light mode. Each
+        sample contains light sensor events from this span of time duration. -->
+    <integer name="config_ambientLightModeSamplingSpanMillis">10000</integer>
+
+    <!-- This value is used when calculating whether the device is in ambient dark mode. Each
+    sample contains light sensor events from this span of time duration. -->
+    <integer name="config_ambientDarkModeSamplingSpanMillis">2000</integer>
+
+    <!-- This value is used when calculating whether the device is in ambient light mode. The
+        samples are collected at this frequency. -->
+    <integer name="config_ambientLightModeSamplingFrequencyMillis">1000</integer>
+
+    <!-- This value is used when calculating whether the device is in ambient dark mode. The
+    samples are collected at this frequency. -->
+    <integer name="config_ambientDarkModeSamplingFrequencyMillis">500</integer>
+
     <!-- The maximum number of attempts to reconnect to the communal source target after failing
          to connect -->
     <integer name="config_communalSourceMaxReconnectAttempts">10</integer>

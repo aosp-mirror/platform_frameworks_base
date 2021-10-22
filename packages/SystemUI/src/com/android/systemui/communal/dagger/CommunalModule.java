@@ -20,10 +20,13 @@ import android.content.Context;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import com.android.systemui.idle.AmbientLightModeMonitor;
+import com.android.systemui.idle.LightSensorEventsDebounceAlgorithm;
 import com.android.systemui.idle.dagger.IdleViewComponent;
 
 import javax.inject.Named;
 
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 
@@ -44,4 +47,13 @@ public interface CommunalModule {
         FrameLayout view = new FrameLayout(context);
         return view;
     }
+
+    /**
+     * Provides LightSensorEventsDebounceAlgorithm as an instance to DebounceAlgorithm interface.
+     * @param algorithm the instance of algorithm that is bound to the interface.
+     * @return the interface that is bound to.
+     */
+    @Binds
+    AmbientLightModeMonitor.DebounceAlgorithm ambientLightDebounceAlgorithm(
+            LightSensorEventsDebounceAlgorithm algorithm);
 }
