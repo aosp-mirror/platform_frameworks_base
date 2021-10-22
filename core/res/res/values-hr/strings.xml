@@ -546,6 +546,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Aplikaciji omogućuje oglašavanje na Bluetooth uređajima u blizini"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"odredite približni položaj između uređaja u blizini koji upotrebljavaju ultraširokopojasno povezivanje"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Dopušta aplikaciji da odredi približni položaj između uređaja u blizini koji upotrebljavaju ultraširokopojasno povezivanje"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interakcija s Wi-Fi uređajima u blizini"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Aplikaciji omogućuje oglašavanje, povezivanje i određivanje približnog položaja Wi-Fi uređaja u blizini"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informacije o preferiranoj usluzi plaćanja NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Omogućuje aplikaciji primanje informacija o preferiranoj usluzi plaćanja NFC kao što su registrirana pomagala i odredište."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"upravljanje beskontaktnom komunikacijom (NFC)"</string>
@@ -729,6 +731,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Omogućuje aplikaciji čitanje i pisanje konfiguracije opcije Ne uznemiravaj."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"pokrenuti upotrebu dopuštenja za pregled"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Dopušta nositelju pokretanje upotrebe dopuštenja za aplikaciju. Ne bi smjelo biti potrebno za uobičajene aplikacije."</string>
+    <!-- no translation found for permlab_startViewAppFeatures (7955084203185903001) -->
+    <skip />
+    <!-- no translation found for permdesc_startViewAppFeatures (7207240860165206107) -->
+    <skip />
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"pristup podacima senzora pri višoj brzini uzorkovanja"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Aplikaciji omogućuje uzorkovanje podataka senzora pri brzini većoj od 200 Hz"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Postavi pravila zaporke"</string>

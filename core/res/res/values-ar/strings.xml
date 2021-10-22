@@ -555,6 +555,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"للسماح للتطبيق بعرض إعلانات على الأجهزة القريبة التي تتضمّن بلوتوث."</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"تحديد الموضع النسبي بين الأجهزة المجاورة التي تستخدم النطاق الواسع جدًا"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"يسمح هذا الإذن للتطبيق بتحديد الموضع النسبي بين الأجهزة المجاورة التي تستخدم النطاق الواسع جدًا."</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"‏التفاعل مع أجهزة Wi‑Fi المجاورة"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"‏للسماح للتطبيق بالإعلان والربط وتحديد الموقع النسبي لأجهزة Wi-Fi المجاورة."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏معلومات الخدمات المدفوعة باستخدام الاتصال قصير المدى NFC المفضّل"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏يسمح هذا الإذن للتطبيق بالحصول على معلومات الخدمات المدفوعة باستخدام الاتصال قصير المدى NFC المفضّل، مثلاً المساعدات المسجّلة ووجهة المسار."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"التحكم في اتصال الحقل القريب"</string>
@@ -738,6 +740,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"للسماح للتطبيق بقراءة إعداد \"عدم الإزعاج\" وكتابتها."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"بدء استخدام إذن العرض"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"للسماح للمالك ببدء استخدام الإذن لأحد التطبيقات. ولن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"بدء عرض ميزات التطبيق"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"للسماح للمالك ببدء عرض معلومات عن ميزات التطبيق."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"الوصول إلى بيانات جهاز الاستشعار بمعدّل مرتفع للبيانات في الملف الصوتي"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"يسمح هذا الأذن للتطبيق بزيادة بيانات جهاز الاستشعار بمعدّل بيانات في الملف الصوتي أكبر من 200 هرتز."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"تعيين قواعد كلمة المرور"</string>

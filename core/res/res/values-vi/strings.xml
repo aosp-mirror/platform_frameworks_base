@@ -543,6 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Cho phép ứng dụng quảng cáo trên các thiết bị Bluetooth ở gần"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"xác định khoảng cách tương đối giữa các thiết bị ở gần dùng Băng tần siêu rộng"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Cho phép ứng dụng xác định khoảng cách tương đối giữa các thiết bị ở gần dùng Băng tần siêu rộng"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"tương tác với các thiết bị Wi‑Fi lân cận"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Cho phép ứng dụng thông báo, kết nối và xác định vị trí tương đối của các thiết bị Wi‑Fi lân cận"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Thông tin về dịch vụ thanh toán qua công nghệ giao tiếp tầm gần (NFC) được ưu tiên"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Cho phép ứng dụng nhận thông tin về dịch vụ thanh toán qua công nghệ giao tiếp tầm gần mà bạn ưu tiên, chẳng hạn như các hình thức hỗ trợ đã đăng ký và điểm đến trong hành trình."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kiểm soát Liên lạc trường gần"</string>
@@ -726,6 +728,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Cho phép ứng dụng đọc và ghi cấu hình Không làm phiền."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"cấp quyền xem"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Cho phép chủ sở hữu cấp quyền cho một ứng dụng. Các ứng dụng thông thường sẽ không bao giờ cần quyền này."</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"bắt đầu xem các tính năng của ứng dụng"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Cho phép chủ sở hữu bắt đầu xem thông tin về tính năng của một ứng dụng."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"truy cập vào dữ liệu cảm biến ở tốc độ lấy mẫu cao"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Cho phép ứng dụng lấy mẫu dữ liệu cảm biến ở tốc độ lớn hơn 200 Hz"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Đặt quy tắc mật khẩu"</string>
