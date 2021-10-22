@@ -16519,6 +16519,26 @@ package android.graphics {
     method public boolean setUseCompositingLayer(boolean, @Nullable android.graphics.Paint);
   }
 
+  public class RuntimeShader extends android.graphics.Shader {
+    ctor public RuntimeShader(@NonNull String);
+    ctor public RuntimeShader(@NonNull String, boolean);
+    method public boolean isForceOpaque();
+    method public void setColorUniform(@NonNull String, @ColorInt int);
+    method public void setColorUniform(@NonNull String, @ColorLong long);
+    method public void setColorUniform(@NonNull String, @NonNull android.graphics.Color);
+    method public void setFloatUniform(@NonNull String, float);
+    method public void setFloatUniform(@NonNull String, float, float);
+    method public void setFloatUniform(@NonNull String, float, float, float);
+    method public void setFloatUniform(@NonNull String, float, float, float, float);
+    method public void setFloatUniform(@NonNull String, @NonNull float[]);
+    method public void setInputShader(@NonNull String, @NonNull android.graphics.Shader);
+    method public void setIntUniform(@NonNull String, int);
+    method public void setIntUniform(@NonNull String, int, int);
+    method public void setIntUniform(@NonNull String, int, int, int);
+    method public void setIntUniform(@NonNull String, int, int, int, int);
+    method public void setIntUniform(@NonNull String, @NonNull int[]);
+  }
+
   public class Shader {
     ctor @Deprecated public Shader();
     method public boolean getLocalMatrix(@NonNull android.graphics.Matrix);
