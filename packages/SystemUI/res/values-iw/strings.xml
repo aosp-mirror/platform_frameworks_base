@@ -1191,6 +1191,5 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"‏ה-Wi-Fi לא יתחבר באופן אוטומטי בינתיים"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"הצגת הכול"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"כדי לעבור בין רשתות, צריך לנתק את האתרנט"</string>
-    <!-- no translation found for wifi_scan_notify_message (3753839537448621794) -->
-    <skip />
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"‏כדי לשפר את חוויית השימוש במכשיר, אפליקציות ושירותים יוכלו לחפש רשתות Wi-Fi בכל שלב, גם כאשר ה-Wi-Fi כבוי. אפשר לשנות זאת בהגדרות של חיפוש נקודות Wi-Fi. "<annotation id="link">"שינוי"</annotation></string>
 </resources>

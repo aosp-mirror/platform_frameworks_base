@@ -1179,6 +1179,5 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi ei toistaiseksi yhdistä automaattisesti"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Näytä kaikki"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Irrota Ethernet-johto, jos haluat vaihtaa verkkoa"</string>
-    <!-- no translation found for wifi_scan_notify_message (3753839537448621794) -->
-    <skip />
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Laitteen käyttökokemuksen parantamiseksi sovellukset ja palvelut voivat hakea Wi-Fi-verkkoja myös silloin, kun Wi-Fi on pois päältä. Voit muuttaa asetusta Wi-Fi-haun asetuksissa. "<annotation id="link">"Muuta"</annotation></string>
 </resources>

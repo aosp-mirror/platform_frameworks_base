@@ -1185,6 +1185,5 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi se zasad neće automatski povezivati"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Prikaži sve"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Da biste se prebacili na drugu mrežu, odspojite Ethernet"</string>
-    <!-- no translation found for wifi_scan_notify_message (3753839537448621794) -->
-    <skip />
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Da bi se poboljšao doživljaj uređaja, aplikacije i usluge i dalje mogu tražiti Wi-Fi mreže u bilo kojem trenutku, čak i kada je Wi-Fi isključen. To možete promijeniti u postavkama traženja Wi-Fija. "<annotation id="link">"Promijeni"</annotation></string>
 </resources>

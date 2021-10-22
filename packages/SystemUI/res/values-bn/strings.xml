@@ -1179,6 +1179,5 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"এখন ওয়াই-ফাই নিজে থেকে কানেক্ট হবে না"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"সবকটি দেখুন"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"নেটওয়ার্ক বদলাতে ইথারনেট ডিসকানেক্ট করুন"</string>
-    <!-- no translation found for wifi_scan_notify_message (3753839537448621794) -->
-    <skip />
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"ডিভাইস সংক্রান্ত অভিজ্ঞতা আরও ভাল করতে, অ্যাপ ও পরিষেবা যেকোনও সময় আপনার ওয়াই-ফাই নেটওয়ার্ক স্ক্যান করতে পারবে, এমনকি ডিভাইসের ওয়াই-ফাই বন্ধ করা থাকলেও। ওয়াই-ফাই স্ক্যানিং সেটিংস থেকে আপনি এটি পরিবর্তন করতে পারবেন। "<annotation id="link">"পরিবর্তন করুন"</annotation></string>
 </resources>
