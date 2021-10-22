@@ -1191,6 +1191,5 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Пристрій не підключатиметься до Wi-Fi автоматично"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Показати все"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Щоб вибрати іншу мережу, від’єднайте кабель Ethernet"</string>
-    <!-- no translation found for wifi_scan_notify_message (3753839537448621794) -->
-    <skip />
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Щоб користуватися пристроєм було зручніше, додатки й сервіси можуть шукати бездротові мережі, навіть якщо Wi-Fi вимкнено. Це налаштування можна змінити в параметрах пошуку мереж Wi-Fi. "<annotation id="link">"Змінити"</annotation></string>
 </resources>
