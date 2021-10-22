@@ -1179,5 +1179,6 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi hozir avtomatik ulanmaydi"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Hammasi"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Boshqa tarmoqqa almashish uchun Ethernet tarmogʻini uzing"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Qurilma ishlashini yaxshilash uchun ilova va xizmatlar hatto Wi-Fi yoqilmaganda ham istalgan vaqt Wi-Fi tarmoqlarni qidirishi mumkin. Buni taqiqlash uchun Wi-Fi tarmoqlarni qidirish funksiyasini faolsizlantiring. "<annotation id="link">"Sozlamalarni ochish"</annotation></string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Foydalanuvchini tanlang"</string>
 </resources>

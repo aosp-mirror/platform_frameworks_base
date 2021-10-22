@@ -1179,5 +1179,6 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi nuk do të lidhet automatikisht për momentin"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Shiko të gjitha"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Për të ndërruar rrjetet, shkëput Ethernet-in"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Për të përmirësuar përvojën e pajisjes, aplikacionet dhe shërbimet mund të vazhdojnë të skanojnë për rrjete Wi-Fi në çdo kohë, edhe kur Wi-Fi është joaktiv. Mund ta ndryshosh këtë te cilësimet e skanimit të Wi-Fi. "<annotation id="link">"Ndrysho"</annotation></string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Zgjidh përdoruesin"</string>
 </resources>

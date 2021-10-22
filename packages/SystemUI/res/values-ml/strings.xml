@@ -1179,5 +1179,6 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"വൈഫൈ ഇപ്പോൾ സ്വയമേവ കണക്റ്റ് ചെയ്യില്ല"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"എല്ലാം കാണുക"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"മറ്റ് നെറ്റ്‌വർക്കുകളിലേക്ക് മാറാൻ, ഇതർനെറ്റ് വിച്ഛേദിക്കുക"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"ഉപകരണ അനുഭവം മെച്ചപ്പെടുത്താൻ, വൈഫൈ ഓഫാക്കിയിരിക്കുമ്പോൾ പോലും ആപ്പുകൾക്കും സേവനങ്ങൾക്കും വൈഫൈ നെറ്റ്‌വർക്കുകൾ കണ്ടെത്താൻ ഏത് സമയത്തും സ്‌കാൻ ചെയ്യാനാകും. നിങ്ങൾക്ക് ഇത് വൈഫൈ സ്‌കാനിംഗ് ക്രമീകരണത്തിൽ മാറ്റാം. "<annotation id="link">"മാറ്റുക"</annotation></string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ഉപയോക്താവിനെ തിരഞ്ഞെടുക്കൂ"</string>
 </resources>

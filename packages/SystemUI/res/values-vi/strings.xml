@@ -1179,5 +1179,6 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Tạm thời, Wi-Fi sẽ không tự động kết nối"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Xem tất cả"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Để chuyển mạng, hãy rút cáp Ethernet"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Để cải thiện trải nghiệm khi dùng thiết bị, các ứng dụng và dịch vụ vẫn có thể quét tìm mạng Wi‑Fi bất cứ lúc nào, ngay cả khi Wi‑Fi tắt. Bạn có thể thay đổi chế độ này trong phần cài đặt tính năng Quét tìm Wi‑Fi. "<annotation id="link">"Thay đổi"</annotation></string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Chọn người dùng"</string>
 </resources>

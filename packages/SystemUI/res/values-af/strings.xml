@@ -1179,5 +1179,6 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-fi sal vir nou nie outomaties koppel nie"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Sien alles"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Ontkoppel Ethernet om netwerke te wissel"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Om toestelervaring te verbeter, kan programme en dienste steeds enige tyd na wi‑fi-netwerke soek, selfs wanneer wi‑fi af is. Jy kan dit in Wi-fi-opsporing-instellings verander. "<annotation id="link">"Verander"</annotation></string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Kies gebruiker"</string>
 </resources>
