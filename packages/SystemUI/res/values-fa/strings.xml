@@ -1179,6 +1179,5 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"‏فعلاً Wi-Fi به‌طور خودکار متصل نمی‌شود"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"مشاهده همه"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"برای تغییر شبکه، اترنت را قطع کنید"</string>
-    <!-- no translation found for wifi_scan_notify_message (3753839537448621794) -->
-    <skip />
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"‏برای بهبود تجربه استفاده از دستگاه، برنامه‌ها و سرویس‌ها همچنان می‌توانند در هر زمانی شبکه‌های Wi-Fi را اسکن کنند؛ حتی وقتی که Wi-Fi خاموش باشد. می‌توانید این مورد را در تنظیمات اسکن کردن Wi‑Fi تغییر دهید. "<annotation id="link">"تغییر"</annotation></string>
 </resources>
