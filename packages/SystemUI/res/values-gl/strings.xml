@@ -1179,6 +1179,5 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"De momento, a wifi non se conectará automaticamente"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Ver todo"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Para cambiar de rede, desconecta a Ethernet"</string>
-    <!-- no translation found for wifi_scan_notify_message (3753839537448621794) -->
-    <skip />
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Para mellorar a experiencia que ofrece o dispositivo, as aplicacións e os servizos poden seguir buscando redes wifi en calquera momento, aínda que esta conexión estea desactivada. Podes cambiar esta opción na configuración da función Busca de redes wifi. "<annotation id="link">"Cambiar"</annotation></string>
 </resources>
