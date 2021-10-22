@@ -1191,6 +1191,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Vmesnik Wi-Fi trenutno ne bo samodejno vzpostavil povezave."</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Prikaz vseh omrežij"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Če želite preklopiti omrežje, prekinite ethernetno povezavo."</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Za izboljšano izkušnjo pri uporabi naprave lahko aplikacije in storitve kadar koli iščejo omrežja Wi‑Fi, tudi ko je Wi‑Fi izklopljen. To lahko spremenite v nastavitvah iskanja omrežij Wi-Fi. "<annotation id="link">"Spremeni"</annotation></string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"Aplikacija <xliff:g id="APPNAME">%1$s</xliff:g> želi dodati to ploščico v hitre nastavitve."</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Dodaj ploščico"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Ne dodaj ploščice"</string>

@@ -1179,6 +1179,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wifi maakt momenteel niet automatisch verbinding"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Alles tonen"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Verbreek de ethernetverbinding om van netwerk te wisselen"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Apps en services kunnen nog steeds op elk moment scannen op wifi-netwerken, zelfs als wifi uitstaat, om de apparaatfunctionaliteit te verbeteren. Je kunt dit aanpassen in de instellingen voor wifi-scannen. "<annotation id="link">"Wijzigen"</annotation></string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> wil de volgende tegel toevoegen aan Snelle instellingen"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Tegel toevoegen"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Tegel niet toevoegen"</string>

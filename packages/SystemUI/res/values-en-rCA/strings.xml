@@ -1179,6 +1179,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi‑Fi won’t auto-connect for now"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"See all"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"To switch networks, disconnect Ethernet"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"To improve device experience, apps and services can still scan for Wi‑Fi networks at any time, even when Wi‑Fi is off. You can change this in Wi‑Fi scanning settings. "<annotation id="link">"Change"</annotation></string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> wants to add the following tile to Quick Settings"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Add tile"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Do not add tile"</string>

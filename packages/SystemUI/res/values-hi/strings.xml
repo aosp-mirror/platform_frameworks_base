@@ -1179,6 +1179,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"फ़िलहाल, वाई-फ़ाई अपने-आप कनेक्ट नहीं होगा"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"सभी देखें"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"नेटवर्क बदलने के लिए, पहले ईथरनेट को डिसकनेक्ट करें"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"डिवाइस इस्तेमाल करने के अनुभव काे बेहतर बनाने के लिए, ऐप्लिकेशन और सेवाओं की मदद से, किसी भी समय वाई-फ़ाई नेटवर्क स्कैन किए जा सकते हैं. ऐसा वाई-फ़ाई बंद होने पर भी किया जा सकता है. वाई-फ़ाई स्कैनिंग की सेटिंग में जाकर, इसे बदला जा सकता है. "<annotation id="link">"बदलें"</annotation></string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> इस टाइल को \'फटाफट सेटिंग\' में जोड़ने के लिए अनुमति चाहता है"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"टाइल जोड़ें"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"टाइल न जोड़ें"</string>

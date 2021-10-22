@@ -1179,6 +1179,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Connessione automatica rete Wi-Fi non attiva al momento"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Mostra tutte"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Per cambiare rete, scollega il cavo Ethernet"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Per migliorare l\'esperienza con il dispositivo, le app e i servizi possono continuare a cercare reti Wi-Fi in qualsiasi momento, anche quando la connessione Wi-Fi non è attiva. Puoi modificare questa preferenza nelle impostazioni relative alla ricerca di reti Wi-Fi. "<annotation id="link">"Cambia"</annotation></string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> vuole aggiungere il seguente riquadro alle Impostazioni rapide"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Aggiungi riquadro"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Non aggiungerlo"</string>
