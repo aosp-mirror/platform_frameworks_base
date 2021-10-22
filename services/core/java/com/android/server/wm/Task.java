@@ -1464,6 +1464,9 @@ class Task extends WindowContainer<WindowContainer> {
         adjustBoundsForDisplayChangeIfNeeded(getDisplayContent());
 
         mRootWindowContainer.updateUIDsPresentOnDisplay();
+
+        // Ensure all animations are finished at same time in split-screen mode.
+        forAllActivities(ActivityRecord::updateAnimatingActivityRegistry);
     }
 
     void cleanUpActivityReferences(ActivityRecord r) {

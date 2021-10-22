@@ -1343,13 +1343,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         final Task rootTask = getRootTask();
 
-        // If we reparent, make sure to remove ourselves from the old animation registry.
-        if (mAnimatingActivityRegistry != null) {
-            mAnimatingActivityRegistry.notifyFinished(this);
-        }
-        mAnimatingActivityRegistry = rootTask != null
-                ? rootTask.getAnimatingActivityRegistry()
-                : null;
+        updateAnimatingActivityRegistry();
 
         if (task == mLastParentBeforePip) {
             // Activity's reparented back from pip, clear the links once established
@@ -1371,6 +1365,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 rootTask.setHasBeenVisible(true);
             }
         }
+    }
+
+    void updateAnimatingActivityRegistry() {
+        final Task rootTask = getRootTask();
+        final AnimatingActivityRegistry registry = rootTask != null
+                ? rootTask.getAnimatingActivityRegistry()
+                : null;
+
+        // If we reparent, make sure to remove ourselves from the old animation registry.
+        if (mAnimatingActivityRegistry != null && mAnimatingActivityRegistry != registry) {
+            mAnimatingActivityRegistry.notifyFinished(this);
+        }
+
+        mAnimatingActivityRegistry = registry;
     }
 
     /**
