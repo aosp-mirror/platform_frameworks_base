@@ -1179,5 +1179,6 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"केही समयका लागि Wi-Fi स्वतः कनेक्ट हुँदैन"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"सबै नेटवर्क हेर्नुहोस्"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"नेटवर्क बदल्न इथरनेट डिस्कनेक्ट गर्नुहोस्"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"डिभाइस प्रयोगको अनुभवमा गुणस्तर सुधार गर्न, एप तथा सेवाहरूले अझै पनि जुनसुकै बेला (Wi‑Fi अफ भएका बेलामा पनि) Wi‑Fi नेटवर्क खोज्न सक्छन्। तपाईं यसलाई Wi‑Fi स्क्यानिङका सेटिङमा गई परिवर्तन गर्न सक्नुहुन्छ। "<annotation id="link">"बदल्नुहोस्"</annotation></string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"प्रयोगकर्ता चयन गर्नु…"</string>
 </resources>

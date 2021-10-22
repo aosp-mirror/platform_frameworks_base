@@ -1179,5 +1179,6 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Connexion automatique au Wi-Fi impossible pour le moment"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Tout afficher"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Pour changer de réseau, débranchez le câble Ethernet"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Pour améliorer l\'expérience de l\'appareil, les applications et les services peuvent quand même rechercher des réseaux Wi-Fi en tout temps, même lorsque le Wi-Fi est désactivé. Vous pouvez modifier vos préférences dans les paramètres de recherche de réseaux Wi-Fi. "<annotation id="link">"Modifier"</annotation></string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Sélect. utilisateur"</string>
 </resources>

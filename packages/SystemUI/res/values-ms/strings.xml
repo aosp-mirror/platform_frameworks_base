@@ -1179,5 +1179,6 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi tidak akan disambungkan secara automatik buat masa ini"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Lihat semua"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Untuk menukar rangkaian, putuskan sambungan ethernet"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Untuk meningkatkan pengalaman peranti, apl dan perkhidmatan masih dapat melakukan imbasan untuk mengesan rangkaian Wi-Fi pada bila-bila masa, meskipun apabila Wi-Fi dimatikan. Anda boleh menukar tetapan ini dalam tetapan pengimbasan Wi-Fi. "<annotation id="link">"Tukar"</annotation></string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Pilih pengguna"</string>
 </resources>

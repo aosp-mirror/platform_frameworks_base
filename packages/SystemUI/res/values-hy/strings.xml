@@ -1179,5 +1179,6 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi-ն ավտոմատ չի միանա"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Տեսնել բոլորը"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Մի ցանցից մյուսին անցնելու համար անջատեք Ethernet-ը"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Սարքի աշխատանքը բարելավելու համար հավելվածներն ու ծառայությունները կորոնեն Wi‑Fi ցանցեր, նույնիսկ երբ Wi‑Fi-ն անջատված է։ Այս պարամետրը կարող եք փոխել Wi‑Fi ցանցերի որոնման կարգավորումներում։ "<annotation id="link">"Փոխել"</annotation></string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Ընտրեք օգտատեր"</string>
 </resources>

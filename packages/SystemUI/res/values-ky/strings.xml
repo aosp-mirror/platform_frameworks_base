@@ -1179,5 +1179,6 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi азырынча автоматтык түрдө туташпайт"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Баарын көрүү"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Башка тармактарга которулуу үчүн Ethernet кабелин ажыратыңыз"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Түзмөктүн колдонулушун жакшыртуу үчүн колдонмолор менен кызматтар Wi‑Fi өчүп турса да зымсыз тармактарды издей беришет. Аны Wi-Fi тармактарын издөө жөндөөлөрүнөн өзгөртө аласыз. "<annotation id="link">"Өзгөртүү"</annotation></string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Колдонуучуну тандоо"</string>
 </resources>
