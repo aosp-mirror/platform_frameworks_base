@@ -543,6 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"برنامه مجاز می‌شود در دستگاه‌های بلوتوث اطراف تبلیغ کند."</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"مشخص کردن موقعیت نسبی بین دستگاه‌های باند فوق‌وسیع اطراف"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"به برنامه اجازه داده می‌شود موقعیت نسبی بین دستگاه‌های باند فوق‌وسیع اطراف را مشخص کند"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"‏برقراری تعامل با دستگاه‌های Wi-Fi اطراف"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"‏به برنامه اجازه می‌دهد در دستگاه‌های Wi-Fi اطراف تبلیغ کند، به آن‌ها متصل شود، و موقعیت نسبی آن‌ها را تشخیص دهد"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏اطلاعات ترجیحی سرویس پولی NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏به برنامه اجازه می‌دهد اطلاعات ترجیحی سرویس پولی NFC، مانند کمک‌های ثبت‌شده و مقصد مسیر را دریافت کند."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"کنترل ارتباط راه نزدیک"</string>
@@ -726,6 +728,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"به برنامه امکان می‌دهد پیکربندی «مزاحم نشوید» را بخواند و بنویسد."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"شروع مشاهده استفاده از مجوز"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"به دارنده اجازه شروع استفاده از مجوز را برای برنامه می‌دهد. هرگز برای برنامه‌های معمول نیاز نیست."</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"مشاهده ویژگی‌های برنامه"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"به دارنده اجازه می‌دهد اطلاعات مربوط به ویژگی‌های برنامه را مشاهده کند."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"دسترسی به داده‌های حسگر با نرخ نمونه‌برداری بالا"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"به برنامه اجازه می‌دهد داده‌های حسگر را با نرخ بیش‌از ۲۰۰ هرتز نمونه‌برداری کند"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"تنظیم قوانین گذرواژه"</string>

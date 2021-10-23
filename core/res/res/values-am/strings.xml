@@ -543,6 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"በአቅራቢያ ላሉ የብሉቱዝ መሣሪያዎችን እንዲያስተዋውቅ መተግበሪያው ያስችለዋል"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"በአቅራቢያ ባሉ ልዕለ ሰፊ ባንድ መሣሪያዎች መካከል ተዛማጅ የሆነውን ቦታ ይወቁ"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"በአቅራቢያ ባሉ ልዕለ-ሰፊ ባንድ መሣሪያዎች መካከል ያለውን አንጻራዊ አቀማመጣቸውን ለማወቅ ንዲችል ለመተግበሪያው ይፍቀዱ"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"በአቅራቢያ ካሉ የWi‑Fi መሣሪያዎች ጋር መስተጋብር መፍጠር"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"መተግበሪያው በአቅራቢያ ያሉ የWi-Fi መሣሪያዎች አንጻራዊ ቦታን እንዲያሳውቅ፣ እንዲያገናኝ እና እንዲያውቅ ያስችለዋል"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ተመራጭ NFC የክፍያ አገልግሎት መረጃ"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"እንደ የተመዘገቡ እርዳታዎች እና የጉዞ መሥመር መዳረሻ የመሳሰለ ተመራጭ nfc የክፍያ አገልግሎት መረጃን ለማግኘት ለመተግበሪያው ያፈቅድለታል።"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ቅርብ የግኑኙነትመስክ (NFC) ተቆጣጠር"</string>
@@ -726,6 +728,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"መተግበሪያው የአትረብሽ ውቅረትን እንዲያነብብ እና እንዲጸፍ ይፈቅዳል።"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"የእይታ ፈቃድ መጠቀምን መጀመር"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"ያዢው ለአንድ መተግበሪያ የፈቃድ አጠቃቀሙን እንዲያስጀምር ያስችለዋል። ለመደበኛ መተግበሪያዎች በጭራሽ ሊያስፈልግ አይገባም።"</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"የመተግበሪያ ባህሪያትን ማየት መጀመር"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ያዢው የአንድ መተግበሪያ የባህሪያት መረጃን ማየት እንዲጀምር ያስችለዋል።"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"የዳሳሽ ውሂቡን በከፍተኛ የናሙና ብዛት ላይ ይድረሱበት"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"መተግበሪያው የዳሳሽ ውሂቡን ከ200 ኸ በሚበልጥ ፍጥነት ናሙና እንዲያደርግ ይፈቅድለታል"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"የይለፍ ቃል ደንቦች አዘጋጅ"</string>

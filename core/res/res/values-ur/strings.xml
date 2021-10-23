@@ -543,6 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"اس سے ایپ کو قریبی بلوٹوتھ آلات پر تشہیر کرنے کی اجازت ملتی ہے"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"قریبی الٹرا وائڈ بینڈ آلات کے مابین متعلقہ پوزیشن کا تعین کریں"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"ایپ کو قریبی الٹرا وائڈ بینڈ آلات کے مابین متعلقہ پوزیشن کا تعین کرنے کی اجازت دیں"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"‏قریبی Wi-Fi آلات کے ساتھ تعامل کریں"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"‏ایپ کو اشتہار دینے، منسلک کرنے اور قریبی Wi-Fi آلات کی متعلقہ پوزیشن کا تعین کرنے کی اجازت دیتا ہے"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏ترجیح شدہ NFC ادائیگی کی سروس کی معلومات"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏ایپ کو رجسٹرشدہ ایڈز اور روٹ ڈسٹنیشن جیسی ترجیح شدہ nfc ادائیگی سروس کی معلومات حاصل کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"‏Near Field کمیونیکیشن کنٹرول کریں"</string>
@@ -726,6 +728,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"ایپ کو ڈسٹرب نہ کریں کنفیگریشن لکھنے اور پڑھنے کے قابل کرتا ہے۔"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"اجازت کی استعمال کا ملاحظہ شروع کریں"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"حامل کو ایپ کی اجازت کے استعمال کو شروع کرنے کی اجازت دیتا ہے۔ عام ایپس کے لیے کبھی بھی درکار نہیں ہونا چاہیے۔"</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"ایپ کی خصوصیات کا ملاحظہ شروع کریں"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ہولڈر کو ایپ کے لیے خصوصیات کی معلومات دیکھنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"نمونہ کاری کی اعلی شرح پر سینسر کے ڈیٹا تک رسائی حاصل کریں"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"‏ایپ کو Hz‏200 سے زیادہ شرح پر سینسر ڈیٹا کا نمونہ لینے کی اجازت دیتی ہے"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"پاس ورڈ کے اصول سیٹ کریں"</string>

@@ -24,17 +24,17 @@ import android.hardware.SensorManager
 import android.util.Log
 import com.android.systemui.util.sensors.AsyncSensorManager
 import javax.inject.Inject
-import kotlin.properties.Delegates
 
 /**
  * Monitors ambient light signals, applies a debouncing algorithm, and produces the current
- * [AmbientLightMode].
+ * ambient light mode.
  *
- * For debouncer behavior, refer to go/titan-light-sensor-debouncer.
- *
+ * @property algorithm the debounce algorithm which transforms light sensor events into an
+ * ambient light mode.
  * @property sensorManager the sensor manager used to register sensor event updates.
  */
 class AmbientLightModeMonitor @Inject constructor(
+    private val algorithm: DebounceAlgorithm,
     private val sensorManager: AsyncSensorManager
 ) {
     companion object {
@@ -47,41 +47,27 @@ class AmbientLightModeMonitor @Inject constructor(
     }
 
     // Light sensor used to detect ambient lighting conditions.
-    private val lightSensor: Sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
-
-    // Registered callback, which gets triggered when the ambient light mode changes.
-    private var callback: Callback? = null
+    private val lightSensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
 
     // Represents all ambient light modes.
     @Retention(AnnotationRetention.SOURCE)
     @IntDef(AMBIENT_LIGHT_MODE_LIGHT, AMBIENT_LIGHT_MODE_DARK, AMBIENT_LIGHT_MODE_UNDECIDED)
     annotation class AmbientLightMode
 
-    // The current ambient light mode.
-    @AmbientLightMode private var mode: Int by Delegates.observable(AMBIENT_LIGHT_MODE_UNDECIDED
-    ) { _, old, new ->
-        if (old != new) {
-            callback?.onChange(new)
-        }
-    }
-
     /**
      * Start monitoring the current ambient light mode.
      *
-     * @param callback callback that gets triggered when the ambient light mode changes. It also
-     * gets triggered immediately to update the current value when this function is called.
+     * @param callback callback that gets triggered when the ambient light mode changes.
      */
     fun start(callback: Callback) {
         if (DEBUG) Log.d(TAG, "start monitoring ambient light mode")
 
-        if (this.callback != null) {
-            if (DEBUG) Log.w(TAG, "already started")
+        if (lightSensor == null) {
+            if (DEBUG) Log.w(TAG, "light sensor not available")
             return
         }
 
-        this.callback = callback
-        callback.onChange(mode)
-
+        algorithm.start(callback)
         sensorManager.registerListener(mSensorEventListener, lightSensor,
                 SensorManager.SENSOR_DELAY_NORMAL)
     }
@@ -92,12 +78,7 @@ class AmbientLightModeMonitor @Inject constructor(
     fun stop() {
         if (DEBUG) Log.d(TAG, "stop monitoring ambient light mode")
 
-        if (callback == null) {
-            if (DEBUG) Log.w(TAG, "haven't started")
-            return
-        }
-
-        callback = null
+        algorithm.stop()
         sensorManager.unregisterListener(mSensorEventListener)
     }
 
@@ -108,9 +89,7 @@ class AmbientLightModeMonitor @Inject constructor(
                 return
             }
 
-            // TODO(b/201657509): add debouncing logic.
-            val shouldBeLowLight = event.values[0] < 10
-            mode = if (shouldBeLowLight) AMBIENT_LIGHT_MODE_DARK else AMBIENT_LIGHT_MODE_LIGHT
+            algorithm.onUpdateLightSensorEvent(event.values[0])
         }
 
         override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
@@ -123,5 +102,15 @@ class AmbientLightModeMonitor @Inject constructor(
      */
     interface Callback {
         fun onChange(@AmbientLightMode mode: Int)
+    }
+
+    /**
+     * Interface of the algorithm that transforms light sensor events to an ambient light mode.
+     */
+    interface DebounceAlgorithm {
+        // Setting Callback to nullable so mockito can verify without throwing NullPointerException.
+        fun start(callback: Callback?)
+        fun stop()
+        fun onUpdateLightSensorEvent(value: Float)
     }
 }

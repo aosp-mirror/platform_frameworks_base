@@ -25,7 +25,13 @@ package {
 
 android_test {
     name: "HwAccelerationTest",
-    srcs: ["**/*.java"],
+    jni_libs: [
+        "libhwaccelerationtest_jni",
+    ],
+    srcs: [
+        "**/*.java",
+        "**/*.kt",
+    ],
     platform_apis: true,
     certificate: "platform",
 }

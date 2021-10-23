@@ -543,6 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"यो एपले नजिकै रहेका ब्लुटुथ चल्ने डिभाइसहरूमा विज्ञापन गर्न पाउँछ"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"नजिकै रहेका अल्ट्रा-वाइडब्यान्ड चल्ने डिभाइसहरूबिचको तुलनात्मक स्थान पत्ता लगाउने"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"यो एपलाई नजिकै रहेका अल्ट्रा-वाइडब्यान्ड चल्ने डिभाइसहरूबिचको तुलनात्मक स्थान पत्ता लगाउन दिनुहोस्"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"Wi-Fi चल्ने नजिकै रहेका डिभाइसहरूमा चलाउन दिन्छ"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"यसले एपलाई Wi-Fi चल्ने नजिकै रहेका डिभाइसहरूमा विज्ञापन गर्न, कनेक्ट गर्न र सापेक्ष स्थिति निर्धारण गर्न दिन्छ"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"NFC भुक्तानी सेवासम्बन्धी रुचाइएको जानकारी"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"यसले एपलाई दर्ता गरिएका सहायता तथा मार्गको गन्तव्य जस्ता रुचाइएका NFC भुक्तानी सेवासम्बन्धी जानकारी प्राप्त गर्न दिन्छ।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"नजिक क्षेत्र संचार नियन्त्रणहरू"</string>
@@ -726,6 +728,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"बाधा नपुर्याउँनुहोस् कन्फिगरेसन पढ्न र लेख्‍नको लागि एपलाई अनुमति दिनुहोस्।"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"हेर्ने अनुमतिको प्रयोग सुरु गर्नुहोस्"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"वाहकलाई कुनै एपसम्बन्धी अनुमतिको प्रयोग सुरु गर्न दिन्छ। साधारण एपहरूलाई कहिल्यै आवश्यक नपर्नु पर्ने हो।"</string>
+    <!-- no translation found for permlab_startViewAppFeatures (7955084203185903001) -->
+    <skip />
+    <!-- no translation found for permdesc_startViewAppFeatures (7207240860165206107) -->
+    <skip />
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"नमुना लिने उच्च दरमा सेन्सरसम्बन्धी डेटा प्रयोग गर्ने"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"यो अनुमति दिइएमा एपले २०० हर्जभन्दा बढी दरमा सेन्सरसम्बन्धी डेटाको नमुना लिन सक्छ"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"पासवर्ड नियमहरू मिलाउनुहोस्"</string>

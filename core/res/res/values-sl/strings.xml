@@ -549,6 +549,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Aplikaciji dovoljuje oddajanje napravam Bluetooth v bližini."</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"določanje relativne oddaljenosti med napravami UWB v bližini"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Aplikaciji dovoli, da določi relativno oddaljenost med napravami UWB v bližini."</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"komunikacijo z napravami Wi‑Fi v bližini"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Aplikaciji dovoljuje objavljanje in določanje relativnega položaja naprav Wi‑Fi v bližini ter povezovanje z njimi."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Podatki o prednostni storitvi za plačevanje prek povezave NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Aplikaciji omogoča pridobivanje podatkov o prednostni storitvi za plačevanje prek povezave NFC, kot so registrirani pripomočki in cilj preusmeritve."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"nadzor nad komunikacijo s tehnologijo bližnjega polja"</string>
@@ -732,6 +734,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Aplikaciji omogoča branje in pisanje konfiguracije načina »ne moti«."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"začetek uporabe dovoljenja za ogledovanje"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Imetniku omogoča začetek uporabe dovoljenj za aplikacijo. Nikoli ni potrebno za navadne aplikacije."</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"začetek ogledovanja funkcij aplikacije"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Imetniku omogoča začetek ogledovanja informacij o funkcijah poljubne aplikacije."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"dostop do podatkov tipal z večjo hitrostjo vzorčenja"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Aplikaciji dovoljuje, da vzorči podatke tipal s hitrostjo, večjo od 200 Hz."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Nastavitev pravil za geslo"</string>

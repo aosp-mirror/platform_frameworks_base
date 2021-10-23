@@ -543,6 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"નજીકના બ્લૂટૂથ ડિવાઇસ પર ઍપને જાહેરાત કરવાની મંજૂરી આપે છે"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"અલ્ટ્રા-વાઇડબૅન્ડ ડિવાઇસની વચ્ચેનું અંતર નક્કી કરો"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"ઍપને નજીકના અલ્ટ્રા-વાઇડબૅન્ડ ડિવાઇસની વચ્ચેનું સંબંધિત અંતર નક્કી કરવાની મંજૂરી આપો"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"નજીકના વાઇ-ફાઇ ડિવાઇસ સાથે ક્રિયાપ્રતિક્રિયા કરો"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"ઍપને નજીકના વાઇ-ફાઇ ડિવાઇસની માહિતી બતાવવાની, તેની સાથે કનેક્ટ કરવાની અને તેની સંબંધિત સ્થિતિ નક્કી કરવાની મંજૂરી આપો"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"પસંદગીની NFC ચુકવણીની સેવા વિશે માહિતી"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"આ મંજૂરીને આપવાથી, ઍપ તમારી પસંદગીની NFC ચુકવણીની સેવા વિશે માહિતી મેળવી શકે છે, જેમ કે રજિસ્ટર થયેલી સહાય અને નિર્ધારિત સ્થાન."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"નિઅર ફીલ્ડ કમ્યુનિકેશન નિયંત્રિત કરો"</string>
@@ -726,6 +728,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"એપ્લિકેશનને ખલેલ પાડશો નહીં ગોઠવણી વાંચવા અને લખવાની મંજૂરી આપે છે."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"પરવાનગી વપરાશ જુઓને શરૂ કરો"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"કોઈ ઍપ માટે પરવાનગી વપરાશ શરૂ કરવાની ધારકને મંજૂરી આપે છે. સામાન્ય ઍપ માટે ક્યારેય જરૂર પડી ન શકે."</string>
+    <!-- no translation found for permlab_startViewAppFeatures (7955084203185903001) -->
+    <skip />
+    <!-- no translation found for permdesc_startViewAppFeatures (7207240860165206107) -->
+    <skip />
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ઉચ્ચ સેમ્પ્લિંગ રેટ પર સેન્સરનો ડેટા ઍક્સેસ કરો"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"ઍપને 200 Hzથી વધુના દરે સેન્સરના ડેટાના નમૂનાની મંજૂરી આપે છે"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"પાસવર્ડ નિયમો સેટ કરો"</string>

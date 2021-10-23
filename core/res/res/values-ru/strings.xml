@@ -549,6 +549,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Приложение сможет передавать рекламу на устройства Bluetooth поблизости."</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"Определять относительное позиционирование устройств с технологией сверхширокополосной связи поблизости"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Приложение сможет определять относительное позиционирование устройств с технологией сверхширокополосной связи поблизости"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"Взаимодействие с устройствами Wi‑Fi поблизости"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Приложение сможет передавать данные на устройства Wi‑Fi рядом, подключаться к ним и определять их примерное местоположение."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Сведения о предпочтительном платежном сервисе NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Приложение сможет получать сведения о предпочтительном платежном сервисе NFC (например, зарегистрированные идентификаторы AID и конечный пункт маршрута)."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Управление NFC-модулем"</string>
@@ -732,6 +734,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Открывает приложению доступ к настройкам режима \"Не беспокоить\" и позволяет изменять их."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"Просмотр данных об используемых разрешениях"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Приложение получит доступ к данным об используемых разрешениях. Это разрешение не требуется обычным приложениям."</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"Просмотр функций приложения"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Позволяет просматривать информацию о функциях приложения."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"Доступ к данным датчиков при высокой частоте дискретизации"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Приложение сможет считывать данные датчиков на частоте более 200 Гц."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Настройка правил для паролей"</string>

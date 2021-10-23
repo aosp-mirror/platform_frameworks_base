@@ -543,6 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Nagbibigay-daan sa app na mag-advertise sa mga kalapit na Bluetooth device"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"tukuyin ang relatibong posisyon sa pagitan ng mga kalapit na Ultra-Wideband device"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Payagan ang app na tukuyin ang relatibong posisyon sa pagitan ng mga kalapit na Ultra-Wideband device"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"makipag-ugnayan sa mga kalapit na Wi‑Fi device"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Nagbibigay-daan sa app na i-advertise, kumonekta sa, at tukuyin ang nauugnay na posisyon ng mga kalapit na Wi‑Fi device"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Impormasyon sa Gustong NFC na Serbisyo sa Pagbabayad"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Pinapayagan ang app na makakuha ng impormasyon sa gustong nfc na serbisyo sa pagbabayad tulad ng mga nakarehistrong application ID at destinasyon ng ruta."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrolin ang Near Field Communication"</string>
@@ -726,6 +728,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Nagbibigay-daan sa app na basahin at isulat ang configuration ng Huwag Istorbohin."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"simulan ang paggamit sa pahintulot sa pagtingin"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Binibigyang-daan ang may hawak na simulan ang paggamit ng pahintulot para sa isang app. Hindi dapat kailanganin kailanman para sa mga normal na app."</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"simulang tingnan ang mga feature ng app"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Nagbibigay-daan sa may hawak na simulang tingnan ang impormasyon ng mga feature para sa isang app."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"mag-access ng data ng sensor sa mataas na rate ng pag-sample"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Pinapahintulutan ang app na mag-sample ng data ng sensor sa rate na higit sa 200 Hz"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Magtakda ng mga panuntunan sa password"</string>
