@@ -1191,6 +1191,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Подключение по Wi-Fi не установится автоматически."</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Показать все"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Чтобы переключиться между сетями, отключите кабель Ethernet."</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Чтобы улучшать работу устройства, приложения и сервисы могут искать беспроводные сети в любое время, даже если вы отключили Wi‑Fi. Чтобы запретить это, отключите поиск сетей Wi‑Fi. "<annotation id="link">"Открыть настройки"</annotation></string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"Приложение \"<xliff:g id="APPNAME">%1$s</xliff:g>\" хочет добавить в меню \"Быстрые настройки\" указанный параметр."</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Добавить параметр"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Не добавлять"</string>

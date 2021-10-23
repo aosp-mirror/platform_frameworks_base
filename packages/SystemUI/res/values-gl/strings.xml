@@ -1179,6 +1179,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"De momento, a wifi non se conectará automaticamente"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Ver todo"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Para cambiar de rede, desconecta a Ethernet"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Para mellorar a experiencia que ofrece o dispositivo, as aplicacións e os servizos poden seguir buscando redes wifi en calquera momento, aínda que esta conexión estea desactivada. Podes cambiar esta opción na configuración da función Busca de redes wifi. "<annotation id="link">"Cambiar"</annotation></string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> solicita a túa aprobación para engadir o seguinte atallo a Configuración rápida"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Engadir atallo"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Non engadir atallo"</string>

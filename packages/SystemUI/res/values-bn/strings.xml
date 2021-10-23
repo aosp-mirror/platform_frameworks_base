@@ -1090,8 +1090,7 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"আবার চালু করুন"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"সেটিংস"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="ARTIST_NAME">%2$s</xliff:g>-এর <xliff:g id="SONG_NAME">%1$s</xliff:g> গানটি <xliff:g id="APP_LABEL">%3$s</xliff:g> অ্যাপে চলছে"</string>
-    <!-- no translation found for controls_media_seekbar_description (4389621713616214611) -->
-    <skip />
+    <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="TOTAL_TIME">%2$s</xliff:g>টির মধ্যে <xliff:g id="ELAPSED_TIME">%1$s</xliff:g>টি"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"চালান"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> অ্যাপ খুলুন"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="ARTIST_NAME">%2$s</xliff:g>-এর <xliff:g id="SONG_NAME">%1$s</xliff:g> গানটি <xliff:g id="APP_LABEL">%3$s</xliff:g> অ্যাপে চালান"</string>
@@ -1180,6 +1179,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"এখন ওয়াই-ফাই নিজে থেকে কানেক্ট হবে না"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"সবকটি দেখুন"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"নেটওয়ার্ক বদলাতে ইথারনেট ডিসকানেক্ট করুন"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"ডিভাইস সংক্রান্ত অভিজ্ঞতা আরও ভাল করতে, অ্যাপ ও পরিষেবা যেকোনও সময় আপনার ওয়াই-ফাই নেটওয়ার্ক স্ক্যান করতে পারবে, এমনকি ডিভাইসের ওয়াই-ফাই বন্ধ করা থাকলেও। ওয়াই-ফাই স্ক্যানিং সেটিংস থেকে আপনি এটি পরিবর্তন করতে পারবেন। "<annotation id="link">"পরিবর্তন করুন"</annotation></string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> নিম্নলিখিত টাইল দ্রুত সেটিংস মেনুতে যোগ করতে চায়"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"টাইল যোগ করুন"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"টাইল যোগ করবেন না"</string>

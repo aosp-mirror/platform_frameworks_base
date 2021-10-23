@@ -1179,6 +1179,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"WLAN 暂时无法自动连接"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"查看全部"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"如要切换网络，请断开以太网连接"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"为了提升设备的使用体验，即使 WLAN 已关闭，应用和服务仍可以随时扫描 WLAN 网络。您可以在 WLAN 扫描设置中更改此设置。"<annotation id="link">"更改"</annotation></string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"“<xliff:g id="APPNAME">%1$s</xliff:g>”希望将以下图块添加到“快捷设置”"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"添加图块"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"不添加图块"</string>
