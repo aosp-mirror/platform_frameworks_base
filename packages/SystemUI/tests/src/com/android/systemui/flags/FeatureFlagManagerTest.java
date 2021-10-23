@@ -18,23 +18,35 @@ package com.android.systemui.flags;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 @SmallTest
 public class FeatureFlagManagerTest extends SysuiTestCase {
     FeatureFlagManager mFeatureFlagManager;
 
+    @Mock private DumpManager mDumpManager;
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        mFeatureFlagManager = new FeatureFlagManager();
+        mFeatureFlagManager = new FeatureFlagManager(mDumpManager);
     }
 
     @Test
@@ -42,5 +54,32 @@ public class FeatureFlagManagerTest extends SysuiTestCase {
         mFeatureFlagManager.setEnabled(1, true);
         // Again, nothing changes.
         assertThat(mFeatureFlagManager.isEnabled(1, false)).isFalse();
+    }
+
+    @Test
+    public void testDump() {
+        // Even if a flag is set before
+        mFeatureFlagManager.setEnabled(1, true);
+
+        // WHEN the flags have been accessed
+        assertFalse(mFeatureFlagManager.isEnabled(1, false));
+        assertTrue(mFeatureFlagManager.isEnabled(2, true));
+
+        // Even if a flag is set after
+        mFeatureFlagManager.setEnabled(2, false);
+
+        // THEN the dump contains the flags and the default values
+        String dump = dumpToString();
+        assertThat(dump).contains(" sysui_flag_1: false\n");
+        assertThat(dump).contains(" sysui_flag_2: true\n");
+    }
+
+    private String dumpToString() {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        mFeatureFlagManager.dump(mock(FileDescriptor.class), pw, new String[0]);
+        pw.flush();
+        String dump = sw.toString();
+        return dump;
     }
 }
