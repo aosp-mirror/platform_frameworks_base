@@ -1203,5 +1203,6 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"‏لن يتم الاتصال بشبكة Wi-Fi تلقائيًا في الوقت الحالي."</string>
     <string name="see_all_networks" msgid="3773666844913168122">"عرض الكل"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"للتبديل بين الشبكات، يجب فصل إيثرنت."</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"‏لتحسين تجربتك على الجهاز، يظل بإمكان التطبيقات والخدمات البحث عن شبكات Wi‑Fi في أي وقت، حتى عند إيقاف شبكة Wi‑Fi. وبإمكانك تغيير هذا الخيار في إعدادات البحث عن شبكات Wi-Fi. "<annotation id="link">"تغيير"</annotation></string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"اختيار المستخدم"</string>
 </resources>

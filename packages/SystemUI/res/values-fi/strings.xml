@@ -1090,8 +1090,7 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Jatka"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Asetukset"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="APP_LABEL">%3$s</xliff:g> soittaa nyt tätä: <xliff:g id="SONG_NAME">%1$s</xliff:g> (<xliff:g id="ARTIST_NAME">%2$s</xliff:g>)"</string>
-    <!-- no translation found for controls_media_seekbar_description (4389621713616214611) -->
-    <skip />
+    <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g>/<xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Toista"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Avaa <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Soita <xliff:g id="SONG_NAME">%1$s</xliff:g> (<xliff:g id="ARTIST_NAME">%2$s</xliff:g>) sovelluksessa <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
@@ -1180,5 +1179,6 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi ei toistaiseksi yhdistä automaattisesti"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Näytä kaikki"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Irrota Ethernet-johto, jos haluat vaihtaa verkkoa"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Laitteen käyttökokemuksen parantamiseksi sovellukset ja palvelut voivat hakea Wi-Fi-verkkoja myös silloin, kun Wi-Fi on pois päältä. Voit muuttaa asetusta Wi-Fi-haun asetuksissa. "<annotation id="link">"Muuta"</annotation></string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Valitse käyttäjä"</string>
 </resources>

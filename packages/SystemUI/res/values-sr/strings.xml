@@ -1185,5 +1185,6 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"WiFi тренутно не може да се аутоматски повеже"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Погледајте све"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Да бисте променили мрежу, прекините етернет везу"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Ради бољег доживљаја уређаја, апликације и услуге и даље могу да траже WiFi мреже у било ком тренутку, чак и када је WiFi искључен. То можете да промените у подешавањима WiFi скенирања. "<annotation id="link">"Промените"</annotation></string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Изаберите корисника"</string>
 </resources>
