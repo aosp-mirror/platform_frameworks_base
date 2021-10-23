@@ -1179,6 +1179,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi ຈະບໍ່ເຊື່ອມຕໍ່ອັດຕະໂນມັດສຳລັບຕອນນີ້"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"ເບິ່ງທັງໝົດ"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ເພື່ອສະຫຼັບເຄືອຂ່າຍ, ໃຫ້ຕັດການເຊື່ອມຕໍ່ອີເທີເນັດກ່ອນ"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"ເພື່ອປັບປຸງປະສົບການອຸປະກອນ, ແອັບ ແລະ ບໍລິການຍັງຄົງສາມາດສະແກນຫາເຄືອຂ່າຍ Wi‑Fi ຕອນໃດກໍໄດ້, ເຖິງແມ່ນວ່າຈະປິດ Wi‑Fi ໄວ້ກໍຕາມ. ທ່ານສາມາດປ່ຽນສິ່ງນີ້ໄດ້ໃນການຕັ້ງຄ່າການສະແກນ Wi‑Fi. "<annotation id="link">"ປ່ຽນ"</annotation></string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> ຕ້ອງການເພີ່ມແຜ່ນຕໍ່ໄປນີ້ໃສ່ການຕັ້ງຄ່າດ່ວນ"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"ເພີ່ມແຜ່ນ"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"ຢ່າເພີ່ມແຜ່ນ"</string>

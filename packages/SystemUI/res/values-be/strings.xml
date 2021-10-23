@@ -1191,6 +1191,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Аўтаматычнае падключэнне да Wi-Fi адсутнічае"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Паказаць усе"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Каб падключыцца да сетак, выключыце Ethernet"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Каб палепшыць працу прылады, вы можаце дазволіць праграмам і сэрвісам шукаць сеткі Wi-Fi, нават калі Wi‑Fi выключаны. Змяніць гэты рэжым можна ў наладах пошуку сетак Wi-Fi. "<annotation id="link">"Змяніць"</annotation></string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> запытвае дазвол на дадаванне ў хуткія налады наступнай пліткі"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Дадаць плітку"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Не дадаваць плітку"</string>

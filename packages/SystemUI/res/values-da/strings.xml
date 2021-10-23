@@ -1179,6 +1179,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Ingen automatisk forbindelse til Wi-Fi i øjeblikket"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Se alle"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Afbryd ethernetforbindelsen for at skifte netværk"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"For at forbedre brugeroplevelsen på enheden kan apps og tjenester stadig til enhver tid scanne efter Wi‑Fi-netværk, også selvom Wi‑Fi er deaktiveret. Du kan ændre dette i indstillingerne for Wi-Fi-scanning. "<annotation id="link">"Skift indstilling"</annotation></string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> vil gerne føje dette handlingsfelt til Kvikmenu"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Tilføj handlingsfelt"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Tilføj ikke felt"</string>

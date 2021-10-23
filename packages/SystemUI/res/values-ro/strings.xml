@@ -1185,6 +1185,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Deocamdată, Wi-Fi nu se poate conecta automat"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Afișează-le pe toate"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Pentru a schimba rețeaua, deconectați ethernet"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Pentru a îmbunătăți experiența cu dispozitivul, aplicațiile și serviciile pot să caute în continuare rețele Wi‑Fi chiar și atunci când conexiunea Wi-Fi este dezactivată. Puteți să schimbați acest aspect din setările pentru căutarea de rețele Wi-Fi. "<annotation id="link">"Schimbați"</annotation></string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> vrea să adauge următorul card la Setări rapide"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Adăugați un card"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Nu adăugați un card"</string>

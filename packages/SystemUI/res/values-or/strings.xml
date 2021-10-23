@@ -1090,8 +1090,7 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"ପୁଣି ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ସେଟିଂସ୍"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="APP_LABEL">%3$s</xliff:g>ରୁ <xliff:g id="ARTIST_NAME">%2$s</xliff:g>ଙ୍କ <xliff:g id="SONG_NAME">%1$s</xliff:g> ଚାଲୁଛି"</string>
-    <!-- no translation found for controls_media_seekbar_description (4389621713616214611) -->
-    <skip />
+    <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="TOTAL_TIME">%2$s</xliff:g>ରୁ <xliff:g id="ELAPSED_TIME">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"ଚଲାନ୍ତୁ"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> ଖୋଲନ୍ତୁ"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="APP_LABEL">%3$s</xliff:g>ରୁ <xliff:g id="ARTIST_NAME">%2$s</xliff:g>ଙ୍କ <xliff:g id="SONG_NAME">%1$s</xliff:g> ଚଲାନ୍ତୁ"</string>
@@ -1180,6 +1179,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"ବର୍ତ୍ତମାନ ପାଇଁ ୱାଇ-ଫାଇ ସ୍ୱତଃ-ସଂଯୋଗ ହେବ ନାହିଁ"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"ସବୁ ଦେଖନ୍ତୁ"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ନେଟୱାର୍କ ସ୍ୱିଚ୍ କରିବାକୁ, ଇଥରନେଟ୍ ବିଚ୍ଛିନ୍ନ କରନ୍ତୁ"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"ଡିଭାଇସ ଅନୁଭୂତିକୁ ଉନ୍ନତ କରିବା ପାଇଁ, ୱାଇ-ଫାଇ ବନ୍ଦ ଥିଲେ ମଧ୍ୟ ଆପ ଓ ସେବାଗୁଡ଼ିକ ଏବେ ବି ଯେ କୌଣସି ସମୟରେ ୱାଇ-ଫାଇ ନେଟୱାର୍କ ପାଇଁ ସ୍କାନ କରିପାରିବ। ଆପଣ ଏହାକୁ ୱାଇ-ଫାଇ ସ୍କାନିଂ ସେଟିଂସରେ ପରିବର୍ତ୍ତନ କରିପାରିବେ। "<annotation id="link">"ପରିବର୍ତ୍ତନ କରନ୍ତୁ"</annotation></string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> କ୍ୱିକ୍ ସେଟିଂସରେ ନିମ୍ନୋକ୍ତ ଟାଇଲ୍ ଯୋଗ କରିବାକୁ ଚାହେଁ"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"ଟାଇଲ୍ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"ଟାଇଲ୍ ଯୋଗ କର ନାହିଁ"</string>

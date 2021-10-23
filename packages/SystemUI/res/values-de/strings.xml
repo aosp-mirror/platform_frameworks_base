@@ -1090,8 +1090,7 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Fortsetzen"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Einstellungen"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> von <xliff:g id="ARTIST_NAME">%2$s</xliff:g> wird gerade über <xliff:g id="APP_LABEL">%3$s</xliff:g> wiedergegeben"</string>
-    <!-- no translation found for controls_media_seekbar_description (4389621713616214611) -->
-    <skip />
+    <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> von <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Wiedergeben"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> öffnen"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="SONG_NAME">%1$s</xliff:g> von <xliff:g id="ARTIST_NAME">%2$s</xliff:g> über <xliff:g id="APP_LABEL">%3$s</xliff:g> wiedergeben"</string>
@@ -1180,6 +1179,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Zurzeit wird keine automatische WLAN-Verbindung hergestellt"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Alle ansehen"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Trenne das Ethernetkabel, um das Netzwerk zu wechseln"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Zur Verbesserung der Gerätenutzung können Apps und Dienste weiter nach WLANs suchen, auch wenn die WLAN-Funktion deaktiviert ist. Dies lässt sich in den Einstellungen für die WLAN-Suche ändern. "<annotation id="link">"Ändern"</annotation></string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> möchte die folgende Kachel den Schnelleinstellungen hinzufügen"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Kachel hinzufügen"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Kachel nicht hinzu"</string>

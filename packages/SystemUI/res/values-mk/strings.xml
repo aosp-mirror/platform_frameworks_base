@@ -1179,6 +1179,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi нема да се поврзува автоматски засега"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Прикажи ги сите"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"За промена на мрежата, прекинете ја врската со етернетот"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"За да се подобри доживувањето на уредот, апликациите и услугите може сѐ уште да скенираат за Wi‑Fi мрежи во секое време, дури и кога Wi‑Fi е исклучено. Може да го промените ова во поставките за „Скенирање за Wi-Fi“. "<annotation id="link">"Промени"</annotation></string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> сака да ја додаде следнава плочка на „Брзите поставки“"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Додајте плочка"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Не додавајте плочка"</string>

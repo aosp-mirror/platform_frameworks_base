@@ -60,6 +60,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Pair;
 
+import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.IStatusBarService;
@@ -1405,25 +1406,26 @@ public class NotifCollectionTest extends SysuiTestCase {
             mName = name;
         }
 
+        @NonNull
         @Override
         public String getName() {
             return mName;
         }
 
         @Override
-        public void setCallback(OnEndLifetimeExtensionCallback callback) {
+        public void setCallback(@NonNull OnEndLifetimeExtensionCallback callback) {
             this.callback = callback;
         }
 
         @Override
         public boolean shouldExtendLifetime(
-                NotificationEntry entry,
+                @NonNull NotificationEntry entry,
                 @CancellationReason int reason) {
             return shouldExtendLifetime;
         }
 
         @Override
-        public void cancelLifetimeExtension(NotificationEntry entry) {
+        public void cancelLifetimeExtension(@NonNull NotificationEntry entry) {
             if (onCancelLifetimeExtension != null) {
                 onCancelLifetimeExtension.run();
             }

@@ -1179,6 +1179,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Әзірше Wi-Fi автоматты түрде қосылмайды."</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Барлығын көру"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Желілерді ауыстыру үшін ethernet кабелін ажыратыңыз."</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Құрылғы жұмысын жақсарту үшін қолданбалар мен қызметтер Wi-Fi байланысы өшірулі кезде де Wi-Fi желілерін іздейді. Оны Wi-Fi іздеу параметрлерінен өзгерте аласыз. "<annotation id="link">"Өзгерту"</annotation></string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> Жылдам параметрлерге келесі бөлшекті қосқысы келеді."</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Бөлшек қосу"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Бөлшек қоспау"</string>
