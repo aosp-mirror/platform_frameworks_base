@@ -1179,6 +1179,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi hələlik avtomatik qoşulmayacaq"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Hamısına baxın"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Şəbəkəni dəyişmək üçün etherneti ayırın"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Cihaz təcrübəsini yaxşılaşdırmaq üçün Wi-Fi deaktiv olduqda belə, tətbiqlər və xidmətlər Wi-Fi şəbəkəsini axtara biləcək. Bunu Wi-Fi axtarışı ayarlarında dəyişə bilərsiniz. "<annotation id="link">"Dəyişin"</annotation></string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> aşağıdakı mozaiki Sürətli Ayarlara əlavə etmək istəyir"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Mozaik əlavə edin"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Mozaik əlavə etməyin"</string>

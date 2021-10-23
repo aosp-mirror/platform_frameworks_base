@@ -1179,6 +1179,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"‏ابھی Wi-Fi خود کار طور پر منسلک نہیں ہوگا"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"سبھی دیکھیں"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"نیٹ ورکس پر سوئچ کرنے کیلئے، ایتھرنیٹ غیر منسلک کریں"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"‏آلے کے تجربے کو بہتر بنانے کے لیے، Wi‑Fi کے آف ہونے پر بھی ایپس اور سروسز کسی بھی وقت Wi‑Fi نیٹ ورکس اسکین کر سکتی ہیں۔ آپ اسے Wi‑Fi اسکیننگ کی ترتیبات میں تبدیل کر سکتے ہیں۔ "<annotation id="link">"تبدیل کریں"</annotation></string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> درج ذیل ٹائل کو فوری ترتیبات میں شامل کرنا چاہتی ہے"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"ٹائل شامل کریں"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"ٹائل شامل نہ کریں"</string>
