@@ -1179,5 +1179,6 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Hindi awtomatikong kokonekta ang Wi-Fi sa ngayon"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Tingnan lahat"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Para lumipat ng network, idiskonekta ang ethernet"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Para pahusayin ang karanasan sa device, puwede pa ring mag-scan ng mga Wi-Fi network ang mga app at serbisyo anumang oras, kahit habang naka-off ang Wi‑Fi. Mababago mo ito sa mga setting ng pag-scan ng Wi-Fi. "<annotation id="link">"Baguhin"</annotation></string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Pumili ng user"</string>
 </resources>

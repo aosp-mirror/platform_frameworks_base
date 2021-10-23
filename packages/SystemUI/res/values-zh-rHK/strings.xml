@@ -1179,5 +1179,6 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"目前系統不會自動連線至 Wi-Fi"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"顯示全部"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"如要切換網絡，請中斷以太網連線"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"為改善裝置的使用體驗，應用程式和服務仍可隨時掃瞄 Wi-Fi 網絡 (即使 Wi-Fi 已關閉)。您可在 Wi-Fi 掃瞄設定中變更此設定。"<annotation id="link">"變更"</annotation></string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"選取使用者"</string>
 </resources>

@@ -1191,5 +1191,6 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"„Wi-Fi“ šiuo metu nebus prijungtas automatiškai"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Žiūrėti viską"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Norėdami perjungti tinklus, atjunkite eternetą"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Kad pagerintų įrenginio funkcijas, programos ir paslaugos vis tiek gali bet kada nuskaityti ieškodamos „Wi‑Fi“ tinklų, net jei „Wi‑Fi“ išjungtas. Tai galite pakeisti „Wi-Fi“ nuskaitymo nustatymuose. "<annotation id="link">"Pakeisti"</annotation></string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Naudotojo pasirinkimas"</string>
 </resources>

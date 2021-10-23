@@ -1090,8 +1090,7 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"ફરી શરૂ કરો"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"સેટિંગ"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="APP_LABEL">%3$s</xliff:g> પર <xliff:g id="ARTIST_NAME">%2$s</xliff:g>નું <xliff:g id="SONG_NAME">%1$s</xliff:g> ગીત ચાલી રહ્યું છે"</string>
-    <!-- no translation found for controls_media_seekbar_description (4389621713616214611) -->
-    <skip />
+    <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="TOTAL_TIME">%2$s</xliff:g>માંથી <xliff:g id="ELAPSED_TIME">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"ચલાવો"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> ખોલો"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="APP_LABEL">%3$s</xliff:g> પર <xliff:g id="ARTIST_NAME">%2$s</xliff:g>નું <xliff:g id="SONG_NAME">%1$s</xliff:g> ગીત ચલાવો"</string>
@@ -1180,5 +1179,6 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"હમણાં પૂરતું વાઇ-ફાઇ ઑટોમૅટિક રીતે કનેક્ટ થશે નહીં"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"બધા જુઓ"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"બીજા નેટવર્ક પર જવા માટે, ઇથરનેટ ડિસ્કનેક્ટ કરો"</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"ડિવાઇસના અનુભવને બહેતર બનાવવા માટે, વાઇ-ફાઇ બંધ હોય ત્યારે પણ ઍપ અને સેવાઓ કોઈપણ સમયે વાઇ-ફાઇ નેટવર્ક સ્કૅન કરી શકે છે. તમે વાઇ-ફાઇ સ્કૅનિંગના સેટિંગમાં જઈને આને બદલી શકો છો. "<annotation id="link">"બદલો"</annotation></string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"વપરાશકર્તા પસંદ કરો"</string>
 </resources>
