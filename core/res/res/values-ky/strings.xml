@@ -543,6 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Колдонмого жакын жердеги Bluetooth түзмөктөрүнө жарнама көрсөтүүгө мүмкүндүк берет"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"кең тилкелүү тармак аркылуу туташа турган жакын жердеги түзмөктөрдү аныктоо"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Колдонмо кең тилкелүү тармак аркылуу туташа турган жакын жердеги түзмөктөрдү аныктай алат"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"жакын жердеги Wi‑Fi түзмөктөрү менен байланышуу"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Колдонмого жарнама көрсөтүүгө, байланышууга жана жакын жердеги Wi‑Fi түзмөктөрүн аныктоого мүмкүндүк берет"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Тандалган NFC төлөм кызматы жөнүндө маалымат"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Колдонмого катталган жардам же көздөлгөн жерге маршрут сыяктуу тандалган nfc төлөм кызматы жөнүндө маалыматты алууга уруксат берүү."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Near Field Communication көзөмөлү"</string>
@@ -726,6 +728,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Колдонмого \"Тынчымды алба\" режиминин конфигурациясын окуу жана жазуу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"уруксаттын колдонулушун көрүп баштоо"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Колдонмонун пайдаланылышына уруксат берүүгө мүмкүнчүлүк берет. Кадимки колдонмолорго эч качан талап кылынбашы керек."</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"колдонмонун функцияларын көрүп баштоо"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Колдонуучуга функциялары тууралуу маалыматты көрүп баштоо мүмкүнчүлүгүн берет."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"үлгүнү жаздыруу ылдамдыгы жогору болгон сенсор дайындарынын үлгүсүнө мүмкүнчүлүк алуу"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Колдонмолорго сенсор дайындарынын үлгүсү 200 Герцтен жогору болгон үлгүлөрдү алууга уруксат берет"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Сырсөз эрежелерин коюу"</string>

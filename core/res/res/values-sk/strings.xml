@@ -549,6 +549,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Umožňuje aplikácii zobrazovať reklamu v zariadeniach s rozhraním Bluetooth v okolí"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"určovať relatívnu polohu medzi zariadeniami so ultraširokopásmovým pripojením v okolí"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Povoľte aplikácii určovať relatívnu polohu medzi zariadeniami s ultraširokopásmovým pripojením v okolí"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interakcia so zariadeniami Wi-Fi v okolí"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Umožňuje aplikácii oznamovať a rozpoznávať relatívnu polohu zariadení Wi‑Fi v okolí a pripájať sa k nim"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Preferované informácie platenej služby NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Umožňuje aplikácii získavať preferované informácie platenej služby NFC, napríklad o registrovanej pomoci a trasách k cieľu."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ovládať technológiu NFC"</string>
@@ -732,6 +734,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Umožňuje aplikácii čítať a zapisovať konfiguráciu režimu bez vyrušení."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"spustenie používania povolenia na zobrazenie"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Umožňuje držiteľovi spustiť používanie povolenia aplikáciou. Bežné aplikácie by toto povolenie nemali nikdy potrebovať."</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"zobrazenie informácií o funkciách aplikácie"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Umožňuje držiteľovi zobraziť informácie o funkciách aplikácie."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"prístup k dátam senzorom s vysokou vzorkovacou frekvenciou"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Umožňuje aplikácii vzorkovať dáta senzorov s frekvenciou vyššou ako 200 Hz"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Nastaviť pravidlá pre heslo"</string>

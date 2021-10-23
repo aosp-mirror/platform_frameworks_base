@@ -543,6 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Huruhusu programu itangaze kwenye vifaa vyenye Bluetooth vilivyo karibu"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"kubainisha nafasi kati ya vifaa vyenye Bendi Pana Zaidi vilivyo karibu"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Ruhusu programu ibainishe nafasi kati ya vifaa vyenye Bendi Pana Zaidi vilivyo karibu"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"tumia vifaa vya Wi‑Fi vilivyo karibu"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Huruhusu programu kutangaza, kuunganisha na kubaini mahali palipokadiriwa vilipo vifaa vya Wi-Fi vilivyo karibu"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Maelezo ya Huduma Inayopendelewa ya Malipo ya NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Huruhusu programu kupata maelezo ya huduma inayopendelewa ya malipo ya nfc kama vile huduma zilizosajiliwa na njia."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kudhibiti Mawasiliano ya Vifaa Vilivyokaribu (NFC)"</string>
@@ -726,6 +728,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Inaruhusu programu kusoma na kuandika usanidi wa kipengee cha Usinisumbue."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"anzisha kipengele cha kuona matumizi ya ruhusa"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Huruhusu kishikiliaji kuanzisha matumizi ya ruhusa ya programu. Haipaswi kuhitajika kwa ajili ya programu za kawaida."</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"anzisha kipengele cha kuangalia vipengele vya programu"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Huruhusu mmiliki kuanza kuangalia maelezo ya vipengele vya programu."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"fikia data ya vitambuzi kwa kasi ya juu ya sampuli"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Huruhusu programu kujaribu sampuli ya data ya vitambuzi kwa kasi inayozidi Hz 200"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Kuweka kanuni za nenosiri"</string>

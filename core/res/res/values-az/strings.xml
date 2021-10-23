@@ -543,6 +543,10 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Tətbiqə yaxınlıqdakı Bluetooth cihazlarında reklam etmək imkanı verir"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"yaxınlıqdakı Ultra Genişzolaqlı cihazları arasında nisbi mövqeyi təyin etmək"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Tətbiqə yaxınlıqdakı Ultra Genişzolaqlı cihazları arasında nisbi mövqeyi təyin etməyə icazə verin"</string>
+    <!-- no translation found for permlab_nearby_wifi_devices (392774237063608500) -->
+    <skip />
+    <!-- no translation found for permdesc_nearby_wifi_devices (3054307728646332906) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Tərcih edilən NFC ödəniş xidməti məlumatı"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Tətbiqə qeydiyyatdan keçmiş yardım və marşrut təyinatı kimi tərcih edilən nfc ödəniş xidməti məlumatını əldə etmək icazəsi verir."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Near Field Communication\'ı kontrol et"</string>
@@ -726,6 +730,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Tətbiqə \"Narahat Etməyin\" konfiqurasiyasını oxumağa və yazmağa icazə verin."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"Baxış icazəsinin istifadəsinə başlayın"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Sahibinə tətbiqin icazədən istifadəsinə başlamağa imkan verir. Adi tətbiqlər üçün heç vaxt tələb edilmir."</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"tətbiqin funksiyalarını görməyə başlamaq"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"İstifadəçinin tətbiqin funksiyaları barədə məlumatları görməyə başlamasına icazə verir."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"sensor datasına yüksək ölçmə sürəti ilə giriş etmək"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Tətbiqə sensor datasını 200 Hz-dən yüksək sürətlə ölçməyə imkan verir"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Parol qaydalarını təyin edin"</string>

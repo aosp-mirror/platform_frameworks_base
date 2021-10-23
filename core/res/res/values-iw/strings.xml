@@ -549,6 +549,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"‏האפליקציה תוכל לפרסם במכשירי Bluetooth בקרבת מקום"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"זיהוי מיקום יחסי בין מכשירי \'תחום רחב סרט\' קרובים"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"האפליקציה תזהה את המיקום היחסי בין מכשירים קרובים שמשדרים בטכנולוגיה \'תחום רחב סרט\'"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"‏אינטראקציה עם מכשירי Wi-Fi בקרבת מקום"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"‏האפליקציה תוכל לפרסם במכשירי Wi-Fi בקרבת מקום, להתחבר אליהם ולהעריך את המיקום היחסי שלהם"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏פרטים על שירות תשלום מועדף ב-NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏מאפשרת לאפליקציה לקבל פרטים על שירות תשלום מועדף ב-NFC, כמו עזרים רשומים ויעד של נתיב."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"שליטה בתקשורת מטווח קצר"</string>
@@ -732,6 +734,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"מאפשרת לאפליקציה לקרוא ולכתוב את התצורה של התכונה \'נא לא להפריע\'."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"התחלת צפייה בהרשאות השימוש"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"מאפשרת לבעלים להפעיל את השימוש בהרשאות עבור אפליקציה מסוימת. הרשאה זו אף פעם לא נדרשת עבור אפליקציות רגילות."</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"התחלת צפייה בהרשאות של אפליקציות"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"בעלי ההרשאה יוכלו להתחיל לצפות בפרטי התכונות של אפליקציות."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"גישה לנתוני חיישנים בתדירות דגימה גבוהה"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"האפליקציה תוכל לדגום נתוני חיישנים בתדירות של מעל 200 הרץ"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"הגדרת כללי סיסמה"</string>

@@ -543,6 +543,10 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Қолданба жарнаманы маңайдағы Bluetooth құрылғыларына бере алады."</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"маңайдағы кең жолақты құрылғылардың бір-біріне қатысты орнын анықтау"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Қолданбаға маңайдағы кең жолақты құрылғылардың бір-біріне қатысты орнын анықтауға мүмкіндік береді."</string>
+    <!-- no translation found for permlab_nearby_wifi_devices (392774237063608500) -->
+    <skip />
+    <!-- no translation found for permdesc_nearby_wifi_devices (3054307728646332906) -->
+    <skip />
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Таңдаулы NFC төлеу қызметі туралы ақпарат"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Қолданба тіркелген көмектер және баратын жер маршруты сияқты таңдаулы NFC төлеу қызметі туралы ақпаратты ала алатын болады."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"NFC функциясын басқару"</string>
@@ -726,6 +730,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Қолданбаға «Мазаламау» конфигурациясын оқу және жазу мүмкіндігін береді."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"рұқсаттарды пайдалану туралы деректерді көру"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Пайдаланушы қолданбаға берілетін рұқсаттарды басқара алады. Ондай рұқсаттар әдеттегі қолданбаларға керек емес."</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"қолданба функцияларын көре бастау"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Қолданбаға функциялар туралы ақпаратты көре бастауды кідіртуге мүмкіндік береді."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"жоғары дискретизация жиілігіндегі датчик деректерін пайдалану"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Қолданбаға жиілігі 200 Гц-тен жоғары датчик деректерінің үлгісін таңдауға рұқсат береді."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Құпия сөз ережелерін тағайындау"</string>

@@ -543,6 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"ଆଖପାଖର ବ୍ଲୁଟୁଥ୍ ଡିଭାଇସଗୁଡ଼ିକରେ ବିଜ୍ଞାପନ ଦେବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦିଏ"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"ଆଖପାଖର ଅଲଟ୍ରା-ୱାଇଡବ୍ୟାଣ୍ଡ ଡିଭାଇସଗୁଡ଼ିକ ମଧ୍ୟରେ ଆପେକ୍ଷିକ ଅବସ୍ଥିତିକୁ ନିର୍ଦ୍ଧାରଣ କର"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"ଆଖପାଖର ଅଲଟ୍ରା-ୱାଇଡବ୍ୟାଣ୍ଡ ଡିଭାଇସଗୁଡ଼ିକ ମଧ୍ୟରେ ଆପେକ୍ଷିକ ଅବସ୍ଥିତିକୁ ନିର୍ଦ୍ଧାରଣ କରିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"ଆଖପାଖର ୱାଇ-ଫାଇ ଡିଭାଇସଗୁଡ଼ିକ ସହ ଇଣ୍ଟରାକ୍ଟ କରନ୍ତୁ"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"ଆଖପାଖର ୱାଇ-ଫାଇ ଡିଭାଇସରେ ବିଜ୍ଞାପନ ଦେବା, ତା ସହ ସଂଯୋଗ କରିବା ଓ ତା’ର ଆପେକ୍ଷିକ ଅବସ୍ଥିତି ନିର୍ଦ୍ଧାରଣ କରିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦିଏ"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ପସନ୍ଦର NFC ପେମେଣ୍ଟ ସେବା ସୂଚନା"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ପଞ୍ଜିକୃତ ଯନ୍ତ୍ର ଏବଂ ମାର୍ଗ ଲକ୍ଷସ୍ଥଳ ପରି ପସନ୍ଦର nfc ପେମେଣ୍ଟ ସେବା ସୂଚନା ପାଇବାକୁ ଆପ୍ ଅନୁମତି କରିଥାଏ।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ନିଅର୍ ଫିଲ୍ଡ କମ୍ୟୁନିକେଶନ୍ ଉପରେ ନିୟନ୍ତ୍ରଣ ରଖନ୍ତୁ"</string>
@@ -726,6 +728,10 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" କନଫିଗରେଶନ୍‍ ପଢ଼ିବା ତଥା ଲେଖିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦେଇଥାଏ।"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"ଅନୁମତି ବ୍ୟବହାର ଦେଖିବା ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"ଏକ ଆପ୍ ପାଇଁ ଅନୁମତିର ବ୍ୟବହାର ଆରମ୍ଭ କରିବାକୁ ଧାରକକୁ ଅନୁମତି ଦେଇଥାଏ। ସାଧାରଣ ଆପ୍‌ଗୁଡ଼ିକ ପାଇଁ ଏହା ଆବଶ୍ୟକ ନୁହେଁ।"</string>
+    <!-- no translation found for permlab_startViewAppFeatures (7955084203185903001) -->
+    <skip />
+    <!-- no translation found for permdesc_startViewAppFeatures (7207240860165206107) -->
+    <skip />
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ଏକ ଉଚ୍ଚ ନମୁନାକରଣ ରେଟରେ ସେନ୍ସର୍ ଡାଟାକୁ ଆକ୍ସେସ୍ କରନ୍ତୁ"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"200 Hz ଠାରୁ ଅଧିକ ଏକ ରେଟରେ ସେନ୍ସର୍ ଡାଟାର ନମୁନା ନେବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦିଏ"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"ପାସ୍‌ୱର୍ଡ ନିୟମାବଳୀ ସେଟ୍ କରନ୍ତୁ"</string>

@@ -543,6 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Giver appen tilladelse til at give sig til kende for Bluetooth-enheder i nærheden"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"fastlægge den relative position mellem UWB-enheder i nærheden"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Tillad, at appen fastlægger den relative position mellem UWB-enheder (Ultra-Wideband) i nærheden"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interagere med Wi‑Fi-enheder i nærheden"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Giver appen tilladelse til at informere om, oprette forbindelse til og fastslå den relative placering af Wi‑Fi -enheder i nærheden"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Foretrukne oplysninger vedrørende NFC-betalingstjeneste"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Tillader, at appen får foretrukne oplysninger vedrørende NFC-betalingstjeneste, f.eks. registrerede hjælpemidler og rutedestinationer."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"administrere Near Field Communication"</string>
@@ -726,6 +728,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Giver appen tilladelse til at læse og redigere konfigurationen af Forstyr ikke."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"start brugen at tilladelsesvisning"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Tillader, at brugeren kan bruge en tilladelse for en app. Dette bør aldrig være nødvendigt for almindelige apps."</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"se appfunktioner"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Giver den app, som har tilladelsen, mulighed for at se oplysninger om en apps funktioner."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"få adgang til sensordata ved høj samplingfrekvens"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Tillader, at appen kan sample sensordata ved en højere frekvens end 200 Hz"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Angiv regler for adgangskoder"</string>

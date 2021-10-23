@@ -543,6 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"允许该应用向附近的蓝牙设备广播"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"确定附近超宽带设备之间的相对位置"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"允许应用确定附近超宽带设备之间的相对位置"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"与附近的 WLAN 设备互动"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"允许该应用向附近的 WLAN 设备进行广播、连接到这些设备以及确定这些设备的相对位置"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"首选 NFC 付款服务信息"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"允许应用获取首选 NFC 付款服务信息，例如注册的应用标识符和路线目的地。"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"控制近距离通信"</string>
@@ -726,6 +728,8 @@
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"允许此应用读取和写入“勿扰”模式配置。"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"授权使用“查看权限”"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"允许该应用开始查看应用的权限使用情况（普通应用绝不需要此权限）。"</string>
+    <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"开始查看应用功能"</string>
+    <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"允许具有该权限的应用开始查看某个应用的功能信息。"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"以高采样率访问传感器数据"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"允许应用以高于 200 Hz 的频率对传感器数据进行采样"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"设置密码规则"</string>
