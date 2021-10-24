@@ -38,6 +38,7 @@ import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
 import com.android.settingslib.bluetooth.HearingAidProfile;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfile;
+import com.android.settingslib.bluetooth.LeAudioProfile;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -440,6 +441,7 @@ public class LocalMediaManager implements BluetoothCallback {
     private boolean isActiveDevice(CachedBluetoothDevice device) {
         boolean isActiveDeviceA2dp = false;
         boolean isActiveDeviceHearingAid = false;
+        boolean isActiveLeAudio = false;
         final A2dpProfile a2dpProfile = mLocalBluetoothManager.getProfileManager().getA2dpProfile();
         if (a2dpProfile != null) {
             isActiveDeviceA2dp = device.getDevice().equals(a2dpProfile.getActiveDevice());
@@ -453,7 +455,15 @@ public class LocalMediaManager implements BluetoothCallback {
             }
         }
 
-        return isActiveDeviceA2dp || isActiveDeviceHearingAid;
+        if (!isActiveDeviceA2dp && !isActiveDeviceHearingAid) {
+            final LeAudioProfile leAudioProfile = mLocalBluetoothManager.getProfileManager()
+                    .getLeAudioProfile();
+            if (leAudioProfile != null) {
+                isActiveLeAudio = leAudioProfile.getActiveDevices().contains(device.getDevice());
+            }
+        }
+
+        return isActiveDeviceA2dp || isActiveDeviceHearingAid || isActiveLeAudio;
     }
 
     private Collection<DeviceCallback> getCallbacks() {
@@ -526,7 +536,7 @@ public class LocalMediaManager implements BluetoothCallback {
                 if (cachedDevice != null) {
                     if (cachedDevice.getBondState() == BluetoothDevice.BOND_BONDED
                             && !cachedDevice.isConnected()
-                            && isA2dpOrHearingAidDevice(cachedDevice)) {
+                            && isMediaDevice(cachedDevice)) {
                         deviceCount++;
                         cachedBluetoothDeviceList.add(cachedDevice);
                         if (deviceCount >= MAX_DISCONNECTED_DEVICE_NUM) {
@@ -550,9 +560,10 @@ public class LocalMediaManager implements BluetoothCallback {
             return new ArrayList<>(mDisconnectedMediaDevices);
         }
 
-        private boolean isA2dpOrHearingAidDevice(CachedBluetoothDevice device) {
+        private boolean isMediaDevice(CachedBluetoothDevice device) {
             for (LocalBluetoothProfile profile : device.getConnectableProfiles()) {
-                if (profile instanceof A2dpProfile || profile instanceof HearingAidProfile) {
+                if (profile instanceof A2dpProfile || profile instanceof HearingAidProfile ||
+                        profile instanceof LeAudioProfile) {
                     return true;
                 }
             }
