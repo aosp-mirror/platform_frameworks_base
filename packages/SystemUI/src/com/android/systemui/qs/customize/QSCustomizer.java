@@ -36,6 +36,7 @@ import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QSContainerController;
 import com.android.systemui.qs.QSDetailClipper;
 import com.android.systemui.statusbar.phone.LightBarController;
+import com.android.systemui.util.Utils;
 
 /**
  * Allows full-screen customization of QS, through show() and hide().
@@ -84,8 +85,7 @@ public class QSCustomizer extends LinearLayout {
 
     void updateResources() {
         LayoutParams lp = (LayoutParams) mTransparentView.getLayoutParams();
-        lp.height = mContext.getResources()
-                .getDimensionPixelSize(R.dimen.qs_header_system_icons_area_height);
+        lp.height = Utils.getQsHeaderSystemIconsAreaHeight(mContext);
         mTransparentView.setLayoutParams(lp);
     }
 
