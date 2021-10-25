@@ -654,6 +654,24 @@ public abstract class BatteryStats implements Parcelable {
     }
 
     /**
+     * Maps BatteryStats.Uid process state to the BatteryConsumer process state.
+     */
+    public static @BatteryConsumer.ProcessState int
+            mapUidProcessStateToBatteryConsumerProcessState(int processState) {
+        switch (processState) {
+            case BatteryStats.Uid.PROCESS_STATE_TOP:
+                return BatteryConsumer.PROCESS_STATE_FOREGROUND;
+            case BatteryStats.Uid.PROCESS_STATE_BACKGROUND:
+            case BatteryStats.Uid.PROCESS_STATE_TOP_SLEEPING:
+                return BatteryConsumer.PROCESS_STATE_BACKGROUND;
+            case BatteryStats.Uid.PROCESS_STATE_FOREGROUND_SERVICE:
+                return BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE;
+            default:
+                return BatteryConsumer.PROCESS_STATE_ANY;
+        }
+    }
+
+    /**
      * Returns true if battery consumption is tracked on a per-process-state basis.
      */
     public abstract boolean isProcessStateDataAvailable();
