@@ -34,10 +34,7 @@
 package android.media.audio.common;
 /* @hide */
 @JavaDerive(equals=true, toString=true) @VintfStability
-parcelable AudioPortMixExt {
-  int handle;
-  android.media.audio.common.AudioPortMixExtUseCase usecase;
-  int maxOpenStreamCount;
-  int maxActiveStreamCount;
-  int recommendedMuteDurationMs;
+union AudioIoFlags {
+  int input;
+  int output;
 }

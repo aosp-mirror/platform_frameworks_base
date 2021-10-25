@@ -30,4 +30,16 @@ parcelable AudioPortMixExt {
     int handle;
     /** Parameters specific to the mix use case. */
     AudioPortMixExtUseCase usecase;
+    /**
+     * Maximum number of input or output streams that can be simultaneously
+     * opened for this port.
+     */
+    int maxOpenStreamCount;
+    /**
+     * Maximum number of input or output streams that can be simultaneously
+     * active for this port.
+     */
+    int maxActiveStreamCount;
+    /** Mute duration while changing device, when used for output. */
+    int recommendedMuteDurationMs;
 }

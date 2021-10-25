@@ -36,7 +36,7 @@ package android.media.audio.common;
 @JavaDerive(equals=true, toString=true) @VintfStability
 union AudioPortExt {
   boolean unspecified;
-  android.media.audio.common.AudioDevice device;
+  android.media.audio.common.AudioPortDeviceExt device;
   android.media.audio.common.AudioPortMixExt mix;
   int session;
 }
