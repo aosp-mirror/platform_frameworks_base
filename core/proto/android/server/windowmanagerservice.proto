@@ -202,7 +202,6 @@ message DisplayContentProto {
     optional .com.android.server.wm.IdentifierProto resumed_activity = 24;
     repeated TaskProto tasks = 25 [deprecated=true];
     optional bool display_ready = 26;
-
     optional WindowStateProto input_method_target = 27;
     optional WindowStateProto input_method_input_target = 28;
     optional WindowStateProto input_method_control_target = 29;
@@ -212,6 +211,8 @@ message DisplayContentProto {
 
     optional DisplayRotationProto display_rotation = 33;
     optional int32 ime_policy = 34;
+    optional bool is_sleeping = 36;
+    repeated string sleep_tokens = 37;
 }
 
 /* represents DisplayArea object */
