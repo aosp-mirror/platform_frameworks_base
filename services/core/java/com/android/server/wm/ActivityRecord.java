@@ -3602,6 +3602,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         if (mPendingRelaunchCount > 0) {
             mPendingRelaunchCount--;
+            if (mPendingRelaunchCount == 0 && !isClientVisible()) {
+                // Don't count if the client won't report drawn.
+                mRelaunchStartTime = 0;
+            }
         } else {
             // Update keyguard flags upon finishing relaunch.
             checkKeyguardFlagsChanged();
