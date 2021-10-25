@@ -21,7 +21,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_CLOSE;
-import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
@@ -44,6 +43,7 @@ import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.view.SurfaceControl;
 import android.window.ITaskOrganizer;
 import android.window.ITransitionPlayer;
 import android.window.TransitionInfo;
@@ -53,9 +53,12 @@ import androidx.test.filters.SmallTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Build/Install/Run:
- *  atest WmTests:TransitionRecordTests
+ *  atest WmTests:TransitionTests
  */
 @SmallTest
 @Presubmit
@@ -64,13 +67,13 @@ public class TransitionTests extends WindowTestsBase {
 
     private Transition createTestTransition(int transitType) {
         TransitionController controller = mock(TransitionController.class);
-        BLASTSyncEngine sync = new BLASTSyncEngine(mWm);
-        return new Transition(transitType, 0 /* flags */, controller, sync);
+        final BLASTSyncEngine sync = createTestBLASTSyncEngine();
+        return new Transition(transitType, 0 /* flags */, 0 /* timeoutMs */, controller, sync);
     }
 
     @Test
     public void testCreateInfo_NewTask() {
-        final Transition transition = createTestTransition(TRANSIT_OLD_TASK_OPEN);
+        final Transition transition = createTestTransition(TRANSIT_OPEN);
         ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
         ArraySet<WindowContainer> participants = transition.mParticipants;
 
@@ -88,7 +91,7 @@ public class TransitionTests extends WindowTestsBase {
         closing.mVisibleRequested = false;
         opening.mVisibleRequested = true;
 
-        int transit = TRANSIT_OLD_TASK_OPEN;
+        final int transit = transition.mType;
         int flags = 0;
 
         // Check basic both tasks participating
@@ -127,7 +130,7 @@ public class TransitionTests extends WindowTestsBase {
 
     @Test
     public void testCreateInfo_NestedTasks() {
-        final Transition transition = createTestTransition(TRANSIT_OLD_TASK_OPEN);
+        final Transition transition = createTestTransition(TRANSIT_OPEN);
         ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
         ArraySet<WindowContainer> participants = transition.mParticipants;
 
@@ -152,7 +155,7 @@ public class TransitionTests extends WindowTestsBase {
         opening.mVisibleRequested = true;
         opening2.mVisibleRequested = true;
 
-        int transit = TRANSIT_OLD_TASK_OPEN;
+        final int transit = transition.mType;
         int flags = 0;
 
         // Check full promotion from leaf
@@ -177,7 +180,7 @@ public class TransitionTests extends WindowTestsBase {
 
     @Test
     public void testCreateInfo_DisplayArea() {
-        final Transition transition = createTestTransition(TRANSIT_OLD_TASK_OPEN);
+        final Transition transition = createTestTransition(TRANSIT_OPEN);
         ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
         ArraySet<WindowContainer> participants = transition.mParticipants;
         final Task showTask = createTask(mDisplayContent);
@@ -199,7 +202,7 @@ public class TransitionTests extends WindowTestsBase {
         showing.mVisibleRequested = true;
         showing2.mVisibleRequested = true;
 
-        int transit = TRANSIT_OLD_TASK_OPEN;
+        final int transit = transition.mType;
         int flags = 0;
 
         // Check promotion to DisplayArea
@@ -228,7 +231,7 @@ public class TransitionTests extends WindowTestsBase {
 
     @Test
     public void testCreateInfo_existenceChange() {
-        final Transition transition = createTestTransition(TRANSIT_OLD_TASK_OPEN);
+        final Transition transition = createTestTransition(TRANSIT_OPEN);
 
         final Task openTask = createTask(mDisplayContent);
         final ActivityRecord opening = createActivityRecord(openTask);
@@ -258,7 +261,7 @@ public class TransitionTests extends WindowTestsBase {
 
     @Test
     public void testCreateInfo_ordering() {
-        final Transition transition = createTestTransition(TRANSIT_OLD_TASK_OPEN);
+        final Transition transition = createTestTransition(TRANSIT_OPEN);
         // pick some number with a high enough chance of being out-of-order when added to set.
         final int taskCount = 6;
 
@@ -294,7 +297,7 @@ public class TransitionTests extends WindowTestsBase {
 
     @Test
     public void testCreateInfo_wallpaper() {
-        final Transition transition = createTestTransition(TRANSIT_OLD_TASK_OPEN);
+        final Transition transition = createTestTransition(TRANSIT_OPEN);
         // pick some number with a high enough chance of being out-of-order when added to set.
         final int taskCount = 4;
         final int showWallpaperTask = 2;
@@ -345,7 +348,7 @@ public class TransitionTests extends WindowTestsBase {
 
     @Test
     public void testTargets_noIntermediatesToWallpaper() {
-        final Transition transition = createTestTransition(TRANSIT_OLD_TASK_OPEN);
+        final Transition transition = createTestTransition(TRANSIT_OPEN);
 
         final WallpaperWindowToken wallpaperWindowToken = new WallpaperWindowToken(mWm,
                 mock(IBinder.class), true, mDisplayContent, true /* ownerCanManageAppTokens */);
@@ -419,7 +422,7 @@ public class TransitionTests extends WindowTestsBase {
         openInOpen.mVisibleRequested = true;
         openInChange.mVisibleRequested = true;
 
-        int transit = TRANSIT_OLD_TASK_OPEN;
+        final int transit = transition.mType;
         int flags = 0;
 
         // Check full promotion from leaf
@@ -447,6 +450,22 @@ public class TransitionTests extends WindowTestsBase {
         // open/close within a change are independent
         assertTrue(isIndependent(
                 info.getChange(openInChangeTask.mRemoteToken.toWindowContainerToken()), info));
+    }
+
+    @Test
+    public void testTimeout() {
+        final TransitionController controller = new TransitionController(mAtm,
+                mock(TaskSnapshotController.class));
+        final BLASTSyncEngine sync = new BLASTSyncEngine(mWm);
+        final CountDownLatch latch = new CountDownLatch(1);
+        // When the timeout is reached, it will finish the sync-group and notify transaction ready.
+        new Transition(TRANSIT_OPEN, 0 /* flags */, 10 /* timeoutMs */, controller, sync) {
+            @Override
+            public void onTransactionReady(int syncId, SurfaceControl.Transaction transaction) {
+                latch.countDown();
+            }
+        };
+        assertTrue(awaitInWmLock(() -> latch.await(3, TimeUnit.SECONDS)));
     }
 
     @Test
