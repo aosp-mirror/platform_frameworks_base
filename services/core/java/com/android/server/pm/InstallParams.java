@@ -299,13 +299,15 @@ final class InstallParams extends HandlerParams {
             final long sizeBytes = PackageManagerServiceUtils.calculateInstalledSize(
                     mOriginInfo.mResolvedPath, mPackageAbiOverride);
             if (sizeBytes >= 0) {
-                try {
-                    mPm.mInstaller.freeCache(null, sizeBytes + lowThreshold, 0, 0);
-                    pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mPm.mContext,
-                            mPackageLite, mOriginInfo.mResolvedPath, mInstallFlags,
-                            mPackageAbiOverride);
-                } catch (Installer.InstallerException e) {
-                    Slog.w(TAG, "Failed to free cache", e);
+                synchronized (mPm.mInstallLock) {
+                    try {
+                        mPm.mInstaller.freeCache(null, sizeBytes + lowThreshold, 0);
+                        pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mPm.mContext,
+                                mPackageLite, mOriginInfo.mResolvedPath, mInstallFlags,
+                                mPackageAbiOverride);
+                    } catch (Installer.InstallerException e) {
+                        Slog.w(TAG, "Failed to free cache", e);
+                    }
                 }
             }
 

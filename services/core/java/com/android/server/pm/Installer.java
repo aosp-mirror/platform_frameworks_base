@@ -655,11 +655,15 @@ public class Installer extends SystemService {
         }
     }
 
-    public void freeCache(String uuid, long targetFreeBytes, long cacheReservedBytes, int flags)
-            throws InstallerException {
+    /**
+     * Deletes cache from specified uuid until targetFreeBytes amount of space is free.
+     * flag denotes aggressive or non-aggresive mode where cache under quota is eligible or not
+     * respectively for clearing.
+     */
+    public void freeCache(String uuid, long targetFreeBytes, int flags) throws InstallerException {
         if (!checkBeforeRemote()) return;
         try {
-            mInstalld.freeCache(uuid, targetFreeBytes, cacheReservedBytes, flags);
+            mInstalld.freeCache(uuid, targetFreeBytes, flags);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }

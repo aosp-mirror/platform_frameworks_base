@@ -142,7 +142,6 @@ import android.content.pm.dex.IArtManager;
 import android.content.pm.overlay.OverlayPaths;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.component.ParsedActivity;
-import android.content.pm.parsing.component.ParsedActivityImpl;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedMainComponent;
@@ -2849,7 +2848,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     volumeUuid);
             final boolean aggressive = (storageFlags
                     & StorageManager.FLAG_ALLOCATE_AGGRESSIVE) != 0;
-            final long reservedBytes = storage.getStorageCacheBytes(file, storageFlags);
 
             // 1. Pre-flight to determine if we have any chance to succeed
             // 2. Consider preloaded data (after 1w honeymoon, unless aggressive)
@@ -2866,10 +2864,11 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             // 4. Consider cached app data (above quotas)
-            try {
-                mInstaller.freeCache(volumeUuid, bytes, reservedBytes,
-                        Installer.FLAG_FREE_CACHE_V2);
-            } catch (InstallerException ignored) {
+            synchronized (mInstallLock) {
+                try {
+                    mInstaller.freeCache(volumeUuid, bytes, Installer.FLAG_FREE_CACHE_V2);
+                } catch (InstallerException ignored) {
+                }
             }
             if (file.getUsableSpace() >= bytes) return;
 
@@ -2893,10 +2892,12 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             // 8. Consider cached app data (below quotas)
-            try {
-                mInstaller.freeCache(volumeUuid, bytes, reservedBytes,
-                        Installer.FLAG_FREE_CACHE_V2 | Installer.FLAG_FREE_CACHE_V2_DEFY_QUOTA);
-            } catch (InstallerException ignored) {
+            synchronized (mInstallLock) {
+                try {
+                    mInstaller.freeCache(volumeUuid, bytes,
+                            Installer.FLAG_FREE_CACHE_V2 | Installer.FLAG_FREE_CACHE_V2_DEFY_QUOTA);
+                } catch (InstallerException ignored) {
+                }
             }
             if (file.getUsableSpace() >= bytes) return;
 
@@ -2922,9 +2923,11 @@ public class PackageManagerService extends IPackageManager.Stub
             // 12. Clear temp install session files
             mInstallerService.freeStageDirs(volumeUuid);
         } else {
-            try {
-                mInstaller.freeCache(volumeUuid, bytes, 0, 0);
-            } catch (InstallerException ignored) {
+            synchronized (mInstallLock) {
+                try {
+                    mInstaller.freeCache(volumeUuid, bytes, 0);
+                } catch (InstallerException ignored) {
+                }
             }
         }
         if (file.getUsableSpace() >= bytes) return;
