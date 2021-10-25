@@ -153,6 +153,7 @@ import android.app.ActivityClient;
 import android.app.ActivityManager;
 import android.app.ActivityManager.PendingIntentInfo;
 import android.app.ActivityManager.ProcessCapability;
+import android.app.ActivityManager.RestrictionLevel;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityTaskManager.RootTaskInfo;
@@ -186,7 +187,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProcessMemoryState;
 import android.app.ProfilerInfo;
-import android.app.PropertyInvalidatedCache;
 import android.app.SyncNotedAppOp;
 import android.app.WaitResult;
 import android.app.backup.BackupManager.OperationType;
@@ -233,11 +233,9 @@ import android.content.pm.ProcessInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ProviderInfoList;
 import android.content.pm.ResolveInfo;
-import com.android.server.pm.pkg.SELinuxUtil;
 import android.content.pm.ServiceInfo;
 import android.content.pm.TestUtilityService;
 import android.content.pm.UserInfo;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -396,6 +394,8 @@ import com.android.server.pm.Installer;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
+import com.android.server.pm.pkg.SELinuxUtil;
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.uri.GrantUri;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriGrantsManagerInternal;
@@ -1456,6 +1456,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     final UidObserverController mUidObserverController;
 
+    final AppRestrictionController mAppRestrictionController;
+
     private final class AppDeathRecipient implements IBinder.DeathRecipient {
         final ProcessRecord mApp;
         final int mPid;
@@ -2269,6 +2271,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mPendingIntentController = hasHandlerThread
                 ? new PendingIntentController(handlerThread.getLooper(), mUserController,
                         mConstants) : null;
+        mAppRestrictionController = new AppRestrictionController(mContext);
         mProcStartHandlerThread = null;
         mProcStartHandler = null;
         mHiddenApiBlacklist = null;
@@ -2377,6 +2380,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mPendingIntentController = new PendingIntentController(
                 mHandlerThread.getLooper(), mUserController, mConstants);
+
+        mAppRestrictionController = new AppRestrictionController(mContext);
 
         mUseFifoUiScheduling = SystemProperties.getInt("sys.use_fifo_ui", 0) != 0;
 
@@ -7746,6 +7751,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             mUserController.onSystemReady();
             mAppOpsService.systemReady();
             mProcessList.onSystemReady();
+            mAppRestrictionController.onSystemReady();
             mSystemReady = true;
             t.traceEnd();
         }
@@ -9028,6 +9034,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("-------------------------------------------------------------------------------");
             }
             mComponentAliasResolver.dump(pw);
+        }
+        if (dumpAll) {
+            pw.println("-------------------------------------------------------------------------------");
+            mAppRestrictionController.dump(pw, "");
         }
     }
 
@@ -16817,6 +16827,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void setStopUserOnSwitch(int value) {
             ActivityManagerService.this.setStopUserOnSwitch(value);
+        }
+
+        @Override
+        public @RestrictionLevel int getRestrictionLevel(int uid) {
+            return mAppRestrictionController.getRestrictionLevel(uid);
+        }
+
+        @Override
+        public @RestrictionLevel int getRestrictionLevel(String pkg, @UserIdInt int userId) {
+            return mAppRestrictionController.getRestrictionLevel(pkg, userId);
         }
     }
 

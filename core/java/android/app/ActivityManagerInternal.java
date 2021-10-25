@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager.ProcessCapability;
+import android.app.ActivityManager.RestrictionLevel;
 import android.content.ComponentName;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
@@ -712,4 +713,15 @@ public abstract class ActivityManagerInternal {
          */
         void notifyActivityEventChanged();
     }
+
+    /**
+     * Get the restriction level of the given UID, if it hosts multiple packages,
+     * return least restricted level.
+     */
+    public abstract @RestrictionLevel int getRestrictionLevel(int uid);
+
+    /**
+     * Get the restriction level of the given package for given user id.
+     */
+    public abstract @RestrictionLevel int getRestrictionLevel(String pkg, @UserIdInt int userId);
 }

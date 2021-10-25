@@ -63,8 +63,8 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.UsageEvents;
+import android.app.usage.UsageStatsManager.ForcedReasons;
 import android.app.usage.UsageStatsManager.StandbyBuckets;
-import android.app.usage.UsageStatsManager.SystemForcedReasons;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
@@ -1406,13 +1406,13 @@ public class AppStandbyController
 
     @Override
     public void restrictApp(@NonNull String packageName, int userId,
-            @SystemForcedReasons int restrictReason) {
+            @ForcedReasons int restrictReason) {
         restrictApp(packageName, userId, REASON_MAIN_FORCED_BY_SYSTEM, restrictReason);
     }
 
     @Override
     public void restrictApp(@NonNull String packageName, int userId, int mainReason,
-            @SystemForcedReasons int restrictReason) {
+            @ForcedReasons int restrictReason) {
         if (mainReason != REASON_MAIN_FORCED_BY_SYSTEM
                 && mainReason != REASON_MAIN_FORCED_BY_USER) {
             Slog.e(TAG, "Tried to restrict app " + packageName + " for an unsupported reason");
@@ -1799,27 +1799,36 @@ public class AppStandbyController
      * bucket if it was forced into the bucket by the system because it was buggy.
      */
     @VisibleForTesting
-    void maybeUnrestrictBuggyApp(String packageName, int userId) {
+    void maybeUnrestrictBuggyApp(@NonNull String packageName, int userId) {
+        maybeUnrestrictApp(packageName, userId,
+                REASON_MAIN_FORCED_BY_SYSTEM, REASON_SUB_FORCED_SYSTEM_FLAG_BUGGY,
+                REASON_MAIN_DEFAULT, REASON_SUB_DEFAULT_APP_UPDATE);
+    }
+
+    @Override
+    public void maybeUnrestrictApp(@NonNull String packageName, int userId,
+            int prevMainReasonRestrict, int prevSubReasonRestrict,
+            int mainReasonUnrestrict, int subReasonUnrestrict) {
         synchronized (mAppIdleLock) {
             final long elapsedRealtime = mInjector.elapsedRealtime();
             final AppIdleHistory.AppUsageHistory app =
                     mAppIdleHistory.getAppUsageHistory(packageName, userId, elapsedRealtime);
             if (app.currentBucket != STANDBY_BUCKET_RESTRICTED
-                    || (app.bucketingReason & REASON_MAIN_MASK) != REASON_MAIN_FORCED_BY_SYSTEM) {
+                    || (app.bucketingReason & REASON_MAIN_MASK) != prevMainReasonRestrict) {
                 return;
             }
 
             final int newBucket;
             final int newReason;
-            if ((app.bucketingReason & REASON_SUB_MASK) == REASON_SUB_FORCED_SYSTEM_FLAG_BUGGY) {
-                // If bugginess was the only reason the app should be restricted, then lift it out.
+            if ((app.bucketingReason & REASON_SUB_MASK) == prevSubReasonRestrict) {
+                // If it was the only reason the app should be restricted, then lift it out.
                 newBucket = STANDBY_BUCKET_RARE;
-                newReason = REASON_MAIN_DEFAULT | REASON_SUB_DEFAULT_APP_UPDATE;
+                newReason = mainReasonUnrestrict | subReasonUnrestrict;
             } else {
-                // There's another reason the app was restricted. Remove the buggy bit and call
+                // There's another reason the app was restricted. Remove the subreason bit and call
                 // it a day.
                 newBucket = STANDBY_BUCKET_RESTRICTED;
-                newReason = app.bucketingReason & ~REASON_SUB_FORCED_SYSTEM_FLAG_BUGGY;
+                newReason = app.bucketingReason & ~prevSubReasonRestrict;
             }
             mAppIdleHistory.setAppStandbyBucket(
                     packageName, userId, elapsedRealtime, newBucket, newReason);

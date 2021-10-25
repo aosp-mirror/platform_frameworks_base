@@ -62,6 +62,14 @@ public class SparseArrayMap<K, V> {
     }
 
     /**
+     * Removes all the data for the keyIndex, if there was any.
+     * @hide
+     */
+    public void deleteAt(int keyIndex) {
+        mData.removeAt(keyIndex);
+    }
+
+    /**
      * Removes the data for the key and mapKey, if there was any.
      *
      * @return Returns the value that was stored under the keys, or null if there was none.
@@ -139,6 +147,15 @@ public class SparseArrayMap<K, V> {
     /** Returns the number of elements in the map of the given key. */
     public int numElementsForKey(int key) {
         ArrayMap<K, V> data = mData.get(key);
+        return data == null ? 0 : data.size();
+    }
+
+    /**
+     * Returns the number of elements in the map of the given keyIndex.
+     * @hide
+     */
+    public int numElementsForKeyAt(int keyIndex) {
+        ArrayMap<K, V> data = mData.valueAt(keyIndex);
         return data == null ? 0 : data.size();
     }
 

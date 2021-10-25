@@ -320,6 +320,17 @@ public final class UsageStatsManager {
      * @hide
      */
     public static final int REASON_SUB_FORCED_SYSTEM_FLAG_BUGGY = 1 << 2;
+    /**
+     * The app was moved to restricted bucket due to user interaction, i.e., toggling FAS.
+     *
+     * <p>
+     * Note: This should be coming from the more end-user facing UX, not from developer
+     * options nor adb command.
+     </p>
+     *
+     * @hide
+     */
+    public static final int REASON_SUB_FORCED_USER_FLAG_INTERACTION = 1 << 1;
 
 
     /** @hide */
@@ -336,14 +347,15 @@ public final class UsageStatsManager {
     public @interface StandbyBuckets {}
 
     /** @hide */
-    @IntDef(flag = true, prefix = {"REASON_SUB_FORCED_SYSTEM_FLAG_FLAG_"}, value = {
+    @IntDef(flag = true, prefix = {"REASON_SUB_FORCED_"}, value = {
             REASON_SUB_FORCED_SYSTEM_FLAG_UNDEFINED,
             REASON_SUB_FORCED_SYSTEM_FLAG_BACKGROUND_RESOURCE_USAGE,
             REASON_SUB_FORCED_SYSTEM_FLAG_ABUSE,
             REASON_SUB_FORCED_SYSTEM_FLAG_BUGGY,
+            REASON_SUB_FORCED_USER_FLAG_INTERACTION,
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface SystemForcedReasons {
+    public @interface ForcedReasons {
     }
 
     /**
@@ -1188,11 +1200,6 @@ public final class UsageStatsManager {
             case REASON_MAIN_FORCED_BY_USER:
                 sb.append("f");
                 if (subReason > 0) {
-                    // Although not expected and shouldn't happen, this could potentially have a
-                    // sub-reason if the system tries to give a reason when applying the
-                    // FORCED_BY_USER reason. The sub-reason is undefined (though most likely a
-                    // REASON_SUB_FORCED_SYSTEM_FLAG_ sub-reason), but it's better to note it in the
-                    // log than to exclude it altogether.
                     sb.append("-").append(Integer.toBinaryString(subReason));
                 }
                 break;
