@@ -12818,7 +12818,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     return;
                 }
             } else {
-                if (isInstantApp(packageName, callingUserId)) {
+                if (isInstantAppInternal(packageName, callingUserId, Process.SYSTEM_UID)) {
                     return;
                 }
             }
