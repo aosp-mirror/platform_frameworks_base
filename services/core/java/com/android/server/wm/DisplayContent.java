@@ -114,10 +114,12 @@ import static com.android.server.wm.DisplayContentProto.INPUT_METHOD_CONTROL_TAR
 import static com.android.server.wm.DisplayContentProto.INPUT_METHOD_INPUT_TARGET;
 import static com.android.server.wm.DisplayContentProto.INPUT_METHOD_TARGET;
 import static com.android.server.wm.DisplayContentProto.INSETS_SOURCE_PROVIDERS;
+import static com.android.server.wm.DisplayContentProto.IS_SLEEPING;
 import static com.android.server.wm.DisplayContentProto.OPENING_APPS;
 import static com.android.server.wm.DisplayContentProto.RESUMED_ACTIVITY;
 import static com.android.server.wm.DisplayContentProto.ROOT_DISPLAY_AREA;
 import static com.android.server.wm.DisplayContentProto.SCREEN_ROTATION_ANIMATION;
+import static com.android.server.wm.DisplayContentProto.SLEEP_TOKENS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
@@ -3261,6 +3263,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             proto.write(FOCUSED_ROOT_TASK_ID, INVALID_TASK_ID);
         }
         proto.write(DISPLAY_READY, isReady());
+        proto.write(IS_SLEEPING, isSleeping());
+        for (int i = 0; i < mAllSleepTokens.size(); ++i) {
+            mAllSleepTokens.get(i).writeTagToProto(proto, SLEEP_TOKENS);
+        }
+
         if (mImeLayeringTarget != null) {
             mImeLayeringTarget.dumpDebug(proto, INPUT_METHOD_TARGET, logLevel);
         }
