@@ -96,9 +96,11 @@ public interface StatusBarDependenciesModule {
     @Provides
     static NotificationRemoteInputManager provideNotificationRemoteInputManager(
             Context context,
+            FeatureFlags featureFlags,
             NotificationLockscreenUserManager lockscreenUserManager,
             SmartReplyController smartReplyController,
             NotificationEntryManager notificationEntryManager,
+            NotifPipeline notifPipeline,
             Lazy<Optional<StatusBar>> statusBarOptionalLazy,
             StatusBarStateController statusBarStateController,
             Handler mainHandler,
@@ -108,9 +110,11 @@ public interface StatusBarDependenciesModule {
             DumpManager dumpManager) {
         return new NotificationRemoteInputManager(
                 context,
+                featureFlags,
                 lockscreenUserManager,
                 smartReplyController,
                 notificationEntryManager,
+                notifPipeline,
                 statusBarOptionalLazy,
                 statusBarStateController,
                 mainHandler,
