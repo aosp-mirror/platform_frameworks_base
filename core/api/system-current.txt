@@ -1948,6 +1948,22 @@ package android.bluetooth {
     field @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.a2dp-sink.profile.action.CONNECTION_STATE_CHANGED";
   }
 
+  public final class BluetoothActivityEnergyInfo implements android.os.Parcelable {
+    method public int getBluetoothStackState();
+    method public long getControllerEnergyUsed();
+    method public long getControllerIdleTimeMillis();
+    method public long getControllerRxTimeMillis();
+    method public long getControllerTxTimeMillis();
+    method public long getTimeStamp();
+    method @NonNull public java.util.List<android.bluetooth.UidTraffic> getUidTraffic();
+    method public boolean isValid();
+    field public static final int BT_STACK_STATE_INVALID = 0; // 0x0
+    field public static final int BT_STACK_STATE_STATE_ACTIVE = 1; // 0x1
+    field public static final int BT_STACK_STATE_STATE_IDLE = 3; // 0x3
+    field public static final int BT_STACK_STATE_STATE_SCANNING = 2; // 0x2
+    field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.BluetoothActivityEnergyInfo> CREATOR;
+  }
+
   public final class BluetoothAdapter {
     method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean addOnMetadataChangedListener(@NonNull android.bluetooth.BluetoothDevice, @NonNull java.util.concurrent.Executor, @NonNull android.bluetooth.BluetoothAdapter.OnMetadataChangedListener);
     method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean disable(boolean);
@@ -2245,6 +2261,13 @@ package android.bluetooth {
     method @NonNull public android.bluetooth.OobData.LeBuilder setLeFlags(int);
     method @NonNull public android.bluetooth.OobData.LeBuilder setLeTemporaryKey(@NonNull byte[]);
     method @NonNull public android.bluetooth.OobData.LeBuilder setRandomizerHash(@NonNull byte[]);
+  }
+
+  public final class UidTraffic implements java.lang.Cloneable android.os.Parcelable {
+    method public long getRxBytes();
+    method public long getTxBytes();
+    method public int getUid();
+    field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.UidTraffic> CREATOR;
   }
 
 }

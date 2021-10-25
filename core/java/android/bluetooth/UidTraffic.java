@@ -15,6 +15,7 @@
  */
 package android.bluetooth;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -23,27 +24,27 @@ import android.os.Parcelable;
  *
  * @hide
  */
-public class UidTraffic implements Cloneable, Parcelable {
+@SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+public final class UidTraffic implements Cloneable, Parcelable {
     private final int mAppUid;
     private long mRxBytes;
     private long mTxBytes;
 
-    public UidTraffic(int appUid) {
-        mAppUid = appUid;
-    }
-
+    /** @hide */
     public UidTraffic(int appUid, long rx, long tx) {
         mAppUid = appUid;
         mRxBytes = rx;
         mTxBytes = tx;
     }
 
-    UidTraffic(Parcel in) {
+    /** @hide */
+    private UidTraffic(Parcel in) {
         mAppUid = in.readInt();
         mRxBytes = in.readLong();
         mTxBytes = in.readLong();
     }
 
+    /** @hide */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mAppUid);
@@ -51,44 +52,60 @@ public class UidTraffic implements Cloneable, Parcelable {
         dest.writeLong(mTxBytes);
     }
 
+    /** @hide */
     public void setRxBytes(long bytes) {
         mRxBytes = bytes;
     }
 
+    /** @hide */
     public void setTxBytes(long bytes) {
         mTxBytes = bytes;
     }
 
+    /** @hide */
     public void addRxBytes(long bytes) {
         mRxBytes += bytes;
     }
 
+    /** @hide */
     public void addTxBytes(long bytes) {
         mTxBytes += bytes;
     }
 
+    /**
+     * @return corresponding app Uid
+     */
     public int getUid() {
         return mAppUid;
     }
 
+    /**
+     * @return rx bytes count
+     */
     public long getRxBytes() {
         return mRxBytes;
     }
 
+    /**
+     * @return tx bytes count
+     */
     public long getTxBytes() {
         return mTxBytes;
     }
 
+    /** @hide */
     @Override
     public int describeContents() {
         return 0;
     }
 
+    /** @hide */
     @Override
     public UidTraffic clone() {
         return new UidTraffic(mAppUid, mRxBytes, mTxBytes);
     }
 
+    /** @hide */
     @Override
     public String toString() {
         return "UidTraffic{mAppUid=" + mAppUid + ", mRxBytes=" + mRxBytes + ", mTxBytes="
