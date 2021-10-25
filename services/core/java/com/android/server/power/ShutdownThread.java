@@ -213,7 +213,7 @@ public final class ShutdownThread extends Thread {
         CloseDialogReceiver(Context context) {
             mContext = context;
             IntentFilter filter = new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-            context.registerReceiver(this, filter);
+            context.registerReceiver(this, filter, Context.RECEIVER_EXPORTED);
         }
 
         @Override
