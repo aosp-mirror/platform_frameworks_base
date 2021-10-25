@@ -1043,9 +1043,11 @@ public class PreferencesHelper implements RankingConfig {
             r.channels.put(updatedChannel.getId(), updatedChannel);
 
             if (onlyHasDefaultChannel(pkg, uid)) {
-                // copy settings to app level so they are inherited by new channels
-                // when the app migrates
-                r.importance = updatedChannel.getImportance();
+                if (!mPermissionHelper.isMigrationEnabled()) {
+                    // copy settings to app level so they are inherited by new channels
+                    // when the app migrates
+                    r.importance = updatedChannel.getImportance();
+                }
                 r.priority = updatedChannel.canBypassDnd()
                         ? Notification.PRIORITY_MAX : Notification.PRIORITY_DEFAULT;
                 r.visibility = updatedChannel.getLockscreenVisibility();

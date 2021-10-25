@@ -4072,6 +4072,28 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertTrue((channelA.getUserLockedFields() & USER_LOCKED_IMPORTANCE) == 0);
         assertTrue((channelB.getUserLockedFields() & USER_LOCKED_IMPORTANCE) == 0);
         assertTrue((channelC.getUserLockedFields() & USER_LOCKED_IMPORTANCE) == 0);
+    }
 
+    @Test
+    public void testDefaultChannelUpdatesApp_preMigrationToPermissions() throws Exception {
+        final NotificationChannel defaultChannel = mHelper.getNotificationChannel(PKG_N_MR1,
+                UID_N_MR1,
+                NotificationChannel.DEFAULT_CHANNEL_ID, false);
+        defaultChannel.setImportance(IMPORTANCE_NONE);
+        mHelper.updateNotificationChannel(PKG_N_MR1, UID_N_MR1, defaultChannel, true);
+
+        assertEquals(IMPORTANCE_NONE, mHelper.getImportance(PKG_N_MR1, UID_N_MR1));
+    }
+
+    @Test
+    public void testDefaultChannelDoesNotUpdateApp_postMigrationToPermissions() throws Exception {
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+        final NotificationChannel defaultChannel = mHelper.getNotificationChannel(PKG_N_MR1,
+                UID_N_MR1,
+                NotificationChannel.DEFAULT_CHANNEL_ID, false);
+        defaultChannel.setImportance(IMPORTANCE_NONE);
+        mHelper.updateNotificationChannel(PKG_N_MR1, UID_N_MR1, defaultChannel, true);
+
+        assertEquals(IMPORTANCE_UNSPECIFIED, mHelper.getImportance(PKG_N_MR1, UID_N_MR1));
     }
 }
