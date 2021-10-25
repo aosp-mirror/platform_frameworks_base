@@ -41,14 +41,12 @@ public final class DomainVerificationConnection implements DomainVerificationSer
     final PackageManagerService mPm;
     final PackageManagerInternal mPmInternal;
     final UserManagerInternal mUmInternal;
-    final VerificationHelper mVerificationHelper;
 
     // TODO(b/198166813): remove PMS dependency
     DomainVerificationConnection(PackageManagerService pm) {
         mPm = pm;
         mPmInternal = mPm.mInjector.getLocalService(PackageManagerInternal.class);
         mUmInternal = mPm.mInjector.getLocalService(UserManagerInternal.class);
-        mVerificationHelper = new VerificationHelper(mPm.mContext);
     }
 
     @Override
@@ -79,7 +77,7 @@ public final class DomainVerificationConnection implements DomainVerificationSer
 
     @Override
     public long getPowerSaveTempWhitelistAppDuration() {
-        return mVerificationHelper.getVerificationTimeout();
+        return VerificationUtils.getVerificationTimeout(mPm.mContext);
     }
 
     @Override
