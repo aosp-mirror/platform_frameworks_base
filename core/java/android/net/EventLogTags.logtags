@@ -1,0 +1,6 @@
+# See system/core/logcat/event.logtags for a description of the format of this file.
+
+option java_package android.net
+
+50080 ntp_success (server|3),(rtt|2),(offset|2)
+50081 ntp_failure (server|3),(msg|3)

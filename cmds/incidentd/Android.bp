@@ -1,0 +1,162 @@
+// Copyright (C) 2016 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// =========
+// incidentd
+// =========
+
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+cc_binary {
+    name: "incidentd",
+
+    srcs: [
+        "src/**/*.cpp",
+        "src/**/*.proto",
+        ":incidentd_section_list",
+    ],
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-missing-field-initializers",
+        "-Wno-unused-variable",
+        "-Wunused-parameter",
+        "-Wno-tautological-undefined-compare",
+
+        // Allow implicit fallthrough in IncidentService.cpp:85 until it is fixed.
+        "-Wno-error=implicit-fallthrough",
+
+        // optimize for size (protobuf glop can get big)
+        "-Os",
+        //"-g",
+        //"-O0",
+    ],
+
+    local_include_dirs: ["src"],
+    generated_headers: ["framework-cppstream-protos"],
+
+    proto: {
+        type: "lite",
+    },
+
+    shared_libs: [
+        "libbase",
+        "libbinder",
+        "libdebuggerd_client",
+        "libdumputils",
+        "libincidentpriv",
+        "liblog",
+        "libprotoutil",
+        "libservices",
+        "libutils",
+        "libprotobuf-cpp-lite",
+    ],
+
+    static_libs: [
+        "libincidentcompanion",
+        "libplatformprotos",
+    ],
+
+    product_variables: {
+        debuggable: {
+            cflags: ["-DALLOW_RESTRICTED_SECTIONS=1"],
+        },
+    },
+
+
+    init_rc: ["incidentd.rc"],
+}
+
+// ==============
+// incidentd_test
+// ==============
+
+cc_test {
+    name: "incidentd_test",
+    test_suites: ["device-tests"],
+
+    cflags: [
+        "-Werror",
+        "-Wall",
+        "-Wno-unused-variable",
+        "-Wunused-parameter",
+        "-g",
+        "-Wno-tautological-undefined-compare",
+
+        // Allow implicit fallthrough in IncidentService.cpp:85 until it is fixed.
+        "-Wno-error=implicit-fallthrough",
+    ],
+
+    local_include_dirs: ["src"],
+    generated_headers: ["framework-cppstream-protos"],
+
+    srcs: [
+        "tests/**/*.cpp",
+        "tests/**/*.proto",
+        "src/FdBuffer.cpp",
+        "src/Privacy.cpp",
+        "src/PrivacyFilter.cpp",
+        "src/Reporter.cpp",
+        "src/Section.cpp",
+        "src/Throttler.cpp",
+        "src/WorkDirectory.cpp",
+        "src/incidentd_util.cpp",
+        "src/proto_util.cpp",
+        "src/report_directory.cpp",
+        "src/**/*.proto",
+    ],
+
+    data: ["testdata/**/*"],
+
+    static_libs: [
+        "libgmock",
+        "libincidentcompanion",
+        "libplatformprotos-test",
+    ],
+    shared_libs: [
+        "libbase",
+        "libbinder",
+        "libdebuggerd_client",
+        "libdumputils",
+        "libincidentpriv",
+        "liblog",
+        "libprotobuf-cpp-full",
+        "libprotoutil",
+        "libservices",
+        "libutils",
+    ],
+
+    target: {
+        android: {
+            proto: {
+                type: "full",
+            },
+        },
+    },
+}
+
+genrule {
+    name: "incidentd_section_list",
+    tools: ["incident-section-gen"],
+    out: ["section_list.cpp"],
+    cmd: "$(location incident-section-gen) incidentd > $(out)",
+}

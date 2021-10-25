@@ -1,0 +1,42 @@
+// Copyright 2008 The Android Open Source Project
+//
+
+package {
+    default_applicable_licenses: ["frameworks_base_cmds_am_license"],
+}
+
+// Added automatically by a large-scale-change
+// See: http://go/android-license-faq
+license {
+    name: "frameworks_base_cmds_am_license",
+    visibility: [":__subpackages__"],
+    license_kinds: [
+        "SPDX-license-identifier-Apache-2.0",
+    ],
+    license_text: [
+        "NOTICE",
+    ],
+}
+
+cc_library_host_static {
+    name: "libinstrumentation",
+    srcs: ["**/*.proto"],
+    cflags: ["-Wall", "-Werror"],
+    proto: {
+        type: "full",
+        export_proto_headers: true,
+    },
+}
+
+java_binary {
+    name: "am",
+    wrapper: "am",
+    srcs: [
+        "src/**/*.java",
+        "proto/**/*.proto",
+    ],
+    proto: {
+        plugin: "javastream",
+    },
+    static_libs: ["libprotobuf-java-lite"],
+}

@@ -1,0 +1,98 @@
+// Copyright (C) 2017 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+java_binary {
+    name: "incident-helper-cmd",
+    wrapper: "incident_helper_cmd",
+    srcs: [
+        "java/**/*.java",
+    ],
+    proto: {
+        plugin: "javastream",
+    },
+}
+
+cc_defaults {
+    name: "incident_helper_defaults",
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-g",
+        "-O0"
+    ],
+
+    local_include_dirs: [
+        "src/",
+        "src/parsers/",
+    ],
+
+    srcs: [
+        "src/parsers/*.cpp",
+        "src/TextParserBase.cpp",
+        "src/ih_util.cpp",
+    ],
+
+    generated_headers: ["framework-cppstream-protos"],
+
+    shared_libs: [
+        "libbase",
+        "liblog",
+        "libprotoutil",
+        "libutils",
+    ],
+}
+
+cc_binary {
+    name: "incident_helper",
+    defaults: ["incident_helper_defaults"],
+    srcs: ["src/main.cpp"],
+}
+
+
+cc_test {
+    name: "incident_helper_test",
+    test_suites: ["device-tests"],
+    defaults: ["incident_helper_defaults"],
+    local_include_dirs: ["src/"],
+
+    srcs: [
+        "tests/*.cpp",
+    ],
+
+    data: [
+        "testdata/*",
+    ],
+
+    static_libs: [
+        "libgmock",
+        "libplatformprotos"
+    ],
+
+    shared_libs: [
+        "libprotobuf-cpp-full"
+    ],
+    proto: {
+        type: "full",
+    },
+}

@@ -1,0 +1,100 @@
+// Copyright (C) 2012 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+droidstubs {
+    name: "uiautomator-stubs",
+    srcs: [
+        "core-src/**/*.java",
+        "testrunner-src/**/*.java",
+    ],
+    libs: [
+        "android.test.runner",
+        "junit",
+        "android.test.base",
+        "unsupportedappusage",
+    ],
+    installable: false,
+    flags: [
+        "-stubpackages com.android.uiautomator.core:com.android.uiautomator.testrunner",
+    ],
+
+    check_api: {
+        current: {
+            api_file: ":uiautomator-current-api",
+            removed_api_file: ":uiautomator-removed-api",
+        },
+        last_released: {
+            api_file: ":uiautomator-last-released-api",
+            removed_api_file: ":uiautomator-removed-api",
+        },
+    },
+}
+
+droiddoc {
+    name: "uiautomator-stubs-docs",
+    srcs: [
+        ":uiautomator-stubs",
+    ],
+    libs: [
+        "android.test.runner",
+        "junit",
+        "android.test.base",
+    ],
+    sdk_version: "current",
+    installable: false,
+    custom_template: "droiddoc-templates-sdk",
+}
+
+java_library_static {
+    name: "android_uiautomator",
+    srcs: [
+        ":uiautomator-stubs",
+    ],
+    libs: [
+        "android.test.runner",
+        "junit",
+    ],
+    java_version: "1.8",
+}
+
+java_library_static {
+    name: "uiautomator.core",
+    srcs: [
+        "core-src/**/*.java",
+        "testrunner-src/**/*.java",
+    ],
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+    ],
+    static_libs: [
+        "junit",
+    ],
+}
+
+java_library_static {
+    name: "uiautomator.library",
+    srcs: [
+        "core-src/**/*.java",
+    ],
+}

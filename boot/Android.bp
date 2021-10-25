@@ -1,0 +1,153 @@
+// Copyright (C) 2021 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    //   SPDX-license-identifier-MIT
+    //   SPDX-license-identifier-Unicode-DFS
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+// This module provides access to information Soong has related to the
+// whole platform bootclasspath. Currently, that information is provided solely
+// through configuration but additional information will be added here.
+//
+// This will provide support for the following:
+// * Hidden API processing for those parts of the bootclasspath that are not
+//   part of an APEX.
+// * Compatibility checking to ensure that the hidden API bits encoded into the
+//   dex files by the modularized hidden API processing is compatible with the
+//   runtimes of earlier releases which expect the bits to have been computed
+//   over the entirety of the bootclasspath in one go not separately.
+// * Dexpreopting apps and other libraries not on the platform bootclasspath.
+// * Generating and installing the appropriate files to the device which will
+//   allow it to generate the bootclasspath related environment variables
+//   dynamically.
+//
+// This module needs to be present in the build for the above processing to be
+// done correctly.
+platform_bootclasspath {
+    name: "platform-bootclasspath",
+
+    // The bootclasspath_fragments that contribute to the platform
+    // bootclasspath.
+    fragments: [
+        {
+            apex: "com.android.appsearch",
+            module: "com.android.appsearch-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.art",
+            module: "art-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.conscrypt",
+            module: "com.android.conscrypt-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.i18n",
+            module: "i18n-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.ipsec",
+            module: "com.android.ipsec-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.media",
+            module: "com.android.media-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.mediaprovider",
+            module: "com.android.mediaprovider-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.os.statsd",
+            module: "com.android.os.statsd-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.permission",
+            module: "com.android.permission-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.scheduling",
+            module: "com.android.scheduling-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.sdkext",
+            module: "com.android.sdkext-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.tethering",
+            module: "com.android.tethering-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.wifi",
+            module: "com.android.wifi-bootclasspath-fragment",
+        },
+    ],
+
+    // Additional information needed by hidden api processing.
+    hidden_api: {
+        unsupported: [
+            "hiddenapi/hiddenapi-unsupported.txt",
+        ],
+        removed: [
+            ":combined-removed-dex",
+        ],
+        max_target_r_low_priority: [
+            "hiddenapi/hiddenapi-max-target-r-loprio.txt",
+        ],
+        max_target_q: [
+            "hiddenapi/hiddenapi-max-target-q.txt",
+        ],
+        max_target_p: [
+            "hiddenapi/hiddenapi-max-target-p.txt",
+        ],
+        max_target_o_low_priority: [
+            "hiddenapi/hiddenapi-max-target-o.txt",
+        ],
+        unsupported_packages: [
+            "hiddenapi/hiddenapi-unsupported-packages.txt",
+        ],
+    },
+
+    dists: [
+        {
+            targets: ["droidcore"],
+            tag: "hiddenapi-flags.csv",
+        },
+        {
+            targets: ["droidcore"],
+            tag: "hiddenapi-index.csv",
+        },
+        {
+            targets: ["droidcore"],
+            tag: "hiddenapi-metadata.csv",
+            // Legacy name
+            dest: "hiddenapi-unsupported.csv",
+        },
+    ],
+
+    required: [
+        "platform-systemserverclasspath",
+    ],
+}
+
+platform_systemserverclasspath {
+    name: "platform-systemserverclasspath",
+}

@@ -1,0 +1,43 @@
+// Job Scheduler Service jar, which will eventually be put in the jobscheduler mainline apex.
+// service-jobscheduler needs to be added to PRODUCT_SYSTEM_SERVER_JARS.
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+java_library {
+    name: "service-jobscheduler",
+    installable: true,
+
+    srcs: [
+        "java/**/*.java",
+        ":framework-jobscheduler-shared-srcs",
+        ":statslog-framework-java-gen", // FrameworkStatsLog.java
+    ],
+
+    libs: [
+        "app-compat-annotations",
+        "framework",
+        "services.core",
+        "unsupportedappusage",
+    ],
+
+    // Rename classes shared with the framework
+    jarjar_rules: "jarjar-rules.txt",
+
+    required: [
+        "libalarm_jni",
+    ],
+    visibility: [
+        "//frameworks/base/apex/jobscheduler:__subpackages__",
+        // These are required until jobscheduler is properly unbundled.
+        "//frameworks/base/services",
+        "//frameworks/base/services/tests/mockingservicestests",
+        "//frameworks/base/services/tests/servicestests",
+        "//frameworks/base/tests/JobSchedulerPerfTests",
+    ],
+}

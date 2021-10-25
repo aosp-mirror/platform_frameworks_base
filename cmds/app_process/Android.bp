@@ -1,0 +1,101 @@
+package {
+    default_applicable_licenses: ["frameworks_base_cmds_app_process_license"],
+}
+
+// Added automatically by a large-scale-change
+// See: http://go/android-license-faq
+license {
+    name: "frameworks_base_cmds_app_process_license",
+    visibility: [":__subpackages__"],
+    license_kinds: [
+        "SPDX-license-identifier-Apache-2.0",
+    ],
+    license_text: [
+        "NOTICE",
+    ],
+}
+
+cc_binary {
+    name: "app_process",
+
+    srcs: ["app_main.cpp"],
+
+    multilib: {
+        lib32: {
+            suffix: "32",
+        },
+        lib64: {
+            suffix: "64",
+        },
+    },
+
+    // Symbols exported from the executable in .dynsym interpose symbols in every
+    // linker namespace, including an app's classloader namespace. Provide this
+    // version script to prevent unwanted interposition.
+    //
+    // By default, the static linker doesn't export most of an executable's symbols,
+    // but it will export a symbol that appears to override a symbol in a needed DSO.
+    // This commonly happens with C++ vaguely-linked entities, such as template
+    // functions or type_info variables. Hence, a version script is needed even for
+    // an executable.
+    version_script: "version-script.txt",
+
+    shared_libs: [
+        "libandroid_runtime",
+        "libbinder",
+        "libcutils",
+        "libdl",
+        "libhidlbase",
+        "liblog",
+        "libnativeloader",
+
+        // Even though app_process doesn't call into libsigchain, we need to
+        // make sure it's in the DT list of app_process, as we want all code
+        // in app_process and the libraries it loads to find libsigchain
+        // symbols before libc symbols.
+        "libsigchain",
+
+        "libutils",
+
+        // This is a list of libraries that need to be included in order to avoid
+        // bad apps. This prevents a library from having a mismatch when resolving
+        // new/delete from an app shared library.
+        // See b/21032018 for more details.
+        "libwilhelm",
+    ],
+
+    compile_multilib: "both",
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wunused",
+        "-Wunreachable-code",
+    ],
+
+    // If SANITIZE_LITE is revived this will need:
+    //product_variables: {
+    //    sanitize_lite: {
+    //        // In SANITIZE_LITE mode, we create the sanitized binary in a separate location (but reuse
+    //        // the same module). Using the same module also works around an issue with make: binaries
+    //        // that depend on sanitized libraries will be relinked, even if they set LOCAL_SANITIZE := never.
+    //        //
+    //        // Also pull in the asanwrapper helper.
+    //        relative_install_path: "asan",
+    //        required: ["asanwrapper"],
+    //    },
+    //},
+
+    // Create a symlink from app_process to app_process32 or 64
+    // depending on the target configuration.
+    symlink_preferred_arch: true,
+
+    // Enable ASYNC MTE in the zygote, in order to allow apps and the system
+    // server to use MTE. We use ASYNC because we don't expect the pre-fork
+    // zygote to have substantial memory corruption bugs (as it's primarily Java
+    // code), and we don't want to waste memory recording malloc/free stack
+    // traces (which happens in SYNC mode).
+    sanitize: {
+        memtag_heap: true,
+    },
+}

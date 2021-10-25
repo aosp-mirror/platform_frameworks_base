@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="5" by="lint 4.1.0" client="cli" variant="all" version="4.1.0">
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 31 (current min is 29): `new android.media.ApplicationMediaCapabilities.Builder`"
+        errorLine1="                            new ApplicationMediaCapabilities.Builder();"
+        errorLine2="                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/ApplicationMediaCapabilities.java"
+            line="208"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 31 (current min is 29): `new android.media.ApplicationMediaCapabilities.Builder`"
+        errorLine1="        ApplicationMediaCapabilities.Builder builder = new ApplicationMediaCapabilities.Builder();"
+        errorLine2="                                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/ApplicationMediaCapabilities.java"
+            line="314"
+            column="56"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level R (current min is 29): `android.os.RemoteException#rethrowFromSystemServer`"
+        errorLine1="            e.rethrowFromSystemServer();"
+        errorLine2="              ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaCommunicationManager.java"
+            line="110"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level R (current min is 29): `android.os.Parcel#writeParcelableCreator`"
+        errorLine1="        dest.writeParcelableCreator((Parcelable) parcelable);"
+        errorLine2="             ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaParceledListSlice.java"
+            line="77"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level R (current min is 29): `android.os.Parcel#readParcelableCreator`"
+        errorLine1="        return from.readParcelableCreator(loader);"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaParceledListSlice.java"
+            line="82"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level R (current min is 29): `android.media.MediaParser.TrackData#mediaFormat`"
+        errorLine1="            this.mediaFormat = mediaFormat;"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
+            line="273"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level R (current min is 29): `android.media.MediaParser.TrackData#drmInitData`"
+        errorLine1="            this.drmInitData = drmInitData;"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
+            line="274"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level R (current min is 29): `android.media.MediaParser.SeekPoint#timeMicros`"
+        errorLine1="            this.timeMicros = timeMicros;"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
+            line="295"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level R (current min is 29): `android.media.MediaParser.SeekPoint#position`"
+        errorLine1="            this.position = position;"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
+            line="296"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level R (current min is 29): `android.media.MediaParser.SeekPoint#position`"
+        errorLine1="            return &quot;[timeMicros=&quot; + timeMicros + &quot;, position=&quot; + position + &quot;]&quot;;"
+        errorLine2="                                                                 ~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
+            line="302"
+            column="66"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level R (current min is 29): `android.media.MediaParser.SeekPoint#timeMicros`"
+        errorLine1="            return &quot;[timeMicros=&quot; + timeMicros + &quot;, position=&quot; + position + &quot;]&quot;;"
+        errorLine2="                                    ~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
+            line="302"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Class requires API level R (current min is 29): `android.media.MediaParser.SeekPoint`"
+        errorLine1="            SeekPoint other = (SeekPoint) obj;"
+        errorLine2="                               ~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
+            line="313"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level R (current min is 29): `android.media.MediaParser.SeekPoint#position`"
+        errorLine1="            return timeMicros == other.timeMicros &amp;&amp; position == other.position;"
+        errorLine2="                                                     ~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
+            line="314"
+            column="54"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level R (current min is 29): `android.media.MediaParser.SeekPoint#position`"
+        errorLine1="            return timeMicros == other.timeMicros &amp;&amp; position == other.position;"
+        errorLine2="                                                                 ~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
+            line="314"
+            column="66"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level R (current min is 29): `android.media.MediaParser.SeekPoint#timeMicros`"
+        errorLine1="            return timeMicros == other.timeMicros &amp;&amp; position == other.position;"
+        errorLine2="                   ~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
+            line="314"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level R (current min is 29): `android.media.MediaParser.SeekPoint#timeMicros`"
+        errorLine1="            return timeMicros == other.timeMicros &amp;&amp; position == other.position;"
+        errorLine2="                                 ~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
+            line="314"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level R (current min is 29): `android.media.MediaParser.SeekPoint#timeMicros`"
+        errorLine1="            int result = (int) timeMicros;"
+        errorLine2="                               ~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
+            line="319"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level R (current min is 29): `android.media.MediaParser.SeekPoint#position`"
+        errorLine1="            result = 31 * result + (int) position;"
+        errorLine2="                                         ~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
+            line="320"
+            column="42"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Class requires API level R (current min is 29): `android.media.MediaParser.InputReader`"
+        errorLine1="    public interface SeekableInputReader extends InputReader {"
+        errorLine2="                                                 ~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
+            line="352"
+            column="50"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level 31 (current min is 29): `android.media.metrics.LogSessionId#LOG_SESSION_ID_NONE`"
+        errorLine1="    @NonNull private LogSessionId mLogSessionId = LogSessionId.LOG_SESSION_ID_NONE;"
+        errorLine2="                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
+            line="1071"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `SeekableInputReader` to `InputReader` requires API level 30 (current min is 29)"
+        errorLine1="        mExoDataReader.mInputReader = seekableInputReader;"
+        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
+            line="1201"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level R (current min is 29): `android.media.MediaParser.SeekPoint#position`"
+        errorLine1="            mPendingSeekPosition = seekPoint.position;"
+        errorLine2="                                   ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
+            line="1287"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level R (current min is 29): `android.media.MediaParser.SeekPoint#timeMicros`"
+        errorLine1="            mPendingSeekTimeMicros = seekPoint.timeMicros;"
+        errorLine2="                                     ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
+            line="1288"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level R (current min is 29): `android.media.MediaParser.SeekPoint#position`"
+        errorLine1="            mExtractor.seek(seekPoint.position, seekPoint.timeMicros);"
+        errorLine2="                            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
+            line="1290"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level R (current min is 29): `android.media.MediaParser.SeekPoint#timeMicros`"
+        errorLine1="            mExtractor.seek(seekPoint.position, seekPoint.timeMicros);"
+        errorLine2="                                                ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
+            line="1290"
+            column="49"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level R (current min is 29): `android.media.DrmInitData.SchemeInitData#uuid`"
+        errorLine1="                if (schemeInitData.uuid.equals(schemeUuid)) {"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
+            line="1579"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Class requires API level R (current min is 29): `android.media.MediaParser.InputReader`"
+        errorLine1="    private static final class DataReaderAdapter implements InputReader {"
+        errorLine2="                                                            ~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
+            line="1872"
+            column="61"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Class requires API level R (current min is 29): `android.media.MediaParser.InputReader`"
+        errorLine1="    private static final class ParsableByteArrayAdapter implements InputReader {"
+        errorLine2="                                                                   ~~~~~~~~~~~">
+        <location
+            file="frameworks/base/apex/media/framework/java/android/media/MediaParser.java"
+            line="1905"
+            column="68"/>
+    </issue>
+
+</issues>
