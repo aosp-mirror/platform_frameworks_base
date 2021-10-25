@@ -12526,7 +12526,7 @@ public class BatteryStatsImpl extends BatteryStats {
             rxTimeMs = info.getControllerRxTimeMillis();
             txTimeMs = info.getControllerTxTimeMillis();
             energy = info.getControllerEnergyUsed();
-            if (info.getUidTraffic() != null) {
+            if (!info.getUidTraffic().isEmpty()) {
                 for (UidTraffic traffic : info.getUidTraffic()) {
                     uidRxBytes.put(traffic.getUid(), traffic.getRxBytes());
                     uidTxBytes.put(traffic.getUid(), traffic.getTxBytes());
@@ -12677,10 +12677,10 @@ public class BatteryStatsImpl extends BatteryStats {
         long totalTxBytes = 0;
         long totalRxBytes = 0;
 
-        final UidTraffic[] uidTraffic = info.getUidTraffic();
-        final int numUids = uidTraffic != null ? uidTraffic.length : 0;
+        final List<UidTraffic> uidTraffic = info.getUidTraffic();
+        final int numUids = uidTraffic.size();
         for (int i = 0; i < numUids; i++) {
-            final UidTraffic traffic = uidTraffic[i];
+            final UidTraffic traffic = uidTraffic.get(i);
             final long rxBytes = traffic.getRxBytes() - mLastBluetoothActivityInfo.uidRxBytes.get(
                     traffic.getUid());
             final long txBytes = traffic.getTxBytes() - mLastBluetoothActivityInfo.uidTxBytes.get(
@@ -12703,7 +12703,7 @@ public class BatteryStatsImpl extends BatteryStats {
         if ((totalTxBytes != 0 || totalRxBytes != 0) && (leftOverRxTimeMs != 0
                 || leftOverTxTimeMs != 0)) {
             for (int i = 0; i < numUids; i++) {
-                final UidTraffic traffic = uidTraffic[i];
+                final UidTraffic traffic = uidTraffic.get(i);
                 final int uid = traffic.getUid();
                 final long rxBytes =
                         traffic.getRxBytes() - mLastBluetoothActivityInfo.uidRxBytes.get(uid);
