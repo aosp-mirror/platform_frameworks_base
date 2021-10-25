@@ -28,8 +28,6 @@ import android.os.Parcel;
 import android.os.ParcelUuid;
 import android.os.Parcelable;
 
-import com.android.internal.util.BitUtils;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -448,7 +446,7 @@ public final class ScanFilter implements Parcelable {
 
     // Check if the uuid pattern matches the particular service uuid.
     private static boolean matchesServiceUuid(UUID uuid, UUID mask, UUID data) {
-        return BitUtils.maskedEquals(data, uuid, mask);
+        return BluetoothLeUtils.maskedEquals(data, uuid, mask);
     }
 
     /**
@@ -478,7 +476,7 @@ public final class ScanFilter implements Parcelable {
     // Check if the solicitation uuid pattern matches the particular service solicitation uuid.
     private static boolean matchesServiceSolicitationUuid(UUID solicitationUuid,
             UUID solicitationUuidMask, UUID data) {
-        return BitUtils.maskedEquals(data, solicitationUuid, solicitationUuidMask);
+        return BluetoothLeUtils.maskedEquals(data, solicitationUuid, solicitationUuidMask);
     }
 
     // Check whether the data pattern matches the parsed data.
