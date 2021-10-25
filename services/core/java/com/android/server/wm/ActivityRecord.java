@@ -8945,7 +8945,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         proto.write(PIP_AUTO_ENTER_ENABLED, pictureInPictureArgs.isAutoEnterEnabled());
         proto.write(IN_SIZE_COMPAT_MODE, inSizeCompatMode());
-        proto.write(MIN_ASPECT_RATIO, info.getMinAspectRatio());
+        proto.write(MIN_ASPECT_RATIO, getMinAspectRatio());
     }
 
     @Override
