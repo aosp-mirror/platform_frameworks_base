@@ -70,6 +70,8 @@ public class LocaleManagerService extends SystemService {
         mActivityTaskManagerInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
+        mBackupHelper = new LocaleManagerBackupHelper(this,
+                mPackageManagerInternal);
     }
 
     @VisibleForTesting
@@ -82,13 +84,13 @@ public class LocaleManagerService extends SystemService {
         mActivityTaskManagerInternal = activityTaskManagerInternal;
         mActivityManagerInternal = activityManagerInternal;
         mPackageManagerInternal = packageManagerInternal;
+        mBackupHelper = new LocaleManagerBackupHelper(this,
+                mPackageManagerInternal);
     }
 
     @Override
     public void onStart() {
         publishBinderService(Context.LOCALE_SERVICE, mBinderService);
-        mBackupHelper = new LocaleManagerBackupHelper(LocaleManagerService.this,
-                mPackageManagerInternal);
         LocalServices.addService(LocaleManagerInternal.class, new LocaleManagerInternalImpl());
     }
 
@@ -98,6 +100,11 @@ public class LocaleManagerService extends SystemService {
         public @Nullable byte[] getBackupPayload(int userId) {
             checkCallerIsSystem();
             return mBackupHelper.getBackupPayload(userId);
+        }
+
+        @Override
+        public void stageAndApplyRestoredPayload(byte[] payload, int userId) {
+            mBackupHelper.stageAndApplyRestoredPayload(payload, userId);
         }
 
         private void checkCallerIsSystem() {

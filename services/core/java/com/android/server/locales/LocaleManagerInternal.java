@@ -28,4 +28,13 @@ public abstract class LocaleManagerInternal {
      * Returns the app-specific locales to be backed up as a data-blob.
      */
     public abstract @Nullable byte[] getBackupPayload(int userId);
+
+    /**
+     * Restores the app-locales that were previously backed up.
+     *
+     * <p>This method will parse the input data blob and restore the locales for apps which are
+     * present on the device. It will stage the locale data for the apps which are not installed
+     * at the time this is called, to be referenced later when the app is installed.
+     */
+    public abstract void stageAndApplyRestoredPayload(byte[] payload, int userId);
 }
