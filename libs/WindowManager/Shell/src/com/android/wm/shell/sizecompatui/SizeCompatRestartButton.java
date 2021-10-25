@@ -17,10 +17,6 @@
 package com.android.wm.shell.sizecompatui;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -63,11 +59,6 @@ public class SizeCompatRestartButton extends FrameLayout implements View.OnClick
     protected void onFinishInflate() {
         super.onFinishInflate();
         final ImageButton restartButton = findViewById(R.id.size_compat_restart_button);
-        final ColorStateList color = ColorStateList.valueOf(Color.LTGRAY);
-        final GradientDrawable mask = new GradientDrawable();
-        mask.setShape(GradientDrawable.OVAL);
-        mask.setColor(color);
-        restartButton.setBackground(new RippleDrawable(color, null /* content */, mask));
         restartButton.setOnClickListener(this);
         restartButton.setOnLongClickListener(this);
     }

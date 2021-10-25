@@ -24,7 +24,7 @@ import static org.mockito.Mockito.verify;
 import android.content.res.Configuration;
 import android.testing.AndroidTestingRunner;
 import android.view.LayoutInflater;
-import android.widget.Button;
+import android.widget.LinearLayout;
 
 import androidx.test.filters.SmallTest;
 
@@ -77,8 +77,8 @@ public class SizeCompatHintPopupTest extends ShellTestCase {
     public void testOnClick() {
         doNothing().when(mLayout).dismissHint();
 
-        final Button button = mHint.findViewById(R.id.got_it);
-        button.performClick();
+        final LinearLayout hintPopup = mHint.findViewById(R.id.size_compat_hint_popup);
+        hintPopup.performClick();
 
         verify(mLayout).dismissHint();
     }
