@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.ScreenDecorations.DisplayCutoutView.boundsFromDirection;
+import static com.android.systemui.util.Utils.getStatusBarHeaderHeightKeyguard;
 
 import android.annotation.ColorInt;
 import android.content.Context;
@@ -162,11 +163,8 @@ public class KeyguardStatusBarView extends RelativeLayout {
     }
 
     private void updateKeyguardStatusBarHeight() {
-        final int waterfallTop =
-                mDisplayCutout == null ? 0 : mDisplayCutout.getWaterfallInsets().top;
         MarginLayoutParams lp =  (MarginLayoutParams) getLayoutParams();
-        lp.height =  getResources().getDimensionPixelSize(
-                R.dimen.status_bar_header_height_keyguard) + waterfallTop;
+        lp.height = getStatusBarHeaderHeightKeyguard(mContext);
         setLayoutParams(lp);
     }
 

@@ -34,6 +34,7 @@ import android.widget.Space;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.policy.SystemBarUtils;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
@@ -240,8 +241,7 @@ public class QuickStatusBarHeader extends FrameLayout {
         mRoundedCornerPadding = resources.getDimensionPixelSize(
                 R.dimen.rounded_corner_content_padding);
 
-        int qsOffsetHeight = resources.getDimensionPixelSize(
-                com.android.internal.R.dimen.quick_qs_offset_height);
+        int qsOffsetHeight = SystemBarUtils.getQuickQsOffsetHeight(mContext);
 
         mDatePrivacyView.getLayoutParams().height =
                 Math.max(qsOffsetHeight, mDatePrivacyView.getMinimumHeight());
