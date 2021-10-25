@@ -40,7 +40,7 @@ class CollapsedStatusBarFragmentLoggerTest : SysuiTestCase() {
     private val logger = CollapsedStatusBarFragmentLogger(buffer, disableFlagsLogger)
 
     @Test
-    fun logToBuffer_bufferHasStates() {
+    fun logDisableFlagChange_bufferHasStates() {
         val state = DisableFlagsLogger.DisableState(0, 1)
 
         logger.logDisableFlagChange(state, state)
@@ -48,7 +48,9 @@ class CollapsedStatusBarFragmentLoggerTest : SysuiTestCase() {
         val stringWriter = StringWriter()
         buffer.dump(PrintWriter(stringWriter), tailLength = 0)
         val actualString = stringWriter.toString()
-        val expectedLogString = disableFlagsLogger.getDisableFlagsString(state, state)
+        val expectedLogString = disableFlagsLogger.getDisableFlagsString(
+            old = null, new = state, newAfterLocalModification = state
+        )
 
         assertThat(actualString).contains(expectedLogString)
     }
