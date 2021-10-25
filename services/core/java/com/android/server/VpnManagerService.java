@@ -681,7 +681,7 @@ public class VpnManagerService extends IVpnManager.Stub {
         intentFilter = new IntentFilter();
         intentFilter.addAction(LockdownVpnTracker.ACTION_LOCKDOWN_RESET);
         mUserAllContext.registerReceiver(
-                mIntentReceiver, intentFilter, NETWORK_STACK, mHandler);
+                mIntentReceiver, intentFilter, NETWORK_STACK, mHandler, Context.RECEIVER_EXPORTED);
     }
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
