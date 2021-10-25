@@ -50,9 +50,6 @@ public class PhoneStatusBarView extends FrameLayout {
     private static final String TAG = "PhoneStatusBarView";
     private final StatusBarContentInsetsProvider mContentInsetsProvider;
 
-    StatusBar mBar;
-
-    private ScrimController mScrimController;
     private DarkReceiver mBattery;
     private DarkReceiver mClock;
     private int mRotationOrientation = -1;
@@ -76,16 +73,8 @@ public class PhoneStatusBarView extends FrameLayout {
         mContentInsetsProvider = Dependency.get(StatusBarContentInsetsProvider.class);
     }
 
-    public void setBar(StatusBar bar) {
-        mBar = bar;
-    }
-
     void setTouchEventHandler(TouchEventHandler handler) {
         mTouchEventHandler = handler;
-    }
-
-    public void setScrimController(ScrimController scrimController) {
-        mScrimController = scrimController;
     }
 
     @Override
@@ -174,7 +163,6 @@ public class PhoneStatusBarView extends FrameLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        mBar.onTouchEvent(event);
         if (mTouchEventHandler == null) {
             Log.w(
                     TAG,
@@ -191,7 +179,7 @@ public class PhoneStatusBarView extends FrameLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        mBar.onTouchEvent(event);
+        mTouchEventHandler.onInterceptTouchEvent(event);
         return super.onInterceptTouchEvent(event);
     }
 
@@ -275,13 +263,26 @@ public class PhoneStatusBarView extends FrameLayout {
     }
 
     /**
-     * A handler repsonsible for all touch event handling on the status bar.
+     * A handler responsible for all touch event handling on the status bar.
      *
-     * The handler will be notified each time {@link this#onTouchEvent} is called, and the return
-     * value from the handler will be returned from {@link this#onTouchEvent}.
+     * Touches that occur on the status bar view may have ramifications for the notification
+     * panel (e.g. a touch that pulls down the shade could start on the status bar), so this
+     * interface provides a way to notify the panel controller when these touches occur.
+     *
+     * The handler will be notified each time {@link PhoneStatusBarView#onTouchEvent} and
+     * {@link PhoneStatusBarView#onInterceptTouchEvent} are called.
      **/
     public interface TouchEventHandler {
-        /** Called each time {@link this#onTouchEvent} is called. */
+        /** Called each time {@link PhoneStatusBarView#onInterceptTouchEvent} is called. */
+        void onInterceptTouchEvent(MotionEvent event);
+
+        /**
+         * Called each time {@link PhoneStatusBarView#onTouchEvent} is called.
+         *
+         * Should return true if the touch was handled by this handler and false otherwise. The
+         * return value from the handler will be returned from
+         * {@link PhoneStatusBarView#onTouchEvent}.
+         */
         boolean handleTouchEvent(MotionEvent event);
     }
 }

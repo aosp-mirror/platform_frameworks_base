@@ -52,8 +52,6 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var panelView: ViewGroup
     @Mock
-    private lateinit var scrimController: ScrimController
-    @Mock
     private lateinit var moveFromCenterAnimation: StatusBarMoveFromCenterAnimationController
     @Mock
     private lateinit var sysuiUnfoldComponent: SysUIUnfoldComponent
@@ -76,8 +74,6 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
             val parent = FrameLayout(mContext) // add parent to keep layout params
             view = LayoutInflater.from(mContext)
                 .inflate(R.layout.status_bar, parent, false) as PhoneStatusBarView
-            view.setScrimController(scrimController)
-            view.setBar(mock(StatusBar::class.java))
         }
 
         controller = createController(view)
@@ -85,10 +81,13 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
 
     @Test
     fun constructor_setsTouchHandlerOnView() {
+        val interceptEvent = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 10f, 10f, 0)
         val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
 
+        view.onInterceptTouchEvent(interceptEvent)
         view.onTouchEvent(event)
 
+        assertThat(touchEventHandler.lastInterceptEvent).isEqualTo(interceptEvent)
         assertThat(touchEventHandler.lastEvent).isEqualTo(event)
     }
 
@@ -128,6 +127,11 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
 
     private class TestTouchEventHandler : PhoneStatusBarView.TouchEventHandler {
         var lastEvent: MotionEvent? = null
+        var lastInterceptEvent: MotionEvent? = null
+
+        override fun onInterceptTouchEvent(event: MotionEvent?) {
+            lastInterceptEvent = event
+        }
         override fun handleTouchEvent(event: MotionEvent?): Boolean {
             lastEvent = event
             return false
