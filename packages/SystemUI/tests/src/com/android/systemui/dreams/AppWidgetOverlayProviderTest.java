@@ -109,7 +109,6 @@ public class AppWidgetOverlayProviderTest extends SysuiTestCase {
         mInteractionHandler = creationCallbackCapture.getValue();
     }
 
-
     @Test
     public void testWidgetBringup() {
         // Make sure widget was requested.

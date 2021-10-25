@@ -715,7 +715,22 @@
     <!-- Flag to enable privacy dot views, it shall be true for normal case -->
     <bool name="config_enablePrivacyDot">true</bool>
 
+    <!-- The positions widgets can be in defined as View.Gravity constants -->
+    <integer-array name="config_dreamOverlayPositions">
+    </integer-array>
+
+    <!-- Widget components to show as dream overlays -->
+    <string-array name="config_dreamOverlayComponents" translatable="false">
+    </string-array>
+
+    <!-- Width percentage of dream overlay components -->
+    <item name="config_dreamOverlayComponentWidthPercent" translatable="false" format="float"
+          type="dimen">0.33</item>
+
+    <!-- Height percentage of dream overlay components -->
+    <item name="config_dreamOverlayComponentHeightPercent" translatable="false" format="float"
+          type="dimen">0.25</item>
+
     <!-- Flag to enable dream overlay service and its registration -->
     <bool name="config_dreamOverlayServiceEnabled">false</bool>
-
 </resources>
