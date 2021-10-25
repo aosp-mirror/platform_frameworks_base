@@ -3449,7 +3449,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     @Override
     public String toString() {
-        return "Display " + mDisplayId + " info=" + mDisplayInfo + " rootTasks=" + mChildren;
+        return "Display{#" + mDisplayId + " state=" + Display.stateToString(mDisplayInfo.state)
+                + " size=" + mDisplayInfo.logicalWidth + "x" + mDisplayInfo.logicalHeight
+                + " " + Surface.rotationToString(mDisplayInfo.rotation) + "}";
     }
 
     String getName() {

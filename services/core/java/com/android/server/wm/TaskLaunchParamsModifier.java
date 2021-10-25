@@ -818,7 +818,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         final int layoutMinHeight = (layout == null) ? -1 : layout.minHeight;
 
         // Aspect ratio requirements.
-        final float minAspectRatio = info.getMinAspectRatio();
+        final float minAspectRatio = info.getMinAspectRatio(orientation);
         final float maxAspectRatio = info.getMaxAspectRatio();
 
         final int width = Math.min(defaultWidth, Math.max(phoneWidth, layoutMinWidth));

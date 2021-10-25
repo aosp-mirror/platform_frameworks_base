@@ -39,7 +39,7 @@ import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.internal.R;
+import com.android.internal.policy.SystemBarUtils;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
@@ -307,12 +307,9 @@ class HideDisplayCutoutOrganizer extends DisplayAreaOrganizer {
         t.apply();
     }
 
-    private int getStatusBarHeight() {
-        final boolean isLandscape =
-                mIsDefaultPortrait ? isDisplaySizeFlipped() : !isDisplaySizeFlipped();
-        return mContext.getResources().getDimensionPixelSize(
-                isLandscape ? R.dimen.status_bar_height_landscape
-                        : R.dimen.status_bar_height_portrait);
+    @VisibleForTesting
+    int getStatusBarHeight() {
+        return SystemBarUtils.getStatusBarHeight(mContext);
     }
 
     void dump(@NonNull PrintWriter pw) {

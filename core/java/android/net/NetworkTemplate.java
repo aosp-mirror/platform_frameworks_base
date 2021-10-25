@@ -47,7 +47,6 @@ import android.text.TextUtils;
 import android.util.BackupUtils;
 import android.util.Log;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.net.module.util.NetworkIdentityUtils;
 
@@ -151,24 +150,6 @@ public class NetworkTemplate implements Parcelable {
         }
     }
 
-    private static boolean sForceAllNetworkTypes = false;
-
-    /**
-     * Results in matching against all mobile network types.
-     *
-     * <p>See {@link #matchesMobile} and {@link matchesMobileWildcard}.
-     */
-    @VisibleForTesting
-    public static void forceAllNetworkTypes() {
-        sForceAllNetworkTypes = true;
-    }
-
-    /** Resets the affect of {@link #forceAllNetworkTypes}. */
-    @VisibleForTesting
-    public static void resetForceAllNetworkTypes() {
-        sForceAllNetworkTypes = false;
-    }
-
     /**
      * Template to match {@link ConnectivityManager#TYPE_MOBILE} networks with
      * the given IMSI.
@@ -179,19 +160,19 @@ public class NetworkTemplate implements Parcelable {
     }
 
     /**
-     * Template to match cellular networks with the given IMSI and {@code ratType}.
-     * Use {@link #NETWORK_TYPE_ALL} to include all network types when filtering.
-     * See {@code TelephonyManager.NETWORK_TYPE_*}.
+     * Template to match cellular networks with the given IMSI, {@code ratType} and
+     * {@code metered}. Use {@link #NETWORK_TYPE_ALL} to include all network types when
+     * filtering. See {@code TelephonyManager.NETWORK_TYPE_*}.
      */
     public static NetworkTemplate buildTemplateMobileWithRatType(@Nullable String subscriberId,
-            @NetworkType int ratType) {
+            @NetworkType int ratType, int metered) {
         if (TextUtils.isEmpty(subscriberId)) {
             return new NetworkTemplate(MATCH_MOBILE_WILDCARD, null, null, null,
-                    METERED_ALL, ROAMING_ALL, DEFAULT_NETWORK_ALL, ratType, OEM_MANAGED_ALL,
+                    metered, ROAMING_ALL, DEFAULT_NETWORK_ALL, ratType, OEM_MANAGED_ALL,
                     SUBSCRIBER_ID_MATCH_RULE_EXACT);
         }
         return new NetworkTemplate(MATCH_MOBILE, subscriberId, new String[]{subscriberId}, null,
-                METERED_ALL, ROAMING_ALL, DEFAULT_NETWORK_ALL, ratType, OEM_MANAGED_ALL,
+                metered, ROAMING_ALL, DEFAULT_NETWORK_ALL, ratType, OEM_MANAGED_ALL,
                 SUBSCRIBER_ID_MATCH_RULE_EXACT);
     }
 
@@ -324,6 +305,7 @@ public class NetworkTemplate implements Parcelable {
         }
     }
 
+    // TODO: Deprecate this constructor, mark it @UnsupportedAppUsage(maxTargetSdk = S)
     @UnsupportedAppUsage
     public NetworkTemplate(int matchRule, String subscriberId, String networkId) {
         this(matchRule, subscriberId, new String[] { subscriberId }, networkId);
@@ -331,9 +313,14 @@ public class NetworkTemplate implements Parcelable {
 
     public NetworkTemplate(int matchRule, String subscriberId, String[] matchSubscriberIds,
             String networkId) {
-        this(matchRule, subscriberId, matchSubscriberIds, networkId, METERED_ALL, ROAMING_ALL,
-                DEFAULT_NETWORK_ALL, NETWORK_TYPE_ALL, OEM_MANAGED_ALL,
-                SUBSCRIBER_ID_MATCH_RULE_EXACT);
+        // Older versions used to only match MATCH_MOBILE and MATCH_MOBILE_WILDCARD templates
+        // to metered networks. It is now possible to match mobile with any meteredness, but
+        // in order to preserve backward compatibility of @UnsupportedAppUsage methods, this
+        //constructor passes METERED_YES for these types.
+        this(matchRule, subscriberId, matchSubscriberIds, networkId,
+                (matchRule == MATCH_MOBILE || matchRule == MATCH_MOBILE_WILDCARD) ? METERED_YES
+                : METERED_ALL , ROAMING_ALL, DEFAULT_NETWORK_ALL, NETWORK_TYPE_ALL,
+                OEM_MANAGED_ALL, SUBSCRIBER_ID_MATCH_RULE_EXACT);
     }
 
     // TODO: Remove it after updating all of the caller.
@@ -608,11 +595,7 @@ public class NetworkTemplate implements Parcelable {
             // TODO: consider matching against WiMAX subscriber identity
             return true;
         } else {
-            // Only metered mobile network would be matched regardless of metered filter.
-            // This is used to exclude non-metered APNs, e.g. IMS. See ag/908650.
-            // TODO: Respect metered filter and remove mMetered condition.
-            return (sForceAllNetworkTypes || (ident.mType == TYPE_MOBILE && ident.mMetered))
-                    && !ArrayUtils.isEmpty(mMatchSubscriberIds)
+            return ident.mType == TYPE_MOBILE && !ArrayUtils.isEmpty(mMatchSubscriberIds)
                     && ArrayUtils.contains(mMatchSubscriberIds, ident.mSubscriberId)
                     && matchesCollapsedRatType(ident);
         }
@@ -726,8 +709,7 @@ public class NetworkTemplate implements Parcelable {
         if (ident.mType == TYPE_WIMAX) {
             return true;
         } else {
-            return (sForceAllNetworkTypes || (ident.mType == TYPE_MOBILE && ident.mMetered))
-                    && matchesCollapsedRatType(ident);
+            return ident.mType == TYPE_MOBILE && matchesCollapsedRatType(ident);
         }
     }
 

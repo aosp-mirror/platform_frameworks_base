@@ -126,7 +126,6 @@ public class MediaOutputGroupAdapter extends MediaOutputBaseAdapter {
 
         @Override
         void onBind(int customizedItem, boolean topMargin, boolean bottomMargin) {
-            super.onBind(customizedItem, topMargin, bottomMargin);
             if (customizedItem == CUSTOMIZED_ITEM_GROUP) {
                 setTwoLineLayout(mContext.getText(R.string.media_output_dialog_group),
                         true /* bFocused */, true /* showSeekBar */, false /* showProgressBar */,
