@@ -16,18 +16,25 @@
 
 package android.bluetooth;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.Arrays;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Record of energy and activity information from controller and
  * underlying bt stack state.Timestamp the record with system
- * time
+ * time.
  *
  * @hide
  */
+@SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
 public final class BluetoothActivityEnergyInfo implements Parcelable {
     private final long mTimestamp;
     private int mBluetoothStackState;
@@ -35,13 +42,24 @@ public final class BluetoothActivityEnergyInfo implements Parcelable {
     private long mControllerRxTimeMs;
     private long mControllerIdleTimeMs;
     private long mControllerEnergyUsed;
-    private UidTraffic[] mUidTraffic;
+    private List<UidTraffic> mUidTraffic;
+
+    /** @hide */
+    @IntDef(prefix = { "BT_STACK_STATE_" }, value = {
+            BT_STACK_STATE_INVALID,
+            BT_STACK_STATE_STATE_ACTIVE,
+            BT_STACK_STATE_STATE_SCANNING,
+            BT_STACK_STATE_STATE_IDLE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface BluetoothStackState {}
 
     public static final int BT_STACK_STATE_INVALID = 0;
     public static final int BT_STACK_STATE_STATE_ACTIVE = 1;
     public static final int BT_STACK_STATE_STATE_SCANNING = 2;
     public static final int BT_STACK_STATE_STATE_IDLE = 3;
 
+    /** @hide */
     public BluetoothActivityEnergyInfo(long timestamp, int stackState,
             long txTime, long rxTime, long idleTime, long energyUsed) {
         mTimestamp = timestamp;
@@ -52,17 +70,18 @@ public final class BluetoothActivityEnergyInfo implements Parcelable {
         mControllerEnergyUsed = energyUsed;
     }
 
-    @SuppressWarnings("unchecked")
-    BluetoothActivityEnergyInfo(Parcel in) {
+    /** @hide */
+    private BluetoothActivityEnergyInfo(Parcel in) {
         mTimestamp = in.readLong();
         mBluetoothStackState = in.readInt();
         mControllerTxTimeMs = in.readLong();
         mControllerRxTimeMs = in.readLong();
         mControllerIdleTimeMs = in.readLong();
         mControllerEnergyUsed = in.readLong();
-        mUidTraffic = in.createTypedArray(UidTraffic.CREATOR);
+        mUidTraffic = in.createTypedArrayList(UidTraffic.CREATOR);
     }
 
+    /** @hide */
     @Override
     public String toString() {
         return "BluetoothActivityEnergyInfo{"
@@ -72,11 +91,11 @@ public final class BluetoothActivityEnergyInfo implements Parcelable {
                 + " mControllerRxTimeMs=" + mControllerRxTimeMs
                 + " mControllerIdleTimeMs=" + mControllerIdleTimeMs
                 + " mControllerEnergyUsed=" + mControllerEnergyUsed
-                + " mUidTraffic=" + Arrays.toString(mUidTraffic)
+                + " mUidTraffic=" + mUidTraffic
                 + " }";
     }
 
-    public static final @android.annotation.NonNull Parcelable.Creator<BluetoothActivityEnergyInfo> CREATOR =
+    public static final @NonNull Parcelable.Creator<BluetoothActivityEnergyInfo> CREATOR =
             new Parcelable.Creator<BluetoothActivityEnergyInfo>() {
                 public BluetoothActivityEnergyInfo createFromParcel(Parcel in) {
                     return new BluetoothActivityEnergyInfo(in);
@@ -87,9 +106,8 @@ public final class BluetoothActivityEnergyInfo implements Parcelable {
                 }
             };
 
-
+    /** @hide */
     @Override
-    @SuppressWarnings("unchecked")
     public void writeToParcel(Parcel out, int flags) {
         out.writeLong(mTimestamp);
         out.writeInt(mBluetoothStackState);
@@ -97,17 +115,21 @@ public final class BluetoothActivityEnergyInfo implements Parcelable {
         out.writeLong(mControllerRxTimeMs);
         out.writeLong(mControllerIdleTimeMs);
         out.writeLong(mControllerEnergyUsed);
-        out.writeTypedArray(mUidTraffic, flags);
+        out.writeTypedList(mUidTraffic);
     }
 
+    /** @hide */
     @Override
     public int describeContents() {
         return 0;
     }
 
     /**
-     * @return bt stack reported state
+     * Get the Bluetooth stack state associated with the energy info.
+     *
+     * @return one of {@link #BluetoothStackState} states
      */
+    @BluetoothStackState
     public int getBluetoothStackState() {
         return mBluetoothStackState;
     }
@@ -134,7 +156,7 @@ public final class BluetoothActivityEnergyInfo implements Parcelable {
     }
 
     /**
-     * product of current(mA), voltage(V) and time(ms)
+     * Get the product of current (mA), voltage (V), and time (ms).
      *
      * @return energy used
      */
@@ -143,22 +165,31 @@ public final class BluetoothActivityEnergyInfo implements Parcelable {
     }
 
     /**
-     * @return timestamp(real time elapsed in milliseconds since boot) of record creation.
+     * @return timestamp (real time elapsed in milliseconds since boot) of record creation
      */
     public long getTimeStamp() {
         return mTimestamp;
     }
 
-    public UidTraffic[] getUidTraffic() {
+    /**
+     * Get the {@link List} of each application {@link android.bluetooth.UidTraffic}.
+     *
+     * @return current {@link List} of {@link android.bluetooth.UidTraffic}
+     */
+    public @NonNull List<UidTraffic> getUidTraffic() {
+        if (mUidTraffic == null) {
+            return Collections.emptyList();
+        }
         return mUidTraffic;
     }
 
-    public void setUidTraffic(UidTraffic[] traffic) {
+    /** @hide */
+    public void setUidTraffic(List<UidTraffic> traffic) {
         mUidTraffic = traffic;
     }
 
     /**
-     * @return if the record is valid
+     * @return true if the record is valid
      */
     public boolean isValid() {
         return ((mControllerTxTimeMs >= 0) && (mControllerRxTimeMs >= 0)

@@ -1601,7 +1601,7 @@ public class StatsPullAtomService extends SystemService {
 
     int pullBluetoothBytesTransferLocked(int atomTag, List<StatsEvent> pulledData) {
         BluetoothActivityEnergyInfo info = fetchBluetoothData();
-        if (info == null || info.getUidTraffic() == null) {
+        if (info == null) {
             return StatsManager.PULL_SKIP;
         }
         for (UidTraffic traffic : info.getUidTraffic()) {
