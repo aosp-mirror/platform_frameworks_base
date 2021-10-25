@@ -15,4 +15,4 @@
  */
 package android.companion;
 
-parcelable Association;
+parcelable AssociationInfo;
