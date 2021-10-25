@@ -44,7 +44,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
-import com.android.systemui.keyguard.FaceAuthScreenBrightnessController;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
@@ -59,8 +58,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.Optional;
 
 import dagger.Lazy;
 
@@ -91,8 +88,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     private View mNotificationContainer;
     @Mock
     private KeyguardBypassController mBypassController;
-    @Mock
-    private FaceAuthScreenBrightnessController mFaceAuthScreenBrightnessController;
     @Mock
     private KeyguardBouncer.Factory mKeyguardBouncerFactory;
     @Mock
@@ -133,7 +128,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 mock(DockManager.class),
                 mock(NotificationShadeWindowController.class),
                 mKeyguardStateController,
-                Optional.of(mFaceAuthScreenBrightnessController),
                 mock(NotificationMediaManager.class),
                 mKeyguardBouncerFactory,
                 mWakefulnessLifecycle,
