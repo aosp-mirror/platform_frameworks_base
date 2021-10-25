@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.R;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.statusbar.NotificationShelf;
@@ -77,7 +78,7 @@ public class StackScrollAlgorithm {
                 R.dimen.notification_divider_height);
         mCollapsedSize = res.getDimensionPixelSize(R.dimen.notification_min_height);
         mClipNotificationScrollToTop = res.getBoolean(R.bool.config_clipNotificationScrollToTop);
-        int statusBarHeight = res.getDimensionPixelSize(R.dimen.status_bar_height);
+        int statusBarHeight = SystemBarUtils.getStatusBarHeight(context);
         mHeadsUpInset = statusBarHeight + res.getDimensionPixelSize(
                 R.dimen.heads_up_status_bar_padding);
         mPinnedZTranslationExtra = res.getDimensionPixelSize(

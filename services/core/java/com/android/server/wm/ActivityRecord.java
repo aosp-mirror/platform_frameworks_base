@@ -1146,10 +1146,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (info.getMaxAspectRatio() != 0) {
                 pw.println(prefix + "maxAspectRatio=" + info.getMaxAspectRatio());
             }
-            if (info.getMinAspectRatio() != 0) {
-                pw.println(prefix + "minAspectRatio=" + info.getMinAspectRatio());
+            final float minAspectRatio = getMinAspectRatio();
+            if (minAspectRatio != 0) {
+                pw.println(prefix + "minAspectRatio=" + minAspectRatio);
             }
-            if (info.getMinAspectRatio() != info.getManifestMinAspectRatio()) {
+            if (minAspectRatio != info.getManifestMinAspectRatio()) {
                 // Log the fact that we've overridden the min aspect ratio from the manifest
                 pw.println(prefix + "manifestMinAspectRatio="
                         + info.getManifestMinAspectRatio());
@@ -3643,6 +3644,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         if (mPendingRelaunchCount > 0) {
             mPendingRelaunchCount--;
+            if (mPendingRelaunchCount == 0 && !isClientVisible()) {
+                // Don't count if the client won't report drawn.
+                mRelaunchStartTime = 0;
+            }
         } else {
             // Update keyguard flags upon finishing relaunch.
             checkKeyguardFlagsChanged();
@@ -7273,7 +7278,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 return false;
             }
         }
-        return !isResizeable() && (info.isFixedOrientation() || info.hasFixedAspectRatio())
+        return !isResizeable() && (info.isFixedOrientation() || hasFixedAspectRatio())
                 // The configuration of non-standard type should be enforced by system.
                 // {@link WindowConfiguration#ACTIVITY_TYPE_STANDARD} is set when this activity is
                 // added to a task, but this function is called when resolving the launch params, at
@@ -7944,13 +7949,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 return false;
             }
         }
-        if (info.getMinAspectRatio() > 0) {
+        final float minAspectRatio = getMinAspectRatio();
+        if (minAspectRatio > 0) {
             // The activity should have at least the min aspect ratio, so this checks if the
             // container still has available space to provide larger aspect ratio.
             final float containerAspectRatio =
                     (0.5f + Math.max(containerAppWidth, containerAppHeight))
                             / Math.min(containerAppWidth, containerAppHeight);
-            if (containerAspectRatio <= info.getMinAspectRatio()) {
+            if (containerAspectRatio <= minAspectRatio) {
                 // The long side has reached the parent.
                 return false;
             }
@@ -8161,8 +8167,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             Rect containingBounds, float desiredAspectRatio, boolean fixedOrientationLetterboxed) {
         final float maxAspectRatio = info.getMaxAspectRatio();
         final Task rootTask = getRootTask();
-        final float minAspectRatio = info.getMinAspectRatio();
-
+        final float minAspectRatio = getMinAspectRatio();
         if (task == null || rootTask == null
                 || (inMultiWindowMode() && !shouldCreateCompatDisplayInsets()
                 && !fixedOrientationLetterboxed)
@@ -8263,6 +8268,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         return true;
+    }
+
+    /**
+     * Returns the min aspect ratio of this activity.
+     */
+    private float getMinAspectRatio() {
+        return info.getMinAspectRatio(getRequestedOrientation());
+    }
+
+    /**
+     * Returns true if the activity has maximum or minimum aspect ratio.
+     */
+    private boolean hasFixedAspectRatio() {
+        return info.hasFixedAspectRatio(getRequestedOrientation());
     }
 
     /**
@@ -8994,7 +9013,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         proto.write(PIP_AUTO_ENTER_ENABLED, pictureInPictureArgs.isAutoEnterEnabled());
         proto.write(IN_SIZE_COMPAT_MODE, inSizeCompatMode());
-        proto.write(MIN_ASPECT_RATIO, info.getMinAspectRatio());
+        proto.write(MIN_ASPECT_RATIO, getMinAspectRatio());
     }
 
     @Override

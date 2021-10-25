@@ -71,6 +71,7 @@ import android.widget.ScrollView;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.jank.InteractionJankMonitor;
+import com.android.internal.policy.SystemBarUtils;
 import com.android.keyguard.KeyguardSliceView;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
@@ -937,7 +938,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 res.getDimensionPixelSize(R.dimen.notification_divider_height));
         mMinTopOverScrollToEscape = res.getDimensionPixelSize(
                 R.dimen.min_top_overscroll_to_qs);
-        mStatusBarHeight = res.getDimensionPixelSize(R.dimen.status_bar_height);
+        mStatusBarHeight = SystemBarUtils.getStatusBarHeight(mContext);
         mBottomMargin = res.getDimensionPixelSize(R.dimen.notification_panel_margin_bottom);
         mMinimumPaddings = res.getDimensionPixelSize(R.dimen.notification_side_paddings);
         mQsTilePadding = res.getDimensionPixelOffset(R.dimen.qs_tile_margin_horizontal);
@@ -948,8 +949,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mCornerRadius = res.getDimensionPixelSize(R.dimen.notification_corner_radius);
         mHeadsUpInset = mStatusBarHeight + res.getDimensionPixelSize(
                 R.dimen.heads_up_status_bar_padding);
-        mQsScrollBoundaryPosition = res.getDimensionPixelSize(
-                com.android.internal.R.dimen.quick_qs_offset_height);
+        mQsScrollBoundaryPosition = SystemBarUtils.getQuickQsOffsetHeight(mContext);
     }
 
     void updateSidePadding(int viewWidth) {
@@ -1707,7 +1707,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         super.onConfigurationChanged(newConfig);
         Resources res = getResources();
         updateSplitNotificationShade();
-        mStatusBarHeight = res.getDimensionPixelOffset(R.dimen.status_bar_height);
+        mStatusBarHeight = SystemBarUtils.getStatusBarHeight(mContext);
         float densityScale = res.getDisplayMetrics().density;
         mSwipeHelper.setDensityScale(densityScale);
         float pagingTouchSlop = ViewConfiguration.get(getContext()).getScaledPagingTouchSlop();

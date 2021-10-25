@@ -32,6 +32,7 @@ import android.widget.ImageView;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.qs.customize.QSCustomizer;
+import com.android.systemui.util.Utils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -155,8 +156,7 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
             QuickStatusBarHeaderController quickStatusBarHeaderController) {
         mQSPanelContainer.setPaddingRelative(
                 getPaddingStart(),
-                mContext.getResources()
-                        .getDimensionPixelSize(R.dimen.qs_header_system_icons_area_height),
+                Utils.getQsHeaderSystemIconsAreaHeight(mContext),
                 getPaddingEnd(),
                 getPaddingBottom()
         );
