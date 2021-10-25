@@ -95,7 +95,7 @@ class ChangeAppRotationTest(
             }
         }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun runPresubmitAssertion() {
         flickerRule.checkPresubmitAssertions()

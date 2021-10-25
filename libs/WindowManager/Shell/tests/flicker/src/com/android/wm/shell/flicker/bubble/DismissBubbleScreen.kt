@@ -18,9 +18,9 @@ package com.android.wm.shell.flicker.bubble
 
 import android.content.Context
 import android.graphics.Point
+import android.platform.test.annotations.Postsubmit
 import android.util.DisplayMetrics
 import android.view.WindowManager
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
@@ -66,7 +66,7 @@ class DismissBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(tes
             }
         }
 
-    @FlakyTest
+    @Postsubmit
     @Test
     fun testAppIsAlwaysVisible() {
         testSpec.assertLayers {
