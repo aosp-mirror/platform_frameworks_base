@@ -689,8 +689,9 @@ public class NotificationEntryManager implements
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
             listener.onPreEntryUpdated(entry);
         }
+        final boolean fromSystem = ranking != null;
         for (NotifCollectionListener listener : mNotifCollectionListeners) {
-            listener.onEntryUpdated(entry);
+            listener.onEntryUpdated(entry, fromSystem);
         }
 
         if (!mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {

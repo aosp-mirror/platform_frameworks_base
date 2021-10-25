@@ -86,7 +86,7 @@ class OngoingCallController @Inject constructor(
         //
         // TODO(b/183229367): Remove this function override when b/178406514 is fixed.
         override fun onEntryAdded(entry: NotificationEntry) {
-            onEntryUpdated(entry)
+            onEntryUpdated(entry, true)
         }
 
         override fun onEntryUpdated(entry: NotificationEntry) {
