@@ -313,7 +313,7 @@ public class Binder implements IBinder {
      * @hide
      */
     @CriticalNative
-    public static final native boolean isHandlingTransaction();
+    public static final native boolean isDirectlyHandlingTransaction();
 
     /**
      * Return the Linux uid assigned to the process that sent the transaction
@@ -323,7 +323,7 @@ public class Binder implements IBinder {
      *        executing an incoming transaction.
      */
     public static final int getCallingUidOrThrow() {
-        if (!isHandlingTransaction()) {
+        if (!isDirectlyHandlingTransaction()) {
             throw new IllegalStateException(
                   "Thread is not in a binder transcation");
         }
