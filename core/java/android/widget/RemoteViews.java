@@ -34,6 +34,7 @@ import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.Application;
+import android.app.LoadedApk;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.appwidget.AppWidgetHostView;
@@ -5475,7 +5476,8 @@ public class RemoteViews implements Parcelable, Filter {
         // user. So build a context that loads resources from that user but
         // still returns the current users userId so settings like data / time formats
         // are loaded without requiring cross user persmissions.
-        final Context contextForResources = getContextForResources(context);
+        final Context contextForResources =
+                getContextForResourcesEnsuringCorrectCachedApkPaths(context);
         if (colorResources != null) {
             colorResources.apply(contextForResources);
         }
@@ -5853,13 +5855,14 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
-    private Context getContextForResources(Context context) {
+    private Context getContextForResourcesEnsuringCorrectCachedApkPaths(Context context) {
         if (mApplication != null) {
             if (context.getUserId() == UserHandle.getUserId(mApplication.uid)
                     && context.getPackageName().equals(mApplication.packageName)) {
                 return context;
             }
             try {
+                LoadedApk.checkAndUpdateApkPaths(mApplication);
                 return context.createApplicationContext(mApplication,
                         Context.CONTEXT_RESTRICTED);
             } catch (NameNotFoundException e) {
