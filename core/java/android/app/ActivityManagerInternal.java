@@ -518,6 +518,11 @@ public abstract class ActivityManagerInternal {
             Notification notification, int id, String pkg, @UserIdInt int userId);
 
     /**
+     * Un-foreground all foreground services in the given app.
+     */
+    public abstract void makeServicesNonForeground(String pkg, @UserIdInt int userId);
+
+    /**
      * If the given app has any FGSs whose notifications are in the given channel,
      * stop them.
      */
