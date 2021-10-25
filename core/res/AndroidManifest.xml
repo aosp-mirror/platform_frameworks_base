@@ -3015,6 +3015,13 @@
     <permission android:name="android.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION"
                 android:protectionLevel="internal|role" />
 
+    <!-- Allows an application to create a "self-managed" association.
+         @hide
+         @SystemApi
+    -->
+    <permission android:name="android.permission.REQUEST_COMPANION_SELF_MANAGED"
+                android:protectionLevel="signature|privileged" />
+
     <!-- Allows a companion app to associate to Wi-Fi.
          <p>Only for use by a single pre-approved app.
          @hide

@@ -17,6 +17,7 @@ package android.companion;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
 import android.net.MacAddress;
 import android.os.Parcel;
@@ -26,11 +27,12 @@ import java.util.Date;
 import java.util.Objects;
 
 /**
- * A record indicating that a device with a given address was confirmed by the user to be
- * associated to a given companion app
- *
- * @hide
- * TODO(b/1979395): un-hide.
+ * Details for a specific "association" that has been established between an app and companion
+ * device.
+ * <p>
+ * An association gives an app the ability to interact with a companion device without needing to
+ * acquire broader runtime permissions. An association only exists after the user has confirmed that
+ * an app should have access to a companion device.
  */
 public final class AssociationInfo implements Parcelable {
     /**
@@ -90,12 +92,19 @@ public final class AssociationInfo implements Parcelable {
         return mId;
     }
 
-    /** @hide */
-    public int getUserId() {
+    /**
+     * @return the ID of the user who "owns" this association.
+     * @hide
+     */
+    public @UserIdInt int getUserId() {
         return mUserId;
     }
 
-    /** @hide */
+    /**
+     * @return the package name of the app which this association refers to.
+     * @hide
+     */
+    @SystemApi
     public @NonNull String getPackageName() {
         return mPackageName;
     }
@@ -113,17 +122,19 @@ public final class AssociationInfo implements Parcelable {
     }
 
     /**
-     * @return the display name of the device (only "self-managed" association are expected to
-     * specify a non-null display name of the device).
+     * @return the display name of the companion device (optionally) provided by the companion
+     * application.
      *
-     * @see #isSelfManaged()
+     * @see AssociationRequest.Builder#setDisplayName(CharSequence)
      */
     public @Nullable CharSequence getDisplayName() {
         return mDisplayName;
     }
 
     /**
-     * @return the profile of the device.
+     * @return the companion device profile used when establishing this
+     *         association, or {@code null} if no specific profile was used.
+     * @see AssociationRequest.Builder#setDeviceProfile(String)
      */
     public @Nullable String getDeviceProfile() {
         return mDeviceProfile;
@@ -131,8 +142,10 @@ public final class AssociationInfo implements Parcelable {
 
     /**
      * @return whether the association is managed by the companion application it belongs to.
+     * @see AssociationRequest.Builder#setSelfManaged(boolean)
      * @hide
      */
+    @SystemApi
     public boolean isSelfManaged() {
         return mSelfManaged;
     }
@@ -158,6 +171,30 @@ public final class AssociationInfo implements Parcelable {
     /** @hide */
     public boolean belongsToPackage(@UserIdInt int userId, String packageName) {
         return mUserId == userId && Objects.equals(mPackageName, packageName);
+    }
+
+    /**
+     * Utility method for checking if the association represents a device with the given MAC
+     * address.
+     *
+     * @return {@code false} if the association is "self-managed".
+     *         {@code false} if the {@code addr} is {@code null} or is not a valid MAC address.
+     *         Otherwise - the result of {@link MacAddress#equals(Object)}
+     *
+     * @hide
+     */
+    public boolean isLinkedTo(@Nullable String addr) {
+        if (mSelfManaged) return false;
+
+        if (addr == null) return false;
+
+        final MacAddress macAddress;
+        try {
+            macAddress = MacAddress.fromString(addr);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+        return macAddress.equals(mDeviceMacAddress);
     }
 
     @Override
@@ -233,6 +270,7 @@ public final class AssociationInfo implements Parcelable {
         mTimeApprovedMs = in.readLong();
     }
 
+    @NonNull
     public static final Parcelable.Creator<AssociationInfo> CREATOR =
             new Parcelable.Creator<AssociationInfo>() {
         @Override

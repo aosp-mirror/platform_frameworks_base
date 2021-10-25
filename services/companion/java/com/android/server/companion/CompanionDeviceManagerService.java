@@ -17,10 +17,17 @@
 
 package com.android.server.companion;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS;
+import static android.Manifest.permission.MANAGE_COMPANION_DEVICES;
+import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.bluetooth.le.ScanSettings.CALLBACK_TYPE_ALL_MATCHES;
 import static android.bluetooth.le.ScanSettings.SCAN_MODE_BALANCED;
 import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
+import static android.content.pm.PackageManager.FEATURE_COMPANION_DEVICE_SETUP;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.Binder.getCallingUid;
+import static android.os.Process.SYSTEM_UID;
+import static android.os.UserHandle.getCallingUserId;
 
 import static com.android.internal.util.CollectionUtils.add;
 import static com.android.internal.util.CollectionUtils.any;
@@ -28,8 +35,6 @@ import static com.android.internal.util.CollectionUtils.filter;
 import static com.android.internal.util.CollectionUtils.find;
 import static com.android.internal.util.CollectionUtils.forEach;
 import static com.android.internal.util.CollectionUtils.map;
-import static com.android.internal.util.Preconditions.checkArgument;
-import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.Preconditions.checkState;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainRunnable;
@@ -58,8 +63,9 @@ import android.bluetooth.le.ScanSettings;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
 import android.companion.DeviceNotAssociatedException;
+import android.companion.IAssociationRequestCallback;
 import android.companion.ICompanionDeviceManager;
-import android.companion.IFindDeviceCallback;
+import android.companion.IOnAssociationsChangedListener;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -79,7 +85,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.PowerWhitelistManager;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -234,7 +239,7 @@ public class CompanionDeviceManagerService extends SystemService {
             public void onPackageModified(String packageName) {
                 Slog.d(LOG_TAG, "onPackageModified(packageName = " + packageName + ")");
                 int userId = getChangingUserId();
-                forEach(getAllAssociations(userId, packageName), association -> {
+                forEach(getAssociations(userId, packageName), association -> {
                     updateSpecialAccessPermissionForAssociatedPackage(association);
                 });
             }
@@ -267,16 +272,79 @@ public class CompanionDeviceManagerService extends SystemService {
 
     @Override
     public void onUserUnlocking(@NonNull TargetUser user) {
-        int userHandle = user.getUserIdentifier();
-        Set<AssociationInfo> associations = getAllAssociations(userHandle);
-        if (associations == null || associations.isEmpty()) {
-            return;
-        }
-        updateAtm(userHandle, associations);
+        final int userId = user.getUserIdentifier();
+        final Set<AssociationInfo> associations = getAllAssociationsForUser(userId);
+
+        if (associations.isEmpty()) return;
+
+        updateAtm(userId, associations);
 
         BackgroundThread.getHandler().sendMessageDelayed(
                 obtainMessage(CompanionDeviceManagerService::maybeGrantAutoRevokeExemptions, this),
                 MINUTES.toMillis(10));
+    }
+
+    @NonNull
+    Set<AssociationInfo> getAllAssociationsForUser(@UserIdInt int userId) {
+        synchronized (mLock) {
+            readPersistedStateForUserIfNeededLocked(userId);
+            // This returns non-null, because the readAssociationsInfoForUserIfNeededLocked() method
+            // we just called adds an empty set, if there was no previously saved data.
+            return mCachedAssociations.get(userId);
+        }
+    }
+
+    @NonNull
+    Set<AssociationInfo> getAssociations(@UserIdInt int userId, @NonNull String packageName) {
+        return filter(getAllAssociationsForUser(userId),
+                a -> a.belongsToPackage(userId, packageName));
+    }
+
+    @Nullable
+    private AssociationInfo getAssociation(int associationId) {
+        return find(getAllAssociations(), association -> association.getId() == associationId);
+    }
+
+    @Nullable
+    AssociationInfo getAssociation(
+            @UserIdInt int userId, @NonNull String packageName, @NonNull String macAddress) {
+        return find(getAssociations(userId, packageName), a -> a.isLinkedTo(macAddress));
+    }
+
+    @Nullable
+    AssociationInfo getAssociationWithCallerChecks(
+            @UserIdInt int userId, @NonNull String packageName, @NonNull String macAddress) {
+        return sanitizeWithCallerChecks(getAssociation(userId, packageName, macAddress));
+    }
+
+    @Nullable
+    AssociationInfo getAssociationWithCallerChecks(int associationId) {
+        return sanitizeWithCallerChecks(getAssociation(associationId));
+    }
+
+    @Nullable
+    private AssociationInfo sanitizeWithCallerChecks(@Nullable AssociationInfo association) {
+        if (association == null) return null;
+
+        final int userId = association.getUserId();
+        final String packageName = association.getPackageName();
+
+        if (!checkCallerCanManageAssociationsForPackage(userId, packageName)) return null;
+
+        return association;
+    }
+
+    private Set<AssociationInfo> getAllAssociations() {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            final Set<AssociationInfo> result = new ArraySet<>();
+            for (UserInfo user : mUserManager.getAliveUsers()) {
+                result.addAll(getAllAssociationsForUser(user.id));
+            }
+            return result;
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     void maybeGrantAutoRevokeExemptions() {
@@ -291,7 +359,7 @@ public class CompanionDeviceManagerService extends SystemService {
             }
 
             try {
-                Set<AssociationInfo> associations = getAllAssociations(userId);
+                Set<AssociationInfo> associations = getAllAssociationsForUser(userId);
                 if (associations == null) {
                     continue;
                 }
@@ -323,67 +391,92 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
-        public void associate(
-                AssociationRequest request,
-                IFindDeviceCallback callback,
-                String callingPackage) throws RemoteException {
-            Slog.i(LOG_TAG, "associate(request = " + request + ", callback = " + callback
-                    + ", callingPackage = " + callingPackage + ")");
-            mAssociationRequestsProcessor.process(request, callback, callingPackage);
+        public void associate(AssociationRequest request, IAssociationRequestCallback callback,
+                String packageName, int userId) throws RemoteException {
+            Slog.i(LOG_TAG, "associate() "
+                    + "request=" + request + ", "
+                    + "package=u" + userId + "/" + packageName);
+            mAssociationRequestsProcessor.process(request, packageName, userId, callback);
+
         }
 
         @Override
-        public void stopScan(AssociationRequest request,
-                IFindDeviceCallback callback,
-                String callingPackage) {
-            Slog.i(LOG_TAG, "stopScan(request = " + request + ")");
-            mAssociationRequestsProcessor.stopScan(request, callback, callingPackage);
-        }
-
-        @Override
-        public List<String> getAssociations(String callingPackage, int userId)
-                throws RemoteException {
-            if (!callerCanManageCompanionDevices()) {
-                checkCallerIsSystemOr(callingPackage, userId);
-                checkUsesFeature(callingPackage, getCallingUserId());
-            }
-            return new ArrayList<>(map(
-                    getAllAssociations(userId, callingPackage),
-                    AssociationInfo::getDeviceMacAddressAsString));
-        }
-
-        @Override
-        public List<AssociationInfo> getAssociationsForUser(int userId) {
-            if (!callerCanManageCompanionDevices()) {
-                throw new SecurityException("Caller must hold "
-                        + android.Manifest.permission.MANAGE_COMPANION_DEVICES);
+        public List<AssociationInfo> getAssociations(String packageName, int userId) {
+            final int callingUid = getCallingUserId();
+            if (!checkCallerCanManageAssociationsForPackage(userId, packageName)) {
+                throw new SecurityException("Caller (uid=" + callingUid + ") does not have "
+                        + "permissions to get associations for u" + userId + "/" + packageName);
             }
 
-            return new ArrayList<>(getAllAssociations(userId, null /* packageFilter */));
-        }
+            if (!checkCallerCanManagerCompanionDevice()) {
+                // If the caller neither is system nor holds MANAGE_COMPANION_DEVICES: it needs to
+                // request the feature (also: the caller is the app itself).
+                checkUsesFeature(packageName, getCallingUserId());
+            }
 
-        //TODO also revoke notification access
-        @Override
-        public void disassociate(String deviceMacAddress, String callingPackage)
-                throws RemoteException {
-            checkNotNull(deviceMacAddress);
-            checkCallerIsSystemOr(callingPackage);
-            checkUsesFeature(callingPackage, getCallingUserId());
-            removeAssociation(getCallingUserId(), callingPackage, deviceMacAddress);
-        }
-
-        private boolean callerCanManageCompanionDevices() {
-            return getContext().checkCallingOrSelfPermission(
-                    android.Manifest.permission.MANAGE_COMPANION_DEVICES)
-                    == PERMISSION_GRANTED;
+            return new ArrayList<>(
+                    CompanionDeviceManagerService.this.getAssociations(userId, packageName));
         }
 
         @Override
-        public PendingIntent requestNotificationAccess(ComponentName component)
+        public List<AssociationInfo> getAllAssociationsForUser(int userId) throws RemoteException {
+            enforceCallerCanInteractWithUserId(userId);
+            enforceCallerCanManagerCompanionDevice();
+
+            return new ArrayList<>(
+                    CompanionDeviceManagerService.this.getAllAssociationsForUser(userId));
+        }
+
+        @Override
+        public void addOnAssociationsChangedListener(IOnAssociationsChangedListener listener,
+                int userId) {
+            enforceCallerCanInteractWithUserId(userId);
+            enforceCallerCanManagerCompanionDevice();
+
+            //TODO: Implement.
+        }
+
+        @Override
+        public void removeOnAssociationsChangedListener(IOnAssociationsChangedListener listener,
+                int userId) {
+            //TODO: Implement.
+        }
+
+        @Override
+        public void legacyDisassociate(String deviceMacAddress, String packageName, int userId) {
+            requireNonNull(deviceMacAddress);
+            requireNonNull(packageName);
+
+            final AssociationInfo association =
+                    getAssociationWithCallerChecks(userId, packageName, deviceMacAddress);
+            if (association == null) {
+                throw new IllegalArgumentException("Association does not exist "
+                        + "or the caller does not have permissions to manage it "
+                        + "(ie. it belongs ot a different package or a different user).");
+            }
+
+            disassociateInternal(userId, association.getId());
+        }
+
+        @Override
+        public void disassociate(int associationId) {
+            final AssociationInfo association = getAssociationWithCallerChecks(associationId);
+            if (association == null) {
+                throw new IllegalArgumentException("Association with ID " + associationId + " "
+                        + "does not exist "
+                        + "or belongs to a different package "
+                        + "or belongs to a different user");
+            }
+
+            disassociateInternal(association.getUserId(), associationId);
+        }
+
+        @Override
+        public PendingIntent requestNotificationAccess(ComponentName component, int userId)
                 throws RemoteException {
             String callingPackage = component.getPackageName();
             checkCanCallNotificationApi(callingPackage);
-            int userId = getCallingUserId();
+            //TODO: check userId.
             String packageTitle = BidiFormatter.getInstance().unicodeWrap(
                     getPackageInfo(callingPackage, userId)
                             .applicationInfo
@@ -423,7 +516,7 @@ public class CompanionDeviceManagerService extends SystemService {
         public boolean isDeviceAssociatedForWifiConnection(String packageName, String macAddress,
                 int userId) {
             getContext().enforceCallingOrSelfPermission(
-                    android.Manifest.permission.MANAGE_COMPANION_DEVICES, "isDeviceAssociated");
+                    MANAGE_COMPANION_DEVICES, "isDeviceAssociated");
 
             boolean bypassMacPermission = getContext().getPackageManager().checkPermission(
                     android.Manifest.permission.COMPANION_APPROVE_WIFI_CONNECTIONS, packageName)
@@ -432,23 +525,22 @@ public class CompanionDeviceManagerService extends SystemService {
                 return true;
             }
 
-            return any(
-                    getAllAssociations(userId, packageName),
-                    a -> Objects.equals(a.getDeviceMacAddress(), macAddress));
+            return any(CompanionDeviceManagerService.this.getAssociations(userId, packageName),
+                    a -> a.isLinkedTo(macAddress));
         }
 
         @Override
-        public void registerDevicePresenceListenerService(
-                String packageName, String deviceAddress)
-                throws RemoteException {
-            registerDevicePresenceListenerActive(packageName, deviceAddress, true);
+        public void registerDevicePresenceListenerService(String deviceAddress,
+                String callingPackage, int userId) throws RemoteException {
+            //TODO: take the userId into account.
+            registerDevicePresenceListenerActive(callingPackage, deviceAddress, true);
         }
 
         @Override
-        public void unregisterDevicePresenceListenerService(
-                String packageName, String deviceAddress)
-                throws RemoteException {
-            registerDevicePresenceListenerActive(packageName, deviceAddress, false);
+        public void unregisterDevicePresenceListenerService(String deviceAddress,
+                String callingPackage, int userId) throws RemoteException {
+            //TODO: take the userId into account.
+            registerDevicePresenceListenerActive(callingPackage, deviceAddress, false);
         }
 
         @Override
@@ -462,12 +554,12 @@ public class CompanionDeviceManagerService extends SystemService {
             getContext().enforceCallingOrSelfPermission(
                     android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE,
                     "[un]registerDevicePresenceListenerService");
-            checkCallerIsSystemOr(packageName);
+            final int userId = getCallingUserId();
+            enforceCallerIsSystemOr(userId, packageName);
 
-            int userId = getCallingUserId();
             Set<AssociationInfo> deviceAssociations = filter(
-                    getAllAssociations(userId, packageName),
-                    association -> deviceAddress.equals(association.getDeviceMacAddress()));
+                    CompanionDeviceManagerService.this.getAssociations(userId, packageName),
+                    a -> a.isLinkedTo(deviceAddress));
 
             if (deviceAssociations.isEmpty()) {
                 throw new RemoteException(new DeviceNotAssociatedException("App " + packageName
@@ -476,8 +568,8 @@ public class CompanionDeviceManagerService extends SystemService {
             }
 
             updateAssociations(associations -> map(associations, association -> {
-                if (Objects.equals(association.getPackageName(), packageName)
-                        && Objects.equals(association.getDeviceMacAddress(), deviceAddress)) {
+                if (association.belongsToPackage(userId, packageName)
+                        && association.isLinkedTo(deviceAddress)) {
                     association.setNotifyOnDeviceNearby(active);
                 }
                 return association;
@@ -501,29 +593,31 @@ public class CompanionDeviceManagerService extends SystemService {
             createAssociationInternal(userId, macAddress, packageName, null);
         }
 
-        private void checkCanCallNotificationApi(String callingPackage) throws RemoteException {
-            checkCallerIsSystemOr(callingPackage);
-            int userId = getCallingUserId();
-            checkState(!ArrayUtils.isEmpty(getAllAssociations(userId, callingPackage)),
+        private void checkCanCallNotificationApi(String callingPackage) {
+            final int userId = getCallingUserId();
+            enforceCallerIsSystemOr(userId, callingPackage);
+
+            checkState(!ArrayUtils.isEmpty(
+                    CompanionDeviceManagerService.this.getAssociations(userId, callingPackage)),
                     "App must have an association before calling this API");
             checkUsesFeature(callingPackage, userId);
         }
 
         @Override
-        public boolean canPairWithoutPrompt(
-                String packageName, String deviceMacAddress, int userId) {
-            return any(
-                    getAllAssociations(userId, packageName, deviceMacAddress),
-                    a -> System.currentTimeMillis() - a.getTimeApprovedMs()
-                            < PAIR_WITHOUT_PROMPT_WINDOW_MS);
+        public boolean canPairWithoutPrompt(String packageName, String macAddress, int userId) {
+            final AssociationInfo association = getAssociation(userId, packageName, macAddress);
+            if (association == null) {
+                return false;
+            }
+            return System.currentTimeMillis() - association.getTimeApprovedMs()
+                    < PAIR_WITHOUT_PROMPT_WINDOW_MS;
         }
 
         @Override
         public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
                 String[] args, ShellCallback callback, ResultReceiver resultReceiver)
                 throws RemoteException {
-            getContext().enforceCallingOrSelfPermission(
-                    android.Manifest.permission.MANAGE_COMPANION_DEVICES, null);
+            enforceCallerCanManagerCompanionDevice();
             new CompanionDeviceShellCommand(CompanionDeviceManagerService.this)
                     .exec(this, in, out, err, args, callback, resultReceiver);
         }
@@ -573,48 +667,6 @@ public class CompanionDeviceManagerService extends SystemService {
         }
     }
 
-    void checkCallerIsSystemOr(String pkg) throws RemoteException {
-        checkCallerIsSystemOr(pkg, getCallingUserId());
-    }
-
-    private void checkCallerIsSystemOr(String pkg, int userId) throws RemoteException {
-        if (isCallerSystem()) {
-            return;
-        }
-
-        checkArgument(getCallingUserId() == userId,
-                "Must be called by either same user or system");
-        int callingUid = Binder.getCallingUid();
-        if (mAppOpsManager.checkPackage(callingUid, pkg) != AppOpsManager.MODE_ALLOWED) {
-            throw new SecurityException(pkg + " doesn't belong to uid " + callingUid);
-        }
-    }
-
-    static int getCallingUserId() {
-        return UserHandle.getUserId(Binder.getCallingUid());
-    }
-
-    private static boolean isCallerSystem() {
-        return Binder.getCallingUid() == Process.SYSTEM_UID;
-    }
-
-    void checkUsesFeature(String pkg, int userId) {
-        if (isCallerSystem()) {
-            // Drop the requirement for calls from system process
-            return;
-        }
-
-        FeatureInfo[] reqFeatures = getPackageInfo(pkg, userId).reqFeatures;
-        String requiredFeature = PackageManager.FEATURE_COMPANION_DEVICE_SETUP;
-        int numFeatures = ArrayUtils.size(reqFeatures);
-        for (int i = 0; i < numFeatures; i++) {
-            if (requiredFeature.equals(reqFeatures[i].name)) return;
-        }
-        throw new IllegalStateException("Must declare uses-feature "
-                + requiredFeature
-                + " in manifest to use this API");
-    }
-
     void createAssociationInternal(
             int userId, String deviceMacAddress, String packageName, String deviceProfile) {
         final AssociationInfo association = new AssociationInfo(
@@ -647,7 +699,7 @@ public class CompanionDeviceManagerService extends SystemService {
 
             // First: collect all IDs currently in use for this user's Associations.
             final SparseBooleanArray usedIds = new SparseBooleanArray();
-            for (AssociationInfo it : getAllAssociations(userId)) {
+            for (AssociationInfo it : getAllAssociationsForUser(userId)) {
                 usedIds.put(it.getId(), true);
             }
 
@@ -673,16 +725,18 @@ public class CompanionDeviceManagerService extends SystemService {
         }
     }
 
-    void removeAssociation(int userId, String packageName, String deviceMacAddress) {
-        updateAssociations(associations -> filterOut(associations, it -> {
-            final boolean match = it.belongsToPackage(userId, packageName)
-                    && Objects.equals(it.getDeviceMacAddress(), deviceMacAddress);
-            if (match) {
-                onAssociationPreRemove(it);
-                markIdAsPreviouslyUsedForPackage(it.getId(), userId, packageName);
-            }
-            return match;
-        }), userId);
+    //TODO also revoke notification access
+    void disassociateInternal(@UserIdInt int userId, int associationId) {
+        updateAssociations(associations ->
+                filterOut(associations, it -> {
+                    if (it.getId() != associationId) return false;
+
+                    onAssociationPreRemove(it);
+                    markIdAsPreviouslyUsedForPackage(
+                            it.getId(), it.getUserId(), it.getPackageName());
+                    return true;
+                }), userId);
+
         restartBleScan();
     }
 
@@ -706,7 +760,7 @@ public class CompanionDeviceManagerService extends SystemService {
         String deviceProfile = association.getDeviceProfile();
         if (deviceProfile != null) {
             AssociationInfo otherAssociationWithDeviceProfile = find(
-                    getAllAssociations(association.getUserId()),
+                    getAllAssociationsForUser(association.getUserId()),
                     a -> !a.equals(association) && deviceProfile.equals(a.getDeviceProfile()));
             if (otherAssociationWithDeviceProfile != null) {
                 Slog.i(LOG_TAG, "Not revoking " + deviceProfile
@@ -780,7 +834,7 @@ public class CompanionDeviceManagerService extends SystemService {
         exemptFromAutoRevoke(packageInfo.packageName, packageInfo.applicationInfo.uid);
 
         if (!association.isSelfManaged()) {
-            if (mCurrentlyConnectedDevices.contains(association.getDeviceMacAddress())) {
+            if (mCurrentlyConnectedDevices.contains(association.getDeviceMacAddressAsString())) {
                 grantDeviceProfile(association);
             }
 
@@ -809,17 +863,10 @@ public class CompanionDeviceManagerService extends SystemService {
 
     @Nullable
     private PackageInfo getPackageInfo(String packageName, int userId) {
-        return Binder.withCleanCallingIdentity(PooledLambda.obtainSupplier((context, pkg, id) -> {
-            try {
-                return context.getPackageManager().getPackageInfoAsUser(
-                        pkg,
-                        PackageManager.GET_PERMISSIONS | PackageManager.GET_CONFIGURATIONS,
-                        id);
-            } catch (PackageManager.NameNotFoundException e) {
-                Slog.e(LOG_TAG, "Failed to get PackageInfo for package " + pkg, e);
-                return null;
-            }
-        }, getContext(), packageName, userId).recycleOnUse());
+        final int flags = PackageManager.GET_PERMISSIONS | PackageManager.GET_CONFIGURATIONS;
+        return Binder.withCleanCallingIdentity(
+                () -> getContext().getPackageManager()
+                        .getPackageInfoAsUser(packageName, flags , userId));
     }
 
     private void recordAssociation(AssociationInfo association, int userId) {
@@ -832,7 +879,7 @@ public class CompanionDeviceManagerService extends SystemService {
         synchronized (mLock) {
             if (DEBUG) Slog.d(LOG_TAG, "Updating Associations set...");
 
-            final Set<AssociationInfo> prevAssociations = getAllAssociations(userId);
+            final Set<AssociationInfo> prevAssociations = getAllAssociationsForUser(userId);
             if (DEBUG) Slog.d(LOG_TAG, "  > Before : " + prevAssociations + "...");
 
             final Set<AssociationInfo> updatedAssociations = update.apply(
@@ -870,15 +917,6 @@ public class CompanionDeviceManagerService extends SystemService {
         }
     }
 
-    @NonNull Set<AssociationInfo> getAllAssociations(int userId) {
-        synchronized (mLock) {
-            readPersistedStateForUserIfNeededLocked(userId);
-            // This returns non-null, because the readAssociationsInfoForUserIfNeededLocked() method
-            // we just called adds an empty set, if there was no previously saved data.
-            return mCachedAssociations.get(userId);
-        }
-    }
-
     @GuardedBy("mLock")
     private void readPersistedStateForUserIfNeededLocked(@UserIdInt int userId) {
         if (mCachedAssociations.get(userId) != null) return;
@@ -907,44 +945,14 @@ public class CompanionDeviceManagerService extends SystemService {
         }
     }
 
-    Set<AssociationInfo> getAllAssociations(int userId, @Nullable String packageFilter) {
-        return filter(
-                getAllAssociations(userId),
-                // Null filter == get all associations
-                a -> packageFilter == null || Objects.equals(packageFilter, a.getPackageName()));
-    }
-
-    private Set<AssociationInfo> getAllAssociations() {
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            ArraySet<AssociationInfo> result = new ArraySet<>();
-            for (UserInfo user : mUserManager.getAliveUsers()) {
-                result.addAll(getAllAssociations(user.id));
-            }
-            return result;
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
-
-    private Set<AssociationInfo> getAllAssociations(
-            int userId, @Nullable String packageFilter, @Nullable String addressFilter) {
-        return filter(
-                getAllAssociations(userId),
-                // Null filter == get all associations
-                a -> (packageFilter == null || Objects.equals(packageFilter, a.getPackageName()))
-                        && (addressFilter == null
-                                || Objects.equals(addressFilter, a.getDeviceMacAddress())));
-    }
-
     void onDeviceConnected(String address) {
         Slog.d(LOG_TAG, "onDeviceConnected(address = " + address + ")");
 
         mCurrentlyConnectedDevices.add(address);
 
         for (UserInfo user : getAllUsers()) {
-            for (AssociationInfo association : getAllAssociations(user.id)) {
-                if (Objects.equals(address, association.getDeviceMacAddress())) {
+            for (AssociationInfo association : getAllAssociationsForUser(user.id)) {
+                if (association.isLinkedTo(address)) {
                     if (association.getDeviceProfile() != null) {
                         Slog.i(LOG_TAG, "Granting role " + association.getDeviceProfile()
                                 + " to " + association.getPackageName()
@@ -1112,8 +1120,8 @@ public class CompanionDeviceManagerService extends SystemService {
         Set<AssociationInfo> result = new ArraySet<>();
         for (int i = 0, size = aliveUsers.size(); i < size; i++) {
             UserInfo user = aliveUsers.get(i);
-            for (AssociationInfo association : getAllAssociations(user.id)) {
-                if (Objects.equals(association.getDeviceMacAddress(), deviceAddress)) {
+            for (AssociationInfo association : getAllAssociationsForUser(user.id)) {
+                if (association.isLinkedTo(deviceAddress)) {
                     result.add(association);
                 }
             }
@@ -1271,5 +1279,88 @@ public class CompanionDeviceManagerService extends SystemService {
         final Map<String, Set<Integer>> copy = new HashMap<>(orig.size(), 1f);
         forEach(orig, (key, value) -> copy.put(key, new ArraySet<>(value)));
         return copy;
+    }
+
+    boolean checkCallerCanInteractWithUserId(int userId) {
+        if (getCallingUserId() == userId) return true;
+
+        return getContext().checkCallingPermission(INTERACT_ACROSS_USERS) == PERMISSION_GRANTED;
+    }
+
+    void enforceCallerCanInteractWithUserId(int userId) {
+        if (getCallingUserId() == userId) return;
+
+        getContext().enforceCallingPermission(INTERACT_ACROSS_USERS, null);
+    }
+
+    private boolean checkCallerIsSystemOr(@UserIdInt int userId, @NonNull String pkg) {
+        final int callingUid = getCallingUid();
+        if (callingUid == SYSTEM_UID) return true;
+
+        if (getCallingUserId() != userId) return false;
+
+        try {
+            if (mAppOpsManager.checkPackage(callingUid, pkg) != MODE_ALLOWED) return false;
+        } catch (RemoteException e) {
+            // Can't happen: AppOpsManager is running in the same process.
+        }
+        return true;
+    }
+
+    void enforceCallerIsSystemOr(@UserIdInt int userId, @NonNull String pkg) {
+        final int callingUid = getCallingUid();
+        if (callingUid == SYSTEM_UID) return;
+
+        final int callingUserId = getCallingUserId();
+        if (getCallingUserId() != userId) {
+            throw new SecurityException("Calling UserId (" + callingUserId + ") does not match "
+                    + "the expected UserId (" + userId + ")");
+        }
+
+        try {
+            if (mAppOpsManager.checkPackage(callingUid, pkg) != MODE_ALLOWED) {
+                throw new SecurityException(pkg + " doesn't belong to calling uid ("
+                        + callingUid + ")");
+            }
+        } catch (RemoteException e) {
+            // Can't happen: AppOpsManager is running in the same process.
+        }
+    }
+
+    private boolean checkCallerCanManagerCompanionDevice() {
+        if (getCallingUserId() == SYSTEM_UID) return true;
+
+        return getContext().checkCallingPermission(MANAGE_COMPANION_DEVICES) == PERMISSION_GRANTED;
+    }
+
+    void enforceCallerCanManagerCompanionDevice() {
+        if (getCallingUserId() == SYSTEM_UID) return;
+
+        getContext().enforceCallingPermission(MANAGE_COMPANION_DEVICES,
+                "Caller must hold " + MANAGE_COMPANION_DEVICES + " permission.");
+    }
+
+    private boolean checkCallerCanManageAssociationsForPackage(
+            @UserIdInt int userId, @NonNull String packageName) {
+        if (checkCallerIsSystemOr(userId, packageName)) return true;
+
+        if (!checkCallerCanInteractWithUserId(userId)) return false;
+
+        return checkCallerCanManagerCompanionDevice();
+    }
+
+    void checkUsesFeature(@NonNull String pkg, @UserIdInt int userId) {
+        if (getCallingUserId() == SYSTEM_UID) return;
+
+        final FeatureInfo[] requestedFeatures = getPackageInfo(pkg, userId).reqFeatures;
+        if (requestedFeatures != null) {
+            for (int i = 0; i < requestedFeatures.length; i++) {
+                if (FEATURE_COMPANION_DEVICE_SETUP.equals(requestedFeatures[i].name)) return;
+            }
+        }
+
+        throw new IllegalStateException("Must declare uses-feature "
+                + FEATURE_COMPANION_DEVICE_SETUP
+                + " in manifest to use this API");
     }
 }

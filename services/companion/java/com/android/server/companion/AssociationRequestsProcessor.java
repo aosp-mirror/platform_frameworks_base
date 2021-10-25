@@ -23,22 +23,22 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import static com.android.internal.util.CollectionUtils.filter;
 import static com.android.internal.util.FunctionalUtils.uncheckExceptions;
-import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.companion.CompanionDeviceManagerService.DEBUG;
 import static com.android.server.companion.CompanionDeviceManagerService.LOG_TAG;
-import static com.android.server.companion.CompanionDeviceManagerService.getCallingUserId;
 
 import static java.util.Collections.unmodifiableMap;
+import static java.util.Objects.requireNonNull;
 
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.role.RoleManager;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
+import android.companion.IAssociationRequestCallback;
 import android.companion.ICompanionDeviceDiscoveryService;
-import android.companion.IFindDeviceCallback;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -88,15 +88,13 @@ class AssociationRequestsProcessor {
     private static final long ASSOCIATE_WITHOUT_PROMPT_WINDOW_MS = 60 * 60 * 1000; // 60 min;
 
     private final Context mContext;
+    private final RoleManager mRoleManager;
     private final CompanionDeviceManagerService mService;
+    private final PerUser<ServiceConnector<ICompanionDeviceDiscoveryService>> mServiceConnectors;
 
     private AssociationRequest mRequest;
-    private IFindDeviceCallback mFindDeviceCallback;
-    private String mCallingPackage;
+    private IAssociationRequestCallback mAppCallback;
     private AndroidFuture<?> mOngoingDeviceDiscovery;
-    private RoleManager mRoleManager;
-
-    private PerUser<ServiceConnector<ICompanionDeviceDiscoveryService>> mServiceConnectors;
 
     AssociationRequestsProcessor(CompanionDeviceManagerService service, RoleManager roleManager) {
         mContext = service.getContext();
@@ -115,30 +113,59 @@ class AssociationRequestsProcessor {
         };
     }
 
-    void process(AssociationRequest request, IFindDeviceCallback callback, String callingPackage)
-            throws RemoteException {
+    /**
+     * Handle incoming {@link AssociationRequest}s, sent via
+     * {@link android.companion.ICompanionDeviceManager#associate(AssociationRequest, IAssociationRequestCallback, String, int)}
+     */
+    void process(@NonNull AssociationRequest request, @NonNull String packageName,
+            @UserIdInt int userId, @NonNull IAssociationRequestCallback callback) {
+        requireNonNull(request, "Request MUST NOT be null");
+        requireNonNull(packageName, "Package name MUST NOT be null");
+        requireNonNull(callback, "Callback MUST NOT be null");
+
         if (DEBUG) {
-            Slog.d(TAG, "process(request=" + request + ", from=" + callingPackage + ")");
+            Slog.d(TAG, "process() "
+                    + "request=" + request + ", "
+                    + "package=u" + userId + "/" + packageName);
         }
 
-        checkNotNull(request, "Request cannot be null");
-        checkNotNull(callback, "Callback cannot be null");
-        mService.checkCallerIsSystemOr(callingPackage);
-        int userId = getCallingUserId();
-        mService.checkUsesFeature(callingPackage, userId);
+        mService.enforceCallerCanInteractWithUserId(userId);
+        mService.enforceCallerIsSystemOr(userId, packageName);
+
+        mService.checkUsesFeature(packageName, userId);
+
         final String deviceProfile = request.getDeviceProfile();
         validateDeviceProfileAndCheckPermission(deviceProfile);
 
-        mFindDeviceCallback = callback;
-        mRequest = request;
-        mCallingPackage = callingPackage;
-        request.setCallingPackage(callingPackage);
+        synchronized (mService.mLock) {
+            if (mRequest != null) {
+                Slog.w(TAG, "CDM is already processing another AssociationRequest.");
 
-        if (mayAssociateWithoutPrompt(callingPackage, userId)) {
+                try {
+                    callback.onFailure("Busy.");
+                } catch (RemoteException e) {
+                    // OK to ignore.
+                }
+                return;
+            }
+
+            try {
+                callback.asBinder().linkToDeath(mBinderDeathRecipient /* recipient */, 0);
+            } catch (RemoteException e) {
+                // The process has died by now: do not proceed.
+                return;
+            }
+
+            mRequest = request;
+        }
+
+        mAppCallback = callback;
+        request.setCallingPackage(packageName);
+
+        if (mayAssociateWithoutPrompt(packageName, userId)) {
             Slog.i(TAG, "setSkipPrompt(true)");
             request.setSkipPrompt(true);
         }
-        callback.asBinder().linkToDeath(mBinderDeathRecipient /* recipient */, 0);
 
         mOngoingDeviceDiscovery = getDeviceProfilePermissionDescription(deviceProfile)
                 .thenComposeAsync(description -> {
@@ -155,14 +182,14 @@ class AssociationRequestsProcessor {
                         }
 
                         AndroidFuture<String> future = new AndroidFuture<>();
-                        service.startDiscovery(request, callingPackage, callback, future);
+                        service.startDiscovery(request, packageName, callback, future);
                         return future;
                     }).cancelTimeout();
 
                 }, FgThread.getExecutor()).whenComplete(uncheckExceptions((deviceAddress, err) -> {
                     if (err == null) {
                         mService.createAssociationInternal(
-                                userId, deviceAddress, callingPackage, deviceProfile);
+                                userId, deviceAddress, packageName, deviceProfile);
                         mServiceConnectors.forUser(userId).post(service -> {
                             service.onAssociationCreated();
                         });
@@ -181,17 +208,6 @@ class AssociationRequestsProcessor {
             return holders.contains(packageName);
         } finally {
             Binder.restoreCallingIdentity(identity);
-        }
-    }
-
-    void stopScan(AssociationRequest request, IFindDeviceCallback callback, String callingPackage) {
-        if (DEBUG) {
-            Slog.d(TAG, "stopScan(request = " + request + ")");
-        }
-        if (Objects.equals(request, mRequest)
-                && Objects.equals(callback, mFindDeviceCallback)
-                && Objects.equals(callingPackage, mCallingPackage)) {
-            cleanup();
         }
     }
 
@@ -232,12 +248,11 @@ class AssociationRequestsProcessor {
             if (ongoingDeviceDiscovery != null && !ongoingDeviceDiscovery.isDone()) {
                 ongoingDeviceDiscovery.cancel(true);
             }
-            if (mFindDeviceCallback != null) {
-                mFindDeviceCallback.asBinder().unlinkToDeath(mBinderDeathRecipient, 0);
-                mFindDeviceCallback = null;
+            if (mAppCallback != null) {
+                mAppCallback.asBinder().unlinkToDeath(mBinderDeathRecipient, 0);
+                mAppCallback = null;
             }
             mRequest = null;
-            mCallingPackage = null;
         }
     }
 
@@ -261,7 +276,7 @@ class AssociationRequestsProcessor {
         // Throttle frequent associations
         long now = System.currentTimeMillis();
         Set<AssociationInfo> recentAssociations = filter(
-                mService.getAllAssociations(userId, packageName),
+                mService.getAssociations(userId, packageName),
                 a -> now - a.getTimeApprovedMs() < ASSOCIATE_WITHOUT_PROMPT_WINDOW_MS);
 
         if (recentAssociations.size() >= ASSOCIATE_WITHOUT_PROMPT_MAX_PER_TIME_WINDOW) {

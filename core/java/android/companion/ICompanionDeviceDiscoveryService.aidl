@@ -17,7 +17,7 @@
 package android.companion;
 
 import android.companion.AssociationRequest;
-import android.companion.IFindDeviceCallback;
+import android.companion.IAssociationRequestCallback;
 import com.android.internal.infra.AndroidFuture;
 
 
@@ -26,7 +26,7 @@ oneway interface ICompanionDeviceDiscoveryService {
     void startDiscovery(
         in AssociationRequest request,
         in String callingPackage,
-        in IFindDeviceCallback findCallback,
+        in IAssociationRequestCallback applicationCallback,
         in AndroidFuture<String> serviceCallback);
 
     void onAssociationCreated();
